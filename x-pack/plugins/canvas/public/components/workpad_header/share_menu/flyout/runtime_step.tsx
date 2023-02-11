@@ -28,7 +28,9 @@ const strings = {
     }),
 };
 
-export const RuntimeStep: FC<React.PropsWithChildren<{ onDownload: OnDownloadFn }>> = ({ onDownload }) => (
+export const RuntimeStep: FC<React.PropsWithChildren<{ onDownload: OnDownloadFn }>> = ({
+  onDownload,
+}) => (
   <EuiText size="s">
     <p>{strings.getStepDescription()}</p>
     <EuiSpacer size="s" />

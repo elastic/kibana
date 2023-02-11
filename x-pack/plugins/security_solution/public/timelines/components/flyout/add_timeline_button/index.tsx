@@ -23,7 +23,9 @@ export const ADD_TIMELINE_BUTTON_CLASS_NAME = 'add-timeline-button';
 
 const actionTimelineToHide: ActionTimelineToShow[] = ['createFrom'];
 
-const AddTimelineButtonComponent: React.FC<React.PropsWithChildren<AddTimelineButtonComponentProps>> = ({ timelineId }) => {
+const AddTimelineButtonComponent: React.FC<
+  React.PropsWithChildren<AddTimelineButtonComponentProps>
+> = ({ timelineId }) => {
   const [showActions, setShowActions] = useState(false);
   const [showTimelineModal, setShowTimelineModal] = useState(false);
 

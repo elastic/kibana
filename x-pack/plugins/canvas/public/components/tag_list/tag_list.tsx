@@ -26,7 +26,11 @@ export interface Props {
   getTag: (tagName: string) => TagSpec;
 }
 
-export const TagList: FunctionComponent<React.PropsWithChildren<Props>> = ({ tags = [], tagType = 'health', getTag }) => (
+export const TagList: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  tags = [],
+  tagType = 'health',
+  getTag,
+}) => (
   <Fragment>
     {tags.length
       ? tags.map((tag: string) => {

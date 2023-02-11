@@ -11,9 +11,9 @@ import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 
 import { CrawlerDomainValidationStepState } from '../../types';
 
-export const ValidationStateIcon: React.FC<React.PropsWithChildren<{ state: CrawlerDomainValidationStepState }>> = ({
-  state,
-}) => {
+export const ValidationStateIcon: React.FC<
+  React.PropsWithChildren<{ state: CrawlerDomainValidationStepState }>
+> = ({ state }) => {
   switch (state) {
     case 'valid':
       return <EuiIcon color="success" type="check" />;

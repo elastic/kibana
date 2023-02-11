@@ -14,7 +14,9 @@ import { usePollingAgentCount } from '../../../../../../../../../components/agen
 import { InstallElasticAgentManagedPageStep } from './install_agent_managed';
 import { InstallElasticAgentStandalonePageStep } from './install_agent_standalone';
 
-export const InstallElasticAgentPageStep: React.FC<React.PropsWithChildren<MultiPageStepLayoutProps>> = (props) => {
+export const InstallElasticAgentPageStep: React.FC<
+  React.PropsWithChildren<MultiPageStepLayoutProps>
+> = (props) => {
   const [localIsManaged, setLocalIsManaged] = useState(props.isManaged);
   const [useLocalState, setUseLocalState] = useState(false);
 

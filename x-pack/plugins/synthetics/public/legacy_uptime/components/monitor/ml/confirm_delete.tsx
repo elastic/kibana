@@ -16,7 +16,11 @@ interface Props {
   onCancel: () => void;
 }
 
-export const ConfirmJobDeletion: React.FC<React.PropsWithChildren<Props>> = ({ loading, onConfirm, onCancel }) => {
+export const ConfirmJobDeletion: React.FC<React.PropsWithChildren<Props>> = ({
+  loading,
+  onConfirm,
+  onCancel,
+}) => {
   return (
     <EuiConfirmModal
       title={labels.JOB_DELETION_CONFIRMATION}

@@ -17,7 +17,9 @@ export interface Props {
   shortcut: string;
 }
 
-export const ToolTipShortcut: FunctionComponent<React.PropsWithChildren<Props>> = ({ shortcut }) => (
+export const ToolTipShortcut: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  shortcut,
+}) => (
   <EuiText size="xs" textAlign="center" color="ghost">
     {shortcut.replace(/\+/g, ' + ')}
   </EuiText>

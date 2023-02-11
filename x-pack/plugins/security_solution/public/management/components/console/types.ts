@@ -259,8 +259,9 @@ export interface CommandArgumentValueSelectorProps<TSelection = any, TState = an
 /**
  * Component for rendering an argument's value selector
  */
-export type CommandArgumentValueSelectorComponent =
-  ComponentType<React.PropsWithChildren<CommandArgumentValueSelectorProps>>;
+export type CommandArgumentValueSelectorComponent = ComponentType<
+  React.PropsWithChildren<CommandArgumentValueSelectorProps>
+>;
 
 export interface ConsoleProps extends CommonProps {
   /**

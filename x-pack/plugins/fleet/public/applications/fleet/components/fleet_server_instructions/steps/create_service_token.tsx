@@ -67,11 +67,13 @@ export const getGenerateServiceTokenStep = ({
   };
 };
 
-const ServiceTokenStepContent: React.FunctionComponent<React.PropsWithChildren<{
-  serviceToken?: string;
-  generateServiceToken: () => void;
-  isLoadingServiceToken: boolean;
-}>> = ({ serviceToken, generateServiceToken, isLoadingServiceToken }) => {
+const ServiceTokenStepContent: React.FunctionComponent<
+  React.PropsWithChildren<{
+    serviceToken?: string;
+    generateServiceToken: () => void;
+    isLoadingServiceToken: boolean;
+  }>
+> = ({ serviceToken, generateServiceToken, isLoadingServiceToken }) => {
   return (
     <>
       <EuiText>

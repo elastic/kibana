@@ -27,9 +27,9 @@ interface AnalyticsCollectionSettingsProps {
   collection: AnalyticsCollection;
 }
 
-export const AnalyticsCollectionSettings: React.FC<React.PropsWithChildren<AnalyticsCollectionSettingsProps>> = ({
-  collection,
-}) => {
+export const AnalyticsCollectionSettings: React.FC<
+  React.PropsWithChildren<AnalyticsCollectionSettingsProps>
+> = ({ collection }) => {
   const { deleteAnalyticsCollection } = useActions(DeleteAnalyticsCollectionLogic);
   const { isLoading } = useValues(DeleteAnalyticsCollectionLogic);
 

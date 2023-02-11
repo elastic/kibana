@@ -30,21 +30,23 @@ import {
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 import { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
 
-export const AnomaliesResults: React.FunctionComponent<React.PropsWithChildren<{
-  isLoadingAnomaliesResults: boolean;
-  anomalies: LogEntryAnomalies;
-  timeRange: TimeRange;
-  page: Page;
-  fetchNextPage?: FetchNextPage;
-  fetchPreviousPage?: FetchPreviousPage;
-  changeSortOptions: ChangeSortOptions;
-  changePaginationOptions: ChangePaginationOptions;
-  sortOptions: SortOptions;
-  paginationOptions: PaginationOptions;
-  selectedDatasets: string[];
-  jobIds: string[];
-  autoRefresh: AutoRefresh;
-}>> = ({
+export const AnomaliesResults: React.FunctionComponent<
+  React.PropsWithChildren<{
+    isLoadingAnomaliesResults: boolean;
+    anomalies: LogEntryAnomalies;
+    timeRange: TimeRange;
+    page: Page;
+    fetchNextPage?: FetchNextPage;
+    fetchPreviousPage?: FetchPreviousPage;
+    changeSortOptions: ChangeSortOptions;
+    changePaginationOptions: ChangePaginationOptions;
+    sortOptions: SortOptions;
+    paginationOptions: PaginationOptions;
+    selectedDatasets: string[];
+    jobIds: string[];
+    autoRefresh: AutoRefresh;
+  }>
+> = ({
   isLoadingAnomaliesResults,
   timeRange,
   anomalies,

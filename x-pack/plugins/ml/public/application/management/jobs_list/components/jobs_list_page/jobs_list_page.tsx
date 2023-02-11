@@ -47,17 +47,21 @@ import { HttpService } from '../../../../services/http_service';
 import { SpaceManagement } from './space_management';
 import { DocsLink } from './docs_link';
 
-const getEmptyFunctionComponent: React.FC<React.PropsWithChildren<SpacesContextProps>> = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent: React.FC<React.PropsWithChildren<SpacesContextProps>> = ({
+  children,
+}) => <>{children}</>;
 
-export const JobsListPage: FC<React.PropsWithChildren<{
-  coreStart: CoreStart;
-  share: SharePluginStart;
-  history: ManagementAppMountParams['history'];
-  spacesApi?: SpacesPluginStart;
-  data: DataPublicPluginStart;
-  usageCollection?: UsageCollectionSetup;
-  fieldFormats: FieldFormatsStart;
-}>> = ({ coreStart, share, history, spacesApi, data, usageCollection, fieldFormats }) => {
+export const JobsListPage: FC<
+  React.PropsWithChildren<{
+    coreStart: CoreStart;
+    share: SharePluginStart;
+    history: ManagementAppMountParams['history'];
+    spacesApi?: SpacesPluginStart;
+    data: DataPublicPluginStart;
+    usageCollection?: UsageCollectionSetup;
+    fieldFormats: FieldFormatsStart;
+  }>
+> = ({ coreStart, share, history, spacesApi, data, usageCollection, fieldFormats }) => {
   const mlApiServices = useMemo(
     () => mlApiServicesProvider(new HttpService(coreStart.http)),
     [coreStart.http]

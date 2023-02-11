@@ -10,9 +10,11 @@ import React, { useMemo } from 'react';
 import { getFormattedSeverityScore } from '@kbn/ml-plugin/public';
 import { getSeverityCategoryForScore, ML_SEVERITY_COLORS } from '../../../../common/log_analysis';
 
-export const AnomalySeverityIndicator: React.FunctionComponent<React.PropsWithChildren<{
-  anomalyScore: number;
-}>> = ({ anomalyScore }) => {
+export const AnomalySeverityIndicator: React.FunctionComponent<
+  React.PropsWithChildren<{
+    anomalyScore: number;
+  }>
+> = ({ anomalyScore }) => {
   const severityColor = useMemo(() => getColorForAnomalyScore(anomalyScore), [anomalyScore]);
 
   return <EuiHealth color={severityColor}>{getFormattedSeverityScore(anomalyScore)}</EuiHealth>;

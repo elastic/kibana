@@ -15,10 +15,9 @@ import type { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
 import { connectorValidator } from './validator';
 
-const SwimlaneComponent: React.FunctionComponent<React.PropsWithChildren<ConnectorFieldsProps<SwimlaneFieldsType>>> = ({
-  connector,
-  isEdit = true,
-}) => {
+const SwimlaneComponent: React.FunctionComponent<
+  React.PropsWithChildren<ConnectorFieldsProps<SwimlaneFieldsType>>
+> = ({ connector, isEdit = true }) => {
   const showMappingWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
 
   return (

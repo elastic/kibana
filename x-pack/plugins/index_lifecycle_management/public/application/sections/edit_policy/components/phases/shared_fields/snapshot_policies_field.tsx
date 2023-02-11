@@ -27,7 +27,9 @@ import { FieldLoadingError, LearnMoreLink, OptionalLabel } from '../..';
 
 const waitForSnapshotFormField = 'phases.delete.actions.wait_for_snapshot.policy';
 
-export const SnapshotPoliciesField: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
+export const SnapshotPoliciesField: React.FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const {
     services: { docLinks, getUrlForApp },
   } = useKibana();

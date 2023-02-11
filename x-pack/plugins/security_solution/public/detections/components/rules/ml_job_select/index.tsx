@@ -77,7 +77,10 @@ const renderJobOption = (option: MlJobOption) => (
   />
 );
 
-export const MlJobSelect: React.FC<React.PropsWithChildren<MlJobSelectProps>> = ({ describedByIds = [], field }) => {
+export const MlJobSelect: React.FC<React.PropsWithChildren<MlJobSelectProps>> = ({
+  describedByIds = [],
+  field,
+}) => {
   const jobIds = field.value as string[];
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { loading, jobs } = useSecurityJobs();

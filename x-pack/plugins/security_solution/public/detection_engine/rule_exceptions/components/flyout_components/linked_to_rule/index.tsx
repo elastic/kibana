@@ -23,9 +23,9 @@ const SectionHeader = styled(EuiTitle)`
   `}
 `;
 
-const ExceptionsLinkedToRuleComponent: React.FC<React.PropsWithChildren<ExceptionsLinkedToRuleComponentProps>> = ({
-  rule,
-}): JSX.Element => {
+const ExceptionsLinkedToRuleComponent: React.FC<
+  React.PropsWithChildren<ExceptionsLinkedToRuleComponentProps>
+> = ({ rule }): JSX.Element => {
   return (
     <>
       <SectionHeader size="xs" data-test-subj="exceptionItemLinkedToRuleSection">

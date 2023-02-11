@@ -24,7 +24,9 @@ interface MatchParams {
   name: string;
 }
 
-export const TemplateClone: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps<MatchParams>>> = ({
+export const TemplateClone: React.FunctionComponent<
+  React.PropsWithChildren<RouteComponentProps<MatchParams>>
+> = ({
   match: {
     params: { name },
   },

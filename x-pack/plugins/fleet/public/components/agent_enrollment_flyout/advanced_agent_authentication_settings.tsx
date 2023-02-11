@@ -23,10 +23,12 @@ import {
 } from '../../applications/fleet/hooks';
 import { Loading } from '../loading';
 
-const NoEnrollmentKeysCallout: React.FunctionComponent<React.PropsWithChildren<{
-  agentPolicyId?: string;
-  onCreateEnrollmentApiKey: (key: EnrollmentAPIKey) => void;
-}>> = ({ agentPolicyId, onCreateEnrollmentApiKey }) => {
+const NoEnrollmentKeysCallout: React.FunctionComponent<
+  React.PropsWithChildren<{
+    agentPolicyId?: string;
+    onCreateEnrollmentApiKey: (key: EnrollmentAPIKey) => void;
+  }>
+> = ({ agentPolicyId, onCreateEnrollmentApiKey }) => {
   const { notifications } = useStartServices();
 
   const [isLoadingEnrollmentKey, setIsLoadingEnrollmentKey] = useState(false);
@@ -96,7 +98,9 @@ interface Props {
   onKeyChange: (key?: string) => void;
 }
 
-export const AdvancedAgentAuthenticationSettings: FunctionComponent<React.PropsWithChildren<Props>> = ({
+export const AdvancedAgentAuthenticationSettings: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({
   agentPolicyId,
   selectedApiKeyId,
   initialAuthenticationSettingsOpen = false,

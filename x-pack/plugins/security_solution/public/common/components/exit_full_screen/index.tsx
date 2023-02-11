@@ -22,7 +22,10 @@ interface Props {
   setFullScreen: (fullScreen: boolean) => void;
 }
 
-const ExitFullScreenComponent: React.FC<React.PropsWithChildren<Props>> = ({ fullScreen, setFullScreen }) => {
+const ExitFullScreenComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  fullScreen,
+  setFullScreen,
+}) => {
   const exitFullScreen = useCallback(() => {
     setFullScreen(false);
   }, [setFullScreen]);

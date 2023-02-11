@@ -18,12 +18,9 @@ import type { StartPlugins } from '../../types';
 import type { OsqueryActionResultsProps } from './types';
 import { OsqueryResult } from './osquery_result';
 
-const OsqueryActionResultsComponent: React.FC<React.PropsWithChildren<OsqueryActionResultsProps>> = ({
-  agentIds,
-  ruleName,
-  actionItems,
-  ecsData,
-}) => (
+const OsqueryActionResultsComponent: React.FC<
+  React.PropsWithChildren<OsqueryActionResultsProps>
+> = ({ agentIds, ruleName, actionItems, ecsData }) => (
   <div data-test-subj={'osquery-results'}>
     {actionItems?.map((item) => {
       const actionId = item.fields?.action_id?.[0];
@@ -52,10 +49,9 @@ type OsqueryActionResultsWrapperProps = {
   services: CoreStart & StartPlugins;
 } & OsqueryActionResultsProps;
 
-const OsqueryActionResultsWrapperComponent: React.FC<React.PropsWithChildren<OsqueryActionResultsWrapperProps>> = ({
-  services,
-  ...restProps
-}) => (
+const OsqueryActionResultsWrapperComponent: React.FC<
+  React.PropsWithChildren<OsqueryActionResultsWrapperProps>
+> = ({ services, ...restProps }) => (
   <KibanaThemeProvider theme$={services.theme.theme$}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>

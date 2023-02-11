@@ -21,7 +21,9 @@ jest.mock('../components/case_view/use_on_refresh_case_view_page');
 
 const commentId = 'ab124';
 
-const wrapper: React.FC<React.PropsWithChildren<string>> = ({ children }) => <TestProviders>{children}</TestProviders>;
+const wrapper: React.FC<React.PropsWithChildren<string>> = ({ children }) => (
+  <TestProviders>{children}</TestProviders>
+);
 
 describe('useDeleteComment', () => {
   const addSuccess = jest.fn();

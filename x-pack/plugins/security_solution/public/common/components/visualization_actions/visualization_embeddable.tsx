@@ -20,7 +20,9 @@ import { LensEmbeddable } from './lens_embeddable';
 import type { EmbeddableData, VisualizationEmbeddableProps } from './types';
 import { useSourcererDataView } from '../../containers/sourcerer';
 
-const VisualizationEmbeddableComponent: React.FC<React.PropsWithChildren<VisualizationEmbeddableProps>> = (props) => {
+const VisualizationEmbeddableComponent: React.FC<
+  React.PropsWithChildren<VisualizationEmbeddableProps>
+> = (props) => {
   const dispatch = useDispatch();
   const {
     inputId = InputsModelId.global,

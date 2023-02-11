@@ -24,7 +24,10 @@ interface Props {
   showTitle?: boolean;
 }
 
-export const PingRedirects: React.FC<React.PropsWithChildren<Props>> = ({ monitorStatus, showTitle }) => {
+export const PingRedirects: React.FC<React.PropsWithChildren<Props>> = ({
+  monitorStatus,
+  showTitle,
+}) => {
   const monitorUrl = monitorStatus?.url?.full;
 
   const list = monitorStatus?.http?.response?.redirects;

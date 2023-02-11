@@ -64,12 +64,9 @@ function isVersionUnsupported(version?: string) {
   return semverLt(version, ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION);
 }
 
-export const AgentUpgradeAgentModal: React.FunctionComponent<React.PropsWithChildren<AgentUpgradeAgentModalProps>> = ({
-  onClose,
-  agents,
-  agentCount,
-  isScheduled = false,
-}) => {
+export const AgentUpgradeAgentModal: React.FunctionComponent<
+  React.PropsWithChildren<AgentUpgradeAgentModalProps>
+> = ({ onClose, agents, agentCount, isScheduled = false }) => {
   const { notifications } = useStartServices();
   const kibanaVersion = semverCoerce(useKibanaVersion())?.version || '';
   const [isSubmitting, setIsSubmitting] = useState(false);

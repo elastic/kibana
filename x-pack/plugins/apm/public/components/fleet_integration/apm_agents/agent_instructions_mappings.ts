@@ -50,7 +50,9 @@ export const ApmAgentInstructionsMappings: Array<{
   title: string;
   variantId: string;
   createAgentInstructions: CreateAgentInstructions;
-  AgentRuntimeAttachment?: ComponentType<React.PropsWithChildren<AgentRuntimeAttachmentProps>>;
+  AgentRuntimeAttachment?: ComponentType<
+    React.PropsWithChildren<AgentRuntimeAttachmentProps>
+  >;
 }> = [
   {
     agentName: 'java',

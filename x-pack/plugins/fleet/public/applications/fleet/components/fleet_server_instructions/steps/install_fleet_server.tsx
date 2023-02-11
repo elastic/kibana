@@ -52,12 +52,14 @@ export function getInstallFleetServerStep({
   };
 }
 
-const InstallFleetServerStepContent: React.FunctionComponent<React.PropsWithChildren<{
-  serviceToken?: string;
-  fleetServerHost?: string;
-  fleetServerPolicyId?: string;
-  deploymentMode: DeploymentMode;
-}>> = ({ serviceToken, fleetServerHost, fleetServerPolicyId, deploymentMode }) => {
+const InstallFleetServerStepContent: React.FunctionComponent<
+  React.PropsWithChildren<{
+    serviceToken?: string;
+    fleetServerHost?: string;
+    fleetServerPolicyId?: string;
+    deploymentMode: DeploymentMode;
+  }>
+> = ({ serviceToken, fleetServerHost, fleetServerPolicyId, deploymentMode }) => {
   const { docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion();
   const { output } = useDefaultOutput();

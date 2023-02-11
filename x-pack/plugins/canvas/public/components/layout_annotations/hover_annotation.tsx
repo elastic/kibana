@@ -16,7 +16,11 @@ interface Props {
   width: number;
 }
 
-export const HoverAnnotation: FC<React.PropsWithChildren<Props>> = ({ transformMatrix, width, height }) => (
+export const HoverAnnotation: FC<React.PropsWithChildren<Props>> = ({
+  transformMatrix,
+  width,
+  height,
+}) => (
   <div
     className="canvasHoverAnnotation canvasLayoutAnnotation"
     style={{

@@ -22,10 +22,9 @@ interface StopCrawlPopoverContextMenuProps {
   stopCrawl(): void;
 }
 
-export const StopCrawlPopoverContextMenu: React.FC<React.PropsWithChildren<StopCrawlPopoverContextMenuProps>> = ({
-  stopCrawl,
-  ...rest
-}) => {
+export const StopCrawlPopoverContextMenu: React.FC<
+  React.PropsWithChildren<StopCrawlPopoverContextMenuProps>
+> = ({ stopCrawl, ...rest }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const togglePopover = () => setPopover(!isPopoverOpen);

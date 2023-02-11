@@ -18,7 +18,11 @@ export interface Props {
   isMetaEngine: boolean;
 }
 
-export const ResultView: React.FC<React.PropsWithChildren<Props>> = ({ result, schemaForTypeHighlights, isMetaEngine }) => {
+export const ResultView: React.FC<React.PropsWithChildren<Props>> = ({
+  result,
+  schemaForTypeHighlights,
+  isMetaEngine,
+}) => {
   return (
     <li>
       <Result

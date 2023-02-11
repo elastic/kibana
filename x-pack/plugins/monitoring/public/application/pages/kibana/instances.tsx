@@ -21,7 +21,9 @@ import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { KIBANA_SYSTEM_ID, RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 
-export const KibanaInstancesPage: React.FC<React.PropsWithChildren<ComponentProps>> = ({ clusters }) => {
+export const KibanaInstancesPage: React.FC<React.PropsWithChildren<ComponentProps>> = ({
+  clusters,
+}) => {
   const { cluster_uuid: clusterUuid, ccs } = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();

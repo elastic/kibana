@@ -28,7 +28,9 @@ const defaultFields: Fields = {
   subcategory: [],
 };
 
-const ServiceNowITSMFieldsComponent: React.FunctionComponent<React.PropsWithChildren<ConnectorFieldsProps<ServiceNowITSMFieldsType>>> =
+const ServiceNowITSMFieldsComponent: React.FunctionComponent<
+  React.PropsWithChildren<ConnectorFieldsProps<ServiceNowITSMFieldsType>>
+> =
   // TODO: Fix this manually. Issue #123375
   // eslint-disable-next-line react/display-name
   ({ isEdit = true, fields, connector, onChange }) => {

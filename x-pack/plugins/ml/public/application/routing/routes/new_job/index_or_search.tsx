@@ -180,7 +180,11 @@ export const changePointDetectionIndexOrSearchRouteFactory = (
   breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
-const PageWrapper: FC<React.PropsWithChildren<IndexOrSearchPageProps>> = ({ nextStepPath, deps, mode }) => {
+const PageWrapper: FC<React.PropsWithChildren<IndexOrSearchPageProps>> = ({
+  nextStepPath,
+  deps,
+  mode,
+}) => {
   const {
     services: {
       http: { basePath },

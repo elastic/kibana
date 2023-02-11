@@ -30,7 +30,9 @@ interface ExceptionsAddToListsOptionsComponentProps {
   onRadioChange: (option: string) => void;
 }
 
-const ExceptionsAddToListsOptionsComponent: React.FC<React.PropsWithChildren<ExceptionsAddToListsOptionsComponentProps>> = ({
+const ExceptionsAddToListsOptionsComponent: React.FC<
+  React.PropsWithChildren<ExceptionsAddToListsOptionsComponentProps>
+> = ({
   rulesCount,
   selectedRadioOption,
   sharedLists,

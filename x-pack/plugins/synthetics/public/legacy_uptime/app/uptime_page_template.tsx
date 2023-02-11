@@ -21,12 +21,9 @@ interface Props {
   pageHeader?: EuiPageHeaderProps;
 }
 
-export const UptimePageTemplateComponent: React.FC<React.PropsWithChildren<Props & EuiPageTemplateProps>> = ({
-  path,
-  pageHeader,
-  children,
-  ...pageTemplateProps
-}) => {
+export const UptimePageTemplateComponent: React.FC<
+  React.PropsWithChildren<Props & EuiPageTemplateProps>
+> = ({ path, pageHeader, children, ...pageTemplateProps }) => {
   const {
     services: { observability },
   } = useKibana<ClientPluginsStart>();

@@ -29,13 +29,9 @@ interface ViewResultsInLensActionProps {
   mode?: string;
 }
 
-const ViewResultsInLensActionComponent: React.FC<React.PropsWithChildren<ViewResultsInLensActionProps>> = ({
-  actionId,
-  buttonType,
-  endDate,
-  startDate,
-  mode,
-}) => {
+const ViewResultsInLensActionComponent: React.FC<
+  React.PropsWithChildren<ViewResultsInLensActionProps>
+> = ({ actionId, buttonType, endDate, startDate, mode }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
   const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });

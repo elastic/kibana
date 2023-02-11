@@ -524,7 +524,10 @@ export const ImportJobsFlyout: FC<React.PropsWithChildren<Props>> = ({ isDisable
   );
 };
 
-const FlyoutButton: FC<React.PropsWithChildren<{ isDisabled: boolean; onClick(): void }>> = ({ isDisabled, onClick }) => {
+const FlyoutButton: FC<React.PropsWithChildren<{ isDisabled: boolean; onClick(): void }>> = ({
+  isDisabled,
+  onClick,
+}) => {
   return (
     <EuiButtonEmpty
       iconType="importAction"

@@ -56,10 +56,9 @@ describe('CreateCaseForm', () => {
   let globalForm: FormHook;
   const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
 
-  const MockHookWrapperComponent: React.FC<React.PropsWithChildren<{ testProviderProps?: unknown }>> = ({
-    children,
-    testProviderProps = {},
-  }) => {
+  const MockHookWrapperComponent: React.FC<
+    React.PropsWithChildren<{ testProviderProps?: unknown }>
+  > = ({ children, testProviderProps = {} }) => {
     const { form } = useForm<FormProps>({
       defaultValue: initialCaseValue,
       options: { stripEmptyFields: false },

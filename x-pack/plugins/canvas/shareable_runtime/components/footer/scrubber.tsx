@@ -32,7 +32,10 @@ const THUMBNAIL_HEIGHT = 100;
  * The panel of previews of the pages in the workpad, allowing one to select and
  * navigate to a specific page.
  */
-export const ScrubberComponent: FC<React.PropsWithChildren<Props>> = ({ isScrubberVisible, pages }) => {
+export const ScrubberComponent: FC<React.PropsWithChildren<Props>> = ({
+  isScrubberVisible,
+  pages,
+}) => {
   const className = isScrubberVisible ? classnames(css.root, css.visible) : css.root;
 
   const slides = pages.map((page, index) => (

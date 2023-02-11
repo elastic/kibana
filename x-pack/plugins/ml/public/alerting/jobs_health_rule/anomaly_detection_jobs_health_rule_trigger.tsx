@@ -25,11 +25,9 @@ import { BetaBadge } from '../beta_badge';
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
 
-const AnomalyDetectionJobsHealthRuleTrigger: FC<React.PropsWithChildren<MlAnomalyAlertTriggerProps>> = ({
-  ruleParams,
-  setRuleParams,
-  errors,
-}) => {
+const AnomalyDetectionJobsHealthRuleTrigger: FC<
+  React.PropsWithChildren<MlAnomalyAlertTriggerProps>
+> = ({ ruleParams, setRuleParams, errors }) => {
   const {
     services: { http },
   } = useMlKibana();

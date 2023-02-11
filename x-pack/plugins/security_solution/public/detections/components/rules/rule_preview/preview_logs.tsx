@@ -73,7 +73,11 @@ export const PreviewLogsComponent: React.FC<React.PropsWithChildren<PreviewLogsC
   );
 };
 
-const LogAccordion: React.FC<React.PropsWithChildren<LogAccordionProps>> = ({ logs, isError, children }) => {
+const LogAccordion: React.FC<React.PropsWithChildren<LogAccordionProps>> = ({
+  logs,
+  isError,
+  children,
+}) => {
   const firstLog = logs[0];
   if (!(children || firstLog)) return null;
 
@@ -113,12 +117,14 @@ const LogAccordion: React.FC<React.PropsWithChildren<LogAccordionProps>> = ({ lo
   );
 };
 
-export const CalloutGroup: React.FC<React.PropsWithChildren<{
-  logs: string[];
-  duration: number;
-  startedAt?: string;
-  isError?: boolean;
-}>> = ({ logs, startedAt, isError, duration }) => {
+export const CalloutGroup: React.FC<
+  React.PropsWithChildren<{
+    logs: string[];
+    duration: number;
+    startedAt?: string;
+    isError?: boolean;
+  }>
+> = ({ logs, startedAt, isError, duration }) => {
   return logs.length > 0 ? (
     <>
       {logs.map((log, i) => (

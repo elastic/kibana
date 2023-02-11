@@ -236,11 +236,13 @@ const getCellValue = (value: unknown) => {
   if (typeof value === 'string' || typeof value === 'number') return value;
 };
 
-const FilterableCell: React.FC<React.PropsWithChildren<{
-  onAddFilter(): void;
-  onAddNegateFilter(): void;
-  field: string;
-}>> = ({ children, onAddFilter, onAddNegateFilter, field }) => (
+const FilterableCell: React.FC<
+  React.PropsWithChildren<{
+    onAddFilter(): void;
+    onAddNegateFilter(): void;
+    field: string;
+  }>
+> = ({ children, onAddFilter, onAddNegateFilter, field }) => (
   <div
     css={css`
       position: relative;

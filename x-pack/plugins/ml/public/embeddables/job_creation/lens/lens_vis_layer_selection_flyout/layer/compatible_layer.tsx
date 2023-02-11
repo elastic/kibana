@@ -26,7 +26,11 @@ interface Props {
   embeddable: Embeddable;
 }
 
-export const CompatibleLayer: FC<React.PropsWithChildren<Props>> = ({ layer, layerIndex, embeddable }) => {
+export const CompatibleLayer: FC<React.PropsWithChildren<Props>> = ({
+  layer,
+  layerIndex,
+  embeddable,
+}) => {
   const {
     services: {
       data,

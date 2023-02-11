@@ -30,7 +30,11 @@ interface ComponentProps {
 /**
  * A Page in the Shareable Workpad is conceptually identical to a Page in a Workpad.
  */
-export const PageComponent: FC<React.PropsWithChildren<ComponentProps>> = ({ page, height, width }) => {
+export const PageComponent: FC<React.PropsWithChildren<ComponentProps>> = ({
+  page,
+  height,
+  width,
+}) => {
   const { elements, style, id } = page;
 
   const output = elements.map((element: CanvasRenderedElement, i) => (

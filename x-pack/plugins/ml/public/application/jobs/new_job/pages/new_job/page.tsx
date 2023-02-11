@@ -51,7 +51,10 @@ export interface PageProps {
   jobType: JOB_TYPE;
 }
 
-export const Page: FC<React.PropsWithChildren<PageProps>> = ({ existingJobsAndGroups, jobType }) => {
+export const Page: FC<React.PropsWithChildren<PageProps>> = ({
+  existingJobsAndGroups,
+  jobType,
+}) => {
   const timefilter = useTimefilter();
   const mlContext = useMlContext();
   const {

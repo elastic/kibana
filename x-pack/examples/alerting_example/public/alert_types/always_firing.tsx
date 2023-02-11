@@ -63,7 +63,9 @@ const DEFAULT_THRESHOLDS: AlwaysFiringParams['thresholds'] = {
   large: 10000,
 };
 
-export const AlwaysFiringExpression: React.FunctionComponent<React.PropsWithChildren<RuleTypeParamsExpressionProps<AlwaysFiringParams>>> = ({ ruleParams, setRuleParams, actionGroups, defaultActionGroupId }) => {
+export const AlwaysFiringExpression: React.FunctionComponent<
+  React.PropsWithChildren<RuleTypeParamsExpressionProps<AlwaysFiringParams>>
+> = ({ ruleParams, setRuleParams, actionGroups, defaultActionGroupId }) => {
   const {
     instances = DEFAULT_INSTANCES_TO_GENERATE,
     thresholds = pick(DEFAULT_THRESHOLDS, defaultActionGroupId),

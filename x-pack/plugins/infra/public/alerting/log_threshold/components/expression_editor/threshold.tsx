@@ -52,7 +52,12 @@ interface Props {
   errors: IErrorObject;
 }
 
-export const Threshold: React.FC<React.PropsWithChildren<Props>> = ({ comparator, value, updateThreshold, errors }) => {
+export const Threshold: React.FC<React.PropsWithChildren<Props>> = ({
+  comparator,
+  value,
+  updateThreshold,
+  errors,
+}) => {
   const [isThresholdPopoverOpen, setThresholdPopoverOpenState] = useState(false);
 
   return (

@@ -16,7 +16,10 @@ interface Props {
   optionsDataId: string;
 }
 
-export const GroupByLabelSummary: React.FC<React.PropsWithChildren<Props>> = ({ item, optionsDataId }) => {
+export const GroupByLabelSummary: React.FC<React.PropsWithChildren<Props>> = ({
+  item,
+  optionsDataId,
+}) => {
   let interval: string | undefined;
 
   if (isGroupByDateHistogram(item)) {

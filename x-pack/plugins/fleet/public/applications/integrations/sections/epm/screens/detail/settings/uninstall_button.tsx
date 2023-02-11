@@ -22,14 +22,9 @@ interface UninstallButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'ver
   numOfAssets: number;
 }
 
-export const UninstallButton: React.FunctionComponent<React.PropsWithChildren<UninstallButtonProps>> = ({
-  disabled = false,
-  latestVersion,
-  name,
-  numOfAssets,
-  title,
-  version,
-}) => {
+export const UninstallButton: React.FunctionComponent<
+  React.PropsWithChildren<UninstallButtonProps>
+> = ({ disabled = false, latestVersion, name, numOfAssets, title, version }) => {
   const canRemovePackages = useAuthz().integrations.removePackages;
   const uninstallPackage = useUninstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();

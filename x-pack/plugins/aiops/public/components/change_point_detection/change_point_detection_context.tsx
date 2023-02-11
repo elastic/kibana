@@ -108,7 +108,9 @@ export interface ChangePointAnnotation {
   p_value: number;
 }
 
-export const ChangePointDetectionContextProvider: FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const ChangePointDetectionContextProvider: FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const { dataView, savedSearch } = useDataSource();
   const {
     uiSettings,

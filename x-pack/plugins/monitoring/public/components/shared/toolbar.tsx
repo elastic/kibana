@@ -24,7 +24,10 @@ interface TimePickerQuickRange {
   display: string;
 }
 
-export const MonitoringToolbar: React.FC<React.PropsWithChildren<MonitoringToolbarProps>> = ({ pageTitle, onRefresh }) => {
+export const MonitoringToolbar: React.FC<React.PropsWithChildren<MonitoringToolbarProps>> = ({
+  pageTitle,
+  onRefresh,
+}) => {
   const { services } = useKibana<MonitoringStartServices>();
 
   const timePickerQuickRanges = services.uiSettings.get<TimePickerQuickRange[]>(

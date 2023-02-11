@@ -389,7 +389,10 @@ const IconWrapper = styled.span`
   }
 `;
 
-export const ExternalServiceColumn: React.FC<React.PropsWithChildren<Props>> = ({ theCase, connectors }) => {
+export const ExternalServiceColumn: React.FC<React.PropsWithChildren<Props>> = ({
+  theCase,
+  connectors,
+}) => {
   const { triggersActionsUi } = useKibana().services;
   const { actions } = useApplicationCapabilities();
 

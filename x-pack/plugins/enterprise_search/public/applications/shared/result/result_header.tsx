@@ -47,7 +47,10 @@ const Definition: React.FC<React.PropsWithChildren<TermDef>> = ({ label }) => (
     <EuiTextColor color="subdued">{label}</EuiTextColor>
   </EuiFlexItem>
 );
-const MetadataPopover: React.FC<React.PropsWithChildren<MetaDataProps>> = ({ id, onDocumentDelete }) => {
+const MetadataPopover: React.FC<React.PropsWithChildren<MetaDataProps>> = ({
+  id,
+  onDocumentDelete,
+}) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
 

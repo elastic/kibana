@@ -22,7 +22,11 @@ interface Props {
   rareDetectorType: RARE_DETECTOR_TYPE;
 }
 
-export const RareDetectors: FC<React.PropsWithChildren<Props>> = ({ setIsValid, rareDetectorType, setRareDetectorType }) => {
+export const RareDetectors: FC<React.PropsWithChildren<Props>> = ({
+  setIsValid,
+  rareDetectorType,
+  setRareDetectorType,
+}) => {
   const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
   const [detectorValid, setDetectorValid] = useState(false);

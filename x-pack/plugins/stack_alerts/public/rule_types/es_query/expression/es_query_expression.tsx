@@ -36,7 +36,11 @@ import { useTriggerUiActionServices } from '../util';
 
 const { useXJsonMode } = XJson;
 
-export const EsQueryExpression: React.FC<React.PropsWithChildren<RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>>> = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
+export const EsQueryExpression: React.FC<
+  React.PropsWithChildren<
+    RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>
+  >
+> = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
   const {
     index,
     timeField,

@@ -25,11 +25,13 @@ interface SelectableColumnOption {
   columnConfiguration: LogColumnConfiguration;
 }
 
-export const AddLogColumnButtonAndPopover: React.FunctionComponent<React.PropsWithChildren<{
-  addLogColumn: (logColumnConfiguration: LogColumnConfiguration) => void;
-  availableFields: string[];
-  isDisabled?: boolean;
-}>> = ({ addLogColumn, availableFields, isDisabled }) => {
+export const AddLogColumnButtonAndPopover: React.FunctionComponent<
+  React.PropsWithChildren<{
+    addLogColumn: (logColumnConfiguration: LogColumnConfiguration) => void;
+    availableFields: string[];
+    isDisabled?: boolean;
+  }>
+> = ({ addLogColumn, availableFields, isDisabled }) => {
   const { isVisible: isOpen, show: openPopover, hide: closePopover } = useVisibilityState(false);
 
   const availableColumnOptions = useMemo<SelectableColumnOption[]>(

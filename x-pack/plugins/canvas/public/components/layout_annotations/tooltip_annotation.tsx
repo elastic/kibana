@@ -15,7 +15,10 @@ interface Props {
   text: string;
 }
 
-export const TooltipAnnotation: FC<React.PropsWithChildren<Props>> = ({ transformMatrix, text }) => {
+export const TooltipAnnotation: FC<React.PropsWithChildren<Props>> = ({
+  transformMatrix,
+  text,
+}) => {
   const newStyle = {
     transform: `${matrixToCSS(transformMatrix)} translate(1em, -1em)`,
   };

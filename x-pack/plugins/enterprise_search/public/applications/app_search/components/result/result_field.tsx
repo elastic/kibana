@@ -20,7 +20,12 @@ interface Props {
   type?: FieldType;
 }
 
-export const ResultField: React.FC<React.PropsWithChildren<Props>> = ({ field, raw, snippet, type }) => {
+export const ResultField: React.FC<React.PropsWithChildren<Props>> = ({
+  field,
+  raw,
+  snippet,
+  type,
+}) => {
   return (
     <div className="appSearchResultField">
       <div className="appSearchResultField__key eui-textTruncate">

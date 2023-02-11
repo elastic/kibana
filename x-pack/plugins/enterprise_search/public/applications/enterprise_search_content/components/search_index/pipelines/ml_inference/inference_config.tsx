@@ -40,7 +40,9 @@ export const InferenceConfiguration: React.FC<React.PropsWithChildren<unknown>> 
   }
 };
 
-const InferenceConfigurationWrapper: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+const InferenceConfigurationWrapper: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   return (
     <>
       <EuiSpacer />

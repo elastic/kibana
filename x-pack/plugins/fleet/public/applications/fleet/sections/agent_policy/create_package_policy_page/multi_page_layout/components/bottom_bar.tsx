@@ -27,17 +27,19 @@ export const NotObscuredByBottomBar = styled('div')`
   padding-bottom: 100px;
 `;
 
-export const CreatePackagePolicyBottomBar: React.FC<React.PropsWithChildren<{
-  isLoading?: boolean;
-  isDisabled?: boolean;
-  cancelClickHandler?: React.ReactEventHandler;
-  cancelUrl?: string;
-  cancelMessage?: React.ReactElement;
-  actionMessage: React.ReactElement;
-  onNext: () => void;
-  noAnimation?: boolean;
-  loadingMessage?: React.ReactElement;
-}>> = ({
+export const CreatePackagePolicyBottomBar: React.FC<
+  React.PropsWithChildren<{
+    isLoading?: boolean;
+    isDisabled?: boolean;
+    cancelClickHandler?: React.ReactEventHandler;
+    cancelUrl?: string;
+    cancelMessage?: React.ReactElement;
+    actionMessage: React.ReactElement;
+    onNext: () => void;
+    noAnimation?: boolean;
+    loadingMessage?: React.ReactElement;
+  }>
+> = ({
   isLoading,
   loadingMessage,
   onNext,
@@ -89,12 +91,14 @@ export const CreatePackagePolicyBottomBar: React.FC<React.PropsWithChildren<{
   );
 };
 
-export const AgentStandaloneBottomBar: React.FC<React.PropsWithChildren<{
-  cancelClickHandler?: React.ReactEventHandler;
-  cancelUrl?: string;
-  onNext: () => void;
-  noAnimation?: boolean;
-}>> = ({ onNext, cancelClickHandler, cancelUrl, noAnimation = false }) => {
+export const AgentStandaloneBottomBar: React.FC<
+  React.PropsWithChildren<{
+    cancelClickHandler?: React.ReactEventHandler;
+    cancelUrl?: string;
+    onNext: () => void;
+    noAnimation?: boolean;
+  }>
+> = ({ onNext, cancelClickHandler, cancelUrl, noAnimation = false }) => {
   const Bar = noAnimation ? NoAnimationCenteredRoundedBottomBar : CenteredRoundedBottomBar;
   return (
     <Bar>
@@ -123,9 +127,11 @@ export const AgentStandaloneBottomBar: React.FC<React.PropsWithChildren<{
   );
 };
 
-export const CreatePackagePolicyFinalBottomBar: React.FC<React.PropsWithChildren<{
-  pkgkey: string;
-}>> = ({ pkgkey }) => {
+export const CreatePackagePolicyFinalBottomBar: React.FC<
+  React.PropsWithChildren<{
+    pkgkey: string;
+  }>
+> = ({ pkgkey }) => {
   const isK8s = pkgkey.includes(FLEET_KUBERNETES_PACKAGE);
   const { getHref } = useLink();
   const { getAbsolutePath } = useLink();
@@ -181,11 +187,13 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<React.PropsWithChildren
   );
 };
 
-export const AgentDataTimedOutBottomBar: React.FC<React.PropsWithChildren<{
-  troubleshootLink: string;
-  agentIds: string[];
-  integration?: string;
-}>> = ({ troubleshootLink, agentIds, integration }) => {
+export const AgentDataTimedOutBottomBar: React.FC<
+  React.PropsWithChildren<{
+    troubleshootLink: string;
+    agentIds: string[];
+    integration?: string;
+  }>
+> = ({ troubleshootLink, agentIds, integration }) => {
   const discoverLogsLink = useGetDiscoverLogsLinkForAgents(agentIds);
 
   return (

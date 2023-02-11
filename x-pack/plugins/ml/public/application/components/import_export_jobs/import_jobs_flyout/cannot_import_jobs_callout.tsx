@@ -17,7 +17,10 @@ interface Props {
   autoExpand?: boolean;
 }
 
-export const CannotImportJobsCallout: FC<React.PropsWithChildren<Props>> = ({ jobs, autoExpand = false }) => {
+export const CannotImportJobsCallout: FC<React.PropsWithChildren<Props>> = ({
+  jobs,
+  autoExpand = false,
+}) => {
   if (jobs.length === 0) {
     return null;
   }

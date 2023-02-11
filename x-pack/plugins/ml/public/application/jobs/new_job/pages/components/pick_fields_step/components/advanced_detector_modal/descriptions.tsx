@@ -106,53 +106,57 @@ export const OverFieldDescription: FC<React.PropsWithChildren<unknown>> = memo((
   );
 });
 
-export const PartitionFieldDescription: FC<React.PropsWithChildren<unknown>> = memo(({ children }) => {
-  const title = i18n.translate(
-    'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.partitionFieldSelect.title',
-    {
-      defaultMessage: 'Partition field',
-    }
-  );
-  return (
-    <EuiDescribedFormGroup
-      title={<h3>{title}</h3>}
-      description={
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.partitionFieldSelect.description"
-          defaultMessage="Allows segmentation of modeling into logical groups."
-        />
+export const PartitionFieldDescription: FC<React.PropsWithChildren<unknown>> = memo(
+  ({ children }) => {
+    const title = i18n.translate(
+      'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.partitionFieldSelect.title',
+      {
+        defaultMessage: 'Partition field',
       }
-    >
-      <EuiFormRow>
-        <>{children}</>
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  );
-});
+    );
+    return (
+      <EuiDescribedFormGroup
+        title={<h3>{title}</h3>}
+        description={
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.partitionFieldSelect.description"
+            defaultMessage="Allows segmentation of modeling into logical groups."
+          />
+        }
+      >
+        <EuiFormRow>
+          <>{children}</>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  }
+);
 
-export const ExcludeFrequentDescription: FC<React.PropsWithChildren<unknown>> = memo(({ children }) => {
-  const title = i18n.translate(
-    'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.excludeFrequent.title',
-    {
-      defaultMessage: 'Exclude frequent',
-    }
-  );
-  return (
-    <EuiDescribedFormGroup
-      title={<h3>{title}</h3>}
-      description={
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.excludeFrequent.description"
-          defaultMessage="If set, it will automatically identify and exclude frequently occurring entities which may otherwise have dominated results."
-        />
+export const ExcludeFrequentDescription: FC<React.PropsWithChildren<unknown>> = memo(
+  ({ children }) => {
+    const title = i18n.translate(
+      'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.excludeFrequent.title',
+      {
+        defaultMessage: 'Exclude frequent',
       }
-    >
-      <EuiFormRow>
-        <>{children}</>
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  );
-});
+    );
+    return (
+      <EuiDescribedFormGroup
+        title={<h3>{title}</h3>}
+        description={
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.excludeFrequent.description"
+            defaultMessage="If set, it will automatically identify and exclude frequently occurring entities which may otherwise have dominated results."
+          />
+        }
+      >
+        <EuiFormRow>
+          <>{children}</>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  }
+);
 
 export const DescriptionDescription: FC<React.PropsWithChildren<unknown>> = memo(({ children }) => {
   const title = i18n.translate(

@@ -20,7 +20,9 @@ export type DeletePolicy = (names: string[], onSuccess?: OnSuccessCallback) => v
 
 type OnSuccessCallback = (policiesDeleted: string[]) => void;
 
-export const PolicyDeleteProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ children }) => {
+export const PolicyDeleteProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  children,
+}) => {
   const { i18n } = useServices();
   const toastNotifications = useToastNotifications();
 

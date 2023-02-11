@@ -15,10 +15,9 @@ const HelpTextWarningContainer = styled.div`
   margin-top: 10px;
 `;
 
-const HelpTextComponent: React.FC<React.PropsWithChildren<{ href: string; notRunningJobIds: string[] }>> = ({
-  href,
-  notRunningJobIds,
-}) => (
+const HelpTextComponent: React.FC<
+  React.PropsWithChildren<{ href: string; notRunningJobIds: string[] }>
+> = ({ href, notRunningJobIds }) => (
   <>
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdHelpText"

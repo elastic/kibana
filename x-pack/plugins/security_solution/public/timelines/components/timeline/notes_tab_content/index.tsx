@@ -75,7 +75,9 @@ interface UsernameWithAvatar {
   username: string;
 }
 
-const UsernameWithAvatarComponent: React.FC<React.PropsWithChildren<UsernameWithAvatar>> = ({ username }) => (
+const UsernameWithAvatarComponent: React.FC<React.PropsWithChildren<UsernameWithAvatar>> = ({
+  username,
+}) => (
   <StyledEuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiAvatar data-test-subj="avatar" name={username} size="l" />
@@ -130,7 +132,9 @@ interface NotesTabContentProps {
   timelineId: string;
 }
 
-const NotesTabContentComponent: React.FC<React.PropsWithChildren<NotesTabContentProps>> = ({ timelineId }) => {
+const NotesTabContentComponent: React.FC<React.PropsWithChildren<NotesTabContentProps>> = ({
+  timelineId,
+}) => {
   const dispatch = useDispatch();
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 

@@ -27,12 +27,14 @@ const LoadingContent = styled(EuiLoadingContent)`
   }
 `;
 
-const StatValueComponent: React.FC<React.PropsWithChildren<{
-  count: number;
-  isGroupStat: boolean;
-  isLoading: boolean;
-  max: number;
-}>> = ({ count, isGroupStat, isLoading, max }) => {
+const StatValueComponent: React.FC<
+  React.PropsWithChildren<{
+    count: number;
+    isGroupStat: boolean;
+    isLoading: boolean;
+    max: number;
+  }>
+> = ({ count, isGroupStat, isLoading, max }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 

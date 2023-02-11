@@ -111,10 +111,9 @@ export const LogEntryCategoriesPageContent = () => {
 
 const allowedSetupModules = ['logs_ui_categories' as const];
 
-const CategoriesPageTemplate: React.FC<React.PropsWithChildren<LazyObservabilityPageTemplateProps>> = ({
-  children,
-  ...rest
-}) => {
+const CategoriesPageTemplate: React.FC<
+  React.PropsWithChildren<LazyObservabilityPageTemplateProps>
+> = ({ children, ...rest }) => {
   const { logViewStatus } = useLogViewContext();
   return (
     <LogsPageTemplate

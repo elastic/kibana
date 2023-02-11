@@ -117,14 +117,16 @@ export const AnomalyDetails: FC<React.PropsWithChildren<Props>> = ({
   );
 };
 
-const Contents: FC<React.PropsWithChildren<{
-  anomaly: AnomaliesTableRecordExtended;
-  isAggregatedData: boolean;
-  filter: EntityCellFilter;
-  influencersLimit: number;
-  influencerFilter: EntityCellFilter;
-  job: ExplorerJob;
-}>> = ({ anomaly, isAggregatedData, filter, influencersLimit, influencerFilter, job }) => {
+const Contents: FC<
+  React.PropsWithChildren<{
+    anomaly: AnomaliesTableRecordExtended;
+    isAggregatedData: boolean;
+    filter: EntityCellFilter;
+    influencersLimit: number;
+    influencerFilter: EntityCellFilter;
+    job: ExplorerJob;
+  }>
+> = ({ anomaly, isAggregatedData, filter, influencersLimit, influencerFilter, job }) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();
@@ -166,7 +168,9 @@ const Contents: FC<React.PropsWithChildren<{
   );
 };
 
-const Description: FC<React.PropsWithChildren<{ anomaly: AnomaliesTableRecordExtended }>> = ({ anomaly }) => {
+const Description: FC<React.PropsWithChildren<{ anomaly: AnomaliesTableRecordExtended }>> = ({
+  anomaly,
+}) => {
   const source = anomaly.source;
 
   let anomalyDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyInLabel', {
@@ -234,12 +238,14 @@ const Description: FC<React.PropsWithChildren<{ anomaly: AnomaliesTableRecordExt
   );
 };
 
-const Details: FC<React.PropsWithChildren<{
-  anomaly: AnomaliesTableRecordExtended;
-  isAggregatedData: boolean;
-  filter: EntityCellFilter;
-  job: ExplorerJob;
-}>> = ({ anomaly, isAggregatedData, filter, job }) => {
+const Details: FC<
+  React.PropsWithChildren<{
+    anomaly: AnomaliesTableRecordExtended;
+    isAggregatedData: boolean;
+    filter: EntityCellFilter;
+    job: ExplorerJob;
+  }>
+> = ({ anomaly, isAggregatedData, filter, job }) => {
   const isInterimResult = anomaly.source?.is_interim ?? false;
   return (
     <>
@@ -279,11 +285,13 @@ const Details: FC<React.PropsWithChildren<{
   );
 };
 
-const Influencers: FC<React.PropsWithChildren<{
-  anomaly: AnomaliesTableRecordExtended;
-  influencersLimit: number;
-  influencerFilter: EntityCellFilter;
-}>> = ({ anomaly, influencersLimit, influencerFilter }) => {
+const Influencers: FC<
+  React.PropsWithChildren<{
+    anomaly: AnomaliesTableRecordExtended;
+    influencersLimit: number;
+    influencerFilter: EntityCellFilter;
+  }>
+> = ({ anomaly, influencersLimit, influencerFilter }) => {
   const [showAllInfluencers, setShowAllInfluencers] = useState(false);
   const toggleAllInfluencers = setShowAllInfluencers.bind(null, (prev) => !prev);
 
@@ -354,10 +362,9 @@ const Influencers: FC<React.PropsWithChildren<{
   return null;
 };
 
-const CategoryExamples: FC<React.PropsWithChildren<{ definition: CategoryDefinition; examples: string[] }>> = ({
-  definition,
-  examples,
-}) => {
+const CategoryExamples: FC<
+  React.PropsWithChildren<{ definition: CategoryDefinition; examples: string[] }>
+> = ({ definition, examples }) => {
   return (
     <EuiFlexGroup
       direction="column"

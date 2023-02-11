@@ -40,11 +40,9 @@ interface SecurityNavControlProps {
   userMenuLinks$: Observable<UserMenuLink[]>;
 }
 
-export const SecurityNavControl: FunctionComponent<React.PropsWithChildren<SecurityNavControlProps>> = ({
-  editProfileUrl,
-  logoutUrl,
-  userMenuLinks$,
-}) => {
+export const SecurityNavControl: FunctionComponent<
+  React.PropsWithChildren<SecurityNavControlProps>
+> = ({ editProfileUrl, logoutUrl, userMenuLinks$ }) => {
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 

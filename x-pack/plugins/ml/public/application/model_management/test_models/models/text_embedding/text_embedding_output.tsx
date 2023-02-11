@@ -23,9 +23,11 @@ export const getTextEmbeddingOutputComponent = (inferrer: TextEmbeddingInference
   <TextEmbeddingOutput inferrer={inferrer} />
 );
 
-const TextEmbeddingOutput: FC<React.PropsWithChildren<{
-  inferrer: TextEmbeddingInference;
-}>> = ({ inferrer }) => {
+const TextEmbeddingOutput: FC<
+  React.PropsWithChildren<{
+    inferrer: TextEmbeddingInference;
+  }>
+> = ({ inferrer }) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
@@ -43,10 +45,12 @@ const TextEmbeddingOutput: FC<React.PropsWithChildren<{
   );
 };
 
-const TextEmbedding: FC<React.PropsWithChildren<{
-  value: string;
-  inputText: string;
-}>> = ({ value, inputText }) => {
+const TextEmbedding: FC<
+  React.PropsWithChildren<{
+    value: string;
+    inputText: string;
+  }>
+> = ({ value, inputText }) => {
   return (
     <>
       <EuiText size="s">{inputText}</EuiText>

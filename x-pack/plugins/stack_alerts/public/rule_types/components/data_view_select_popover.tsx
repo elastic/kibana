@@ -40,7 +40,9 @@ const toDataViewListItem = (dataView: DataView): DataViewListItem => {
   };
 };
 
-export const DataViewSelectPopover: React.FunctionComponent<React.PropsWithChildren<DataViewSelectPopoverProps>> = ({
+export const DataViewSelectPopover: React.FunctionComponent<
+  React.PropsWithChildren<DataViewSelectPopoverProps>
+> = ({
   metadata = { adHocDataViewList: [], isManagementPage: true },
   dataView,
   onSelectDataView,

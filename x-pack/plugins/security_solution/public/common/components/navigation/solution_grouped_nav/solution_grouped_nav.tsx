@@ -50,12 +50,9 @@ type NavItemsById = Record<
   { title: string; panelItems: DefaultSideNavItem[]; categories?: LinkCategories }
 >;
 
-export const SolutionGroupedNavComponent: React.FC<React.PropsWithChildren<SolutionGroupedNavProps>> = ({
-  items,
-  selectedId,
-  footerItems = [],
-  bottomOffset,
-}) => {
+export const SolutionGroupedNavComponent: React.FC<
+  React.PropsWithChildren<SolutionGroupedNavProps>
+> = ({ items, selectedId, footerItems = [], bottomOffset }) => {
   const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
 
   const [activePanelNavId, setActivePanelNavId] = useState<ActivePanelNav>(null);

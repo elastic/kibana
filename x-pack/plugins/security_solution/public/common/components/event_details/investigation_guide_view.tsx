@@ -25,9 +25,11 @@ export const Indent = styled.div`
 
 export const BasicAlertDataContext = createContext<Partial<GetBasicDataFromDetailsData>>({});
 
-const InvestigationGuideViewComponent: React.FC<React.PropsWithChildren<{
-  data: TimelineEventsDetailsItem[];
-}>> = ({ data }) => {
+const InvestigationGuideViewComponent: React.FC<
+  React.PropsWithChildren<{
+    data: TimelineEventsDetailsItem[];
+  }>
+> = ({ data }) => {
   const ruleId = useMemo(() => {
     const item = data.find((d) => d.field === 'signal.rule.id' || d.field === ALERT_RULE_UUID);
     return Array.isArray(item?.originalValue)

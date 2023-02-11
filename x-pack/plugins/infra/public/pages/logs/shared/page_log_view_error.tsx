@@ -19,10 +19,12 @@ import {
 } from '../../../../common/log_views';
 import { LogsPageTemplate } from './page_template';
 
-export const LogViewErrorPage: React.FC<React.PropsWithChildren<{
-  errors: Error[];
-  onRetry: () => void;
-}>> = ({ errors, onRetry }) => {
+export const LogViewErrorPage: React.FC<
+  React.PropsWithChildren<{
+    errors: Error[];
+    onRetry: () => void;
+  }>
+> = ({ errors, onRetry }) => {
   const settingsLinkProps = useLinkProps({ app: 'logs', pathname: '/settings' });
 
   return (
@@ -152,7 +154,10 @@ const LogSourceErrorMessage: React.FC<React.PropsWithChildren<{ error: Error }>>
   }
 };
 
-const LogSourceErrorCallout: React.FC<React.PropsWithChildren<{ title: React.ReactNode }>> = ({ title, children }) => (
+const LogSourceErrorCallout: React.FC<React.PropsWithChildren<{ title: React.ReactNode }>> = ({
+  title,
+  children,
+}) => (
   <EuiCallOut className="eui-textLeft" color="danger" iconType="alert" title={title}>
     <p>{children}</p>
   </EuiCallOut>

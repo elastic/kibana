@@ -16,9 +16,9 @@ interface ExecutionEventsTableRowDetailsProps {
   item: RuleExecutionEvent;
 }
 
-const ExecutionEventsTableRowDetailsComponent: React.FC<React.PropsWithChildren<ExecutionEventsTableRowDetailsProps>> = ({
-  item,
-}) => {
+const ExecutionEventsTableRowDetailsComponent: React.FC<
+  React.PropsWithChildren<ExecutionEventsTableRowDetailsProps>
+> = ({ item }) => {
   return (
     <EuiDescriptionList
       className="eui-fullWidth"

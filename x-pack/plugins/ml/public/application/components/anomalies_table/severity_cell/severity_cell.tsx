@@ -27,22 +27,24 @@ interface SeverityCellProps {
 /**
  * Renders anomaly severity score with single or multi-bucket impact marker.
  */
-export const SeverityCell: FC<React.PropsWithChildren<SeverityCellProps>> = memo(({ score, isMultiBucketAnomaly }) => {
-  const severity = getFormattedSeverityScore(score);
-  const color = getSeverityColor(score);
-  return isMultiBucketAnomaly ? (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <svg width="16" height="16" viewBox="-2 -2 20 20" fill={color}>
-          <path
-            d="M-6.708203932499369,-2.23606797749979H-2.23606797749979V-6.708203932499369H2.23606797749979V-2.23606797749979H6.708203932499369V2.23606797749979H2.23606797749979V6.708203932499369H-2.23606797749979V2.23606797749979H-6.708203932499369Z"
-            transform="translate(8,8)"
-          />
-        </svg>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>{severity}</EuiFlexItem>
-    </EuiFlexGroup>
-  ) : (
-    <EuiHealth color={color}>{severity}</EuiHealth>
-  );
-});
+export const SeverityCell: FC<React.PropsWithChildren<SeverityCellProps>> = memo(
+  ({ score, isMultiBucketAnomaly }) => {
+    const severity = getFormattedSeverityScore(score);
+    const color = getSeverityColor(score);
+    return isMultiBucketAnomaly ? (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <svg width="16" height="16" viewBox="-2 -2 20 20" fill={color}>
+            <path
+              d="M-6.708203932499369,-2.23606797749979H-2.23606797749979V-6.708203932499369H2.23606797749979V-2.23606797749979H6.708203932499369V2.23606797749979H2.23606797749979V6.708203932499369H-2.23606797749979V2.23606797749979H-6.708203932499369Z"
+              transform="translate(8,8)"
+            />
+          </svg>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{severity}</EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
+      <EuiHealth color={color}>{severity}</EuiHealth>
+    );
+  }
+);

@@ -32,10 +32,12 @@ type FormatSideNavItems = (navItems: NavLinkItem) => SideNavItem;
 /**
  * Renders the navigation item for "Get Started" custom link
  */
-const GetStartedCustomLinkComponent: React.FC<React.PropsWithChildren<{
-  isSelected: boolean;
-  title: string;
-}>> = ({ isSelected, title }) => (
+const GetStartedCustomLinkComponent: React.FC<
+  React.PropsWithChildren<{
+    isSelected: boolean;
+    title: string;
+  }>
+> = ({ isSelected, title }) => (
   <SecuritySolutionLinkAnchor
     deepLinkId={SecurityPageName.landing}
     color={isSelected ? 'primary' : 'text'}

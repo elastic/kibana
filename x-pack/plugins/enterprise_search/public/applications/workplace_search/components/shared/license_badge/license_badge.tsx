@@ -11,4 +11,6 @@ import { EuiBadge } from '@elastic/eui';
 
 import { PLATINUM_FEATURE } from '../../../constants';
 
-export const LicenseBadge: React.FC<React.PropsWithChildren<unknown>> = () => <EuiBadge color="accent">{PLATINUM_FEATURE}</EuiBadge>;
+export const LicenseBadge: React.FC<React.PropsWithChildren<unknown>> = () => (
+  <EuiBadge color="accent">{PLATINUM_FEATURE}</EuiBadge>
+);

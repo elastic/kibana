@@ -86,7 +86,10 @@ export const PagePreviewComponent: FC<React.PropsWithChildren<Props>> = ({
 /**
  * A store-connected container for the `PagePreview` component.
  */
-export const PagePreview: FC<React.PropsWithChildren<Pick<Props, 'index' | 'height'>>> = ({ index, height }) => {
+export const PagePreview: FC<React.PropsWithChildren<Pick<Props, 'index' | 'height'>>> = ({
+  index,
+  height,
+}) => {
   const [{ workpad }, dispatch] = useCanvasShareableState();
 
   if (!workpad) {

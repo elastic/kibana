@@ -18,7 +18,11 @@ interface ExternalLinkProps {
 /**
  * A link for opening external urls in a new browser tab.
  */
-export const ExternalLink: FC<React.PropsWithChildren<ExternalLinkProps>> = ({ url, children, ariaLabel }) => {
+export const ExternalLink: FC<React.PropsWithChildren<ExternalLinkProps>> = ({
+  url,
+  children,
+  ariaLabel,
+}) => {
   if (!children) {
     return null;
   }

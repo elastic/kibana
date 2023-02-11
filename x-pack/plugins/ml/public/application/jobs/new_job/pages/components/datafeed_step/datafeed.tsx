@@ -19,7 +19,10 @@ import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 
-export const DatafeedStep: FC<React.PropsWithChildren<StepProps>> = ({ setCurrentStep, isCurrentStep }) => {
+export const DatafeedStep: FC<React.PropsWithChildren<StepProps>> = ({
+  setCurrentStep,
+  isCurrentStep,
+}) => {
   const { jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
   const [isValidQuery, setIsValidQuery] = useState(false);

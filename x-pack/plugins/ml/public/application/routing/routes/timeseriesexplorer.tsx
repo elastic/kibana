@@ -107,10 +107,9 @@ interface TimeSeriesExplorerUrlStateManager {
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
-export const TimeSeriesExplorerUrlStateManager: FC<React.PropsWithChildren<TimeSeriesExplorerUrlStateManager>> = ({
-  config,
-  jobsWithTimeRange,
-}) => {
+export const TimeSeriesExplorerUrlStateManager: FC<
+  React.PropsWithChildren<TimeSeriesExplorerUrlStateManager>
+> = ({ config, jobsWithTimeRange }) => {
   const dataViewsService = useMlContext().dataViewsContract;
   const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();

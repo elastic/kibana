@@ -26,7 +26,9 @@ interface Props {
   shards: SnapshotRestore['shards'];
 }
 
-export const ShardsTable: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ shards }) => {
+export const ShardsTable: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  shards,
+}) => {
   const { i18n } = useServices();
 
   const Progress = ({

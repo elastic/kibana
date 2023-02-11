@@ -15,7 +15,10 @@ interface Props {
   onCancel: () => void;
 }
 
-export const ConfirmAlertDeletion: React.FC<React.PropsWithChildren<Props>> = ({ onConfirm, onCancel }) => {
+export const ConfirmAlertDeletion: React.FC<React.PropsWithChildren<Props>> = ({
+  onConfirm,
+  onCancel,
+}) => {
   return (
     <EuiConfirmModal
       title={labels.DISABLE_ANOMALY_ALERT}

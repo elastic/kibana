@@ -49,7 +49,10 @@ const THREADS_MAX_EXPONENT = 4;
 /**
  * Form for setting threading params.
  */
-export const DeploymentSetup: FC<React.PropsWithChildren<DeploymentSetupProps>> = ({ config, onConfigChange }) => {
+export const DeploymentSetup: FC<React.PropsWithChildren<DeploymentSetupProps>> = ({
+  config,
+  onConfigChange,
+}) => {
   const numOfAllocation = config.numOfAllocations;
   const threadsPerAllocations = config.threadsPerAllocations;
 

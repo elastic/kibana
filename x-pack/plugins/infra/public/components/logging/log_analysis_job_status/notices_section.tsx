@@ -10,17 +10,19 @@ import { QualityWarning } from '../../../../common/log_analysis';
 import { LogAnalysisJobProblemIndicator } from './log_analysis_job_problem_indicator';
 import { CategoryQualityWarnings } from './quality_warning_notices';
 
-export const CategoryJobNoticesSection: React.FC<React.PropsWithChildren<{
-  hasOutdatedJobConfigurations: boolean;
-  hasOutdatedJobDefinitions: boolean;
-  hasSetupCapabilities: boolean;
-  hasStoppedJobs: boolean;
-  isFirstUse: boolean;
-  moduleName: string;
-  onRecreateMlJobForReconfiguration: () => void;
-  onRecreateMlJobForUpdate: () => void;
-  qualityWarnings: QualityWarning[];
-}>> = ({
+export const CategoryJobNoticesSection: React.FC<
+  React.PropsWithChildren<{
+    hasOutdatedJobConfigurations: boolean;
+    hasOutdatedJobDefinitions: boolean;
+    hasSetupCapabilities: boolean;
+    hasStoppedJobs: boolean;
+    isFirstUse: boolean;
+    moduleName: string;
+    onRecreateMlJobForReconfiguration: () => void;
+    onRecreateMlJobForUpdate: () => void;
+    qualityWarnings: QualityWarning[];
+  }>
+> = ({
   hasOutdatedJobConfigurations,
   hasOutdatedJobDefinitions,
   hasSetupCapabilities,

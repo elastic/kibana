@@ -66,16 +66,18 @@ const mappingConfig: FieldConfig<SwimlaneFieldMappingConfig | null> = {
   ],
 };
 
-const MappingField: React.FC<React.PropsWithChildren<{
-  path: string;
-  label: string;
-  validationLabel: string;
-  options: EuiComboBoxProps<string>['options'];
-  fieldIdMap: Map<string, SwimlaneFieldMappingConfig>;
-  connectorType: SwimlaneConnectorType;
-  readOnly: boolean;
-  dataTestSubj?: string;
-}>> = React.memo(
+const MappingField: React.FC<
+  React.PropsWithChildren<{
+    path: string;
+    label: string;
+    validationLabel: string;
+    options: EuiComboBoxProps<string>['options'];
+    fieldIdMap: Map<string, SwimlaneFieldMappingConfig>;
+    connectorType: SwimlaneConnectorType;
+    readOnly: boolean;
+    dataTestSubj?: string;
+  }>
+> = React.memo(
   ({
     path,
     options,
@@ -142,7 +144,10 @@ const MappingField: React.FC<React.PropsWithChildren<{
   }
 );
 
-const SwimlaneFieldsComponent: React.FC<React.PropsWithChildren<Props>> = ({ fields, readOnly }) => {
+const SwimlaneFieldsComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  fields,
+  readOnly,
+}) => {
   const [{ config }] = useFormData({
     watch: ['config.connectorType'],
   });

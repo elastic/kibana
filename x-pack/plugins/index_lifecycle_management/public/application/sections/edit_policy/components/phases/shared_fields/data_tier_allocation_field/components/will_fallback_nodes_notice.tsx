@@ -21,10 +21,9 @@ interface Props {
   targetNodeRole: DataTierRole;
 }
 
-export const WillUseFallbackTierUsingNodeAttributesNotice: FunctionComponent<React.PropsWithChildren<Props>> = ({
-  phase,
-  targetNodeRole,
-}) => {
+export const WillUseFallbackTierUsingNodeAttributesNotice: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ phase, targetNodeRole }) => {
   return (
     <EuiCallOut
       data-test-subj="willUseFallbackTierUsingNodeAttributesNotice"

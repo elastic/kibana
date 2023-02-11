@@ -21,7 +21,11 @@ interface Props {
 // Rotate over the statuses. open -> in-progress -> closes -> open...
 const getNextItem = (item: number) => (item + 1) % caseStatuses.length;
 
-const StatusActionButtonComponent: React.FC<React.PropsWithChildren<Props>> = ({ status, onStatusChanged, isLoading }) => {
+const StatusActionButtonComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  status,
+  onStatusChanged,
+  isLoading,
+}) => {
   const indexOfCurrentStatus = useMemo(
     () => caseStatuses.findIndex((caseStatus) => caseStatus === status),
     [status]

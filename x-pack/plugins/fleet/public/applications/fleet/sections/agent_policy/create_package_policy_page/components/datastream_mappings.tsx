@@ -33,7 +33,9 @@ function useComponentTemplates(dataStream: { dataset: string; type: string }) {
   ];
 }
 
-export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<React.PropsWithChildren<PackagePolicyEditorDatastreamMappingsProps>> = ({ packageInputStream, packageInfo }) => {
+export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
+  React.PropsWithChildren<PackagePolicyEditorDatastreamMappingsProps>
+> = ({ packageInputStream, packageInfo }) => {
   const dataStream = packageInputStream.data_stream;
   const pageUrl = usePackagePolicyEditorPageUrl(packageInputStream.id);
 

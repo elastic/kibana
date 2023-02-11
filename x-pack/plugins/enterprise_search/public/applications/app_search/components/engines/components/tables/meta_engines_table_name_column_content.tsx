@@ -22,7 +22,9 @@ interface MetaEnginesTableNameContentProps {
   showRow: (name: string) => void;
 }
 
-export const MetaEnginesTableNameColumnContent: React.FC<React.PropsWithChildren<MetaEnginesTableNameContentProps>> = ({
+export const MetaEnginesTableNameColumnContent: React.FC<
+  React.PropsWithChildren<MetaEnginesTableNameContentProps>
+> = ({
   item: { name, schemaConflicts, engine_count: engineCount },
   isExpanded,
   hideRow,

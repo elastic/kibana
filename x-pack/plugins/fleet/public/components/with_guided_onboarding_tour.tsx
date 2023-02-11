@@ -68,14 +68,16 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
 
   return null;
 };
-export const WithGuidedOnboardingTour: FunctionComponent<React.PropsWithChildren<{
-  packageKey: string;
-  isTourVisible: boolean;
-  tourType: TourType;
-  tourPosition?: EuiTourStepProps['anchorPosition'];
-  children: ReactElement;
-  tourOffset?: EuiTourStepProps['offset'];
-}>> = ({ packageKey, isTourVisible, tourType, children, tourPosition, tourOffset }) => {
+export const WithGuidedOnboardingTour: FunctionComponent<
+  React.PropsWithChildren<{
+    packageKey: string;
+    isTourVisible: boolean;
+    tourType: TourType;
+    tourPosition?: EuiTourStepProps['anchorPosition'];
+    children: ReactElement;
+    tourOffset?: EuiTourStepProps['offset'];
+  }>
+> = ({ packageKey, isTourVisible, tourType, children, tourPosition, tourOffset }) => {
   const [isGuidedOnboardingTourOpen, setIsGuidedOnboardingTourOpen] =
     useState<boolean>(isTourVisible);
   useEffect(() => {

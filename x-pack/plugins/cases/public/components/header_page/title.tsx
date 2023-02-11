@@ -35,7 +35,11 @@ const BetaBadge: React.FC<React.PropsWithChildren<unknown>> = () => (
 
 BetaBadge.displayName = 'BetaBadge';
 
-const TitleComponent: React.FC<React.PropsWithChildren<Props>> = ({ title, releasePhase, children }) => (
+const TitleComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  title,
+  releasePhase,
+  children,
+}) => (
   <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
       <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>

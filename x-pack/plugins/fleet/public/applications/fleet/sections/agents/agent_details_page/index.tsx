@@ -218,10 +218,12 @@ export const AgentDetailsPage: React.FunctionComponent<React.PropsWithChildren<u
   );
 };
 
-const AgentDetailsPageContent: React.FunctionComponent<React.PropsWithChildren<{
-  agent: Agent;
-  agentPolicy?: AgentPolicy;
-}>> = ({ agent, agentPolicy }) => {
+const AgentDetailsPageContent: React.FunctionComponent<
+  React.PropsWithChildren<{
+    agent: Agent;
+    agentPolicy?: AgentPolicy;
+  }>
+> = ({ agent, agentPolicy }) => {
   useBreadcrumbs('agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&

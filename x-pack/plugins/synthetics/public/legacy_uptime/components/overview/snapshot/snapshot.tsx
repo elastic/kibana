@@ -23,7 +23,9 @@ interface SnapshotComponentProps {
  * glean the status of their uptime environment.
  * @param props the props required by the component
  */
-export const SnapshotComponent: React.FC<React.PropsWithChildren<SnapshotComponentProps>> = ({ height }) => {
+export const SnapshotComponent: React.FC<React.PropsWithChildren<SnapshotComponentProps>> = ({
+  height,
+}) => {
   const { count, loading } = useSnapShotCount();
 
   return (

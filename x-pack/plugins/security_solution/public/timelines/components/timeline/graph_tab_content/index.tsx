@@ -29,7 +29,9 @@ const VerticalRule = styled.div`
   background: ${({ theme }) => theme.eui.euiColorLightShade};
 `;
 
-const GraphTabContentComponent: React.FC<React.PropsWithChildren<GraphTabContentProps>> = ({ timelineId }) => {
+const GraphTabContentComponent: React.FC<React.PropsWithChildren<GraphTabContentProps>> = ({
+  timelineId,
+}) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => getTimeline(state, timelineId)?.graphEventId

@@ -260,16 +260,18 @@ export const renderEventModule = ({
   );
 };
 
-const GenericLinkComponent: React.FC<React.PropsWithChildren<{
-  children?: React.ReactNode;
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  dataTestSubj?: string;
-  href: string;
-  onClick?: (e: SyntheticEvent) => void;
-  title?: string;
-  iconType?: string;
-}>> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'link' }) => {
+const GenericLinkComponent: React.FC<
+  React.PropsWithChildren<{
+    children?: React.ReactNode;
+    /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+    Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+    dataTestSubj?: string;
+    href: string;
+    onClick?: (e: SyntheticEvent) => void;
+    title?: string;
+    iconType?: string;
+  }>
+> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'link' }) => {
   return Component ? (
     <Component
       data-test-subj={dataTestSubj}

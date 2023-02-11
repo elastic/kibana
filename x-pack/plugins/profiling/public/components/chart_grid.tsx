@@ -17,7 +17,11 @@ export interface ChartGridProps {
   showFrames: boolean;
 }
 
-export const ChartGrid: React.FC<React.PropsWithChildren<ChartGridProps>> = ({ limit, charts, showFrames }) => {
+export const ChartGrid: React.FC<React.PropsWithChildren<ChartGridProps>> = ({
+  limit,
+  charts,
+  showFrames,
+}) => {
   const maximum = Math.min(limit, charts.length ?? 0);
 
   const ncharts = Math.min(maximum, charts.length);

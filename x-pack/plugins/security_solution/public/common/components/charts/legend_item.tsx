@@ -35,9 +35,11 @@ const ValueWrapper = React.memo<{ value: LegendItem['value'] }>(({ value }) =>
 
 ValueWrapper.displayName = 'ValueWrapper';
 
-const LegendItemComponent: React.FC<React.PropsWithChildren<{
-  legendItem: LegendItem;
-}>> = ({ legendItem }) => {
+const LegendItemComponent: React.FC<
+  React.PropsWithChildren<{
+    legendItem: LegendItem;
+  }>
+> = ({ legendItem }) => {
   const { color, value } = legendItem;
 
   return (

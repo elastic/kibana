@@ -38,7 +38,9 @@ import { DefaultLayout } from '../../../layouts';
 
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
 
-const ApiKeyField: React.FunctionComponent<React.PropsWithChildren<{ apiKeyId: string }>> = ({ apiKeyId }) => {
+const ApiKeyField: React.FunctionComponent<React.PropsWithChildren<{ apiKeyId: string }>> = ({
+  apiKeyId,
+}) => {
   const { notifications } = useStartServices();
   const [state, setState] = useState<'VISIBLE' | 'HIDDEN' | 'LOADING'>('HIDDEN');
   const [key, setKey] = useState<string | undefined>();
@@ -105,10 +107,9 @@ const ApiKeyField: React.FunctionComponent<React.PropsWithChildren<{ apiKeyId: s
   );
 };
 
-const DeleteButton: React.FunctionComponent<React.PropsWithChildren<{ apiKey: EnrollmentAPIKey; refresh: () => void }>> = ({
-  apiKey,
-  refresh,
-}) => {
+const DeleteButton: React.FunctionComponent<
+  React.PropsWithChildren<{ apiKey: EnrollmentAPIKey; refresh: () => void }>
+> = ({ apiKey, refresh }) => {
   const { notifications } = useStartServices();
   const [state, setState] = useState<'CONFIRM_VISIBLE' | 'CONFIRM_HIDDEN'>('CONFIRM_HIDDEN');
 

@@ -12,10 +12,9 @@ import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { Credentials } from './credentials';
 import { ServiceNowConfig, ServiceNowSecrets } from './types';
 
-const ServiceNowConnectorFieldsNoApp: React.FC<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({
-  isEdit,
-  readOnly,
-}) => {
+const ServiceNowConnectorFieldsNoApp: React.FC<
+  React.PropsWithChildren<ActionConnectorFieldsProps>
+> = ({ isEdit, readOnly }) => {
   const [{ config }] = useFormData<ConnectorFormSchema<ServiceNowConfig, ServiceNowSecrets>>({
     watch: ['config.isOAuth'],
   });

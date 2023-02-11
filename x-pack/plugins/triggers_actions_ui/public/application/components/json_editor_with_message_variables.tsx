@@ -55,7 +55,9 @@ const { useXJsonMode } = XJson;
 // Multiple editors can use the same ID without any issues.
 const EDITOR_SOURCE = 'json-editor-with-message-variables';
 
-export const JsonEditorWithMessageVariables: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+export const JsonEditorWithMessageVariables: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({
   buttonTitle,
   messageVariables,
   paramsProperty,

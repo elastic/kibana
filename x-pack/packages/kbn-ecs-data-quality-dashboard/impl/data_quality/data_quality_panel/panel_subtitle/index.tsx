@@ -17,7 +17,12 @@ interface Props {
   versionLoading: boolean;
 }
 
-const PanelSubtitleComponent: React.FC<React.PropsWithChildren<Props>> = ({ error, loading, version, versionLoading }) => {
+const PanelSubtitleComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  error,
+  loading,
+  version,
+  versionLoading,
+}) => {
   const allDataLoaded = !loading && !versionLoading && error == null && version != null;
 
   return allDataLoaded ? (

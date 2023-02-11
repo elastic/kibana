@@ -95,9 +95,9 @@ const portConfig: FieldConfig<string> = {
   ],
 };
 
-export const EmailActionConnectorFields: React.FunctionComponent<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({
-  readOnly,
-}) => {
+export const EmailActionConnectorFields: React.FunctionComponent<
+  React.PropsWithChildren<ActionConnectorFieldsProps>
+> = ({ readOnly }) => {
   const {
     docLinks,
     http,

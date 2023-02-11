@@ -44,9 +44,9 @@ const i18nTexts = {
   },
 };
 
-export const DefaultToDataTiersNotice: FunctionComponent<React.PropsWithChildren<{ phase: PhaseWithAllocation }>> = ({
-  phase,
-}) => {
+export const DefaultToDataTiersNotice: FunctionComponent<
+  React.PropsWithChildren<{ phase: PhaseWithAllocation }>
+> = ({ phase }) => {
   return (
     <EuiCallOut
       data-test-subj="defaultToDataTiersNotice"

@@ -10,10 +10,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { WIZARD_STEPS } from '../step_types';
 
-export const SkipValidationButton: FC<React.PropsWithChildren<{
-  nextActive: boolean;
-  setCurrentStep: React.Dispatch<React.SetStateAction<WIZARD_STEPS>>;
-}>> = ({ nextActive, setCurrentStep }) =>
+export const SkipValidationButton: FC<
+  React.PropsWithChildren<{
+    nextActive: boolean;
+    setCurrentStep: React.Dispatch<React.SetStateAction<WIZARD_STEPS>>;
+  }>
+> = ({ nextActive, setCurrentStep }) =>
   nextActive ? null : (
     <EuiButtonEmpty
       onClick={() => setCurrentStep(WIZARD_STEPS.SUMMARY)}

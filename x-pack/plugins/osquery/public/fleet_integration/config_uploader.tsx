@@ -30,7 +30,9 @@ interface ConfigUploaderProps {
   onChange: (payload: Record<string, unknown>) => void;
 }
 
-const ConfigUploaderComponent: React.FC<React.PropsWithChildren<ConfigUploaderProps>> = ({ onChange }) => {
+const ConfigUploaderComponent: React.FC<React.PropsWithChildren<ConfigUploaderProps>> = ({
+  onChange,
+}) => {
   const filePickerRef = useRef<EuiFilePicker>(null);
   const [isInvalid, setIsInvalid] = useState<string | null>(null);
   // @ts-expect-error update types

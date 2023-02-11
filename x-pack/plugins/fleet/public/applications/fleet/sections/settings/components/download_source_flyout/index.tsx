@@ -37,10 +37,9 @@ export interface EditDownloadSourceFlyoutProps {
   onClose: () => void;
 }
 
-export const EditDownloadSourceFlyout: React.FunctionComponent<React.PropsWithChildren<EditDownloadSourceFlyoutProps>> = ({
-  onClose,
-  downloadSource,
-}) => {
+export const EditDownloadSourceFlyout: React.FunctionComponent<
+  React.PropsWithChildren<EditDownloadSourceFlyoutProps>
+> = ({ onClose, downloadSource }) => {
   useBreadcrumbs('settings');
   const form = useDowloadSourceFlyoutForm(onClose, downloadSource);
   const inputs = form.inputs;

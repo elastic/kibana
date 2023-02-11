@@ -16,7 +16,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { linkToAddRepository } from '../../../../services/navigation';
 
-export const RepositoryEmptyPrompt: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
+export const RepositoryEmptyPrompt: React.FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const history = useHistory();
   return (
     <EuiPageContent

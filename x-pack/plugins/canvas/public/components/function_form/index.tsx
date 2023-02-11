@@ -51,7 +51,9 @@ interface FunctionFormProps {
   removable?: boolean;
 }
 
-export const FunctionForm: React.FunctionComponent<React.PropsWithChildren<FunctionFormProps>> = (props) => {
+export const FunctionForm: React.FunctionComponent<React.PropsWithChildren<FunctionFormProps>> = (
+  props
+) => {
   const { expressionIndex, ...restProps } = props;
   const { nextArgType, path, parentPath, argType } = restProps;
   const service = useWorkpadService();

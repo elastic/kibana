@@ -38,7 +38,10 @@ export const RareCard: FC<React.PropsWithChildren<CardProps>> = ({ onClick, isSe
   </EuiFlexItem>
 );
 
-export const RareInPopulationCard: FC<React.PropsWithChildren<CardProps>> = ({ onClick, isSelected }) => (
+export const RareInPopulationCard: FC<React.PropsWithChildren<CardProps>> = ({
+  onClick,
+  isSelected,
+}) => (
   <EuiFlexItem>
     <EuiCard
       data-test-subj={`mlJobWizardCategorizationDetectorRareCard${isSelected ? ' selected' : ''}`}
@@ -61,7 +64,10 @@ export const RareInPopulationCard: FC<React.PropsWithChildren<CardProps>> = ({ o
   </EuiFlexItem>
 );
 
-export const FrequentlyRareInPopulationCard: FC<React.PropsWithChildren<CardProps>> = ({ onClick, isSelected }) => (
+export const FrequentlyRareInPopulationCard: FC<React.PropsWithChildren<CardProps>> = ({
+  onClick,
+  isSelected,
+}) => (
   <EuiFlexItem>
     <EuiCard
       data-test-subj={`mlJobWizardCategorizationDetectorRareCard${isSelected ? ' selected' : ''}`}

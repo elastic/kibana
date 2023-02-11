@@ -23,10 +23,9 @@ const NameFlexItemWithMaxWidth = styled(EuiFlexItem)`
   max-width: 250px;
 `;
 
-export const FleetProxiesTable: React.FunctionComponent<React.PropsWithChildren<FleetProxiesTableProps>> = ({
-  proxies,
-  deleteFleetProxy,
-}) => {
+export const FleetProxiesTable: React.FunctionComponent<
+  React.PropsWithChildren<FleetProxiesTableProps>
+> = ({ proxies, deleteFleetProxy }) => {
   const { getHref } = useLink();
 
   const columns = useMemo((): Array<EuiBasicTableColumn<FleetProxy>> => {

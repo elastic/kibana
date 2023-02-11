@@ -208,12 +208,14 @@ export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
 export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: any }>
   extends PivotAggsConfigWithUiBase {
   /** Form component */
-  AggFormComponent: FC<React.PropsWithChildren<{
-    aggConfig: Partial<T>;
-    onChange: (arg: Partial<T>) => void;
-    selectedField: string;
-    isValid?: boolean;
-  }>>;
+  AggFormComponent: FC<
+    React.PropsWithChildren<{
+      aggConfig: Partial<T>;
+      onChange: (arg: Partial<T>) => void;
+      selectedField: string;
+      isValid?: boolean;
+    }>
+  >;
   /** Aggregation specific configuration */
   aggConfig: Partial<T>;
   /** Set UI configuration from ES aggregation definition */

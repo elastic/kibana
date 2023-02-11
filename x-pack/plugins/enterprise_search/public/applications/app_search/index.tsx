@@ -83,7 +83,9 @@ export const AppSearchUnconfigured: React.FC<React.PropsWithChildren<unknown>> =
   </Switch>
 );
 
-export const AppSearchConfigured: React.FC<React.PropsWithChildren<Required<InitialAppData>>> = (props) => {
+export const AppSearchConfigured: React.FC<React.PropsWithChildren<Required<InitialAppData>>> = (
+  props
+) => {
   const {
     myRole: {
       canManageEngines,

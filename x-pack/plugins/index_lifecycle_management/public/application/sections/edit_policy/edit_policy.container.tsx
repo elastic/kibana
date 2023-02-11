@@ -29,7 +29,9 @@ interface RouterProps {
   policyName: string;
 }
 
-export const EditPolicy: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps<RouterProps>>> = ({
+export const EditPolicy: React.FunctionComponent<
+  React.PropsWithChildren<RouteComponentProps<RouterProps>>
+> = ({
   match: {
     params: { policyName },
   },

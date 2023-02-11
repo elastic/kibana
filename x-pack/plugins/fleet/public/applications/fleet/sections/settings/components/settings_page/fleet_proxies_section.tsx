@@ -26,10 +26,9 @@ export interface FleetProxiesSectionProps {
   deleteFleetProxy: (proxy: FleetProxy) => void;
 }
 
-export const FleetProxiesSection: React.FunctionComponent<React.PropsWithChildren<FleetProxiesSectionProps>> = ({
-  proxies,
-  deleteFleetProxy,
-}) => {
+export const FleetProxiesSection: React.FunctionComponent<
+  React.PropsWithChildren<FleetProxiesSectionProps>
+> = ({ proxies, deleteFleetProxy }) => {
   const { getHref } = useLink();
 
   return (

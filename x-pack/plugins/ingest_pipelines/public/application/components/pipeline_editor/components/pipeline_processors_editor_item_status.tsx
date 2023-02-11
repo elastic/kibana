@@ -76,7 +76,9 @@ interface Props {
   processorStatus: ProcessorStatus;
 }
 
-export const PipelineProcessorsItemStatus: FunctionComponent<React.PropsWithChildren<Props>> = ({ processorStatus }) => {
+export const PipelineProcessorsItemStatus: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  processorStatus,
+}) => {
   const { icon, iconColor, label } = processorStatusToIconMap[processorStatus] || unknownStatus;
 
   return (

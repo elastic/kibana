@@ -88,10 +88,9 @@ const StyledFullHeightContainer = styled.div`
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
-const DetectionEnginePageComponent: React.FC<React.PropsWithChildren<DetectionEngineComponentProps>> = ({
-  clearEventsLoading,
-  clearEventsDeleted,
-}) => {
+const DetectionEnginePageComponent: React.FC<
+  React.PropsWithChildren<DetectionEngineComponentProps>
+> = ({ clearEventsLoading, clearEventsDeleted }) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);

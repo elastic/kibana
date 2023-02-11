@@ -7,8 +7,10 @@
 
 import { FC } from 'react';
 
-declare const EditFilterList: FC<React.PropsWithChildren<{
-  filterId?: string;
-  canCreateFilter: boolean;
-  canDeleteFilter: boolean;
-}>>;
+declare const EditFilterList: FC<
+  React.PropsWithChildren<{
+    filterId?: string;
+    canCreateFilter: boolean;
+    canDeleteFilter: boolean;
+  }>
+>;

@@ -106,14 +106,9 @@ interface ExpandableSectionResultsProps {
   searchQuery: SavedSearchQuery;
 }
 
-export const ExpandableSectionResults: FC<React.PropsWithChildren<ExpandableSectionResultsProps>> = ({
-  colorRange,
-  indexData,
-  indexPattern,
-  jobConfig,
-  needsDestIndexPattern,
-  searchQuery,
-}) => {
+export const ExpandableSectionResults: FC<
+  React.PropsWithChildren<ExpandableSectionResultsProps>
+> = ({ colorRange, indexData, indexPattern, jobConfig, needsDestIndexPattern, searchQuery }) => {
   const { columnsWithCharts, status, tableItems } = indexData;
 
   // Results section header items and content

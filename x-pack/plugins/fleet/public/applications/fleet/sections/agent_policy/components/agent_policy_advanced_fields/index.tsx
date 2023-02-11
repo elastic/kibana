@@ -54,13 +54,9 @@ interface Props {
   onDelete?: () => void;
 }
 
-export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
-  agentPolicy,
-  updateAgentPolicy,
-  validation,
-  isEditing = false,
-  onDelete = () => {},
-}) => {
+export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ agentPolicy, updateAgentPolicy, validation, isEditing = false, onDelete = () => {} }) => {
   const { agentFqdnMode: agentFqdnModeEnabled } = ExperimentalFeaturesService.get();
   const { docLinks } = useStartServices();
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});

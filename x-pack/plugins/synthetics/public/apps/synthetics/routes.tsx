@@ -162,7 +162,10 @@ const getRoutes = (
   ];
 };
 
-const RouteInit: React.FC<React.PropsWithChildren<Pick<RouteProps, 'path' | 'title'>>> = ({ path, title }) => {
+const RouteInit: React.FC<React.PropsWithChildren<Pick<RouteProps, 'path' | 'title'>>> = ({
+  path,
+  title,
+}) => {
   useEffect(() => {
     document.title = title;
   }, [path, title]);

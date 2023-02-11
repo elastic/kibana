@@ -123,11 +123,9 @@ const SolutionNavPanelComponent: React.FC<React.PropsWithChildren<SolutionNavPan
 };
 export const SolutionNavPanel = React.memo(SolutionNavPanelComponent);
 
-const SolutionNavPanelCategories: React.FC<React.PropsWithChildren<SolutionNavPanelCategoriesProps>> = ({
-  categories,
-  items,
-  onClose,
-}) => {
+const SolutionNavPanelCategories: React.FC<
+  React.PropsWithChildren<SolutionNavPanelCategoriesProps>
+> = ({ categories, items, onClose }) => {
   const itemsMap = new Map(items.map((item) => [item.id, item]));
 
   return (
@@ -160,7 +158,10 @@ const SolutionNavPanelCategories: React.FC<React.PropsWithChildren<SolutionNavPa
   );
 };
 
-const SolutionNavPanelItems: React.FC<React.PropsWithChildren<SolutionNavPanelItemsProps>> = ({ items, onClose }) => {
+const SolutionNavPanelItems: React.FC<React.PropsWithChildren<SolutionNavPanelItemsProps>> = ({
+  items,
+  onClose,
+}) => {
   const panelLinkClassNames = classNames('solutionGroupedNavPanelLink');
   const panelLinkItemClassNames = classNames('solutionGroupedNavPanelLinkItem');
   return (

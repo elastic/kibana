@@ -40,7 +40,9 @@ import { errorToText } from '../utils/error_to_text';
 
 import { AddConnectorLogic } from './add_connector_logic';
 
-export const MethodConnector: React.FC<React.PropsWithChildren<{ isNative: boolean }>> = ({ isNative }) => {
+export const MethodConnector: React.FC<React.PropsWithChildren<{ isNative: boolean }>> = ({
+  isNative,
+}) => {
   const { apiReset, makeRequest } = useActions(AddConnectorApiLogic);
   const { error, status } = useValues(AddConnectorApiLogic);
   const { isModalVisible } = useValues(AddConnectorLogic);

@@ -30,7 +30,10 @@ import { ROUTES } from '../constants';
 
 import './capture_test.scss';
 
-const ItemsContainer: FunctionComponent<React.PropsWithChildren<{ count: string }>> = ({ count, children }) => (
+const ItemsContainer: FunctionComponent<React.PropsWithChildren<{ count: string }>> = ({
+  count,
+  children,
+}) => (
   <div
     className="reportingExample__captureContainer"
     data-shared-items-container

@@ -111,4 +111,6 @@ export const CommandExecutionResult = memo<CommandExecutionResultProps>(
 );
 CommandExecutionResult.displayName = 'CommandExecutionResult';
 
-export type CommandExecutionResultComponent = ComponentType<React.PropsWithChildren<CommandExecutionResultProps>>;
+export type CommandExecutionResultComponent = ComponentType<
+  React.PropsWithChildren<CommandExecutionResultProps>
+>;

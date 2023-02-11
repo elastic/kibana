@@ -16,11 +16,9 @@ interface ActionTypeFilterProps {
   filters: string[];
 }
 
-export const ActionTypeFilter: React.FunctionComponent<React.PropsWithChildren<ActionTypeFilterProps>> = ({
-  actionTypes,
-  onChange: onFilterChange,
-  filters,
-}: ActionTypeFilterProps) => {
+export const ActionTypeFilter: React.FunctionComponent<
+  React.PropsWithChildren<ActionTypeFilterProps>
+> = ({ actionTypes, onChange: onFilterChange, filters }: ActionTypeFilterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const onClick = useCallback(

@@ -39,7 +39,11 @@ interface Props {
   layerIndex: number;
 }
 
-export const CompatibleLayer: FC<React.PropsWithChildren<Props>> = ({ embeddable, layer, layerIndex }) => {
+export const CompatibleLayer: FC<React.PropsWithChildren<Props>> = ({
+  embeddable,
+  layer,
+  layerIndex,
+}) => {
   const [selectedSplitField, setSelectedSplitField] = useState<string | null>(null);
   const [createError, setCreateError] = useState<{ text: string; errorText: string } | undefined>();
 

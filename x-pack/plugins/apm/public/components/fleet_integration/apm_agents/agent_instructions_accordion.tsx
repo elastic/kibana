@@ -91,7 +91,9 @@ interface Props {
   title: string;
   variantId: string;
   createAgentInstructions: CreateAgentInstructions;
-  AgentRuntimeAttachment?: ComponentType<React.PropsWithChildren<AgentRuntimeAttachmentProps>>;
+  AgentRuntimeAttachment?: ComponentType<
+    React.PropsWithChildren<AgentRuntimeAttachmentProps>
+  >;
 }
 
 const StyledEuiAccordion = styled(EuiAccordion)`

@@ -37,7 +37,12 @@ interface Props {
   removeOptions: AggFieldPair[];
 }
 
-export const AggSelect: FC<React.PropsWithChildren<Props>> = ({ fields, changeHandler, selectedOptions, removeOptions }) => {
+export const AggSelect: FC<React.PropsWithChildren<Props>> = ({
+  fields,
+  changeHandler,
+  selectedOptions,
+  removeOptions,
+}) => {
   const { jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.duplicateDetectors);
   // create list of labels based on already selected detectors

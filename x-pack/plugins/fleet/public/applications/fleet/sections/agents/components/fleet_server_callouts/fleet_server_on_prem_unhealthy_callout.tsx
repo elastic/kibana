@@ -14,7 +14,9 @@ import { useStartServices } from '../../../../hooks';
 export interface FleetServerOnPremUnhealthyCalloutProps {
   onClickAddFleetServer: () => void;
 }
-export const FleetServerOnPremUnhealthyCallout: React.FunctionComponent<React.PropsWithChildren<FleetServerOnPremUnhealthyCalloutProps>> = ({ onClickAddFleetServer }) => {
+export const FleetServerOnPremUnhealthyCallout: React.FunctionComponent<
+  React.PropsWithChildren<FleetServerOnPremUnhealthyCalloutProps>
+> = ({ onClickAddFleetServer }) => {
   const { docLinks } = useStartServices();
   return (
     <EuiCallOut

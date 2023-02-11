@@ -28,8 +28,8 @@ interface TestsSelectionControlProps {
   errors?: string[];
 }
 
-export const TestsSelectionControl: FC<React.PropsWithChildren<TestsSelectionControlProps>> = React.memo(
-  ({ config, onChange, errors }) => {
+export const TestsSelectionControl: FC<React.PropsWithChildren<TestsSelectionControlProps>> =
+  React.memo(({ config, onChange, errors }) => {
     const uiConfig = getResultJobsHealthRuleConfig(config);
 
     const updateCallback = useCallback(
@@ -154,5 +154,4 @@ export const TestsSelectionControl: FC<React.PropsWithChildren<TestsSelectionCon
         <EuiSpacer size="l" />
       </>
     );
-  }
-);
+  });

@@ -81,7 +81,10 @@ interface DocsColumnResultsProps {
   isLive?: boolean;
 }
 
-const DocsColumnResults: React.FC<React.PropsWithChildren<DocsColumnResultsProps>> = ({ count, isLive }) => (
+const DocsColumnResults: React.FC<React.PropsWithChildren<DocsColumnResultsProps>> = ({
+  count,
+  isLive,
+}) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
       {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
@@ -143,15 +146,9 @@ interface PackQueriesStatusTableProps {
   showResultsHeader?: boolean;
 }
 
-const PackQueriesStatusTableComponent: React.FC<React.PropsWithChildren<PackQueriesStatusTableProps>> = ({
-  actionId,
-  queryId,
-  agentIds,
-  data,
-  startDate,
-  expirationDate,
-  showResultsHeader,
-}) => {
+const PackQueriesStatusTableComponent: React.FC<
+  React.PropsWithChildren<PackQueriesStatusTableProps>
+> = ({ actionId, queryId, agentIds, data, startDate, expirationDate, showResultsHeader }) => {
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
     id: string;
     query: string;

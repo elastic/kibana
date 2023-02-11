@@ -79,7 +79,9 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
     };
   });
 
-export const KeyboardShortcutsDoc: FunctionComponent<React.PropsWithChildren<Props>> = ({ onClose }) => (
+export const KeyboardShortcutsDoc: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  onClose,
+}) => (
   <EuiFlyout
     closeButtonAriaLabel={strings.getFlyoutCloseButtonAriaLabel()}
     size="s"

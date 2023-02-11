@@ -32,17 +32,19 @@ const minimumFieldsMessage = i18n.translate(
 const checkboxDisabledCheck = (item: FieldSelectionItem) =>
   item.is_required === true || (item.reason && item.reason.includes('unsupported type'));
 
-export const AnalysisFieldsTable: FC<React.PropsWithChildren<{
-  dependentVariable?: string;
-  includes: string[];
-  isJobTypeWithDepVar: boolean;
-  setFormState: React.Dispatch<React.SetStateAction<any>>;
-  minimumFieldsRequiredMessage?: string;
-  setMinimumFieldsRequiredMessage: React.Dispatch<React.SetStateAction<any>>;
-  tableItems: FieldSelectionItem[];
-  unsupportedFieldsError?: string;
-  setUnsupportedFieldsError: React.Dispatch<React.SetStateAction<any>>;
-}>> = React.memo(
+export const AnalysisFieldsTable: FC<
+  React.PropsWithChildren<{
+    dependentVariable?: string;
+    includes: string[];
+    isJobTypeWithDepVar: boolean;
+    setFormState: React.Dispatch<React.SetStateAction<any>>;
+    minimumFieldsRequiredMessage?: string;
+    setMinimumFieldsRequiredMessage: React.Dispatch<React.SetStateAction<any>>;
+    tableItems: FieldSelectionItem[];
+    unsupportedFieldsError?: string;
+    setUnsupportedFieldsError: React.Dispatch<React.SetStateAction<any>>;
+  }>
+> = React.memo(
   ({
     dependentVariable,
     includes,

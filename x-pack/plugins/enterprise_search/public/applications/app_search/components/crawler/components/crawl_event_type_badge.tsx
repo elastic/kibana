@@ -13,7 +13,9 @@ import { i18n } from '@kbn/i18n';
 
 import { CrawlEvent, CrawlType, readableCrawlTypes } from '../types';
 
-export const CrawlEventTypeBadge: React.FC<React.PropsWithChildren<{ event: CrawlEvent }>> = ({ event }) => {
+export const CrawlEventTypeBadge: React.FC<React.PropsWithChildren<{ event: CrawlEvent }>> = ({
+  event,
+}) => {
   if (event.stage === 'process') {
     return (
       <EuiBadge color="hollow">

@@ -145,6 +145,8 @@ export const EDITOR_PX_HEIGHT = {
 
 export type FieldsConfig = Record<string, FieldConfig<any>>;
 
-export type FormFieldsComponent = FunctionComponent<React.PropsWithChildren<{
-  initialFieldValues?: Record<string, any>;
-}>>;
+export type FormFieldsComponent = FunctionComponent<
+  React.PropsWithChildren<{
+    initialFieldValues?: Record<string, any>;
+  }>
+>;

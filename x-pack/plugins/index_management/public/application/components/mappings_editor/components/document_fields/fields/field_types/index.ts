@@ -38,47 +38,50 @@ import { WildcardType } from './wildcard_type';
 import { PointType } from './point_type';
 import { VersionType } from './version_type';
 
-const typeToParametersFormMap: { [key in DataType]?: ComponentType<React.PropsWithChildren<any>> } = {
-  alias: AliasType,
-  keyword: KeywordType,
-  numeric: NumericType,
-  text: TextType,
-  boolean: BooleanType,
-  binary: BinaryType,
-  range: RangeType,
-  ip: IpType,
-  token_count: TokenCountType,
-  completion: CompletionType,
-  geo_point: GeoPointType,
-  date: DateType,
-  date_nanos: DateType,
-  geo_shape: GeoShapeType,
-  search_as_you_type: SearchAsYouType,
-  flattened: FlattenedType,
-  shape: ShapeType,
-  dense_vector: DenseVectorType,
-  object: ObjectType,
-  other: OtherType,
-  nested: NestedType,
-  join: JoinType,
-  histogram: HistogramType,
-  constant_keyword: ConstantKeywordType,
-  rank_feature: RankFeatureType,
-  wildcard: WildcardType,
-  point: PointType,
-  version: VersionType,
-};
+const typeToParametersFormMap: { [key in DataType]?: ComponentType<React.PropsWithChildren<any>> } =
+  {
+    alias: AliasType,
+    keyword: KeywordType,
+    numeric: NumericType,
+    text: TextType,
+    boolean: BooleanType,
+    binary: BinaryType,
+    range: RangeType,
+    ip: IpType,
+    token_count: TokenCountType,
+    completion: CompletionType,
+    geo_point: GeoPointType,
+    date: DateType,
+    date_nanos: DateType,
+    geo_shape: GeoShapeType,
+    search_as_you_type: SearchAsYouType,
+    flattened: FlattenedType,
+    shape: ShapeType,
+    dense_vector: DenseVectorType,
+    object: ObjectType,
+    other: OtherType,
+    nested: NestedType,
+    join: JoinType,
+    histogram: HistogramType,
+    constant_keyword: ConstantKeywordType,
+    rank_feature: RankFeatureType,
+    wildcard: WildcardType,
+    point: PointType,
+    version: VersionType,
+  };
 
 export const getParametersFormForType = (
   type: MainType,
   subType?: SubType
 ):
-  | ComponentType<React.PropsWithChildren<{
-      field: NormalizedField;
-      allFields: NormalizedFields['byId'];
-      isMultiField: boolean;
-      kibanaVersion: SemVer;
-    }>>
+  | ComponentType<
+      React.PropsWithChildren<{
+        field: NormalizedField;
+        allFields: NormalizedFields['byId'];
+        isMultiField: boolean;
+        kibanaVersion: SemVer;
+      }>
+    >
   | undefined =>
   subType === undefined
     ? typeToParametersFormMap[type]

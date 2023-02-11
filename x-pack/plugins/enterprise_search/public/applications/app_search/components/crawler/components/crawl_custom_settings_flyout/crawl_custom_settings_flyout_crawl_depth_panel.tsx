@@ -22,7 +22,9 @@ import { i18n } from '@kbn/i18n';
 
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
-export const CrawlCustomSettingsFlyoutCrawlDepthPanel: React.FC<React.PropsWithChildren<unknown>> = () => {
+export const CrawlCustomSettingsFlyoutCrawlDepthPanel: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { maxCrawlDepth } = useValues(CrawlCustomSettingsFlyoutLogic);
   const { onSelectMaxCrawlDepth } = useActions(CrawlCustomSettingsFlyoutLogic);
 

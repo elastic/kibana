@@ -11,7 +11,9 @@ import { BulkActionsVerbs } from '../../../../../types';
 import { BulkActionsContext } from '../context';
 import { COLUMN_HEADER_ARIA_LABEL } from '../translations';
 
-const BulkActionsHeaderComponent: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
+const BulkActionsHeaderComponent: React.FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const [{ isAllSelected, areAllVisibleRowsSelected }, updateSelectedRows] =
     useContext(BulkActionsContext);
 

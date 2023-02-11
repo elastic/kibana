@@ -132,11 +132,13 @@ const FlyoutButton: FC<React.PropsWithChildren<{ onClick(): void }>> = ({ onClic
   );
 };
 
-const Contents: FC<React.PropsWithChildren<{
-  title: string;
-  value: string;
-  onChange(s: string): void;
-}>> = ({ title, value, onChange }) => {
+const Contents: FC<
+  React.PropsWithChildren<{
+    title: string;
+    value: string;
+    onChange(s: string): void;
+  }>
+> = ({ title, value, onChange }) => {
   return (
     <EuiFlexItem>
       <EuiTitle size="s">

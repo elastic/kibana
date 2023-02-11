@@ -61,12 +61,14 @@ const useFleetServerTabs = (onClose: () => void) => {
   return { tabs: [quickStartTab, advancedTab], currentTab, setCurrentTab, currentTabContent };
 };
 
-const Header: React.FunctionComponent<React.PropsWithChildren<{
-  isFlyout?: boolean;
-  currentTab: string;
-  tabs: Array<{ id: string; label: string; content: React.ReactNode }>;
-  onTabClick: (id: string) => void;
-}>> = ({ isFlyout = false, currentTab: currentTabId, tabs, onTabClick }) => {
+const Header: React.FunctionComponent<
+  React.PropsWithChildren<{
+    isFlyout?: boolean;
+    currentTab: string;
+    tabs: Array<{ id: string; label: string; content: React.ReactNode }>;
+    onTabClick: (id: string) => void;
+  }>
+> = ({ isFlyout = false, currentTab: currentTabId, tabs, onTabClick }) => {
   const { docLinks } = useStartServices();
 
   return (
@@ -118,7 +120,9 @@ const Header: React.FunctionComponent<React.PropsWithChildren<{
 };
 
 // Renders instructions inside of a flyout
-export const FleetServerFlyout: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ onClose }) => {
+export const FleetServerFlyout: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  onClose,
+}) => {
   const { tabs, currentTab, setCurrentTab, currentTabContent } = useFleetServerTabs(onClose);
 
   return (
@@ -137,7 +141,9 @@ export const FleetServerFlyout: React.FunctionComponent<React.PropsWithChildren<
   );
 };
 
-export const AddFleetServerLanding: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
+export const AddFleetServerLanding: React.FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { docLinks } = useStartServices();
   const flyoutContext = useFlyoutContext();
 

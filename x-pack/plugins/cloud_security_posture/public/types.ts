@@ -62,8 +62,10 @@ export interface CspSecuritySolutionContext {
   /** Gets the `FiltersGlobal` component for embedding a filter bar in the security solution application. */
   getFiltersGlobalComponent: () => ComponentType<React.PropsWithChildren<{ children: ReactNode }>>;
   /** Gets the `SpyRoute` component for navigation highlighting and breadcrumbs. */
-  getSpyRouteComponent: () => ComponentType<React.PropsWithChildren<{
-    pageName: CloudSecurityPosturePageId;
-    state?: Record<string, string | undefined>;
-  }>>;
+  getSpyRouteComponent: () => ComponentType<
+    React.PropsWithChildren<{
+      pageName: CloudSecurityPosturePageId;
+      state?: Record<string, string | undefined>;
+    }>
+  >;
 }

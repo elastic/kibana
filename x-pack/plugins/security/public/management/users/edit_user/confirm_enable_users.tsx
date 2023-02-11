@@ -22,11 +22,9 @@ export interface ConfirmEnableUsersProps {
   onSuccess?(): void;
 }
 
-export const ConfirmEnableUsers: FunctionComponent<React.PropsWithChildren<ConfirmEnableUsersProps>> = ({
-  usernames,
-  onCancel,
-  onSuccess,
-}) => {
+export const ConfirmEnableUsers: FunctionComponent<
+  React.PropsWithChildren<ConfirmEnableUsersProps>
+> = ({ usernames, onCancel, onSuccess }) => {
   const { services } = useKibana();
 
   const [state, enableUsers] = useAsyncFn(async () => {

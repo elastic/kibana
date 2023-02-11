@@ -52,12 +52,9 @@ interface AddToDashboardControlProps {
 /**
  * Component for attaching anomaly swim lane embeddable to dashboards.
  */
-export const AddSwimlaneToDashboardControl: FC<React.PropsWithChildren<AddToDashboardControlProps>> = ({
-  onClose,
-  jobIds,
-  viewBy,
-  queryString,
-}) => {
+export const AddSwimlaneToDashboardControl: FC<
+  React.PropsWithChildren<AddToDashboardControlProps>
+> = ({ onClose, jobIds, viewBy, queryString }) => {
   const { dashboardItems, isLoading, search } = useDashboardTable();
 
   const [selectedSwimlane, setSelectedSwimlane] = useState<SwimlaneType>(SWIMLANE_TYPE.OVERALL);

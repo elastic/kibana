@@ -19,10 +19,9 @@ interface RuleExecutionStatusFilterProps {
 
 const sortedRuleExecutionStatusValues = [...RuleExecutionStatusValues].sort();
 
-export const RuleExecutionStatusFilter: React.FunctionComponent<React.PropsWithChildren<RuleExecutionStatusFilterProps>> = ({
-  selectedStatuses,
-  onChange,
-}: RuleExecutionStatusFilterProps) => {
+export const RuleExecutionStatusFilter: React.FunctionComponent<
+  React.PropsWithChildren<RuleExecutionStatusFilterProps>
+> = ({ selectedStatuses, onChange }: RuleExecutionStatusFilterProps) => {
   const [selectedValues, setSelectedValues] = useState<string[]>(selectedStatuses);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 

@@ -72,7 +72,10 @@ import { ResponderActionButton } from '../../../../detections/components/endpoin
 const ES_HOST_FIELD = 'host.hostname';
 const HostOverviewManage = manageQuery(HostOverview);
 
-const HostDetailsComponent: React.FC<React.PropsWithChildren<HostDetailsProps>> = ({ detailName, hostDetailsPagePath }) => {
+const HostDetailsComponent: React.FC<React.PropsWithChildren<HostDetailsProps>> = ({
+  detailName,
+  hostDetailsPagePath,
+}) => {
   const dispatch = useDispatch();
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(

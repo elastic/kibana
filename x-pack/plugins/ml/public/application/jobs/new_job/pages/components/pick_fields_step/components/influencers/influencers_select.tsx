@@ -22,7 +22,11 @@ interface Props {
   selectedInfluencers: string[];
 }
 
-export const InfluencersSelect: FC<React.PropsWithChildren<Props>> = ({ fields, changeHandler, selectedInfluencers }) => {
+export const InfluencersSelect: FC<React.PropsWithChildren<Props>> = ({
+  fields,
+  changeHandler,
+  selectedInfluencers,
+}) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const { renderOption, optionCss } = useFieldStatsTrigger();
 

@@ -7,7 +7,9 @@
 
 import { FC } from 'react';
 
-declare const CalendarsList: FC<React.PropsWithChildren<{
-  canCreateCalendar: boolean;
-  canDeleteCalendar: boolean;
-}>>;
+declare const CalendarsList: FC<
+  React.PropsWithChildren<{
+    canCreateCalendar: boolean;
+    canDeleteCalendar: boolean;
+  }>
+>;

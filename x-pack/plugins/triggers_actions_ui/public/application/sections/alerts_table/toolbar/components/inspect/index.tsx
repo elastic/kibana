@@ -21,10 +21,9 @@ interface InspectButtonContainerProps {
   children: React.ReactNode;
 }
 
-export const InspectButtonContainer: React.FC<React.PropsWithChildren<InspectButtonContainerProps>> = ({
-  children,
-  hide,
-}) => (
+export const InspectButtonContainer: React.FC<
+  React.PropsWithChildren<InspectButtonContainerProps>
+> = ({ children, hide }) => (
   <HoverVisibilityContainer hide={hide} targetClassNames={[BUTTON_CLASS]}>
     {children}
   </HoverVisibilityContainer>
@@ -36,7 +35,9 @@ interface InspectButtonProps {
   getInspectQuery: GetInspectQuery;
 }
 
-const InspectButtonComponent: React.FC<React.PropsWithChildren<InspectButtonProps>> = ({ getInspectQuery }) => {
+const InspectButtonComponent: React.FC<React.PropsWithChildren<InspectButtonProps>> = ({
+  getInspectQuery,
+}) => {
   const [isShowingModal, setIsShowingModal] = useState(false);
 
   const onOpenModal = () => {

@@ -18,7 +18,9 @@ import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 import { ENGINES_PATH } from '../../routes';
 
-export const EngineError: React.FC<React.PropsWithChildren<{ error: HttpError | undefined }>> = ({ error }) => {
+export const EngineError: React.FC<React.PropsWithChildren<{ error: HttpError | undefined }>> = ({
+  error,
+}) => {
   if (error?.body?.statusCode === 404) {
     return (
       <>

@@ -15,7 +15,9 @@ import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
-export const ElasticsearchOverviewPage: React.FC<React.PropsWithChildren<ComponentProps>> = ({ clusters }) => {
+export const ElasticsearchOverviewPage: React.FC<React.PropsWithChildren<ComponentProps>> = ({
+  clusters,
+}) => {
   const globalState = useContext(GlobalStateContext);
   const { zoomInfo, onBrush } = useCharts();
   const { services } = useKibana<{ data: any }>();

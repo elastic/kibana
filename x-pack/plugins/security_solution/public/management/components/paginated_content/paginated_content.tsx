@@ -202,7 +202,9 @@ export const PaginatedContent = memo(
       // stating that the attributes given to the `ItemComponent` are not assignable to
       // type 'LibraryManagedAttributes<C, any>'
       // @see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/34553
-      const Item = ItemComponent as ComponentType<React.PropsWithChildren<ReturnType<typeof itemComponentProps>>>;
+      const Item = ItemComponent as ComponentType<
+        React.PropsWithChildren<ReturnType<typeof itemComponentProps>>
+      >;
 
       if (items.length) {
         // Cast here is to get around the fact that TS does not seem to be able to narrow the types down when the only

@@ -8,7 +8,9 @@
 import React, { FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 
-export const LoadingIssuesError: FunctionComponent<React.PropsWithChildren<unknown>> = ({ children }) => (
+export const LoadingIssuesError: FunctionComponent<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => (
   <EuiText color="subdued" data-test-subj="loadingIssuesError">
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>

@@ -14,7 +14,9 @@ interface Props {
   size?: EuiLoadingSpinnerSize;
 }
 
-export const CenterJustifiedSpinner: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ size }) => (
+export const CenterJustifiedSpinner: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  size,
+}) => (
   <EuiFlexGroup data-test-subj="centerJustifiedSpinner" justifyContent="center">
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size={size || 'xl'} />

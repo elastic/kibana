@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const MissingEmbeddableFactoryCallout: React.FC<React.PropsWithChildren<{ embeddableType: string }>> = ({
-  embeddableType,
-}) => {
+export const MissingEmbeddableFactoryCallout: React.FC<
+  React.PropsWithChildren<{ embeddableType: string }>
+> = ({ embeddableType }) => {
   return (
     <EuiCallOut
       size="s"

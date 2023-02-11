@@ -199,7 +199,13 @@ export const ColumnHeadersComponent = ({
 
   const LeadingHeaderActions = useMemo(() => {
     return leadingHeaderCells.map(
-      (Header: React.ComponentType<React.PropsWithChildren<HeaderActionProps>> | React.ComponentType<React.PropsWithChildren<unknown>> | undefined, index) => {
+      (
+        Header:
+          | React.ComponentType<React.PropsWithChildren<HeaderActionProps>>
+          | React.ComponentType<React.PropsWithChildren<unknown>>
+          | undefined,
+        index
+      ) => {
         const passedWidth = leadingControlColumns[index] && leadingControlColumns[index].width;
         const width = passedWidth ? passedWidth : actionsColumnWidth;
         return (
@@ -248,7 +254,13 @@ export const ColumnHeadersComponent = ({
 
   const TrailingHeaderActions = useMemo(() => {
     return trailingHeaderCells.map(
-      (Header: React.ComponentType<React.PropsWithChildren<HeaderActionProps>> | React.ComponentType<React.PropsWithChildren<unknown>> | undefined, index) => {
+      (
+        Header:
+          | React.ComponentType<React.PropsWithChildren<HeaderActionProps>>
+          | React.ComponentType<React.PropsWithChildren<unknown>>
+          | undefined,
+        index
+      ) => {
         const passedWidth = trailingControlColumns[index] && trailingControlColumns[index].width;
         const width = passedWidth ? passedWidth : actionsColumnWidth;
         return (

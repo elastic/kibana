@@ -16,12 +16,9 @@ import {
 } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
-export const EnterpriseSearchAnalyticsPageTemplate: React.FC<React.PropsWithChildren<PageTemplateProps>> = ({
-  children,
-  pageChrome,
-  pageViewTelemetry,
-  ...pageTemplateProps
-}) => {
+export const EnterpriseSearchAnalyticsPageTemplate: React.FC<
+  React.PropsWithChildren<PageTemplateProps>
+> = ({ children, pageChrome, pageViewTelemetry, ...pageTemplateProps }) => {
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}

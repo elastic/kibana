@@ -234,7 +234,9 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     },
   });
 
-  const AppWrapper: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>> = ({ children }) => (
+  const AppWrapper: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>> = ({
+    children,
+  }) => (
     <KibanaContextProvider services={startServices}>
       <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
         <QueryClientProvider client={queryClient}>

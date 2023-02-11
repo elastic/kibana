@@ -41,13 +41,9 @@ export interface AnomalySwimlaneInitializerProps {
   onCancel: () => void;
 }
 
-export const AnomalySwimlaneInitializer: FC<React.PropsWithChildren<AnomalySwimlaneInitializerProps>> = ({
-  defaultTitle,
-  influencers,
-  onCreate,
-  onCancel,
-  initialInput,
-}) => {
+export const AnomalySwimlaneInitializer: FC<
+  React.PropsWithChildren<AnomalySwimlaneInitializerProps>
+> = ({ defaultTitle, influencers, onCreate, onCancel, initialInput }) => {
   const [panelTitle, setPanelTitle] = useState(defaultTitle);
   const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>(
     initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL

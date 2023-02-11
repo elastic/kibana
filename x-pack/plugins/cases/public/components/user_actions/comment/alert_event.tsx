@@ -88,7 +88,9 @@ SingleAlertCommentEventComponent.displayName = 'SingleAlertCommentEvent';
 
 export const SingleAlertCommentEvent = memo(SingleAlertCommentEventComponent);
 
-const MultipleAlertsCommentEventComponent: React.FC<React.PropsWithChildren<MultipleAlertsProps>> = ({
+const MultipleAlertsCommentEventComponent: React.FC<
+  React.PropsWithChildren<MultipleAlertsProps>
+> = ({
   actionId,
   getRuleDetailsHref,
   loadingAlertData = false,

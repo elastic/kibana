@@ -15,27 +15,29 @@ interface HelpMenuProps {
 }
 
 // Component for adding a documentation link to the help menu
-export const HelpMenu: FC<React.PropsWithChildren<HelpMenuProps>> = React.memo(({ docLink, appName }) => {
-  const { chrome } = useMlKibana().services;
+export const HelpMenu: FC<React.PropsWithChildren<HelpMenuProps>> = React.memo(
+  ({ docLink, appName }) => {
+    const { chrome } = useMlKibana().services;
 
-  useEffect(() => {
-    chrome.setHelpExtension({
-      appName:
-        appName ??
-        i18n.translate('xpack.ml.chrome.help.appName', {
-          defaultMessage: 'Machine Learning',
-        }),
-      links: [
-        {
-          href: docLink,
-          linkType: 'documentation',
-        },
-      ],
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    useEffect(() => {
+      chrome.setHelpExtension({
+        appName:
+          appName ??
+          i18n.translate('xpack.ml.chrome.help.appName', {
+            defaultMessage: 'Machine Learning',
+          }),
+        links: [
+          {
+            href: docLink,
+            linkType: 'documentation',
+          },
+        ],
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-  return null;
-});
+    return null;
+  }
+);
 
 HelpMenu.displayName = 'HelpMenu';

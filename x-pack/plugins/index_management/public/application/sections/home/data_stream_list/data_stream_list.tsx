@@ -46,7 +46,9 @@ interface MatchParams {
   dataStreamName?: string;
 }
 
-export const DataStreamList: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps<MatchParams>>> = ({
+export const DataStreamList: React.FunctionComponent<
+  React.PropsWithChildren<RouteComponentProps<MatchParams>>
+> = ({
   match: {
     params: { dataStreamName },
   },

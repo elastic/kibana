@@ -31,7 +31,11 @@ export interface Props {
   commit: (value: string) => void;
 }
 
-export const AdvancedFilter: FunctionComponent<React.PropsWithChildren<Props>> = ({ value = '', onChange, commit }) => (
+export const AdvancedFilter: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  value = '',
+  onChange,
+  commit,
+}) => (
   <form
     onSubmit={(e) => {
       e.preventDefault();

@@ -25,21 +25,23 @@ interface Props {
 const showMoveToReference = (action: UserAction, commentId: string | null): commentId is string =>
   action === Actions.update && commentId != null;
 
-const CommentListActions: React.FC<React.PropsWithChildren<Props>> = React.memo(({ userAction, handleOutlineComment }) => (
-  <EuiFlexGroup responsive={false}>
-    <EuiFlexItem grow={false}>
-      <UserActionCopyLink id={userAction.id} />
-    </EuiFlexItem>
-    {showMoveToReference(userAction.action, userAction.commentId) && (
+const CommentListActions: React.FC<React.PropsWithChildren<Props>> = React.memo(
+  ({ userAction, handleOutlineComment }) => (
+    <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false}>
-        <UserActionMoveToReference
-          id={userAction.commentId}
-          outlineComment={handleOutlineComment}
-        />
+        <UserActionCopyLink id={userAction.id} />
       </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-));
+      {showMoveToReference(userAction.action, userAction.commentId) && (
+        <EuiFlexItem grow={false}>
+          <UserActionMoveToReference
+            id={userAction.commentId}
+            outlineComment={handleOutlineComment}
+          />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  )
+);
 
 CommentListActions.displayName = 'CommentListActions';
 

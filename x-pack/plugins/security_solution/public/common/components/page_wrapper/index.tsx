@@ -38,7 +38,9 @@ interface SecuritySolutionPageWrapperProps {
   noTimeline?: boolean;
 }
 
-const SecuritySolutionPageWrapperComponent: React.FC<React.PropsWithChildren<SecuritySolutionPageWrapperProps & CommonProps>> = ({ children, className, style, noPadding, noTimeline, ...otherProps }) => {
+const SecuritySolutionPageWrapperComponent: React.FC<
+  React.PropsWithChildren<SecuritySolutionPageWrapperProps & CommonProps>
+> = ({ children, className, style, noPadding, noTimeline, ...otherProps }) => {
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   useEffect(() => {
     setGlobalFullScreen(false); // exit full screen mode on page load

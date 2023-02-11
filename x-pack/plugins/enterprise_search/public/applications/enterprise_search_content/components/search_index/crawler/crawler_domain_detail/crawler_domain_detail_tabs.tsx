@@ -33,10 +33,9 @@ export interface CrawlerDomainDetailTabsProps {
   indexName: string;
 }
 
-export const CrawlerDomainDetailTabs: React.FC<React.PropsWithChildren<CrawlerDomainDetailTabsProps>> = ({
-  domain,
-  indexName,
-}) => {
+export const CrawlerDomainDetailTabs: React.FC<
+  React.PropsWithChildren<CrawlerDomainDetailTabsProps>
+> = ({ domain, indexName }) => {
   const [tabIndex, setTabIndex] = useState(0);
   const tabs = [
     {

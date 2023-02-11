@@ -24,10 +24,9 @@ import { BASE_PATH, Section } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addRepository } from '../../services/http';
 
-export const RepositoryAdd: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps>> = ({
-  history,
-  location: { search },
-}) => {
+export const RepositoryAdd: React.FunctionComponent<
+  React.PropsWithChildren<RouteComponentProps>
+> = ({ history, location: { search } }) => {
   const section = 'repositories' as Section;
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);

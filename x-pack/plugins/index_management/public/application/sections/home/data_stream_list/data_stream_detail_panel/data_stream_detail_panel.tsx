@@ -43,7 +43,9 @@ interface DetailsListProps {
   }>;
 }
 
-const DetailsList: React.FunctionComponent<React.PropsWithChildren<DetailsListProps>> = ({ details }) => {
+const DetailsList: React.FunctionComponent<React.PropsWithChildren<DetailsListProps>> = ({
+  details,
+}) => {
   const groups: any[] = [];
   let items: any[];
 

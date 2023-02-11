@@ -21,7 +21,10 @@ export interface DeleteEngineModalProps {
   onClose: () => void;
 }
 
-export const DeleteEngineModal: React.FC<React.PropsWithChildren<DeleteEngineModalProps>> = ({ engineName, onClose }) => {
+export const DeleteEngineModal: React.FC<React.PropsWithChildren<DeleteEngineModalProps>> = ({
+  engineName,
+  onClose,
+}) => {
   const { deleteEngine } = useActions(EnginesListLogic);
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { isDeleteLoading } = useValues(EnginesListLogic);

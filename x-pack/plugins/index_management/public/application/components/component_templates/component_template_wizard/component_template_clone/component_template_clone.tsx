@@ -18,7 +18,9 @@ export interface Params {
   sourceComponentTemplateName: string;
 }
 
-export const ComponentTemplateClone: FunctionComponent<React.PropsWithChildren<RouteComponentProps<Params>>> = (props) => {
+export const ComponentTemplateClone: FunctionComponent<
+  React.PropsWithChildren<RouteComponentProps<Params>>
+> = (props) => {
   const { sourceComponentTemplateName } = props.match.params;
   const decodedSourceName = attemptToURIDecode(sourceComponentTemplateName)!;
 

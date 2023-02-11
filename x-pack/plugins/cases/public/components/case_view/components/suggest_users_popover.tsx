@@ -21,10 +21,9 @@ import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
 import type { CurrentUserProfile } from '../../types';
 
-const PopoverButton: React.FC<React.PropsWithChildren<{ togglePopover: () => void; isDisabled: boolean }>> = ({
-  togglePopover,
-  isDisabled,
-}) => (
+const PopoverButton: React.FC<
+  React.PropsWithChildren<{ togglePopover: () => void; isDisabled: boolean }>
+> = ({ togglePopover, isDisabled }) => (
   <EuiToolTip position="left" content={i18n.EDIT_ASSIGNEES}>
     <EuiButtonIcon
       data-test-subj="case-view-assignees-edit-button"

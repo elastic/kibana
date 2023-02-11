@@ -44,7 +44,9 @@ export interface ExplorerSwimlaneContainerProps {
   onError: (error: Error) => void;
 }
 
-export const EmbeddableSwimLaneContainer: FC<React.PropsWithChildren<ExplorerSwimlaneContainerProps>> = ({
+export const EmbeddableSwimLaneContainer: FC<
+  React.PropsWithChildren<ExplorerSwimlaneContainerProps>
+> = ({
   id,
   embeddableContext,
   embeddableInput$,

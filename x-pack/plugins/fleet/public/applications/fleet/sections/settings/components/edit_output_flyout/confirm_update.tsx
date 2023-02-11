@@ -25,11 +25,9 @@ interface ConfirmDescriptionProps {
   agentPolicyCount: number;
 }
 
-const ConfirmDescription: React.FunctionComponent<React.PropsWithChildren<ConfirmDescriptionProps>> = ({
-  output,
-  agentCount,
-  agentPolicyCount,
-}) => (
+const ConfirmDescription: React.FunctionComponent<
+  React.PropsWithChildren<ConfirmDescriptionProps>
+> = ({ output, agentCount, agentPolicyCount }) => (
   <FormattedMessage
     id="xpack.fleet.settings.updateOutput.confirmModalText"
     defaultMessage="This action will update {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"

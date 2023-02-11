@@ -45,7 +45,11 @@ interface Props {
   onCancel: () => void;
 }
 
-export const DeleteVar: FC<React.PropsWithChildren<Props>> = ({ selectedVar, onCancel, onDelete }) => {
+export const DeleteVar: FC<React.PropsWithChildren<Props>> = ({
+  selectedVar,
+  onCancel,
+  onDelete,
+}) => {
   return (
     <React.Fragment>
       <div className="canvasVarHeader__triggerWrapper">

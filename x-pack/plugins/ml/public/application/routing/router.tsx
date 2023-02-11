@@ -73,7 +73,10 @@ export interface PageDependencies {
   };
 }
 
-export const PageLoader: FC<React.PropsWithChildren<{ context: MlContextValue }>> = ({ context, children }) => {
+export const PageLoader: FC<React.PropsWithChildren<{ context: MlContextValue }>> = ({
+  context,
+  children,
+}) => {
   return context === null ? (
     <EuiLoadingContent lines={10} />
   ) : (
@@ -87,9 +90,11 @@ export const PageLoader: FC<React.PropsWithChildren<{ context: MlContextValue }>
  * `UrlStateProvider` manages state stored in `_g/_a` URL parameters which can be
  * use in components further down via `useUrlState()`.
  */
-export const MlRouter: FC<React.PropsWithChildren<{
-  pageDeps: PageDependencies;
-}>> = ({ pageDeps }) => (
+export const MlRouter: FC<
+  React.PropsWithChildren<{
+    pageDeps: PageDependencies;
+  }>
+> = ({ pageDeps }) => (
   <Router history={pageDeps.history}>
     <UrlStateProvider>
       <MlNotificationsContextProvider>

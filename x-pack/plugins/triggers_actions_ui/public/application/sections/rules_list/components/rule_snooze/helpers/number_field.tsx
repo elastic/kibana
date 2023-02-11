@@ -8,9 +8,13 @@
 import React, { useState, useCallback } from 'react';
 import { EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
 
-export const NumberField: React.FC<React.PropsWithChildren<EuiFieldNumberProps & {
-  onChange: (value: string) => void;
-}>> = (props) => {
+export const NumberField: React.FC<
+  React.PropsWithChildren<
+    EuiFieldNumberProps & {
+      onChange: (value: string) => void;
+    }
+  >
+> = (props) => {
   const [displayValue, setDisplayValue] = useState(props.value);
   const min = typeof props.min !== 'undefined' ? props.min : -Infinity;
   const max = typeof props.max !== 'undefined' ? props.max : Infinity;

@@ -21,7 +21,11 @@ interface Props {
   selectedField: Field | null;
 }
 
-export const GeoFieldSelect: FC<React.PropsWithChildren<Props>> = ({ fields, changeHandler, selectedField }) => {
+export const GeoFieldSelect: FC<React.PropsWithChildren<Props>> = ({
+  fields,
+  changeHandler,
+  selectedField,
+}) => {
   const { renderOption, optionCss } = useFieldStatsTrigger();
 
   const options: EuiComboBoxOptionOption[] = useMemo(

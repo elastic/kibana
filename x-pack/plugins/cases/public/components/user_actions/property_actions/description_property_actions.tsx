@@ -16,7 +16,11 @@ interface Props {
   onQuote: () => void;
 }
 
-const DescriptionPropertyActionsComponent: React.FC<React.PropsWithChildren<Props>> = ({ isLoading, onEdit, onQuote }) => {
+const DescriptionPropertyActionsComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  isLoading,
+  onEdit,
+  onQuote,
+}) => {
   const { permissions } = useCasesContext();
 
   const propertyActions = useMemo(() => {

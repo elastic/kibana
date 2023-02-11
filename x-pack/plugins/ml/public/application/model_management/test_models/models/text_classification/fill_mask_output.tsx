@@ -16,9 +16,11 @@ export const getFillMaskOutputComponent = (inferrer: FillMaskInference) => (
   <FillMaskOutput inferrer={inferrer} />
 );
 
-const FillMaskOutput: FC<React.PropsWithChildren<{
-  inferrer: FillMaskInference;
-}>> = ({ inferrer }) => {
+const FillMaskOutput: FC<
+  React.PropsWithChildren<{
+    inferrer: FillMaskInference;
+  }>
+> = ({ inferrer }) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
 
   if (!result) {

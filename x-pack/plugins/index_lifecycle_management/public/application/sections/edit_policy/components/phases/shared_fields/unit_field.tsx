@@ -18,7 +18,11 @@ interface Props {
   }>;
 }
 
-export const UnitField: FunctionComponent<React.PropsWithChildren<Props>> = ({ path, options, euiFieldProps }) => {
+export const UnitField: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  path,
+  options,
+  euiFieldProps,
+}) => {
   const [open, setOpen] = useState(false);
 
   return (

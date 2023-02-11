@@ -44,7 +44,11 @@ export const Expression: FC<React.PropsWithChildren<ExpressionProps>> = ({ done 
   return <ExpressionContainer key={element.id} done={done} element={element} pageId={pageId} />;
 };
 
-const ExpressionContainer: FC<React.PropsWithChildren<ExpressionContainerProps>> = ({ done, element, pageId }) => {
+const ExpressionContainer: FC<React.PropsWithChildren<ExpressionContainerProps>> = ({
+  done,
+  element,
+  pageId,
+}) => {
   const expressions = useExpressionsService();
   const dispatch = useDispatch();
   const [isCompact, setCompact] = useState<boolean>(true);

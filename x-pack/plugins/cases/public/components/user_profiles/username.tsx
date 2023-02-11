@@ -15,7 +15,10 @@ export interface UsernameProps {
   boldName?: boolean;
 }
 
-const UsernameComponent: React.FC<React.PropsWithChildren<UsernameProps>> = ({ userInfo, boldName = false }) => {
+const UsernameComponent: React.FC<React.PropsWithChildren<UsernameProps>> = ({
+  userInfo,
+  boldName = false,
+}) => {
   const name = getName(userInfo?.user);
 
   return (

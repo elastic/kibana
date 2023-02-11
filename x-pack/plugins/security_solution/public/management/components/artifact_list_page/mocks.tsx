@@ -20,7 +20,9 @@ import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/api_clien
 import { artifactListPageLabels } from './translations';
 
 export const getFormComponentMock = (): {
-  FormComponentMock: jest.Mock<React.FunctionComponent<React.PropsWithChildren<ArtifactFormComponentProps>>>;
+  FormComponentMock: jest.Mock<
+    React.FunctionComponent<React.PropsWithChildren<ArtifactFormComponentProps>>
+  >;
   /**
    * Returns the props object that the Form component was last called with
    */

@@ -28,7 +28,9 @@ interface MemoryPreviewChartProps {
   memoryOverview: NodeDeploymentStatsResponse['memory_overview'];
 }
 
-export const MemoryPreviewChart: FC<React.PropsWithChildren<MemoryPreviewChartProps>> = ({ memoryOverview }) => {
+export const MemoryPreviewChart: FC<React.PropsWithChildren<MemoryPreviewChartProps>> = ({
+  memoryOverview,
+}) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
 
   const groups = useMemo(

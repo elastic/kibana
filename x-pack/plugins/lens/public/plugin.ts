@@ -198,7 +198,9 @@ export interface LensPublicStart {
    *
    * @experimental
    */
-  SaveModalComponent: React.ComponentType<React.PropsWithChildren<Omit<SaveModalContainerProps, 'lensServices'>>>;
+  SaveModalComponent: React.ComponentType<
+    React.PropsWithChildren<Omit<SaveModalContainerProps, 'lensServices'>>
+  >;
   /**
    * Method which navigates to the Lens editor, loading the state specified by the `input` parameter.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.

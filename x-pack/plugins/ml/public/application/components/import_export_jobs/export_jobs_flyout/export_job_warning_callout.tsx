@@ -16,7 +16,9 @@ interface Props {
   jobs: JobDependencies;
 }
 
-export const ExportJobDependenciesWarningCallout: FC<React.PropsWithChildren<Props>> = ({ jobs: allJobs }) => {
+export const ExportJobDependenciesWarningCallout: FC<React.PropsWithChildren<Props>> = ({
+  jobs: allJobs,
+}) => {
   const [jobs, jobsWithCalendars, jobsWithFilters] = filterJobs(allJobs);
   const usingCalendars = jobsWithCalendars.length > 0;
   const usingFilters = jobsWithFilters.length > 0;

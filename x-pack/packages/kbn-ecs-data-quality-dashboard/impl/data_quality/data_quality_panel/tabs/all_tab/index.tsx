@@ -21,7 +21,10 @@ interface Props {
   partitionedFieldMetadata: PartitionedFieldMetadata;
 }
 
-const AllTabComponent: React.FC<React.PropsWithChildren<Props>> = ({ indexName, partitionedFieldMetadata }) => {
+const AllTabComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  indexName,
+  partitionedFieldMetadata,
+}) => {
   const body = useMemo(() => <EmptyPromptBody body={i18n.ALL_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.ALL_EMPTY_TITLE} />, []);
 

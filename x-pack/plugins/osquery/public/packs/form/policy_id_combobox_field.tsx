@@ -35,10 +35,9 @@ interface PolicyIdComboBoxFieldProps {
   options: Array<EuiComboBoxOptionOption<string>>;
 }
 
-const PolicyIdComboBoxFieldComponent: React.FC<React.PropsWithChildren<PolicyIdComboBoxFieldProps>> = ({
-  euiFieldProps,
-  options,
-}) => {
+const PolicyIdComboBoxFieldComponent: React.FC<
+  React.PropsWithChildren<PolicyIdComboBoxFieldProps>
+> = ({ euiFieldProps, options }) => {
   const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
   const {

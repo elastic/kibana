@@ -24,12 +24,14 @@ import { isAgentUpgradeable, policyHasFleetServer } from '../../../../services';
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 import { ExperimentalFeaturesService } from '../../../../services';
 
-export const AgentDetailsActionMenu: React.FunctionComponent<React.PropsWithChildren<{
-  agent: Agent;
-  agentPolicy?: AgentPolicy;
-  assignFlyoutOpenByDefault?: boolean;
-  onCancelReassign?: () => void;
-}>> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign, agentPolicy }) => {
+export const AgentDetailsActionMenu: React.FunctionComponent<
+  React.PropsWithChildren<{
+    agent: Agent;
+    agentPolicy?: AgentPolicy;
+    assignFlyoutOpenByDefault?: boolean;
+    onCancelReassign?: () => void;
+  }>
+> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign, agentPolicy }) => {
   const hasFleetAllPrivileges = useAuthz().fleet.all;
   const kibanaVersion = useKibanaVersion();
   const refreshAgent = useAgentRefresh();

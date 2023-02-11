@@ -79,7 +79,9 @@ interface ExpandableSectionAnalyticsProps {
   jobId: string;
 }
 
-export const ExpandableSectionAnalytics: FC<React.PropsWithChildren<ExpandableSectionAnalyticsProps>> = ({ jobId }) => {
+export const ExpandableSectionAnalytics: FC<
+  React.PropsWithChildren<ExpandableSectionAnalyticsProps>
+> = ({ jobId }) => {
   const [expandedRowItem, setExpandedRowItem] = useState<DataFrameAnalyticsListRow | undefined>();
 
   const fetchStats = async () => {

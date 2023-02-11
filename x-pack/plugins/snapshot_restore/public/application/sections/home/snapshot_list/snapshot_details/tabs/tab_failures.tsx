@@ -16,7 +16,10 @@ interface Props {
   snapshotState: string;
 }
 
-export const TabFailures: React.FC<React.PropsWithChildren<Props>> = ({ indexFailures, snapshotState }) => {
+export const TabFailures: React.FC<React.PropsWithChildren<Props>> = ({
+  indexFailures,
+  snapshotState,
+}) => {
   if (!indexFailures.length) {
     // If the snapshot is in progress then we still might encounter errors later.
     if (snapshotState === SNAPSHOT_STATE.IN_PROGRESS) {

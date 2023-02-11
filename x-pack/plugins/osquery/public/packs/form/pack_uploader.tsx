@@ -28,7 +28,9 @@ interface OsqueryPackUploaderProps {
   onChange: (payload: Record<string, unknown>, packName: string) => void;
 }
 
-const OsqueryPackUploaderComponent: React.FC<React.PropsWithChildren<OsqueryPackUploaderProps>> = ({ onChange }) => {
+const OsqueryPackUploaderComponent: React.FC<React.PropsWithChildren<OsqueryPackUploaderProps>> = ({
+  onChange,
+}) => {
   const packName = useRef('');
   const filePickerRef = useRef<EuiFilePicker>(null);
   const [isInvalid, setIsInvalid] = useState<string | null>(null);

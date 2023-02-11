@@ -19,11 +19,9 @@ interface RuleStatusFailedCallOutProps {
   status?: RuleExecutionStatus | null;
 }
 
-const RuleStatusFailedCallOutComponent: React.FC<React.PropsWithChildren<RuleStatusFailedCallOutProps>> = ({
-  date,
-  message,
-  status,
-}) => {
+const RuleStatusFailedCallOutComponent: React.FC<
+  React.PropsWithChildren<RuleStatusFailedCallOutProps>
+> = ({ date, message, status }) => {
   const { shouldBeDisplayed, color, title } = getPropsByStatus(status);
   if (!shouldBeDisplayed) {
     return null;

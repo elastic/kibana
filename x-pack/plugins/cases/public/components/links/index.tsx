@@ -18,16 +18,19 @@ export interface CasesNavigation<T = React.MouseEvent | MouseEvent | null, K = n
     : (arg: T) => Promise<void> | void;
 }
 
-export const LinkButton: React.FC<React.PropsWithChildren<PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>>> =
+export const LinkButton: React.FC<
+  React.PropsWithChildren<PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>>
+> =
   // TODO: Fix this manually. Issue #123375
   // eslint-disable-next-line react/display-name
   ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
 
 // TODO: Fix this manually. Issue #123375
 // eslint-disable-next-line react/display-name
-export const LinkAnchor: React.FC<React.PropsWithChildren<EuiLinkProps>> = ({ children, ...props }) => (
-  <EuiLink {...props}>{children}</EuiLink>
-);
+export const LinkAnchor: React.FC<React.PropsWithChildren<EuiLinkProps>> = ({
+  children,
+  ...props
+}) => <EuiLink {...props}>{children}</EuiLink>;
 
 export interface CaseDetailsLinkProps {
   children?: React.ReactNode;

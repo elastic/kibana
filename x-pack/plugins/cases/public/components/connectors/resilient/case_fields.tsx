@@ -19,7 +19,9 @@ import type { ResilientFieldsType } from '../../../../common/api';
 import { ConnectorTypes } from '../../../../common/api';
 import { ConnectorCard } from '../card';
 
-const ResilientFieldsComponent: React.FunctionComponent<React.PropsWithChildren<ConnectorFieldsProps<ResilientFieldsType>>> =
+const ResilientFieldsComponent: React.FunctionComponent<
+  React.PropsWithChildren<ConnectorFieldsProps<ResilientFieldsType>>
+> =
   // TODO: Fix this manually. Issue #123375
   // eslint-disable-next-line react/display-name
   ({ isEdit = true, fields, connector, onChange }) => {

@@ -277,11 +277,9 @@ const getRoutes = (): RouteProps[] => {
   ];
 };
 
-const RouteInit: React.FC<React.PropsWithChildren<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>>> = ({
-  path,
-  title,
-  telemetryId,
-}) => {
+const RouteInit: React.FC<
+  React.PropsWithChildren<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>>
+> = ({ path, title, telemetryId }) => {
   useUptimeTelemetry(telemetryId);
   useEffect(() => {
     document.title = title;

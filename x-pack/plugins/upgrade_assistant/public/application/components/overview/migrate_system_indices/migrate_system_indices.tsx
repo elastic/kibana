@@ -123,7 +123,9 @@ const i18nTexts = {
   },
 };
 
-const MigrateSystemIndicesStep: FunctionComponent<React.PropsWithChildren<Props>> = ({ setIsComplete }) => {
+const MigrateSystemIndicesStep: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  setIsComplete,
+}) => {
   const { beginSystemIndicesMigration, startMigrationStatus, migrationStatus, setShowFlyout } =
     useMigrateSystemIndices();
 

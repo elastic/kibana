@@ -30,7 +30,9 @@ export const PanelSpinner: React.FC<React.PropsWithChildren<unknown>> = (props) 
   );
 };
 
-export const DownloadPanelContent: FC<React.PropsWithChildren<Omit<DownloadPanelContentProps, 'intl'>>> = (props) => {
+export const DownloadPanelContent: FC<
+  React.PropsWithChildren<Omit<DownloadPanelContentProps, 'intl'>>
+> = (props) => {
   return (
     <Suspense fallback={<PanelSpinner />}>
       <LazyComponent {...props} />

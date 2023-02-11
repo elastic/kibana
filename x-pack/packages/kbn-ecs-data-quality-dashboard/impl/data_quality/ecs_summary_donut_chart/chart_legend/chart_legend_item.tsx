@@ -15,7 +15,12 @@ interface Props {
   text: string;
 }
 
-const ChartLegendItemComponent: React.FC<React.PropsWithChildren<Props>> = ({ color, count, onClick, text }) => {
+const ChartLegendItemComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  color,
+  count,
+  onClick,
+  text,
+}) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>

@@ -17,10 +17,9 @@ import { SnapshotConfig } from '../../../../../common/types';
 import { FEATURE_STATES_NONE_OPTION } from '../../../../../common/constants';
 import { CollapsibleFeatureStatesList } from '../../collapsible_lists';
 
-export const PolicyFeatureStatesSummary: React.FunctionComponent<React.PropsWithChildren<SnapshotConfig>> = ({
-  includeGlobalState,
-  featureStates,
-}) => {
+export const PolicyFeatureStatesSummary: React.FunctionComponent<
+  React.PropsWithChildren<SnapshotConfig>
+> = ({ includeGlobalState, featureStates }) => {
   const hasGlobalStateButNoFeatureStates = includeGlobalState && featureStates === undefined;
   const hasNoFeatureStates = !featureStates || featureStates?.includes(FEATURE_STATES_NONE_OPTION);
   const hasAllFeatureStates = hasGlobalStateButNoFeatureStates || featureStates?.length === 0;

@@ -40,7 +40,10 @@ import {
 } from '../../../common/job_creator/util/general';
 import { JobSectionTitle, DatafeedSectionTitle } from './components/common';
 
-export const SummaryStep: FC<React.PropsWithChildren<StepProps>> = ({ setCurrentStep, isCurrentStep }) => {
+export const SummaryStep: FC<React.PropsWithChildren<StepProps>> = ({
+  setCurrentStep,
+  isCurrentStep,
+}) => {
   const {
     services: {
       notifications,

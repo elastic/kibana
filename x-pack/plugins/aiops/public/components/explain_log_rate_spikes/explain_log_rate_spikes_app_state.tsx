@@ -70,11 +70,9 @@ export const getDefaultAiOpsListState = (
 
 export const restorableDefaults = getDefaultAiOpsListState();
 
-export const ExplainLogRateSpikesAppState: FC<React.PropsWithChildren<ExplainLogRateSpikesAppStateProps>> = ({
-  dataView,
-  savedSearch,
-  appDependencies,
-}) => {
+export const ExplainLogRateSpikesAppState: FC<
+  React.PropsWithChildren<ExplainLogRateSpikesAppStateProps>
+> = ({ dataView, savedSearch, appDependencies }) => {
   if (!dataView) return null;
 
   if (!dataView.isTimeBased()) {

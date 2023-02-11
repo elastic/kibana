@@ -31,12 +31,9 @@ export interface AnomalyChartsInitializerProps {
   onCancel: () => void;
 }
 
-export const AnomalyChartsInitializer: FC<React.PropsWithChildren<AnomalyChartsInitializerProps>> = ({
-  defaultTitle,
-  initialInput,
-  onCreate,
-  onCancel,
-}) => {
+export const AnomalyChartsInitializer: FC<
+  React.PropsWithChildren<AnomalyChartsInitializerProps>
+> = ({ defaultTitle, initialInput, onCreate, onCancel }) => {
   const [panelTitle, setPanelTitle] = useState(defaultTitle);
   const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(
     initialInput?.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT

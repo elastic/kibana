@@ -14,8 +14,8 @@ import { getName } from './display_name';
 import * as i18n from './translations';
 import type { UserInfoWithAvatar } from './types';
 
-const UserFullInformation: React.FC<React.PropsWithChildren<{ userInfo?: UserInfoWithAvatar }>> = React.memo(
-  ({ userInfo }) => {
+const UserFullInformation: React.FC<React.PropsWithChildren<{ userInfo?: UserInfoWithAvatar }>> =
+  React.memo(({ userInfo }) => {
     if (userInfo?.user?.full_name) {
       return (
         <EuiText size="s" className="eui-textBreakWord">
@@ -33,8 +33,7 @@ const UserFullInformation: React.FC<React.PropsWithChildren<{ userInfo?: UserInf
         <strong>{getNameOrMissingText(userInfo?.user)}</strong>
       </EuiText>
     );
-  }
-);
+  });
 
 const getNameOrMissingText = (user?: UserProfileUserInfo) => {
   if (!user) {
@@ -46,14 +45,18 @@ const getNameOrMissingText = (user?: UserProfileUserInfo) => {
 
 UserFullInformation.displayName = 'UserFullInformation';
 
-const UserToolTipAvatar: React.FC<React.PropsWithChildren<Pick<React.ComponentProps<typeof CaseUserAvatar>, 'userInfo'>>> = ({ userInfo }) => <CaseUserAvatar size={'m'} userInfo={userInfo} />;
+const UserToolTipAvatar: React.FC<
+  React.PropsWithChildren<Pick<React.ComponentProps<typeof CaseUserAvatar>, 'userInfo'>>
+> = ({ userInfo }) => <CaseUserAvatar size={'m'} userInfo={userInfo} />;
 UserToolTipAvatar.displayName = 'UserToolTipAvatar';
 
 interface UserFullRepresentationProps {
   userInfo?: UserInfoWithAvatar;
 }
 
-const UserFullRepresentationComponent: React.FC<React.PropsWithChildren<UserFullRepresentationProps>> = ({ userInfo }) => {
+const UserFullRepresentationComponent: React.FC<
+  React.PropsWithChildren<UserFullRepresentationProps>
+> = ({ userInfo }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false} data-test-subj="user-profile-tooltip-avatar">
@@ -92,7 +95,10 @@ export interface UserToolTipProps {
   userInfo?: UserInfoWithAvatar;
 }
 
-const UserToolTipComponent: React.FC<React.PropsWithChildren<UserToolTipProps>> = ({ children, userInfo }) => {
+const UserToolTipComponent: React.FC<React.PropsWithChildren<UserToolTipProps>> = ({
+  children,
+  userInfo,
+}) => {
   return (
     <EuiToolTip
       display="inlineBlock"

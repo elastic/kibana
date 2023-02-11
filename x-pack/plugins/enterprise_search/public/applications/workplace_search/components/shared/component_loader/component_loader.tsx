@@ -15,7 +15,9 @@ interface ComponentLoaderProps {
 
 import './component_loader.scss';
 
-export const ComponentLoader: React.FC<React.PropsWithChildren<ComponentLoaderProps>> = ({ text = 'Loading...' }) => (
+export const ComponentLoader: React.FC<React.PropsWithChildren<ComponentLoaderProps>> = ({
+  text = 'Loading...',
+}) => (
   <div className="componentLoader">
     <EuiLoadingSpinner size="l" />
     <EuiTextColor className="componentLoaderText" color="subdued">

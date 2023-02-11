@@ -40,7 +40,9 @@ import { DeleteInferencePipelineButton } from './delete_inference_pipeline_butto
 import { TrainedModelHealth } from './ml_model_health';
 import { PipelinesLogic } from './pipelines_logic';
 
-export const InferencePipelineCard: React.FC<React.PropsWithChildren<InferencePipeline>> = (pipeline) => {
+export const InferencePipelineCard: React.FC<React.PropsWithChildren<InferencePipeline>> = (
+  pipeline
+) => {
   const { http } = useValues(HttpLogic);
   const { indexName } = useValues(IndexNameLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);

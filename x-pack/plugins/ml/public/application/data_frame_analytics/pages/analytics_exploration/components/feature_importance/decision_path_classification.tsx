@@ -31,7 +31,9 @@ interface ClassificationDecisionPathProps {
   baseline?: FeatureImportanceBaseline;
 }
 
-export const ClassificationDecisionPath: FC<React.PropsWithChildren<ClassificationDecisionPathProps>> = ({
+export const ClassificationDecisionPath: FC<
+  React.PropsWithChildren<ClassificationDecisionPathProps>
+> = ({
   featureImportance,
   predictedValue,
   topClasses,

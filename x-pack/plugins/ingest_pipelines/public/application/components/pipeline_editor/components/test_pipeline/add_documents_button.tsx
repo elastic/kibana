@@ -20,7 +20,9 @@ interface Props {
   openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
-export const AddDocumentsButton: FunctionComponent<React.PropsWithChildren<Props>> = ({ openFlyout }) => {
+export const AddDocumentsButton: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  openFlyout,
+}) => {
   return (
     <EuiButtonEmpty
       size="s"

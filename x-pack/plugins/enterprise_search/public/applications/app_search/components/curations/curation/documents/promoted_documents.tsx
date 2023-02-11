@@ -46,7 +46,9 @@ export const PromotedDocuments: React.FC<React.PropsWithChildren<unknown>> = () 
     }
   };
 
-  const CountBadge: React.FC<React.PropsWithChildren<unknown>> = () => <EuiBadge color="accent">{documents.length}</EuiBadge>;
+  const CountBadge: React.FC<React.PropsWithChildren<unknown>> = () => (
+    <EuiBadge color="accent">{documents.length}</EuiBadge>
+  );
 
   return (
     <DataPanel

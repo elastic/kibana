@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 import { StartAction } from './use_start_action';
 
-export const StartActionModal: FC<React.PropsWithChildren<StartAction>> = ({ closeModal, items, startAndCloseModal }) => {
+export const StartActionModal: FC<React.PropsWithChildren<StartAction>> = ({
+  closeModal,
+  items,
+  startAndCloseModal,
+}) => {
   const isBulkAction = items.length > 1;
 
   const bulkStartModalTitle = i18n.translate('xpack.transform.transformList.bulkStartModalTitle', {

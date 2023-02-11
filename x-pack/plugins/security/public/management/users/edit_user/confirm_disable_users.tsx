@@ -22,11 +22,9 @@ export interface ConfirmDisableUsersProps {
   onSuccess?(): void;
 }
 
-export const ConfirmDisableUsers: FunctionComponent<React.PropsWithChildren<ConfirmDisableUsersProps>> = ({
-  usernames,
-  onCancel,
-  onSuccess,
-}) => {
+export const ConfirmDisableUsers: FunctionComponent<
+  React.PropsWithChildren<ConfirmDisableUsersProps>
+> = ({ usernames, onCancel, onSuccess }) => {
   const { services } = useKibana();
   const isSystemUser = usernames[0] === 'kibana' || usernames[0] === 'kibana_system';
 

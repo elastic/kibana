@@ -87,7 +87,9 @@ export const AssignFlyoutResultList: FC<React.PropsWithChildren<AssignFlyoutResu
   );
 };
 
-const ResultActionLabel: FC<React.PropsWithChildren<{ action: AssignmentAction }>> = ({ action }) => {
+const ResultActionLabel: FC<React.PropsWithChildren<{ action: AssignmentAction }>> = ({
+  action,
+}) => {
   if (action === 'unchanged') {
     return null;
   }

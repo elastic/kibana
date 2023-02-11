@@ -49,4 +49,6 @@ export const DatafeedSectionTitle: FC<React.PropsWithChildren<unknown>> = () => 
   </EuiTitle>
 );
 
-export const Italic: FC<React.PropsWithChildren<unknown>> = ({ children }) => <span style={{ fontStyle: 'italic' }}>{children}</span>;
+export const Italic: FC<React.PropsWithChildren<unknown>> = ({ children }) => (
+  <span style={{ fontStyle: 'italic' }}>{children}</span>
+);

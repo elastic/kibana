@@ -29,10 +29,12 @@ const sparklineSize = {
   width: 100,
 };
 
-export const SingleMetricSparkline: React.FunctionComponent<React.PropsWithChildren<{
-  metric: TimeSeriesPoint[];
-  timeRange: TimeRange;
-}>> = ({ metric, timeRange }) => {
+export const SingleMetricSparkline: React.FunctionComponent<
+  React.PropsWithChildren<{
+    metric: TimeSeriesPoint[];
+    timeRange: TimeRange;
+  }>
+> = ({ metric, timeRange }) => {
   const [isDarkMode] = useKibanaUiSetting('theme:darkMode');
   const timeZone = useKibanaTimeZoneSetting();
 

@@ -17,7 +17,12 @@ interface NoIndicesProps {
 }
 
 // Represents a fully constructed page, including page template.
-export const NoIndices: React.FC<React.PropsWithChildren<NoIndicesProps>> = ({ actions, message, title, ...rest }) => {
+export const NoIndices: React.FC<React.PropsWithChildren<NoIndicesProps>> = ({
+  actions,
+  message,
+  title,
+  ...rest
+}) => {
   return (
     <PageTemplate isEmptyState={true}>
       <KibanaPageTemplate.EmptyPrompt

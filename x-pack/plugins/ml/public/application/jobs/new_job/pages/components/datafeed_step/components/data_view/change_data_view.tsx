@@ -236,10 +236,12 @@ export const ChangeDataViewModal: FC<React.PropsWithChildren<Props>> = ({ onClos
   );
 };
 
-const ValidationMessage: FC<React.PropsWithChildren<{
-  validationResponse: DatafeedValidationResponse | null;
-  dataViewTitle: string;
-}>> = ({ validationResponse, dataViewTitle }) => {
+const ValidationMessage: FC<
+  React.PropsWithChildren<{
+    validationResponse: DatafeedValidationResponse | null;
+    dataViewTitle: string;
+  }>
+> = ({ validationResponse, dataViewTitle }) => {
   if (validationResponse === null) {
     return (
       <EuiCallOut

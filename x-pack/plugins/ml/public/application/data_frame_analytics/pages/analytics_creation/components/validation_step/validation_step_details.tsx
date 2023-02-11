@@ -20,11 +20,13 @@ import { State } from '../../../analytics_management/hooks/use_create_analytics_
 import { ANALYTICS_STEPS } from '../../page';
 import { ValidationSummary } from './validation_step_wrapper';
 
-export const ValidationStepDetails: FC<React.PropsWithChildren<{
-  setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
-  state: State;
-  validationSummary: ValidationSummary;
-}>> = ({ setCurrentStep, state, validationSummary }) => {
+export const ValidationStepDetails: FC<
+  React.PropsWithChildren<{
+    setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
+    state: State;
+    validationSummary: ValidationSummary;
+  }>
+> = ({ setCurrentStep, state, validationSummary }) => {
   const { isJobCreated } = state;
   const detailsFirstCol = [
     {

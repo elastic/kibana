@@ -15,7 +15,9 @@ interface Props {
   esDocsBase: string;
 }
 
-export const StepAliasesContainer: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ esDocsBase }) => {
+export const StepAliasesContainer: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  esDocsBase,
+}) => {
   const { defaultValue, updateContent } = Forms.useContent<CommonWizardSteps, 'aliases'>('aliases');
 
   return (

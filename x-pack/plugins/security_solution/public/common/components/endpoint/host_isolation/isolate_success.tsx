@@ -20,7 +20,9 @@ export interface EndpointIsolateSuccessProps {
   additionalInfo?: ReactNode;
 }
 
-const CasesAdditionalInfo: React.FC<React.PropsWithChildren<{ alertIdForCase: string }>> = ({ alertIdForCase }) => {
+const CasesAdditionalInfo: React.FC<React.PropsWithChildren<{ alertIdForCase: string }>> = ({
+  alertIdForCase,
+}) => {
   const { casesInfo } = useCasesFromAlerts({ alertId: alertIdForCase });
 
   const caseCount: number = useMemo(() => casesInfo.length, [casesInfo]);

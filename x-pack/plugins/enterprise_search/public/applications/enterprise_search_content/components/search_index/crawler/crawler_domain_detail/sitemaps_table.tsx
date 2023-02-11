@@ -33,7 +33,11 @@ interface SitemapsTableProps {
   items: Sitemap[];
 }
 
-export const SitemapsTable: React.FC<React.PropsWithChildren<SitemapsTableProps>> = ({ domain, indexName, items }) => {
+export const SitemapsTable: React.FC<React.PropsWithChildren<SitemapsTableProps>> = ({
+  domain,
+  indexName,
+  items,
+}) => {
   const { updateSitemaps } = useActions(CrawlerDomainDetailLogic);
   const field = 'url';
 

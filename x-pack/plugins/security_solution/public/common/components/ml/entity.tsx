@@ -14,7 +14,10 @@ interface Props {
   entityValue: string;
 }
 
-export const EntityComponent: React.FC<React.PropsWithChildren<Props>> = ({ entityName, entityValue }) => {
+export const EntityComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  entityName,
+  entityValue,
+}) => {
   return (
     <CellActions
       field={{

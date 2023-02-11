@@ -11,16 +11,18 @@ import { FILTERS } from './constants';
 
 export type FilterAggType = typeof FILTERS[keyof typeof FILTERS];
 
-type FilterAggForm<T> = FC<React.PropsWithChildren<{
-  /** Filter aggregation related configuration */
-  config: Partial<T> | undefined;
-  /** Callback for configuration updates */
-  onChange: (arg: Partial<{ config: Partial<T> }>) => void;
-  /** Selected field for the aggregation */
-  selectedField?: string;
-  /** Whether the configuration is valid */
-  isValid?: boolean;
-}>>;
+type FilterAggForm<T> = FC<
+  React.PropsWithChildren<{
+    /** Filter aggregation related configuration */
+    config: Partial<T> | undefined;
+    /** Callback for configuration updates */
+    onChange: (arg: Partial<{ config: Partial<T> }>) => void;
+    /** Selected field for the aggregation */
+    selectedField?: string;
+    /** Whether the configuration is valid */
+    isValid?: boolean;
+  }>
+>;
 
 interface FilterAggTypeConfig<U, R> {
   /** Form component */

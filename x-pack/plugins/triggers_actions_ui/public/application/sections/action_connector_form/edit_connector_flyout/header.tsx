@@ -25,15 +25,17 @@ import { i18n } from '@kbn/i18n';
 import { betaBadgeProps } from '../beta_badge_props';
 import { EditConnectorTabs } from '../../../../types';
 
-const FlyoutHeaderComponent: React.FC<React.PropsWithChildren<{
-  isExperimental?: boolean;
-  isPreconfigured: boolean;
-  connectorName: string;
-  connectorTypeDesc: string;
-  selectedTab: EditConnectorTabs;
-  setTab: () => void;
-  icon?: IconType | null;
-}>> = ({
+const FlyoutHeaderComponent: React.FC<
+  React.PropsWithChildren<{
+    isExperimental?: boolean;
+    isPreconfigured: boolean;
+    connectorName: string;
+    connectorTypeDesc: string;
+    selectedTab: EditConnectorTabs;
+    setTab: () => void;
+    icon?: IconType | null;
+  }>
+> = ({
   icon,
   isExperimental = false,
   isPreconfigured,

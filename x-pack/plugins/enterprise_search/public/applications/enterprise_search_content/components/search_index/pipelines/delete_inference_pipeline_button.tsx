@@ -26,9 +26,9 @@ const DELETE_PIPELINE_LABEL = i18n.translate(
   }
 );
 
-export const DeleteInferencePipelineButton: React.FC<React.PropsWithChildren<DeleteInferencePipelineButtonProps>> = (
-  props
-) => {
+export const DeleteInferencePipelineButton: React.FC<
+  React.PropsWithChildren<DeleteInferencePipelineButtonProps>
+> = (props) => {
   if (props.pipeline.pipelineReferences.length > 1) {
     const indexReferences = props.pipeline.pipelineReferences
       .map((mlPipeline) => mlPipeline.replace('@ml-inference', ''))

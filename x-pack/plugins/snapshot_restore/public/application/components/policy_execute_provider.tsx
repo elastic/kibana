@@ -20,7 +20,9 @@ export type ExecutePolicy = (name: string, onSuccess?: OnSuccessCallback) => voi
 
 type OnSuccessCallback = () => void;
 
-export const PolicyExecuteProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ children }) => {
+export const PolicyExecuteProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  children,
+}) => {
   const { i18n } = useServices();
   const toastNotifications = useToastNotifications();
 

@@ -25,7 +25,9 @@ const defaultContext: SyntheticsRefreshContext = {
 
 export const SyntheticsRefreshContext = createContext(defaultContext);
 
-export const SyntheticsRefreshContextProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const SyntheticsRefreshContextProvider: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
   const refreshApp = useCallback(() => {

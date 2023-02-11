@@ -36,7 +36,10 @@ interface ResultTagListProps {
   searchTagIds: string[];
 }
 
-export const ResultTagList: FC<React.PropsWithChildren<ResultTagListProps>> = ({ tags, searchTagIds }) => {
+export const ResultTagList: FC<React.PropsWithChildren<ResultTagListProps>> = ({
+  tags,
+  searchTagIds,
+}) => {
   const showOverflow = tags.length > MAX_TAGS_TO_SHOW;
 
   if (!showOverflow) {

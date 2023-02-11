@@ -14,7 +14,10 @@ interface Props {
   docLink: string;
 }
 
-export const DocumentationButton: FunctionComponent<React.PropsWithChildren<Props>> = ({ processorLabel, docLink }) => {
+export const DocumentationButton: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  processorLabel,
+  docLink,
+}) => {
   return (
     <EuiButtonEmpty size="s" flush="right" href={docLink} target="_blank" iconType="help">
       {i18n.translate(

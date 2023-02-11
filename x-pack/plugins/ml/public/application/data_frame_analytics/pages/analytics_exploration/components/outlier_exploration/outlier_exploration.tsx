@@ -46,134 +46,136 @@ interface ExplorationProps {
   jobId: string;
 }
 
-export const OutlierExploration: FC<React.PropsWithChildren<ExplorationProps>> = React.memo(({ jobId }) => {
-  const { indexPattern, indexPatternErrorMessage, jobConfig, needsDestIndexPattern } =
-    useResultsViewConfig(jobId);
-  const [pageUrlState, setPageUrlState] = useExplorationUrlState();
-  const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
-  const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
+export const OutlierExploration: FC<React.PropsWithChildren<ExplorationProps>> = React.memo(
+  ({ jobId }) => {
+    const { indexPattern, indexPatternErrorMessage, jobConfig, needsDestIndexPattern } =
+      useResultsViewConfig(jobId);
+    const [pageUrlState, setPageUrlState] = useExplorationUrlState();
+    const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
+    const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
 
-  const searchQueryUpdateHandler: ExplorationQueryBarProps['setSearchQuery'] = useCallback(
-    (update) => {
-      if (update.query) {
-        setSearchQuery(update.query);
-      }
-      if (update.queryString !== pageUrlState.queryText) {
-        setPageUrlState({ queryText: update.queryString, queryLanguage: update.language });
-      }
-    },
-    [pageUrlState, setPageUrlState]
-  );
-
-  const query: ExplorationQueryBarProps['query'] = {
-    query: pageUrlState.queryText,
-    language: pageUrlState.queryLanguage,
-  };
-
-  const { columnsWithCharts, tableItems } = outlierData;
-
-  const resultsField = jobConfig?.dest.results_field ?? '';
-  const featureCount = getFeatureCount(resultsField, tableItems);
-  const colorRange = useColorRange(COLOR_RANGE.BLUE, COLOR_RANGE_SCALE.INFLUENCER, featureCount);
-
-  // Show the color range only if feature influence is enabled.
-  const showColorRange =
-    isOutlierAnalysis(jobConfig?.analysis) &&
-    jobConfig?.analysis.outlier_detection.compute_feature_influence === true;
-
-  // Identify if the results index has a legacy feature influence format.
-  // If feature influence was enabled for the legacy job we'll show a callout
-  // with some additional information for a workaround.
-  const showLegacyFeatureInfluenceFormatCallout =
-    !needsDestIndexPattern &&
-    isOutlierAnalysis(jobConfig?.analysis) &&
-    jobConfig?.analysis.outlier_detection.compute_feature_influence === true &&
-    columnsWithCharts.findIndex((d) => d.id === `${resultsField}.${FEATURE_INFLUENCE}`) === -1;
-
-  const scatterplotFieldOptions = useScatterplotFieldOptions(
-    indexPattern,
-    jobConfig?.analyzed_fields?.includes,
-    jobConfig?.analyzed_fields?.excludes,
-    resultsField
-  );
-  const destIndex = getDestinationIndex(jobConfig);
-
-  if (indexPatternErrorMessage !== undefined) {
-    return (
-      <EuiPanel grow={false} hasShadow={false} hasBorder>
-        <EuiCallOut
-          title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
-            defaultMessage: 'An error occurred loading the index data.',
-          })}
-          color="danger"
-          iconType="cross"
-        >
-          <p>
-            {indexPatternErrorMessage}
-            {needsDestIndexPattern ? (
-              <IndexPatternPrompt destIndex={destIndex} color="text" />
-            ) : null}
-          </p>
-        </EuiCallOut>
-      </EuiPanel>
+    const searchQueryUpdateHandler: ExplorationQueryBarProps['setSearchQuery'] = useCallback(
+      (update) => {
+        if (update.query) {
+          setSearchQuery(update.query);
+        }
+        if (update.queryString !== pageUrlState.queryText) {
+          setPageUrlState({ queryText: update.queryString, queryLanguage: update.language });
+        }
+      },
+      [pageUrlState, setPageUrlState]
     );
-  }
 
-  return (
-    <>
-      {typeof jobConfig?.description !== 'undefined' && jobConfig?.description !== '' && (
-        <>
-          <EuiText>{jobConfig?.description}</EuiText>
-          <EuiSpacer size="m" />
-        </>
-      )}
-      {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
-        indexPattern !== undefined && (
+    const query: ExplorationQueryBarProps['query'] = {
+      query: pageUrlState.queryText,
+      language: pageUrlState.queryLanguage,
+    };
+
+    const { columnsWithCharts, tableItems } = outlierData;
+
+    const resultsField = jobConfig?.dest.results_field ?? '';
+    const featureCount = getFeatureCount(resultsField, tableItems);
+    const colorRange = useColorRange(COLOR_RANGE.BLUE, COLOR_RANGE_SCALE.INFLUENCER, featureCount);
+
+    // Show the color range only if feature influence is enabled.
+    const showColorRange =
+      isOutlierAnalysis(jobConfig?.analysis) &&
+      jobConfig?.analysis.outlier_detection.compute_feature_influence === true;
+
+    // Identify if the results index has a legacy feature influence format.
+    // If feature influence was enabled for the legacy job we'll show a callout
+    // with some additional information for a workaround.
+    const showLegacyFeatureInfluenceFormatCallout =
+      !needsDestIndexPattern &&
+      isOutlierAnalysis(jobConfig?.analysis) &&
+      jobConfig?.analysis.outlier_detection.compute_feature_influence === true &&
+      columnsWithCharts.findIndex((d) => d.id === `${resultsField}.${FEATURE_INFLUENCE}`) === -1;
+
+    const scatterplotFieldOptions = useScatterplotFieldOptions(
+      indexPattern,
+      jobConfig?.analyzed_fields?.includes,
+      jobConfig?.analyzed_fields?.excludes,
+      resultsField
+    );
+    const destIndex = getDestinationIndex(jobConfig);
+
+    if (indexPatternErrorMessage !== undefined) {
+      return (
+        <EuiPanel grow={false} hasShadow={false} hasBorder>
+          <EuiCallOut
+            title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
+              defaultMessage: 'An error occurred loading the index data.',
+            })}
+            color="danger"
+            iconType="cross"
+          >
+            <p>
+              {indexPatternErrorMessage}
+              {needsDestIndexPattern ? (
+                <IndexPatternPrompt destIndex={destIndex} color="text" />
+              ) : null}
+            </p>
+          </EuiCallOut>
+        </EuiPanel>
+      );
+    }
+
+    return (
+      <>
+        {typeof jobConfig?.description !== 'undefined' && jobConfig?.description !== '' && (
           <>
-            <ExplorationQueryBar
-              indexPattern={indexPattern}
-              setSearchQuery={searchQueryUpdateHandler}
-              query={query}
+            <EuiText>{jobConfig?.description}</EuiText>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
+          indexPattern !== undefined && (
+            <>
+              <ExplorationQueryBar
+                indexPattern={indexPattern}
+                setSearchQuery={searchQueryUpdateHandler}
+                query={query}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {typeof jobConfig?.id === 'string' && <ExpandableSectionAnalytics jobId={jobConfig?.id} />}
+        {typeof jobConfig?.id === 'string' && scatterplotFieldOptions.length > 1 && (
+          <ExpandableSectionSplom
+            fields={scatterplotFieldOptions}
+            index={jobConfig?.dest.index}
+            resultsField={jobConfig?.dest.results_field}
+            searchQuery={searchQuery}
+            query={query}
+          />
+        )}
+        {showLegacyFeatureInfluenceFormatCallout && (
+          <>
+            <EuiCallOut
+              size="s"
+              title={i18n.translate(
+                'xpack.ml.dataframe.analytics.outlierExploration.legacyFeatureInfluenceFormatCalloutTitle',
+                {
+                  defaultMessage:
+                    'Color coded table cells based on feature influence are not available because the results index uses an unsupported legacy format. Please clone and rerun the job.',
+                }
+              )}
+              iconType="pin"
             />
             <EuiSpacer size="m" />
           </>
         )}
-      {typeof jobConfig?.id === 'string' && <ExpandableSectionAnalytics jobId={jobConfig?.id} />}
-      {typeof jobConfig?.id === 'string' && scatterplotFieldOptions.length > 1 && (
-        <ExpandableSectionSplom
-          fields={scatterplotFieldOptions}
-          index={jobConfig?.dest.index}
-          resultsField={jobConfig?.dest.results_field}
+        <ExpandableSectionResults
+          colorRange={
+            showColorRange && !showLegacyFeatureInfluenceFormatCallout ? colorRange : undefined
+          }
+          indexData={outlierData}
+          indexPattern={indexPattern}
+          jobConfig={jobConfig}
+          needsDestIndexPattern={needsDestIndexPattern}
           searchQuery={searchQuery}
-          query={query}
         />
-      )}
-      {showLegacyFeatureInfluenceFormatCallout && (
-        <>
-          <EuiCallOut
-            size="s"
-            title={i18n.translate(
-              'xpack.ml.dataframe.analytics.outlierExploration.legacyFeatureInfluenceFormatCalloutTitle',
-              {
-                defaultMessage:
-                  'Color coded table cells based on feature influence are not available because the results index uses an unsupported legacy format. Please clone and rerun the job.',
-              }
-            )}
-            iconType="pin"
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
-      <ExpandableSectionResults
-        colorRange={
-          showColorRange && !showLegacyFeatureInfluenceFormatCallout ? colorRange : undefined
-        }
-        indexData={outlierData}
-        indexPattern={indexPattern}
-        jobConfig={jobConfig}
-        needsDestIndexPattern={needsDestIndexPattern}
-        searchQuery={searchQuery}
-      />
-    </>
-  );
-});
+      </>
+    );
+  }
+);

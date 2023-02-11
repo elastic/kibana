@@ -29,7 +29,9 @@ import { useReadonlyHeader } from './use_readonly_header';
 import { casesQueryClient } from '../cases_context/query_client';
 import type { CaseViewProps } from '../case_view/types';
 
-const CaseViewLazy: React.FC<React.PropsWithChildren<CaseViewProps>> = lazy(() => import('../case_view'));
+const CaseViewLazy: React.FC<React.PropsWithChildren<CaseViewProps>> = lazy(
+  () => import('../case_view')
+);
 
 const CasesRoutesComponent: React.FC<React.PropsWithChildren<CasesRoutesProps>> = ({
   onComponentInitialized,

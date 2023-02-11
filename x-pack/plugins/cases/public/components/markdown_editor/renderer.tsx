@@ -18,17 +18,22 @@ interface Props {
   textSize?: EuiMarkdownFormatProps['textSize'];
 }
 
-const withDisabledLinks = (disableLinks?: boolean): React.FC<React.PropsWithChildren<EuiLinkAnchorProps>> => {
-  const MarkdownLinkProcessingComponent: React.FC<React.PropsWithChildren<EuiLinkAnchorProps>> = memo((props) => (
-    <MarkdownLink {...props} disableLinks={disableLinks} />
-  ));
+const withDisabledLinks = (
+  disableLinks?: boolean
+): React.FC<React.PropsWithChildren<EuiLinkAnchorProps>> => {
+  const MarkdownLinkProcessingComponent: React.FC<React.PropsWithChildren<EuiLinkAnchorProps>> =
+    memo((props) => <MarkdownLink {...props} disableLinks={disableLinks} />);
 
   MarkdownLinkProcessingComponent.displayName = 'MarkdownLinkProcessingComponent';
 
   return MarkdownLinkProcessingComponent;
 };
 
-const MarkdownRendererComponent: React.FC<React.PropsWithChildren<Props>> = ({ children, disableLinks, textSize }) => {
+const MarkdownRendererComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  children,
+  disableLinks,
+  textSize,
+}) => {
   const { processingPlugins, parsingPlugins } = usePlugins();
   // Deep clone of the processing plugins to prevent affecting the markdown editor.
   const processingPluginList = cloneDeep(processingPlugins);

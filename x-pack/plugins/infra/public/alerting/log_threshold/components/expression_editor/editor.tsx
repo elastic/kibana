@@ -96,7 +96,9 @@ const createDefaultRatioRuleParams = (
   ],
 });
 
-export const ExpressionEditor: React.FC<React.PropsWithChildren<RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>>> = (props) => {
+export const ExpressionEditor: React.FC<
+  React.PropsWithChildren<RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>>
+> = (props) => {
   const isInternal = props.metadata?.isInternal ?? false;
   const [logViewId] = useSourceId();
   const {
@@ -152,9 +154,9 @@ export const SourceStatusWrapper: React.FC<React.PropsWithChildren<unknown>> = (
   );
 };
 
-export const Editor: React.FC<React.PropsWithChildren<RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>>> = (
-  props
-) => {
+export const Editor: React.FC<
+  React.PropsWithChildren<RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>>
+> = (props) => {
   const { setRuleParams, ruleParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { logViewId, resolvedLogView } = useLogViewContext();

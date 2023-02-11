@@ -31,7 +31,11 @@ interface Props {
   onEnable(): void;
 }
 
-export const RolesEmptyPrompt: React.FC<React.PropsWithChildren<Props>> = ({ onEnable, docsLink, productName }) => {
+export const RolesEmptyPrompt: React.FC<React.PropsWithChildren<Props>> = ({
+  onEnable,
+  docsLink,
+  productName,
+}) => {
   const { security } = useValues(KibanaLogic);
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const isSuperUser = currentUser?.roles.includes('superuser');

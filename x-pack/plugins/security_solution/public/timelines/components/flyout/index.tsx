@@ -23,7 +23,10 @@ interface OwnProps {
 
 type VoidFunc = () => void;
 
-const FlyoutComponent: React.FC<React.PropsWithChildren<OwnProps>> = ({ timelineId, onAppLeave }) => {
+const FlyoutComponent: React.FC<React.PropsWithChildren<OwnProps>> = ({
+  timelineId,
+  onAppLeave,
+}) => {
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
   const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
 

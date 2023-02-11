@@ -41,7 +41,9 @@ interface LogEntryCategoriesResultsContentProps {
   pageTitle: string;
 }
 
-export const LogEntryCategoriesResultsContent: React.FunctionComponent<React.PropsWithChildren<LogEntryCategoriesResultsContentProps>> = ({ onOpenSetup, pageTitle }) => {
+export const LogEntryCategoriesResultsContent: React.FunctionComponent<
+  React.PropsWithChildren<LogEntryCategoriesResultsContentProps>
+> = ({ onOpenSetup, pageTitle }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
 

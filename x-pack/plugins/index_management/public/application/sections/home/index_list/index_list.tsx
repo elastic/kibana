@@ -13,7 +13,9 @@ import { useAppContext } from '../../../app_context';
 import { DetailPanel } from './detail_panel';
 import { IndexTable } from './index_table';
 
-export const IndexList: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps>> = ({ history }) => {
+export const IndexList: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps>> = ({
+  history,
+}) => {
   const {
     core: { executionContext },
   } = useAppContext();

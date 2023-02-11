@@ -10,17 +10,19 @@ import { EuiButton } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useEffect, useRef } from 'react';
 
-export const AutoFocusButton: FC<React.PropsWithChildren<PropsForButton<EuiButtonProps>>> = memo((props) => {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const button = <EuiButton buttonRef={buttonRef} {...props} />;
+export const AutoFocusButton: FC<React.PropsWithChildren<PropsForButton<EuiButtonProps>>> = memo(
+  (props) => {
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const button = <EuiButton buttonRef={buttonRef} {...props} />;
 
-  useEffect(() => {
-    if (buttonRef.current) {
-      buttonRef.current.focus();
-    }
-  }, []);
+    useEffect(() => {
+      if (buttonRef.current) {
+        buttonRef.current.focus();
+      }
+    }, []);
 
-  return button;
-});
+    return button;
+  }
+);
 
 AutoFocusButton.displayName = 'AutoFocusButton';

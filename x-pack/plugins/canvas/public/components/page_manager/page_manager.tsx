@@ -16,7 +16,9 @@ import { PageManager as Component } from './page_manager.component';
 import { State } from '../../../types';
 import { WorkpadRoutingContext } from '../../routes/workpad';
 
-export const PageManager: FC<React.PropsWithChildren<{ onPreviousPage: () => void }>> = ({ onPreviousPage }) => {
+export const PageManager: FC<React.PropsWithChildren<{ onPreviousPage: () => void }>> = ({
+  onPreviousPage,
+}) => {
   const dispatch = useDispatch();
   const propsFromState = useSelector((state: State) => ({
     isWriteable: isWriteable(state) && canUserWrite(state),

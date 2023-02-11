@@ -33,7 +33,11 @@ interface Props {
   onChange(selectedUrls: string[]): void;
 }
 
-export const UrlComboBox: React.FC<React.PropsWithChildren<Props>> = ({ label, selectedUrls, onChange }) => {
+export const UrlComboBox: React.FC<React.PropsWithChildren<Props>> = ({
+  label,
+  selectedUrls,
+  onChange,
+}) => {
   const id = useGeneratedHtmlId();
   const urlComboBoxLogic = UrlComboBoxLogic({ id });
   const { isInvalid } = useValues(urlComboBoxLogic);

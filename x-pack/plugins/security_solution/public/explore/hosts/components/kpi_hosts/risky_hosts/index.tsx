@@ -65,11 +65,13 @@ const RiskScoreContainer = styled(EuiFlexItem)`
  * we decided not to go forward with this for 8.1
  * saving the code for future implementation
  */
-const RiskyHostsComponent: React.FC<React.PropsWithChildren<{
-  error: unknown;
-  loading: boolean;
-  data?: KpiRiskScoreStrategyResponse;
-}>> = ({ error, loading, data }) => {
+const RiskyHostsComponent: React.FC<
+  React.PropsWithChildren<{
+    error: unknown;
+    loading: boolean;
+    data?: KpiRiskScoreStrategyResponse;
+  }>
+> = ({ error, loading, data }) => {
   useInspectQuery(QUERY_ID, loading, data);
   useErrorToast(i18n.ERROR_TITLE, error);
 

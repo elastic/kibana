@@ -99,7 +99,9 @@ interface ExplorerUrlStateManagerProps {
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
-const ExplorerUrlStateManager: FC<React.PropsWithChildren<ExplorerUrlStateManagerProps>> = ({ jobsWithTimeRange }) => {
+const ExplorerUrlStateManager: FC<React.PropsWithChildren<ExplorerUrlStateManagerProps>> = ({
+  jobsWithTimeRange,
+}) => {
   const {
     services: { cases },
   } = useMlKibana();

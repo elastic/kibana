@@ -90,7 +90,9 @@ function useDatastreamIngestPipelines(
   };
 }
 
-export const PackagePolicyEditorDatastreamPipelines: React.FunctionComponent<React.PropsWithChildren<PackagePolicyEditorDatastreamPipelinesProps>> = ({ packageInputStream, packageInfo }) => {
+export const PackagePolicyEditorDatastreamPipelines: React.FunctionComponent<
+  React.PropsWithChildren<PackagePolicyEditorDatastreamPipelinesProps>
+> = ({ packageInputStream, packageInfo }) => {
   const dataStream = packageInputStream.data_stream;
   const { application, share, docLinks } = useStartServices();
   const ingestPipelineLocator = share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR');

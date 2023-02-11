@@ -15,9 +15,9 @@ interface CustomFormattedTimestampProps {
   timestamp: string | number | Date;
 }
 
-export const CustomFormattedTimestamp: React.FC<React.PropsWithChildren<CustomFormattedTimestampProps>> = ({
-  timestamp,
-}) => {
+export const CustomFormattedTimestamp: React.FC<
+  React.PropsWithChildren<CustomFormattedTimestampProps>
+> = ({ timestamp }) => {
   const date = new Date(timestamp);
   const isDateToday = date >= new Date(new Date(Date.now()).toDateString());
   return isDateToday ? (

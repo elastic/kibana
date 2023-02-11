@@ -49,7 +49,9 @@ export type ComponentOpts = {
   'bulkDisableRules' | 'bulkEnableRules' | 'snoozeRule' | 'unsnoozeRule'
 >;
 
-export const CollapsedItemActions: React.FunctionComponent<React.PropsWithChildren<ComponentOpts>> = ({
+export const CollapsedItemActions: React.FunctionComponent<
+  React.PropsWithChildren<ComponentOpts>
+> = ({
   item,
   onLoading,
   onRuleChanged,

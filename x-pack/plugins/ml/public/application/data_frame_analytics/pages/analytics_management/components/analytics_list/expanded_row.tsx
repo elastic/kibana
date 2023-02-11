@@ -50,7 +50,11 @@ interface LoadedStatProps {
   resultProperty: REGRESSION_STATS;
 }
 
-const LoadedStat: FC<React.PropsWithChildren<LoadedStatProps>> = ({ isLoading, evalData, resultProperty }) => {
+const LoadedStat: FC<React.PropsWithChildren<LoadedStatProps>> = ({
+  isLoading,
+  evalData,
+  resultProperty,
+}) => {
   return (
     <Fragment>
       {isLoading === false && evalData.error !== null && <EuiIcon type="alert" size="s" />}

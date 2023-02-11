@@ -50,7 +50,9 @@ const rowItems: ItemsPerRow[] = [
 
 export const NetworkTopNFlowTableId = 'networkTopSourceFlow-top-talkers';
 
-const NetworkTopNFlowTableComponent: React.FC<React.PropsWithChildren<NetworkTopNFlowTableProps>> = ({
+const NetworkTopNFlowTableComponent: React.FC<
+  React.PropsWithChildren<NetworkTopNFlowTableProps>
+> = ({
   data,
   fakeTotalCount,
   flowTargeted,

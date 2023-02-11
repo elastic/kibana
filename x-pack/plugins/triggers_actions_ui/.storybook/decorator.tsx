@@ -48,7 +48,9 @@ const notifications: NotificationsStart = {
   },
 };
 
-export const StorybookContextDecorator: React.FC<React.PropsWithChildren<StorybookContextDecoratorProps>> = (props) => {
+export const StorybookContextDecorator: React.FC<
+  React.PropsWithChildren<StorybookContextDecoratorProps>
+> = (props) => {
   const { children, context, servicesApplicationOverride, servicesOverride } = props;
   const { globals } = context;
   const { euiTheme } = globals;

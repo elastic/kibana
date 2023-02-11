@@ -23,9 +23,11 @@ export interface BrowserFieldItem {
 
 export type OnFieldSelected = (fieldId: string) => void;
 
-export type CreateFieldComponent = React.FC<React.PropsWithChildren<{
-  onHide: () => void;
-}>>;
+export type CreateFieldComponent = React.FC<
+  React.PropsWithChildren<{
+    onHide: () => void;
+  }>
+>;
 export type FieldTableColumns = Array<EuiBasicTableColumn<BrowserFieldItem>>;
 export type GetFieldTableColumns = (params: {
   highlight: string;

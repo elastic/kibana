@@ -31,14 +31,16 @@ const Button = styled(EuiButtonEmpty)`
   }
 `;
 
-export const AgentsSelectionStatus: React.FunctionComponent<React.PropsWithChildren<{
-  totalAgents: number;
-  selectableAgents: number;
-  selectionMode: SelectionMode;
-  setSelectionMode: (mode: SelectionMode) => void;
-  selectedAgents: Agent[];
-  setSelectedAgents: (agents: Agent[]) => void;
-}>> = ({
+export const AgentsSelectionStatus: React.FunctionComponent<
+  React.PropsWithChildren<{
+    totalAgents: number;
+    selectableAgents: number;
+    selectionMode: SelectionMode;
+    setSelectionMode: (mode: SelectionMode) => void;
+    selectedAgents: Agent[];
+    setSelectedAgents: (agents: Agent[]) => void;
+  }>
+> = ({
   totalAgents,
   selectableAgents,
   selectionMode,

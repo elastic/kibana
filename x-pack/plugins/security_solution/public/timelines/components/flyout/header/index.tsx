@@ -73,7 +73,9 @@ const ActiveTimelinesContainer = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
-const FlyoutHeaderPanelComponent: React.FC<React.PropsWithChildren<FlyoutHeaderPanelProps>> = ({ timelineId }) => {
+const FlyoutHeaderPanelComponent: React.FC<React.PropsWithChildren<FlyoutHeaderPanelProps>> = ({
+  timelineId,
+}) => {
   const dispatch = useDispatch();
   const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
   const { uiSettings } = useKibana().services;
@@ -257,7 +259,9 @@ const TimelineTitleContainer = styled.h3`
   word-break: break-word;
 `;
 
-const TimelineNameComponent: React.FC<React.PropsWithChildren<FlyoutHeaderProps>> = ({ timelineId }) => {
+const TimelineNameComponent: React.FC<React.PropsWithChildren<FlyoutHeaderProps>> = ({
+  timelineId,
+}) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { title, timelineType } = useDeepEqualSelector((state) =>
     pick(['title', 'timelineType'], getTimeline(state, timelineId) ?? timelineDefaults)
@@ -283,7 +287,9 @@ const TimelineNameComponent: React.FC<React.PropsWithChildren<FlyoutHeaderProps>
 
 const TimelineName = React.memo(TimelineNameComponent);
 
-const TimelineDescriptionComponent: React.FC<React.PropsWithChildren<FlyoutHeaderProps>> = ({ timelineId }) => {
+const TimelineDescriptionComponent: React.FC<React.PropsWithChildren<FlyoutHeaderProps>> = ({
+  timelineId,
+}) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const description = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
@@ -312,7 +318,9 @@ const TimelineDescriptionComponent: React.FC<React.PropsWithChildren<FlyoutHeade
 
 const TimelineDescription = React.memo(TimelineDescriptionComponent);
 
-const TimelineStatusInfoComponent: React.FC<React.PropsWithChildren<FlyoutHeaderProps>> = ({ timelineId }) => {
+const TimelineStatusInfoComponent: React.FC<React.PropsWithChildren<FlyoutHeaderProps>> = ({
+  timelineId,
+}) => {
   const getTimelineStatus = useMemo(() => getTimelineStatusByIdSelector(), []);
   const { status: timelineStatus, updated } = useDeepEqualSelector((state) =>
     getTimelineStatus(state, timelineId)
@@ -347,7 +355,9 @@ const TimelineStatusInfoComponent: React.FC<React.PropsWithChildren<FlyoutHeader
 
 const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
 
-const FlyoutHeaderComponent: React.FC<React.PropsWithChildren<FlyoutHeaderProps>> = ({ timelineId }) => {
+const FlyoutHeaderComponent: React.FC<React.PropsWithChildren<FlyoutHeaderProps>> = ({
+  timelineId,
+}) => {
   const { selectedPatterns, indexPattern, browserFields } = useSourcererDataView(
     SourcererScopeName.timeline
   );

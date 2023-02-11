@@ -14,7 +14,9 @@ import {
   nodeAllocationMigrationGuidance,
 } from './no_custom_attributes_messages';
 
-export const NoTiersAvailableUsingNodeAttributesNotice: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
+export const NoTiersAvailableUsingNodeAttributesNotice: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   return (
     <EuiCallOut
       data-test-subj="noTiersAvailableUsingNodeAttributesNotice"

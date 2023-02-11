@@ -15,7 +15,9 @@ interface Props {
   repository: GCSRepository;
 }
 
-export const GCSDetails: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ repository }) => {
+export const GCSDetails: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  repository,
+}) => {
   const {
     settings: {
       bucket,

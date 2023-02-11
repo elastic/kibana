@@ -24,7 +24,9 @@ interface MatchParams {
   section: Section;
 }
 
-export const SnapshotRestoreHome: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps<MatchParams>>> = ({
+export const SnapshotRestoreHome: React.FunctionComponent<
+  React.PropsWithChildren<RouteComponentProps<MatchParams>>
+> = ({
   match: {
     params: { section },
   },

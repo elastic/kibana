@@ -27,7 +27,9 @@ export interface ScreenshotImageProps {
   onClick?: MouseEventHandler<HTMLImageElement>;
 }
 
-export const ScreenshotImage: React.FC<React.PropsWithChildren<ScreenshotImageProps & { imgSrc?: string }>> = ({
+export const ScreenshotImage: React.FC<
+  React.PropsWithChildren<ScreenshotImageProps & { imgSrc?: string }>
+> = ({
   label,
   imgSrc,
   isLoading,

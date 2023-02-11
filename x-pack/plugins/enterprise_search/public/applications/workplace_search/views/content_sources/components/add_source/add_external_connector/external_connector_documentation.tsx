@@ -16,10 +16,9 @@ interface ExternalConnectorDocumentationProps {
   documentationUrl: string;
 }
 
-export const ExternalConnectorDocumentation: React.FC<React.PropsWithChildren<ExternalConnectorDocumentationProps>> = ({
-  name,
-  documentationUrl,
-}) => {
+export const ExternalConnectorDocumentation: React.FC<
+  React.PropsWithChildren<ExternalConnectorDocumentationProps>
+> = ({ name, documentationUrl }) => {
   return (
     <EuiText size="s">
       <p>

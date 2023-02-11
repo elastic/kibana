@@ -25,7 +25,9 @@ import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capab
 import { RuleActions } from './rule_actions';
 import { RuleEdit } from '../../rule_form';
 
-export const RuleDefinition: React.FunctionComponent<React.PropsWithChildren<RuleDefinitionProps>> = ({
+export const RuleDefinition: React.FunctionComponent<
+  React.PropsWithChildren<RuleDefinitionProps>
+> = ({
   rule,
   actionTypeRegistry,
   ruleTypeRegistry,

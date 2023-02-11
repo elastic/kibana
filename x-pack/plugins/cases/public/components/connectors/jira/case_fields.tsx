@@ -19,12 +19,9 @@ import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
 import { ConnectorCard } from '../card';
 
-const JiraFieldsComponent: React.FunctionComponent<React.PropsWithChildren<ConnectorFieldsProps<JiraFieldsType>>> = ({
-  connector,
-  fields,
-  isEdit = true,
-  onChange,
-}) => {
+const JiraFieldsComponent: React.FunctionComponent<
+  React.PropsWithChildren<ConnectorFieldsProps<JiraFieldsType>>
+> = ({ connector, fields, isEdit = true, onChange }) => {
   const init = useRef(true);
   const { issueType = null, priority = null, parent = null } = fields ?? {};
   const { http, notifications } = useKibana().services;

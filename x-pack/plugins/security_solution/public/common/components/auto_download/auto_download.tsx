@@ -18,7 +18,11 @@ interface AutoDownloadProps {
   onDownload?: () => void;
 }
 
-export const AutoDownload: React.FC<React.PropsWithChildren<AutoDownloadProps>> = ({ blob, name, onDownload }) => {
+export const AutoDownload: React.FC<React.PropsWithChildren<AutoDownloadProps>> = ({
+  blob,
+  name,
+  onDownload,
+}) => {
   const anchorRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {

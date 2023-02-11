@@ -21,9 +21,9 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-export const IntegrationDescriptionComponent: React.FC<React.PropsWithChildren<{ integration: IntegrationDetails }>> = ({
-  integration,
-}) => {
+export const IntegrationDescriptionComponent: React.FC<
+  React.PropsWithChildren<{ integration: IntegrationDetails }>
+> = ({ integration }) => {
   return (
     <Wrapper>
       <IntegrationLink integration={integration} />{' '}
@@ -35,9 +35,11 @@ export const IntegrationDescriptionComponent: React.FC<React.PropsWithChildren<{
 
 export const IntegrationDescription = React.memo(IntegrationDescriptionComponent);
 
-export const RelatedIntegrationsDescription: React.FC<React.PropsWithChildren<{
-  relatedIntegrations: RelatedIntegrationArray;
-}>> = ({ relatedIntegrations }) => {
+export const RelatedIntegrationsDescription: React.FC<
+  React.PropsWithChildren<{
+    relatedIntegrations: RelatedIntegrationArray;
+  }>
+> = ({ relatedIntegrations }) => {
   const { integrations } = useRelatedIntegrations(relatedIntegrations);
 
   return (

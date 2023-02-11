@@ -37,11 +37,9 @@ export interface ChangePointDetectionAppStateProps {
   appDependencies: AiopsAppDependencies;
 }
 
-export const ChangePointDetectionAppState: FC<React.PropsWithChildren<ChangePointDetectionAppStateProps>> = ({
-  dataView,
-  savedSearch,
-  appDependencies,
-}) => {
+export const ChangePointDetectionAppState: FC<
+  React.PropsWithChildren<ChangePointDetectionAppStateProps>
+> = ({ dataView, savedSearch, appDependencies }) => {
   const datePickerDeps = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
     toMountPoint,

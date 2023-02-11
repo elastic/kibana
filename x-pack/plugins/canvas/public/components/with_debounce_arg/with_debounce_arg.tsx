@@ -13,7 +13,10 @@ import { ArgTemplateFormProps } from '../arg_form/arg_template_form';
 type Props = ArgTemplateFormProps['argumentProps'];
 
 export const withDebounceArg =
-  (Arg: FC<React.PropsWithChildren<Props>>, debouncePeriod: number = 150): FC<React.PropsWithChildren<Props>> =>
+  (
+    Arg: FC<React.PropsWithChildren<Props>>,
+    debouncePeriod: number = 150
+  ): FC<React.PropsWithChildren<Props>> =>
   ({ argValue, onValueChange, ...restProps }) => {
     const [localArgValue, setArgValue] = useState(argValue);
 

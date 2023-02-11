@@ -61,7 +61,9 @@ function filterTemplates(templates: TemplateListItem[], types: string[]): Templa
   });
 }
 
-export const TemplateList: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps<MatchParams>>> = ({
+export const TemplateList: React.FunctionComponent<
+  React.PropsWithChildren<RouteComponentProps<MatchParams>>
+> = ({
   match: {
     params: { templateName },
   },

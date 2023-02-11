@@ -175,13 +175,9 @@ function getLensAttributes(
   };
 }
 
-const ViewResultsInLensActionComponent: React.FC<React.PropsWithChildren<ViewResultsInDiscoverActionProps>> = ({
-  actionId,
-  buttonType,
-  endDate,
-  startDate,
-  mode,
-}) => {
+const ViewResultsInLensActionComponent: React.FC<
+  React.PropsWithChildren<ViewResultsInDiscoverActionProps>
+> = ({ actionId, buttonType, endDate, startDate, mode }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
   const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
@@ -237,12 +233,9 @@ const ViewResultsInLensActionComponent: React.FC<React.PropsWithChildren<ViewRes
 
 export const ViewResultsInLensAction = React.memo(ViewResultsInLensActionComponent);
 
-const ViewResultsInDiscoverActionComponent: React.FC<React.PropsWithChildren<ViewResultsInDiscoverActionProps>> = ({
-  actionId,
-  buttonType,
-  endDate,
-  startDate,
-}) => {
+const ViewResultsInDiscoverActionComponent: React.FC<
+  React.PropsWithChildren<ViewResultsInDiscoverActionProps>
+> = ({ actionId, buttonType, endDate, startDate }) => {
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover;
@@ -363,10 +356,9 @@ interface ScheduledQueryErrorsProps {
   expanded: boolean;
 }
 
-const ScheduledQueryLastResults: React.FC<React.PropsWithChildren<ScheduledQueryLastResultsProps>> = ({
-  actionId,
-  interval,
-}) => {
+const ScheduledQueryLastResults: React.FC<
+  React.PropsWithChildren<ScheduledQueryLastResultsProps>
+> = ({ actionId, interval }) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
@@ -407,7 +399,10 @@ const ScheduledQueryLastResults: React.FC<React.PropsWithChildren<ScheduledQuery
   );
 };
 
-const DocsColumnResults: React.FC<React.PropsWithChildren<ScheduledQueryLastResultsProps>> = ({ actionId, interval }) => {
+const DocsColumnResults: React.FC<React.PropsWithChildren<ScheduledQueryLastResultsProps>> = ({
+  actionId,
+  interval,
+}) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
@@ -432,7 +427,10 @@ const DocsColumnResults: React.FC<React.PropsWithChildren<ScheduledQueryLastResu
   );
 };
 
-const AgentsColumnResults: React.FC<React.PropsWithChildren<ScheduledQueryLastResultsProps>> = ({ actionId, interval }) => {
+const AgentsColumnResults: React.FC<React.PropsWithChildren<ScheduledQueryLastResultsProps>> = ({
+  actionId,
+  interval,
+}) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
@@ -511,7 +509,9 @@ interface PackViewInActionProps {
   packName: string;
 }
 
-const PackViewInDiscoverActionComponent: React.FC<React.PropsWithChildren<PackViewInActionProps>> = ({ item, packName }) => {
+const PackViewInDiscoverActionComponent: React.FC<
+  React.PropsWithChildren<PackViewInActionProps>
+> = ({ item, packName }) => {
   const { id, interval } = item;
   const actionId = getPackActionId(id, packName);
   const { data: lastResultsData } = usePackQueryLastResults({
@@ -539,7 +539,10 @@ const PackViewInDiscoverActionComponent: React.FC<React.PropsWithChildren<PackVi
 
 const PackViewInDiscoverAction = React.memo(PackViewInDiscoverActionComponent);
 
-const PackViewInLensActionComponent: React.FC<React.PropsWithChildren<PackViewInActionProps>> = ({ item, packName }) => {
+const PackViewInLensActionComponent: React.FC<React.PropsWithChildren<PackViewInActionProps>> = ({
+  item,
+  packName,
+}) => {
   const { id, interval } = item;
   const actionId = getPackActionId(id, packName);
   const { data: lastResultsData } = usePackQueryLastResults({
@@ -573,11 +576,9 @@ interface PackQueriesStatusTableProps {
   packName: string;
 }
 
-const PackQueriesStatusTableComponent: React.FC<React.PropsWithChildren<PackQueriesStatusTableProps>> = ({
-  agentIds,
-  data,
-  packName,
-}) => {
+const PackQueriesStatusTableComponent: React.FC<
+  React.PropsWithChildren<PackQueriesStatusTableProps>
+> = ({ agentIds, data, packName }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
   >({});

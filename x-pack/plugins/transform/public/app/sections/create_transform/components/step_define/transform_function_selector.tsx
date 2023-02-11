@@ -15,10 +15,9 @@ interface TransformFunctionSelectorProps {
   onChange: (update: TransformFunction) => void;
 }
 
-export const TransformFunctionSelector: FC<React.PropsWithChildren<TransformFunctionSelectorProps>> = ({
-  selectedFunction,
-  onChange,
-}) => {
+export const TransformFunctionSelector: FC<
+  React.PropsWithChildren<TransformFunctionSelectorProps>
+> = ({ selectedFunction, onChange }) => {
   const transformFunctions = [
     {
       name: TRANSFORM_FUNCTION.PIVOT,

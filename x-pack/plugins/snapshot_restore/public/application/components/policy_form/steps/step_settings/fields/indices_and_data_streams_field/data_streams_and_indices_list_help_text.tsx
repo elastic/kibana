@@ -16,12 +16,9 @@ interface Props {
   dataStreams: string[];
 }
 
-export const DataStreamsAndIndicesListHelpText: FunctionComponent<React.PropsWithChildren<Props>> = ({
-  onSelectionChange,
-  selectedIndicesAndDataStreams,
-  indices,
-  dataStreams,
-}) => {
+export const DataStreamsAndIndicesListHelpText: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ onSelectionChange, selectedIndicesAndDataStreams, indices, dataStreams }) => {
   if (selectedIndicesAndDataStreams.length === 0) {
     return (
       <FormattedMessage

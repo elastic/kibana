@@ -6,7 +6,9 @@
  */
 import type { SVGProps } from 'react';
 import React from 'react';
-export const IconEndpoints: React.FC<React.PropsWithChildren<SVGProps<SVGSVGElement>>> = ({ ...props }) => (
+export const IconEndpoints: React.FC<React.PropsWithChildren<SVGProps<SVGSVGElement>>> = ({
+  ...props
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={16}

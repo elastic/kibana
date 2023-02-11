@@ -14,7 +14,10 @@ interface Props {
   hidePanel: () => void;
 }
 
-export const KeyboardShortcutsDocPanel: FC<React.PropsWithChildren<Props>> = ({ isVisible, hidePanel }) => (
+export const KeyboardShortcutsDocPanel: FC<React.PropsWithChildren<Props>> = ({
+  isVisible,
+  hidePanel,
+}) => (
   <>
     {isVisible && (
       <EuiPortal>

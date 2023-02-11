@@ -16,7 +16,10 @@ interface Props {
   onChange?: (key: string) => void;
 }
 
-export const ShapePicker: FC<React.PropsWithChildren<Props>> = ({ shapes, onChange = () => {} }) => (
+export const ShapePicker: FC<React.PropsWithChildren<Props>> = ({
+  shapes,
+  onChange = () => {},
+}) => (
   <EuiFlexGrid gutterSize="s" columns={4} className="canvasShapePicker">
     {shapes.sort().map((shapeKey: string) => (
       <EuiFlexItem key={shapeKey}>

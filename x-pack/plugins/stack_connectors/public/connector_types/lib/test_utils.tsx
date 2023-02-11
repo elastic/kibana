@@ -33,12 +33,9 @@ type ConnectorFormTestProviderProps = Omit<FormTestProviderProps, 'defaultValue'
   connector: ConnectorFormSchema;
 };
 
-const ConnectorFormTestProviderComponent: React.FC<React.PropsWithChildren<ConnectorFormTestProviderProps>> = ({
-  children,
-  connector,
-  onSubmit,
-  connectorServices,
-}) => {
+const ConnectorFormTestProviderComponent: React.FC<
+  React.PropsWithChildren<ConnectorFormTestProviderProps>
+> = ({ children, connector, onSubmit, connectorServices }) => {
   return (
     <FormTestProviderComponent
       defaultValue={connector}
@@ -95,7 +92,9 @@ export const createAppMockRenderer = (): AppMockRenderer => {
   const services = createStartServicesMock();
   const theme$ = of({ darkMode: false });
 
-  const AppWrapper: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>> = ({ children }) => (
+  const AppWrapper: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>> = ({
+    children,
+  }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>

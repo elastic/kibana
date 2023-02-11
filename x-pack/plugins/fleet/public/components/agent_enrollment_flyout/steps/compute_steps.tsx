@@ -39,7 +39,9 @@ import {
   IncomingDataConfirmationStep,
 } from '.';
 
-export const StandaloneSteps: React.FunctionComponent<React.PropsWithChildren<InstructionProps>> = ({
+export const StandaloneSteps: React.FunctionComponent<
+  React.PropsWithChildren<InstructionProps>
+> = ({
   agentPolicy,
   agentPolicies,
   selectedPolicy,

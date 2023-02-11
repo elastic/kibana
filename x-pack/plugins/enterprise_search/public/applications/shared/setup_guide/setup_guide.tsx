@@ -39,7 +39,11 @@ interface Props {
   productEuiIcon: 'logoAppSearch' | 'logoWorkplaceSearch' | 'logoEnterpriseSearch';
 }
 
-export const SetupGuideLayout: React.FC<React.PropsWithChildren<Props>> = ({ children, productName, productEuiIcon }) => {
+export const SetupGuideLayout: React.FC<React.PropsWithChildren<Props>> = ({
+  children,
+  productName,
+  productEuiIcon,
+}) => {
   const { cloud } = useValues(KibanaLogic);
   const isCloudEnabled = Boolean(cloud.isCloudEnabled);
   const cloudDeploymentLink = cloud.deploymentUrl || '';

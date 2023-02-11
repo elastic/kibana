@@ -24,7 +24,11 @@ export interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const WorkpadApp: FC<React.PropsWithChildren<Props>> = ({ deselectElement, isWriteable, workpad }) => {
+export const WorkpadApp: FC<React.PropsWithChildren<Props>> = ({
+  deselectElement,
+  isWriteable,
+  workpad,
+}) => {
   const interactivePageLayout = useRef<CommitFn | null>(null); // future versions may enable editing on multiple pages => use array then
   const workpadTitle = useRef<HTMLHeadingElement>(null); // future versions may enable editing on multiple pages => use array then
 

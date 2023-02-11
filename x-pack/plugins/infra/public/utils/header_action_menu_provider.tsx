@@ -15,11 +15,9 @@ interface ContextProps {
 
 export const HeaderActionMenuContext = React.createContext<ContextProps>({});
 
-export const HeaderActionMenuProvider: React.FC<React.PropsWithChildren<Required<ContextProps>>> = ({
-  setHeaderActionMenu,
-  theme$,
-  children,
-}) => {
+export const HeaderActionMenuProvider: React.FC<
+  React.PropsWithChildren<Required<ContextProps>>
+> = ({ setHeaderActionMenu, theme$, children }) => {
   return (
     <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu, theme$ }}>
       {children}

@@ -34,7 +34,12 @@ const dateDisplay = (date: string) =>
     ? moment(date).fromNow()
     : moment(date).format('MMMM D, YYYY');
 
-export const GroupRow: React.FC<React.PropsWithChildren<Group>> = ({ id, name, updatedAt, contentSources }) => {
+export const GroupRow: React.FC<React.PropsWithChildren<Group>> = ({
+  id,
+  name,
+  updatedAt,
+  contentSources,
+}) => {
   const GROUP_UPDATED_TEXT = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.groups.groupUpdatedText',
     {

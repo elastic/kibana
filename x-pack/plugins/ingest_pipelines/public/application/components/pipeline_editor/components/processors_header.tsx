@@ -19,7 +19,10 @@ export interface Props {
   hasProcessors: boolean;
 }
 
-export const ProcessorsHeader: FunctionComponent<React.PropsWithChildren<Props>> = ({ onLoadJson, hasProcessors }) => {
+export const ProcessorsHeader: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  onLoadJson,
+  hasProcessors,
+}) => {
   const { services } = useKibana();
 
   const ProcessorTitle: FunctionComponent<React.PropsWithChildren<unknown>> = () => (

@@ -45,7 +45,9 @@ export interface Props {
   timelineId: TimelineId;
 }
 
-const TimelineSavingProgressComponent: React.FC<React.PropsWithChildren<{ timelineId: TimelineId }>> = ({ timelineId }) => {
+const TimelineSavingProgressComponent: React.FC<
+  React.PropsWithChildren<{ timelineId: TimelineId }>
+> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const isSaving = useShallowEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isSaving

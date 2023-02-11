@@ -19,7 +19,11 @@ export interface CallOutSwitcherProps {
   message: CallOutMessage;
 }
 
-const CallOutSwitcherComponent: FC<React.PropsWithChildren<CallOutSwitcherProps>> = ({ namespace, condition, message }) => {
+const CallOutSwitcherComponent: FC<React.PropsWithChildren<CallOutSwitcherProps>> = ({
+  namespace,
+  condition,
+  message,
+}) => {
   const { isVisible, dismiss } = useCallOutStorage([message], namespace);
 
   const shouldRender = condition && isVisible(message);

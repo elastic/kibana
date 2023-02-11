@@ -29,16 +29,18 @@ import type { PackagePolicyValidationResults } from '../../services';
 
 import { PackagePolicyInputPanel } from './components';
 
-export const StepConfigurePackagePolicy: React.FunctionComponent<React.PropsWithChildren<{
-  packageInfo: PackageInfo;
-  showOnlyIntegration?: string;
-  packagePolicy: NewPackagePolicy;
-  updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
-  validationResults: PackagePolicyValidationResults;
-  submitAttempted: boolean;
-  noTopRule?: boolean;
-  isEditPage?: boolean;
-}>> = ({
+export const StepConfigurePackagePolicy: React.FunctionComponent<
+  React.PropsWithChildren<{
+    packageInfo: PackageInfo;
+    showOnlyIntegration?: string;
+    packagePolicy: NewPackagePolicy;
+    updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
+    validationResults: PackagePolicyValidationResults;
+    submitAttempted: boolean;
+    noTopRule?: boolean;
+    isEditPage?: boolean;
+  }>
+> = ({
   packageInfo,
   showOnlyIntegration,
   packagePolicy,

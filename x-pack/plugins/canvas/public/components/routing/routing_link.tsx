@@ -58,7 +58,10 @@ export const RoutingLink: FC<React.PropsWithChildren<RoutingLinkProps>> = ({ to,
 
 type RoutingButtonIconProps = Omit<EuiButtonIconProps, 'href' | 'onClick'> & RoutingProps;
 
-export const RoutingButtonIcon: FC<React.PropsWithChildren<RoutingButtonIconProps>> = ({ to, ...rest }) => {
+export const RoutingButtonIcon: FC<React.PropsWithChildren<RoutingButtonIconProps>> = ({
+  to,
+  ...rest
+}) => {
   const history = useHistory();
 
   const onClick = useCallback(

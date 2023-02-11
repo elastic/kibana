@@ -40,7 +40,10 @@ interface Props {
   onEdit: (event: MouseEvent) => void;
 }
 
-export const ElementControls: FunctionComponent<React.PropsWithChildren<Props>> = ({ onDelete, onEdit }) => (
+export const ElementControls: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  onDelete,
+  onEdit,
+}) => (
   <EuiFlexGroup
     className="canvasElementCard__controls"
     gutterSize="xs"

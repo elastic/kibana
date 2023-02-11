@@ -8,10 +8,12 @@
 import React, { FunctionComponent, ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-export const TimelinePhaseText: FunctionComponent<React.PropsWithChildren<{
-  phaseName: ReactNode | string;
-  durationInPhase?: ReactNode | string;
-}>> = ({ phaseName, durationInPhase }) => (
+export const TimelinePhaseText: FunctionComponent<
+  React.PropsWithChildren<{
+    phaseName: ReactNode | string;
+    durationInPhase?: ReactNode | string;
+  }>
+> = ({ phaseName, durationInPhase }) => (
   <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
     <EuiFlexItem grow={false}>
       <EuiText size="s">

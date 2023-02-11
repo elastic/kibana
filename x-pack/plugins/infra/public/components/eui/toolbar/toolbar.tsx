@@ -13,12 +13,13 @@ import { euiStyled, EuiTheme } from '@kbn/kibana-react-plugin/common';
 // The return type of this component needs to be specified because the inferred
 // return type depends on types that are not exported from EUI. You get a TS4023
 // error if the return type is not specified.
-export const Toolbar: StyledComponent<FunctionComponent<React.PropsWithChildren<unknown>>, EuiTheme> = euiStyled(EuiPanel).attrs(
-  () => ({
-    grow: false,
-    paddingSize: 'none',
-  })
-)`
+export const Toolbar: StyledComponent<
+  FunctionComponent<React.PropsWithChildren<unknown>>,
+  EuiTheme
+> = euiStyled(EuiPanel).attrs(() => ({
+  grow: false,
+  paddingSize: 'none',
+}))`
   border-top: none;
   border-right: none;
   border-left: none;

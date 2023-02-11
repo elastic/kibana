@@ -11,11 +11,13 @@ import React from 'react';
 
 import { RecreateJobCallout } from './recreate_job_callout';
 
-export const JobConfigurationOutdatedCallout: React.FC<React.PropsWithChildren<{
-  hasSetupCapabilities: boolean;
-  moduleName: string;
-  onRecreateMlJob: () => void;
-}>> = ({ hasSetupCapabilities, moduleName, onRecreateMlJob }) => (
+export const JobConfigurationOutdatedCallout: React.FC<
+  React.PropsWithChildren<{
+    hasSetupCapabilities: boolean;
+    moduleName: string;
+    onRecreateMlJob: () => void;
+  }>
+> = ({ hasSetupCapabilities, moduleName, onRecreateMlJob }) => (
   <RecreateJobCallout
     hasSetupCapabilities={hasSetupCapabilities}
     title={i18n.translate('xpack.infra.logs.analysis.jobConfigurationOutdatedCalloutTitle', {

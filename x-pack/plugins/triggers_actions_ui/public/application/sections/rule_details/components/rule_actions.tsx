@@ -61,7 +61,9 @@ export function RuleActions({
     const actionGroup = actionTypeRegistry.list().find((group) => group.id === actionGroupId);
     return typeof actionGroup?.iconClass === 'string'
       ? actionGroup?.iconClass
-      : suspendedComponentWithProps(actionGroup?.iconClass as React.ComponentType<React.PropsWithChildren<unknown>>);
+      : suspendedComponentWithProps(
+          actionGroup?.iconClass as React.ComponentType<React.PropsWithChildren<unknown>>
+        );
   };
 
   const getActionName = (actionTypeId?: string) => {

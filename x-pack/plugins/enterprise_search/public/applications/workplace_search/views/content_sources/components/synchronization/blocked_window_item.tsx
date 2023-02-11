@@ -99,7 +99,10 @@ const daySelectOptions = DAYS_OF_WEEK_VALUES.map((day) => ({
 })) as EuiSelectOption[];
 daySelectOptions.push({ text: ALL_DAYS_LABEL, value: 'all' });
 
-export const BlockedWindowItem: React.FC<React.PropsWithChildren<Props>> = ({ blockedWindow, index }) => {
+export const BlockedWindowItem: React.FC<React.PropsWithChildren<Props>> = ({
+  blockedWindow,
+  index,
+}) => {
   const { contentSource } = useValues(SourceLogic);
   const { removeBlockedWindow, setBlockedTimeWindow } = useActions(
     SynchronizationLogic({ contentSource })

@@ -21,7 +21,9 @@ interface Props {
   indexInvalidValues: UnallowedValueCount[];
 }
 
-const IndexInvalidValuesComponent: React.FC<React.PropsWithChildren<Props>> = ({ indexInvalidValues }) =>
+const IndexInvalidValuesComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  indexInvalidValues,
+}) =>
   indexInvalidValues.length === 0 ? (
     <EuiCode>{EMPTY_PLACEHOLDER}</EuiCode>
   ) : (

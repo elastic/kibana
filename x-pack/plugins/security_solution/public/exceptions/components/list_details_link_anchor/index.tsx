@@ -20,7 +20,11 @@ interface LinkAnchorProps {
 // This component should be removed and moved to @kbn/securitysolution-exception-list-components
 // once all the building components get moved
 
-const LinkAnchor: FC<React.PropsWithChildren<LinkAnchorProps>> = ({ referenceName, referenceId, external }) => {
+const LinkAnchor: FC<React.PropsWithChildren<LinkAnchorProps>> = ({
+  referenceName,
+  referenceId,
+  external,
+}) => {
   return (
     <SecuritySolutionLinkAnchor
       data-test-subj="SecuritySolutionLinkAnchor"

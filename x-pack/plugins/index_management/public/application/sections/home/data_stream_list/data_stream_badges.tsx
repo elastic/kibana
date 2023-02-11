@@ -15,7 +15,9 @@ interface Props {
   dataStream: DataStream;
 }
 
-export const DataStreamsBadges: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ dataStream }) => {
+export const DataStreamsBadges: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  dataStream,
+}) => {
   const badges = [];
   if (isFleetManaged(dataStream)) {
     badges.push(

@@ -9,9 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTextAlign } 
 import React from 'react';
 import * as i18n from './translations';
 
-const NoSelectedAssigneesComponent: React.FC<React.PropsWithChildren<{ totalSelectedCases: number }>> = ({
-  totalSelectedCases,
-}) => {
+const NoSelectedAssigneesComponent: React.FC<
+  React.PropsWithChildren<{ totalSelectedCases: number }>
+> = ({ totalSelectedCases }) => {
   return (
     <EuiFlexGroup
       alignItems="center"

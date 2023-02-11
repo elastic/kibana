@@ -34,7 +34,9 @@ const StyledEuiTitle = styled(EuiTitle)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
-export const LandingLinksIcons: React.FC<React.PropsWithChildren<LandingLinksImagesProps>> = ({ items }) => (
+export const LandingLinksIcons: React.FC<React.PropsWithChildren<LandingLinksImagesProps>> = ({
+  items,
+}) => (
   <EuiFlexGrid columns={3} gutterSize="xl">
     {items.map(({ title, description, id, icon, isBeta, betaOptions }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">

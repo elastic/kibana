@@ -19,10 +19,9 @@ interface RuleLastRunOutcomeFilterProps {
   onChange?: (selectedRuleOutcomeIds: string[]) => void;
 }
 
-export const RuleLastRunOutcomeFilter: React.FunctionComponent<React.PropsWithChildren<RuleLastRunOutcomeFilterProps>> = ({
-  selectedOutcomes,
-  onChange,
-}: RuleLastRunOutcomeFilterProps) => {
+export const RuleLastRunOutcomeFilter: React.FunctionComponent<
+  React.PropsWithChildren<RuleLastRunOutcomeFilterProps>
+> = ({ selectedOutcomes, onChange }: RuleLastRunOutcomeFilterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const onTogglePopover = useCallback(() => {

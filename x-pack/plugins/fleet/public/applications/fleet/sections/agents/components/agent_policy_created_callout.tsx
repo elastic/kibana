@@ -24,7 +24,9 @@ interface Props {
   createState: AgentPolicyCreateState;
 }
 
-export const AgentPolicyCreatedCallOut: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ createState }) => {
+export const AgentPolicyCreatedCallOut: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  createState,
+}) => {
   return (
     <>
       <EuiSpacer size="m" />

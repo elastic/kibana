@@ -29,10 +29,9 @@ import { StepProps } from '.';
 import { CollapsibleIndicesList } from '../../collapsible_lists';
 import { PolicyFeatureStatesSummary } from '../../summaries';
 
-export const RestoreSnapshotStepReview: React.FunctionComponent<React.PropsWithChildren<StepProps>> = ({
-  restoreSettings,
-  updateCurrentStep,
-}) => {
+export const RestoreSnapshotStepReview: React.FunctionComponent<
+  React.PropsWithChildren<StepProps>
+> = ({ restoreSettings, updateCurrentStep }) => {
   const { i18n } = useServices();
   const {
     indices: restoreIndices,

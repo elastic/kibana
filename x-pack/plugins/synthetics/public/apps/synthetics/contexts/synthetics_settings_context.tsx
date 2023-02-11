@@ -75,10 +75,9 @@ const defaultContext: SyntheticsSettingsContextValues = {
 };
 export const SyntheticsSettingsContext = createContext(defaultContext);
 
-export const SyntheticsSettingsContextProvider: React.FC<React.PropsWithChildren<SyntheticsAppProps>> = ({
-  children,
-  ...props
-}) => {
+export const SyntheticsSettingsContextProvider: React.FC<
+  React.PropsWithChildren<SyntheticsAppProps>
+> = ({ children, ...props }) => {
   const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable, commonlyUsedRanges, isDev } =
     props;
 

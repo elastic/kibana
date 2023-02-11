@@ -17,7 +17,9 @@ export interface PipelineSelectOptionProps {
   pipeline: MLInferencePipelineOption;
 }
 
-export const PipelineSelectOption: React.FC<React.PropsWithChildren<PipelineSelectOptionProps>> = ({ pipeline }) => {
+export const PipelineSelectOption: React.FC<React.PropsWithChildren<PipelineSelectOptionProps>> = ({
+  pipeline,
+}) => {
   const modelIdDisplay = pipeline.modelId.length > 0 ? pipeline.modelId : MODEL_REDACTED_VALUE;
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">

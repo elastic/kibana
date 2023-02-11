@@ -15,7 +15,10 @@ import type { SecurityJob } from '../types';
 
 jest.mock('../../../lib/kibana');
 
-export async function getRenderedHref(Component: React.FC<React.PropsWithChildren<unknown>>, selector: string) {
+export async function getRenderedHref(
+  Component: React.FC<React.PropsWithChildren<unknown>>,
+  selector: string
+) {
   const el = render(<Component />);
 
   await waitFor(() => el.container.querySelector(selector));

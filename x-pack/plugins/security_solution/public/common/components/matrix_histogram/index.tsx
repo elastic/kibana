@@ -72,7 +72,9 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 
 const CHART_HEIGHT = '150px';
 
-export const MatrixHistogramComponent: React.FC<React.PropsWithChildren<MatrixHistogramComponentProps>> = ({
+export const MatrixHistogramComponent: React.FC<
+  React.PropsWithChildren<MatrixHistogramComponentProps>
+> = ({
   chartHeight,
   defaultStackByOption,
   endDate,

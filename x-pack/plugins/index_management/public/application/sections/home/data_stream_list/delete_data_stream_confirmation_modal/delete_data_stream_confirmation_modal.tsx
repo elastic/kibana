@@ -18,7 +18,9 @@ interface Props {
   onClose: (data?: { hasDeletedDataStreams: boolean }) => void;
 }
 
-export const DeleteDataStreamConfirmationModal: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+export const DeleteDataStreamConfirmationModal: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({
   dataStreams,
   onClose,
 }: {

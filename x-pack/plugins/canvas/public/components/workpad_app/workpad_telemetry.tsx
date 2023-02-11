@@ -62,7 +62,7 @@ export const withUnconnectedElementsLoadedTelemetry = <P extends {}>(
   Component: React.ComponentType<React.PropsWithChildren<P>>,
   trackMetric = trackCanvasUiMetric
 ) =>
-  (function ElementsLoadedTelemetry(props: P & ElementsLoadedTelemetryProps) {
+  function ElementsLoadedTelemetry(props: P & ElementsLoadedTelemetryProps) {
     const { workpad } = props;
 
     const [currentWorkpadId, setWorkpadId] = useState<string | undefined>(undefined);
@@ -97,7 +97,8 @@ export const withUnconnectedElementsLoadedTelemetry = <P extends {}>(
       }
     }, [currentWorkpadId, hasReported, error, workpad.id, resolved, workpad.pages]);
     return <Component {...props} />;
-  });
+  };
 
-export const withElementsLoadedTelemetry = <P extends {}>(Component: React.ComponentType<React.PropsWithChildren<P>>) =>
-  withUnconnectedElementsLoadedTelemetry(Component);
+export const withElementsLoadedTelemetry = <P extends {}>(
+  Component: React.ComponentType<React.PropsWithChildren<P>>
+) => withUnconnectedElementsLoadedTelemetry(Component);

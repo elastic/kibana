@@ -42,11 +42,9 @@ export interface FleetServerHostsFlyoutProps {
   proxies: FleetProxy[];
 }
 
-export const FleetServerHostsFlyout: React.FunctionComponent<React.PropsWithChildren<FleetServerHostsFlyoutProps>> = ({
-  onClose,
-  fleetServerHost,
-  proxies,
-}) => {
+export const FleetServerHostsFlyout: React.FunctionComponent<
+  React.PropsWithChildren<FleetServerHostsFlyoutProps>
+> = ({ onClose, fleetServerHost, proxies }) => {
   const { docLinks } = useStartServices();
 
   const form = useFleetServerHostsForm(fleetServerHost, onClose);

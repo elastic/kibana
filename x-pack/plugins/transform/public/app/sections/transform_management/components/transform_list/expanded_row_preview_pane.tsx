@@ -25,7 +25,9 @@ interface ExpandedRowPreviewPaneProps {
   transformConfig: TransformConfigUnion;
 }
 
-export const ExpandedRowPreviewPane: FC<React.PropsWithChildren<ExpandedRowPreviewPaneProps>> = ({ transformConfig }) => {
+export const ExpandedRowPreviewPane: FC<React.PropsWithChildren<ExpandedRowPreviewPaneProps>> = ({
+  transformConfig,
+}) => {
   const {
     ml: { DataGrid },
   } = useAppDependencies();

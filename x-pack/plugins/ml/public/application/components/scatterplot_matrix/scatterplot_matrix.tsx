@@ -69,7 +69,10 @@ interface OptionLabelWithIconTipProps {
   tooltip: string;
 }
 
-const OptionLabelWithIconTip: FC<React.PropsWithChildren<OptionLabelWithIconTipProps>> = ({ label, tooltip }) => (
+const OptionLabelWithIconTip: FC<React.PropsWithChildren<OptionLabelWithIconTipProps>> = ({
+  label,
+  tooltip,
+}) => (
   <>
     {label}
     <EuiIconTip

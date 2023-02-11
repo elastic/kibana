@@ -29,12 +29,9 @@ export interface AssigneesFilterPopoverProps {
   onSelectionChange: (users: AssigneesFilteringSelection[]) => void;
 }
 
-const AssigneesFilterPopoverComponent: React.FC<React.PropsWithChildren<AssigneesFilterPopoverProps>> = ({
-  selectedAssignees,
-  currentUserProfile,
-  isLoading,
-  onSelectionChange,
-}) => {
+const AssigneesFilterPopoverComponent: React.FC<
+  React.PropsWithChildren<AssigneesFilterPopoverProps>
+> = ({ selectedAssignees, currentUserProfile, isLoading, onSelectionChange }) => {
   const { owner: owners } = useCasesContext();
   const hasOwners = owners.length > 0;
   const availableOwners = useAvailableCasesOwners(['read']);

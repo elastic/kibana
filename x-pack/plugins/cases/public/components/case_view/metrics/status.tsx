@@ -156,10 +156,12 @@ const Title = euiStyled(EuiFlexItem)`
   font-weight: bold;
 `;
 
-const CaseStatusMetricsItem: React.FC<React.PropsWithChildren<{
-  title: string;
-  value: JSX.Element | string;
-}>> = React.memo(({ title, value }) => (
+const CaseStatusMetricsItem: React.FC<
+  React.PropsWithChildren<{
+    title: string;
+    value: JSX.Element | string;
+  }>
+> = React.memo(({ title, value }) => (
   <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
     <Title>{title}</Title>
     <EuiFlexItem>{value}</EuiFlexItem>
@@ -167,11 +169,13 @@ const CaseStatusMetricsItem: React.FC<React.PropsWithChildren<{
 ));
 CaseStatusMetricsItem.displayName = 'CaseStatusMetricsItem';
 
-const CaseStatusMetricsOpenCloseDuration: React.FC<React.PropsWithChildren<{
-  title: string;
-  value?: string;
-  reopens: string[];
-}>> = React.memo(({ title, value, reopens }) => {
+const CaseStatusMetricsOpenCloseDuration: React.FC<
+  React.PropsWithChildren<{
+    title: string;
+    value?: string;
+    reopens: string[];
+  }>
+> = React.memo(({ title, value, reopens }) => {
   const valueText = getOpenCloseDurationText(value, reopens);
 
   return (
@@ -201,10 +205,12 @@ const caseWasReopened = (reopens: string[]) => {
   return reopens.length > 0;
 };
 
-const ValueWithExplanationIcon: React.FC<React.PropsWithChildren<{
-  value: string | JSX.Element;
-  explanationValues: string[];
-}>> = React.memo(({ value, explanationValues }) => {
+const ValueWithExplanationIcon: React.FC<
+  React.PropsWithChildren<{
+    value: string | JSX.Element;
+    explanationValues: string[];
+  }>
+> = React.memo(({ value, explanationValues }) => {
   const content = (
     <>
       {CASE_REOPENED_ON}

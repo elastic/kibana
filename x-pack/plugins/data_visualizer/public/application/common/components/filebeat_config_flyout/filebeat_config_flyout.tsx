@@ -101,11 +101,13 @@ export const FilebeatConfigFlyout: FC<React.PropsWithChildren<Props>> = ({
   );
 };
 
-const Contents: FC<React.PropsWithChildren<{
-  value: string;
-  index: string;
-  username: string | null;
-}>> = ({ value, index, username }) => {
+const Contents: FC<
+  React.PropsWithChildren<{
+    value: string;
+    index: string;
+    username: string | null;
+  }>
+> = ({ value, index, username }) => {
   return (
     <EuiFlexItem data-test-subj="fileDataVisFilebeatConfigPanel">
       <EuiTitle size="s">

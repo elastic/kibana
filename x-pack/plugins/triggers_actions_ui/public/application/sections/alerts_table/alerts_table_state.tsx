@@ -77,10 +77,12 @@ const EmptyConfiguration: AlertsTableConfigurationRegistry = {
   getRenderCellValue: () => () => null,
 };
 
-const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<React.PropsWithChildren<{
-  tableProps: AlertsTableProps;
-  initialBulkActionsState: [BulkActionsState, React.Dispatch<BulkActionsReducerAction>];
-}>> = ({ tableProps, initialBulkActionsState }) => (
+const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<
+  React.PropsWithChildren<{
+    tableProps: AlertsTableProps;
+    initialBulkActionsState: [BulkActionsState, React.Dispatch<BulkActionsReducerAction>];
+  }>
+> = ({ tableProps, initialBulkActionsState }) => (
   <BulkActionsContext.Provider value={initialBulkActionsState}>
     <AlertsTable {...tableProps} />
   </BulkActionsContext.Provider>

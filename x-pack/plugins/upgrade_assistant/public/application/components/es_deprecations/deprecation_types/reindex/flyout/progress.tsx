@@ -24,9 +24,9 @@ import type { ReindexState } from '../use_reindex_state';
 import { StepProgress, StepProgressStep } from './step_progress';
 import { getReindexProgressLabel } from '../../../../../lib/utils';
 
-const ErrorCallout: React.FunctionComponent<React.PropsWithChildren<{ errorMessage: string | null }>> = ({
-  errorMessage,
-}) => (
+const ErrorCallout: React.FunctionComponent<
+  React.PropsWithChildren<{ errorMessage: string | null }>
+> = ({ errorMessage }) => (
   <EuiCallOut color="danger" title="There was an error">
     <EuiText>
       <p>{errorMessage}</p>
@@ -41,10 +41,12 @@ const PausedCallout = () => (
   />
 );
 
-const ReindexingDocumentsStepTitle: React.FunctionComponent<React.PropsWithChildren<{
-  reindexState: ReindexState;
-  cancelReindex: () => void;
-}>> = ({ reindexState: { lastCompletedStep, status, cancelLoadingState }, cancelReindex }) => {
+const ReindexingDocumentsStepTitle: React.FunctionComponent<
+  React.PropsWithChildren<{
+    reindexState: ReindexState;
+    cancelReindex: () => void;
+  }>
+> = ({ reindexState: { lastCompletedStep, status, cancelLoadingState }, cancelReindex }) => {
   if (status === ReindexStatus.cancelled) {
     return (
       <>

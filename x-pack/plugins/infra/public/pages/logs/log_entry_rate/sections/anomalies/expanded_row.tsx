@@ -24,10 +24,12 @@ const examplesTitle = i18n.translate('xpack.infra.logs.analysis.anomaliesTableEx
   defaultMessage: 'Example log entries',
 });
 
-export const AnomaliesTableExpandedRow: React.FunctionComponent<React.PropsWithChildren<{
-  anomaly: LogEntryAnomaly;
-  timeRange: TimeRange;
-}>> = ({ anomaly, timeRange }) => {
+export const AnomaliesTableExpandedRow: React.FunctionComponent<
+  React.PropsWithChildren<{
+    anomaly: LogEntryAnomaly;
+    timeRange: TimeRange;
+  }>
+> = ({ anomaly, timeRange }) => {
   const { logViewId } = useLogViewContext();
 
   const {

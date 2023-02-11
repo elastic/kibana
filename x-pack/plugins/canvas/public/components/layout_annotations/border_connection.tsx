@@ -16,7 +16,11 @@ interface Props {
   width: number;
 }
 
-export const BorderConnection: FC<React.PropsWithChildren<Props>> = ({ transformMatrix, width, height }) => (
+export const BorderConnection: FC<React.PropsWithChildren<Props>> = ({
+  transformMatrix,
+  width,
+  height,
+}) => (
   <div
     className="canvasBorderConnection canvasLayoutAnnotation"
     style={{

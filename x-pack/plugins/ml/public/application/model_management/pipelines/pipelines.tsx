@@ -27,7 +27,10 @@ interface ModelPipelinesProps {
   ingestStats: IngestStatsResponse;
 }
 
-export const ModelPipelines: FC<React.PropsWithChildren<ModelPipelinesProps>> = ({ pipelines, ingestStats }) => {
+export const ModelPipelines: FC<React.PropsWithChildren<ModelPipelinesProps>> = ({
+  pipelines,
+  ingestStats,
+}) => {
   const {
     services: { share },
   } = useMlKibana();

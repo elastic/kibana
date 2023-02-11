@@ -30,7 +30,9 @@ import { Legacy } from '../../legacy_shims';
 interface AddLicenseProps {
   uploadPath?: string;
 }
-const AddLicense: FunctionComponent<React.PropsWithChildren<AddLicenseProps>> = ({ uploadPath }) => {
+const AddLicense: FunctionComponent<React.PropsWithChildren<AddLicenseProps>> = ({
+  uploadPath,
+}) => {
   return (
     <EuiCard
       title={
@@ -148,10 +150,9 @@ export interface LicenseUpdateInfoProps {
   uploadLicensePath?: string;
 }
 
-const LicenseUpdateInfoForPrimary: FunctionComponent<React.PropsWithChildren<LicenseUpdateInfoProps>> = ({
-  isPrimaryCluster,
-  uploadLicensePath,
-}) => {
+const LicenseUpdateInfoForPrimary: FunctionComponent<
+  React.PropsWithChildren<LicenseUpdateInfoProps>
+> = ({ isPrimaryCluster, uploadLicensePath }) => {
   if (!isPrimaryCluster) {
     return null;
   }
@@ -160,9 +161,9 @@ const LicenseUpdateInfoForPrimary: FunctionComponent<React.PropsWithChildren<Lic
   return <AddLicense uploadPath={uploadLicensePath} />;
 };
 
-const LicenseUpdateInfoForRemote: FunctionComponent<React.PropsWithChildren<LicenseUpdateInfoProps>> = ({
-  isPrimaryCluster,
-}) => {
+const LicenseUpdateInfoForRemote: FunctionComponent<
+  React.PropsWithChildren<LicenseUpdateInfoProps>
+> = ({ isPrimaryCluster }) => {
   if (isPrimaryCluster) {
     return null;
   }

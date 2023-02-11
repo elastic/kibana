@@ -35,9 +35,11 @@ const FlyoutBody = styled(EuiFlyoutBody)`
   }
 `;
 
-export const UpgradeStatusCallout: React.FunctionComponent<React.PropsWithChildren<{
-  dryRunData: UpgradePackagePolicyDryRunResponse;
-}>> = ({ dryRunData }) => {
+export const UpgradeStatusCallout: React.FunctionComponent<
+  React.PropsWithChildren<{
+    dryRunData: UpgradePackagePolicyDryRunResponse;
+  }>
+> = ({ dryRunData }) => {
   const [isPreviousVersionFlyoutOpen, setIsPreviousVersionFlyoutOpen] = useState<boolean>(false);
 
   if (!dryRunData) {

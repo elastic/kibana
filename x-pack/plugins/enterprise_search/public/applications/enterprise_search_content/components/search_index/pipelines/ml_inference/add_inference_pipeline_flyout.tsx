@@ -137,7 +137,9 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
   );
 };
 
-export const AddInferencePipelineHorizontalSteps: React.FC<React.PropsWithChildren<unknown>> = () => {
+export const AddInferencePipelineHorizontalSteps: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const {
     addInferencePipelineModal: { step },
     isPipelineDataValid,
@@ -195,7 +197,9 @@ export const AddInferencePipelineHorizontalSteps: React.FC<React.PropsWithChildr
   return <EuiStepsHorizontal steps={navSteps} />;
 };
 
-export const AddInferencePipelineFooter: React.FC<React.PropsWithChildren<AddInferencePipelineFlyoutProps & { ingestionMethod: string }>> = ({ ingestionMethod, onClose }) => {
+export const AddInferencePipelineFooter: React.FC<
+  React.PropsWithChildren<AddInferencePipelineFlyoutProps & { ingestionMethod: string }>
+> = ({ ingestionMethod, onClose }) => {
   const { addInferencePipelineModal: modal, isPipelineDataValid } = useValues(MLInferenceLogic);
   const { attachPipeline, createPipeline, setAddInferencePipelineStep } =
     useActions(MLInferenceLogic);

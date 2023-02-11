@@ -48,11 +48,9 @@ function getExperimentalFeatureValue(
   )?.features?.[feature];
 }
 
-export const ExperimentDatastreamSettings: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
-  registryDataStream,
-  experimentalDataFeatures,
-  setNewExperimentalDataFeatures,
-}) => {
+export const ExperimentDatastreamSettings: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ registryDataStream, experimentalDataFeatures, setNewExperimentalDataFeatures }) => {
   const { docLinks } = useStartServices();
 
   const isSyntheticSourceEditable = registryDataStream.elasticsearch?.source_mode !== 'default';

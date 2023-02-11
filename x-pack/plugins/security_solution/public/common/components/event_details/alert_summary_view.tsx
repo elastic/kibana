@@ -14,16 +14,18 @@ import type { TimelineEventsDetailsItem } from '../../../../common/search_strate
 
 import { getSummaryRows } from './get_alert_summary_rows';
 
-const AlertSummaryViewComponent: React.FC<React.PropsWithChildren<{
-  browserFields: BrowserFields;
-  data: TimelineEventsDetailsItem[];
-  eventId: string;
-  isDraggable?: boolean;
-  scopeId: string;
-  title: string;
-  goToTable: () => void;
-  isReadOnly?: boolean;
-}>> = ({ browserFields, data, eventId, isDraggable, scopeId, title, goToTable, isReadOnly }) => {
+const AlertSummaryViewComponent: React.FC<
+  React.PropsWithChildren<{
+    browserFields: BrowserFields;
+    data: TimelineEventsDetailsItem[];
+    eventId: string;
+    isDraggable?: boolean;
+    scopeId: string;
+    title: string;
+    goToTable: () => void;
+    isReadOnly?: boolean;
+  }>
+> = ({ browserFields, data, eventId, isDraggable, scopeId, title, goToTable, isReadOnly }) => {
   const summaryRows = useMemo(
     () => getSummaryRows({ browserFields, data, eventId, isDraggable, scopeId, isReadOnly }),
     [browserFields, data, eventId, isDraggable, scopeId, isReadOnly]

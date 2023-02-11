@@ -45,10 +45,9 @@ interface SelectedOption {
   };
 }
 
-const SavedQueriesDropdownComponent: React.FC<React.PropsWithChildren<SavedQueriesDropdownProps>> = ({
-  disabled,
-  onChange,
-}) => {
+const SavedQueriesDropdownComponent: React.FC<
+  React.PropsWithChildren<SavedQueriesDropdownProps>
+> = ({ disabled, onChange }) => {
   const savedQueryId = useWatch({ name: 'savedQueryId' });
   const context = useFormContext();
   const { errors } = context.formState;

@@ -200,7 +200,9 @@ const AssigneesFieldComponent: React.FC<React.PropsWithChildren<FieldProps>> = R
 
 AssigneesFieldComponent.displayName = 'AssigneesFieldComponent';
 
-const AssigneesComponent: React.FC<React.PropsWithChildren<Props>> = ({ isLoading: isLoadingForm }) => {
+const AssigneesComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  isLoading: isLoadingForm,
+}) => {
   const { owner: owners } = useCasesContext();
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
   const [searchTerm, setSearchTerm] = useState('');

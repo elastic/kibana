@@ -27,7 +27,11 @@ interface Props {
 }
 type Columns = Array<EuiBasicTableColumn<Query>>;
 
-export const AnalyticsTable: React.FC<React.PropsWithChildren<Props>> = ({ items, hasClicks, isSmall }) => {
+export const AnalyticsTable: React.FC<React.PropsWithChildren<Props>> = ({
+  items,
+  hasClicks,
+  isSmall,
+}) => {
   const TERM_COLUMN = {
     field: 'key',
     ...TERM_COLUMN_PROPS,

@@ -19,7 +19,9 @@ import { MAX_NESTING_SUB_AGGS } from '../../../../common/pivot_aggs';
  * Component for managing sub-aggregation of the provided
  * aggregation item.
  */
-export const SubAggsSection: FC<React.PropsWithChildren<{ item: PivotAggsConfig }>> = ({ item }) => {
+export const SubAggsSection: FC<React.PropsWithChildren<{ item: PivotAggsConfig }>> = ({
+  item,
+}) => {
   const { state, actions } = useContext(PivotConfigurationContext)!;
 
   const addSubAggHandler = useCallback(

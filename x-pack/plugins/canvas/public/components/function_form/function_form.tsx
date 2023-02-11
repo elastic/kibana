@@ -25,7 +25,9 @@ function is(
   return expressionType && expressionType.requiresContext && matchState;
 }
 
-export const FunctionForm: React.FunctionComponent<React.PropsWithChildren<FunctionFormProps>> = (props) => {
+export const FunctionForm: React.FunctionComponent<React.PropsWithChildren<FunctionFormProps>> = (
+  props
+) => {
   const { expressionType, context } = props;
 
   if (!expressionType) {

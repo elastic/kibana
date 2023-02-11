@@ -14,7 +14,9 @@ import { MAX_SPACE_INITIALS } from '../../common';
 import { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_attributes';
 import type { SpaceAvatarProps } from './types';
 
-export const SpaceAvatarInternal: FC<React.PropsWithChildren<SpaceAvatarProps>> = (props: SpaceAvatarProps) => {
+export const SpaceAvatarInternal: FC<React.PropsWithChildren<SpaceAvatarProps>> = (
+  props: SpaceAvatarProps
+) => {
   const { space, size, announceSpaceName, ...rest } = props;
 
   const spaceName = space.name ? space.name.trim() : '';

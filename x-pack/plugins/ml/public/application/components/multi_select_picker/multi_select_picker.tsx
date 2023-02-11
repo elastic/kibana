@@ -41,13 +41,15 @@ const NoFilterItems = () => {
   );
 };
 
-export const MultiSelectPicker: FC<React.PropsWithChildren<{
-  options: Option[];
-  onChange?: (items: string[]) => void;
-  title?: string;
-  checkedOptions: string[];
-  dataTestSubj: string;
-}>> = ({ options, onChange, title, checkedOptions, dataTestSubj }) => {
+export const MultiSelectPicker: FC<
+  React.PropsWithChildren<{
+    options: Option[];
+    onChange?: (items: string[]) => void;
+    title?: string;
+    checkedOptions: string[];
+    dataTestSubj: string;
+  }>
+> = ({ options, onChange, title, checkedOptions, dataTestSubj }) => {
   const [items, setItems] = useState<Option[]>(options);
   const [searchTerm, setSearchTerm] = useState<string>('');
 

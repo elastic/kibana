@@ -14,7 +14,10 @@ export interface Props {
   argValue: boolean;
 }
 
-export const SimpleTemplate: FunctionComponent<React.PropsWithChildren<Props>> = ({ onValueChange, argValue }) => {
+export const SimpleTemplate: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  onValueChange,
+  argValue,
+}) => {
   return (
     <EuiSwitch
       compressed

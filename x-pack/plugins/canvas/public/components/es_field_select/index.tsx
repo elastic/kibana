@@ -11,7 +11,9 @@ import { ESFieldSelect as Component, ESFieldSelectProps as Props } from './es_fi
 
 type ESFieldSelectProps = Omit<Props, 'fields'>;
 
-export const ESFieldSelect: React.FunctionComponent<React.PropsWithChildren<ESFieldSelectProps>> = (props) => {
+export const ESFieldSelect: React.FunctionComponent<React.PropsWithChildren<ESFieldSelectProps>> = (
+  props
+) => {
   const { index, value, onChange } = props;
   const [fields, setFields] = useState<string[]>([]);
   const loadingFields = useRef(false);

@@ -225,23 +225,17 @@ const CenteredLearnMoreLink = () => {
   );
 };
 
-export const AddFirstIntegrationSplashScreen: React.FC<React.PropsWithChildren<{
-  integrationInfo?: RegistryPolicyTemplate;
-  error?: RequestError | null;
-  packageInfo?: PackageInfo;
-  isLoading: boolean;
-  cancelClickHandler?: React.ReactEventHandler;
-  cancelUrl: string;
-  onNext: () => void;
-}>> = ({
-  integrationInfo,
-  packageInfo,
-  isLoading,
-  error,
-  cancelUrl,
-  cancelClickHandler,
-  onNext,
-}) => {
+export const AddFirstIntegrationSplashScreen: React.FC<
+  React.PropsWithChildren<{
+    integrationInfo?: RegistryPolicyTemplate;
+    error?: RequestError | null;
+    packageInfo?: PackageInfo;
+    isLoading: boolean;
+    cancelClickHandler?: React.ReactEventHandler;
+    cancelUrl: string;
+    onNext: () => void;
+  }>
+> = ({ integrationInfo, packageInfo, isLoading, error, cancelUrl, cancelClickHandler, onNext }) => {
   if (error) {
     return (
       <Error

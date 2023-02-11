@@ -36,10 +36,9 @@ const FlexGroupWithMinWidth = styled(EuiFlexGroup)`
   min-width: 0px;
 `;
 
-export const FleetServerHostsTable: React.FunctionComponent<React.PropsWithChildren<FleetServerHostsTableProps>> = ({
-  fleetServerHosts,
-  deleteFleetServerHost,
-}) => {
+export const FleetServerHostsTable: React.FunctionComponent<
+  React.PropsWithChildren<FleetServerHostsTableProps>
+> = ({ fleetServerHosts, deleteFleetServerHost }) => {
   const { getHref } = useLink();
 
   const columns = useMemo((): Array<EuiBasicTableColumn<FleetServerHost>> => {

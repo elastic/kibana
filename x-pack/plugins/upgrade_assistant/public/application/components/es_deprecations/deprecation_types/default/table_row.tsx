@@ -20,7 +20,10 @@ interface Props {
   deprecation: EnrichedDeprecationInfo;
 }
 
-export const DefaultTableRow: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ rowFieldNames, deprecation }) => {
+export const DefaultTableRow: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  rowFieldNames,
+  deprecation,
+}) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =

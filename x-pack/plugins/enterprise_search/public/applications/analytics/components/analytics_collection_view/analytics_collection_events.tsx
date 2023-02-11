@@ -30,9 +30,9 @@ interface AnalyticsCollectionEventsProps {
 
 const EVENTS_POLLING_INTERVAL = 30 * 1000;
 
-export const AnalyticsCollectionEvents: React.FC<React.PropsWithChildren<AnalyticsCollectionEventsProps>> = ({
-  collection,
-}) => {
+export const AnalyticsCollectionEvents: React.FC<
+  React.PropsWithChildren<AnalyticsCollectionEventsProps>
+> = ({ collection }) => {
   const { analyticsEventsIndexExists } = useActions(AnalyticsEventsIndexExistsLogic);
   const { isLoading, isPresent } = useValues(AnalyticsEventsIndexExistsLogic);
   const { navigateToUrl } = useValues(KibanaLogic);

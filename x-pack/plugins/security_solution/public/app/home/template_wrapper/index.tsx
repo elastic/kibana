@@ -54,61 +54,62 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
   }
 `;
 
-export const SecuritySolutionTemplateWrapper: React.FC<React.PropsWithChildren<Omit<KibanaPageTemplateProps, 'ref'>>> =
-  React.memo(({ children, ...rest }) => {
-    const solutionNav = useSecuritySolutionNavigation();
-    const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
-    const [isTimelineBottomBarVisible] = useShowTimeline();
-    const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-    const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
-      getTimelineShowStatus(state, TimelineId.active)
-    );
-    const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
-    const addBottomPadding =
-      isTimelineBottomBarVisible || isPolicySettingsVisible || isGroupedNavEnabled;
+export const SecuritySolutionTemplateWrapper: React.FC<
+  React.PropsWithChildren<Omit<KibanaPageTemplateProps, 'ref'>>
+> = React.memo(({ children, ...rest }) => {
+  const solutionNav = useSecuritySolutionNavigation();
+  const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
+  const [isTimelineBottomBarVisible] = useShowTimeline();
+  const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
+  const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
+    getTimelineShowStatus(state, TimelineId.active)
+  );
+  const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
+  const addBottomPadding =
+    isTimelineBottomBarVisible || isPolicySettingsVisible || isGroupedNavEnabled;
 
-    // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
-    // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
-    const { colorMode: globalColorMode } = useEuiTheme();
+  // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
+  // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
+  const { colorMode: globalColorMode } = useEuiTheme();
 
-    const showEmptyState = useShowPagesWithEmptyView() || rest.isEmptyState;
+  const showEmptyState = useShowPagesWithEmptyView() || rest.isEmptyState;
 
-    /*
-     * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
-     * and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop,
-     * which may account for any style discrepancies, such as the bottom border not extending the full width of the page,
-     * between EuiPageTemplate and the security solution pages.
-     */
-    return (
-      <StyledKibanaPageTemplate
-        $addBottomPadding={addBottomPadding}
-        $isShowingTimelineOverlay={isShowingTimelineOverlay}
-        paddingSize="none"
-        solutionNav={solutionNav}
-        restrictWidth={showEmptyState ? NO_DATA_PAGE_MAX_WIDTH : false}
-        {...rest}
+  /*
+   * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
+   * and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop,
+   * which may account for any style discrepancies, such as the bottom border not extending the full width of the page,
+   * between EuiPageTemplate and the security solution pages.
+   */
+  return (
+    <StyledKibanaPageTemplate
+      $addBottomPadding={addBottomPadding}
+      $isShowingTimelineOverlay={isShowingTimelineOverlay}
+      paddingSize="none"
+      solutionNav={solutionNav}
+      restrictWidth={showEmptyState ? NO_DATA_PAGE_MAX_WIDTH : false}
+      {...rest}
+    >
+      <GlobalKQLHeader />
+
+      <KibanaPageTemplate.Section
+        className="securityPageWrapper"
+        data-test-subj="pageContainer"
+        paddingSize="l"
+        alignment={showEmptyState ? 'center' : 'top'}
+        component="div"
       >
-        <GlobalKQLHeader />
+        {children}
+      </KibanaPageTemplate.Section>
 
-        <KibanaPageTemplate.Section
-          className="securityPageWrapper"
-          data-test-subj="pageContainer"
-          paddingSize="l"
-          alignment={showEmptyState ? 'center' : 'top'}
-          component="div"
-        >
-          {children}
-        </KibanaPageTemplate.Section>
-
-        {isTimelineBottomBarVisible && (
-          <KibanaPageTemplate.BottomBar {...SecuritySolutionBottomBarProps}>
-            <EuiThemeProvider colorMode={globalColorMode}>
-              <SecuritySolutionBottomBar />
-            </EuiThemeProvider>
-          </KibanaPageTemplate.BottomBar>
-        )}
-      </StyledKibanaPageTemplate>
-    );
-  });
+      {isTimelineBottomBarVisible && (
+        <KibanaPageTemplate.BottomBar {...SecuritySolutionBottomBarProps}>
+          <EuiThemeProvider colorMode={globalColorMode}>
+            <SecuritySolutionBottomBar />
+          </EuiThemeProvider>
+        </KibanaPageTemplate.BottomBar>
+      )}
+    </StyledKibanaPageTemplate>
+  );
+});
 
 SecuritySolutionTemplateWrapper.displayName = 'SecuritySolutionTemplateWrapper';

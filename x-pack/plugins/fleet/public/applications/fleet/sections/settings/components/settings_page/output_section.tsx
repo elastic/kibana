@@ -18,10 +18,9 @@ export interface OutputSectionProps {
   deleteOutput: (output: Output) => void;
 }
 
-export const OutputSection: React.FunctionComponent<React.PropsWithChildren<OutputSectionProps>> = ({
-  outputs,
-  deleteOutput,
-}) => {
+export const OutputSection: React.FunctionComponent<
+  React.PropsWithChildren<OutputSectionProps>
+> = ({ outputs, deleteOutput }) => {
   const { getHref } = useLink();
 
   return (

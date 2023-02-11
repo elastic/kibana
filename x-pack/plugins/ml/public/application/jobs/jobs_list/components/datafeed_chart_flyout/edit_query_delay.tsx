@@ -29,11 +29,13 @@ const tooltipContent = i18n.translate(
   }
 );
 
-export const EditQueryDelay: FC<React.PropsWithChildren<{
-  datafeedId: Datafeed['datafeed_id'];
-  queryDelay: Datafeed['query_delay'];
-  isEnabled: boolean;
-}>> = ({ datafeedId, queryDelay, isEnabled }) => {
+export const EditQueryDelay: FC<
+  React.PropsWithChildren<{
+    datafeedId: Datafeed['datafeed_id'];
+    queryDelay: Datafeed['query_delay'];
+    isEnabled: boolean;
+  }>
+> = ({ datafeedId, queryDelay, isEnabled }) => {
   const [newQueryDelay, setNewQueryDelay] = useState<string | undefined>();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { updateDatafeed } = useMlApiContext();

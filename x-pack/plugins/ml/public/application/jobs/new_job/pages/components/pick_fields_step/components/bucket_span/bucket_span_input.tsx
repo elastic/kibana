@@ -16,7 +16,12 @@ interface Props {
   disabled: boolean;
 }
 
-export const BucketSpanInput: FC<React.PropsWithChildren<Props>> = ({ bucketSpan, setBucketSpan, isInvalid, disabled }) => {
+export const BucketSpanInput: FC<React.PropsWithChildren<Props>> = ({
+  bucketSpan,
+  setBucketSpan,
+  isInvalid,
+  disabled,
+}) => {
   return (
     <EuiFieldText
       disabled={disabled}

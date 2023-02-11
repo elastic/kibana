@@ -46,7 +46,10 @@ const authenticationButtons = [
   },
 ];
 
-const XmattersUrlField: React.FC<React.PropsWithChildren<{ path: string; readOnly: boolean }>> = ({ path, readOnly }) => {
+const XmattersUrlField: React.FC<React.PropsWithChildren<{ path: string; readOnly: boolean }>> = ({
+  path,
+  readOnly,
+}) => {
   return (
     <UseField
       path={path}
@@ -72,9 +75,9 @@ const XmattersUrlField: React.FC<React.PropsWithChildren<{ path: string; readOnl
   );
 };
 
-const XmattersActionConnectorFields: React.FunctionComponent<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({
-  readOnly,
-}) => {
+const XmattersActionConnectorFields: React.FunctionComponent<
+  React.PropsWithChildren<ActionConnectorFieldsProps>
+> = ({ readOnly }) => {
   const { setFieldValue, getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: ['config.usesBasic', '__internal__.auth'],

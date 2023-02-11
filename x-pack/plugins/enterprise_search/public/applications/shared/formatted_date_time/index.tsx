@@ -14,7 +14,10 @@ interface Props {
   hideTime?: boolean;
 }
 
-export const FormattedDateTime: React.FC<React.PropsWithChildren<Props>> = ({ date, hideTime = false }) => (
+export const FormattedDateTime: React.FC<React.PropsWithChildren<Props>> = ({
+  date,
+  hideTime = false,
+}) => (
   <>
     <FormattedDate value={date} year="numeric" month="short" day="numeric" />
     {!hideTime && (

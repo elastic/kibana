@@ -229,7 +229,11 @@ interface CustomConnectorSelectionItem {
   getText: (actionConnector: ActionConnector) => string;
   getComponent: (
     actionConnector: ActionConnector
-  ) => React.LazyExoticComponent<ComponentType<React.PropsWithChildren<{ actionConnector: ActionConnector }>>> | undefined;
+  ) =>
+    | React.LazyExoticComponent<
+        ComponentType<React.PropsWithChildren<{ actionConnector: ActionConnector }>>
+      >
+    | undefined;
 }
 
 export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
@@ -243,7 +247,9 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   actionConnectorFields: React.LazyExoticComponent<
     ComponentType<React.PropsWithChildren<ActionConnectorFieldsProps>>
   > | null;
-  actionParamsFields: React.LazyExoticComponent<ComponentType<React.PropsWithChildren<ActionParamsProps<ActionParams>>>>;
+  actionParamsFields: React.LazyExoticComponent<
+    ComponentType<React.PropsWithChildren<ActionParamsProps<ActionParams>>>
+  >;
   defaultActionParams?: RecursivePartial<ActionParams>;
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
@@ -376,7 +382,9 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   validate: (ruleParams: Params) => ValidationResult;
   ruleParamsExpression:
     | React.FunctionComponent<React.PropsWithChildren<any>>
-    | React.LazyExoticComponent<ComponentType<React.PropsWithChildren<RuleTypeParamsExpressionProps<Params>>>>;
+    | React.LazyExoticComponent<
+        ComponentType<React.PropsWithChildren<RuleTypeParamsExpressionProps<Params>>>
+      >;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;

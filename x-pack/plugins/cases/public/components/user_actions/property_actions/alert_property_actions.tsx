@@ -18,7 +18,11 @@ interface Props {
   onDelete: () => void;
 }
 
-const AlertPropertyActionsComponent: React.FC<React.PropsWithChildren<Props>> = ({ isLoading, totalAlerts, onDelete }) => {
+const AlertPropertyActionsComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  isLoading,
+  totalAlerts,
+  onDelete,
+}) => {
   const { permissions } = useCasesContext();
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete,

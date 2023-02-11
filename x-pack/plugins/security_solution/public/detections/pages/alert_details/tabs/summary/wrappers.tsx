@@ -11,10 +11,9 @@ import type { EuiFlexItemProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { HoverVisibilityContainer } from '../../../../../common/components/hover_visibility_container';
 
-export const SummaryColumn: React.FC<React.PropsWithChildren<{ grow?: EuiFlexItemProps['grow'] }>> = ({
-  children,
-  grow,
-}) => (
+export const SummaryColumn: React.FC<
+  React.PropsWithChildren<{ grow?: EuiFlexItemProps['grow'] }>
+> = ({ children, grow }) => (
   <EuiFlexItem grow={grow}>
     <EuiFlexGroup
       direction="column"
@@ -28,7 +27,10 @@ export const SummaryColumn: React.FC<React.PropsWithChildren<{ grow?: EuiFlexIte
   </EuiFlexItem>
 );
 
-export const SummaryRow: React.FC<React.PropsWithChildren<{ grow?: EuiFlexItemProps['grow'] }>> = ({ children, grow }) => (
+export const SummaryRow: React.FC<React.PropsWithChildren<{ grow?: EuiFlexItemProps['grow'] }>> = ({
+  children,
+  grow,
+}) => (
   <EuiFlexItem grow={grow}>
     <EuiFlexGroup direction="row" wrap>
       {children}
@@ -36,13 +38,15 @@ export const SummaryRow: React.FC<React.PropsWithChildren<{ grow?: EuiFlexItemPr
   </EuiFlexItem>
 );
 
-export const SummaryPanel: React.FC<React.PropsWithChildren<{
-  grow?: EuiFlexItemProps['grow'];
-  title: string;
-  description?: string;
-  actionsClassName?: string;
-  renderActionsPopover?: () => JSX.Element;
-}>> = ({ actionsClassName, children, description, grow = false, renderActionsPopover, title }) => (
+export const SummaryPanel: React.FC<
+  React.PropsWithChildren<{
+    grow?: EuiFlexItemProps['grow'];
+    title: string;
+    description?: string;
+    actionsClassName?: string;
+    renderActionsPopover?: () => JSX.Element;
+  }>
+> = ({ actionsClassName, children, description, grow = false, renderActionsPopover, title }) => (
   <EuiFlexItem grow={grow}>
     <EuiPanel hasShadow={false} hasBorder>
       <HoverVisibilityContainer targetClassNames={[actionsClassName ?? '']}>

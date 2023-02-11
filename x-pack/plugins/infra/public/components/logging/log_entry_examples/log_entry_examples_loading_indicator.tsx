@@ -8,9 +8,11 @@
 import { EuiLoadingContent } from '@elastic/eui';
 import React from 'react';
 
-export const LogEntryExampleMessagesLoadingIndicator: React.FunctionComponent<React.PropsWithChildren<{
-  exampleCount: number;
-}>> = ({ exampleCount }) => (
+export const LogEntryExampleMessagesLoadingIndicator: React.FunctionComponent<
+  React.PropsWithChildren<{
+    exampleCount: number;
+  }>
+> = ({ exampleCount }) => (
   <>
     {Array.from(new Array(exampleCount), (_value, index) => (
       <EuiLoadingContent key={index} lines={1} />

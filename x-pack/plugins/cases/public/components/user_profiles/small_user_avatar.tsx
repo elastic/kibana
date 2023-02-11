@@ -9,9 +9,9 @@ import React from 'react';
 import type { CaseUserAvatarProps } from './user_avatar';
 import { CaseUserAvatar } from './user_avatar';
 
-const SmallUserAvatarComponent: React.FC<React.PropsWithChildren<Pick<CaseUserAvatarProps, 'userInfo'>>> = ({
-  userInfo,
-}) => <CaseUserAvatar size={'s'} userInfo={userInfo} />;
+const SmallUserAvatarComponent: React.FC<
+  React.PropsWithChildren<Pick<CaseUserAvatarProps, 'userInfo'>>
+> = ({ userInfo }) => <CaseUserAvatar size={'s'} userInfo={userInfo} />;
 SmallUserAvatarComponent.displayName = 'SmallUserAvatar';
 
 export const SmallUserAvatar = React.memo(SmallUserAvatarComponent);

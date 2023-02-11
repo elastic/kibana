@@ -15,7 +15,9 @@ interface AddPackButtonComponentProps {
   fill?: EuiButtonProps['fill'];
 }
 
-const AddPackButtonComponent: React.FC<React.PropsWithChildren<AddPackButtonComponentProps>> = ({ fill = true }) => {
+const AddPackButtonComponent: React.FC<React.PropsWithChildren<AddPackButtonComponentProps>> = ({
+  fill = true,
+}) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const newQueryLinkProps = useRouterNavigate('packs/add');
 

@@ -13,9 +13,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { EVENTS } from '../constants';
 import { RecordedAction, RecordedPayload } from '../types';
 
-export const ActionList: FC<React.PropsWithChildren<{
-  onSelect: (action: RecordedAction | null) => void;
-}>> = ({ onSelect }) => {
+export const ActionList: FC<
+  React.PropsWithChildren<{
+    onSelect: (action: RecordedAction | null) => void;
+  }>
+> = ({ onSelect }) => {
   const [recordedActions, setRecordedActions] = useState<Record<string, RecordedAction>>({});
   const [selectedAction, setSelectedAction] = useState<RecordedAction | null>(null);
 

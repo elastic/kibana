@@ -31,18 +31,20 @@ const FixedHeightDiv = styled.div`
   height: 300px;
 `;
 
-export const PackagePolicyInputVarField: React.FunctionComponent<React.PropsWithChildren<{
-  varDef: RegistryVarsEntry;
-  value: any;
-  onChange: (newValue: any) => void;
-  errors?: string[] | null;
-  forceShowErrors?: boolean;
-  frozen?: boolean;
-  packageType?: string;
-  packageName?: string;
-  datastreams?: DataStream[];
-  isEditPage?: boolean;
-}>> = memo(
+export const PackagePolicyInputVarField: React.FunctionComponent<
+  React.PropsWithChildren<{
+    varDef: RegistryVarsEntry;
+    value: any;
+    onChange: (newValue: any) => void;
+    errors?: string[] | null;
+    forceShowErrors?: boolean;
+    frozen?: boolean;
+    packageType?: string;
+    packageName?: string;
+    datastreams?: DataStream[];
+    isEditPage?: boolean;
+  }>
+> = memo(
   ({
     varDef,
     value,

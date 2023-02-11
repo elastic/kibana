@@ -19,7 +19,10 @@ interface Props {
   enrichedFieldMetadata: EnrichedFieldMetadata[];
 }
 
-const CustomCalloutComponent: React.FC<React.PropsWithChildren<Props>> = ({ children, enrichedFieldMetadata }) => (
+const CustomCalloutComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  children,
+  enrichedFieldMetadata,
+}) => (
   <EuiCallOut
     color="primary"
     size="s"

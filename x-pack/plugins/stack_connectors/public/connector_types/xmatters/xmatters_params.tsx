@@ -58,13 +58,9 @@ const severityOptions = [
   },
 ];
 
-const XmattersParamsFields: React.FunctionComponent<React.PropsWithChildren<ActionParamsProps<XmattersActionParams>>> = ({
-  actionParams,
-  editAction,
-  index,
-  messageVariables,
-  errors,
-}) => {
+const XmattersParamsFields: React.FunctionComponent<
+  React.PropsWithChildren<ActionParamsProps<XmattersActionParams>>
+> = ({ actionParams, editAction, index, messageVariables, errors }) => {
   useEffect(() => {
     if (!actionParams) {
       editAction(

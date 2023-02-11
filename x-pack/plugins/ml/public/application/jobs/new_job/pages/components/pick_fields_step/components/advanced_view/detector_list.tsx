@@ -34,7 +34,11 @@ interface Props {
   onDeleteJob: (i: number) => void;
 }
 
-export const DetectorList: FC<React.PropsWithChildren<Props>> = ({ isActive, onEditJob, onDeleteJob }) => {
+export const DetectorList: FC<React.PropsWithChildren<Props>> = ({
+  isActive,
+  onEditJob,
+  onDeleteJob,
+}) => {
   const {
     jobCreator: jc,
     jobCreatorUpdated,
@@ -174,7 +178,9 @@ const NoDetectorsWarning: FC<React.PropsWithChildren<{ show: boolean }>> = ({ sh
   );
 };
 
-const DetectorsValidationWarning: FC<React.PropsWithChildren<{ validation: Validation }>> = ({ validation }) => {
+const DetectorsValidationWarning: FC<React.PropsWithChildren<{ validation: Validation }>> = ({
+  validation,
+}) => {
   if (validation.valid === true) {
     return null;
   }

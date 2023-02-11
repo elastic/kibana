@@ -19,10 +19,9 @@ export interface VisualOptionsPopoverProps {
   datasourceLayers: FramePublicAPI['datasourceLayers'];
 }
 
-export const AppearanceOptionsPopover: React.FC<React.PropsWithChildren<VisualOptionsPopoverProps>> = ({
-  state,
-  setState,
-}) => {
+export const AppearanceOptionsPopover: React.FC<
+  React.PropsWithChildren<VisualOptionsPopoverProps>
+> = ({ state, setState }) => {
   return (
     <TooltipWrapper
       tooltipContent={i18n.translate('xpack.lens.shared.AppearanceLabel', {

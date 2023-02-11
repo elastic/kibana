@@ -103,7 +103,9 @@ interface Props {
   onAddDocuments: (document: Document) => void;
 }
 
-export const AddDocumentForm: FunctionComponent<React.PropsWithChildren<Props>> = ({ onAddDocuments }) => {
+export const AddDocumentForm: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  onAddDocuments,
+}) => {
   const { services } = useKibana();
   const isMounted = useIsMounted();
 

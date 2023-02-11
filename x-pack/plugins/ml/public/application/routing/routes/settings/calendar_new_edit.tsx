@@ -74,7 +74,11 @@ export const editCalendarRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<React.PropsWithChildren<NewCalendarPageProps>> = ({ location, mode, deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<NewCalendarPageProps>> = ({
+  location,
+  mode,
+  deps,
+}) => {
   let calendarId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);

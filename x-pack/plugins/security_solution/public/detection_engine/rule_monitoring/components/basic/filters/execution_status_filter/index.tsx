@@ -19,11 +19,9 @@ interface ExecutionStatusFilterProps {
   onChange: (selectedItems: RuleExecutionStatus[]) => void;
 }
 
-const ExecutionStatusFilterComponent: React.FC<React.PropsWithChildren<ExecutionStatusFilterProps>> = ({
-  items,
-  selectedItems,
-  onChange,
-}) => {
+const ExecutionStatusFilterComponent: React.FC<
+  React.PropsWithChildren<ExecutionStatusFilterProps>
+> = ({ items, selectedItems, onChange }) => {
   const renderItem = useCallback((item: RuleExecutionStatus) => {
     return <ExecutionStatusIndicator status={item} />;
   }, []);

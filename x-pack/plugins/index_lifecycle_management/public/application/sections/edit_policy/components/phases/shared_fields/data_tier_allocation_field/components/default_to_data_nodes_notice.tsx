@@ -15,9 +15,9 @@ import {
   nodeAllocationMigrationGuidance,
 } from './no_custom_attributes_messages';
 
-export const DefaultToDataNodesNotice: FunctionComponent<React.PropsWithChildren<{ phase: PhaseWithAllocation }>> = ({
-  phase,
-}) => {
+export const DefaultToDataNodesNotice: FunctionComponent<
+  React.PropsWithChildren<{ phase: PhaseWithAllocation }>
+> = ({ phase }) => {
   return (
     <EuiCallOut
       data-test-subj="defaultToDataNodesNotice"

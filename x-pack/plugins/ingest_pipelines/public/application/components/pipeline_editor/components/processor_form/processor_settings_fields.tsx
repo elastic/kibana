@@ -19,7 +19,9 @@ export interface Props {
   processor?: ProcessorInternal;
 }
 
-export const ProcessorSettingsFields: FunctionComponent<React.PropsWithChildren<Props>> = ({ processor }) => {
+export const ProcessorSettingsFields: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  processor,
+}) => {
   return (
     <>
       <ProcessorTypeField initialType={processor?.type} />

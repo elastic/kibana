@@ -45,7 +45,10 @@ interface PlayButtonProps {
   savedQuery: SavedQuerySO;
 }
 
-const PlayButtonComponent: React.FC<React.PropsWithChildren<PlayButtonProps>> = ({ disabled = false, savedQuery }) => {
+const PlayButtonComponent: React.FC<React.PropsWithChildren<PlayButtonProps>> = ({
+  disabled = false,
+  savedQuery,
+}) => {
   const { push } = useHistory();
 
   // TODO: Add href

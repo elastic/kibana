@@ -12,7 +12,9 @@ import { ColumnChart } from './column_chart';
 import type { OrdinalChartData } from './field_histograms';
 import type { FieldDataRowProps } from '../../types';
 
-export const BooleanContentPreview: FC<React.PropsWithChildren<FieldDataRowProps>> = ({ config }) => {
+export const BooleanContentPreview: FC<React.PropsWithChildren<FieldDataRowProps>> = ({
+  config,
+}) => {
   const chartData = useMemo(() => {
     const results = getTFPercentage(config);
     if (results) {

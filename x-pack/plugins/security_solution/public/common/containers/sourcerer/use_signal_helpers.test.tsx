@@ -19,9 +19,9 @@ import type { State } from '../../store';
 import { createStore } from '../../store';
 
 describe('useSignalHelpers', () => {
-  const wrapperContainer: React.FC<React.PropsWithChildren<{ children?: React.ReactNode }>> = ({ children }) => (
-    <TestProviders>{children}</TestProviders>
-  );
+  const wrapperContainer: React.FC<React.PropsWithChildren<{ children?: React.ReactNode }>> = ({
+    children,
+  }) => <TestProviders>{children}</TestProviders>;
 
   test('Default state, does not need init and does not need poll', async () => {
     await act(async () => {

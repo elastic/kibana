@@ -26,10 +26,12 @@ import {
   isFieldColumnRenderConfiguration,
 } from '../../../utils/log_column_render_configuration';
 
-export const LogColumnHeaders: React.FunctionComponent<React.PropsWithChildren<{
-  columnConfigurations: LogColumnRenderConfiguration[];
-  columnWidths: LogEntryColumnWidths;
-}>> = ({ columnConfigurations, columnWidths }) => {
+export const LogColumnHeaders: React.FunctionComponent<
+  React.PropsWithChildren<{
+    columnConfigurations: LogColumnRenderConfiguration[];
+    columnWidths: LogEntryColumnWidths;
+  }>
+> = ({ columnConfigurations, columnWidths }) => {
   const { firstVisiblePosition } = useLogPositionStateContext();
   return (
     <LogColumnHeadersWrapper>
@@ -103,10 +105,12 @@ export const LogColumnHeaders: React.FunctionComponent<React.PropsWithChildren<{
   );
 };
 
-export const LogColumnHeader: React.FunctionComponent<React.PropsWithChildren<{
-  columnWidth: LogEntryColumnWidth;
-  'data-test-subj'?: string;
-}>> = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (
+export const LogColumnHeader: React.FunctionComponent<
+  React.PropsWithChildren<{
+    columnWidth: LogEntryColumnWidth;
+    'data-test-subj'?: string;
+  }>
+> = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (
   <LogColumnHeaderWrapper data-test-subj={dataTestSubj} {...columnWidth}>
     <LogColumnHeaderContent>{children}</LogColumnHeaderContent>
   </LogColumnHeaderWrapper>

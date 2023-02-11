@@ -39,9 +39,9 @@ export type UpdateRetentionSettings = (
 
 type OnSuccessCallback = () => void;
 
-export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
-  children,
-}) => {
+export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ children }) => {
   const { i18n } = useServices();
   const { docLinks } = useCore();
   const toastNotifications = useToastNotifications();

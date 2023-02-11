@@ -12,7 +12,11 @@ import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
 import { StopAction } from './use_stop_action';
 
-export const StopActionModal: FC<React.PropsWithChildren<StopAction>> = ({ closeModal, item, forceStopAndCloseModal }) => {
+export const StopActionModal: FC<React.PropsWithChildren<StopAction>> = ({
+  closeModal,
+  item,
+  forceStopAndCloseModal,
+}) => {
   return (
     <>
       {item !== undefined && (

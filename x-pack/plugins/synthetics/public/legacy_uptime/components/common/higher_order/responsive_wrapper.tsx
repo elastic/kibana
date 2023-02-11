@@ -29,7 +29,9 @@ export interface ResponsiveWrapperProps {
  * @param Component The component to wrap.
  */
 export const withResponsiveWrapper =
-  <P extends {} & ResponsiveWrapperProps>(Component: FC<React.PropsWithChildren<P>>): FC<React.PropsWithChildren<ResponsiveWrapperProps & P>> =>
+  <P extends {} & ResponsiveWrapperProps>(
+    Component: FC<React.PropsWithChildren<P>>
+  ): FC<React.PropsWithChildren<ResponsiveWrapperProps & P>> =>
   ({ isResponsive, ...rest }: ResponsiveWrapperProps) =>
     isResponsive ? (
       <ResponsiveWrapper data-test-subj="uptimeWithResponsiveWrapper--wrapper">

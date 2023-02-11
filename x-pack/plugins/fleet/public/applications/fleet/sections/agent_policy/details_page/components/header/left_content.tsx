@@ -28,11 +28,9 @@ interface HeaderLeftContentProps {
   agentPolicy?: AgentPolicy | null;
 }
 
-export const HeaderLeftContent: React.FunctionComponent<React.PropsWithChildren<HeaderLeftContentProps>> = ({
-  isLoading,
-  policyId,
-  agentPolicy,
-}) => {
+export const HeaderLeftContent: React.FunctionComponent<
+  React.PropsWithChildren<HeaderLeftContentProps>
+> = ({ isLoading, policyId, agentPolicy }) => {
   const { getHref } = useLink();
 
   return (

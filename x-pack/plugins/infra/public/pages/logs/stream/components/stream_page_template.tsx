@@ -11,21 +11,22 @@ import React from 'react';
 import { fullHeightContentStyles } from '../../../../page_template.styles';
 import { LogsPageTemplate, LogsPageTemplateProps } from '../../shared/page_template';
 
-export const LogStreamPageTemplate: React.FC<React.PropsWithChildren<LogsPageTemplateProps>> = React.memo((props) => (
-  <div className={APP_WRAPPER_CLASS}>
-    <LogsPageTemplate
-      pageHeader={{
-        pageTitle: streamTitle,
-      }}
-      pageSectionProps={{
-        contentProps: {
-          css: fullHeightContentStyles,
-        },
-      }}
-      {...props}
-    />
-  </div>
-));
+export const LogStreamPageTemplate: React.FC<React.PropsWithChildren<LogsPageTemplateProps>> =
+  React.memo((props) => (
+    <div className={APP_WRAPPER_CLASS}>
+      <LogsPageTemplate
+        pageHeader={{
+          pageTitle: streamTitle,
+        }}
+        pageSectionProps={{
+          contentProps: {
+            css: fullHeightContentStyles,
+          },
+        }}
+        {...props}
+      />
+    </div>
+  ));
 
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
   defaultMessage: 'Stream',

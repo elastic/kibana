@@ -31,10 +31,12 @@ export interface ListItems {
   description: string | JSX.Element;
 }
 
-export const AdvancedStepDetails: FC<React.PropsWithChildren<{
-  setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
-  state: State;
-}>> = ({ setCurrentStep, state }) => {
+export const AdvancedStepDetails: FC<
+  React.PropsWithChildren<{
+    setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
+    state: State;
+  }>
+> = ({ setCurrentStep, state }) => {
   const { form, isJobCreated } = state;
   const {
     computeFeatureInfluence,

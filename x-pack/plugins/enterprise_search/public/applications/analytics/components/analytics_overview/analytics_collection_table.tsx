@@ -25,10 +25,9 @@ interface AnalyticsCollectionTableProps {
   isLoading: boolean;
 }
 
-export const AnalyticsCollectionTable: React.FC<React.PropsWithChildren<AnalyticsCollectionTableProps>> = ({
-  collections,
-  isLoading,
-}) => {
+export const AnalyticsCollectionTable: React.FC<
+  React.PropsWithChildren<AnalyticsCollectionTableProps>
+> = ({ collections, isLoading }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
 
   const columns: Array<EuiBasicTableColumn<AnalyticsCollection>> = [

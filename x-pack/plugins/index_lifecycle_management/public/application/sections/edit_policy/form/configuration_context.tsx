@@ -48,7 +48,9 @@ const pathToHotPhaseSearchableSnapshot =
 const pathToColdPhaseSearchableSnapshot =
   'phases.cold.actions.searchable_snapshot.snapshot_repository';
 
-export const ConfigurationProvider: FunctionComponent<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const ConfigurationProvider: FunctionComponent<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const [formData] = useFormData({
     watch: [
       pathToHotPhaseSearchableSnapshot,

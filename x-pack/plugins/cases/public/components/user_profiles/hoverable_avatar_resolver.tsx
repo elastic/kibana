@@ -11,10 +11,12 @@ import type { ElasticUser } from '../../containers/types';
 import { convertToUserInfo } from './user_converter';
 import { HoverableAvatar } from './hoverable_avatar';
 
-const HoverableAvatarResolverComponent: React.FC<React.PropsWithChildren<{
-  user: ElasticUser;
-  userProfiles?: Map<string, UserProfileWithAvatar>;
-}>> = ({ user, userProfiles }) => {
+const HoverableAvatarResolverComponent: React.FC<
+  React.PropsWithChildren<{
+    user: ElasticUser;
+    userProfiles?: Map<string, UserProfileWithAvatar>;
+  }>
+> = ({ user, userProfiles }) => {
   const { userInfo } = convertToUserInfo(user, userProfiles) ?? { userInfo: undefined };
 
   return <HoverableAvatar userInfo={userInfo} />;

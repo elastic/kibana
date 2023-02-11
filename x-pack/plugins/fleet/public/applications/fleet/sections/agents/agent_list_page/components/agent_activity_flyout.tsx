@@ -46,11 +46,13 @@ const FlyoutFooterWPadding = styled(EuiFlyoutFooter)`
   padding: 16px 24px !important;
 `;
 
-export const AgentActivityFlyout: React.FunctionComponent<React.PropsWithChildren<{
-  onClose: () => void;
-  onAbortSuccess: () => void;
-  refreshAgentActivity: boolean;
-}>> = ({ onClose, onAbortSuccess, refreshAgentActivity }) => {
+export const AgentActivityFlyout: React.FunctionComponent<
+  React.PropsWithChildren<{
+    onClose: () => void;
+    onAbortSuccess: () => void;
+    refreshAgentActivity: boolean;
+  }>
+> = ({ onClose, onAbortSuccess, refreshAgentActivity }) => {
   const { data: agentPoliciesData } = useGetAgentPolicies({
     perPage: SO_SEARCH_LIMIT,
   });
@@ -202,11 +204,13 @@ export const AgentActivityFlyout: React.FunctionComponent<React.PropsWithChildre
   );
 };
 
-const ActivitySection: React.FunctionComponent<React.PropsWithChildren<{
-  title: ReactNode;
-  actions: ActionStatus[];
-  abortUpgrade: (action: ActionStatus) => Promise<void>;
-}>> = ({ title, actions, abortUpgrade }) => {
+const ActivitySection: React.FunctionComponent<
+  React.PropsWithChildren<{
+    title: ReactNode;
+    actions: ActionStatus[];
+    abortUpgrade: (action: ActionStatus) => Promise<void>;
+  }>
+> = ({ title, actions, abortUpgrade }) => {
   return (
     <>
       <EuiPanel color="subdued" hasBorder={true} borderRadius="none">
@@ -322,7 +326,9 @@ const inProgressDescription = (time?: string) => (
   />
 );
 
-const ActivityItem: React.FunctionComponent<React.PropsWithChildren<{ action: ActionStatus }>> = ({ action }) => {
+const ActivityItem: React.FunctionComponent<React.PropsWithChildren<{ action: ActionStatus }>> = ({
+  action,
+}) => {
   const completeTitle = (
     <EuiText>
       <FormattedMessage
@@ -507,10 +513,12 @@ const ActivityItem: React.FunctionComponent<React.PropsWithChildren<{ action: Ac
   );
 };
 
-export const UpgradeInProgressActivityItem: React.FunctionComponent<React.PropsWithChildren<{
-  action: ActionStatus;
-  abortUpgrade: (action: ActionStatus) => Promise<void>;
-}>> = ({ action, abortUpgrade }) => {
+export const UpgradeInProgressActivityItem: React.FunctionComponent<
+  React.PropsWithChildren<{
+    action: ActionStatus;
+    abortUpgrade: (action: ActionStatus) => Promise<void>;
+  }>
+> = ({ action, abortUpgrade }) => {
   const { docLinks } = useStartServices();
   const [isAborting, setIsAborting] = useState(false);
   const onClickAbortUpgrade = useCallback(async () => {

@@ -28,7 +28,9 @@ export interface MatchParams {
   section: Section;
 }
 
-export const TriggersActionsUIHome: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps<MatchParams>>> = ({
+export const TriggersActionsUIHome: React.FunctionComponent<
+  React.PropsWithChildren<RouteComponentProps<MatchParams>>
+> = ({
   match: {
     params: { section },
   },

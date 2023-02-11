@@ -30,7 +30,12 @@ const getAttributes = (tag: Tag): TagAttributes => {
   return attributes;
 };
 
-export const EditTagModal: FC<React.PropsWithChildren<EditTagModalProps>> = ({ tag, onSave, onClose, tagClient }) => {
+export const EditTagModal: FC<React.PropsWithChildren<EditTagModalProps>> = ({
+  tag,
+  onSave,
+  onClose,
+  tagClient,
+}) => {
   const [validation, setValidation] = useState<TagValidation>(initialValidation);
   const [tagAttributes, setTagAttributes] = useState<TagAttributes>(getAttributes(tag));
 

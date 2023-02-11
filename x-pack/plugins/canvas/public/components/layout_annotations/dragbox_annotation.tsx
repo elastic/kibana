@@ -16,7 +16,11 @@ interface Props {
   width: number;
 }
 
-export const DragBoxAnnotation: FC<React.PropsWithChildren<Props>> = ({ transformMatrix, width, height }) => (
+export const DragBoxAnnotation: FC<React.PropsWithChildren<Props>> = ({
+  transformMatrix,
+  width,
+  height,
+}) => (
   <div
     className="canvasDragBoxAnnotation canvasLayoutAnnotation"
     style={{

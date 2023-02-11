@@ -39,7 +39,9 @@ export const WorkpadRoute = () => {
   );
 };
 
-const WorkpadRouteComponent: FC<React.PropsWithChildren<{ route: WorkpadRouteProps }>> = ({ route }) => {
+const WorkpadRouteComponent: FC<React.PropsWithChildren<{ route: WorkpadRouteProps }>> = ({
+  route,
+}) => {
   const getRedirectPath = useCallback(
     (workpadId: string) =>
       `/workpad/${workpadId}${
@@ -88,7 +90,9 @@ export const ExportWorkpadRoute = () => {
   );
 };
 
-const ExportWorkpadRouteComponent: FC<React.PropsWithChildren<{ route: WorkpadRouteProps }>> = ({ route: { match } }) => {
+const ExportWorkpadRouteComponent: FC<React.PropsWithChildren<{ route: WorkpadRouteProps }>> = ({
+  route: { match },
+}) => {
   const getRedirectPath = useCallback(
     (workpadId: string) => `/export/workpad/pdf/${workpadId}/page/${match.params.pageNumber}`,
     [match.params.pageNumber]
@@ -131,12 +135,14 @@ export const WorkpadHistoryManager: FC<React.PropsWithChildren<unknown>> = ({ ch
   return <>{children}</>;
 };
 
-const WorkpadLoaderComponent: FC<React.PropsWithChildren<{
-  params: WorkpadRouteProps['match']['params'];
-  loadPages?: boolean;
-  getRedirectPath: (workpadId: string) => string;
-  children: (workpad: CanvasWorkpad) => JSX.Element;
-}>> = ({ params, children, loadPages, getRedirectPath }) => {
+const WorkpadLoaderComponent: FC<
+  React.PropsWithChildren<{
+    params: WorkpadRouteProps['match']['params'];
+    loadPages?: boolean;
+    getRedirectPath: (workpadId: string) => string;
+    children: (workpad: CanvasWorkpad) => JSX.Element;
+  }>
+> = ({ params, children, loadPages, getRedirectPath }) => {
   const [workpad, error] = useWorkpad(params.id, loadPages, getRedirectPath);
   const notifyService = useNotifyService();
 

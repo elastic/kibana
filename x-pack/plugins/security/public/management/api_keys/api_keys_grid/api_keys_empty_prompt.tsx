@@ -20,11 +20,9 @@ export interface ApiKeysEmptyPromptProps {
   readOnly?: boolean;
 }
 
-export const ApiKeysEmptyPrompt: FunctionComponent<React.PropsWithChildren<ApiKeysEmptyPromptProps>> = ({
-  error,
-  readOnly,
-  children,
-}) => {
+export const ApiKeysEmptyPrompt: FunctionComponent<
+  React.PropsWithChildren<ApiKeysEmptyPromptProps>
+> = ({ error, readOnly, children }) => {
   const accordionId = useHtmlId('apiKeysEmptyPrompt', 'accordion');
 
   if (error) {

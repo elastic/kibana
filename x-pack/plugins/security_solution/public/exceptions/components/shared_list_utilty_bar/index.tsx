@@ -28,13 +28,9 @@ interface ExceptionsTableUtilityBarProps {
   sortFields?: Array<{ field: string; label: string; defaultOrder: 'asc' | 'desc' }>;
 }
 
-export const ExceptionsTableUtilityBar: React.FC<React.PropsWithChildren<ExceptionsTableUtilityBarProps>> = ({
-  onRefresh,
-  totalExceptionLists,
-  setSort,
-  sort,
-  sortFields,
-}) => {
+export const ExceptionsTableUtilityBar: React.FC<
+  React.PropsWithChildren<ExceptionsTableUtilityBarProps>
+> = ({ onRefresh, totalExceptionLists, setSort, sort, sortFields }) => {
   const selectedSortField = sortFields?.find((sortField) => sortField.field === sort?.field);
   return (
     <UtilityBar border>

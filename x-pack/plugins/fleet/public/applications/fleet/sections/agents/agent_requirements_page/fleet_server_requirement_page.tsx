@@ -29,14 +29,18 @@ const ContentWrapper = styled(EuiFlexGroup)`
   margin: 0 auto;
 `;
 
-export const FleetServerRequirementPage: React.FunctionComponent<React.PropsWithChildren<| {
-    showEnrollmentRecommendation?: false;
-    showStandaloneTab?: never;
-  }
-| {
-    showEnrollmentRecommendation?: true;
-    showStandaloneTab: () => void;
-  }>> = ({ showStandaloneTab = () => {}, showEnrollmentRecommendation = true }) => {
+export const FleetServerRequirementPage: React.FunctionComponent<
+  React.PropsWithChildren<
+    | {
+        showEnrollmentRecommendation?: false;
+        showStandaloneTab?: never;
+      }
+    | {
+        showEnrollmentRecommendation?: true;
+        showStandaloneTab: () => void;
+      }
+  >
+> = ({ showStandaloneTab = () => {}, showEnrollmentRecommendation = true }) => {
   const startService = useStartServices();
   const deploymentUrl = startService.cloud?.deploymentUrl;
 

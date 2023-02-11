@@ -26,7 +26,10 @@ interface JobFilterBarProps {
   queryText?: string;
 }
 
-export const JobFilterBar: FC<React.PropsWithChildren<JobFilterBarProps>> = ({ queryText, setFilters }) => {
+export const JobFilterBar: FC<React.PropsWithChildren<JobFilterBarProps>> = ({
+  queryText,
+  setFilters,
+}) => {
   const [error, setError] = useState<Error | null>(null);
   const {
     services: {

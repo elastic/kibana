@@ -58,7 +58,11 @@ const defaultEval: Eval = {
   error: null,
 };
 
-export const EvaluatePanel: FC<React.PropsWithChildren<Props>> = ({ jobConfig, jobStatus, searchQuery }) => {
+export const EvaluatePanel: FC<React.PropsWithChildren<Props>> = ({
+  jobConfig,
+  jobStatus,
+  searchQuery,
+}) => {
   const {
     services: { docLinks },
   } = useMlKibana();

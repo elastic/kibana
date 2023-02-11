@@ -43,7 +43,8 @@ describe('useCasePermission', () => {
       },
     };
     // @ts-ignore
-    const ProviderComponent: FC<React.PropsWithChildren<unknown>> = getProviderComponent(mockedServices);
+    const ProviderComponent: FC<React.PropsWithChildren<unknown>> =
+      getProviderComponent(mockedServices);
 
     const indicatorName: string = 'abc';
 
@@ -67,7 +68,8 @@ describe('useCasePermission', () => {
       },
     };
     // @ts-ignore
-    const ProviderComponent: FC<React.PropsWithChildren<unknown>> = getProviderComponent(mockedServices);
+    const ProviderComponent: FC<React.PropsWithChildren<unknown>> =
+      getProviderComponent(mockedServices);
 
     const indicatorName: string = 'abc';
 
@@ -91,7 +93,8 @@ describe('useCasePermission', () => {
       },
     };
     // @ts-ignore
-    const ProviderComponent: FC<React.PropsWithChildren<unknown>> = getProviderComponent(mockedServices);
+    const ProviderComponent: FC<React.PropsWithChildren<unknown>> =
+      getProviderComponent(mockedServices);
 
     const indicatorName: string = EMPTY_VALUE;
 

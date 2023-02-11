@@ -40,10 +40,9 @@ interface GenerateEngineApiKeyModalProps {
   onClose(): void;
 }
 
-export const GenerateEngineApiKeyModal: React.FC<React.PropsWithChildren<GenerateEngineApiKeyModalProps>> = ({
-  engineName,
-  onClose,
-}) => {
+export const GenerateEngineApiKeyModal: React.FC<
+  React.PropsWithChildren<GenerateEngineApiKeyModalProps>
+> = ({ engineName, onClose }) => {
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
   const { setKeyName } = useActions(GenerateApiKeyModalLogic);
   const { makeRequest } = useActions(GenerateEngineApiKeyLogic);

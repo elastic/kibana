@@ -16,7 +16,9 @@ import { isRuntimeMappings } from '../../../../../../common/shared_imports';
 
 import { StepDefineFormHook } from '../step_define';
 
-export const AdvancedRuntimeMappingsEditor: FC<React.PropsWithChildren<StepDefineFormHook['runtimeMappingsEditor']>> = memo(
+export const AdvancedRuntimeMappingsEditor: FC<
+  React.PropsWithChildren<StepDefineFormHook['runtimeMappingsEditor']>
+> = memo(
   ({
     actions: {
       convertToJson,

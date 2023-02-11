@@ -35,11 +35,9 @@ interface Props {
   onCancel: () => void;
 }
 
-export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
-  policy,
-  onSuccess,
-  onCancel,
-}) => {
+export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ policy, onSuccess, onCancel }) => {
   const [isLegacy, setIsLegacy] = useState<boolean>(false);
   const [templateName, setTemplateName] = useState<string>('');
   const [aliasName, setAliasName] = useState<string>('');

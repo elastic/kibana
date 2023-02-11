@@ -25,9 +25,11 @@ export const LogStreamErrorBoundary: React.FC<React.PropsWithChildren<{ resetOnC
   );
 };
 
-const LogStreamErrorContent: React.FC<React.PropsWithChildren<{
-  error: any;
-}>> = ({ error }) => {
+const LogStreamErrorContent: React.FC<
+  React.PropsWithChildren<{
+    error: any;
+  }>
+> = ({ error }) => {
   if (error instanceof KQLSyntaxError) {
     return (
       <EuiEmptyPrompt

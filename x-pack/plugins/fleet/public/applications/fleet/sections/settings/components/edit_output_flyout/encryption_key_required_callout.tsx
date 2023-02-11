@@ -11,7 +11,9 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { useStartServices } from '../../../../hooks';
 
-export const EncryptionKeyRequiredCallout: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
+export const EncryptionKeyRequiredCallout: React.FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { docLinks } = useStartServices();
   return (
     <EuiCallOut

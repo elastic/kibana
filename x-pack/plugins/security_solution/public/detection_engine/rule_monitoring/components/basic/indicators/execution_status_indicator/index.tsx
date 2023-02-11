@@ -23,10 +23,9 @@ interface ExecutionStatusIndicatorProps {
   showTooltip?: boolean;
 }
 
-const ExecutionStatusIndicatorComponent: React.FC<React.PropsWithChildren<ExecutionStatusIndicatorProps>> = ({
-  status,
-  showTooltip = false,
-}) => {
+const ExecutionStatusIndicatorComponent: React.FC<
+  React.PropsWithChildren<ExecutionStatusIndicatorProps>
+> = ({ status, showTooltip = false }) => {
   const statusText = getCapitalizedStatusText(status) ?? EMPTY_STATUS_TEXT;
   const statusColor = getStatusColor(status);
 

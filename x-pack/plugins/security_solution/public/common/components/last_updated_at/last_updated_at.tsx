@@ -24,7 +24,10 @@ const UPDATED = i18n.translate('xpack.securitySolution.detectionResponse.updated
   defaultMessage: 'Updated',
 });
 
-export const LastUpdatedAt: React.FC<React.PropsWithChildren<LastUpdatedAtProps>> = ({ isUpdating, updatedAt }) => (
+export const LastUpdatedAt: React.FC<React.PropsWithChildren<LastUpdatedAtProps>> = ({
+  isUpdating,
+  updatedAt,
+}) => (
   <EuiFlexGroup>
     {isUpdating ? (
       <EuiFlexItem grow={false}>{UPDATING}</EuiFlexItem>

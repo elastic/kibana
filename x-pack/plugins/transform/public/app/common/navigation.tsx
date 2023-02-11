@@ -10,8 +10,10 @@ import { Redirect } from 'react-router-dom';
 
 import { SECTION_SLUG } from '../constants';
 
-export const RedirectToTransformManagement: FC<React.PropsWithChildren<unknown>> = () => <Redirect to={`/${SECTION_SLUG.HOME}`} />;
-
-export const RedirectToCreateTransform: FC<React.PropsWithChildren<{ savedObjectId: string }>> = ({ savedObjectId }) => (
-  <Redirect push to={`/${SECTION_SLUG.CREATE_TRANSFORM}/${savedObjectId}`} />
+export const RedirectToTransformManagement: FC<React.PropsWithChildren<unknown>> = () => (
+  <Redirect to={`/${SECTION_SLUG.HOME}`} />
 );
+
+export const RedirectToCreateTransform: FC<React.PropsWithChildren<{ savedObjectId: string }>> = ({
+  savedObjectId,
+}) => <Redirect push to={`/${SECTION_SLUG.CREATE_TRANSFORM}/${savedObjectId}`} />;

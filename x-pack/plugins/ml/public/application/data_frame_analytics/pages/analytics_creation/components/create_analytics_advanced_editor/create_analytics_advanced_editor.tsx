@@ -19,7 +19,9 @@ import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/us
 import { CreateStep } from '../create_step';
 import { ANALYTICS_STEPS } from '../../page';
 
-export const CreateAnalyticsAdvancedEditor: FC<React.PropsWithChildren<CreateAnalyticsFormProps>> = (props) => {
+export const CreateAnalyticsAdvancedEditor: FC<
+  React.PropsWithChildren<CreateAnalyticsFormProps>
+> = (props) => {
   const { actions, state } = props;
   const { setAdvancedEditorRawString, setFormState } = actions;
 

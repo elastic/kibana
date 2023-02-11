@@ -51,7 +51,10 @@ export interface ValueListsFormProps {
   onSuccess: (response: ListSchema) => void;
 }
 
-export const ValueListsFormComponent: React.FC<React.PropsWithChildren<ValueListsFormProps>> = ({ onError, onSuccess }) => {
+export const ValueListsFormComponent: React.FC<React.PropsWithChildren<ValueListsFormProps>> = ({
+  onError,
+  onSuccess,
+}) => {
   const ctrl = useRef(new AbortController());
   const [file, setFile] = useState<File | null>(null);
   const [type, setType] = useState<Type>(defaultListType);

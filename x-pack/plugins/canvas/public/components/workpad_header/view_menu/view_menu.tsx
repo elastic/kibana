@@ -81,7 +81,9 @@ const mergeProps = (
   };
 };
 
-const ViewMenuWithContext: FC<React.PropsWithChildren<Omit<ComponentProps, PropsFromContext>>> = (props) => {
+const ViewMenuWithContext: FC<React.PropsWithChildren<Omit<ComponentProps, PropsFromContext>>> = (
+  props
+) => {
   const dispatch = useDispatch();
   const {
     autoplayInterval,

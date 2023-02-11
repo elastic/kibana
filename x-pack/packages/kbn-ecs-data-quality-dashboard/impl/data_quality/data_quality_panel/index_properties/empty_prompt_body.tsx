@@ -11,7 +11,9 @@ interface Props {
   body: string;
 }
 
-const EmptyPromptBodyComponent: React.FC<React.PropsWithChildren<Props>> = ({ body }) => <p>{body}</p>;
+const EmptyPromptBodyComponent: React.FC<React.PropsWithChildren<Props>> = ({ body }) => (
+  <p>{body}</p>
+);
 
 EmptyPromptBodyComponent.displayName = 'EmptyPromptBodyComponent';
 

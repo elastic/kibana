@@ -23,7 +23,10 @@ const StyledHorizontalRule = euiStyled(EuiHorizontalRule)`
   background-color: ${(props) => props.theme.eui.euiColorDarkShade};
 `;
 
-export const WaterfallTooltipContent: React.FC<React.PropsWithChildren<Props>> = ({ text, url }) => {
+export const WaterfallTooltipContent: React.FC<React.PropsWithChildren<Props>> = ({
+  text,
+  url,
+}) => {
   const { data, renderTooltipItem, sidebarItems } = useWaterfallContext();
 
   const tooltipMetrics = data.filter(

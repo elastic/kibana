@@ -92,11 +92,9 @@ export function getAlertType(): RuleTypeModel {
   };
 }
 
-export const PeopleinSpaceExpression: React.FunctionComponent<React.PropsWithChildren<PeopleinSpaceParamsProps>> = ({
-  ruleParams,
-  setRuleParams,
-  errors,
-}) => {
+export const PeopleinSpaceExpression: React.FunctionComponent<
+  React.PropsWithChildren<PeopleinSpaceParamsProps>
+> = ({ ruleParams, setRuleParams, errors }) => {
   const { outerSpaceCapacity = 0, craft = Craft.OuterSpace, op = Operator.AreAbove } = ruleParams;
 
   // store defaults

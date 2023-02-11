@@ -15,7 +15,9 @@ interface Props {
   repository: FSRepository;
 }
 
-export const FSDetails: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ repository }) => {
+export const FSDetails: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  repository,
+}) => {
   const {
     settings: {
       location,

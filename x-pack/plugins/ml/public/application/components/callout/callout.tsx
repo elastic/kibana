@@ -44,13 +44,21 @@ const Link: FC<React.PropsWithChildren<{ url: string }>> = ({ url }) => (
   </EuiLink>
 );
 
-const Message: FC<React.PropsWithChildren<Pick<CalloutMessage, 'text' | 'url'>>> = ({ text, url }) => (
+const Message: FC<React.PropsWithChildren<Pick<CalloutMessage, 'text' | 'url'>>> = ({
+  text,
+  url,
+}) => (
   <>
     {text} {url && <Link url={url} />}
   </>
 );
 
-export const Callout: FC<React.PropsWithChildren<CalloutMessage>> = ({ heading, status, text, url }) => (
+export const Callout: FC<React.PropsWithChildren<CalloutMessage>> = ({
+  heading,
+  status,
+  text,
+  url,
+}) => (
   <>
     <EuiCallOut
       data-test-subj={'mlValidationCallout'}

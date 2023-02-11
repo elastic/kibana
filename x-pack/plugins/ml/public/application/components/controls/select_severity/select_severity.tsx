@@ -124,17 +124,23 @@ interface Props {
   classNames?: string;
 }
 
-export const SelectSeverity: FC<React.PropsWithChildren<Props>> = ({ classNames } = { classNames: '' }) => {
+export const SelectSeverity: FC<React.PropsWithChildren<Props>> = (
+  { classNames } = { classNames: '' }
+) => {
   const [severity, setSeverity] = useTableSeverity();
 
   return <SelectSeverityUI severity={severity} onChange={setSeverity} />;
 };
 
-export const SelectSeverityUI: FC<React.PropsWithChildren<Omit<EuiSuperSelectProps<string>, 'onChange' | 'options'> & {
-  classNames?: string;
-  severity: TableSeverity;
-  onChange: (s: TableSeverity) => void;
-}>> = ({ classNames = '', severity, onChange, compressed }) => {
+export const SelectSeverityUI: FC<
+  React.PropsWithChildren<
+    Omit<EuiSuperSelectProps<string>, 'onChange' | 'options'> & {
+      classNames?: string;
+      severity: TableSeverity;
+      onChange: (s: TableSeverity) => void;
+    }
+  >
+> = ({ classNames = '', severity, onChange, compressed }) => {
   const handleOnChange = (valueDisplay: string) => {
     onChange(optionValueToThreshold(optionsMap[valueDisplay]));
   };

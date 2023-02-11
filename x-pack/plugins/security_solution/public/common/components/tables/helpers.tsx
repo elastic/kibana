@@ -143,7 +143,11 @@ interface PopoverComponentProps {
   idPrefix: string;
 }
 
-const PopoverComponent: React.FC<React.PropsWithChildren<PopoverComponentProps>> = ({ children, count, idPrefix }) => {
+const PopoverComponent: React.FC<React.PropsWithChildren<PopoverComponentProps>> = ({
+  children,
+  count,
+  idPrefix,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const onButtonClick = useCallback(() => {
     setIsOpen(!isOpen);

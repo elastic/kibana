@@ -17,7 +17,9 @@ import { useToasts } from '../common/lib/kibana';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-const wrapper: React.FC<React.PropsWithChildren<string>> = ({ children }) => <TestProviders>{children}</TestProviders>;
+const wrapper: React.FC<React.PropsWithChildren<string>> = ({ children }) => (
+  <TestProviders>{children}</TestProviders>
+);
 
 describe('useGetCaseMetrics', () => {
   const abortCtrl = new AbortController();

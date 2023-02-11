@@ -22,7 +22,9 @@ import { SEARCH_INDEX_TAB_PATH } from '../../../../routes';
 import { IndexNameLogic } from '../../index_name_logic';
 import { SearchIndexTabId } from '../../search_index';
 
-export const NativeConnectorAdvancedConfiguration: React.FC<React.PropsWithChildren<unknown>> = () => {
+export const NativeConnectorAdvancedConfiguration: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { indexName } = useValues(IndexNameLogic);
 
   return (

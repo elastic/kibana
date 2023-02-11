@@ -14,7 +14,9 @@ interface Props {
   mappings: Mappings | undefined;
 }
 
-export const TabMappings: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ mappings }) => {
+export const TabMappings: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  mappings,
+}) => {
   if (mappings && Object.keys(mappings).length) {
     return (
       <div data-test-subj="mappingsTabContent">

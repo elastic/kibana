@@ -24,12 +24,9 @@ export interface FilterExpressionsSelectProps {
 
 const { TYPE, TAGS, LOCATION, PORT } = FILTER_FIELDS;
 
-export const FiltersExpressionsSelect: React.FC<React.PropsWithChildren<FilterExpressionsSelectProps>> = ({
-  ruleParams,
-  newFilters,
-  onRemoveFilter,
-  setRuleParams,
-}) => {
+export const FiltersExpressionsSelect: React.FC<
+  React.PropsWithChildren<FilterExpressionsSelectProps>
+> = ({ ruleParams, newFilters, onRemoveFilter, setRuleParams }) => {
   const alertFilters = ruleParams?.filters;
 
   const selectedPorts = alertFilters?.[PORT] ?? [];

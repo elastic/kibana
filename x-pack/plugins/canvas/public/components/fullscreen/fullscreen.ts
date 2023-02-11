@@ -17,7 +17,10 @@ interface Props {
   }) => JSX.Element;
 }
 
-export const Fullscreen: FC<React.PropsWithChildren<Props>> = ({ isFullscreen = false, children }) => {
+export const Fullscreen: FC<React.PropsWithChildren<Props>> = ({
+  isFullscreen = false,
+  children,
+}) => {
   const [width, setWidth] = useState(getWindow().innerWidth);
   const [height, setHeight] = useState(getWindow().innerHeight);
 

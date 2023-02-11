@@ -22,10 +22,9 @@ interface InspectButtonContainerProps {
   children: React.ReactNode;
 }
 
-export const InspectButtonContainer: React.FC<React.PropsWithChildren<InspectButtonContainerProps>> = ({
-  children,
-  show = true,
-}) => (
+export const InspectButtonContainer: React.FC<
+  React.PropsWithChildren<InspectButtonContainerProps>
+> = ({ children, show = true }) => (
   <HoverVisibilityContainer show={show} targetClassNames={[BUTTON_CLASS]}>
     {children}
   </HoverVisibilityContainer>

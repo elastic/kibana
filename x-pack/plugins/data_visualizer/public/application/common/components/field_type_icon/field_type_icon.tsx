@@ -18,7 +18,10 @@ interface FieldTypeIconProps {
   type: SupportedFieldType;
 }
 
-export const FieldTypeIcon: FC<React.PropsWithChildren<FieldTypeIconProps>> = ({ tooltipEnabled = false, type }) => {
+export const FieldTypeIcon: FC<React.PropsWithChildren<FieldTypeIconProps>> = ({
+  tooltipEnabled = false,
+  type,
+}) => {
   const label =
     getJobTypeLabel(type) ??
     i18n.translate('xpack.dataVisualizer.fieldTypeIcon.fieldTypeTooltip', {

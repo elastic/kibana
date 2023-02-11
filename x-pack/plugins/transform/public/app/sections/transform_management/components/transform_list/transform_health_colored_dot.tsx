@@ -20,7 +20,9 @@ interface TransformHealthProps {
   healthStatus: TransformHealth;
 }
 
-export const TransformHealthColoredDot: FC<React.PropsWithChildren<TransformHealthProps>> = ({ healthStatus }) => {
+export const TransformHealthColoredDot: FC<React.PropsWithChildren<TransformHealthProps>> = ({
+  healthStatus,
+}) => {
   return (
     <EuiToolTip content={TRANSFORM_HEALTH_DESCRIPTION[healthStatus]}>
       <EuiHealth color={TRANSFORM_HEALTH_COLOR[healthStatus]}>

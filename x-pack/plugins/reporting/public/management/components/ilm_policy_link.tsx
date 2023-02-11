@@ -25,7 +25,10 @@ const i18nTexts = {
   }),
 };
 
-export const IlmPolicyLink: FunctionComponent<React.PropsWithChildren<Props>> = ({ locator, navigateToUrl }) => {
+export const IlmPolicyLink: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  locator,
+  navigateToUrl,
+}) => {
   return (
     <EuiButtonEmpty
       data-test-subj="ilmPolicyLink"

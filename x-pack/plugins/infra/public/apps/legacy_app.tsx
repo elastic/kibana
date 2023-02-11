@@ -24,7 +24,9 @@ export async function renderApp({ element }: AppMountParameters) {
   };
 }
 
-const LegacyApp: React.FunctionComponent<React.PropsWithChildren<{ history: History<unknown> }>> = ({ history }) => {
+const LegacyApp: React.FunctionComponent<
+  React.PropsWithChildren<{ history: History<unknown> }>
+> = ({ history }) => {
   return (
     <EuiErrorBoundary>
       <Router history={history}>

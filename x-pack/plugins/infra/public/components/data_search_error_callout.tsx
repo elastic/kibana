@@ -15,11 +15,13 @@ import {
   ShardFailureSearchStrategyError,
 } from '../../common/search_strategies/common/errors';
 
-export const DataSearchErrorCallout: React.FC<React.PropsWithChildren<{
-  title: React.ReactNode;
-  errors: SearchStrategyError[];
-  onRetry?: () => void;
-}>> = ({ errors, onRetry, title }) => {
+export const DataSearchErrorCallout: React.FC<
+  React.PropsWithChildren<{
+    title: React.ReactNode;
+    errors: SearchStrategyError[];
+    onRetry?: () => void;
+  }>
+> = ({ errors, onRetry, title }) => {
   const calloutColor = errors.some((error) => error.type !== 'aborted') ? 'danger' : 'warning';
 
   return (
@@ -39,7 +41,9 @@ export const DataSearchErrorCallout: React.FC<React.PropsWithChildren<{
   );
 };
 
-const DataSearchErrorMessage: React.FC<React.PropsWithChildren<{ error: SearchStrategyError }>> = ({ error }) => {
+const DataSearchErrorMessage: React.FC<React.PropsWithChildren<{ error: SearchStrategyError }>> = ({
+  error,
+}) => {
   if (error.type === 'aborted') {
     return <AbortedRequestErrorMessage error={error} />;
   } else if (error.type === 'shardFailure') {
@@ -49,9 +53,11 @@ const DataSearchErrorMessage: React.FC<React.PropsWithChildren<{ error: SearchSt
   }
 };
 
-const AbortedRequestErrorMessage: React.FC<React.PropsWithChildren<{
-  error?: AbortedRequestSearchStrategyError;
-}>> = ({}) => (
+const AbortedRequestErrorMessage: React.FC<
+  React.PropsWithChildren<{
+    error?: AbortedRequestSearchStrategyError;
+  }>
+> = ({}) => (
   <FormattedMessage
     tagName="p"
     id="xpack.infra.dataSearch.abortedRequestErrorMessage"
@@ -59,13 +65,13 @@ const AbortedRequestErrorMessage: React.FC<React.PropsWithChildren<{
   />
 );
 
-const GenericErrorMessage: React.FC<React.PropsWithChildren<{ error: GenericSearchStrategyError }>> = ({ error }) => (
-  <p>{error.message ?? `${error}`}</p>
-);
+const GenericErrorMessage: React.FC<
+  React.PropsWithChildren<{ error: GenericSearchStrategyError }>
+> = ({ error }) => <p>{error.message ?? `${error}`}</p>;
 
-const ShardFailureErrorMessage: React.FC<React.PropsWithChildren<{ error: ShardFailureSearchStrategyError }>> = ({
-  error,
-}) => (
+const ShardFailureErrorMessage: React.FC<
+  React.PropsWithChildren<{ error: ShardFailureSearchStrategyError }>
+> = ({ error }) => (
   <FormattedMessage
     tagName="p"
     id="xpack.infra.dataSearch.shardFailureErrorMessage"

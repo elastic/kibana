@@ -14,7 +14,9 @@ import './_step_progress.scss';
 
 type STATUS = 'incomplete' | 'inProgress' | 'complete' | 'failed' | 'paused' | 'cancelled';
 
-const StepStatus: React.FunctionComponent<React.PropsWithChildren<{ status: STATUS; idx: number }>> = ({ status, idx }) => {
+const StepStatus: React.FunctionComponent<
+  React.PropsWithChildren<{ status: STATUS; idx: number }>
+> = ({ status, idx }) => {
   if (status === 'incomplete') {
     return <span className="upgStepProgress__status">{idx + 1}.</span>;
   } else if (status === 'inProgress') {
@@ -48,12 +50,9 @@ const StepStatus: React.FunctionComponent<React.PropsWithChildren<{ status: STAT
   throw new Error(`Unsupported status: ${status}`);
 };
 
-const Step: React.FunctionComponent<React.PropsWithChildren<StepProgressStep & { idx: number }>> = ({
-  title,
-  status,
-  children,
-  idx,
-}) => {
+const Step: React.FunctionComponent<
+  React.PropsWithChildren<StepProgressStep & { idx: number }>
+> = ({ title, status, children, idx }) => {
   const titleClassName = classNames('upgStepProgress__title', {
     'upgStepProgress__title--currentStep': status === 'inProgress',
   });
@@ -78,9 +77,11 @@ export interface StepProgressStep {
 /**
  * A generic component that displays a series of automated steps and the system's progress.
  */
-export const StepProgress: React.FunctionComponent<React.PropsWithChildren<{
-  steps: StepProgressStep[];
-}>> = ({ steps }) => {
+export const StepProgress: React.FunctionComponent<
+  React.PropsWithChildren<{
+    steps: StepProgressStep[];
+  }>
+> = ({ steps }) => {
   return (
     <div className="upgStepProgress__container">
       {/* Use the index as the key only works here because these values do not change order after mounting. */}

@@ -15,10 +15,9 @@ import { useKibana } from '../hooks/use_kibana';
  *
  * The `template` prop can be used to alter the page layout for a given plugin route / all routes within a plugin - depending on the nesting.
  */
-export const SecuritySolutionPluginTemplateWrapper: FC<React.PropsWithChildren<KibanaPageTemplateProps>> = ({
-  children,
-  ...rest
-}) => {
+export const SecuritySolutionPluginTemplateWrapper: FC<
+  React.PropsWithChildren<KibanaPageTemplateProps>
+> = ({ children, ...rest }) => {
   const {
     services: {
       securityLayout: { getPluginWrapper },

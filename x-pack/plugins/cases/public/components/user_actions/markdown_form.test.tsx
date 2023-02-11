@@ -235,10 +235,9 @@ describe('UserActionMarkdown ', () => {
   describe('draft comment ', () => {
     const content = 'test content';
     const initialState = { content };
-    const MockHookWrapperComponent: React.FC<React.PropsWithChildren<{ testProviderProps?: unknown }>> = ({
-      children,
-      testProviderProps = {},
-    }) => {
+    const MockHookWrapperComponent: React.FC<
+      React.PropsWithChildren<{ testProviderProps?: unknown }>
+    > = ({ children, testProviderProps = {} }) => {
       const { form } = useForm<Content>({
         defaultValue: initialState,
         options: { stripEmptyFields: false },

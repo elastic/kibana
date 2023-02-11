@@ -32,10 +32,9 @@ interface Props {
   agents: Agent[] | string;
 }
 
-export const AgentReassignAgentPolicyModal: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
-  onClose,
-  agents,
-}) => {
+export const AgentReassignAgentPolicyModal: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ onClose, agents }) => {
   const { notifications } = useStartServices();
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
 

@@ -15,10 +15,9 @@ interface SourceErrorPageProps {
   retry: () => void;
 }
 
-export const SourceErrorPage: React.FunctionComponent<React.PropsWithChildren<SourceErrorPageProps>> = ({
-  errorMessage,
-  retry,
-}) => (
+export const SourceErrorPage: React.FunctionComponent<
+  React.PropsWithChildren<SourceErrorPageProps>
+> = ({ errorMessage, retry }) => (
   <ErrorPage
     shortMessage={
       <FormattedMessage

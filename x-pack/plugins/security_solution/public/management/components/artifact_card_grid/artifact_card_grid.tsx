@@ -22,7 +22,9 @@ type ArtifactsPaginatedContentProps = PaginatedContentProps<
   typeof ArtifactEntryCollapsibleCard
 >;
 
-type ArtifactsPaginatedComponent = ComponentType<React.PropsWithChildren<ArtifactsPaginatedContentProps>>;
+type ArtifactsPaginatedComponent = ComponentType<
+  React.PropsWithChildren<ArtifactsPaginatedContentProps>
+>;
 
 interface CardExpandCollapseState {
   expanded: MaybeImmutable<AnyArtifact[]>;

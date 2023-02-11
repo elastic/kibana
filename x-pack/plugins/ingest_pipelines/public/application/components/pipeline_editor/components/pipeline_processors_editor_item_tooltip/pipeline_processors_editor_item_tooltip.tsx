@@ -24,7 +24,9 @@ interface Props {
 const MOUSE_PADDING_RIGHT = 20;
 const MOUSE_PADDING_BOTTOM = 20;
 
-export const PipelineProcessorsItemTooltip: FunctionComponent<React.PropsWithChildren<Props>> = ({ processor }) => {
+export const PipelineProcessorsItemTooltip: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  processor,
+}) => {
   const [position, setPosition] = useState<Position | undefined>();
 
   useEffect(() => {

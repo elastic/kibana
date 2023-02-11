@@ -106,7 +106,10 @@ const OwnerSelector = ({
 };
 OwnerSelector.displayName = 'OwnerSelector';
 
-const CaseOwnerSelector: React.FC<React.PropsWithChildren<Props>> = ({ availableOwners, isLoading }) => {
+const CaseOwnerSelector: React.FC<React.PropsWithChildren<Props>> = ({
+  availableOwners,
+  isLoading,
+}) => {
   return (
     <UseField
       path={FIELD_NAME}

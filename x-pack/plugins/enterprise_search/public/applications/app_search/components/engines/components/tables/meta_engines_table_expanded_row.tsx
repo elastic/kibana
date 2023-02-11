@@ -27,10 +27,9 @@ interface MetaEnginesTableExpandedRowProps {
   conflictingEngines: Set<string>;
 }
 
-export const MetaEnginesTableExpandedRow: React.FC<React.PropsWithChildren<MetaEnginesTableExpandedRowProps>> = ({
-  sourceEngines,
-  conflictingEngines,
-}) => (
+export const MetaEnginesTableExpandedRow: React.FC<
+  React.PropsWithChildren<MetaEnginesTableExpandedRowProps>
+> = ({ sourceEngines, conflictingEngines }) => (
   <div className="metaEnginesSourceEnginesTable">
     <EuiTitle size="xs" className="eui-textCenter">
       <h3>{SOURCE_ENGINES_TITLE}</h3>

@@ -15,8 +15,8 @@ interface MetricFieldSelectorProps {
   onChange: (value: string) => void;
 }
 
-export const MetricFieldSelector: FC<React.PropsWithChildren<MetricFieldSelectorProps>> = React.memo(
-  ({ value, onChange }) => {
+export const MetricFieldSelector: FC<React.PropsWithChildren<MetricFieldSelectorProps>> =
+  React.memo(({ value, onChange }) => {
     const { metricFieldOptions } = useChangePointDetectionContext();
 
     const options = useMemo<EuiComboBoxOptionOption[]>(() => {
@@ -50,5 +50,4 @@ export const MetricFieldSelector: FC<React.PropsWithChildren<MetricFieldSelector
         />
       </EuiFormRow>
     );
-  }
-);
+  });

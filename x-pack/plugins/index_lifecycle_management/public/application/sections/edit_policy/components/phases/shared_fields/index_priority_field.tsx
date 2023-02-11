@@ -23,7 +23,9 @@ interface Props {
   phase: PhaseExceptDelete;
 }
 
-export const IndexPriorityField: FunctionComponent<React.PropsWithChildren<Props>> = ({ phase }) => {
+export const IndexPriorityField: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  phase,
+}) => {
   const { policy, isNewPolicy } = useEditPolicyContext();
 
   const initialToggleValue = useMemo<boolean>(() => {

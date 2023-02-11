@@ -14,12 +14,9 @@ export type TooltipWrapperProps = Partial<Omit<EuiToolTipProps, 'content'>> & {
   condition: boolean;
 };
 
-export const TooltipWrapper: React.FunctionComponent<React.PropsWithChildren<TooltipWrapperProps>> = ({
-  children,
-  condition,
-  tooltipContent,
-  ...tooltipProps
-}) => {
+export const TooltipWrapper: React.FunctionComponent<
+  React.PropsWithChildren<TooltipWrapperProps>
+> = ({ children, condition, tooltipContent, ...tooltipProps }) => {
   return (
     <>
       {condition ? (

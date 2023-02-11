@@ -34,7 +34,9 @@ import {
   HeaderLeftContent,
 } from './components';
 
-export const AgentPolicyDetailsPage: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
+export const AgentPolicyDetailsPage: React.FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const {
     params: { policyId, tabId = '' },
   } = useRouteMatch<{ policyId: string; tabId?: string }>();
@@ -193,9 +195,9 @@ export const AgentPolicyDetailsPage: React.FunctionComponent<React.PropsWithChil
   );
 };
 
-const AgentPolicyDetailsContent: React.FunctionComponent<React.PropsWithChildren<{ agentPolicy: AgentPolicy }>> = ({
-  agentPolicy,
-}) => {
+const AgentPolicyDetailsContent: React.FunctionComponent<
+  React.PropsWithChildren<{ agentPolicy: AgentPolicy }>
+> = ({ agentPolicy }) => {
   useBreadcrumbs('policy_details', { policyName: agentPolicy.name });
   return (
     <Switch>

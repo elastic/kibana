@@ -37,10 +37,9 @@ const getPipelineNameFromLocation = (location: Location) => {
   return pipeline;
 };
 
-export const PipelinesList: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps>> = ({
-  history,
-  location,
-}) => {
+export const PipelinesList: React.FunctionComponent<
+  React.PropsWithChildren<RouteComponentProps>
+> = ({ history, location }) => {
   const { services } = useKibana();
   const pipelineNameFromLocation = getPipelineNameFromLocation(location);
 

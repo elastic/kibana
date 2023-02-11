@@ -15,9 +15,11 @@ import { TextInput } from '../text_input';
 import { QuestionAnsweringInference } from './question_answering_inference';
 import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 
-const QuestionInput: FC<React.PropsWithChildren<{
-  inferrer: QuestionAnsweringInference;
-}>> = ({ inferrer }) => {
+const QuestionInput: FC<
+  React.PropsWithChildren<{
+    inferrer: QuestionAnsweringInference;
+  }>
+> = ({ inferrer }) => {
   const questionText = useObservable(inferrer.getQuestionText$(), inferrer.getQuestionText());
   const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
 

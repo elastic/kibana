@@ -17,12 +17,13 @@ export interface ComponentProps {
   allFields: NormalizedFields['byId'];
 }
 
-const typeToParametersFormMap: { [key in DataType]?: ComponentType<React.PropsWithChildren<any>> } = {
-  alias: AliasTypeRequiredParameters,
-  token_count: TokenCountTypeRequiredParameters,
-  scaled_float: ScaledFloatTypeRequiredParameters,
-  dense_vector: DenseVectorRequiredParameters,
-};
+const typeToParametersFormMap: { [key in DataType]?: ComponentType<React.PropsWithChildren<any>> } =
+  {
+    alias: AliasTypeRequiredParameters,
+    token_count: TokenCountTypeRequiredParameters,
+    scaled_float: ScaledFloatTypeRequiredParameters,
+    dense_vector: DenseVectorRequiredParameters,
+  };
 
 export const getRequiredParametersFormForType = (
   type: MainType,

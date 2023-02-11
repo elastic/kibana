@@ -37,10 +37,9 @@ interface MatchParams {
   snapshotId?: string;
 }
 
-export const SnapshotList: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps<MatchParams>>> = ({
-  location: { search },
-  history,
-}) => {
+export const SnapshotList: React.FunctionComponent<
+  React.PropsWithChildren<RouteComponentProps<MatchParams>>
+> = ({ location: { search }, history }) => {
   const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
   const [listParams, setListParams] = useState<SnapshotListParams>(DEFAULT_SNAPSHOT_LIST_PARAMS);
   const {

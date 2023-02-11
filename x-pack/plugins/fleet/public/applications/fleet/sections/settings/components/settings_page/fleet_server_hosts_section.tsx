@@ -19,10 +19,9 @@ export interface FleetServerHostsSectionProps {
   deleteFleetServerHost: (fleetServerHost: FleetServerHost) => void;
 }
 
-export const FleetServerHostsSection: React.FunctionComponent<React.PropsWithChildren<FleetServerHostsSectionProps>> = ({
-  fleetServerHosts,
-  deleteFleetServerHost,
-}) => {
+export const FleetServerHostsSection: React.FunctionComponent<
+  React.PropsWithChildren<FleetServerHostsSectionProps>
+> = ({ fleetServerHosts, deleteFleetServerHost }) => {
   const { docLinks } = useStartServices();
   const { getHref } = useLink();
 

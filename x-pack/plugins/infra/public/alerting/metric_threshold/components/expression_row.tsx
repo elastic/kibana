@@ -350,14 +350,16 @@ export const ExpressionRow: React.FC<React.PropsWithChildren<ExpressionRowProps>
   );
 };
 
-const ThresholdElement: React.FC<React.PropsWithChildren<{
-  updateComparator: (c?: string) => void;
-  updateThreshold: (t?: number[]) => void;
-  threshold: MetricExpression['threshold'];
-  isMetricPct: boolean;
-  comparator: MetricExpression['comparator'];
-  errors: IErrorObject;
-}>> = ({ updateComparator, updateThreshold, threshold, isMetricPct, comparator, errors }) => {
+const ThresholdElement: React.FC<
+  React.PropsWithChildren<{
+    updateComparator: (c?: string) => void;
+    updateThreshold: (t?: number[]) => void;
+    threshold: MetricExpression['threshold'];
+    isMetricPct: boolean;
+    comparator: MetricExpression['comparator'];
+    errors: IErrorObject;
+  }>
+> = ({ updateComparator, updateThreshold, threshold, isMetricPct, comparator, errors }) => {
   const displayedThreshold = useMemo(() => {
     if (isMetricPct) return threshold.map((v) => decimalToPct(v));
     return threshold;

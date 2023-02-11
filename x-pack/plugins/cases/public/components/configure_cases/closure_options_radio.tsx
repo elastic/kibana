@@ -34,11 +34,9 @@ export interface ClosureOptionsRadioComponentProps {
   onChangeClosureType: (newClosureType: ClosureType) => void;
 }
 
-const ClosureOptionsRadioComponent: React.FC<React.PropsWithChildren<ClosureOptionsRadioComponentProps>> = ({
-  closureTypeSelected,
-  disabled,
-  onChangeClosureType,
-}) => {
+const ClosureOptionsRadioComponent: React.FC<
+  React.PropsWithChildren<ClosureOptionsRadioComponentProps>
+> = ({ closureTypeSelected, disabled, onChangeClosureType }) => {
   const onChangeLocal = useCallback(
     (id: string) => {
       onChangeClosureType(id as ClosureType);

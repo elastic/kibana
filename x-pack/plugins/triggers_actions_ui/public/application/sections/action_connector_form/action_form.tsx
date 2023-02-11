@@ -281,7 +281,9 @@ export const ActionForm = ({
               type={
                 typeof item.iconClass === 'string'
                   ? item.iconClass
-                  : suspendedComponentWithProps(item.iconClass as React.ComponentType<React.PropsWithChildren<unknown>>)
+                  : suspendedComponentWithProps(
+                      item.iconClass as React.ComponentType<React.PropsWithChildren<unknown>>
+                    )
               }
             />
           </EuiKeyPadMenuItem>

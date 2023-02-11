@@ -36,7 +36,10 @@ interface Props {
   setCurrentTab: (tabId: MlSavedObjectType) => void;
 }
 
-export const SpaceManagement: FC<React.PropsWithChildren<Props>> = ({ spacesApi, setCurrentTab }) => {
+export const SpaceManagement: FC<React.PropsWithChildren<Props>> = ({
+  spacesApi,
+  setCurrentTab,
+}) => {
   const { getList } = useManagementApiService();
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
   const [items, setItems] = useState<ManagementListResponse>();
@@ -208,10 +211,9 @@ export const SpaceManagement: FC<React.PropsWithChildren<Props>> = ({ spacesApi,
   );
 };
 
-export const RefreshButton: FC<React.PropsWithChildren<{ onRefreshClick: () => void; isRefreshing: boolean }>> = ({
-  onRefreshClick,
-  isRefreshing,
-}) => (
+export const RefreshButton: FC<
+  React.PropsWithChildren<{ onRefreshClick: () => void; isRefreshing: boolean }>
+> = ({ onRefreshClick, isRefreshing }) => (
   <EuiButtonEmpty
     data-test-subj={`mlRefreshJobListButton${isRefreshing ? ' loading' : ' loaded'}`}
     onClick={onRefreshClick}

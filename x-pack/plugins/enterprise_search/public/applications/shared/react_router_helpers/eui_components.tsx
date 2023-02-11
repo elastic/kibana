@@ -49,12 +49,9 @@ export const EuiButtonTo: React.FC<React.PropsWithChildren<ReactRouterEuiButtonP
 }) => <EuiButton {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
 
 type ReactRouterEuiButtonEmptyProps = ReactRouterProps & EuiButtonEmptyProps;
-export const EuiButtonEmptyTo: React.FC<React.PropsWithChildren<ReactRouterEuiButtonEmptyProps>> = ({
-  to,
-  onClick,
-  shouldNotCreateHref,
-  ...rest
-}) => (
+export const EuiButtonEmptyTo: React.FC<
+  React.PropsWithChildren<ReactRouterEuiButtonEmptyProps>
+> = ({ to, onClick, shouldNotCreateHref, ...rest }) => (
   <EuiButtonEmpty {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
 );
 
@@ -85,12 +82,9 @@ export const EuiCardTo: React.FC<React.PropsWithChildren<ReactRouterEuiCardProps
 }) => <EuiCard {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
 
 type ReactRouterEuiListGroupItemProps = ReactRouterProps & EuiListGroupItemProps;
-export const EuiListGroupItemTo: React.FC<React.PropsWithChildren<ReactRouterEuiListGroupItemProps>> = ({
-  to,
-  onClick,
-  shouldNotCreateHref,
-  ...rest
-}) => (
+export const EuiListGroupItemTo: React.FC<
+  React.PropsWithChildren<ReactRouterEuiListGroupItemProps>
+> = ({ to, onClick, shouldNotCreateHref, ...rest }) => (
   <EuiListGroupItem {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
 );
 

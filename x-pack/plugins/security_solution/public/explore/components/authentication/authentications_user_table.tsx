@@ -27,7 +27,9 @@ import type { AuthenticationsUserTableProps } from './types';
 
 const TABLE_QUERY_ID = 'authenticationsUsersTableQuery';
 
-const AuthenticationsUserTableComponent: React.FC<React.PropsWithChildren<AuthenticationsUserTableProps>> = ({
+const AuthenticationsUserTableComponent: React.FC<
+  React.PropsWithChildren<AuthenticationsUserTableProps>
+> = ({
   endDate,
   filterQuery,
   indexNames,

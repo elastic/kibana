@@ -49,7 +49,11 @@ export interface CustomUrlListProps {
  * React component for listing the custom URLs added to a job,
  * with buttons for testing and deleting each custom URL.
  */
-export const CustomUrlList: FC<React.PropsWithChildren<CustomUrlListProps>> = ({ job, customUrls, setCustomUrls }) => {
+export const CustomUrlList: FC<React.PropsWithChildren<CustomUrlListProps>> = ({
+  job,
+  customUrls,
+  setCustomUrls,
+}) => {
   const {
     services: { http, notifications },
   } = useMlKibana();

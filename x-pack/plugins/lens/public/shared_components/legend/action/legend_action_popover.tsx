@@ -26,11 +26,9 @@ export interface LegendActionPopoverProps {
   context: ClickTriggerEvent['data'];
 }
 
-export const LegendActionPopover: React.FunctionComponent<React.PropsWithChildren<LegendActionPopoverProps>> = ({
-  label,
-  onFilter,
-  context,
-}) => {
+export const LegendActionPopover: React.FunctionComponent<
+  React.PropsWithChildren<LegendActionPopoverProps>
+> = ({ label, onFilter, context }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [ref, onClose] = useLegendAction<HTMLDivElement>();
   const panels: EuiContextMenuPanelDescriptor[] = [

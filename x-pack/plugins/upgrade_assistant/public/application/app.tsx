@@ -31,7 +31,9 @@ import { EsDeprecations, EsDeprecationLogs, KibanaDeprecations, Overview } from 
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
-const AppHandlingClusterUpgradeState: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
+const AppHandlingClusterUpgradeState: React.FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const {
     services: { api, core },
   } = useAppContext();

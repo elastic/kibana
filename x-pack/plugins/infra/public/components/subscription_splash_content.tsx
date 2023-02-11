@@ -20,9 +20,9 @@ const loadingMessage = i18n.translate('xpack.infra.ml.splash.loadingMessage', {
   defaultMessage: 'Checking license...',
 });
 
-export const SubscriptionSplashPage: React.FC<React.PropsWithChildren<LazyObservabilityPageTemplateProps>> = (
-  templateProps
-) => {
+export const SubscriptionSplashPage: React.FC<
+  React.PropsWithChildren<LazyObservabilityPageTemplateProps>
+> = (templateProps) => {
   return (
     <PageTemplate {...templateProps} isEmptyState={true}>
       <SubscriptionSplashPrompt />

@@ -15,11 +15,9 @@ export interface CollectConfigContainerProps extends CollectConfigProps {
   params: Params;
 }
 
-export const CollectConfigContainer: React.FC<React.PropsWithChildren<CollectConfigContainerProps>> = ({
-  config,
-  onConfig,
-  params: { start },
-}) => {
+export const CollectConfigContainer: React.FC<
+  React.PropsWithChildren<CollectConfigContainerProps>
+> = ({ config, onConfig, params: { start } }) => {
   const isMounted = useMountedState();
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternItem[]>([]);
 

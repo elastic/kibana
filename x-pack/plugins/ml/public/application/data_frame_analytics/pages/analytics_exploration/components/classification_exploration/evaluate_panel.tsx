@@ -104,7 +104,11 @@ function getHelpText(dataSubsetTitle: string): string {
   return helpText;
 }
 
-export const EvaluatePanel: FC<React.PropsWithChildren<EvaluatePanelProps>> = ({ jobConfig, jobStatus, searchQuery }) => {
+export const EvaluatePanel: FC<React.PropsWithChildren<EvaluatePanelProps>> = ({
+  jobConfig,
+  jobStatus,
+  searchQuery,
+}) => {
   const {
     services: { docLinks },
   } = useMlKibana();

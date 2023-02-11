@@ -28,7 +28,9 @@ interface MatchParams {
   name: string;
 }
 
-export const TemplateEdit: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps<MatchParams>>> = ({
+export const TemplateEdit: React.FunctionComponent<
+  React.PropsWithChildren<RouteComponentProps<MatchParams>>
+> = ({
   match: {
     params: { name },
   },

@@ -40,7 +40,9 @@ export const spikeAnalysisTableRowContext = createContext<SpikeAnalysisTableRow 
   undefined
 );
 
-export const SpikeAnalysisTableRowStateProvider: FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const SpikeAnalysisTableRowStateProvider: FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   // State that will be shared with all components
   const [pinnedChangePoint, setPinnedChangePoint] = useState<ChangePointOrNull>(null);
   const [pinnedGroup, setPinnedGroup] = useState<GroupOrNull>(null);

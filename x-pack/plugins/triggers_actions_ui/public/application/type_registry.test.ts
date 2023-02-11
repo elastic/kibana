@@ -14,7 +14,9 @@ import {
 } from '../types';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
 
-export const ExpressionComponent: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
+export const ExpressionComponent: React.FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   return null;
 };
 

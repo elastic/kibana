@@ -17,7 +17,10 @@ interface Props {
   setCanProceed?: (proceed: boolean) => void;
 }
 
-export const CategorizationView: FC<React.PropsWithChildren<Props>> = ({ isActive, setCanProceed }) => {
+export const CategorizationView: FC<React.PropsWithChildren<Props>> = ({
+  isActive,
+  setCanProceed,
+}) => {
   const [categoryFieldValid, setCategoryFieldValid] = useState(false);
   const [settingsValid, setSettingsValid] = useState(false);
 

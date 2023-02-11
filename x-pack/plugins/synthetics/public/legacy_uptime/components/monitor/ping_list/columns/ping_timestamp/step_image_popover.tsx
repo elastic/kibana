@@ -29,11 +29,9 @@ interface ScreenshotImageProps {
   imageCaption: JSX.Element;
 }
 
-const DefaultImage: React.FC<React.PropsWithChildren<ScreenshotImageProps & { imageData?: string }>> = ({
-  captionContent,
-  imageCaption,
-  imageData,
-}) =>
+const DefaultImage: React.FC<
+  React.PropsWithChildren<ScreenshotImageProps & { imageData?: string }>
+> = ({ captionContent, imageCaption, imageData }) =>
   imageData ? (
     <StepImage
       allowFullScreen={true}
@@ -53,11 +51,15 @@ const DefaultImage: React.FC<React.PropsWithChildren<ScreenshotImageProps & { im
  * This component provides an intermediate step for composite images. It causes a loading spinner to appear
  * while the image is being re-assembled, then calls the default image component and provides a data URL for the image.
  */
-const RecomposedScreenshotImage: React.FC<React.PropsWithChildren<ScreenshotImageProps & {
-  imgRef: ScreenshotRefImageData;
-  setImageData: React.Dispatch<string | undefined>;
-  imageData: string | undefined;
-}>> = ({ captionContent, imageCaption, imageData, imgRef, setImageData }) => {
+const RecomposedScreenshotImage: React.FC<
+  React.PropsWithChildren<
+    ScreenshotImageProps & {
+      imgRef: ScreenshotRefImageData;
+      setImageData: React.Dispatch<string | undefined>;
+      imageData: string | undefined;
+    }
+  >
+> = ({ captionContent, imageCaption, imageData, imgRef, setImageData }) => {
   // initially an undefined URL value is passed to the image display, and a loading spinner is rendered.
   // `useCompositeImage` will call `setImageData` when the image is composited, and the updated `imageData` will display.
   useCompositeImage(imgRef, setImageData, imageData);
@@ -79,10 +81,14 @@ export interface StepImagePopoverProps {
   isImagePopoverOpen: boolean;
 }
 
-const StepImageComponent: React.FC<React.PropsWithChildren<Omit<StepImagePopoverProps, 'isImagePopoverOpen'> & {
-  setImageData: React.Dispatch<string | undefined>;
-  imageData: string | undefined;
-}>> = ({ captionContent, imageCaption, imageData, imgRef, imgSrc, setImageData }) => {
+const StepImageComponent: React.FC<
+  React.PropsWithChildren<
+    Omit<StepImagePopoverProps, 'isImagePopoverOpen'> & {
+      setImageData: React.Dispatch<string | undefined>;
+      imageData: string | undefined;
+    }
+  >
+> = ({ captionContent, imageCaption, imageData, imgRef, imgSrc, setImageData }) => {
   if (imgSrc) {
     return (
       <DefaultImage

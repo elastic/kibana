@@ -41,7 +41,10 @@ import { EditAction } from './use_edit_action';
 
 let mmLValidator: (value: any) => MemoryInputValidatorResult;
 
-export const EditActionFlyout: FC<React.PropsWithChildren<Required<EditAction>>> = ({ closeFlyout, item }) => {
+export const EditActionFlyout: FC<React.PropsWithChildren<Required<EditAction>>> = ({
+  closeFlyout,
+  item,
+}) => {
   const { id: jobId, config } = item;
   const { state } = item.stats;
   const initialAllowLazyStart =

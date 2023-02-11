@@ -31,11 +31,9 @@ export interface LogCategorizationAppStateProps {
   appDependencies: AiopsAppDependencies;
 }
 
-export const LogCategorizationAppState: FC<React.PropsWithChildren<LogCategorizationAppStateProps>> = ({
-  dataView,
-  savedSearch,
-  appDependencies,
-}) => {
+export const LogCategorizationAppState: FC<
+  React.PropsWithChildren<LogCategorizationAppStateProps>
+> = ({ dataView, savedSearch, appDependencies }) => {
   const datePickerDeps = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
     toMountPoint,

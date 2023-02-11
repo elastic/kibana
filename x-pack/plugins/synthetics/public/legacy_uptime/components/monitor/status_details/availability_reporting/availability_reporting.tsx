@@ -21,7 +21,9 @@ export const formatAvailabilityValue = (val: number) => {
   return result.toFixed(2);
 };
 
-export const AvailabilityReporting: React.FC<React.PropsWithChildren<Props>> = ({ allLocations }) => {
+export const AvailabilityReporting: React.FC<React.PropsWithChildren<Props>> = ({
+  allLocations,
+}) => {
   const [pageIndex, setPageIndex] = useState(0);
 
   const cols = [

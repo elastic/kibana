@@ -135,7 +135,9 @@ export interface IndexDataVisualizerViewProps {
   getAdditionalLinks?: GetAdditionalLinks;
 }
 
-export const IndexDataVisualizerView: FC<React.PropsWithChildren<IndexDataVisualizerViewProps>> = (dataVisualizerProps) => {
+export const IndexDataVisualizerView: FC<React.PropsWithChildren<IndexDataVisualizerViewProps>> = (
+  dataVisualizerProps
+) => {
   const euiTheme = useCurrentEuiTheme();
 
   const [savedRandomSamplerPreference, saveRandomSamplerPreference] = useStorage<

@@ -96,7 +96,10 @@ export class RenderedElementComponent extends PureComponent<Props> {
 /**
  * A store-connected container for the `RenderedElement` component.
  */
-export const RenderedElement: FC<React.PropsWithChildren<Pick<Props, 'element' | 'index'>>> = ({ index, element }) => {
+export const RenderedElement: FC<React.PropsWithChildren<Pick<Props, 'element' | 'index'>>> = ({
+  index,
+  element,
+}) => {
   const [{ renderers }] = useCanvasShareableState();
 
   const { expressionRenderable } = element;

@@ -27,7 +27,10 @@ interface Props {
   updatePolicies: () => void;
 }
 
-export const PolicyList: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ policies, updatePolicies }) => {
+export const PolicyList: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  policies,
+  updatePolicies,
+}) => {
   const history = useHistory();
 
   const createPolicyButton = (

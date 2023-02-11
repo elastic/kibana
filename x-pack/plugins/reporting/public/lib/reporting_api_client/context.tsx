@@ -19,9 +19,11 @@ interface ContextValue {
 
 const InternalApiClientContext = createContext<undefined | ContextValue>(undefined);
 
-export const InternalApiClientProvider: FunctionComponent<React.PropsWithChildren<{
-  apiClient: ReportingAPIClient;
-}>> = ({ apiClient, children }) => {
+export const InternalApiClientProvider: FunctionComponent<
+  React.PropsWithChildren<{
+    apiClient: ReportingAPIClient;
+  }>
+> = ({ apiClient, children }) => {
   const {
     services: { http },
   } = useKibana();

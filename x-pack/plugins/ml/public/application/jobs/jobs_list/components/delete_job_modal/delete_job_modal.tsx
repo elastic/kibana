@@ -37,7 +37,11 @@ interface Props {
   refreshJobs(): void;
 }
 
-export const DeleteJobModal: FC<React.PropsWithChildren<Props>> = ({ setShowFunction, unsetShowFunction, refreshJobs }) => {
+export const DeleteJobModal: FC<React.PropsWithChildren<Props>> = ({
+  setShowFunction,
+  unsetShowFunction,
+  refreshJobs,
+}) => {
   const [deleting, setDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [jobIds, setJobIds] = useState<string[]>([]);

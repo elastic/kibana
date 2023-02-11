@@ -93,9 +93,9 @@ export const ExamplesValidCallout: FC<React.PropsWithChildren<Props>> = ({
   );
 };
 
-const AnalyzerUsed: FC<React.PropsWithChildren<{ categorizationAnalyzer: CategorizationAnalyzer }>> = ({
-  categorizationAnalyzer,
-}) => {
+const AnalyzerUsed: FC<
+  React.PropsWithChildren<{ categorizationAnalyzer: CategorizationAnalyzer }>
+> = ({ categorizationAnalyzer }) => {
   let analyzer = '';
 
   if (categorizationAnalyzer?.tokenizer !== undefined) {
@@ -120,9 +120,9 @@ const AnalyzerUsed: FC<React.PropsWithChildren<{ categorizationAnalyzer: Categor
   );
 };
 
-const AllValidationChecks: FC<React.PropsWithChildren<{ validationChecks: FieldExampleCheck[] }>> = ({
-  validationChecks,
-}) => {
+const AllValidationChecks: FC<
+  React.PropsWithChildren<{ validationChecks: FieldExampleCheck[] }>
+> = ({ validationChecks }) => {
   const list: EuiListGroupItemProps[] = Object.keys(VALIDATION_CHECK_DESCRIPTION).map((k, i) => {
     const failedCheck = validationChecks.find((vc) => vc.id === i);
     if (

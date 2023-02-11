@@ -13,9 +13,9 @@ interface Props {
   troubleshootLink: string;
 }
 
-export const ConfirmIncomingDataStandalone: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
-  troubleshootLink,
-}) => {
+export const ConfirmIncomingDataStandalone: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ troubleshootLink }) => {
   return (
     <>
       <EuiText>

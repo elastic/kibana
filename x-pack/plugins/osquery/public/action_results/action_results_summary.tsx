@@ -27,12 +27,9 @@ const renderErrorMessage = (error: string) => (
   </EuiCodeBlock>
 );
 
-const ActionResultsSummaryComponent: React.FC<React.PropsWithChildren<ActionResultsSummaryProps>> = ({
-  actionId,
-  expirationDate,
-  agentIds,
-  error,
-}) => {
+const ActionResultsSummaryComponent: React.FC<
+  React.PropsWithChildren<ActionResultsSummaryProps>
+> = ({ actionId, expirationDate, agentIds, error }) => {
   const [pageIndex] = useState(0);
   const [pageSize] = useState(50);
   const expired = useMemo(

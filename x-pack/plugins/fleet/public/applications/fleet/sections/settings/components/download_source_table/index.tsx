@@ -28,10 +28,9 @@ const FlexGroupWithMinWidth = styled(EuiFlexGroup)`
   min-width: 0px;
 `;
 
-export const DownloadSourceTable: React.FunctionComponent<React.PropsWithChildren<DownloadSourceTableProps>> = ({
-  downloadSources,
-  deleteDownloadSource,
-}) => {
+export const DownloadSourceTable: React.FunctionComponent<
+  React.PropsWithChildren<DownloadSourceTableProps>
+> = ({ downloadSources, deleteDownloadSource }) => {
   const { getHref } = useLink();
 
   const columns = useMemo((): Array<EuiBasicTableColumn<DownloadSource>> => {

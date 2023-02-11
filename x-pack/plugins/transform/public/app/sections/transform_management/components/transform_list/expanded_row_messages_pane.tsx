@@ -39,7 +39,9 @@ interface Sorting {
   direction: 'asc' | 'desc';
 }
 
-export const ExpandedRowMessagesPane: React.FC<React.PropsWithChildren<Props>> = ({ transformId }) => {
+export const ExpandedRowMessagesPane: React.FC<React.PropsWithChildren<Props>> = ({
+  transformId,
+}) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [msgCount, setMsgCount] = useState<number>(0);
 

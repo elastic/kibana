@@ -14,10 +14,9 @@ interface RefreshTransformListButton {
   isLoading: boolean;
   onClick(): void;
 }
-export const RefreshTransformListButton: FC<React.PropsWithChildren<RefreshTransformListButton>> = ({
-  onClick,
-  isLoading,
-}) => (
+export const RefreshTransformListButton: FC<
+  React.PropsWithChildren<RefreshTransformListButton>
+> = ({ onClick, isLoading }) => (
   <EuiButton
     color="success"
     iconType="refresh"

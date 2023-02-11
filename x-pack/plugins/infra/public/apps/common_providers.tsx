@@ -21,13 +21,15 @@ import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 
-export const CommonInfraProviders: React.FC<React.PropsWithChildren<{
-  appName: string;
-  storage: Storage;
-  triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
-}>> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
+export const CommonInfraProviders: React.FC<
+  React.PropsWithChildren<{
+    appName: string;
+    storage: Storage;
+    triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+    theme$: AppMountParameters['theme$'];
+  }>
+> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (

@@ -28,14 +28,16 @@ export const hasReindexWarning = (
   return Boolean(warnings.find((warning) => warning.warningType === warningType));
 };
 
-const WarningCheckbox: React.FunctionComponent<React.PropsWithChildren<{
-  isChecked: boolean;
-  warningId: string;
-  label: React.ReactNode;
-  description: React.ReactNode;
-  documentationUrl?: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}>> = ({ isChecked, warningId, label, onChange, description, documentationUrl }) => (
+const WarningCheckbox: React.FunctionComponent<
+  React.PropsWithChildren<{
+    isChecked: boolean;
+    warningId: string;
+    label: React.ReactNode;
+    description: React.ReactNode;
+    documentationUrl?: string;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  }>
+> = ({ isChecked, warningId, label, onChange, description, documentationUrl }) => (
   <>
     <EuiText>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -82,13 +84,9 @@ export interface WarningCheckboxProps {
   meta?: ReindexWarning['meta'];
 }
 
-export const CustomTypeNameWarningCheckbox: React.FunctionComponent<React.PropsWithChildren<WarningCheckboxProps>> = ({
-  isChecked,
-  onChange,
-  docLinks,
-  id,
-  meta,
-}) => {
+export const CustomTypeNameWarningCheckbox: React.FunctionComponent<
+  React.PropsWithChildren<WarningCheckboxProps>
+> = ({ isChecked, onChange, docLinks, id, meta }) => {
   return (
     <WarningCheckbox
       isChecked={isChecked}
@@ -118,13 +116,9 @@ export const CustomTypeNameWarningCheckbox: React.FunctionComponent<React.PropsW
   );
 };
 
-export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<React.PropsWithChildren<WarningCheckboxProps>> = ({
-  isChecked,
-  onChange,
-  docLinks,
-  id,
-  meta,
-}) => {
+export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<
+  React.PropsWithChildren<WarningCheckboxProps>
+> = ({ isChecked, onChange, docLinks, id, meta }) => {
   return (
     <WarningCheckbox
       isChecked={isChecked}
@@ -161,7 +155,9 @@ export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<React.Pro
   );
 };
 
-export const ReplaceIndexWithAliasWarningCheckbox: React.FunctionComponent<React.PropsWithChildren<WarningCheckboxProps>> = ({ isChecked, onChange, docLinks, id, meta }) => {
+export const ReplaceIndexWithAliasWarningCheckbox: React.FunctionComponent<
+  React.PropsWithChildren<WarningCheckboxProps>
+> = ({ isChecked, onChange, docLinks, id, meta }) => {
   return (
     <WarningCheckbox
       isChecked={isChecked}

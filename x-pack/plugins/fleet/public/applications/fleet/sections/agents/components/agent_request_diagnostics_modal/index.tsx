@@ -25,11 +25,9 @@ interface Props {
   agentCount: number;
 }
 
-export const AgentRequestDiagnosticsModal: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
-  onClose,
-  agents,
-  agentCount,
-}) => {
+export const AgentRequestDiagnosticsModal: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ onClose, agents, agentCount }) => {
   const { notifications } = useStartServices();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;

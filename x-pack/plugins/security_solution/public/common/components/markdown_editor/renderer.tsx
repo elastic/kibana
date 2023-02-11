@@ -18,12 +18,16 @@ interface Props {
   disableLinks?: boolean;
 }
 
-const MarkdownRendererComponent: React.FC<React.PropsWithChildren<Props>> = ({ children, disableLinks }) => {
-  const MarkdownLinkProcessingComponent: React.FC<React.PropsWithChildren<EuiLinkAnchorProps>> = useMemo(
-    // eslint-disable-next-line react/display-name
-    () => (props) => <MarkdownLink {...props} disableLinks={disableLinks} />,
-    [disableLinks]
-  );
+const MarkdownRendererComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  children,
+  disableLinks,
+}) => {
+  const MarkdownLinkProcessingComponent: React.FC<React.PropsWithChildren<EuiLinkAnchorProps>> =
+    useMemo(
+      // eslint-disable-next-line react/display-name
+      () => (props) => <MarkdownLink {...props} disableLinks={disableLinks} />,
+      [disableLinks]
+    );
   // Deep clone of the processing plugins to prevent affecting the markdown editor.
   const processingPluginList = cloneDeep(processingPlugins);
   // This line of code is TS-compatible and it will break if [1][1] change in the future.

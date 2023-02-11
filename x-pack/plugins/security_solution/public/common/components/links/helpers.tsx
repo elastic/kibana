@@ -28,11 +28,14 @@ export interface ReputationLinkSetting {
   name: string;
   url_template: string;
 }
-export const LinkButton: React.FC<React.PropsWithChildren<PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>>> = ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
+export const LinkButton: React.FC<
+  React.PropsWithChildren<PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>>
+> = ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
 
-export const LinkAnchor: React.FC<React.PropsWithChildren<EuiLinkProps>> = ({ children, ...props }) => (
-  <EuiLink {...props}>{children}</EuiLink>
-);
+export const LinkAnchor: React.FC<React.PropsWithChildren<EuiLinkProps>> = ({
+  children,
+  ...props
+}) => <EuiLink {...props}>{children}</EuiLink>;
 
 export const Comma = styled('span')`
   margin-right: 5px;
@@ -44,16 +47,18 @@ export const Comma = styled('span')`
 
 Comma.displayName = 'Comma';
 
-const GenericLinkButtonComponent: React.FC<React.PropsWithChildren<{
-  children?: React.ReactNode;
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  dataTestSubj?: string;
-  href: string;
-  onClick?: (e: SyntheticEvent) => void;
-  title?: string;
-  iconType?: string;
-}>> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'expand' }) => {
+const GenericLinkButtonComponent: React.FC<
+  React.PropsWithChildren<{
+    children?: React.ReactNode;
+    /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+    Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+    dataTestSubj?: string;
+    href: string;
+    onClick?: (e: SyntheticEvent) => void;
+    title?: string;
+    iconType?: string;
+  }>
+> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'expand' }) => {
   return Component ? (
     <Component
       data-test-subj={dataTestSubj}

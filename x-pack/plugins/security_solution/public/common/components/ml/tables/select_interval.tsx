@@ -27,10 +27,12 @@ const OPTIONS = [
   },
 ];
 
-export const SelectInterval: React.FC<React.PropsWithChildren<{
-  interval: string;
-  onChange: (interval: string) => void;
-}>> = ({ interval, onChange }) => {
+export const SelectInterval: React.FC<
+  React.PropsWithChildren<{
+    interval: string;
+    onChange: (interval: string) => void;
+  }>
+> = ({ interval, onChange }) => {
   const onChangeCb = useCallback(
     (e) => {
       onChange(e.target.value);

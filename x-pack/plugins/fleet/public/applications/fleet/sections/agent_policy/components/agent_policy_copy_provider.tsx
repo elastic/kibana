@@ -21,7 +21,9 @@ export type CopyAgentPolicy = (agentPolicy: AgentPolicy, onSuccess?: OnSuccessCa
 
 type OnSuccessCallback = (newAgentPolicy: AgentPolicy) => void;
 
-export const AgentPolicyCopyProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ children }) => {
+export const AgentPolicyCopyProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  children,
+}) => {
   const { notifications } = useStartServices();
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
   const [newAgentPolicy, setNewAgentPolicy] = useState<Pick<AgentPolicy, 'name' | 'description'>>();

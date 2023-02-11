@@ -37,7 +37,9 @@ export interface FormRowProps {
  * @throws Error if not a child of a `<Formik>` component.
  * @throws Error if `name` prop is not set and can't be inferred from its child element.
  */
-export const FormRow: FunctionComponent<React.PropsWithChildren<EuiFormRowProps & FormRowProps>> = (props) => {
+export const FormRow: FunctionComponent<React.PropsWithChildren<EuiFormRowProps & FormRowProps>> = (
+  props
+) => {
   const formik = useFormikContext();
   const child = Children.only(props.children);
   const name = props.name ?? child.props.name;

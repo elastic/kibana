@@ -51,15 +51,17 @@ interface MultiSelectPickerStyles {
   filterGroup?: SerializedStyles;
   filterItemContainer?: SerializedStyles;
 }
-export const MultiSelectPicker: FC<React.PropsWithChildren<{
-  options: Option[];
-  onChange?: (items: string[]) => void;
-  title?: string;
-  checkedOptions: string[];
-  dataTestSubj: string;
-  postfix?: React.ReactElement;
-  cssStyles?: MultiSelectPickerStyles;
-}>> = ({ options, onChange, title, checkedOptions, dataTestSubj, postfix, cssStyles }) => {
+export const MultiSelectPicker: FC<
+  React.PropsWithChildren<{
+    options: Option[];
+    onChange?: (items: string[]) => void;
+    title?: string;
+    checkedOptions: string[];
+    dataTestSubj: string;
+    postfix?: React.ReactElement;
+    cssStyles?: MultiSelectPickerStyles;
+  }>
+> = ({ options, onChange, title, checkedOptions, dataTestSubj, postfix, cssStyles }) => {
   const euiTheme = useCurrentEuiTheme();
 
   const [items, setItems] = useState<Option[]>(options);

@@ -35,7 +35,11 @@ interface Props {
   onDuplicate: (pageId: string) => void;
 }
 
-export const PageControls: FC<React.PropsWithChildren<Props>> = ({ pageId, onRemove, onDuplicate }) => {
+export const PageControls: FC<React.PropsWithChildren<Props>> = ({
+  pageId,
+  onRemove,
+  onDuplicate,
+}) => {
   const handleDuplicate: ReactEventHandler = (ev) => {
     ev.preventDefault();
     onDuplicate(pageId);

@@ -46,7 +46,9 @@ const permissions = {
 
 const attachments = [{ type: CommentType.user as const, comment: 'test' }];
 
-const CasesFixtureAppWithContext: React.FC<React.PropsWithChildren<CasesFixtureAppDeps>> = (props) => {
+const CasesFixtureAppWithContext: React.FC<React.PropsWithChildren<CasesFixtureAppDeps>> = (
+  props
+) => {
   const { cases } = props;
 
   const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout();

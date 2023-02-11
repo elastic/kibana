@@ -15,7 +15,9 @@ interface LogEntryCategoriesSetupContentProps {
   onOpenSetup: () => void;
 }
 
-export const LogEntryCategoriesSetupContent: React.FunctionComponent<React.PropsWithChildren<LogEntryCategoriesSetupContentProps>> = ({ onOpenSetup }) => {
+export const LogEntryCategoriesSetupContent: React.FunctionComponent<
+  React.PropsWithChildren<LogEntryCategoriesSetupContentProps>
+> = ({ onOpenSetup }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup', delay: 15000 });
 

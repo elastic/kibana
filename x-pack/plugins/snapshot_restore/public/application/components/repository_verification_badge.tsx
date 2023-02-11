@@ -15,9 +15,9 @@ interface Props {
   verificationResults: RepositoryVerification | null;
 }
 
-export const RepositoryVerificationBadge: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
-  verificationResults,
-}) => {
+export const RepositoryVerificationBadge: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ verificationResults }) => {
   if (!verificationResults) {
     return (
       <EuiHealth color="subdued">

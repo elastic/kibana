@@ -45,9 +45,11 @@ const StyledEnrichmentFieldTitle = styled(EuiTitle)`
   width: 220px;
 `;
 
-const EnrichmentFieldTitle: React.FC<React.PropsWithChildren<{
-  title: string | React.ReactNode | undefined;
-}>> = ({ title }) => (
+const EnrichmentFieldTitle: React.FC<
+  React.PropsWithChildren<{
+    title: string | React.ReactNode | undefined;
+  }>
+> = ({ title }) => (
   <StyledEnrichmentFieldTitle size="xxxs">
     <h6>{title}</h6>
   </StyledEnrichmentFieldTitle>
@@ -58,10 +60,12 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const EnrichedDataRow: React.FC<React.PropsWithChildren<{
-  field: string | React.ReactNode | undefined;
-  value: React.ReactNode;
-}>> = ({ field, value }) => (
+export const EnrichedDataRow: React.FC<
+  React.PropsWithChildren<{
+    field: string | React.ReactNode | undefined;
+    value: React.ReactNode;
+  }>
+> = ({ field, value }) => (
   <StyledEuiFlexGroup
     direction="row"
     gutterSize="none"
@@ -76,10 +80,12 @@ export const EnrichedDataRow: React.FC<React.PropsWithChildren<{
   </StyledEuiFlexGroup>
 );
 
-export const ThreatSummaryPanelHeader: React.FC<React.PropsWithChildren<{
-  title: string | React.ReactNode;
-  toolTipContent: React.ReactNode;
-}>> = ({ title, toolTipContent }) => {
+export const ThreatSummaryPanelHeader: React.FC<
+  React.PropsWithChildren<{
+    title: string | React.ReactNode;
+    toolTipContent: React.ReactNode;
+  }>
+> = ({ title, toolTipContent }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onClick = useCallback(() => {
@@ -121,17 +127,19 @@ export const ThreatSummaryPanelHeader: React.FC<React.PropsWithChildren<{
   );
 };
 
-const ThreatSummaryViewComponent: React.FC<React.PropsWithChildren<{
-  browserFields: BrowserFields;
-  data: TimelineEventsDetailsItem[];
-  enrichments: CtiEnrichment[];
-  eventId: string;
-  scopeId: string;
-  hostRisk: HostRisk;
-  userRisk: UserRisk;
-  isDraggable?: boolean;
-  isReadOnly?: boolean;
-}>> = ({
+const ThreatSummaryViewComponent: React.FC<
+  React.PropsWithChildren<{
+    browserFields: BrowserFields;
+    data: TimelineEventsDetailsItem[];
+    enrichments: CtiEnrichment[];
+    eventId: string;
+    scopeId: string;
+    hostRisk: HostRisk;
+    userRisk: UserRisk;
+    isDraggable?: boolean;
+    isReadOnly?: boolean;
+  }>
+> = ({
   browserFields,
   data,
   enrichments,

@@ -16,11 +16,9 @@ interface Props {
   onChange: () => void;
 }
 
-export const KeepPoliciesUpToDateSwitch: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
-  checked,
-  disabled = false,
-  onChange,
-}) => (
+export const KeepPoliciesUpToDateSwitch: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ checked, disabled = false, onChange }) => (
   <>
     <EuiSwitch
       label={i18n.translate(

@@ -47,10 +47,12 @@ export interface HostPanelProps {
   browserFields: SelectedDataView['browserFields'];
 }
 
-const HostPanelSection: React.FC<React.PropsWithChildren<{
-  title?: string | React.ReactElement;
-  grow?: EuiFlexItemProps['grow'];
-}>> = ({ grow, title, children }) =>
+const HostPanelSection: React.FC<
+  React.PropsWithChildren<{
+    title?: string | React.ReactElement;
+    grow?: EuiFlexItemProps['grow'];
+  }>
+> = ({ grow, title, children }) =>
   children ? (
     <EuiFlexItem grow={grow}>
       {title && (

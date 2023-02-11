@@ -16,7 +16,9 @@ import { useCharts } from '../../hooks/use_charts';
 import { EnterpriseSearchOverview } from '../../../components/enterprise_search/overview';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
-export const EntSearchOverviewPage: React.FC<React.PropsWithChildren<ComponentProps>> = ({ clusters }) => {
+export const EntSearchOverviewPage: React.FC<React.PropsWithChildren<ComponentProps>> = ({
+  clusters,
+}) => {
   const globalState = useContext(GlobalStateContext);
   const { zoomInfo, onBrush } = useCharts();
   const { services } = useKibana<{ data: any }>();

@@ -14,12 +14,14 @@ import React from 'react';
 
 import type { PackageInfo } from '../../common';
 
-export const ConfirmForceInstallModal: React.FC<React.PropsWithChildren<{
-  onCancel: () => void;
-  onConfirm: () => void;
-  pkg?: Pick<PackageInfo, 'name' | 'version'>;
-  docLinks: DocLinksStart;
-}>> = ({ onCancel, onConfirm, pkg, docLinks }) => {
+export const ConfirmForceInstallModal: React.FC<
+  React.PropsWithChildren<{
+    onCancel: () => void;
+    onConfirm: () => void;
+    pkg?: Pick<PackageInfo, 'name' | 'version'>;
+    docLinks: DocLinksStart;
+  }>
+> = ({ onCancel, onConfirm, pkg, docLinks }) => {
   const title =
     pkg && pkg.name && pkg.version
       ? i18n.translate('xpack.fleet.ConfirmForceInstallModal.calloutTitleWithPkg', {

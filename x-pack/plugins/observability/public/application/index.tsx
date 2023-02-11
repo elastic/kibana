@@ -60,7 +60,9 @@ export const renderApp = ({
   plugins: ObservabilityPublicPluginsStart;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   appMountParameters: AppMountParameters;
-  ObservabilityPageTemplate: React.ComponentType<React.PropsWithChildren<LazyObservabilityPageTemplateProps>>;
+  ObservabilityPageTemplate: React.ComponentType<
+    React.PropsWithChildren<LazyObservabilityPageTemplateProps>
+  >;
   usageCollection: UsageCollectionSetup;
   isDev?: boolean;
   kibanaVersion: string;

@@ -20,7 +20,9 @@ export interface GettingStartedStepsProps {
   step?: 'first' | 'second';
 }
 
-export const GettingStartedSteps: React.FC<React.PropsWithChildren<GettingStartedStepsProps>> = ({ step = 'first' }) => {
+export const GettingStartedSteps: React.FC<React.PropsWithChildren<GettingStartedStepsProps>> = ({
+  step = 'first',
+}) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>

@@ -18,7 +18,9 @@ const strings = {
     }),
 };
 
-export const ClearablePalettePicker: FC<React.PropsWithChildren<ClearableComponentProps>> = (props) => {
+export const ClearablePalettePicker: FC<React.PropsWithChildren<ClearableComponentProps>> = (
+  props
+) => {
   const { palette, palettes, onChange = () => {} } = props;
   const colorPalettes = palettes.map(prepareColorPalette);
 

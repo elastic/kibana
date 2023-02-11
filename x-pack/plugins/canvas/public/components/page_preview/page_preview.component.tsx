@@ -18,7 +18,13 @@ export interface Props {
   onDuplicate: (pageId: string) => void;
   onRemove: (pageId: string) => void;
 }
-export const PagePreview: FC<React.PropsWithChildren<Props>> = ({ isWriteable, page, height, onDuplicate, onRemove }) => (
+export const PagePreview: FC<React.PropsWithChildren<Props>> = ({
+  isWriteable,
+  page,
+  height,
+  onDuplicate,
+  onRemove,
+}) => (
   <div
     className="canvasPageManager__pagePreview"
     style={{ backgroundColor: page.style.background }}

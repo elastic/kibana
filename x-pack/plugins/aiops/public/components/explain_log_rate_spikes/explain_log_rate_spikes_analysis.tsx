@@ -69,13 +69,9 @@ interface ExplainLogRateSpikesAnalysisProps {
   searchQuery: Query['query'];
 }
 
-export const ExplainLogRateSpikesAnalysis: FC<React.PropsWithChildren<ExplainLogRateSpikesAnalysisProps>> = ({
-  dataView,
-  earliest,
-  latest,
-  windowParameters,
-  searchQuery,
-}) => {
+export const ExplainLogRateSpikesAnalysis: FC<
+  React.PropsWithChildren<ExplainLogRateSpikesAnalysisProps>
+> = ({ dataView, earliest, latest, windowParameters, searchQuery }) => {
   const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
 

@@ -42,7 +42,10 @@ export interface BreadcrumbProps extends EuiBreadcrumb {
  * </Breadcrumb>
  * ```
  */
-export const Breadcrumb: FunctionComponent<React.PropsWithChildren<BreadcrumbProps>> = ({ children, ...breadcrumb }) => {
+export const Breadcrumb: FunctionComponent<React.PropsWithChildren<BreadcrumbProps>> = ({
+  children,
+  ...breadcrumb
+}) => {
   const context = useContext(BreadcrumbsContext);
   const component = <InnerBreadcrumb breadcrumb={breadcrumb}>{children}</InnerBreadcrumb>;
 
@@ -71,10 +74,9 @@ export type BreadcrumbsChangeHandler = (breadcrumbs: BreadcrumbProps[]) => void;
  * </Breadcrumbs>
  * ```
  */
-export const BreadcrumbsProvider: FunctionComponent<React.PropsWithChildren<BreadcrumbsProviderProps>> = ({
-  children,
-  onChange,
-}) => {
+export const BreadcrumbsProvider: FunctionComponent<
+  React.PropsWithChildren<BreadcrumbsProviderProps>
+> = ({ children, onChange }) => {
   const { services } = useKibana();
   const breadcrumbsRef = useRef<BreadcrumbProps[]>([]);
 

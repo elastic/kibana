@@ -16,7 +16,9 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { StepDefineFormHook } from '../step_define';
 
-export const AdvancedPivotEditor: FC<React.PropsWithChildren<StepDefineFormHook['advancedPivotEditor']>> = memo(
+export const AdvancedPivotEditor: FC<
+  React.PropsWithChildren<StepDefineFormHook['advancedPivotEditor']>
+> = memo(
   ({
     actions: { convertToJson, setAdvancedEditorConfig, setAdvancedPivotEditorApplyButtonEnabled },
     state: { advancedEditorConfigLastApplied, advancedEditorConfig, xJsonMode },

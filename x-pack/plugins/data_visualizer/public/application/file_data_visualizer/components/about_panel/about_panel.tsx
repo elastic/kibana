@@ -29,7 +29,10 @@ interface Props {
   hasPermissionToImport: boolean;
 }
 
-export const AboutPanel: FC<React.PropsWithChildren<Props>> = ({ onFilePickerChange, hasPermissionToImport }) => {
+export const AboutPanel: FC<React.PropsWithChildren<Props>> = ({
+  onFilePickerChange,
+  hasPermissionToImport,
+}) => {
   return (
     <EuiPageBody
       paddingSize="none"

@@ -50,13 +50,9 @@ const columns: Array<EuiTableFieldDataColumnType<TableItem>> = [
 
 const PAGE_SIZE = 5;
 
-const TopRiskScoreContributorsComponent: React.FC<React.PropsWithChildren<TopRiskScoreContributorsProps>> = ({
-  rules = [],
-  loading,
-  queryId,
-  toggleStatus,
-  toggleQuery,
-}) => {
+const TopRiskScoreContributorsComponent: React.FC<
+  React.PropsWithChildren<TopRiskScoreContributorsProps>
+> = ({ rules = [], loading, queryId, toggleStatus, toggleQuery }) => {
   const items = useMemo(() => {
     return rules
       ?.sort((a, b) => b.rule_risk - a.rule_risk)

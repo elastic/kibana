@@ -30,7 +30,9 @@ import {
   ENGINES_PATH,
 } from './routes';
 
-export const EnterpriseSearchContent: React.FC<React.PropsWithChildren<InitialAppData>> = (props) => {
+export const EnterpriseSearchContent: React.FC<React.PropsWithChildren<InitialAppData>> = (
+  props
+) => {
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { enterpriseSearchVersion, kibanaVersion } = props;
@@ -63,7 +65,9 @@ export const EnterpriseSearchContent: React.FC<React.PropsWithChildren<InitialAp
   );
 };
 
-export const EnterpriseSearchContentUnconfigured: React.FC<React.PropsWithChildren<unknown>> = () => (
+export const EnterpriseSearchContentUnconfigured: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => (
   <Switch>
     <Route>
       <Redirect to={SETUP_GUIDE_PATH} />
@@ -71,7 +75,9 @@ export const EnterpriseSearchContentUnconfigured: React.FC<React.PropsWithChildr
   </Switch>
 );
 
-export const EnterpriseSearchContentConfigured: React.FC<React.PropsWithChildren<Required<InitialAppData>>> = () => {
+export const EnterpriseSearchContentConfigured: React.FC<
+  React.PropsWithChildren<Required<InitialAppData>>
+> = () => {
   return (
     <Switch>
       <Redirect exact from={ROOT_PATH} to={SEARCH_INDICES_PATH} />

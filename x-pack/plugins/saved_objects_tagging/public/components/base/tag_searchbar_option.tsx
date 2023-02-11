@@ -14,7 +14,9 @@ export interface TagSearchBarOptionProps {
   tag: Tag;
 }
 
-export const TagSearchBarOption: FC<React.PropsWithChildren<TagSearchBarOptionProps>> = ({ tag }) => {
+export const TagSearchBarOption: FC<React.PropsWithChildren<TagSearchBarOptionProps>> = ({
+  tag,
+}) => {
   const { name, color } = tag;
   return (
     <EuiHealth color={color} data-test-subj={`tag-searchbar-option-${testSubjFriendly(name)}`}>

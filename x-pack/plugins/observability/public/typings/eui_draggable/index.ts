@@ -8,7 +8,9 @@
 import React from 'react';
 import { EuiDraggable, EuiDragDropContext } from '@elastic/eui';
 
-type PropsOf<T> = T extends React.ComponentType<React.PropsWithChildren<infer ComponentProps>> ? ComponentProps : never;
+type PropsOf<T> = T extends React.ComponentType<React.PropsWithChildren<infer ComponentProps>>
+  ? ComponentProps
+  : never;
 type FirstArgumentOf<Func> = Func extends (arg1: infer FirstArgument, ...rest: any[]) => any
   ? FirstArgument
   : never;

@@ -12,7 +12,9 @@ import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { FILE_FORMATS } from '../../../../../common/constants';
 
-export const AnalysisSummary: FC<React.PropsWithChildren<{ results: FindFileStructureResponse }>> = ({ results }) => {
+export const AnalysisSummary: FC<
+  React.PropsWithChildren<{ results: FindFileStructureResponse }>
+> = ({ results }) => {
   const items = createDisplayItems(results);
 
   return (

@@ -82,18 +82,20 @@ const datasetColumnName = i18n.translate(
   }
 );
 
-export const AnomaliesTable: React.FunctionComponent<React.PropsWithChildren<{
-  results: LogEntryAnomalies;
-  timeRange: TimeRange;
-  changeSortOptions: ChangeSortOptions;
-  changePaginationOptions: ChangePaginationOptions;
-  sortOptions: SortOptions;
-  paginationOptions: PaginationOptions;
-  page: Page;
-  fetchNextPage?: FetchNextPage;
-  fetchPreviousPage?: FetchPreviousPage;
-  isLoading: boolean;
-}>> = ({
+export const AnomaliesTable: React.FunctionComponent<
+  React.PropsWithChildren<{
+    results: LogEntryAnomalies;
+    timeRange: TimeRange;
+    changeSortOptions: ChangeSortOptions;
+    changePaginationOptions: ChangePaginationOptions;
+    sortOptions: SortOptions;
+    paginationOptions: PaginationOptions;
+    page: Page;
+    fetchNextPage?: FetchNextPage;
+    fetchPreviousPage?: FetchPreviousPage;
+    isLoading: boolean;
+  }>
+> = ({
   results,
   timeRange,
   changeSortOptions,

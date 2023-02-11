@@ -98,7 +98,10 @@ const onDragEndHandler = ({
 /**
  * DragDropContextWrapperComponent handles all drag end events
  */
-export const DragDropContextWrapperComponent: React.FC<React.PropsWithChildren<Props>> = ({ browserFields, children }) => {
+export const DragDropContextWrapperComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  browserFields,
+  children,
+}) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const getDataProviders = useMemo(() => dragAndDropSelectors.getDataProvidersSelector(), []);

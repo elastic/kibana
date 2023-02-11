@@ -19,7 +19,10 @@ interface FileTooLargeProps {
   maxFileSize: number;
 }
 
-export const FileTooLarge: FC<React.PropsWithChildren<FileTooLargeProps>> = ({ fileSize, maxFileSize }) => {
+export const FileTooLarge: FC<React.PropsWithChildren<FileTooLargeProps>> = ({
+  fileSize,
+  maxFileSize,
+}) => {
   const fileSizeFormatted = numeral(fileSize).format(FILE_SIZE_DISPLAY_FORMAT);
   const maxFileSizeFormatted = numeral(maxFileSize).format(FILE_SIZE_DISPLAY_FORMAT);
 
@@ -132,7 +135,9 @@ export const FileCouldNotBeRead: FC<React.PropsWithChildren<FileCouldNotBeReadPr
   );
 };
 
-export const Explanation: FC<React.PropsWithChildren<{ error: FindFileStructureErrorResponse }>> = ({ error }) => {
+export const Explanation: FC<
+  React.PropsWithChildren<{ error: FindFileStructureErrorResponse }>
+> = ({ error }) => {
   if (!error?.body?.attributes?.body?.error?.suppressed?.length) {
     return null;
   }

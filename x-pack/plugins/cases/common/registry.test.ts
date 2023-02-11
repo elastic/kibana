@@ -7,7 +7,9 @@
 
 import { AttachmentTypeRegistry } from './registry';
 
-export const ExpressionComponent: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
+export const ExpressionComponent: React.FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   return null;
 };
 

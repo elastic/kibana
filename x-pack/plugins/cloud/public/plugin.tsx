@@ -109,7 +109,7 @@ interface CloudUrls {
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
-  private readonly contextProviders: FC<React.PropsWithChildren<unknown>>[] = [];
+  private readonly contextProviders: Array<FC<React.PropsWithChildren<unknown>>> = [];
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();

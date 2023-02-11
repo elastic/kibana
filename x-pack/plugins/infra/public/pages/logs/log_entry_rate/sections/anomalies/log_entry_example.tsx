@@ -279,9 +279,11 @@ export const exampleMessageColumnConfigurations: LogColumnConfiguration[] = [
   },
 ];
 
-export const LogEntryExampleMessageHeaders: React.FunctionComponent<React.PropsWithChildren<{
-  dateTime: number;
-}>> = ({ dateTime }) => {
+export const LogEntryExampleMessageHeaders: React.FunctionComponent<
+  React.PropsWithChildren<{
+    dateTime: number;
+  }>
+> = ({ dateTime }) => {
   return (
     <LogEntryExampleMessageHeadersWrapper>
       <>

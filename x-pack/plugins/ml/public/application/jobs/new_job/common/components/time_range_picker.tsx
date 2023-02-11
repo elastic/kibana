@@ -23,7 +23,10 @@ interface Props {
   timeRange: TimeRange;
 }
 
-export const TimeRangePicker: FC<React.PropsWithChildren<Props>> = ({ setTimeRange, timeRange }) => {
+export const TimeRangePicker: FC<React.PropsWithChildren<Props>> = ({
+  setTimeRange,
+  timeRange,
+}) => {
   const mlContext = useMlContext();
   const dateFormat: string = mlContext.kibanaConfig.get('dateFormat');
 

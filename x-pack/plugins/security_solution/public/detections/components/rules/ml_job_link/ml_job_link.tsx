@@ -21,7 +21,10 @@ interface MlJobLinkProps {
   jobName: string | undefined;
 }
 
-const MlJobLinkComponent: React.FC<React.PropsWithChildren<MlJobLinkProps>> = ({ jobId, jobName }) => {
+const MlJobLinkComponent: React.FC<React.PropsWithChildren<MlJobLinkProps>> = ({
+  jobId,
+  jobName,
+}) => {
   const {
     services: { http, ml },
   } = useKibana();

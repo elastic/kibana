@@ -25,7 +25,9 @@ import { IndexViewLogic } from '../index_view_logic';
 import { ConnectorConfigurationForm } from './connector_configuration_form';
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
-export const ConnectorConfigurationConfig: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const ConnectorConfigurationConfig: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const { connectorError } = useValues(IndexViewLogic);
   const { configView, isEditing } = useValues(ConnectorConfigurationLogic);
   const { setIsEditing } = useActions(ConnectorConfigurationLogic);

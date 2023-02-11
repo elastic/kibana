@@ -20,12 +20,9 @@ interface Props {
   api: ReturnType<typeof useComponentTemplatesContext>['api'];
 }
 
-export const MappingsDatastreamRolloverModal: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
-  componentTemplatename,
-  dataStreams,
-  onClose,
-  api,
-}) => {
+export const MappingsDatastreamRolloverModal: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ componentTemplatename, dataStreams, onClose, api }) => {
   const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState(false);
 

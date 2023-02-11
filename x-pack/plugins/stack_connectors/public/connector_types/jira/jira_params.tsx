@@ -29,14 +29,9 @@ import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
 
-const JiraParamsFields: React.FunctionComponent<React.PropsWithChildren<ActionParamsProps<JiraActionParams>>> = ({
-  actionConnector,
-  actionParams,
-  editAction,
-  errors,
-  index,
-  messageVariables,
-}) => {
+const JiraParamsFields: React.FunctionComponent<
+  React.PropsWithChildren<ActionParamsProps<JiraActionParams>>
+> = ({ actionConnector, actionParams, editAction, errors, index, messageVariables }) => {
   const {
     http,
     notifications: { toasts },

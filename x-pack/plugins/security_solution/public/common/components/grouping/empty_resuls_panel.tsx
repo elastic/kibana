@@ -20,9 +20,9 @@ const heights = {
   short: 250,
 };
 
-export const EmptyGroupingComponent: React.FC<React.PropsWithChildren<{ height?: keyof typeof heights }>> = ({
-  height = 'tall',
-}) => {
+export const EmptyGroupingComponent: React.FC<
+  React.PropsWithChildren<{ height?: keyof typeof heights }>
+> = ({ height = 'tall' }) => {
   const { http } = useKibana<CoreStart>().services;
 
   return (

@@ -7,7 +7,9 @@
 
 import { FunctionComponent } from 'react';
 
-export const ElasticsearchNodes: FunctionComponent<React.PropsWithChildren<ElasticsearchNodesProps>>;
+export const ElasticsearchNodes: FunctionComponent<
+  React.PropsWithChildren<ElasticsearchNodesProps>
+>;
 export interface ElasticsearchNodesProps {
   clusterStatus: unknown;
   showCgroupMetricsElasticsearch: unknown;

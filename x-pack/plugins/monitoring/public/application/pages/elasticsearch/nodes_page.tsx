@@ -29,7 +29,9 @@ import {
   RULE_MISSING_MONITORING_DATA,
 } from '../../../../common/constants';
 
-export const ElasticsearchNodesPage: React.FC<React.PropsWithChildren<ComponentProps>> = ({ clusters }) => {
+export const ElasticsearchNodesPage: React.FC<React.PropsWithChildren<ComponentProps>> = ({
+  clusters,
+}) => {
   const globalState = useContext(GlobalStateContext);
   const { showCgroupMetricsElasticsearch } = useContext(ExternalConfigContext);
   const { services } = useKibana<{ data: any }>();

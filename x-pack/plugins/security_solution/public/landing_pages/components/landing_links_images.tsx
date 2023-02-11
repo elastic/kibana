@@ -55,7 +55,9 @@ const TitleText = styled.h2`
 
 const SecuritySolutionLink = withSecuritySolutionLink(Link);
 
-export const LandingLinksImages: React.FC<React.PropsWithChildren<LandingImagesProps>> = ({ items }) => (
+export const LandingLinksImages: React.FC<React.PropsWithChildren<LandingImagesProps>> = ({
+  items,
+}) => (
   <EuiFlexGroup direction="column">
     {items.map(({ title, description, image, id, isBeta, betaOptions }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">
@@ -112,39 +114,41 @@ const PrimaryTitleCard = styled(EuiCard)`
 
 const SecuritySolutionCard = withSecuritySolutionLink(PrimaryTitleCard);
 
-export const LandingImageCards: React.FC<React.PropsWithChildren<LandingImagesProps>> = React.memo(({ items }) => (
-  <EuiFlexGroup direction="row" wrap>
-    {items.map(({ id, image, title, description, isBeta, betaOptions }) => (
-      <LandingImageCardItem key={id} data-test-subj="LandingImageCard-item" grow={false}>
-        <SecuritySolutionCard
-          deepLinkId={id}
-          hasBorder
-          textAlign="left"
-          paddingSize="m"
-          image={
-            image && (
-              <EuiImage
-                data-test-subj="LandingImageCard-image"
-                role="presentation"
-                size={CARD_WIDTH}
-                alt={title}
-                src={image}
-              />
-            )
-          }
-          title={
-            <PrimaryEuiTitle size="xs">
-              <FlexTitle>
-                <TitleText>{title}</TitleText>
-                {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
-              </FlexTitle>
-            </PrimaryEuiTitle>
-          }
-          description={<LandingCardDescription>{description}</LandingCardDescription>}
-        />
-      </LandingImageCardItem>
-    ))}
-  </EuiFlexGroup>
-));
+export const LandingImageCards: React.FC<React.PropsWithChildren<LandingImagesProps>> = React.memo(
+  ({ items }) => (
+    <EuiFlexGroup direction="row" wrap>
+      {items.map(({ id, image, title, description, isBeta, betaOptions }) => (
+        <LandingImageCardItem key={id} data-test-subj="LandingImageCard-item" grow={false}>
+          <SecuritySolutionCard
+            deepLinkId={id}
+            hasBorder
+            textAlign="left"
+            paddingSize="m"
+            image={
+              image && (
+                <EuiImage
+                  data-test-subj="LandingImageCard-image"
+                  role="presentation"
+                  size={CARD_WIDTH}
+                  alt={title}
+                  src={image}
+                />
+              )
+            }
+            title={
+              <PrimaryEuiTitle size="xs">
+                <FlexTitle>
+                  <TitleText>{title}</TitleText>
+                  {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
+                </FlexTitle>
+              </PrimaryEuiTitle>
+            }
+            description={<LandingCardDescription>{description}</LandingCardDescription>}
+          />
+        </LandingImageCardItem>
+      ))}
+    </EuiFlexGroup>
+  )
+);
 
 LandingImageCards.displayName = 'LandingImageCards';

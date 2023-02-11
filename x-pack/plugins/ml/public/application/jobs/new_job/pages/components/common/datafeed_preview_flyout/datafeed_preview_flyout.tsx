@@ -67,7 +67,10 @@ export const DatafeedPreviewFlyout: FC<React.PropsWithChildren<Props>> = ({ isDi
   );
 };
 
-const FlyoutButton: FC<React.PropsWithChildren<{ isDisabled: boolean; onClick(): void }>> = ({ isDisabled, onClick }) => {
+const FlyoutButton: FC<React.PropsWithChildren<{ isDisabled: boolean; onClick(): void }>> = ({
+  isDisabled,
+  onClick,
+}) => {
   return (
     <EuiButtonEmpty
       onClick={onClick}

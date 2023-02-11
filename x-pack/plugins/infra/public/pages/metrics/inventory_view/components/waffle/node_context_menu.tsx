@@ -37,8 +37,8 @@ interface Props {
   nodeType: InventoryItemType;
 }
 
-export const NodeContextMenu: React.FC<React.PropsWithChildren<Props & { theme?: EuiTheme }>> = withTheme(
-  ({ options, currentTime, node, nodeType }) => {
+export const NodeContextMenu: React.FC<React.PropsWithChildren<Props & { theme?: EuiTheme }>> =
+  withTheme(({ options, currentTime, node, nodeType }) => {
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
@@ -193,5 +193,4 @@ export const NodeContextMenu: React.FC<React.PropsWithChildren<Props & { theme?:
         )}
       </>
     );
-  }
-);
+  });

@@ -13,13 +13,9 @@ import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { PagerDutyActionParams } from '../types';
 
-const PagerDutyParamsFields: React.FunctionComponent<React.PropsWithChildren<ActionParamsProps<PagerDutyActionParams>>> = ({
-  actionParams,
-  editAction,
-  index,
-  messageVariables,
-  errors,
-}) => {
+const PagerDutyParamsFields: React.FunctionComponent<
+  React.PropsWithChildren<ActionParamsProps<PagerDutyActionParams>>
+> = ({ actionParams, editAction, index, messageVariables, errors }) => {
   const { eventAction, dedupKey, summary, source, severity, timestamp, component, group } =
     actionParams;
   const severityOptions = [

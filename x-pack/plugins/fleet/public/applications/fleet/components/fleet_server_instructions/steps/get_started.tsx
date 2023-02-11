@@ -41,7 +41,9 @@ export function getGettingStartedStep(props: QuickStartCreateForm): EuiStepProps
   };
 }
 
-const GettingStartedStepContent: React.FunctionComponent<React.PropsWithChildren<QuickStartCreateForm>> = ({
+const GettingStartedStepContent: React.FunctionComponent<
+  React.PropsWithChildren<QuickStartCreateForm>
+> = ({
   fleetServerHosts,
   fleetServerHost: selectedFleetServerHost,
   setFleetServerHost,

@@ -20,7 +20,9 @@ interface Props {
 
 const { emptyField, urlField } = fieldValidators;
 
-const SwimlaneConnectionComponent: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ readOnly }) => {
+const SwimlaneConnectionComponent: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  readOnly,
+}) => {
   const { docLinks } = useKibana().services;
   return (
     <>

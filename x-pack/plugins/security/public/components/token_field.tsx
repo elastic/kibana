@@ -77,7 +77,9 @@ export interface SelectableTokenFieldProps extends Omit<EuiFieldTextProps, 'valu
   options: SelectableTokenFieldOption[];
 }
 
-export const SelectableTokenField: FunctionComponent<React.PropsWithChildren<SelectableTokenFieldProps>> = (props) => {
+export const SelectableTokenField: FunctionComponent<
+  React.PropsWithChildren<SelectableTokenFieldProps>
+> = (props) => {
   const { options, ...rest } = props;
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const [selectedOption, setSelectedOption] = React.useState<SelectableTokenFieldOption>(

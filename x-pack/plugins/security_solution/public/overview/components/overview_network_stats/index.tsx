@@ -178,7 +178,10 @@ const AccordionContent = styled.div`
   margin-top: 8px;
 `;
 
-const OverviewNetworkStatsComponent: React.FC<React.PropsWithChildren<OverviewNetworkProps>> = ({ data, loading }) => {
+const OverviewNetworkStatsComponent: React.FC<React.PropsWithChildren<OverviewNetworkProps>> = ({
+  data,
+  loading,
+}) => {
   const allNetworkStats = getOverviewNetworkStats(data);
   const allNetworkStatsCount = allNetworkStats.reduce((total, stat) => total + stat.count, 0);
 

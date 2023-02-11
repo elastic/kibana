@@ -28,7 +28,10 @@ interface Props {
   modelId: string;
   onClose: () => void;
 }
-export const TestTrainedModelFlyout: FC<React.PropsWithChildren<Props>> = ({ modelId, onClose }) => {
+export const TestTrainedModelFlyout: FC<React.PropsWithChildren<Props>> = ({
+  modelId,
+  onClose,
+}) => {
   const mediumPadding = useEuiPaddingSize('m');
 
   const trainedModelsApiService = useTrainedModelsApiService();

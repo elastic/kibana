@@ -32,7 +32,10 @@ interface HomePageProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const HomePageComponent: React.FC<React.PropsWithChildren<HomePageProps>> = ({ children, setHeaderActionMenu }) => {
+const HomePageComponent: React.FC<React.PropsWithChildren<HomePageProps>> = ({
+  children,
+  setHeaderActionMenu,
+}) => {
   const { pathname } = useLocation();
   useInitSourcerer(getScopeFromPath(pathname));
   useUrlState();

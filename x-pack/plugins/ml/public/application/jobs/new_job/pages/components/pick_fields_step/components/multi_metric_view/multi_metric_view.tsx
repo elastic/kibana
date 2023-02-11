@@ -17,7 +17,10 @@ interface Props {
   setCanProceed?: (proceed: boolean) => void;
 }
 
-export const MultiMetricView: FC<React.PropsWithChildren<Props>> = ({ isActive, setCanProceed }) => {
+export const MultiMetricView: FC<React.PropsWithChildren<Props>> = ({
+  isActive,
+  setCanProceed,
+}) => {
   const [metricsValid, setMetricValid] = useState(false);
   const [settingsValid, setSettingsValid] = useState(false);
 

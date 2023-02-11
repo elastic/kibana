@@ -98,7 +98,12 @@ interface Props {
   onChange(item: PivotGroupByConfig): void;
 }
 
-export const PopoverForm: React.FC<React.PropsWithChildren<Props>> = ({ defaultData, otherAggNames, onChange, options }) => {
+export const PopoverForm: React.FC<React.PropsWithChildren<Props>> = ({
+  defaultData,
+  otherAggNames,
+  onChange,
+  options,
+}) => {
   const { esAggsCompositeMissingBucket } = useDocumentationLinks();
 
   const isUnsupportedAgg = !isPivotGroupByConfigWithUiSupport(defaultData);

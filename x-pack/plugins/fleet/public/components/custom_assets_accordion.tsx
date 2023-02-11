@@ -33,10 +33,9 @@ export interface CustomAssetsAccordionProps {
   initialIsOpen?: boolean;
 }
 
-export const CustomAssetsAccordion: FunctionComponent<React.PropsWithChildren<CustomAssetsAccordionProps>> = ({
-  views,
-  initialIsOpen = false,
-}) => {
+export const CustomAssetsAccordion: FunctionComponent<
+  React.PropsWithChildren<CustomAssetsAccordionProps>
+> = ({ views, initialIsOpen = false }) => {
   const { application } = useStartServices();
 
   return (

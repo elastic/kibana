@@ -17,12 +17,9 @@ interface ConfirmDeployAgentPolicyModalProps {
   agentPolicyCount: number;
 }
 
-const ConfirmDeployAgentPolicyModalComponent: React.FC<React.PropsWithChildren<ConfirmDeployAgentPolicyModalProps>> = ({
-  onConfirm,
-  onCancel,
-  agentCount,
-  agentPolicyCount,
-}) => (
+const ConfirmDeployAgentPolicyModalComponent: React.FC<
+  React.PropsWithChildren<ConfirmDeployAgentPolicyModalProps>
+> = ({ onConfirm, onCancel, agentCount, agentPolicyCount }) => (
   <EuiConfirmModal
     title={
       <FormattedMessage

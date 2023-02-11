@@ -19,7 +19,9 @@ const agentFlyoutContext = createContext<
   | undefined
 >(undefined);
 
-export const FlyoutContextProvider: React.FunctionComponent<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const FlyoutContextProvider: React.FunctionComponent<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const [isFleetServerFlyoutOpen, setIsFleetServerFlyoutOpen] = useState(false);
 

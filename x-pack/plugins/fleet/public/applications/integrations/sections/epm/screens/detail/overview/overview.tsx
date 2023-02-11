@@ -70,11 +70,13 @@ const UnverifiedCallout: React.FC<React.PropsWithChildren<unknown>> = () => {
   );
 };
 
-const PrereleaseCallout: React.FC<React.PropsWithChildren<{
-  packageName: string;
-  latestGAVersion?: string;
-  packageTitle: string;
-}>> = ({ packageName, packageTitle, latestGAVersion }) => {
+const PrereleaseCallout: React.FC<
+  React.PropsWithChildren<{
+    packageName: string;
+    latestGAVersion?: string;
+    packageTitle: string;
+  }>
+> = ({ packageName, packageTitle, latestGAVersion }) => {
   const { getHref } = useLink();
   const overviewPathLatestGA = getHref('integration_details_overview', {
     pkgkey: `${packageName}-${latestGAVersion}`,

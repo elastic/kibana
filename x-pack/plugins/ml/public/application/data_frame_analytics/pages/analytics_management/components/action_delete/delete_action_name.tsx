@@ -23,7 +23,10 @@ interface DeleteActionNameProps {
   item: DataFrameAnalyticsListRow;
 }
 
-export const DeleteActionName: FC<React.PropsWithChildren<DeleteActionNameProps>> = ({ isDisabled, item }) => {
+export const DeleteActionName: FC<React.PropsWithChildren<DeleteActionNameProps>> = ({
+  isDisabled,
+  item,
+}) => {
   if (isDisabled) {
     return (
       <EuiToolTip

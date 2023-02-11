@@ -16,7 +16,9 @@ interface Props {
   esDocsBase: string;
 }
 
-export const StepMappingsContainer: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ esDocsBase }) => {
+export const StepMappingsContainer: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  esDocsBase,
+}) => {
   const { defaultValue, updateContent, getSingleContentData } = Forms.useContent<
     CommonWizardSteps,
     'mappings'

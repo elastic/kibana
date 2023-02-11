@@ -20,7 +20,12 @@ interface Props {
   text: string;
 }
 
-const RegistryEventDetailsComponent: React.FC<React.PropsWithChildren<Props>> = ({ contextId, data, isDraggable, text }) => {
+const RegistryEventDetailsComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  contextId,
+  data,
+  isDraggable,
+  text,
+}) => {
   const hostName: string | null | undefined = get('host.name[0]', data);
   const id = data._id;
   const processName: string | null | undefined = get('process.name[0]', data);

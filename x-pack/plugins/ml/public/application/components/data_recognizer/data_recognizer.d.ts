@@ -9,12 +9,14 @@ import { FC } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { type SavedSearch } from '@kbn/saved-search-plugin/public';
 
-declare const DataRecognizer: FC<React.PropsWithChildren<{
-  indexPattern: DataView;
-  savedSearch: SavedSearch | null;
-  results: {
-    count: number;
-    onChange?: Function;
-  };
-  className?: string;
-}>>;
+declare const DataRecognizer: FC<
+  React.PropsWithChildren<{
+    indexPattern: DataView;
+    savedSearch: SavedSearch | null;
+    results: {
+      count: number;
+      onChange?: Function;
+    };
+    className?: string;
+  }>
+>;

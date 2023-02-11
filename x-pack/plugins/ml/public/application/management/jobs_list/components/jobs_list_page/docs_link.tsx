@@ -12,7 +12,9 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { useMlKibana } from '../../../../contexts/kibana';
 import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
 
-export const DocsLink: FC<React.PropsWithChildren<{ currentTabId: MlSavedObjectType }>> = ({ currentTabId }) => {
+export const DocsLink: FC<React.PropsWithChildren<{ currentTabId: MlSavedObjectType }>> = ({
+  currentTabId,
+}) => {
   const {
     services: {
       docLinks: {

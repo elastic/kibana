@@ -50,7 +50,9 @@ interface ExpandedRowDetailsPaneProps {
   sections: SectionConfig[];
 }
 
-export const ExpandedRowDetailsPane: FC<React.PropsWithChildren<ExpandedRowDetailsPaneProps>> = ({ sections }) => {
+export const ExpandedRowDetailsPane: FC<React.PropsWithChildren<ExpandedRowDetailsPaneProps>> = ({
+  sections,
+}) => {
   return (
     <div data-test-subj="transformDetailsTabContent">
       <EuiFlexGroup>

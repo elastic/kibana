@@ -22,13 +22,9 @@ interface GroupRowSourcesDropdownProps {
   closePopover(): void;
 }
 
-export const GroupRowSourcesDropdown: React.FC<React.PropsWithChildren<GroupRowSourcesDropdownProps>> = ({
-  isPopoverOpen,
-  numOptions,
-  groupSources,
-  onButtonClick,
-  closePopover,
-}) => {
+export const GroupRowSourcesDropdown: React.FC<
+  React.PropsWithChildren<GroupRowSourcesDropdownProps>
+> = ({ isPopoverOpen, numOptions, groupSources, onButtonClick, closePopover }) => {
   const toggleLink = (
     <EuiButtonEmpty className="user-group-source--additional" onClick={onButtonClick}>
       + {numOptions}

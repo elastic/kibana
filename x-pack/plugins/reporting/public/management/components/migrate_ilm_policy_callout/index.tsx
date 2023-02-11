@@ -19,7 +19,9 @@ interface Props {
   toasts: NotificationsSetup['toasts'];
 }
 
-export const MigrateIlmPolicyCallOut: FunctionComponent<React.PropsWithChildren<Props>> = ({ toasts }) => {
+export const MigrateIlmPolicyCallOut: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  toasts,
+}) => {
   const { isLoading, recheckStatus, status } = useIlmPolicyStatus();
 
   if (isLoading || !status || status === 'ok') {

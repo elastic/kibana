@@ -41,7 +41,12 @@ interface Props {
   certificates: CertResult & { loading?: boolean };
 }
 
-export const CertificateList: React.FC<React.PropsWithChildren<Props>> = ({ page, certificates, sort, onChange }) => {
+export const CertificateList: React.FC<React.PropsWithChildren<Props>> = ({
+  page,
+  certificates,
+  sort,
+  onChange,
+}) => {
   const onTableChange = (newVal: Partial<Props>) => {
     onChange(newVal.page as Page, newVal.sort as CertSort);
   };

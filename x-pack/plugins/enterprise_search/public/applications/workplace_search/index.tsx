@@ -71,7 +71,9 @@ export const WorkplaceSearch: React.FC<React.PropsWithChildren<InitialAppData>> 
   return <WorkplaceSearchConfigured {...props} />;
 };
 
-export const WorkplaceSearchConfigured: React.FC<React.PropsWithChildren<InitialAppData>> = (props) => {
+export const WorkplaceSearchConfigured: React.FC<React.PropsWithChildren<InitialAppData>> = (
+  props
+) => {
   const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData, setContext } = useActions(AppLogic);
   const { renderHeaderActions, setChromeIsVisible } = useValues(KibanaLogic);

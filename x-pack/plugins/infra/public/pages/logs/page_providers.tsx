@@ -11,7 +11,9 @@ import { useSourceId } from '../../containers/source_id';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { LogViewProvider } from '../../hooks/use_log_view';
 
-export const LogsPageProviders: React.FunctionComponent<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const LogsPageProviders: React.FunctionComponent<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const [sourceId] = useSourceId();
   const { services } = useKibanaContextForPlugin();
 

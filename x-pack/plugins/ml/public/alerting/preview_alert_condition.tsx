@@ -35,8 +35,8 @@ export interface PreviewAlertConditionProps {
   alertParams: MlAnomalyDetectionAlertParams;
 }
 
-const AlertInstancePreview: FC<React.PropsWithChildren<PreviewResponse['results'][number]>> = React.memo(
-  ({ jobIds, timestampIso8601, score, topInfluencers, topRecords }) => {
+const AlertInstancePreview: FC<React.PropsWithChildren<PreviewResponse['results'][number]>> =
+  React.memo(({ jobIds, timestampIso8601, score, topInfluencers, topRecords }) => {
     const listItems = [
       {
         title: i18n.translate('xpack.ml.previewAlert.jobsLabel', {
@@ -110,8 +110,7 @@ const AlertInstancePreview: FC<React.PropsWithChildren<PreviewResponse['results'
     ];
 
     return <EuiDescriptionList type={'row'} compressed={true} listItems={listItems} />;
-  }
-);
+  });
 
 export const PreviewAlertCondition: FC<React.PropsWithChildren<PreviewAlertConditionProps>> = ({
   alertingApiService,

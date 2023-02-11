@@ -24,7 +24,10 @@ describe('when using PaginatedContent', () => {
 
   type ItemComponentType = FC<React.PropsWithChildren<ItemComponentProps>>;
 
-  type PropsForPaginatedContent = PaginatedContentProps<Foo, FC<React.PropsWithChildren<ItemComponentProps>>>;
+  type PropsForPaginatedContent = PaginatedContentProps<
+    Foo,
+    FC<React.PropsWithChildren<ItemComponentProps>>
+  >;
 
   const ItemComponent: ItemComponentType = jest.fn((props) => (
     <div className="foo-item">{'hi'}</div>

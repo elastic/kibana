@@ -26,8 +26,9 @@ export interface UIExtensionsStorage {
  * UI Component Extension is used to replace the Define Step on
  * the pages displaying the ability to edit/create an Integration Policy
  */
-export type PackagePolicyReplaceDefineStepExtensionComponent =
-  ComponentType<React.PropsWithChildren<PackagePolicyReplaceDefineStepExtensionComponentProps>>;
+export type PackagePolicyReplaceDefineStepExtensionComponent = ComponentType<
+  React.PropsWithChildren<PackagePolicyReplaceDefineStepExtensionComponentProps>
+>;
 
 export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
   | (PackagePolicyEditExtensionComponentProps & { isEditPage: true })
@@ -42,8 +43,9 @@ export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
  * UI Component Extension is used on the pages displaying the ability to edit an
  * Integration Policy
  */
-export type PackagePolicyEditExtensionComponent =
-  ComponentType<React.PropsWithChildren<PackagePolicyEditExtensionComponentProps>>;
+export type PackagePolicyEditExtensionComponent = ComponentType<
+  React.PropsWithChildren<PackagePolicyEditExtensionComponentProps>
+>;
 
 export interface PackagePolicyEditExtensionComponentProps {
   /** The current integration policy being edited */
@@ -70,8 +72,9 @@ export interface PackagePolicyEditExtensionComponentProps {
  * UI Component Extension is used on the pages displaying the ability to see
  * Policy response view
  */
-export type PackagePolicyResponseExtensionComponent =
-  ComponentType<React.PropsWithChildren<PackagePolicyResponseExtensionComponentProps>>;
+export type PackagePolicyResponseExtensionComponent = ComponentType<
+  React.PropsWithChildren<PackagePolicyResponseExtensionComponentProps>
+>;
 
 export interface PackagePolicyResponseExtensionComponentProps {
   /** The current agent to retrieve response from */
@@ -84,7 +87,9 @@ export interface PackagePolicyResponseExtensionComponentProps {
  * UI Component Extension is used on the pages displaying the ability to see
  * a generic endpoint errors list
  */
-export type PackageGenericErrorsListComponent = ComponentType<React.PropsWithChildren<PackageGenericErrorsListProps>>;
+export type PackageGenericErrorsListComponent = ComponentType<
+  React.PropsWithChildren<PackageGenericErrorsListProps>
+>;
 
 export interface PackageGenericErrorsListProps {
   /** A list of errors from a package */
@@ -131,8 +136,9 @@ export interface PackagePolicyEditTabsExtension {
  * UI Component Extension is used on the pages displaying the ability to Create an
  * Integration Policy
  */
-export type PackagePolicyCreateExtensionComponent =
-  ComponentType<React.PropsWithChildren<PackagePolicyCreateExtensionComponentProps>>;
+export type PackagePolicyCreateExtensionComponent = ComponentType<
+  React.PropsWithChildren<PackagePolicyCreateExtensionComponentProps>
+>;
 
 export interface PackagePolicyCreateExtensionComponentProps {
   /** The integration policy being created */
@@ -160,7 +166,9 @@ export interface PackagePolicyCreateExtension {
  * UI Component Extension is used on the pages displaying the ability to Create a multi step
  * Integration Policy
  */
-export type PackagePolicyCreateMultiStepExtensionComponent = ComponentType<React.PropsWithChildren<{}>>;
+export type PackagePolicyCreateMultiStepExtensionComponent = ComponentType<
+  React.PropsWithChildren<{}>
+>;
 
 /** Extension point registration contract for Integration Policy Create views in multi-step onboarding */
 export interface PackagePolicyCreateMultiStepExtension {
@@ -172,7 +180,9 @@ export interface PackagePolicyCreateMultiStepExtension {
 /**
  * UI Component Extension is used to display a Custom tab (and view) under a given Integration
  */
-export type PackageCustomExtensionComponent = ComponentType<React.PropsWithChildren<PackageCustomExtensionComponentProps>>;
+export type PackageCustomExtensionComponent = ComponentType<
+  React.PropsWithChildren<PackageCustomExtensionComponentProps>
+>;
 
 export interface PackageCustomExtensionComponentProps {
   /** The package key value that should be used used for URLs */

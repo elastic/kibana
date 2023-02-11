@@ -46,7 +46,9 @@ export interface EmbeddableAnomalyChartsContainerProps {
   onError: (error: Error) => void;
 }
 
-export const EmbeddableAnomalyChartsContainer: FC<React.PropsWithChildren<EmbeddableAnomalyChartsContainerProps>> = ({
+export const EmbeddableAnomalyChartsContainer: FC<
+  React.PropsWithChildren<EmbeddableAnomalyChartsContainerProps>
+> = ({
   id,
   embeddableContext,
   embeddableInput,

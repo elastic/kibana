@@ -46,7 +46,10 @@ interface ThemeContextProps {
   darkMode: boolean;
 }
 
-export const UptimeThemeContextProvider: React.FC<React.PropsWithChildren<ThemeContextProps>> = ({ darkMode, children }) => {
+export const UptimeThemeContextProvider: React.FC<React.PropsWithChildren<ThemeContextProps>> = ({
+  darkMode,
+  children,
+}) => {
   let colors: UptimeAppColors;
   if (darkMode) {
     colors = {

@@ -22,7 +22,9 @@ interface InvestigateInTimelineActionProps {
   onInvestigateInTimelineAlertClick?: () => void;
 }
 
-const InvestigateInTimelineActionComponent: React.FC<React.PropsWithChildren<InvestigateInTimelineActionProps>> = ({
+const InvestigateInTimelineActionComponent: React.FC<
+  React.PropsWithChildren<InvestigateInTimelineActionProps>
+> = ({
   ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
   ecsRowData,
   buttonType,

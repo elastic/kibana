@@ -32,7 +32,10 @@ interface Props {
   readOnly: boolean;
 }
 
-export const AuthStep: FunctionComponent<React.PropsWithChildren<Props>> = ({ display, readOnly }) => {
+export const AuthStep: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  display,
+  readOnly,
+}) => {
   const { getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: ['config.hasAuth', '__internal__.hasHeaders'],

@@ -17,10 +17,9 @@ interface UserActionMarkdownFooterProps {
   handleCancelAction: () => void;
 }
 
-const UserActionMarkdownFooterComponent: React.FC<React.PropsWithChildren<UserActionMarkdownFooterProps>> = ({
-  handleSaveAction,
-  handleCancelAction,
-}) => {
+const UserActionMarkdownFooterComponent: React.FC<
+  React.PropsWithChildren<UserActionMarkdownFooterProps>
+> = ({ handleSaveAction, handleCancelAction }) => {
   const [{ content }] = useFormData<{ content: string }>({ watch: ['content'] });
 
   return (

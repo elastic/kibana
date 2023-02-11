@@ -18,10 +18,9 @@ export interface AgentBinarySectionProps {
   deleteDownloadSource: (ds: DownloadSource) => void;
 }
 
-export const AgentBinarySection: React.FunctionComponent<React.PropsWithChildren<AgentBinarySectionProps>> = ({
-  downloadSources,
-  deleteDownloadSource,
-}) => {
+export const AgentBinarySection: React.FunctionComponent<
+  React.PropsWithChildren<AgentBinarySectionProps>
+> = ({ downloadSources, deleteDownloadSource }) => {
   const { getHref } = useLink();
 
   return (

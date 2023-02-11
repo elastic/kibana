@@ -46,26 +46,28 @@ import { UserName } from './user_name';
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 
-const FormattedFieldValueComponent: React.FC<React.PropsWithChildren<{
-  asPlainText?: boolean;
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  contextId: string;
-  eventId: string;
-  isAggregatable?: boolean;
-  isObjectArray?: boolean;
-  fieldFormat?: string;
-  fieldName: string;
-  fieldType?: string;
-  isButton?: boolean;
-  isDraggable?: boolean;
-  onClick?: () => void;
-  onClickAriaLabel?: string;
-  title?: string;
-  truncate?: boolean;
-  value: string | number | undefined | null;
-  linkValue?: string | null | undefined;
-}>> = ({
+const FormattedFieldValueComponent: React.FC<
+  React.PropsWithChildren<{
+    asPlainText?: boolean;
+    /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+    Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+    contextId: string;
+    eventId: string;
+    isAggregatable?: boolean;
+    isObjectArray?: boolean;
+    fieldFormat?: string;
+    fieldName: string;
+    fieldType?: string;
+    isButton?: boolean;
+    isDraggable?: boolean;
+    onClick?: () => void;
+    onClickAriaLabel?: string;
+    title?: string;
+    truncate?: boolean;
+    value: string | number | undefined | null;
+    linkValue?: string | null | undefined;
+  }>
+> = ({
   asPlainText,
   Component,
   contextId,

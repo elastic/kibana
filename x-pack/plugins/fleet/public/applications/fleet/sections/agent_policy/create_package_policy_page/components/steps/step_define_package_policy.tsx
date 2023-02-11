@@ -46,16 +46,18 @@ const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
   }
 `;
 
-export const StepDefinePackagePolicy: React.FunctionComponent<React.PropsWithChildren<{
-  agentPolicy?: AgentPolicy;
-  packageInfo: PackageInfo;
-  packagePolicy: NewPackagePolicy;
-  updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
-  validationResults: PackagePolicyValidationResults;
-  submitAttempted: boolean;
-  isEditPage?: boolean;
-  noAdvancedToggle?: boolean;
-}>> = memo(
+export const StepDefinePackagePolicy: React.FunctionComponent<
+  React.PropsWithChildren<{
+    agentPolicy?: AgentPolicy;
+    packageInfo: PackageInfo;
+    packagePolicy: NewPackagePolicy;
+    updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
+    validationResults: PackagePolicyValidationResults;
+    submitAttempted: boolean;
+    isEditPage?: boolean;
+    noAdvancedToggle?: boolean;
+  }>
+> = memo(
   ({
     agentPolicy,
     packageInfo,

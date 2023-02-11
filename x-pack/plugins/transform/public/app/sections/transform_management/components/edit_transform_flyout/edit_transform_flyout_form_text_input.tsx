@@ -19,15 +19,9 @@ interface EditTransformFlyoutFormTextInputProps {
   value: string;
 }
 
-export const EditTransformFlyoutFormTextInput: FC<React.PropsWithChildren<EditTransformFlyoutFormTextInputProps>> = ({
-  dataTestSubj,
-  errorMessages,
-  helpText,
-  label,
-  onChange,
-  placeholder,
-  value,
-}) => {
+export const EditTransformFlyoutFormTextInput: FC<
+  React.PropsWithChildren<EditTransformFlyoutFormTextInputProps>
+> = ({ dataTestSubj, errorMessages, helpText, label, onChange, placeholder, value }) => {
   return (
     <EuiFormRow
       label={label}

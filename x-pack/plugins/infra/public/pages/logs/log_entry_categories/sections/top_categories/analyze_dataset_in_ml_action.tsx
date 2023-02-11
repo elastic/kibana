@@ -15,12 +15,14 @@ import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 
-export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<React.PropsWithChildren<{
-  categorizationJobId: string;
-  categoryId: number;
-  dataset: string;
-  timeRange: TimeRange;
-}>> = ({ categorizationJobId, categoryId, dataset, timeRange }) => {
+export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<
+  React.PropsWithChildren<{
+    categorizationJobId: string;
+    categoryId: number;
+    dataset: string;
+    timeRange: TimeRange;
+  }>
+> = ({ categorizationJobId, categoryId, dataset, timeRange }) => {
   const {
     services: { ml, http, application },
   } = useKibanaContextForPlugin();

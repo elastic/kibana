@@ -7,7 +7,9 @@
 import React, { ComponentType } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-export function KibanaReactStorybookDecorator(Story: ComponentType<React.PropsWithChildren<unknown>>) {
+export function KibanaReactStorybookDecorator(
+  Story: ComponentType<React.PropsWithChildren<unknown>>
+) {
   return (
     <KibanaContextProvider
       services={{

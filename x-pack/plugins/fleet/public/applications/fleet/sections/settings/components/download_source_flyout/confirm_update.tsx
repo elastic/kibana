@@ -19,11 +19,9 @@ interface ConfirmDescriptionProps {
   agentPolicyCount: number;
 }
 
-const ConfirmDescription: React.FunctionComponent<React.PropsWithChildren<ConfirmDescriptionProps>> = ({
-  downloadSource,
-  agentCount,
-  agentPolicyCount,
-}) => (
+const ConfirmDescription: React.FunctionComponent<
+  React.PropsWithChildren<ConfirmDescriptionProps>
+> = ({ downloadSource, agentCount, agentPolicyCount }) => (
   <FormattedMessage
     id="xpack.fleet.settings.updateDownloadSourceModal.confirmModalText"
     data-test-subj="editDownloadSourcesConfirmModal.confirmModalText"

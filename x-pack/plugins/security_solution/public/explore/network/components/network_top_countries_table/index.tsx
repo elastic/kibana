@@ -54,7 +54,9 @@ const rowItems: ItemsPerRow[] = [
 
 export const NetworkTopCountriesTableId = 'networkTopCountries-top-talkers';
 
-const NetworkTopCountriesTableComponent: React.FC<React.PropsWithChildren<NetworkTopCountriesTableProps>> = ({
+const NetworkTopCountriesTableComponent: React.FC<
+  React.PropsWithChildren<NetworkTopCountriesTableProps>
+> = ({
   data,
   fakeTotalCount,
   flowTargeted,

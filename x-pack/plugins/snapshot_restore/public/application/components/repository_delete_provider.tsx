@@ -24,7 +24,9 @@ export type DeleteRepository = (
 
 type OnSuccessCallback = (repositoriesDeleted: Array<Repository['name']>) => void;
 
-export const RepositoryDeleteProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ children }) => {
+export const RepositoryDeleteProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+  children,
+}) => {
   const { i18n } = useServices();
   const toastNotifications = useToastNotifications();
 

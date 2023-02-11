@@ -53,7 +53,11 @@ export interface DocLinkProps {
   doc: string;
 }
 
-export const DocLink: FunctionComponent<React.PropsWithChildren<DocLinkProps>> = ({ app, doc, children }) => {
+export const DocLink: FunctionComponent<React.PropsWithChildren<DocLinkProps>> = ({
+  app,
+  doc,
+  children,
+}) => {
   const [, getDocLink] = useDocLinks();
   return (
     <EuiLink href={getDocLink(app, doc)} target="_blank" external>

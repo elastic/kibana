@@ -63,7 +63,9 @@ const InstalledIntegrationsInfoCallout: React.FC<React.PropsWithChildren<unknown
   </EuiCallOut>
 );
 
-const UpdatesAvailableCallout: React.FC<React.PropsWithChildren<{ count: number }>> = ({ count }) => (
+const UpdatesAvailableCallout: React.FC<React.PropsWithChildren<{ count: number }>> = ({
+  count,
+}) => (
   <EuiCallOut
     title={i18n.translate('xpack.fleet.epmList.updatesAvailableCalloutTitle', {
       defaultMessage:
@@ -115,10 +117,12 @@ const VerificationWarningCallout: React.FC<React.PropsWithChildren<unknown>> = (
   );
 };
 
-export const InstalledPackages: React.FC<React.PropsWithChildren<{
-  installedPackages: PackageListItem[];
-  isLoading: boolean;
-}>> = ({ installedPackages, isLoading }) => {
+export const InstalledPackages: React.FC<
+  React.PropsWithChildren<{
+    installedPackages: PackageListItem[];
+    isLoading: boolean;
+  }>
+> = ({ installedPackages, isLoading }) => {
   useBreadcrumbs('integrations_installed');
 
   const { packageVerificationKeyId } = useFleetStatus();

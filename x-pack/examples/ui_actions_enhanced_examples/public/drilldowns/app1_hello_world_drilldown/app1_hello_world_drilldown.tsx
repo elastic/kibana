@@ -36,7 +36,10 @@ export class App1HelloWorldDrilldown implements Drilldown<Config, Context> {
     return [SAMPLE_APP1_CLICK_TRIGGER];
   }
 
-  public readonly CollectConfig: React.FC<React.PropsWithChildren<CollectConfigProps>> = ({ config, onConfig }) => (
+  public readonly CollectConfig: React.FC<React.PropsWithChildren<CollectConfigProps>> = ({
+    config,
+    onConfig,
+  }) => (
     <EuiFormRow label="Enter your name" fullWidth>
       <EuiFieldText
         fullWidth

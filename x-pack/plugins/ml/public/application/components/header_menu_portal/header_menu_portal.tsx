@@ -15,7 +15,9 @@ export interface HeaderMenuPortalProps {
   children: ReactNode;
 }
 
-export const HeaderMenuPortal: FC<React.PropsWithChildren<HeaderMenuPortalProps>> = ({ children }) => {
+export const HeaderMenuPortal: FC<React.PropsWithChildren<HeaderMenuPortalProps>> = ({
+  children,
+}) => {
   const { services } = useMlKibana();
 
   const { setHeaderActionMenu } = useContext(MlPageControlsContext);

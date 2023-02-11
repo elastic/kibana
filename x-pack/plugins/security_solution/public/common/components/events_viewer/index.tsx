@@ -104,7 +104,9 @@ export interface EventsViewerProps {
  * timeline is used BESIDES the flyout. The flyout makes use of the `EventsViewer` component which is a subcomponent here
  * NOTE: As of writting, it is not used in the Case_View component
  */
-const StatefulEventsViewerComponent: React.FC<React.PropsWithChildren<EventsViewerProps & PropsFromRedux>> = ({
+const StatefulEventsViewerComponent: React.FC<
+  React.PropsWithChildren<EventsViewerProps & PropsFromRedux>
+> = ({
   defaultCellActions,
   defaultModel,
   end,
@@ -612,6 +614,6 @@ const connector = connect(undefined, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const StatefulEventsViewer: React.FunctionComponent<React.PropsWithChildren<EventsViewerProps>> = connector(
-  StatefulEventsViewerComponent
-);
+export const StatefulEventsViewer: React.FunctionComponent<
+  React.PropsWithChildren<EventsViewerProps>
+> = connector(StatefulEventsViewerComponent);

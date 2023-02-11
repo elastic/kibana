@@ -12,10 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * React component for rendering EuiEmptyPrompt when no influencers were found.
  */
-export const ExplorerNoInfluencersFound: FC<React.PropsWithChildren<{
-  viewBySwimlaneFieldName: string;
-  showFilterMessage?: boolean;
-}>> = ({ viewBySwimlaneFieldName, showFilterMessage = false }) =>
+export const ExplorerNoInfluencersFound: FC<
+  React.PropsWithChildren<{
+    viewBySwimlaneFieldName: string;
+    showFilterMessage?: boolean;
+  }>
+> = ({ viewBySwimlaneFieldName, showFilterMessage = false }) =>
   showFilterMessage === false ? (
     <FormattedMessage
       id="xpack.ml.explorer.noInfluencersFoundTitle"

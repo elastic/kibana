@@ -44,7 +44,11 @@ interface Props {
   forceRefresh?: boolean;
 }
 
-export const JobMap: FC<React.PropsWithChildren<Props>> = ({ analyticsId, modelId, forceRefresh }) => {
+export const JobMap: FC<React.PropsWithChildren<Props>> = ({
+  analyticsId,
+  modelId,
+  forceRefresh,
+}) => {
   // itemsDeleted will reset to false when Controls component calls updateElements to remove nodes deleted from map
   const [itemsDeleted, setItemsDeleted] = useState<boolean>(false);
   const [resetCyToggle, setResetCyToggle] = useState<boolean>(false);

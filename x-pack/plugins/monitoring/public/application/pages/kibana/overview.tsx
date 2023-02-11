@@ -102,7 +102,9 @@ const KibanaOverview = ({ data }: { data: any }) => {
   );
 };
 
-export const KibanaOverviewPage: React.FC<React.PropsWithChildren<ComponentProps>> = ({ clusters }) => {
+export const KibanaOverviewPage: React.FC<React.PropsWithChildren<ComponentProps>> = ({
+  clusters,
+}) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();

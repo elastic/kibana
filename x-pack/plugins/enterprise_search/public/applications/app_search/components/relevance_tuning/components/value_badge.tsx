@@ -15,7 +15,10 @@ interface Props {
   children: React.ReactNode;
   disabled?: boolean;
 }
-export const ValueBadge: React.FC<React.PropsWithChildren<Props>> = ({ children, disabled = false }) => {
+export const ValueBadge: React.FC<React.PropsWithChildren<Props>> = ({
+  children,
+  disabled = false,
+}) => {
   const className = classNames('valueBadge', {
     'valueBadge--disabled': disabled,
   });

@@ -11,7 +11,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy } from '../../../types';
 
-export const MetricNonAvailable: React.FC<React.PropsWithChildren<{ agentPolicy?: AgentPolicy }>> = ({ agentPolicy }) => {
+export const MetricNonAvailable: React.FC<
+  React.PropsWithChildren<{ agentPolicy?: AgentPolicy }>
+> = ({ agentPolicy }) => {
   const isMonitoringEnabled = agentPolicy?.monitoring_enabled?.includes('metrics');
 
   return (

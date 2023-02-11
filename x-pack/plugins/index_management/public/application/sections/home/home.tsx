@@ -34,7 +34,9 @@ interface MatchParams {
   section: Section;
 }
 
-export const IndexManagementHome: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps<MatchParams>>> = ({
+export const IndexManagementHome: React.FunctionComponent<
+  React.PropsWithChildren<RouteComponentProps<MatchParams>>
+> = ({
   match: {
     params: { section },
   },

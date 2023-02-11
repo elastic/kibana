@@ -32,7 +32,9 @@ interface OwnProps {
 
 type Props = OwnProps;
 
-export const NavButtons: FunctionComponent<React.PropsWithChildren<Props>> = ({ actionsErrors }) => {
+export const NavButtons: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  actionsErrors,
+}) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
   const navigateToCreateCaseClick = useCallback(

@@ -45,7 +45,9 @@ export * from './agent_policy_select_create';
 export * from './instructions';
 export * from './steps';
 
-export const AgentEnrollmentFlyout: React.FunctionComponent<React.PropsWithChildren<FlyOutProps>> = ({
+export const AgentEnrollmentFlyout: React.FunctionComponent<
+  React.PropsWithChildren<FlyOutProps>
+> = ({
   onClose,
   agentPolicy,
   defaultMode = 'managed',

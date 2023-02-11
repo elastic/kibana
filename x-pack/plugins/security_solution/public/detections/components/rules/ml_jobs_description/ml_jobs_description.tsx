@@ -19,7 +19,9 @@ interface MlJobsDescriptionProps {
   jobIds: string[];
 }
 
-const MlJobsDescriptionComponent: FC<React.PropsWithChildren<MlJobsDescriptionProps>> = ({ jobIds }) => {
+const MlJobsDescriptionComponent: FC<React.PropsWithChildren<MlJobsDescriptionProps>> = ({
+  jobIds,
+}) => {
   const mlCapabilities = useMlCapabilities();
 
   const isMlUser = hasMlUserPermissions(mlCapabilities);

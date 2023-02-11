@@ -9,7 +9,9 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { EuiLoadingSpinnerSize } from '@elastic/eui/src/components/loading/loading_spinner';
 
-export const Loading: React.FunctionComponent<React.PropsWithChildren<{ size?: EuiLoadingSpinnerSize }>> = ({ size }) => (
+export const Loading: React.FunctionComponent<
+  React.PropsWithChildren<{ size?: EuiLoadingSpinnerSize }>
+> = ({ size }) => (
   <EuiFlexGroup justifyContent="spaceAround">
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size={size || 'xl'} data-test-subj="loadingSpinner" />

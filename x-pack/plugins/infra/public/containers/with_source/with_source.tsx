@@ -38,7 +38,9 @@ interface WithSourceProps {
   }>;
 }
 
-export const WithSource: React.FunctionComponent<React.PropsWithChildren<WithSourceProps>> = ({ children }) => {
+export const WithSource: React.FunctionComponent<React.PropsWithChildren<WithSourceProps>> = ({
+  children,
+}) => {
   const {
     createSourceConfiguration,
     createDerivedIndexPattern,

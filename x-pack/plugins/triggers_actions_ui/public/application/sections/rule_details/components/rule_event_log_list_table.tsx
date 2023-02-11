@@ -53,7 +53,9 @@ import {
 import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 
-const getEmptyFunctionComponent: React.FC<React.PropsWithChildren<SpacesContextProps>> = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent: React.FC<React.PropsWithChildren<SpacesContextProps>> = ({
+  children,
+}) => <>{children}</>;
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -748,7 +750,9 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   );
 };
 
-const RuleEventLogListTableWithSpaces: React.FC<React.PropsWithChildren<RuleEventLogListTableProps>> = (props) => {
+const RuleEventLogListTableWithSpaces: React.FC<
+  React.PropsWithChildren<RuleEventLogListTableProps>
+> = (props) => {
   const { spaces } = useKibana().services;
 
   // eslint-disable-next-line react-hooks/exhaustive-deps

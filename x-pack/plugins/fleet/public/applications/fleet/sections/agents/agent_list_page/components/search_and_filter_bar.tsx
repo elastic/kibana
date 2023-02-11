@@ -40,32 +40,34 @@ const FlexEndEuiFlexItem = styled(EuiFlexItem)`
   align-self: flex-end;
 `;
 
-export const SearchAndFilterBar: React.FunctionComponent<React.PropsWithChildren<{
-  agentPolicies: AgentPolicy[];
-  draftKuery: string;
-  onDraftKueryChange: (kuery: string) => void;
-  onSubmitSearch: (kuery: string) => void;
-  selectedAgentPolicies: string[];
-  onSelectedAgentPoliciesChange: (selectedPolicies: string[]) => void;
-  selectedStatus: string[];
-  onSelectedStatusChange: (selectedStatus: string[]) => void;
-  showUpgradeable: boolean;
-  onShowUpgradeableChange: (showUpgradeable: boolean) => void;
-  tags: string[];
-  selectedTags: string[];
-  onSelectedTagsChange: (selectedTags: string[]) => void;
-  totalAgents: number;
-  totalInactiveAgents: number;
-  selectionMode: SelectionMode;
-  currentQuery: string;
-  selectedAgents: Agent[];
-  refreshAgents: (args?: { refreshTags?: boolean }) => void;
-  onClickAddAgent: () => void;
-  onClickAddFleetServer: () => void;
-  visibleAgents: Agent[];
-  onClickAgentActivity: () => void;
-  showAgentActivityTour: { isOpen: boolean };
-}>> = ({
+export const SearchAndFilterBar: React.FunctionComponent<
+  React.PropsWithChildren<{
+    agentPolicies: AgentPolicy[];
+    draftKuery: string;
+    onDraftKueryChange: (kuery: string) => void;
+    onSubmitSearch: (kuery: string) => void;
+    selectedAgentPolicies: string[];
+    onSelectedAgentPoliciesChange: (selectedPolicies: string[]) => void;
+    selectedStatus: string[];
+    onSelectedStatusChange: (selectedStatus: string[]) => void;
+    showUpgradeable: boolean;
+    onShowUpgradeableChange: (showUpgradeable: boolean) => void;
+    tags: string[];
+    selectedTags: string[];
+    onSelectedTagsChange: (selectedTags: string[]) => void;
+    totalAgents: number;
+    totalInactiveAgents: number;
+    selectionMode: SelectionMode;
+    currentQuery: string;
+    selectedAgents: Agent[];
+    refreshAgents: (args?: { refreshTags?: boolean }) => void;
+    onClickAddAgent: () => void;
+    onClickAddFleetServer: () => void;
+    visibleAgents: Agent[];
+    onClickAgentActivity: () => void;
+    showAgentActivityTour: { isOpen: boolean };
+  }>
+> = ({
   agentPolicies,
   draftKuery,
   onDraftKueryChange,

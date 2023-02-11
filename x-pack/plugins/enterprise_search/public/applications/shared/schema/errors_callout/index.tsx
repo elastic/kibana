@@ -17,7 +17,9 @@ interface Props {
   viewErrorsPath: string;
 }
 
-export const SchemaErrorsCallout: React.FC<React.PropsWithChildren<Props>> = ({ viewErrorsPath }) => (
+export const SchemaErrorsCallout: React.FC<React.PropsWithChildren<Props>> = ({
+  viewErrorsPath,
+}) => (
   <EuiCallOut
     color="danger"
     iconType="alert"

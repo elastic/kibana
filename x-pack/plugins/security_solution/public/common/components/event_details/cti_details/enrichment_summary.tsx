@@ -124,15 +124,17 @@ const EnrichmentDescription: React.FC<React.PropsWithChildren<ThreatSummaryDescr
   );
 };
 
-const EnrichmentSummaryComponent: React.FC<React.PropsWithChildren<{
-  browserFields: BrowserFields;
-  data: TimelineEventsDetailsItem[];
-  enrichments: CtiEnrichment[];
-  scopeId: string;
-  eventId: string;
-  isDraggable?: boolean;
-  isReadOnly?: boolean;
-}>> = ({ browserFields, data, enrichments, scopeId, eventId, isDraggable, isReadOnly }) => {
+const EnrichmentSummaryComponent: React.FC<
+  React.PropsWithChildren<{
+    browserFields: BrowserFields;
+    data: TimelineEventsDetailsItem[];
+    enrichments: CtiEnrichment[];
+    scopeId: string;
+    eventId: string;
+    isDraggable?: boolean;
+    isReadOnly?: boolean;
+  }>
+> = ({ browserFields, data, enrichments, scopeId, eventId, isDraggable, isReadOnly }) => {
   const parsedEnrichments = enrichments.map((enrichment, index) => {
     const { field, type, feedName, value } = getEnrichmentIdentifiers(enrichment);
     const eventData = data.find((item) => item.field === field);

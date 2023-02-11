@@ -38,10 +38,9 @@ const AddFieldPopoverContainer = styled.div`
   min-width: 350px;
 `;
 
-const AddDataProviderPopoverComponent: React.FC<React.PropsWithChildren<AddDataProviderPopoverProps>> = ({
-  browserFields,
-  timelineId,
-}) => {
+const AddDataProviderPopoverComponent: React.FC<
+  React.PropsWithChildren<AddDataProviderPopoverProps>
+> = ({ browserFields, timelineId }) => {
   const dispatch = useDispatch();
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);

@@ -28,7 +28,9 @@ interface ActiveStateSwitchProps {
   item: PackSavedObject & { policy_ids: string[] };
 }
 
-const ActiveStateSwitchComponent: React.FC<React.PropsWithChildren<ActiveStateSwitchProps>> = ({ item }) => {
+const ActiveStateSwitchComponent: React.FC<React.PropsWithChildren<ActiveStateSwitchProps>> = ({
+  item,
+}) => {
   const queryClient = useQueryClient();
   const {
     application: {

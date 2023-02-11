@@ -19,7 +19,9 @@ import { MLInferenceLogic } from './ml_inference_logic';
 
 type LabelOptions = Array<{ label: string }>;
 
-export const ZeroShotClassificationInferenceConfiguration: React.FC<React.PropsWithChildren<unknown>> = () => {
+export const ZeroShotClassificationInferenceConfiguration: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { ingestionMethod } = useValues(IndexViewLogic);
   const {
     addInferencePipelineModal: { configuration },

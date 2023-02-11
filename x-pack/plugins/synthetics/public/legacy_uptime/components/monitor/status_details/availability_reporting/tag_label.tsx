@@ -20,7 +20,11 @@ const BadgeItem = styled.div`
   }
 `;
 
-export const TagLabel: React.FC<React.PropsWithChildren<StatusTag>> = ({ color, label, status }) => {
+export const TagLabel: React.FC<React.PropsWithChildren<StatusTag>> = ({
+  color,
+  label,
+  status,
+}) => {
   return (
     <BadgeItem>
       <EuiBadge color={status === STATUS.DOWN ? 'danger' : 'success'}>{label}</EuiBadge>

@@ -29,9 +29,9 @@ jest.mock('react-redux', () => {
 describe('useCreateTimelineButton', () => {
   const mockId = 'mockId';
   const timelineType = TimelineType.default;
-  const wrapperContainer: React.FC<React.PropsWithChildren<{ children?: React.ReactNode }>> = ({ children }) => (
-    <TestProviders>{children}</TestProviders>
-  );
+  const wrapperContainer: React.FC<React.PropsWithChildren<{ children?: React.ReactNode }>> = ({
+    children,
+  }) => <TestProviders>{children}</TestProviders>;
 
   test('return getButton', async () => {
     await act(async () => {

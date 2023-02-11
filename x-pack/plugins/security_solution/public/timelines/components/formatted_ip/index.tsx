@@ -74,16 +74,18 @@ const getDataProvider = ({
   and: [],
 });
 
-const NonDecoratedIpComponent: React.FC<React.PropsWithChildren<{
-  contextId: string;
-  eventId: string;
-  fieldName: string;
-  fieldType: string;
-  isAggregatable: boolean;
-  isDraggable: boolean;
-  truncate?: boolean;
-  value: string | object | null | undefined;
-}>> = ({
+const NonDecoratedIpComponent: React.FC<
+  React.PropsWithChildren<{
+    contextId: string;
+    eventId: string;
+    fieldName: string;
+    fieldType: string;
+    isAggregatable: boolean;
+    isDraggable: boolean;
+    truncate?: boolean;
+    value: string | object | null | undefined;
+  }>
+> = ({
   contextId,
   eventId,
   fieldName,
@@ -367,20 +369,22 @@ const AddressLinks = React.memo(
     deepEqual(prevProps.addresses, nextProps.addresses)
 );
 
-const FormattedIpComponent: React.FC<React.PropsWithChildren<{
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  contextId: string;
-  eventId: string;
-  fieldName: string;
-  fieldType: string;
-  isAggregatable: boolean;
-  isButton?: boolean;
-  isDraggable: boolean;
-  onClick?: () => void;
-  title?: string;
-  truncate?: boolean;
-  value: string | object | null | undefined;
-}>> = ({
+const FormattedIpComponent: React.FC<
+  React.PropsWithChildren<{
+    Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+    contextId: string;
+    eventId: string;
+    fieldName: string;
+    fieldType: string;
+    isAggregatable: boolean;
+    isButton?: boolean;
+    isDraggable: boolean;
+    onClick?: () => void;
+    title?: string;
+    truncate?: boolean;
+    value: string | object | null | undefined;
+  }>
+> = ({
   Component,
   contextId,
   eventId,

@@ -37,11 +37,9 @@ interface MlRuleWarningPopoverComponentProps {
   jobs: SecurityJob[];
 }
 
-const MlRuleWarningPopoverComponent: React.FC<React.PropsWithChildren<MlRuleWarningPopoverComponentProps>> = ({
-  rule,
-  loadingJobs,
-  jobs,
-}) => {
+const MlRuleWarningPopoverComponent: React.FC<
+  React.PropsWithChildren<MlRuleWarningPopoverComponentProps>
+> = ({ rule, loadingJobs, jobs }) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
 
   if (!isMlRule(rule.type) || loadingJobs || !rule.machine_learning_job_id) {

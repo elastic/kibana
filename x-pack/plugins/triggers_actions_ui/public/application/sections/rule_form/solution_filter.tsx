@@ -14,10 +14,9 @@ interface SolutionFilterProps {
   onChange?: (selectedSolutions: string[]) => void;
 }
 
-export const SolutionFilter: React.FunctionComponent<React.PropsWithChildren<SolutionFilterProps>> = ({
-  solutions,
-  onChange,
-}: SolutionFilterProps) => {
+export const SolutionFilter: React.FunctionComponent<
+  React.PropsWithChildren<SolutionFilterProps>
+> = ({ solutions, onChange }: SolutionFilterProps) => {
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 

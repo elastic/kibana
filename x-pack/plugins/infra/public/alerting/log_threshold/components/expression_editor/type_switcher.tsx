@@ -54,7 +54,10 @@ const getThresholdType = (criteria: PartialCriteria): ThresholdType => {
   return isRatioRule(criteria) ? 'ratio' : 'count';
 };
 
-export const TypeSwitcher: React.FC<React.PropsWithChildren<Props>> = ({ criteria, updateType }) => {
+export const TypeSwitcher: React.FC<React.PropsWithChildren<Props>> = ({
+  criteria,
+  updateType,
+}) => {
   const [isThresholdTypePopoverOpen, setThresholdTypePopoverOpenState] = useState(false);
   const thresholdType = getThresholdType(criteria);
 

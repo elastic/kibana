@@ -26,7 +26,9 @@ export const HiddenDocuments: React.FC<React.PropsWithChildren<unknown>> = () =>
   const documents = curation.hidden;
   const hasDocuments = documents.length > 0;
 
-  const CountBadge: React.FC<React.PropsWithChildren<unknown>> = () => <EuiBadge color="accent">{documents.length}</EuiBadge>;
+  const CountBadge: React.FC<React.PropsWithChildren<unknown>> = () => (
+    <EuiBadge color="accent">{documents.length}</EuiBadge>
+  );
 
   return (
     <DataPanel

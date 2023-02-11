@@ -20,7 +20,10 @@ interface Props {
   dataTestSubj: string;
 }
 
-export const ExpandedRowMessagesPane: FC<React.PropsWithChildren<Props>> = ({ analyticsId, dataTestSubj }) => {
+export const ExpandedRowMessagesPane: FC<React.PropsWithChildren<Props>> = ({
+  analyticsId,
+  dataTestSubj,
+}) => {
   const [messages, setMessages] = useState<JobMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');

@@ -27,7 +27,10 @@ interface ReauthenticateProps {
   header: React.ReactNode;
 }
 
-export const Reauthenticate: React.FC<React.PropsWithChildren<ReauthenticateProps>> = ({ name, header }) => {
+export const Reauthenticate: React.FC<React.PropsWithChildren<ReauthenticateProps>> = ({
+  name,
+  header,
+}) => {
   const { search } = useLocation() as Location;
 
   const { sourceId } = parseQueryParams(search) as unknown as SourceQueryParams;

@@ -23,7 +23,9 @@ interface ManageCrawlsPopoverProps {
   domain?: CrawlerDomain;
 }
 
-export const ManageCrawlsPopover: React.FC<React.PropsWithChildren<ManageCrawlsPopoverProps>> = ({ domain }) => {
+export const ManageCrawlsPopover: React.FC<React.PropsWithChildren<ManageCrawlsPopoverProps>> = ({
+  domain,
+}) => {
   const { closePopover, reApplyCrawlRules, togglePopover } = useActions(ManageCrawlsPopoverLogic);
 
   const { isOpen } = useValues(ManageCrawlsPopoverLogic);

@@ -15,24 +15,26 @@ interface FunctionPickerProps {
   onChange: (value: string) => void;
 }
 
-export const FunctionPicker: FC<React.PropsWithChildren<FunctionPickerProps>> = React.memo(({ value, onChange }) => {
-  const options = Object.keys(fnOperationTypeMapping).map((v) => {
-    return {
-      value: v,
-      text: v,
-    };
-  });
+export const FunctionPicker: FC<React.PropsWithChildren<FunctionPickerProps>> = React.memo(
+  ({ value, onChange }) => {
+    const options = Object.keys(fnOperationTypeMapping).map((v) => {
+      return {
+        value: v,
+        text: v,
+      };
+    });
 
-  return (
-    <EuiFormRow>
-      <EuiSelect
-        options={options}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        prepend={i18n.translate('xpack.aiops.changePointDetection.selectFunctionLabel', {
-          defaultMessage: 'Function',
-        })}
-      />
-    </EuiFormRow>
-  );
-});
+    return (
+      <EuiFormRow>
+        <EuiSelect
+          options={options}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          prepend={i18n.translate('xpack.aiops.changePointDetection.selectFunctionLabel', {
+            defaultMessage: 'Function',
+          })}
+        />
+      </EuiFormRow>
+    );
+  }
+);

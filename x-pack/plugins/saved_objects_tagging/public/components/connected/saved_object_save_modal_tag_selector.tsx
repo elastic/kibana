@@ -25,7 +25,9 @@ export const getConnectedSavedObjectModalTagSelectorComponent = ({
   cache,
   capabilities,
   openCreateModal,
-}: GetConnectedTagSelectorOptions): FC<React.PropsWithChildren<SavedObjectSaveModalTagSelectorComponentProps>> => {
+}: GetConnectedTagSelectorOptions): FC<
+  React.PropsWithChildren<SavedObjectSaveModalTagSelectorComponentProps>
+> => {
   return ({
     initialSelection,
     onTagsSelected: notifySelectionChange,

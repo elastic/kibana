@@ -28,9 +28,11 @@ interface PalletteObject {
 }
 type PalletteArray = PalletteObject[];
 
-export const SeverityBar: React.FC<React.PropsWithChildren<{
-  severityCount: SeverityCount;
-}>> = ({ severityCount }) => {
+export const SeverityBar: React.FC<
+  React.PropsWithChildren<{
+    severityCount: SeverityCount;
+  }>
+> = ({ severityCount }) => {
   const palette = useMemo(
     () =>
       (Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[]).reduce(

@@ -20,7 +20,9 @@ import {
 
 import { ExpandableSection } from './expandable_section';
 
-export const ExpandableSectionSplom: FC<React.PropsWithChildren<ScatterplotMatrixProps>> = (props) => {
+export const ExpandableSectionSplom: FC<React.PropsWithChildren<ScatterplotMatrixProps>> = (
+  props
+) => {
   const splomSectionHeaderItems = undefined;
   const splomSectionContent = (
     <>

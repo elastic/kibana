@@ -9,11 +9,13 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const StreamLiveButton: React.FC<React.PropsWithChildren<{
-  isStreaming: boolean;
-  onStartStreaming: () => void;
-  onStopStreaming: () => void;
-}>> = ({ isStreaming, onStartStreaming, onStopStreaming }) =>
+export const StreamLiveButton: React.FC<
+  React.PropsWithChildren<{
+    isStreaming: boolean;
+    onStartStreaming: () => void;
+    onStopStreaming: () => void;
+  }>
+> = ({ isStreaming, onStartStreaming, onStopStreaming }) =>
   isStreaming ? (
     <EuiButtonEmpty color="warning" iconSide="left" iconType="pause" onClick={onStopStreaming}>
       <FormattedMessage

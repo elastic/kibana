@@ -32,7 +32,10 @@ interface SyncJobFlyoutProps {
   syncJob?: SyncJobView;
 }
 
-export const SyncJobFlyout: React.FC<React.PropsWithChildren<SyncJobFlyoutProps>> = ({ onClose, syncJob }) => {
+export const SyncJobFlyout: React.FC<React.PropsWithChildren<SyncJobFlyoutProps>> = ({
+  onClose,
+  syncJob,
+}) => {
   const filtering = syncJob?.connector.filtering ? syncJob.connector.filtering[0] : null;
   const visible = !!syncJob;
   return visible ? (

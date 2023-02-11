@@ -68,13 +68,13 @@ interface FindingFlyoutProps {
   findings: CspFinding;
 }
 
-export const CodeBlock: React.FC<React.PropsWithChildren<PropsOf<typeof EuiCodeBlock>>> = (props) => (
-  <EuiCodeBlock isCopyable paddingSize="s" overflowHeight={300} {...props} />
-);
+export const CodeBlock: React.FC<React.PropsWithChildren<PropsOf<typeof EuiCodeBlock>>> = (
+  props
+) => <EuiCodeBlock isCopyable paddingSize="s" overflowHeight={300} {...props} />;
 
-export const Markdown: React.FC<React.PropsWithChildren<PropsOf<typeof EuiMarkdownFormat>>> = (props) => (
-  <EuiMarkdownFormat textSize="s" {...props} />
-);
+export const Markdown: React.FC<React.PropsWithChildren<PropsOf<typeof EuiMarkdownFormat>>> = (
+  props
+) => <EuiMarkdownFormat textSize="s" {...props} />;
 
 export const CisKubernetesIcons = ({
   benchmarkId,

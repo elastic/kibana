@@ -16,7 +16,11 @@ interface Props {
   width: number;
 }
 
-export const AlignmentGuide: FC<React.PropsWithChildren<Props>> = ({ transformMatrix, width, height }) => (
+export const AlignmentGuide: FC<React.PropsWithChildren<Props>> = ({
+  transformMatrix,
+  width,
+  height,
+}) => (
   <div
     className="canvasAlignmentGuide canvasInteractable canvasLayoutAnnotation"
     style={{

@@ -70,18 +70,20 @@ export const shouldShowStreamsByDefault = (
   );
 };
 
-export const PackagePolicyInputPanel: React.FunctionComponent<React.PropsWithChildren<{
-  packageInput: RegistryInput;
-  packageInfo: PackageInfo;
-  packagePolicy: NewPackagePolicy;
-  packageInputStreams: RegistryStreamWithDataStream[];
-  packagePolicyInput: NewPackagePolicyInput;
-  updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
-  updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
-  inputValidationResults: PackagePolicyInputValidationResults;
-  forceShowErrors?: boolean;
-  isEditPage?: boolean;
-}>> = memo(
+export const PackagePolicyInputPanel: React.FunctionComponent<
+  React.PropsWithChildren<{
+    packageInput: RegistryInput;
+    packageInfo: PackageInfo;
+    packagePolicy: NewPackagePolicy;
+    packageInputStreams: RegistryStreamWithDataStream[];
+    packagePolicyInput: NewPackagePolicyInput;
+    updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
+    updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
+    inputValidationResults: PackagePolicyInputValidationResults;
+    forceShowErrors?: boolean;
+    isEditPage?: boolean;
+  }>
+> = memo(
   ({
     packageInput,
     packageInfo,

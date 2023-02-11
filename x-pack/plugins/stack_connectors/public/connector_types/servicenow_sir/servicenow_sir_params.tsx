@@ -37,7 +37,9 @@ const defaultFields: Fields = {
   priority: [],
 };
 
-const ServiceNowSIRParamsFields: React.FunctionComponent<React.PropsWithChildren<ActionParamsProps<ServiceNowSIRActionParams>>> = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
+const ServiceNowSIRParamsFields: React.FunctionComponent<
+  React.PropsWithChildren<ActionParamsProps<ServiceNowSIRActionParams>>
+> = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
   const {
     docLinks,
     http,

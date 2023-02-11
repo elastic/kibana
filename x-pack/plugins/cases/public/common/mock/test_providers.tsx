@@ -147,7 +147,9 @@ export const createAppMockRenderer = ({
     },
   });
 
-  const AppWrapper: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>> = ({ children }) => (
+  const AppWrapper: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>> = ({
+    children,
+  }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>

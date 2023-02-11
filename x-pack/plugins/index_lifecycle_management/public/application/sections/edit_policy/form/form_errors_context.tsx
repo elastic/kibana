@@ -53,7 +53,9 @@ const createEmptyErrors = (): Errors => ({
   other: {},
 });
 
-export const FormErrorsProvider: FunctionComponent<React.PropsWithChildren<unknown>> = ({ children }) => {
+export const FormErrorsProvider: FunctionComponent<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const [errors, setErrors] = useState<Errors>(createEmptyErrors);
   const form = useFormContext<FormInternal>();
 

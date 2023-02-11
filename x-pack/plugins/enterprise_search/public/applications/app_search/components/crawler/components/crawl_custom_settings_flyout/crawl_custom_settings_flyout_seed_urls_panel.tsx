@@ -33,7 +33,9 @@ import { SimplifiedSelectable } from '../crawl_select_domains_modal/simplified_s
 
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
-export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC<React.PropsWithChildren<unknown>> = () => {
+export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const {
     customEntryPointUrls,
     customSitemapUrls,

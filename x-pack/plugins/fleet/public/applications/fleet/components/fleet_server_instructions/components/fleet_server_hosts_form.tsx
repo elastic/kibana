@@ -20,11 +20,9 @@ interface FleetServerHostSelectProps {
   setFleetServerHost: (host: FleetServerHost | null | undefined) => void;
 }
 
-export const FleetServerHostSelect: React.FunctionComponent<React.PropsWithChildren<FleetServerHostSelectProps>> = ({
-  selectedFleetServerHost,
-  setFleetServerHost,
-  fleetServerHosts,
-}) => {
+export const FleetServerHostSelect: React.FunctionComponent<
+  React.PropsWithChildren<FleetServerHostSelectProps>
+> = ({ selectedFleetServerHost, setFleetServerHost, fleetServerHosts }) => {
   const theme = useTheme() as EuiTheme;
 
   const fleetServerHostsOptions = useMemo(

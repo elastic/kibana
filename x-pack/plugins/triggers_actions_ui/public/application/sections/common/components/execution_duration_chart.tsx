@@ -46,12 +46,9 @@ const NUM_EXECUTIONS_OPTIONS = [120, 60, 30, 15].map((value) => ({
   ),
 }));
 
-export const ExecutionDurationChart: React.FunctionComponent<React.PropsWithChildren<ComponentOpts>> = ({
-  executionDuration,
-  numberOfExecutions,
-  onChangeDuration,
-  isLoading,
-}: ComponentOpts) => {
+export const ExecutionDurationChart: React.FunctionComponent<
+  React.PropsWithChildren<ComponentOpts>
+> = ({ executionDuration, numberOfExecutions, onChangeDuration, isLoading }: ComponentOpts) => {
   const paddedExecutionDurations = padOrTruncateDurations(
     executionDuration.valuesWithTimestamp,
     numberOfExecutions

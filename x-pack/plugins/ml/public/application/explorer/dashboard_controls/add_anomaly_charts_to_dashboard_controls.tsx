@@ -39,10 +39,9 @@ export interface AddToDashboardControlProps {
 /**
  * Component for attaching anomaly swim lane embeddable to dashboards.
  */
-export const AddAnomalyChartsToDashboardControl: FC<React.PropsWithChildren<AddToDashboardControlProps>> = ({
-  onClose,
-  jobIds,
-}) => {
+export const AddAnomalyChartsToDashboardControl: FC<
+  React.PropsWithChildren<AddToDashboardControlProps>
+> = ({ onClose, jobIds }) => {
   const [severity] = useTableSeverity();
   const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(DEFAULT_MAX_SERIES_TO_PLOT);
   const { anomalyExplorerCommonStateService, anomalyTimelineStateService } =

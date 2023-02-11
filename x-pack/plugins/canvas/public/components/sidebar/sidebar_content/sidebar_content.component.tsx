@@ -61,9 +61,9 @@ const GroupedElementSidebar: React.FC<React.PropsWithChildren<unknown>> = () => 
   </Fragment>
 );
 
-const SingleElementSidebar: React.FC<React.PropsWithChildren<{ selectedElementId: string | null }>> = ({
-  selectedElementId,
-}) => (
+const SingleElementSidebar: React.FC<
+  React.PropsWithChildren<{ selectedElementId: string | null }>
+> = ({ selectedElementId }) => (
   <Fragment>
     <SidebarHeader title={strings.getSingleElementSidebarTitle()} showLayerControls />
     <ElementSettings selectedElementId={selectedElementId} />

@@ -60,10 +60,9 @@ const ExpandableAdvancedSettings: React.FC<React.PropsWithChildren<unknown>> = (
     </EuiFlexItem>
   );
 };
-const AddIntegrationError: React.FC<React.PropsWithChildren<{ error: Error | string; title?: JSX.Element }>> = ({
-  error,
-  title,
-}) => (
+const AddIntegrationError: React.FC<
+  React.PropsWithChildren<{ error: Error | string; title?: JSX.Element }>
+> = ({ error, title }) => (
   <Error
     title={
       title ? (
@@ -79,7 +78,9 @@ const AddIntegrationError: React.FC<React.PropsWithChildren<{ error: Error | str
   />
 );
 
-export const AddIntegrationPageStep: React.FC<React.PropsWithChildren<MultiPageStepLayoutProps>> = (props) => {
+export const AddIntegrationPageStep: React.FC<React.PropsWithChildren<MultiPageStepLayoutProps>> = (
+  props
+) => {
   const { onNext, onBack, isManaged, setIsManaged, packageInfo, integrationInfo, agentPolicy } =
     props;
 

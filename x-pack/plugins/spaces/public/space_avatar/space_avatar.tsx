@@ -9,7 +9,9 @@ import React from 'react';
 
 import type { SpaceAvatarProps } from './types';
 
-export const getSpaceAvatarComponent = async (): Promise<React.FC<React.PropsWithChildren<SpaceAvatarProps>>> => {
+export const getSpaceAvatarComponent = async (): Promise<
+  React.FC<React.PropsWithChildren<SpaceAvatarProps>>
+> => {
   const { SpaceAvatarInternal } = await import('./space_avatar_internal');
   return (props: SpaceAvatarProps) => {
     return <SpaceAvatarInternal {...props} />;

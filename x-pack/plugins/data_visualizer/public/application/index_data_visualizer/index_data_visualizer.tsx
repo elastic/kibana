@@ -85,10 +85,9 @@ export const getLocatorParams = (params: {
   return locatorParams;
 };
 
-export const DataVisualizerStateContextProvider: FC<React.PropsWithChildren<DataVisualizerStateContextProviderProps>> = ({
-  IndexDataVisualizerComponent,
-  getAdditionalLinks,
-}) => {
+export const DataVisualizerStateContextProvider: FC<
+  React.PropsWithChildren<DataVisualizerStateContextProviderProps>
+> = ({ IndexDataVisualizerComponent, getAdditionalLinks }) => {
   const { services } = useDataVisualizerKibana();
   const {
     data: { dataViews, search },
@@ -270,9 +269,11 @@ export const DataVisualizerStateContextProvider: FC<React.PropsWithChildren<Data
   );
 };
 
-export const IndexDataVisualizer: FC<React.PropsWithChildren<{
-  getAdditionalLinks?: GetAdditionalLinks;
-}>> = ({ getAdditionalLinks }) => {
+export const IndexDataVisualizer: FC<
+  React.PropsWithChildren<{
+    getAdditionalLinks?: GetAdditionalLinks;
+  }>
+> = ({ getAdditionalLinks }) => {
   const coreStart = getCoreStart();
   const {
     data,

@@ -93,7 +93,9 @@ const ReindexTableRowCells: React.FunctionComponent<React.PropsWithChildren<Tabl
   );
 };
 
-export const ReindexTableRow: React.FunctionComponent<React.PropsWithChildren<TableRowProps>> = (props) => {
+export const ReindexTableRow: React.FunctionComponent<React.PropsWithChildren<TableRowProps>> = (
+  props
+) => {
   const {
     services: { api },
   } = useAppContext();

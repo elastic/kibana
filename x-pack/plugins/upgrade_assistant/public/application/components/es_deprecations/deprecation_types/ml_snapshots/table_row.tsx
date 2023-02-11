@@ -24,10 +24,9 @@ interface TableRowProps {
   mlUpgradeModeEnabled: boolean;
 }
 
-export const MlSnapshotsTableRowCells: React.FunctionComponent<React.PropsWithChildren<TableRowProps>> = ({
-  rowFieldNames,
-  deprecation,
-}) => {
+export const MlSnapshotsTableRowCells: React.FunctionComponent<
+  React.PropsWithChildren<TableRowProps>
+> = ({ rowFieldNames, deprecation }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const snapshotState = useMlSnapshotContext();
 
@@ -77,7 +76,9 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<React.PropsWithCh
   );
 };
 
-export const MlSnapshotsTableRow: React.FunctionComponent<React.PropsWithChildren<TableRowProps>> = (props) => {
+export const MlSnapshotsTableRow: React.FunctionComponent<
+  React.PropsWithChildren<TableRowProps>
+> = (props) => {
   const {
     services: { api },
   } = useAppContext();

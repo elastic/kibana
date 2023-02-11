@@ -27,9 +27,9 @@ Date.now = jest.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
 
 jest.mock('../../../../../common/containers/use_global_time');
 describe('useSocTrends', () => {
-  const wrapperContainer: React.FC<React.PropsWithChildren<{ children?: React.ReactNode }>> = ({ children }) => (
-    <TestProviders>{children}</TestProviders>
-  );
+  const wrapperContainer: React.FC<React.PropsWithChildren<{ children?: React.ReactNode }>> = ({
+    children,
+  }) => <TestProviders>{children}</TestProviders>;
   beforeEach(() => {
     (useGlobalTime as jest.Mock).mockReturnValue({
       from: '2020-07-07T08:20:18.966Z',

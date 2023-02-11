@@ -39,7 +39,9 @@ export const Error: React.FC<React.PropsWithChildren<Props>> = ({ message }) => 
   );
 };
 
-export const ErrorPageBody: React.FC<React.PropsWithChildren<{ message: string }>> = ({ message }) => {
+export const ErrorPageBody: React.FC<React.PropsWithChildren<{ message: string }>> = ({
+  message,
+}) => {
   return (
     <EuiPage style={{ flex: '1 0 auto' }}>
       <EuiPageBody>

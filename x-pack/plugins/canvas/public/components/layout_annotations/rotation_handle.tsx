@@ -15,7 +15,10 @@ interface Props {
   zoomScale?: number;
 }
 
-export const RotationHandle: FC<React.PropsWithChildren<Props>> = ({ transformMatrix, zoomScale = 1 }) => (
+export const RotationHandle: FC<React.PropsWithChildren<Props>> = ({
+  transformMatrix,
+  zoomScale = 1,
+}) => (
   <div
     className="canvasRotationHandle canvasLayoutAnnotation"
     style={{

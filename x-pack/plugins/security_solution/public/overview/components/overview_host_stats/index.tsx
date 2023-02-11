@@ -265,7 +265,10 @@ const AccordionContent = styled.div`
   margin-top: 8px;
 `;
 
-const OverviewHostStatsComponent: React.FC<React.PropsWithChildren<OverviewHostProps>> = ({ data, loading }) => {
+const OverviewHostStatsComponent: React.FC<React.PropsWithChildren<OverviewHostProps>> = ({
+  data,
+  loading,
+}) => {
   const allHostStats = getOverviewHostStats(data);
   const allHostStatsCount = allHostStats.reduce((total, stat) => total + stat.count, 0);
   return (

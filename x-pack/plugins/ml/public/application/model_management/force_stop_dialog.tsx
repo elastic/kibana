@@ -19,11 +19,9 @@ interface ForceStopModelConfirmDialogProps {
   onConfirm: () => void;
 }
 
-export const ForceStopModelConfirmDialog: FC<React.PropsWithChildren<ForceStopModelConfirmDialogProps>> = ({
-  model,
-  onConfirm,
-  onCancel,
-}) => {
+export const ForceStopModelConfirmDialog: FC<
+  React.PropsWithChildren<ForceStopModelConfirmDialogProps>
+> = ({ model, onConfirm, onCancel }) => {
   return (
     <EuiConfirmModal
       title={i18n.translate('xpack.ml.trainedModels.modelsList.forceStopDialog.title', {

@@ -32,7 +32,9 @@ import { Tags } from './tags';
 import { Priority } from './priority';
 import type { JsonEditorProps } from './json_editor';
 
-const JsonEditorLazy: React.FC<React.PropsWithChildren<JsonEditorProps>> = lazy(() => import('./json_editor'));
+const JsonEditorLazy: React.FC<React.PropsWithChildren<JsonEditorProps>> = lazy(
+  () => import('./json_editor')
+);
 
 type FormViewProps = Omit<CreateAlertProps, 'editAction'>;
 

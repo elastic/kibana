@@ -29,7 +29,9 @@ export interface DashboardDrilldownConfigProps {
   error?: string;
 }
 
-export const DashboardDrilldownConfig: React.FC<React.PropsWithChildren<DashboardDrilldownConfigProps>> = ({
+export const DashboardDrilldownConfig: React.FC<
+  React.PropsWithChildren<DashboardDrilldownConfigProps>
+> = ({
   activeDashboardId,
   dashboards,
   currentFilters,

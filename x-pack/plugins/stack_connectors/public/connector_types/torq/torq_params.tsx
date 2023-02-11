@@ -13,13 +13,9 @@ import React from 'react';
 import { TorqActionParams } from '../types';
 import * as i18n from './translations';
 
-const TorqParamsFields: React.FunctionComponent<React.PropsWithChildren<ActionParamsProps<TorqActionParams>>> = ({
-  actionParams,
-  editAction,
-  index,
-  messageVariables,
-  errors,
-}) => {
+const TorqParamsFields: React.FunctionComponent<
+  React.PropsWithChildren<ActionParamsProps<TorqActionParams>>
+> = ({ actionParams, editAction, index, messageVariables, errors }) => {
   const { body } = actionParams;
   return (
     <JsonEditorWithMessageVariables

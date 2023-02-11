@@ -638,11 +638,9 @@ interface JobListDatafeedChartFlyoutProps {
  * @param refreshJobs function to refresh the jobs list
  * @constructor
  */
-export const JobListDatafeedChartFlyout: FC<React.PropsWithChildren<JobListDatafeedChartFlyoutProps>> = ({
-  setShowFunction,
-  unsetShowFunction,
-  refreshJobs,
-}) => {
+export const JobListDatafeedChartFlyout: FC<
+  React.PropsWithChildren<JobListDatafeedChartFlyoutProps>
+> = ({ setShowFunction, unsetShowFunction, refreshJobs }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [job, setJob] = useState<MlSummaryJob | undefined>();
   const [jobWithStats, setJobWithStats] = useState<CombinedJobWithStats | undefined>();

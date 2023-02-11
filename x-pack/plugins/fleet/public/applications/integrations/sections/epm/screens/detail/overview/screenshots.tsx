@@ -22,78 +22,80 @@ const Pagination = styled(EuiPagination)`
   max-width: 130px;
 `;
 
-export const Screenshots: React.FC<React.PropsWithChildren<ScreenshotProps>> = memo(({ images, packageName, version }) => {
-  const { toPackageImage } = useLinks();
-  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
-  const maxImageIndex = useMemo(() => images.length - 1, [images.length]);
-  const currentImageUrl = useMemo(
-    () => toPackageImage(images[currentImageIndex], packageName, version),
-    [currentImageIndex, images, packageName, toPackageImage, version]
-  );
+export const Screenshots: React.FC<React.PropsWithChildren<ScreenshotProps>> = memo(
+  ({ images, packageName, version }) => {
+    const { toPackageImage } = useLinks();
+    const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+    const maxImageIndex = useMemo(() => images.length - 1, [images.length]);
+    const currentImageUrl = useMemo(
+      () => toPackageImage(images[currentImageIndex], packageName, version),
+      [currentImageIndex, images, packageName, toPackageImage, version]
+    );
 
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      {/* Title with carousel navigation */}
-      <EuiFlexItem>
-        <EuiFlexGroup
-          direction="row"
-          alignItems="center"
-          gutterSize="xs"
-          justifyContent="spaceBetween"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <h4>
-                <FormattedMessage
-                  id="xpack.fleet.epm.screenshotsTitle"
-                  defaultMessage="Screenshots"
-                />
-              </h4>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <Pagination
-              aria-label={i18n.translate('xpack.fleet.epm.screenshotPaginationAriaLabel', {
-                defaultMessage: '{packageName} screenshot pagination',
-                values: {
-                  packageName,
-                },
-              })}
-              pageCount={maxImageIndex + 1}
-              activePage={currentImageIndex}
-              onPageClick={(activePage) => setCurrentImageIndex(activePage)}
-              compressed
+    return (
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {/* Title with carousel navigation */}
+        <EuiFlexItem>
+          <EuiFlexGroup
+            direction="row"
+            alignItems="center"
+            gutterSize="xs"
+            justifyContent="spaceBetween"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h4>
+                  <FormattedMessage
+                    id="xpack.fleet.epm.screenshotsTitle"
+                    defaultMessage="Screenshots"
+                  />
+                </h4>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <Pagination
+                aria-label={i18n.translate('xpack.fleet.epm.screenshotPaginationAriaLabel', {
+                  defaultMessage: '{packageName} screenshot pagination',
+                  values: {
+                    packageName,
+                  },
+                })}
+                pageCount={maxImageIndex + 1}
+                activePage={currentImageIndex}
+                onPageClick={(activePage) => setCurrentImageIndex(activePage)}
+                compressed
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        {/* Current screenshot */}
+        <EuiFlexItem>
+          {currentImageUrl ? (
+            <EuiImage
+              allowFullScreen
+              hasShadow
+              alt={
+                images[currentImageIndex].title ||
+                i18n.translate('xpack.fleet.epm.screenshotAltText', {
+                  defaultMessage: '{packageName} screenshot #{imageNumber}',
+                  values: {
+                    packageName,
+                    imageNumber: currentImageIndex + 1,
+                  },
+                })
+              }
+              title={images[currentImageIndex].title}
+              url={currentImageUrl}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      {/* Current screenshot */}
-      <EuiFlexItem>
-        {currentImageUrl ? (
-          <EuiImage
-            allowFullScreen
-            hasShadow
-            alt={
-              images[currentImageIndex].title ||
-              i18n.translate('xpack.fleet.epm.screenshotAltText', {
-                defaultMessage: '{packageName} screenshot #{imageNumber}',
-                values: {
-                  packageName,
-                  imageNumber: currentImageIndex + 1,
-                },
-              })
-            }
-            title={images[currentImageIndex].title}
-            url={currentImageUrl}
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.epm.screenshotErrorText"
-            defaultMessage="Unable to load this screenshot"
-          />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.epm.screenshotErrorText"
+              defaultMessage="Unable to load this screenshot"
+            />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);

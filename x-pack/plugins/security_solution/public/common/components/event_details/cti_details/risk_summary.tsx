@@ -32,7 +32,11 @@ interface UserRiskEntity {
 
 export type RiskEntity = HostRiskEntity | UserRiskEntity;
 
-const RiskSummaryComponent: React.FC<React.PropsWithChildren<RiskEntity>> = ({ risk, riskEntity, originalRisk }) => {
+const RiskSummaryComponent: React.FC<React.PropsWithChildren<RiskEntity>> = ({
+  risk,
+  riskEntity,
+  originalRisk,
+}) => {
   const currentRiskScore =
     riskEntity === RiskScoreEntity.host
       ? risk?.result?.[0]?.host?.risk?.calculated_level

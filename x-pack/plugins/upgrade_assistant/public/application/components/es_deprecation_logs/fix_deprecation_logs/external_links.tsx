@@ -125,7 +125,9 @@ const DiscoverAppLink: FunctionComponent<React.PropsWithChildren<Props>> = ({ ch
   );
 };
 
-const ObservabilityAppLink: FunctionComponent<React.PropsWithChildren<Props>> = ({ checkpoint }) => {
+const ObservabilityAppLink: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  checkpoint,
+}) => {
   const {
     services: {
       core: { http },
@@ -164,7 +166,9 @@ const ObservabilityAppLink: FunctionComponent<React.PropsWithChildren<Props>> = 
   );
 };
 
-export const ExternalLinks: FunctionComponent<React.PropsWithChildren<Props>> = ({ checkpoint }) => {
+export const ExternalLinks: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  checkpoint,
+}) => {
   const { infra: hasInfraPlugin } = useAppContext().plugins;
 
   return (

@@ -24,7 +24,11 @@ interface Props {
   line2?: string;
 }
 
-export const StatLabel: React.FC<React.PropsWithChildren<Props>> = ({ color, line1 = EMPTY, line2 = EMPTY }) => (
+export const StatLabel: React.FC<React.PropsWithChildren<Props>> = ({
+  color,
+  line1 = EMPTY,
+  line2 = EMPTY,
+}) => (
   <>
     <Line1 data-test-subj="line1">{line1}</Line1>
     <Line2 data-test-subj="line2">{line2}</Line2>

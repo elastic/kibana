@@ -14,7 +14,10 @@ interface Props {
   canCreateJobs: boolean;
 }
 
-export const AnomalyJobSelectorEmptyState: FC<React.PropsWithChildren<Props>> = ({ jobsManagementPath, canCreateJobs }) => (
+export const AnomalyJobSelectorEmptyState: FC<React.PropsWithChildren<Props>> = ({
+  jobsManagementPath,
+  canCreateJobs,
+}) => (
   <EuiEmptyPrompt
     layout="vertical"
     hasBorder={false}

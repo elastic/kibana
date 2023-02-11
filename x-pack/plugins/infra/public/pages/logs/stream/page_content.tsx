@@ -26,9 +26,9 @@ export const ConnectedStreamPageContent: React.FC<React.PropsWithChildren<unknow
   return <StreamPageContentForState logStreamPageState={logStreamPageState} />;
 };
 
-export const StreamPageContentForState: React.FC<React.PropsWithChildren<{ logStreamPageState: LogStreamPageState }>> = ({
-  logStreamPageState,
-}) => {
+export const StreamPageContentForState: React.FC<
+  React.PropsWithChildren<{ logStreamPageState: LogStreamPageState }>
+> = ({ logStreamPageState }) => {
   if (logStreamPageState.matches('uninitialized') || logStreamPageState.matches('loadingLogView')) {
     return <SourceLoadingPage />;
   } else if (logStreamPageState.matches('loadingLogViewFailed')) {

@@ -40,7 +40,11 @@ export const getConnectorDescriptiveTitle = (connector: ActionConnector) => {
 
 export const getSelectedConnectorIcon = (
   actionConnector: ActionConnector
-): React.LazyExoticComponent<ComponentType<React.PropsWithChildren<{ actionConnector: ActionConnector }>>> | undefined => {
+):
+  | React.LazyExoticComponent<
+      ComponentType<React.PropsWithChildren<{ actionConnector: ActionConnector }>>
+    >
+  | undefined => {
   if (actionConnector.isDeprecated) {
     return lazy(() => import('./selection_row'));
   }

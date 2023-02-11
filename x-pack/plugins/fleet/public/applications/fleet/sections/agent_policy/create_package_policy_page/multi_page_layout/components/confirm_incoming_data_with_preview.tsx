@@ -102,7 +102,9 @@ const HitTimestamp: React.FC<React.PropsWithChildren<{ hit: SearchHit }>> = ({ h
   );
 };
 
-const AgentDataPreview: React.FC<React.PropsWithChildren<{ dataPreview: SearchHit[] }>> = ({ dataPreview }) => {
+const AgentDataPreview: React.FC<React.PropsWithChildren<{ dataPreview: SearchHit[] }>> = ({
+  dataPreview,
+}) => {
   const previewData = dataPreview.slice(0, MAX_AGENT_DATA_PREVIEW_COUNT);
   return (
     <>
@@ -124,13 +126,9 @@ const AgentDataPreview: React.FC<React.PropsWithChildren<{ dataPreview: SearchHi
   );
 };
 
-export const ConfirmIncomingDataWithPreview: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
-  agentIds,
-  packageInfo,
-  agentDataConfirmed,
-  setAgentDataConfirmed,
-  troubleshootLink,
-}) => {
+export const ConfirmIncomingDataWithPreview: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ agentIds, packageInfo, agentDataConfirmed, setAgentDataConfirmed, troubleshootLink }) => {
   const { incomingData, dataPreview, isLoading, hasReachedTimeout } = usePollingIncomingData(
     agentIds,
     true,

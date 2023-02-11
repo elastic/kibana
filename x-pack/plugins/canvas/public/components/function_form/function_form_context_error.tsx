@@ -22,9 +22,9 @@ interface FunctionFormContextErrorProps {
   context: ExpressionContext;
 }
 
-export const FunctionFormContextError: FunctionComponent<React.PropsWithChildren<FunctionFormContextErrorProps>> = ({
-  context,
-}) => (
+export const FunctionFormContextError: FunctionComponent<
+  React.PropsWithChildren<FunctionFormContextErrorProps>
+> = ({ context }) => (
   <div className="canvasFunctionForm canvasFunctionForm--error">
     {strings.getContextErrorMessage(context.error)}
   </div>

@@ -23,7 +23,9 @@ export const optionCss = css`
   }
 `;
 
-export const EuiComboBoxWithFieldStats: FC<React.PropsWithChildren<EuiComboBoxProps<string | number | string[] | undefined>>> = ({ options, ...restProps }) => {
+export const EuiComboBoxWithFieldStats: FC<
+  React.PropsWithChildren<EuiComboBoxProps<string | number | string[] | undefined>>
+> = ({ options, ...restProps }) => {
   const { renderOption } = useFieldStatsTrigger();
   const comboBoxOptions: EuiComboBoxOptionOption[] = useMemo(
     () =>

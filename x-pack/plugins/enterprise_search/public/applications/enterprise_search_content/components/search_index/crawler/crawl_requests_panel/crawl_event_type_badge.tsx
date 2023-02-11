@@ -15,7 +15,9 @@ import { CrawlEvent, CrawlType } from '../../../../api/crawler/types';
 
 import { readableCrawlTypes } from './constants';
 
-export const CrawlEventTypeBadge: React.FC<React.PropsWithChildren<{ event: CrawlEvent }>> = ({ event }) => {
+export const CrawlEventTypeBadge: React.FC<React.PropsWithChildren<{ event: CrawlEvent }>> = ({
+  event,
+}) => {
   if (event.stage === 'process') {
     return (
       <EuiBadge color="hollow">

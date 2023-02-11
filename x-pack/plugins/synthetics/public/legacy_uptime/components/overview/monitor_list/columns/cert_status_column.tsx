@@ -32,7 +32,10 @@ const H4Text = styled.h4`
   }
 `;
 
-export const CertStatusColumn: React.FC<React.PropsWithChildren<Props>> = ({ expiry, boldStyle = false }) => {
+export const CertStatusColumn: React.FC<React.PropsWithChildren<Props>> = ({
+  expiry,
+  boldStyle = false,
+}) => {
   const notAfter = expiry?.not_after;
   const certStatus = useCertStatus(notAfter);
 

@@ -51,10 +51,9 @@ const referenceModalInitialState: ReferenceFlyoutState = {
   valueListId: '',
 };
 
-export const ValueListsFlyoutComponent: React.FC<React.PropsWithChildren<ValueListsFlyoutProps>> = ({
-  onClose,
-  showFlyout,
-}) => {
+export const ValueListsFlyoutComponent: React.FC<
+  React.PropsWithChildren<ValueListsFlyoutProps>
+> = ({ onClose, showFlyout }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [cursor, setCursor] = useCursor({ pageIndex, pageSize });

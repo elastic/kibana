@@ -22,11 +22,9 @@ interface Props {
   packageInfo?: PackageInfo;
 }
 
-export const ConfirmIncomingDataTimeout: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
-  agentIds,
-  troubleshootLink,
-  packageInfo,
-}) => {
+export const ConfirmIncomingDataTimeout: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ agentIds, troubleshootLink, packageInfo }) => {
   const discoverLogsLink = useGetDiscoverLogsLinkForAgents(agentIds);
 
   return (

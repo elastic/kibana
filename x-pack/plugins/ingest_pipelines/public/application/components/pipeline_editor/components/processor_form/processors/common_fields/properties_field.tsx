@@ -32,7 +32,10 @@ interface Props {
   euiFieldProps?: EuiComboBoxProps<string>;
 }
 
-export const PropertiesField: FunctionComponent<React.PropsWithChildren<Props>> = ({ helpText, euiFieldProps }) => {
+export const PropertiesField: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  helpText,
+  euiFieldProps,
+}) => {
   return (
     <UseField
       config={{

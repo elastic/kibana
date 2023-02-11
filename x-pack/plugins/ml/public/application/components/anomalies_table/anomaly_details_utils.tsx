@@ -67,11 +67,13 @@ export function getInfluencersItems(
   return items;
 }
 
-export const DetailsItems: FC<React.PropsWithChildren<{
-  anomaly: AnomaliesTableRecord;
-  filter: EntityCellFilter;
-  modelPlotEnabled: boolean;
-}>> = ({ anomaly, filter, modelPlotEnabled }) => {
+export const DetailsItems: FC<
+  React.PropsWithChildren<{
+    anomaly: AnomaliesTableRecord;
+    filter: EntityCellFilter;
+    modelPlotEnabled: boolean;
+  }>
+> = ({ anomaly, filter, modelPlotEnabled }) => {
   const source = anomaly.source;
 
   // TODO - when multivariate analyses are more common,
@@ -328,7 +330,9 @@ export const DetailsItems: FC<React.PropsWithChildren<{
   );
 };
 
-export const AnomalyExplanationDetails: FC<React.PropsWithChildren<{ anomaly: AnomaliesTableRecord }>> = ({ anomaly }) => {
+export const AnomalyExplanationDetails: FC<
+  React.PropsWithChildren<{ anomaly: AnomaliesTableRecord }>
+> = ({ anomaly }) => {
   const {
     services: { docLinks },
   } = useMlKibana();

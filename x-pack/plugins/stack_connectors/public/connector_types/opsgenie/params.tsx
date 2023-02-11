@@ -36,14 +36,9 @@ const actionOptions = [
   },
 ];
 
-const OpsgenieParamFields: React.FC<React.PropsWithChildren<ActionParamsProps<OpsgenieActionParams>>> = ({
-  actionParams,
-  editAction,
-  errors,
-  index,
-  messageVariables,
-  executionMode,
-}) => {
+const OpsgenieParamFields: React.FC<
+  React.PropsWithChildren<ActionParamsProps<OpsgenieActionParams>>
+> = ({ actionParams, editAction, errors, index, messageVariables, executionMode }) => {
   const { subAction, subActionParams } = actionParams;
 
   const currentSubAction = useRef<string>(subAction ?? OpsgenieSubActions.CreateAlert);

@@ -27,7 +27,9 @@ const AttachmentActions: React.FC<React.PropsWithChildren<unknown>> = () => {
 
 const getLazyComponent = (
   EmbeddableComponent: React.ComponentType<React.PropsWithChildren<EmbeddableComponentProps>>
-): React.LazyExoticComponent<React.FC<React.PropsWithChildren<PersistableStateAttachmentViewProps>>> =>
+): React.LazyExoticComponent<
+  React.FC<React.PropsWithChildren<PersistableStateAttachmentViewProps>>
+> =>
   React.lazy(() => {
     return Promise.resolve().then(() => {
       return {

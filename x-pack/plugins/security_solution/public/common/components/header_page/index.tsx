@@ -71,8 +71,8 @@ export interface HeaderPageProps extends HeaderProps {
   titleNode?: React.ReactElement;
 }
 
-export const HeaderLinkBack: React.FC<React.PropsWithChildren<{ backOptions: BackOptions }>> = React.memo(
-  ({ backOptions }) => {
+export const HeaderLinkBack: React.FC<React.PropsWithChildren<{ backOptions: BackOptions }>> =
+  React.memo(({ backOptions }) => {
     const { navigateToUrl } = useKibana().services.application;
     const { formatUrl } = useFormatUrl(backOptions.pageId);
 
@@ -92,8 +92,7 @@ export const HeaderLinkBack: React.FC<React.PropsWithChildren<{ backOptions: Bac
         </LinkIcon>
       </LinkBack>
     );
-  }
-);
+  });
 HeaderLinkBack.displayName = 'HeaderLinkBack';
 
 const HeaderPageComponent: React.FC<React.PropsWithChildren<HeaderPageProps>> = ({

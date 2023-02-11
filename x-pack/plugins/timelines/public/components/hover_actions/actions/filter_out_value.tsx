@@ -20,7 +20,9 @@ export const FILTER_OUT_VALUE = i18n.translate('xpack.timelines.hoverActions.fil
 
 export const FILTER_OUT_VALUE_KEYBOARD_SHORTCUT = 'o';
 
-const FilterOutValueButton: React.FC<React.PropsWithChildren<HoverActionComponentProps & FilterValueFnArgs>> = React.memo(
+const FilterOutValueButton: React.FC<
+  React.PropsWithChildren<HoverActionComponentProps & FilterValueFnArgs>
+> = React.memo(
   ({
     Component,
     defaultFocusedButtonRef,

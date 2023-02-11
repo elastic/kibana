@@ -24,7 +24,11 @@ interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const SimpleTemplate: FunctionComponent<React.PropsWithChildren<Props>> = ({ getArgValue, setArgValue, workpad }) => (
+export const SimpleTemplate: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  getArgValue,
+  setArgValue,
+  workpad,
+}) => (
   <div style={{ fontSize: 0 }}>
     <ColorPickerPopover
       value={getArgValue('backgroundColor')}

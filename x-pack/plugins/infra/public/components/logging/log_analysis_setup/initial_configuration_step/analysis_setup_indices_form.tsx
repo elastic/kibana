@@ -14,14 +14,16 @@ import { LoadingOverlayWrapper } from '../../../loading_overlay_wrapper';
 import { IndexSetupRow } from './index_setup_row';
 import { AvailableIndex, ValidationIndicesError } from './validation';
 
-export const AnalysisSetupIndicesForm: React.FunctionComponent<React.PropsWithChildren<{
-  disabled?: boolean;
-  indices: AvailableIndex[];
-  isValidating: boolean;
-  onChangeSelectedIndices: (selectedIndices: AvailableIndex[]) => void;
-  previousQualityWarnings?: QualityWarning[];
-  validationErrors?: ValidationIndicesError[];
-}>> = ({
+export const AnalysisSetupIndicesForm: React.FunctionComponent<
+  React.PropsWithChildren<{
+    disabled?: boolean;
+    indices: AvailableIndex[];
+    isValidating: boolean;
+    onChangeSelectedIndices: (selectedIndices: AvailableIndex[]) => void;
+    previousQualityWarnings?: QualityWarning[];
+    validationErrors?: ValidationIndicesError[];
+  }>
+> = ({
   disabled = false,
   indices,
   isValidating,

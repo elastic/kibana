@@ -69,11 +69,9 @@ const StyledEuiLink = styled(EuiLink)`
   font-size: ${(props) => props.theme.eui.euiFontSizeS};
 `;
 
-const CollapsablePanel: React.FC<React.PropsWithChildren<{ id: string; title: React.ReactNode }>> = ({
-  id,
-  title,
-  children,
-}) => {
+const CollapsablePanel: React.FC<
+  React.PropsWithChildren<{ id: string; title: React.ReactNode }>
+> = ({ id, title, children }) => {
   return (
     <EuiPanel paddingSize="none">
       <StyledEuiAccordion
@@ -88,11 +86,13 @@ const CollapsablePanel: React.FC<React.PropsWithChildren<{ id: string; title: Re
   );
 };
 
-export const AgentDetailsIntegration: React.FunctionComponent<React.PropsWithChildren<{
-  agent: Agent;
-  agentPolicy: AgentPolicy;
-  packagePolicy: PackagePolicy;
-}>> = memo(({ agent, agentPolicy, packagePolicy }) => {
+export const AgentDetailsIntegration: React.FunctionComponent<
+  React.PropsWithChildren<{
+    agent: Agent;
+    agentPolicy: AgentPolicy;
+    packagePolicy: PackagePolicy;
+  }>
+> = memo(({ agent, agentPolicy, packagePolicy }) => {
   const { getHref } = useLink();
   const theme = useEuiTheme();
 
@@ -258,10 +258,12 @@ export const AgentDetailsIntegration: React.FunctionComponent<React.PropsWithChi
   );
 });
 
-export const AgentDetailsIntegrationsSection: React.FunctionComponent<React.PropsWithChildren<{
-  agent: Agent;
-  agentPolicy?: AgentPolicy;
-}>> = memo(({ agent, agentPolicy }) => {
+export const AgentDetailsIntegrationsSection: React.FunctionComponent<
+  React.PropsWithChildren<{
+    agent: Agent;
+    agentPolicy?: AgentPolicy;
+  }>
+> = memo(({ agent, agentPolicy }) => {
   if (!agentPolicy || !agentPolicy.package_policies) {
     return null;
   }

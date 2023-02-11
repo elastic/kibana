@@ -117,7 +117,9 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     },
   });
 
-  const AppWrapper: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>> = ({ children }) => (
+  const AppWrapper: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>> = ({
+    children,
+  }) => (
     <AppRootProvider history={history} coreStart={coreStart}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </AppRootProvider>

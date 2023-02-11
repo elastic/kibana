@@ -97,9 +97,11 @@ function OnPremLink() {
   );
 }
 
-export const AvailablePackages: React.FC<React.PropsWithChildren<{
-  setPrereleaseEnabled: (isEnabled: boolean) => void;
-}>> = ({ setPrereleaseEnabled }) => {
+export const AvailablePackages: React.FC<
+  React.PropsWithChildren<{
+    setPrereleaseEnabled: (isEnabled: boolean) => void;
+  }>
+> = ({ setPrereleaseEnabled }) => {
   useBreadcrumbs('integrations_all');
 
   const {

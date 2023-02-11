@@ -16,7 +16,9 @@ interface InvalidNodeErrorProps {
   nodeName: string;
 }
 
-export const InvalidNodeError: React.FunctionComponent<React.PropsWithChildren<InvalidNodeErrorProps>> = ({ nodeName }) => {
+export const InvalidNodeError: React.FunctionComponent<
+  React.PropsWithChildren<InvalidNodeErrorProps>
+> = ({ nodeName }) => {
   const tutorialLinkProps = useLinkProps({
     app: 'integrations',
     hash: '/browse',

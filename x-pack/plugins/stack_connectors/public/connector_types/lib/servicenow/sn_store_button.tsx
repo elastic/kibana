@@ -18,7 +18,10 @@ interface Props {
   color: EuiButtonProps['color'];
 }
 
-const SNStoreButtonComponent: React.FC<React.PropsWithChildren<Props>> = ({ color, appId = '' }) => {
+const SNStoreButtonComponent: React.FC<React.PropsWithChildren<Props>> = ({
+  color,
+  appId = '',
+}) => {
   return (
     <EuiButton
       href={getStoreURL(appId)}
@@ -34,7 +37,9 @@ const SNStoreButtonComponent: React.FC<React.PropsWithChildren<Props>> = ({ colo
 
 export const SNStoreButton = memo(SNStoreButtonComponent);
 
-const SNStoreLinkComponent: React.FC<React.PropsWithChildren<Pick<Props, 'appId'>>> = ({ appId = '' }) => (
+const SNStoreLinkComponent: React.FC<React.PropsWithChildren<Pick<Props, 'appId'>>> = ({
+  appId = '',
+}) => (
   <EuiLink href={getStoreURL(appId)} target="_blank">
     {i18n.VISIT_SN_STORE}
   </EuiLink>

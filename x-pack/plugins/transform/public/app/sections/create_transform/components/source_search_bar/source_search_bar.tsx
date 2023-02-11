@@ -23,7 +23,10 @@ interface SourceSearchBarProps {
   dataView: SearchItems['dataView'];
   searchBar: StepDefineFormHook['searchBar'];
 }
-export const SourceSearchBar: FC<React.PropsWithChildren<SourceSearchBarProps>> = ({ dataView, searchBar }) => {
+export const SourceSearchBar: FC<React.PropsWithChildren<SourceSearchBarProps>> = ({
+  dataView,
+  searchBar,
+}) => {
   const {
     actions: { searchChangeHandler, searchSubmitHandler, setErrorMessage },
     state: { errorMessage, searchInput },

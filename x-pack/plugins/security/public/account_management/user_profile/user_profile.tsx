@@ -430,7 +430,10 @@ function UserPasswordEditor({
   );
 }
 
-export const UserProfile: FunctionComponent<React.PropsWithChildren<UserProfileProps>> = ({ user, data }) => {
+export const UserProfile: FunctionComponent<React.PropsWithChildren<UserProfileProps>> = ({
+  user,
+  data,
+}) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<CoreStart>();
   const formik = useUserProfileForm({ user, data });

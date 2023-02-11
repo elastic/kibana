@@ -683,14 +683,16 @@ export const ExpressionRow: React.FC<React.PropsWithChildren<ExpressionRowProps>
   );
 };
 
-const ThresholdElement: React.FC<React.PropsWithChildren<{
-  updateComparator: (c?: string) => void;
-  updateThreshold: (t?: number[]) => void;
-  threshold: InventoryMetricConditions['threshold'];
-  comparator: InventoryMetricConditions['comparator'];
-  errors: IErrorObject;
-  metric?: SnapshotMetricType;
-}>> = ({ updateComparator, updateThreshold, threshold, metric, comparator, errors }) => {
+const ThresholdElement: React.FC<
+  React.PropsWithChildren<{
+    updateComparator: (c?: string) => void;
+    updateThreshold: (t?: number[]) => void;
+    threshold: InventoryMetricConditions['threshold'];
+    comparator: InventoryMetricConditions['comparator'];
+    errors: IErrorObject;
+    metric?: SnapshotMetricType;
+  }>
+> = ({ updateComparator, updateThreshold, threshold, metric, comparator, errors }) => {
   return (
     <>
       <StyledExpression>

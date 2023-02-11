@@ -80,7 +80,10 @@ interface SelectIntervalUIProps {
   interval: TableInterval;
   onChange: (interval: TableInterval) => void;
 }
-export const SelectIntervalUI: FC<React.PropsWithChildren<SelectIntervalUIProps>> = ({ interval, onChange }) => {
+export const SelectIntervalUI: FC<React.PropsWithChildren<SelectIntervalUIProps>> = ({
+  interval,
+  onChange,
+}) => {
   const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChange(optionValueToInterval(e.target.value));
   };

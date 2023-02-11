@@ -17,15 +17,17 @@ import { ContextMenuActions } from '../../../../components';
 import { isAgentUpgradeable } from '../../../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
 
-export const TableRowActions: React.FunctionComponent<React.PropsWithChildren<{
-  agent: Agent;
-  agentPolicy?: AgentPolicy;
-  onReassignClick: () => void;
-  onUnenrollClick: () => void;
-  onUpgradeClick: () => void;
-  onAddRemoveTagsClick: (button: HTMLElement) => void;
-  onRequestDiagnosticsClick: () => void;
-}>> = ({
+export const TableRowActions: React.FunctionComponent<
+  React.PropsWithChildren<{
+    agent: Agent;
+    agentPolicy?: AgentPolicy;
+    onReassignClick: () => void;
+    onUnenrollClick: () => void;
+    onUpgradeClick: () => void;
+    onAddRemoveTagsClick: (button: HTMLElement) => void;
+    onRequestDiagnosticsClick: () => void;
+  }>
+> = ({
   agent,
   agentPolicy,
   onReassignClick,

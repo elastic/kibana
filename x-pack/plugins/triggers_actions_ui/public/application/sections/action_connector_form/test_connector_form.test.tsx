@@ -65,9 +65,9 @@ const actionType = {
 const actionTypeRegistry = actionTypeRegistryMock.create();
 actionTypeRegistry.get.mockReturnValue(actionType);
 
-const ExecutionModeComponent: React.FC<React.PropsWithChildren<Pick<ActionParamsProps<{}>, 'executionMode'>>> = ({
-  executionMode,
-}) => {
+const ExecutionModeComponent: React.FC<
+  React.PropsWithChildren<Pick<ActionParamsProps<{}>, 'executionMode'>>
+> = ({ executionMode }) => {
   return (
     <EuiForm component="form">
       <EuiFormRow label="Execution mode" helpText="Execution mode help text.">

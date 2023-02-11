@@ -10,10 +10,9 @@ import React from 'react';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 
 // Keep this component lean as it is part of the main app bundle
-export const CspLoadingState: React.FunctionComponent<React.PropsWithChildren<{ ['data-test-subj']?: string }>> = ({
-  children,
-  ...rest
-}) => {
+export const CspLoadingState: React.FunctionComponent<
+  React.PropsWithChildren<{ ['data-test-subj']?: string }>
+> = ({ children, ...rest }) => {
   return (
     <FullSizeCenteredPage data-test-subj={rest['data-test-subj']}>
       <EuiLoadingSpinner size="xl" />

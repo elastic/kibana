@@ -139,7 +139,9 @@ describe('AlertsTable', () => {
     rowCount: 2,
   };
 
-  const AlertsTableWithLocale: React.FunctionComponent<React.PropsWithChildren<AlertsTableProps & { initialBulkActionsState?: BulkActionsState }>> = (props) => {
+  const AlertsTableWithLocale: React.FunctionComponent<
+    React.PropsWithChildren<AlertsTableProps & { initialBulkActionsState?: BulkActionsState }>
+  > = (props) => {
     const initialBulkActionsState = useReducer(
       bulkActionsReducer,
       props.initialBulkActionsState || defaultBulkActionsState

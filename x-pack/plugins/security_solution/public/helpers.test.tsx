@@ -85,7 +85,9 @@ describe('#getSubPluginRoutesByCapabilities', () => {
     } as unknown as Capabilities);
     const casesRoute = routes.find((r) => r.path === 'cases');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const CasesView = (casesRoute?.component ?? mockRender) as React.ComponentType<React.PropsWithChildren<any>>;
+    const CasesView = (casesRoute?.component ?? mockRender) as React.ComponentType<
+      React.PropsWithChildren<any>
+    >;
     expect(shallow(<CasesView />)).toMatchInlineSnapshot(`
       <NoPrivilegePage
         docLinkSelector={[Function]}
@@ -101,7 +103,9 @@ describe('#getSubPluginRoutesByCapabilities', () => {
     } as unknown as Capabilities);
     const alertsRoute = routes.find((r) => r.path === 'alerts');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const AlertsView = (alertsRoute?.component ?? mockRender) as React.ComponentType<React.PropsWithChildren<any>>;
+    const AlertsView = (alertsRoute?.component ?? mockRender) as React.ComponentType<
+      React.PropsWithChildren<any>
+    >;
     expect(shallow(<AlertsView />)).toMatchInlineSnapshot(`
       <NoPrivilegePage
         docLinkSelector={[Function]}
@@ -117,11 +121,15 @@ describe('#getSubPluginRoutesByCapabilities', () => {
     } as unknown as Capabilities);
     const casesRoute = routes.find((r) => r.path === 'cases');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const CasesView = (casesRoute?.component ?? mockRender) as React.ComponentType<React.PropsWithChildren<any>>;
+    const CasesView = (casesRoute?.component ?? mockRender) as React.ComponentType<
+      React.PropsWithChildren<any>
+    >;
 
     const alertsRoute = routes.find((r) => r.path === 'alerts');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const AlertsView = (alertsRoute?.component ?? mockRender) as React.ComponentType<React.PropsWithChildren<any>>;
+    const AlertsView = (alertsRoute?.component ?? mockRender) as React.ComponentType<
+      React.PropsWithChildren<any>
+    >;
 
     expect(shallow(<AlertsView />)).toMatchInlineSnapshot(`
       <NoPrivilegePage

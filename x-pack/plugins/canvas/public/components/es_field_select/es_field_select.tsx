@@ -17,13 +17,9 @@ export interface ESFieldSelectProps {
   fields: string[];
 }
 
-export const ESFieldSelect: React.FunctionComponent<React.PropsWithChildren<ESFieldSelectProps>> = ({
-  value,
-  fields = [],
-  onChange,
-  onFocus,
-  onBlur,
-}) => {
+export const ESFieldSelect: React.FunctionComponent<
+  React.PropsWithChildren<ESFieldSelectProps>
+> = ({ value, fields = [], onChange, onFocus, onBlur }) => {
   const selectedOption = value ? [{ label: value }] : [];
   const options = fields.map((field) => ({ label: field }));
   return (

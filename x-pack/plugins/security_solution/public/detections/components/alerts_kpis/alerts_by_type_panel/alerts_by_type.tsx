@@ -42,7 +42,10 @@ export interface AlertsByTypeProps {
   isLoading: boolean;
 }
 
-export const AlertsByType: React.FC<React.PropsWithChildren<AlertsByTypeProps>> = ({ data, isLoading }) => {
+export const AlertsByType: React.FC<React.PropsWithChildren<AlertsByTypeProps>> = ({
+  data,
+  isLoading,
+}) => {
   const columns = useMemo(() => getAlertsTypeTableColumns(), []);
 
   const subtotals = useMemo(

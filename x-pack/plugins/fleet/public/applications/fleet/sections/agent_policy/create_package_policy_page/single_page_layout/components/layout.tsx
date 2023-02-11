@@ -32,20 +32,22 @@ const AgentPolicyName = styled(EuiDescriptionListDescription)`
   overflow: hidden;
 `;
 
-export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<React.PropsWithChildren<{
-  from: EditPackagePolicyFrom;
-  cancelUrl: string;
-  onCancel?: React.ReactEventHandler;
-  agentPolicy?: AgentPolicy;
-  packageInfo?: PackageInfo;
-  integrationInfo?: RegistryPolicyTemplate;
-  'data-test-subj'?: string;
-  tabs?: Array<{
-    title: string;
-    isSelected: boolean;
-    onClick: React.ReactEventHandler;
-  }>;
-}>> = memo(
+export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<
+  React.PropsWithChildren<{
+    from: EditPackagePolicyFrom;
+    cancelUrl: string;
+    onCancel?: React.ReactEventHandler;
+    agentPolicy?: AgentPolicy;
+    packageInfo?: PackageInfo;
+    integrationInfo?: RegistryPolicyTemplate;
+    'data-test-subj'?: string;
+    tabs?: Array<{
+      title: string;
+      isSelected: boolean;
+      onClick: React.ReactEventHandler;
+    }>;
+  }>
+> = memo(
   ({
     from,
     cancelUrl,

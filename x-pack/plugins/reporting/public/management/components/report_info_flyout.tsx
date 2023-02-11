@@ -35,7 +35,10 @@ interface Props {
   job: Job;
 }
 
-export const ReportInfoFlyout: FunctionComponent<React.PropsWithChildren<Props>> = ({ onClose, job }) => {
+export const ReportInfoFlyout: FunctionComponent<React.PropsWithChildren<Props>> = ({
+  onClose,
+  job,
+}) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadingError, setLoadingError] = useState<undefined | Error>();
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState<boolean>(false);

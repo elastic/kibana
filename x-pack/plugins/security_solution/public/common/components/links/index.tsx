@@ -55,16 +55,18 @@ const isModified = (event: MouseEvent) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 
 // Internal Links
-const UserDetailsLinkComponent: React.FC<React.PropsWithChildren<{
-  children?: React.ReactNode;
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  userName: string;
-  userTab?: UsersTableType;
-  title?: string;
-  isButton?: boolean;
-  onClick?: (e: SyntheticEvent) => void;
-}>> = ({ children, Component, userName, isButton, onClick, title, userTab }) => {
+const UserDetailsLinkComponent: React.FC<
+  React.PropsWithChildren<{
+    children?: React.ReactNode;
+    /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+    Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+    userName: string;
+    userTab?: UsersTableType;
+    title?: string;
+    isButton?: boolean;
+    onClick?: (e: SyntheticEvent) => void;
+  }>
+> = ({ children, Component, userName, isButton, onClick, title, userTab }) => {
   const encodedUserName = encodeURIComponent(userName);
 
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
@@ -115,16 +117,18 @@ const UserDetailsLinkComponent: React.FC<React.PropsWithChildren<{
 
 export const UserDetailsLink = React.memo(UserDetailsLinkComponent);
 
-const HostDetailsLinkComponent: React.FC<React.PropsWithChildren<{
-  children?: React.ReactNode;
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  hostName: string;
-  isButton?: boolean;
-  onClick?: (e: SyntheticEvent) => void;
-  hostTab?: HostsTableType;
-  title?: string;
-}>> = ({ children, Component, hostName, isButton, onClick, title, hostTab }) => {
+const HostDetailsLinkComponent: React.FC<
+  React.PropsWithChildren<{
+    children?: React.ReactNode;
+    /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+    Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+    hostName: string;
+    isButton?: boolean;
+    onClick?: (e: SyntheticEvent) => void;
+    hostTab?: HostsTableType;
+    title?: string;
+  }>
+> = ({ children, Component, hostName, isButton, onClick, title, hostTab }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const { navigateToApp } = useKibana().services.application;
 
@@ -209,16 +213,18 @@ export const ExternalLink = React.memo<{
 
 ExternalLink.displayName = 'ExternalLink';
 
-const NetworkDetailsLinkComponent: React.FC<React.PropsWithChildren<{
-  children?: React.ReactNode;
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  ip: string | string[];
-  flowTarget?: FlowTarget | FlowTargetSourceDest;
-  isButton?: boolean;
-  onClick?: (e: SyntheticEvent) => void | undefined;
-  title?: string;
-}>> = ({ Component, children, ip, flowTarget = FlowTarget.source, isButton, onClick, title }) => {
+const NetworkDetailsLinkComponent: React.FC<
+  React.PropsWithChildren<{
+    children?: React.ReactNode;
+    /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+    Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+    ip: string | string[];
+    flowTarget?: FlowTarget | FlowTargetSourceDest;
+    isButton?: boolean;
+    onClick?: (e: SyntheticEvent) => void | undefined;
+    title?: string;
+  }>
+> = ({ Component, children, ip, flowTarget = FlowTarget.source, isButton, onClick, title }) => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   const getLink = useCallback(
@@ -259,12 +265,14 @@ const NetworkDetailsLinkComponent: React.FC<React.PropsWithChildren<{
 
 export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
 
-const CaseDetailsLinkComponent: React.FC<React.PropsWithChildren<{
-  children?: React.ReactNode;
-  detailName: string;
-  title?: string;
-  index?: number;
-}>> = ({ index, children, detailName, title }) => {
+const CaseDetailsLinkComponent: React.FC<
+  React.PropsWithChildren<{
+    children?: React.ReactNode;
+    detailName: string;
+    title?: string;
+    index?: number;
+  }>
+> = ({ index, children, detailName, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const { activeStep, isTourShown } = useTourContext();
@@ -440,13 +448,15 @@ const defaultNameMapping: Record<DefaultReputationLink, string> = {
   [DefaultReputationLink['talosIntelligence.com']]: i18n.VIEW_TALOS_INTELLIGENCE,
 };
 
-const ReputationLinkComponent: React.FC<React.PropsWithChildren<{
-  overflowIndexStart?: number;
-  allItemsLimit?: number;
-  showDomain?: boolean;
-  domain: string;
-  direction?: 'row' | 'column';
-}>> = ({
+const ReputationLinkComponent: React.FC<
+  React.PropsWithChildren<{
+    overflowIndexStart?: number;
+    allItemsLimit?: number;
+    showDomain?: boolean;
+    domain: string;
+    direction?: 'row' | 'column';
+  }>
+> = ({
   overflowIndexStart = DEFAULT_NUMBER_OF_LINK,
   allItemsLimit = DEFAULT_NUMBER_OF_LINK,
   showDomain = false,
@@ -595,12 +605,9 @@ export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionProps => {
 export const withSecuritySolutionLink = <T extends Partial<LinkProps>>(
   WrappedComponent: React.FC<React.PropsWithChildren<T>>
 ) => {
-  const SecuritySolutionLink: React.FC<React.PropsWithChildren<Omit<T & SecuritySolutionLinkProps, 'href'>>> = ({
-    deepLinkId,
-    path,
-    onClick: onClickProps,
-    ...rest
-  }) => {
+  const SecuritySolutionLink: React.FC<
+    React.PropsWithChildren<Omit<T & SecuritySolutionLinkProps, 'href'>>
+  > = ({ deepLinkId, path, onClick: onClickProps, ...rest }) => {
     const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
     const { onClick, href } = getSecuritySolutionLinkProps({
       deepLinkId,

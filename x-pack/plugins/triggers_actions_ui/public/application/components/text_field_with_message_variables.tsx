@@ -59,7 +59,9 @@ const Wrapper = ({
     <>{children}</>
   );
 
-export const TextFieldWithMessageVariables: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
+export const TextFieldWithMessageVariables: React.FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({
   buttonTitle,
   messageVariables,
   paramsProperty,

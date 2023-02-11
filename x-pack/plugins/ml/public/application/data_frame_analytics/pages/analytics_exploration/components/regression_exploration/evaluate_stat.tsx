@@ -82,7 +82,12 @@ const tooltipContent = {
   ),
 };
 
-export const EvaluateStat: FC<React.PropsWithChildren<Props>> = ({ isLoading, statType, title, dataTestSubj }) => (
+export const EvaluateStat: FC<React.PropsWithChildren<Props>> = ({
+  isLoading,
+  statType,
+  title,
+  dataTestSubj,
+}) => (
   <EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
     <EuiFlexItem grow={false}>
       <EuiStat

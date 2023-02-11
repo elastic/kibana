@@ -22,9 +22,11 @@ const StyledEuiColorPaletteDisplay = styled(EuiColorPaletteDisplay)`
   }
 `;
 
-export const AgentStatusBar: React.FC<React.PropsWithChildren<{
-  agentStatus: { [k in ActionAgentStatus]: number };
-}>> = ({ agentStatus }) => {
+export const AgentStatusBar: React.FC<
+  React.PropsWithChildren<{
+    agentStatus: { [k in ActionAgentStatus]: number };
+  }>
+> = ({ agentStatus }) => {
   const palette = useMemo(() => {
     let stop = 0;
 

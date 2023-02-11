@@ -25,7 +25,13 @@ const descriptionStyle = {
 };
 
 const renderElement = (
-  Component: FC<React.PropsWithChildren<Omit<CustomComponentProps, 'updateFilter'> & { onChange?: CustomComponentProps['updateFilter'] }>>,
+  Component: FC<
+    React.PropsWithChildren<
+      Omit<CustomComponentProps, 'updateFilter'> & {
+        onChange?: CustomComponentProps['updateFilter'];
+      }
+    >
+  >,
   { updateFilter, ...props }: CustomComponentProps
 ) => {
   return <Component {...props} onChange={updateFilter} />;

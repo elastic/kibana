@@ -19,7 +19,13 @@ interface Props {
   showMarker?: boolean;
 }
 
-export const OverlayRange: FC<React.PropsWithChildren<Props>> = ({ overlayKey, start, end, color, showMarker = true }) => {
+export const OverlayRange: FC<React.PropsWithChildren<Props>> = ({
+  overlayKey,
+  start,
+  end,
+  color,
+  showMarker = true,
+}) => {
   const { euiTheme } = useCurrentEuiTheme();
 
   return (

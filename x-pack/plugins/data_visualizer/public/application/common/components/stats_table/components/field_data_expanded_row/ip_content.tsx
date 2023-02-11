@@ -11,7 +11,10 @@ import { TopValues } from '../../../top_values';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 
-export const IpContent: FC<React.PropsWithChildren<FieldDataRowProps>> = ({ config, onAddFilter }) => {
+export const IpContent: FC<React.PropsWithChildren<FieldDataRowProps>> = ({
+  config,
+  onAddFilter,
+}) => {
   const { stats } = config;
   if (stats === undefined) return null;
   const { count, sampleCount, cardinality } = stats;

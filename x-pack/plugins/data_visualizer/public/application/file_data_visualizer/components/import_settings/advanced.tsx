@@ -183,7 +183,11 @@ interface JsonEditorProps {
   onChange(value: string): void;
 }
 
-const IndexSettings: FC<React.PropsWithChildren<JsonEditorProps>> = ({ initialized, data, onChange }) => {
+const IndexSettings: FC<React.PropsWithChildren<JsonEditorProps>> = ({
+  initialized,
+  data,
+  onChange,
+}) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -208,7 +212,11 @@ const IndexSettings: FC<React.PropsWithChildren<JsonEditorProps>> = ({ initializ
   );
 };
 
-const Mappings: FC<React.PropsWithChildren<JsonEditorProps>> = ({ initialized, data, onChange }) => {
+const Mappings: FC<React.PropsWithChildren<JsonEditorProps>> = ({
+  initialized,
+  data,
+  onChange,
+}) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -233,7 +241,11 @@ const Mappings: FC<React.PropsWithChildren<JsonEditorProps>> = ({ initialized, d
   );
 };
 
-const IngestPipeline: FC<React.PropsWithChildren<JsonEditorProps>> = ({ initialized, data, onChange }) => {
+const IngestPipeline: FC<React.PropsWithChildren<JsonEditorProps>> = ({
+  initialized,
+  data,
+  onChange,
+}) => {
   return (
     <React.Fragment>
       <EuiFormRow

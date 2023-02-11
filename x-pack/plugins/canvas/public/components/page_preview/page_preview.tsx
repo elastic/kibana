@@ -16,7 +16,9 @@ import { PagePreview as Component, Props } from './page_preview.component';
 import { State } from '../../../types';
 import { WorkpadRoutingContext } from '../../routes/workpad';
 
-export const PagePreview: FC<React.PropsWithChildren<Omit<Props, 'onDuplicate' | 'isWriteable'>>> = (props) => {
+export const PagePreview: FC<
+  React.PropsWithChildren<Omit<Props, 'onDuplicate' | 'isWriteable'>>
+> = (props) => {
   const dispatch = useDispatch();
   const stateFromProps = useSelector((state: State) => ({
     isWriteable: isWriteable(state) && canUserWrite(state),

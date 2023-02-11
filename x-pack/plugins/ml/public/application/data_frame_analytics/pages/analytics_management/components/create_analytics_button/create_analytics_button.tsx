@@ -15,7 +15,10 @@ interface Props {
   navigateToSourceSelection: () => void;
 }
 
-export const CreateAnalyticsButton: FC<React.PropsWithChildren<Props>> = ({ isDisabled, navigateToSourceSelection }) => {
+export const CreateAnalyticsButton: FC<React.PropsWithChildren<Props>> = ({
+  isDisabled,
+  navigateToSourceSelection,
+}) => {
   const handleClick = () => {
     navigateToSourceSelection();
   };

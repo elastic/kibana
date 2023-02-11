@@ -38,7 +38,10 @@ interface Props {
   currentTab: JobType;
 }
 
-export const ExportJobsFlyout: FC<React.PropsWithChildren<Props>> = ({ isDisabled, currentTab }) => {
+export const ExportJobsFlyout: FC<React.PropsWithChildren<Props>> = ({
+  isDisabled,
+  currentTab,
+}) => {
   const mlApiServices = useMlApiContext();
   const {
     getJobs,
@@ -396,7 +399,10 @@ export const ExportJobsFlyout: FC<React.PropsWithChildren<Props>> = ({ isDisable
   );
 };
 
-const FlyoutButton: FC<React.PropsWithChildren<{ isDisabled: boolean; onClick(): void }>> = ({ isDisabled, onClick }) => {
+const FlyoutButton: FC<React.PropsWithChildren<{ isDisabled: boolean; onClick(): void }>> = ({
+  isDisabled,
+  onClick,
+}) => {
   return (
     <EuiButtonEmpty
       iconType="exportAction"
@@ -420,10 +426,9 @@ const LoadingSpinner: FC<React.PropsWithChildren<unknown>> = () => (
   </>
 );
 
-const SwitchTabsConfirm: FC<React.PropsWithChildren<{ onCancel: () => void; onConfirm: () => void }>> = ({
-  onCancel,
-  onConfirm,
-}) => (
+const SwitchTabsConfirm: FC<
+  React.PropsWithChildren<{ onCancel: () => void; onConfirm: () => void }>
+> = ({ onCancel, onConfirm }) => (
   <EuiConfirmModal
     title={i18n.translate('xpack.ml.importExport.exportFlyout.switchTabsConfirm.title', {
       defaultMessage: 'Change tabs?',

@@ -14,7 +14,9 @@ interface LogLevelIndicatorProps {
   logLevel: LogLevel;
 }
 
-const LogLevelIndicatorComponent: React.FC<React.PropsWithChildren<LogLevelIndicatorProps>> = ({ logLevel }) => {
+const LogLevelIndicatorComponent: React.FC<React.PropsWithChildren<LogLevelIndicatorProps>> = ({
+  logLevel,
+}) => {
   const color = getBadgeColor(logLevel);
   const text = getBadgeText(logLevel);
 

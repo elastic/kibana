@@ -12,7 +12,9 @@ import { EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { useLink, useStartServices } from '../../hooks';
 
-export const MissingFleetServerHostCallout: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
+export const MissingFleetServerHostCallout: React.FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { docLinks } = useStartServices();
   const { getHref } = useLink();
 

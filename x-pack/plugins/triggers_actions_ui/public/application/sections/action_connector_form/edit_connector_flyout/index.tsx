@@ -51,7 +51,9 @@ const getConnectorWithoutSecrets = (
   secrets: {},
 });
 
-const ReadOnlyConnectorMessage: React.FC<React.PropsWithChildren<{ href: string }>> = ({ href }) => {
+const ReadOnlyConnectorMessage: React.FC<React.PropsWithChildren<{ href: string }>> = ({
+  href,
+}) => {
   return (
     <>
       <EuiText>

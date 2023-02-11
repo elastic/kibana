@@ -29,10 +29,9 @@ interface LensMarkDownRendererProps {
   timeRange?: TypedLensByValueInput['timeRange'];
 }
 
-const LensMarkDownRendererComponent: React.FC<React.PropsWithChildren<LensMarkDownRendererProps>> = ({
-  attributes,
-  timeRange,
-}) => {
+const LensMarkDownRendererComponent: React.FC<
+  React.PropsWithChildren<LensMarkDownRendererProps>
+> = ({ attributes, timeRange }) => {
   const {
     lens: { EmbeddableComponent },
   } = useKibana().services;
