@@ -19,7 +19,6 @@ import {
   addAlertPropertyToTimeline,
   filterForAlertProperty,
   showTopNAlertProperty,
-  copyToClipboardAlertProperty,
 } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
