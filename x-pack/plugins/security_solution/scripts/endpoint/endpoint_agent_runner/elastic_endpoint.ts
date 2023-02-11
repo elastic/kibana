@@ -38,6 +38,7 @@ interface ElasticArtifactSearchResponse {
 }
 
 export const enrollEndpointHost = async () => {
+  let vmName;
   const {
     log,
     kbnClient,
@@ -73,7 +74,7 @@ export const enrollEndpointHost = async () => {
       throw new Error(`No API enrollment key found for policy id [${policyId}]`);
     }
 
-    const vmName = `${username}-dev-${uniqueId}`;
+    vmName = `${username}-dev-${uniqueId}`;
 
     log.info(`Creating VM named: ${vmName}`);
 
@@ -159,6 +160,8 @@ export const enrollEndpointHost = async () => {
   }
 
   log.indent(-4);
+
+  return vmName;
 };
 
 const getAgentDownloadUrl = async (version: string): Promise<string> => {

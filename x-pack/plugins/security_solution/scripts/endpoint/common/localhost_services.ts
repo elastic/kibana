@@ -16,7 +16,7 @@ const POSSIBLE_LOCALHOST_VALUES: readonly string[] = [
   '0000:0000:0000:0000:0000:0000:0000:0000',
 ];
 
-export const getLocalhostRealIp = async (): Promise<string> => {
+export const getLocalhostRealIp = (): string => {
   return find(os.networkInterfaces().en0, { family: 'IPv4' })?.address ?? '0.0.0.0';
 };
 
