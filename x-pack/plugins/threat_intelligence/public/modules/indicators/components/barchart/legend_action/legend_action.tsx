@@ -7,7 +7,6 @@
 
 import React, { useState, VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { CopyToClipboardContextMenu } from '../../copy_to_clipboard';
 import { FilterInContextMenu, FilterOutContextMenu } from '../../../../query_bar';
 import { AddToTimelineContextMenu } from '../../../../timeline';
@@ -18,10 +17,7 @@ import {
   POPOVER_BUTTON_TEST_ID,
   TIMELINE_BUTTON_TEST_ID,
 } from './test_ids';
-
-const BUTTON_LABEL = i18n.translate('xpack.threatIntelligence.indicator.barChart.popover', {
-  defaultMessage: 'More actions',
-});
+import { BUTTON_LABEL } from './translations';
 
 export interface IndicatorBarchartLegendActionProps {
   /**
