@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useAggregatedIndicators, UseAggregatedIndicatorsParam } from './use_aggregated_indicators';
 import {
@@ -25,7 +26,7 @@ const useAggregatedIndicatorsParams: UseAggregatedIndicatorsParam = {
 const renderUseAggregatedIndicators = () =>
   renderHook((props: UseAggregatedIndicatorsParam) => useAggregatedIndicators(props), {
     initialProps: useAggregatedIndicatorsParams,
-    wrapper: TestProvidersComponent,
+    wrapper: (props) => <TestProvidersComponent {...props} />,
   });
 
 describe('useAggregatedIndicators()', () => {

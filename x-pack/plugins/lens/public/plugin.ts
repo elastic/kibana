@@ -189,7 +189,7 @@ export interface LensPublicStart {
    *
    * @experimental
    */
-  EmbeddableComponent: React.ComponentType<React.PropsWithChildren<EmbeddableComponentProps>>;
+  EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>;
   /**
    * React component which can be used to embed a Lens Visualization Save Modal Component.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.

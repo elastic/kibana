@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useIndicatorById, UseIndicatorByIdValue } from './use_indicator_by_id';
 import { TestProvidersComponent } from '../../../common/mocks/test_providers';
@@ -20,7 +21,7 @@ const renderUseIndicatorById = (initialProps = { indicatorId: 'testId' }) =>
     (props) => useIndicatorById(props.indicatorId),
     {
       initialProps,
-      wrapper: TestProvidersComponent,
+      wrapper: (props) => <TestProvidersComponent {...props} />,
     }
   );
 

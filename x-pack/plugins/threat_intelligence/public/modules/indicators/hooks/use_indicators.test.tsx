@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useIndicators, UseIndicatorsParams, UseIndicatorsValue } from './use_indicators';
 import { TestProvidersComponent } from '../../../common/mocks/test_providers';
@@ -25,7 +26,7 @@ const indicatorsQueryResult = { indicators: [], total: 0 };
 const renderUseIndicators = (initialProps = useIndicatorsParams) =>
   renderHook<UseIndicatorsParams, UseIndicatorsValue>((props) => useIndicators(props), {
     initialProps,
-    wrapper: TestProvidersComponent,
+    wrapper: (props) => <TestProvidersComponent {...props} />,
   });
 
 describe('useIndicators()', () => {
