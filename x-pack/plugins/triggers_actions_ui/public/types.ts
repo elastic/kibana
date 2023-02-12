@@ -458,9 +458,12 @@ export interface InspectQuery {
 }
 export type GetInspectQuery = () => InspectQuery;
 
+export type Alert = EcsFieldsResponse;
+export type Alerts = Alert[];
+
 export interface FetchAlertData {
   activePage: number;
-  alerts: EcsFieldsResponse[];
+  alerts: Alerts;
   alertsCount: number;
   isInitializing: boolean;
   isLoading: boolean;
@@ -511,7 +514,7 @@ export type AlertTableFlyoutComponent =
   | null;
 
 export interface AlertsTableFlyoutBaseProps {
-  alert: EcsFieldsResponse;
+  alert: Alert;
   isLoading: boolean;
   id?: string;
 }
@@ -530,7 +533,7 @@ export interface BulkActionsConfig {
 }
 
 export interface RenderCustomActionsRowArgs {
-  alert: EcsFieldsResponse;
+  alert: Alert;
   setFlyoutAlert: (data: unknown) => void;
   id?: string;
   setIsActionLoading?: (isLoading: boolean) => void;

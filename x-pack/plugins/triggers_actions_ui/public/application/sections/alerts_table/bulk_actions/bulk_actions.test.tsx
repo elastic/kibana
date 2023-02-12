@@ -8,11 +8,11 @@ import React, { useReducer } from 'react';
 
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 import { BulkActionsContext } from './context';
 import { AlertsTable } from '../alerts_table';
 import {
+  Alerts,
   AlertsField,
   AlertsTableProps,
   BulkActionsState,
@@ -53,7 +53,7 @@ describe('AlertsTable.BulkActions', () => {
       _id: 'alert1',
       _index: 'idx1',
     },
-  ] as unknown as EcsFieldsResponse[];
+  ] as unknown as Alerts;
 
   const alertsData = {
     activePage: 0,
@@ -237,7 +237,7 @@ describe('AlertsTable.BulkActions', () => {
               [AlertsField.reason]: ['six'],
               _id: 'alert2',
             },
-          ] as unknown as EcsFieldsResponse[];
+          ] as unknown as Alerts;
           const props = {
             ...tablePropsWithBulkActions,
             alerts: secondPageAlerts,

@@ -9,10 +9,9 @@ import React, { useReducer } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { ALERT_RULE_NAME, ALERT_REASON, ALERT_FLAPPING, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { AlertsTable } from './alerts_table';
-import { AlertsTableProps, BulkActionsState, RowSelectionState } from '../../../types';
+import type { Alerts, AlertsTableProps, BulkActionsState, RowSelectionState } from '../../../types';
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BulkActionsContext } from './bulk_actions/context';
@@ -63,7 +62,7 @@ const alerts = [
     [ALERT_STATUS]: ['recovered'],
     [ALERT_FLAPPING]: [false],
   },
-] as unknown as EcsFieldsResponse[];
+] as unknown as Alerts;
 
 describe('AlertsTable', () => {
   const fetchAlertsData = {

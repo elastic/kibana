@@ -9,10 +9,10 @@ import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
 import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
+  Alerts,
   AlertsField,
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
@@ -89,7 +89,7 @@ const alerts = [
     [AlertsField.reason]: ['four'],
     [AlertsField.uuid]: ['bf5f6d63-5afd-48e0-baf6-f28c2b68db46'],
   },
-] as unknown as EcsFieldsResponse[];
+] as unknown as Alerts;
 
 const FlyoutBody = ({ alert }: AlertsTableFlyoutBaseProps) => (
   <ul>
