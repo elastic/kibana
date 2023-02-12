@@ -5,8 +5,11 @@
  * 2.0.
  */
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 
 export interface Consumer {
   id: AlertConsumers;
   name: string;
 }
+
+export type ServerError = IHttpFetchError<ResponseErrorBody>;

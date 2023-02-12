@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { HttpStart } from '@kbn/core-http-browser';
 import type {
   CaseResponse,
   CasesBulkGetRequestCertainFields,
@@ -14,10 +14,9 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { INTERNAL_BULK_GET_CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { useKibana } from '../../common';
-import { triggersActionsUiQueriesKeys } from './constants';
-
-type ServerError = IHttpFetchError<ResponseErrorBody>;
+import { useKibana } from '../../../../common';
+import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
+import { ServerError } from '../types';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.cases.api.bulkGet', {
   defaultMessage: 'Error fetching cases data',
