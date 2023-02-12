@@ -603,7 +603,7 @@ export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionProps => {
  * HOC that wraps any Link component and makes it a Security solutions internal navigation Link.
  */
 export const withSecuritySolutionLink = <T extends Partial<LinkProps>>(
-  WrappedComponent: React.FC<React.PropsWithChildren<T>>
+  WrappedComponent: React.FC<T>
 ) => {
   const SecuritySolutionLink: React.FC<
     React.PropsWithChildren<Omit<T & SecuritySolutionLinkProps, 'href'>>
