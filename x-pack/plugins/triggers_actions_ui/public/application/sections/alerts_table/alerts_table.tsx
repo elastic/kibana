@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_UUID, ALERT_STATUS, ALERT_FLAPPING } from '@kbn/rule-data-utils';
+import { ALERT_UUID, ALERT_STATUS, ALERT_FLAPPING, ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import { AlertStatus } from '@kbn/rule-data-utils';
 import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
 import {
@@ -17,6 +17,7 @@ import {
   EuiButtonIcon,
   EuiDataGridStyle,
   EuiLoadingContent,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps } from '../../../types';
@@ -86,6 +87,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     sort: sortingFields,
     getInspectQuery,
   } = alertsData;
+  const { cases, isLoading: isLoadingCases } = props.casesData;
+
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
 
   const { renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback } =
@@ -285,6 +288,15 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             data,
           });
         }
+
+        if (_props.columnId === ALERT_CASE_IDS) {
+          return (
+            <EuiSkeletonText lines={1} isLoading={isLoadingCases} size="s">
+              {cases.get(alert[ALERT_CASE_IDS]?.[0] ?? '')?.title ?? '-'}
+            </EuiSkeletonText>
+          );
+        }
+
         return renderCellValue({
           ..._props,
           data,
@@ -296,7 +308,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     },
     [
       alerts,
+      cases,
       isLoading,
+      isLoadingCases,
       pagination.pageIndex,
       pagination.pageSize,
       renderCellValue,
