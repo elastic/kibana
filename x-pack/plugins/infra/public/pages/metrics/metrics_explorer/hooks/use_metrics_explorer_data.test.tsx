@@ -27,7 +27,7 @@ import { MetricsSourceConfigurationProperties } from '../../../../../common/metr
 const mockedFetch = jest.fn();
 
 const renderUseMetricsExplorerDataHook = () => {
-  const wrapper: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+  const Wrapper: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const services = {
       http: {
         fetch: mockedFetch,
@@ -63,7 +63,7 @@ const renderUseMetricsExplorerDataHook = () => {
         afterKey: null as string | null | Record<string, string | null>,
         signal: 1,
       },
-      wrapper,
+      wrapper: (props) => <Wrapper {...props} />,
     }
   );
 };

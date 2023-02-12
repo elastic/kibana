@@ -73,7 +73,9 @@ describe('useRefreshHelper', () => {
     };
 
     mockGetState.mockReturnValue(state);
-    const { rerender } = renderHook(useRefreshHelper, { wrapper: getContextWrapper(context) });
+    const { rerender } = renderHook<() => void, void>(useRefreshHelper, {
+      wrapper: getContextWrapper(context),
+    });
 
     jest.advanceTimersByTime(context.refreshInterval - 1);
     expect(mockDispatch).not.toHaveBeenCalledWith(refreshAction);
