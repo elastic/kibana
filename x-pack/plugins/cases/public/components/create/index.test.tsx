@@ -69,81 +69,77 @@ const defaultProps = {
   onSuccess: jest.fn(),
 };
 
-const TIMES_TO_RUN = 1;
+describe('CreateCase case', () => {
+  let appMockRenderer: AppMockRenderer;
 
-for (let i = 0; i < TIMES_TO_RUN; i++) {
-  describe('CreateCase case', () => {
-    let appMockRenderer: AppMockRenderer;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useGetConnectorsMock.mockReturnValue(sampleConnectorData);
+    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+    useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
+    useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
+    useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
+    useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
+    useGetTagsMock.mockImplementation(() => ({
+      data: sampleTags,
+      refetch: fetchTags,
+    }));
 
-    beforeEach(() => {
-      jest.clearAllMocks();
-      useGetConnectorsMock.mockReturnValue(sampleConnectorData);
-      useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
-      useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
-      useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
-      useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
-      useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
-      useGetTagsMock.mockImplementation(() => ({
-        data: sampleTags,
-        refetch: fetchTags,
-      }));
+    appMockRenderer = createAppMockRenderer();
+  });
 
-      appMockRenderer = createAppMockRenderer();
-    });
+  it('renders', async () => {
+    const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
 
-    it('renders', async () => {
-      const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
+    expect(await result.findByTestId('create-case-submit')).toBeInTheDocument();
+    expect(await result.findByTestId('create-case-cancel')).toBeInTheDocument();
+  });
 
-      expect(await result.findByTestId('create-case-submit')).toBeInTheDocument();
-      expect(await result.findByTestId('create-case-cancel')).toBeInTheDocument();
-    });
+  it('should open modal on cancel click', async () => {
+    const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
 
-    it('should open modal on cancel click', async () => {
-      const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
+    expect(await result.findByTestId('create-case-cancel')).toBeInTheDocument();
+    userEvent.click(await result.findByTestId('create-case-cancel'));
 
-      expect(await result.findByTestId('create-case-cancel')).toBeInTheDocument();
-      userEvent.click(await result.findByTestId('create-case-cancel'));
+    expect(await result.findByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
+  });
 
-      expect(await result.findByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
-    });
+  it('should confirm cancelation on modal confirm click', async () => {
+    const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
 
-    it('should confirm cancelation on modal confirm click', async () => {
-      const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
+    expect(await result.findByTestId('create-case-cancel')).toBeInTheDocument();
+    userEvent.click(await result.findByTestId('create-case-cancel'));
 
-      expect(await result.findByTestId('create-case-cancel')).toBeInTheDocument();
-      userEvent.click(await result.findByTestId('create-case-cancel'));
+    expect(await result.findByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
 
-      expect(await result.findByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
+    userEvent.click(await result.findByTestId('confirmModalConfirmButton'));
 
-      userEvent.click(await result.findByTestId('confirmModalConfirmButton'));
-
-      await waitFor(() => {
-        expect(defaultProps.onCancel).toHaveBeenCalled();
-      });
-    });
-
-    it('should close modal on modal cancel click', async () => {
-      const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
-
-      expect(await result.findByTestId('create-case-cancel')).toBeInTheDocument();
-      userEvent.click(await result.findByTestId('create-case-cancel'));
-
-      expect(await result.findByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
-      userEvent.click(await result.findByTestId('confirmModalCancelButton'));
-
-      expect(result.queryByTestId('cancel-creation-confirmation-modal')).not.toBeInTheDocument();
-    });
-
-    it('should redirect to new case when posting the case', async () => {
-      const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
-
-      await fillForm(result);
-
-      userEvent.click(result.getByTestId('create-case-submit'));
-
-      await waitFor(() => {
-        expect(defaultProps.onSuccess).toHaveBeenCalled();
-      });
+    await waitFor(() => {
+      expect(defaultProps.onCancel).toHaveBeenCalled();
     });
   });
-}
+
+  it('should close modal on modal cancel click', async () => {
+    const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
+
+    expect(await result.findByTestId('create-case-cancel')).toBeInTheDocument();
+    userEvent.click(await result.findByTestId('create-case-cancel'));
+
+    expect(await result.findByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
+    userEvent.click(await result.findByTestId('confirmModalCancelButton'));
+
+    expect(result.queryByTestId('cancel-creation-confirmation-modal')).not.toBeInTheDocument();
+  });
+
+  it('should redirect to new case when posting the case', async () => {
+    const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
+
+    await fillForm(result);
+
+    userEvent.click(result.getByTestId('create-case-submit'));
+
+    await waitFor(() => {
+      expect(defaultProps.onSuccess).toHaveBeenCalled();
+    });
+  });
+});
