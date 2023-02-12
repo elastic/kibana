@@ -13,7 +13,7 @@ import type {
 } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
-import { INTERNAL_BULK_GET_CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { INTERNAL_BULK_GET_CASES_URL } from '@kbn/cases-plugin/common';
 import { useKibana } from '../../../../common';
 import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
 import { ServerError } from '../types';
@@ -21,6 +21,22 @@ import { ServerError } from '../types';
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.cases.api.bulkGet', {
   defaultMessage: 'Error fetching cases data',
 });
+
+const caseFields = ['title'] as const;
+
+type Response = CasesBulkGetResponseCertainFields<typeof caseFields[number]>;
+export type Cases = Response['cases'];
+export type Case = Response['cases'][number];
+
+const transformCases = (data: Response): Map<string, Case> => {
+  const casesMap = new Map();
+
+  for (const theCase of data?.cases ?? []) {
+    casesMap.set(theCase.id, { ...theCase });
+  }
+
+  return casesMap;
+};
 
 const bulkGetCases = async <Field extends keyof CaseResponse = keyof CaseResponse>(
   http: HttpStart,
@@ -30,7 +46,7 @@ const bulkGetCases = async <Field extends keyof CaseResponse = keyof CaseRespons
   const res = await http.post<CasesBulkGetResponseCertainFields<Field>>(
     INTERNAL_BULK_GET_CASES_URL,
     {
-      body: JSON.stringify({ params }),
+      body: JSON.stringify({ ...params }),
       signal,
     }
   );
@@ -44,13 +60,16 @@ export const useBulkGetCases = (caseIds: string[]) => {
     notifications: { toasts },
   } = useKibana().services;
 
-  return useQuery<CasesBulkGetResponseCertainFields<'title'>, ServerError>(
+  return useQuery(
     triggersActionsUiQueriesKeys.casesBulkGet(),
     () => {
       const abortCtrlRef = new AbortController();
-      return bulkGetCases(http, { ids: caseIds, fields: ['title'] }, abortCtrlRef.signal);
+      // @ts-expect-error: FIX it
+      return bulkGetCases(http, { ids: caseIds, fields: caseFields }, abortCtrlRef.signal);
     },
     {
+      enabled: caseIds.length > 0,
+      select: transformCases,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(
@@ -64,5 +83,3 @@ export const useBulkGetCases = (caseIds: string[]) => {
     }
   );
 };
-
-export type UseBulkGetCases = ReturnType<typeof useBulkGetCases>;
