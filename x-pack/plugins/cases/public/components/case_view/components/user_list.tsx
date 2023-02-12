@@ -92,7 +92,7 @@ export const UserList = React.memo<React.PropsWithChildren<UserListProps>>(
     );
 
     const validUsers = getValidUsers(users, userProfiles ?? new Map());
-    const orderedUsers = sortBy<UserListProps['users']>(validUsers, getSortField);
+    const orderedUsers = sortBy(validUsers, getSortField);
 
     if (orderedUsers.length === 0) {
       return null;

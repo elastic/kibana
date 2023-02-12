@@ -84,9 +84,8 @@ describe('#getSubPluginRoutesByCapabilities', () => {
       [CASES_FEATURE_ID]: noCasesCapabilities(),
     } as unknown as Capabilities);
     const casesRoute = routes.find((r) => r.path === 'cases');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const CasesView = (casesRoute?.component ?? mockRender) as React.ComponentType<
-      React.PropsWithChildren<any>
+      React.PropsWithChildren<unknown>
     >;
     expect(shallow(<CasesView />)).toMatchInlineSnapshot(`
       <NoPrivilegePage
@@ -102,9 +101,8 @@ describe('#getSubPluginRoutesByCapabilities', () => {
       [CASES_FEATURE_ID]: readCasesCapabilities(),
     } as unknown as Capabilities);
     const alertsRoute = routes.find((r) => r.path === 'alerts');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const AlertsView = (alertsRoute?.component ?? mockRender) as React.ComponentType<
-      React.PropsWithChildren<any>
+      React.PropsWithChildren<unknown>
     >;
     expect(shallow(<AlertsView />)).toMatchInlineSnapshot(`
       <NoPrivilegePage
@@ -120,15 +118,13 @@ describe('#getSubPluginRoutesByCapabilities', () => {
       [CASES_FEATURE_ID]: noCasesCapabilities(),
     } as unknown as Capabilities);
     const casesRoute = routes.find((r) => r.path === 'cases');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const CasesView = (casesRoute?.component ?? mockRender) as React.ComponentType<
-      React.PropsWithChildren<any>
+      React.PropsWithChildren<unknown>
     >;
 
     const alertsRoute = routes.find((r) => r.path === 'alerts');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const AlertsView = (alertsRoute?.component ?? mockRender) as React.ComponentType<
-      React.PropsWithChildren<any>
+      React.PropsWithChildren<unknown>
     >;
 
     expect(shallow(<AlertsView />)).toMatchInlineSnapshot(`
