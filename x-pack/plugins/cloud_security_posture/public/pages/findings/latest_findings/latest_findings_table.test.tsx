@@ -11,64 +11,10 @@ import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsTable } from './latest_findings_table';
 import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
-import type { EcsEvent } from '@kbn/ecs';
 import { TestProvider } from '../../../test/test_provider';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
+import { getFindingsFixture } from '../../../test/fixtures/findings_fixture';
 
 const chance = new Chance();
-
-const getFakeFindings = (name: string): CspFinding & { id: string } => ({
-  cluster_id: chance.guid(),
-  id: chance.word(),
-  result: {
-    expected: {
-      source: {},
-    },
-    evaluation: chance.weighted(['passed', 'failed'], [0.5, 0.5]),
-    evidence: {
-      filemode: chance.word(),
-    },
-  },
-  rule: {
-    audit: chance.paragraph(),
-    benchmark: {
-      rule_number: '1.1.1',
-      name: 'CIS Kubernetes',
-      version: '1.6.0',
-      id: 'cis_k8s',
-    },
-    default_value: chance.sentence(),
-    description: chance.paragraph(),
-    id: chance.guid(),
-    impact: chance.word(),
-    name,
-    profile_applicability: chance.sentence(),
-    rationale: chance.paragraph(),
-    references: chance.paragraph(),
-    rego_rule_id: 'cis_X_X_X',
-    remediation: chance.word(),
-    section: chance.sentence(),
-    tags: [],
-    version: '1.0',
-  },
-  agent: {
-    id: chance.string(),
-    name: chance.string(),
-    type: chance.string(),
-    version: chance.string(),
-  },
-  resource: {
-    name: chance.string(),
-    type: chance.string(),
-    raw: {} as any,
-    sub_type: chance.string(),
-    id: chance.string(),
-  },
-  host: {} as any,
-  ecs: {} as any,
-  event: {} as EcsEvent,
-  '@timestamp': new Date().toISOString(),
-});
 
 type TableProps = PropsOf<typeof FindingsTable>;
 
@@ -96,7 +42,7 @@ describe('<FindingsTable />', () => {
 
   it('renders the table with provided items', () => {
     const names = chance.unique(chance.sentence, 10);
-    const data = names.map(getFakeFindings);
+    const data = names.map(getFindingsFixture);
 
     const props: TableProps = {
       loading: false,
@@ -120,7 +66,7 @@ describe('<FindingsTable />', () => {
 
   it('adds filter with a cell button click', () => {
     const names = chance.unique(chance.sentence, 10);
-    const data = names.map(getFakeFindings);
+    const data = names.map(getFindingsFixture);
 
     const filterProps = { onAddFilter: jest.fn() };
     const props: TableProps = {
