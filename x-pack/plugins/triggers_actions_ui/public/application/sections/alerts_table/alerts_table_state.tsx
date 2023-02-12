@@ -91,7 +91,16 @@ const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
 const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
 const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
 
-const AlertsTableState = ({
+
+const AlertsTableState = (props: AlertsTableStateProps) => {
+  return (
+    <QueryClientProvider client={alertsTableQueryClient}>
+      <AlertsTableStateWithQueryProvider {...props} />
+    </QueryClientProvider>
+  );
+};
+
+const AlertsTableStateWithQueryProvider = ({
   alertsTableConfigurationRegistry,
   configurationId,
   id,
@@ -291,7 +300,7 @@ const AlertsTableState = ({
   const userCasesPermissions = useGetUserCasesPermissions(alertsTableConfiguration.casesFeatureId);
 
   return hasAlertsTableConfiguration ? (
-    <QueryClientProvider client={alertsTableQueryClient}>
+    <>
       {!isLoading && alertsCount === 0 && (
         <InspectButtonContainer>
           <EmptyState
@@ -322,7 +331,7 @@ const AlertsTableState = ({
           initialBulkActionsState={initialBulkActionsState}
         />
       )}
-    </QueryClientProvider>
+    </>
   ) : (
     <EuiEmptyPrompt
       data-test-subj="alertsTableNoConfiguration"
