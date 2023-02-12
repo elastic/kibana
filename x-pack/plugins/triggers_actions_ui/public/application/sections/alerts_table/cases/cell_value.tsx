@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { EuiSkeletonText } from '@elastic/eui';
 import React, { memo } from 'react';
+import { camelCase, mapKeys } from 'lodash';
+import { EuiLink, EuiSkeletonText } from '@elastic/eui';
+import { Tooltip as CaseTooltip } from '@kbn/cases-components';
+import type { CaseTooltipContentProps } from '@kbn/cases-components';
 import { Case } from '../hooks/use_bulk_get_cases';
 
 interface Props {
@@ -20,10 +23,18 @@ const CellValueComponent: React.FC<Props> = ({ isLoading, cases }) => {
   }
 
   const firstCase = cases[0];
+  const firstCaseAsCamel = mapKeys(firstCase, (_, key) =>
+    camelCase(key)
+  ) as unknown as CaseTooltipContentProps;
 
   return (
     <EuiSkeletonText lines={1} isLoading={isLoading} size="s">
-      {firstCase.title}
+      <CaseTooltip
+        loading={false}
+        content={{ ...firstCaseAsCamel, totalComments: firstCase.totalComment }}
+      >
+        <EuiLink onClick={() => {}}>{firstCase.title}</EuiLink>
+      </CaseTooltip>
     </EuiSkeletonText>
   );
 };

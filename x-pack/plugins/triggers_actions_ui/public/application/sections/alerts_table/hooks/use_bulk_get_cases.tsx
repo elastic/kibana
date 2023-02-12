@@ -22,7 +22,14 @@ const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.cases.api.bulkGet', 
   defaultMessage: 'Error fetching cases data',
 });
 
-const caseFields = ['title'] as const;
+const caseFields = [
+  'title',
+  'description',
+  'status',
+  'totalComment',
+  'created_at',
+  'created_by',
+] as const;
 
 type Response = CasesBulkGetResponseCertainFields<typeof caseFields[number]>;
 export type Cases = Response['cases'];
