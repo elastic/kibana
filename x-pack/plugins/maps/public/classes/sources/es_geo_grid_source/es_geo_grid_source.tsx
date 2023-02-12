@@ -98,7 +98,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       const resolutionPropChange = sourceChanges.find((sourceChange) => {
         return sourceChange.propName === 'resolution';
       });
-      if (resolutionPropChange) {
+      if (resolutionPropChange && 'getPropertiesDescriptor' in sourceEditorArgs.style) {
         const propertiesDescriptor = (
           sourceEditorArgs.style as VectorStyle
         ).getPropertiesDescriptor();
@@ -502,7 +502,8 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   async getTileUrl(
     searchFilters: VectorSourceRequestMeta,
     refreshToken: string,
-    hasLabels: boolean
+    hasLabels: boolean,
+    buffer: number
   ): Promise<string> {
     const dataView = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
@@ -517,6 +518,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 &index=${dataView.getIndexPattern()}\
 &gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
 &hasLabels=${hasLabels}\
+&buffer=${buffer}\
 &requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
 &renderAs=${this._descriptor.requestType}\
 &token=${refreshToken}`;
