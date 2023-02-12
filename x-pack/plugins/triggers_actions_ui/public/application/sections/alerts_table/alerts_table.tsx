@@ -17,7 +17,6 @@ import {
   EuiButtonIcon,
   EuiDataGridStyle,
   EuiLoadingContent,
-  EuiSkeletonText,
 } from '@elastic/eui';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps } from '../../../types';
@@ -30,6 +29,8 @@ import { AlertLifecycleStatusBadge } from '../../components/alert_lifecycle_stat
 import './alerts_table.scss';
 import { getToolbarVisibility } from './toolbar';
 import { InspectButtonContainer } from './toolbar/components/inspect';
+import { CellValue as CaseCell } from './cases/cell_value';
+import { Case } from './hooks/use_bulk_get_cases';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 
@@ -282,6 +283,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         Object.entries(alert ?? {}).forEach(([key, value]) => {
           data.push({ field: key, value: value as string[] });
         });
+
         if (showAlertStatusWithFlapping && _props.columnId === ALERT_STATUS) {
           return renderAlertLifecycleStatus({
             ..._props,
@@ -290,11 +292,13 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         }
 
         if (_props.columnId === ALERT_CASE_IDS) {
-          return (
-            <EuiSkeletonText lines={1} isLoading={isLoadingCases} size="s">
-              {cases.get(alert[ALERT_CASE_IDS]?.[0] ?? '')?.title ?? '-'}
-            </EuiSkeletonText>
-          );
+          const caseIds = alert[ALERT_CASE_IDS] ?? [];
+
+          const alertCases = caseIds
+            .map((id) => cases.get(id))
+            .filter((theCase): theCase is Case => theCase != null);
+
+          return <CaseCell isLoading={isLoadingCases} cases={alertCases} />;
         }
 
         return renderCellValue({
