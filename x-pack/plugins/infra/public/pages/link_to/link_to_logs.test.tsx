@@ -8,7 +8,8 @@
 import { render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Router, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
