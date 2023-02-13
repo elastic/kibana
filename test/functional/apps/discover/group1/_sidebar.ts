@@ -718,11 +718,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should remove the table column after a field was deleted', async () => {
-        const newField = '_test_field_removal';
-        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          INITIAL_FIELD_LIST_SUMMARY
-        );
-
+        const newField = '_test_field_and_column_removal';
         await PageObjects.discover.addRuntimeField(newField, `emit("hi there")`);
 
         await retry.waitFor('form to close', async () => {
@@ -732,37 +728,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
-        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '54 available fields. 0 empty fields. 3 meta fields.'
-        );
-
-        let allFields = await PageObjects.discover.getAllFieldNames();
-        expect(allFields.includes(newField)).to.be(true);
-
+        let selectedFields = await PageObjects.discover.getSidebarSectionFieldNames('selected');
+        expect(selectedFields.includes(newField)).to.be(false);
         expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Document']);
-        await PageObjects.discover.clickFieldListItemAdd(newField);
 
+        await PageObjects.discover.clickFieldListItemAdd(newField);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
-        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '1 selected field. 1 popular field. 54 available fields. 0 empty fields. 3 meta fields.'
-        );
-
-        allFields = await PageObjects.discover.getAllFieldNames();
-        expect(allFields.filter((item) => item === newField).length).to.be(3);
+        selectedFields = await PageObjects.discover.getSidebarSectionFieldNames('selected');
+        expect(selectedFields.includes(newField)).to.be(true);
         expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', newField]);
 
         await PageObjects.discover.removeField(newField);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
-        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          INITIAL_FIELD_LIST_SUMMARY
-        );
+        await retry.waitFor('sidebar to update', async () => {
+          return !(await PageObjects.discover.getAllFieldNames()).includes(newField);
+        });
 
-        allFields = await PageObjects.discover.getAllFieldNames();
-        expect(allFields.includes(newField)).to.be(false);
         expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Document']);
       });
     });

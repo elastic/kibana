@@ -173,8 +173,7 @@ export function DiscoverSidebarComponent({
               },
               fieldName,
               onDelete: async () => {
-                onRemoveField(fieldName);
-                await onFieldEdited();
+                await onFieldEdited({ removedFieldName: fieldName });
               },
             });
             if (setFieldEditorRef) {
@@ -191,7 +190,6 @@ export function DiscoverSidebarComponent({
       setFieldEditorRef,
       closeFlyout,
       onFieldEdited,
-      onRemoveField,
       dataViewFieldEditor,
     ]
   );

@@ -156,12 +156,18 @@ export function DiscoverLayout({
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
-  const onFieldEdited = useCallback(async () => {
-    if (!dataView.isPersisted()) {
-      await updateAdHocDataViewId(dataView);
-    }
-    stateContainer.dataState.refetch$.next('reset');
-  }, [dataView, stateContainer, updateAdHocDataViewId]);
+  const onFieldEdited = useCallback(
+    async ({ removedFieldName }: { removedFieldName?: string } = {}) => {
+      if (removedFieldName && currentColumns.includes(removedFieldName)) {
+        onRemoveColumn(removedFieldName);
+      }
+      if (!dataView.isPersisted()) {
+        await updateAdHocDataViewId(dataView);
+      }
+      stateContainer.dataState.refetch$.next('reset');
+    },
+    [dataView, stateContainer, updateAdHocDataViewId, currentColumns, onRemoveColumn]
+  );
 
   const onDisableFilters = useCallback(() => {
     const disabledFilters = filterManager

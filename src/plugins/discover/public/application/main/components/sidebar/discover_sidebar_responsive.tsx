@@ -100,7 +100,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * callback to execute on edit runtime field
    */
-  onFieldEdited: () => Promise<void>;
+  onFieldEdited: (options?: { removedFieldName?: string }) => Promise<void>;
   /**
    * callback to execute on create dataview
    */
