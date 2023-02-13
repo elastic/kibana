@@ -6,8 +6,17 @@
  */
 
 import React, { VFC } from 'react';
-import { i18n } from '@kbn/i18n';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import {
+  CONFIDENCE,
+  FEED,
+  FIRST_SEEN,
+  INDICATORS,
+  LAST_SEEN,
+  TIMESTAMP,
+  TLP_MARKETING,
+  TYPE,
+} from './translations';
 
 interface IndicatorFieldLabelProps {
   field: string;
@@ -26,44 +35,28 @@ export const translateFieldLabel = (field: string) => {
   // https://github.com/elastic/kibana/blob/main/src/dev/i18n/README.md
   switch (field) {
     case RawIndicatorFieldId.TimeStamp: {
-      return i18n.translate('xpack.threatIntelligence.field.@timestamp', {
-        defaultMessage: '@timestamp',
-      });
+      return TIMESTAMP;
     }
     case RawIndicatorFieldId.Name: {
-      return i18n.translate('xpack.threatIntelligence.field.threat.indicator.name', {
-        defaultMessage: 'Indicator',
-      });
+      return INDICATORS;
     }
     case RawIndicatorFieldId.Type: {
-      return i18n.translate('xpack.threatIntelligence.field.threat.indicator.type', {
-        defaultMessage: 'Indicator type',
-      });
+      return TYPE;
     }
     case RawIndicatorFieldId.Feed: {
-      return i18n.translate('xpack.threatIntelligence.field.threat.feed.name', {
-        defaultMessage: 'Feed',
-      });
+      return FEED;
     }
     case RawIndicatorFieldId.FirstSeen: {
-      return i18n.translate('xpack.threatIntelligence.field.threat.indicator.first_seen', {
-        defaultMessage: 'First seen',
-      });
+      return FIRST_SEEN;
     }
     case RawIndicatorFieldId.LastSeen: {
-      return i18n.translate('xpack.threatIntelligence.field.threat.indicator.last_seen', {
-        defaultMessage: 'Last seen',
-      });
+      return LAST_SEEN;
     }
     case RawIndicatorFieldId.Confidence: {
-      return i18n.translate('xpack.threatIntelligence.field.threat.indicator.confidence', {
-        defaultMessage: 'Confidence',
-      });
+      return CONFIDENCE;
     }
     case RawIndicatorFieldId.MarkingTLP: {
-      return i18n.translate('xpack.threatIntelligence.field.threat.indicator.marking.tlp', {
-        defaultMessage: 'TLP Marking',
-      });
+      return TLP_MARKETING;
     }
     default:
       return field;
