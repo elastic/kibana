@@ -6,7 +6,7 @@
  */
 
 import { createDynamicQueries, createQueries } from './create_queries';
-import type { Ecs } from '@kbn/core/server';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 describe('create queries', () => {
@@ -56,7 +56,7 @@ describe('create queries', () => {
           process: {
             pid,
           },
-        } as Ecs,
+        } as unknown as ParsedTechnicalFields,
         {} as OsqueryAppContext
       );
       expect(queries[0].query).toBe(`SELECT * FROM processes where pid=${pid};`);
@@ -73,7 +73,7 @@ describe('create queries', () => {
           process: {
             pid,
           },
-        } as Ecs,
+        } as unknown as ParsedTechnicalFields,
         {} as OsqueryAppContext
       );
       expect(queries[0].query).toBe(`SELECT * FROM processes where pid=${pid};`);
@@ -83,7 +83,7 @@ describe('create queries', () => {
         mockedSingleQueryParams,
         {
           process: {},
-        } as Ecs,
+        } as unknown as ParsedTechnicalFields,
         {} as OsqueryAppContext
       );
       expect(queries[0].query).toBe('SELECT * FROM processes where pid={{process.pid}};');

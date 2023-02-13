@@ -9,7 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { filter, flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import type { Ecs, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
   containsDynamicQuery,
   replaceParamsQuery,
@@ -32,7 +33,7 @@ interface Metadata {
 interface CreateActionHandlerOptions {
   soClient?: SavedObjectsClientContract;
   metadata?: Metadata;
-  ecsData?: Ecs;
+  alertData?: ParsedTechnicalFields;
 }
 
 export const createActionHandler = async (
@@ -45,7 +46,7 @@ export const createActionHandler = async (
   const internalSavedObjectsClient = await getInternalSavedObjectsClient(
     osqueryContext.getStartServices
   );
-  const { soClient, metadata, ecsData } = options;
+  const { soClient, metadata, alertData } = options;
   const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -100,8 +101,8 @@ export const createActionHandler = async (
               action_id: uuidv4(),
               id: packQueryId,
               query:
-                dynamicQueryPresent && packQuery.query && ecsData
-                  ? replaceParamsQuery(packQuery.query, ecsData).result
+                dynamicQueryPresent && packQuery.query && alertData
+                  ? replaceParamsQuery(packQuery.query, alertData).result
                   : packQuery.query,
               ecs_mapping: packQuery.ecs_mapping,
               version: packQuery.version,
@@ -111,8 +112,8 @@ export const createActionHandler = async (
             (value) => !isEmpty(value)
           );
         })
-      : ecsData
-      ? await createDynamicQueries(params, ecsData, osqueryContext)
+      : alertData
+      ? await createDynamicQueries(params, alertData, osqueryContext)
       : await createQueries(params, selectedAgents, osqueryContext),
   };
 

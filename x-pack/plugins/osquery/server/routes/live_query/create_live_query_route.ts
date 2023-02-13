@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { Ecs, IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import unified from 'unified';
 import markdown from 'remark-parse';
 import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
@@ -100,7 +99,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           {
             soClient,
             metadata: { currentUser },
-            ecsData: { ecs: { version: '8.6.0' }, ...alertData } as Ecs,
+            alertData,
           }
         );
 

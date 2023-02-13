@@ -11,13 +11,13 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-  Ecs,
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { upgradeIntegration } from './utils/upgrade_integration';
 import type { PackSavedObjectAttributes } from './common/types';
 import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
@@ -94,8 +94,10 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
     return {
-      osqueryCreateAction: (params: CreateLiveQueryRequestBodySchema, ecsData?: Ecs) =>
-        createActionHandler(osqueryContext, params, { ecsData }),
+      osqueryCreateAction: (
+        params: CreateLiveQueryRequestBodySchema,
+        alertData?: ParsedTechnicalFields
+      ) => createActionHandler(osqueryContext, params, { alertData }),
     };
   }
 
