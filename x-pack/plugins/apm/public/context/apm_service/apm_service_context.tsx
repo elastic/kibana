@@ -8,11 +8,7 @@
 import React, { createContext, ReactNode } from 'react';
 import { useHistory } from 'react-router-dom';
 import { History } from 'history';
-import { isRumAgentName } from '../../../common/agent_name';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../common/transaction_types';
+import { getDefaultTransactionType } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
 import { useServiceAgentFetcher } from './use_service_agent_fetcher';
 import { useAnyOfApmParams } from '../../hooks/use_apm_params';
@@ -142,10 +138,7 @@ export function getTransactionType({
 
   if (isNoAgentAndNoTransactionTypesExists) return undefined;
 
-  // The default transaction type is "page-load" for RUM agents and "request" for all others
-  const defaultTransactionType = isRumAgentName(agentName)
-    ? TRANSACTION_PAGE_LOAD
-    : TRANSACTION_REQUEST;
+  const defaultTransactionType = getDefaultTransactionType(agentName);
 
   // If the default transaction type is not in transactionTypes the first in the list is returned
   const currentTransactionType = transactionTypes.includes(
