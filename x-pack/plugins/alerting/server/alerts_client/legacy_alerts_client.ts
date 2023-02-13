@@ -28,6 +28,7 @@ import {
   AlertInstanceState,
   RawAlertInstance,
   WithoutReservedActionGroups,
+  RuleNotifyWhenType,
 } from '../types';
 import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 
@@ -113,12 +114,14 @@ export class LegacyAlertsClient<
     ruleRunMetricsStore,
     shouldLogAndScheduleActionsForAlerts,
     flappingSettings,
+    notifyWhen,
   }: {
     eventLogger: AlertingEventLogger;
     ruleLabel: string;
     shouldLogAndScheduleActionsForAlerts: boolean;
     ruleRunMetricsStore: RuleRunMetricsStore;
     flappingSettings: RulesSettingsFlappingProperties;
+    notifyWhen: RuleNotifyWhenType | null;
   }) {
     const {
       newAlerts: processedAlertsNew,
@@ -152,6 +155,7 @@ export class LegacyAlertsClient<
 
     const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       flappingSettings,
+      notifyWhen,
       this.options.ruleType.defaultActionGroupId,
       processedAlertsNew,
       processedAlertsActive,

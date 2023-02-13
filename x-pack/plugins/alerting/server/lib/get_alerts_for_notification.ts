@@ -8,7 +8,12 @@
 import { keys } from 'lodash';
 import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../types';
+import {
+  AlertInstanceState,
+  AlertInstanceContext,
+  RuleNotifyWhenType,
+  RuleNotifyWhen,
+} from '../types';
 
 export function getAlertsForNotification<
   State extends AlertInstanceState,
@@ -17,6 +22,7 @@ export function getAlertsForNotification<
   RecoveryActionGroupId extends string
 >(
   flappingSettings: RulesSettingsFlappingProperties,
+  notifyWhen: RuleNotifyWhenType | null,
   actionGroupId: string,
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
@@ -30,7 +36,8 @@ export function getAlertsForNotification<
 
   for (const id of keys(currentRecoveredAlerts)) {
     const alert = recoveredAlerts[id];
-    if (flappingSettings.enabled) {
+    // rules with "notify on every run" should not be subject to changes in flapping
+    if (flappingSettings.enabled && notifyWhen !== RuleNotifyWhen.ACTIVE) {
       const flapping = alert.getFlapping();
       if (flapping) {
         alert.incrementPendingRecoveredCount();

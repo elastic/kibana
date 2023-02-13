@@ -165,6 +165,7 @@ export const createLifecycleExecutor =
       services: { alertFactory, shouldWriteAlerts },
       state: previousState,
       flappingSettings,
+      rule: { notifyWhen },
     } = options;
 
     const ruleDataClientWriter = await ruleDataClient.getWriter();
@@ -333,7 +334,7 @@ export const createLifecycleExecutor =
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
     const trackedRecoveredEventsToIndex = makeEventsDataMapFor(trackedAlertRecoveredIds);
     const allEventsToIndex = [
-      ...getAlertsForNotification(flappingSettings, trackedEventsToIndex),
+      ...getAlertsForNotification(flappingSettings, trackedEventsToIndex, notifyWhen),
       ...newEventsToIndex,
     ];
 

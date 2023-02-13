@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleNotifyWhen, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common/rules_settings';
 import {
   ALERT_END,
@@ -16,10 +17,15 @@ import {
 
 export function getAlertsForNotification(
   flappingSettings: RulesSettingsFlappingProperties,
-  trackedEventsToIndex: any[]
+  trackedEventsToIndex: any[],
+  notifyWhen?: RuleNotifyWhenType | null
 ) {
   return trackedEventsToIndex.map((trackedEvent) => {
-    if (!flappingSettings.enabled || trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_ACTIVE) {
+    if (
+      !flappingSettings.enabled ||
+      trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_ACTIVE ||
+      notifyWhen === RuleNotifyWhen.ACTIVE
+    ) {
       trackedEvent.pendingRecoveredCount = 0;
     } else if (
       flappingSettings.enabled &&

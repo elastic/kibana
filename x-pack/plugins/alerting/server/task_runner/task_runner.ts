@@ -427,6 +427,7 @@ export class TaskRunner<
         ruleRunMetricsStore,
         shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
         flappingSettings,
+        notifyWhen,
       });
     });
 

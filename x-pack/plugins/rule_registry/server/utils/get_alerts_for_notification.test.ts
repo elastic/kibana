@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   DEFAULT_FLAPPING_SETTINGS,
   DISABLE_FLAPPING_SETTINGS,
@@ -94,6 +95,37 @@ describe('getAlertsForNotification', () => {
     const trackedEvents = cloneDeep([alert1, alert2, alert3]);
     expect(getAlertsForNotification(DISABLE_FLAPPING_SETTINGS, trackedEvents))
       .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "event": Object {
+            "kibana.alert.status": "recovered",
+          },
+          "flapping": true,
+          "pendingRecoveredCount": 0,
+        },
+        Object {
+          "event": Object {
+            "kibana.alert.status": "recovered",
+          },
+          "flapping": false,
+          "pendingRecoveredCount": 0,
+        },
+        Object {
+          "event": Object {
+            "kibana.alert.status": "recovered",
+          },
+          "flapping": true,
+          "pendingRecoveredCount": 0,
+        },
+      ]
+    `);
+  });
+
+  test('should reset counts and not modify alerts if the rule has "notify on every run" set', () => {
+    const trackedEvents = cloneDeep([alert1, alert2, alert3]);
+    expect(
+      getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, trackedEvents, RuleNotifyWhen.ACTIVE)
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "event": Object {
