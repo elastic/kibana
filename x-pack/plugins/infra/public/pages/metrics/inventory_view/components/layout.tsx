@@ -150,7 +150,7 @@ export const Layout = React.memo(
                   responsive={false}
                   css={css`
                     margin: 0;
-                    justifycontent: 'end';
+                    justify-content: flex-end;
                   `}
                 >
                   {view === 'map' && (
