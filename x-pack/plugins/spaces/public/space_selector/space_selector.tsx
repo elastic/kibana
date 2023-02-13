@@ -9,6 +9,7 @@ import './space_selector.scss';
 
 import {
   EuiFieldSearch,
+  EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -18,7 +19,9 @@ import {
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
+import type { Observable, Subscription } from 'rxjs';
 
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,6 +37,7 @@ import { SpaceCards } from './components';
 interface Props {
   spacesManager: SpacesManager;
   serverBasePath: string;
+  customBranding$: Observable<CustomBranding>;
 }
 
 interface State {
@@ -41,10 +45,13 @@ interface State {
   searchTerm: string;
   spaces: Space[];
   error?: Error;
+  customLogo?: string;
 }
 
 export class SpaceSelector extends Component<Props, State> {
   private headerRef?: HTMLElement | null;
+  private customBrandingSubscription?: Subscription;
+
   constructor(props: Props) {
     super(props);
 
@@ -67,6 +74,13 @@ export class SpaceSelector extends Component<Props, State> {
     if (this.state.spaces.length === 0) {
       this.loadSpaces();
     }
+    this.customBrandingSubscription = this.props.customBranding$.subscribe((next) => {
+      this.setState({ ...this.state, customLogo: next.logo });
+    });
+  }
+
+  public componentWillUnmount() {
+    this.customBrandingSubscription?.unsubscribe();
   }
 
   public loadSpaces() {
@@ -110,7 +124,17 @@ export class SpaceSelector extends Component<Props, State> {
         <KibanaPageTemplate.Section className="spcSpaceSelector__pageContent" color="transparent">
           <EuiText textAlign="center" size="s">
             <EuiSpacer size="xxl" />
-            <KibanaSolutionAvatar name="Elastic" size="xl" />
+            {this.state.customLogo ? (
+              <EuiImage
+                src={this.state.customLogo}
+                size={64}
+                alt={i18n.translate('xpack.spaces.spaceSelector.customLogoAlt', {
+                  defaultMessage: 'Custom logo',
+                })}
+              />
+            ) : (
+              <KibanaSolutionAvatar name="Elastic" size="xl" />
+            )}
             <EuiSpacer size="xxl" />
             <EuiTextColor color="subdued">
               <h1
