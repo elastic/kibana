@@ -8,6 +8,26 @@
 import type { EventBus } from './event_bus';
 import type { ContentStorage, StorageContext } from './types';
 
+export interface GetResponse<T = any> {
+  item: T;
+}
+
+export interface BulkGetResponse<T = any> {
+  items: T;
+}
+
+export interface CreateItemResponse<T = any> {
+  result: T;
+}
+
+export interface UpdateItemResponse<T = any> {
+  result: T;
+}
+
+export interface DeleteItemResponse<T = any> {
+  result: T;
+}
+
 export class ContentCrud implements ContentStorage {
   private storage: ContentStorage;
   private eventBus: EventBus;
@@ -31,7 +51,7 @@ export class ContentCrud implements ContentStorage {
     ctx: StorageContext,
     contentId: string,
     options?: Options
-  ): Promise<O> {
+  ): Promise<GetResponse<O>> {
     this.eventBus.emit({
       type: 'getItemStart',
       contentId,
@@ -40,16 +60,16 @@ export class ContentCrud implements ContentStorage {
     });
 
     try {
-      const result = await this.storage.get(ctx, contentId, options);
+      const item = await this.storage.get(ctx, contentId, options);
 
       this.eventBus.emit({
         type: 'getItemSuccess',
         contentId,
         contentType: this.contentType,
-        data: result,
+        data: item,
       });
 
-      return result;
+      return { item };
     } catch (e) {
       this.eventBus.emit({
         type: 'getItemError',
@@ -67,7 +87,7 @@ export class ContentCrud implements ContentStorage {
     ctx: StorageContext,
     ids: string[],
     options?: Options
-  ): Promise<O> {
+  ): Promise<BulkGetResponse<O>> {
     this.eventBus.emit({
       type: 'bulkGetItemStart',
       contentType: this.contentType,
@@ -76,16 +96,18 @@ export class ContentCrud implements ContentStorage {
     });
 
     try {
-      const result = await this.storage.bulkGet(ctx, ids, options);
+      const items = await this.storage.bulkGet(ctx, ids, options);
 
       this.eventBus.emit({
         type: 'bulkGetItemSuccess',
         ids,
         contentType: this.contentType,
-        data: result,
+        data: items,
       });
 
-      return result;
+      return {
+        items,
+      };
     } catch (e) {
       this.eventBus.emit({
         type: 'bulkGetItemError',
@@ -103,7 +125,7 @@ export class ContentCrud implements ContentStorage {
     ctx: StorageContext,
     data: Data,
     options?: Options
-  ): Promise<O> {
+  ): Promise<CreateItemResponse<O>> {
     this.eventBus.emit({
       type: 'createItemStart',
       contentType: this.contentType,
@@ -121,7 +143,7 @@ export class ContentCrud implements ContentStorage {
         options,
       });
 
-      return result;
+      return { result };
     } catch (e) {
       this.eventBus.emit({
         type: 'createItemError',
@@ -140,7 +162,7 @@ export class ContentCrud implements ContentStorage {
     id: string,
     data: Data,
     options?: Options
-  ): Promise<O> {
+  ): Promise<UpdateItemResponse<O>> {
     this.eventBus.emit({
       type: 'updateItemStart',
       contentId: id,
@@ -160,7 +182,7 @@ export class ContentCrud implements ContentStorage {
         options,
       });
 
-      return result;
+      return { result };
     } catch (e) {
       this.eventBus.emit({
         type: 'updateItemError',
@@ -179,7 +201,7 @@ export class ContentCrud implements ContentStorage {
     ctx: StorageContext,
     id: string,
     options?: Options
-  ): Promise<O> {
+  ): Promise<DeleteItemResponse<O>> {
     this.eventBus.emit({
       type: 'deleteItemStart',
       contentId: id,
@@ -188,7 +210,7 @@ export class ContentCrud implements ContentStorage {
     });
 
     try {
-      const res = await this.storage.delete(ctx, id, options);
+      const result = await this.storage.delete(ctx, id, options);
 
       this.eventBus.emit({
         type: 'deleteItemSuccess',
@@ -197,7 +219,7 @@ export class ContentCrud implements ContentStorage {
         options,
       });
 
-      return res;
+      return { result };
     } catch (e) {
       this.eventBus.emit({
         type: 'deleteItemError',
