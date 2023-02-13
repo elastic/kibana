@@ -132,6 +132,7 @@ const RendererContainer = styled.div`
 `;
 
 const ThreatTacticContainer = styled(EuiFlexGroup)`
+  flex-grow: 0;
   flex-wrap: nowrap;
   & .euiFlexGroup {
     flex-wrap: nowrap;
@@ -232,8 +233,13 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
                 <EuiSpacer size="l" />
-                <ThreatTacticContainer direction="column" wrap={false} gutterSize="none">
-                  {threatDetails && threatDetails[0] && (
+                {threatDetails && threatDetails[0] && (
+                  <ThreatTacticContainer
+                    alignItems="flexStart"
+                    direction="column"
+                    wrap={false}
+                    gutterSize="none"
+                  >
                     <>
                       <EuiTitle size="xxs">
                         <h5>{threatDetails[0].title}</h5>
@@ -242,8 +248,8 @@ const EventDetailsComponent: React.FC<Props> = ({
                         {threatDetails[0].description}
                       </ThreatTacticDescription>
                     </>
-                  )}
-                </ThreatTacticContainer>
+                  </ThreatTacticContainer>
+                )}
                 <EuiSpacer size="l" />
                 {renderer != null && detailsEcsData != null && (
                   <div>

@@ -1395,6 +1395,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.MAX_CASES_PER_ALERT",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_CASES_PER_ALERT",
+        "description": [],
+        "signature": [
+          "10"
+        ],
+        "path": "packages/kbn-rule-data-utils/src/alerts_as_data_cases.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ruleDetailsRoute",
         "type": "string",
         "tags": [],

@@ -9,15 +9,15 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { isEqual, uniq } from 'lodash';
+import { isEqual } from 'lodash';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { useGetCaseUsers } from '../../../containers/use_get_case_users';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
-import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import type { CaseSeverity } from '../../../../common/api';
-import { useCaseViewNavigation } from '../../../common/navigation';
-import type { UseFetchAlertData } from '../../../../common/ui/types';
+import type { CaseUsers, UseFetchAlertData } from '../../../../common/ui/types';
 import type { Case, CaseStatuses } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
@@ -32,6 +32,41 @@ import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
 import { AssignUsers } from './assign_users';
 import type { Assignee } from '../../user_profiles/types';
+import { convertToCaseUserWithProfileInfo } from '../../user_profiles/user_converter';
+
+const buildUserProfilesMap = (users?: CaseUsers): Map<string, UserProfileWithAvatar> => {
+  const userProfiles = new Map();
+
+  if (!users) {
+    return userProfiles;
+  }
+
+  for (const user of [
+    ...users.assignees,
+    ...users.participants,
+    users.reporter,
+    ...users.unassignedUsers,
+  ]) {
+    /**
+     * If the user has a valid profile UID and a valid username
+     * then the backend successfully fetched the user profile
+     * information from the security plugin. Checking only for the
+     * profile UID is not enough as a user can use our API to add
+     * an assignee with a non existing UID.
+     */
+    if (user.uid != null && user.user.username != null) {
+      userProfiles.set(user.uid, {
+        uid: user.uid,
+        user: user.user,
+        data: {
+          avatar: user.avatar,
+        },
+      });
+    }
+  }
+
+  return userProfiles;
+};
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -47,7 +82,6 @@ export const CaseViewActivity = ({
   useFetchAlertData: UseFetchAlertData;
 }) => {
   const { permissions } = useCasesContext();
-  const { getCaseViewUrl } = useCaseViewNavigation();
   const { caseAssignmentAuthorized, pushToServiceAuthorized } = useCasesFeatures();
 
   const { data: caseConnectors, isLoading: isLoadingCaseConnectors } = useGetCaseConnectors(
@@ -58,17 +92,14 @@ export const CaseViewActivity = ({
     caseData.id
   );
 
+  const { data: caseUsers, isLoading: isLoadingCaseUsers } = useGetCaseUsers(caseData.id);
+
+  const userProfiles = buildUserProfilesMap(caseUsers);
+
   const assignees = useMemo(
     () => caseData.assignees.map((assignee) => assignee.uid),
     [caseData.assignees]
   );
-
-  const userActionProfileUids = Array.from(userActionsData?.profileUids?.values() ?? []);
-  const uidsToRetrieve = uniq([...userActionProfileUids, ...assignees]);
-
-  const { data: userProfiles, isFetching: isLoadingUserProfiles } = useBulkGetUserProfiles({
-    uids: uidsToRetrieve,
-  });
 
   const { data: currentUserProfile, isFetching: isLoadingCurrentUserProfile } =
     useGetCurrentUserProfile();
@@ -87,9 +118,7 @@ export const CaseViewActivity = ({
   });
 
   const isLoadingAssigneeData =
-    (isLoading && loadingKey === 'assignees') ||
-    isLoadingUserProfiles ||
-    isLoadingCurrentUserProfile;
+    (isLoading && loadingKey === 'assignees') || isLoadingCaseUsers || isLoadingCurrentUserProfile;
 
   const changeStatus = useCallback(
     (status: CaseStatuses) =>
@@ -98,14 +127,6 @@ export const CaseViewActivity = ({
         value: status,
       }),
     [onUpdateField]
-  );
-
-  const emailContent = useMemo(
-    () => ({
-      subject: i18n.EMAIL_SUBJECT(caseData.title),
-      body: i18n.EMAIL_BODY(getCaseViewUrl({ detailName: caseData.id })),
-    }),
-    [caseData.title, getCaseViewUrl, caseData.id]
   );
 
   const onSubmitTags = useCallback(
@@ -148,10 +169,15 @@ export const CaseViewActivity = ({
     !isLoadingCaseConnectors &&
     userActionsData &&
     caseConnectors &&
-    userProfiles;
+    caseUsers;
 
   const showConnectorSidebar =
     pushToServiceAuthorized && userActionsData && caseConnectors && supportedActionConnectors;
+
+  const reporterAsArray =
+    caseUsers?.reporter != null
+      ? [caseUsers.reporter]
+      : [convertToCaseUserWithProfileInfo(caseData.createdBy)];
 
   return (
     <>
@@ -168,7 +194,7 @@ export const CaseViewActivity = ({
                 getRuleDetailsHref={ruleDetailsNavigation?.href}
                 onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                 caseConnectors={caseConnectors}
-                caseUserActions={userActionsData.caseUserActions}
+                caseUserActions={userActionsData.userActions}
                 data={caseData}
                 actionsNavigation={actionsNavigation}
                 isLoadingDescription={isLoading && loadingKey === 'description'}
@@ -211,18 +237,18 @@ export const CaseViewActivity = ({
           />
           <UserList
             dataTestSubj="case-view-user-list-reporter"
-            email={emailContent}
+            theCase={caseData}
             headline={i18n.REPORTER}
-            users={[caseData.createdBy]}
+            users={reporterAsArray}
             userProfiles={userProfiles}
           />
-          {userActionsData?.participants ? (
+          {caseUsers != null ? (
             <UserList
               dataTestSubj="case-view-user-list-participants"
-              email={emailContent}
+              theCase={caseData}
               headline={i18n.PARTICIPANTS}
               loading={isLoadingUserActions}
-              users={userActionsData.participants}
+              users={[...caseUsers.participants, ...caseUsers.assignees]}
               userProfiles={userProfiles}
             />
           ) : null}
