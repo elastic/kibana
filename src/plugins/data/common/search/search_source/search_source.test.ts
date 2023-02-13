@@ -173,7 +173,6 @@ describe('SearchSource', () => {
             alias: null,
             negate: false,
             disabled: false,
-            value: ['auditbeat-*', 'packetbeat-*'],
           },
           query: {
             bool: {
