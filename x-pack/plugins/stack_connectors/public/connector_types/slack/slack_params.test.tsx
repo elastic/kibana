@@ -28,4 +28,56 @@ describe('SlackParamsFields renders', () => {
       'test message'
     );
   });
+
+  test('when useDefaultMessage is set to true and the default message changes, the underlying message is replaced with the default message', () => {
+    const actionParams = {
+      message: 'not the default message',
+    };
+
+    const editAction = jest.fn();
+    const wrapper = mountWithIntl(
+      <SlackParamsFields
+        actionParams={actionParams}
+        errors={{ message: [] }}
+        editAction={editAction}
+        defaultMessage={'Some default message'}
+        index={0}
+      />
+    );
+    const text = wrapper.find('[data-test-subj="messageTextArea"]').first().text();
+    expect(text).toEqual('not the default message');
+
+    wrapper.setProps({
+      useDefaultMessage: true,
+      defaultMessage: 'Some different default message',
+    });
+
+    expect(editAction).toHaveBeenCalledWith('message', 'Some different default message', 0);
+  });
+
+  test('when useDefaultMessage is set to false and the default message changes, the underlying message is not changed', () => {
+    const actionParams = {
+      message: 'not the default message',
+    };
+
+    const editAction = jest.fn();
+    const wrapper = mountWithIntl(
+      <SlackParamsFields
+        actionParams={actionParams}
+        errors={{ message: [] }}
+        editAction={editAction}
+        defaultMessage={'Some default message'}
+        index={0}
+      />
+    );
+    const text = wrapper.find('[data-test-subj="messageTextArea"]').first().text();
+    expect(text).toEqual('not the default message');
+
+    wrapper.setProps({
+      useDefaultMessage: false,
+      defaultMessage: 'Some different default message',
+    });
+
+    expect(editAction).not.toHaveBeenCalled();
+  });
 });

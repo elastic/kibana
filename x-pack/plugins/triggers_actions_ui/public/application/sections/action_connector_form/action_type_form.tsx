@@ -137,6 +137,7 @@ export const ActionTypeForm = ({
     -1,
     's',
   ];
+  const [useDefaultMessage, setUseDefaultMessage] = useState(false);
   const isSummaryAction = actionItem.frequency?.summary;
 
   const getDefaultParams = async () => {
@@ -264,6 +265,8 @@ export const ActionTypeForm = ({
       )}
       onSummaryChange={useCallback(
         (summary: boolean) => {
+          // use the default message when a user toggles between action frequencies
+          setUseDefaultMessage(true);
           setActionFrequencyProperty('summary', summary, index);
         },
         [setActionFrequencyProperty, index]
@@ -387,6 +390,7 @@ export const ActionTypeForm = ({
                     ? defaultSummaryMessage
                     : selectedActionGroup?.defaultActionMessage ?? defaultActionMessage
                 }
+                useDefaultMessage={useDefaultMessage}
                 actionConnector={actionConnector}
                 executionMode={ActionConnectorMode.ActionForm}
               />

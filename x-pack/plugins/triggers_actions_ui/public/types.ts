@@ -207,6 +207,7 @@ export interface ActionParamsProps<TParams> {
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
+  useDefaultMessage?: boolean;
   actionConnector?: ActionConnector;
   isLoading?: boolean;
   isDisabled?: boolean;
