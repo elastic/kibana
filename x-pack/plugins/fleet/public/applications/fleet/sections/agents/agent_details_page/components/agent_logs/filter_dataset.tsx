@@ -32,7 +32,7 @@ export const DatasetFilter: React.FunctionComponent<{
       setIsLoading(true);
       try {
         const newFields: DataViewFieldMap = {
-          'dataset': DATASET_FIELD,
+          dataset: DATASET_FIELD,
         };
         const newDataViewSpec: DataViewSpec = { title: AGENT_LOG_INDEX_PATTERN, fields: newFields };
         const newDataView = await dataViews.create(newDataViewSpec);
