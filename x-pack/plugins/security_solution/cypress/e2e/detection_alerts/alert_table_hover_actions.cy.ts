@@ -20,7 +20,6 @@ import {
 import {
   DATA_GRID_FIELDS,
   GET_DATA_GRID_HEADER,
-  ID_COLUMN_NAME,
   ID_COLUMN_VALUES,
   TOP_N_ALERT_HISTOGRAM,
   TOP_N_CONTAINER_CLOSE_BTN,
@@ -47,7 +46,8 @@ describe('Alerts Table : Hover Actions', () => {
     before(() => {
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      addsFieldsToTimeline(ID_COLUMN_NAME, [ID_COLUMN_NAME]);
+      const idColName = DATA_GRID_FIELDS.ID.fieldName;
+      addsFieldsToTimeline(idColName, [idColName]);
       cy.get(GET_DATA_GRID_HEADER(DATA_GRID_FIELDS.ID.fieldName)).should('be.visible');
     });
     beforeEach(() => {

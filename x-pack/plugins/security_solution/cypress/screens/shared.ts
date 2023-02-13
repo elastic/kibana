@@ -47,13 +47,6 @@ export const GET_DATA_GRID_HEADER_CELL_ACTION_GROUP = (fieldName: string) => {
 
 export const DATA_GRID_FULL_SCREEN = '[data-test-subj="dataGridFullScreenButton"]';
 
-export const DATA_GRID_HEADERS = {
-  ID: '[data-gridcell-column-id="_id"]',
-  TIMESTAMP: '[data-test-subj="dataGridHeaderCell-@timestamp"]',
-};
-
-export const ID_COLUMN_NAME = '_id';
-
 export const DATA_GRID_FIELD_SORT_BTN = '[data-test-subj="dataGridColumnSortingButton"]';
 
 export const DATA_GRID_COLUMN_ORDER_BTN = '[data-test-subj="dataGridColumnSelectorButton"]';
