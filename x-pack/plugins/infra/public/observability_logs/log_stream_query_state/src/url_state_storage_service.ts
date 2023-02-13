@@ -165,11 +165,24 @@ const legacyFilterStateInUrlRT = rt.union([
   }),
 ]);
 
+const legacyLegacyFilterStateWithExpressionInUrlRT = rt.type({
+  kind: rt.literal('kuery'),
+  expression: rt.string,
+});
+
 const decodeQueryValueFromUrl = (queryValueFromUrl: unknown) =>
   Either.getAltValidation(Array.getMonoid<rt.ValidationError>()).alt<FilterStateInUrl>(
     pipe(
-      legacyFilterStateInUrlRT.decode(queryValueFromUrl),
-      Either.map((legacyQuery) => ({ query: legacyQuery }))
+      pipe(
+        legacyLegacyFilterStateWithExpressionInUrlRT.decode(queryValueFromUrl),
+        Either.map(({ expression, kind }) => ({ query: { language: kind, query: expression } }))
+      ),
+      Either.alt(() =>
+        pipe(
+          legacyFilterStateInUrlRT.decode(queryValueFromUrl),
+          Either.map((legacyQuery) => ({ query: legacyQuery }))
+        )
+      )
     ),
     () => filterStateInUrlRT.decode(queryValueFromUrl)
   );
