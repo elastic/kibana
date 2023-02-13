@@ -16,14 +16,11 @@ import { updateAgentTags } from './update_agent_tags';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
 jest.mock('../app_context', () => {
+  const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
   return {
     appContextService: {
-      getLogger: jest.fn().mockReturnValue({
-        debug: jest.fn(),
-        warn: jest.fn(),
-        info: jest.fn(),
-        error: jest.fn(),
-      } as any),
+      getLogger: () => loggerMock.create(),
+      getConfig: () => {},
     },
   };
 });
