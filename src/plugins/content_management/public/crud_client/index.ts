@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { DashboardEmbeddableExamples } from './plugin';
-
-export const plugin = () => new DashboardEmbeddableExamples();
+export type { CrudClient } from './crud_client';

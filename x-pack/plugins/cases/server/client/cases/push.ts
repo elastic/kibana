@@ -31,7 +31,7 @@ import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
 import { createCaseError } from '../../common/error';
 import {
-  createAlertUpdateRequest,
+  createAlertUpdateStatusRequest,
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
@@ -68,7 +68,7 @@ const changeAlertsStatusToClose = async (
 
   const alerts = alertAttachments.saved_objects
     .map((attachment) =>
-      createAlertUpdateRequest({
+      createAlertUpdateStatusRequest({
         comment: attachment.attributes,
         status: CaseStatuses.closed,
       })
