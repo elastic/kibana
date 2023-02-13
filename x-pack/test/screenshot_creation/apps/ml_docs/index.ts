@@ -36,5 +36,6 @@ export default function ({ getPageObject, getService, loadTestFile }: FtrProvide
 
     loadTestFile(require.resolve('./anomaly_detection'));
     loadTestFile(require.resolve('./data_frame_analytics'));
+    loadTestFile(require.resolve('./transforms'));
   });
 }
