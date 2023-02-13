@@ -51,8 +51,7 @@ export function createEuiListItem({
     /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
     onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       if (!isModifiedOrPrevented(event)) {
-        onClick();
-        <EuiScreenReaderLive>
+        <EuiScreenReaderLive focusRegionOnTextChange>
           {i18n.translate('core.ui.recentLinks.linkItem.screenReaderAnnouncement', {
             defaultMessage: '{url}, type: {title}',
             values: {
@@ -61,6 +60,7 @@ export function createEuiListItem({
             },
           })}
         </EuiScreenReaderLive>;
+        onClick();
       }
 
       if (
@@ -69,6 +69,15 @@ export function createEuiListItem({
         !isModifiedOrPrevented(event)
       ) {
         event.preventDefault();
+        <EuiScreenReaderLive focusRegionOnTextChange>
+          {i18n.translate('core.ui.recentLinks.linkItem.screenReaderAnnouncement', {
+            defaultMessage: '{url}, type: {title}',
+            values: {
+              url,
+              title,
+            },
+          })}
+        </EuiScreenReaderLive>;
         navigateToUrl(url);
       }
     },
@@ -180,8 +189,15 @@ export function createRecentNavLink(
     onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       if (event.button === 0 && !isModifiedOrPrevented(event)) {
         event.preventDefault();
+        <EuiScreenReaderLive focusRegionOnTextChange>
+        {i18n.translate('core.ui.recentLinks.linkItem.screenReaderAnnouncement', {
+          defaultMessage: 'type: {title}',
+          values: {
+            title: navLink?.title,
+          },
+        })}
+      </EuiScreenReaderLive>;
         navigateToUrl(href);
-        // <EuiScreenReaderLive>{href}</EuiScreenReaderLive>;
       }
     },
   };
