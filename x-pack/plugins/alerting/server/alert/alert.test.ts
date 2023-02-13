@@ -8,6 +8,7 @@
 import sinon from 'sinon';
 import { Alert } from './alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
+import { alertWithAnyUUID } from '../test_utils';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -335,6 +336,7 @@ describe('updateLastScheduledActions()', () => {
       state: {},
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',
@@ -510,12 +512,13 @@ describe('setFlappingHistory', () => {
     );
     alertInstance.setFlappingHistory([false]);
     expect(alertInstance.getFlappingHistory()).toEqual([false]);
-    expect(alertInstance.toRaw()).toMatchInlineSnapshot(`
+    expect(alertWithAnyUUID(alertInstance.toRaw())).toMatchInlineSnapshot(`
       Object {
         "meta": Object {
           "flappingHistory": Array [
             false,
           ],
+          "uuid": Any<String>,
         },
         "state": Object {},
       }
@@ -542,11 +545,12 @@ describe('setFlapping', () => {
     );
     alertInstance.setFlapping(false);
     expect(alertInstance.getFlapping()).toEqual(false);
-    expect(alertInstance.toRaw()).toMatchInlineSnapshot(`
+    expect(alertWithAnyUUID(alertInstance.toRaw())).toMatchInlineSnapshot(`
       Object {
         "meta": Object {
           "flapping": false,
           "flappingHistory": Array [],
+          "uuid": Any<String>,
         },
         "state": Object {},
       }

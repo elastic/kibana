@@ -262,7 +262,7 @@ export class ExecutionHandler<
                 spaceId,
                 tags: this.rule.tags,
                 alertInstanceId: executableAlert.getId(),
-                alertUuid: 'uuid-1',
+                alertUuid: executableAlert.getUuid(),
                 alertActionGroup: actionGroup,
                 alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
                 context: executableAlert.getContext(),

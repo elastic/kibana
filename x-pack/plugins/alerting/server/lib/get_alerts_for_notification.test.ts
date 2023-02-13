@@ -8,11 +8,14 @@
 import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
 import { getAlertsForNotification } from '.';
 import { Alert } from '../alert';
+import { alertsWithAnyUUID } from '../test_utils';
 
 describe('getAlertsForNotification', () => {
   test('should set pendingRecoveredCount to zero for all active alerts', () => {
-    const alert1 = new Alert('1', { meta: { flapping: true, pendingRecoveredCount: 3 } });
-    const alert2 = new Alert('2', { meta: { flapping: false } });
+    const alert1 = new Alert('1', {
+      meta: { flapping: true, pendingRecoveredCount: 3, uuid: 'uuid-1' },
+    });
+    const alert2 = new Alert('2', { meta: { flapping: false, uuid: 'uuid-2' } });
 
     const { newAlerts, activeAlerts } = getAlertsForNotification(
       DEFAULT_FLAPPING_SETTINGS,
@@ -34,6 +37,7 @@ describe('getAlertsForNotification', () => {
             "flapping": true,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 0,
+            "uuid": "uuid-1",
           },
           "state": Object {},
         },
@@ -46,6 +50,7 @@ describe('getAlertsForNotification', () => {
             "flapping": true,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 0,
+            "uuid": "uuid-1",
           },
           "state": Object {},
         },
@@ -54,6 +59,7 @@ describe('getAlertsForNotification', () => {
             "flapping": false,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 0,
+            "uuid": "uuid-2",
           },
           "state": Object {},
         },
@@ -178,7 +184,7 @@ describe('getAlertsForNotification', () => {
 
     expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
     expect(activeAlerts).toMatchInlineSnapshot(`Object {}`);
-    expect(recoveredAlerts).toMatchInlineSnapshot(`
+    expect(alertsWithAnyUUID(recoveredAlerts)).toMatchInlineSnapshot(`
       Object {
         "1": Object {
           "meta": Object {
@@ -189,6 +195,7 @@ describe('getAlertsForNotification', () => {
               true,
             ],
             "pendingRecoveredCount": 0,
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
@@ -201,6 +208,7 @@ describe('getAlertsForNotification', () => {
               true,
             ],
             "pendingRecoveredCount": 0,
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
@@ -213,12 +221,13 @@ describe('getAlertsForNotification', () => {
               true,
             ],
             "pendingRecoveredCount": 0,
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
       }
     `);
-    expect(currentRecoveredAlerts).toMatchInlineSnapshot(`
+    expect(alertsWithAnyUUID(currentRecoveredAlerts)).toMatchInlineSnapshot(`
       Object {
         "1": Object {
           "meta": Object {
@@ -229,6 +238,7 @@ describe('getAlertsForNotification', () => {
               true,
             ],
             "pendingRecoveredCount": 0,
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
@@ -241,6 +251,7 @@ describe('getAlertsForNotification', () => {
               true,
             ],
             "pendingRecoveredCount": 0,
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
@@ -253,6 +264,7 @@ describe('getAlertsForNotification', () => {
               true,
             ],
             "pendingRecoveredCount": 0,
+            "uuid": Any<String>,
           },
           "state": Object {},
         },

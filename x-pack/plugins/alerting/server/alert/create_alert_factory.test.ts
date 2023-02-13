@@ -332,6 +332,7 @@ describe('createAlertFactory()', () => {
     expect(result).toEqual({
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
       },
       state: {},
       context: {},
