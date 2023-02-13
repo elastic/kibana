@@ -47,7 +47,7 @@ const noDataOptions: Record<
     actionDescription: (
       <FormattedMessage
         id="xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.description"
-        defaultMessage="Use our {integrationFullName} (KSPM) integration to measure your Kubernetes cluster setup against CIS recommendations."
+        defaultMessage="Use our {integrationFullName} (KSPM) integration to detect security misconfigurations in your Kubernetes clusters."
         values={{
           integrationFullName: (
             <EuiLink href="https://ela.st/kspm">
@@ -72,7 +72,7 @@ const noDataOptions: Record<
     actionDescription: (
       <FormattedMessage
         id="xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.description"
-        defaultMessage="Use our {integrationFullName} (CSPM) integration to measure your Cloud account setup against CIS recommendations."
+        defaultMessage="Use our {integrationFullName} (CSPM) integration to detect security misconfigurations in your cloud infrastructure."
         values={{
           integrationFullName: (
             // TODO: CIS AWS - replace link or create the docs
