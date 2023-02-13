@@ -371,6 +371,10 @@ export interface ActionDetailsApiResponse<
 > {
   data: ActionDetails<TOutputType, TParameters>;
 }
+
+/** Action Details normally returned by Action List API response  */
+type ActionDetailsNoOutputs = Array<Omit<ActionDetails, 'outputs'>>;
+
 export interface ActionListApiResponse {
   page: number | undefined;
   pageSize: number | undefined;
@@ -386,7 +390,7 @@ export interface ActionListApiResponse {
    * data, especially for cases (in the future) where we might support actions being sent to
    * multiple agents
    */
-  data: ActionDetails[];
+  data: ActionDetailsNoOutputs | ActionDetails[];
   statuses: ResponseActionStatus[] | undefined;
   total: number;
 }
