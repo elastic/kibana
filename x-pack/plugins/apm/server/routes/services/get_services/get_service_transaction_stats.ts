@@ -16,10 +16,7 @@ import {
 } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
 import { ServiceGroup } from '../../../../common/service_groups';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
+import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
@@ -41,7 +38,10 @@ interface AggregationParams {
   end: number;
   serviceGroup: ServiceGroup | null;
   randomSampler: RandomSampler;
-  documentType: ApmDocumentType;
+  documentType:
+    | ApmDocumentType.ServiceTransactionMetric
+    | ApmDocumentType.TransactionMetric
+    | ApmDocumentType.TransactionEvent;
   rollupInterval: RollupInterval;
 }
 
@@ -141,9 +141,8 @@ export async function getServiceTransactionStats({
     serviceStats:
       response.aggregations?.sample.services.buckets.map((bucket) => {
         const topTransactionTypeBucket =
-          bucket.transactionType.buckets.find(
-            ({ key }) =>
-              key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
+          bucket.transactionType.buckets.find(({ key }) =>
+            isDefaultTransactionType(key as string)
           ) ?? bucket.transactionType.buckets[0];
 
         return {

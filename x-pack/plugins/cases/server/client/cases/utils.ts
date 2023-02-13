@@ -8,6 +8,8 @@
 import { uniqBy, isEmpty } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type {
@@ -429,4 +431,25 @@ export const getDurationForUpdate = ({
       duration: null,
     };
   }
+};
+
+export const getUserProfiles = async (
+  securityStartPlugin: SecurityPluginStart,
+  uids: Set<string>,
+  dataPath?: string
+): Promise<Map<string, UserProfileWithAvatar>> => {
+  if (uids.size <= 0) {
+    return new Map();
+  }
+
+  const userProfiles =
+    (await securityStartPlugin.userProfiles.bulkGet({
+      uids,
+      dataPath,
+    })) ?? [];
+
+  return userProfiles.reduce<Map<string, UserProfileWithAvatar>>((acc, profile) => {
+    acc.set(profile.uid, profile);
+    return acc;
+  }, new Map());
 };

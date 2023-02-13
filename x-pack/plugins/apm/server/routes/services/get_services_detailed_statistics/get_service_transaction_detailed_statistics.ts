@@ -7,19 +7,16 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
-import { ApmDocumentType } from '../../../../common/document_type';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
+import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
-import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithInterval } from '../../../lib/helpers/calculate_throughput';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
@@ -46,7 +43,7 @@ export async function getServiceTransactionDetailedStats({
   environment: string;
   kuery: string;
   apmEventClient: APMEventClient;
-  documentType: ApmDocumentType;
+  documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
   bucketSizeInSeconds: number;
   offset?: string;
@@ -137,9 +134,8 @@ export async function getServiceTransactionDetailedStats({
   return keyBy(
     response.aggregations?.sample.services.buckets.map((bucket) => {
       const topTransactionTypeBucket =
-        bucket.transactionType.buckets.find(
-          ({ key }) =>
-            key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
+        bucket.transactionType.buckets.find(({ key }) =>
+          isDefaultTransactionType(key as string)
         ) ?? bucket.transactionType.buckets[0];
 
       return {
@@ -159,9 +155,8 @@ export async function getServiceTransactionDetailedStats({
         throughput: topTransactionTypeBucket.timeseries.buckets.map(
           (dateBucket) => ({
             x: dateBucket.key + offsetInMs,
-            y: calculateThroughputWithRange({
-              start,
-              end,
+            y: calculateThroughputWithInterval({
+              bucketSize: bucketSizeInSeconds,
               value: dateBucket.doc_count,
             }),
           })
@@ -189,7 +184,7 @@ export async function getServiceDetailedStatsPeriods({
   environment: string;
   kuery: string;
   apmEventClient: APMEventClient;
-  documentType: ApmDocumentType;
+  documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
   bucketSizeInSeconds: number;
   offset?: string;

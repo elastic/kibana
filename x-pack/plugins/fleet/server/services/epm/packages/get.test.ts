@@ -24,7 +24,7 @@ import { PackageNotFoundError } from '../../../errors';
 
 import { getSettings } from '../../settings';
 
-import { getPackageInfo, getPackageUsageStats } from './get';
+import { getPackageInfo, getPackages, getPackageUsageStats } from './get';
 
 const MockRegistry = Registry as jest.Mocked<typeof Registry>;
 
@@ -183,6 +183,65 @@ describe('When using EPM `get` services', () => {
       ).toEqual({
         agent_policy_count: 3,
       });
+    });
+  });
+
+  describe('getPackages', () => {
+    beforeEach(() => {
+      const mockContract = createAppContextStartContractMock();
+      appContextService.start(mockContract);
+      jest.clearAllMocks();
+      MockRegistry.fetchList.mockResolvedValue([
+        {
+          name: 'nginx',
+          version: '1.0.0',
+          title: 'Nginx',
+        } as any,
+      ]);
+    });
+
+    it('should return installed package that is not in registry', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+            },
+          },
+        ],
+      } as any);
+
+      await expect(
+        getPackages({
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toMatchObject([
+        {
+          id: 'elasticsearch',
+          name: 'elasticsearch',
+          version: '0.0.1',
+          title: 'Elasticsearch',
+          savedObject: {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+            },
+          },
+        },
+        {
+          name: 'nginx',
+          version: '1.0.0',
+          title: 'Nginx',
+          id: 'nginx',
+          status: 'not_installed',
+        },
+      ]);
     });
   });
 
