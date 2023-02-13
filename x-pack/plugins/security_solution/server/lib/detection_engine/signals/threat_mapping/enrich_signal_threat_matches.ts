@@ -9,102 +9,9 @@ import { get, isObject } from 'lodash';
 import { ENRICHMENT_TYPES, FEED_NAME_PATH } from '../../../../../common/cti/constants';
 
 import type { SignalSourceHit } from '../types';
-import type {
-  GetMatchedThreats,
-  ThreatEnrichment,
-  ThreatListItem,
-  ThreatMatchNamedQuery,
-  SignalMatch,
-  SignalValuesMap,
-  ThreatTermNamedQuery,
-} from './types';
-import { ThreatMatchQueryType } from './types';
-import { extractNamedQueries } from './utils';
+import type { ThreatEnrichment, ThreatListItem, ThreatMatchNamedQuery } from './types';
 
-export const MAX_NUMBER_OF_SIGNAL_MATCHES = 1000;
-
-export const getSignalMatchesFromThreatList = (
-  threatList: ThreatListItem[] = [],
-  signalValueMap?: SignalValuesMap
-): SignalMatch[] => {
-  const signalMap: { [key: string]: ThreatMatchNamedQuery[] } = {};
-  const addSignalValueToMap = ({
-    id,
-    threatHit,
-    query,
-  }: {
-    id: string;
-    threatHit: ThreatListItem;
-    query: ThreatMatchNamedQuery | ThreatTermNamedQuery;
-  }) => {
-    if (!signalMap[id]) {
-      signalMap[id] = [];
-    }
-
-    // creating map of signal with large number of threats could lead to out of memory Kibana crash
-    // large number of threats also can cause signals bulk create failure due too large payload (413)
-    // large number of threats significantly slower alert details page render
-    // so, its number is limited to MAX_NUMBER_OF_SIGNAL_MATCHES
-    // more details https://github.com/elastic/kibana/issues/143595#issuecomment-1335433592
-    if (signalMap[id].length >= MAX_NUMBER_OF_SIGNAL_MATCHES) {
-      return;
-    }
-
-    signalMap[id].push({
-      id: threatHit._id,
-      index: threatHit._index,
-      field: query.field,
-      value: query.value,
-      queryType: query.queryType,
-    });
-  };
-  threatList.forEach((threatHit) =>
-    extractNamedQueries(threatHit).forEach((query) => {
-      const signalId = query.id;
-
-      if (query.queryType === ThreatMatchQueryType.term) {
-        const threatValue = get(threatHit?._source, query.value);
-        let values;
-        if (Array.isArray(threatValue)) {
-          values = threatValue;
-        } else {
-          values = [threatValue];
-        }
-
-        values.forEach((value) => {
-          if (value && signalValueMap) {
-            const ids = signalValueMap[query.field][value?.toString()];
-
-            ids?.forEach((id: string) => {
-              addSignalValueToMap({
-                id,
-                threatHit,
-                query,
-              });
-            });
-          }
-        });
-      } else {
-        if (!signalId) {
-          return;
-        }
-
-        addSignalValueToMap({
-          id: signalId,
-          threatHit,
-          query,
-        });
-      }
-    })
-  );
-
-  const signalMatches = Object.entries(signalMap).map(([key, value]) => ({
-    signalId: key,
-    queries: value,
-  }));
-
-  return signalMatches;
-};
+export const MAX_NUMBER_OF_SIGNAL_MATCHES = 200;
 
 const getSignalId = (signal: SignalSourceHit): string => signal._id;
 
@@ -163,68 +70,70 @@ export const buildEnrichments = ({
     };
   });
 
-export const enrichSignalThreatMatches = async (
+const enrichSignalWithThreatMatches = (
+  signalHit: SignalSourceHit,
+  enrichmentsWithoutAtomic: { [key: string]: ThreatEnrichment[] }
+) => {
+  const threat = get(signalHit._source, 'threat') ?? {};
+  if (!isObject(threat)) {
+    throw new Error(`Expected threat field to be an object, but found: ${threat}`);
+  }
+  // We are not using ENRICHMENT_DESTINATION_PATH here because the code above
+  // and below make assumptions about its current value, 'threat.enrichments',
+  // and making this code dynamic on an arbitrary path would introduce several
+  // new issues.
+  const existingEnrichmentValue = get(signalHit._source, 'threat.enrichments') ?? [];
+  const existingEnrichments = [existingEnrichmentValue].flat(); // ensure enrichments is an array
+  const newEnrichmentsWithoutAtomic = enrichmentsWithoutAtomic[signalHit._id] ?? [];
+  const newEnrichments = newEnrichmentsWithoutAtomic.map((enrichment) => ({
+    ...enrichment,
+    matched: {
+      ...enrichment.matched,
+      atomic: get(signalHit._source, enrichment.matched.field),
+    },
+  }));
+
+  return {
+    ...signalHit,
+    _source: {
+      ...signalHit._source,
+      threat: {
+        ...threat,
+        enrichments: [...existingEnrichments, ...newEnrichments],
+      },
+    },
+  };
+};
+
+/**
+ * enrich signals threat matches using signalsMap(Map<string, ThreatMatchNamedQuery[]>) that has match named query results
+ */
+export const enrichSignalThreatMatchesFromSignalsMap = async (
   signals: SignalSourceHit[],
-  getMatchedThreats: GetMatchedThreats,
+  getMatchedThreats: () => Promise<ThreatListItem[]>,
   indicatorPath: string,
-  signalMatches: SignalMatch[]
+  signalsMap: Map<string, ThreatMatchNamedQuery[]>
 ): Promise<SignalSourceHit[]> => {
   if (signals.length === 0) {
-    return signals;
+    return [];
   }
 
   const uniqueHits = groupAndMergeSignalMatches(signals);
+  const matchedThreats = await getMatchedThreats();
 
-  const matchedThreatIds = [
-    ...new Set(
-      signalMatches
-        .map((signalMatch) => signalMatch.queries)
-        .flat()
-        .map(({ id }) => id)
-    ),
-  ];
-  const matchedThreats = await getMatchedThreats(matchedThreatIds);
+  const enrichmentsWithoutAtomic: Record<string, ThreatEnrichment[]> = {};
 
-  const enrichmentsWithoutAtomic: { [key: string]: ThreatEnrichment[] } = {};
-  signalMatches.forEach((signalMatch) => {
-    enrichmentsWithoutAtomic[signalMatch.signalId] = buildEnrichments({
+  uniqueHits.forEach((hit) => {
+    enrichmentsWithoutAtomic[hit._id] = buildEnrichments({
       indicatorPath,
-      queries: signalMatch.queries,
+      queries: signalsMap.get(hit._id) ?? [],
       threats: matchedThreats,
     });
   });
 
-  const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit, i) => {
-    const threat = get(signalHit._source, 'threat') ?? {};
-    if (!isObject(threat)) {
-      throw new Error(`Expected threat field to be an object, but found: ${threat}`);
-    }
-    // We are not using ENRICHMENT_DESTINATION_PATH here because the code above
-    // and below make assumptions about its current value, 'threat.enrichments',
-    // and making this code dynamic on an arbitrary path would introduce several
-    // new issues.
-    const existingEnrichmentValue = get(signalHit._source, 'threat.enrichments') ?? [];
-    const existingEnrichments = [existingEnrichmentValue].flat(); // ensure enrichments is an array
-    const newEnrichmentsWithoutAtomic = enrichmentsWithoutAtomic[signalHit._id] ?? [];
-    const newEnrichments = newEnrichmentsWithoutAtomic.map((enrichment) => ({
-      ...enrichment,
-      matched: {
-        ...enrichment.matched,
-        atomic: get(signalHit._source, enrichment.matched.field),
-      },
-    }));
-
-    return {
-      ...signalHit,
-      _source: {
-        ...signalHit._source,
-        threat: {
-          ...threat,
-          enrichments: [...existingEnrichments, ...newEnrichments],
-        },
-      },
-    };
-  });
+  const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit) =>
+    enrichSignalWithThreatMatches(signalHit, enrichmentsWithoutAtomic)
+  );
 
   return enrichedSignals;
 };

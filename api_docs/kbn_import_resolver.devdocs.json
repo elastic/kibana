@@ -37,7 +37,9 @@
             "label": "create",
             "description": [],
             "signature": [
-              "(repoRoot: string) => ",
+              "(repoRoot: string, packages?: ",
+              "Package",
+              "[]) => ",
               {
                 "pluginId": "@kbn/import-resolver",
                 "scope": "common",
@@ -59,6 +61,22 @@
                 "description": [],
                 "signature": [
                   "string"
+                ],
+                "path": "packages/kbn-import-resolver/src/import_resolver.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/import-resolver",
+                "id": "def-common.ImportResolver.create.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "packages",
+                "description": [],
+                "signature": [
+                  "Package",
+                  "[]"
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
@@ -102,26 +120,11 @@
                 "id": "def-common.ImportResolver.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "pkgMap",
-                "description": [],
-                "signature": [
-                  "PackageMap"
-                ],
-                "path": "packages/kbn-import-resolver/src/import_resolver.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/import-resolver",
-                "id": "def-common.ImportResolver.Unnamed.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "pkgManifests",
+                "label": "pkgsById",
                 "description": [],
                 "signature": [
                   "Map<string, ",
-                  "KibanaPackageManifest",
+                  "Package",
                   ">"
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
@@ -232,47 +235,21 @@
           },
           {
             "parentPluginId": "@kbn/import-resolver",
-            "id": "def-common.ImportResolver.isBazelPackage",
+            "id": "def-common.ImportResolver.isRepoPkg",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "isBazelPackage",
-            "description": [
-              "\nIs the package a bazel package?"
-            ],
+            "tags": [],
+            "label": "isRepoPkg",
+            "description": [],
             "signature": [
               "(pkgId: string) => boolean"
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
-            "deprecated": true,
+            "deprecated": false,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/repo-source-classifier",
-                "path": "packages/kbn-repo-source-classifier/src/repo_path.ts"
-              },
-              {
-                "plugin": "@kbn/eslint-plugin-imports",
-                "path": "packages/kbn-eslint-plugin-imports/src/rules/uniform_imports.ts"
-              },
-              {
-                "plugin": "@kbn/find-used-node-modules",
-                "path": "packages/kbn-find-used-node-modules/src/find_used_node_modules.ts"
-              },
-              {
-                "plugin": "@kbn/find-used-node-modules",
-                "path": "packages/kbn-find-used-node-modules/src/find_used_node_modules.test.ts"
-              },
-              {
-                "plugin": "@kbn/find-used-node-modules",
-                "path": "packages/kbn-find-used-node-modules/src/find_used_node_modules.test.ts"
-              }
-            ],
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
-                "id": "def-common.ImportResolver.isBazelPackage.$1",
+                "id": "def-common.ImportResolver.isRepoPkg.$1",
                 "type": "string",
                 "tags": [],
                 "label": "pkgId",

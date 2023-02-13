@@ -28,10 +28,10 @@ import {
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
-import { createIncident, getDurationInSeconds } from './utils';
+import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
 import { createCaseError } from '../../common/error';
 import {
-  createAlertUpdateRequest,
+  createAlertUpdateStatusRequest,
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
@@ -68,7 +68,7 @@ const changeAlertsStatusToClose = async (
 
   const alerts = alertAttachments.saved_objects
     .map((attachment) =>
-      createAlertUpdateRequest({
+      createAlertUpdateStatusRequest({
         comment: attachment.attributes,
         status: CaseStatuses.closed,
       })
@@ -317,17 +317,11 @@ const getProfiles = async (
     ...(caseInfo.created_by?.profile_uid != null ? [caseInfo.created_by.profile_uid] : []),
   ]);
 
-  if (uids.size <= 0) {
+  const userProfiles = await getUserProfiles(securityStartPlugin, uids);
+
+  if (userProfiles.size <= 0) {
     return;
   }
 
-  const userProfiles =
-    (await securityStartPlugin.userProfiles.bulkGet({
-      uids,
-    })) ?? [];
-
-  return userProfiles.reduce<Map<string, UserProfile>>((acc, profile) => {
-    acc.set(profile.uid, profile);
-    return acc;
-  }, new Map());
+  return userProfiles;
 };

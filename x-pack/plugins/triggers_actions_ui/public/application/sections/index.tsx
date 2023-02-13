@@ -46,8 +46,8 @@ export const RuleEventLogList = suspendedComponentWithProps(
 export const RulesList = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rules_list'))
 );
-export const RulesListNotifyBadge = suspendedComponentWithProps(
-  lazy(() => import('./rules_list/components/rules_list_notify_badge'))
+export const RulesListNotifyBadgeWithApi = suspendedComponentWithProps(
+  lazy(() => import('./rules_list/components/notify_badge'))
 );
 export const RuleSnoozeModal = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rule_snooze_modal'))
@@ -59,7 +59,7 @@ export const RuleTagBadge = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rule_tag_badge'))
 );
 export const AlertSummaryWidget = suspendedComponentWithProps(
-  lazy(() => import('./rule_details/components/alert_summary/alert_summary_widget'))
+  lazy(() => import('./alert_summary_widget/alert_summary_widget'))
 );
 export const RuleStatusPanel = suspendedComponentWithProps(
   lazy(() => import('./rule_details/components/rule_status_panel'))

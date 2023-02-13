@@ -17,7 +17,11 @@ export const timeRangeMetadataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/time_range_metadata',
   params: t.type({
     query: t.intersection([
-      t.type({ useSpanName: toBooleanRt }),
+      t.type({
+        useSpanName: toBooleanRt,
+        enableServiceTransactionMetrics: toBooleanRt,
+        enableContinuousRollups: toBooleanRt,
+      }),
       kueryRt,
       rangeRt,
     ]),
@@ -29,7 +33,14 @@ export const timeRangeMetadataRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
 
     const {
-      query: { useSpanName, start, end, kuery },
+      query: {
+        useSpanName,
+        start,
+        end,
+        kuery,
+        enableServiceTransactionMetrics,
+        enableContinuousRollups,
+      },
     } = resources.params;
 
     const [isUsingServiceDestinationMetrics, sources] = await Promise.all([
@@ -45,6 +56,8 @@ export const timeRangeMetadataRoute = createApmServerRoute({
         start,
         end,
         kuery,
+        enableServiceTransactionMetrics,
+        enableContinuousRollups,
       }),
     ]);
 

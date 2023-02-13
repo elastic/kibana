@@ -63,8 +63,6 @@ export interface ControlEditorProps<T extends ControlInput = ControlInput> {
 
 export interface DataControlField {
   field: DataViewField;
-  parentFieldName?: string;
-  childFieldName?: string;
   compatibleControlTypes: string[];
 }
 
