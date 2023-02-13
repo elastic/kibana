@@ -19,17 +19,17 @@ You access the options from the *Share* menu in the toolbar. The sharing options
 
 * *CSV Reports* &mdash; Generate and download a CSV file of a *Discover* saved search.
 
-* *Permalinks* &mdash; Share a direct link to a *Discover* saved search, dashboard, or visualization.
+* *Get links* &mdash; Share a direct link to a *Discover* saved search, dashboard, or visualization.
 
 * *Download as JSON* &mdash; Generate and download a JSON file of a *Canvas* workpad.
 
 * beta[] *Share on a website* &mdash; Download and securely share *Canvas* workpads on any website.
 
-* *Embed code* &mdash; Embed a fully interactive dashboard or visualization as an iframe on a web page.
+* *Embed code* &mdash; Embed a fully interactive dashboard as an iframe on a web page.
 
 [[reporting-on-cloud-resource-requirements]]
-NOTE: For Elastic Cloud deployments, Kibana instances require a minimum of 2GB RAM to generate PDF or PNG reports. To
-change Kibana sizing, {ess-console}[edit the deployment].
+NOTE: For Elastic Cloud deployments, {kib} instances require a minimum of 2GB RAM to generate PDF or PNG reports. To
+change {kib} sizing, {ess-console}[edit the deployment].
 
 [float]
 [[manually-generate-reports]]
@@ -84,7 +84,7 @@ Share a direct link to a saved search, dashboard, or visualization. To access th
 
 . Open the main menu, then open the saved search, dashboard, or visualization you want to share.
 
-. From the toolbar, click *Share*, then select *Permalinks*.
+. From the toolbar, click *Share*, then select *Get links*.
 
 . Specify how you want to generate the link:
 
@@ -142,11 +142,11 @@ NOTE: Shareable workpads encode the current state of the workpad in a JSON file.
 [[embed-code]]
 == Embed code
 
-Display your dashboard or visualization on an internal company website or personal web page with an iframe. Embedding other {kib} objects is generally supported, but you might need to manually craft the proper HTML code.
+Display your dashboard on an internal company website or personal web page with an iframe. Embedding other {kib} objects is generally supported, but you might need to manually craft the proper HTML code.
 
 Some users might not have access to the dashboard or visualization. For more information, refer to <<anonymous-access-and-embedding>> and <<embedded-content-authentication>>.
 
-. Open the main menu, then open the dashboard or visualization you want to share.
+. Open the main menu, then open the dashboard you want to share.
 
 . Click *Share > Embed code*.
 
@@ -156,7 +156,7 @@ Some users might not have access to the dashboard or visualization. For more inf
 
 * To display up-to-date changes, select *Saved object*.
 
-* Select the dashboard or visualization elements you want to include.
+* Select the dashboard components you want to include.
 
 * To generate a shortened link, select *Short URL*.
 
