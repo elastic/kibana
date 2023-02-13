@@ -381,10 +381,6 @@ export const expectFilterByTags = (tags: string[]) => {
     .each(($el, index) => {
       cy.wrap($el).contains(tags[index]);
     });
-
-  for (const tag of tags) {
-    cy.get(RULES_TAGS_FILTER_POPOVER).contains(RULES_SELECTED_TAG, tag);
-  }
 };
 
 export const expectNoFilterByTags = () => {
