@@ -292,8 +292,8 @@ const getActionDetailsList = async ({
       agentState,
       isExpired,
       status,
-      // 8.8 onwards, show outputs only if action is completed for matching requested action ids
-      outputs: isCompleted && withOutputs && withOutputs.includes(action.id) ? outputs : undefined,
+      // 8.8 onwards, show outputs only for actions with matching requested action ids
+      outputs: withOutputs && withOutputs.includes(action.id) ? outputs : undefined,
       createdBy: action.createdBy,
       comment: action.comment,
       parameters: action.parameters,
