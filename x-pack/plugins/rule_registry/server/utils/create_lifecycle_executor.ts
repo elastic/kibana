@@ -411,6 +411,8 @@ export interface AlertFields {
   [x: string]: any;
 }
 
+const contextFields = ['host', 'cloud', 'orchestrator', 'container'];
+
 /**
  * Wrap the key with [] if it is a key from an Array
  * @param key The object key
@@ -448,7 +450,7 @@ export const flattenFields = (fields: AlertFields): AlertFields => {
   let flattenedFields: AlertFields = {};
   Object.keys(fields).forEach((key: string) => {
     if (fields[key]) {
-      if (key !== 'labels') {
+      if (contextFields.includes(key)) {
         flattenedFields = {
           ...flattenedFields,
           ...flattenObject(fields[key], [key + '.']),
