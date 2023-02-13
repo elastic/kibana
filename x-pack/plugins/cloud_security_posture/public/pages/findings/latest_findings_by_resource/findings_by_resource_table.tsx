@@ -169,7 +169,6 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
         )}
       />
     ),
-    sortable: true,
     truncateText: true,
   },
   {
