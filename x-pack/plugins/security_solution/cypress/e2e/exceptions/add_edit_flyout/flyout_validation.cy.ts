@@ -289,6 +289,7 @@ describe('Exceptions flyout', () => {
     openExceptionFlyoutFromEmptyViewerPrompt();
 
     cy.get(FIELD_INPUT).eq(0).click({ force: true });
+    cy.get(FIELD_INPUT).eq(0).type('unique');
     cy.get(EXCEPTION_FIELD_LIST).contains('unique_value.test');
 
     closeExceptionBuilderFlyout();
