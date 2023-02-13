@@ -108,13 +108,10 @@ describe('DataTable', () => {
 
   beforeEach(() => {
     mockDispatch.mockClear();
+    mockUseDataGridColumnsCellActions.mockClear();
   });
 
   describe('rendering', () => {
-    beforeEach(() => {
-      mockDispatch.mockClear();
-    });
-
     test('it renders the body data grid', () => {
       const wrapper = mount(
         <TestProviders>
@@ -177,10 +174,6 @@ describe('DataTable', () => {
   });
 
   describe('cellActions', () => {
-    beforeEach(() => {
-      mockDispatch.mockClear();
-    });
-
     test('calls useDataGridColumnsCellActions properly', () => {
       const data = mockTimelineData.slice(0, 1);
       const wrapper = mount(
@@ -192,10 +185,18 @@ describe('DataTable', () => {
 
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
         triggerId: CELL_ACTIONS_DEFAULT_TRIGGER,
-        fields: [{ name: '@timestamp', values: [data[0]?.data[0]?.value], type: 'date' }],
+        fields: [
+          {
+            name: '@timestamp',
+            values: [data[0]?.data[0]?.value],
+            type: 'date',
+            aggregatable: true,
+          },
+        ],
         metadata: {
           scopeId: 'table-test',
         },
+        dataGridRef: expect.any(Object),
       });
     });
 
