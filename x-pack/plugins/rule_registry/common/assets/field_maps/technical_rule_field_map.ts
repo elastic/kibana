@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertFieldMap, legacyAlertFieldMap } from '@kbn/alerting-plugin/common';
+import { alertFieldMap, legacyAlertFieldMap } from '@kbn/rule-data-utils';
 import { pickWithPatterns } from '../../pick_with_patterns';
 
 export const technicalRuleFieldMap = {
