@@ -65,8 +65,8 @@ describe('getModelVersionTransforms', () => {
     const transforms = getModelVersionTransforms({ log, typeDefinition });
 
     expect(transforms).toEqual([
-      expectTransform('migrate', '10.1.0'),
-      expectTransform('migrate', '10.3.0'),
+      expectTransform(TransformType.Migrate, '10.1.0'),
+      expectTransform(TransformType.Migrate, '10.3.0'),
     ]);
   });
 
@@ -98,8 +98,8 @@ describe('getModelVersionTransforms', () => {
     const transforms = getModelVersionTransforms({ log, typeDefinition });
 
     expect(transforms).toEqual([
-      expectTransform('migrate', '10.1.0'),
-      expectTransform('migrate', '10.3.0'),
+      expectTransform(TransformType.Migrate, '10.1.0'),
+      expectTransform(TransformType.Migrate, '10.3.0'),
     ]);
   });
 });

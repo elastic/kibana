@@ -8,10 +8,10 @@
 
 import {
   getConversionTransformsMock,
-  getReferenceTransformsMock,
   getModelVersionTransformsMock,
-  validateMigrationsMapObjectMock,
+  getReferenceTransformsMock,
   resetAllMocks,
+  validateMigrationsMapObjectMock,
 } from './build_active_migrations.test.mocks';
 
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
@@ -128,9 +128,9 @@ describe('buildActiveMigrations', () => {
 
       expect(Object.keys(migrations).sort()).toEqual(['foo']);
       expect(migrations.foo.transforms).toEqual([
-        expectTransform('migrate', '7.12.0'),
-        expectTransform('migrate', '7.16.0'),
-        expectTransform('migrate', '8.3.0'),
+        expectTransform(TransformType.Migrate, '7.12.0'),
+        expectTransform(TransformType.Migrate, '7.16.0'),
+        expectTransform(TransformType.Migrate, '8.3.0'),
       ]);
     });
   });
@@ -166,9 +166,9 @@ describe('buildActiveMigrations', () => {
       getModelVersionTransformsMock.mockImplementation(
         ({ typeDefinition }: { typeDefinition: SavedObjectsType }) => {
           if (typeDefinition.name === 'foo') {
-            return [transform('migrate', '7.12.0')];
+            return [transform(TransformType.Migrate, '7.12.0')];
           } else {
-            return [transform('migrate', '8.3.0')];
+            return [transform(TransformType.Migrate, '8.3.0')];
           }
         }
       );
@@ -176,8 +176,8 @@ describe('buildActiveMigrations', () => {
       const migrations = buildMigrations();
 
       expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
-      expect(migrations.foo.transforms).toEqual([expectTransform('migrate', '7.12.0')]);
-      expect(migrations.bar.transforms).toEqual([expectTransform('migrate', '8.3.0')]);
+      expect(migrations.foo.transforms).toEqual([expectTransform(TransformType.Migrate, '7.12.0')]);
+      expect(migrations.bar.transforms).toEqual([expectTransform(TransformType.Migrate, '8.3.0')]);
     });
   });
 
@@ -203,19 +203,19 @@ describe('buildActiveMigrations', () => {
       addType(bar);
 
       getReferenceTransformsMock.mockReturnValue([
-        transform('reference', '7.12.0'),
-        transform('reference', '7.17.0'),
+        transform(TransformType.Reference, '7.12.0'),
+        transform(TransformType.Reference, '7.17.0'),
       ]);
 
       const migrations = buildMigrations();
       expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
       expect(migrations.foo.transforms).toEqual([
-        expectTransform('reference', '7.12.0'),
-        expectTransform('reference', '7.17.0'),
+        expectTransform(TransformType.Reference, '7.12.0'),
+        expectTransform(TransformType.Reference, '7.17.0'),
       ]);
       expect(migrations.bar.transforms).toEqual([
-        expectTransform('reference', '7.12.0'),
-        expectTransform('reference', '7.17.0'),
+        expectTransform(TransformType.Reference, '7.12.0'),
+        expectTransform(TransformType.Reference, '7.17.0'),
       ]);
     });
 
@@ -242,16 +242,16 @@ describe('buildActiveMigrations', () => {
 
       getConversionTransformsMock.mockImplementation((type: SavedObjectsType) => {
         if (type.name === 'foo') {
-          return [transform('convert', '7.12.0')];
+          return [transform(TransformType.Convert, '7.12.0')];
         } else {
-          return [transform('convert', '8.7.0')];
+          return [transform(TransformType.Convert, '8.7.0')];
         }
       });
 
       const migrations = buildMigrations();
       expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
-      expect(migrations.foo.transforms).toEqual([expectTransform('convert', '7.12.0')]);
-      expect(migrations.bar.transforms).toEqual([expectTransform('convert', '8.7.0')]);
+      expect(migrations.foo.transforms).toEqual([expectTransform(TransformType.Convert, '7.12.0')]);
+      expect(migrations.bar.transforms).toEqual([expectTransform(TransformType.Convert, '8.7.0')]);
     });
   });
 
@@ -276,23 +276,23 @@ describe('buildActiveMigrations', () => {
       getModelVersionTransformsMock.mockImplementation(
         ({ typeDefinition }: { typeDefinition: SavedObjectsType }) => {
           if (typeDefinition.name === 'foo') {
-            return [transform('migrate', '7.18.2')];
+            return [transform(TransformType.Migrate, '7.18.2')];
           } else {
-            return [transform('migrate', '8.4.2')];
+            return [transform(TransformType.Migrate, '8.4.2')];
           }
         }
       );
 
       getReferenceTransformsMock.mockReturnValue([
-        transform('reference', '7.12.0'),
-        transform('reference', '7.17.3'),
+        transform(TransformType.Reference, '7.12.0'),
+        transform(TransformType.Reference, '7.17.3'),
       ]);
 
       getConversionTransformsMock.mockImplementation((type: SavedObjectsType) => {
         if (type.name === 'foo') {
-          return [transform('convert', '7.14.0')];
+          return [transform(TransformType.Convert, '7.14.0')];
         } else {
-          return [transform('convert', '8.7.0')];
+          return [transform(TransformType.Convert, '8.7.0')];
         }
       });
 
@@ -300,20 +300,20 @@ describe('buildActiveMigrations', () => {
 
       expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
       expect(migrations.foo.transforms).toEqual([
-        expectTransform('reference', '7.12.0'),
-        expectTransform('migrate', '7.12.0'),
-        expectTransform('convert', '7.14.0'),
-        expectTransform('migrate', '7.16.0'),
-        expectTransform('reference', '7.17.3'),
-        expectTransform('migrate', '7.18.2'),
+        expectTransform(TransformType.Reference, '7.12.0'),
+        expectTransform(TransformType.Migrate, '7.12.0'),
+        expectTransform(TransformType.Convert, '7.14.0'),
+        expectTransform(TransformType.Migrate, '7.16.0'),
+        expectTransform(TransformType.Reference, '7.17.3'),
+        expectTransform(TransformType.Migrate, '7.18.2'),
       ]);
       expect(migrations.bar.transforms).toEqual([
-        expectTransform('reference', '7.12.0'),
-        expectTransform('migrate', '7.17.0'),
-        expectTransform('reference', '7.17.3'),
-        expectTransform('migrate', '8.2.1'),
-        expectTransform('migrate', '8.4.2'),
-        expectTransform('convert', '8.7.0'),
+        expectTransform(TransformType.Reference, '7.12.0'),
+        expectTransform(TransformType.Migrate, '7.17.0'),
+        expectTransform(TransformType.Reference, '7.17.3'),
+        expectTransform(TransformType.Migrate, '8.2.1'),
+        expectTransform(TransformType.Migrate, '8.4.2'),
+        expectTransform(TransformType.Convert, '8.7.0'),
       ]);
     });
   });
