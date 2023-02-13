@@ -24,7 +24,7 @@ export function MachineLearningJobWizardGeoProvider({ getService }: FtrProviderC
       );
       expect(comboBoxSelectedOptions).to.eql(
         expectedIdentifier,
-        `Expected population field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        `Expected geo field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
       );
     },
 
@@ -34,12 +34,12 @@ export function MachineLearningJobWizardGeoProvider({ getService }: FtrProviderC
     },
 
     async assertSplitFieldInputExists() {
-      await testSubjects.existOrFail('mlMultiMetricSplitFieldSelect > comboBoxInput');
+      await testSubjects.existOrFail('mlSplitFieldSelect > comboBoxInput');
     },
 
     async assertSplitFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlMultiMetricSplitFieldSelect > comboBoxInput'
+        'mlSplitFieldSelect > comboBoxInput'
       );
       expect(comboBoxSelectedOptions).to.eql(
         expectedIdentifier,
@@ -48,7 +48,7 @@ export function MachineLearningJobWizardGeoProvider({ getService }: FtrProviderC
     },
 
     async selectSplitField(identifier: string) {
-      await comboBox.set('mlMultiMetricSplitFieldSelect > comboBoxInput', identifier);
+      await comboBox.set('mlSplitFieldSelect > comboBoxInput', identifier);
       await this.assertSplitFieldSelection([identifier]);
     },
 
