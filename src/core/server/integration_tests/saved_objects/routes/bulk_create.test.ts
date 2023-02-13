@@ -19,6 +19,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
+import { loggerMock } from '@kbn/logging-mocks';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -33,6 +34,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
+  let loggerWarnSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -50,7 +52,9 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsBulkCreate.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
-    registerBulkCreateRoute(router, { coreUsageData });
+    const logger = loggerMock.create();
+    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registerBulkCreateRoute(router, { coreUsageData, logger });
 
     await server.start();
   });
@@ -160,5 +164,22 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     expect(result.body.message).toContain(
       'Unsupported saved object type(s): hidden-from-http: Bad Request'
     );
+  });
+
+  it('logs a warning message when called', async () => {
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_create')
+      .send([
+        {
+          id: 'abc1234',
+          type: 'index-pattern',
+          attributes: {
+            title: 'foo',
+          },
+          references: [],
+        },
+      ])
+      .expect(200);
+    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
   });
 });
