@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { Ecs, IRouter } from '@kbn/core/server';
 import unified from 'unified';
 import markdown from 'remark-parse';
 import { some, filter } from 'lodash';
@@ -44,15 +44,17 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         (runSavedQueries && (request.body.saved_query_id || request.body.pack_id))
       );
 
+      const client = await osqueryContext.service
+        .getRuleRegistryService()
+        ?.getRacClientWithRequest(request);
+
+      const alertData = request.body.alert_ids?.length
+        ? await client?.get({ id: request.body.alert_ids[0] })
+        : undefined;
+
       if (isInvalid) {
         if (request.body.alert_ids?.length) {
           try {
-            const client = await osqueryContext.service
-              .getRuleRegistryService()
-              ?.getRacClientWithRequest(request);
-
-            const alertData = await client?.get({ id: request.body.alert_ids[0] });
-
             if (alertData?.['kibana.alert.rule.note']) {
               const parsedAlertInvestigationGuide = unified()
                 .use([[markdown, {}], OsqueryParser])
@@ -95,7 +97,11 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         const { response: osqueryAction } = await createActionHandler(
           osqueryContext,
           request.body,
-          { soClient, metadata: { currentUser } }
+          {
+            soClient,
+            metadata: { currentUser },
+            ecsData: { ecs: { version: '8.6.0' }, ...alertData } as Ecs,
+          }
         );
 
         return response.ok({

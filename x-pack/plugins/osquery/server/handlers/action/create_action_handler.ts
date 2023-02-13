@@ -10,6 +10,10 @@ import moment from 'moment';
 import { filter, flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { Ecs, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  containsDynamicQuery,
+  replaceParamsQuery,
+} from '../../../common/utils/replace_params_query';
 import { createDynamicQueries, createQueries } from './create_queries';
 import { getInternalSavedObjectsClient } from '../../routes/utils';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
@@ -88,20 +92,25 @@ export const createActionHandler = async (
       ? !!some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
     queries: packSO
-      ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) =>
-          pickBy(
+      ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
+          const dynamicQueryPresent = packQuery.query && containsDynamicQuery(packQuery.query);
+
+          return pickBy(
             {
               action_id: uuidv4(),
               id: packQueryId,
-              query: packQuery.query,
+              query:
+                dynamicQueryPresent && packQuery.query && ecsData
+                  ? replaceParamsQuery(packQuery.query, ecsData).result
+                  : packQuery.query,
               ecs_mapping: packQuery.ecs_mapping,
               version: packQuery.version,
               platform: packQuery.platform,
               agents: selectedAgents,
             },
             (value) => !isEmpty(value)
-          )
-        )
+          );
+        })
       : ecsData
       ? await createDynamicQueries(params, ecsData, osqueryContext)
       : await createQueries(params, selectedAgents, osqueryContext),
