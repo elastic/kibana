@@ -8,13 +8,14 @@
 import { userInfo } from 'os';
 import execa from 'execa';
 import nodeFetch from 'node-fetch';
-import type { UpdatePackagePolicyResponse, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   packagePolicyRouteService,
+  type UpdatePackagePolicyResponse,
+  type UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import chalk from 'chalk';
-import * as util from 'util';
+import { inspect } from 'util';
 import { getEndpointPackageInfo } from '../../../common/endpoint/index_data';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
@@ -24,8 +25,7 @@ import {
   waitForHostToEnroll,
 } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
-import type { PolicyData } from '../../../common/endpoint/types';
-import { ProtectionModes } from '../../../common/endpoint/types';
+import { type PolicyData, ProtectionModes } from '../../../common/endpoint/types';
 
 interface ElasticArtifactSearchResponse {
   manifest: {
@@ -160,7 +160,7 @@ export const enrollEndpointHost = async () => {
     Delete VM:    ${chalk.bold(`multipass delete -p ${vmName}${await getVmCountNotice()}`)}
 `);
   } catch (error) {
-    log.error(util.inspect(error, { depth: 4 }));
+    log.error(inspect(error, { depth: 4 }));
     log.indent(-4);
     throw error;
   }
