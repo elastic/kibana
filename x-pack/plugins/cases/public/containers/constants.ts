@@ -26,6 +26,7 @@ export const casesQueriesKeys = {
   caseMetrics: (id: string, features: SingleCaseMetricsFeature[]) =>
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
+  caseUsers: (id: string) => [...casesQueriesKeys.case(id), 'users'],
   userActions: (
     id: string,
     filterActionType: CaseUserActionTypeWithAll,

@@ -5,43 +5,13 @@
  * 2.0.
  */
 
-import { isEmpty, uniqBy } from 'lodash/fp';
-
 import { useQuery } from '@tanstack/react-query';
-import type { CaseUserActions, CaseUserActionTypeWithAll } from '../../common/ui/types';
-import { ActionTypes } from '../../common/api';
+import type { FindCaseUserActions, CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { findCaseUserActions } from './api';
-import { isPushedUserAction } from '../../common/utils/user_actions';
 import type { ServerError } from '../types';
 import { useToasts } from '../common/lib/kibana';
 import { ERROR_TITLE } from './translations';
 import { casesQueriesKeys } from './constants';
-
-export const getProfileUids = (userActions: CaseUserActions[]) => {
-  const uids = userActions.reduce<Set<string>>((acc, userAction) => {
-    if (userAction.type === ActionTypes.assignees) {
-      const uidsFromPayload = userAction.payload.assignees.map((assignee) => assignee.uid);
-      for (const uid of uidsFromPayload) {
-        acc.add(uid);
-      }
-    }
-
-    if (
-      isPushedUserAction<'camelCase'>(userAction) &&
-      userAction.payload.externalService.pushedBy.profileUid != null
-    ) {
-      acc.add(userAction.payload.externalService.pushedBy.profileUid);
-    }
-
-    if (userAction.createdBy.profileUid != null) {
-      acc.add(userAction.createdBy.profileUid);
-    }
-
-    return acc;
-  }, new Set());
-
-  return uids;
-};
 
 export const useFindCaseUserActions = (
   caseId: string,
@@ -51,27 +21,15 @@ export const useFindCaseUserActions = (
   const toasts = useToasts();
   const abortCtrlRef = new AbortController();
 
-  return useQuery(
+  return useQuery<FindCaseUserActions, ServerError>(
     casesQueriesKeys.userActions(caseId, filterActionType, sortOrder),
     async () => {
-      const response = await findCaseUserActions(
+      return findCaseUserActions(
         caseId,
         filterActionType,
         sortOrder,
         abortCtrlRef.signal
       );
-      const participants = !isEmpty(response.userActions)
-        ? uniqBy('createdBy.username', response.userActions).map((cau) => cau.createdBy)
-        : [];
-
-      const caseUserActions = !isEmpty(response.userActions) ? response.userActions : [];
-      const profileUids = getProfileUids(caseUserActions);
-
-      return {
-        caseUserActions,
-        participants,
-        profileUids,
-      };
     },
     {
       onError: (error: ServerError) => {

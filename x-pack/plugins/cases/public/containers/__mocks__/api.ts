@@ -27,12 +27,14 @@ import {
   tags,
   findCaseUserActionsResponse,
   getCaseUserActionsStatsResponse,
+  getCaseUsersMockResponse,
 } from '../mock';
 import type {
   CaseConnectors,
   CaseUpdateRequest,
-  CaseUserActionsStats,
+  CaseUsers,
   ResolvedCase,
+  CaseUserActionsStats,
 } from '../../../common/ui/types';
 import { SeverityAll } from '../../../common/ui/types';
 import type {
@@ -157,3 +159,6 @@ export const getCaseConnectors = async (
   caseId: string,
   signal: AbortSignal
 ): Promise<CaseConnectors> => Promise.resolve(getCaseConnectorsMockResponse());
+
+export const getCaseUsers = async (caseId: string, signal: AbortSignal): Promise<CaseUsers> =>
+  Promise.resolve(getCaseUsersMockResponse());
