@@ -364,9 +364,10 @@ export const importRules = (rulesFile: string) => {
 };
 
 export const expectRulesManagementTab = () =>
-  cy.get(RULES_MANAGEMENT_TAB).should('have.class', 'euiTab-isSelected');
+  cy.get(RULES_MANAGEMENT_TAB).should('have.attr', 'aria-selected');
+
 export const expectRulesMonitoringTab = () =>
-  cy.get(RULES_MONITORING_TAB).should('have.class', 'euiTab-isSelected');
+  cy.get(RULES_MONITORING_TAB).should('have.attr', 'aria-selected');
 
 export const expectFilterSearchTerm = (searchTerm: string) =>
   cy.get(RULE_SEARCH_FIELD).should('have.value', searchTerm);
