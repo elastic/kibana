@@ -107,14 +107,21 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
       expectedValues: string[]
     ) {
       await retry.tryForTime(2000, async () => {
-        // check for top values chart
+        // check for top values rows
         await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`);
         const topValuesRows = await testSubjects.findAll(
           `mlFieldStatsFlyoutContent ${fieldName}-topValues-formattedFieldValue`
         );
-        expect(topValuesRows.length).to.eql(expectedValues.length);
-        for (const [idx, expecteValue] of expectedValues.entries()) {
-          expect(await topValuesRows[idx].getVisibleText()).to.eql(expecteValue);
+        expect(topValuesRows.length).to.eql(
+          expectedValues.length,
+          `Expected top values to have ${expectedValues.length} (got ${topValuesRows.length})`
+        );
+        for (const [idx, expectedValue] of expectedValues.entries()) {
+          const actualValue = await topValuesRows[idx].getVisibleText();
+          expect(actualValue).to.eql(
+            expectedValue,
+            `Expected top value row to be ${expectedValue} (got ${actualValue})`
+          );
         }
       });
     },

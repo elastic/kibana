@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FieldStatsType } from './types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -32,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
     const fieldStatsEntries = [
       {
         fieldName: '1stFlrSF',
-        type: 'keyword' as 'number' | 'keyword' | 'date',
+        type: 'keyword' as FieldStatsType,
         isIncludeFieldInput: true,
       },
     ];

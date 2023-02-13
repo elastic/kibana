@@ -7,7 +7,7 @@
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   GroupByEntry,
   isLatestTransformTestData,
@@ -40,12 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       {
         identifier: 'terms(customer_gender)',
         fieldName: 'customer_gender',
-        type: 'keyword',
-        isGroupByInput: true,
-      },
-      {
-        identifier: 'histogram(day_of_week_i)',
-        fieldName: 'day_of_week_i',
         type: 'keyword',
         isGroupByInput: true,
       },

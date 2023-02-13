@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FieldStatsType } from './types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -41,13 +42,13 @@ export default function ({ getService }: FtrProviderContext) {
     const fieldStatsEntries = [
       {
         fieldName: 'airline',
-        type: 'keyword' as 'number' | 'keyword' | 'date',
+        type: 'keyword' as FieldStatsType,
         isDependentVariableInput: true,
         isIncludeFieldInput: true,
       },
       {
         fieldName: '@version',
-        type: 'keyword' as 'number' | 'keyword' | 'date',
+        type: 'keyword' as FieldStatsType,
         isIncludeFieldInput: true,
       },
     ];
@@ -109,177 +110,171 @@ export default function ({ getService }: FtrProviderContext) {
           } as AnalyticsTableRowDetails,
         },
       },
-      // {
-      //   suiteTitle: 'with kuery query',
-      //   jobType: 'classification',
-      //   jobId: `fq_saved_search_3_${dateNow}`,
-      //   jobDescription: 'Classification job based on a saved search with kuery query',
-      //   source: 'ft_farequote_kuery',
-      //   get destinationIndex(): string {
-      //     return `user-${this.jobId}`;
-      //   },
-      //   fieldStatsEntries,
-      //   runtimeFields: {
-      //     uppercase_airline: {
-      //       type: 'keyword',
-      //       script: 'emit(params._source.airline.toUpperCase())',
-      //     },
-      //   },
-      //   dependentVariable: 'airline',
-      //   trainingPercent: 20,
-      //   modelMemory: '20mb',
-      //   createIndexPattern: true,
-      //   expected: {
-      //     fieldStatsValues: { airline: ['AAL', 'AWE', 'ASA', 'ACA', 'AMX'] } as Record<
-      //             string,
-      //             string[]
-      //           >,
-      //     source: 'ft_farequote_small',
-      //     rocCurveColorState: [
-      //       // tick/grid/axis
-      //       { color: '#DDDDDD', percentage: 38 },
-      //       // line
-      //       { color: '#98A2B3', percentage: 7 },
-      //     ],
-      //     runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
-      //     row: {
-      //       memoryStatus: 'ok',
-      //       type: 'classification',
-      //       status: 'stopped',
-      //       progress: '100',
-      //     },
-      //     rowDetails: {
-      //       jobDetails: [
-      //         {
-      //           section: 'state',
-      //           expectedEntries: {
-      //             id: `fq_saved_search_3_${dateNow}`,
-      //             state: 'stopped',
-      //             data_counts:
-      //               '{"training_docs_count":320,"test_docs_count":1283,"skipped_docs_count":0}',
-      //             description: 'Classification job based on a saved search with kuery query',
-      //           },
-      //         },
-      //         { section: 'progress', expectedEntries: { Phase: '8/8' } },
-      //       ],
-      //     } as AnalyticsTableRowDetails,
-      //   },
-      // },
-      // {
-      //   suiteTitle: 'with filter and lucene query',
-      //   jobType: 'classification',
-      //   jobId: `fq_saved_search_4_${dateNow}`,
-      //   jobDescription: 'Classification job based on a saved search with filter and lucene query',
-      //   source: 'ft_farequote_filter_two_and_lucene',
-      //   get destinationIndex(): string {
-      //     return `user-${this.jobId}`;
-      //   },
-      //   fieldStatsEntries,
-      //   runtimeFields: {
-      //     uppercase_airline: {
-      //       type: 'keyword',
-      //       script: 'emit(params._source.airline.toUpperCase())',
-      //     },
-      //   },
-      //   dependentVariable: 'airline',
-      //   trainingPercent: 20,
-      //   modelMemory: '20mb',
-      //   createIndexPattern: true,
-      //   expected: {
-      //     fieldStatsValues: {
-      //       airline: ['AAL', 'ASA'],
-      //     } as Record<
-      //             string,
-      //             string[]
-      //           >,
-      //     source: 'ft_farequote_small',
-      //     rocCurveColorState: [
-      //       // tick/grid/axis
-      //       { color: '#DDDDDD', percentage: 38 },
-      //       // line
-      //       { color: '#98A2B3', percentage: 7 },
-      //     ],
-      //     runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
-      //     row: {
-      //       memoryStatus: 'ok',
-      //       type: 'classification',
-      //       status: 'stopped',
-      //       progress: '100',
-      //     },
-      //     rowDetails: {
-      //       jobDetails: [
-      //         {
-      //           section: 'state',
-      //           expectedEntries: {
-      //             id: `fq_saved_search_4_${dateNow}`,
-      //             state: 'stopped',
-      //             data_counts:
-      //               '{"training_docs_count":135,"test_docs_count":544,"skipped_docs_count":0}',
-      //             description:
-      //               'Classification job based on a saved search with filter and lucene query',
-      //           },
-      //         },
-      //         { section: 'progress', expectedEntries: { Phase: '8/8' } },
-      //       ],
-      //     } as AnalyticsTableRowDetails,
-      //   },
-      // },
-      // {
-      //   suiteTitle: 'with filter and kuery query',
-      //   jobType: 'classification',
-      //   jobId: `fq_saved_search_5_${dateNow}`,
-      //   jobDescription: 'Classification job based on a saved search with filter and kuery query',
-      //   source: 'ft_farequote_filter_two_and_kuery',
-      //   get destinationIndex(): string {
-      //     return `user-${this.jobId}`;
-      //   },
-      //   runtimeFields: {
-      //     uppercase_airline: {
-      //       type: 'keyword',
-      //       script: 'emit(params._source.airline.toUpperCase())',
-      //     },
-      //   },
-      //   dependentVariable: 'airline',
-      //   trainingPercent: 20,
-      //   modelMemory: '20mb',
-      //   createIndexPattern: true,
-      //   expected: {
-      //     fieldStatsValues: { airline: ['ASA', 'FFT'] } as Record<
-      //             string,
-      //             string[]
-      //           >,
-      //     source: 'ft_farequote_small',
-      //     rocCurveColorState: [
-      //       // tick/grid/axis
-      //       { color: '#DDDDDD', percentage: 38 },
-      //       // line
-      //       { color: '#98A2B3', percentage: 7 },
-      //     ],
-      //     runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
-      //     row: {
-      //       memoryStatus: 'ok',
-      //       type: 'classification',
-      //       status: 'stopped',
-      //       progress: '100',
-      //     },
-      //     rowDetails: {
-      //       jobDetails: [
-      //         {
-      //           section: 'state',
-      //           expectedEntries: {
-      //             id: `fq_saved_search_5_${dateNow}`,
-      //             state: 'stopped',
-      //             data_counts:
-      //               '{"training_docs_count":109,"test_docs_count":436,"skipped_docs_count":0}',
-      //             description:
-      //               'Classification job based on a saved search with filter and kuery query',
-      //           },
-      //         },
-      //         { section: 'progress', expectedEntries: { Phase: '8/8' } },
-      //       ],
-      //     } as AnalyticsTableRowDetails,
-      //   },
-      // },
+      {
+        suiteTitle: 'with kuery query',
+        jobType: 'classification',
+        jobId: `fq_saved_search_3_${dateNow}`,
+        jobDescription: 'Classification job based on a saved search with kuery query',
+        source: 'ft_farequote_kuery',
+        get destinationIndex(): string {
+          return `user-${this.jobId}`;
+        },
+        fieldStatsEntries,
+        runtimeFields: {
+          uppercase_airline: {
+            type: 'keyword',
+            script: 'emit(params._source.airline.toUpperCase())',
+          },
+        },
+        dependentVariable: 'airline',
+        trainingPercent: 20,
+        modelMemory: '20mb',
+        createIndexPattern: true,
+        expected: {
+          fieldStatsValues: { airline: ['AAL', 'AWE', 'ASA', 'ACA', 'AMX'] } as Record<
+            string,
+            string[]
+          >,
+          source: 'ft_farequote_small',
+          rocCurveColorState: [
+            // tick/grid/axis
+            { color: '#DDDDDD', percentage: 38 },
+            // line
+            { color: '#98A2B3', percentage: 7 },
+          ],
+          runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+          row: {
+            memoryStatus: 'ok',
+            type: 'classification',
+            status: 'stopped',
+            progress: '100',
+          },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                expectedEntries: {
+                  id: `fq_saved_search_3_${dateNow}`,
+                  state: 'stopped',
+                  data_counts:
+                    '{"training_docs_count":320,"test_docs_count":1283,"skipped_docs_count":0}',
+                  description: 'Classification job based on a saved search with kuery query',
+                },
+              },
+              { section: 'progress', expectedEntries: { Phase: '8/8' } },
+            ],
+          } as AnalyticsTableRowDetails,
+        },
+      },
+      {
+        suiteTitle: 'with filter and lucene query',
+        jobType: 'classification',
+        jobId: `fq_saved_search_4_${dateNow}`,
+        jobDescription: 'Classification job based on a saved search with filter and lucene query',
+        source: 'ft_farequote_filter_two_and_lucene',
+        get destinationIndex(): string {
+          return `user-${this.jobId}`;
+        },
+        fieldStatsEntries,
+        runtimeFields: {
+          uppercase_airline: {
+            type: 'keyword',
+            script: 'emit(params._source.airline.toUpperCase())',
+          },
+        },
+        dependentVariable: 'airline',
+        trainingPercent: 20,
+        modelMemory: '20mb',
+        createIndexPattern: true,
+        expected: {
+          fieldStatsValues: {
+            airline: ['AAL', 'ASA'],
+          } as Record<string, string[]>,
+          source: 'ft_farequote_small',
+          rocCurveColorState: [
+            // tick/grid/axis
+            { color: '#DDDDDD', percentage: 38 },
+            // line
+            { color: '#98A2B3', percentage: 7 },
+          ],
+          runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+          row: {
+            memoryStatus: 'ok',
+            type: 'classification',
+            status: 'stopped',
+            progress: '100',
+          },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                expectedEntries: {
+                  id: `fq_saved_search_4_${dateNow}`,
+                  state: 'stopped',
+                  data_counts:
+                    '{"training_docs_count":135,"test_docs_count":544,"skipped_docs_count":0}',
+                  description:
+                    'Classification job based on a saved search with filter and lucene query',
+                },
+              },
+              { section: 'progress', expectedEntries: { Phase: '8/8' } },
+            ],
+          } as AnalyticsTableRowDetails,
+        },
+      },
+      {
+        suiteTitle: 'with filter and kuery query',
+        jobType: 'classification',
+        jobId: `fq_saved_search_5_${dateNow}`,
+        jobDescription: 'Classification job based on a saved search with filter and kuery query',
+        source: 'ft_farequote_filter_two_and_kuery',
+        get destinationIndex(): string {
+          return `user-${this.jobId}`;
+        },
+        runtimeFields: {
+          uppercase_airline: {
+            type: 'keyword',
+            script: 'emit(params._source.airline.toUpperCase())',
+          },
+        },
+        dependentVariable: 'airline',
+        trainingPercent: 20,
+        modelMemory: '20mb',
+        createIndexPattern: true,
+        expected: {
+          fieldStatsValues: { airline: ['ASA', 'FFT'] } as Record<string, string[]>,
+          source: 'ft_farequote_small',
+          rocCurveColorState: [
+            // tick/grid/axis
+            { color: '#DDDDDD', percentage: 38 },
+            // line
+            { color: '#98A2B3', percentage: 7 },
+          ],
+          runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+          row: {
+            memoryStatus: 'ok',
+            type: 'classification',
+            status: 'stopped',
+            progress: '100',
+          },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                expectedEntries: {
+                  id: `fq_saved_search_5_${dateNow}`,
+                  state: 'stopped',
+                  data_counts:
+                    '{"training_docs_count":109,"test_docs_count":436,"skipped_docs_count":0}',
+                  description:
+                    'Classification job based on a saved search with filter and kuery query',
+                },
+              },
+              { section: 'progress', expectedEntries: { Phase: '8/8' } },
+            ],
+          } as AnalyticsTableRowDetails,
+        },
+      },
     ];
 
     for (const testData of testDataList) {
