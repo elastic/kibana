@@ -57,7 +57,19 @@ class InternalEngineTransporter implements Transporter {
     const response = await this.http.post<SearchResponse>(url, {
       body: JSON.stringify(request),
     });
-    return response;
+
+    const withUniqueIds = {
+      ...response,
+      hits: {
+        ...response.hits,
+        hits: response.hits.hits.map((hit) => ({
+          ...hit,
+          _id: btoa(JSON.stringify([hit._index, hit._id])),
+        })),
+      },
+    };
+
+    return withUniqueIds;
   }
 }
 
@@ -77,10 +89,12 @@ const ResultView: React.FC<ResultViewProps> = ({ result }) => {
 
   const {
     _meta: {
-      id,
+      id: encodedId,
       rawHit: { _index: index },
     },
   } = result;
+
+  const [, id] = JSON.parse(atob(encodedId));
 
   const columns: Array<EuiBasicTableColumn<SearchResult>> = [
     {
