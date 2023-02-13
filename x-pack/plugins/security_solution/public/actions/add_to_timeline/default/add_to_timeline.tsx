@@ -45,13 +45,15 @@ export const createAddToTimelineAction = ({
     getDisplayNameTooltip: () => ADD_TO_TIMELINE,
     isCompatible: async ({ field }) =>
       isInSecurityApp(currentAppId) && fieldHasCellActions(field.name),
-    execute: async ({ field }) => {
+    execute: async ({ field, metadata }) => {
+      const negate = Boolean(metadata?.negateFilters);
       const dataProviders =
         createDataProviders({
           contextId: TimelineId.active,
           fieldType: field.type,
           values: field.value,
           field: field.name,
+          negate,
         }) ?? [];
 
       if (dataProviders.length > 0) {
