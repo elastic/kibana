@@ -118,7 +118,7 @@ const packageNotInstalledRenderer = ({
           <h2>
             <FormattedMessage
               id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
-              defaultMessage="Detect security misconfigurations in your cloud resources!"
+              defaultMessage="Detect security misconfigurations in your cloud infrastructure!"
             />
           </h2>
         }
@@ -128,11 +128,10 @@ const packageNotInstalledRenderer = ({
           <p>
             <FormattedMessage
               id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
-              defaultMessage="Add the Cloud and or Kubernetes Security Posture Management (K/CSPM) integration to begin. {learnMore}."
+              defaultMessage="Detect and remediate potential configuration risks in your cloud infrastructure, like publicly accessible s3 buckets, with our Cloud and Kubernetes security posture management solutions. {learnMore}"
               values={{
                 learnMore: (
-                  // TODO: CIS AWS - replace link with general doc for both integartions
-                  <EuiLink href="https://ela.st/getting-started-with-kspm">
+                  <EuiLink href="https://ela.st/cspm ">
                     <FormattedMessage
                       id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
                       defaultMessage="Learn more about Cloud Security Posture"
