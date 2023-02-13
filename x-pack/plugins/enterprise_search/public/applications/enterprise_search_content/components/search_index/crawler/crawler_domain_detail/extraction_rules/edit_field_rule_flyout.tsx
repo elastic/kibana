@@ -20,6 +20,7 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiPanel,
   EuiRadioGroup,
   EuiSpacer,
@@ -35,6 +36,7 @@ import {
   FieldType,
   MultipleObjectsHandling,
 } from '../../../../../../../../common/types/extraction_rules';
+import { docLinks } from '../../../../../../shared/doc_links';
 
 interface EditFieldRuleFlyoutProps {
   fieldRule: ExtractionRuleFieldRule | null;
@@ -274,6 +276,34 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                           )}
                         />
                       </EuiFormRow>
+                      <EuiSpacer />
+                      {field.value === FieldType.HTML ? (
+                        <EuiLink
+                          data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-learnMoreCSSSelectors"
+                          href={`${docLinks.crawlerExtractionRules}#crawler-extraction-rules-css-selectors`}
+                          external
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.indices.extractionRules.editRule.contentField.cssSelectorsLink',
+                            {
+                              defaultMessage: 'Learn more about CSS selectors',
+                            }
+                          )}
+                        </EuiLink>
+                      ) : (
+                        <EuiLink
+                          data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-learnMoreUrlPatterns"
+                          href={`${docLinks.crawlerExtractionRules}#crawler-extraction-rules-url-patterns`}
+                          external
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.indices.extractionRules.editRule.contentField.urlPatternsLinks',
+                            {
+                              defaultMessage: 'Learn more about URL patterns',
+                            }
+                          )}
+                        </EuiLink>
+                      )}
                     </>
                   )}
                 </>
@@ -450,6 +480,19 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                 </>
               )}
             />
+            <EuiSpacer />
+            <EuiLink
+              data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-learnMoreDifferentContent"
+              href={`${docLinks.crawlerExtractionRules}#crawler-extraction-rules-field-content`}
+              external
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.extractionRules.editRule.contentField.differentContentLink',
+                {
+                  defaultMessage: 'Learn more about storing different kinds of content',
+                }
+              )}
+            </EuiLink>
           </EuiPanel>
         </EuiForm>
       </EuiFlyoutBody>
