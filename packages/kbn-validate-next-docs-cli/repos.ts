@@ -24,13 +24,14 @@ function lines(read: NodeJS.ReadableStream) {
   });
 }
 
-function getGithubBase() {
+function getGithubBase(log: ToolingLog) {
   try {
     const originUrl = execa.sync('git', ['remote', 'get-url', 'origin'], {
       encoding: 'utf8',
     }).stdout;
 
     if (originUrl.startsWith('git@')) {
+      log.warning('using ssh urls for Github repos');
       return `git@github.com:`;
     }
   } catch {
@@ -38,9 +39,11 @@ function getGithubBase() {
   }
 
   if (process.env.GITHUB_TOKEN) {
-    return `https://${process.env.GITHUB_TOKEN}@github.com/`;
+    log.warning('using https urls for Github repos (with token)');
+    return `https://token:${process.env.GITHUB_TOKEN}@github.com/`;
   }
 
+  log.warning('using https urls for Github repos');
   return `https://github.com/`;
 }
 
@@ -146,10 +149,12 @@ export class Repo {
 }
 
 export class Repos {
-  githubBase = getGithubBase();
+  githubBase: string;
   repoDir = Path.resolve(Os.userInfo().homedir, '.cache/next-docs/repos');
 
-  constructor(private readonly log: ToolingLog) {}
+  constructor(private readonly log: ToolingLog) {
+    this.githubBase = getGithubBase(this.log);
+  }
 
   async init(repoName: string) {
     const repo = new Repo(
