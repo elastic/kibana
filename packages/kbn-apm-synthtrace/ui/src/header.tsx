@@ -21,7 +21,11 @@ export default () => {
             href="https://github.com/elastic/app-obs-dev/issues/7"
             target="_blank"
           >
-            Docs
+            On-Week Issue
+          </EuiHeaderLink>
+
+          <EuiHeaderLink isActive href="https://eui.elastic.co" target="_blank">
+            EUI
           </EuiHeaderLink>
 
           <EuiHeaderLink
@@ -29,7 +33,7 @@ export default () => {
             target="_blank"
             href="https://github.com/elastic/kibana/tree/main/packages/kbn-apm-synthtrace"
           >
-            Help
+            Help (Synthtrace)
           </EuiHeaderLink>
         </EuiHeaderLinks>
       </EuiHeaderSectionItem>
