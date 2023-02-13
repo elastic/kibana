@@ -7,7 +7,13 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiPanel, useEuiTheme, EuiResizeObserver, EuiSpacer, TooltipContainer } from '@elastic/eui';
+import {
+  EuiPanel,
+  useEuiTheme,
+  EuiResizeObserver,
+  EuiSpacer,
+  TooltipContainer,
+} from '@elastic/eui';
 import { Chart, Settings, Heatmap, ScaleType } from '@elastic/charts';
 
 import { MonitorStatusHeader } from './monitor_status_header';
@@ -65,7 +71,9 @@ export const MonitorStatusPanel = ({
                 tooltip={{
                   customTooltip: ({ values }) => (
                     <TooltipContainer>
-                      <MonitorStatusCellTooltip timeBin={getTimeBinByXValue(values?.[0]?.datum?.x)} />
+                      <MonitorStatusCellTooltip
+                        timeBin={getTimeBinByXValue(values?.[0]?.datum?.x)}
+                      />
                     </TooltipContainer>
                   ),
                 }}
