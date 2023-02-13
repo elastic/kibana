@@ -218,9 +218,10 @@ export async function pickTestGroupRunOrder() {
       : ['build'];
 
   const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
-  if (!LIMIT_CONFIG_TYPE.includes('functional')) {
-    ftrConfigsByQueue.clear();
-  }
+
+  const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
+
+  if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
   const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
     ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
@@ -377,9 +378,11 @@ export async function pickTestGroupRunOrder() {
   Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit, integration }, null, 2));
   bk.uploadArtifacts('jest_run_order.json');
 
-  // write the config for functional steps to an artifact that can be used by the individual functional jobs
-  Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
-  bk.uploadArtifacts('ftr_run_order.json');
+  if (ftrConfigsIncluded) {
+    // write the config for functional steps to an artifact that can be used by the individual functional jobs
+    Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
+    bk.uploadArtifacts('ftr_run_order.json');
+  }
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(
