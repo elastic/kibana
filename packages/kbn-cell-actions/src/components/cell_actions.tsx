@@ -7,6 +7,7 @@
  */
 
 import React, { useMemo, useRef } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InlineActions } from './inline_actions';
 import { HoverActionsPopover } from './hover_actions_popover';
 import { CellActionsMode, type CellActionsProps, type CellActionExecutionContext } from '../types';
@@ -18,7 +19,9 @@ export const CellActions: React.FC<CellActionsProps> = ({
   mode,
   showActionTooltips = true,
   visibleCellActions = 3,
+  disabledActions = [],
   metadata,
+  className,
 }) => {
   const extraContentNodeRef = useRef<HTMLDivElement | null>(null);
   const nodeRef = useRef<HTMLDivElement | null>(null);
@@ -35,14 +38,14 @@ export const CellActions: React.FC<CellActionsProps> = ({
   );
 
   const dataTestSubj = `cellActions-renderContent-${field.name}`;
-
   if (mode === CellActionsMode.HOVER) {
     return (
-      <div ref={nodeRef} data-test-subj={dataTestSubj}>
+      <div className={className} ref={nodeRef} data-test-subj={dataTestSubj}>
         <HoverActionsPopover
           actionContext={actionContext}
           showActionTooltips={showActionTooltips}
           visibleCellActions={visibleCellActions}
+          disabledActions={disabledActions}
         >
           {children}
         </HoverActionsPopover>
@@ -53,14 +56,23 @@ export const CellActions: React.FC<CellActionsProps> = ({
   }
 
   return (
-    <div ref={nodeRef} data-test-subj={dataTestSubj}>
-      {children}
-      <InlineActions
-        actionContext={actionContext}
-        showActionTooltips={showActionTooltips}
-        visibleCellActions={visibleCellActions}
-      />
-      <div ref={extraContentNodeRef} />
-    </div>
+    <EuiFlexGroup
+      responsive={false}
+      alignItems="center"
+      ref={nodeRef}
+      gutterSize="none"
+      justifyContent="flexStart"
+    >
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+      <EuiFlexItem grow={false} className={className} data-test-subj={dataTestSubj}>
+        <InlineActions
+          actionContext={actionContext}
+          showActionTooltips={showActionTooltips}
+          visibleCellActions={visibleCellActions}
+          disabledActions={disabledActions}
+        />
+        <div ref={extraContentNodeRef} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
