@@ -60,7 +60,7 @@ describe('registerTransactionDurationRuleType', () => {
         'http://localhost:5601/eyr/app/observability/alerts/'
       ),
       environment: 'Not defined',
-      interval: `5m`,
+      interval: `5 mins`,
       reason:
         'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java. Alert when > 3,000 ms.',
       transactionType: 'request',
