@@ -36,8 +36,8 @@ export function getAlertsForNotification<
 
   for (const id of keys(currentRecoveredAlerts)) {
     const alert = recoveredAlerts[id];
-    // rules with "notify on every run" should not be subject to changes in flapping
-    if (flappingSettings.enabled && notifyWhen !== RuleNotifyWhen.ACTIVE) {
+    // rules with "on status change" should only be subject to flapping changes
+    if (flappingSettings.enabled && notifyWhen === RuleNotifyWhen.CHANGE) {
       const flapping = alert.getFlapping();
       if (flapping) {
         alert.incrementPendingRecoveredCount();

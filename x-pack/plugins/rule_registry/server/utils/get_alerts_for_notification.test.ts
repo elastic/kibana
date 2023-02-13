@@ -44,8 +44,9 @@ describe('getAlertsForNotification', () => {
 
   test('should set pendingRecoveredCount to zero for all active alerts', () => {
     const trackedEvents = [alert4];
-    expect(getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, trackedEvents))
-      .toMatchInlineSnapshot(`
+    expect(
+      getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, trackedEvents, RuleNotifyWhen.CHANGE)
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "event": Object {
@@ -63,8 +64,9 @@ describe('getAlertsForNotification', () => {
 
   test('should not remove alerts if the num of recovered alerts is not at the limit', () => {
     const trackedEvents = cloneDeep([alert1, alert2, alert3]);
-    expect(getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, trackedEvents))
-      .toMatchInlineSnapshot(`
+    expect(
+      getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, trackedEvents, RuleNotifyWhen.CHANGE)
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "event": Object {
@@ -93,8 +95,9 @@ describe('getAlertsForNotification', () => {
 
   test('should reset counts and not modify alerts if flapping is disabled', () => {
     const trackedEvents = cloneDeep([alert1, alert2, alert3]);
-    expect(getAlertsForNotification(DISABLE_FLAPPING_SETTINGS, trackedEvents))
-      .toMatchInlineSnapshot(`
+    expect(
+      getAlertsForNotification(DISABLE_FLAPPING_SETTINGS, trackedEvents, RuleNotifyWhen.CHANGE)
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "event": Object {

@@ -24,12 +24,14 @@ export function getAlertsForNotification(
     if (
       !flappingSettings.enabled ||
       trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_ACTIVE ||
-      notifyWhen === RuleNotifyWhen.ACTIVE
+      notifyWhen !== RuleNotifyWhen.CHANGE
     ) {
       trackedEvent.pendingRecoveredCount = 0;
     } else if (
       flappingSettings.enabled &&
-      trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_RECOVERED
+      trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_RECOVERED &&
+      // rules with "on status change" should only be subject to flapping changes
+      notifyWhen === RuleNotifyWhen.CHANGE
     ) {
       if (trackedEvent.flapping) {
         const count = trackedEvent.pendingRecoveredCount || 0;
