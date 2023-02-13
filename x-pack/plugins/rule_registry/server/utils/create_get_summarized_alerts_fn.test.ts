@@ -9,6 +9,7 @@ import {
   RuleDataClientMock,
 } from '../rule_data_client/rule_data_client.mock';
 import {
+  ALERT_ACTION_GROUP,
   ALERT_END,
   ALERT_INSTANCE_ID,
   ALERT_RULE_EXECUTION_UUID,
@@ -1660,6 +1661,19 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_RULE_UUID]: 'rule-id',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
               [ALERT_UUID]: 'uuid1',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_3',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid1',
+                },
+              },
             },
           },
           {
@@ -1671,6 +1685,19 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_RULE_UUID]: 'rule-id',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_4',
               [ALERT_UUID]: 'uuid2',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_4',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid2',
+                },
+              },
             },
           },
           {
@@ -1682,6 +1709,19 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_RULE_UUID]: 'rule-id',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
               [ALERT_UUID]: 'uuid3',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_1',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid3',
+                },
+              },
             },
           },
           {
@@ -1693,6 +1733,19 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_RULE_UUID]: 'rule-id',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
               [ALERT_UUID]: 'uuid4',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_2',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid4',
+                },
+              },
             },
           },
           {
@@ -1704,6 +1757,19 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_RULE_UUID]: 'rule-id',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_5',
               [ALERT_UUID]: 'uuid5',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_5',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid5',
+                },
+              },
             },
           },
           {
@@ -1715,6 +1781,19 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_RULE_UUID]: 'rule-id',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_9',
               [ALERT_UUID]: 'uuid6',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_9',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid6',
+                },
+              },
             },
           },
         ],
@@ -1727,7 +1806,7 @@ describe('createGetSummarizedAlertsFn', () => {
       formatAlert: (alert: AlertDocument) => {
         return {
           ...alert,
-          [ALERT_RULE_EXECUTION_UUID]: 'boopboopdedoo',
+          [ALERT_ACTION_GROUP]: 'boopboopdedoo',
         };
       },
     })();
@@ -1785,12 +1864,13 @@ describe('createGetSummarizedAlertsFn', () => {
         [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
         kibana: {
           alert: {
+            action_group: 'boopboopdedoo',
             instance: {
               id: 'TEST_ALERT_3',
             },
             rule: {
               execution: {
-                uuid: 'boopboopdedoo',
+                uuid: 'abc',
               },
               uuid: 'rule-id',
             },
@@ -1804,12 +1884,13 @@ describe('createGetSummarizedAlertsFn', () => {
         [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
         kibana: {
           alert: {
+            action_group: 'boopboopdedoo',
             instance: {
               id: 'TEST_ALERT_4',
             },
             rule: {
               execution: {
-                uuid: 'boopboopdedoo',
+                uuid: 'abc',
               },
               uuid: 'rule-id',
             },
@@ -1823,12 +1904,13 @@ describe('createGetSummarizedAlertsFn', () => {
         [TIMESTAMP]: '2020-01-01T12:10:00.000Z',
         kibana: {
           alert: {
+            action_group: 'boopboopdedoo',
             instance: {
               id: 'TEST_ALERT_1',
             },
             rule: {
               execution: {
-                uuid: 'boopboopdedoo',
+                uuid: 'abc',
               },
               uuid: 'rule-id',
             },
@@ -1842,12 +1924,13 @@ describe('createGetSummarizedAlertsFn', () => {
         [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
         kibana: {
           alert: {
+            action_group: 'boopboopdedoo',
             instance: {
               id: 'TEST_ALERT_2',
             },
             rule: {
               execution: {
-                uuid: 'boopboopdedoo',
+                uuid: 'abc',
               },
               uuid: 'rule-id',
             },
@@ -1861,12 +1944,13 @@ describe('createGetSummarizedAlertsFn', () => {
         [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
         kibana: {
           alert: {
+            action_group: 'boopboopdedoo',
             instance: {
               id: 'TEST_ALERT_5',
             },
             rule: {
               execution: {
-                uuid: 'boopboopdedoo',
+                uuid: 'abc',
               },
               uuid: 'rule-id',
             },
@@ -1880,12 +1964,13 @@ describe('createGetSummarizedAlertsFn', () => {
         [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
         kibana: {
           alert: {
+            action_group: 'boopboopdedoo',
             instance: {
               id: 'TEST_ALERT_9',
             },
             rule: {
               execution: {
-                uuid: 'boopboopdedoo',
+                uuid: 'abc',
               },
               uuid: 'rule-id',
             },
