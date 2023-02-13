@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getDocsCount, getTotalDocsCount } from './helpers';
+import { getDocsCount, getIncompatibleStatColor, getTotalDocsCount } from './helpers';
 import { mockStatsGreenIndex } from './mock/stats/mock_stats_green_index';
 import { mockStatsYellowIndex } from './mock/stats/mock_stats_yellow_index';
 
@@ -103,6 +103,26 @@ describe('helpers', () => {
           stats: mockStatsGreenIndex,
         })
       ).toEqual(expectedCount);
+    });
+  });
+
+  describe('getIncompatibleStatColor', () => {
+    test('it returns the expected color when incompatible is greater than zero', () => {
+      const incompatible = 123;
+
+      expect(getIncompatibleStatColor(incompatible)).toBe('#bd271e');
+    });
+
+    test('it returns undefined when incompatible is zero', () => {
+      const incompatible = 0;
+
+      expect(getIncompatibleStatColor(incompatible)).toBeUndefined();
+    });
+
+    test('it returns undefined when incompatible is undefined', () => {
+      const incompatible = undefined;
+
+      expect(getIncompatibleStatColor(incompatible)).toBeUndefined();
     });
   });
 });
