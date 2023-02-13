@@ -225,6 +225,7 @@ describe('getAlertSummary()', () => {
         ],
         Object {
           "end": "2019-02-12T21:01:22.479Z",
+          "filter": "NOT event.action: execute-action AND event.provider: alerting",
           "page": 1,
           "per_page": 10000,
           "sort": Array [
@@ -267,6 +268,7 @@ describe('getAlertSummary()', () => {
         ],
         Object {
           "end": "2019-02-12T21:01:22.479Z",
+          "filter": "NOT event.action: execute-action AND event.provider: alerting",
           "page": 1,
           "per_page": 10000,
           "sort": Array [

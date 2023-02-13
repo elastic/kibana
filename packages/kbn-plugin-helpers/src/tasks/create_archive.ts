@@ -42,4 +42,5 @@ export async function createArchive({ kibanaVersion, plugin, log }: BuildContext
 
   // delete the files that were zipped
   await del(Path.resolve(buildDir, 'kibana'));
+  log.success('plugin archive created');
 }

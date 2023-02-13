@@ -37,6 +37,11 @@ interface CreateAlertEventLogRecordParams {
     relation?: string;
   }>;
   flapping?: boolean;
+  alertSummary?: {
+    new: number;
+    ongoing: number;
+    recovered: number;
+  };
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
@@ -54,13 +59,23 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     spaceId,
     flapping,
     alertUuid,
+    alertSummary,
   } = params;
   const alerting =
-    params.instanceId || group
+    params.instanceId || group || alertSummary
       ? {
           alerting: {
             ...(params.instanceId ? { instance_id: params.instanceId } : {}),
             ...(group ? { action_group_id: group } : {}),
+            ...(alertSummary
+              ? {
+                  summary: {
+                    new: { count: alertSummary.new },
+                    ongoing: { count: alertSummary.ongoing },
+                    recovered: { count: alertSummary.recovered },
+                  },
+                }
+              : {}),
           },
         }
       : undefined;

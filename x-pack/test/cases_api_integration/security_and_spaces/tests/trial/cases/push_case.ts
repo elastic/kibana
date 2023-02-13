@@ -11,6 +11,7 @@ import http from 'http';
 
 import expect from '@kbn/expect';
 import { CaseConnector, CaseStatuses, CommentType, User } from '@kbn/cases-plugin/common/api';
+import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -42,14 +43,14 @@ import {
   calculateDuration,
   getComment,
   bulkCreateAttachments,
-} from '../../../../common/lib/utils';
-import {
+  loginUsers,
+  setupSuperUserProfile,
   getServiceNowConnector,
   createCaseWithConnector,
   getRecordingServiceNowSimulatorServer,
   getServiceNowSimulationServer,
   createConnector,
-} from '../../../../common/lib/connectors';
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -59,8 +60,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { RecordingServiceNowSimulator } from '../../../../../alerting_api_integration/common/plugins/actions_simulators/server/servicenow_simulation';
-import { loginUsers, setupSuperUserProfile } from '../../../../common/lib/user_profiles';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -617,7 +616,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('alerts', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/150962
+      describe.skip('alerts', () => {
         const defaultSignalsIndex = '.siem-signals-default-000001';
         const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
         const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';

@@ -1905,17 +1905,7 @@
         "label": "ActionsClient",
         "description": [],
         "signature": [
-          "{ get: ({ id }: { id: string; }) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<",
-          "ActionTypeConfig",
-          ">>; delete: ({ id }: { id: string; }) => Promise<{}>; create: ({ action: { actionTypeId, name, config, secrets }, }: ",
+          "{ create: ({ action: { actionTypeId, name, config, secrets }, }: ",
           "CreateOptions",
           ") => Promise<",
           {
@@ -1939,17 +1929,17 @@
           },
           "<",
           "ActionTypeConfig",
-          ">>; execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
-          "ExecuteOptions",
-          "<unknown>, \"request\" | \"actionExecutionId\">) => Promise<",
+          ">>; get: ({ id }: { id: string; }) => Promise<",
           {
             "pluginId": "actions",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibActionsPluginApi",
-            "section": "def-common.ActionTypeExecutorResult",
-            "text": "ActionTypeExecutorResult"
+            "section": "def-server.ActionResult",
+            "text": "ActionResult"
           },
-          "<unknown>>; getAll: () => Promise<",
+          "<",
+          "ActionTypeConfig",
+          ">>; getAll: () => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -1967,9 +1957,19 @@
           },
           "<",
           "ActionTypeConfig",
-          ">[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { options: Readonly<{} & { config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; tokenUrl: string; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { scope: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; tokenUrl: string; secrets: Readonly<{} & { clientSecret: string; }>; }>; type: \"jwt\" | \"client\"; }>, configurationUtilities: ",
+          ">[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
           "ActionsConfigurationUtilities",
-          ") => Promise<{ accessToken: string | null; }>; enqueueExecution: (options: ",
+          ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
+          "ExecuteOptions",
+          "<unknown>, \"request\" | \"actionExecutionId\">) => Promise<",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.ActionTypeExecutorResult",
+            "text": "ActionTypeExecutorResult"
+          },
+          "<unknown>>; enqueueExecution: (options: ",
           "ExecuteOptions",
           ") => Promise<void>; bulkEnqueueExecution: (options: ",
           "ExecuteOptions",
@@ -3218,7 +3218,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"ok\""
+              "\"ok\" | \"error\""
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,

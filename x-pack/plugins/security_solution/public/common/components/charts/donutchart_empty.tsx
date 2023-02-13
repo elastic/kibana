@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import styled from 'styled-components';
+import { useEuiBackgroundColor } from '@elastic/eui';
 
 interface DonutChartEmptyProps {
   size?: number;
@@ -29,7 +30,7 @@ const SmallRing = styled.div<DonutChartEmptyProps>`
   ${({ size }) => `
     height: ${size}px;
     width: ${size}px;
-    background-color: white;
+    background-color: ${useEuiBackgroundColor('plain')};
     display: inline-block;
     vertical-align: middle;`}
 `;
