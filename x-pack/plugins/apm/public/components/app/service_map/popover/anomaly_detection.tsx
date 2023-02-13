@@ -65,7 +65,6 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
   const severity = getSeverity(anomalyScore);
   const actualValue = serviceAnomalyStats?.actualValue;
   const mlJobId = serviceAnomalyStats?.jobId;
-  // TODO check the type
   const transactionType =
     serviceAnomalyStats?.transactionType ?? TRANSACTION_REQUEST;
   const hasAnomalyDetectionScore = anomalyScore !== undefined;
