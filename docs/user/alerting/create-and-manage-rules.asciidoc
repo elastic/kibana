@@ -125,6 +125,8 @@ You can attach more than one action. Clicking the *Add action* button will promp
 [[defining-rules-actions-variables]]
 ===== Action variables
 
+Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass rule values to an action at the time a condition is detected. You can access the list of available variables using the "add rule variable" button:
+
 [role="screenshot"]
 image::images/rule-flyout-action-variables.png[Passing rule values to an action]
 
