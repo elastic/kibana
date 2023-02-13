@@ -100,10 +100,8 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
         >
           <FormattedMessage
             id="xpack.enterpriseSearch.content.enginesList.table.column.view.indices"
-            defaultMessage="{indicesLength} indices"
-            values={{
-              indicesLength: indices.length,
-            }}
+            defaultMessage="{indicesCount, number} {indicesCount, plural, one {index} other {indices}}"
+            values={{ indicesCount: indices.length }}
           />
         </EuiButtonEmpty>
       ),
