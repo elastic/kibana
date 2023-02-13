@@ -58,12 +58,9 @@ export {
   DatePicker,
   LoadWhenInView,
   ObservabilityAlertSearchBar,
-  ObservabilityAlertStatusFilter,
 } from './components/shared';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';
-
-export { ALERT_STATUS_QUERY } from './components/shared/alert_search_bar';
 
 export type { UiTracker, TrackMetricOptions } from './hooks/use_track_metric';
 export {

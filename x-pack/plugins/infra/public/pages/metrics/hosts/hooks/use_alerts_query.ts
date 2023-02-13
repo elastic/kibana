@@ -9,12 +9,12 @@ import createContainer from 'constate';
 import { getTime } from '@kbn/data-plugin/common';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { buildEsQuery, Filter, Query } from '@kbn/es-query';
-import { ALERT_STATUS_QUERY } from '@kbn/observability-plugin/public';
-import { AlertStatus } from '@kbn/observability-plugin/common';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { HostsState } from './use_unified_search_url_state';
 import { useHostsView } from './use_hosts_view';
+import { AlertStatus } from '../types';
+import { ALERT_STATUS_QUERY } from '../constants';
 
 export const useAlertsQueryImpl = () => {
   const { hostNodes } = useHostsView();

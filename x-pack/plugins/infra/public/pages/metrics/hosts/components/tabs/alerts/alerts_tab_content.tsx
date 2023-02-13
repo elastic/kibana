@@ -7,11 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  getAlertSummaryTimeRange,
-  ObservabilityAlertStatusFilter,
-  useTimeBuckets,
-} from '@kbn/observability-plugin/public';
+import { getAlertSummaryTimeRange, useTimeBuckets } from '@kbn/observability-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { HeightRetainer } from '../../../../../../components/height_retainer';
 import type { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../../types';
@@ -25,6 +21,7 @@ import {
   infraAlertFeatureIds,
 } from '../config';
 import { useAlertsQuery } from '../../../hooks/use_alerts_query';
+import AlertsStatusFilter from './alerts_status_filter';
 
 export const AlertsTabContent = React.memo(() => {
   const { services } = useKibana<InfraClientCoreStart & InfraClientStartDeps>();
@@ -59,7 +56,7 @@ export const AlertsTabContent = React.memo(() => {
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
-            <ObservabilityAlertStatusFilter onChange={setAlertStatus} status={alertStatus} />
+            <AlertsStatusFilter onChange={setAlertStatus} status={alertStatus} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexItem>
