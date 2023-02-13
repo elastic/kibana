@@ -15,8 +15,8 @@ import { isNestedObject } from '../utils/is_nested_object';
 import { recursiveUnboxingFields } from '../utils/recursive_unboxing_fields';
 import { isPrimitive } from '../utils/is_primitive';
 import { isArrayOfPrimitives } from '../utils/is_array_of_primitives';
-import { arrayInPathExists } from '../utils/array_in_path_exists';
 import { isTypeObject } from '../utils/is_type_object';
+import { isPathValid } from '../utils/is_path_valid';
 
 /**
  * Merges all of "doc._source" with its "doc.fields" on a "best effort" basis. See ../README.md for more information
@@ -107,7 +107,7 @@ const hasEarlyReturnConditions = ({
   const valueInMergedDocument = get(fieldsKey, merged);
   return (
     fieldsValue.length === 0 ||
-    (valueInMergedDocument === undefined && arrayInPathExists(fieldsKey, merged)) ||
+    (valueInMergedDocument === undefined && !isPathValid(fieldsKey, merged)) ||
     (isObjectLikeOrArrayOfObjectLikes(valueInMergedDocument) &&
       !isNestedObject(fieldsValue) &&
       !isTypeObject(fieldsValue))

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, cloneDeep } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import { set } from '@kbn/safer-lodash-set';
 import type { SignalSource } from '../../types';
 import { filterFieldEntries } from '../utils/filter_field_entries';
@@ -46,7 +46,7 @@ export const mergeMissingFieldsWithSource: MergeStrategyFunction = ({ doc, ignor
       const valueToMerge = recursiveUnboxingFields(fieldsValue, valueInMergedDocument);
       return set(merged, fieldsKey, valueToMerge);
     },
-    cloneDeep(source)
+    { ...source }
   );
 
   return {
