@@ -13,11 +13,11 @@ import type {
   ResponseActionGetFileParameters,
 } from '../../../../common/endpoint/types';
 import React from 'react';
-import type { ResponseActionFileDownloadLinkProps } from './response_action_file_download_link';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   FILE_NO_LONGER_AVAILABLE_MESSAGE,
   ResponseActionFileDownloadLink,
+  type ResponseActionFileDownloadLinkProps,
 } from './response_action_file_download_link';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';

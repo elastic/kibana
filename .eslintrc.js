@@ -1736,6 +1736,7 @@ module.exports = {
     {
       files: [
         'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+        'packages/kbn-validate-next-docs-cli/**/*',
         'packages/kbn-find-used-node-modules/**/*',
       ],
       rules: {
