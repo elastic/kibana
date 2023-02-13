@@ -7,18 +7,12 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { Processor } from '../../../../common/types';
 
-import {
-  getUseField,
-  getFormRow,
-  Field,
-  JsonEditorField,
-  useKibana,
-} from '../../../shared_imports';
+import { getUseField, getFormRow, Field, JsonEditorField } from '../../../shared_imports';
 
 import {
   ProcessorsEditorContextProvider,
@@ -56,8 +50,6 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(hasVersion);
 
   const [isMetaVisible, setIsMetaVisible] = useState<boolean>(hasMeta);
-
-  const { services } = useKibana();
 
   return (
     <>
@@ -147,20 +139,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
           <>
             <FormattedMessage
               id="xpack.ingestPipelines.form.metaDescription"
-              defaultMessage="Additional information about the ingest pipeline. This information is stored in the cluster state, so best to keep it short. {learnMoreLink}"
-              values={{
-                learnMoreLink: (
-                  <EuiLink
-                    href={services.documentation.getPipelineMetadataUrl()}
-                    target="_blank"
-                    external
-                  >
-                    {i18n.translate('xpack.ingestPipelines.form.metaDocumentionLink', {
-                      defaultMessage: 'Learn more.',
-                    })}
-                  </EuiLink>
-                ),
-              }}
+              defaultMessage="Additional information about the ingest pipeline. This information is stored in the cluster state, so best to keep it short."
             />
 
             <EuiSpacer size="m" />

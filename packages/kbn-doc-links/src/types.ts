@@ -329,7 +329,6 @@ export interface DocLinks {
     painlessExecute: string;
     painlessExecuteAPIContexts: string;
     putComponentTemplateMetadata: string;
-    putPipelineMetadata: string;
     putSnapshotLifecyclePolicy: string;
     putIndexTemplateV1: string;
     putWatch: string;
