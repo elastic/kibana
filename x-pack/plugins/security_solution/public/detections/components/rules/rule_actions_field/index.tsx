@@ -58,12 +58,15 @@ const ContainerActions = styled.div.attrs(
 
 export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
-  const [isInitializingAction, setIsInitializingAction] = useState(false);
   const form = useFormContext();
   const { isSubmitted, isSubmitting, isValid } = form;
   const {
     triggersActionsUi: { getActionForm },
   } = useKibana().services;
+
+  // Workaround for setAlertActionsProperty being fired with prevProps when followed by setActionIdByIndex
+  // For details see: https://github.com/elastic/kibana/issues/142217
+  const [isInitializingAction, setIsInitializingAction] = useState(false);
 
   const actions: RuleAction[] = useMemo(
     () => (!isEmpty(field.value) ? (field.value as RuleAction[]) : []),
@@ -102,7 +105,8 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     (key: string, value: RuleActionParam, index: number) => {
       // validation is not triggered correctly when actions params updated (more details in https://github.com/elastic/kibana/issues/142217)
       // wrapping field.setValue in setTimeout fixes the issue above
-      // and triggers validation after params have been updated
+      // and triggers validation after params have been updated, however it introduced a new issue where any additional input
+      // would result in the cursor jumping to the end of the text area (https://github.com/elastic/kibana/issues/149885)
       const updateValue = () => {
         field.setValue((prevValue: RuleAction[]) => {
           const updatedActions = [...prevValue];

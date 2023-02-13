@@ -6,3 +6,4 @@
  */
 
 export { validateRuleActionsField } from './validate_rule_actions_field';
+export { throttledValidateRuleActionsField } from './validate_rule_actions_field';

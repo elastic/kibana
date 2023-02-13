@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { validateRuleActionsField } from '../../../containers/detection_engine/rules/validate_rule_actions_field';
+import { throttledValidateRuleActionsField } from '../../../containers/detection_engine/rules/validate_rule_actions_field';
 
 import type { FormSchema } from '../../../../shared_imports';
 import type { ActionsStepRule } from '../../../pages/detection_engine/rules/types';
@@ -21,7 +21,8 @@ export const getSchema = ({
   actions: {
     validations: [
       {
-        validator: validateRuleActionsField(actionTypeRegistry),
+        // Throttled validator is necessary here to prevent error validation flashing when first adding an action
+        validator: throttledValidateRuleActionsField(actionTypeRegistry),
       },
     ],
   },
