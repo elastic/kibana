@@ -7,6 +7,7 @@
  */
 
 import React, { FunctionComponent, useMemo } from 'react';
+// eslint-disable-next-line no-restricted-imports
 import { RouteComponentProps, Router, Route, Switch } from 'react-router-dom';
 import { History } from 'history';
 import { EMPTY, Observable } from 'rxjs';
