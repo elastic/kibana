@@ -112,7 +112,7 @@ export const DatasetComboBox: React.FC<{
                     content={
                       <FormattedMessage
                         id="xpack.fleet.datasetCombo.warningTooltip"
-                        defaultMessage="The destination data stream may not be designed to receive data from this integration, check that mappings and index templates are compatible before sending data."
+                        defaultMessage="The destination data stream may not be designed to receive data from this integration, check that the mappings and ingest pipelines are compatible before sending data."
                       />
                     }
                   >
