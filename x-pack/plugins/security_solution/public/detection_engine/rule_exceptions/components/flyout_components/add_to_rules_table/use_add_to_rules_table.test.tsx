@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render as rTLRender } from '@testing-library/react';
 import { waitFor } from '@testing-library/dom';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { EuiTableFieldDataColumnType } from '@elastic/eui';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { getRulesSchemaMock } from '../../../../../../common/detection_engine/rule_schema/mocks';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
