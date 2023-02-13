@@ -50,6 +50,7 @@ import {
   InfraPluginStart,
 } from './types';
 import { UsageCollector } from './usage/usage_collector';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
@@ -196,7 +197,7 @@ export class InfraServerPlugin
         const soClient = (await context.core).savedObjects.client;
         const mlSystem = plugins.ml?.mlSystemProvider(request, soClient);
         const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(request, soClient);
-        const spaceId = plugins.spaces?.spacesService.getSpaceId(request) || 'default';
+        const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;;
 
         return {
           mlAnomalyDetectors,

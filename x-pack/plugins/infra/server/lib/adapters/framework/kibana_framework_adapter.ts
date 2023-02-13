@@ -24,6 +24,7 @@ import {
   InfraServerPluginSetupDeps,
   InfraServerPluginStartDeps,
 } from './adapter_types';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 interface FrozenIndexParams {
   ignore_throttled?: boolean;
@@ -213,17 +214,7 @@ export class KibanaFramework {
   }
 
   public getSpaceId(request: KibanaRequest): string {
-    const spacesPlugin = this.plugins.spaces;
-
-    if (
-      spacesPlugin &&
-      spacesPlugin.spacesService &&
-      typeof spacesPlugin.spacesService.getSpaceId === 'function'
-    ) {
-      return spacesPlugin.spacesService.getSpaceId(request);
-    } else {
-      return 'default';
-    }
+    return this.plugins.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
   }
 
   public async makeTSVBRequest(

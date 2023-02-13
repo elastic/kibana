@@ -12,12 +12,20 @@ import { useKibanaContextForPlugin } from './use_kibana';
 export type ActiveSpace =
   | { isLoading: true; error: undefined; space: undefined }
   | { isLoading: false; error: Error; space: undefined }
-  | { isLoading: false; error: undefined; space: Space };
+  | { isLoading: false; error: undefined; space: Space | undefined };
 
 export const useActiveKibanaSpace = (): ActiveSpace => {
   const kibana = useKibanaContextForPlugin();
 
-  const asyncActiveSpace = useAsync(kibana.services.spaces.getActiveSpace);
+  const asyncActiveSpace = kibana.services.spaces?.getActiveSpace ? useAsync(kibana.services.spaces.getActiveSpace) : undefined
+
+  if(!asyncActiveSpace) {
+    return {
+      isLoading: false,
+      error: undefined,
+      space: undefined,
+    };
+  }
 
   if (asyncActiveSpace.loading) {
     return {
@@ -35,7 +43,7 @@ export const useActiveKibanaSpace = (): ActiveSpace => {
     return {
       isLoading: false,
       error: undefined,
-      space: asyncActiveSpace.value!,
+      space: asyncActiveSpace.value,
     };
   }
 };
