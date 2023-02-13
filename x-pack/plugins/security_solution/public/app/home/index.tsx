@@ -18,7 +18,6 @@ import {
   getScopeFromPath,
   useSourcererDataView,
 } from '../../common/containers/sourcerer';
-import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_security_packages';
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 
@@ -26,6 +25,7 @@ import { TourContextProvider } from '../../common/components/guided_onboarding_t
 
 import { useUrlState } from '../../common/hooks/use_url_state';
 import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_title';
+import { useUpgradeSecurityPackages } from '../../detection_engine/rule_management/logic/use_upgrade_security_packages';
 
 interface HomePageProps {
   children: React.ReactNode;

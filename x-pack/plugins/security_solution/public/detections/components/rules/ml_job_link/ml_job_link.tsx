@@ -28,12 +28,17 @@ const MlJobLinkComponent: React.FC<React.PropsWithChildren<MlJobLinkProps>> = ({
   const {
     services: { http, ml },
   } = useKibana();
-  const jobUrl = useMlHref(ml, http.basePath.get(), {
-    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-    pageState: {
-      jobId: [jobId],
+  const jobUrl = useMlHref(
+    ml,
+    http.basePath.get(),
+    {
+      page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+      pageState: {
+        jobId: [jobId],
+      },
     },
-  });
+    [jobId]
+  );
 
   return (
     <StyledJobEuiLInk data-test-subj="machineLearningJobLink" href={jobUrl} target="_blank">
