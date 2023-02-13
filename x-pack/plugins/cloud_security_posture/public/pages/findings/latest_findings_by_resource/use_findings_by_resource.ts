@@ -9,6 +9,7 @@ import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Pagination } from '@elastic/eui';
+import { getBelongsToRuntimeMapping } from '../../../../common/runtime_mappings/get_belongs_to_runtime_mapping';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
@@ -43,7 +44,7 @@ export interface FindingsByResourcePage {
   };
   compliance_score: number;
   resource_id: string;
-  cluster_id: string;
+  belongs_to: string;
   'resource.name': string;
   'resource.sub_type': string;
   'rule.benchmark.name': string;
@@ -62,7 +63,7 @@ interface FindingsAggBucket extends estypes.AggregationsStringRareTermsBucketKey
   passed_findings: estypes.AggregationsMultiBucketBase;
   name: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
   subtype: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
-  cluster_id: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
+  belongs_to: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
   benchmarkName: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
   cis_sections: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
@@ -75,6 +76,7 @@ export const getFindingsByResourceAggQuery = ({
   body: {
     query,
     size: 0,
+    runtime_mappings: getBelongsToRuntimeMapping(),
     aggs: {
       ...getFindingsCountAggQuery(),
       resource_total: { cardinality: { field: 'resource.id' } },
@@ -99,8 +101,9 @@ export const getFindingsByResourceAggQuery = ({
           passed_findings: {
             filter: { term: { 'result.evaluation': 'passed' } },
           },
-          cluster_id: {
-            terms: { field: 'cluster_id', size: 1 },
+          // this field is runtime generated
+          belongs_to: {
+            terms: { field: 'belongs_to', size: 1 },
           },
           compliance_score: {
             bucket_script: {
@@ -177,12 +180,12 @@ const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResour
     !Array.isArray(resource.cis_sections.buckets) ||
     !Array.isArray(resource.name.buckets) ||
     !Array.isArray(resource.subtype.buckets) ||
-    !Array.isArray(resource.cluster_id.buckets) ||
+    !Array.isArray(resource.belongs_to.buckets) ||
     !resource.benchmarkName.buckets.length ||
     !resource.cis_sections.buckets.length ||
     !resource.name.buckets.length ||
     !resource.subtype.buckets.length ||
-    !resource.cluster_id.buckets.length
+    !resource.belongs_to.buckets.length
   )
     throw new Error('expected buckets to be an array');
 
@@ -190,9 +193,9 @@ const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResour
     resource_id: resource.key,
     ['resource.name']: resource.name.buckets[0]?.key,
     ['resource.sub_type']: resource.subtype.buckets[0]?.key,
-    cluster_id: resource.cluster_id.buckets[0]?.key,
     ['rule.section']: resource.cis_sections.buckets.map((v) => v.key),
     ['rule.benchmark.name']: resource.benchmarkName.buckets[0]?.key,
+    belongs_to: resource.belongs_to.buckets[0]?.key,
     compliance_score: resource.compliance_score.value,
     findings: {
       failed_findings: resource.failed_findings.doc_count,
