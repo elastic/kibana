@@ -143,17 +143,6 @@ put:
               - items
   operationId: update-package
   description: ''
-  parameters:
-    - schema:
-        type: string
-      name: pkgName
-      in: path
-      required: true
-    - schema:
-        type: string
-      name: pkgVersion
-      in: path
-      required: true
   requestBody:
     content:
       application/json:

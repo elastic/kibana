@@ -6,6 +6,7 @@
   "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*",

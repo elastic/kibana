@@ -18,7 +18,7 @@ import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
 
 import type { PluginState } from '../../common';
 import { API_BASE_PATH } from '../../common';
-import { apiService } from '../services/api';
+import { apiService } from '../services/api.service';
 import type { GuidedOnboardingApi } from '../types';
 import {
   testGuideStep1ActiveState,
@@ -164,6 +164,16 @@ describe('Guided setup', () => {
         // mock state is by default { status: 'not_started', isActivePeriod: true }
         test('shows redirect button when no guide has been started yet', () => {
           const { exists } = testBed;
+          expect(exists('guideButtonRedirect')).toBe(true);
+          expect(exists('guideButton')).toBe(false);
+        });
+
+        test('shows redirect button when a guide has been viewed but not started', async () => {
+          const { exists } = await setupComponentWithPluginStateMock(httpClient, {
+            status: 'in_progress',
+            isActivePeriod: true,
+            activeGuide: { ...testGuideStep1InProgressState, status: 'not_started' },
+          });
           expect(exists('guideButtonRedirect')).toBe(true);
           expect(exists('guideButton')).toBe(false);
         });

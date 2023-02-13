@@ -17,7 +17,6 @@ import type {
   CaseStatuses,
   User,
   ActionConnector,
-  CaseExternalServiceBasic,
   CaseUserActionResponse,
   SingleCaseMetricsResponse,
   CommentResponse,
@@ -30,6 +29,8 @@ import type {
   CaseSeverity,
   CommentResponseExternalReferenceType,
   CommentResponseTypePersistableState,
+  GetCaseConnectorsResponse,
+  GetCaseUsersResponse,
 } from '../api';
 import type { PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
@@ -81,12 +82,13 @@ export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
   userActions: CaseUserActions[];
 };
-export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
 export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
+export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
+export type CaseUsers = GetCaseUsersResponse;
 
 export interface ResolvedCase {
   case: Case;
@@ -147,7 +149,7 @@ export enum SortFieldCase {
   title = 'title',
 }
 
-export type ElasticUser = SnakeToCamelCase<User>;
+export type CaseUser = SnakeToCamelCase<User>;
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;

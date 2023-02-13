@@ -8,11 +8,13 @@
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import type {
+  CaseConnectors,
   Cases,
   CaseUpdateRequest,
   FetchCasesProps,
   ResolvedCase,
   FindCaseUserActions,
+  CaseUsers,
 } from '../../common/ui/types';
 import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
 import type {
@@ -27,6 +29,7 @@ import type {
   User,
   SingleCaseMetricsResponse,
   CasesFindResponse,
+  GetCaseConnectorsResponse,
 } from '../../common/api';
 import {
   CommentType,
@@ -36,6 +39,8 @@ import {
   getCasePushUrl,
   getCaseFindUserActionsUrl,
   getCaseCommentDeleteUrl,
+  getCaseConnectorsUrl,
+  getCaseUsersUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -377,4 +382,36 @@ export const getFeatureIds = async (
       query,
     }
   );
+};
+
+export const getCaseConnectors = async (
+  caseId: string,
+  signal: AbortSignal
+): Promise<CaseConnectors> => {
+  const res = await KibanaServices.get().http.fetch<GetCaseConnectorsResponse>(
+    getCaseConnectorsUrl(caseId),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+  return Object.keys(res).reduce(
+    (acc, connectorId) => ({
+      ...acc,
+      [connectorId]: {
+        ...convertToCamelCase<GetCaseConnectorsResponse[string], CaseConnectors[string]>(
+          res[connectorId]
+        ),
+      },
+    }),
+    {}
+  );
+};
+
+export const getCaseUsers = async (caseId: string, signal: AbortSignal): Promise<CaseUsers> => {
+  return KibanaServices.get().http.fetch<CaseUsers>(getCaseUsersUrl(caseId), {
+    method: 'GET',
+    signal,
+  });
 };

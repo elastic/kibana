@@ -25,9 +25,14 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickCreateNewLink() {
     this.log.debug('DashboardAddPanel.clickAddNewPanelButton');
-    await this.testSubjects.click('dashboardAddNewPanelButton');
-    // Give some time for the animation to complete
-    await this.common.sleep(500);
+    await this.retry.try(async () => {
+      await this.testSubjects.click('dashboardAddNewPanelButton');
+      await this.testSubjects.waitForDeleted('dashboardAddNewPanelButton');
+      await this.header.waitUntilLoadingHasFinished();
+      await this.testSubjects.existOrFail('lnsApp', {
+        timeout: 5000,
+      });
+    });
   }
 
   async clickQuickButton(visType: string) {
@@ -112,12 +117,17 @@ export class DashboardAddPanelService extends FtrService {
     // Clear all toasts that could hide pagination controls
     await this.common.clearAllToasts();
 
-    const isNext = await this.testSubjects.exists('pagination-button-next');
+    const addPanel = await this.testSubjects.find('dashboardAddPanel');
+
+    const isNext = await this.testSubjects.descendantExists('pagination-button-next', addPanel);
     if (!isNext) {
       return false;
     }
 
-    const pagerNextButton = await this.testSubjects.find('pagination-button-next');
+    const pagerNextButton = await this.testSubjects.findDescendant(
+      'pagination-button-next',
+      addPanel
+    );
 
     const isDisabled = await pagerNextButton.getAttribute('disabled');
     if (isDisabled != null) {
