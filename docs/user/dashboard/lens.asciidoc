@@ -21,7 +21,7 @@ With *Lens*, you can:
 
 If you're unsure about the visualization type you want to use, or how you want to display the data, drag the fields you want to visualize onto the workspace, then let *Lens* choose for you. 
 
-If you already know the visualization type you want to use, and how you want to display the data, use the following process:
+If you already know the visualization type you want to use, and how you want to display the data, use the following process.
 
 Choose the visualization type. 
 
