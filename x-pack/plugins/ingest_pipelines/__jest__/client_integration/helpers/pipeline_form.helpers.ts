@@ -37,10 +37,22 @@ export const getFormActions = (testBed: TestBed) => {
     component.update();
   };
 
+  const toggleMetaSwitch = () => {
+    act(() => {
+      form.toggleEuiSwitch('metaToggle');
+    });
+  };
+
+  const setMetaField = (value: object) => {
+    find('metaEditor').simulate('change', { jsonString: JSON.stringify(value) });
+  };
+
   return {
     clickSubmitButton,
     clickShowRequestLink,
     toggleVersionSwitch,
+    toggleMetaSwitch,
+    setMetaField,
   };
 };
 
@@ -54,6 +66,8 @@ export type PipelineFormTestSubjects =
   | 'pipelineForm'
   | 'versionToggle'
   | 'versionField'
+  | 'metaToggle'
+  | 'metaEditor'
   | 'nameField.input'
   | 'descriptionField.input'
   | 'processorsEditor'
