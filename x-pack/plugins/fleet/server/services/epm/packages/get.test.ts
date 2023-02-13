@@ -209,7 +209,7 @@ describe('When using EPM `get` services', () => {
             attributes: {
               name: 'elasticsearch',
               version: '0.0.1',
-              install_status: 'upload',
+              install_source: 'upload',
             },
           },
         ],
@@ -224,13 +224,12 @@ describe('When using EPM `get` services', () => {
           name: 'elasticsearch',
           version: '0.0.1',
           title: 'Elasticsearch',
-          status: 'upload',
           savedObject: {
             id: 'elasticsearch',
             attributes: {
               name: 'elasticsearch',
               version: '0.0.1',
-              install_status: 'upload',
+              install_source: 'upload',
             },
           },
         },
