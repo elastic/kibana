@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const ml = getService('ml');
+  const transform = getService('transform');
   const commonScreenshots = getService('commonScreenshots');
   const screenshotDirectories = ['ml_docs', 'transforms'];
   const pageObjects = getPageObjects(['triggersActionsUI']);
@@ -17,18 +17,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('transform alerts', function () {
     it('transform rule screenshot', async () => {
-      await ml.testExecution.logTestStep('navigate to stack management rules');
-      await ml.navigation.navigateToAlertsAndAction();
+      await transform.testExecution.logTestStep('navigate to stack management rules');
+      await transform.navigation.navigateToRules();
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await ml.alerting.setRuleName('transform-health-rule');
-      await ml.testExecution.logTestStep('search for transform rule type');
+      await transform.alerting.setRuleName('transform-health-rule');
+      await transform.testExecution.logTestStep('search for transform rule type');
       const searchBox = await testSubjects.find('ruleSearchField');
       await searchBox.click();
       await searchBox.clearValue();
       await searchBox.type('transform');
       await searchBox.pressKeys(ENTER_KEY);
-      await ml.testExecution.logTestStep('take screenshot');
+      await transform.testExecution.logTestStep('take screenshot');
       await commonScreenshots.takeScreenshot('transform-rule', screenshotDirectories);
+      await transform.testExecution.logTestStep('select transform rule type');
+      await transform.alerting.selectTransformAlertType();
+      await transform.testExecution.logTestStep('take screenshot');
+      await commonScreenshots.takeScreenshot('transform-check-config', screenshotDirectories);
     });
   });
 }
