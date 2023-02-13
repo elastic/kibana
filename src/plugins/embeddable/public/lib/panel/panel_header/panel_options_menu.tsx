@@ -131,6 +131,7 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
             ? 'embeddablePanelContextMenuOpen'
             : 'embeddablePanelContextMenuClosed'
         }
+        repositionOnScroll
       >
         <EuiContextMenu
           initialPanelId="mainMenu"

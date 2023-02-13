@@ -28,7 +28,7 @@ const SHOW_TOP = (fieldName: string) =>
     defaultMessage: `Show top {fieldName}`,
   });
 
-const ID = 'security_showTopN';
+export const ACTION_ID = 'security_showTopN';
 const ICON = 'visBarVertical';
 const UNSUPPORTED_FIELD_TYPES = ['date', 'text'];
 
@@ -56,8 +56,8 @@ export const createShowTopNAction = ({
   });
 
   return {
-    id: ID,
-    type: ID,
+    id: ACTION_ID,
+    type: ACTION_ID,
     order,
     getIconType: (): string => ICON,
     getDisplayName: ({ field }) => SHOW_TOP(field.name),
@@ -65,7 +65,8 @@ export const createShowTopNAction = ({
     isCompatible: async ({ field }) =>
       isInSecurityApp(currentAppId) &&
       fieldHasCellActions(field.name) &&
-      !UNSUPPORTED_FIELD_TYPES.includes(field.type),
+      !UNSUPPORTED_FIELD_TYPES.includes(field.type) &&
+      !!field.aggregatable,
     execute: async (context) => {
       if (!context.nodeRef.current) return;
 
