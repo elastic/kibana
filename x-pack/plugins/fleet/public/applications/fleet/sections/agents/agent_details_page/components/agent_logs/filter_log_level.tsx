@@ -60,7 +60,7 @@ export const LogLevelFilter: React.FunctionComponent<{
       setIsLoading(false);
     };
     fetchValues();
-  }, [unifiedSearch.autocomplete]);
+  }, [unifiedSearch.autocomplete, dataViews]);
 
   const noLogsFound = (
     <div className="euiFilterSelect__note">

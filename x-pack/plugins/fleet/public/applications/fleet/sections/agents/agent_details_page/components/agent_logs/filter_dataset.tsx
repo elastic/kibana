@@ -49,7 +49,7 @@ export const DatasetFilter: React.FunctionComponent<{
       setIsLoading(false);
     };
     fetchValues();
-  }, [unifiedSearch.autocomplete]);
+  }, [unifiedSearch.autocomplete, dataViews]);
 
   return (
     <EuiPopover
