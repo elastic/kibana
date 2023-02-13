@@ -7,7 +7,7 @@ import {
   EuiHeaderLink,
 } from '@elastic/eui';
 
-export default () => {
+export function Header() {
   return (
     <EuiHeader>
       <EuiHeaderSectionItem border="right">
@@ -39,4 +39,4 @@ export default () => {
       </EuiHeaderSectionItem>
     </EuiHeader>
   );
-};
+}

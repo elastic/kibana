@@ -1,15 +1,21 @@
-import { EuiPageSection } from '@elastic/eui';
 import React from 'react';
-import './App.css';
-import Header from './header';
+import { Header } from './components/header';
+import { NewScenarioForm } from './components/new_scenario_form';
+import { ScenarioView } from './components/scenario_view';
+import { Template } from './components/template';
+import { ScenarioContextProvider } from './context/scenario_context';
+
 function App() {
   return (
-    <div className="App">
+    <>
       <Header />
-      <EuiPageSection restrictWidth={false} color="subdued" bottomBorder={true}>
-        Synthtrace UI is under construction.
-      </EuiPageSection>
-    </div>
+      <Template>
+        <ScenarioContextProvider>
+          <NewScenarioForm />
+          <ScenarioView />
+        </ScenarioContextProvider>
+      </Template>
+    </>
   );
 }
 
