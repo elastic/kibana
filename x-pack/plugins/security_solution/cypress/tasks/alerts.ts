@@ -36,6 +36,7 @@ import {
   CELL_FILTER_IN_BUTTON,
   CELL_SHOW_TOP_FIELD_BUTTON,
   ACTIONS_EXPAND_BUTTON,
+  SELECT_HISTOGRAM,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -258,6 +259,10 @@ export const openAlerts = () => {
 
 export const selectCountTable = () => {
   cy.get(SELECT_AGGREGATION_CHART).click({ force: true });
+};
+
+export const selectAlertsHistogram = () => {
+  cy.get(SELECT_HISTOGRAM).click({ force: true });
 };
 
 export const clearGroupByTopInput = () => {
