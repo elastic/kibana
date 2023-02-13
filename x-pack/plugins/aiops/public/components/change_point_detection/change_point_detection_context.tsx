@@ -163,7 +163,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
       ({ aggregatable, esTypes, displayName }) =>
         aggregatable &&
         esTypes &&
-        esTypes.includes('keyword') &&
+        esTypes.some((el) => ['keyword', 'ip'].includes(el)) &&
         !['_id', '_index'].includes(displayName)
     );
   }, [dataView]);
