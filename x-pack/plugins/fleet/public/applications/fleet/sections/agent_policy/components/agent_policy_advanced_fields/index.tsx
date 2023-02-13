@@ -24,11 +24,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBetaBadge,
+  EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { dataTypes } from '../../../../../../../common/constants';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, dataTypes } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useStartServices, useConfig, useGetAgentPolicies } from '../../../../hooks';
 
@@ -76,12 +77,13 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const { data: agentPoliciesData } = useGetAgentPolicies({
     page: 1,
     perPage: 0,
+    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout: *`,
   });
 
-  const totalAgentPolicies = agentPoliciesData?.total ?? 0;
+  const totalAgentPoliciesWithInactivityTimeout = agentPoliciesData?.total ?? 0;
   const tooManyAgentPoliciesForInactivityTimeout =
     maxAgentPoliciesWithInactivityTimeout !== undefined &&
-    totalAgentPolicies > (maxAgentPoliciesWithInactivityTimeout ?? 0);
+    totalAgentPoliciesWithInactivityTimeout > (maxAgentPoliciesWithInactivityTimeout ?? 0);
   const { dataDownloadSourceOptions, isLoading: isLoadingDownloadSources } =
     useDownloadSourcesOptions(agentPolicy);
 
@@ -292,7 +294,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 <EuiToolTip
                   content={i18n.translate('xpack.fleet.agentPolicyForm.inactivityTimeoutTooltip', {
                     defaultMessage:
-                      'There are over 750 agent policies with an inactivity timeout. Remove inactivity timeouts or agent policies to allow agents to become inactive again.',
+                      'The maximum of 750 agent policies with an inactivity timeout has been exceeded. Remove inactivity timeouts or agent policies to allow agents to become inactive again.',
                     values: { maxAgentPoliciesWithInactivityTimeout },
                   })}
                 >
