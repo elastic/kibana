@@ -172,7 +172,7 @@ export class DetectionsPageObject extends FtrService {
 
     for (const eventRow of allEvents) {
       const hostNameButton = await this.testSubjects.findDescendant(
-        'formatted-field-host.name',
+        'host-details-button',
         eventRow
       );
       const eventRowHostName = (await hostNameButton.getVisibleText()).trim();

@@ -57,6 +57,50 @@
           },
           {
             "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertsClient.ensureAllAlertsAuthorizedRead",
+            "type": "Function",
+            "tags": [],
+            "label": "ensureAllAlertsAuthorizedRead",
+            "description": [],
+            "signature": [
+              "({ alerts }: { alerts: MgetAndAuditAlert[]; }) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.AlertsClient.ensureAllAlertsAuthorizedRead.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ alerts }",
+                "description": [],
+                "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.ensureAllAlertsAuthorizedRead.$1.alerts",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "alerts",
+                    "description": [],
+                    "signature": [
+                      "MgetAndAuditAlert[]"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
             "id": "def-server.AlertsClient.get",
             "type": "Function",
             "tags": [],
@@ -214,6 +258,44 @@
                 "signature": [
                   "BulkUpdateOptions",
                   "<Params>"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertsClient.bulkUpdateCases",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkUpdateCases",
+            "description": [
+              "\nThis function updates the case ids of multiple alerts per index.\nIt is supposed to be used only by Cases.\nCases implements its own RBAC. By using this function directly\nCases RBAC is bypassed.\nPlugins that want to attach alerts to a case should use the\ncases client that does all the necessary cases RBAC checks\nbefore updating the alert with the case ids."
+            ],
+            "signature": [
+              "({ alerts, caseIds }: ",
+              "BulkUpdateCasesOptions",
+              ") => Promise<",
+              "BulkResponse",
+              ">"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.AlertsClient.bulkUpdateCases.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ alerts, caseIds }",
+                "description": [],
+                "signature": [
+                  "BulkUpdateCasesOptions"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
