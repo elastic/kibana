@@ -6,11 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { resolve, relative } from 'path';
+import Path from 'path';
 import os from 'os';
 
-import { getPackages, type Package } from '@kbn/repo-packages';
 import { REPO_ROOT, kibanaPackageJson, KibanaPackageJson } from '@kbn/repo-info';
+import {
+  Package,
+  getPackages,
+  PluginSelector,
+  PluginPackage,
+  getPluginPackagesFilter,
+} from '@kbn/repo-packages';
 
 import { getVersionInfo, VersionInfo } from './version_info';
 import { PlatformName, PlatformArchitecture, ALL_PLATFORMS } from './platform';
@@ -25,44 +31,44 @@ interface Options {
   dockerTag: string | null;
   dockerTagQualifier: string | null;
   dockerPush: boolean;
+  withExamplePlugins: boolean;
+  withTestPlugins: boolean;
+  downloadFreshNode: boolean;
 }
 
 export class Config {
-  static async create({
-    isRelease,
-    targetAllPlatforms,
-    versionQualifier,
-    dockerContextUseLocalArtifact,
-    dockerCrossCompile,
-    dockerTag,
-    dockerTagQualifier,
-    dockerPush,
-    dockerNamespace,
-  }: Options) {
+  static async create(opts: Options) {
     const nodeVersion = kibanaPackageJson.engines?.node;
     if (!nodeVersion) {
       throw new Error('missing node version in package.json');
     }
 
     return new Config(
-      targetAllPlatforms,
+      opts.targetAllPlatforms,
       kibanaPackageJson,
       nodeVersion,
       REPO_ROOT,
       await getVersionInfo({
-        isRelease,
-        versionQualifier,
+        isRelease: opts.isRelease,
+        versionQualifier: opts.versionQualifier,
         pkg: kibanaPackageJson,
       }),
-      dockerContextUseLocalArtifact,
-      dockerCrossCompile,
-      dockerNamespace,
-      dockerTag,
-      dockerTagQualifier,
-      dockerPush,
-      isRelease
+      opts.dockerContextUseLocalArtifact,
+      opts.dockerCrossCompile,
+      opts.dockerNamespace,
+      opts.dockerTag,
+      opts.dockerTagQualifier,
+      opts.dockerPush,
+      opts.isRelease,
+      opts.downloadFreshNode,
+      {
+        examples: opts.withExamplePlugins,
+        testPlugins: opts.withTestPlugins,
+      }
     );
   }
+
+  private readonly pluginFilter: (pkg: Package) => pkg is PluginPackage;
 
   constructor(
     private readonly targetAllPlatforms: boolean,
@@ -76,8 +82,12 @@ export class Config {
     private readonly dockerTag: string | null,
     private readonly dockerTagQualifier: string | null,
     private readonly dockerPush: boolean,
-    public readonly isRelease: boolean
-  ) {}
+    public readonly downloadFreshNode: boolean,
+    public readonly isRelease: boolean,
+    public readonly pluginSelector: PluginSelector
+  ) {
+    this.pluginFilter = getPluginPackagesFilter(this.pluginSelector);
+  }
 
   /**
    * Get Kibana's parsed package.json file
@@ -139,14 +149,14 @@ export class Config {
    * Convert an absolute path to a relative path, based from the repo
    */
   getRepoRelativePath(absolutePath: string) {
-    return relative(this.repoRoot, absolutePath);
+    return Path.relative(this.repoRoot, absolutePath);
   }
 
   /**
    * Resolve a set of relative paths based from the directory of the Kibana repo
    */
   resolveFromRepo(...subPaths: string[]) {
-    return resolve(this.repoRoot, ...subPaths);
+    return Path.resolve(this.repoRoot, ...subPaths);
   }
 
   /**
@@ -222,19 +232,18 @@ export class Config {
    * Resolve a set of paths based from the target directory for this build.
    */
   resolveFromTarget(...subPaths: string[]) {
-    return resolve(this.repoRoot, 'target', ...subPaths);
+    return Path.resolve(this.repoRoot, 'target', ...subPaths);
   }
 
-  private _prodPackages: Package[] | undefined;
-  async getProductionPackages() {
-    if (!this._prodPackages) {
-      this._prodPackages = getPackages(REPO_ROOT).filter((pkg) => !pkg.isDevOnly);
-    }
-
-    return this._prodPackages;
+  getDistPackagesFromRepo() {
+    return getPackages(this.repoRoot).filter(
+      (p) =>
+        (this.pluginSelector.testPlugins || !p.isDevOnly()) &&
+        (!p.isPlugin() || this.pluginFilter(p))
+    );
   }
 
-  async getPkgIdsInNodeModules() {
-    return (await this.getProductionPackages()).map((p) => p.manifest.id);
+  getDistPluginsFromRepo() {
+    return getPackages(this.repoRoot).filter(this.pluginFilter);
   }
 }

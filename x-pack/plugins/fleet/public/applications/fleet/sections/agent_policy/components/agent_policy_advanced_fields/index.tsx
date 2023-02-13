@@ -19,12 +19,14 @@ import {
   EuiFieldText,
   EuiSuperSelect,
   EuiToolTip,
-  EuiBadge,
+  EuiRadioGroup,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-
-import styled from 'styled-components';
 
 import { dataTypes } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
@@ -35,7 +37,7 @@ import { AgentPolicyPackageBadge } from '../../../../components';
 import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
 import type { ValidationResults } from '../agent_policy_validation';
 
-import { policyHasFleetServer } from '../../../../services';
+import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../../services';
 
 import {
   useOutputOptions,
@@ -43,10 +45,6 @@ import {
   DEFAULT_SELECT_VALUE,
   useFleetServerHostsOptions,
 } from './hooks';
-
-const LeftPaddedEUIBadge = styled(EuiBadge)`
-  margin-left: 5px;
-`;
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -63,6 +61,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   isEditing = false,
   onDelete = () => {},
 }) => {
+  const { agentFqdnMode: agentFqdnModeEnabled } = ExperimentalFeaturesService.get();
   const { docLinks } = useStartServices();
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
   const {
@@ -471,18 +470,20 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
               defaultMessage="Unenrollment timeout"
             />
+            &nbsp;
             <EuiToolTip
               content={i18n.translate('xpack.fleet.agentPolicyForm.unenrollmentTimeoutTooltip', {
                 defaultMessage:
                   'This setting is deprecated and will be removed in a future release. Consider using inactivity timeout instead',
               })}
             >
-              <LeftPaddedEUIBadge color="hollow">
-                <FormattedMessage
-                  id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel"
-                  defaultMessage="Deprecated"
-                />
-              </LeftPaddedEUIBadge>
+              <EuiBetaBadge
+                label={i18n.translate(
+                  'xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel',
+                  { defaultMessage: 'Deprecated' }
+                )}
+                size="s"
+              />
             </EuiToolTip>
           </h4>
         }
@@ -517,6 +518,93 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+      {agentFqdnModeEnabled && (
+        <EuiDescribedFormGroup
+          title={
+            <h4>
+              <FormattedMessage
+                id="xpack.fleet.agentPolicyForm.hostnameFormatLabel"
+                defaultMessage="Host name format"
+              />
+              &nbsp;
+              <EuiBetaBadge label="beta" size="s" color="accent" />
+            </h4>
+          }
+          description={
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.hostnameFormatLabelDescription"
+              defaultMessage="Select how you would like agent domain names to be displayed."
+            />
+          }
+        >
+          <EuiFormRow fullWidth>
+            <EuiRadioGroup
+              options={[
+                {
+                  id: 'hostname',
+                  label: (
+                    <>
+                      <EuiFlexGroup gutterSize="xs" direction="column">
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s">
+                            <b>
+                              <FormattedMessage
+                                id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostname"
+                                defaultMessage="Hostname"
+                              />
+                            </b>
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s" color="subdued">
+                            <FormattedMessage
+                              id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostnameExample"
+                              defaultMessage="ex: My-Laptop"
+                            />
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="s" />
+                    </>
+                  ),
+                },
+                {
+                  id: 'fqdn',
+                  label: (
+                    <EuiFlexGroup gutterSize="xs" direction="column">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">
+                          <b>
+                            <FormattedMessage
+                              id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdn"
+                              defaultMessage="Fully Qualified Domain Name (FQDN)"
+                            />
+                          </b>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s" color="subdued">
+                          <FormattedMessage
+                            id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdnExample"
+                            defaultMessage="ex: My-Laptop.admin.acme.co"
+                          />
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ),
+                },
+              ]}
+              idSelected={agentPolicy.agent_features?.length ? 'fqdn' : 'hostname'}
+              onChange={(id: string) => {
+                updateAgentPolicy({
+                  agent_features: id === 'hostname' ? [] : [{ name: 'fqdn', enabled: true }],
+                });
+              }}
+              name="radio group"
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+      )}
       {isEditing && 'id' in agentPolicy && !agentPolicy.is_managed ? (
         <EuiDescribedFormGroup
           title={

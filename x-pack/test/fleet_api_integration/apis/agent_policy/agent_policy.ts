@@ -17,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
 
   describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -94,6 +95,67 @@ export default function (providerContext: FtrProviderContext) {
           body: { item: policy2 },
         } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy2.id}`);
         expect(policy2.is_managed).to.equal(false);
+      });
+
+      it('does not allow arbitrary config in agent_features value', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agent-features',
+            namespace: 'default',
+            agent_features: [
+              {
+                name: 'fqdn',
+                enabled: true,
+                config: "I'm not allowed yet",
+              },
+            ],
+          })
+          .expect(400);
+      });
+
+      it('sets given agent_features value', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agent-features',
+            namespace: 'default',
+            agent_features: [
+              {
+                name: 'fqdn',
+                enabled: true,
+              },
+            ],
+          })
+          .expect(200);
+
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
+        expect(body.item.agent_features).to.eql([
+          {
+            name: 'fqdn',
+            enabled: true,
+          },
+        ]);
+
+        const policyDocRes = await es.search({
+          index: '.fleet-policies',
+          query: {
+            term: {
+              policy_id: createdPolicy.id,
+            },
+          },
+        });
+
+        // @ts-expect-error
+        expect(policyDocRes?.hits?.hits[0]?._source?.data?.agent?.features).to.eql({
+          fqdn: {
+            enabled: true,
+          },
+        });
       });
 
       it('should return a 400 with an empty namespace', async () => {

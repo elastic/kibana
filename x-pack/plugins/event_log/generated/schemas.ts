@@ -116,6 +116,25 @@ export const EventSchema = schema.maybe(
             action_subgroup: ecsString(),
             status: ecsString(),
             outcome: ecsString(),
+            summary: schema.maybe(
+              schema.object({
+                new: schema.maybe(
+                  schema.object({
+                    count: ecsStringOrNumber(),
+                  })
+                ),
+                ongoing: schema.maybe(
+                  schema.object({
+                    count: ecsStringOrNumber(),
+                  })
+                ),
+                recovered: schema.maybe(
+                  schema.object({
+                    count: ecsStringOrNumber(),
+                  })
+                ),
+              })
+            ),
           })
         ),
         alert: schema.maybe(
