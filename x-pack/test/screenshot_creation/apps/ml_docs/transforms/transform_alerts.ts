@@ -14,8 +14,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['triggersActionsUI']);
   const testSubjects = getService('testSubjects');
   const ENTER_KEY = '\uE007';
+  const browser = getService('browser');
+  const actions = getService('actions');
+
+  let testTransformId = '';
 
   describe('transform alerts', function () {
+    before(async () => {
+      await browser.setWindowSize(1920, 1080);
+      await actions.api.createConnector({
+        name: 'server-log-connector',
+        config: {},
+        secrets: {},
+        connectorTypeId: '.server-log',
+      });
+    });
+
     it('transform rule screenshot', async () => {
       await transform.testExecution.logTestStep('navigate to stack management rules');
       await transform.navigation.navigateToRules();
@@ -31,8 +45,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('transform-rule', screenshotDirectories);
       await transform.testExecution.logTestStep('select transform rule type');
       await transform.alerting.selectTransformAlertType();
+      testTransformId = '*';
+      await transform.testExecution.logTestStep('choose transforms');
+      await transform.alerting.selectTransforms([testTransformId]);
       await transform.testExecution.logTestStep('take screenshot');
       await commonScreenshots.takeScreenshot('transform-check-config', screenshotDirectories);
+
+      await transform.alerting.clickCancelSaveRuleButton();
+    });
+
+    after(async () => {
+      await actions.api.deleteAllConnectors();
     });
   });
 }
