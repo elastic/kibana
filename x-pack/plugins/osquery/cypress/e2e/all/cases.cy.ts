@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { checkResults } from '../../tasks/live_query';
+import { addLastLiveQueryToCase, checkResults } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
@@ -23,20 +23,13 @@ describe('Add to Cases', () => {
       runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_observability');
     });
     it('should add result a case and not have add to timeline in result', () => {
-      cy.waitForReact();
-      cy.react('CustomItemAction', {
-        props: { index: 1 },
-      }).click();
-      cy.contains('Live query details');
-      cy.contains('Add to Case').click();
-      cy.contains('Select case');
-      cy.contains(/Select$/).click();
+      addLastLiveQueryToCase();
       cy.contains('Test Obs case has been updated');
       cy.visit('/app/observability/cases');
       cy.contains('Test Obs case').click();
       checkResults();
       cy.contains('attached Osquery results');
-      cy.contains('select * from uptime;');
+      cy.contains("SELECT * FROM os_version where name='Ubuntu';");
       cy.contains('View in Discover').should('exist');
       cy.contains('View in Lens').should('exist');
       cy.contains('Add to Case').should('not.exist');
@@ -55,20 +48,13 @@ describe('Add to Cases', () => {
     });
 
     it('should add result a case and have add to timeline in result', () => {
-      cy.waitForReact();
-      cy.react('CustomItemAction', {
-        props: { index: 1 },
-      }).click();
-      cy.contains('Live query details');
-      cy.contains('Add to Case').click();
-      cy.contains('Select case');
-      cy.contains(/Select$/).click();
+      addLastLiveQueryToCase();
       cy.contains('Test Security Case has been updated');
       cy.visit('/app/security/cases');
       cy.contains('Test Security Case').click();
       checkResults();
       cy.contains('attached Osquery results');
-      cy.contains('select * from uptime;');
+      cy.contains("SELECT * FROM os_version where name='Ubuntu';");
       cy.contains('View in Discover').should('exist');
       cy.contains('View in Lens').should('exist');
       cy.contains('Add to Case').should('not.exist');

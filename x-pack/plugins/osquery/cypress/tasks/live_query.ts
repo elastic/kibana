@@ -91,3 +91,16 @@ export const loadAlertsEvents = () => {
       cy.get(`[data-is-loading="true"]`).should('not.exist');
     });
 };
+
+export const addLastLiveQueryToCase = () => {
+  cy.waitForReact();
+  cy.react('CustomItemAction', {
+    props: { index: 1 },
+  })
+    .first()
+    .click();
+  cy.contains('Live query details');
+  cy.contains('Add to Case').click();
+  cy.contains('Select case');
+  cy.contains(/Select$/).click();
+};
