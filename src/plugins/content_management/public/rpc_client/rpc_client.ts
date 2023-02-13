@@ -9,15 +9,16 @@
 import { HttpSetup } from '@kbn/core/public';
 import { API_ENDPOINT } from '../../common';
 import type { GetIn, CreateIn, ProcedureName } from '../../common';
+import type { CrudClient } from '../crud_client/crud_client';
 
-export class RpcClient {
+export class RpcClient implements CrudClient {
   constructor(private http: { post: HttpSetup['post'] }) {}
 
   public get<I extends GetIn = GetIn, O = unknown>(input: I): Promise<O> {
     return this.sendMessage('get', input);
   }
 
-  public create<I extends CreateIn, O = unknown>(input: I): Promise<O> {
+  public create<I extends CreateIn = CreateIn, O = unknown>(input: I): Promise<O> {
     return this.sendMessage('create', input);
   }
 
