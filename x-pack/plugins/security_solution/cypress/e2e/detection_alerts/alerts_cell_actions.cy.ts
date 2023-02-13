@@ -6,7 +6,12 @@
  */
 
 import { getNewRule } from '../../objects/rule';
-import { FILTER_BADGE, SHOW_TOP_N_HEADER } from '../../screens/alerts';
+import {
+  ACTIONS_EXPAND_BUTTON,
+  CELL_COPY_BUTTON,
+  FILTER_BADGE,
+  SHOW_TOP_N_HEADER,
+} from '../../screens/alerts';
 import {
   ALERT_TABLE_FILE_NAME_HEADER,
   ALERT_TABLE_FILE_NAME_VALUES,
@@ -19,7 +24,7 @@ import {
   addAlertPropertyToTimeline,
   filterForAlertProperty,
   showTopNAlertProperty,
-  copyToClipboardAlertProperty,
+  clickAction,
 } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -100,10 +105,29 @@ describe('Alerts cell actions', () => {
         cy.get(ALERT_TABLE_SEVERITY_VALUES)
           .first()
           .invoke('text')
-          .then((severityVal) => {
+          .then(() => {
             scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
             showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
             cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
+          });
+      });
+    });
+
+    describe('Copy to clipboard', () => {
+      it('should copy to clipboard', () => {
+        cy.get(ALERT_TABLE_SEVERITY_VALUES)
+          .first()
+          .invoke('text')
+          .then(() => {
+            scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+            cy.window().then((win) => {
+              cy.stub(win, 'prompt').returns('DISABLED WINDOW PROMPT');
+            });
+            clickAction(ALERT_TABLE_SEVERITY_VALUES, 0, ACTIONS_EXPAND_BUTTON);
+            cy.get(CELL_COPY_BUTTON).should('exist');
+            // We are not able to test the "copy to clipboard" action execution
+            // due to browsers security limitation accessing the clipboard services.
+            // We assume external `copy` library works
           });
       });
     });

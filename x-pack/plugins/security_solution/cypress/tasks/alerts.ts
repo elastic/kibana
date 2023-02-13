@@ -35,7 +35,6 @@ import {
   CELL_ADD_TO_TIMELINE_BUTTON,
   CELL_FILTER_IN_BUTTON,
   CELL_SHOW_TOP_FIELD_BUTTON,
-  CELL_COPY_BUTTON,
   ACTIONS_EXPAND_BUTTON,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
@@ -301,7 +300,7 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
   cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
-const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
+export const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
   cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
   cy.get(actionSelector).first().click({ force: true });
 };
@@ -314,10 +313,6 @@ export const filterForAlertProperty = (propertySelector: string, rowIndex: numbe
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
   clickAction(propertySelector, rowIndex, ACTIONS_EXPAND_BUTTON);
   cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click({ force: true });
-};
-export const copyToClipboardAlertProperty = (propertySelector: string, rowIndex: number) => {
-  clickAction(propertySelector, rowIndex, ACTIONS_EXPAND_BUTTON);
-  cy.get(CELL_COPY_BUTTON).first().click({ force: true });
 };
 
 export const waitForAlerts = () => {
