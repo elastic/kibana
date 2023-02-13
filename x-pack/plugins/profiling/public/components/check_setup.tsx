@@ -59,7 +59,11 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
             <EuiLoadingSpinner size="xxl" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText>Loading data sources</EuiText>
+            <EuiText>
+              {i18n.translate('xpack.profiling.noDataConfig.loading.loaderText', {
+                defaultMessage: 'Loading data sources',
+              })}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </ProfilingAppPageTemplate>
@@ -119,7 +123,9 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                       To control data retention. `,
                         })}
                         <EuiLink target="_blank" href={docsLink}>
-                          Read more
+                          {i18n.translate('xpack.profiling.noDataConfig.readMore.linkLabel', {
+                            defaultMessage: 'Read more',
+                          })}
                         </EuiLink>
                       </li>
                       <li>
@@ -130,7 +136,9 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                           target="_blank"
                           href={`https://www.elastic.co/agreements/beta-release-terms`}
                         >
-                          Elastic&apos;s Beta Release Terms
+                          {i18n.translate('xpack.profiling.noDataConfig.betaTerms.linkLabel', {
+                            defaultMessage: 'Elastic Beta Release Terms',
+                          })}
                         </EuiLink>
                       </li>
                     </ul>
