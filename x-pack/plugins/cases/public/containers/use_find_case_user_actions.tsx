@@ -24,12 +24,7 @@ export const useFindCaseUserActions = (
   return useQuery<FindCaseUserActions, ServerError>(
     casesQueriesKeys.userActions(caseId, filterActionType, sortOrder),
     async () => {
-      return findCaseUserActions(
-        caseId,
-        filterActionType,
-        sortOrder,
-        abortCtrlRef.signal
-      );
+      return findCaseUserActions(caseId, filterActionType, sortOrder, abortCtrlRef.signal);
     },
     {
       onError: (error: ServerError) => {
