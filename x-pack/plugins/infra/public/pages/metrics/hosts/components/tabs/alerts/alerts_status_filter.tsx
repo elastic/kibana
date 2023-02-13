@@ -20,26 +20,26 @@ const options: EuiButtonGroupOptionProps[] = [
     id: ALL_ALERTS.status,
     label: ALL_ALERTS.label,
     value: ALL_ALERTS.query,
-    'data-test-subj': 'alert-status-filter-show-all-button',
+    'data-test-subj': 'hostsView-alert-status-filter-show-all-button',
   },
   {
     id: ACTIVE_ALERTS.status,
     label: ACTIVE_ALERTS.label,
     value: ACTIVE_ALERTS.query,
-    'data-test-subj': 'alert-status-filter-active-button',
+    'data-test-subj': 'hostsView-alert-status-filter-active-button',
   },
   {
     id: RECOVERED_ALERTS.status,
     label: RECOVERED_ALERTS.label,
     value: RECOVERED_ALERTS.query,
-    'data-test-subj': 'alert-status-filter-recovered-button',
+    'data-test-subj': 'hostsView-alert-status-filter-recovered-button',
   },
 ];
 
 export function AlertsStatusFilter({ status, onChange }: AlertStatusFilterProps) {
   return (
     <EuiButtonGroup
-      legend={i18n.translate('xpack.observability.alerts.alertStatusFilter.legend', {
+      legend={i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.alertStatusFilter.legend', {
         defaultMessage: 'Filter by',
       })}
       color="primary"
