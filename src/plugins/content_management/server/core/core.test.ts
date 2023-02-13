@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ContentConfig } from './types';
 import { Core } from './core';
 import { createMemoryStorage, MockContent } from './mocks';
 import { ContentRegistry } from './registry';
@@ -25,40 +24,57 @@ import type {
   DeleteItemSuccess,
   DeleteItemError,
 } from './event_types';
-import { EventBus } from './event_bus';
 
 const logger = loggingSystemMock.createLogger();
 
+const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) => {
+  const FOO_CONTENT_ID = 'foo';
+  const ctx = {};
+
+  const core = new Core({ logger });
+  const coreSetup = core.setup();
+  const contentConfig = {
+    storage: createMemoryStorage(),
+  };
+  const cleanUp = () => {
+    coreSetup.api.eventBus.stop();
+  };
+
+  let fooContentCrud: ContentCrud | undefined;
+
+  if (registerFooType) {
+    coreSetup.api.register(FOO_CONTENT_ID, contentConfig);
+    fooContentCrud = coreSetup.api.crud(FOO_CONTENT_ID);
+  }
+
+  return {
+    core,
+    coreSetup,
+    contentConfig,
+    FOO_CONTENT_ID,
+    ctx,
+    fooContentCrud,
+    cleanUp,
+    eventBus: coreSetup.api.eventBus,
+  };
+};
+
 describe('Content Core', () => {
   describe('setup()', () => {
-    let core: Core;
-    let coreSetup: ReturnType<Core['setup']>;
-    let contentConfig: ContentConfig;
-
-    beforeEach(() => {
-      core = new Core({ logger });
-      coreSetup = core.setup();
-      contentConfig = {
-        storage: createMemoryStorage(),
-      };
-    });
-
-    afterEach(() => {
-      // Remove subscription of the events$
-      coreSetup.api.eventBus.stop();
-    });
-
     test('should return the registry and the public api', () => {
+      const { coreSetup, cleanUp } = setup();
+
       expect(coreSetup.contentRegistry).toBeInstanceOf(ContentRegistry);
       expect(Object.keys(coreSetup.api).sort()).toEqual(['crud', 'eventBus', 'register']);
+
+      cleanUp();
     });
 
     describe('api', () => {
-      const CONTENT_TYPE = 'foo';
-      const ctx = {};
-
       describe('register()', () => {
         test('should expose the register handler from the registry instance', () => {
+          const { coreSetup, cleanUp, contentConfig } = setup();
+
           const {
             contentRegistry,
             api: { register },
@@ -72,61 +88,74 @@ describe('Content Core', () => {
           // the content into our "contentRegistry" instance
           expect(contentRegistry.isContentRegistered('foo')).toBe(true);
           expect(contentRegistry.getConfig('foo')).toBe(contentConfig);
+
+          cleanUp();
         });
       });
 
       describe('crud()', () => {
-        let contentCrud: ContentCrud;
-
-        beforeEach(() => {
-          const {
-            api: { register, crud },
-          } = coreSetup;
-          register(CONTENT_TYPE, contentConfig);
-          contentCrud = crud(CONTENT_TYPE);
-        });
-
         test('get()', async () => {
-          const res = await contentCrud.get(ctx, '1');
+          const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
+
+          const res = await fooContentCrud!.get(ctx, '1');
           expect(res).toBeUndefined();
+
+          cleanUp();
         });
 
         test('get() - options are forwared to storage layer', async () => {
-          const res = await contentCrud.get(ctx, '1', { forwardInResponse: { foo: 'bar' } });
+          const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
+
+          const res = await fooContentCrud!.get(ctx, '1', { forwardInResponse: { foo: 'bar' } });
           expect(res).toEqual({
             // Options forwared in response
             options: { foo: 'bar' },
           });
+
+          cleanUp();
         });
 
         test('create()', async () => {
-          const res = await contentCrud.get(ctx, '1234');
+          const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
+
+          const res = await fooContentCrud!.get(ctx, '1234');
           expect(res).toBeUndefined();
-          await contentCrud.create<Omit<MockContent, 'id'>, { id: string }>(
+          await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
             ctx,
             { title: 'Hello' },
             { id: '1234' } // We send this "id" option to specify the id of the content created
           );
-          expect(contentCrud.get(ctx, '1234')).resolves.toEqual({ id: '1234', title: 'Hello' });
+          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({ id: '1234', title: 'Hello' });
+
+          cleanUp();
         });
 
         test('update()', async () => {
-          await contentCrud.create<Omit<MockContent, 'id'>, { id: string }>(
+          const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
+
+          await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
             ctx,
             { title: 'Hello' },
             { id: '1234' }
           );
-          await contentCrud.update<Omit<MockContent, 'id'>>(ctx, '1234', { title: 'changed' });
-          expect(contentCrud.get(ctx, '1234')).resolves.toEqual({ id: '1234', title: 'changed' });
+          await fooContentCrud!.update<Omit<MockContent, 'id'>>(ctx, '1234', { title: 'changed' });
+          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+            id: '1234',
+            title: 'changed',
+          });
+
+          cleanUp();
         });
 
         test('update() - options are forwared to storage layer', async () => {
-          await contentCrud.create<Omit<MockContent, 'id'>, { id: string }>(
+          const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
+
+          await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
             ctx,
             { title: 'Hello' },
             { id: '1234' }
           );
-          const res = await contentCrud.update<Omit<MockContent, 'id'>>(
+          const res = await fooContentCrud!.update<Omit<MockContent, 'id'>>(
             ctx,
             '1234',
             { title: 'changed' },
@@ -140,36 +169,50 @@ describe('Content Core', () => {
             options: { foo: 'bar' },
           });
 
-          expect(contentCrud.get(ctx, '1234')).resolves.toEqual({
+          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             id: '1234',
             title: 'changed',
           });
+
+          cleanUp();
         });
 
         test('delete()', async () => {
-          await contentCrud.create<Omit<MockContent, 'id'>, { id: string }>(
+          const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
+
+          await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
             ctx,
             { title: 'Hello' },
             { id: '1234' }
           );
-          expect(contentCrud.get(ctx, '1234')).resolves.not.toBeUndefined();
-          await contentCrud.delete(ctx, '1234');
-          expect(contentCrud.get(ctx, '1234')).resolves.toBeUndefined();
+          expect(fooContentCrud!.get(ctx, '1234')).resolves.not.toBeUndefined();
+          await fooContentCrud!.delete(ctx, '1234');
+          expect(fooContentCrud!.get(ctx, '1234')).resolves.toBeUndefined();
+
+          cleanUp();
         });
 
         test('delete() - options are forwared to storage layer', async () => {
-          await contentCrud.create<Omit<MockContent, 'id'>, { id: string }>(
+          const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
+
+          await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
             ctx,
             { title: 'Hello' },
             { id: '1234' }
           );
-          const res = await contentCrud.delete(ctx, '1234', { forwardInResponse: { foo: 'bar' } });
+          const res = await fooContentCrud!.delete(ctx, '1234', {
+            forwardInResponse: { foo: 'bar' },
+          });
           expect(res).toMatchObject({ options: { foo: 'bar' } });
+
+          cleanUp();
         });
       });
 
       describe('eventBus', () => {
         test('should allow to emit and subscribe to events', () => {
+          const { coreSetup, cleanUp } = setup();
+
           const {
             api: { eventBus },
           } = coreSetup;
@@ -186,9 +229,13 @@ describe('Content Core', () => {
 
           expect(listener).toHaveBeenCalledWith(event);
           subscription.unsubscribe();
+
+          cleanUp();
         });
 
         test('should allow to subscribe to a single event', () => {
+          const { coreSetup, cleanUp } = setup();
+
           const {
             api: { eventBus },
           } = coreSetup;
@@ -212,26 +259,34 @@ describe('Content Core', () => {
 
           eventBus.emit(event);
           expect(listener).not.toHaveBeenCalledWith(event);
+
+          cleanUp();
         });
 
         test('should validate that the content type is registered when subscribing to single event with content type', () => {
+          const { coreSetup, cleanUp } = setup();
+
           const {
             api: { eventBus },
           } = coreSetup;
 
-          expect(() => { eventBus.on('getItemStart', 'foo', jest.fn()) }).toThrow(
-            'Invalid content type [foo].'
-          );
+          expect(() => {
+            eventBus.on('getItemStart', 'foo', jest.fn());
+          }).toThrow('Invalid content type [foo].');
+
+          cleanUp();
         });
 
         test('should allow to subscribe to a single event for a single content type', async () => {
+          const { coreSetup, ctx, contentConfig, FOO_CONTENT_ID, cleanUp } = setup();
+
           const {
             api: { eventBus, register, crud },
           } = coreSetup;
 
-          register(CONTENT_TYPE, contentConfig);
+          register(FOO_CONTENT_ID, contentConfig);
 
-          await crud(CONTENT_TYPE).create<Omit<MockContent, 'id'>, { id: string }>(
+          await crud(FOO_CONTENT_ID).create<Omit<MockContent, 'id'>, { id: string }>(
             ctx,
             { title: 'Hello' },
             { id: '1234' }
@@ -240,7 +295,7 @@ describe('Content Core', () => {
           const listener = jest.fn();
 
           // Listen to "getItemStart" events *only* on the "foo" content type
-          eventBus.on('getItemStart', CONTENT_TYPE, listener);
+          eventBus.on('getItemStart', FOO_CONTENT_ID, listener);
 
           let event: GetItemStart = {
             type: 'getItemStart',
@@ -259,37 +314,31 @@ describe('Content Core', () => {
           eventBus.emit(event);
 
           expect(listener).toHaveBeenCalledWith(event);
+
+          cleanUp();
         });
 
         describe('crud operations should emit start|success|error events', () => {
-          let contentCrud: ContentCrud;
-          let eventBus: EventBus;
-
-          beforeEach(() => {
-            const {
-              api: { register, crud, eventBus: _eventBus },
-            } = coreSetup;
-            register(CONTENT_TYPE, contentConfig);
-            contentCrud = crud(CONTENT_TYPE);
-            eventBus = _eventBus;
-          });
-
           test('get()', async () => {
+            const { fooContentCrud, eventBus, ctx, FOO_CONTENT_ID, cleanUp } = setup({
+              registerFooType: true,
+            });
+
             const data = { title: 'Hello' };
 
-            await contentCrud.create<Omit<MockContent, 'id'>, { id: string }>(ctx, data, {
+            await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(ctx, data, {
               id: '1234',
             });
 
             const listener = jest.fn();
             const sub = eventBus.events$.subscribe(listener);
 
-            const promise = contentCrud.get(ctx, '1234', { someOption: 'baz' });
+            const promise = fooContentCrud!.get(ctx, '1234', { someOption: 'baz' });
 
             const getItemStart: GetItemStart = {
               type: 'getItemStart',
               contentId: '1234',
-              contentType: CONTENT_TYPE,
+              contentType: FOO_CONTENT_ID,
               options: { someOption: 'baz' },
             };
 
@@ -304,7 +353,7 @@ describe('Content Core', () => {
                 id: '1234',
                 ...data,
               },
-              contentType: CONTENT_TYPE,
+              contentType: FOO_CONTENT_ID,
             };
 
             expect(listener).toHaveBeenCalledWith(getItemSuccess);
@@ -313,12 +362,12 @@ describe('Content Core', () => {
 
             const errorMessage = 'Ohhh no!';
             const reject = jest.fn();
-            await contentCrud.get(ctx, '1234', { errorToThrow: errorMessage }).catch(reject);
+            await fooContentCrud!.get(ctx, '1234', { errorToThrow: errorMessage }).catch(reject);
 
             const getItemError: GetItemError = {
               type: 'getItemError',
               contentId: '1234',
-              contentType: CONTENT_TYPE,
+              contentType: FOO_CONTENT_ID,
               error: errorMessage,
               options: { errorToThrow: errorMessage },
             };
@@ -328,21 +377,31 @@ describe('Content Core', () => {
             expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
 
             sub.unsubscribe();
+
+            cleanUp();
           });
 
           test('create()', async () => {
+            const { fooContentCrud, ctx, FOO_CONTENT_ID, eventBus, cleanUp } = setup({
+              registerFooType: true,
+            });
+
             const data = { title: 'Hello' };
 
             const listener = jest.fn();
             const sub = eventBus.events$.subscribe(listener);
 
-            const promise = contentCrud.create<Omit<MockContent, 'id'>, { id: string }>(ctx, data, {
-              id: '1234',
-            });
+            const promise = fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
+              ctx,
+              data,
+              {
+                id: '1234',
+              }
+            );
 
             const createItemStart: CreateItemStart = {
               type: 'createItemStart',
-              contentType: CONTENT_TYPE,
+              contentType: FOO_CONTENT_ID,
               data,
               options: { id: '1234' },
             };
@@ -357,7 +416,7 @@ describe('Content Core', () => {
                 id: '1234',
                 ...data,
               },
-              contentType: CONTENT_TYPE,
+              contentType: FOO_CONTENT_ID,
               options: { id: '1234' },
             };
 
@@ -367,7 +426,7 @@ describe('Content Core', () => {
 
             const errorMessage = 'Ohhh no!';
             const reject = jest.fn();
-            await contentCrud
+            await fooContentCrud!
               .create<Omit<MockContent, 'id'>, { id: string; errorToThrow: string }>(ctx, data, {
                 id: '1234',
                 errorToThrow: errorMessage,
@@ -376,7 +435,7 @@ describe('Content Core', () => {
 
             const createItemError: CreateItemError = {
               type: 'createItemError',
-              contentType: CONTENT_TYPE,
+              contentType: FOO_CONTENT_ID,
               data,
               error: errorMessage,
               options: { id: '1234', errorToThrow: errorMessage },
@@ -387,10 +446,15 @@ describe('Content Core', () => {
             expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
 
             sub.unsubscribe();
+            cleanUp();
           });
 
           test('update()', async () => {
-            await contentCrud.create<Omit<MockContent, 'id'>, { id: string }>(
+            const { fooContentCrud, ctx, eventBus, FOO_CONTENT_ID, cleanUp } = setup({
+              registerFooType: true,
+            });
+
+            await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
               ctx,
               { title: 'Hello' },
               {
@@ -403,12 +467,12 @@ describe('Content Core', () => {
 
             const data = { title: 'Updated' };
 
-            const promise = await contentCrud.update(ctx, '1234', data, { someOptions: 'baz' });
+            const promise = await fooContentCrud!.update(ctx, '1234', data, { someOptions: 'baz' });
 
             const updateItemStart: UpdateItemStart = {
               type: 'updateItemStart',
               contentId: '1234',
-              contentType: CONTENT_TYPE,
+              contentType: FOO_CONTENT_ID,
               data,
               options: { someOptions: 'baz' },
             };
@@ -420,7 +484,7 @@ describe('Content Core', () => {
             const updateItemSuccess: UpdateItemSuccess = {
               type: 'updateItemSuccess',
               contentId: '1234',
-              contentType: CONTENT_TYPE,
+              contentType: FOO_CONTENT_ID,
               data: {
                 id: '1234',
                 ...data,
@@ -434,7 +498,7 @@ describe('Content Core', () => {
 
             const errorMessage = 'Ohhh no!';
             const reject = jest.fn();
-            await contentCrud
+            await fooContentCrud!
               .update(ctx, '1234', data, {
                 errorToThrow: errorMessage,
               })
@@ -442,7 +506,7 @@ describe('Content Core', () => {
 
             const updateItemError: UpdateItemError = {
               type: 'updateItemError',
-              contentType: CONTENT_TYPE,
+              contentType: FOO_CONTENT_ID,
               contentId: '1234',
               data,
               error: errorMessage,
@@ -454,10 +518,15 @@ describe('Content Core', () => {
             expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
 
             sub.unsubscribe();
+            cleanUp();
           });
 
           test('delete()', async () => {
-            await contentCrud.create<Omit<MockContent, 'id'>, { id: string }>(
+            const { fooContentCrud, ctx, FOO_CONTENT_ID, eventBus, cleanUp } = setup({
+              registerFooType: true,
+            });
+
+            await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
               ctx,
               { title: 'Hello' },
               {
@@ -468,12 +537,12 @@ describe('Content Core', () => {
             const listener = jest.fn();
             const sub = eventBus.events$.subscribe(listener);
 
-            const promise = await contentCrud.delete(ctx, '1234', { someOptions: 'baz' });
+            const promise = await fooContentCrud!.delete(ctx, '1234', { someOptions: 'baz' });
 
             const deleteItemStart: DeleteItemStart = {
               type: 'deleteItemStart',
               contentId: '1234',
-              contentType: CONTENT_TYPE,
+              contentType: FOO_CONTENT_ID,
               options: { someOptions: 'baz' },
             };
 
@@ -484,7 +553,7 @@ describe('Content Core', () => {
             const deleteItemSuccess: DeleteItemSuccess = {
               type: 'deleteItemSuccess',
               contentId: '1234',
-              contentType: CONTENT_TYPE,
+              contentType: FOO_CONTENT_ID,
               options: { someOptions: 'baz' },
             };
 
@@ -494,7 +563,7 @@ describe('Content Core', () => {
 
             const errorMessage = 'Ohhh no!';
             const reject = jest.fn();
-            await contentCrud
+            await fooContentCrud!
               .delete(ctx, '1234', {
                 errorToThrow: errorMessage,
               })
@@ -502,7 +571,7 @@ describe('Content Core', () => {
 
             const deleteItemError: DeleteItemError = {
               type: 'deleteItemError',
-              contentType: CONTENT_TYPE,
+              contentType: FOO_CONTENT_ID,
               contentId: '1234',
               error: errorMessage,
               options: { errorToThrow: errorMessage },
@@ -513,6 +582,7 @@ describe('Content Core', () => {
             expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
 
             sub.unsubscribe();
+            cleanUp();
           });
         });
       });
