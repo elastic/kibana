@@ -27,6 +27,7 @@ export const FieldComponent: React.FC<FieldProps> = ({
   placeholder,
   selectedField,
   acceptsCustomOptions = false,
+  showMappingConflicts = false,
 }): JSX.Element => {
   const {
     isInvalid,
@@ -44,6 +45,7 @@ export const FieldComponent: React.FC<FieldProps> = ({
     isRequired,
     selectedField,
     fieldInputWidth,
+    showMappingConflicts,
     onChange,
   });
 
@@ -68,6 +70,7 @@ export const FieldComponent: React.FC<FieldProps> = ({
           values: { searchValuePlaceholder: '{searchValue}' },
         })}
         fullWidth
+        renderOption={renderFields}
       />
     );
   }

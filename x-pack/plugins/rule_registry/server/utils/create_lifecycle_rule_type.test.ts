@@ -22,6 +22,7 @@ import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_fac
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -114,6 +115,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           createdAt,
           createdBy: 'createdBy',
           enabled: true,
+          muteAll: false,
           name: 'name',
           notifyWhen: 'onActionGroupChange',
           producer: 'producer',
@@ -122,6 +124,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           schedule: {
             interval: '1m',
           },
+          snoozeSchedule: [],
           tags: ['tags'],
           throttle: null,
           updatedAt: createdAt,
@@ -142,6 +145,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         spaceId: 'spaceId',
         startedAt,
         state,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       })) ?? {}) as Record<string, any>);
 
       previousStartedAt = startedAt;
