@@ -226,12 +226,12 @@ export const getXyVisualization = ({
   triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
 
   initialize(addNewLayer, state, _, references, initialContext) {
-    let finalState = state;
-    if (state && isPersistedState(state)) {
-      finalState = injectReferences(state, references, initialContext);
-    }
+    const finalState =
+      state && isPersistedState(state)
+        ? injectReferences(state, references, initialContext)
+        : state;
     return (
-      (finalState as XYState) || {
+      finalState || {
         title: 'Empty XY chart',
         legend: { isVisible: true, position: Position.Right },
         valueLabels: 'hide',

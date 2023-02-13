@@ -151,7 +151,7 @@ export const getHeatmapVisualization = ({
 
   initialize(addNewLayer, state, mainPalette) {
     return (
-      (state as HeatmapVisualizationState) || {
+      state || {
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         title: 'Empty Heatmap chart',

@@ -1018,7 +1018,7 @@ interface VisualizationStateFromContextChangeProps {
   context: VisualizeEditorContext;
 }
 
-export interface Visualization<T = unknown, P = unknown> {
+export interface Visualization<T = unknown, P = T> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
 

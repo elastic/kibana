@@ -146,7 +146,7 @@ export const getPieVisualization = ({
 
   initialize(addNewLayer, state, mainPalette) {
     return (
-      (state as PieVisualizationState) || {
+      state || {
         shape: PieChartTypes.DONUT,
         layers: [newLayerState(addNewLayer())],
         palette: mainPalette,

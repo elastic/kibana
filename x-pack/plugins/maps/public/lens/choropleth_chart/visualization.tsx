@@ -81,7 +81,7 @@ export const getVisualization = ({
 
   initialize(addNewLayer, state) {
     return (
-      (state as ChoroplethChartState) || {
+      state || {
         layerId: addNewLayer(),
         layerType: layerTypes.DATA,
       }
