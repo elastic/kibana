@@ -8,31 +8,31 @@
 
 import { lastValueFrom } from 'rxjs';
 import { takeWhile, toArray } from 'rxjs/operators';
-import type { RpcClient } from '../rpc_client';
-import { createRpcClientMock } from '../rpc_client/rpc_client.mock';
+import type { CrudClient } from '../crud_client';
+import { createCrudClientMock } from '../crud_client/crud_client.mock';
 import { ContentClient } from './content_client';
 import type { GetIn, CreateIn } from '../../common';
 
 let contentClient: ContentClient;
-let rpcClient: jest.Mocked<RpcClient>;
+let crudClient: jest.Mocked<CrudClient>;
 beforeEach(() => {
-  rpcClient = createRpcClientMock();
-  contentClient = new ContentClient(rpcClient);
+  crudClient = createCrudClientMock();
+  contentClient = new ContentClient(() => crudClient);
 });
 
 describe('#get', () => {
   it('calls rpcClient.get with input and returns output', async () => {
     const input: GetIn = { id: 'test', contentType: 'testType' };
     const output = { test: 'test' };
-    rpcClient.get.mockResolvedValueOnce(output);
+    crudClient.get.mockResolvedValueOnce(output);
     expect(await contentClient.get(input)).toEqual(output);
-    expect(rpcClient.get).toBeCalledWith(input);
+    expect(crudClient.get).toBeCalledWith(input);
   });
 
   it('calls rpcClient.get$ with input and returns output', async () => {
     const input: GetIn = { id: 'test', contentType: 'testType' };
     const output = { test: 'test' };
-    rpcClient.get.mockResolvedValueOnce(output);
+    crudClient.get.mockResolvedValueOnce(output);
     const get$ = contentClient.get$(input).pipe(
       takeWhile((result) => {
         return result.data == null;
@@ -54,9 +54,9 @@ describe('#create', () => {
   it('calls rpcClient.create with input and returns output', async () => {
     const input: CreateIn = { contentType: 'testType', data: { foo: 'bar' } };
     const output = { test: 'test' };
-    rpcClient.create.mockImplementation(() => Promise.resolve(output));
+    crudClient.create.mockResolvedValueOnce(output);
 
     expect(await contentClient.create(input)).toEqual(output);
-    expect(rpcClient.create).toBeCalledWith(input);
+    expect(crudClient.create).toBeCalledWith(input);
   });
 });

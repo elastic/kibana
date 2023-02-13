@@ -10,16 +10,16 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { ContentClientProvider } from './content_client_context';
 import { ContentClient } from './content_client';
-import { RpcClient } from '../rpc_client';
-import { createRpcClientMock } from '../rpc_client/rpc_client.mock';
+import { CrudClient } from '../crud_client';
+import { createCrudClientMock } from '../crud_client/crud_client.mock';
 import { useGetContentQuery } from './content_client_query_hooks';
 import type { GetIn } from '../../common';
 
 let contentClient: ContentClient;
-let rpcClient: jest.Mocked<RpcClient>;
+let crudClient: jest.Mocked<CrudClient>;
 beforeEach(() => {
-  rpcClient = createRpcClientMock();
-  contentClient = new ContentClient(rpcClient);
+  crudClient = createCrudClientMock();
+  contentClient = new ContentClient(() => crudClient);
 });
 
 const Wrapper: React.FC = ({ children }) => (
@@ -30,7 +30,7 @@ describe('useGetContentQuery', () => {
   test('should call rpcClient.get with input and resolve with output', async () => {
     const input: GetIn = { id: 'test', contentType: 'testType' };
     const output = { test: 'test' };
-    rpcClient.get.mockImplementation(() => Promise.resolve(output));
+    crudClient.get.mockResolvedValueOnce(output);
     const { result, waitFor } = renderHook(() => useGetContentQuery(input), { wrapper: Wrapper });
     await waitFor(() => result.current.isSuccess);
     expect(result.current.data).toEqual(output);
