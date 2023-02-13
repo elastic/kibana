@@ -73,11 +73,21 @@ describe('createLifecycleExecutor', () => {
     )<{}, TestRuleState, never, never, never>(async ({ services, state }) => {
       services.alertWithLifecycle({
         id: 'TEST_ALERT_0',
-        fields: {},
+        fields: {
+          labels: {
+            eventId: 'event-0',
+            instanceId: 'instance-0',
+          },
+        },
       });
       services.alertWithLifecycle({
         id: 'TEST_ALERT_1',
-        fields: {},
+        fields: {
+          labels: {
+            eventId: 'event-1',
+            instanceId: 'instance-1',
+          },
+        },
       });
 
       return { state };
@@ -101,6 +111,10 @@ describe('createLifecycleExecutor', () => {
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
             [EVENT_ACTION]: 'open',
             [EVENT_KIND]: 'signal',
+            labels: {
+              eventId: 'event-0',
+              instanceId: 'instance-0',
+            },
           }),
           { index: { _id: expect.any(String) } },
           expect.objectContaining({
@@ -108,6 +122,10 @@ describe('createLifecycleExecutor', () => {
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
             [EVENT_ACTION]: 'open',
             [EVENT_KIND]: 'signal',
+            labels: {
+              eventId: 'event-1',
+              instanceId: 'instance-1',
+            },
           }),
         ],
       })
@@ -162,7 +180,7 @@ describe('createLifecycleExecutor', () => {
               [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
               [ALERT_WORKFLOW_STATUS]: 'open',
               [SPACE_IDS]: ['fake-space-id'],
-              labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
+              labels: { LABEL_1_KEY: 'LABEL_1_VALUE' }, // this must not show up in the written doc
             },
           },
         ],
@@ -224,7 +242,6 @@ describe('createLifecycleExecutor', () => {
             [ALERT_WORKFLOW_STATUS]: 'closed',
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
             labels: { LABEL_0_KEY: 'LABEL_0_VALUE' },
-
             [EVENT_ACTION]: 'active',
             [EVENT_KIND]: 'signal',
           }),
@@ -233,7 +250,7 @@ describe('createLifecycleExecutor', () => {
             [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
             [ALERT_WORKFLOW_STATUS]: 'open',
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-
+            labels: { LABEL_1_KEY: 'LABEL_1_VALUE' },
             [EVENT_ACTION]: 'active',
             [EVENT_KIND]: 'signal',
           }),

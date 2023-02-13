@@ -34,7 +34,6 @@ import {
 import {
   AdditionalContext,
   createScopedLogger,
-  flattenAdditionalContext,
   getAlertDetailsUrl,
   getContextForRecoveredAlerts,
   getViewInInventoryAppUrl,
@@ -108,7 +107,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         fields: {
           [ALERT_REASON]: reason,
           [ALERT_ACTION_GROUP]: actionGroup,
-          ...flattenAdditionalContext(additionalContext),
+          ...additionalContext,
         },
       });
 

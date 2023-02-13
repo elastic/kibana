@@ -189,7 +189,7 @@ export const createLifecycleExecutor =
       ActionGroupIds
     > = {
       alertWithLifecycle: ({ id, fields }) => {
-        currentAlerts[id] = fields;
+        currentAlerts[id] = flattenFields(fields);
         return alertFactory.create(id);
       },
       getAlertStartedDate: (alertId: string) => state.trackedAlerts[alertId]?.started ?? null,
@@ -406,3 +406,57 @@ export const createLifecycleExecutor =
       },
     };
   };
+
+export interface AlertFields {
+  [x: string]: any;
+}
+
+/**
+ * Wrap the key with [] if it is a key from an Array
+ * @param key The object key
+ * @param isArrayItem Flag to indicate if it is the key of an Array
+ */
+const renderKey = (key: string, isArrayItem: boolean): string => (isArrayItem ? `[${key}]` : key);
+
+const flattenObject = (obj: AlertFields, prefix: string[] = [], isArrayItem = false): AlertFields =>
+  Object.keys(obj).reduce<AlertFields>((acc, k) => {
+    const nextValue = obj[k];
+
+    if (typeof nextValue === 'object' && nextValue !== null) {
+      const isNextValueArray = Array.isArray(nextValue);
+      const dotSuffix = isNextValueArray ? '' : '.';
+
+      if (Object.keys(nextValue).length > 0) {
+        return {
+          ...acc,
+          ...flattenObject(
+            nextValue,
+            [...prefix, `${renderKey(k, isArrayItem)}${dotSuffix}`],
+            isNextValueArray
+          ),
+        };
+      }
+    }
+
+    const fullPath = `${prefix.join('')}${renderKey(k, isArrayItem)}`;
+    acc[fullPath] = nextValue;
+
+    return acc;
+  }, {});
+
+export const flattenFields = (fields: AlertFields): AlertFields => {
+  let flattenedFields: AlertFields = {};
+  Object.keys(fields).forEach((key: string) => {
+    if (fields[key]) {
+      if (key !== 'labels') {
+        flattenedFields = {
+          ...flattenedFields,
+          ...flattenObject(fields[key], [key + '.']),
+        };
+      } else {
+        flattenedFields[key] = fields[key];
+      }
+    }
+  });
+  return flattenedFields;
+};

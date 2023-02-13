@@ -36,7 +36,6 @@ import {
   UNGROUPED_FACTORY_KEY,
   hasAdditionalContext,
   validGroupByForContext,
-  flattenAdditionalContext,
   getGroupByObject,
 } from '../common/utils';
 
@@ -124,7 +123,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         fields: {
           [ALERT_REASON]: reason,
           [ALERT_ACTION_GROUP]: actionGroup,
-          ...flattenAdditionalContext(additionalContext),
+          ...additionalContext,
         },
       });
 
