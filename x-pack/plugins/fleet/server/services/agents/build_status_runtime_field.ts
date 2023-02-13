@@ -171,7 +171,14 @@ export async function buildAgentStatusRuntimeField(
   pathPrefix?: string
 ) {
   const config = appContextService.getConfig();
-  const logger = appContextService.getLogger();
+
+  let logger: Logger | undefined;
+  try {
+    logger = appContextService.getLogger();
+  } catch (e) {
+    // ignore, logger is optional
+    // this code can be used and tested without an app context
+  }
   const maxAgentPoliciesWithInactivityTimeout =
     config?.developer?.maxAgentPoliciesWithInactivityTimeout;
   const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts(soClient);
