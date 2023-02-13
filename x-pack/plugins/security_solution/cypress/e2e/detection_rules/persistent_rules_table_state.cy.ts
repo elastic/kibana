@@ -278,7 +278,7 @@ describe('Persistent rules table state', () => {
     });
   });
 
-  describe('upon version upgrade', async () => {
+  describe('upon state format upgrade', async () => {
     describe('and having state in the url', () => {
       it('ignores unsupported state key', () => {
         visitWithState({
