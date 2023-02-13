@@ -292,11 +292,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               <>
                 &nbsp;
                 <EuiToolTip
-                  content={i18n.translate('xpack.fleet.agentPolicyForm.inactivityTimeoutTooltip', {
-                    defaultMessage:
-                      'The maximum of 750 agent policies with an inactivity timeout has been exceeded. Remove inactivity timeouts or agent policies to allow agents to become inactive again.',
-                    values: { maxAgentPoliciesWithInactivityTimeout },
-                  })}
+                  content={
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicyForm.inactivityTimeoutTooltip"
+                      defaultMessage="The maximum of 750 agent policies with an inactivity timeout has been exceeded. Remove inactivity timeouts or agent policies to allow agents to become inactive again."
+                    />
+                  }
                 >
                   <EuiBadge color="warning">
                     <FormattedMessage
