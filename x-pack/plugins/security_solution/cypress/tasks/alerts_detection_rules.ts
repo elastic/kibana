@@ -372,7 +372,7 @@ export const expectRulesMonitoringTab = () =>
 export const expectFilterSearchTerm = (searchTerm: string) =>
   cy.get(RULE_SEARCH_FIELD).should('have.value', searchTerm);
 
-export const expectTags = (tags: string[]) => {
+export const expectFilterByTags = (tags: string[]) => {
   cy.get(RULES_TAGS_FILTER_BTN).contains(`Tags${tags.length}`).click();
 
   cy.get(RULES_TAGS_FILTER_POPOVER)
@@ -387,32 +387,32 @@ export const expectTags = (tags: string[]) => {
   }
 };
 
-export const expectNoTags = () => {
+export const expectNoFilterByTags = () => {
   cy.get(RULES_TAGS_FILTER_BTN).contains('Tags').click();
 
   cy.get(RULES_TAGS_FILTER_POPOVER).find(RULES_SELECTED_TAG).should('not.exist');
 };
 
-export const expectCustomRules = () => {
+export const expectFilterByCustomRules = () => {
   cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
 };
 
-export const expectElasticAndCustomRules = () => {
+export const expectNoFilterByElasticOrCustomRules = () => {
   cy.get(ELASTIC_RULES_BTN).should('exist');
   cy.get(`${ELASTIC_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
   cy.get(CUSTOM_RULES_BTN).should('exist');
   cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
 };
 
-export const expectEnabledRules = () => {
+export const expectFilterByEnabledRules = () => {
   cy.get(`${ENABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
 };
 
-export const expectDisabledRules = () => {
+export const expectFilterByDisabledRules = () => {
   cy.get(`${DISABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
 };
 
-export const expectEnabledAndDisabledRules = () => {
+export const expectNoFilterByEnabledOrDisabledRules = () => {
   cy.get(ENABLED_RULES_BTN).should('exist');
   cy.get(`${ENABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
   cy.get(DISABLED_RULES_BTN).should('exist');

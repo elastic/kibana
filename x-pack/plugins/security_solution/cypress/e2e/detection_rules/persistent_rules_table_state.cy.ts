@@ -24,14 +24,14 @@ import {
   filterByTags,
   goToRuleDetails,
   expectFilterSearchTerm,
-  expectTags,
-  expectCustomRules,
+  expectFilterByTags,
+  expectFilterByCustomRules,
   expectRulesManagementTab,
   expectRulesMonitoringTab,
-  expectNoTags,
-  expectElasticAndCustomRules,
-  expectDisabledRules,
-  expectEnabledAndDisabledRules,
+  expectNoFilterByTags,
+  expectNoFilterByElasticOrCustomRules,
+  expectFilterByDisabledRules,
+  expectNoFilterByEnabledOrDisabledRules,
   filterByDisabledRules,
 } from '../../tasks/alerts_detection_rules';
 import {
@@ -90,18 +90,18 @@ function changeRulesTableState(): void {
 
 function expectRulesTableState(): void {
   expectFilterSearchTerm('rule');
-  expectTags(['tag-b']);
-  expectCustomRules();
-  expectDisabledRules();
+  expectFilterByTags(['tag-b']);
+  expectFilterByCustomRules();
+  expectFilterByDisabledRules();
   expectTableSorting('Rule', 'asc');
   expectRowsPerPage(5);
 }
 
 function expectDefaultRulesTableState(): void {
   expectFilterSearchTerm('');
-  expectNoTags();
-  expectElasticAndCustomRules();
-  expectEnabledAndDisabledRules();
+  expectNoFilterByTags();
+  expectNoFilterByElasticOrCustomRules();
+  expectNoFilterByEnabledOrDisabledRules();
   expectTableSorting('Enabled', 'desc');
   expectRowsPerPage(20);
   expectTablePage(1);
@@ -311,9 +311,9 @@ describe('Persistent rules table state', () => {
         });
 
         expectFilterSearchTerm('rule');
-        expectTags(['tag-b']);
-        expectCustomRules();
-        expectDisabledRules();
+        expectFilterByTags(['tag-b']);
+        expectFilterByCustomRules();
+        expectFilterByDisabledRules();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(20);
         expectTablePage(1);
@@ -333,9 +333,9 @@ describe('Persistent rules table state', () => {
         });
 
         expectFilterSearchTerm('rule');
-        expectTags(['tag-b']);
-        expectCustomRules();
-        expectDisabledRules();
+        expectFilterByTags(['tag-b']);
+        expectFilterByCustomRules();
+        expectFilterByDisabledRules();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(20);
         expectTablePage(1);
@@ -355,9 +355,9 @@ describe('Persistent rules table state', () => {
         });
 
         expectFilterSearchTerm('');
-        expectNoTags();
-        expectElasticAndCustomRules();
-        expectEnabledAndDisabledRules();
+        expectNoFilterByTags();
+        expectNoFilterByElasticOrCustomRules();
+        expectNoFilterByEnabledOrDisabledRules();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(5);
         expectTablePage(2);
@@ -399,9 +399,9 @@ describe('Persistent rules table state', () => {
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
 
         expectFilterSearchTerm('rule');
-        expectTags(['tag-b']);
-        expectCustomRules();
-        expectDisabledRules();
+        expectFilterByTags(['tag-b']);
+        expectFilterByCustomRules();
+        expectFilterByDisabledRules();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(20);
         expectTablePage(1);
@@ -422,9 +422,9 @@ describe('Persistent rules table state', () => {
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
 
         expectFilterSearchTerm('');
-        expectNoTags();
-        expectElasticAndCustomRules();
-        expectEnabledAndDisabledRules();
+        expectNoFilterByTags();
+        expectNoFilterByElasticOrCustomRules();
+        expectNoFilterByEnabledOrDisabledRules();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(5);
         expectTablePage(1);
