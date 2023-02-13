@@ -107,14 +107,6 @@ export class IndexPatternStatsCollector {
       return false;
     }
 
-    if (
-      layer.type !== LAYER_TYPE.GEOJSON_VECTOR &&
-      layer.type !== LAYER_TYPE.BLENDED_VECTOR &&
-      layer.type !== LAYER_TYPE.HEATMAP
-    ) {
-      return false;
-    }
-
     const sourceDescriptor = layer.sourceDescriptor;
     if (sourceDescriptor.type === SOURCE_TYPES.ES_GEO_GRID) {
       return await this._isFieldGeoShape(
