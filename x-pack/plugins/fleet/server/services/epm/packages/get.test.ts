@@ -221,6 +221,7 @@ describe('When using EPM `get` services', () => {
         })
       ).resolves.toMatchObject([
         {
+          id: 'elasticsearch',
           name: 'elasticsearch',
           version: '0.0.1',
           title: 'Elasticsearch',

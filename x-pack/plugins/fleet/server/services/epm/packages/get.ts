@@ -75,12 +75,10 @@ export async function getPackages(
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
 
   const uploadedPackagesNotInRegistry = packageSavedObjects.saved_objects
-    .filter(
-      (pkg) =>
-        pkg.attributes.install_source === 'upload' &&
-        !registryItems.some((item) => item.name === pkg.id)
-    )
-    .map((pkg) => createInstallableFrom({ ...pkg.attributes, title: nameAsTitle(pkg.id) }, pkg));
+    .filter((pkg) => !registryItems.some((item) => item.name === pkg.id))
+    .map((pkg) =>
+      createInstallableFrom({ ...pkg.attributes, title: nameAsTitle(pkg.id), id: pkg.id }, pkg)
+    );
 
   const packageList = registryItems
     .map((item) =>
