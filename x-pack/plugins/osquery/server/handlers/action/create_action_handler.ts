@@ -101,7 +101,7 @@ export const createActionHandler = async (
               action_id: uuidv4(),
               id: packQueryId,
               query:
-                dynamicQueryPresent && packQuery.query && alertData
+                dynamicQueryPresent && alertData
                   ? replaceParamsQuery(packQuery.query, alertData).result
                   : packQuery.query,
               ecs_mapping: packQuery.ecs_mapping,
