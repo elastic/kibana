@@ -267,6 +267,25 @@ describe('Alert Event Details', () => {
     cy.contains("SELECT * FROM os_version where name='Ubuntu';");
   });
 
+  it('should substitute parameters in live query', () => {
+    loadAlertsEvents();
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.getBySel('take-action-dropdown-btn').click();
+    cy.getBySel('osquery-action-item').click();
+    cy.contains('1 agent selected.');
+    inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
+      parseSpecialCharSequences: false,
+    });
+    cy.contains('Advanced').click();
+    typeInECSFieldInput('tags{downArrow}{enter}');
+    cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
+    cy.wait(1000);
+    submitQuery();
+    cy.getBySel('dataGridHeader').within(() => {
+      cy.contains('tags');
+    });
+  });
+
   it('sees osquery results from last action', () => {
     toggleRuleOffAndOn(RULE_NAME);
     cy.wait(2000);

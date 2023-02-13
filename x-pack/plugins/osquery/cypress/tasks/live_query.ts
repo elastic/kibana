@@ -23,7 +23,8 @@ export const selectAllAgents = () => {
 export const clearInputQuery = () =>
   cy.get(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
 
-export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(query);
+export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
+  cy.get(LIVE_QUERY_EDITOR).type(query, options);
 
 export const submitQuery = () => {
   cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
