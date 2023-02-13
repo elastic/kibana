@@ -23,6 +23,7 @@ import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_fr
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
   kubernetesGuideId,
   kubernetesGuideConfig,
@@ -41,6 +42,7 @@ import { slo, SO_SLO_TYPE } from './saved_objects';
 import { SLO_RULE_REGISTRATION_CONTEXT } from './common/constants';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { SLO_BURN_RATE_RULE_ID } from '../common/constants';
+import { registerSloUsageCollector } from './lib/collectors/register';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -50,6 +52,7 @@ interface PluginSetup {
   spaces: SpacesPluginStart;
   alerting: PluginSetupContract;
   guidedOnboarding: GuidedOnboardingPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
@@ -225,6 +228,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
 
       registerRuleTypes(plugins.alerting, this.logger, ruleDataClient);
+
+      registerSloUsageCollector(plugins.usageCollection);
     }
 
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);

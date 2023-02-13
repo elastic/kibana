@@ -73,6 +73,7 @@ export function SlosPage() {
             color="primary"
             fill
             onClick={handleClickCreateSlo}
+            data-test-subj="slosPage-createNewSloButton"
           >
             {i18n.translate('xpack.observability.slos.sloList.pageHeader.createNewButtonLabel', {
               defaultMessage: 'Create new SLO',
