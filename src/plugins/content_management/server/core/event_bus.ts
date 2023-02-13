@@ -26,7 +26,10 @@ export class EventBus {
   /** The events Rxjs Subject */
   private _events$: Subject<ContentEvent>;
   /** Map of listener for each content type */
-  private eventListeners = new Map<ContentEventType, { [contentType: string]: Set<EventListener> }>();
+  private eventListeners = new Map<
+    ContentEventType,
+    { [contentType: string]: Set<EventListener> }
+  >();
   /** Subscription to the _events$ Observable */
   private eventsSubscription: Subscription;
 
@@ -111,7 +114,7 @@ export class EventBus {
 
     return () => {
       eventTypeListeners[contentType].delete(cb);
-    }
+    };
   }
 
   /**

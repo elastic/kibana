@@ -219,9 +219,9 @@ describe('Content Core', () => {
             api: { eventBus },
           } = coreSetup;
 
-          expect(() => { eventBus.on('getItemStart', 'foo', jest.fn()) }).toThrow(
-            'Invalid content type [foo].'
-          );
+          expect(() => {
+            eventBus.on('getItemStart', 'foo', jest.fn());
+          }).toThrow('Invalid content type [foo].');
         });
 
         test('should allow to subscribe to a single event for a single content type', async () => {
