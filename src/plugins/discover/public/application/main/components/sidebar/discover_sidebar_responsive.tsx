@@ -79,7 +79,7 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onChangeDataView: (id: string) => void;
   /**
-   * Callback function when removing a field
+   * Callback to remove a field column from the table
    * @param fieldName
    */
   onRemoveField: (fieldName: string) => void;
