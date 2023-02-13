@@ -279,8 +279,8 @@ const rulesSettingsGetResponse = (path: string) => {
   if (path.endsWith('/settings/_flapping')) {
     return {
       enabled: true,
-      lookBackWindow: 20,
-      statusChangeThreshold: 4,
+      look_back_window: 20,
+      status_change_threshold: 4,
     };
   }
 };
