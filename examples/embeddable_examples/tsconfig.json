@@ -24,5 +24,6 @@
     "@kbn/saved-objects-plugin",
     "@kbn/i18n",
     "@kbn/utility-types",
+    "@kbn/es-query",
   ]
 }

@@ -41,6 +41,7 @@ export const getAnomaliesNetworkTableColumns = (
         idPrefix: `anomalies-network-table-ip-${createCompoundAnomalyKey(
           anomaliesByNetwork.anomaly
         )}`,
+        aggregatable: true,
         fieldType: 'ip',
         render: (item) => <NetworkDetailsLink ip={item} flowTarget={flowTarget} />,
       }),

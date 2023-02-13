@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import type { Transform, ActiveMigrations } from './types';
+import { type ActiveMigrations, type Transform, TransformType } from './types';
 import { getReferenceTransforms, getConversionTransforms } from './internal_transforms';
 import { validateMigrationsMapObject } from './validate_migrations';
 import { transformComparator, convertMigrationFunction } from './utils';
@@ -19,7 +19,7 @@ import { getModelVersionTransforms } from './model_version';
  * Converts migrations from a format that is convenient for callers to a format that
  * is convenient for our internal usage:
  * From: { type: { version: fn } }
- * To:   { type: { latestMigrationVersion?: string; latestCoreMigrationVersion?: string; transforms: [{ version: string, transform: fn }] } }
+ * To:   { type: { latestVersion?: Record<TransformType, string>; transforms: [{ version: string, transform: fn }] } }
  */
 export function buildActiveMigrations(
   typeRegistry: ISavedObjectTypeRegistry,
@@ -37,7 +37,7 @@ export function buildActiveMigrations(
       ([version, transform]) => ({
         version,
         transform: convertMigrationFunction(version, type, transform, log),
-        transformType: 'migrate',
+        transformType: TransformType.Migrate,
       })
     );
 
@@ -55,21 +55,13 @@ export function buildActiveMigrations(
       return migrations;
     }
 
-    const migrationVersionTransforms: Transform[] = [];
-    const coreMigrationVersionTransforms: Transform[] = [];
-    transforms.forEach((x) => {
-      if (x.transformType === 'migrate' || x.transformType === 'convert') {
-        migrationVersionTransforms.push(x);
-      } else {
-        coreMigrationVersionTransforms.push(x);
-      }
-    });
-
     return {
       ...migrations,
       [type.name]: {
-        latestMigrationVersion: _.last(migrationVersionTransforms)?.version,
-        latestCoreMigrationVersion: _.last(coreMigrationVersionTransforms)?.version,
+        latestVersion: _.chain(transforms)
+          .groupBy('transformType')
+          .mapValues((items) => _.last(items)?.version)
+          .value() as Record<TransformType, string>,
         transforms,
       },
     };
