@@ -404,7 +404,7 @@ export const expectFilterByCustomRules = () => {
 
 export const expectNoFilterByElasticOrCustomRules = () => {
   cy.log(`Expecting rules table has no filtering by either elastic nor custom rules`);
-  cy.get(ELASTIC_RULES_BTN).should('exist').should('a');
+  cy.get(ELASTIC_RULES_BTN).should('exist');
   cy.get(`${ELASTIC_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
   cy.get(CUSTOM_RULES_BTN).should('exist');
   cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
