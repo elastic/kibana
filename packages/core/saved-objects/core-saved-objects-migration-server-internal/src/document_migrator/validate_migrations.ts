@@ -22,6 +22,18 @@ export function validateTypeMigrations({
   kibanaVersion: string;
   convertVersion?: string;
 }) {
+  if (type.switchToModelVersionAt) {
+    const switchToModelVersionAt = Semver.parse(type.switchToModelVersionAt);
+    if (!switchToModelVersionAt) {
+      throw new Error(
+        `Invalid version specified for switchToModelVersionAt: ${type.switchToModelVersionAt}`
+      );
+    }
+    if (switchToModelVersionAt.patch !== 0) {
+      throw new Error(`Can't use a patch version for switchToModelVersionAt`);
+    }
+  }
+
   if (type.migrations) {
     assertObjectOrFunction(
       type.migrations,
@@ -39,6 +51,11 @@ export function validateTypeMigrations({
     Object.entries(migrationMap).forEach(([version, fn]) => {
       assertValidSemver(kibanaVersion, version, type.name);
       assertValidTransform(fn, version, type.name);
+      if (type.switchToModelVersionAt && Semver.gte(version, type.switchToModelVersionAt)) {
+        throw new Error(
+          `Migration for type ${type.name} for version ${version} registered after switchToModelVersionAt (${type.switchToModelVersionAt})`
+        );
+      }
     });
   }
 

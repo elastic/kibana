@@ -71,6 +71,75 @@ describe('validateTypeMigrations', () => {
 
       expect(() => validate({ type })).toThrow(/expected a function, but got 23/i);
     });
+
+    describe('when switchToModelVersionAt is specified', () => {
+      it('throws if a migration is specified for a version superior to switchToModelVersionAt', () => {
+        const type = createType({
+          name: 'foo',
+          switchToModelVersionAt: '8.9.0',
+          migrations: {
+            '8.10.0': jest.fn(),
+          },
+        });
+
+        expect(() =>
+          validate({ type, kibanaVersion: '8.10.0' })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Migration for type foo for version 8.10.0 registered after switchToModelVersionAt (8.9.0)"`
+        );
+      });
+      it('throws if a migration is specified for a version equal to switchToModelVersionAt', () => {
+        const type = createType({
+          name: 'foo',
+          switchToModelVersionAt: '8.9.0',
+          migrations: {
+            '8.9.0': jest.fn(),
+          },
+        });
+
+        expect(() =>
+          validate({ type, kibanaVersion: '8.10.0' })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Migration for type foo for version 8.9.0 registered after switchToModelVersionAt (8.9.0)"`
+        );
+      });
+
+      it('does not throw if a migration is specified for a version inferior to switchToModelVersionAt', () => {
+        const type = createType({
+          name: 'foo',
+          switchToModelVersionAt: '8.9.0',
+          migrations: {
+            '8.7.0': jest.fn(),
+          },
+        });
+
+        expect(() => validate({ type, kibanaVersion: '8.10.0' })).not.toThrow();
+      });
+    });
+  });
+
+  describe('switchToModelVersionAt', () => {
+    it('throws if the specified version is not a valid semver', () => {
+      const type = createType({
+        name: 'foo',
+        switchToModelVersionAt: 'foo',
+      });
+
+      expect(() => validate({ type })).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid version specified for switchToModelVersionAt: foo"`
+      );
+    });
+
+    it('throws if the specified version defines a patch version > 0', () => {
+      const type = createType({
+        name: 'foo',
+        switchToModelVersionAt: '8.9.3',
+      });
+
+      expect(() => validate({ type })).toThrowErrorMatchingInlineSnapshot(
+        `"Can't use a patch version for switchToModelVersionAt"`
+      );
+    });
   });
 
   describe('convertToMultiNamespaceTypeVersion', () => {
