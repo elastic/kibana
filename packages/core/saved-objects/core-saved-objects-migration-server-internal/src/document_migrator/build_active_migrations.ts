@@ -8,8 +8,8 @@
 
 import _ from 'lodash';
 import type { Logger } from '@kbn/logging';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { type ActiveMigrations, type Transform, TransformType } from './types';
+import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { type ActiveMigrations, type Transform, type TypeTransforms, TransformType } from './types';
 import { getReferenceTransforms, getConversionTransforms } from './internal_transforms';
 import { validateMigrationsMapObject } from './validate_migrations';
 import { transformComparator, convertMigrationFunction } from './utils';
@@ -29,41 +29,62 @@ export function buildActiveMigrations(
   const referenceTransforms = getReferenceTransforms(typeRegistry);
 
   return typeRegistry.getAllTypes().reduce((migrations, type) => {
-    const migrationsMap =
-      typeof type.migrations === 'function' ? type.migrations() : type.migrations ?? {};
-    validateMigrationsMapObject(type.name, kibanaVersion, migrationsMap);
+    const typeTransforms = buildTypeTransforms({
+      type,
+      log,
+      kibanaVersion,
+      referenceTransforms,
+    });
 
-    const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(
-      ([version, transform]) => ({
-        version,
-        transform: convertMigrationFunction(version, type, transform, log),
-        transformType: TransformType.Migrate,
-      })
-    );
-
-    const modelVersionTransforms = getModelVersionTransforms({ log, typeDefinition: type });
-
-    const conversionTransforms = getConversionTransforms(type);
-    const transforms = [
-      ...referenceTransforms,
-      ...conversionTransforms,
-      ...migrationTransforms,
-      ...modelVersionTransforms,
-    ].sort(transformComparator);
-
-    if (!transforms.length) {
+    if (!typeTransforms.transforms.length) {
       return migrations;
     }
 
     return {
       ...migrations,
-      [type.name]: {
-        latestVersion: _.chain(transforms)
-          .groupBy('transformType')
-          .mapValues((items) => _.last(items)?.version)
-          .value() as Record<TransformType, string>,
-        transforms,
-      },
+      [type.name]: typeTransforms,
     };
   }, {} as ActiveMigrations);
 }
+
+const buildTypeTransforms = ({
+  type,
+  log,
+  referenceTransforms,
+  kibanaVersion,
+}: {
+  type: SavedObjectsType;
+  kibanaVersion: string;
+  log: Logger;
+  referenceTransforms: Transform[];
+}): TypeTransforms => {
+  const migrationsMap =
+    typeof type.migrations === 'function' ? type.migrations() : type.migrations ?? {};
+  validateMigrationsMapObject(type.name, kibanaVersion, migrationsMap);
+
+  const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(
+    ([version, transform]) => ({
+      version,
+      transform: convertMigrationFunction(version, type, transform, log),
+      transformType: TransformType.Migrate,
+    })
+  );
+
+  const modelVersionTransforms = getModelVersionTransforms({ log, typeDefinition: type });
+
+  const conversionTransforms = getConversionTransforms(type);
+  const transforms = [
+    ...referenceTransforms,
+    ...conversionTransforms,
+    ...migrationTransforms,
+    ...modelVersionTransforms,
+  ].sort(transformComparator);
+
+  return {
+    latestVersion: _.chain(transforms)
+      .groupBy('transformType')
+      .mapValues((items) => _.last(items)?.version)
+      .value() as Record<TransformType, string>,
+    transforms,
+  };
+};

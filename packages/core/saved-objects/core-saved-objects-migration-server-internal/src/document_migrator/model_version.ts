@@ -18,7 +18,7 @@ import {
   assertValidModelVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { TransformSavedObjectDocumentError } from '../core';
-import type { Transform, TransformFn } from './types';
+import { type Transform, type TransformFn, TransformType } from './types';
 
 export const getModelVersionTransforms = ({
   typeDefinition,
@@ -45,7 +45,7 @@ export const getModelVersionTransforms = ({
           virtualVersion,
           definition,
         }),
-        transformType: 'migrate',
+        transformType: TransformType.Migrate,
       };
     });
 
