@@ -9,6 +9,7 @@
 import Semver from 'semver';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { assertValidModelVersion } from '@kbn/core-saved-objects-base-server-internal';
 
 /**
  * Validates the consistency of the given type for use with the document migrator.
@@ -26,11 +27,11 @@ export function validateTypeMigrations({
     const switchToModelVersionAt = Semver.parse(type.switchToModelVersionAt);
     if (!switchToModelVersionAt) {
       throw new Error(
-        `Invalid version specified for switchToModelVersionAt: ${type.switchToModelVersionAt}`
+        `Type ${type.name}: invalid version specified for switchToModelVersionAt: ${type.switchToModelVersionAt}`
       );
     }
     if (switchToModelVersionAt.patch !== 0) {
-      throw new Error(`Can't use a patch version for switchToModelVersionAt`);
+      throw new Error(`Type ${type.name}: can't use a patch version for switchToModelVersionAt`);
     }
   }
 
@@ -57,6 +58,49 @@ export function validateTypeMigrations({
         );
       }
     });
+  }
+
+  if (type.modelVersions) {
+    const modelVersionMap =
+      typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions ?? {};
+
+    if (Object.keys(modelVersionMap).length > 0 && !type.switchToModelVersionAt) {
+      throw new Error(
+        `Type ${type.name}: Uusing modelVersions requires to specify switchToModelVersionAt`
+      );
+    }
+
+    Object.entries(modelVersionMap).forEach(([version, definition]) => {
+      assertValidModelVersion(version);
+    });
+
+    const { min: minVersion, max: maxVersion } = Object.keys(modelVersionMap).reduce(
+      (minMax, rawVersion) => {
+        const version = Number.parseInt(rawVersion, 10);
+        minMax.min = Math.min(minMax.min, version);
+        minMax.max = Math.max(minMax.max, version);
+        return minMax;
+      },
+      { min: Infinity, max: -Infinity }
+    );
+
+    if (minVersion > 1) {
+      throw new Error(`Type ${type.name}: model versioning must start with version 1`);
+    }
+    const missingVersions = getMissingVersions(
+      minVersion,
+      maxVersion,
+      Object.keys(modelVersionMap).map((v) => Number.parseInt(v, 10))
+    );
+    if (missingVersions.length) {
+      throw new Error(
+        `Type ${
+          type.name
+        }: gaps between model versions aren't allowed (missing versions: ${missingVersions.join(
+          ','
+        )})`
+      );
+    }
   }
 
   if (type.convertToMultiNamespaceTypeVersion) {
@@ -129,4 +173,15 @@ const assertValidTransform = (fn: any, version: string, type: string) => {
   if (typeof fn !== 'function') {
     throw new Error(`Invalid migration ${type}.${version}: expected a function, but got ${fn}.`);
   }
+};
+
+const getMissingVersions = (from: number, to: number, versions: number[]): number[] => {
+  const versionSet = new Set(versions);
+  const missing: number[] = [];
+  for (let i = from; i <= to; i++) {
+    if (!versionSet.has(i)) {
+      missing.push(i);
+    }
+  }
+  return missing;
 };

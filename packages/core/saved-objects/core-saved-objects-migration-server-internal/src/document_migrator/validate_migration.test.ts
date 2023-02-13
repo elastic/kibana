@@ -6,12 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { validateTypeMigrations } from './validate_migrations';
 
 describe('validateTypeMigrations', () => {
   const defaultKibanaVersion = '3.2.3';
   const defaultConvertVersion = '8.0.0';
+
+  const someModelVersion: SavedObjectsModelVersion = {
+    modelChange: {
+      type: 'expansion',
+      transformation: { up: jest.fn(), down: jest.fn() },
+    },
+  };
 
   const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
     name: 'test',
@@ -126,7 +133,7 @@ describe('validateTypeMigrations', () => {
       });
 
       expect(() => validate({ type })).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid version specified for switchToModelVersionAt: foo"`
+        `"Type foo: invalid version specified for switchToModelVersionAt: foo"`
       );
     });
 
@@ -137,7 +144,66 @@ describe('validateTypeMigrations', () => {
       });
 
       expect(() => validate({ type })).toThrowErrorMatchingInlineSnapshot(
-        `"Can't use a patch version for switchToModelVersionAt"`
+        `"Type foo: can't use a patch version for switchToModelVersionAt"`
+      );
+    });
+  });
+
+  describe('modelVersions', () => {
+    it('throws if used without specifying switchToModelVersionAt', () => {
+      const type = createType({
+        name: 'foo',
+        modelVersions: {
+          '1': someModelVersion,
+        },
+      });
+
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
+        `"Type foo: Uusing modelVersions requires to specify switchToModelVersionAt"`
+      );
+    });
+
+    it('throws if the version number is invalid', () => {
+      const type = createType({
+        name: 'foo',
+        switchToModelVersionAt: '3.1.0',
+        modelVersions: {
+          '1.1': someModelVersion,
+        },
+      });
+
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
+        `"Model version must be an integer"`
+      );
+    });
+
+    it('throws when starting with a version higher than 1', () => {
+      const type = createType({
+        name: 'foo',
+        switchToModelVersionAt: '3.1.0',
+        modelVersions: {
+          '2': someModelVersion,
+        },
+      });
+
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
+        `"Type foo: model versioning must start with version 1"`
+      );
+    });
+
+    it('throws when there is a gap in versions', () => {
+      const type = createType({
+        name: 'foo',
+        switchToModelVersionAt: '3.1.0',
+        modelVersions: {
+          '1': someModelVersion,
+          '3': someModelVersion,
+          '6': someModelVersion,
+        },
+      });
+
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
+        `"Type foo: gaps between model versions aren't allowed (missing versions: 2,4,5)"`
       );
     });
   });
