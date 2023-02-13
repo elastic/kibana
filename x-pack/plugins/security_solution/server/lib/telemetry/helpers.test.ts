@@ -28,7 +28,8 @@ import {
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
-import { cloneDeep, set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep } from 'lodash';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {

@@ -7,7 +7,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { Readable } from 'stream';
 import { encode } from 'cbor-x';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';

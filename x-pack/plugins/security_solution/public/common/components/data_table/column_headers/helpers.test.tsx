@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { mount } from 'enzyme';
-import { omit, set } from 'lodash/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
+import { omit } from 'lodash/fp';
 import React from 'react';
 
 import type { BUILT_IN_SCHEMA } from './helpers';
