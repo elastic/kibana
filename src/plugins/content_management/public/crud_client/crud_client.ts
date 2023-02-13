@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ContentManagementPlugin } from './plugin';
+import type { GetIn, CreateIn } from '../../common';
 
-export function plugin() {
-  return new ContentManagementPlugin();
+export interface CrudClient {
+  get<I extends GetIn = GetIn, O = unknown>(input: I): Promise<O>;
+  create<I extends CreateIn = CreateIn, O = unknown>(input: I): Promise<O>;
 }
-
-export type { ContentManagementPublicStart, ContentManagementPublicSetup } from './types';
