@@ -6,12 +6,12 @@
  */
 import {
   EuiButton,
+  EuiCallOut,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
-  EuiMarkdownFormat,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -58,6 +58,9 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xxl" />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText>Loading data sources</EuiText>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </ProfilingAppPageTemplate>
     );
@@ -90,39 +93,49 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
           action: {
             elasticAgent: {
               description: (
-                <EuiFlexGrid>
+                <EuiFlexGrid gutterSize="s">
                   <EuiText>
                     {i18n.translate('xpack.profiling.noDataConfig.action.title', {
                       defaultMessage: `Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation.
               Understand what lines of code are consuming compute resources, at all times, and across your entire infrastructure.`,
                     })}
                   </EuiText>
-                  <EuiMarkdownFormat>
-                    {i18n.translate('xpack.profiling.noDataConfig.action.permissionsWarning', {
-                      defaultMessage:
-                        'To setup Universal Profiling, you must be logged in as a superuser, typically the `elastic` user.',
-                    })}
-                  </EuiMarkdownFormat>
-                  <EuiText size={'s'}>
-                    {i18n.translate('xpack.profiling.noDataConfig.action.dataRetention', {
-                      defaultMessage: `Normal data storage costs apply for profiling data stored in Elasticsearch.
-                      Refer to the documentation to control data retention. `,
-                    })}
-                    <EuiLink target="_blank" href={docsLink}>
-                      Read more.
-                    </EuiLink>
-                  </EuiText>
+                  <EuiCallOut
+                    size="s"
+                    color="warning"
+                    title={i18n.translate(
+                      'xpack.profiling.noDataConfig.action.permissionsWarning',
+                      {
+                        defaultMessage:
+                          'To setup Universal Profiling, you must be logged in as a superuser.',
+                      }
+                    )}
+                  />
                   <EuiText size={'xs'}>
-                    {i18n.translate('xpack.profiling.noDataConfig.action.legalBetaTerms', {
-                      defaultMessage: `By using this feature, you acknowledge that you have read and agree to `,
-                    })}
-                    <EuiLink
-                      target="_blank"
-                      href={`https://www.elastic.co/agreements/beta-release-terms`}
-                    >
-                      Elastic&apos;s Beta Release Terms
-                    </EuiLink>
+                    <ul>
+                      <li>
+                        {i18n.translate('xpack.profiling.noDataConfig.action.dataRetention', {
+                          defaultMessage: `Normal data storage costs apply for profiling data stored in Elasticsearch.
+                      To control data retention. `,
+                        })}
+                        <EuiLink target="_blank" href={docsLink}>
+                          Read more
+                        </EuiLink>
+                      </li>
+                      <li>
+                        {i18n.translate('xpack.profiling.noDataConfig.action.legalBetaTerms', {
+                          defaultMessage: `By using this feature, you acknowledge that you have read and agree to `,
+                        })}
+                        <EuiLink
+                          target="_blank"
+                          href={`https://www.elastic.co/agreements/beta-release-terms`}
+                        >
+                          Elastic&apos;s Beta Release Terms
+                        </EuiLink>
+                      </li>
+                    </ul>
                   </EuiText>
+                  <EuiText size={'xs'}></EuiText>
                 </EuiFlexGrid>
               ),
               onClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
