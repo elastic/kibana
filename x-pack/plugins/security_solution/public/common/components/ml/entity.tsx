@@ -21,6 +21,7 @@ export const EntityComponent: React.FC<Props> = ({ entityName, entityValue }) =>
         name: entityName,
         value: entityValue,
         type: 'keyword',
+        aggregatable: true,
       }}
       triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
       mode={CellActionsMode.HOVER}
