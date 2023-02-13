@@ -31,8 +31,14 @@ export const createPureLogStreamPositionStateMachine = (initialContext: LogStrea
       initial: 'uninitialized',
       states: {
         uninitialized: {
-          always: {
-            target: 'initializingFromUrl',
+          meta: {
+            _DX_warning_:
+              "The Position machine cannot initializeFromUrl until after the Query machine has initialized, this is due to a dual dependency on the 'logPosition' URL parameter for legacy reasons.",
+          },
+          on: {
+            RECEIVED_INITIAL_QUERY_PARAMETERS: {
+              target: 'initializingFromUrl',
+            },
           },
         },
         initializingFromUrl: {

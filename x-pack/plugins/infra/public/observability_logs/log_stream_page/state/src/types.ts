@@ -25,20 +25,27 @@ import type {
   LogViewNotificationEvent,
 } from '../../../log_view_state';
 
+export interface ReceivedInitialQueryParametersEvent {
+  type: 'RECEIVED_INITIAL_QUERY_PARAMETERS';
+  validatedQuery: ParsedQuery;
+  timeRange: LogStreamPageContextWithTime['timeRange'];
+  refreshInterval: LogStreamPageContextWithTime['refreshInterval'];
+  timestamps: LogStreamPageContextWithTime['timestamps'];
+}
+
+export interface ReceivedInitialPositionParametersEvent {
+  type: 'RECEIVED_INITIAL_POSITION_PARAMETERS';
+  targetPosition: LogStreamPageContextWithPositions['targetPosition'];
+  latestPosition: LogStreamPageContextWithPositions['latestPosition'];
+  visiblePositions: LogStreamPageContextWithPositions['visiblePositions'];
+}
+
 export type LogStreamPageEvent =
   | LogViewNotificationEvent
   | LogStreamQueryNotificationEvent
   | LogStreamPositionNotificationEvent
-  | {
-      type: 'RECEIVED_INITIAL_PARAMETERS';
-      validatedQuery: ParsedQuery;
-      timeRange: LogStreamPageContextWithTime['timeRange'];
-      refreshInterval: LogStreamPageContextWithTime['refreshInterval'];
-      timestamps: LogStreamPageContextWithTime['timestamps'];
-      targetPosition: LogStreamPageContextWithPositions['targetPosition'];
-      latestPosition: LogStreamPageContextWithPositions['latestPosition'];
-      visiblePositions: LogStreamPageContextWithPositions['visiblePositions'];
-    }
+  | ReceivedInitialQueryParametersEvent
+  | ReceivedInitialPositionParametersEvent
   | JumpToTargetPositionEvent
   | ReportVisiblePositionsEvent
   | UpdateTimeRangeEvent

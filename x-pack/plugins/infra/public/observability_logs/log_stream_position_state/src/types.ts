@@ -6,6 +6,7 @@
  */
 
 import { TimeKey } from '../../../../common/time';
+import { ReceivedInitialQueryParametersEvent } from '../../log_stream_page/state';
 import { TimeChangedEvent } from '../../log_stream_query_state/src/notifications';
 
 export interface VisiblePositions {
@@ -58,6 +59,7 @@ export type LogStreamPositionEvent =
       latestPosition: TimeKey | null;
       targetPosition: TimeKey | null;
     }
+  | ReceivedInitialQueryParametersEvent
   | JumpToTargetPositionEvent
   | ReportVisiblePositionsEvent
   | TimeChangedEvent;

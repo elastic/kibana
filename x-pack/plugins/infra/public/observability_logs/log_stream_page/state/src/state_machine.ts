@@ -16,7 +16,10 @@ import {
 } from '../../../log_stream_query_state';
 import type { LogViewNotificationChannel } from '../../../log_view_state';
 import { OmitDeprecatedState } from '../../../xstate_helpers';
-import { waitForInitialParameters } from './initial_parameters_service';
+import {
+  waitForInitialQueryParameters,
+  waitForInitialPositionParameters,
+} from './initial_parameters_service';
 import type {
   LogStreamPageContext,
   LogStreamPageContextWithLogView,
@@ -89,41 +92,65 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
           },
         },
         hasLogViewIndices: {
-          initial: 'uninitialized',
+          initial: 'initializingQuery',
 
           states: {
-            uninitialized: {
+            initializingQuery: {
+              meta: {
+                _DX_warning_:
+                  "The Query machine must be invoked and complete initialisation before the Position machine is invoked. This is due to legacy URL dependencies on the 'logPosition' key, we need to read the key before it is reset by the Position machine.",
+              },
               invoke: {
-                src: 'waitForInitialParameters',
-                id: 'waitForInitialParameters',
+                src: 'waitForInitialQueryParameters',
+                id: 'waitForInitialQueryParameters',
               },
 
               on: {
-                RECEIVED_INITIAL_PARAMETERS: {
-                  target: 'initialized',
-                  actions: ['storeQuery', 'storeTime', 'storePositions'],
+                RECEIVED_INITIAL_QUERY_PARAMETERS: {
+                  target: 'initializingPositions',
+                  actions: ['storeQuery', 'storeTime', 'forwardToLogPosition'],
                 },
 
                 VALID_QUERY_CHANGED: {
-                  target: 'uninitialized',
+                  target: 'initializingQuery',
                   internal: true,
-                  actions: 'forwardToInitialParameters',
+                  actions: 'forwardToInitialQueryParameters',
                 },
 
                 INVALID_QUERY_CHANGED: {
-                  target: 'uninitialized',
+                  target: 'initializingQuery',
                   internal: true,
-                  actions: 'forwardToInitialParameters',
+                  actions: 'forwardToInitialQueryParameters',
                 },
                 TIME_CHANGED: {
-                  target: 'uninitialized',
+                  target: 'initializingQuery',
                   internal: true,
-                  actions: 'forwardToInitialParameters',
+                  actions: 'forwardToInitialQueryParameters',
                 },
+              },
+            },
+            initializingPositions: {
+              meta: {
+                _DX_warning_:
+                  "The Position machine must be invoked after the Query machine has been invoked and completed initialisation. This is due to the Query machine having some legacy URL dependencies on the 'logPosition' key, we don't want the Position machine to reset the URL parameters before the Query machine has had a chance to read them.",
+              },
+              invoke: [
+                {
+                  src: 'waitForInitialPositionParameters',
+                  id: 'waitForInitialPositionParameters',
+                },
+              ],
+
+              on: {
+                RECEIVED_INITIAL_POSITION_PARAMETERS: {
+                  target: 'initialized',
+                  actions: ['storePositions'],
+                },
+
                 POSITIONS_CHANGED: {
-                  target: 'uninitialized',
+                  target: 'initializingPositions',
                   internal: true,
-                  actions: 'forwardToInitialParameters',
+                  actions: 'forwardToInitialPositionParameters',
                 },
               },
             },
@@ -184,7 +211,8 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
     },
     {
       actions: {
-        forwardToInitialParameters: actions.forwardTo('waitForInitialParameters'),
+        forwardToInitialQueryParameters: actions.forwardTo('waitForInitialQueryParameters'),
+        forwardToInitialPositionParameters: actions.forwardTo('waitForInitialPositionParameters'),
         forwardToLogPosition: actions.forwardTo('logStreamPosition'),
         forwardToLogStreamQuery: actions.forwardTo('logStreamQuery'),
         storeLogViewError: actions.assign((_context, event) =>
@@ -201,7 +229,7 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
             : {}
         ),
         storeQuery: actions.assign((_context, event) =>
-          event.type === 'RECEIVED_INITIAL_PARAMETERS'
+          event.type === 'RECEIVED_INITIAL_QUERY_PARAMETERS'
             ? ({
                 parsedQuery: event.validatedQuery,
               } as LogStreamPageContextWithQuery)
@@ -321,6 +349,7 @@ export const createLogStreamPageStateMachine = ({
           }
         );
       },
-      waitForInitialParameters: waitForInitialParameters(),
+      waitForInitialQueryParameters: waitForInitialQueryParameters(),
+      waitForInitialPositionParameters: waitForInitialPositionParameters(),
     },
   });
