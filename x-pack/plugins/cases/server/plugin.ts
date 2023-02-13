@@ -32,6 +32,7 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 
 import { APP_ID } from '../common/constants';
 import {
@@ -74,6 +75,7 @@ export interface PluginsStart {
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   notifications: NotificationsPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
 }
 
 export class CasePlugin {
@@ -202,6 +204,7 @@ export class CasePlugin {
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       notifications: plugins.notifications,
+      ruleRegistry: plugins.ruleRegistry,
     });
 
     const client = core.elasticsearch.client;

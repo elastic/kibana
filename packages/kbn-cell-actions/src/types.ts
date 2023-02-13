@@ -36,6 +36,14 @@ export interface CellActionField {
    * Example: 'My-Laptop'
    */
   value: string | string[] | null | undefined;
+  /**
+   * When true the field supports aggregations.
+   *
+   * It defaults to false.
+   *
+   * You can verify if a field is aggregatable on kibana/management/kibana/dataViews.
+   */
+  aggregatable?: boolean;
 }
 
 export enum CellActionsMode {
@@ -70,40 +78,43 @@ export interface CellActionsProps {
    */
   visibleCellActions?: number;
   /**
+   * List of Actions ids that shouldn't be displayed inside cell actions.
+   */
+  disabledActions?: string[];
+  /**
    * Custom set of properties used by some actions.
    * An action might require a specific set of metadata properties to render.
    * This data is sent directly to actions.
    */
   metadata?: Record<string, unknown>;
+
+  className?: string;
 }
+
+type Metadata = Record<string, unknown> | undefined;
 
 export interface CellActionExecutionContext extends ActionExecutionContext {
   field: CellActionField;
   /**
-   * Ref to a DOM node where the action can add custom HTML.
-   */
-  extraContentNodeRef: React.MutableRefObject<HTMLDivElement | null>;
-
-  /**
    * Ref to the node where the cell action are rendered.
    */
   nodeRef: React.MutableRefObject<HTMLElement | null>;
-
   /**
    * Extra configurations for actions.
    */
-  metadata?: Record<string, unknown>;
+  metadata?: Metadata;
 }
 
-export interface CellActionCompatibilityContext extends ActionExecutionContext {
+export interface CellActionCompatibilityContext<M extends Metadata = Metadata>
+  extends ActionExecutionContext {
   /**
    * The object containing the field name and type, needed for the compatibility check
    */
-  field: Pick<CellActionField, 'name' | 'type'>;
+  field: Pick<CellActionField, 'name' | 'type' | 'aggregatable'>;
   /**
    * Extra configurations for actions.
    */
-  metadata?: Record<string, unknown>;
+  metadata?: M;
 }
 
 export interface CellAction<C extends CellActionExecutionContext = CellActionExecutionContext>
@@ -112,7 +123,7 @@ export interface CellAction<C extends CellActionExecutionContext = CellActionExe
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  isCompatible(context: CellActionCompatibilityContext): Promise<boolean>;
+  isCompatible(context: CellActionCompatibilityContext<C['metadata']>): Promise<boolean>;
 }
 
 export type GetActions = (context: CellActionCompatibilityContext) => Promise<CellAction[]>;
