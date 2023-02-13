@@ -1327,7 +1327,7 @@ describe('merge_all_fields_with_source', () => {
         });
       });
 
-      test('DOES NOT add multi field values such as "process.command_line.text" to nested source when "process.command_line" has value', () => {
+      test('does not add multi field values such as "process.command_line.text" to nested source when "process.command_line" has value', () => {
         const _source: SignalSourceHit['_source'] = {
           process: {
             command_line: 'string longer than 10 characters',
@@ -1341,7 +1341,7 @@ describe('merge_all_fields_with_source', () => {
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
-      test('DOES NOT add multi field values such as "process.command_line.text" to nested source when "process.command_line" has array value', () => {
+      test('does not add multi field values such as "process.command_line.text" to nested source when "process.command_line" has array value', () => {
         const _source: SignalSourceHit['_source'] = {
           process: {
             command_line: ['string longer than 10 characters'],
@@ -1423,7 +1423,7 @@ describe('merge_all_fields_with_source', () => {
         });
       });
 
-      test('DOES NOT add multi field values such as "process.command_line.text" to flattened source when "process.command_line" has value', () => {
+      test('does not add multi field values such as "process.command_line.text" to flattened source when "process.command_line" has value', () => {
         const _source: SignalSourceHit['_source'] = {
           'process.command_line': 'string longer than 10 characters',
         };
@@ -1436,7 +1436,7 @@ describe('merge_all_fields_with_source', () => {
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
 
-      test('DOES NOT add multi field values such as "process.command_line.text" to flattened source when "process.command_line" has array value value', () => {
+      test('does not add multi field values such as "process.command_line.text" to flattened source when "process.command_line" has array value', () => {
         const _source: SignalSourceHit['_source'] = {
           'process.command_line': ['string longer than 10 characters'],
         };
