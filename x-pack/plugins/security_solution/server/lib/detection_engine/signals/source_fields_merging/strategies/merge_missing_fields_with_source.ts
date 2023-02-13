@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
+import { get, cloneDeep } from 'lodash/fp';
 import { set } from '@kbn/safer-lodash-set';
 import type { SignalSource } from '../../types';
 import { filterFieldEntries } from '../utils/filter_field_entries';
@@ -14,6 +14,7 @@ import { recursiveUnboxingFields } from '../utils/recursive_unboxing_fields';
 import { isTypeObject } from '../utils/is_type_object';
 import { arrayInPathExists } from '../utils/array_in_path_exists';
 import { isNestedObject } from '../utils/is_nested_object';
+import { isExistingValueInPathNotObject } from '../utils/is_existing_value_in_path_not_object';
 
 /**
  * Merges only missing sections of "doc._source" with its "doc.fields" on a "best effort" basis. See ../README.md for more information
@@ -46,7 +47,7 @@ export const mergeMissingFieldsWithSource: MergeStrategyFunction = ({ doc, ignor
       const valueToMerge = recursiveUnboxingFields(fieldsValue, valueInMergedDocument);
       return set(merged, fieldsKey, valueToMerge);
     },
-    { ...source }
+    cloneDeep(source)
   );
 
   return {
@@ -80,6 +81,7 @@ const hasEarlyReturnConditions = ({
     fieldsValue.length === 0 ||
     valueInMergedDocument !== undefined ||
     arrayInPathExists(fieldsKey, merged) ||
+    isExistingValueInPathNotObject(fieldsKey, merged) ||
     isNestedObject(fieldsValue) ||
     isTypeObject(fieldsValue)
   );
