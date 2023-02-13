@@ -19,7 +19,6 @@ import { WebElementWrapper } from '../../../../../test/functional/services/lib/w
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
 
   const expectedData = [
