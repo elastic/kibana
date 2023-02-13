@@ -143,7 +143,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                       </li>
                     </ul>
                   </EuiText>
-                  <EuiText size={'xs'}></EuiText>
+                  <EuiText size={'xs'} />
                 </EuiFlexGrid>
               ),
               onClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
