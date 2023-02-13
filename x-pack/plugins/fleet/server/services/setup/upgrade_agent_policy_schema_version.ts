@@ -10,14 +10,16 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-  SO_SEARCH_LIMIT,
 } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
+import { appContextService } from '../app_context';
 
-function getOutdatedAgentPoliciesBatch(soClient: SavedObjectsClientContract) {
+const DEFAULT_BATCH_SIZE = 100;
+function getOutdatedAgentPoliciesBatch(soClient: SavedObjectsClientContract, batchSize: number) {
   return agentPolicyService.list(soClient, {
-    perPage: SO_SEARCH_LIMIT,
+    perPage: batchSize,
     kuery: `NOT ${AGENT_POLICY_SAVED_OBJECT_TYPE}.schema_version:${FLEET_AGENT_POLICIES_SCHEMA_VERSION}`,
+    fields: ['id'], // we only need the ID of the agent policy
   });
 }
 
@@ -26,13 +28,23 @@ function getOutdatedAgentPoliciesBatch(soClient: SavedObjectsClientContract) {
 // deploy outdated policies to .fleet-policies index
 // bump oudated SOs schema_version
 export async function upgradeAgentPolicySchemaVersion(soClient: SavedObjectsClientContract) {
-  let outdatedAgentPolicies = await getOutdatedAgentPoliciesBatch(soClient);
+  const config = appContextService.getConfig();
+  const logger = appContextService.getLogger();
 
+  const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? DEFAULT_BATCH_SIZE;
+  let outdatedAgentPolicies = await getOutdatedAgentPoliciesBatch(soClient, batchSize);
+  logger.debug(`Found ${outdatedAgentPolicies.total} outdated agent policies`);
   while (outdatedAgentPolicies.total > 0) {
+    const start = Date.now();
     const outdatedAgentPolicyIds = outdatedAgentPolicies.items.map(
       (outdatedAgentPolicy) => outdatedAgentPolicy.id
     );
     await agentPolicyService.deployPolicies(soClient, outdatedAgentPolicyIds);
-    outdatedAgentPolicies = await getOutdatedAgentPoliciesBatch(soClient);
+    outdatedAgentPolicies = await getOutdatedAgentPoliciesBatch(soClient, batchSize);
+    logger.debug(
+      `Upgraded ${outdatedAgentPolicyIds.length} agent policies in ${Date.now() - start}ms, ${
+        outdatedAgentPolicies.total
+      } remaining`
+    );
   }
 }

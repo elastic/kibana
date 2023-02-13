@@ -6,7 +6,6 @@
  */
 
 import React, { VFC } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -17,11 +16,9 @@ import {
 import { useFilterInOut } from '../../hooks';
 import { FilterIn } from '../../utils';
 import { Indicator } from '../../../../../common/types/indicator';
+import { TITLE } from './translations';
 
 const ICON_TYPE = 'plusInCircle';
-const TITLE = i18n.translate('xpack.threatIntelligence.queryBar.filterIn', {
-  defaultMessage: 'Filter In',
-});
 
 export interface FilterInProps {
   /**
