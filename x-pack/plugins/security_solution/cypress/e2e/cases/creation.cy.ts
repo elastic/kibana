@@ -37,7 +37,7 @@ import {
 } from '../../screens/case_details';
 import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../../screens/timeline';
 
-import { OVERVIEW_CASE_DESCRIPTION, OVERVIEW_CASE_NAME} from '../../screens/overview';
+import { OVERVIEW_CASE_DESCRIPTION, OVERVIEW_CASE_NAME } from '../../screens/overview';
 
 import { goToCaseDetails, goToCreateNewCase } from '../../tasks/all_cases';
 import { createTimeline } from '../../tasks/api_calls/timelines';
@@ -125,6 +125,9 @@ describe('Cases', () => {
 
     cy.visit(OVERVIEW_URL);
     cy.get(OVERVIEW_CASE_NAME).should('have.text', this.mycase.name);
-    cy.get(OVERVIEW_CASE_DESCRIPTION).should('have.text', `${this.mycase.description} ${this.mycase.timeline.title}`);
+    cy.get(OVERVIEW_CASE_DESCRIPTION).should(
+      'have.text',
+      `${this.mycase.description} ${this.mycase.timeline.title}`
+    );
   });
 });
