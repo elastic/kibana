@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TooltipInfo, XYChartSeriesIdentifier, TooltipContainer } from '@elastic/charts';
+import { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import React, { FC } from 'react';
@@ -125,17 +125,15 @@ export const Tooltip: FC<Props> = ({
   const renderEndzoneTooltip = header ? isEndzoneBucket(header?.value, xDomain) : false;
 
   return (
-    <TooltipContainer>
-      <div className="detailedTooltip">
-        {renderEndzoneTooltip && (
-          <div className="detailedTooltip__header">
-            <EndzoneTooltipHeader />
-          </div>
-        )}
-        <table>
-          <tbody>{tooltipRows}</tbody>
-        </table>
-      </div>
-    </TooltipContainer>
+    <div className="detailedTooltip">
+      {renderEndzoneTooltip && (
+        <div className="detailedTooltip__header">
+          <EndzoneTooltipHeader />
+        </div>
+      )}
+      <table>
+        <tbody>{tooltipRows}</tbody>
+      </table>
+    </div>
   );
 };
