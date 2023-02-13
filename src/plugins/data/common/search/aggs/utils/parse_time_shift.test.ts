@@ -120,7 +120,7 @@ describe('parse time shifts', () => {
         }
       });
 
-      it('should validate against absolute tiem range values', () => {
+      it('should validate against absolute time range values', () => {
         expect(
           validateAbsoluteTimeShift(`startAt(${futureDateString})`, {
             from: 'now-1y',
