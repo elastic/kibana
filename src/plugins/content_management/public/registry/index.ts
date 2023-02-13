@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ContentManagementPlugin } from './plugin';
-
-export function plugin() {
-  return new ContentManagementPlugin();
-}
-
-export type { ContentManagementPublicStart, ContentManagementPublicSetup } from './types';
+export type { ContentTypeDefinition } from './content_type_definition';
+export { ContentType } from './content_type';
+export { ContentTypeRegistry } from './registry';
