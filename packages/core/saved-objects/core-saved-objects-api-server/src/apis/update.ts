@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObjectReference,
-  SavedObject,
-} from '@kbn/core-saved-objects-common/src/server_types';
+import type { SavedObject, SavedObjectReference } from '../..';
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**

@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
+import type { SavedObjectReference } from '../..';
 
 /**
  * Object parameters for the bulk create operation
