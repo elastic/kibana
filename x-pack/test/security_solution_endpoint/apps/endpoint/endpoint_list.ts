@@ -125,10 +125,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('for the search bar', () => {
         let adminSearchBar: WebElementWrapper;
         let querySubmitButton: WebElementWrapper;
-        beforeEach(async () => {
+        before(async () => {
           await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 60000);
-          adminSearchBar = await testSubjects.find('adminSearchBar');
-          querySubmitButton = await testSubjects.find('querySubmitButton');
         });
         after(async () => {
           adminSearchBar = await testSubjects.find('adminSearchBar');
@@ -137,8 +135,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await querySubmitButton.click();
         });
         it('when the kql query is `na`, table shows an empty list', async () => {
+          adminSearchBar = await testSubjects.find('adminSearchBar');
           await adminSearchBar.clearValueWithKeyboard();
           await adminSearchBar.type('na');
+          querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
           const expectedDataFromQuery = [
             [
@@ -163,10 +163,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('when the kql filters for united.endpoint.host.hostname, table shows 1 item', async () => {
           const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
           const hostName = expectedDataFromQuery[1][0];
+          adminSearchBar = await testSubjects.find('adminSearchBar');
           await adminSearchBar.clearValueWithKeyboard();
           await adminSearchBar.type(
             `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
           );
+          querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
           await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
             'endpointListTable',
