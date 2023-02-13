@@ -9,12 +9,15 @@
 import { QueryClient } from '@tanstack/react-query';
 import { createQueryObservable } from './query_observable';
 import type { CrudClient } from '../crud_client';
-import type { CreateIn, GetIn } from '../../common';
+import type { CreateIn, GetIn, UpdateIn, DeleteIn, SearchIn, SearchOut } from '../../common';
 
 const queryKeyBuilder = {
   all: (type: string) => [type] as const,
   item: (type: string, id: string) => {
     return [...queryKeyBuilder.all(type), id] as const;
+  },
+  search: (type: string, params: unknown) => {
+    return [...queryKeyBuilder.all(type), 'search', params] as const;
   },
 };
 
@@ -28,6 +31,12 @@ const createQueryOptionBuilder = ({
       return {
         queryKey: queryKeyBuilder.item(input.contentType, input.id),
         queryFn: () => crudClientProvider(input.contentType).get<I, O>(input),
+      };
+    },
+    search: <I extends SearchIn = SearchIn, O extends SearchOut = SearchOut>(input: I) => {
+      return {
+        queryKey: queryKeyBuilder.search(input.contentType, input.params),
+        queryFn: () => crudClientProvider(input.contentType).search<I, O>(input),
       };
     },
   };
@@ -54,5 +63,21 @@ export class ContentClient {
 
   create<I extends CreateIn, O = unknown>(input: I): Promise<O> {
     return this.crudClientProvider(input.contentType).create(input);
+  }
+
+  update<I extends UpdateIn, O = unknown>(input: I): Promise<O> {
+    return this.crudClientProvider(input.contentType).update(input);
+  }
+
+  delete<I extends DeleteIn, O = unknown>(input: I): Promise<O> {
+    return this.crudClientProvider(input.contentType).delete(input);
+  }
+
+  search<I extends SearchIn, O extends SearchOut = SearchOut>(input: I): Promise<O> {
+    return this.crudClientProvider(input.contentType).search(input);
+  }
+
+  search$<I extends SearchIn, O extends SearchOut = SearchOut>(input: I) {
+    return createQueryObservable(this.queryClient, this.queryOptionBuilder.search<I, O>(input));
   }
 }
