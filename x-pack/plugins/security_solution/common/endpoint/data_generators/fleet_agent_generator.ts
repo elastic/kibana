@@ -88,7 +88,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
       FleetServerAgentComponentStatuses
     );
     const componentInputPayload =
-      componentStatus === 'failed'
+      componentStatus === 'FAILED'
         ? {
             error: {
               code: ENDPOINT_ERROR_CODES.ES_CONNECTION_ERROR,
