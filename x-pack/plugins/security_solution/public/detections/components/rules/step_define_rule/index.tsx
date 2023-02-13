@@ -29,6 +29,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
 import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
@@ -189,16 +190,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     },
   });
 
-  const handleSetRuleFromTimeline = useCallback(
-    ({ index: timelineIndex, queryBar: timelineQueryBar }) => {
-      setFieldValue('index', timelineIndex);
-      setFieldValue('queryBar', timelineQueryBar);
-    },
-    [setFieldValue]
-  );
-  const { onOpenTimeline, loading: timelineQueryLoading } =
-    useRuleFromTimeline(handleSetRuleFromTimeline);
-
   const {
     index: formIndex,
     ruleType: formRuleType,
@@ -222,6 +213,26 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const dataSourceType = formDataSourceType || initialState.dataSourceType;
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const queryBar = formQuery ?? initialState.queryBar;
+
+  const setFieldValueCb = useSetFieldValueWithCallback('ruleType', setFieldValue, ruleType);
+
+  const handleSetRuleFromTimeline = useCallback(
+    ({ index: timelineIndex, queryBar: timelineQueryBar }) => {
+      const setQuery = () => {
+        setFieldValue('index', timelineIndex);
+        setFieldValue('queryBar', timelineQueryBar);
+      };
+      if (timelineQueryBar.query.language === 'eql') {
+        setFieldValueCb('eql', setQuery);
+      } else {
+        setQuery();
+      }
+    },
+    [setFieldValue, setFieldValueCb]
+  );
+
+  const { onOpenTimeline, loading: timelineQueryLoading } =
+    useRuleFromTimeline(handleSetRuleFromTimeline);
 
   const [isPreviewValid, setIsPreviewValid] = useState(false);
   useEffect(() => {

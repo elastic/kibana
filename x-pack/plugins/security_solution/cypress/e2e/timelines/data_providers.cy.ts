@@ -72,7 +72,7 @@ describe('timeline data providers', () => {
       });
   });
 
-  it('persists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
+  it('presists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
     updateDataProviderByFieldHoverAction('host.name', 0);
     waitForTimelineChanges();
     cy.wait(1000);

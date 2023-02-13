@@ -26,20 +26,12 @@ import { getDataProviderFilter } from '../../../../timelines/components/timeline
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 export const RULE_FROM_TIMELINE_URL_PARAM = 'createRuleFromTimeline';
+export const RULE_FROM_EQL_URL_PARAM = 'createRuleFromEql';
 
 export interface RuleFromTimeline {
   loading: boolean;
   onOpenTimeline: (timeline: TimelineModel) => void;
 }
-
-export const initialState = {
-  index: [],
-  queryBar: {
-    query: { query: '', language: 'kuery' },
-    filters: [],
-    saved_id: null,
-  },
-};
 
 type SetRuleQuery = ({
   index,
@@ -103,18 +95,32 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   );
   // end browser field management
 
+  const getInitialUrlParamValue = useGetInitialUrlParamValue<string>(RULE_FROM_TIMELINE_URL_PARAM);
+  const timelineIdFromUrl = useMemo(getInitialUrlParamValue, [getInitialUrlParamValue]);
+
+  const getInitialUrlParamValueEql = useGetInitialUrlParamValue<string>(RULE_FROM_EQL_URL_PARAM);
+  const timelineIdFromUrlEql = useMemo(getInitialUrlParamValueEql, [getInitialUrlParamValueEql]);
+
   // start set rule
   const handleSetRuleFromTimeline = useCallback(() => {
     if (selectedTimeline == null || selectedDataViewBrowserFields == null) return;
 
-    const newQuery = {
-      query: selectedTimeline.kqlQuery.filterQuery?.kuery?.expression ?? '',
-      language: selectedTimeline.kqlQuery.filterQuery?.kuery?.kind ?? 'kuery',
-    };
-    const newFilters = selectedTimeline.filters ?? [];
+    const isEql = timelineIdFromUrlEql != null;
+    const newQuery = isEql
+      ? {
+          query: selectedTimeline.eqlOptions.query ?? '',
+          language: 'eql',
+        }
+      : {
+          query: selectedTimeline.kqlQuery.filterQuery?.kuery?.expression ?? '',
+          language: selectedTimeline.kqlQuery.filterQuery?.kuery?.kind ?? 'kuery',
+        };
+    const newFilters = isEql ? [] : selectedTimeline.filters ?? [];
     try {
       const dataProvidersDsl =
-        selectedTimeline.dataProviders != null && selectedTimeline.dataProviders.length > 0
+        !isEql &&
+        selectedTimeline.dataProviders != null &&
+        selectedTimeline.dataProviders.length > 0
           ? convertKueryToElasticSearchQuery(
               buildGlobalQuery(selectedTimeline.dataProviders, selectedDataViewBrowserFields),
               { fields: [], title: selectedPatterns.join(',') }
@@ -169,6 +175,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     selectedPatterns,
     selectedTimeline,
     setRuleQuery,
+    timelineIdFromUrlEql,
   ]);
 
   useEffect(() => {
@@ -178,10 +185,6 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     }
   }, [handleSetRuleFromTimeline, selectedDataViewBrowserFields]);
   // end set rule
-
-  // start handle set rule from timeline id
-  const getInitialUrlParamValue = useGetInitialUrlParamValue<string>(RULE_FROM_TIMELINE_URL_PARAM);
-  const timelineIdFromUrl = useMemo(getInitialUrlParamValue, [getInitialUrlParamValue]);
 
   const getTimelineById = useCallback(
     (timelineId: string) => {
@@ -206,12 +209,19 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);
 
   useEffect(() => {
-    if (timelineIdFromUrl != null && !urlStateInitialized) {
+    const id =
+      timelineIdFromUrl != null
+        ? timelineIdFromUrl
+        : timelineIdFromUrlEql != null
+        ? timelineIdFromUrlEql
+        : null;
+
+    if (id != null && !urlStateInitialized) {
       setUrlStateInitialized(true);
-      getTimelineById(timelineIdFromUrl);
+      getTimelineById(id);
       setLoading(true);
     }
-  }, [getTimelineById, timelineIdFromUrl, urlStateInitialized]);
+  }, [getTimelineById, timelineIdFromUrl, timelineIdFromUrlEql, urlStateInitialized]);
   // end handle set rule from timeline id
 
   return { loading, onOpenTimeline };
