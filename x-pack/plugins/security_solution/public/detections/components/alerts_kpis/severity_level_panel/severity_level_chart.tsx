@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash/fp';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLoadingSpinner } from '@elastic/eui';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ShapeTreeNode, ElementClickListener } from '@elastic/charts';
@@ -17,10 +18,12 @@ import { ChartLabel } from '../../../../overview/components/detection_response/a
 import { getSeverityTableColumns } from './columns';
 import { getSeverityColor } from './helpers';
 import { TOTAL_COUNT_OF_ALERTS } from '../../alerts_table/translations';
-import { showInitialLoadingSpinner } from '../alerts_histogram_panel/helpers';
 
 const DONUT_HEIGHT = 150;
 
+const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
+  margin: auto;
+`;
 export interface SeverityLevelProps {
   data: SeverityData[];
   isLoading: boolean;
@@ -32,7 +35,6 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
   isLoading,
   addFilter,
 }) => {
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const columns = useMemo(() => getSeverityTableColumns(), []);
 
   const count = useMemo(() => {
@@ -71,12 +73,6 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
     [addFilter]
   );
 
-  useEffect(() => {
-    if (!showInitialLoadingSpinner({ isInitialLoading, isLoadingAlerts: isLoading })) {
-      setIsInitialLoading(false);
-    }
-  }, [isInitialLoading, isLoading, setIsInitialLoading]);
-
   return (
     <EuiFlexGroup gutterSize="s" data-test-subj="severity-level-chart">
       <EuiFlexItem>
@@ -89,8 +85,8 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
         />
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="severity-level-donut">
-        {isInitialLoading ? (
-          <EuiLoadingSpinner size="l" />
+        {isLoading ? (
+          <StyledEuiLoadingSpinner size="l" />
         ) : (
           <DonutChart
             data={data}
