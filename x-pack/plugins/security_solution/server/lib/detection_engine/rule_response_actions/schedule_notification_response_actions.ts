@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { Ecs } from '@kbn/ecs';
 import { uniq, reduce, some, each } from 'lodash';
 import { containsDynamicQuery } from '@kbn/osquery-plugin/common/utils/replace_params_query';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type { SetupPlugins } from '../../../plugin_contract';
+
+type Alerts = Array<ParsedTechnicalFields & { agent?: { id: string } }>;
 
 interface ScheduleNotificationActions {
   signals: unknown[];
@@ -18,7 +20,7 @@ interface ScheduleNotificationActions {
 }
 
 interface AlertsWithAgentType {
-  alerts: Ecs[];
+  alerts: Alerts;
   agents: string[];
   alertIds: string[];
 }
@@ -27,7 +29,7 @@ export const scheduleNotificationResponseActions = (
   { signals, responseActions }: ScheduleNotificationActions,
   osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction']
 ) => {
-  const filteredAlerts = (signals as Ecs[]).filter((alert) => alert.agent?.id);
+  const filteredAlerts = (signals as Alerts).filter((alert) => alert.agent?.id);
 
   const { alerts, agents, alertIds }: AlertsWithAgentType = reduce(
     filteredAlerts,
