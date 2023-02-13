@@ -30,7 +30,15 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
 
         if (fieldType === 'date') {
           await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-histogram`);
-        } else {
+        }
+
+        if (fieldType === 'keyword') {
+          await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`);
+        }
+
+        // For numeric fields, we expect both the top values and the distribution chart
+        if (fieldType === 'number') {
+          // Assert top values exist
           await testSubjects.existOrFail(
             `mlFieldStatsFlyoutContent ${fieldName}-buttonGroup-topValuesButton`
           );
@@ -39,9 +47,8 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
           );
 
           await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`);
-        }
 
-        if (fieldType === 'number') {
+          // Assert distribution chart exists
           await testSubjects.existOrFail(
             `mlFieldStatsFlyoutContent ${fieldName}-buttonGroup-distributionButton`
           );
