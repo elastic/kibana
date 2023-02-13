@@ -6,7 +6,9 @@
  */
 
 import { getNewRule } from '../../objects/rule';
+import { FIELDS_BROWSER_BTN } from '../../screens/rule_details';
 import {
+  DATA_GRID_COLUMN_ORDER_BTN,
   DATA_GRID_FIELDS,
   DATA_GRID_FULL_SCREEN,
   GET_DATA_GRID_HEADER,
@@ -35,7 +37,15 @@ describe('Alert Table Contorls', { testIsolation: false }, () => {
       .trigger('click');
   });
 
-  context('Sorting', { testIsolation: false }, () => {
+  it('column sorting control exists', () => {
+    cy.get(DATA_GRID_COLUMN_ORDER_BTN).should('be.visible');
+  });
+
+  it('field Browser Exists', () => {
+    cy.get(FIELDS_BROWSER_BTN).should('be.visible');
+  });
+
+  context('Sorting', () => {
     it('Date Column', () => {
       const timestampField = DATA_GRID_FIELDS.TIMESTAMP.fieldName;
       cy.get(GET_DATA_GRID_HEADER(timestampField)).trigger('click');
