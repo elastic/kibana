@@ -67,7 +67,10 @@ export function PrimaryAndComparisonSearchBar() {
         <EuiTitle size="xxs">
           <h3>
             {i18n.translate('xpack.profiling.comparisonSearch.baselineTitle', {
-              defaultMessage: 'Baseline flamegraph',
+              defaultMessage:
+                routePath === '/flamegraphs/differential'
+                  ? 'Baseline flamegraph'
+                  : 'Baseline functions',
             })}
           </h3>
         </EuiTitle>
@@ -109,7 +112,10 @@ export function PrimaryAndComparisonSearchBar() {
         <EuiTitle size="xxs">
           <h3>
             {i18n.translate('xpack.profiling.comparisonSearch.comparisonTitle', {
-              defaultMessage: 'Comparison flamegraph',
+              defaultMessage:
+                routePath === '/flamegraphs/differential'
+                  ? 'Comparison flamegraph'
+                  : 'Comparison functions',
             })}
           </h3>
         </EuiTitle>
