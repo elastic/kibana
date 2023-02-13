@@ -230,10 +230,14 @@ export const flattenAdditionalContext = (
   if (additionalContext) {
     Object.keys(additionalContext).forEach((context: string) => {
       if (additionalContext[context]) {
-        flattenedContext = {
-          ...flattenedContext,
-          ...flattenObject(additionalContext[context], [context + '.']),
-        };
+        if (context !== 'labels') {
+          flattenedContext = {
+            ...flattenedContext,
+            ...flattenObject(additionalContext[context], [context + '.']),
+          };
+        } else {
+          flattenedContext[context] = additionalContext[context];
+        }
       }
     });
   }
