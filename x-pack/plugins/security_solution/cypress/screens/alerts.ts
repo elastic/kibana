@@ -144,3 +144,11 @@ export const EVENT_SUMMARY_COLUMN = '[data-gridcell-column-id="eventSummary"]';
 export const EVENT_SUMMARY_ALERT_RENDERER_CONTENT = '[data-test-subj="alertRenderer"]';
 
 export const ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION = '[data-test-subj="eventRenderedView"]';
+
+export const ALERT_TABLE_ADDITIONAL_CONTROLS = '[data-test-subj="additionalFilters-popover"]';
+
+export const ALERT_TABLE_SHOW_BUILDING_BLOCK_TOGGLE =
+  '[data-test-subj="showBuildingBlockAlertsCheckbox"]';
+
+export const ALERT_TABLE_SHOW_THREAT_INDICATOR =
+  '[data-test-subj="showOnlyThreatIndicatorAlertsCheckbox"]';

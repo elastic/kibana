@@ -18,7 +18,8 @@ import {
   GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE,
 } from '../../screens/search_bar';
 import {
-  ID_COLUMN_HEADER,
+  DATA_GRID_FIELDS,
+  GET_DATA_GRID_HEADER,
   ID_COLUMN_NAME,
   ID_COLUMN_VALUES,
   TOP_N_ALERT_HISTOGRAM,
@@ -47,7 +48,7 @@ describe('Alerts Table : Hover Actions', () => {
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       addsFieldsToTimeline(ID_COLUMN_NAME, [ID_COLUMN_NAME]);
-      cy.get(ID_COLUMN_HEADER).should('be.visible');
+      cy.get(GET_DATA_GRID_HEADER(DATA_GRID_FIELDS.ID.fieldName)).should('be.visible');
     });
     beforeEach(() => {
       /*
