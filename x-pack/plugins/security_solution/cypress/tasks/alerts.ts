@@ -300,9 +300,12 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
   cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
-export const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
+const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
   cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
   cy.get(actionSelector).first().click({ force: true });
+};
+export const clickExpandActions = (propertySelector: string, rowIndex: number) => {
+  clickAction(propertySelector, rowIndex, ACTIONS_EXPAND_BUTTON);
 };
 export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: number) => {
   clickAction(propertySelector, rowIndex, CELL_ADD_TO_TIMELINE_BUTTON);
@@ -311,7 +314,7 @@ export const filterForAlertProperty = (propertySelector: string, rowIndex: numbe
   clickAction(propertySelector, rowIndex, CELL_FILTER_IN_BUTTON);
 };
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
-  clickAction(propertySelector, rowIndex, ACTIONS_EXPAND_BUTTON);
+  clickExpandActions(propertySelector, rowIndex);
   cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click({ force: true });
 };
 
