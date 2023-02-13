@@ -129,7 +129,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 {(resizeRef) => (
                   <AboutContent ref={resizeRef}>
                     <VerticalOverflowContainer maxHeight={120}>
-                      <VerticalOverflowContent maxHeight={120} className="eui-yScrollWithShadows">
+                      <VerticalOverflowContent maxHeight={120} className="eui-yScroll">
                         <EuiText
                           size="s"
                           data-test-subj="stepAboutRuleDetailsToggleDescriptionText"
@@ -154,10 +154,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 data-test-subj="stepAboutDetailsNoteContent"
                 maxHeight={aboutPanelHeight}
               >
-                <VerticalOverflowContent
-                  maxHeight={aboutPanelHeight}
-                  className="eui-yScrollWithShadows"
-                >
+                <VerticalOverflowContent maxHeight={aboutPanelHeight} className="eui-yScroll">
                   <MarkdownRenderer>{stepDataDetails.note}</MarkdownRenderer>
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
@@ -167,10 +164,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 data-test-subj="stepAboutDetailsSetupContent"
                 maxHeight={aboutPanelHeight}
               >
-                <VerticalOverflowContent
-                  maxHeight={aboutPanelHeight}
-                  className="eui-yScrollWithShadows"
-                >
+                <VerticalOverflowContent maxHeight={aboutPanelHeight} className="eui-yScroll">
                   <MarkdownRenderer>{stepDataDetails.setup}</MarkdownRenderer>
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
