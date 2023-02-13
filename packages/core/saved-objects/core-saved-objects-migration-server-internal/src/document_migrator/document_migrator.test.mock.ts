@@ -19,14 +19,12 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
   };
 });
 
-export const validateMigrationDefinitionMock = jest.fn();
-export const validateMigrationsMapObjectMock = jest.fn();
+export const validateTypeMigrationsMock = jest.fn();
 
 jest.doMock('./validate_migrations', () => {
   const actual = jest.requireActual('./validate_migrations');
   return {
     ...actual,
-    validateMigrationDefinition: validateMigrationDefinitionMock,
-    validateMigrationsMapObject: validateMigrationsMapObjectMock,
+    validateTypeMigrations: validateTypeMigrationsMock,
   };
 });

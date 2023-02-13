@@ -8,8 +8,7 @@
 
 import {
   mockGetConvertedObjectId,
-  validateMigrationsMapObjectMock,
-  validateMigrationDefinitionMock,
+  validateTypeMigrationsMock,
 } from './document_migrator.test.mock';
 import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
@@ -52,8 +51,7 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
 
 beforeEach(() => {
   mockGetConvertedObjectId.mockClear();
-  validateMigrationsMapObjectMock.mockReset();
-  validateMigrationDefinitionMock.mockReset();
+  validateTypeMigrationsMock.mockReset();
 });
 
 describe('DocumentMigrator', () => {
@@ -66,29 +64,6 @@ describe('DocumentMigrator', () => {
   }
 
   describe('validation', () => {
-    describe('during constructor call', () => {
-      it('calls validateMigrationDefinition with the correct parameters', () => {
-        const ops = {
-          ...testOpts(),
-          typeRegistry: createRegistry({
-            name: 'user',
-            migrations: {
-              '1.2.3': setAttr('attributes.name', 'Chris'),
-            },
-          }),
-        };
-
-        new DocumentMigrator(ops);
-
-        expect(validateMigrationDefinitionMock).toHaveBeenCalledTimes(1);
-        expect(validateMigrationDefinitionMock).toHaveBeenCalledWith(
-          ops.typeRegistry,
-          ops.kibanaVersion,
-          undefined
-        );
-      });
-    });
-
     describe('during #prepareMigrations', () => {
       it('calls validateMigrationsMapObject with the correct parameters', () => {
         const ops = {
@@ -111,22 +86,24 @@ describe('DocumentMigrator', () => {
 
         const migrator = new DocumentMigrator(ops);
 
-        expect(validateMigrationsMapObjectMock).not.toHaveBeenCalled();
+        expect(validateTypeMigrationsMock).not.toHaveBeenCalled();
 
         migrator.prepareMigrations();
 
-        expect(validateMigrationsMapObjectMock).toHaveBeenCalledTimes(3);
-        expect(validateMigrationsMapObjectMock).toHaveBeenNthCalledWith(
+        expect(validateTypeMigrationsMock).toHaveBeenCalledTimes(3);
+        expect(validateTypeMigrationsMock).toHaveBeenNthCalledWith(
           1,
-          'foo',
-          ops.kibanaVersion,
-          expect.any(Object)
+          expect.objectContaining({
+            type: expect.objectContaining({ name: 'foo' }),
+            kibanaVersion,
+          })
         );
-        expect(validateMigrationsMapObjectMock).toHaveBeenNthCalledWith(
+        expect(validateTypeMigrationsMock).toHaveBeenNthCalledWith(
           2,
-          'bar',
-          ops.kibanaVersion,
-          expect.any(Object)
+          expect.objectContaining({
+            type: expect.objectContaining({ name: 'bar' }),
+            kibanaVersion,
+          })
         );
       });
     });

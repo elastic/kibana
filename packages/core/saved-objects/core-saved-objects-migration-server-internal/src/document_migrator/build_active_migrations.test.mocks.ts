@@ -20,15 +20,15 @@ jest.doMock('./model_version', () => ({
   getModelVersionTransforms: getModelVersionTransformsMock,
 }));
 
-export const validateMigrationsMapObjectMock = jest.fn();
+export const validateTypeMigrationsMock = jest.fn();
 
 jest.doMock('./validate_migrations', () => ({
-  validateMigrationsMapObject: validateMigrationsMapObjectMock,
+  validateTypeMigrations: validateTypeMigrationsMock,
 }));
 
 export const resetAllMocks = () => {
   getReferenceTransformsMock.mockReset().mockReturnValue([]);
   getConversionTransformsMock.mockReset().mockReturnValue([]);
   getModelVersionTransformsMock.mockReset().mockReturnValue([]);
-  validateMigrationsMapObjectMock.mockReset();
+  validateTypeMigrationsMock.mockReset();
 };

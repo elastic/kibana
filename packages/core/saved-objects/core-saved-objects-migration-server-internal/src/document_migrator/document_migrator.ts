@@ -54,7 +54,6 @@ import type {
 import type { ActiveMigrations, TransformResult } from './types';
 import { maxVersion } from './utils';
 import { buildActiveMigrations } from './build_active_migrations';
-import { validateMigrationDefinition } from './validate_migrations';
 
 export type MigrateFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 export type MigrateAndConvertFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];
@@ -89,7 +88,7 @@ export interface VersionedTransformer {
  * A concrete implementation of the VersionedTransformer interface.
  */
 export class DocumentMigrator implements VersionedTransformer {
-  private documentMigratorOptions: Omit<DocumentMigratorOptions, 'convertVersion'>;
+  private documentMigratorOptions: DocumentMigratorOptions;
   private migrations?: ActiveMigrations;
   private transformDoc?: ApplyTransformsFn;
 
@@ -103,9 +102,8 @@ export class DocumentMigrator implements VersionedTransformer {
    * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
-  constructor({ typeRegistry, kibanaVersion, convertVersion, log }: DocumentMigratorOptions) {
-    validateMigrationDefinition(typeRegistry, kibanaVersion, convertVersion);
-    this.documentMigratorOptions = { typeRegistry, kibanaVersion, log };
+  constructor(documentMigratorOptions: DocumentMigratorOptions) {
+    this.documentMigratorOptions = documentMigratorOptions;
   }
 
   /**
@@ -138,8 +136,13 @@ export class DocumentMigrator implements VersionedTransformer {
    */
 
   public prepareMigrations = () => {
-    const { typeRegistry, kibanaVersion, log } = this.documentMigratorOptions;
-    this.migrations = buildActiveMigrations(typeRegistry, kibanaVersion, log);
+    const { typeRegistry, kibanaVersion, log, convertVersion } = this.documentMigratorOptions;
+    this.migrations = buildActiveMigrations({
+      typeRegistry,
+      kibanaVersion,
+      log,
+      convertVersion,
+    });
     this.transformDoc = buildDocumentTransform({
       kibanaVersion,
       migrations: this.migrations,

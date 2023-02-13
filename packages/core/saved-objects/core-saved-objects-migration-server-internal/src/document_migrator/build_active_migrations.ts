@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { type ActiveMigrations, type Transform, type TypeTransforms, TransformType } from './types';
 import { getReferenceTransforms, getConversionTransforms } from './internal_transforms';
-import { validateMigrationsMapObject } from './validate_migrations';
+import { validateTypeMigrations } from './validate_migrations';
 import { transformComparator, convertMigrationFunction } from './utils';
 import { getModelVersionTransforms } from './model_version';
 
@@ -21,14 +21,22 @@ import { getModelVersionTransforms } from './model_version';
  * From: { type: { version: fn } }
  * To:   { type: { latestVersion?: Record<TransformType, string>; transforms: [{ version: string, transform: fn }] } }
  */
-export function buildActiveMigrations(
-  typeRegistry: ISavedObjectTypeRegistry,
-  kibanaVersion: string,
-  log: Logger
-): ActiveMigrations {
+export function buildActiveMigrations({
+  typeRegistry,
+  kibanaVersion,
+  convertVersion,
+  log,
+}: {
+  typeRegistry: ISavedObjectTypeRegistry;
+  kibanaVersion: string;
+  convertVersion?: string;
+  log: Logger;
+}): ActiveMigrations {
   const referenceTransforms = getReferenceTransforms(typeRegistry);
 
   return typeRegistry.getAllTypes().reduce((migrations, type) => {
+    validateTypeMigrations({ type, kibanaVersion, convertVersion });
+
     const typeTransforms = buildTypeTransforms({
       type,
       log,
@@ -51,7 +59,6 @@ const buildTypeTransforms = ({
   type,
   log,
   referenceTransforms,
-  kibanaVersion,
 }: {
   type: SavedObjectsType;
   kibanaVersion: string;
@@ -60,7 +67,6 @@ const buildTypeTransforms = ({
 }): TypeTransforms => {
   const migrationsMap =
     typeof type.migrations === 'function' ? type.migrations() : type.migrations ?? {};
-  validateMigrationsMapObject(type.name, kibanaVersion, migrationsMap);
 
   const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(
     ([version, transform]) => ({

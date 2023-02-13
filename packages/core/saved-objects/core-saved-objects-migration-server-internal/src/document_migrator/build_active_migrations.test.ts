@@ -11,7 +11,7 @@ import {
   getModelVersionTransformsMock,
   getReferenceTransformsMock,
   resetAllMocks,
-  validateMigrationsMapObjectMock,
+  validateTypeMigrationsMock,
 } from './build_active_migrations.test.mocks';
 
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
@@ -27,7 +27,7 @@ describe('buildActiveMigrations', () => {
   let typeRegistry: SavedObjectTypeRegistry;
 
   const buildMigrations = () => {
-    return buildActiveMigrations(typeRegistry, kibanaVersion, log);
+    return buildActiveMigrations({ typeRegistry, kibanaVersion, log });
   };
 
   const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
@@ -81,23 +81,25 @@ describe('buildActiveMigrations', () => {
 
       buildMigrations();
 
-      expect(validateMigrationsMapObjectMock).toHaveBeenCalledTimes(2);
-      expect(validateMigrationsMapObjectMock).toHaveBeenNthCalledWith(
+      expect(validateTypeMigrationsMock).toHaveBeenCalledTimes(2);
+      expect(validateTypeMigrationsMock).toHaveBeenNthCalledWith(
         1,
-        'foo',
-        kibanaVersion,
-        expect.any(Object)
+        expect.objectContaining({
+          type: expect.objectContaining({ name: 'foo' }),
+          kibanaVersion,
+        })
       );
-      expect(validateMigrationsMapObjectMock).toHaveBeenNthCalledWith(
+      expect(validateTypeMigrationsMock).toHaveBeenNthCalledWith(
         2,
-        'bar',
-        kibanaVersion,
-        expect.any(Object)
+        expect.objectContaining({
+          type: expect.objectContaining({ name: 'bar' }),
+          kibanaVersion,
+        })
       );
     });
 
     it('throws if validateMigrationsMapObject throws', () => {
-      validateMigrationsMapObjectMock.mockImplementation(() => {
+      validateTypeMigrationsMock.mockImplementation(() => {
         throw new Error('woups');
       });
 
