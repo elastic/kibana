@@ -125,7 +125,7 @@ const ResultView: React.FC<ResultViewProps> = ({ result }) => {
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiBasicTable items={fields} rowHeader="firstName" columns={columns} />
+        <EuiBasicTable items={fields} columns={columns} />
       </EuiFlexGroup>
     </EuiPanel>
   );
