@@ -12,7 +12,11 @@ import { modelVersionVirtualMajor } from './constants';
 /**
  * Returns the virtual version associated with the given model version
  *
- * @param modelVersion
+ * @example
+ * ```
+ * modelVersionToVirtualVersion(5); // "10.5.0";
+ * modelVersionToVirtualVersion("3"); // "10.3.0";
+ * ```
  */
 export const modelVersionToVirtualVersion = (modelVersion: number | string) => {
   const validatedModelVersion = assertValidModelVersion(modelVersion);
@@ -22,6 +26,12 @@ export const modelVersionToVirtualVersion = (modelVersion: number | string) => {
 /**
  * Return true if the given semver version is a virtual model version.
  * Virtual model versions are version which major is the {@link modelVersionVirtualMajor}
+ *
+ * @example
+ * ```
+ * isVirtualModelVersion("10.3.0"); // true
+ * isVirtualModelVersion("9.7.1");  // false
+ * ```
  */
 export const isVirtualModelVersion = (version: string): boolean => {
   const semver = Semver.parse(version);
@@ -31,6 +41,15 @@ export const isVirtualModelVersion = (version: string): boolean => {
   return _isVirtualModelVersion(semver);
 };
 
+/**
+ * Converts a virtual model version to its model version.
+ *
+ *  @example
+ *  ```
+ *  virtualVersionToModelVersion('10.3.0'); // 3
+ *  virtualVersionToModelVersion('9.3.0'); // throw
+ *  ```
+ */
 export const virtualVersionToModelVersion = (virtualVersion: string): number => {
   const semver = Semver.parse(virtualVersion);
   if (!semver) {
@@ -42,12 +61,29 @@ export const virtualVersionToModelVersion = (virtualVersion: string): number => 
   return semver.minor;
 };
 
+/**
+ * Asserts the provided number or string is a valid model version, and returns it.
+ *
+ * A valid model version is a positive integer.
+ *
+ * @example
+ * ```
+ * assertValidModelVersion("7"); // 7
+ * assertValidModelVersion(4); // 4
+ * assertValidModelVersion("foo"); // throw
+ * assertValidModelVersion("9.7"); // throw
+ * assertValidModelVersion("-3"); // throw
+ * ```
+ */
 export const assertValidModelVersion = (modelVersion: string | number): number => {
   if (typeof modelVersion === 'string') {
     modelVersion = parseFloat(modelVersion);
   }
   if (!Number.isInteger(modelVersion)) {
     throw new Error('Model version must be an integer');
+  }
+  if (modelVersion < 0) {
+    throw new Error('Model version cannot be negative');
   }
   return modelVersion;
 };

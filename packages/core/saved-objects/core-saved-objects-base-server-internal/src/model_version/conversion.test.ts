@@ -10,6 +10,7 @@ import {
   isVirtualModelVersion,
   virtualVersionToModelVersion,
   modelVersionToVirtualVersion,
+  assertValidModelVersion,
 } from './conversion';
 
 describe('isVirtualModelVersion', () => {
@@ -75,5 +76,30 @@ describe('modelVersionToVirtualVersion', () => {
     expect(modelVersionToVirtualVersion(0)).toEqual('10.0.0');
     expect(modelVersionToVirtualVersion(7)).toEqual('10.7.0');
     expect(modelVersionToVirtualVersion(12)).toEqual('10.12.0');
+  });
+});
+
+describe('assertValidModelVersion', () => {
+  it('throws if the provided value is not an integer', () => {
+    expect(() => assertValidModelVersion(9.4)).toThrowErrorMatchingInlineSnapshot(
+      `"Model version must be an integer"`
+    );
+    expect(() => assertValidModelVersion('7.6')).toThrowErrorMatchingInlineSnapshot(
+      `"Model version must be an integer"`
+    );
+  });
+
+  it('throws if the provided value is a negative integer', () => {
+    expect(() => assertValidModelVersion(-4)).toThrowErrorMatchingInlineSnapshot(
+      `"Model version cannot be negative"`
+    );
+    expect(() => assertValidModelVersion('-3')).toThrowErrorMatchingInlineSnapshot(
+      `"Model version cannot be negative"`
+    );
+  });
+
+  it('returns the model version as a number', () => {
+    expect(assertValidModelVersion(4)).toEqual(4);
+    expect(assertValidModelVersion('3')).toEqual(3);
   });
 });
