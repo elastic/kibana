@@ -90,6 +90,8 @@ steps:
         TARGET_FILE: kibana-controller.yaml
         IMAGE_TAG: "$GIT_ABBREV_COMMIT"
         SERVICE: kibana-controller
+        NAMESPACE: kibana-ci
+        IMAGE_NAME: kibana
 EOF
 
 else
