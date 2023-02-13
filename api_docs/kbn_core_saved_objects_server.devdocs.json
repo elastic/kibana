@@ -6170,6 +6170,10 @@
             "references": [
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/utils.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
               },
               {
@@ -6183,10 +6187,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/utils.ts"
               },
               {
                 "plugin": "actions",
@@ -6299,6 +6299,14 @@
               {
                 "plugin": "@kbn/core-test-helpers-so-type-serializer",
                 "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",

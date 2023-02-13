@@ -288,13 +288,23 @@ interface MoreContainerProps {
   fieldType: string;
   values: string[];
   idPrefix: string;
+  isAggregatable?: boolean;
   moreMaxHeight: string;
   overflowIndexStart: number;
   render?: (item: string) => React.ReactNode;
 }
 
 export const MoreContainer = React.memo<MoreContainerProps>(
-  ({ fieldName, fieldType, idPrefix, moreMaxHeight, overflowIndexStart, render, values }) => {
+  ({
+    fieldName,
+    fieldType,
+    idPrefix,
+    isAggregatable,
+    moreMaxHeight,
+    overflowIndexStart,
+    render,
+    values,
+  }) => {
     const { timelineId } = useContext(TimelineContext);
 
     const moreItemsWithHoverActions = useMemo(
@@ -317,6 +327,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                     name: fieldName,
                     value,
                     type: fieldType,
+                    aggregatable: isAggregatable,
                   }}
                 >
                   <>{render ? render(value) : defaultToEmptyTag(value)}</>
@@ -327,7 +338,16 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 
           return acc;
         }, []),
-      [fieldName, fieldType, idPrefix, overflowIndexStart, render, values, timelineId]
+      [
+        fieldName,
+        fieldType,
+        idPrefix,
+        overflowIndexStart,
+        render,
+        values,
+        timelineId,
+        isAggregatable,
+      ]
     );
 
     return (
@@ -349,7 +369,16 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 MoreContainer.displayName = 'MoreContainer';
 
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
-  ({ attrName, idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems, fieldType }) => {
+  ({
+    attrName,
+    idPrefix,
+    moreMaxHeight,
+    overflowIndexStart = 5,
+    render,
+    rowItems,
+    fieldType,
+    isAggregatable,
+  }) => {
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
     const button = useMemo(
@@ -391,6 +420,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
               fieldType={fieldType}
+              isAggregatable={isAggregatable}
             />
           </EuiPopover>
         )}
