@@ -13,7 +13,8 @@ import {
 import { get, isEmpty, isEqual } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
-import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap, type FieldMap } from '../../common';
+import { alertFieldMap, legacyAlertFieldMap, type FieldMap } from '../../common';
+import { ecsFieldMap } from '../../common/alert_schema';
 import { ILM_POLICY_NAME, DEFAULT_ILM_POLICY } from './default_lifecycle_policy';
 import {
   getComponentTemplate,
