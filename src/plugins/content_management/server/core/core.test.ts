@@ -195,7 +195,7 @@ describe('Content Core', () => {
 
           const listener = jest.fn();
           // Listen to all "getItemStart" events, regardless of the content type
-          eventBus.on('getItemStart', listener);
+          const unsubscribe = eventBus.on('getItemStart', listener);
 
           const event: GetItemStart = {
             type: 'getItemStart',
@@ -205,6 +205,13 @@ describe('Content Core', () => {
           eventBus.emit(event);
 
           expect(listener).toHaveBeenCalledWith(event);
+
+          // Test the returned unsubscribe() handler
+          listener.mockReset();
+          unsubscribe();
+
+          eventBus.emit(event);
+          expect(listener).not.toHaveBeenCalledWith(event);
         });
 
         test('should validate that the content type is registered when subscribing to single event with content type', () => {
@@ -212,7 +219,7 @@ describe('Content Core', () => {
             api: { eventBus },
           } = coreSetup;
 
-          expect(eventBus.on('getItemStart', 'foo', jest.fn())).rejects.toThrow(
+          expect(() => { eventBus.on('getItemStart', 'foo', jest.fn()) }).toThrow(
             'Invalid content type [foo].'
           );
         });

@@ -26,7 +26,7 @@ export class EventBus {
   /** The events Rxjs Subject */
   private _events$: Subject<ContentEvent>;
   /** Map of listener for each content type */
-  private eventListeners = new Map<ContentEventType, { [contentType: string]: EventListener[] }>();
+  private eventListeners = new Map<ContentEventType, { [contentType: string]: Set<EventListener> }>();
   /** Subscription to the _events$ Observable */
   private eventsSubscription: Subscription;
 
@@ -70,21 +70,23 @@ export class EventBus {
   /**
    * Register an event listener for specific events on specific content types
    *
-   * @param eventType - The event type to listen to
-   * @param contentType - The content type to listen to (if not specified all content types will send the event type)
-   * @param cb - Handler to call when the event occurs
+   * @param eventType The event type to listen to
+   * @param contentType The content type to listen to (if not specified all content types will send the event type)
+   * @param cb Handler to call when the event occurs
+   *
+   * @returns Handler to unsubscribe
    */
-  async on(eventType: ContentEventType, cb: EventListener): Promise<void>;
-  async on<ContentType extends string = string>(
+  on(eventType: ContentEventType, cb: EventListener): () => void;
+  on<ContentType extends string = string>(
     eventType: ContentEventType,
     contentType: ContentType,
     cb: EventListener
-  ): Promise<void>;
-  async on<ContentType extends string = string>(
+  ): () => void;
+  on<ContentType extends string = string>(
     eventType: ContentEventType,
     _contentType: ContentType | EventListener,
     _cb?: EventListener
-  ) {
+  ): () => void {
     const contentType = typeof _contentType === 'function' ? ALL_TYPES_KEY : _contentType;
     const cb = typeof _contentType === 'function' ? _contentType : _cb!;
 
@@ -102,10 +104,14 @@ export class EventBus {
     const eventTypeListeners = this.eventListeners.get(eventType)!;
 
     if (eventTypeListeners[contentType] === undefined) {
-      eventTypeListeners[contentType] = [];
+      eventTypeListeners[contentType] = new Set();
     }
 
-    eventTypeListeners[contentType].push(cb);
+    eventTypeListeners[contentType].add(cb);
+
+    return () => {
+      eventTypeListeners[contentType].delete(cb);
+    }
   }
 
   /**
