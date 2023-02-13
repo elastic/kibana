@@ -19,7 +19,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { setupConfig } from '../routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -29,13 +29,12 @@ const testTypes = [
   { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
 ];
 
-describe('DELETE /api/saved_objects/{type}/{id}', () => {
+describe('DELETE /api/saved_objects/{type}/{id} with allowApiAccess true', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
-  let loggerWarnSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -53,8 +52,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     coreUsageStatsClient.incrementSavedObjectsDelete.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
-    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
-    const config = setupConfig();
+    const config = setupConfig(true);
     registerDeleteRoute(router, { config, coreUsageData, logger });
 
     await server.start();
@@ -64,57 +62,18 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     await server.stop();
   });
 
-  it('formats successful response and records usage stats', async () => {
-    const result = await supertest(httpSetup.server.listener)
-      .delete('/api/saved_objects/index-pattern/logstash-*')
-      .expect(200);
-
-    expect(result.body).toEqual({});
-    expect(coreUsageStatsClient.incrementSavedObjectsDelete).toHaveBeenCalledWith({
-      request: expect.anything(),
-    });
-  });
-
-  it('calls upon savedObjectClient.delete', async () => {
-    await supertest(httpSetup.server.listener)
-      .delete('/api/saved_objects/index-pattern/logstash-*')
-      .expect(200);
-
-    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*', {
-      force: undefined,
-    });
-  });
-
-  it('can specify `force` option', async () => {
-    await supertest(httpSetup.server.listener)
-      .delete('/api/saved_objects/index-pattern/logstash-*')
-      .query({ force: true })
-      .expect(200);
-
-    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*', {
-      force: true,
-    });
-  });
-
   it('returns with status 400 if a type is hidden from the HTTP APIs', async () => {
     const result = await supertest(httpSetup.server.listener)
       .delete('/api/saved_objects/hidden-from-http/hiddenId')
-      .expect(400);
-    expect(result.body.message).toContain("Unsupported saved object type: 'hidden-from-http'");
+      .expect(200);
+    expect(result.body).toEqual({});
   });
 
   it('returns with status 400 if a type is hidden from the HTTP APIs with `force` option', async () => {
     const result = await supertest(httpSetup.server.listener)
       .delete('/api/saved_objects/hidden-from-http/hiddenId')
       .query({ force: true })
-      .expect(400);
-    expect(result.body.message).toContain("Unsupported saved object type: 'hidden-from-http'");
-  });
-
-  it('logs a warning message when called', async () => {
-    await supertest(httpSetup.server.listener)
-      .delete('/api/saved_objects/index-pattern/logstash-*')
       .expect(200);
-    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+    expect(result.body).toEqual({});
   });
 });

@@ -91,6 +91,7 @@ export class SavedObjectsService
 {
   private logger: Logger;
   private readonly kibanaVersion: string;
+  private readonly allowHttpApiAccess: boolean;
 
   private setupDeps?: SavedObjectsSetupDeps;
   private config?: SavedObjectConfig;
@@ -108,6 +109,7 @@ export class SavedObjectsService
     this.kibanaVersion = SavedObjectsService.stripVersionQualifier(
       this.coreContext.env.packageInfo.version
     );
+    this.allowHttpApiAccess = coreContext.env.mode.prod;
   }
 
   public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
@@ -122,7 +124,15 @@ export class SavedObjectsService
     const savedObjectsMigrationConfig = await firstValueFrom(
       this.coreContext.configService.atPath<SavedObjectsMigrationConfigType>('migrations')
     );
-    this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
+    this.config = new SavedObjectConfig(
+      savedObjectsConfig,
+      savedObjectsMigrationConfig,
+      this.allowHttpApiAccess
+    );
+    this.logger.debug(
+      `allowHTTPApisAccess in SavedObjectConfig: this.config.allowHttpApiAccess: ${this.config.allowHttpApiAccess}`
+    );
+    this.logger.debug(`maxImportPayloadBytes: ${this.config.maxImportPayloadBytes}`);
 
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({

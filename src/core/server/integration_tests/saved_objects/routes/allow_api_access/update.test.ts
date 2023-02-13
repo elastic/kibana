@@ -19,7 +19,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { setupConfig } from '../routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -29,28 +29,16 @@ const testTypes = [
   { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
 ];
 
-describe('PUT /api/saved_objects/{type}/{id?}', () => {
+describe('PUT /api/saved_objects/{type}/{id?} with allowApiAccess true', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
-  let loggerWarnSpy: jest.SpyInstance;
 
   beforeEach(async () => {
-    const clientResponse = {
-      id: 'logstash-*',
-      title: 'logstash-*',
-      type: 'logstash-type',
-      attributes: {},
-      timeFieldName: '@timestamp',
-      notExpandable: true,
-      references: [],
-    };
-
     ({ server, httpSetup, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
-    savedObjectsClient.update.mockResolvedValue(clientResponse);
 
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
       return testTypes
@@ -64,9 +52,8 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     coreUsageStatsClient.incrementSavedObjectsUpdate.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
-    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
 
-    const config = setupConfig();
+    const config = setupConfig(true);
     registerUpdateRoute(router, { config, coreUsageData, logger });
 
     await server.start();
@@ -76,66 +63,13 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     await server.stop();
   });
 
-  it('formats successful response and records usage stats', async () => {
-    const clientResponse = {
-      id: 'logstash-*',
-      title: 'logstash-*',
-      type: 'logstash-type',
-      timeFieldName: '@timestamp',
-      notExpandable: true,
-      attributes: {},
-      references: [],
-    };
-    savedObjectsClient.update.mockResolvedValue(clientResponse);
-
-    const result = await supertest(httpSetup.server.listener)
-      .put('/api/saved_objects/index-pattern/logstash-*')
-      .send({
-        attributes: {
-          title: 'Testing',
-        },
-        references: [],
-      })
-      .expect(200);
-
-    expect(result.body).toEqual(clientResponse);
-    expect(coreUsageStatsClient.incrementSavedObjectsUpdate).toHaveBeenCalledWith({
-      request: expect.anything(),
-    });
-  });
-
-  it('calls upon savedObjectClient.update', async () => {
+  it('returns with status 200 for types hidden from the HTTP APIs', async () => {
     await supertest(httpSetup.server.listener)
-      .put('/api/saved_objects/index-pattern/logstash-*')
-      .send({
-        attributes: { title: 'Testing' },
-        version: 'foo',
-      })
-      .expect(200);
-
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
-      'index-pattern',
-      'logstash-*',
-      { title: 'Testing' },
-      { version: 'foo' }
-    );
-  });
-
-  it('returns with status 400 for types hidden from the HTTP APIs', async () => {
-    const result = await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/hidden-from-http/hiddenId')
       .send({
         attributes: { title: 'does not matter' },
       })
-      .expect(400);
-    expect(result.body.message).toContain("Unsupported saved object type: 'hidden-from-http'");
-  });
-
-  it('logs a warning message when called', async () => {
-    await supertest(httpSetup.server.listener)
-      .put('/api/saved_objects/index-pattern/logstash-*')
-      .send({ attributes: { title: 'Logging test' }, version: 'log' })
       .expect(200);
-    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
   });
 });

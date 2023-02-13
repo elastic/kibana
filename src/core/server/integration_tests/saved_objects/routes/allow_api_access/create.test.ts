@@ -19,7 +19,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { setupConfig } from '../routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -28,13 +28,12 @@ const testTypes = [
   { name: 'hidden-type', hide: true },
   { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
 ];
-describe('POST /api/saved_objects/{type}', () => {
+describe('POST /api/saved_objects/{type} with allowApiAccess true', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
-  let loggerWarnSpy: jest.SpyInstance;
 
   const clientResponse = {
     id: 'logstash-*',
@@ -56,8 +55,8 @@ describe('POST /api/saved_objects/{type}', () => {
     coreUsageStatsClient.incrementSavedObjectsCreate.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
-    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
-    const config = setupConfig();
+    const config = setupConfig(true);
+
     registerCreateRoute(router, { config, coreUsageData, logger });
 
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
@@ -73,73 +72,7 @@ describe('POST /api/saved_objects/{type}', () => {
     await server.stop();
   });
 
-  it('formats successful response and records usage stats', async () => {
-    const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/index-pattern')
-      .send({
-        attributes: {
-          title: 'Testing',
-        },
-      })
-      .expect(200);
-
-    expect(result.body).toEqual(clientResponse);
-    expect(coreUsageStatsClient.incrementSavedObjectsCreate).toHaveBeenCalledWith({
-      request: expect.anything(),
-    });
-  });
-
-  it('requires attributes', async () => {
-    const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/index-pattern')
-      .send({})
-      .expect(400);
-
-    // expect(response.validation.keys).toContain('attributes');
-    expect(result.body.message).toMatchInlineSnapshot(
-      `"[request body.attributes]: expected value of type [object] but got [undefined]"`
-    );
-  });
-
-  it('calls upon savedObjectClient.create', async () => {
-    await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/index-pattern')
-      .send({
-        attributes: {
-          title: 'Testing',
-        },
-      })
-      .expect(200);
-
-    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.create).toHaveBeenCalledWith(
-      'index-pattern',
-      { title: 'Testing' },
-      { overwrite: false, id: undefined, migrationVersion: undefined }
-    );
-  });
-
-  it('can specify an id', async () => {
-    await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/index-pattern/logstash-*')
-      .send({
-        attributes: {
-          title: 'Testing',
-        },
-      })
-      .expect(200);
-
-    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-
-    const args = savedObjectsClient.create.mock.calls[0];
-    expect(args).toEqual([
-      'index-pattern',
-      { title: 'Testing' },
-      { overwrite: false, id: 'logstash-*' },
-    ]);
-  });
-
-  it('returns with status 400 if the type is hidden from the HTTP APIs', async () => {
+  it('uses config option allowHttpApiAccess to grant hiddenFromHttpApis types access', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/hidden-from-http')
       .send({
@@ -147,20 +80,8 @@ describe('POST /api/saved_objects/{type}', () => {
           properties: {},
         },
       })
-      .expect(400);
-
-    expect(result.body.message).toContain("Unsupported saved object type: 'hidden-from-http'");
-  });
-
-  it('logs a warning message when called', async () => {
-    await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/index-pattern')
-      .send({
-        attributes: {
-          title: 'Logging test',
-        },
-      })
       .expect(200);
-    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+
+    expect(result.body).toEqual(clientResponse);
   });
 });
