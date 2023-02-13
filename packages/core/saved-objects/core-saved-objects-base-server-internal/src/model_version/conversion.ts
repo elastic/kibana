@@ -30,7 +30,8 @@ export const modelVersionToVirtualVersion = (modelVersion: number | string) => {
  * @example
  * ```
  * isVirtualModelVersion("10.3.0"); // true
- * isVirtualModelVersion("9.7.1");  // false
+ * isVirtualModelVersion("9.7.0);   // false
+ * isVirtualModelVersion("10.3.1);  // false
  * ```
  */
 export const isVirtualModelVersion = (version: string): boolean => {
