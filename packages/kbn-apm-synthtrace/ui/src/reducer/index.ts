@@ -1,4 +1,4 @@
-import { SynthtraceScenario } from '../typings';
+import { SynthtraceScenario, Transaction } from '../typings';
 import { Action } from './actions';
 
 export const INITIAL_STATE: SynthtraceScenario = {
@@ -18,7 +18,11 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
     case 'change_top_level_service': {
       return {
         ...state,
-        service: action.payload,
+        service: {
+          agentName: action.payload.agentName,
+          name: `synth-${action.payload.agentName}`,
+          children: [{ name: 'tx1' } as Transaction],
+        },
       };
     }
   }

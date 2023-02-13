@@ -1,4 +1,4 @@
-import { SynthtraceScenario } from '../typings';
+import { ElasticAgentName, SynthtraceScenario } from '../typings';
 
 export type Action = ToggletDistributedTracingAction | ChangeTopLevelServiceAction;
 
@@ -9,5 +9,5 @@ interface ToggletDistributedTracingAction {
 
 interface ChangeTopLevelServiceAction {
   type: 'change_top_level_service';
-  payload: SynthtraceScenario['service'];
+  payload: { agentName: ElasticAgentName };
 }

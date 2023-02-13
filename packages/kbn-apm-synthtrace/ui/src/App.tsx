@@ -1,4 +1,4 @@
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Header } from './components/header';
 import { NewScenarioForm } from './components/new_scenario_form';
 import { ScenarioView } from './components/scenario_view';
@@ -11,8 +11,14 @@ function App() {
       <Header />
       <Template>
         <ScenarioContextProvider>
-          <NewScenarioForm />
-          <ScenarioView />
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>
+              <NewScenarioForm />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ScenarioView />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </ScenarioContextProvider>
       </Template>
     </>

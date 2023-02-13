@@ -25,7 +25,7 @@ type Service = {
   children?: Array<Transaction | Span>;
 };
 
-interface Transaction {
+export interface Transaction {
   name: string;
   repeat?: number;
   children: Array<Transaction | Span | Service>;
