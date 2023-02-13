@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { RpcClient } from './rpc_client';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { CrudClient } from './crud_client';
 
-export const createRpcClientMock = (): jest.Mocked<RpcClient> => {
-  const mock: jest.Mocked<PublicMethodsOf<RpcClient>> = {
+export const createCrudClientMock = (): jest.Mocked<CrudClient> => {
+  const mock: jest.Mocked<CrudClient> = {
     get: jest.fn((input) => Promise.resolve({} as any)),
     create: jest.fn((input) => Promise.resolve({} as any)),
   };
-  return mock as jest.Mocked<RpcClient>;
+  return mock;
 };
