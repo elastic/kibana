@@ -81,7 +81,7 @@ export type FilterMeta = {
   type?: string;
   key?: string;
   params?: FilterMetaParams;
-  value?: string;
+  value?: string | string[];
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

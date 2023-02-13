@@ -108,10 +108,10 @@ export const useLensAttributes = ({
         ...(applyGlobalQueriesAndFilters ? { query } : {}),
         filters: [
           ...attrs.state.filters,
-          ...(applyGlobalQueriesAndFilters ? filters : []),
           ...pageFilters,
           ...tabsFilters,
           ...indexFilters,
+          ...(applyGlobalQueriesAndFilters ? filters : []),
         ],
       },
       references: attrs?.references?.map((ref: { id: string; name: string; type: string }) => ({
