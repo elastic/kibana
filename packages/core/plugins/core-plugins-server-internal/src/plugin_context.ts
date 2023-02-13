@@ -319,6 +319,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,
       globalAsScopedToClient: deps.uiSettings.globalAsScopedToClient,
+      userAsScopedToClient: deps.uiSettings.userAsScopedToClient,
+      setUserProfilesClientFactoryProvider: deps.uiSettings.setUserProfilesClientFactoryProvider, // TODO KCG What is this for?
     },
     coreUsageData: deps.coreUsageData,
   };

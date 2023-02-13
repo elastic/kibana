@@ -8,7 +8,8 @@
 
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { IUiSettingsClient } from './ui_settings_client';
+import type { UserProfileGetCurrentParams } from '@kbn/security-plugin/server';
+import type { IUiSettingsClient, IUserUiSettingsClient } from './ui_settings_client';
 
 /** @public */
 export interface UiSettingsServiceSetup {
@@ -50,6 +51,19 @@ export interface UiSettingsServiceSetup {
   registerGlobal(settings: Record<string, UiSettingsParams>): void;
 }
 
+/**
+ * Provider to invoke to retrieve a {@link SavedObjectsClientFactory}.
+ * @public
+ */
+export type UserProfilesClientFactoryProvider = () => UserProfilesClientFactory;
+
+// Describes the factory used to create instances of the Saved Objects Client.
+export type UserProfilesClientFactory = () => UserProfilesClientContract;
+
+export interface UserProfilesClientContract {
+  get(params: UserProfileGetCurrentParams): Promise<any>;
+}
+
 /** @public */
 export interface UiSettingsServiceStart {
   /**
@@ -83,4 +97,10 @@ export interface UiSettingsServiceStart {
    * ```
    */
   globalAsScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+
+  userAsScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUserUiSettingsClient;
+
+  setUserProfilesClientFactoryProvider(
+    userProfilesClientFactoryProvider: UserProfilesClientFactoryProvider
+  ): void;
 }

@@ -57,13 +57,23 @@ import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
-import { UserProfileService } from './user_profile';
+import {
+  setupUserProfilesClientOnUiSettingsServiceStart,
+  UserProfileService,
+} from './user_profile';
 import type { UserProfileServiceStart, UserProfileServiceStartInternal } from './user_profile';
+import type { UserProfilesServiceSetup } from './user_profile/user_profile_service';
+import type { UserSettingServiceStart } from './user_profile/user_setting_service';
+import { UserSettingService } from './user_profile/user_setting_service';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
   'getSpaceId' | 'namespaceToSpaceId'
 >;
+
+// export interface SecurityPluginPreboot {
+//   userProfiles: UserProfilesPreboot;
+// }
 
 /**
  * Describes public Security plugin contract returned at the `setup` stage.
@@ -89,6 +99,8 @@ export interface SecurityPluginSetup {
    * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
    */
   privilegeDeprecationsService: PrivilegeDeprecationsService;
+
+  userProfiles: UserProfilesServiceSetup;
 }
 
 /**
@@ -195,6 +207,9 @@ export class SecurityPlugin
 
   private readonly userProfileService: UserProfileService;
   private userProfileStart?: UserProfileServiceStartInternal;
+
+  private readonly userSettingService: UserSettingService;
+  private userSettingServiceStart?: UserSettingServiceStart;
   private readonly getUserProfileService = () => {
     if (!this.userProfileStart) {
       throw new Error(`userProfileStart is not registered!`);
@@ -222,6 +237,7 @@ export class SecurityPlugin
     this.userProfileService = new UserProfileService(
       this.initializerContext.logger.get('user-profile')
     );
+    this.userSettingService = new UserSettingService();
     this.analyticsService = new AnalyticsService(this.initializerContext.logger.get('analytics'));
   }
 
@@ -299,7 +315,10 @@ export class SecurityPlugin
       getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
     });
 
-    this.userProfileService.setup({ authz: this.authorizationSetup, license });
+    const userProfilesSetup = this.userProfileService.setup({
+      authz: this.authorizationSetup,
+      license,
+    });
 
     setupSpacesClient({
       spaces,
@@ -354,6 +373,7 @@ export class SecurityPlugin
         license,
         logger: this.logger.get('deprecations'),
       }),
+      userProfiles: userProfilesSetup,
     });
   }
 
@@ -379,6 +399,12 @@ export class SecurityPlugin
     this.session = session;
 
     this.userProfileStart = this.userProfileService.start({ clusterClient, session });
+    this.userSettingServiceStart = this.userSettingService.start(this.userProfileStart);
+
+    setupUserProfilesClientOnUiSettingsServiceStart({
+      userSettingsServiceStart: this.userSettingServiceStart,
+      uiSettingServiceStart: core.uiSettings,
+    });
 
     const config = this.getConfig();
     this.authenticationStart = this.authenticationService.start({

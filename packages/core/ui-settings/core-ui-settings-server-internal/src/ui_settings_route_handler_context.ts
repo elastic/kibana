@@ -11,6 +11,7 @@ import type {
   UiSettingsRequestHandlerContext,
   IUiSettingsClient,
 } from '@kbn/core-ui-settings-server';
+import { IUserUiSettingsClient } from '@kbn/core-ui-settings-server/src/ui_settings_client';
 import type { InternalUiSettingsServiceStart } from './types';
 
 /**
@@ -20,6 +21,7 @@ import type { InternalUiSettingsServiceStart } from './types';
 export class CoreUiSettingsRouteHandlerContext implements UiSettingsRequestHandlerContext {
   #client?: IUiSettingsClient;
   #globalClient?: IUiSettingsClient;
+  #userClient?: IUserUiSettingsClient;
 
   constructor(
     private readonly uiSettingsStart: InternalUiSettingsServiceStart,
@@ -42,5 +44,16 @@ export class CoreUiSettingsRouteHandlerContext implements UiSettingsRequestHandl
       );
     }
     return this.#globalClient;
+  }
+
+  public get userClient() {
+    console.log('This is the ui settings route handler context');
+    if (this.#userClient == null) {
+      console.log('route handler context calling uiSettingsStart service');
+      this.#userClient = this.uiSettingsStart.userAsScopedToClient(
+        this.savedObjectsRouterHandlerContext.client
+      );
+    }
+    return this.#userClient;
   }
 }

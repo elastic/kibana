@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import Cookies from 'js-cookie';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core/public';
 
 import type { GetUserProfileResponse, UserProfile, UserProfileData } from '../../../common';
+import type { UserSettingsData } from '../../../common/model/user_profile';
 
 /**
  * Parameters for the get user profile for the current user API.
@@ -131,5 +133,17 @@ export class UserProfileAPIClient {
       .then(() => {
         this.internalDataUpdates$.next(data);
       });
+  }
+
+  public getDarkModeSetting(): string {
+    return Cookies.get('userSettingsCookie') || 'light';
+  }
+
+  public setUserSettings(userSettings: UserSettingsData) {
+    const userProfileData = {
+      userSettings,
+    } as UserProfileData;
+
+    return this.update(userProfileData);
   }
 }

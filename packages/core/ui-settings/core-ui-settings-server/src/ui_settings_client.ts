@@ -7,6 +7,7 @@
  */
 
 import type { UserProvidedValues, PublicUiSettingsParams } from '@kbn/core-ui-settings-common';
+import { KibanaRequest } from '@kbn/core-http-server';
 
 /**
  * Server-side client that provides access to the advanced settings stored in elasticsearch.
@@ -57,4 +58,8 @@ export interface IUiSettingsClient {
    * Shows whether the uiSetting is a sensitive value. Used by telemetry to not send sensitive values.
    */
   isSensitive: (key: string) => boolean;
+}
+
+export interface IUserUiSettingsClient extends IUiSettingsClient {
+  getUserProfileSettings: (request: KibanaRequest) => Promise<any>;
 }

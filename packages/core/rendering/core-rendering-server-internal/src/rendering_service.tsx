@@ -18,6 +18,7 @@ import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
+import { IUserUiSettingsClient } from '@kbn/core-ui-settings-server/src/ui_settings_client';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -89,6 +90,7 @@ export class RenderingService {
     uiSettings: {
       client: IUiSettingsClient;
       globalClient: IUiSettingsClient;
+      userClient: IUserUiSettingsClient;
     },
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
@@ -101,6 +103,9 @@ export class RenderingService {
     const buildNum = env.packageInfo.buildNum;
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
+
+    // TODO KCG const user: AuthenticatedUser = http.auth.get<AuthenticatedUser>(request).state ?? null;
+
     const settings = {
       defaults: uiSettings.client?.getRegistered() ?? {},
       user: isAnonymousPage ? {} : await uiSettings.client?.getUserProvided(),
@@ -109,6 +114,11 @@ export class RenderingService {
       defaults: uiSettings.globalClient?.getRegistered() ?? {},
       user: isAnonymousPage ? {} : await uiSettings.globalClient?.getUserProvided(),
     };
+
+    const userProfile = await uiSettings.userClient.getUserProfileSettings(request);
+    const userSettingsDarkMode = userProfile.data.userSettings.darkMode;
+    const isDarkMode = userSettingsDarkMode && userSettingsDarkMode === 'dark';
+
     let clusterInfo = {};
     let branding: CustomBranding = {};
     try {
@@ -126,7 +136,8 @@ export class RenderingService {
       // swallow error
     }
 
-    const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+    const darkMode = getSettingValue('theme:darkMode', settings, Boolean) || isDarkMode;
+
     const themeVersion: ThemeVersion = 'v8';
 
     const stylesheetPaths = getStylesheetPaths({

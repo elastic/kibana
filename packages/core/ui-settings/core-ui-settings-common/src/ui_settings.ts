@@ -112,4 +112,4 @@ export interface UserProvidedValues<T = any> {
 /**
  * Denotes the scope of the setting
  */
-export type UiSettingsScope = 'namespace' | 'global';
+export type UiSettingsScope = 'namespace' | 'global' | 'user';

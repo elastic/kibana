@@ -20,6 +20,7 @@ import {
   EuiIconTip,
   EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -42,6 +43,7 @@ import {
   getUserAvatarColor,
   getUserAvatarInitials,
 } from '../../../common/model';
+import type { UserSettingsData } from '../../../common/model/user_profile';
 import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import {
@@ -60,6 +62,7 @@ export interface UserProfileProps {
   user: AuthenticatedUser;
   data?: {
     avatar?: UserProfileAvatarData;
+    userSettings?: UserSettingsData;
   };
 }
 
@@ -437,8 +440,10 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
   const formChanges = useFormChanges();
   const titleId = useGeneratedHtmlId();
   const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(data?.userSettings?.darkMode === 'dark');
 
   const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
+  const { userProfiles } = useSecurityApiClients();
 
   const isCloudUser = user.elastic_cloud_user;
 
@@ -498,81 +503,92 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
   }
 
   return (
-    <FormikProvider value={formik}>
-      <FormChangesProvider value={formChanges}>
-        <Breadcrumb
-          text={i18n.translate('xpack.security.accountManagement.userProfile.title', {
-            defaultMessage: 'Profile',
-          })}
-        >
-          {showChangePasswordForm ? (
-            <ChangePasswordModal
-              username={user.username}
-              onCancel={() => setShowChangePasswordForm(false)}
-              onSuccess={() => setShowChangePasswordForm(false)}
-            />
-          ) : null}
-
-          <EuiPageTemplate
-            className="eui-fullHeight"
-            pageHeader={{
-              pageTitle: (
-                <FormattedMessage
-                  id="xpack.security.accountManagement.userProfile.title"
-                  defaultMessage="Profile"
-                />
-              ),
-              pageTitleProps: { id: titleId },
-              rightSideItems: rightSideItems.reverse().map((item) => (
-                <EuiDescriptionList
-                  textStyle="reverse"
-                  listItems={[
-                    {
-                      title: (
-                        <EuiText color={euiTheme.colors.darkestShade} size="s">
-                          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-                            <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
-                            <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
-                              <EuiIconTip type="questionInCircle" content={item.helpText} />
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiText>
-                      ),
-                      description: (
-                        <span data-test-subj={item.testSubj}>
-                          {item.description || (
-                            <EuiText color={euiTheme.colors.disabledText} size="s">
-                              <FormattedMessage
-                                id="xpack.security.accountManagement.userProfile.noneProvided"
-                                defaultMessage="None provided"
-                              />
-                            </EuiText>
-                          )}
-                        </span>
-                      ),
-                    },
-                  ]}
-                  compressed
-                />
-              )),
-            }}
-            bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
-            bottomBarProps={{ paddingSize: 'm', position: 'fixed' }}
-            restrictWidth={1000}
+    <>
+      <FormikProvider value={formik}>
+        <FormChangesProvider value={formChanges}>
+          <Breadcrumb
+            text={i18n.translate('xpack.security.accountManagement.userProfile.title', {
+              defaultMessage: 'Profile',
+            })}
           >
-            <Form aria-labelledby={titleId}>
-              <UserDetailsEditor user={user} />
-              {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
-              <UserPasswordEditor
-                user={user}
-                onShowPasswordForm={() => setShowChangePasswordForm(true)}
+            {showChangePasswordForm ? (
+              <ChangePasswordModal
+                username={user.username}
+                onCancel={() => setShowChangePasswordForm(false)}
+                onSuccess={() => setShowChangePasswordForm(false)}
               />
-            </Form>
-            <EuiSpacer />
-          </EuiPageTemplate>
-        </Breadcrumb>
-      </FormChangesProvider>
-    </FormikProvider>
+            ) : null}
+
+            <EuiPageTemplate
+              className="eui-fullHeight"
+              pageHeader={{
+                pageTitle: (
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.userProfile.title"
+                    defaultMessage="Profile"
+                  />
+                ),
+                pageTitleProps: { id: titleId },
+                rightSideItems: rightSideItems.reverse().map((item) => (
+                  <EuiDescriptionList
+                    textStyle="reverse"
+                    listItems={[
+                      {
+                        title: (
+                          <EuiText color={euiTheme.colors.darkestShade} size="s">
+                            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+                              <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                              <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
+                                <EuiIconTip type="questionInCircle" content={item.helpText} />
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiText>
+                        ),
+                        description: (
+                          <span data-test-subj={item.testSubj}>
+                            {item.description || (
+                              <EuiText color={euiTheme.colors.disabledText} size="s">
+                                <FormattedMessage
+                                  id="xpack.security.accountManagement.userProfile.noneProvided"
+                                  defaultMessage="None provided"
+                                />
+                              </EuiText>
+                            )}
+                          </span>
+                        ),
+                      },
+                    ]}
+                    compressed
+                  />
+                )),
+              }}
+              bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
+              bottomBarProps={{ paddingSize: 'm', position: 'fixed' }}
+              restrictWidth={1000}
+            >
+              <Form aria-labelledby={titleId}>
+                <UserDetailsEditor user={user} />
+                {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
+                <UserPasswordEditor
+                  user={user}
+                  onShowPasswordForm={() => setShowChangePasswordForm(true)}
+                />
+              </Form>
+              <EuiSpacer />
+              <EuiSwitch
+                label="Dark mode"
+                checked={isDarkMode}
+                onChange={(e) => {
+                  const mode = e.target.checked ? 'dark' : 'light';
+                  setIsDarkMode(e.target.checked);
+                  userProfiles.setUserSettings({ darkMode: mode });
+                }}
+              />
+            </EuiPageTemplate>
+          </Breadcrumb>
+        </FormChangesProvider>
+      </FormikProvider>
+    </>
   );
 };
 

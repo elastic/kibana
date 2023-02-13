@@ -15,6 +15,11 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import type { UiSettingsParams, UiSettingsScope } from '@kbn/core-ui-settings-common';
+import {
+  UserProfilesClientContract,
+  UserProfilesClientFactoryProvider,
+} from '@kbn/core-ui-settings-server/src/contracts';
+import { UiSettingsUserClient } from './clients/ui_settings_user_client';
 import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient, UiSettingsClientFactory, UiSettingsGlobalClient } from './clients';
 import type {
@@ -27,6 +32,7 @@ import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
+import { UiSettingsServiceOptions } from './types';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -36,6 +42,8 @@ type ClientType<T> = T extends 'global'
   ? UiSettingsGlobalClient
   : T extends 'namespace'
   ? UiSettingsClient
+  : T extends 'user'
+  ? UiSettingsUserClient
   : never;
 
 /** @internal */
@@ -48,6 +56,7 @@ export class UiSettingsService
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private readonly uiSettingsGlobalDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
+  private userProfilesClientFactoryProvider?: UserProfilesClientFactoryProvider;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
@@ -96,28 +105,85 @@ export class UiSettingsService
     return {
       asScopedToClient: this.getScopedClientFactory('namespace'),
       globalAsScopedToClient: this.getScopedClientFactory('global'),
+      userAsScopedToClient: this.getUserClientFactory<'user'>(),
+      setUserProfilesClientFactoryProvider: this.setUserProfilesClientFactoryProvider(),
     };
   }
 
   public async stop() {}
 
+  private setUserProfilesClientFactoryProvider(): (
+    provider: UserProfilesClientFactoryProvider
+  ) => void {
+    console.log('The factory provider was called\n');
+    return (provider: UserProfilesClientFactoryProvider) => {
+      console.log('The factory provider was set\n');
+      this.userProfilesClientFactoryProvider = provider;
+    };
+  }
+
   private getScopedClientFactory<T extends UiSettingsScope>(
     scope: UiSettingsScope
   ): (savedObjectsClient: SavedObjectsClientContract) => ClientType<T> {
     const { version, buildNum } = this.coreContext.env.packageInfo;
+
     return (savedObjectsClient: SavedObjectsClientContract): ClientType<T> => {
-      const isNamespaceScope = scope === 'namespace';
-      const options = {
-        type: (isNamespaceScope ? 'config' : 'config-global') as 'config' | 'config-global',
+      const commonOptions = {
         id: version,
         buildNum,
-        savedObjectsClient,
-        defaults: isNamespaceScope
-          ? mapToObject(this.uiSettingsDefaults)
-          : mapToObject(this.uiSettingsGlobalDefaults),
-        overrides: isNamespaceScope ? this.overrides : {},
         log: this.log,
+        savedObjectsClient,
       };
+
+      let options: UiSettingsServiceOptions;
+      if (scope === 'namespace') {
+        options = {
+          ...commonOptions,
+          type: 'config',
+          defaults: mapToObject(this.uiSettingsDefaults),
+          overrides: this.overrides,
+        };
+      } else {
+        options = {
+          ...commonOptions,
+          type: 'config-global',
+          defaults: mapToObject(this.uiSettingsGlobalDefaults),
+          overrides: {},
+        };
+      }
+
+      return UiSettingsClientFactory.create(options) as ClientType<T>;
+    };
+  }
+
+  private getUserClientFactory<T extends UiSettingsScope>(): (
+    savedObjectsClient: SavedObjectsClientContract
+  ) => ClientType<T> {
+    const { version, buildNum } = this.coreContext.env.packageInfo;
+
+    return (savedObjectsClient: SavedObjectsClientContract): ClientType<T> => {
+      let userProfilesClient: UserProfilesClientContract | undefined;
+
+      console.log('Yes! userProfilesClientFactoryProvider was set!\n');
+      if (this.userProfilesClientFactoryProvider) {
+        const userProfilesClientFactory = this.userProfilesClientFactoryProvider();
+        userProfilesClient = userProfilesClientFactory();
+
+        console.log('the userProfilesClient is:');
+        console.log(userProfilesClient);
+      }
+
+      const options = {
+        id: version,
+        buildNum,
+        log: this.log,
+        savedObjectsClient,
+        type: 'config-user' as 'config' | 'config-global' | 'config-user',
+        defaults: {}, // TODO KCG
+        ...(userProfilesClient && { userProfilesClient }),
+        overrides: {},
+      };
+
       return UiSettingsClientFactory.create(options) as ClientType<T>;
     };
   }
