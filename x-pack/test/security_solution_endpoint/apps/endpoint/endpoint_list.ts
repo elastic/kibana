@@ -130,7 +130,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           adminSearchBar = await testSubjects.find('adminSearchBar');
           querySubmitButton = await testSubjects.find('querySubmitButton');
         });
-        afterEach(async () => {
+        after(async () => {
           adminSearchBar = await testSubjects.find('adminSearchBar');
           querySubmitButton = await testSubjects.find('querySubmitButton');
           await adminSearchBar.clearValueWithKeyboard();
