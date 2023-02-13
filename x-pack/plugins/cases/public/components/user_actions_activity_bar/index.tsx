@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FilterActivity } from './filter_activity';
 import { SortActivity } from './sort_activity';
 import type { FilterType, SortOrderType } from './types';
+import type { CaseUserActionsStats } from '../../containers/types';
 
 export interface Params {
   type: FilterType;
@@ -20,11 +21,12 @@ export interface Params {
 interface UserActionsActivityProps {
   isLoading?: boolean;
   params: Params;
+  userActionsStats?: CaseUserActionsStats;
   onUserActionsActivityChanged: (params: Params) => void;
 }
 
 export const UserActionsActivityBar = React.memo<UserActionsActivityProps>(
-  ({ params, onUserActionsActivityChanged, isLoading }) => {
+  ({ params, onUserActionsActivityChanged, userActionsStats, isLoading }) => {
     const handleFilterChange = (type: FilterType) => {
       onUserActionsActivityChanged({ ...params, type });
     };
@@ -44,6 +46,7 @@ export const UserActionsActivityBar = React.memo<UserActionsActivityProps>(
           <FilterActivity
             type={params.type}
             onFilterChange={handleFilterChange}
+            userActionsStats={userActionsStats}
             isLoading={isLoading}
           />
         </EuiFlexItem>

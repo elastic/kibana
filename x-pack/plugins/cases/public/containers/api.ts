@@ -15,6 +15,7 @@ import type {
   ResolvedCase,
   FindCaseUserActions,
   CaseUserActionTypeWithAll,
+  CaseUserActionsStats,
 } from '../../common/ui/types';
 import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
 import type {
@@ -40,6 +41,7 @@ import {
   getCaseFindUserActionsUrl,
   getCaseCommentDeleteUrl,
   getCaseConnectorsUrl,
+  getCaseUserActionStatsUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -78,6 +80,7 @@ import {
   decodeSingleCaseMetricsResponse,
   constructAssigneesFilter,
   constructReportersFilter,
+  decodeCaseUserActionStatsResponse,
 } from './utils';
 import { decodeCasesFindResponse } from '../api/decoders';
 
@@ -177,6 +180,21 @@ export const findCaseUserActions = async (
       decodeCaseUserActionsResponse(response.userActions)
     ) as CaseUserActions[],
   };
+};
+
+export const getCaseUserActionsStats = async (
+  caseId: string,
+  signal: AbortSignal
+): Promise<CaseUserActionsStats> => {
+  const response = await KibanaServices.get().http.fetch<CaseUserActionsStats>(
+    getCaseUserActionStatsUrl(caseId),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+  return convertToCamelCase(decodeCaseUserActionStatsResponse(response));
 };
 
 export const getCases = async ({

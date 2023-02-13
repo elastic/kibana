@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { isEqual, uniq } from 'lodash';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
@@ -30,6 +30,7 @@ import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../translations';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
+import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
 import { AssignUsers } from './assign_users';
 import { UserActionsActivityBar } from '../../user_actions_activity_bar';
 import type { Assignee } from '../../user_profiles/types';
@@ -65,6 +66,9 @@ export const CaseViewActivity = ({
     isLoading: isLoadingUserActions,
     refetch: refetchFindCaseUserActions,
   } = useFindCaseUserActions(caseData.id, filterOptions, sortOrder);
+
+  const { data: userActionsStats, isLoading: isLoadingUserActionsStats } =
+    useGetCaseUserActionsStats(caseData.id);
 
   const assignees = useMemo(
     () => caseData.assignees.map((assignee) => assignee.uid),
@@ -178,17 +182,19 @@ export const CaseViewActivity = ({
     <>
       <EuiFlexItem grow={6}>
         {(isLoadingUserActions || isLoadingCaseConnectors) && (
-          <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
+          <EuiSkeletonText lines={8} data-test-subj="case-view-loading-content" />
         )}
-        {showUserActions && (
-          <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
-            <EuiFlexItem grow={false}>
-              <UserActionsActivityBar
-                onUserActionsActivityChanged={handleUserActionsActivityChanged}
-                params={{ type: filterOptions, sortOrder }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
+        <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
+          <EuiFlexItem grow={false}>
+            <UserActionsActivityBar
+              onUserActionsActivityChanged={handleUserActionsActivityChanged}
+              params={{ type: filterOptions, sortOrder }}
+              userActionsStats={userActionsStats}
+              isLoading={isLoadingUserActions || isLoadingUserActionsStats}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {showUserActions && (
               <UserActions
                 userProfiles={userProfiles}
                 currentUserProfile={currentUserProfile}
@@ -213,9 +219,9 @@ export const CaseViewActivity = ({
                 }
                 useFetchAlertData={useFetchAlertData}
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">

@@ -29,7 +29,7 @@ describe('FilterActivity ', () => {
     expect(res.getByTestId('user-actions-filter-activity-group')).toBeInTheDocument();
     expect(res.getByTestId('user-actions-filter-activity-button-all')).toBeInTheDocument();
     expect(res.getByTestId('user-actions-filter-activity-button-comments')).toBeInTheDocument();
-    expect(res.getByTestId('user-actions-filter-activity-button-actions')).toBeInTheDocument();
+    expect(res.getByTestId('user-actions-filter-activity-button-history')).toBeInTheDocument();
   });
 
   it('renders loading state correctly', () => {
@@ -84,7 +84,7 @@ describe('FilterActivity ', () => {
       <FilterActivity type="user" onFilterChange={onFilterActivityChange} />
     );
 
-    const actionsFilter = res.getByTestId('user-actions-filter-activity-button-actions');
+    const actionsFilter = res.getByTestId('user-actions-filter-activity-button-history');
 
     userEvent.click(actionsFilter);
 
@@ -92,7 +92,7 @@ describe('FilterActivity ', () => {
     await waitFor(() => {
       expect(
         res
-          .getByTestId('user-actions-filter-activity-button-actions')
+          .getByTestId('user-actions-filter-activity-button-history')
           .classList.contains('euiFilterButton-hasActiveFilters')
       );
     });

@@ -15,8 +15,8 @@ export const COMMENTS = i18n.translate('xpack.cases.userActionsActivity.filter.c
   defaultMessage: 'Comments',
 });
 
-export const ACTIONS = i18n.translate('xpack.cases.userActionsActivity.filter.actions', {
-  defaultMessage: 'Actions',
+export const HISTORY = i18n.translate('xpack.cases.userActionsActivity.filter.history', {
+  defaultMessage: 'History',
 });
 
 export const OLDEST = i18n.translate('xpack.cases.userActionsActivity.sort.oldest', {

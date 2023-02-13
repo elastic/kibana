@@ -114,7 +114,7 @@ describe('UserActionsActivityBar ', () => {
       />
     );
 
-    const commentsFilter = res.getByTestId('user-actions-filter-activity-button-actions');
+    const commentsFilter = res.getByTestId('user-actions-filter-activity-button-history');
 
     userEvent.click(commentsFilter);
 

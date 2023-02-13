@@ -7,6 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 import { fireEvent, waitFor } from '@testing-library/dom';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
@@ -30,8 +31,10 @@ import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bu
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
 import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
+import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
 
 jest.mock('../../../containers/use_find_case_user_actions');
+jest.mock('../../../containers/use_get_case_user_actions_stats');
 jest.mock('../../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../../containers/use_post_push_to_service');
 jest.mock('../../user_actions/timestamp', () => ({
@@ -91,6 +94,12 @@ const defaultUseFindCaseUserActions = {
   isError: false,
 };
 
+const userActionsStats = {
+  total: 21,
+  totalComments: 9,
+  totalOtherActions: 11,
+};
+
 export const caseProps = {
   ...caseViewProps,
   caseData,
@@ -98,6 +107,7 @@ export const caseProps = {
 };
 
 const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
+const useGetCaseUserActionsStatsMock = useGetCaseUserActionsStats as jest.Mock;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
@@ -108,6 +118,7 @@ describe('Case View Page activity tab', () => {
 
   beforeAll(() => {
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
+    useGetCaseUserActionsStatsMock.mockReturnValue({ data: userActionsStats, isLoading: false });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useBulkGetUserProfilesMock.mockReturnValue({ isLoading: false, data: new Map() });
@@ -134,11 +145,11 @@ describe('Case View Page activity tab', () => {
     appMockRender = createAppMockRenderer({ license: platinumLicense });
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-    expect(result.getByTestId('case-view-activity')).toBeTruthy();
-    expect(result.getByTestId('user-actions')).toBeTruthy();
-    expect(result.getByTestId('case-tags')).toBeTruthy();
-    expect(result.getByTestId('connector-edit-header')).toBeTruthy();
-    expect(result.getByTestId('case-view-status-action-button')).toBeTruthy();
+    expect(result.getByTestId('case-view-activity')).toBeInTheDocument();
+    expect(result.getByTestId('user-actions')).toBeInTheDocument();
+    expect(result.getByTestId('case-tags')).toBeInTheDocument();
+    expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
+    expect(result.getByTestId('case-view-status-action-button')).toBeInTheDocument();
     expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
       caseData.id,
       filterActionType,
@@ -155,10 +166,10 @@ describe('Case View Page activity tab', () => {
     });
 
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
-    expect(result.getByTestId('case-view-activity')).toBeTruthy();
-    expect(result.getByTestId('user-actions')).toBeTruthy();
-    expect(result.getByTestId('case-tags')).toBeTruthy();
-    expect(result.getByTestId('connector-edit-header')).toBeTruthy();
+    expect(result.getByTestId('case-view-activity')).toBeInTheDocument();
+    expect(result.getByTestId('user-actions')).toBeInTheDocument();
+    expect(result.getByTestId('case-tags')).toBeInTheDocument();
+    expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(result.queryByTestId('case-view-status-action-button')).not.toBeInTheDocument();
     expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
       caseData.id,
@@ -176,10 +187,10 @@ describe('Case View Page activity tab', () => {
     });
 
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
-    expect(result.getByTestId('case-view-activity')).toBeTruthy();
-    expect(result.getByTestId('user-actions')).toBeTruthy();
-    expect(result.getByTestId('case-tags')).toBeTruthy();
-    expect(result.getByTestId('connector-edit-header')).toBeTruthy();
+    expect(result.getByTestId('case-view-activity')).toBeInTheDocument();
+    expect(result.getByTestId('user-actions')).toBeInTheDocument();
+    expect(result.getByTestId('case-tags')).toBeInTheDocument();
+    expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(result.getByTestId('case-severity-selection')).toBeDisabled();
     expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
       caseData.id,
@@ -197,8 +208,9 @@ describe('Case View Page activity tab', () => {
       isLoading: true,
     });
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
-    expect(result.getByTestId('case-view-loading-content')).toBeTruthy();
-    expect(result.queryByTestId('case-view-activity')).toBeFalsy();
+    expect(result.getByTestId('case-view-activity')).toBeInTheDocument();
+    expect(result.getByTestId('case-view-loading-content')).toBeInTheDocument();
+    expect(result.queryByTestId('user-actions')).not.toBeInTheDocument();
     expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
       caseData.id,
       filterActionType,
@@ -246,6 +258,25 @@ describe('Case View Page activity tab', () => {
       });
     });
 
+    it('should render all filter by default', async () => {
+      appMockRender.render(<CaseViewActivity {...caseProps} />);
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+        caseData.id,
+        filterActionType,
+        sortOrder
+      );
+
+      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-all'));
+
+      await waitFor(() => {
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'all', sortOrder);
+        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
+        expect(screen.getByLabelText(`${userActionsStats.total} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
+        expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`));
+      });
+    });
+
     it('should render comment filter', async () => {
       const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
       expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
@@ -258,10 +289,12 @@ describe('Case View Page activity tab', () => {
 
       await waitFor(() => {
         expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'user', sortOrder);
+        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
+        expect(screen.getByLabelText(`${userActionsStats.totalComments} active filters`));
       });
     });
 
-    it('should render action filter', async () => {
+    it('should render history filter', async () => {
       const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
       expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
         caseData.id,
@@ -269,10 +302,12 @@ describe('Case View Page activity tab', () => {
         sortOrder
       );
 
-      userEvent.click(result.getByTestId('user-actions-filter-activity-button-actions'));
+      userEvent.click(result.getByTestId('user-actions-filter-activity-button-history'));
 
       await waitFor(() => {
         expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'action', sortOrder);
+        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
+        expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} active filters`));
       });
     });
 
@@ -290,6 +325,8 @@ describe('Case View Page activity tab', () => {
 
       await waitFor(() => {
         expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'all', 'desc');
+        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
+        expect(screen.getByLabelText(`${userActionsStats.total} active filters`));
       });
     });
   });

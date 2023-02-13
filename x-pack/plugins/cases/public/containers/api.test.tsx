@@ -16,6 +16,7 @@ import {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   SECURITY_SOLUTION_OWNER,
   MAX_DOCS_PER_PAGE,
+  INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
 } from '../../common/constants';
 
 import {
@@ -36,6 +37,7 @@ import {
   getFeatureIds,
   postComment,
   getCaseConnectors,
+  getCaseUserActionsStats,
 } from './api';
 
 import {
@@ -57,6 +59,7 @@ import {
   caseWithRegisteredAttachments,
   caseUserActionsWithRegisteredAttachmentsSnake,
   basicPushSnake,
+  getCaseUserActionsStatsResponse,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -508,6 +511,35 @@ describe('Cases API', () => {
         abortCtrl.signal
       );
       expect(resp).toEqual(findCaseUserActionsResponse);
+    });
+  });
+
+  describe('getCaseUserActionsStats', () => {
+    const getCaseUserActionsStatsSnake = {
+      total: 20,
+      total_comments: 10,
+      total_other_actions: 10,
+    };
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(getCaseUserActionsStatsSnake);
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await getCaseUserActionsStats(basicCase.id, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL.replace('{case_id}', basicCase.id)}`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return correct response', async () => {
+      const resp = await getCaseUserActionsStats(basicCase.id, abortCtrl.signal);
+      expect(resp).toEqual(getCaseUserActionsStatsResponse);
     });
   });
 

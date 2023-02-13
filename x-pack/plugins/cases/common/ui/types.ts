@@ -31,6 +31,7 @@ import type {
   CommentResponseExternalReferenceType,
   CommentResponseTypePersistableState,
   GetCaseConnectorsResponse,
+  CaseUserActionStatsResponse,
 } from '../api';
 import type { PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
@@ -85,6 +86,7 @@ export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
   userActions: CaseUserActions[];
 };
+export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
 export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
 export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;

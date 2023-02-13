@@ -8,17 +8,19 @@
 import React, { useCallback } from 'react';
 import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
 
+import type { CaseUserActionsStats } from '../../containers/types';
 import * as i18n from './translations';
 import type { FilterType } from './types';
 
 interface FilterActivityProps {
   isLoading?: boolean;
   type: FilterType;
+  userActionsStats?: CaseUserActionsStats;
   onFilterChange: (type: FilterType) => void;
 }
 
 export const FilterActivity = React.memo<FilterActivityProps>(
-  ({ type, onFilterChange, isLoading = false }) => {
+  ({ type, onFilterChange, userActionsStats, isLoading = false }) => {
     const handleFilterChange = useCallback(
       (value: FilterType) => {
         onFilterChange(value);
@@ -33,6 +35,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           grow={false}
           onClick={() => handleFilterChange('all')}
           hasActiveFilters={type === 'all'}
+          numFilters={userActionsStats?.total}
           isLoading={isLoading}
           data-test-subj="user-actions-filter-activity-button-all"
         >
@@ -42,6 +45,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           withNext
           grow={false}
           hasActiveFilters={type === 'user'}
+          numActiveFilters={userActionsStats?.totalComments}
           isLoading={isLoading}
           onClick={() => handleFilterChange('user')}
           data-test-subj="user-actions-filter-activity-button-comments"
@@ -50,11 +54,12 @@ export const FilterActivity = React.memo<FilterActivityProps>(
         </EuiFilterButton>
         <EuiFilterButton
           hasActiveFilters={type === 'action'}
+          numActiveFilters={userActionsStats?.totalOtherActions}
           onClick={() => handleFilterChange('action')}
           isLoading={isLoading}
-          data-test-subj="user-actions-filter-activity-button-actions"
+          data-test-subj="user-actions-filter-activity-button-history"
         >
-          {i18n.ACTIONS}
+          {i18n.HISTORY}
         </EuiFilterButton>
       </EuiFilterGroup>
     );
