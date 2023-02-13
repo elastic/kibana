@@ -103,49 +103,29 @@ export const useLogPositionState = ({
     }
   }, [timeRange.to, throttledPagesAfterEnd, logStreamPageSend]);
 
-  const jumpToTargetPosition = useCallback(
-    (_targetPosition: TimeKey | null) => {
-      logStreamPageSend({
-        type: 'JUMP_TO_TARGET_POSITION',
-        targetPosition: _targetPosition,
-      });
-    },
+  const actions = useMemo(
+    () => ({
+      jumpToTargetPosition: (_targetPosition: TimeKey | null) => {
+        logStreamPageSend({ type: 'JUMP_TO_TARGET_POSITION', targetPosition: _targetPosition });
+      },
+      jumpToTargetPositionTime: (time: number) => {
+        logStreamPageSend({ type: 'JUMP_TO_TARGET_POSITION', targetPosition: { time } });
+      },
+      reportVisiblePositions: (_visiblePositions: VisiblePositions) => {
+        logStreamPageSend({
+          type: 'REPORT_VISIBLE_POSITIONS',
+          visiblePositions: _visiblePositions,
+        });
+      },
+      startLiveStreaming: () => {
+        logStreamPageSend({ type: 'UPDATE_REFRESH_INTERVAL', refreshInterval: { pause: false } });
+      },
+      stopLiveStreaming: () => {
+        logStreamPageSend({ type: 'UPDATE_REFRESH_INTERVAL', refreshInterval: { pause: true } });
+      },
+    }),
     [logStreamPageSend]
   );
-
-  const jumpToTargetPositionTime = useCallback(
-    (time: number) => {
-      logStreamPageSend({
-        type: 'JUMP_TO_TARGET_POSITION',
-        targetPosition: { time },
-      });
-    },
-    [logStreamPageSend]
-  );
-
-  const reportVisiblePositions = useCallback(
-    (_visiblePositions: VisiblePositions) => {
-      logStreamPageSend({
-        type: 'REPORT_VISIBLE_POSITIONS',
-        visiblePositions: _visiblePositions,
-      });
-    },
-    [logStreamPageSend]
-  );
-
-  const startLiveStreaming = useCallback(() => {
-    logStreamPageSend({
-      type: 'UPDATE_REFRESH_INTERVAL',
-      refreshInterval: { pause: false },
-    });
-  }, [logStreamPageSend]);
-
-  const stopLiveStreaming = useCallback(() => {
-    logStreamPageSend({
-      type: 'UPDATE_REFRESH_INTERVAL',
-      refreshInterval: { pause: true },
-    });
-  }, [logStreamPageSend]);
 
   return {
     // position state
@@ -162,11 +142,7 @@ export const useLogPositionState = ({
     visibleTimeInterval,
 
     // actions
-    jumpToTargetPosition,
-    jumpToTargetPositionTime,
-    reportVisiblePositions,
-    startLiveStreaming,
-    stopLiveStreaming,
+    ...actions,
     updateDateRange,
   };
 };
