@@ -21,7 +21,7 @@ export interface ActiveMigrations {
 export interface TypeTransforms {
   /** Derived from the related transforms */
   latestVersion: Record<TransformType, string>;
-  /** List of transforms registered for the type **/
+  /** Ordered list of transforms registered for the type **/
   transforms: Transform[];
 }
 
