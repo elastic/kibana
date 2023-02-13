@@ -11,6 +11,7 @@ import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useCreatePrePackagedRules } from '../../../../detection_engine/rule_management/logic/use_create_pre_packaged_rules';
+import { useIsInstallingPrePackagedRules } from '../../../../detection_engine/rule_management/logic/use_install_pre_packaged_rules';
 import { usePrePackagedRulesStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_rules_status';
 import { affectedJobIds } from '../../callouts/ml_job_compatibility_callout/affected_job_ids';
 import { MlJobUpgradeModal } from '../../modals/ml_job_upgrade_modal';
@@ -27,11 +28,8 @@ interface LoadPrePackagedRulesProps {
 
 export const LoadPrePackagedRules = ({ children }: LoadPrePackagedRulesProps) => {
   const { isFetching: isFetchingPrepackagedStatus } = usePrePackagedRulesStatus();
-  const {
-    createPrePackagedRules,
-    canCreatePrePackagedRules,
-    isLoading: loadingCreatePrePackagedRules,
-  } = useCreatePrePackagedRules();
+  const isInstallingPrebuiltRules = useIsInstallingPrePackagedRules();
+  const { createPrePackagedRules, canCreatePrePackagedRules } = useCreatePrePackagedRules();
 
   const { startTransaction } = useStartTransaction();
   const handleCreatePrePackagedRules = useCallback(async () => {
@@ -63,7 +61,7 @@ export const LoadPrePackagedRules = ({ children }: LoadPrePackagedRulesProps) =>
   return (
     <>
       {children({
-        isLoading: loadingCreatePrePackagedRules,
+        isLoading: isInstallingPrebuiltRules,
         isDisabled,
         onClick: handleInstallPrePackagedRules,
       })}
