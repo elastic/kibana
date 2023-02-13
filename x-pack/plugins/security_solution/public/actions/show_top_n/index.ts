@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createShowTopNAction as createShowTopNCellAction } from './cell_action/show_top_n';
+export { createShowTopNCellAction } from './cell_action/show_top_n';

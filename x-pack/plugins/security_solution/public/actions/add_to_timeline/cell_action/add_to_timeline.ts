@@ -22,7 +22,7 @@ import type { SecurityCellAction } from '../../types';
 
 export const ACTION_ID = 'security_addToTimeline';
 
-export const createAddToTimelineAction = ({
+export const createAddToTimelineCellAction = ({
   store,
   order,
 }: {
@@ -45,13 +45,14 @@ export const createAddToTimelineAction = ({
     getDisplayNameTooltip: () => ADD_TO_TIMELINE,
     isCompatible: async ({ field }) =>
       isInSecurityApp(currentAppId) && fieldHasCellActions(field.name),
-    execute: async ({ field }) => {
+    execute: async ({ field, metadata }) => {
       const dataProviders =
         createDataProviders({
           contextId: TimelineId.active,
           fieldType: field.type,
           values: field.value,
           field: field.name,
+          negate: metadata?.negateFilters === true,
         }) ?? [];
 
       if (dataProviders.length > 0) {

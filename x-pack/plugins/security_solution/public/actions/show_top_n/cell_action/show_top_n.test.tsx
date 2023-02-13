@@ -16,7 +16,7 @@ import {
 } from '../../../common/mock';
 import { mockHistory } from '../../../common/mock/router';
 import { createStore } from '../../../common/store';
-import { createShowTopNAction } from './show_top_n';
+import { createShowTopNCellAction } from './show_top_n';
 import React from 'react';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
@@ -43,15 +43,15 @@ const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObserv
 const element = document.createElement('div');
 document.body.appendChild(element);
 
-describe('createShowTopNAction', () => {
-  const showTopNAction = createShowTopNAction({
+describe('createShowTopNCellAction', () => {
+  const showTopNAction = createShowTopNCellAction({
     store: mockStore,
     history: mockHistory,
     order: 1,
     services: mockServices,
   });
   const context = {
-    field: { name: 'user.name', value: 'the-value', type: 'keyword' },
+    field: { name: 'user.name', value: 'the-value', type: 'keyword', aggregatable: true },
     trigger: { id: 'trigger' },
     extraContentNodeRef: {
       current: element,
@@ -59,6 +59,7 @@ describe('createShowTopNAction', () => {
     nodeRef: {
       current: element,
     },
+    metadata: undefined,
   } as CellActionExecutionContext;
 
   beforeEach(() => {
@@ -88,6 +89,15 @@ describe('createShowTopNAction', () => {
       currentAppId$.next('not security');
       expect(
         await showTopNAction.isCompatible({ ...context, field: { ...context.field, type: 'text' } })
+      ).toEqual(false);
+    });
+
+    it('should return false if field is not aggregatable', async () => {
+      expect(
+        await showTopNAction.isCompatible({
+          ...context,
+          field: { ...context.field, aggregatable: false },
+        })
       ).toEqual(false);
     });
   });

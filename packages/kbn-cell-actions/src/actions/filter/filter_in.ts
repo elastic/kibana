@@ -13,9 +13,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import type { Filter } from '@kbn/es-query';
 import type { CellAction } from '../../types';
-import { createFilter } from './create_filter';
+import { createFilter, isEmptyFilterValue } from './create_filter';
 
 const ID = 'filterIn';
 const ICON = 'plusInCircle';
@@ -43,21 +42,17 @@ export const addFilterIn = ({
   filterManager,
   fieldName,
   value,
-  negate,
 }: {
   filterManager: FilterManager | undefined;
   fieldName: string;
   value: string[] | string | null | undefined;
-  negate?: boolean;
 }) => {
   if (filterManager != null) {
-    const filter = createFilterIn(fieldName, value, negate);
+    const filter = createFilter({
+      key: fieldName,
+      value,
+      negate: isEmptyFilterValue(value),
+    });
     filterManager.addFilters(filter);
   }
 };
-
-const createFilterIn = (
-  key: string,
-  value: string[] | string | null | undefined,
-  negate: boolean = value == null || value.length === 0
-): Filter => createFilter(key, value, negate);

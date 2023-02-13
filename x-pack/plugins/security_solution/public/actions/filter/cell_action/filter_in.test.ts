@@ -14,7 +14,7 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
 import { createStore } from '../../../common/store';
-import { createFilterInAction } from './filter_in';
+import { createFilterInCellAction } from './filter_in';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { SecurityCellActionExecutionContext } from '../../types';
 
@@ -36,11 +36,17 @@ const mockState = {
   },
 };
 
+jest.mock('@kbn/ui-actions-plugin/public', () => ({
+  ...jest.requireActual('@kbn/ui-actions-plugin/public'),
+  addFilterIn: () => {},
+  addFilterOut: () => {},
+}));
+
 const { storage } = createSecuritySolutionStorageMock();
 const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-describe('createFilterInAction', () => {
-  const filterInAction = createFilterInAction({ store: mockStore, order: 1 });
+describe('createFilterInCellAction', () => {
+  const filterInAction = createFilterInCellAction({ store: mockStore, order: 1 });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -99,6 +105,30 @@ describe('createFilterInAction', () => {
         mockState.timeline.timelineById[TimelineId.active].filterManager?.addFilters
       ).toHaveBeenCalled();
       expect(mockFilterManager.addFilters).not.toHaveBeenCalled();
+    });
+
+    describe('should execute correctly when negateFilters is provided', () => {
+      it('if negateFilters is false, negate should be false (do not exclude)', async () => {
+        await filterInAction.execute({
+          ...context,
+          metadata: {
+            negateFilters: false,
+          },
+        });
+        expect(mockFilterManager.addFilters).toHaveBeenCalled();
+        // expect(mockCreateFilter).toBeCalledWith(context.field.name, context.field.value, false);
+      });
+
+      it('if negateFilters is true, negate should be true (exclude)', async () => {
+        await filterInAction.execute({
+          ...context,
+          metadata: {
+            negateFilters: true,
+          },
+        });
+        expect(mockFilterManager.addFilters).toHaveBeenCalled();
+        // expect(mockCreateFilter).toBeCalledWith(context.field.name, context.field.value, true);
+      });
     });
   });
 });

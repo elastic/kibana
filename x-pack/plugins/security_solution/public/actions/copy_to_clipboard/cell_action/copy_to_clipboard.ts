@@ -12,7 +12,11 @@ import type { SecurityCellAction } from '../../types';
 
 const ID = 'security_copyToClipboard';
 
-export const createCopyToClipboardAction = ({ order }: { order?: number }): SecurityCellAction => {
+export const createCopyToClipboardCellAction = ({
+  order,
+}: {
+  order?: number;
+}): SecurityCellAction => {
   const { notifications } = KibanaServices.get();
   const copyToClipboardActionFactory = createCopyToClipboardActionFactory({ notifications });
   return copyToClipboardActionFactory<SecurityCellAction>({

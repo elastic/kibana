@@ -16,7 +16,7 @@ describe('createFilter', () => {
     { caseName: 'string', caseValue: value },
     { caseName: 'array', caseValue: [value] },
   ])('should return filter with $caseName value', ({ caseValue }) => {
-    expect(createFilter(field, caseValue, false)).toEqual({
+    expect(createFilter({ key: field, value: caseValue, negate: false })).toEqual({
       meta: {
         alias: null,
         disabled: false,
@@ -43,7 +43,7 @@ describe('createFilter', () => {
     { caseName: 'string', caseValue: value },
     { caseName: 'array', caseValue: [value] },
   ])('should return negate filter with $caseName value', ({ caseValue }) => {
-    expect(createFilter(field, caseValue, true)).toEqual({
+    expect(createFilter({ key: field, value: caseValue, negate: true })).toEqual({
       meta: {
         alias: null,
         disabled: false,
@@ -72,7 +72,7 @@ describe('createFilter', () => {
     { caseName: 'empty string', caseValue: '' },
     { caseName: 'empty array', caseValue: [] },
   ])('should return exist filter with $caseName value', ({ caseValue }) => {
-    expect(createFilter(field, caseValue, false)).toEqual({
+    expect(createFilter({ key: field, value: caseValue, negate: false })).toEqual({
       query: {
         exists: {
           field,
@@ -95,7 +95,7 @@ describe('createFilter', () => {
     { caseName: 'empty string', caseValue: '' },
     { caseName: 'empty array', caseValue: [] },
   ])('should return negate exist filter with $caseName value', ({ caseValue }) => {
-    expect(createFilter(field, caseValue, true)).toEqual({
+    expect(createFilter({ key: field, value: caseValue, negate: true })).toEqual({
       query: {
         exists: {
           field,

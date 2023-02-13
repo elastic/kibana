@@ -14,7 +14,7 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
 import { createStore } from '../../../common/store';
-import { createFilterOutAction } from './filter_out';
+import { createFilterOutCellAction } from './filter_out';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { SecurityCellActionExecutionContext } from '../../types';
 
@@ -39,8 +39,8 @@ const mockState = {
 const { storage } = createSecuritySolutionStorageMock();
 const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-describe('createFilterOutAction', () => {
-  const filterOutAction = createFilterOutAction({ store: mockStore, order: 1 });
+describe('createFilterOutCellAction', () => {
+  const filterOutAction = createFilterOutCellAction({ store: mockStore, order: 1 });
 
   beforeEach(() => {
     jest.clearAllMocks();

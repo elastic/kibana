@@ -7,13 +7,19 @@
  */
 import type { Filter } from '@kbn/es-query';
 
-export const createFilter = (
-  key: string,
-  value: string[] | string | null | undefined,
-  negate: boolean
-): Filter => {
-  const queryValue =
-    value != null && value.length > 0 ? (Array.isArray(value) ? value[0] : value) : null;
+export const isEmptyFilterValue = (value: string[] | string | null | undefined) =>
+  value == null || value.length === 0;
+
+export const createFilter = ({
+  key,
+  value,
+  negate,
+}: {
+  key: string;
+  value: string[] | string | null | undefined;
+  negate: boolean;
+}): Filter => {
+  const queryValue = !isEmptyFilterValue(value) ? (Array.isArray(value) ? value[0] : value) : null;
   const meta = { alias: null, disabled: false, key, negate };
 
   if (queryValue == null) {

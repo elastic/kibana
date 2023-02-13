@@ -36,12 +36,22 @@ export interface CellActionField {
    * Example: 'My-Laptop'
    */
   value: string | string[] | null | undefined;
+  /**
+   * When true the field supports aggregations.
+   *
+   * It defaults to false.
+   *
+   * You can verify if a field is aggregatable on kibana/management/kibana/dataViews.
+   */
+  aggregatable?: boolean;
 }
 
 export enum CellActionsMode {
   HOVER = 'hover',
   INLINE = 'inline',
 }
+
+type Metadata = Record<string, unknown>;
 
 export interface CellActionsProps {
   /**
@@ -70,11 +80,17 @@ export interface CellActionsProps {
    */
   visibleCellActions?: number;
   /**
+   * List of Actions ids that shouldn't be displayed inside cell actions.
+   */
+  disabledActions?: string[];
+  /**
    * Custom set of properties used by some actions.
    * An action might require a specific set of metadata properties to render.
    * This data is sent directly to actions.
    */
-  metadata?: Record<string, unknown>;
+  metadata?: Metadata;
+
+  className?: string;
 }
 
 export interface CellActionExecutionContext extends ActionExecutionContext {
@@ -92,7 +108,7 @@ export interface CellActionExecutionContext extends ActionExecutionContext {
   /**
    * Extra configurations for actions.
    */
-  metadata?: Record<string, unknown>;
+  metadata: Metadata | undefined;
 }
 
 /**
@@ -109,7 +125,7 @@ export interface CellActionCompatibilityContext<
   /**
    * Extra configurations for actions.
    */
-  metadata?: C['metadata'];
+  metadata: C['metadata'] | undefined;
 }
 
 export interface CellAction<C extends CellActionExecutionContext = CellActionExecutionContext>

@@ -262,7 +262,7 @@ export const FleetAppContext: React.FC<{
                   <KibanaThemeProvider theme$={theme$}>
                     <EuiThemeProvider darkMode={isDarkMode}>
                       <QueryClientProvider client={queryClient}>
-                        <ReactQueryDevtools initialIsOpen={true} />
+                        <ReactQueryDevtools initialIsOpen={false} />
                         <UIExtensionsContext.Provider value={extensions}>
                           <FleetStatusProvider>
                             <Router history={history}>

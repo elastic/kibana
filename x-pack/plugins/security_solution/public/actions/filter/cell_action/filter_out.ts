@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addFilterOut, createFilterOutActionFactory } from '@kbn/cell-actions';
+import { addFilterIn, addFilterOut, createFilterOutActionFactory } from '@kbn/cell-actions';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { fieldHasCellActions } from '../../utils';
 import type { SecurityAppStore } from '../../../common/store';
@@ -16,7 +16,7 @@ import type { SecurityCellAction } from '../../types';
 
 const ID = 'security_filterOut';
 
-export const createFilterOutAction = ({
+export const createFilterOutCellAction = ({
   store,
   order,
 }: {
@@ -36,21 +36,27 @@ export const createFilterOutAction = ({
     id: ID,
     order,
     isCompatible: async ({ field }) => fieldHasCellActions(field.name),
-    execute: async (executionContext) => {
-      const { field, metadata } = executionContext;
+    execute: async ({ field, metadata }) => {
+      // if negateFilters is true we execute filterIn instead to perform the opposite operation
+      const addFilter = metadata?.negateFilters === true ? addFilterIn : addFilterOut;
 
       if (metadata?.scopeId && isTimelineScope(metadata.scopeId)) {
         const timelineFilterManager = getTimelineById(
           store.getState(),
           TimelineId.active
         )?.filterManager;
-        addFilterOut({
+
+        addFilter({
           filterManager: timelineFilterManager,
           fieldName: field.name,
           value: field.value,
         });
       } else {
-        addFilterOut({ filterManager, fieldName: field.name, value: field.value });
+        addFilter({
+          filterManager,
+          fieldName: field.name,
+          value: field.value,
+        });
       }
     },
   });
