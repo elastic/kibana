@@ -36,9 +36,12 @@ describe('Shared exception lists - add single exception item', () => {
       cy.contains('Create exception item').click();
       cy.get('[data-test-subj="fieldAutocompleteComboBox"]').click().type('agent.type{enter}');
       cy.get('[data-test-subj="valuesAutocompleteMatch"]').click();
-      cy.get('[data-test-subj="valuesAutocompleteMatch"]')
-        .click()
-        .type('{downarrow}{enter}{downarrow}{enter}');
+      cy.get('[data-test-subj="valuesAutocompleteMatch"]').click();
+      cy.get('[data-test-subj="valuesAutocompleteMatch"]').click();
+      cy.get('[data-test-subj="valuesAutocompleteMatch"]').click();
+      cy.get('[data-test-subj="valuesAutocompleteMatch"]').type(
+        '{downarrow}{enter}{downarrow}{enter}'
+      );
       cy.contains('[data-test-subj="valuesAutocompleteMatch"]', 'auditbeat');
     });
   });
