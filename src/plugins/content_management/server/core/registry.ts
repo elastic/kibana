@@ -58,6 +58,6 @@ export class ContentRegistry {
   }
 
   isContentRegistered(contentType: string): boolean {
-    return this.contents.has(contentType)
+    return this.contents.has(contentType);
   }
 }
