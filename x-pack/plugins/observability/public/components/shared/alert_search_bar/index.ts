@@ -7,4 +7,3 @@
 
 export { ObservabilityAlertSearchBar } from './alert_search_bar';
 export { ObservabilityAlertSearchbarWithUrlSync } from './alert_search_bar_with_url_sync';
-export { ALERT_STATUS_QUERY } from './constants';

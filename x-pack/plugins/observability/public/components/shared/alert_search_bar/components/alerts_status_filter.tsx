@@ -46,6 +46,3 @@ export function AlertsStatusFilter({ status, onChange }: AlertStatusFilterProps)
     />
   );
 }
-
-// eslint-disable-next-line import/no-default-export
-export default AlertsStatusFilter;
