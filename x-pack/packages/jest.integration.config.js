@@ -6,11 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_integration',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/packages/kbn-ecs-data-quality-dashboard'],
-  setupFilesAfterEnv: ['<rootDir>/x-pack/packages/kbn-ecs-data-quality-dashboard/setup_tests.ts'],
-  testMatch: [
-    '<rootDir>/x-pack/packages/kbn-ecs-data-quality-dashboard/impl/**/*.test.{js,mjs,ts,tsx}',
-  ],
 };
