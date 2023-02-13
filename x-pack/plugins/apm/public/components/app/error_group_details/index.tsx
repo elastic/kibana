@@ -12,7 +12,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
@@ -24,11 +23,7 @@ import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
-import {
-  FETCH_STATUS,
-  isPending,
-  useFetcher,
-} from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { ErrorSampler } from './error_sampler';
@@ -37,13 +32,12 @@ import { TopErroneousTransactions } from './top_erroneous_transactions';
 import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 
-type ErrorDistributionAPIResponse =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
+type ErrorSamplesAPIResponse =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;
 
-const emptyState: ErrorDistributionAPIResponse = {
-  currentPeriod: [],
-  previousPeriod: [],
-  bucketSize: 0,
+const emptyErrorSamples: ErrorSamplesAPIResponse = {
+  errorSampleIds: [],
+  occurrencesCount: 0,
 };
 
 function getShortGroupId(errorGroupId?: string) {
@@ -139,31 +133,33 @@ export function ErrorGroupDetails() {
     ]
   );
 
-  const { data: errorSamplesData, status: errorSamplesFetchStatus } =
-    useFetcher(
-      (callApmApi) => {
-        if (start && end) {
-          return callApmApi(
-            'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples',
-            {
-              params: {
-                path: {
-                  serviceName,
-                  groupId,
-                },
-                query: {
-                  environment,
-                  kuery,
-                  start,
-                  end,
-                },
+  const {
+    data: errorSamplesData = emptyErrorSamples,
+    status: errorSamplesFetchStatus,
+  } = useFetcher(
+    (callApmApi) => {
+      if (start && end) {
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples',
+          {
+            params: {
+              path: {
+                serviceName,
+                groupId,
               },
-            }
-          );
-        }
-      },
-      [environment, kuery, serviceName, start, end, groupId]
-    );
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+              },
+            },
+          }
+        );
+      }
+    },
+    [environment, kuery, serviceName, start, end, groupId]
+  );
 
   const { errorDistributionData, status: errorDistributionStatus } =
     useErrorGroupDistributionFetcher({
@@ -192,21 +188,6 @@ export function ErrorGroupDetails() {
     }
   }, [history, errorId, errorSamplesData, errorSamplesFetchStatus]);
 
-  const loadingDistributionData = isPending(errorDistributionStatus);
-  const loadingErrorSamplesData = isPending(errorSamplesFetchStatus);
-
-  if (loadingDistributionData && loadingErrorSamplesData) {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <EuiLoadingSpinner size="xl" />
-      </div>
-    );
-  }
-
-  if (!errorDistributionData || !errorSamplesData) {
-    return <ErrorGroupHeader groupId={groupId} />;
-  }
-
   // If there are 0 occurrences, show only charts w. empty message
   const showDetails = errorSamplesData.occurrencesCount !== 0;
 
@@ -216,7 +197,7 @@ export function ErrorGroupDetails() {
 
       <ErrorGroupHeader
         groupId={groupId}
-        occurrencesCount={errorSamplesData.occurrencesCount}
+        occurrencesCount={errorSamplesData?.occurrencesCount}
       />
 
       <EuiSpacer size={'m'} />
@@ -225,7 +206,7 @@ export function ErrorGroupDetails() {
           <EuiPanel hasBorder={true}>
             <ErrorDistribution
               fetchStatus={errorDistributionStatus}
-              distribution={showDetails ? errorDistributionData : emptyState}
+              distribution={errorDistributionData}
               title={i18n.translate(
                 'xpack.apm.errorGroupDetails.occurrencesChartLabel',
                 {

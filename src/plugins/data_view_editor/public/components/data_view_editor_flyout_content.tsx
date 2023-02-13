@@ -15,7 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiLink,
 } from '@elastic/eui';
-
+import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
@@ -167,9 +167,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const rollupIndex = useObservable(dataViewEditorService.rollupIndex$);
   const rollupIndicesCapabilities = useObservable(dataViewEditorService.rollupIndicesCaps$, {});
 
-  useEffect(() => {
-    dataViewEditorService.setIndexPattern(title);
-  }, [dataViewEditorService, title]);
+  useDebounce(
+    () => {
+      dataViewEditorService.setIndexPattern(title);
+    },
+    250,
+    [dataViewEditorService, title]
+  );
 
   useEffect(() => {
     dataViewEditorService.setAllowHidden(allowHidden);

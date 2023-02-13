@@ -22,6 +22,8 @@ get:
   parameters:
     - schema:
         type: array
+        items:
+          type: string
       name: agentsIds
       in: query
       required: true
