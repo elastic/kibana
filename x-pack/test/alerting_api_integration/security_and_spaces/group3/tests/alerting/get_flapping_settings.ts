@@ -51,14 +51,16 @@ export default function getFlappingSettingsTests({ getService }: FtrProviderCont
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.enabled).to.eql(DEFAULT_FLAPPING_SETTINGS.enabled);
-              expect(response.body.lookBackWindow).to.eql(DEFAULT_FLAPPING_SETTINGS.lookBackWindow);
-              expect(response.body.statusChangeThreshold).to.eql(
+              expect(response.body.look_back_window).to.eql(
+                DEFAULT_FLAPPING_SETTINGS.lookBackWindow
+              );
+              expect(response.body.status_change_threshold).to.eql(
                 DEFAULT_FLAPPING_SETTINGS.statusChangeThreshold
               );
-              expect(response.body.createdBy).to.be.a('string');
-              expect(response.body.updatedBy).to.be.a('string');
-              expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
-              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+              expect(response.body.created_by).to.be.a('string');
+              expect(response.body.updated_by).to.be.a('string');
+              expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
