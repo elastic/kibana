@@ -35,6 +35,9 @@ export const config: PluginConfigDescriptor = {
       enabled: true,
     },
     enableExperimental: true,
+    developer: {
+      maxAgentPoliciesWithInactivityTimeout: true,
+    },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
