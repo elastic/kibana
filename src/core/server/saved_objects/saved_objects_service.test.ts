@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { setImmediate } from 'timers/promises';
 import { join } from 'path';
 import loadJsonFile from 'load-json-file';
 
@@ -304,7 +305,7 @@ describe('SavedObjectsService', () => {
       expect(KibanaMigratorMock).toHaveBeenCalledWith(expect.objectContaining({ kibanaVersion }));
     });
 
-    it('waits for all es nodes to be compatible before running migrations', async (done) => {
+    it('waits for all es nodes to be compatible before running migrations', async () => {
       expect.assertions(2);
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
@@ -331,7 +332,6 @@ describe('SavedObjectsService', () => {
       });
       setImmediate(() => {
         expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
-        done();
       });
     });
 

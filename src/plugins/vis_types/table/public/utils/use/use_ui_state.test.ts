@@ -95,7 +95,7 @@ describe('useUiState', () => {
 
   describe('updating uiState through callbacks', () => {
     beforeAll(() => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
     });
 
     it('should update the uiState with new sort', async () => {

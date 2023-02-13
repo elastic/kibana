@@ -108,7 +108,7 @@ In order to prevent flakiness in component integration tests, please consider th
 ​
   ```js
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
   ​
   afterAll(() => {

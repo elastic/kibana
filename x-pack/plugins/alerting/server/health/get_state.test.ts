@@ -25,7 +25,7 @@ jest.mock('./get_health', () => ({
   }),
 }));
 
-const tick = () => new Promise((resolve) => setImmediate(resolve));
+const tick = () => new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 
 const getHealthCheckTask = (overrides = {}): ConcreteTaskInstance => ({
   id: 'test',

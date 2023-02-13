@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import HttpProxyAgent from 'http-proxy-agent';
+import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
 import { getProxyAgent, getProxyAgentOptions } from './proxy';

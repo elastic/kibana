@@ -7,7 +7,7 @@
 
 import { debounceAsync } from './validators';
 
-jest.useFakeTimers();
+jest.useFakeTimers('legacy');
 
 describe('debounceAsync', () => {
   let fn: jest.Mock;

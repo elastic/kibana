@@ -247,9 +247,9 @@ describe('PluginsService', () => {
     });
 
     describe('timeout', () => {
-      const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+      const flushPromises = () => new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
       beforeAll(() => {
-        jest.useFakeTimers();
+        jest.useFakeTimers('legacy');
       });
       afterAll(() => {
         jest.useRealTimers();
@@ -329,7 +329,7 @@ describe('PluginsService', () => {
     });
     describe('timeout', () => {
       beforeAll(() => {
-        jest.useFakeTimers();
+        jest.useFakeTimers('legacy');
       });
       afterAll(() => {
         jest.useRealTimers();

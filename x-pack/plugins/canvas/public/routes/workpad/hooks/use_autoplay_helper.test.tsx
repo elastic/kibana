@@ -47,7 +47,7 @@ describe('useAutoplayHelper', () => {
 
     const { rerender } = renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
 
-    jest.runTimersToTime(context.autoplayInterval - 1);
+    jest.advanceTimersByTime(context.autoplayInterval - 1);
 
     context.isAutoplayPaused = true;
 

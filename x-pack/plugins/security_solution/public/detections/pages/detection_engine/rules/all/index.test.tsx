@@ -53,7 +53,7 @@ describe('AllRules', () => {
   const mockRefetchRulesData = jest.fn();
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
 
     mockUseUiSetting$.mockImplementation((key, defaultValue) => {
       const useUiSetting$Mock = createUseUiSetting$Mock();

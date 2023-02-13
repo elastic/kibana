@@ -201,7 +201,7 @@ describe('TelemetrySender', () => {
 
     beforeEach(() => {
       window.fetch = mockFetch = jest.fn();
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
       consoleWarnMock = jest.spyOn(global.console, 'warn').mockImplementation(() => {});
     });
 

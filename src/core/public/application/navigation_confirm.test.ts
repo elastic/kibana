@@ -10,7 +10,7 @@ import { OverlayStart } from '../overlays';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { getUserConfirmationHandler, ConfirmHandler } from './navigation_confirm';
 
-const nextTick = () => new Promise((resolve) => setImmediate(resolve));
+const nextTick = () => new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 
 describe('getUserConfirmationHandler', () => {
   let overlayStart: ReturnType<typeof overlayServiceMock.createStartContract>;

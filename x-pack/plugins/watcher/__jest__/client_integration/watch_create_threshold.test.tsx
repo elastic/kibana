@@ -84,7 +84,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
   let testBed: WatchCreateThresholdTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {
