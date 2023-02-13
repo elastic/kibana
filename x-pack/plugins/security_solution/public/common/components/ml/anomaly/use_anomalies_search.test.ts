@@ -26,6 +26,12 @@ jest.mock('../../ml_popover/hooks/use_security_jobs', () => ({
   useSecurityJobs: () => mockUseSecurityJobs(),
 }));
 
+const spaceId = 'test-space';
+
+jest.mock('../../../hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue(spaceId),
+}));
+
 const mockAddToastError = jest.fn();
 jest.mock('../../../hooks/use_app_toasts', () => ({
   useAppToasts: jest.fn(() => ({
@@ -162,14 +168,41 @@ describe('useNotableAnomaliesSearch', () => {
       await waitForNextUpdate();
 
       const names = result.current.data.map(({ name }) => name);
-      expect(names).toEqual([
-        firstJobSecurityName,
-        secondJobSecurityName,
-        'packetbeat_dns_tunneling',
-        'packetbeat_rare_dns_question',
-        'packetbeat_rare_server_domain',
-        'suspicious_login_activity',
-      ]);
+      expect(names).toEqual([firstJobSecurityName, secondJobSecurityName]);
+    });
+  });
+
+  it('returns jobs installed in a space', async () => {
+    await act(async () => {
+      const spaceJobId = `${spaceId}_v3_windows_anomalous_script`;
+      const jobCount = { key: jobId, doc_count: 99 };
+      const spaceJob = {
+        id: spaceJobId,
+        jobState: 'started',
+        datafeedState: 'started',
+      };
+
+      mockNotableAnomaliesSearch.mockResolvedValue({
+        aggregations: { number_of_anomalies: { buckets: [jobCount] } },
+      });
+
+      mockUseSecurityJobs.mockReturnValue({
+        loading: false,
+        isMlAdmin: true,
+        jobs: [spaceJob],
+        refetch: useSecurityJobsRefetch,
+      });
+
+      const { result, waitForNextUpdate } = renderHook(
+        () => useNotableAnomaliesSearch({ skip: false, from, to }),
+        {
+          wrapper: TestProviders,
+        }
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      expect(result.current.data[0].job).toEqual(spaceJob);
     });
   });
 

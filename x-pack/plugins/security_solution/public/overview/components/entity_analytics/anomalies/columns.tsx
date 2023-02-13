@@ -7,7 +7,7 @@
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
 import * as i18n from './translations';
@@ -45,13 +45,15 @@ export const useAnomaliesColumns = (
         truncateText: true,
         mobileOptions: { show: true },
         'data-test-subj': 'anomalies-table-column-name',
-        render: (jobName, { count, job }) => {
-          if (count > 0 || (job && isJobStarted(job.jobState, job.datafeedState))) {
-            return jobName;
-          } else {
-            return <MediumShadeText>{jobName}</MediumShadeText>;
-          }
-        },
+        render: (jobName, { count, job }) => (
+          <EuiToolTip content={job?.id ?? jobName}>
+            {count > 0 || (job && isJobStarted(job.jobState, job.datafeedState)) ? (
+              <span>{jobName}</span>
+            ) : (
+              <MediumShadeText>{jobName}</MediumShadeText>
+            )}
+          </EuiToolTip>
+        ),
       },
       {
         field: 'count',

@@ -7,7 +7,12 @@
 
 import { useCallback, useState } from 'react';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
+import { useSpaceId } from '../../../hooks/use_space_id';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
+import {
+  installedJobPrefix,
+  uninstalledJobIdToInstalledJobId,
+} from '../../ml/anomaly/use_anomalies_search';
 import { setupMlJob, startDatafeeds, stopDatafeeds } from '../api';
 import type { SecurityJob } from '../types';
 import * as i18n from './translations';
@@ -16,6 +21,7 @@ import * as i18n from './translations';
 export const useEnableDataFeed = () => {
   const { addError } = useAppToasts();
   const [isLoading, setIsLoading] = useState(false);
+  const spaceId = useSpaceId();
 
   const enableDatafeed = useCallback(
     async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
@@ -29,6 +35,7 @@ export const useEnableDataFeed = () => {
             indexPatternName: job.defaultIndexPattern,
             jobIdErrorFilter: [job.id],
             groups: job.groups,
+            prefix: installedJobPrefix(spaceId),
           });
           setIsLoading(false);
         } catch (error) {
@@ -46,14 +53,21 @@ export const useEnableDataFeed = () => {
       if (enable) {
         const startTime = Math.max(latestTimestampMs, maxStartTime);
         try {
-          await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], start: startTime });
+          await startDatafeeds({
+            datafeedIds: [
+              job.isInstalled
+                ? `datafeed-${job.id}` // When the job is installed the job.id already contains the prefix.
+                : `datafeed-${uninstalledJobIdToInstalledJobId(job.id, spaceId)}`,
+            ],
+            start: startTime,
+          });
         } catch (error) {
           track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
           addError(error, { title: i18n.START_JOB_FAILURE });
         }
       } else {
         try {
-          await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`] });
+          await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`] }); // When the job is installed the job.id already contains the prefix.
         } catch (error) {
           track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
           addError(error, { title: i18n.STOP_JOB_FAILURE });
@@ -61,7 +75,7 @@ export const useEnableDataFeed = () => {
       }
       setIsLoading(false);
     },
-    [addError]
+    [addError, spaceId]
   );
 
   return { enableDatafeed, isLoading };

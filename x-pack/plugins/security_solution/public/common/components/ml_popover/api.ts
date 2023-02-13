@@ -84,7 +84,6 @@ export const setupMlJob = async ({
         indexPatternName,
         startDatafeed: false,
         useDedicatedIndex: true,
-        applyToAllSpaces: true,
       }),
       asSystemRequest: true,
     }

@@ -18,6 +18,7 @@ import {
   mockGetModuleResponse,
   mockJobsSummaryResponse,
 } from '../api.mock';
+import type { SecurityJob } from '../types';
 
 // TODO: Expand test coverage
 
@@ -115,8 +116,34 @@ describe('useSecurityJobsHelpers', () => {
         const installedJobs = getInstalledJobs(mockJobsSummaryResponse, moduleJobs, [
           'security_linux_v3',
         ]);
-        const securityJobs = composeModuleAndInstalledJobs(installedJobs, moduleJobs);
+        const securityJobs = composeModuleAndInstalledJobs(
+          installedJobs,
+          moduleJobs,
+          'testSpaceId'
+        );
         expect(securityJobs.length).toEqual(6);
+      });
+
+      test('filters out module job when the job id matches a installed job id (jobs installed before 8.8)', () => {
+        const installedJob = mockJob('test_job');
+        const moduleJob = mockJob('test_job');
+        const securityJobs = composeModuleAndInstalledJobs(
+          [installedJob],
+          [moduleJob],
+          'testSpaceId'
+        );
+        expect(securityJobs.length).toEqual(1);
+      });
+
+      test('filters out module job when the job id matches a installed job id (jobs installed after 8.8)', () => {
+        const installedJob = mockJob('testSpaceId_test_job');
+        const moduleJob = mockJob('test_job');
+        const securityJobs = composeModuleAndInstalledJobs(
+          [installedJob],
+          [moduleJob],
+          'testSpaceId'
+        );
+        expect(securityJobs.length).toEqual(1);
       });
     });
 
@@ -125,10 +152,31 @@ describe('useSecurityJobsHelpers', () => {
         const securityJobs = createSecurityJobs(
           mockJobsSummaryResponse,
           mockGetModuleResponse,
-          checkRecognizerSuccess
+          checkRecognizerSuccess,
+          'testSpaceId'
         );
         expect(securityJobs.length).toEqual(6);
       });
     });
   });
+});
+
+const mockJob = (id: string): SecurityJob => ({
+  moduleId: '',
+  defaultIndexPattern: '',
+  isCompatible: false,
+  isInstalled: false,
+  isElasticJob: false,
+  id,
+  description: '',
+  groups: [],
+  jobState: 'closed',
+  datafeedIndices: [],
+  hasDatafeed: false,
+  datafeedId: '',
+  datafeedState: '',
+  isSingleMetricViewerJob: false,
+  awaitingNodeAssignment: false,
+  jobTags: {},
+  bucketSpanSeconds: 0,
 });

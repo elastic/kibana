@@ -19,6 +19,7 @@ import { getAggregatedAnomaliesQuery } from '../../../../overview/components/ent
 import type { inputsModel } from '../../../store';
 import { useSecurityJobs } from '../../ml_popover/hooks/use_security_jobs';
 import type { SecurityJob } from '../../ml_popover/types';
+import { useSpaceId } from '../../../hooks/use_space_id';
 
 export enum AnomalyEntity {
   User,
@@ -48,6 +49,7 @@ export const useNotableAnomaliesSearch = ({
   refetch: inputsModel.Refetch;
 } => {
   const [data, setData] = useState<AnomaliesCount[]>([]);
+  const spaceId = useSpaceId();
 
   const {
     loading: jobsLoading,
@@ -62,7 +64,7 @@ export const useNotableAnomaliesSearch = ({
 
   const { notableAnomaliesJobs, query } = useMemo(() => {
     const newNotableAnomaliesJobs = securityJobs.filter(({ id }) =>
-      NOTABLE_ANOMALIES_IDS.some((notableJobId) => id === notableJobId)
+      NOTABLE_ANOMALIES_IDS.some((notableJobId) => matchJobId(id, notableJobId, spaceId))
     );
 
     const newQuery = getAggregatedAnomaliesQuery({
@@ -76,7 +78,7 @@ export const useNotableAnomaliesSearch = ({
       query: newQuery,
       notableAnomaliesJobs: newNotableAnomaliesJobs,
     };
-  }, [securityJobs, anomalyScoreThreshold, from, to]);
+  }, [securityJobs, anomalyScoreThreshold, from, to, spaceId]);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -103,7 +105,7 @@ export const useNotableAnomaliesSearch = ({
         if (isSubscribed) {
           setLoading(false);
           const buckets = response.aggregations?.number_of_anomalies.buckets ?? [];
-          setData(formatResultData(buckets, notableAnomaliesJobs));
+          setData(formatResultData(buckets, notableAnomaliesJobs, spaceId));
         }
       } catch (error) {
         if (isSubscribed && error.name !== 'AbortError') {
@@ -119,7 +121,7 @@ export const useNotableAnomaliesSearch = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [skip, isMlUser, addError, query, notableAnomaliesJobs, refetchJobs]);
+  }, [skip, isMlUser, addError, query, notableAnomaliesJobs, refetchJobs, spaceId]);
 
   return { isLoading: loading || jobsLoading, data, refetch: refetchJobs };
 };
@@ -129,21 +131,40 @@ function formatResultData(
     key: string;
     doc_count: number;
   }>,
-  notableAnomaliesJobs: SecurityJob[]
+  notableAnomaliesJobs: SecurityJob[],
+  spaceId: string | undefined
 ): AnomaliesCount[] {
-  const unsortedAnomalies: AnomaliesCount[] = NOTABLE_ANOMALIES_IDS.map((notableJobId) => {
-    const job = notableAnomaliesJobs.find(({ id }) => id === notableJobId);
+  const unsortedAnomalies: AnomaliesCount[] = NOTABLE_ANOMALIES_IDS.flatMap((notableJobId) => {
+    const jobs = notableAnomaliesJobs.filter(({ id }) => matchJobId(id, notableJobId, spaceId));
 
-    const bucket = buckets.find(({ key }) => key === job?.id);
-    const hasUserName = has("entity.hits.hits[0]._source['user.name']", bucket);
+    return jobs.map((job) => {
+      const bucket = buckets.find(({ key }) => key === job?.id);
+      const hasUserName = has("entity.hits.hits[0]._source['user.name']", bucket);
 
-    return {
-      name: job?.customSettings?.security_app_display_name ?? notableJobId,
-      count: bucket?.doc_count ?? 0,
-      entity: hasUserName ? AnomalyEntity.User : AnomalyEntity.Host,
-      job,
-    };
+      return {
+        name: job.customSettings?.security_app_display_name ?? notableJobId,
+        count: bucket?.doc_count ?? 0,
+        entity: hasUserName ? AnomalyEntity.User : AnomalyEntity.Host,
+        job,
+      };
+    });
   });
-
   return sortBy(['name'], unsortedAnomalies);
 }
+
+export const installedJobPrefix = (spaceId: string | undefined) => `${spaceId ?? 'default'}_`;
+
+export const uninstalledJobIdToInstalledJobId = (
+  moduleJobId: string,
+  spaceId: string | undefined
+) => `${installedJobPrefix(spaceId)}${moduleJobId}`;
+
+/**
+ * From version 8.8, jobs installed using security solution have the spaceId in their name.
+ * Jobs installed using security solution on versions older than 8.8 don't have the spaceId in their name.
+ */
+const matchJobId = (
+  jobId: string,
+  notableJobId: NotableAnomaliesJobId,
+  spaceId: string | undefined
+) => jobId === uninstalledJobIdToInstalledJobId(notableJobId, spaceId) || jobId === notableJobId;

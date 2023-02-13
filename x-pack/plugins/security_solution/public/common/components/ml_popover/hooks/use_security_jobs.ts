@@ -20,6 +20,7 @@ import { useMlCapabilities } from '../../ml/hooks/use_ml_capabilities';
 import * as i18n from '../../ml/translations';
 import { getJobsSummary } from '../../ml/api/get_jobs_summary';
 import type { inputsModel } from '../../../store';
+import { useSpaceId } from '../../../hooks/use_space_id';
 
 export interface UseSecurityJobsReturn {
   loading: boolean;
@@ -49,6 +50,7 @@ export const useSecurityJobs = (): UseSecurityJobsReturn => {
   const refetch = useRef<inputsModel.Refetch>(noop);
   const isMlAdmin = hasMlAdminPermissions(mlCapabilities);
   const isLicensed = hasMlLicense(mlCapabilities);
+  const spaceId = useSpaceId();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -71,7 +73,8 @@ export const useSecurityJobs = (): UseSecurityJobsReturn => {
           const compositeSecurityJobs = createSecurityJobs(
             jobSummaryData,
             modulesData,
-            compatibleModules
+            compatibleModules,
+            spaceId
           );
 
           if (isSubscribed) {
@@ -95,7 +98,7 @@ export const useSecurityJobs = (): UseSecurityJobsReturn => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [isMlAdmin, isLicensed, securitySolutionDefaultIndex, addError, http]);
+  }, [isMlAdmin, isLicensed, securitySolutionDefaultIndex, addError, http, spaceId]);
 
   return { isLicensed, isMlAdmin, jobs, loading, refetch: refetch.current };
 };

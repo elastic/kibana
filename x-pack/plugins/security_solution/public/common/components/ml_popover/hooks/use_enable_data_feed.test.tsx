@@ -132,7 +132,7 @@ describe('useSecurityJobsHelpers', () => {
       await result.current.enableDatafeed(JOB, TIMESTAMP, true);
     });
     expect(mockStartDatafeeds).toBeCalledWith({
-      datafeedIds: [`datafeed-undefined`],
+      datafeedIds: [`datafeed-default_undefined`],
       start: new Date('1989-02-21').getTime(),
     });
   });

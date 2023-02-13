@@ -14,6 +14,7 @@ import type {
   SecurityJob,
 } from '../types';
 import { mlModules } from '../ml_modules';
+import { uninstalledJobIdToInstalledJobId } from '../../ml/anomaly/use_anomalies_search';
 
 /**
  * Helper function for converting from ModuleJob -> SecurityJob
@@ -127,13 +128,18 @@ export const getInstalledJobs = (
  */
 export const composeModuleAndInstalledJobs = (
   installedJobs: SecurityJob[],
-  moduleSecurityJobs: SecurityJob[]
+  moduleSecurityJobs: SecurityJob[],
+  spaceId: string | undefined
 ): SecurityJob[] => {
   const installedJobsIds = installedJobs.map((installedJob) => installedJob.id);
 
   return [
     ...installedJobs,
-    ...moduleSecurityJobs.filter((mj) => !installedJobsIds.includes(mj.id)),
+    ...moduleSecurityJobs.filter(
+      (mj) =>
+        !installedJobsIds.includes(mj.id) && // Jobs installed using security solutions on versions older than 8.8 don't have the spaceId in their name.
+        !installedJobsIds.includes(uninstalledJobIdToInstalledJobId(mj.id, spaceId))
+    ),
   ].sort((a, b) => a.id.localeCompare(b.id));
 };
 /**
@@ -147,7 +153,8 @@ export const composeModuleAndInstalledJobs = (
 export const createSecurityJobs = (
   jobSummaryData: MlSummaryJob[],
   modulesData: Module[],
-  compatibleModules: RecognizerModule[]
+  compatibleModules: RecognizerModule[],
+  spaceId: string | undefined
 ): SecurityJob[] => {
   // Create lookup of compatible modules
   const compatibleModuleIds = compatibleModules.map((module) => module.id);
@@ -159,5 +166,5 @@ export const createSecurityJobs = (
   const installedJobs = getInstalledJobs(jobSummaryData, moduleSecurityJobs, compatibleModuleIds);
 
   // Combine installed jobs + moduleSecurityJobs that don't overlap, and sort by name asc
-  return composeModuleAndInstalledJobs(installedJobs, moduleSecurityJobs);
+  return composeModuleAndInstalledJobs(installedJobs, moduleSecurityJobs, spaceId);
 };

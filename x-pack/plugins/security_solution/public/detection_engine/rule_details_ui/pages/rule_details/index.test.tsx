@@ -126,6 +126,7 @@ jest.mock('../../../../common/lib/kibana', () => {
             components: { getLegacyUrlConflict: mockGetLegacyUrlConflict },
             redirectLegacyUrl: mockRedirectLegacyUrl,
           },
+          getActiveSpace: jest.fn().mockResolvedValue('test-space'),
         },
       },
     }),
