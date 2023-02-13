@@ -37,12 +37,12 @@ describe('application-level user messages', () => {
         Object {
           "displayLocations": Array [
             Object {
-              "id": "visualization",
+              "id": "visualizationOnEmbeddable",
             },
           ],
           "fixableInEditor": true,
           "longMessage": "Visualization type not found.",
-          "severity": "warning",
+          "severity": "error",
           "shortMessage": "",
         },
       ]
