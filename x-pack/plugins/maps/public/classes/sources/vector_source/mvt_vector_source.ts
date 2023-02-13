@@ -16,7 +16,8 @@ export interface IMvtVectorSource extends IVectorSource {
   getTileUrl(
     searchFilters: VectorSourceRequestMeta,
     refreshToken: string,
-    hasLabels: boolean
+    hasLabels: boolean,
+    buffer: number
   ): Promise<string>;
 
   /*
