@@ -63,11 +63,11 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
   core.uiSettings.registerGlobal({
     [UI_SETTINGS_CUSTOM_LOGO]: {
       name: i18n.translate('xpack.customBranding.customLogoLabel', {
-        defaultMessage: 'Custom logo',
+        defaultMessage: 'Logo icon',
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.customLogoDescription', {
-        defaultMessage: `Customize Elastic with your organization's logo.  {subscriptionLink}`,
+        defaultMessage: `An image that represents your brand.  {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
@@ -79,11 +79,11 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
     },
     [UI_SETTINGS_CUSTOMIZED_LOGO]: {
       name: i18n.translate('xpack.customBranding.customizedLogoLabel', {
-        defaultMessage: 'Custom logo text',
+        defaultMessage: 'Organization name',
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.customizedLogoDescription', {
-        defaultMessage: `Customize Elastic text with your organization's name.  {subscriptionLink}`,
+        defaultMessage: `An image of your organization's name.  {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
@@ -95,11 +95,11 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
     },
     [UI_SETTINGS_PAGE_TITLE]: {
       name: i18n.translate('xpack.customBranding.pageTitleLabel', {
-        defaultMessage: 'Document title',
+        defaultMessage: 'Page title',
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.pageTitleDescription', {
-        defaultMessage: `Add a custom document title to append to your browser window / tab.  {subscriptionLink}`,
+        defaultMessage: `The text that appears on browser tabs. {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
@@ -115,7 +115,7 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.faviconSVGDescription', {
-        defaultMessage: `Link to a favicon in SVG format.  {subscriptionLink}`,
+        defaultMessage: `An icon to appear on browser tabs.  {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
@@ -131,7 +131,7 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.faviconPNGDescription', {
-        defaultMessage: `Link to a favicon in PNG format. Used as a fallback for browsers that do not support SVG format.  {subscriptionLink}`,
+        defaultMessage: `An icon for use in browsers that don’t support svg.  {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
