@@ -8,6 +8,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 
+import partition from 'lodash/partition';
 import type { Rule } from '../../rule_management/logic/types';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 import { useKibana } from '../../../common/lib/kibana';
@@ -97,13 +98,17 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
       if (activeSpaceId !== '' && memoDataViewId) {
         setDataViewLoading(true);
         const dv = await data.dataViews.get(memoDataViewId);
-        dv.setIndexPattern(
-          dv
-            .getIndexPattern()
-            .split(',')
-            .filter((ip) => !ip.includes('.alerts'))
-            .join(',')
+
+        // the autosuggest api fails if the .alerts index does not exist.
+        // So we need to append '*' char at end of .alerts-security.alerts-{spaceId}
+        // to prevent this from happening.
+        const patternArray = dv.getIndexPattern().split(',');
+        const [patternWithAlerts, patternNoAlerts] = partition(patternArray, (ip) =>
+          ip.includes('.alerts')
         );
+        const newAlertsPatterns = patternWithAlerts.map((ip) => ip.concat('*'));
+        dv.setIndexPattern(newAlertsPatterns.join(',').concat(`,${patternNoAlerts.join(',')}`));
+
         const fieldsWithUnmappedInfo = await data.dataViews.getFieldsForIndexPattern(dv, {
           pattern: '',
           includeUnmapped: true,
