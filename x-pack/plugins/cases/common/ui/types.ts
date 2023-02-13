@@ -30,6 +30,7 @@ import type {
   CommentResponseExternalReferenceType,
   CommentResponseTypePersistableState,
   GetCaseConnectorsResponse,
+  GetCaseUsersResponse,
 } from '../api';
 import type { PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
@@ -87,6 +88,7 @@ export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
 export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
+export type CaseUsers = GetCaseUsersResponse;
 
 export interface ResolvedCase {
   case: Case;
@@ -147,7 +149,7 @@ export enum SortFieldCase {
   title = 'title',
 }
 
-export type ElasticUser = SnakeToCamelCase<User>;
+export type CaseUser = SnakeToCamelCase<User>;
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
