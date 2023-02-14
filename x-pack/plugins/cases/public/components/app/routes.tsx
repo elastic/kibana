@@ -9,6 +9,7 @@ import React, { lazy, Suspense, useCallback } from 'react';
 import { Redirect, Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AllCases } from '../all_cases';
 import { CreateCase } from '../create';
@@ -52,6 +53,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
 
   return (
     <QueryClientProvider client={casesQueryClient}>
+      <ReactQueryDevtools initialIsOpen={false} />
       <Switch>
         <Route strict exact path={basePath}>
           <AllCases />
