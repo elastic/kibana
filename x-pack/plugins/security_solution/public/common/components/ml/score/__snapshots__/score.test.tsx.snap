@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`draggable_score renders correctly against snapshot 1`] = `
-<SecurityCellActions
+<CellActions
   field={
     Object {
       "aggregatable": true,
@@ -11,15 +11,15 @@ exports[`draggable_score renders correctly against snapshot 1`] = `
     }
   }
   mode="hover"
-  triggerId="security-solution-default-cellActions"
+  triggerId="security-default-cellActions"
   visibleCellActions={5}
 >
   17
-</SecurityCellActions>
+</CellActions>
 `;
 
 exports[`draggable_score renders correctly against snapshot when the index is not included 1`] = `
-<SecurityCellActions
+<CellActions
   field={
     Object {
       "aggregatable": true,
@@ -29,9 +29,9 @@ exports[`draggable_score renders correctly against snapshot when the index is no
     }
   }
   mode="hover"
-  triggerId="security-solution-default-cellActions"
+  triggerId="security-default-cellActions"
   visibleCellActions={5}
 >
   17
-</SecurityCellActions>
+</CellActions>
 `;

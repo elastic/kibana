@@ -6,8 +6,6 @@
  */
 
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
-import { Subject } from 'rxjs';
-import { APP_UI_ID } from '../../../../common/constants';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -26,17 +24,7 @@ jest.mock('../show_top_n_component', () => ({
   TopNAction: () => <span>{'TEST COMPONENT'}</span>,
 }));
 
-const currentAppId$ = new Subject<string | undefined>();
-const startServices = createStartServicesMock();
-
-const mockServices = {
-  ...startServices,
-  application: {
-    ...startServices.application,
-    currentAppId$: currentAppId$.asObservable(),
-  },
-};
-
+const mockServices = createStartServicesMock();
 const { storage } = createSecuritySolutionStorageMock();
 const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
@@ -62,7 +50,6 @@ describe('createShowTopNCellActionFactory', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    currentAppId$.next(APP_UI_ID);
   });
 
   it('should return display name', () => {
@@ -78,13 +65,7 @@ describe('createShowTopNCellActionFactory', () => {
       expect(await showTopNAction.isCompatible(context)).toEqual(true);
     });
 
-    it('should return false if not in Security', async () => {
-      currentAppId$.next('not security');
-      expect(await showTopNAction.isCompatible(context)).toEqual(false);
-    });
-
     it('should return false if field type does not support aggregations', async () => {
-      currentAppId$.next('not security');
       expect(
         await showTopNAction.isCompatible({ ...context, field: { ...context.field, type: 'text' } })
       ).toEqual(false);
