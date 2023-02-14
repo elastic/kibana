@@ -49,8 +49,8 @@ export function DiscoverNoResults({
       <EuiCallOut
         title={
           <FormattedMessage
-            id="discover.noResults.searchExamples.noResultsBecauseOfError"
-            defaultMessage="We encountered an error retrieving search results"
+            id="discover.noResults.searchExamples.noResultsErrorTitle"
+            defaultMessage="Unable to retrieve search results"
           />
         }
         color="danger"
