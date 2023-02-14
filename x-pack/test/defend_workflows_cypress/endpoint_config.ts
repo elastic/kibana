@@ -8,7 +8,7 @@
 import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/localhost_services';
 import { FtrConfigProviderContext } from '@kbn/test';
 
-import { DefendWorkflowsCypressMultipassTestRunner } from './runner';
+import { DefendWorkflowsCypressEndpointTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const defendWorkflowsCypressConfig = await readConfigFile(require.resolve('./config.ts'));
@@ -27,6 +27,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         )}`,
       ],
     },
-    testRunner: DefendWorkflowsCypressMultipassTestRunner,
+    testRunner: DefendWorkflowsCypressEndpointTestRunner,
   };
 }

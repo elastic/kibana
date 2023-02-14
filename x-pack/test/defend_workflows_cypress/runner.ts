@@ -8,11 +8,11 @@
 import { resolve } from 'path';
 import Url from 'url';
 import { withProcRunner } from '@kbn/dev-proc-runner';
-
 import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/runtime';
 import { FtrProviderContext } from './ftr_provider_context';
 import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
+import { getLatestAvailableAgentVersion } from './utils';
 
 async function withFleetAgent(
   { getService }: FtrProviderContext,
@@ -20,6 +20,7 @@ async function withFleetAgent(
 ) {
   const log = getService('log');
   const config = getService('config');
+  const kbnClient = getService('kibanaServer');
 
   const elasticUrl = Url.format(config.get('servers.elasticsearch'));
   const kibanaUrl = Url.format(config.get('servers.kibana'));
@@ -32,6 +33,7 @@ async function withFleetAgent(
     kibanaUrl,
     username,
     password,
+    version: await getLatestAvailableAgentVersion(kbnClient),
   });
 
   const fleetManager = new FleetManager(log);
@@ -55,8 +57,8 @@ export async function DefendWorkflowsCypressVisualTestRunner(context: FtrProvide
   await startDefendWorkflowsCypress(context, 'dw:open');
 }
 
-export async function DefendWorkflowsCypressMultipassTestRunner(context: FtrProviderContext) {
-  await withFleetAgent(context, (runnerEnv) => startDefendWorkflowsCypress(context, 'dw:open'));
+export async function DefendWorkflowsCypressEndpointTestRunner(context: FtrProviderContext) {
+  await withFleetAgent(context, () => startDefendWorkflowsCypress(context, 'dw:endpoint:open'));
 }
 
 function startDefendWorkflowsCypress(context: FtrProviderContext, cypressCommand: string) {

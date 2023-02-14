@@ -7,6 +7,7 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 
+// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
   execTimeout: 120000,
@@ -34,7 +35,7 @@ export default defineCypressConfig({
   e2e: {
     baseUrl: 'http://localhost:5620',
     supportFile: 'public/management/cypress/support/e2e.ts',
-    specPattern: 'public/management/cypress/e2e/mocked_data/*.cy.{js,jsx,ts,tsx}',
+    specPattern: 'public/management/cypress/e2e/endpoint/*.cy.{js,jsx,ts,tsx}',
     experimentalRunAllSpecs: true,
   },
 });

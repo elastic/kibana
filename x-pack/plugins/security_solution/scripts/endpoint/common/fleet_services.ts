@@ -225,15 +225,7 @@ export const getAgentVersionMatchingCurrentStack = async (
   kbnClient: KbnClient
 ): Promise<string> => {
   const kbnStatus = await kbnClient.status.get();
-  const agentVersions = await axios
-    .get('https://artifacts-api.elastic.co/v1/versions')
-    .then((response) =>
-      filter(response.data.versions, (versionString) => !versionString.includes('SNAPSHOT'))
-    );
-
-  let version =
-    semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
-    kbnStatus.version.number;
+  let version = kbnStatus.version.number;
 
   // Add `-SNAPSHOT` if version indicates it was from a snapshot or the build hash starts
   // with `xxxxxxxxx` (value that seems to be present when running kibana from source)
