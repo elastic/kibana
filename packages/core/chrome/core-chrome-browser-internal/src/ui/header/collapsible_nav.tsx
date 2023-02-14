@@ -167,7 +167,7 @@ export function CollapsibleNav({
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
             <EuiScreenReaderLive focusRegionOnTextChange>
               {i18n.translate('core.ui.primaryNav.screenReaderAnnouncement', {
-                defaultMessage: '{title} visited',
+                defaultMessage: 'Visit {title} application',
                 values: {
                   title: appId,
                 },
