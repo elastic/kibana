@@ -8,6 +8,7 @@
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 
 import {
   installationStatuses,
@@ -73,12 +74,30 @@ export async function getPackages(
   });
   // get the installed packages
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+  const MAX_PKGS_TO_LOAD_TITLE = 10;
 
-  const uploadedPackagesNotInRegistry = packageSavedObjects.saved_objects
-    .filter((pkg) => !registryItems.some((item) => item.name === pkg.id))
-    .map((pkg) =>
-      createInstallableFrom({ ...pkg.attributes, title: nameAsTitle(pkg.id), id: pkg.id }, pkg)
-    );
+  const packagesNotInRegistry = packageSavedObjects.saved_objects.filter(
+    (pkg) => !registryItems.some((item) => item.name === pkg.id)
+  );
+
+  const uploadedPackagesNotInRegistry = [];
+  for (const [i, pkg] of packagesNotInRegistry.entries()) {
+    let installable;
+    // fetching info of uploaded packages to populate title, description
+    // limit to 10 for performance
+    if (i < MAX_PKGS_TO_LOAD_TITLE) {
+      const packageInfo = await withSpan({ name: 'get-package-info', type: 'package' }, () =>
+        getPackageInfo({ savedObjectsClient, pkgName: pkg.id, pkgVersion: pkg.attributes.version })
+      );
+      installable = createInstallableFrom({ ...packageInfo, id: pkg.id }, pkg);
+    } else {
+      installable = createInstallableFrom(
+        { ...pkg.attributes, title: nameAsTitle(pkg.id), id: pkg.id },
+        pkg
+      );
+    }
+    uploadedPackagesNotInRegistry.push(installable);
+  }
 
   const packageList = registryItems
     .map((item) =>
