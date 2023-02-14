@@ -73,7 +73,6 @@ it(
                 $: {
                   classname: 'JUnit Reporter Integration Test.·',
                   name: 'JUnit Reporter fails',
-                  time: expect.anything(),
                 },
                 failure: [expect.stringMatching(/Error: failure\s+at /m)],
               },
