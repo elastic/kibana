@@ -177,8 +177,8 @@ export function useDiscoverState({
           return;
         }
         savedSearch.searchSource.setField('index', nextDataView);
-        reset();
         stateContainer.actions.setDataView(nextDataView);
+        reset();
       }
 
       if (
@@ -219,6 +219,7 @@ export function useDiscoverState({
   const onChangeDataView = useCallback(
     async (id: string) => {
       const nextDataView = await dataViews.get(id);
+      console.log('#### onChangeDataView', nextDataView.title);
       if (nextDataView && dataView) {
         const nextAppState = getDataViewAppState(
           dataView,
@@ -230,7 +231,7 @@ export function useDiscoverState({
           state.query
         );
         setUrlTracking(nextDataView);
-        stateContainer.setAppState(nextAppState);
+        stateContainer.replaceUrlAppState(nextAppState);
       }
       setExpandedDoc(undefined);
     },

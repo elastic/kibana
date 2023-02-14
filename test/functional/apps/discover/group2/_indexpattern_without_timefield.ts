@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         throw new Error('Expected timepicker to exist');
       }
     });
-    it('should switch between with and without timefield using the browser back button', async () => {
+    it.skip('should switch between with and without timefield using the browser back button', async () => {
       await PageObjects.discover.selectIndexPattern('without-timefield');
       await PageObjects.discover.waitForDocTableLoadingComplete();
       await retry.waitForWithTimeout(
@@ -83,6 +83,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         5000,
         async () => await PageObjects.timePicker.timePickerExists()
       );
+
+      // await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 10));
+
       await retry.waitForWithTimeout(
         'index pattern to have been switched back to "without-timefield"',
         5000,

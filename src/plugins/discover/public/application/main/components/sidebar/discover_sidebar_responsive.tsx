@@ -23,10 +23,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewMissingIndices } from '@kbn/data-views-plugin/common';
 import {
   useExistingFieldsFetcher,
   useQuerySubscriber,
+  loadFieldExisting,
 } from '@kbn/unified-field-list-plugin/public';
+import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverSidebar } from './discover_sidebar';
@@ -48,6 +52,7 @@ import {
 } from './lib/sidebar_reducer';
 
 const EMPTY_FIELD_COUNTS = {};
+const getBuildEsQueryAsync = async () => (await import('@kbn/es-query')).buildEsQuery;
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -136,6 +141,99 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
 
+  const querySubscriberResult = useQuerySubscriber({ data });
+
+  const fetchFields = useCallback(
+    async (dataView: DataView) => {
+      console.log(
+        '*** fetchFields is firing',
+        dataView.getName(),
+        // stateContainer.internalState.get().dataView?.title,
+        querySubscriberResult.fromDate,
+        querySubscriberResult.toDate
+      );
+      // todo share type with loadFieldExisting
+      let existingFieldList: {
+        existingFieldNames: string[];
+        indexPatternTitle: string;
+      } = {
+        existingFieldNames: [],
+        indexPatternTitle: dataView.getIndexPattern(),
+      };
+      try {
+        // making request
+        // todo - I suspect we need to make sure the exlcusion list is applied here
+        existingFieldList = await loadFieldExisting({
+          data,
+          dataView,
+          fromDate: querySubscriberResult.fromDate || '',
+          toDate: querySubscriberResult.toDate || '',
+          // dslQuery: querySubscriberResult.query || {},
+          dslQuery: await buildSafeEsQuery(
+            dataView,
+            querySubscriberResult.query!,
+            querySubscriberResult.filters || [],
+            getEsQueryConfig(core.uiSettings)
+          ),
+          timeFieldName: dataView.timeFieldName,
+          dataViewsService: dataViews,
+          uiSettingsClient: core.uiSettings,
+        });
+      } catch (e) {
+        const isMissingIndices = e instanceof DataViewMissingIndices;
+        if (!isMissingIndices) {
+          throw e;
+        }
+      }
+
+      console.log(
+        '***** existingFieldList',
+        // selectedDataViewRef.current!.title,
+        dataView.title,
+        // stateContainer.internalState.get().dataView?.title,
+        JSON.stringify(existingFieldList)
+      );
+
+      console.log('***** POST FETCH');
+
+      dispatchSidebarStateAction({
+        type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+        payload: {
+          // dataView: selectedDataViewRef.current,
+          dataView,
+          fieldCounts: existingFieldList.existingFieldNames.reduce((collector, fieldName) => {
+            collector[fieldName] = 1;
+            return collector;
+          }, {} as Record<string, number>),
+          isPlainRecord: false,
+        },
+      });
+    },
+    [
+      core.uiSettings,
+      data,
+      dataViews,
+      querySubscriberResult.fromDate,
+      querySubscriberResult.query,
+      querySubscriberResult.toDate,
+      querySubscriberResult.filters,
+    ]
+  );
+
+  const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
+    disableAutoFetching: true,
+    dataViews: !isPlainRecord && sidebarState.dataView ? [sidebarState.dataView] : [],
+    query: querySubscriberResult.query,
+    filters: querySubscriberResult.filters,
+    fromDate: querySubscriberResult.fromDate,
+    toDate: querySubscriberResult.toDate,
+    services: {
+      data,
+      dataViews,
+      core,
+    },
+  });
+
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
       const isPlainRecordType = documentState.recordRawType === RecordRawType.PLAIN;
@@ -150,25 +248,41 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           });
           break;
         case FetchStatus.LOADING:
-          dispatchSidebarStateAction({
-            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
-            payload: {
-              isPlainRecord: isPlainRecordType,
-            },
-          });
+          console.log('*** 2 - FetchStatus.LOADING', sidebarState.status);
+          if (isPlainRecordType) {
+            dispatchSidebarStateAction({
+              type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
+              payload: {
+                isPlainRecord: isPlainRecordType,
+              },
+            });
+          } else {
+            console.log('*** 3 - fetchFields');
+            fetchFields(selectedDataViewRef.current!);
+            // refetchFieldsExistenceInfo();
+            // fetchFields(selectedDataViewR!);
+          }
+
           break;
         case FetchStatus.COMPLETE:
-          dispatchSidebarStateAction({
-            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
-            payload: {
-              dataView: selectedDataViewRef.current,
-              fieldCounts: isPlainRecordType
-                ? EMPTY_FIELD_COUNTS
-                : calcFieldCounts(documentState.result),
-              textBasedQueryColumns: documentState.textBasedQueryColumns,
-              isPlainRecord: isPlainRecordType,
-            },
-          });
+          console.log(
+            '*** FetchStatus.COMPLETE',
+            querySubscriberResult.fromDate,
+            querySubscriberResult.toDate
+          );
+          if (isPlainRecordType) {
+            dispatchSidebarStateAction({
+              type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+              payload: {
+                dataView: selectedDataViewRef.current,
+                fieldCounts: isPlainRecordType
+                  ? EMPTY_FIELD_COUNTS
+                  : calcFieldCounts(documentState.result),
+                textBasedQueryColumns: documentState.textBasedQueryColumns,
+                isPlainRecord: isPlainRecordType,
+              },
+            });
+          }
           break;
         case FetchStatus.ERROR:
           dispatchSidebarStateAction({
@@ -185,7 +299,16 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef]);
+  }, [
+    props.documents$,
+    dispatchSidebarStateAction,
+    selectedDataViewRef,
+    fetchFields,
+    querySubscriberResult.fromDate,
+    querySubscriberResult.toDate,
+    refetchFieldsExistenceInfo,
+    sidebarState.status,
+  ]);
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {
@@ -199,29 +322,17 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     }
   }, [selectedDataView, dispatchSidebarStateAction, selectedDataViewRef]);
 
-  const querySubscriberResult = useQuerySubscriber({ data });
   const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
-  const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
-    disableAutoFetching: true,
-    dataViews: !isPlainRecord && sidebarState.dataView ? [sidebarState.dataView] : [],
-    query: querySubscriberResult.query,
-    filters: querySubscriberResult.filters,
-    fromDate: querySubscriberResult.fromDate,
-    toDate: querySubscriberResult.toDate,
-    services: {
-      data,
-      dataViews,
-      core,
-    },
-  });
 
   useEffect(() => {
+    console.log('*** sidebarState.status', sidebarState.status);
     if (sidebarState.status === DiscoverSidebarReducerStatus.COMPLETED) {
+      console.log('*** 4 - refetchFieldsExistenceInfo');
       refetchFieldsExistenceInfo();
     }
     // refetching only if status changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sidebarState.status]);
+    // // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sidebarState.status, refetchFieldsExistenceInfo]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -408,4 +519,27 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       </EuiShowFor>
     </>
   );
+}
+
+// copied from use_existing_fields.ts
+// Wrapper around buildEsQuery, handling errors (e.g. because a query can't be parsed) by
+// returning a query dsl object not matching anything
+async function buildSafeEsQuery(
+  dataView: DataView,
+  query: Query | AggregateQuery,
+  filters: Filter[],
+  queryConfig: EsQueryConfig
+) {
+  const buildEsQuery = await getBuildEsQueryAsync();
+  try {
+    return buildEsQuery(dataView, query, filters, queryConfig);
+  } catch (e) {
+    return {
+      bool: {
+        must_not: {
+          match_all: {},
+        },
+      },
+    };
+  }
 }
