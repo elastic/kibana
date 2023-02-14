@@ -294,3 +294,127 @@ export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
     defaultMessage: 'Investigate in timeline',
   }
 );
+
+export const TAKE_ACTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.additionalActions.takeAction',
+  {
+    defaultMessage: 'Take actions',
+  }
+);
+
+export const STATS_GROUP_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.alertsCount',
+  {
+    defaultMessage: 'Alerts:',
+  }
+);
+
+export const STATS_GROUP_HOSTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.hostsCount',
+  {
+    defaultMessage: 'Hosts:',
+  }
+);
+
+export const STATS_GROUP_IPS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.ipsCount',
+  {
+    defaultMessage: `IP's:`,
+  }
+);
+
+export const GROUP_ALERTS_SELECTOR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.selectGroup.title',
+  {
+    defaultMessage: `Group alerts by`,
+  }
+);
+
+export const STATS_GROUP_USERS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.usersCount',
+  {
+    defaultMessage: 'Users:',
+  }
+);
+
+export const STATS_GROUP_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.rulesCount',
+  {
+    defaultMessage: 'Rules:',
+  }
+);
+
+export const STATS_GROUP_SEVERITY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity',
+  {
+    defaultMessage: 'Severity:',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_MULTI = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.multi',
+  {
+    defaultMessage: 'Multi',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_LOW = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.low',
+  {
+    defaultMessage: 'Low',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_HIGH = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.high',
+  {
+    defaultMessage: 'High',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_CRITICAL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.critical',
+  {
+    defaultMessage: 'Critical',
+  }
+);
+
+export const STATS_GROUP_SEVERITY_MEDIUM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.medium',
+  {
+    defaultMessage: 'Medium',
+  }
+);
+
+export const ruleName = i18n.translate('xpack.securitySolution.selector.groups.ruleName.label', {
+  defaultMessage: 'Rule name',
+});
+export const userName = i18n.translate('xpack.securitySolution.selector.grouping.userName.label', {
+  defaultMessage: 'User name',
+});
+export const hostName = i18n.translate('xpack.securitySolution.selector.grouping.hostName.label', {
+  defaultMessage: 'Host name',
+});
+export const sourceIP = i18n.translate('xpack.securitySolution.selector.grouping.sourceIP.label', {
+  defaultMessage: 'Source IP',
+});
+export const sourceAddress = i18n.translate(
+  'xpack.securitySolution.selector.groups.sourceAddress.label',
+  {
+    defaultMessage: 'Source address',
+  }
+);
+
+export const destinationAddress = i18n.translate(
+  'xpack.securitySolution.selector.groups.destinationAddress.label',
+  {
+    defaultMessage: 'Destination address',
+  }
+);
+
+export const INSPECT_GROUPING_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionsEngine.grouping.inspectTitle',
+  {
+    defaultMessage: 'Grouping query',
+  }
+);

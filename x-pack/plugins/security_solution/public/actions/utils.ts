@@ -6,6 +6,8 @@
  */
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
+import type { Serializable } from '@kbn/utility-types';
+
 import { APP_UI_ID } from '../../common/constants';
 
 /** all cell actions are disabled for these fields */
@@ -26,4 +28,11 @@ export const isLensEmbeddable = (embeddable: IEmbeddable): embeddable is LensEmb
 
 export const fieldHasCellActions = (field?: string): boolean => {
   return !!field && !FIELDS_WITHOUT_CELL_ACTIONS.includes(field);
+};
+
+export const isCountField = (
+  fieldType: string | undefined,
+  sourceParamType: Serializable | undefined
+) => {
+  return fieldType === 'number' && sourceParamType === 'value_count';
 };

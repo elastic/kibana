@@ -32,6 +32,7 @@ export interface IEnvOptions {
   start: number;
   end: number;
   serviceGroupKuery?: string;
+  kuery?: string;
 }
 
 async function getConnectionData({
@@ -42,6 +43,7 @@ async function getConnectionData({
   start,
   end,
   serviceGroupKuery,
+  kuery,
 }: IEnvOptions) {
   return withApmSpan('get_service_map_connections', async () => {
     const { traceIds } = await getTraceSampleIds({
@@ -52,6 +54,7 @@ async function getConnectionData({
       start,
       end,
       serviceGroupKuery,
+      kuery,
     });
 
     const chunks = chunk(traceIds, config.serviceMapMaxTracesPerRequest);
@@ -114,7 +117,6 @@ export function getServiceMap(
       getServiceStats(options),
       anomaliesPromise,
     ]);
-
     return transformServiceMapResponses({
       ...connectionData,
       services: servicesData,

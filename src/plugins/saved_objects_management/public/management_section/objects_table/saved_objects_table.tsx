@@ -34,6 +34,7 @@ import {
   SavedObjectsExportResultDetails,
   getTagFindReferences,
 } from '../../lib';
+
 import { SavedObjectWithMetadata } from '../../types';
 import {
   SavedObjectsManagementActionServiceStart,
@@ -257,7 +258,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         }
 
         return {
-          savedObjects: resp.savedObjects,
+          savedObjects: resp.saved_objects,
           filteredItemCount: resp.total,
           isSearching: false,
         };

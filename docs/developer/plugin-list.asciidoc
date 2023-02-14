@@ -333,7 +333,8 @@ In general this plugin provides:
 
 
 |{kib-repo}blob/{branch}/src/plugins/unified_histogram/README.md[unifiedHistogram]
-|The unifiedHistogram plugin provides UI components to create a layout including a resizable histogram and a main display.
+|Unified Histogram is a UX Building Block including a layout with a resizable histogram and a main display.
+It manages its own state and data fetching, and can easily be dropped into pages with minimal setup.
 
 
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
@@ -500,6 +501,10 @@ This plugin is currently under active development; do not use.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]
 |Contains the enhancements to the OSS discover app.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/ecs_data_quality_dashboard/README.md[ecsDataQualityDashboard]
+|This plugin implements (server) APIs used to render the content of the Data Quality dashboard.
 
 
 |<<enhanced-embeddables-plugin>>

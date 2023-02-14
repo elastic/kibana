@@ -22,6 +22,7 @@ import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { GetInspectQuery, InspectQuery } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DefaultSort } from './constants';
 import * as i18n from './translations';
@@ -41,12 +42,6 @@ export interface FetchAlertsArgs {
 type AlertRequest = Omit<FetchAlertsArgs, 'featureIds' | 'skip'>;
 
 type Refetch = () => void;
-
-interface InspectQuery {
-  request: string[];
-  response: string[];
-}
-type GetInspectQuery = () => InspectQuery;
 
 export interface FetchAlertResp {
   alerts: EcsFieldsResponse[];
@@ -183,12 +178,12 @@ const useFetchAlerts = ({
               }
             )
             .subscribe({
-              next: (response) => {
+              next: (response: RuleRegistrySearchResponse) => {
                 if (isCompleteResponse(response)) {
                   const { rawResponse } = response;
                   inspectQuery.current = {
-                    request: [],
-                    response: [],
+                    request: response?.inspect?.dsl ?? [],
+                    response: [JSON.stringify(rawResponse)] ?? [],
                   };
                   let totalAlerts = 0;
                   if (rawResponse.hits.total && typeof rawResponse.hits.total === 'number') {

@@ -171,6 +171,13 @@ async function createSetupSideEffects(
   logger.debug('Setting up Fleet enrollment keys');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
 
+  if (appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+    logger.debug('Generating key pair for message signing');
+    await appContextService.getMessageSigningService()?.generateKeyPair();
+  } else {
+    logger.info('No encryption key set, skipping key pair generation for message signing');
+  }
+
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');
     formatNonFatalErrors(nonFatalErrors).forEach((error) => logger.info(JSON.stringify(error)));

@@ -5,69 +5,65 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useMemo, useState } from 'react';
-import { FieldStats, FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
-import moment from 'moment';
+import React, { FC, useMemo } from 'react';
+import {
+  FieldStats,
+  FieldStatsProps,
+  FieldStatsServices,
+} from '@kbn/unified-field-list-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { DataView } from '@kbn/data-plugin/common';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import moment from 'moment';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { getDefaultDatafeedQuery } from '../../jobs/new_job/utils/new_job_utils';
-import { useMlKibana } from '../../contexts/kibana';
-import { JobCreatorContext } from '../../jobs/new_job/pages/components/job_creator_context';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 
-const defaultDatafeedQuery = getDefaultDatafeedQuery();
+const DEFAULT_DSL_QUERY = getDefaultDatafeedQuery();
+const DEFAULT_COLOR = euiPaletteColorBlind()[0];
 
-export const FieldStatsContent: FC = () => {
-  const {
-    services: { uiSettings, data, fieldFormats, charts },
-  } = useMlKibana();
-  const fieldStatsServices: FieldStatsServices = {
-    uiSettings,
-    dataViews: data.dataViews,
-    data,
-    fieldFormats,
-    charts,
-  };
-  const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
+export const FieldStatsContent: FC<{
+  dataView: DataView;
+  fieldStatsServices: FieldStatsServices;
+  timeRangeMs?: TimeRangeMs;
+  dslQuery?: FieldStatsProps['dslQuery'];
+}> = ({ dataView: currentDataView, fieldStatsServices, timeRangeMs, dslQuery }) => {
   const { fieldName } = useFieldStatsFlyoutContext();
 
-  const [start, setStart] = useState(jobCreator.start);
-  const [end, setEnd] = useState(jobCreator.end);
-
-  useEffect(() => {
-    if (jobCreator.start !== start || jobCreator.end !== end) {
-      setStart(jobCreator.start);
-      setEnd(jobCreator.end);
+  // Format timestamp to ISO formatted date strings
+  const timeRange = useMemo(() => {
+    // Use the provided timeRange if available
+    if (timeRangeMs) {
+      return {
+        from: moment(timeRangeMs.from).toISOString(),
+        to: moment(timeRangeMs.to).toISOString(),
+      };
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobCreatorUpdated]);
-
-  // Format timestamp to ISO formatted date strings
-  const timeRange = useMemo(
-    () =>
-      start && end
-        ? { from: moment(start).toISOString(), to: moment(end).toISOString() }
-        : undefined,
-    [start, end]
-  );
+    // If time range is available via jobCreator, use that
+    // else mimic Discover and set timeRange to be now for data view without time field
+    const now = moment();
+    return { from: now.toISOString(), to: now.toISOString() };
+  }, [timeRangeMs]);
 
   const fieldForStats = useMemo(
-    () => (isDefined(fieldName) ? jobCreator.dataView.getFieldByName(fieldName) : undefined),
-    [fieldName, jobCreator.dataView]
+    () => (isDefined(fieldName) ? currentDataView.getFieldByName(fieldName) : undefined),
+    [fieldName, currentDataView]
   );
 
-  const showFieldStats = timeRange && isDefined(jobCreator.dataViewId) && fieldForStats;
+  const showFieldStats = timeRange && isDefined(currentDataView) && fieldForStats;
 
   return showFieldStats ? (
     <FieldStats
       key={fieldForStats.name}
       services={fieldStatsServices}
-      dslQuery={jobCreator.query ?? defaultDatafeedQuery}
+      dslQuery={dslQuery ?? DEFAULT_DSL_QUERY}
       fromDate={timeRange.from}
       toDate={timeRange.to}
-      dataViewOrDataViewId={jobCreator.dataView}
+      dataViewOrDataViewId={currentDataView}
       field={fieldForStats}
       data-test-subj={`jobCreatorFieldStatsPopover ${fieldForStats.name}`}
+      color={DEFAULT_COLOR}
     />
   ) : null;
 };

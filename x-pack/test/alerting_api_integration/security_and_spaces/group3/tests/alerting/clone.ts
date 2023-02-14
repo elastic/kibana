@@ -173,6 +173,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                   },
                   outcome: 'succeeded',
                   outcome_msg: null,
+                  outcome_order: 0,
                   warning: null,
                 },
                 next_run: response.body.next_run,

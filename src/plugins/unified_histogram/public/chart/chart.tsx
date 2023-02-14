@@ -18,12 +18,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
-import { useChartPanels } from './use_chart_panels';
+import { useChartPanels } from './hooks/use_chart_panels';
 import type {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
@@ -36,12 +36,13 @@ import type {
   UnifiedHistogramInputMessage,
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
-import { useTotalHits } from './use_total_hits';
-import { useRequestParams } from './use_request_params';
-import { useChartStyles } from './use_chart_styles';
-import { useChartActions } from './use_chart_actions';
-import { getLensAttributes } from './get_lens_attributes';
-import { useRefetch } from './use_refetch';
+import { useTotalHits } from './hooks/use_total_hits';
+import { useRequestParams } from './hooks/use_request_params';
+import { useChartStyles } from './hooks/use_chart_styles';
+import { useChartActions } from './hooks/use_chart_actions';
+import { getLensAttributes } from './utils/get_lens_attributes';
+import { useRefetch } from './hooks/use_refetch';
+import { useEditVisualization } from './hooks/use_edit_visualization';
 
 export interface ChartProps {
   className?: string;
@@ -60,7 +61,7 @@ export interface ChartProps {
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
-  onEditVisualization?: (lensAttributes: TypedLensByValueInput['attributes']) => void;
+  getRelativeTimeRange?: () => TimeRange;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -90,7 +91,7 @@ export function Chart({
   disableTriggers,
   disabledActions,
   input$: originalInput$,
-  onEditVisualization: originalOnEditVisualization,
+  getRelativeTimeRange: originalGetRelativeTimeRange,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -191,15 +192,17 @@ export function Chart({
     [breakdown?.field, chart?.timeInterval, chart?.title, dataView, filters, query]
   );
 
-  const onEditVisualization = useMemo(
-    () =>
-      originalOnEditVisualization
-        ? () => {
-            originalOnEditVisualization(lensAttributes);
-          }
-        : undefined,
-    [lensAttributes, originalOnEditVisualization]
+  const getRelativeTimeRange = useMemo(
+    () => originalGetRelativeTimeRange ?? (() => relativeTimeRange),
+    [originalGetRelativeTimeRange, relativeTimeRange]
   );
+
+  const onEditVisualization = useEditVisualization({
+    services,
+    dataView,
+    getRelativeTimeRange,
+    lensAttributes,
+  });
 
   return (
     <EuiFlexGroup

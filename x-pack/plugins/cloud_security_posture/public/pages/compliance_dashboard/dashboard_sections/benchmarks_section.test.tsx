@@ -32,15 +32,15 @@ describe('<BenchmarksSection />', () => {
     const mockDashboardDataCopy = getMockDashboardData();
     const clusterMockDataCopy = getClusterMockData();
     clusterMockDataCopy.stats.postureScore = 50;
-    clusterMockDataCopy.meta.clusterId = '1';
+    clusterMockDataCopy.meta.assetIdentifierId = '1';
 
     const clusterMockDataCopy1 = getClusterMockData();
     clusterMockDataCopy1.stats.postureScore = 95;
-    clusterMockDataCopy1.meta.clusterId = '2';
+    clusterMockDataCopy1.meta.assetIdentifierId = '2';
 
     const clusterMockDataCopy2 = getClusterMockData();
     clusterMockDataCopy2.stats.postureScore = 45;
-    clusterMockDataCopy2.meta.clusterId = '3';
+    clusterMockDataCopy2.meta.assetIdentifierId = '3';
 
     mockDashboardDataCopy.clusters = [
       clusterMockDataCopy,

@@ -6,6 +6,8 @@
  */
 
 import { escapeDataProviderId } from '@kbn/securitysolution-t-grid';
+import type { Serializable } from '@kbn/utility-types';
+
 import { isArray, isString, isEmpty } from 'lodash/fp';
 import { INDICATOR_REFERENCE } from '../../../common/cti/constants';
 import type { DataProvider, QueryOperator } from '../../../common/types';
@@ -24,6 +26,7 @@ import {
   REFERENCE_URL_FIELD_NAME,
   EVENT_URL_FIELD_NAME,
 } from '../../timelines/components/timeline/body/renderers/constants';
+import { isCountField } from '../utils';
 
 export const getDataProvider = ({
   field,
@@ -58,6 +61,8 @@ export interface CreateDataProviderParams {
   fieldFormat?: string;
   fieldType?: string;
   values: string | string[] | null | undefined;
+  sourceParamType?: Serializable;
+  negate?: boolean;
 }
 
 export const createDataProviders = ({
@@ -67,6 +72,8 @@ export const createDataProviders = ({
   fieldFormat,
   fieldType,
   values,
+  sourceParamType,
+  negate,
 }: CreateDataProviderParams) => {
   if (field == null) return null;
 
@@ -79,6 +86,14 @@ export const createDataProviders = ({
     }`;
 
     if (fieldType === GEO_FIELD_TYPE || field === MESSAGE_FIELD_NAME) {
+      return dataProviders;
+    }
+
+    if (isCountField(fieldType, sourceParamType)) {
+      id = `value-count-data-provider-${contextId}-${field}`;
+      dataProviders.push(
+        getDataProvider({ field, id, value: '', excluded: false, operator: EXISTS_OPERATOR })
+      );
       return dataProviders;
     }
 
@@ -111,7 +126,7 @@ export const createDataProviders = ({
     }
 
     id = getIdForField({ field, fieldFormat, appendedUniqueId, value });
-    dataProviders.push(getDataProvider({ field, id, value }));
+    dataProviders.push(getDataProvider({ field, id, value, excluded: negate }));
     return dataProviders;
   }, []);
 };

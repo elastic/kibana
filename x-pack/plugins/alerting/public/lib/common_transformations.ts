@@ -63,10 +63,16 @@ function transformMonitoring(input: RuleMonitoring): RuleMonitoring {
 }
 
 function transformLastRun(input: AsApiContract<RuleLastRun>): RuleLastRun {
-  const { outcome_msg: outcomeMsg, alerts_count: alertsCount, ...rest } = input;
+  const {
+    outcome_msg: outcomeMsg,
+    alerts_count: alertsCount,
+    outcome_order: outcomeOrder,
+    ...rest
+  } = input;
   return {
     outcomeMsg,
     alertsCount,
+    outcomeOrder,
     ...rest,
   };
 }

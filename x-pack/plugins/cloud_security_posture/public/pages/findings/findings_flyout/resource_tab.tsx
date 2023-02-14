@@ -92,7 +92,7 @@ export const ResourceTab = ({ data }: { data: CspFinding }) => {
                 listItems={accordion.listItems}
                 type="column"
                 style={{
-                  marginTop: euiTheme.size.l,
+                  paddingTop: euiTheme.size.l,
                 }}
                 titleProps={{ style: { width: '35%' } }}
                 descriptionProps={{ style: { width: '65%' } }}

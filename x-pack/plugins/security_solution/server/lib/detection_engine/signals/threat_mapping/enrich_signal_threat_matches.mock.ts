@@ -15,6 +15,7 @@ export const getNamedQueryMock = (
   index: 'index',
   field: 'field',
   value: 'value',
+  queryType: 'mq',
   ...overrides,
 });
 

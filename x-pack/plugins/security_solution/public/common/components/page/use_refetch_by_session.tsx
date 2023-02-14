@@ -29,6 +29,7 @@ export const useRefetchByRestartingSession = ({
 }: UseRefetchByRestartingSessionProps): {
   session: MutableRefObject<ISessionService>;
   refetchByRestartingSession: Refetch;
+  refetchByDeletingSession: Refetch;
 } => {
   const dispatch = useDispatch();
   const { data } = useKibana().services;
@@ -44,6 +45,7 @@ export const useRefetchByRestartingSession = ({
   );
 
   const refetchByRestartingSession = useCallback(() => {
+    const searchSessionId = session.current.start();
     dispatch(
       inputsActions.setInspectionParameter({
         id: queryId,
@@ -54,13 +56,21 @@ export const useRefetchByRestartingSession = ({
          * like most of our components, it refetches when receiving a new search
          * session ID.
          **/
-        searchSessionId: skip ? undefined : session.current.start(),
+        searchSessionId: skip ? undefined : searchSessionId,
       })
     );
   }, [dispatch, queryId, selectedInspectIndex, skip]);
 
+  /**
+   * This is for refetching alert index when the first rule just created
+   */
+  const refetchByDeletingSession = useCallback(() => {
+    dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id: queryId }));
+  }, [dispatch, queryId]);
+
   return {
     session,
     refetchByRestartingSession,
+    refetchByDeletingSession,
   };
 };

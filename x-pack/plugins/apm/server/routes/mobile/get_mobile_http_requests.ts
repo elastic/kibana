@@ -14,16 +14,21 @@ import {
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
-  SERVICE_TARGET_TYPE,
-  METRICSET_NAME,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
 } from '../../../common/es_fields/apm';
+import {
+  MobileSpanSubtype,
+  MobileSpanType,
+} from '../../../common/mobile/constants';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getBucketSize } from '../../lib/helpers/get_bucket_size';
-import { Coordinate } from '../../../typings/timeseries';
 import { Maybe } from '../../../typings/common';
+
+import { Coordinate } from '../../../typings/timeseries';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface HttpRequestsTimeseries {
   currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
@@ -64,21 +69,21 @@ async function getHttpRequestsTimeseries({
 
   const aggs = {
     requests: {
-      filter: { term: { [SERVICE_TARGET_TYPE]: 'http' } },
+      filter: { term: { [SPAN_SUBTYPE]: MobileSpanSubtype.Http } },
     },
   };
 
   const response = await apmEventClient.search('get_http_requests_chart', {
-    apm: { events: [ProcessorEvent.metric] },
+    apm: { events: [ProcessorEvent.span] },
     body: {
       track_total_hits: false,
       size: 0,
       query: {
         bool: {
           filter: [
-            { exists: { field: SERVICE_TARGET_TYPE } },
-            ...termQuery(METRICSET_NAME, 'service_destination'),
+            ...termQuery(SPAN_TYPE, MobileSpanType.External),
             ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(SPAN_TYPE, 'external'),
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),

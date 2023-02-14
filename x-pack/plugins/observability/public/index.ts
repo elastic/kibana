@@ -27,7 +27,6 @@ export type {
 export {
   enableInspectEsQueries,
   enableComparisonByDefault,
-  enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
   enableInfrastructureHostsView,
   enableAgentExplorerView,

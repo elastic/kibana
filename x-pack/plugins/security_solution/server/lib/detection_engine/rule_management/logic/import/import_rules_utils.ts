@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   ImportExceptionsListSchema,
   ImportExceptionListItemSchema,
@@ -31,6 +31,7 @@ export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {
   rules: PromiseFromStreams[];
   exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
+  actionConnectors: SavedObject[];
 }
 
 /**
@@ -60,6 +61,7 @@ export const importRules = async ({
   exceptionsClient,
   spaceId,
   existingLists,
+  allowMissingConnectorSecrets,
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
@@ -70,6 +72,7 @@ export const importRules = async ({
   exceptionsClient: ExceptionListClient | undefined;
   spaceId: string;
   existingLists: Record<string, ExceptionListSchema>;
+  allowMissingConnectorSecrets?: boolean;
 }) => {
   let importRuleResponse: ImportRuleResponse[] = [...rulesResponseAcc];
 
@@ -118,6 +121,7 @@ export const importRules = async ({
                       ...parsedRule,
                       exceptions_list: [...exceptions],
                     },
+                    allowMissingConnectorSecrets,
                   });
                   resolve({
                     rule_id: parsedRule.rule_id,
@@ -136,6 +140,7 @@ export const importRules = async ({
                       ...parsedRule,
                       exceptions_list: [...exceptions],
                     },
+                    allowMissingConnectorSecrets,
                   });
                   resolve({
                     rule_id: parsedRule.rule_id,

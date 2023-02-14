@@ -158,9 +158,9 @@ If you created the panel from the dashboard:
 
 .. In the panel header, click *No Title*.
 
-.. On the *Customize panel* window, select *Show panel title*.
+.. On the *Panel settings* window, select *Show title*.
 
-.. Enter the *Panel title*, then click *Save*.
+.. Enter the *Title*, then click *Save*.
 
 If you created the panel from the *Visualize Library*:
 
@@ -236,9 +236,9 @@ To save the panel to the dashboard:
 
 .. In the panel header, click *No Title*.
 
-.. On the *Customize panel* window, select *Show panel title*.
+.. On the *Panel settings* window, select *Show title*.
 
-.. Enter the *Panel title*, then click *Save*.
+.. Enter the *Title*, then click *Save*.
 
 [float]
 [[add-image]]
@@ -293,7 +293,7 @@ To make changes to the panel, use the panel menu options.
 +
 To make changes without changing the original version, open the panel menu, then click *More > Unlink from library*.
 
-* *Edit panel title* &mdash; Opens the *Customize panel* window to change the *Panel title*.
+* *Edit panel settings* &mdash; Opens the *Panel settings* window to change the *title*, *description*, and *time range*.
 
 * *More > Replace panel* &mdash; Opens the *Visualize Library* so you can select a new panel to replace the existing panel.
 
@@ -341,9 +341,11 @@ For more information about {kib} and {es} filters, refer to <<kibana-concepts-an
 
 To apply a panel-level time filter:
 
-. Open the panel menu, then select *More > Customize time range*.
+. Open the panel menu, then select *More > Edit panel settings*.
 
-. Enter the time range you want to view, then click *Add to panel*.
+. Toggle the switch labelled *Apply a custom time range*.
+
+. Enter the time range you want to view, then click *Save*.
 
 [float]
 [[apply-design-options]]

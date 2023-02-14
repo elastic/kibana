@@ -577,6 +577,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '_bytes-runtimefield',
           `emit((doc["bytes"].value * 2).toString())`
         );
+
+        await retry.waitFor('form to close', async () => {
+          return !(await testSubjects.exists('fieldEditor'));
+        });
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
@@ -591,6 +596,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.enableCustomLabel();
         await fieldEditor.setCustomLabel('_bytes-runtimefield2');
         await fieldEditor.save();
+
+        await retry.waitFor('form to close', async () => {
+          return !(await testSubjects.exists('fieldEditor'));
+        });
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSidebarHasLoaded();

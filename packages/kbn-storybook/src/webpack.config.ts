@@ -129,7 +129,6 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
       },
-      symlinks: false,
     },
     stats,
   };
@@ -152,9 +151,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       // move the plugins to the top of the preset array so they will run after the typescript preset
       options.presets = [
         require.resolve('@kbn/babel-preset/common_preset'),
-        {
-          plugins: [...plugins, require.resolve('@kbn/babel-plugin-package-imports')],
-        },
+        { plugins },
         ...(options.presets as Preset[]).filter(isDesiredPreset).map((preset) => {
           const tsPreset = getTsPreset(preset);
           if (!tsPreset) {

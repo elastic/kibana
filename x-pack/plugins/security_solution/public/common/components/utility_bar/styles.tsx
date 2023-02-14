@@ -112,9 +112,9 @@ export const BarGroup = styled.div.attrs({
 `;
 BarGroup.displayName = 'BarGroup';
 
-export const BarText = styled.p.attrs({
-  className: 'siemUtilityBar__text',
-})<{ shouldWrap: boolean }>`
+export const BarText = styled.p.attrs(({ className }) => ({
+  className: className || 'siemUtilityBar__text',
+}))<{ shouldWrap: boolean }>`
   ${({ shouldWrap, theme }) => css`
     color: ${theme.eui.euiTextSubduedColor};
     font-size: ${theme.eui.euiFontSizeXS};

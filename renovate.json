@@ -154,6 +154,17 @@
       "enabled": true
     },
     {
+      "groupName": "minify",
+      "packageNames": [
+        "gulp-terser",
+        "terser"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true
+    },
+    {
       "groupName": "@testing-library",
       "packageNames": [
         "@testing-library/dom",

@@ -4,6 +4,7 @@ exports[`draggable_score renders correctly against snapshot 1`] = `
 <CellActions
   field={
     Object {
+      "aggregatable": true,
       "name": "process.name",
       "type": "keyword",
       "value": "du",
@@ -21,6 +22,7 @@ exports[`draggable_score renders correctly against snapshot when the index is no
 <CellActions
   field={
     Object {
+      "aggregatable": true,
       "name": "process.name",
       "type": "keyword",
       "value": "du",

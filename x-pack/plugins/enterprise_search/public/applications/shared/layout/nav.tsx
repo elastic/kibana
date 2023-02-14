@@ -271,17 +271,6 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
                 to: `${enginePath}/${EngineViewTabs.INDICES}`,
               }),
             },
-
-            {
-              id: 'enterpriseSearchEngineDocuments',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.documentsTitle', {
-                defaultMessage: 'Documents',
-              }),
-              ...generateNavLink({
-                shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.DOCUMENTS}`,
-              }),
-            },
             {
               id: 'enterpriseSearchEngineSchema',
               name: i18n.translate('xpack.enterpriseSearch.nav.engine.schemaTitle', {
@@ -292,16 +281,17 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
                 to: `${enginePath}/${EngineViewTabs.SCHEMA}`,
               }),
             },
-            {
-              id: 'enterpriseSearchEnginePreview',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
-                defaultMessage: 'Preview',
-              }),
-              ...generateNavLink({
-                shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
-              }),
-            },
+            // Hidden until Preview page is available
+            // {
+            //   id: 'enterpriseSearchEnginePreview',
+            //   name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
+            //     defaultMessage: 'Preview',
+            //   }),
+            //   ...generateNavLink({
+            //     shouldNotCreateHref: true,
+            //     to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
+            //   }),
+            // },
             {
               id: 'enterpriseSearchEngineAPI',
               name: i18n.translate('xpack.enterpriseSearch.nav.engine.apiTitle', {

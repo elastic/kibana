@@ -142,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
           method: 'post',
           info: 'list export',
           get path() {
-            return `${EXCEPTION_LIST_URL}/_export?list_id=${blocklistData.artifact.list_id}&namespace_type=${blocklistData.artifact.namespace_type}&id=${blocklistData.artifact.id}`;
+            return `${EXCEPTION_LIST_URL}/_export?list_id=${blocklistData.artifact.list_id}&namespace_type=${blocklistData.artifact.namespace_type}&id=${blocklistData.artifact.id}&include_expired_exceptions=true`;
           },
           getBody: () => undefined,
         },

@@ -19,6 +19,7 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
+import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
@@ -107,6 +108,13 @@ export const CreateTransformWizardContext = createContext<{
 
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
   const appDependencies = useAppDependencies();
+  const {
+    ml: { FieldStatsFlyoutProvider },
+    uiSettings,
+    data,
+    fieldFormats,
+    charts,
+  } = appDependencies;
   const { dataView } = searchItems;
 
   // The current WIZARD_STEP
@@ -226,17 +234,35 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     uiSettingsKeys: UI_SETTINGS,
   };
 
+  const fieldStatsServices: FieldStatsServices = useMemo(
+    () => ({
+      uiSettings,
+      dataViews: data.dataViews,
+      data,
+      fieldFormats,
+      charts,
+    }),
+    [uiSettings, data, fieldFormats, charts]
+  );
+
   return (
-    <CreateTransformWizardContext.Provider
-      value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
+    <FieldStatsFlyoutProvider
+      dataView={dataView}
+      fieldStatsServices={fieldStatsServices}
+      timeRangeMs={stepDefineState.timeRangeMs}
+      dslQuery={transformConfig.source.query}
     >
-      <UrlStateProvider>
-        <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
-          <DatePickerContextProvider {...datePickerDeps}>
-            <EuiSteps className="transform__steps" steps={stepsConfig} />
-          </DatePickerContextProvider>
-        </StorageContextProvider>
-      </UrlStateProvider>
-    </CreateTransformWizardContext.Provider>
+      <CreateTransformWizardContext.Provider
+        value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
+      >
+        <UrlStateProvider>
+          <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
+            <DatePickerContextProvider {...datePickerDeps}>
+              <EuiSteps className="transform__steps" steps={stepsConfig} />
+            </DatePickerContextProvider>
+          </StorageContextProvider>
+        </UrlStateProvider>
+      </CreateTransformWizardContext.Provider>
+    </FieldStatsFlyoutProvider>
   );
 });

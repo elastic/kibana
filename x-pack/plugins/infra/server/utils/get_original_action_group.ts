@@ -6,10 +6,11 @@
  */
 
 import { ALERT_ACTION_GROUP } from '@kbn/rule-data-utils';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 
 export const getOriginalActionGroup = (
-  alertHits: Array<{ [id: string]: any }> | null | undefined
+  alertHitSource: Partial<ParsedTechnicalFields & ParsedExperimentalFields> | undefined | null
 ) => {
-  const source = alertHits && alertHits.length > 0 ? alertHits[0]._source : undefined;
-  return source?.[ALERT_ACTION_GROUP];
+  return alertHitSource?.[ALERT_ACTION_GROUP];
 };

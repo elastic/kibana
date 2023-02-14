@@ -24,10 +24,11 @@ import {
   fetchMonitorListEffect,
   upsertMonitorEffect,
 } from './monitor_list';
-import { fetchMonitorOverviewEffect, fetchOverviewStatusEffect } from './overview';
+import { fetchMonitorOverviewEffect } from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
 import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journey';
 import { fetchPingStatusesEffect } from './ping_status';
+import { fetchOverviewStatusEffect } from './overview_status';
 
 export const rootEffect = function* root(): Generator {
   yield all([

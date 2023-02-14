@@ -7,7 +7,7 @@
 
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import { sampleSignalHit } from '../__mocks__/es_results';
-import type { ThreatMatchNamedQuery } from './types';
+import type { ThreatMatchNamedQuery, ThreatTermNamedQuery } from './types';
 
 import {
   buildExecutionIntervalValidator,
@@ -18,6 +18,8 @@ import {
   combineResults,
   decodeThreatMatchNamedQuery,
   encodeThreatMatchNamedQuery,
+  getMatchedFields,
+  getSignalValueMap,
 } from './utils';
 
 describe('utils', () => {
@@ -705,6 +707,7 @@ describe('utils', () => {
           index: 'index',
           field: 'field',
           value: 'value',
+          queryType: 'mq',
         });
 
         expect(typeof encoded).toEqual('string');
@@ -718,6 +721,7 @@ describe('utils', () => {
           index: 'index',
           field: 'threat.indicator.domain',
           value: 'host.name',
+          queryType: 'mq',
         };
 
         const encoded = encodeThreatMatchNamedQuery(query);
@@ -725,6 +729,20 @@ describe('utils', () => {
 
         expect(decoded).not.toBe(query);
         expect(decoded).toEqual(query);
+      });
+
+      it('can decode if some parameters not passed', () => {
+        const query: ThreatTermNamedQuery = {
+          field: 'threat.indicator.domain',
+          value: 'host.name',
+          queryType: 'tq',
+        };
+
+        const encoded = encodeThreatMatchNamedQuery(query);
+        const decoded = decodeThreatMatchNamedQuery(encoded);
+
+        expect(decoded).not.toBe(query);
+        expect(decoded).toEqual({ ...query, id: '', index: '' });
       });
 
       it('raises an error if the input is invalid', () => {
@@ -735,18 +753,33 @@ describe('utils', () => {
         );
       });
 
-      it('raises an error if the query is missing a value', () => {
+      it('raises an error if the query is missing a value for match query', () => {
         const badQuery: ThreatMatchNamedQuery = {
           id: 'my_id',
           index: 'index',
           // @ts-expect-error field intentionally undefined
           field: undefined,
           value: 'host.name',
+          queryType: 'mq',
         };
         const badInput = encodeThreatMatchNamedQuery(badQuery);
 
         expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
-          'Decoded query is invalid. Decoded value: {"id":"my_id","index":"index","field":"","value":"host.name"}'
+          'Decoded query is invalid. Decoded value: {"id":"my_id","index":"index","field":"","value":"host.name","queryType":"mq"}'
+        );
+      });
+
+      it('raises an error if the query is invalid a value for term query', () => {
+        const badQuery: ThreatTermNamedQuery = {
+          // @ts-expect-error field intentionally undefined
+          field: undefined,
+          value: 'host.name',
+          queryType: 'tq',
+        };
+        const badInput = encodeThreatMatchNamedQuery(badQuery);
+
+        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
+          'Decoded query is invalid. Decoded value: {"id":"","index":"","field":"","value":"host.name","queryType":"tq"}'
         );
       });
     });
@@ -771,6 +804,122 @@ describe('utils', () => {
       expect(() => buildExecutionIntervalValidator('badString')).toThrowError(
         'Unable to parse rule interval (badString); stopping rule execution since allotted duration is undefined'
       );
+    });
+  });
+
+  describe('getMatchedFields', () => {
+    it('return empty fields if there no mappings', () => {
+      const fields = getMatchedFields([]);
+      expect(fields).toEqual({
+        source: [],
+        threat: [],
+      });
+    });
+
+    it('return fields for source and threat indecies', () => {
+      const fields = getMatchedFields([
+        {
+          entries: [
+            {
+              field: 'host.name',
+              type: 'mapping',
+              value: 'threat.indicator.host.name',
+            },
+          ],
+        },
+        {
+          entries: [
+            {
+              field: 'source.ip',
+              type: 'mapping',
+              value: 'threat.indicator.source.ip',
+            },
+            {
+              field: 'url.full',
+              type: 'mapping',
+              value: 'threat.indicator.url.full',
+            },
+          ],
+        },
+      ]);
+
+      expect(fields).toEqual({
+        source: ['host.name', 'source.ip', 'url.full'],
+        threat: [
+          'threat.indicator.host.name',
+          'threat.indicator.source.ip',
+          'threat.indicator.url.full',
+        ],
+      });
+    });
+  });
+
+  describe('getSignalValueMap', () => {
+    it('return empty object if there no events', () => {
+      const valueMap = getSignalValueMap({
+        eventList: [],
+        threatMatchedFields: {
+          source: [],
+          threat: [],
+        },
+      });
+      expect(valueMap).toEqual({});
+    });
+
+    it('return empty object if there some events but no fields', () => {
+      const valueMap = getSignalValueMap({
+        eventList: [
+          {
+            _id: '1',
+            _index: 'index-1',
+            fields: {
+              'host.name': ['host-1'],
+            },
+          },
+        ],
+        threatMatchedFields: {
+          source: [],
+          threat: [],
+        },
+      });
+      expect(valueMap).toEqual({});
+    });
+    it('return value map for event list and coresponding fields', () => {
+      const createEvent = (id: string, fields: Record<string, unknown>) => ({
+        _id: id,
+        _index: `index`,
+        fields,
+      });
+      const valueMap = getSignalValueMap({
+        eventList: [
+          createEvent('1', {
+            'host.name': ['host-1'],
+            'source.ip': ['source-1'],
+          }),
+          createEvent('2', {
+            'host.name': ['host-2'],
+            'source.ip': ['source-2'],
+          }),
+          createEvent('3', {
+            'host.name': ['host-1'],
+            'source.ip': ['source-2'],
+          }),
+        ],
+        threatMatchedFields: {
+          source: ['host.name', 'source.ip', 'url.full'],
+          threat: [],
+        },
+      });
+      expect(valueMap).toEqual({
+        'host.name': {
+          'host-1': ['1', '3'],
+          'host-2': ['2'],
+        },
+        'source.ip': {
+          'source-1': ['1'],
+          'source-2': ['2', '3'],
+        },
+      });
     });
   });
 });
