@@ -13,7 +13,7 @@ import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, TOOLTIP_DATE_FORMAT } from './constants';
 import { Alert, ChartThemes } from '../types';
 
-export interface AlertsSummaryWidgetFullSizeProps {
+export interface AlertSummaryWidgetFullSizeProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
   chartThemes: ChartThemes;
@@ -21,13 +21,13 @@ export interface AlertsSummaryWidgetFullSizeProps {
   dateFormat?: string;
 }
 
-export const AlertsSummaryWidgetFullSize = ({
+export const AlertSummaryWidgetFullSize = ({
   activeAlertCount,
   activeAlerts,
   chartThemes: { theme, baseTheme },
   dateFormat,
   recoveredAlertCount,
-}: AlertsSummaryWidgetFullSizeProps) => {
+}: AlertSummaryWidgetFullSizeProps) => {
   const chartTheme = [
     theme,
     {
