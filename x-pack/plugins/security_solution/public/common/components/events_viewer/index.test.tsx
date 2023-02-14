@@ -13,7 +13,7 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 
 import { mockEventViewerResponse } from './mock';
-import { StatefulEventsViewer } from '.';
+import { StatefulEventsViewer, type EventsViewerProps } from '.';
 import { eventsDefaultModel } from './default_model';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import { SourcererScopeName } from '../../store/sourcerer/model';
@@ -21,7 +21,6 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
 import { useTimelineEvents } from './use_timelines_events';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { TableId } from '../../../../common/types';
@@ -63,8 +62,7 @@ const from = '2019-08-27T22:10:56.794Z';
 const to = '2019-08-26T22:10:56.791Z';
 const ACTION_BUTTON_COUNT = 4;
 
-const testProps = {
-  defaultCellActions,
+const testProps: EventsViewerProps = {
   defaultModel: eventsDefaultModel,
   end: to,
   entityType: EntityType.ALERTS,

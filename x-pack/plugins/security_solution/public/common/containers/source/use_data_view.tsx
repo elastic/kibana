@@ -50,7 +50,7 @@ interface DataViewInfo {
  * VERY mutatious on purpose to improve the performance of the transform.
  */
 export const getDataViewStateFromIndexFields = memoizeOne(
-  (_title: string, fields: IndexField[]): DataViewInfo => {
+  (_title: string, fields: IndexField[], _includeUnmapped: boolean = false): DataViewInfo => {
     // Adds two dangerous casts to allow for mutations within this function
     type DangerCastForMutation = Record<string, {}>;
 
@@ -78,7 +78,10 @@ export const getDataViewStateFromIndexFields = memoizeOne(
       }
     );
   },
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
+  (newArgs, lastArgs) =>
+    newArgs[0] === lastArgs[0] &&
+    newArgs[1].length === lastArgs[1].length &&
+    newArgs[2] === lastArgs[2]
 );
 
 export const useDataView = (): {
