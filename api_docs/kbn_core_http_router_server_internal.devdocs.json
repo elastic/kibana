@@ -124,9 +124,10 @@
               "(kibanaResponse: ",
               "KibanaResponse",
               "<any>) => ",
+              "ResponseObject",
+              " | ",
               "Boom",
-              "<any> | ",
-              "ResponseObject"
+              "<any>"
             ],
             "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
             "deprecated": false,
@@ -386,9 +387,9 @@
             "label": "custom",
             "description": [],
             "signature": [
-              "<T extends string | Record<string, any> | Error | ",
+              "<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
-              " | Buffer | { message: string | Error; attributes?: ",
+              " | { message: string | Error; attributes?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",

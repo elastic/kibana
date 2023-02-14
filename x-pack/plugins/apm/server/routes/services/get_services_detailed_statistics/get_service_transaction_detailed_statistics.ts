@@ -13,10 +13,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
+import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { calculateThroughputWithInterval } from '../../../lib/helpers/calculate_throughput';
@@ -137,9 +134,8 @@ export async function getServiceTransactionDetailedStats({
   return keyBy(
     response.aggregations?.sample.services.buckets.map((bucket) => {
       const topTransactionTypeBucket =
-        bucket.transactionType.buckets.find(
-          ({ key }) =>
-            key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
+        bucket.transactionType.buckets.find(({ key }) =>
+          isDefaultTransactionType(key as string)
         ) ?? bucket.transactionType.buckets[0];
 
       return {

@@ -1191,7 +1191,7 @@
                 "path": "src/plugins/kibana_overview/public/application.tsx"
               },
               {
-                "plugin": "core",
+                "plugin": "@kbn/core",
                 "path": "src/core/public/mocks.ts"
               }
             ]
@@ -2014,15 +2014,7 @@
             "section": "def-common.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; tooltip?: string | undefined; searchable?: boolean | undefined; deepLinks?: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppDeepLink",
-            "text": "AppDeepLink"
-          },
-          "[] | undefined; navLinkStatus?: ",
+          " | undefined; tooltip?: string | undefined; navLinkStatus?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2030,7 +2022,15 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; defaultPath?: string | undefined; }"
+          " | undefined; searchable?: boolean | undefined; deepLinks?: ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.AppDeepLink",
+            "text": "AppDeepLink"
+          },
+          "[] | undefined; defaultPath?: string | undefined; }"
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
@@ -2112,7 +2112,7 @@
             "section": "def-common.AppDeepLink",
             "text": "AppDeepLink"
           },
-          ", \"searchable\" | \"keywords\" | \"deepLinks\" | \"navLinkStatus\"> & { deepLinks: ",
+          ", \"keywords\" | \"navLinkStatus\" | \"searchable\" | \"deepLinks\"> & { deepLinks: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2153,7 +2153,7 @@
             "section": "def-common.App",
             "text": "App"
           },
-          "<unknown>, \"searchable\" | \"mount\" | \"updater$\" | \"keywords\" | \"deepLinks\"> & { status: ",
+          "<unknown>, \"keywords\" | \"searchable\" | \"deepLinks\" | \"mount\" | \"updater$\"> & { status: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",

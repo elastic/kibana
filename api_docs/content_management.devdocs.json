@@ -31,9 +31,60 @@
           "path": "src/plugins/content_management/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "contentManagement",
+          "id": "def-public.ContentManagementPublicStart.registry",
+          "type": "Object",
+          "tags": [],
+          "label": "registry",
+          "description": [],
+          "signature": [
+            "{ get: (id: string) => ",
+            "ContentType",
+            " | undefined; getAll: () => ",
+            "ContentType",
+            "[]; }"
+          ],
+          "path": "src/plugins/content_management/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
+      "initialIsOpen": true
+    },
+    "setup": {
+      "parentPluginId": "contentManagement",
+      "id": "def-public.ContentManagementPublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ContentManagementPublicSetup",
+      "description": [],
+      "path": "src/plugins/content_management/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "contentManagement",
+          "id": "def-public.ContentManagementPublicSetup.registry",
+          "type": "Object",
+          "tags": [],
+          "label": "registry",
+          "description": [],
+          "signature": [
+            "{ register: (definition: ",
+            "ContentTypeDefinition",
+            ") => ",
+            "ContentType",
+            "; }"
+          ],
+          "path": "src/plugins/content_management/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
       "initialIsOpen": true
     }
   },
@@ -302,7 +353,7 @@
         "label": "ProcedureName",
         "description": [],
         "signature": [
-          "\"get\" | \"create\""
+          "\"create\" | \"get\""
         ],
         "path": "src/plugins/content_management/common/rpc.ts",
         "deprecated": false,

@@ -21,6 +21,7 @@
   "exclude": [
     "target/**/*",
     "*/plugins/**/*",
+    "plugins/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
