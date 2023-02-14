@@ -83,7 +83,7 @@ export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }
             items={issues}
             columns={columns}
             compressed={true}
-            pagination={true}
+            pagination={issues.length > 10}
             sorting={sorting}
           />
         </>
