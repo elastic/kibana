@@ -44,9 +44,27 @@ declare module 'handlebars' {
   // access the correct types.
   // --------------------------------------------------------
 
+  /**
+   * A {@link https://handlebarsjs.com/api-reference/helpers.html helper-function} type.
+   *
+   * When registering a helper function, it should be of this type.
+   */
   export interface HelperDelegate extends HelperDelegateFixed {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+  /**
+   * A template-function type.
+   *
+   * This type is primarily used for the return value of by calls to
+   * {@link https://handlebarsjs.com/api-reference/compilation.html#handlebars-compile-template-options Handlebars.compile},
+   * Handlebars.compileAST and {@link https://handlebarsjs.com/api-reference/compilation.html#handlebars-precompile-template-options Handlebars.template}.
+   */
   export interface TemplateDelegate<T = any> extends TemplateDelegateFixed<T> {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
+  /**
+   * Register one or more {@link https://handlebarsjs.com/api-reference/runtime.html#handlebars-registerpartial-name-partial partials}.
+   *
+   * @param spec A key/value object where each key is the name of a partial (a string) and each value is the partial (either a string or a partial function).
+   */
   export function registerPartial(spec: Record<string, TemplateFixed>): void; // Ensure `spec` object values can be strings
 }
 
@@ -84,6 +102,9 @@ export interface RuntimeOptions extends Pick<Handlebars.RuntimeOptions, 'data' |
   decorators?: DecoratorsHash;
 }
 
+/**
+ * The last argument being passed to a helper function is a an {@link https://handlebarsjs.com/api-reference/helpers.html#the-options-parameter options object}.
+ */
 export interface HelperOptions extends Omit<Handlebars.HelperOptions, 'fn' | 'inverse'> {
   name: string;
   fn: TemplateDelegateFixed;
@@ -93,6 +114,11 @@ export interface HelperOptions extends Omit<Handlebars.HelperOptions, 'fn' | 'in
 }
 
 // Use the post-fix `Fixed` to allow us to acces it inside the 'handlebars' module declared above
+/**
+ * A {@link https://handlebarsjs.com/api-reference/helpers.html helper-function} type.
+ *
+ * When registering a helper function, it should be of this type.
+ */
 interface HelperDelegateFixed {
   // eslint-disable-next-line @typescript-eslint/prefer-function-type
   (...params: any[]): any;
@@ -100,6 +126,13 @@ interface HelperDelegateFixed {
 export type { HelperDelegateFixed as HelperDelegate };
 
 // Use the post-fix `Fixed` to allow us to acces it inside the 'handlebars' module declared above
+/**
+ * A template-function type.
+ *
+ * This type is primarily used for the return value of by calls to
+ * {@link https://handlebarsjs.com/api-reference/compilation.html#handlebars-compile-template-options Handlebars.compile},
+ * Handlebars.compileAST and {@link https://handlebarsjs.com/api-reference/compilation.html#handlebars-precompile-template-options Handlebars.template}.
+ */
 interface TemplateDelegateFixed<T = any> {
   (context?: T, options?: RuntimeOptions): string; // Override to ensure `context` is optional
   blockParams?: number; // TODO: Can this really be optional?
@@ -113,6 +146,11 @@ export type { TemplateDelegateFixed as TemplateDelegate };
 // actually happening in the upstream code. So here I assume that the docs are
 // wrong and that the upstream code is correct. In reality, `context` is the
 // last 4 documented arguments rolled into one object.
+/**
+ * A {@link https://github.com/handlebars-lang/handlebars.js/blob/master/docs/decorators-api.md decorator-function} type.
+ *
+ * When registering a decorator function, it should be of this type.
+ */
 export type DecoratorDelegate = (
   prog: TemplateDelegateFixed,
   props: Record<string, any>,
