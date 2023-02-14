@@ -84,9 +84,11 @@ export const getIntervalSettings = (uiSettings = true): Policy => {
 export const parseDateWithDefault = (
   dateString: string,
   defaultDate: moment.Moment,
-  roundUp: boolean = false
+  roundUp: boolean = false,
+  momentInstance?: typeof moment,
+  forceNow?: Date
 ): moment.Moment => {
-  const date = dateMath.parse(dateString, { roundUp });
+  const date = dateMath.parse(dateString, { roundUp, momentInstance, forceNow });
   if (date != null && date.isValid()) {
     return date;
   } else {

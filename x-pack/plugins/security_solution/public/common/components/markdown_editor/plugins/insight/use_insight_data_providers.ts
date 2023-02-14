@@ -97,7 +97,6 @@ const buildDataProviders = (
         };
       } else {
         const newProvider = {
-          and: [],
           enabled: true,
           id: JSON.stringify(field + value),
           name: field,
