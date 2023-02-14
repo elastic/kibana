@@ -225,7 +225,7 @@ export function render<ExtraCore>(
         </MockRouter>
       </MountWithReduxProvider>,
       renderOptions
-    ),
+    ) as any,
     history,
   };
 }
