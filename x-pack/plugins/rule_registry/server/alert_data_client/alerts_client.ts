@@ -111,7 +111,6 @@ interface GetAlertParams {
 }
 
 interface GetAlertsCountParams {
-  id?: string;
   featureIds: string[];
   filter?: estypes.QueryDslQueryContainer[];
 }
