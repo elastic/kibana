@@ -176,6 +176,7 @@ export const SlackWebApiParamsFields: React.FunctionComponent<
                 }
               )}
               onChange={onChange}
+              singleSelection={true}
             >
               {(list, search) => (
                 <>

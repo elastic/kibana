@@ -64,10 +64,11 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
       )}
       <HiddenField path={'config.type'} config={{ defaultValue: defaultSlackType }} />
       <EuiSpacer size="m" />
-      /*The components size depends on slack type option we choose. Just putting a limit to form
-      width would change component dehaviour during the sizing. This line make component size to
-      max, so it does not change during sizing, but keep the same behaviour the designer put into
-      it. */
+      {/* The components size depends on slack type option we choose. Just putting a limit to form
+          width would change component dehaviour during the sizing. This line make component size to
+          max, so it does not change during sizing, but keep the same behaviour the designer put into
+          it.
+      */}
       <div style={{ width: '100vw', height: 0 }} />
       {selectedSlackType === 'webhook' ? (
         <SlackWebhookActionFields
