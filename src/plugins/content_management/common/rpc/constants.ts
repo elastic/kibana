@@ -6,16 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { PLUGIN_ID, API_ENDPOINT } from './constants';
+export const procedureNames = ['get', 'create', 'update', 'delete', 'search'] as const;
 
-export type {
-  ProcedureSchemas,
-  ProcedureName,
-  GetIn,
-  CreateIn,
-  UpdateIn,
-  DeleteIn,
-  SearchIn,
-} from './rpc';
-
-export { procedureNames, schemas as rpcSchemas } from './rpc';
+export type ProcedureName = typeof procedureNames[number];
