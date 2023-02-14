@@ -165,7 +165,7 @@ export const useWithArtifactListData = (
   return useMemo(
     () => ({
       isPageInitializing,
-      doesDataExist: doesDataExist ?? true,
+      doesDataExist: doesDataExist ?? false,
       uiPagination,
       ...listDataRequest,
     }),
