@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Status } from '../../../../../common/types/api';
+
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import {
   FetchAnalyticsCollectionDataViewIdAPILogic,
@@ -22,6 +24,8 @@ export interface AnalyticsCollectionDataViewIdValues {
   data: typeof FetchAnalyticsCollectionDataViewIdAPILogic.values.data;
 
   dataViewId: string | null;
+
+  status: Status;
 }
 
 export const AnalyticsCollectionDataViewIdLogic = kea<
