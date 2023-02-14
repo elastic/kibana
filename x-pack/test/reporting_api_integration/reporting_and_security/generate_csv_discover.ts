@@ -18,6 +18,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esVersion = getService('esVersion');
 
   describe('Generate CSV from SearchSource', function () {
+    // Failing ES 8.X forward compatibility: https://github.com/elastic/kibana/issues/151229
+    this.onlyEsVersion('<=7');
     let csvFile: string;
 
     before(async () => {
