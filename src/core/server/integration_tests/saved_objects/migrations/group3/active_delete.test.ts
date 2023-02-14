@@ -16,9 +16,9 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { getKibanaMigratorTestKit } from './kibana_migrator_test_kit';
+import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
 import { baselineDocuments, baselineTypes } from './active_delete.fixtures';
-import { delay } from './test_utils';
+import { delay } from '../test_utils';
 
 const kibanaIndex = '.kibana_migrator_tests';
 export const logFilePath = Path.join(__dirname, 'active_delete.test.log');
