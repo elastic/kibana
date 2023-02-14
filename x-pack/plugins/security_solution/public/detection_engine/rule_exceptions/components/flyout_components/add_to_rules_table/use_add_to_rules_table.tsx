@@ -36,7 +36,10 @@ export const useAddToRulesTable = ({
       tags: [],
     },
     sortingOptions: undefined,
-    pagination: undefined,
+    pagination: {
+      page: 1,
+      perPage: 10000,
+    },
   });
 
   const [pagination, setPagination] = useState({
