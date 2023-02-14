@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import {
   LogMeta,
   SavedObjectMigrationContext,
@@ -13,16 +14,18 @@ import {
   SavedObjectsUtils,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
+import { RuleTaskState } from '@kbn/alerting-plugin/common';
+import { TrackedLifecycleAlertState } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_executor';
 import { REMOVED_TYPES } from '../task_type_dictionary';
-import { ConcreteTaskInstance, TaskStatus } from '../task';
+import { SerializedConcreteTaskInstance, TaskStatus } from '../task';
 
 interface TaskInstanceLogMeta extends LogMeta {
-  migrations: { taskInstanceDocument: SavedObjectUnsanitizedDoc<ConcreteTaskInstance> };
+  migrations: { taskInstanceDocument: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> };
 }
 
 type TaskInstanceMigration = (
-  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
-) => SavedObjectUnsanitizedDoc<ConcreteTaskInstance>;
+  doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>
+) => SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>;
 
 export function getMigrations(): SavedObjectMigrationMap {
   return {
@@ -43,15 +46,19 @@ export function getMigrations(): SavedObjectMigrationMap {
       '8.2.0'
     ),
     '8.5.0': executeMigrationWithErrorHandling(pipeMigrations(addEnabledField), '8.5.0'),
+    '8.8.0': executeMigrationWithErrorHandling(pipeMigrations(addAlertUUID), '8.8.0'),
   };
 }
 
 function executeMigrationWithErrorHandling(
-  migrationFunc: SavedObjectMigrationFn<ConcreteTaskInstance, ConcreteTaskInstance>,
+  migrationFunc: SavedObjectMigrationFn<
+    SerializedConcreteTaskInstance,
+    SerializedConcreteTaskInstance
+  >,
   version: string
 ) {
   return (
-    doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>,
+    doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -71,8 +78,8 @@ function executeMigrationWithErrorHandling(
 }
 
 function alertingTaskLegacyIdToSavedObjectIds(
-  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
-): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
+  doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> {
   if (doc.attributes.taskType.startsWith('alerting:')) {
     let params: { spaceId?: string; alertId?: string } = {};
     params = JSON.parse(doc.attributes.params as unknown as string);
@@ -97,8 +104,8 @@ function alertingTaskLegacyIdToSavedObjectIds(
 }
 
 function actionsTasksLegacyIdToSavedObjectIds(
-  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
-): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
+  doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> {
   if (doc.attributes.taskType.startsWith('actions:')) {
     let params: { spaceId?: string; actionTaskParamsId?: string } = {};
     params = JSON.parse(doc.attributes.params as unknown as string);
@@ -129,7 +136,7 @@ function actionsTasksLegacyIdToSavedObjectIds(
 function moveIntervalIntoSchedule({
   attributes: { interval, ...attributes },
   ...doc
-}: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
+}: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>): SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> {
   return {
     ...doc,
     attributes: {
@@ -146,8 +153,8 @@ function moveIntervalIntoSchedule({
 }
 
 function resetUnrecognizedStatus(
-  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
-): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
+  doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> {
   const status = doc?.attributes?.status;
   if (status && status === 'unrecognized') {
     const taskType = doc.attributes.taskType;
@@ -162,20 +169,20 @@ function resetUnrecognizedStatus(
         ...doc.attributes,
         status: 'idle',
       },
-    } as SavedObjectUnsanitizedDoc<ConcreteTaskInstance>;
+    } as SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>;
   }
 
   return doc;
 }
 
 function pipeMigrations(...migrations: TaskInstanceMigration[]): TaskInstanceMigration {
-  return (doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>) =>
+  return (doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>) =>
     migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
 }
 
 function resetAttemptsAndStatusForTheTasksWithoutSchedule(
-  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
-): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
+  doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> {
   if (doc.attributes.taskType.startsWith('alerting:')) {
     if (
       !doc.attributes.schedule?.interval &&
@@ -195,7 +202,7 @@ function resetAttemptsAndStatusForTheTasksWithoutSchedule(
   return doc;
 }
 
-function addEnabledField(doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>) {
+function addEnabledField(doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>) {
   if (
     doc.attributes.status === TaskStatus.Failed ||
     doc.attributes.status === TaskStatus.Unrecognized
@@ -210,4 +217,64 @@ function addEnabledField(doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>) {
       enabled: true,
     },
   };
+}
+
+function addAlertUUID(doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>) {
+  if (!doc.attributes.taskType.startsWith('alerting:')) return doc;
+  if (!doc.attributes.state) return doc;
+
+  const ruleState: RuleTaskState = JSON.parse(doc.attributes.state);
+  if (!ruleState) return doc;
+
+  const trackedAlerts = getTrackedAlerts(ruleState.alertTypeState);
+
+  const alertUUIDs = new Map<string, string>();
+  addAlertUUIDs(ruleState.alertInstances, trackedAlerts, alertUUIDs);
+  addAlertUUIDs(ruleState.alertRecoveredInstances, trackedAlerts, alertUUIDs);
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      state: JSON.stringify(ruleState),
+    },
+  };
+}
+
+function getTrackedAlerts(
+  trAlerts?: Record<string, unknown>
+): Map<string, TrackedLifecycleAlertState> {
+  const result = new Map<string, TrackedLifecycleAlertState>();
+  if (!trAlerts) return result;
+
+  for (const id of Object.keys(trAlerts)) {
+    result.set(id, trAlerts[id] as unknown as TrackedLifecycleAlertState);
+  }
+  return result;
+}
+
+// mutates alerts passed in
+function addAlertUUIDs(
+  alerts: RuleTaskState['alertInstances'] | undefined,
+  trackedAlerts: Map<string, TrackedLifecycleAlertState>,
+  alertUUIDs: Map<string, string>
+): void {
+  if (!alerts) return;
+
+  for (const id of Object.keys(alerts)) {
+    const alert = alerts[id];
+    if (!alert.meta) alert.meta = {};
+
+    const trackedAlert = trackedAlerts.get(id);
+    const recentUUID = alertUUIDs.get(id);
+    if (trackedAlert?.alertUuid) {
+      alert.meta.uuid = trackedAlert.alertUuid;
+    } else if (recentUUID) {
+      alert.meta.uuid = recentUUID;
+    } else {
+      alert.meta.uuid = uuidv4();
+    }
+
+    alertUUIDs.set(id, alert.meta.uuid);
+  }
 }

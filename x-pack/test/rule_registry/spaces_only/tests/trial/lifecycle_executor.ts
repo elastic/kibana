@@ -192,6 +192,11 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
           alertFactory: getMockAlertFactory(),
           shouldWriteAlerts: sinon.stub().returns(true),
         },
+        flappingSettings: {
+          enabled: false,
+          lookBackWindow: 20,
+          statusChangeThreshold: 4,
+        },
       } as unknown as RuleExecutorOptions<
         MockRuleParams,
         WrappedLifecycleRuleState<MockRuleState>,

@@ -196,8 +196,14 @@ export const createLifecycleExecutor =
       },
       getAlertStartedDate: (alertId: string) => state.trackedAlerts[alertId]?.started ?? null,
       getAlertUuid: (alertId: string) => {
-        if (state.trackedAlerts[alertId]) {
-          return state.trackedAlerts[alertId].alertUuid;
+        const trackedAlert = state.trackedAlerts[alertId];
+        if (trackedAlert) {
+          return trackedAlert.alertUuid;
+        }
+
+        const uuid = alertUuidMap.get(alertId);
+        if (uuid) {
+          return uuid;
         }
 
         logger.warn(
