@@ -67,7 +67,7 @@ export async function loadDataView(
   let fetchedDataView: DataView | undefined;
   // try to fetch adhoc data view first
   try {
-    fetchedDataView = fetchId ? await dataViews.get(fetchId) : undefined;
+    fetchedDataView = fetchId ? await dataViews.get(fetchId, false) : undefined;
     if (fetchedDataView && !fetchedDataView.isPersisted()) {
       return {
         list: dataViewList || [],
@@ -88,7 +88,7 @@ export async function loadDataView(
     loaded: fetchedDataView
       ? fetchedDataView
       : // we can be certain that the data view exists due to an earlier hasData check
-        ((await dataViews.getDefaultDataView()) as DataView),
+        ((await dataViews.getDefaultDataView(false, false)) as DataView),
     stateVal: fetchId,
     stateValFound: !!fetchId && !!fetchedDataView,
   };

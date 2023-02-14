@@ -2310,7 +2310,6 @@
     "discover.localMenu.shareTitle": "共享",
     "discover.noMatchRoute.bannerTitleText": "未找到页面",
     "discover.noResults.noDocumentsOrCheckPermissionsDescription": "确保您有权查看索引并且它们包含文档。",
-    "discover.noResults.searchExamples.noResultsBecauseOfError": "检索搜索结果时遇到问题",
     "discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle": "没有任何结果匹配您的搜索条件",
     "discover.noResultsFound": "找不到结果",
     "discover.notifications.invalidTimeRangeText": "提供的时间范围无效。（自：“{from}”，至：“{to}”）",

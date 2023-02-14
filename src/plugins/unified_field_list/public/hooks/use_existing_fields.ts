@@ -106,7 +106,7 @@ export const useExistingFieldsFetcher = (
       }
 
       const numberOfFetches = (currentInfo?.numberOfFetches ?? 0) + 1;
-      const dataView = await dataViews.get(dataViewId);
+      const dataView = await dataViews.get(dataViewId, false);
 
       if (!dataView?.title) {
         return;
@@ -155,8 +155,6 @@ export const useExistingFieldsFetcher = (
           info.existingFieldsByFieldNameMap = booleanMap(existingFieldNames);
           info.fetchStatus = ExistenceFetchStatus.succeeded;
         } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error(error);
           info.fetchStatus = ExistenceFetchStatus.failed;
         }
       }

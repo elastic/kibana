@@ -304,7 +304,11 @@ export function ChangeDataView({
           setPopoverIsOpen={setPopoverIsOpen}
           onChangeDataView={async (newId) => {
             // refreshing the field list
-            await dataViews.get(newId, undefined, true);
+            try {
+              await dataViews.get(newId, false, true);
+            } catch (e) {
+              console.log('****** failed to load data view, all you get is a console msg!', e);
+            }
             setSelectedDataViewId(newId);
             setPopoverIsOpen(false);
             if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {
@@ -355,6 +359,7 @@ export function ChangeDataView({
           </EuiFlexItem>
         </EuiFlexGroup>,
         <TextBasedLanguagesList
+          key="text-based-languages-list"
           textBasedLanguages={textBasedLanguages}
           selectedOption={triggerLabel}
           onChange={(lang) => {
