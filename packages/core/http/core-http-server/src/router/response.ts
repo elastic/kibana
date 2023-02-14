@@ -70,6 +70,25 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
 }
 
 /**
+ * HTTP response parameters for a response with adjustable status code.
+ * @public
+ */
+export interface FileHttpResponseOptions<T extends HttpResponsePayload | ResponseError> {
+  /** Attachment content to send to the client */
+  body: T;
+  /** attachment name, encoded and added to the headers to send to the client */
+  filename: string;
+  /** attachment content type defaults to text/plain */
+  fileContentType?: string | null,
+  /** HTTP Headers with additional information about response */
+  headers?: ResponseHeaders;
+  /** Bypass the default error formatting */
+  bypassErrorFormat?: boolean;
+  /** Bypass filename encoding and converting file content to Buffer */
+  bypassFileFormat?: boolean;
+}
+
+/**
  * HTTP response parameters for redirection response
  * @public
  */

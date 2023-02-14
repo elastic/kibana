@@ -40,6 +40,7 @@ export type {
   RedirectResponseOptions,
   ResponseErrorAttributes,
   ErrorHttpResponseOptions,
+  FileHttpResponseOptions,
 } from './response';
 export type {
   RouteConfigOptions,
