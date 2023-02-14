@@ -45,7 +45,6 @@
       "usageCollection"
     ],
     "requiredBundles": [
-      "alerting",
       "fleet",
       "kibanaReact",
       "kibanaUtils",

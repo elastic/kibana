@@ -26,7 +26,6 @@ export * from './execution_log_types';
 export * from './rule_snooze_type';
 
 export {
-  legacyAlertFieldMap,
   mappingFromFieldMap,
   getComponentTemplateFromFieldMap,
   type FieldMap,
