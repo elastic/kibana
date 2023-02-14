@@ -18,7 +18,7 @@ export type ElasticAgentName =
   | 'php'
   | 'android/java';
 
-type Service = {
+export type Service = {
   environment?: string;
   name: string;
   agentName: ElasticAgentName;
@@ -31,7 +31,7 @@ export interface Transaction {
   children: Array<Transaction | Span | Service>;
 }
 
-interface Span {
+export interface Span {
   name: string;
   type: string;
   subtype: string;
