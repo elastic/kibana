@@ -69,3 +69,16 @@ export const findingsNavigation = {
     id: 'cloud_security_posture-findings-resourceId',
   },
 };
+
+const ELASTIC_BASE_SHORT_URL = 'https://ela.st';
+
+export const cspIntegrationDocsNavigation = {
+  kspm: {
+    overViewPath: `${ELASTIC_BASE_SHORT_URL}/kspm`,
+    getStartedPath: `${ELASTIC_BASE_SHORT_URL}/kspm-get-started`,
+  },
+  cspm: {
+    overviewPath: `${ELASTIC_BASE_SHORT_URL}/cspm`,
+    getStartedPath: `${ELASTIC_BASE_SHORT_URL}/cspm-get-started`,
+  },
+};

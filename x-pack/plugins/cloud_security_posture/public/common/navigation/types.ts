@@ -26,3 +26,5 @@ export type CloudSecurityPosturePageId =
   | 'cloud_security_posture-findings'
   | 'cloud_security_posture-benchmarks'
   | 'cloud_security_posture-benchmarks-rules';
+
+export type PostureType = 'kspm' | 'cspm';

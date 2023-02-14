@@ -20,48 +20,45 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
+import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
+import { PostureType } from '../../common/navigation/types';
 
-const AWSSetupInfoContent = () => (
-  <>
-    <EuiSpacer size="l" />
-    <EuiTitle size="s">
-      <h2>
+interface AWSSetupInfoContentProps {
+  policyTemplate: PostureType;
+}
+
+const AWSSetupInfoContent = ({ policyTemplate }: AWSSetupInfoContentProps) => {
+  return (
+    <>
+      <EuiSpacer size="l" />
+      <EuiTitle size="s">
+        <h2>
+          <FormattedMessage
+            id="xpack.csp.awsIntegration.setupInfoContentTitle"
+            defaultMessage="Setup Access"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+      <EuiText color={'subdued'} size="s">
         <FormattedMessage
-          id="xpack.csp.awsIntegration.setupInfoContentTitle"
-          defaultMessage="Setup Access"
+          id="xpack.csp.awsIntegration.setupInfoContent"
+          defaultMessage="The integration will require certain read-only AWS permissions to detect security misconfigurations. Select your preferred method of providing the AWS credentials this integration will use. You can follow these {stepByStepInstructionsLink} to generate the necessary credentials."
+          values={{
+            stepByStepInstructionsLink: (
+              <EuiLink href={cspIntegrationDocsNavigation[policyTemplate]?.getStartedPath}>
+                <FormattedMessage
+                  id="xpack.csp.awsIntegration.setupInfoContentLink"
+                  defaultMessage="step-by-step instructions"
+                />
+              </EuiLink>
+            ),
+          }}
         />
-      </h2>
-    </EuiTitle>
-    <EuiSpacer size="l" />
-    <EuiText color={'subdued'} size="s">
-      <FormattedMessage
-        id="xpack.csp.awsIntegration.setupInfoContent"
-        defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
-    method of providing the AWS credentials this integration will use. You can follow these
-    step-by-step instructions to generate the necessary credentials."
-      />
-    </EuiText>
-  </>
-);
-
-const DocsLink = (
-  <EuiText color={'subdued'} size="s">
-    <FormattedMessage
-      id="xpack.csp.awsIntegration.docsLink"
-      defaultMessage="Read the {docs} for more details"
-      values={{
-        docs: (
-          <EuiLink
-            href="https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html"
-            external
-          >
-            documentation
-          </EuiLink>
-        ),
-      }}
-    />
-  </EuiText>
-);
+      </EuiText>
+    </>
+  );
+};
 
 const AssumeRoleDescription = (
   <div>
@@ -230,7 +227,7 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
 
   return (
     <>
-      <AWSSetupInfoContent />
+      <AWSSetupInfoContent policyTemplate={input.policy_template} />
       <EuiSpacer size="l" />
       <AwsCredentialTypeSelector
         type={awsCredentialsType}
@@ -244,9 +241,7 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
       />
       <EuiSpacer size="m" />
       {group.info}
-      <EuiSpacer size="s" />
-      {DocsLink}
-      <EuiSpacer />
+      <EuiSpacer size="l" />
       <AwsInputVarFields
         fields={fields}
         onChange={(key, value) =>
