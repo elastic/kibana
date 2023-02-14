@@ -12,8 +12,8 @@ import {
   type Pagination,
   type CriteriaWithPagination,
   EuiLink,
-  EuiIcon,
   EuiToolTip,
+  EuiAvatar,
 } from '@elastic/eui';
 import React from 'react';
 import { generatePath } from 'react-router-dom';
@@ -150,7 +150,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
       return (
         <EuiToolTip position="top" content={createdBy} anchorClassName="eui-textTruncate">
           <span>
-            <EuiIcon type="user" /> {createdBy}
+            <EuiAvatar size="s" name={createdBy} /> {createdBy}
           </span>
         </EuiToolTip>
       );
