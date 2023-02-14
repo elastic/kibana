@@ -35,6 +35,9 @@ export const config: PluginConfigDescriptor = {
       enabled: true,
     },
     enableExperimental: true,
+    developer: {
+      maxAgentPoliciesWithInactivityTimeout: true,
+    },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -126,6 +129,7 @@ export const config: PluginConfigDescriptor = {
       })
     ),
     developer: schema.object({
+      maxAgentPoliciesWithInactivityTimeout: schema.maybe(schema.number()),
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
       allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
       bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
