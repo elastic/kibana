@@ -11,6 +11,7 @@ import type {
   ThreatSubtechnique,
   ThreatTechnique,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import { parseInt } from 'lodash';
 import type {
   CustomRule,
   MachineLearningRule,
@@ -673,13 +674,16 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
-      return cy
-        .get(ALERTS_TABLE_COUNT)
-        .invoke('text')
-        .then((countText) => {
-          const alertCount = parseInt(countText, 10) || 0;
-          return alertCount >= alertCountThreshold;
-        });
+      return cy.root().then(($el) => {
+        const emptyTableState = $el.find('[data-test-subj="alertsStateTableEmptyState"]');
+        if (emptyTableState.length > 0) {
+          cy.log('Table is empty', emptyTableState.length);
+          return false;
+        }
+        const countEl = $el.find(ALERTS_TABLE_COUNT);
+        const alertCount = parseInt(countEl.text(), 10) || 0;
+        return alertCount >= alertCountThreshold;
+      });
     },
     { interval: 500, timeout: 12000 }
   );
