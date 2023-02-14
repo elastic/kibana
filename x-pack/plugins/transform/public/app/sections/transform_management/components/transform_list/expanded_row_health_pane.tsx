@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 
-import { formatDate, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
+import { formatDate, EuiPanel, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -72,7 +72,12 @@ export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }
   ];
 
   return (
-    <div data-test-subj="transformHealthTabContent">
+    <EuiPanel
+      color="transparent"
+      hasBorder={false}
+      paddingSize="s"
+      data-test-subj="transformHealthTabContent"
+    >
       <EuiSpacer size="s" />
       <TransformHealthColoredDot healthStatus={status} compact={false} />
       {Array.isArray(issues) && issues.length > 0 && (
@@ -88,6 +93,6 @@ export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }
           />
         </>
       )}
-    </div>
+    </EuiPanel>
   );
 };

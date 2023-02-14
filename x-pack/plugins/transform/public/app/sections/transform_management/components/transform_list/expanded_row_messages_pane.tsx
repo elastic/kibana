@@ -9,7 +9,7 @@ import React, { MouseEvent, useState, type FC } from 'react';
 
 import {
   formatDate,
-  EuiSpacer,
+  EuiPanel,
   EuiBasicTable,
   EuiBasicTableProps,
   EuiToolTip,
@@ -215,8 +215,12 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
   };
 
   return (
-    <div data-test-subj="transformMessagesTabContent">
-      <EuiSpacer size="s" />
+    <EuiPanel
+      color="transparent"
+      hasBorder={false}
+      paddingSize="s"
+      data-test-subj="transformMessagesTabContent"
+    >
       <EuiBasicTable
         className="transform__TransformTable__messagesPaneTable"
         items={pageOfMessages}
@@ -228,6 +232,6 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
         onChange={onChange}
         sorting={sorting}
       />
-    </div>
+    </EuiPanel>
   );
 };
