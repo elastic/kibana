@@ -22,24 +22,6 @@ Array [
       style="flex-shrink: 0;"
     >
       <div
-        class="emotion-euiScreenReaderOnly"
-        tabindex="-1"
-      >
-        <div
-          aria-atomic="true"
-          aria-live="off"
-          role="status"
-        >
-          Visit test application
-        </div>
-        <div
-          aria-atomic="true"
-          aria-hidden="true"
-          aria-live="off"
-          role="status"
-        />
-      </div>
-      <div
         class="euiCollapsibleNavGroup euiCollapsibleNavGroup--dark eui-yScroll"
         id="generated-id"
         style="max-height: 40vh;"

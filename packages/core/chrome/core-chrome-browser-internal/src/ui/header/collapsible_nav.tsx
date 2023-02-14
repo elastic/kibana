@@ -165,14 +165,6 @@ export function CollapsibleNav({
       {customNavLink && (
         <>
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-            <EuiScreenReaderLive focusRegionOnTextChange>
-              {i18n.translate('core.ui.primaryNav.screenReaderAnnouncement', {
-                defaultMessage: 'Visit {title} application',
-                values: {
-                  title: appId,
-                },
-              })}
-            </EuiScreenReaderLive>
             <EuiCollapsibleNavGroup
               background="dark"
               className="eui-yScroll"
@@ -364,6 +356,14 @@ export function CollapsibleNav({
                 defaultMessage: 'Add integrations',
               })}
             </EuiButton>
+            <EuiScreenReaderLive focusRegionOnTextChange>
+              {i18n.translate('core.ui.primaryNav.screenReaderAnnouncement', {
+                defaultMessage: '{title}',
+                values: {
+                  title: appId,
+                },
+              })}
+            </EuiScreenReaderLive>
           </EuiCollapsibleNavGroup>
         </EuiFlexItem>
       )}
