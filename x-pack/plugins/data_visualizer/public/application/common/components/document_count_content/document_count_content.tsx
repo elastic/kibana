@@ -42,6 +42,31 @@ export interface Props {
   loading: boolean;
 }
 
+const ProbabilityUsedMessage = ({ samplingProbability }: Pick<Props, 'samplingProbability'>) => {
+  return isDefined(samplingProbability) ? (
+    <div data-test-subj="dvRandomSamplerProbabilityUsedMsg">
+      <EuiSpacer size="m" />
+
+      <FormattedMessage
+        id="xpack.dataVisualizer.randomSamplerSettingsPopUp.probabilityLabel"
+        defaultMessage="Probability used: {samplingProbability}%"
+        values={{ samplingProbability: samplingProbability * 100 }}
+      />
+    </div>
+  ) : null;
+};
+
+const CalculatingProbabilityMessage = (
+  <div data-test-subj="dvRandomSamplerCalculatingProbabilityMsg">
+    <EuiSpacer size="m" />
+
+    <FormattedMessage
+      id="xpack.dataVisualizer.randomSamplerSettingsPopUp.calculatingProbabilityLabel"
+      defaultMessage="Calculating the optimal probability"
+    />
+  </div>
+);
+
 export const DocumentCountContent: FC<Props> = ({
   documentCountStats,
   totalCount,
@@ -105,31 +130,6 @@ export const DocumentCountContent: FC<Props> = ({
 
   const approximate = documentCountStats.randomlySampled === true;
 
-  const ProbabilityUsedMessage =
-    randomSamplerPreference !== RANDOM_SAMPLER_OPTION.OFF && isDefined(samplingProbability) ? (
-      <div data-test-subj="dvRandomSamplerAutomaticProbabilityMsg">
-        <EuiSpacer size="m" />
-
-        <FormattedMessage
-          id="xpack.dataVisualizer.randomSamplerSettingsPopUp.probabilityLabel"
-          defaultMessage="Probability used: {samplingProbability}%"
-          values={{ samplingProbability: samplingProbability * 100 }}
-        />
-      </div>
-    ) : null;
-
-  const CalculatingProbMessage =
-    randomSamplerPreference !== RANDOM_SAMPLER_OPTION.OFF && isDefined(samplingProbability) ? (
-      <div data-test-subj="dvRandomSamplerAutomaticProbabilityMsg">
-        <EuiSpacer size="m" />
-
-        <FormattedMessage
-          id="xpack.dataVisualizer.randomSamplerSettingsPopUp.calculatingProbabilityLabel"
-          defaultMessage="Calculating the optimal probability"
-        />
-      </div>
-    ) : null;
-
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -190,11 +190,15 @@ export const DocumentCountContent: FC<Props> = ({
                   samplingProbability={samplingProbability}
                   setSamplingProbability={setSamplingProbability}
                 />
-              ) : loading ? (
-                CalculatingProbMessage
-              ) : (
-                ProbabilityUsedMessage
-              )}
+              ) : null}
+
+              {randomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_AUTOMATIC ? (
+                loading ? (
+                  CalculatingProbabilityMessage
+                ) : (
+                  <ProbabilityUsedMessage samplingProbability={samplingProbability} />
+                )
+              ) : null}
             </EuiPanel>
           </EuiPopover>
           <EuiFlexItem />
