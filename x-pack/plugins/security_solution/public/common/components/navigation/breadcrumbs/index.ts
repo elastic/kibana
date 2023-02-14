@@ -61,7 +61,8 @@ export const useSetBreadcrumbs = () => {
           ? {
               onClick: (ev) => {
                 ev.preventDefault();
-                track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.BREADCRUMB}${breadcrumb.href}`);
+                const trakedPath = breadcrumb.href?.split('?')[0] ?? 'unknown';
+                track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.BREADCRUMB}${trakedPath}`);
                 dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
 
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
