@@ -518,7 +518,7 @@
     "io-ts": "^2.0.5",
     "ipaddr.js": "2.0.0",
     "isbinaryfile": "4.0.2",
-    "joi": "^17.4.0",
+    "joi": "^17.7.1",
     "jquery": "^3.5.0",
     "js-levenshtein": "^1.1.6",
     "js-search": "^1.4.3",
