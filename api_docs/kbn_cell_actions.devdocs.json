@@ -101,7 +101,7 @@
         "label": "useDataGridColumnsCellActions",
         "description": [],
         "signature": [
-          "({ fields, triggerId, metadata, disabledActions, }: ",
+          "({ fields, triggerId, metadata, dataGridRef, disabledActions, }: ",
           {
             "pluginId": "@kbn/cell-actions",
             "scope": "common",
@@ -122,7 +122,7 @@
             "id": "def-common.useDataGridColumnsCellActions.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  fields,\n  triggerId,\n  metadata,\n  disabledActions = [],\n}",
+            "label": "{\n  fields,\n  triggerId,\n  metadata,\n  dataGridRef,\n  disabledActions = [],\n}",
             "description": [],
             "signature": [
               {
@@ -334,22 +334,6 @@
           },
           {
             "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.CellActionExecutionContext.extraContentNodeRef",
-            "type": "Object",
-            "tags": [],
-            "label": "extraContentNodeRef",
-            "description": [
-              "\nRef to a DOM node where the action can add custom HTML."
-            ],
-            "signature": [
-              "React.MutableRefObject<HTMLDivElement | null>"
-            ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cell-actions",
             "id": "def-common.CellActionExecutionContext.nodeRef",
             "type": "Object",
             "tags": [],
@@ -415,6 +399,22 @@
             "description": [],
             "signature": [
               "BulkField[]"
+            ],
+            "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cell-actions",
+            "id": "def-common.UseDataGridColumnsCellActionsProps.dataGridRef",
+            "type": "Object",
+            "tags": [],
+            "label": "dataGridRef",
+            "description": [],
+            "signature": [
+              "React.MutableRefObject<",
+              "EuiDataGridRefProps",
+              " | null>"
             ],
             "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,

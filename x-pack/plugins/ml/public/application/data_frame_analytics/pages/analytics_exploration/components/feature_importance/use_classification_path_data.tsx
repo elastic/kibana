@@ -58,6 +58,10 @@ export const getStringBasedClassName = (v: string | boolean | undefined | number
   if (typeof v === 'boolean') {
     return v ? 'True' : 'False';
   }
+
+  if (v === 'true') return 'True';
+  if (v === 'false') return 'False';
+
   if (typeof v === 'number') {
     return v.toString();
   }
