@@ -9,35 +9,29 @@ import { addFilterIn, addFilterOut, createFilterInActionFactory } from '@kbn/cel
 import type { SecurityAppStore } from '../../../common/store';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { fieldHasCellActions } from '../../utils';
-import { KibanaServices } from '../../../common/lib/kibana';
 import { TimelineId } from '../../../../common/types';
 import { isTimelineScope } from '../../../helpers';
+import { FILTER_ACTION_TYPE } from '../../constants';
+import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
 
-const ID = 'security_filterIn';
-
-export const createFilterInCellAction = ({
+export const createFilterInCellActionFactory = ({
   store,
-  order,
+  services,
 }: {
   store: SecurityAppStore;
-  order?: number;
-}): SecurityCellAction => {
-  const {
-    data: {
-      query: { filterManager },
-    },
-  } = KibanaServices.get();
+  services: StartServices;
+}) => {
   const getTimelineById = timelineSelectors.getTimelineByIdSelector();
 
-  const filterInActionFactory = createFilterInActionFactory({ filterManager });
+  const { filterManager } = services.data.query;
+  const genericFilterInActionFactory = createFilterInActionFactory({ filterManager });
 
-  return filterInActionFactory<SecurityCellAction>({
-    id: ID,
-    order,
+  return genericFilterInActionFactory.combine<SecurityCellAction>({
+    type: FILTER_ACTION_TYPE,
     isCompatible: async ({ field }) => fieldHasCellActions(field.name),
     execute: async ({ field, metadata }) => {
-      // if negateFilters is true we execute filterOut instead to perform the opposite operation
+      // if negateFilters is true we have to perform the opposite operation, we can just execute filterOut with the same params
       const addFilter = metadata?.negateFilters === true ? addFilterOut : addFilterIn;
 
       if (metadata?.scopeId && isTimelineScope(metadata.scopeId)) {

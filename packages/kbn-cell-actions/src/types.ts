@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type {
   Action,
   ActionExecutionContext,
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
+import type { CellActionsMode } from './constants';
 
 export interface CellActionsProviderProps {
   /**
@@ -46,11 +46,6 @@ export interface CellActionField {
   aggregatable?: boolean;
 }
 
-export enum CellActionsMode {
-  HOVER = 'hover',
-  INLINE = 'inline',
-}
-
 type Metadata = Record<string, unknown>;
 
 export interface CellActionsProps {
@@ -82,7 +77,7 @@ export interface CellActionsProps {
   /**
    * List of Actions ids that shouldn't be displayed inside cell actions.
    */
-  disabledActions?: string[];
+  disabledActionTypes?: string[];
   /**
    * Custom set of properties used by some actions.
    * An action might require a specific set of metadata properties to render.
@@ -142,4 +137,21 @@ export type GetActions = (context: CellActionCompatibilityContext) => Promise<Ce
 export interface PartitionedActions {
   extraActions: CellAction[];
   visibleActions: CellAction[];
+}
+
+/**
+ * Cell action factory template with optional `id`.
+ * The id override is required when using the action factory so it
+ * can be omitted in the original action creator
+ */
+export type CellActionTemplate<C extends CellAction = CellAction> = Omit<C, 'id'>;
+/**
+ * Action factory extend parameter type,
+ */
+export type CellActionExtend<C extends CellAction = CellAction> = Partial<C> & { id: string };
+export interface CellActionFactory<C extends CellAction = CellAction> {
+  <A extends C = C>(extend: CellActionExtend<A>): A;
+  combine: <A extends C = C>(
+    partialActionTemplate: Partial<CellActionTemplate<A>>
+  ) => CellActionFactory<A>;
 }

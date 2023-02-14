@@ -5,42 +5,33 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-/**
- * This module does not have any external plugin dependency on purpose
- * It will be moved to a package in following iterations
- */
-
 import { i18n } from '@kbn/i18n';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import type { CellAction } from '../../types';
 import { createFilter, isEmptyFilterValue } from './create_filter';
+import { FILTER_CELL_ACTION_TYPE } from '../../constants';
+import { createCellActionFactory } from '../factory';
 
-const ID = 'filterOut';
 const ICON = 'minusInCircle';
 const FILTER_OUT = i18n.translate('cellActions.actions.filterOut', {
   defaultMessage: 'Filter Out',
 });
 
-export const createFilterOutAction = ({
-  filterManager,
-}: {
-  filterManager: FilterManager;
-}): CellAction => ({
-  id: ID,
-  type: ID,
-  getIconType: (): string => ICON,
-  getDisplayName: () => FILTER_OUT,
-  getDisplayNameTooltip: () => FILTER_OUT,
-  isCompatible: async ({ field }) => !!field.name,
-  execute: async ({ field }) => {
-    addFilterOut({
-      filterManager,
-      fieldName: field.name,
-      value: field.value,
-    });
-  },
-});
+export const createFilterOutActionFactory = createCellActionFactory(
+  ({ filterManager }: { filterManager: FilterManager }) => ({
+    type: FILTER_CELL_ACTION_TYPE,
+    getIconType: () => ICON,
+    getDisplayName: () => FILTER_OUT,
+    getDisplayNameTooltip: () => FILTER_OUT,
+    isCompatible: async ({ field }) => !!field.name,
+    execute: async ({ field }) => {
+      addFilterOut({
+        filterManager,
+        fieldName: field.name,
+        value: field.value,
+      });
+    },
+  })
+);
 
 export const addFilterOut = ({
   filterManager,

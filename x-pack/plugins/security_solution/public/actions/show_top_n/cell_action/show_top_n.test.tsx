@@ -16,7 +16,7 @@ import {
 } from '../../../common/mock';
 import { mockHistory } from '../../../common/mock/router';
 import { createStore } from '../../../common/store';
-import { createShowTopNCellAction } from './show_top_n';
+import { createShowTopNCellActionFactory } from './show_top_n';
 import React from 'react';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
@@ -43,13 +43,14 @@ const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObserv
 const element = document.createElement('div');
 document.body.appendChild(element);
 
-describe('createShowTopNCellAction', () => {
-  const showTopNAction = createShowTopNCellAction({
+describe('createShowTopNCellActionFactory', () => {
+  const showTopNActionFactory = createShowTopNCellActionFactory({
     store: mockStore,
     history: mockHistory,
-    order: 1,
     services: mockServices,
   });
+  const showTopNAction = showTopNActionFactory({ id: 'testAction' });
+
   const context = {
     field: { name: 'user.name', value: 'the-value', type: 'keyword', aggregatable: true },
     trigger: { id: 'trigger' },

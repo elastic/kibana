@@ -11,9 +11,14 @@ export type {
   CellAction,
   CellActionExecutionContext,
   CellActionCompatibilityContext,
+  CellActionTemplate,
+  CellActionFactory,
+  CellActionExtend,
 } from './types';
 export type { UseDataGridColumnsCellActionsProps } from './hooks';
-export { CellActionsMode } from './types';
+
+// Constants
+export { CellActionsMode, FILTER_CELL_ACTION_TYPE, COPY_CELL_ACTION_TYPE } from './constants';
 
 // Components and hooks
 export { CellActionsProvider } from './context';
@@ -28,3 +33,6 @@ export {
   addFilterIn,
   addFilterOut,
 } from './actions/filter';
+
+// Action factory
+export { createCellActionFactory } from './actions/factory';

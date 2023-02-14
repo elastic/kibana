@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { createAddToTimelineCellAction } from './cell_action/add_to_timeline';
+export { createAddToTimelineCellActionFactory } from './cell_action/add_to_timeline';
 export { createAddToTimelineLensAction } from './lens/add_to_timeline';

@@ -16,7 +16,7 @@ import { HostsTableType } from '../../store/model';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreFields } from '../../../../../common/search_strategy';
 import { RiskScore } from '../../../components/risk_score/severity/common';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../actions/constants';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,

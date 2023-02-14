@@ -10,7 +10,8 @@ import React, { useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InlineActions } from './inline_actions';
 import { HoverActionsPopover } from './hover_actions_popover';
-import { CellActionsMode, type CellActionsProps, type CellActionExecutionContext } from '../types';
+import { CellActionsMode } from '../constants';
+import type { CellActionsProps, CellActionExecutionContext } from '../types';
 
 export const CellActions: React.FC<CellActionsProps> = ({
   field,
@@ -19,7 +20,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
   mode,
   showActionTooltips = true,
   visibleCellActions = 3,
-  disabledActions = [],
+  disabledActionTypes = [],
   metadata,
   className,
 }) => {
@@ -45,7 +46,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
           actionContext={actionContext}
           showActionTooltips={showActionTooltips}
           visibleCellActions={visibleCellActions}
-          disabledActions={disabledActions}
+          disabledActionTypes={disabledActionTypes}
         >
           {children}
         </HoverActionsPopover>
@@ -69,7 +70,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
           actionContext={actionContext}
           showActionTooltips={showActionTooltips}
           visibleCellActions={visibleCellActions}
-          disabledActions={disabledActions}
+          disabledActionTypes={disabledActionTypes}
         />
         <div ref={extraContentNodeRef} />
       </EuiFlexItem>

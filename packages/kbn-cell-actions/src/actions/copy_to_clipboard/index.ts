@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { createActionFactory } from '../factory';
-import { createCopyToClipboardAction } from './copy_to_clipboard';
-
-export const createCopyToClipboardActionFactory = createActionFactory(createCopyToClipboardAction);
+export { createCopyToClipboardActionFactory } from './copy_to_clipboard';

@@ -6,4 +6,4 @@
  */
 
 export { createCopyToClipboardLensAction } from './lens/copy_to_clipboard';
-export { createCopyToClipboardCellAction } from './cell_action/copy_to_clipboard';
+export { createCopyToClipboardCellActionFactory } from './cell_action/copy_to_clipboard';

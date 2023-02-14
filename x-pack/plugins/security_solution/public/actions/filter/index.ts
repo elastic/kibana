@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { createFilterInCellAction } from './cell_action/filter_in';
-export { createFilterOutCellAction } from './cell_action/filter_out';
+export { createFilterInCellActionFactory } from './cell_action/filter_in';
+export { createFilterOutCellActionFactory } from './cell_action/filter_out';

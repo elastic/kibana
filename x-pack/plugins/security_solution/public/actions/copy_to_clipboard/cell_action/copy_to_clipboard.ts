@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { createCopyToClipboardActionFactory } from '@kbn/cell-actions';
-import { KibanaServices } from '../../../common/lib/kibana';
+import { createCopyToClipboardActionFactory as genericCreateCopyToClipboardActionFactory } from '@kbn/cell-actions';
 import { fieldHasCellActions } from '../../utils';
+import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
+import { COPY_ACTION_TYPE } from '../../constants';
 
-const ID = 'security_copyToClipboard';
-
-export const createCopyToClipboardCellAction = ({
-  order,
+export const createCopyToClipboardCellActionFactory = ({
+  services,
 }: {
-  order?: number;
-}): SecurityCellAction => {
-  const { notifications } = KibanaServices.get();
-  const copyToClipboardActionFactory = createCopyToClipboardActionFactory({ notifications });
-  return copyToClipboardActionFactory<SecurityCellAction>({
-    id: ID,
-    order,
+  services: StartServices;
+}) => {
+  const { notifications } = services;
+  const genericCopyToClipboardActionFactory = genericCreateCopyToClipboardActionFactory({
+    notifications,
+  });
+  return genericCopyToClipboardActionFactory.combine<SecurityCellAction>({
+    type: COPY_ACTION_TYPE,
     isCompatible: async ({ field }) => fieldHasCellActions(field.name),
   });
 };

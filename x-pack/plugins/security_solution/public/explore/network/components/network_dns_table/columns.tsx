@@ -17,7 +17,8 @@ import type { Columns } from '../../../components/paginated_table';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
 
 import * as i18n from './translations';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../actions/constants';
+
 export type NetworkDnsColumns = [
   Columns<NetworkDnsItem['dnsName']>,
   Columns<NetworkDnsItem['queryCount']>,

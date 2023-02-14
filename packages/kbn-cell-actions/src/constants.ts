@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { createFilterInActionFactory, addFilterIn } from './filter_in';
-export { createFilterOutActionFactory, addFilterOut } from './filter_out';
+export const FILTER_CELL_ACTION_TYPE = 'cellAction-filter';
+export const COPY_CELL_ACTION_TYPE = 'cellAction-copy';
+
+export enum CellActionsMode {
+  HOVER = 'hover',
+  INLINE = 'inline',
+}

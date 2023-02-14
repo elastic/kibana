@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { createCellActionFactory } from '@kbn/cell-actions';
+import type { CellActionTemplate } from '@kbn/cell-actions';
 import { addProvider } from '../../../timelines/store/timeline/actions';
 import { TimelineId } from '../../../../common/types';
-import { KibanaServices } from '../../../common/lib/kibana';
 import type { SecurityAppStore } from '../../../common/store';
-import { fieldHasCellActions, isInSecurityApp } from '../../utils';
+import { fieldHasCellActions } from '../../utils';
 import {
   ADD_TO_TIMELINE,
   ADD_TO_TIMELINE_FAILED_TEXT,
@@ -18,59 +19,53 @@ import {
   ADD_TO_TIMELINE_SUCCESS_TITLE,
 } from '../constants';
 import { createDataProviders } from '../data_provider';
+import { ADD_TO_TIMELINE_ACTION_TYPE } from '../../constants';
+import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
 
-export const ACTION_ID = 'security_addToTimeline';
+export const createAddToTimelineCellActionFactory = createCellActionFactory(
+  ({
+    store,
+    services,
+  }: {
+    store: SecurityAppStore;
+    services: StartServices;
+  }): CellActionTemplate<SecurityCellAction> => {
+    const { notifications: notificationsService } = services;
 
-export const createAddToTimelineCellAction = ({
-  store,
-  order,
-}: {
-  store: SecurityAppStore;
-  order?: number;
-}): SecurityCellAction => {
-  const { application: applicationService, notifications: notificationsService } =
-    KibanaServices.get();
-  let currentAppId: string | undefined;
-  applicationService.currentAppId$.subscribe((appId) => {
-    currentAppId = appId;
-  });
+    return {
+      type: ADD_TO_TIMELINE_ACTION_TYPE,
+      getIconType: () => ADD_TO_TIMELINE_ICON,
+      getDisplayName: () => ADD_TO_TIMELINE,
+      getDisplayNameTooltip: () => ADD_TO_TIMELINE,
+      isCompatible: async ({ field }) => fieldHasCellActions(field.name),
+      execute: async ({ field, metadata }) => {
+        const dataProviders =
+          createDataProviders({
+            contextId: TimelineId.active,
+            fieldType: field.type,
+            values: field.value,
+            field: field.name,
+            negate: metadata?.negateFilters === true,
+          }) ?? [];
 
-  return {
-    id: ACTION_ID,
-    type: ACTION_ID,
-    order,
-    getIconType: (): string => ADD_TO_TIMELINE_ICON,
-    getDisplayName: () => ADD_TO_TIMELINE,
-    getDisplayNameTooltip: () => ADD_TO_TIMELINE,
-    isCompatible: async ({ field }) =>
-      isInSecurityApp(currentAppId) && fieldHasCellActions(field.name),
-    execute: async ({ field, metadata }) => {
-      const dataProviders =
-        createDataProviders({
-          contextId: TimelineId.active,
-          fieldType: field.type,
-          values: field.value,
-          field: field.name,
-          negate: metadata?.negateFilters === true,
-        }) ?? [];
+        if (dataProviders.length > 0) {
+          store.dispatch(addProvider({ id: TimelineId.active, providers: dataProviders }));
 
-      if (dataProviders.length > 0) {
-        store.dispatch(addProvider({ id: TimelineId.active, providers: dataProviders }));
-
-        let messageValue = '';
-        if (field.value != null) {
-          messageValue = Array.isArray(field.value) ? field.value.join(', ') : field.value;
+          let messageValue = '';
+          if (field.value != null) {
+            messageValue = Array.isArray(field.value) ? field.value.join(', ') : field.value;
+          }
+          notificationsService.toasts.addSuccess({
+            title: ADD_TO_TIMELINE_SUCCESS_TITLE(messageValue),
+          });
+        } else {
+          notificationsService.toasts.addWarning({
+            title: ADD_TO_TIMELINE_FAILED_TITLE,
+            text: ADD_TO_TIMELINE_FAILED_TEXT,
+          });
         }
-        notificationsService.toasts.addSuccess({
-          title: ADD_TO_TIMELINE_SUCCESS_TITLE(messageValue),
-        });
-      } else {
-        notificationsService.toasts.addWarning({
-          title: ADD_TO_TIMELINE_FAILED_TITLE,
-          text: ADD_TO_TIMELINE_FAILED_TEXT,
-        });
-      }
-    },
-  };
-};
+      },
+    };
+  }
+);

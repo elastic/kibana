@@ -15,7 +15,7 @@ import { FormattedCount } from '../../../../common/components/formatted_number';
 import { ALERTS_HEADERS_RULE_NAME } from '../../alerts_table/translations';
 import { ALERT_TYPE_COLOR, ALERT_TYPE_LABEL } from './helpers';
 import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../actions/constants';
 import * as i18n from './translations';
 
 export const getAlertsTypeTableColumns = (): Array<EuiBasicTableColumn<AlertsTypeData>> => [

@@ -25,7 +25,7 @@ import type { Columns } from '../../../components/paginated_table';
 import * as i18n from './translations';
 import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../actions/constants';
 
 export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>,

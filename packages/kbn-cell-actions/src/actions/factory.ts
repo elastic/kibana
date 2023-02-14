@@ -6,37 +6,71 @@
  * Side Public License, v 1.
  */
 
-import { CellAction } from '../types';
+import type { CellAction, CellActionExtend, CellActionFactory, CellActionTemplate } from '../types';
 
-type ActionFactory = <C extends CellAction = CellAction>(extend: Partial<C>) => C;
-
-export const createActionFactory = <P>(actionCreator: (params: P) => CellAction) => {
-  return (params: P): ActionFactory => {
+export const createCellActionFactory = <C extends CellAction = CellAction, P = void>(
+  actionCreator: (params: P) => CellActionTemplate<C>
+) => {
+  return (params: P): CellActionFactory<C> => {
     const action = actionCreator(params);
-    return <C extends CellAction = CellAction>(extend: Partial<C>) => {
-      const { isCompatible: extendedIsCompatible, execute: extendedExecute, ...rest } = extend;
+    return createFactory(action);
+  };
+};
 
-      let isCompatible = action.isCompatible;
+const createFactory = <C extends CellAction>(
+  actionTemplate: CellActionTemplate<C>
+): CellActionFactory<C> => {
+  const factory = <A extends C = C>(extend: CellActionExtend<A>): A =>
+    extendAction<A>(actionTemplate, extend);
 
-      if (extendedIsCompatible) {
-        if (extendedExecute) {
-          isCompatible = extendedIsCompatible;
-        } else {
-          isCompatible = async (context) => {
-            // call extended and default `isCompatible` to make sure the default `execute` will run properly
-            return (await action.isCompatible(context)) && (await extendedIsCompatible(context));
-          };
-        }
-      }
+  factory.combine = <A extends C = C>(
+    partialActionTemplate: Partial<CellActionTemplate<A>>
+  ): CellActionFactory<A> => {
+    const combinedActions = extendActionTemplate(actionTemplate, partialActionTemplate);
+    return createFactory(combinedActions);
+  };
 
-      const execute = extendedExecute ?? action.execute;
+  return factory;
+};
 
-      return {
-        ...(action as C),
-        isCompatible,
-        execute,
-        ...rest,
+// extends the template to create another template
+const extendActionTemplate = <C extends CellAction>(
+  action: CellActionTemplate,
+  extend: Partial<CellActionTemplate<C>>
+): CellActionTemplate<C> => _extendAction<CellActionTemplate<C>>(action, extend);
+
+// extends the template to create a full action (with id)
+const extendAction = <C extends CellAction = CellAction>(
+  action: CellActionTemplate,
+  extend: CellActionExtend<C>
+): C => _extendAction<C>(action, extend);
+
+const _extendAction = <C extends Partial<CellAction>>(
+  actionTemplate: CellActionTemplate,
+  extend: Partial<C>
+): C => {
+  const { isCompatible: extendedIsCompatible, execute: extendedExecute, ...rest } = extend;
+
+  let isCompatible = actionTemplate.isCompatible;
+  if (extendedIsCompatible) {
+    if (extendedExecute) {
+      isCompatible = extendedIsCompatible;
+    } else {
+      isCompatible = async (context) => {
+        // call extended and default `isCompatible` to make sure the default `execute` will run properly
+        return (
+          (await actionTemplate.isCompatible(context)) && (await extendedIsCompatible(context))
+        );
       };
-    };
+    }
+  }
+
+  const execute = extendedExecute ?? actionTemplate.execute;
+
+  return {
+    ...(actionTemplate as C),
+    isCompatible,
+    execute,
+    ...rest,
   };
 };

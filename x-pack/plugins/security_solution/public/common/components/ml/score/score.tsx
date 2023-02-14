@@ -10,7 +10,7 @@ import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import type { Anomaly } from '../types';
 import { Spacer } from '../../page';
 import { getScoreString } from './score_health';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../actions/constants';
 
 export const ScoreComponent = ({
   index = 0,

@@ -25,14 +25,14 @@ interface BulkField extends Pick<CellActionField, 'name' | 'type'> {
 }
 
 export interface UseDataGridColumnsCellActionsProps
-  extends Pick<CellActionsProps, 'triggerId' | 'metadata' | 'disabledActions'> {
+  extends Pick<CellActionsProps, 'triggerId' | 'metadata' | 'disabledActionTypes'> {
   fields: BulkField[];
 }
 export const useDataGridColumnsCellActions = ({
   fields,
   triggerId,
   metadata,
-  disabledActions = [],
+  disabledActionTypes = [],
 }: UseDataGridColumnsCellActionsProps): EuiDataGridColumnCellAction[][] => {
   const bulkContexts: CellActionCompatibilityContext[] = useMemo(
     () =>
@@ -44,7 +44,7 @@ export const useDataGridColumnsCellActions = ({
     [fields, triggerId, metadata]
   );
 
-  const { loading, value: columnsActions } = useBulkLoadActions(bulkContexts, { disabledActions });
+  const { loading, value: columnsActions } = useBulkLoadActions(bulkContexts, { disabledActionTypes });
 
   const columnsCellActions = useMemo<EuiDataGridColumnCellAction[][]>(() => {
     if (loading) {

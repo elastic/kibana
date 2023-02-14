@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { i18n } from '@kbn/i18n';
-import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import React from 'react';
-
+import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import type * as H from 'history';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
-
+import { i18n } from '@kbn/i18n';
+import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 import { APP_NAME, DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { SecurityAppStore } from '../../../common/store';
-import { fieldHasCellActions, isInSecurityApp } from '../../utils';
+import { fieldHasCellActions } from '../../utils';
 import { TopNAction } from '../show_top_n_component';
 import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
+import { SHOW_TOP_N_ACTION_TYPE } from '../../constants';
 
 const SHOW_TOP = (fieldName: string) =>
   i18n.translate('xpack.securitySolution.actions.showTopTooltip', {
@@ -28,36 +27,24 @@ const SHOW_TOP = (fieldName: string) =>
     defaultMessage: `Show top {fieldName}`,
   });
 
-export const ACTION_ID = 'security_showTopN';
 const ICON = 'visBarVertical';
 const UNSUPPORTED_FIELD_TYPES = ['date', 'text'];
 
-export const createShowTopNCellAction = ({
-  store,
-  history,
-  services,
-  order,
-}: {
-  store: SecurityAppStore;
-  history: H.History;
-  services: StartServices;
-  order?: number;
-}): SecurityCellAction => {
-  let currentAppId: string | undefined;
-
-  services.application.currentAppId$.subscribe((appId) => {
-    currentAppId = appId;
-  });
-
-  return {
-    id: ACTION_ID,
-    type: ACTION_ID,
-    order,
-    getIconType: (): string => ICON,
+export const createShowTopNCellActionFactory = createCellActionFactory(
+  ({
+    store,
+    history,
+    services,
+  }: {
+    store: SecurityAppStore;
+    history: H.History;
+    services: StartServices;
+  }): CellActionTemplate<SecurityCellAction> => ({
+    type: SHOW_TOP_N_ACTION_TYPE,
+    getIconType: () => ICON,
     getDisplayName: ({ field }) => SHOW_TOP(field.name),
     getDisplayNameTooltip: ({ field }) => SHOW_TOP(field.name),
     isCompatible: async ({ field }) =>
-      isInSecurityApp(currentAppId) &&
       fieldHasCellActions(field.name) &&
       !UNSUPPORTED_FIELD_TYPES.includes(field.type) &&
       !!field.aggregatable,
@@ -88,5 +75,5 @@ export const createShowTopNCellAction = ({
 
       ReactDOM.render(element, node);
     },
-  };
-};
+  })
+);

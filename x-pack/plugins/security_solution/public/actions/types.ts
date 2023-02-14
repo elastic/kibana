@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CellAction, CellActionExecutionContext } from '@kbn/cell-actions';
+import type { CellAction, CellActionExecutionContext, CellActionFactory } from '@kbn/cell-actions';
 
 interface SecurityMetadata extends Record<string, unknown> {
   /**
@@ -22,8 +22,8 @@ interface SecurityMetadata extends Record<string, unknown> {
   isObjectArray?: boolean;
   /**
    * `metadata.negateFilters` is used by some actions (e.g. filterIn/Out and addToTimeline) to negate
-   * the usual filtering behavior. This is used in special cases used where the displayed value is computed
-   * and the filtering execution need to perform the opposite operation.
+   * the usual filtering behavior. This is used in special cases where the displayed value is computed
+   * and we need all the filtering actions to perform the opposite (negate) operation.
    */
   negateFilters?: boolean;
 }
@@ -31,5 +31,15 @@ interface SecurityMetadata extends Record<string, unknown> {
 export interface SecurityCellActionExecutionContext extends CellActionExecutionContext {
   metadata: SecurityMetadata | undefined;
 }
-
 export type SecurityCellAction = CellAction<SecurityCellActionExecutionContext>;
+
+// All security cell actions names
+export type SecurityCellActionName =
+  | 'filterIn'
+  | 'filterOut'
+  | 'addToTimeline'
+  | 'showTopN'
+  | 'copyToClipboard'
+  | 'toggleColumn';
+
+export type SecurityCellActions = Record<SecurityCellActionName, CellActionFactory>;

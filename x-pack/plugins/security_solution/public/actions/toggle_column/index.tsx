@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createToggleColumnCellAction } from './cell_action/toggle_column';
+export { createToggleColumnCellActionFactory } from './cell_action/toggle_column';

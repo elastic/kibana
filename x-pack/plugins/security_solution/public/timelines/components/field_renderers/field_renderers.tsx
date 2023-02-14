@@ -26,7 +26,7 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../explore/network/components/details/translations';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../common/constants';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../actions/constants';
 import { TimelineContext } from '../timeline';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`

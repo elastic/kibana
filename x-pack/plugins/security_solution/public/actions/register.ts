@@ -10,28 +10,28 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type * as H from 'history';
 import type { SecurityAppStore } from '../common/store/types';
 import type { StartPlugins, StartServices } from '../types';
-import { createFilterInCellAction, createFilterOutCellAction } from './filter';
-import { createAddToTimelineLensAction, createAddToTimelineCellAction } from './add_to_timeline';
-import { createShowTopNCellAction } from './show_top_n';
+import { createFilterInCellActionFactory, createFilterOutCellActionFactory } from './filter';
+import {
+  createAddToTimelineLensAction,
+  createAddToTimelineCellActionFactory,
+} from './add_to_timeline';
+import { createShowTopNCellActionFactory } from './show_top_n';
 import {
   createCopyToClipboardLensAction,
-  createCopyToClipboardCellAction,
+  createCopyToClipboardCellActionFactory,
 } from './copy_to_clipboard';
-import { createToggleColumnCellAction } from './toggle_column';
-import {
-  CELL_ACTIONS_DEFAULT_TRIGGER,
-  CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER,
-} from '../../common/constants';
+import { createToggleColumnCellActionFactory } from './toggle_column';
+import { CELL_ACTIONS_DEFAULT_TRIGGER, CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER } from './constants';
+import type { SecurityCellActionName, SecurityCellActions } from './types';
 
 export const registerUIActions = (
-  plugins: StartPlugins,
+  { uiActions }: StartPlugins,
   store: SecurityAppStore,
   history: H.History,
   services: StartServices
 ) => {
-  registerLensActions(plugins.uiActions, store);
-  registerCellActions(plugins.uiActions, store, history, services);
-  registerTableFlyoutActions(plugins.uiActions, store, history, services);
+  registerLensActions(uiActions, store);
+  registerCellActions(uiActions, store, history, services);
 };
 
 const registerLensActions = (uiActions: UiActionsStart, store: SecurityAppStore) => {
@@ -48,60 +48,46 @@ const registerCellActions = (
   history: H.History,
   services: StartServices
 ) => {
-  const filterInAction = createFilterInCellAction({
-    order: 1,
-    store,
-  });
-  const filterOutAction = createFilterOutCellAction({
-    order: 2,
-    store,
-  });
-  const addToTimeline = createAddToTimelineCellAction({ store, order: 3 });
-  const showTopNAction = createShowTopNCellAction({ store, history, services, order: 4 });
-  const copyAction = createCopyToClipboardCellAction({ order: 5 });
+  const cellActions: SecurityCellActions = {
+    filterIn: createFilterInCellActionFactory({ store, services }),
+    filterOut: createFilterOutCellActionFactory({ store, services }),
+    addToTimeline: createAddToTimelineCellActionFactory({ store, services }),
+    showTopN: createShowTopNCellActionFactory({ store, history, services }),
+    copyToClipboard: createCopyToClipboardCellActionFactory({ services }),
+    toggleColumn: createToggleColumnCellActionFactory({ store }),
+  };
 
-  uiActions.registerTrigger({
-    id: CELL_ACTIONS_DEFAULT_TRIGGER,
-  });
+  registerCellActionsTrigger(uiActions, CELL_ACTIONS_DEFAULT_TRIGGER, cellActions, [
+    'filterIn',
+    'filterOut',
+    'addToTimeline',
+    'showTopN',
+    'copyToClipboard',
+  ]);
 
-  uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, filterInAction);
-  uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, filterOutAction);
-  uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, addToTimeline);
-  uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, showTopNAction);
-  uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, copyAction);
+  registerCellActionsTrigger(uiActions, CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, cellActions, [
+    'filterIn',
+    'filterOut',
+    'addToTimeline',
+    'toggleColumn',
+    'showTopN',
+    'copyToClipboard',
+  ]);
 };
 
-/**
- * This actions show up in when a details flyout is open from a table field.
- */
-const registerTableFlyoutActions = (
+const registerCellActionsTrigger = (
   uiActions: UiActionsStart,
-  store: SecurityAppStore,
-  history: H.History,
-  services: StartServices
+  triggerId: string,
+  cellActions: SecurityCellActions,
+  actionsOrder: SecurityCellActionName[]
 ) => {
-  const filterInAction = createFilterInCellAction({
-    store,
-    order: 10,
-  });
-  const filterOutAction = createFilterOutCellAction({
-    store,
-    order: 20,
-  });
+  uiActions.registerTrigger({ id: triggerId });
 
-  const addToTimeline = createAddToTimelineCellAction({ store, order: 30 });
-  const toggleAction = createToggleColumnCellAction({ store, order: 35 });
-  const showTopNAction = createShowTopNCellAction({ store, history, services, order: 40 });
-  const copyAction = createCopyToClipboardCellAction({ order: 50 });
-
-  uiActions.registerTrigger({
-    id: CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER,
+  actionsOrder.forEach((actionName, order) => {
+    const actionFactory = cellActions[actionName];
+    uiActions.addTriggerAction(
+      triggerId,
+      actionFactory({ id: `${triggerId}-${actionName}`, order })
+    );
   });
-
-  uiActions.addTriggerAction(CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, copyAction);
-  uiActions.addTriggerAction(CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, filterInAction);
-  uiActions.addTriggerAction(CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, filterOutAction);
-  uiActions.addTriggerAction(CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, showTopNAction);
-  uiActions.addTriggerAction(CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, addToTimeline);
-  uiActions.addTriggerAction(CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, toggleAction);
 };

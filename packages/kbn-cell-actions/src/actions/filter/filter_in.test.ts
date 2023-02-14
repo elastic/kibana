@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { CellActionExecutionContext } from '../../types';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { createFilterInAction } from './filter_in';
+import { createFilterInActionFactory } from './filter_in';
+import { makeActionContext } from '../../mocks/helpers';
 
 const mockFilterManager = { addFilters: jest.fn() } as unknown as FilterManager;
 
@@ -21,13 +20,14 @@ jest.mock('./create_filter', () => ({
 const fieldName = 'user.name';
 const value = 'the value';
 
-describe('createFilterInAction', () => {
-  const filterInAction = createFilterInAction({
+describe('createFilterInActionFactory', () => {
+  const filterInActionFactory = createFilterInActionFactory({
     filterManager: mockFilterManager,
   });
-  const context = {
+  const filterInAction = filterInActionFactory({ id: 'testAction' });
+  const context = makeActionContext({
     field: { name: fieldName, value, type: 'text' },
-  } as CellActionExecutionContext;
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

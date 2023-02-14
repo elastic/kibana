@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createShowTopNCellAction } from './cell_action/show_top_n';
+export { createShowTopNCellActionFactory } from './cell_action/show_top_n';

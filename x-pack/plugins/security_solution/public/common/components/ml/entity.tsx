@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { CellActions, CellActionsMode } from '@kbn/cell-actions';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../common/constants';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../actions/constants';
 
 interface Props {
   entityName: string;
