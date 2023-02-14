@@ -753,6 +753,22 @@ module.exports = {
             message: 'Please use @kbn/safer-lodash-set/setWith instead',
           },
           {
+            name: 'lodash/fp/set',
+            message: 'Please use @kbn/safer-lodash-set/fp/set instead',
+          },
+          {
+            name: 'lodash/fp/setWith',
+            message: 'Please use @kbn/safer-lodash-set/fp/setWith instead',
+          },
+          {
+            name: 'lodash/fp/assoc',
+            message: 'Please use @kbn/safer-lodash-set/fp/assoc instead',
+          },
+          {
+            name: 'lodash/fp/assocPath',
+            message: 'Please use @kbn/safer-lodash-set/fp/assocPath instead',
+          },
+          {
             name: 'lodash/template',
             message:
               'lodash.template is unsafe, and not compatible with our content security policy.',
