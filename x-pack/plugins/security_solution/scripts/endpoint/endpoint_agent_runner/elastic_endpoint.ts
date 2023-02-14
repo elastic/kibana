@@ -44,7 +44,7 @@ interface ElasticArtifactSearchResponse {
   };
 }
 
-export const enrollEndpointHost = async () => {
+export const enrollEndpointHost = async (): Promise<string | undefined> => {
   let vmName;
   const {
     log,

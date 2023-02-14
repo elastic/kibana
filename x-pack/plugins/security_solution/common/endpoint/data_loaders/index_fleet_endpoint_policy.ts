@@ -16,6 +16,7 @@ import type {
   DeleteAgentPolicyResponse,
   PostDeletePackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { AGENT_POLICY_API_ROUTES, PACKAGE_POLICY_API_ROUTES } from '@kbn/fleet-plugin/common';
 import type { PolicyData } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
@@ -33,7 +34,7 @@ export interface IndexedFleetEndpointPolicyResponse {
 export const indexFleetEndpointPolicy = async (
   kbnClient: KbnClient,
   policyName: string,
-  endpointPackageVersion: string = '8.7.0',
+  endpointPackageVersion: string = kibanaPackageJson.version,
   agentPolicyName?: string
 ): Promise<IndexedFleetEndpointPolicyResponse> => {
   const response: IndexedFleetEndpointPolicyResponse = {

@@ -32,7 +32,6 @@ async function withFleetAgent(
     kibanaUrl,
     username,
     password,
-    version: '8.7.0-SNAPSHOT',
   });
 
   const fleetManager = new FleetManager(log);

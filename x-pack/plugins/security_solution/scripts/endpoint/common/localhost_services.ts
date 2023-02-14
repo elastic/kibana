@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { reduce, filter } from 'lodash';
-import os from 'node:os';
+import { networkInterfaces } from 'node:os';
 
 const POSSIBLE_LOCALHOST_VALUES: readonly string[] = [
   'localhost',
@@ -17,16 +16,20 @@ const POSSIBLE_LOCALHOST_VALUES: readonly string[] = [
 ];
 
 export const getLocalhostRealIp = (): string => {
-  const interfaces = reduce(
-    os.networkInterfaces(),
-    (acc, value) => {
-      acc.push(...filter(value, { family: 'IPv4', internal: false }));
-      return acc;
-    },
-    [] as os.NetworkInterfaceInfo[]
-  );
-
-  return interfaces?.[0]?.address ?? '0.0.0.0';
+  for (const netInterfaceList of Object.values(networkInterfaces())) {
+    if (netInterfaceList) {
+      const netInterface = netInterfaceList.find(
+        (networkInterface) =>
+          networkInterface.family === 'IPv4' &&
+          networkInterface.internal === false &&
+          networkInterface.address
+      );
+      if (netInterface) {
+        return netInterface.address;
+      }
+    }
+  }
+  return '0.0.0.0';
 };
 
 export const isLocalhost = (hostname: string): boolean => {

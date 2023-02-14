@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { filter, pick } from 'lodash';
+import axios from 'axios';
+import semver from 'semver';
 import type { Client, estypes } from '@elastic/elasticsearch';
 import type {
   Agent,
@@ -14,7 +17,6 @@ import type {
   GetAgentsResponse,
 } from '@kbn/fleet-plugin/common';
 import { AGENT_API_ROUTES, agentPolicyRouteService, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import { pick } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import type { GetFleetServerHostsResponse } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
@@ -121,14 +123,11 @@ export const waitForHostToEnroll = async (
   let found: Agent | undefined;
 
   while (!found && !hasTimedOut()) {
-    try {
-      found = await fetchFleetAgents(kbnClient, {
-        perPage: 1,
-        kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online)`,
-        showInactive: false,
-      }).then((response) => response.items[0]);
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
+    found = await fetchFleetAgents(kbnClient, {
+      perPage: 1,
+      kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online)`,
+      showInactive: false,
+    }).then((response) => response.items[0]);
 
     if (!found) {
       // sleep and check again
@@ -226,7 +225,15 @@ export const getAgentVersionMatchingCurrentStack = async (
   kbnClient: KbnClient
 ): Promise<string> => {
   const kbnStatus = await kbnClient.status.get();
-  let version = kbnStatus.version.number;
+  const agentVersions = await axios
+    .get('https://artifacts-api.elastic.co/v1/versions')
+    .then((response) =>
+      filter(response.data.versions, (versionString) => !versionString.includes('SNAPSHOT'))
+    );
+
+  let version =
+    semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
+    kbnStatus.version.number;
 
   // Add `-SNAPSHOT` if version indicates it was from a snapshot or the build hash starts
   // with `xxxxxxxxx` (value that seems to be present when running kibana from source)

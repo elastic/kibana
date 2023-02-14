@@ -44,7 +44,7 @@ import {
 } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
-export const runFleetServerIfNeeded = async () => {
+export const runFleetServerIfNeeded = async (): Promise<string | undefined> => {
   let fleetServerContainerId;
   const {
     log,

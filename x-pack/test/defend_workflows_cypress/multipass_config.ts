@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import os from 'node:os';
-import { find } from 'lodash';
+import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/localhost_services';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { DefendWorkflowsCypressMultipassTestRunner } from './runner';
@@ -14,7 +13,8 @@ import { DefendWorkflowsCypressMultipassTestRunner } from './runner';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const defendWorkflowsCypressConfig = await readConfigFile(require.resolve('./config.ts'));
   const config = defendWorkflowsCypressConfig.getAll();
-  const hostIp = find(os.networkInterfaces().en0, { family: 'IPv4' })?.address ?? '0.0.0.0';
+  const hostIp = getLocalhostRealIp();
+
   return {
     ...config,
     kbnTestServer: {

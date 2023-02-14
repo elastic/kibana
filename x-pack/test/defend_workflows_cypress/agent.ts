@@ -23,15 +23,13 @@ export class AgentManager extends Manager {
     this.vmName = await enrollEndpointHost();
   }
 
-  cleanup() {
+  public cleanup() {
     super.cleanup();
     this.log.info('Cleaning up the agent process');
     if (this.vmName) {
-      execa.commandSync(`multipass delete ${this.vmName}`);
+      execa.commandSync(`multipass delete -p ${this.vmName}`);
 
       this.log.info('Agent process closed');
-      execa.commandSync(`multipass purge`);
     }
-    return;
   }
 }
