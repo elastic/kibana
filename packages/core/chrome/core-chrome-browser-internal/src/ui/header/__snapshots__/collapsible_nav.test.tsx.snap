@@ -10,7 +10,6 @@ Array [
   <nav
     data-eui="EuiFlyout"
     data-test-subj="collapsibleNav"
-    role="dialog"
   >
     <button
       aria-label="Close this dialog"
@@ -21,6 +20,24 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
       style="flex-shrink: 0;"
     >
+      <div
+        class="emotion-euiScreenReaderOnly"
+        tabindex="-1"
+      >
+        <div
+          aria-atomic="true"
+          aria-live="off"
+          role="status"
+        >
+          Visit test application
+        </div>
+        <div
+          aria-atomic="true"
+          aria-hidden="true"
+          aria-live="off"
+          role="status"
+        />
+      </div>
       <div
         class="euiCollapsibleNavGroup euiCollapsibleNavGroup--dark eui-yScroll"
         id="generated-id"
