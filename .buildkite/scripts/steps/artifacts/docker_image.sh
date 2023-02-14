@@ -25,7 +25,7 @@ node scripts/build \
   --docker-cross-compile \
   --docker-images \
   --docker-namespace="kibana-ci" \
-  --docker-tag="$GIT_ABBREV_COMMIT" \
+  --docker-tag="git-$GIT_ABBREV_COMMIT" \
   --skip-docker-ubi \
   --skip-docker-cloud \
   --skip-docker-contexts
