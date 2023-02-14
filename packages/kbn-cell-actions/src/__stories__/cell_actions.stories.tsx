@@ -11,7 +11,8 @@ import { ComponentStory } from '@storybook/react';
 import { CellActionsProvider } from '../context/cell_actions_context';
 import { makeAction } from '../mocks/helpers';
 import { CellActions } from '../components/cell_actions';
-import { CellActionsMode, type CellActionsProps } from '../types';
+import { CellActionsMode } from '../constants';
+import type { CellActionsProps } from '../types';
 
 const TRIGGER_ID = 'testTriggerId';
 
