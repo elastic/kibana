@@ -50,7 +50,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
             isLoading ? (
               <EuiLoadingContent
                 lines={4}
-                data-test-subj="exceptionItemViewerEmptyPrompts-loading"
+                data-test-subj="exceptionItemViewerEmptyPromptsLoading"
               />
             ) : undefined
           }

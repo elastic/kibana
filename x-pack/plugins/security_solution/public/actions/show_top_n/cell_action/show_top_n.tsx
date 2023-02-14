@@ -49,11 +49,14 @@ export const createShowTopNCellActionFactory = createCellActionFactory(
       !UNSUPPORTED_FIELD_TYPES.includes(field.type) &&
       !!field.aggregatable,
     execute: async (context) => {
-      const node = context.extraContentNodeRef?.current;
-      if (!node) return;
+      if (!context.nodeRef.current) return;
+
+      const node = document.createElement('div');
+      document.body.appendChild(node);
 
       const onClose = () => {
         unmountComponentAtNode(node);
+        document.body.removeChild(node);
       };
 
       const element = (

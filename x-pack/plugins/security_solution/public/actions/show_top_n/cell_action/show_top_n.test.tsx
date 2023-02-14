@@ -54,9 +54,6 @@ describe('createShowTopNCellActionFactory', () => {
   const context = {
     field: { name: 'user.name', value: 'the-value', type: 'keyword', aggregatable: true },
     trigger: { id: 'trigger' },
-    extraContentNodeRef: {
-      current: element,
-    },
     nodeRef: {
       current: element,
     },

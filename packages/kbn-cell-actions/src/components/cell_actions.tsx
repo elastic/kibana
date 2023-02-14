@@ -24,14 +24,12 @@ export const CellActions: React.FC<CellActionsProps> = ({
   metadata,
   className,
 }) => {
-  const extraContentNodeRef = useRef<HTMLDivElement | null>(null);
   const nodeRef = useRef<HTMLDivElement | null>(null);
 
   const actionContext: CellActionExecutionContext = useMemo(
     () => ({
       field,
       trigger: { id: triggerId },
-      extraContentNodeRef,
       nodeRef,
       metadata,
     }),
@@ -50,8 +48,6 @@ export const CellActions: React.FC<CellActionsProps> = ({
         >
           {children}
         </HoverActionsPopover>
-
-        <div ref={extraContentNodeRef} />
       </div>
     );
   }
@@ -63,16 +59,17 @@ export const CellActions: React.FC<CellActionsProps> = ({
       ref={nodeRef}
       gutterSize="none"
       justifyContent="flexStart"
+      className={className}
+      data-test-subj={dataTestSubj}
     >
       <EuiFlexItem grow={false}>{children}</EuiFlexItem>
-      <EuiFlexItem grow={false} className={className} data-test-subj={dataTestSubj}>
+      <EuiFlexItem grow={false}>
         <InlineActions
           actionContext={actionContext}
           showActionTooltips={showActionTooltips}
           visibleCellActions={visibleCellActions}
           disabledActionTypes={disabledActionTypes}
         />
-        <div ref={extraContentNodeRef} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
