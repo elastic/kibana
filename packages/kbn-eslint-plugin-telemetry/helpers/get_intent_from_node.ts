@@ -33,7 +33,7 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
   return node.reduce((acc: string, currentNode) => {
     switch (currentNode.type) {
       case 'JSXText':
-        // When node is a literal string
+        // When node is a string primitive
         return `${acc}${strip(currentNode.value)}`;
 
       case 'JSXElement':
