@@ -378,11 +378,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await this.assertSelectedTransformFunction(transformFunction);
     },
 
-    async clickUniqueKeysInputFieldStatTrigger(
+    async assertFieldStatsFlyoutContentFromUniqueKeysInputTrigger(
       fieldName: string,
-      fieldType?: 'keyword' | 'date' | 'number'
+      fieldType: 'keyword' | 'date' | 'number'
     ) {
-      await ml.commonFieldStatsFlyout.clickFieldStatComboBoxTrigger(
+      await ml.commonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
         'transformWizardUniqueKeysSelector',
         fieldName,
         fieldType
@@ -416,11 +416,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       ]);
     },
 
-    async clickSortFieldInputFieldStatTrigger(
+    async assertFieldStatFlyoutContentFromSortFieldInputTrigger(
       fieldName: string,
-      fieldType?: 'keyword' | 'date' | 'number'
+      fieldType: 'keyword' | 'date' | 'number'
     ) {
-      await ml.commonFieldStatsFlyout.clickFieldStatComboBoxTrigger(
+      await ml.commonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
         'transformWizardSortFieldSelector',
         fieldName,
         fieldType
@@ -448,11 +448,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await this.assertSortFieldInputValue(identificator);
     },
 
-    async clickGroupByInputFieldStatTrigger(
+    async assertFieldStatFlyoutContentFromGroupByInputTrigger(
       fieldName: string,
-      fieldType?: 'keyword' | 'date' | 'number'
+      fieldType: 'keyword' | 'date' | 'number'
     ) {
-      await ml.commonFieldStatsFlyout.clickFieldStatComboBoxTrigger(
+      await ml.commonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
         'transformGroupBySelection',
         fieldName,
         fieldType
@@ -518,11 +518,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       } > comboBoxInput`;
     },
 
-    async clickAggInputFieldStatTrigger(
+    async assertFieldStatFlyoutContentFromAggInputTrigger(
       fieldName: string,
-      fieldType?: 'keyword' | 'date' | 'number'
+      fieldType: 'keyword' | 'date' | 'number'
     ) {
-      await ml.commonFieldStatsFlyout.clickFieldStatComboBoxTrigger(
+      await ml.commonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
         'transformAggregationSelection',
         fieldName,
         fieldType

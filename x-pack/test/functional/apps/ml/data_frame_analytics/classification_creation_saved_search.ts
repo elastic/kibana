@@ -330,20 +330,13 @@ export default function ({ getService }: FtrProviderContext) {
           for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
             (e) => e.isDependentVariableInput
           )) {
-            await ml.dataFrameAnalyticsCreation.clickDependentVariableInputFieldStatTrigger(
+            await ml.dataFrameAnalyticsCreation.assertFieldStatsFlyoutContentFromDependentVariableInputTrigger(
               fieldName,
-              fieldType
+              fieldType,
+              testData.expected.fieldStatsValues && fieldName in testData.expected.fieldStatsValues
+                ? (testData.expected.fieldStatsValues[fieldName] as string[])
+                : undefined
             );
-            if (
-              testData.expected.fieldStatsValues &&
-              fieldName in testData.expected.fieldStatsValues
-            ) {
-              await ml.dataFrameAnalyticsCreation.assertFieldStatTopValuesContent(
-                fieldName,
-                fieldType,
-                testData.expected.fieldStatsValues[fieldName] as string[]
-              );
-            }
           }
 
           await ml.testExecution.logTestStep('inputs the dependent variable');
@@ -363,20 +356,13 @@ export default function ({ getService }: FtrProviderContext) {
           for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
             (e) => e.isIncludeFieldInput
           )) {
-            await ml.dataFrameAnalyticsCreation.clickIncludeFieldsInputFieldStatTrigger(
+            await ml.dataFrameAnalyticsCreation.assertFieldStatFlyoutContentFromIncludeFieldTrigger(
               fieldName,
-              fieldType
+              fieldType,
+              testData.expected.fieldStatsValues && fieldName in testData.expected.fieldStatsValues
+                ? (testData.expected.fieldStatsValues[fieldName] as string[])
+                : undefined
             );
-            if (
-              testData.expected.fieldStatsValues &&
-              fieldName in testData.expected.fieldStatsValues
-            ) {
-              await ml.dataFrameAnalyticsCreation.assertFieldStatTopValuesContent(
-                fieldName,
-                fieldType,
-                testData.expected.fieldStatsValues[fieldName] as string[]
-              );
-            }
           }
 
           await ml.testExecution.logTestStep('continues to the additional options step');

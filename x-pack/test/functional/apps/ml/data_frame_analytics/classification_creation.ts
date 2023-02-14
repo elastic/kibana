@@ -158,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
           for (const { fieldName, type: fieldType } of testData.fieldStatsEntries.filter(
             (e) => e.isDependentVariableInput
           )) {
-            await ml.dataFrameAnalyticsCreation.clickDependentVariableInputFieldStatTrigger(
+            await ml.dataFrameAnalyticsCreation.assertFieldStatsFlyoutContentFromDependentVariableInputTrigger(
               fieldName,
               fieldType
             );

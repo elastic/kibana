@@ -22,7 +22,7 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
     async assertFieldStatContentByType(
       testSubj: string,
       fieldName: string,
-      fieldType?: 'keyword' | 'date' | 'number'
+      fieldType: 'keyword' | 'date' | 'number'
     ) {
       await retry.tryForTime(2000, async () => {
         // escape popover
@@ -62,10 +62,11 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
       });
     },
 
-    async clickFieldStatTrigger(
+    async assertFieldStatFlyoutContentFromTrigger(
       testSubj: string,
       fieldName: string,
-      fieldType?: 'keyword' | 'date' | 'number'
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedTopValuesContent?: string[]
     ) {
       const selector = `~${testSubj} > ~mlInspectFieldStatsButton-${fieldName}`;
 
@@ -76,11 +77,17 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
         await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`);
       });
       await this.assertFieldStatContentByType(testSubj, fieldName, fieldType);
+      if (Array.isArray(expectedTopValuesContent)) {
+        await this.assertTopValuesContent(fieldName, fieldType, expectedTopValuesContent);
+      }
+      await this.ensureFieldStatsFlyoutClosed();
     },
-    async clickFieldStatComboBoxTrigger(
+
+    async assertFieldStatFlyoutContentFromComboBoxTrigger(
       parentComboBoxSelector: string,
       fieldName: string,
-      fieldType?: 'keyword' | 'date' | 'number'
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedTopValuesContent?: string[]
     ) {
       const selector = `mlInspectFieldStatsButton-${fieldName}`;
 
@@ -95,16 +102,15 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
         await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`);
 
         await this.assertFieldStatContentByType(parentComboBoxSelector, fieldName, fieldType);
+
+        if (Array.isArray(expectedTopValuesContent)) {
+          await this.assertTopValuesContent(fieldName, fieldType, expectedTopValuesContent);
+        }
         await this.ensureFieldStatsFlyoutClosed();
       });
     },
 
-    async assertTopValuesContent(
-      parentComboBoxSelector: string,
-      fieldName: string,
-      fieldType: string,
-      expectedValues: string[]
-    ) {
+    async assertTopValuesContent(fieldName: string, fieldType: string, expectedValues: string[]) {
       await retry.tryForTime(2000, async () => {
         // check for top values rows
         await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`);

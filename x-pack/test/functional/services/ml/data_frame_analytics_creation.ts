@@ -204,14 +204,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       });
     },
 
-    async clickIncludeFieldsInputFieldStatTrigger(
+    async assertFieldStatFlyoutContentFromIncludeFieldTrigger(
       fieldName: string,
-      fieldType?: 'keyword' | 'date' | 'number'
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedContent?: string[]
     ) {
-      await mlFieldStatsFlyout.clickFieldStatTrigger(
+      await mlFieldStatsFlyout.assertFieldStatFlyoutContentFromTrigger(
         'mlAnalyticsCreateJobWizardIncludesSelect',
         fieldName,
-        fieldType
+        fieldType,
+        expectedContent
       );
     },
 
@@ -268,14 +270,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       });
     },
 
-    async clickDependentVariableInputFieldStatTrigger(
+    async assertFieldStatsFlyoutContentFromDependentVariableInputTrigger(
       fieldName: string,
-      fieldType?: 'keyword' | 'date' | 'number'
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedContent?: string[]
     ) {
-      await mlFieldStatsFlyout.clickFieldStatComboBoxTrigger(
+      await mlFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
         'mlAnalyticsCreateJobWizardDependentVariableSelect loaded',
         fieldName,
-        fieldType
+        fieldType,
+        expectedContent
       );
     },
 
@@ -284,12 +288,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       fieldType: 'keyword' | 'date' | 'number',
       expectedContent: string[]
     ) {
-      await mlFieldStatsFlyout.assertTopValuesContent(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect loaded',
-        fieldName,
-        fieldType,
-        expectedContent
-      );
+      await mlFieldStatsFlyout.assertTopValuesContent(fieldName, fieldType, expectedContent);
     },
 
     async assertDependentVariableInputMissing() {

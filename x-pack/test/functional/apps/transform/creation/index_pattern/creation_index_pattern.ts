@@ -606,7 +606,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               : [];
 
             for (const { fieldName, type } of groupByFieldStatsEntries) {
-              await transform.wizard.clickGroupByInputFieldStatTrigger(fieldName, type);
+              await transform.wizard.assertFieldStatFlyoutContentFromGroupByInputTrigger(
+                fieldName,
+                type
+              );
             }
 
             for (const [index, entry] of testData.groupByEntries.entries()) {
@@ -626,7 +629,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               : [];
 
             for (const { fieldName, type } of aggInputFieldStatsEntries) {
-              await transform.wizard.clickAggInputFieldStatTrigger(fieldName, type);
+              await transform.wizard.assertFieldStatFlyoutContentFromAggInputTrigger(
+                fieldName,
+                type
+              );
             }
 
             await transform.testExecution.logTestStep('adds the aggregation entries');
@@ -655,7 +661,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               : [];
 
             for (const { fieldName, type } of uniqueKeyInputFieldStatsEntries) {
-              await transform.wizard.clickUniqueKeysInputFieldStatTrigger(fieldName, type);
+              await transform.wizard.assertFieldStatsFlyoutContentFromUniqueKeysInputTrigger(
+                fieldName,
+                type
+              );
             }
 
             await transform.testExecution.logTestStep('adds unique keys');
@@ -673,7 +682,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               : [];
 
             for (const { fieldName, type } of sortFieldInputFieldStatsEntries) {
-              await transform.wizard.clickSortFieldInputFieldStatTrigger(fieldName, type);
+              await transform.wizard.assertFieldStatFlyoutContentFromSortFieldInputTrigger(
+                fieldName,
+                type
+              );
             }
 
             await transform.testExecution.logTestStep('sets the sort field');
