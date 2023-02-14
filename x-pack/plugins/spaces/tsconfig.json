@@ -27,6 +27,8 @@
     "@kbn/test",
     "@kbn/utils",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/core-custom-branding-browser-mocks",
+    "@kbn/core-custom-branding-common",
   ],
   "exclude": [
     "target/**/*",

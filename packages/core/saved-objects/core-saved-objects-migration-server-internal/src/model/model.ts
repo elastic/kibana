@@ -486,12 +486,21 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       // we didn't need to cleanup, or the cleanup went well
-      if (res.right.unknownDocs?.length) {
+      if (res.right.unknownDocs.length) {
         logs = [
           ...stateP.logs,
           { level: 'warning', message: extractDiscardedUnknownDocs(res.right.unknownDocs) },
         ];
       }
+
+      logs = [
+        ...logs,
+        ...Object.entries(res.right.errorsByType).map(([soType, error]) => ({
+          level: 'warning' as const,
+          message: `Ignored excludeOnUpgrade hook on type [${soType}] that failed with error: "${error.toString()}"`,
+        })),
+      ];
+
       const source = stateP.sourceIndex.value;
       return {
         ...stateP,

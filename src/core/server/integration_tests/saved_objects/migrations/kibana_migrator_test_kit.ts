@@ -23,6 +23,8 @@ import {
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
   SavedObjectTypeRegistry,
+  IKibanaMigrator,
+  MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
@@ -39,6 +41,7 @@ import { LoggerFactory } from '@kbn/logging';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { registerServiceConfig } from '@kbn/core-root-server-internal';
+import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
@@ -103,6 +106,13 @@ export const checkLogDoesNotContain = async (
 export const clearLog = async (logFilePath: string = defaultLogFilePath): Promise<void> => {
   await fs.truncate(logFilePath).catch(() => {});
 };
+export interface KibanaMigratorTestKit {
+  client: ElasticsearchClient;
+  migrator: IKibanaMigrator;
+  runMigrations: (rerun?: boolean) => Promise<MigrationResult[]>;
+  typeRegistry: ISavedObjectTypeRegistry;
+  savedObjectsRepository: ISavedObjectsRepository;
+}
 
 export const getKibanaMigratorTestKit = async ({
   settings = {},
@@ -110,7 +120,7 @@ export const getKibanaMigratorTestKit = async ({
   kibanaVersion = currentVersion,
   types = [],
   logFilePath = defaultLogFilePath,
-}: KibanaMigratorTestKitParams = {}) => {
+}: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
   const loggingSystem = new LoggingSystem();
   const loggerFactory = loggingSystem.asLoggerFactory();
 
@@ -136,6 +146,11 @@ export const getKibanaMigratorTestKit = async ({
     kibanaVersion
   );
 
+  const runMigrations = async (rerun?: boolean) => {
+    migrator.prepareMigrations();
+    return await migrator.runMigrations({ rerun });
+  };
+
   const savedObjectsRepository = SavedObjectsRepository.createRepository(
     migrator,
     typeRegistry,
@@ -147,9 +162,9 @@ export const getKibanaMigratorTestKit = async ({
   return {
     client,
     migrator,
+    runMigrations,
     typeRegistry,
     savedObjectsRepository,
-    kibanaVersion,
   };
 };
 

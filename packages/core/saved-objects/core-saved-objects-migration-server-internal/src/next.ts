@@ -49,6 +49,7 @@ import type {
 } from './state';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
+import { REMOVED_TYPES } from './core';
 
 type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -84,6 +85,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
         excludeFromUpgradeFilterHooks: state.excludeFromUpgradeFilterHooks,
         knownTypes: state.knownTypes,
+        removedTypes: REMOVED_TYPES,
       }),
     PREPARE_COMPATIBLE_MIGRATION: (state: PrepareCompatibleMigration) =>
       Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),

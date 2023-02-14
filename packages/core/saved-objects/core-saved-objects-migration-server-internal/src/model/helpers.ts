@@ -8,13 +8,16 @@
 
 import { gt, valid } from 'semver';
 import type {
+  BulkOperationContainer,
   QueryDslBoolQuery,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import * as Either from 'fp-ts/lib/Either';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { State } from '../state';
 import type { AliasAction, FetchIndexResponse } from '../actions';
+import type { BulkIndexOperationTuple } from './create_batches';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -205,3 +208,28 @@ export function buildRemoveAliasActions(
     return [{ remove: { index, alias, must_exist: true } }];
   });
 }
+
+/**
+ * Given a document, creates a valid body to index the document using the Bulk API.
+ */
+export const createBulkIndexOperationTuple = (doc: SavedObjectsRawDoc): BulkIndexOperationTuple => {
+  return [
+    {
+      index: {
+        _id: doc._id,
+        // use optimistic concurrency control to ensure that outdated
+        // documents are only overwritten once with the latest version
+        ...(typeof doc._seq_no !== 'undefined' && { if_seq_no: doc._seq_no }),
+        ...(typeof doc._primary_term !== 'undefined' && { if_primary_term: doc._primary_term }),
+      },
+    },
+    doc._source,
+  ];
+};
+
+/**
+ * Given a document id, creates a valid body to delete the document using the Bulk API.
+ */
+export const createBulkDeleteOperationBody = (_id: string): BulkOperationContainer => ({
+  delete: { _id },
+});

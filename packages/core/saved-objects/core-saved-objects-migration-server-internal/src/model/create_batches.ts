@@ -9,35 +9,11 @@
 import * as Either from 'fp-ts/lib/Either';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
+import { createBulkDeleteOperationBody, createBulkIndexOperationTuple } from './helpers';
 import type { TransformErrorObjects } from '../core';
 
 export type BulkIndexOperationTuple = [BulkOperationContainer, SavedObjectsRawDocSource];
 export type BulkOperation = BulkIndexOperationTuple | BulkOperationContainer;
-
-/**
- * Given a document, creates a valid body to index the document using the Bulk API.
- */
-const createBulkIndexOperationTuple = (doc: SavedObjectsRawDoc): BulkIndexOperationTuple => {
-  return [
-    {
-      index: {
-        _id: doc._id,
-        // use optimistic concurrency control to ensure that outdated
-        // documents are only overwritten once with the latest version
-        ...(typeof doc._seq_no !== 'undefined' && { if_seq_no: doc._seq_no }),
-        ...(typeof doc._primary_term !== 'undefined' && { if_primary_term: doc._primary_term }),
-      },
-    },
-    doc._source,
-  ];
-};
-
-/**
- * Given a document id, creates a valid body to delete the document using the Bulk API.
- */
-const createBulkDeleteOperationBody = (_id: string): BulkOperationContainer => ({
-  delete: { _id },
-});
 
 export interface CreateBatchesParams {
   documents: SavedObjectsRawDoc[];
