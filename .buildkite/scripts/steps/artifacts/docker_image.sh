@@ -25,7 +25,7 @@ node scripts/build \
   --docker-cross-compile \
   --docker-images \
   --docker-namespace="kibana-ci" \
-  --docker-tag="$GIT_ABBREV_COMMIT" \
+  --docker-tag="git-$GIT_ABBREV_COMMIT" \
   --skip-docker-ubi \
   --skip-docker-cloud \
   --skip-docker-contexts
@@ -92,7 +92,7 @@ steps:
         SERVICE: kibana-controller
         NAMESPACE: kibana-ci
         IMAGE_NAME: kibana
-        COMMIT_MESSAGE: "gitops: update kibana tag to elastic/kibana@$BUILDKITE_COMMIT"
+        COMMIT_MESSAGE: "gitops: update kibana tag to elastic/kibana@$GIT_ABBREV_COMMIT"
 EOF
 
 else
