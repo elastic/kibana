@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
+import { Core } from './core';
 import {
   ContentManagementServerSetup,
   ContentManagementServerStart,
@@ -16,10 +23,20 @@ import {
 export class ContentManagementPlugin
   implements Plugin<ContentManagementServerSetup, ContentManagementServerStart, SetupDependencies>
 {
-  constructor(initializerContext: PluginInitializerContext) {}
+  private readonly logger: Logger;
+  private readonly core: Core;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+    this.core = new Core({ logger: this.logger });
+  }
 
   public setup(core: CoreSetup) {
-    return {};
+    const { api: coreApi } = this.core.setup();
+
+    return {
+      ...coreApi,
+    };
   }
 
   public start(core: CoreStart) {
