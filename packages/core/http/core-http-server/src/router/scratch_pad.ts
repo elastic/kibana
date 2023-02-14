@@ -44,22 +44,20 @@ router.get(
   }
 );
 
-// Dummy types
-
 /** Definitely subject to revision, just used for examples */
 type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
 
 /**
  * ===================== General comments =====================
- * - In all designs it is possible to pass the version number to the handler
- *   function.
- * - When no API version is specified we will need to adopt the default behaviour of
- *   other Elastic APIs and this is TBD.
+ * - Each version design is an iteration where I tried to write down the pros
+ *   and cons of the approach, so later designs may be more sophisticated than
+ *   earlier ones.
  */
 
 /**
  * Open questions:
- * 1. Are individual APIs versioned or the entire API surface versioned?
+ * 1. Is the convention that individual APIs are versioned or groups of APIs altogether?
+ *    Should we care about this?
  */
 
 /**
@@ -67,7 +65,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
  * We ask consumers to restate all consituents for each route and they
  * provide version number at the route level.
  *
- * This is perhaps the most verbose approach.
+ * This is perhaps the most verbose "dumb" approach.
  */
 {
   type NewRouteRegistrar1<
@@ -81,8 +79,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     handler: RequestHandler<P, Q, B, Context, Method>
   ) => void;
 
-  const newRouter: Omit<IRouter, 'post'> & { post: NewRouteRegistrar1<unknown, unknown, unknown> } =
-    {} as any;
+  const newRouter: { post: NewRouteRegistrar1<unknown, unknown, unknown> } = {} as any;
 
   /**
    * EXAMPLE USAGE:
@@ -129,25 +126,27 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
 /**
  *  * STRENGTHS:
  *   1. Preserves full power of route declaration, even per version of a route
- *   2. Fairly simple, does not require any refactoring to adopt
+ *   2. Fairly simple, does not require much refactoring to adopt
  * WEAKNESSES:
  *   1. More complicated for router implementation because we must
  *      accept duplicate paths + version to uniquely identify a route.
  *   2. Need to redeclare handlers for every version (increased effort to make new versions)
+ *      I.e., this is super verbose. Especially if a new version of an API needs
+ *      many new routes.
  * ===================== End first design =====================
  */
 
 /**
  * ===================== Second design =====================
  *
- * See "Current API". Per route we registration we could:
+ * Per route we registration we could:
  *
  * Change: Validation, Handler
  * Keep constant: Method, Path, Optional config
  *
  * If only Validation & Handler change across versions it implies a coupling between these two.
  *
- * One approach could be to tightly pair the validation and handler in the registrar's
+ * We could tightly pair the validation and handler in the registrar's
  * API.
  */
 {
@@ -210,14 +209,12 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
 }
 /**
  * STRENGTHS:
- *   1. API clearly ties a route handler to a version
+ *   1. API cleanly ties a route handler to a version
  *   2. Declare path and options once
  * WEAKNESSES:
- *   1. Repeated declare the options and the path... Introducing a new version
- *      will result in a lot of boilerplate.
- *   2. Handlers know versions by passed into a given router so you also need
- *      to redeclare handlers
- *   3. Perhaps an overfit for the problem at hand. The router implementation
+ *   1. As with the previous design there is still some verbosity as new handlers
+ *      must be defined for each version
+ *   2. Perhaps an overfit for the problem at hand. The router implementation
  *      will fully internalize the notion of versions. How do we handle routes
  *      that are not versioned?
  * ===================== End second design =====================
@@ -236,7 +233,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     }) => IRouter<Context>;
   } = {} as any;
 
-  const v1Router = http.createRouter(); // defaults to creating v1 router
+  const v1Router = http.createRouter(); // defaults to not versioned?
   const v2Router = http.createRouter({ version: '2' });
   const v3Router = http.createRouter({ version: '3' });
 
@@ -334,6 +331,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
   }
 
   const vtk: VersionedAPIToolkit = {} as any;
+  /** A router with some custom context */
   const myRouter: IRouter<{ test: number } & RequestHandlerContextBase> = {} as any;
 
   const versionedRoute = vtk
@@ -405,7 +403,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
  *  3. Removes only the boilerplate regarding versions
  *  4. Could also implement a simplified version that just takeas in a bunch of validations
  *     and passes them all to one handler, then the consumer must specify if-else/map/switch
- *     to correctly handle versions.
+ *     to correctly handle versions and map to the correct return type...
  * WEAKNESSES:
  *  1. Whole new API to design and implement
  *  2. Will it actually be used since this is only a recommendation?
