@@ -21,6 +21,7 @@ import {
   ControlGroupInput,
   ControlGroupOutput,
   ControlGroupReduxState,
+  ControlGroupSettings,
   ControlPanelState,
   ControlsPanels,
   CONTROL_GROUP_TYPE,
@@ -87,7 +88,9 @@ export class ControlGroupContainer extends Container<
   };
 
   public getMostRelevantDataViewId = () => {
-    return this.lastUsedDataViewId ?? this.relevantDataViewId;
+    const staticDataViewId =
+      this.getReduxEmbeddableTools().getState().componentState.staticDataViewId;
+    return staticDataViewId ?? this.lastUsedDataViewId ?? this.relevantDataViewId;
   };
 
   public getReduxEmbeddableTools = () => {
@@ -134,7 +137,8 @@ export class ControlGroupContainer extends Container<
   constructor(
     reduxEmbeddablePackage: ReduxEmbeddablePackage,
     initialInput: ControlGroupInput,
-    parent?: Container
+    parent?: Container,
+    settings?: ControlGroupSettings
   ) {
     super(
       initialInput,
@@ -148,6 +152,8 @@ export class ControlGroupContainer extends Container<
     this.onFiltersPublished$ = new Subject<Filter[]>();
     this.onControlRemoved$ = new Subject<string>();
 
+    console.log('settings', settings);
+
     // build redux embeddable tools
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       ControlGroupReduxState,
@@ -155,6 +161,7 @@ export class ControlGroupContainer extends Container<
     >({
       embeddable: this,
       reducers: controlGroupReducers,
+      initialComponentState: settings,
     });
 
     // when all children are ready setup subscriptions
