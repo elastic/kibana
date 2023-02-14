@@ -165,18 +165,16 @@ const InsightComponent = ({
   });
   const relativeTimerange: TimeRange | null = useMemo(() => {
     if (relativeFrom && relativeTo) {
-      const fromStr = relativeFrom;
-      const toStr = relativeTo;
       const alertRelativeDate = timestamp ? moment(timestamp) : moment();
       const from = parseDateWithDefault(
-        fromStr,
+        relativeFrom,
         DEFAULT_FROM_MOMENT,
         false,
         moment,
         alertRelativeDate.toDate()
       ).toISOString();
       const to = parseDateWithDefault(
-        toStr,
+        relativeTo,
         DEFAULT_TO_MOMENT,
         true,
         moment,
