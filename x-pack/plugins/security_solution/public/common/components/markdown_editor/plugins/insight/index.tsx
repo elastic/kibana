@@ -186,8 +186,6 @@ const InsightComponent = ({
         kind: 'absolute',
         from,
         to,
-        fromStr: undefined,
-        toStr: undefined,
       };
     } else {
       return null;
