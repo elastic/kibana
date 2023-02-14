@@ -127,6 +127,11 @@ Object {
                       },
                     },
                     Object {
+                      "term": Object {
+                        "type": "upgrade-assistant-telemetry",
+                      },
+                    },
+                    Object {
                       "bool": Object {
                         "must": Array [
                           Object {
@@ -320,6 +325,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "ui-counter",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "upgrade-assistant-telemetry",
                       },
                     },
                     Object {
@@ -520,6 +530,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "ui-counter",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "upgrade-assistant-telemetry",
                       },
                     },
                     Object {
@@ -724,6 +739,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "ui-counter",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "upgrade-assistant-telemetry",
                       },
                     },
                     Object {
@@ -973,6 +993,11 @@ Object {
                       },
                     },
                     Object {
+                      "term": Object {
+                        "type": "upgrade-assistant-telemetry",
+                      },
+                    },
+                    Object {
                       "bool": Object {
                         "must": Array [
                           Object {
@@ -1177,6 +1202,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "ui-counter",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "upgrade-assistant-telemetry",
                       },
                     },
                     Object {

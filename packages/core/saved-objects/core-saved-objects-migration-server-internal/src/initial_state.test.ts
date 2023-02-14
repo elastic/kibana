@@ -164,6 +164,11 @@ describe('createInitialState', () => {
                 },
               },
               Object {
+                "term": Object {
+                  "type": "upgrade-assistant-telemetry",
+                },
+              },
+              Object {
                 "bool": Object {
                   "must": Array [
                     Object {
