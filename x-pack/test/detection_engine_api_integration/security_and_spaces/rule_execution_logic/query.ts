@@ -730,7 +730,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('with a suppression time window', async () => {
-        const { indexListOfDocuments } = dataGeneratorFactory({
+        const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
           es,
           index: 'ecs_compliant',
           log,
@@ -1209,26 +1209,22 @@ export default ({ getService }: FtrProviderContext) => {
         it('should generate and update up to max_signals alerts', async () => {
           const id = uuidv4();
           const timestamp = '2020-10-28T06:00:00.000Z';
-          const docs = Array(150)
-            .fill({})
-            .map((_, i) => ({
-              id,
-              '@timestamp': timestamp,
-              agent: {
-                name: `agent-${i}`,
-              },
-            }));
           const laterTimestamp = '2020-10-28T07:00:00.000Z';
-          const laterDocs = Array(150)
-            .fill({})
-            .map((_, i) => ({
-              id,
-              '@timestamp': laterTimestamp,
-              agent: {
-                name: `agent-${i}`,
-              },
-            }));
-          await indexListOfDocuments([...docs, ...laterDocs]);
+
+          await Promise.all(
+            [timestamp, laterTimestamp].map((t) =>
+              indexGeneratedDocuments({
+                docsCount: 150,
+                seed: (index) => ({
+                  id,
+                  '@timestamp': t,
+                  agent: {
+                    name: `agent-${index}`,
+                  },
+                }),
+              })
+            )
+          );
 
           const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['ecs_compliant']),
