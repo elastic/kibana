@@ -492,6 +492,19 @@ describe('Cases API', () => {
       });
     });
 
+    it('should be called with action type user action and desc sort order', async () => {
+      await findCaseUserActions(basicCase.id, 'action', 'desc', abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
+        method: 'GET',
+        signal: abortCtrl.signal,
+        query: {
+          types: ['action'],
+          sortOrder: 'desc',
+          perPage: MAX_DOCS_PER_PAGE,
+        },
+      });
+    });
+
     it('should return correct response', async () => {
       const resp = await findCaseUserActions(
         basicCase.id,

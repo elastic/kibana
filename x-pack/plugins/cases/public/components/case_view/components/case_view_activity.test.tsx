@@ -8,7 +8,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
-import { fireEvent, waitFor } from '@testing-library/dom';
+import { fireEvent, waitFor, within } from '@testing-library/dom';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
   alertComment,
@@ -29,9 +29,7 @@ import { useGetSupportedActionConnectors } from '../../../containers/configure/u
 import { useGetTags } from '../../../containers/use_get_tags';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { useGetCaseUsers } from '../../../containers/use_get_case_users';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
-import { waitFor, within } from '@testing-library/dom';
 import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
 import { defaultUseFindCaseUserActions } from '../mocks';
 import { ActionTypes } from '../../../../common/api';
@@ -87,17 +85,6 @@ const filterActionType = 'all';
 const sortOrder = 'asc';
 
 const pushCaseToExternalService = jest.fn();
-const refetchFindCaseUserActions = jest.fn();
-
-const defaultUseFindCaseUserActions = {
-  data: {
-    caseUserActions: [...caseUserActions, getAlertUserAction()],
-    participants: [caseData.createdBy],
-  },
-  refetch: refetchFindCaseUserActions,
-  isLoading: false,
-  isError: false,
-};
 
 const userActionsStats = {
   total: 21,

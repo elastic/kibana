@@ -7,8 +7,8 @@
 
 /* eslint-disable complexity */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useGetCaseUsers } from '../../../containers/use_get_case_users';
@@ -95,11 +95,11 @@ export const CaseViewActivity = ({
     caseData.id
   );
 
-  const {
-    data: userActionsData,
-    isLoading: isLoadingUserActions,
-    refetch: refetchFindCaseUserActions,
-  } = useFindCaseUserActions(caseData.id, filterOptions, sortOrder);
+  const { data: userActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
+    caseData.id,
+    filterOptions,
+    sortOrder
+  );
 
   const { data: userActionsStats, isLoading: isLoadingUserActionsStats } =
     useGetCaseUserActionsStats(caseData.id);
@@ -176,11 +176,6 @@ export const CaseViewActivity = ({
     [onUpdateField]
   );
 
-  useEffect(() => {
-    refetchFindCaseUserActions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterOptions, sortOrder]);
-
   const showUserActions =
     !isLoadingUserActions &&
     !isLoadingCaseConnectors &&
@@ -207,18 +202,20 @@ export const CaseViewActivity = ({
   return (
     <>
       <EuiFlexItem grow={6}>
+        <EuiFlexItem grow={false}>
+          <UserActionsActivityBar
+            onUserActionsActivityChanged={handleUserActionsActivityChanged}
+            params={{ type: filterOptions, sortOrder }}
+            userActionsStats={userActionsStats}
+            isLoading={isLoadingUserActionsStats}
+          />
+        </EuiFlexItem>
+        <EuiSpacer size='l' />
         {(isLoadingUserActions || isLoadingCaseConnectors) && (
           <EuiSkeletonText lines={8} data-test-subj="case-view-loading-content" />
         )}
+
         <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
-          <EuiFlexItem grow={false}>
-            <UserActionsActivityBar
-              onUserActionsActivityChanged={handleUserActionsActivityChanged}
-              params={{ type: filterOptions, sortOrder }}
-              userActionsStats={userActionsStats}
-              isLoading={isLoadingUserActions || isLoadingUserActionsStats}
-            />
-          </EuiFlexItem>
           <EuiFlexItem>
             {showUserActions && (
               <UserActions

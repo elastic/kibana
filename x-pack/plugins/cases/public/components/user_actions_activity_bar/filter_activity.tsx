@@ -23,9 +23,11 @@ export const FilterActivity = React.memo<FilterActivityProps>(
   ({ type, onFilterChange, userActionsStats, isLoading = false }) => {
     const handleFilterChange = useCallback(
       (value: FilterType) => {
-        onFilterChange(value);
+        if (value !== type) {
+          onFilterChange(value);
+        }
       },
-      [onFilterChange]
+      [onFilterChange, type]
     );
 
     return (

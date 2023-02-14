@@ -61,6 +61,19 @@ describe('UseFindCaseUserActions', () => {
     );
   });
 
+  it('calls the API with correct parameters', async () => {
+    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+
+    const { waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
+      () => useFindCaseUserActions(basicCase.id, 'user', 'desc'),
+      { wrapper }
+    );
+
+    await waitForNextUpdate();
+
+    expect(spy).toHaveBeenCalledWith(basicCase.id, 'user', 'desc', expect.any(AbortSignal));
+  });
+
   it('shows a toast error when the API returns an error', async () => {
     const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(new Error("C'est la vie"));
 
