@@ -54,6 +54,8 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/code_coverage.yml', false));
+
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
     }
