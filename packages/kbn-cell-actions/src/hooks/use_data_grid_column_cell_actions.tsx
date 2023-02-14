@@ -44,7 +44,9 @@ export const useDataGridColumnsCellActions = ({
     [fields, triggerId, metadata]
   );
 
-  const { loading, value: columnsActions } = useBulkLoadActions(bulkContexts, { disabledActionTypes });
+  const { loading, value: columnsActions } = useBulkLoadActions(bulkContexts, {
+    disabledActionTypes,
+  });
 
   const columnsCellActions = useMemo<EuiDataGridColumnCellAction[][]>(() => {
     if (loading) {
