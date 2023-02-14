@@ -39,7 +39,12 @@ describe('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
         settings: {
           es: {
             license: 'basic',
-            dataArchive: Path.join(__dirname, 'archives', '7.13_1.5k_failed_action_tasks.zip'),
+            dataArchive: Path.join(
+              __dirname,
+              '..',
+              'archives',
+              '7.13_1.5k_failed_action_tasks.zip'
+            ),
           },
         },
       }));
