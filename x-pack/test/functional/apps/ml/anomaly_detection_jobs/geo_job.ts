@@ -239,7 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobTypeSelection.assertGeoJobWizardOpen();
     });
 
-    it('job cloning navigates through the population wizard, checks and sets all needed fields', async () => {
+    it('job cloning navigates through the geo wizard, checks and sets all needed fields', async () => {
       await ml.testExecution.logTestStep('job cloning displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
 
