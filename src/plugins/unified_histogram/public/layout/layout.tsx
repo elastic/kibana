@@ -12,7 +12,7 @@ import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
@@ -53,7 +53,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   timeRange?: TimeRange;
   /**
-   * Context object for requests made by unified histogram components -- optional
+   * Context object for requests made by Unified Histogram components -- optional
    */
   request?: UnifiedHistogramRequestContext;
   /**
@@ -97,13 +97,13 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   input$?: UnifiedHistogramInput$;
   /**
+   * Callback to get the relative time range, useful when passing an absolute time range (e.g. for edit visualization button)
+   */
+  getRelativeTimeRange?: () => TimeRange;
+  /**
    * Callback to update the topPanelHeight prop when a resize is triggered
    */
   onTopPanelHeightChange?: (topPanelHeight: number | undefined) => void;
-  /**
-   * Callback to invoke when the user clicks the edit visualization button -- leave undefined to hide the button
-   */
-  onEditVisualization?: (lensAttributes: TypedLensByValueInput['attributes']) => void;
   /**
    * Callback to hide or show the chart -- should set {@link UnifiedHistogramChartContext.hidden} to chartHidden
    */
@@ -153,8 +153,8 @@ export const UnifiedHistogramLayout = ({
   disableTriggers,
   disabledActions,
   input$,
+  getRelativeTimeRange,
   onTopPanelHeightChange,
-  onEditVisualization,
   onChartHiddenChange,
   onTimeIntervalChange,
   onBreakdownFieldChange,
@@ -222,7 +222,7 @@ export const UnifiedHistogramLayout = ({
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           input$={input$}
-          onEditVisualization={onEditVisualization}
+          getRelativeTimeRange={getRelativeTimeRange}
           onResetChartHeight={onResetChartHeight}
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
@@ -248,6 +248,3 @@ export const UnifiedHistogramLayout = ({
     </>
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export default UnifiedHistogramLayout;

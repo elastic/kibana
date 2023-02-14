@@ -5,174 +5,86 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSuggest } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Control, Controller, UseFormTrigger } from 'react-hook-form';
+import { Control, UseFormWatch } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-import { useFetchIndices } from '../../../hooks/use_fetch_indices';
+import { IndexSelection } from './custom_kql/index_selection';
+import { QueryBuilder } from './custom_kql/query_builder';
 
 export interface Props {
   control: Control<CreateSLOInput>;
-  trigger: UseFormTrigger<CreateSLOInput>;
+  watch: UseFormWatch<CreateSLOInput>;
 }
 
-export function SloEditFormDefinitionCustomKql({ control, trigger }: Props) {
-  const { loading, indices = [] } = useFetchIndices();
-
-  const indicesNames = indices.map(({ name }) => ({
-    type: { iconType: '', color: '' },
-    label: name,
-    description: '',
-  }));
-
-  // Indices are loading in asynchrously, so trigger field validation
-  // once results are returned from API
-  useEffect(() => {
-    if (!loading && indices.length) {
-      trigger();
-    }
-  }, [indices.length, loading, trigger]);
-
-  function valueMatchIndex(value: string | undefined, index: string): boolean {
-    if (value === undefined) {
-      return false;
-    }
-
-    if (value.length > 0 && value.substring(value.length - 1) === '*') {
-      return index.indexOf(value.substring(0, value.length - 1), 0) > -1;
-    }
-
-    return index === value;
-  }
-
+export function SloEditFormDefinitionCustomKql({ control, watch }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
-        <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.sloDefinition.customKql.index', {
-            defaultMessage: 'Index',
-          })}
-        </EuiFormLabel>
-
-        <Controller
-          name="indicator.params.index"
-          control={control}
-          rules={{
-            required: true,
-            validate: (value) => indices.some((index) => valueMatchIndex(value, index.name)),
-          }}
-          render={({ field, fieldState }) => (
-            <EuiSuggest
-              fullWidth
-              isClearable
-              aria-label="Indices"
-              data-test-subj="sloFormCustomKqlIndexInput"
-              status={loading ? 'loading' : field.value ? 'unchanged' : 'unchanged'}
-              onItemClick={({ label }) => {
-                field.onChange(label);
-              }}
-              isInvalid={
-                fieldState.isDirty &&
-                !indicesNames.some((index) => valueMatchIndex(field.value, index.label))
-              }
-              placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.sloDefinition.customKql.index.selectIndex',
-                {
-                  defaultMessage: 'Select an index',
-                }
-              )}
-              suggestions={indicesNames}
-              {...field}
-            />
-          )}
-        />
+        <IndexSelection control={control} />
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.sloDefinition.customKql.queryFilter', {
-            defaultMessage: 'Query filter',
-          })}
-        </EuiFormLabel>
-        <Controller
+        <QueryBuilder
+          control={control}
+          dataTestSubj="sloFormCustomKqlFilterQueryInput"
+          indexPatternString={watch('indicator.params.index')}
+          label={i18n.translate(
+            'xpack.observability.slos.sloEdit.sloDefinition.customKql.queryFilter',
+            {
+              defaultMessage: 'Query filter',
+            }
+          )}
           name="indicator.params.filter"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <EuiSuggest
-              append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
-              status="unchanged"
-              aria-label="Filter query"
-              data-test-subj="sloFormCustomKqlFilterQueryInput"
-              placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.sloDefinition.customKql.customFilter',
-                {
-                  defaultMessage: 'Custom filter to apply on the index',
-                }
-              )}
-              suggestions={[]}
-              {...field}
-            />
+          placeholder={i18n.translate(
+            'xpack.observability.slos.sloEdit.sloDefinition.customKql.customFilter',
+            {
+              defaultMessage: 'Custom filter to apply on the index',
+            }
           )}
         />
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.sloDefinition.customKql.goodQuery', {
-            defaultMessage: 'Good query',
-          })}
-        </EuiFormLabel>
-        <Controller
+        <QueryBuilder
+          control={control}
+          dataTestSubj="sloFormCustomKqlGoodQueryInput"
+          indexPatternString={watch('indicator.params.index')}
+          label={i18n.translate(
+            'xpack.observability.slos.sloEdit.sloDefinition.customKql.goodQuery',
+            {
+              defaultMessage: 'Good query',
+            }
+          )}
           name="indicator.params.good"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <EuiSuggest
-              append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
-              status="unchanged"
-              aria-label="Good filter"
-              data-test-subj="sloFormCustomKqlGoodQueryInput"
-              placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.sloDefinition.customKql.goodQueryPlaceholder',
-                {
-                  defaultMessage: 'Define the good events',
-                }
-              )}
-              suggestions={[]}
-              {...field}
-            />
+          placeholder={i18n.translate(
+            'xpack.observability.slos.sloEdit.sloDefinition.customKql.goodQueryPlaceholder',
+            {
+              defaultMessage: 'Define the good events',
+            }
           )}
         />
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.sloDefinition.customKql.totalQuery', {
-            defaultMessage: 'Total query',
-          })}
-        </EuiFormLabel>
-        <Controller
-          name="indicator.params.total"
+        <QueryBuilder
           control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <EuiSuggest
-              append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
-              status="unchanged"
-              aria-label="Total filter"
-              data-test-subj="sloFormCustomKqlTotalQueryInput"
-              placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.sloDefinition.customKql.totalQueryPlaceholder',
-                {
-                  defaultMessage: 'Define the total events',
-                }
-              )}
-              suggestions={[]}
-              {...field}
-            />
+          dataTestSubj="sloFormCustomKqlTotalQueryInput"
+          indexPatternString={watch('indicator.params.index')}
+          label={i18n.translate(
+            'xpack.observability.slos.sloEdit.sloDefinition.customKql.totalQuery',
+            {
+              defaultMessage: 'Total query',
+            }
+          )}
+          name="indicator.params.total"
+          placeholder={i18n.translate(
+            'xpack.observability.slos.sloEdit.sloDefinition.customKql.totalQueryPlaceholder',
+            {
+              defaultMessage: 'Define the total events',
+            }
           )}
         />
       </EuiFlexItem>

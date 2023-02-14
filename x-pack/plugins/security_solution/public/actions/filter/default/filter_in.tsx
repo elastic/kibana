@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/cell-actions';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { CellAction } from '@kbn/cell-actions';
 import { i18n } from '@kbn/i18n';
 import { createFilter } from '../helpers';
 import { KibanaServices } from '../../../common/lib/kibana';
+import { fieldHasCellActions } from '../../utils';
 
 export const FILTER_IN = i18n.translate('xpack.securitySolution.actions.filterIn', {
   defaultMessage: 'Filter In',
 });
-const ID = 'security_filterIn';
+export const ACTION_ID = 'security_filterIn';
 const ICON = 'plusInCircle';
 
-export const createFilterInAction = ({ order }: { order?: number }) =>
-  createAction<CellActionExecutionContext>({
-    id: ID,
-    type: ID,
-    order,
-    getIconType: (): string => ICON,
-    getDisplayName: () => FILTER_IN,
-    getDisplayNameTooltip: () => FILTER_IN,
-    isCompatible: async ({ field }) => field.name != null && field.value != null,
-    execute: async ({ field }) => {
-      const services = KibanaServices.get();
-      const filterManager = services.data.query.filterManager;
+export const createFilterInAction = ({ order }: { order?: number }): CellAction => ({
+  id: ACTION_ID,
+  type: ACTION_ID,
+  order,
+  getIconType: (): string => ICON,
+  getDisplayName: () => FILTER_IN,
+  getDisplayNameTooltip: () => FILTER_IN,
+  isCompatible: async ({ field }) => fieldHasCellActions(field.name),
+  execute: async ({ field, metadata }) => {
+    const services = KibanaServices.get();
+    const filterManager = services.data.query.filterManager;
+    const negate = Boolean(metadata?.negateFilters);
 
-      const makeFilter = (currentVal: string | string[] | null | undefined) =>
-        currentVal?.length === 0
-          ? createFilter(field.name, undefined)
-          : createFilter(field.name, currentVal);
+    const makeFilter = (currentVal: string | string[] | null | undefined) =>
+      currentVal?.length === 0
+        ? createFilter(field.name, null)
+        : createFilter(field.name, currentVal, negate);
 
-      if (filterManager != null) {
-        filterManager.addFilters(makeFilter(field.value));
-      }
-    },
-  });
+    if (filterManager != null) {
+      filterManager.addFilters(makeFilter(field.value));
+    }
+  },
+});

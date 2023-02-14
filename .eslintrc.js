@@ -121,7 +121,7 @@ const VENN_DIAGRAM_HEADER = `
 
 /** Packages which should not be included within production code. */
 const DEV_PACKAGE_DIRS = getPackages(REPO_ROOT).flatMap((pkg) =>
-  pkg.isDevOnly ? pkg.normalizedRepoRelativeDir : []
+  pkg.isDevOnly() ? pkg.normalizedRepoRelativeDir : []
 );
 
 /** Directories (at any depth) which include dev-only code. */
@@ -248,6 +248,16 @@ const RESTRICTED_IMPORTS = [
   {
     name: 'react-use',
     message: 'Please use react-use/lib/{method} instead.',
+  },
+  {
+    name: 'react-router-dom',
+    importNames: ['Route'],
+    message: 'Please use @kbn/shared-ux-router instead',
+  },
+  {
+    name: '@kbn/kibana-react-plugin/public',
+    importNames: ['Route'],
+    message: 'Please use @kbn/shared-ux-router instead',
   },
 ];
 
@@ -518,7 +528,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-handlebars/src/upstream/**/*.{js,mjs,ts,tsx}'],
+      files: ['packages/kbn-handlebars/src/spec/**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -902,7 +912,10 @@ module.exports = {
       files: ['x-pack/plugins/profiling/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^(useAsync)$' }],
+        'react-hooks/exhaustive-deps': [
+          'error',
+          { additionalHooks: '^(useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$' },
+        ],
       },
     },
     {
@@ -946,6 +959,8 @@ module.exports = {
     {
       // front end and common typescript and javascript files only
       files: [
+        'x-pack/plugins/ecs_data_quality_dashboard/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
@@ -971,11 +986,15 @@ module.exports = {
       // We use this section to add rules in which we do not want to apply to test files.
       // This should be a very small set as most linter rules are useful for tests as well.
       files: [
+        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
       ],
       excludedFiles: [
+        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -987,6 +1006,8 @@ module.exports = {
     {
       // typescript only for front and back end
       files: [
+        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
@@ -1017,6 +1038,8 @@ module.exports = {
     {
       // typescript and javascript for front and back end
       files: [
+        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
@@ -1721,7 +1744,11 @@ module.exports = {
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
     {
-      files: 'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+      files: [
+        'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+        'packages/kbn-validate-next-docs-cli/**/*',
+        'packages/kbn-find-used-node-modules/**/*',
+      ],
       rules: {
         'max-classes-per-file': 'off',
       },

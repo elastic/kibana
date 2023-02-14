@@ -25,6 +25,7 @@ import type {
   PersistenceServices,
   IRuleDataClient,
   IRuleDataReader,
+  SuppressedAlertService,
 } from '@kbn/rule-registry-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
@@ -41,6 +42,7 @@ import type {
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
 import type { IRuleExecutionLogForExecutors, IRuleExecutionLogService } from '../rule_monitoring';
+import type { RefreshTypes } from '../types';
 
 export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
@@ -79,6 +81,8 @@ export interface RunOpts<TParams extends RuleParams> {
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
   alertTimestampOverride: Date | undefined;
+  alertWithSuppression: SuppressedAlertService;
+  refreshOnIndexingAlerts: RefreshTypes;
 }
 
 export type SecurityAlertType<

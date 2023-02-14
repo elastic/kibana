@@ -12,9 +12,14 @@ import type { Logger } from '@kbn/core/server';
 import {
   installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
-import type { PackageUsageStats, PackagePolicySOAttributes } from '../../../../common/types';
+import type {
+  PackageUsageStats,
+  PackagePolicySOAttributes,
+  Installable,
+} from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
   ArchivePackage,
@@ -68,6 +73,13 @@ export async function getPackages(
   });
   // get the installed packages
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+
+  const uploadedPackagesNotInRegistry = packageSavedObjects.saved_objects
+    .filter((pkg) => !registryItems.some((item) => item.name === pkg.id))
+    .map((pkg) =>
+      createInstallableFrom({ ...pkg.attributes, title: nameAsTitle(pkg.id), id: pkg.id }, pkg)
+    );
+
   const packageList = registryItems
     .map((item) =>
       createInstallableFrom(
@@ -75,6 +87,7 @@ export async function getPackages(
         packageSavedObjects.saved_objects.find(({ id }) => id === item.name)
       )
     )
+    .concat(uploadedPackagesNotInRegistry as Installable<any>)
     .sort(sortByName);
 
   if (!excludeInstallStatus) {
@@ -127,6 +140,7 @@ export async function getPackageSavedObjects(
   return savedObjectsClient.find<Installation>({
     ...(options || {}),
     type: PACKAGES_SAVED_OBJECT_TYPE,
+    perPage: SO_SEARCH_LIMIT,
   });
 }
 

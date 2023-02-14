@@ -3873,7 +3873,7 @@
             ],
             "label": "bulkResolve",
             "description": [
-              "\nResolves an array of objects by id, using any legacy URL aliases if they exist\n"
+              "\nResolves an array of objects by id.\n\nSee documentation for `.resolve`.\n"
             ],
             "signature": [
               "<T = unknown>(objects: ",
@@ -3966,7 +3966,7 @@
             "tags": [],
             "label": "resolve",
             "description": [
-              "\nResolves a single object, using any legacy URL alias if it exists\n"
+              "\nResolves a single object.\n\nAfter 8.0.0, saved objects are provided a unique ID _across_ spaces.\nA subset of existing saved objects may have IDs regenerated while upgrading to 8+.\n`.resolve` provides a way for clients with legacy IDs to still retrieve the correct\nsaved object.\n\nAn example of a client with a \"legacy ID\" is a bookmarked dashboard in a\nnon-default space.\n"
             ],
             "signature": [
               "<T = unknown>(type: string, id: string, options?: ",
@@ -6879,7 +6879,7 @@
             "section": "def-common.SavedObject",
             "text": "SavedObject"
           },
-          "<T>, \"attributes\" | \"references\">"
+          "<T>, \"references\" | \"attributes\">"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts",
         "deprecated": false,
@@ -6980,11 +6980,11 @@
           "\nOptions for the create point-in-time finder operation\n"
         ],
         "signature": [
-          "{ type: string | string[]; filter?: any; search?: string | undefined; fields?: string[] | undefined; aggs?: Record<string, ",
+          "{ type: string | string[]; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
+          "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; sortField?: string | undefined; fields?: string[] | undefined; preference?: string | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; sortOrder?: ",
           "SortOrder",
-          " | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
+          " | undefined; hasReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",
@@ -7016,7 +7016,7 @@
             "section": "def-common.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
-          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; }"
+          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; }"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create_point_in_time_finder.ts",
         "deprecated": false,

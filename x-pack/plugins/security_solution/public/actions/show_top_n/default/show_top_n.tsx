@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/cell-actions';
-import { createAction } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { CellAction, CellActionExecutionContext } from '@kbn/cell-actions';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 
@@ -19,7 +18,7 @@ import { Router } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 import { APP_NAME, DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { SecurityAppStore } from '../../../common/store';
-import { isInSecurityApp } from '../../utils';
+import { fieldHasCellActions, isInSecurityApp } from '../../utils';
 import { TopNAction } from '../show_top_n_component';
 import type { StartServices } from '../../../types';
 
@@ -29,7 +28,7 @@ const SHOW_TOP = (fieldName: string) =>
     defaultMessage: `Show top {fieldName}`,
   });
 
-const ID = 'security_showTopN';
+export const ACTION_ID = 'security_showTopN';
 const ICON = 'visBarVertical';
 const UNSUPPORTED_FIELD_TYPES = ['date', 'text'];
 
@@ -49,32 +48,34 @@ export const createShowTopNAction = ({
   history: H.History;
   services: StartServices;
   order?: number;
-}) => {
+}): CellAction<ShowTopNActionContext> => {
   let currentAppId: string | undefined;
 
   services.application.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
   });
 
-  return createAction<ShowTopNActionContext>({
-    id: ID,
-    type: ID,
+  return {
+    id: ACTION_ID,
+    type: ACTION_ID,
     order,
     getIconType: (): string => ICON,
     getDisplayName: ({ field }) => SHOW_TOP(field.name),
     getDisplayNameTooltip: ({ field }) => SHOW_TOP(field.name),
     isCompatible: async ({ field }) =>
       isInSecurityApp(currentAppId) &&
-      field.name != null &&
-      field.value != null &&
-      !UNSUPPORTED_FIELD_TYPES.includes(field.type),
+      fieldHasCellActions(field.name) &&
+      !UNSUPPORTED_FIELD_TYPES.includes(field.type) &&
+      !!field.aggregatable,
     execute: async (context) => {
-      const node = context.extraContentNodeRef?.current;
+      if (!context.nodeRef.current) return;
 
-      if (!node) return;
+      const node = document.createElement('div');
+      document.body.appendChild(node);
 
       const onClose = () => {
         unmountComponentAtNode(node);
+        document.body.removeChild(node);
       };
 
       const element = (
@@ -96,5 +97,5 @@ export const createShowTopNAction = ({
 
       ReactDOM.render(element, node);
     },
-  });
+  };
 };

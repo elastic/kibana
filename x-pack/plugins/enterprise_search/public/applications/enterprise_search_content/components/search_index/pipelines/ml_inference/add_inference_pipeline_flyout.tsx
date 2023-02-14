@@ -89,10 +89,9 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
   const createErrorsHookDep = createErrors.join('|');
   useEffect(() => {
     if (createErrors.length === 0) return;
-    // TODO - update for flyout
-    const modalOverflow = document.getElementsByClassName('euiModalBody__overflow');
-    if (modalOverflow.length === 0) return;
-    modalOverflow[0].scrollTop = 0;
+    const flyoutOverflow = document.getElementsByClassName('euiFlyoutBody__overflow');
+    if (flyoutOverflow.length === 0) return;
+    flyoutOverflow[0].scrollTop = 0;
   }, [createErrorsHookDep]);
 
   if (isLoading) {
@@ -278,7 +277,7 @@ export const AddInferencePipelineFooter: React.FC<
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.footer.create',
               {
-                defaultMessage: 'Create',
+                defaultMessage: 'Create pipeline',
               }
             )}
           </EuiButton>

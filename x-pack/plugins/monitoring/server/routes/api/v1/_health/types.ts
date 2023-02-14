@@ -15,14 +15,8 @@ export enum MonitoredProduct {
   Kibana = 'kibana',
   Beats = 'beat',
   Logstash = 'logstash',
-  EnterpriseSearch = 'enterpriseSearch',
+  EnterpriseSearch = 'enterprisesearch',
 }
-export type MetricbeatMonitoredProduct = Exclude<MonitoredProduct, MonitoredProduct.Cluster>;
-export type PackagesMonitoredProduct = Exclude<
-  MetricbeatMonitoredProduct,
-  MonitoredProduct.EnterpriseSearch
->;
-
 export type SearchFn = (params: any) => Promise<ElasticsearchResponse>;
 
 export interface QueryOptions {

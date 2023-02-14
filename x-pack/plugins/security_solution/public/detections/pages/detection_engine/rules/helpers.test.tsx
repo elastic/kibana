@@ -116,6 +116,11 @@ describe('rule helpers', () => {
           tiebreakerField: undefined,
         },
         groupByFields: ['host.name'],
+        groupByDuration: {
+          value: 5,
+          unit: 'm',
+        },
+        groupByRadioSelection: 'per-rule-execution',
         newTermsFields: ['host.name'],
         historyWindowSize: '7d',
       };
@@ -260,6 +265,11 @@ describe('rule helpers', () => {
           tiebreakerField: undefined,
         },
         groupByFields: [],
+        groupByDuration: {
+          value: 5,
+          unit: 'm',
+        },
+        groupByRadioSelection: 'per-rule-execution',
         newTermsFields: [],
         historyWindowSize: '7d',
         shouldLoadQueryDynamically: true,
@@ -315,6 +325,11 @@ describe('rule helpers', () => {
           tiebreakerField: undefined,
         },
         groupByFields: [],
+        groupByDuration: {
+          value: 5,
+          unit: 'm',
+        },
+        groupByRadioSelection: 'per-rule-execution',
         newTermsFields: [],
         historyWindowSize: '7d',
         shouldLoadQueryDynamically: false,

@@ -10,14 +10,8 @@ import Fs from 'fs';
 import Fsp from 'fs/promises';
 import * as Rx from 'rxjs';
 
-import { assertAbsolute, mkdirp } from './fs';
+import { assertAbsolute, mkdirp, fsReadDir$ } from './fs';
 import { type DirRecord, type FileRecord, type Record, SomePath } from './fs_records';
-
-const fsReadDir$ = Rx.bindNodeCallback(
-  (path: string, cb: (err: Error | null, ents: Fs.Dirent[]) => void) => {
-    Fs.readdir(path, { withFileTypes: true }, cb);
-  }
-);
 
 interface Options {
   /**
@@ -29,7 +23,9 @@ interface Options {
    */
   destination: string;
   /**
-   * function that is called with each Record
+   * function that is called with each Record. If a falsy value is returned the
+   * record will be dropped. If it is a directory none of its children will be
+   * considered.
    */
   filter?: (record: Readonly<Record>) => boolean;
   /**
@@ -41,7 +37,7 @@ interface Options {
    */
   time?: Date;
   /**
-   *
+   * function which can replace the records of files as they are copied
    */
   map?: (record: Readonly<FileRecord>) => Promise<undefined | FileRecord>;
 }
@@ -121,6 +117,6 @@ export async function scanCopy(options: Options) {
       type: 'dir',
       source: SomePath.fromAbs(source),
       dest: SomePath.fromAbs(destination),
-    })
+    }).pipe(Rx.defaultIfEmpty(undefined))
   );
 }

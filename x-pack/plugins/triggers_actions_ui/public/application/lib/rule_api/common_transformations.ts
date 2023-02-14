@@ -42,10 +42,12 @@ const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
 
 const transformLastRun: RewriteRequestCase<RuleLastRun> = ({
   outcome_msg: outcomeMsg,
+  outcome_order: outcomeOrder,
   alerts_count: alertsCount,
   ...rest
 }) => ({
   outcomeMsg,
+  outcomeOrder,
   alertsCount,
   ...rest,
 });

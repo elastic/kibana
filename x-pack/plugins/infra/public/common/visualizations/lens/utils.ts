@@ -46,7 +46,7 @@ export const getBreakdownColumn = (
           type: 'alphabetical',
           fallback: false,
         },
-        orderDirection: 'desc',
+        orderDirection: 'asc',
         otherBucket: false,
         missingBucket: false,
         parentFormat: {
@@ -70,7 +70,7 @@ export const getXYVisualizationState = (
     showSingleSeries: false,
   },
   valueLabels: 'show',
-  fittingFunction: 'None',
+  fittingFunction: 'Zero',
   curveType: 'LINEAR',
   yLeftScale: 'linear',
   axisTitlesVisibilitySettings: {

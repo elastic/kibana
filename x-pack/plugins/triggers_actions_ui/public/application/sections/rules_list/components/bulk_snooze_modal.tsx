@@ -166,8 +166,8 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
               id="xpack.triggersActionsUI.sections.rulesList.bulkSnoozeModal.modalTitle"
               defaultMessage="Add snooze now"
             />
-            <EuiSpacer size="s" />
           </EuiModalHeaderTitle>
+          <EuiSpacer size="s" />
         </EuiModalHeader>
         <EuiModalBody>
           <SnoozePanel

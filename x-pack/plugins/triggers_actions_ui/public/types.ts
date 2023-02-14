@@ -68,10 +68,9 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
 } from './application/sections/rule_details/components/rule_event_log_list';
-import { AlertSummaryTimeRange } from './application/sections/rule_details/components/alert_summary/types';
+import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
-import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
 import type {
   FieldBrowserOptions,
   CreateFieldComponent,
@@ -81,6 +80,7 @@ import type {
 } from './application/sections/field_browser/types';
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
+import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -123,7 +123,7 @@ export type {
   RulesListProps,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
-  RulesListNotifyBadgeProps,
+  RulesListNotifyBadgePropsWithApi,
   FieldBrowserProps,
   FieldBrowserOptions,
   CreateFieldComponent,
@@ -207,6 +207,7 @@ export interface ActionParamsProps<TParams> {
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
+  useDefaultMessage?: boolean;
   actionConnector?: ActionConnector;
   isLoading?: boolean;
   isDisabled?: boolean;
@@ -326,6 +327,7 @@ export interface RuleType<
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   enabledInLicense: boolean;
+  hasGetSummarizedAlerts?: boolean;
 }
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
@@ -379,6 +381,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   requiresAppContext: boolean;
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;
+  defaultSummaryMessage?: string;
   alertDetailsAppSection?:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
@@ -449,13 +452,19 @@ export enum AlertsField {
   uuid = 'kibana.alert.rule.uuid',
 }
 
+export interface InspectQuery {
+  request: string[];
+  response: string[];
+}
+export type GetInspectQuery = () => InspectQuery;
+
 export interface FetchAlertData {
   activePage: number;
   alerts: EcsFieldsResponse[];
   alertsCount: number;
   isInitializing: boolean;
   isLoading: boolean;
-  getInspectQuery: () => { request: {}; response: {} };
+  getInspectQuery: GetInspectQuery;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;
@@ -474,6 +483,7 @@ export interface AlertsTableProps {
   id?: string;
   leadingControlColumns: EuiDataGridControlColumn[];
   showExpandToDetails: boolean;
+  showAlertStatusWithFlapping?: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
   visibleColumns: string[];
@@ -485,6 +495,7 @@ export interface AlertsTableProps {
   onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
+  showInspectButton?: boolean;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -548,6 +559,7 @@ export interface AlertsTableConfigurationRegistry {
   usePersistentControls?: () => {
     right?: ReactNode;
   };
+  showInspectButton?: boolean;
 }
 
 export enum BulkActionsVerbs {
@@ -654,4 +666,8 @@ export interface UpdateRulesToBulkEditProps {
   action: BulkEditActions;
   rules?: RuleTableItem[];
   filter?: KueryNode | null;
+}
+
+export interface LazyLoadProps {
+  hideLazyLoader?: boolean;
 }

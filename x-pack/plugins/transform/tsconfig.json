@@ -46,6 +46,14 @@
     "@kbn/field-types",
     "@kbn/ml-nested-property",
     "@kbn/ml-is-defined",
+    "@kbn/ml-date-picker",
+    "@kbn/ml-url-state",
+    "@kbn/ml-local-storage",
+    "@kbn/ml-query-utils",
+    "@kbn/charts-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/unified-field-list-plugin",
+    "@kbn/shared-ux-router"
   ],
   "exclude": [
     "target/**/*",

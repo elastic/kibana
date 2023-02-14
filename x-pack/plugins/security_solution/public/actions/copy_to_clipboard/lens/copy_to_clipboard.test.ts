@@ -137,6 +137,25 @@ describe('Lens createCopyToClipboardAction', () => {
       expect(mockSuccessToast).toHaveBeenCalled();
     });
 
+    it('should handle number coming from value count', async () => {
+      await copyToClipboardAction.execute({
+        ...context,
+        data: [
+          {
+            columnMeta: {
+              ...columnMeta,
+              type: 'number',
+              sourceParams: {
+                type: 'value_count',
+              },
+            },
+          },
+        ],
+      });
+      expect(mockCopy).toHaveBeenCalledWith('user.name: *');
+      expect(mockSuccessToast).toHaveBeenCalled();
+    });
+
     it('should execute with multiple values', async () => {
       await copyToClipboardAction.execute({
         ...context,

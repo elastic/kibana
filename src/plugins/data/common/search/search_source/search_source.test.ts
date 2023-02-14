@@ -114,7 +114,7 @@ describe('SearchSource', () => {
   });
 
   describe('#getActiveIndexFilter()', () => {
-    test('pase _index from query', () => {
+    test('pass _index from query', () => {
       searchSource.setField('query', {
         language: 'kuery',
         query: `_INDEX : fakebeat and _index : "mybeat-*"`,
@@ -122,7 +122,7 @@ describe('SearchSource', () => {
       expect(searchSource.getActiveIndexFilter()).toMatchObject(['mybeat-*']);
     });
 
-    test('pase _index from filter', () => {
+    test('pass _index from filter', () => {
       const filter = [
         {
           query: { match_phrase: { _index: 'auditbeat-*' } },
@@ -163,7 +163,7 @@ describe('SearchSource', () => {
       expect(searchSource.getActiveIndexFilter()).toMatchObject(['auditbeat-*']);
     });
 
-    test('pase _index from query and filter with negate equals to true', () => {
+    test('pass _index from query and filter with negate equals to true', () => {
       const filter = [
         {
           query: {
@@ -189,7 +189,7 @@ describe('SearchSource', () => {
       expect(searchSource.getActiveIndexFilter()).toMatchObject([]);
     });
 
-    test('pase _index from query and filter with negate equals to true and disabled equals to true', () => {
+    test('pass _index from query and filter with negate equals to true and disabled equals to true', () => {
       const filter = [
         {
           query: {

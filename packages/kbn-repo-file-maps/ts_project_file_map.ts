@@ -31,33 +31,36 @@ export class TsProjectFileMap {
 
       const include = tsProject.config.include ?? [];
       const exclude = tsProject.config.exclude ?? [];
+      const pkg = tsProject.pkg;
 
-      const localPatterns = [
-        ...include.filter(isLocal).map(toRepoRel),
-        ...exclude.filter(isLocal).map(toRepoRelExcl),
-      ];
-      const globalPatterns = [
-        ...include.filter(isNotLocal).map(toRepoRel),
-        ...exclude.filter(isNotLocal).map(toRepoRelExcl),
-      ];
+      const localPatterns = pkg
+        ? [...include.filter(isLocal).map(toRepoRel), ...exclude.filter(isLocal).map(toRepoRelExcl)]
+        : [];
 
-      const localMatch = localPatterns.length ? makeMatcher(localPatterns) : undefined;
-      const globalMatch = globalPatterns.length ? makeMatcher(globalPatterns) : undefined;
+      const externalPatterns = pkg
+        ? [
+            ...include.filter(isNotLocal).map(toRepoRel),
+            ...exclude.filter(isNotLocal).map(toRepoRelExcl),
+          ]
+        : [...include.map(toRepoRel), ...exclude.map(toRepoRelExcl)];
 
-      for (const path of allFiles) {
-        if (
-          localMatch &&
-          (path.repoRelDir === tsProject.repoRelDir ||
-            path.repoRelDir.startsWith(tsProject.repoRelDir + '/'))
-        ) {
-          if (localMatch(path.repoRel)) {
-            this.filesByTsProject.add(tsProject, path);
+      const localMatch = pkg && localPatterns.length ? makeMatcher(localPatterns) : undefined;
+      const externalMatch = externalPatterns.length ? makeMatcher(externalPatterns) : undefined;
+
+      if (localMatch && pkg) {
+        const localFiles = pkgFileMap.getFiles(pkg) ?? [];
+        for (const local of localFiles) {
+          if (localMatch(local.repoRel)) {
+            this.filesByTsProject.add(tsProject, local);
           }
-          continue;
         }
+      }
 
-        if (globalMatch && globalMatch(path.repoRel)) {
-          this.filesByTsProject.add(tsProject, path);
+      if (externalMatch) {
+        for (const external of allFiles) {
+          if (externalMatch(external.repoRel)) {
+            this.filesByTsProject.add(tsProject, external);
+          }
         }
       }
     }

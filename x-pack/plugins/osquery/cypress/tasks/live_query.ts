@@ -23,7 +23,8 @@ export const selectAllAgents = () => {
 export const clearInputQuery = () =>
   cy.get(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
 
-export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(query);
+export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
+  cy.get(LIVE_QUERY_EDITOR).type(query, options);
 
 export const submitQuery = () => {
   cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
@@ -63,4 +64,43 @@ export const deleteAndConfirm = (type: string) => {
 
 export const findAndClickButton = (text: string) => {
   cy.react('EuiButton').contains(text).click();
+};
+
+export const toggleRuleOffAndOn = (ruleName: string) => {
+  cy.visit('/app/security/rules');
+  cy.contains(ruleName);
+  cy.wait(2000);
+  cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+  cy.getBySel('ruleSwitch').click();
+  cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
+  cy.getBySel('ruleSwitch').click();
+  cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+};
+
+export const loadAlertsEvents = () => {
+  cy.visit('/app/security/alerts');
+  cy.getBySel('header-page-title').contains('Alerts').should('exist');
+  cy.getBySel('expand-event')
+    .first()
+    .within(() => {
+      cy.get(`[data-is-loading="true"]`).should('exist');
+    });
+  cy.getBySel('expand-event')
+    .first()
+    .within(() => {
+      cy.get(`[data-is-loading="true"]`).should('not.exist');
+    });
+};
+
+export const addLastLiveQueryToCase = () => {
+  cy.waitForReact();
+  cy.react('CustomItemAction', {
+    props: { index: 1 },
+  })
+    .first()
+    .click();
+  cy.contains('Live query details');
+  cy.contains('Add to Case').click();
+  cy.contains('Select case');
+  cy.contains(/Select$/).click();
 };

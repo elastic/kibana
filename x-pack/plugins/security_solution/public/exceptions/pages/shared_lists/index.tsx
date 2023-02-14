@@ -192,10 +192,21 @@ export const SharedLists = React.memo(() => {
   );
 
   const handleExport = useCallback(
-    ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
+    ({
+        id,
+        listId,
+        namespaceType,
+        includeExpiredExceptions,
+      }: {
+        id: string;
+        listId: string;
+        namespaceType: NamespaceType;
+        includeExpiredExceptions: boolean;
+      }) =>
       async () => {
         await exportExceptionList({
           id,
+          includeExpiredExceptions,
           listId,
           namespaceType,
           onError: handleExportError,

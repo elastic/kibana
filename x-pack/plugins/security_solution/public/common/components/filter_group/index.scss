@@ -9,3 +9,22 @@
 [id^=control-popover] .euiPopoverTitle {
   display: none
 }
+
+.filter-group__wrapper {
+  .euiFlexGroup.controlGroup {
+    min-height: 34px;
+  }
+  .euiFormControlLayout.euiFormControlLayout--group.controlFrame__formControlLayout {
+    height: 34px;
+    & .euiFormLabel.controlFrame__formControlLayoutLabel {
+      padding: 8px;
+    }
+  }
+  .euiText.errorEmbeddableCompact__button {
+    padding: 8px;
+    .euiLink {
+      display:flex;
+      gap: 8px;
+    }
+  }
+}

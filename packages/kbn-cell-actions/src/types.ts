@@ -12,8 +12,6 @@ import type {
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
 
-export type CellAction = Action<CellActionExecutionContext>;
-
 export interface CellActionsProviderProps {
   /**
    * Please assign `uiActions.getTriggerCompatibleActions` function.
@@ -21,8 +19,6 @@ export interface CellActionsProviderProps {
    */
   getTriggerCompatibleActions: UiActionsService['getTriggerCompatibleActions'];
 }
-
-export type GetActions = (context: CellActionExecutionContext) => Promise<CellAction[]>;
 
 export interface CellActionField {
   /**
@@ -39,30 +35,15 @@ export interface CellActionField {
    * Field value.
    * Example: 'My-Laptop'
    */
-  value?: string | string[] | null;
-}
-
-export interface PartitionedActions {
-  extraActions: CellAction[];
-  visibleActions: CellAction[];
-}
-
-export interface CellActionExecutionContext extends ActionExecutionContext {
-  field: CellActionField;
+  value: string | string[] | null | undefined;
   /**
-   * Ref to a DOM node where the action can add custom HTML.
+   * When true the field supports aggregations.
+   *
+   * It defaults to false.
+   *
+   * You can verify if a field is aggregatable on kibana/management/kibana/dataViews.
    */
-  extraContentNodeRef?: React.MutableRefObject<HTMLDivElement | null>;
-
-  /**
-   * Ref to the node where the cell action are rendered.
-   */
-  nodeRef?: React.MutableRefObject<HTMLElement | null>;
-
-  /**
-   * Extra configurations for actions.
-   */
-  metadata?: Record<string, unknown>;
+  aggregatable?: boolean;
 }
 
 export enum CellActionsMode {
@@ -97,9 +78,57 @@ export interface CellActionsProps {
    */
   visibleCellActions?: number;
   /**
+   * List of Actions ids that shouldn't be displayed inside cell actions.
+   */
+  disabledActions?: string[];
+  /**
    * Custom set of properties used by some actions.
    * An action might require a specific set of metadata properties to render.
    * This data is sent directly to actions.
    */
   metadata?: Record<string, unknown>;
+
+  className?: string;
+}
+
+type Metadata = Record<string, unknown> | undefined;
+
+export interface CellActionExecutionContext extends ActionExecutionContext {
+  field: CellActionField;
+  /**
+   * Ref to the node where the cell action are rendered.
+   */
+  nodeRef: React.MutableRefObject<HTMLElement | null>;
+  /**
+   * Extra configurations for actions.
+   */
+  metadata?: Metadata;
+}
+
+export interface CellActionCompatibilityContext<M extends Metadata = Metadata>
+  extends ActionExecutionContext {
+  /**
+   * The object containing the field name and type, needed for the compatibility check
+   */
+  field: Pick<CellActionField, 'name' | 'type' | 'aggregatable'>;
+  /**
+   * Extra configurations for actions.
+   */
+  metadata?: M;
+}
+
+export interface CellAction<C extends CellActionExecutionContext = CellActionExecutionContext>
+  extends Omit<Action<C>, 'isCompatible'> {
+  /**
+   * Returns a promise that resolves to true if this action is compatible given the context,
+   * otherwise resolves to false.
+   */
+  isCompatible(context: CellActionCompatibilityContext<C['metadata']>): Promise<boolean>;
+}
+
+export type GetActions = (context: CellActionCompatibilityContext) => Promise<CellAction[]>;
+
+export interface PartitionedActions {
+  extraActions: CellAction[];
+  visibleActions: CellAction[];
 }

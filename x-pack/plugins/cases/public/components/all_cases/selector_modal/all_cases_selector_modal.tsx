@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -29,7 +29,7 @@ export interface AllCasesSelectorModalProps {
 
 const Modal = styled(EuiModal)`
   ${({ theme }) => `
-    min-width: ${theme.eui.euiBreakpoints.l};
+    min-width: ${theme.eui.euiBreakpoints.m};
     max-width: ${theme.eui.euiBreakpoints.xl};
   `}
 `;
@@ -68,13 +68,13 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
             />
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButton
-              color="text"
+            <EuiButtonEmpty
+              color="primary"
               onClick={closeModal}
               data-test-subj="all-cases-modal-cancel-button"
             >
               {i18n.CANCEL}
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiModalFooter>
         </Modal>
       </QueryClientProvider>

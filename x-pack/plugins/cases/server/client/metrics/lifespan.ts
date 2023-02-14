@@ -7,7 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import type {
-  CaseUserActionInjectedAttributesWithoutActionId,
+  CaseUserActionInjectedAttributes,
   SingleCaseMetricsResponse,
   StatusInfo,
   StatusUserAction,
@@ -83,7 +83,7 @@ interface StatusCalculations {
 }
 
 export function getStatusInfo(
-  statusUserActions: Array<SavedObject<CaseUserActionInjectedAttributesWithoutActionId>>,
+  statusUserActions: Array<SavedObject<CaseUserActionInjectedAttributes>>,
   caseOpenTimestamp: Date
 ): StatusInfo {
   const accStatusInfo = statusUserActions.reduce<StatusCalculations>(
@@ -138,7 +138,7 @@ export function getStatusInfo(
 }
 
 function isValidStatusChangeUserAction(
-  attributes: CaseUserActionInjectedAttributesWithoutActionId,
+  attributes: CaseUserActionInjectedAttributes,
   newStatusChangeTimestamp: Date
 ): attributes is UserActionWithResponse<StatusUserAction> {
   return StatusUserActionRt.is(attributes) && isDateValid(newStatusChangeTimestamp);

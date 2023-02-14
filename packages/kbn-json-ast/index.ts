@@ -14,5 +14,5 @@ export {
   removeAllReferences,
 } from './src/references';
 export { setExtends } from './src/extends';
-export { setProp } from './src/props';
+export { setProp, getPropFromSource as getProp, removeProp } from './src/props';
 export { snip } from './src/snip';

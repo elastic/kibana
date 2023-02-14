@@ -91,6 +91,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 navTabs[SecurityPageName.detectionAndResponse],
                 navTabs[SecurityPageName.cloudSecurityPostureDashboard],
                 navTabs[SecurityPageName.entityAnalytics],
+                navTabs[SecurityPageName.dataQuality],
                 ...(navTabs[SecurityPageName.kubernetes] != null
                   ? [navTabs[SecurityPageName.kubernetes]]
                   : []),

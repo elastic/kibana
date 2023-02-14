@@ -35,9 +35,9 @@ export const deleteMonitorBulk = async ({
   request: KibanaRequest;
 }) => {
   const { logger, telemetry, stackVersion } = server;
-  const spaceId = server.spaces.spacesService.getSpaceId(request);
 
   try {
+    const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
       monitors.map((normalizedMonitor) => ({
         ...normalizedMonitor.attributes,

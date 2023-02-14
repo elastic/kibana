@@ -37,7 +37,7 @@ import {
 } from './get_summary_statistics';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { isCrossClusterSearch } from './is_cross_cluster_search';
-import { getServiceNamesFromTermsEnum } from '../services/get_services/get_sorted_and_filtered_services';
+import { getServiceNamesFromTermsEnum } from '../services/get_services/get_service_names_from_terms_enum';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',

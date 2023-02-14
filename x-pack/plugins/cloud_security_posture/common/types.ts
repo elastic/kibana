@@ -6,8 +6,9 @@
  */
 
 import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
+import { CspFinding } from './schemas/csp_finding';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
-import type { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
+import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 /** number between 1-100 */
@@ -34,10 +35,10 @@ export interface PostureTrend extends Stats {
 
 export interface Cluster {
   meta: {
-    clusterId: string;
-    clusterName?: string;
-    benchmarkName: string;
-    benchmarkId: BenchmarkId;
+    assetIdentifierId: string;
+    cloud: CspFinding['cloud'];
+    benchmark: CspFinding['rule']['benchmark'];
+    cluster: NonNullable<CspFinding['orchestrator']>['cluster'];
     lastUpdate: string;
   };
   stats: Stats;

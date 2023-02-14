@@ -155,9 +155,10 @@ describe('useDeleteAction', () => {
     });
 
     await waitFor(() => {
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-        'Deleted case'
-      );
+      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Deleted case',
+        className: 'eui-textBreakWord',
+      });
     });
   });
 
@@ -180,9 +181,10 @@ describe('useDeleteAction', () => {
     });
 
     await waitFor(() => {
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-        'Deleted 2 cases'
-      );
+      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Deleted 2 cases',
+        className: 'eui-textBreakWord',
+      });
     });
   });
 });

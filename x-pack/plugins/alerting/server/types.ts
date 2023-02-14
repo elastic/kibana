@@ -51,6 +51,7 @@ import {
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { FieldMap } from '../common/alert_schema/field_maps/types';
+import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import { GetViewInAppRelativeUrlFn } from './lib';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
@@ -112,6 +113,7 @@ export interface RuleExecutorOptions<
   startedAt: Date;
   state: State;
   namespace?: string;
+  flappingSettings: RulesSettingsFlappingProperties;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {

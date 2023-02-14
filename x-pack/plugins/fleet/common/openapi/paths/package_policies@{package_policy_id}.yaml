@@ -63,11 +63,6 @@ delete:
               - id
   parameters:
     - schema:
-        type: string
-      name: packagePolicyId
-      in: path
-      required: true
-    - schema:
         type: boolean
       name: force
       in: query

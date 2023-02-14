@@ -93,18 +93,6 @@ export class UpdateSLO {
   }
 
   private toResponse(slo: SLO): UpdateSLOResponse {
-    return updateSLOResponseSchema.encode({
-      id: slo.id,
-      name: slo.name,
-      description: slo.description,
-      indicator: slo.indicator,
-      budgetingMethod: slo.budgetingMethod,
-      timeWindow: slo.timeWindow,
-      objective: slo.objective,
-      settings: slo.settings,
-      revision: slo.revision,
-      createdAt: slo.createdAt,
-      updatedAt: slo.updatedAt,
-    });
+    return updateSLOResponseSchema.encode(slo);
   }
 }

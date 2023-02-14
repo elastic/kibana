@@ -96,6 +96,15 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: disableLinks,
             testSubj: 'mlMainTab notifications',
           },
+          {
+            id: 'memory_usage',
+            pathId: ML_PAGES.MEMORY_USAGE,
+            name: i18n.translate('xpack.ml.navMenu.memoryUsageText', {
+              defaultMessage: 'Memory Usage',
+            }),
+            disabled: disableLinks || !canViewMlNodes,
+            testSubj: 'mlMainTab nodesOverview',
+          },
         ],
       },
       {
@@ -195,15 +204,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab trainedModels',
-          },
-          {
-            id: 'nodes_overview',
-            pathId: ML_PAGES.TRAINED_MODELS_NODES,
-            name: i18n.translate('xpack.ml.navMenu.nodesOverviewText', {
-              defaultMessage: 'Nodes',
-            }),
-            disabled: disableLinks || !canViewMlNodes,
-            testSubj: 'mlMainTab nodesOverview',
           },
         ],
       },

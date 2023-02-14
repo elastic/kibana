@@ -3,11 +3,7 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    // there is still a decent amount of JS in this plugin and we are taking
-    // advantage of the fact that TS doesn't know the types of that code and
-    // gives us `any`. Once that code is converted to .ts we can remove this
-    // and allow TS to infer types from any JS file imported.
-    "allowJs": false
+    "allowJs": true
   },
   "include": [
     "*.ts",
@@ -41,6 +37,7 @@
     "@kbn/std",
     "@kbn/utility-types",
     "@kbn/react-field",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

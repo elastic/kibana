@@ -45,7 +45,9 @@ import { SeverityBadge } from '../severity_badge';
 import type {
   AboutStepRiskScore,
   AboutStepSeverity,
+  Duration,
 } from '../../../pages/detection_engine/rules/types';
+import { GroupByOptions } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
 import type { LicenseService } from '../../../../../common/license';
@@ -532,6 +534,40 @@ export const buildAlertSuppressionDescription = (
       )}
     </EuiFlexGroup>
   );
+
+  const title = (
+    <>
+      {label}
+      <EuiBetaBadge
+        label={i18n.ALERT_SUPPRESSION_TECHNICAL_PREVIEW}
+        style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+        size="s"
+      />
+      {!license.isAtLeast(minimumLicenseForSuppression) && (
+        <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
+          <EuiIcon type={'alert'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
+        </EuiToolTip>
+      )}
+    </>
+  );
+  return [
+    {
+      title,
+      description,
+    },
+  ];
+};
+
+export const buildAlertSuppressionWindowDescription = (
+  label: string,
+  value: Duration,
+  license: LicenseService,
+  groupByRadioSelection: GroupByOptions
+): ListItems[] => {
+  const description =
+    groupByRadioSelection === GroupByOptions.PerTimePeriod
+      ? `${value.value}${value.unit}`
+      : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
 
   const title = (
     <>

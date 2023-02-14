@@ -16,3 +16,4 @@ export * from './sli_client';
 export * from './slo_repository';
 export * from './transform_manager';
 export * from './update_slo';
+export * from './summary_client';

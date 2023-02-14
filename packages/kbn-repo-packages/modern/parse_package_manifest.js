@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+const Path = require('path');
 const Fs = require('fs');
 const { inspect } = require('util');
 
@@ -19,6 +20,7 @@ const {
   PACKAGE_TYPES,
 } = require('./parse_helpers');
 const { parse } = require('../utils/jsonc');
+const { isValidPluginCategoryInfo, PLUGIN_CATEGORY } = require('./plugin_category_info');
 
 /**
  * @param {string} key
@@ -41,35 +43,40 @@ const isValidOwner = (v) => typeof v === 'string' && v.startsWith('@');
 
 /**
  * @param {unknown} plugin
- * @returns {import('./types').PluginPackageManifest['plugin']}
+ * @param {string} path
+ * @returns {import('./types').PluginPackageManifest['plugin']} plugin
  */
-function validatePackageManifestPlugin(plugin) {
+function validatePackageManifestPlugin(plugin, path) {
   if (!isObj(plugin)) {
-    throw err(`plugin`, plugin, `must be an object`);
+    throw err('plugin', plugin, 'must be an object');
   }
 
   const {
     id,
+    browser,
+    server,
+    extraPublicDirs,
     configPath,
     requiredPlugins,
     optionalPlugins,
     requiredBundles,
-    description,
     enabledOnAnonymousPages,
-    serviceFolders,
     type,
-    ...extra
+    __category__,
   } = plugin;
-
-  const extraKeys = Object.keys(extra);
-  if (extraKeys.length) {
-    throw new Error(`unexpected keys in "plugin" of package [${extraKeys.join(', ')}]`);
-  }
 
   if (!isValidPluginId(id)) {
     throw err(`plugin.id`, id, `must be a string in camel or snake case`);
   }
-
+  if (typeof browser !== 'boolean') {
+    throw err('plugin.browser', browser, 'must be a boolean');
+  }
+  if (typeof server !== 'boolean') {
+    throw err('plugin.server', server, 'must be a boolean');
+  }
+  if (extraPublicDirs !== undefined && !isArrOfStrings(extraPublicDirs)) {
+    throw err(`plugin.extraPublicDirs`, extraPublicDirs, `must be an array of strings`);
+  }
   if (configPath !== undefined && !(isSomeString(configPath) || isArrOfStrings(configPath))) {
     throw err(
       `plugin.configPath`,
@@ -102,32 +109,48 @@ function validatePackageManifestPlugin(plugin) {
     );
   }
 
-  if (description !== undefined && !isSomeString(description)) {
-    throw err(`plugin.description`, description, `must be a non-empty string when specified`);
-  }
-
   if (enabledOnAnonymousPages !== undefined && typeof enabledOnAnonymousPages !== 'boolean') {
     throw err(`plugin.enabledOnAnonymousPages`, enabledOnAnonymousPages, `must be a boolean`);
-  }
-
-  if (serviceFolders !== undefined && !isArrOfStrings(serviceFolders)) {
-    throw err(`plugin.serviceFolders`, serviceFolders, `must be an array of non-empty strings`);
   }
 
   if (type !== undefined && type !== 'preboot') {
     throw err(`plugin.type`, type, `must be undefined or "preboot"`);
   }
 
+  const segs = path.split(Path.sep);
+  const isBuild = segs.includes('node_modules') || segs.includes('build');
+  if (__category__ !== undefined) {
+    if (!isBuild) {
+      throw err(
+        'plugin.__category__',
+        __category__,
+        'may only be specified on built packages in node_modules'
+      );
+    }
+
+    if (!isValidPluginCategoryInfo(__category__)) {
+      throw err('plugin.__category__', __category__, 'is not valid');
+    }
+  } else if (isBuild) {
+    throw err(
+      'plugin.__category__',
+      __category__,
+      'must be defined on built packages in node_modules'
+    );
+  }
+
   return {
     id,
+    browser,
+    server,
     type,
     configPath,
     requiredPlugins,
     optionalPlugins,
     requiredBundles,
-    description,
     enabledOnAnonymousPages,
-    serviceFolders,
+    extraPublicDirs,
+    [PLUGIN_CATEGORY]: __category__,
   };
 }
 
@@ -172,14 +195,26 @@ function validatePackageManifestBuild(build) {
 /**
  * Validate the contents of a parsed kibana.jsonc file.
  * @param {unknown} parsed
+ * @param {string} path
  * @returns {import('./types').KibanaPackageManifest}
  */
-function validatePackageManifest(parsed) {
+function validatePackageManifest(parsed, path) {
   if (!isObj(parsed)) {
     throw new Error('expected manifest root to be an object');
   }
 
-  const { type, id, owner, devOnly, plugin, sharedBrowserBundle, build, ...extra } = parsed;
+  const {
+    type,
+    id,
+    owner,
+    devOnly,
+    plugin,
+    sharedBrowserBundle,
+    build,
+    description,
+    serviceFolders,
+    ...extra
+  } = parsed;
 
   const extraKeys = Object.keys(extra);
   if (extraKeys.length) {
@@ -209,11 +244,21 @@ function validatePackageManifest(parsed) {
     throw err(`devOnly`, devOnly, `must be a boolean when defined`);
   }
 
+  if (description !== undefined && !isSomeString(description)) {
+    throw err(`description`, description, `must be a non-empty string when specified`);
+  }
+
+  if (serviceFolders !== undefined && !isArrOfStrings(serviceFolders)) {
+    throw err(`serviceFolders`, serviceFolders, `must be an array of non-empty strings`);
+  }
+
   const base = {
     id,
     owner: Array.isArray(owner) ? owner : [owner],
     devOnly,
     build: validatePackageManifestBuild(build),
+    description,
+    serviceFolders,
   };
 
   // return if this is one of the more basic types of package types
@@ -224,12 +269,11 @@ function validatePackageManifest(parsed) {
     };
   }
 
-  // handle the plugin field for plugin-* types
-  if (type === 'plugin-browser' || type === 'plugin-server') {
+  if (type === 'plugin') {
     return {
       type,
       ...base,
-      plugin: validatePackageManifestPlugin(plugin),
+      plugin: validatePackageManifestPlugin(plugin, path),
     };
   }
 
@@ -254,32 +298,25 @@ function readPackageManifest(path) {
     content = Fs.readFileSync(path, 'utf8');
   } catch (error) {
     if (error.code === 'ENOENT') {
-      throw new Error(`Missing kibana.jsonc file at ${path}`);
+      const err = new Error(`Missing kibana.jsonc file at ${path}`);
+      throw Object.assign(err, { code: 'ENOENT' });
     }
 
     throw error;
   }
 
   try {
-    return parsePackageManifest(content);
+    let parsed;
+    try {
+      parsed = parse(content);
+    } catch (error) {
+      throw new Error(`Invalid JSONc: ${error.message}`);
+    }
+
+    return validatePackageManifest(parsed, path);
   } catch (error) {
     throw new Error(`Unable to parse [${path}]: ${error.message}`);
   }
 }
 
-/**
- * Parse a kibana.jsonc file from a string
- * @param {string} content
- */
-function parsePackageManifest(content) {
-  let parsed;
-  try {
-    parsed = parse(content);
-  } catch (error) {
-    throw new Error(`Invalid JSONc: ${error.message}`);
-  }
-
-  return validatePackageManifest(parsed);
-}
-
-module.exports = { parsePackageManifest, readPackageManifest, validatePackageManifest };
+module.exports = { readPackageManifest };

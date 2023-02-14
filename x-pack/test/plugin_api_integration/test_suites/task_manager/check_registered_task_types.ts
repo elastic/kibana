@@ -60,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.swimlane',
         'actions:.teams',
         'actions:.tines',
+        'actions:.torq',
         'actions:.webhook',
         'actions:.xmatters',
         'actions_telemetry',

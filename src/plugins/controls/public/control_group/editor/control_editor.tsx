@@ -199,11 +199,8 @@ export const ControlEditor = ({
               selectedFieldName={selectedField}
               dataView={dataView}
               onSelectField={(field) => {
-                const { parentFieldName, childFieldName } = fieldRegistry?.[field.name] ?? {};
                 onTypeEditorChange({
                   fieldName: field.name,
-                  ...(parentFieldName && { parentFieldName }),
-                  ...(childFieldName && { childFieldName }),
                 });
                 const newDefaultTitle = field.displayName ?? field.name;
                 setDefaultTitle(newDefaultTitle);

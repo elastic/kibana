@@ -42,7 +42,8 @@ export const Instructions = (props: InstructionProps) => {
     refreshAgentPolicies,
   } = props;
   const fleetStatus = useFleetStatus();
-  const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
+  const { isUnhealthy: isFleetServerUnhealthy, isLoading: isLoadingFleetServerHealth } =
+    useFleetServerUnhealthy();
 
   useEffect(() => {
     refreshAgentPolicies();
@@ -66,14 +67,17 @@ export const Instructions = (props: InstructionProps) => {
 
   const fleetServers = agents?.items || [];
 
-  if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
+  if (isLoadingAgents || isLoadingAgentPolicies || isLoadingFleetServerHealth)
+    return <Loading size="l" />;
 
   const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
 
   const showAgentEnrollment =
-    fleetStatus.isReady &&
-    (isFleetServerPolicySelected ||
-      (!isFleetServerUnhealthy && fleetServers.length > 0 && (fleetServerHosts?.length ?? 0) > 0));
+    isFleetServerPolicySelected ||
+    (fleetStatus.isReady &&
+      !isFleetServerUnhealthy &&
+      fleetServers.length > 0 &&
+      (fleetServerHosts?.length ?? 0) > 0);
 
   const showFleetServerEnrollment =
     !isFleetServerPolicySelected &&

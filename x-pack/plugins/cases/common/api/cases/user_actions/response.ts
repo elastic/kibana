@@ -8,16 +8,17 @@
 import * as rt from 'io-ts';
 
 import type { ActionsRt, ActionTypeValues } from './common';
+
 import {
   CaseUserActionInjectedIdsRt,
-  CaseUserActionSavedObjectIdsRt,
+  CaseUserActionInjectedDeprecatedIdsRt,
   UserActionCommonAttributesRt,
 } from './common';
-import { CreateCaseUserActionRt } from './create_case';
+import { CreateCaseUserActionRt, CreateCaseUserActionWithoutConnectorIdRt } from './create_case';
 import { DescriptionUserActionRt } from './description';
 import { CommentUserActionRt } from './comment';
-import { ConnectorUserActionRt } from './connector';
-import { PushedUserActionRt } from './pushed';
+import { ConnectorUserActionRt, ConnectorUserActionWithoutConnectorIdRt } from './connector';
+import { PushedUserActionRt, PushedUserActionWithoutConnectorIdRt } from './pushed';
 import { TagsUserActionRt } from './tags';
 import { TitleUserActionRt } from './title';
 import { SettingsUserActionRt } from './settings';
@@ -25,6 +26,7 @@ import { StatusUserActionRt } from './status';
 import { DeleteCaseUserActionRt } from './delete_case';
 import { SeverityUserActionRt } from './severity';
 import { AssigneesUserActionRt } from './assignees';
+import { CaseUserActionStatsRt } from './stats';
 
 const CommonUserActionsRt = rt.union([
   DescriptionUserActionRt,
@@ -45,11 +47,11 @@ export const UserActionsRt = rt.union([
   DeleteCaseUserActionRt,
 ]);
 
-export const UserActionsWithoutConnectorIdRt = rt.union([
+const UserActionsWithoutConnectorIdRt = rt.union([
   CommonUserActionsRt,
-  CreateCaseUserActionRt,
-  ConnectorUserActionRt,
-  PushedUserActionRt,
+  CreateCaseUserActionWithoutConnectorIdRt,
+  ConnectorUserActionWithoutConnectorIdRt,
+  PushedUserActionWithoutConnectorIdRt,
   DeleteCaseUserActionRt,
 ]);
 
@@ -59,53 +61,46 @@ const CaseUserActionBasicWithoutConnectorIdRt = rt.intersection([
   UserActionCommonAttributesRt,
 ]);
 
-const CaseUserActionResponseRt = rt.intersection([
+const CaseUserActionDeprecatedResponseRt = rt.intersection([
   CaseUserActionBasicRt,
-  CaseUserActionSavedObjectIdsRt,
+  CaseUserActionInjectedDeprecatedIdsRt,
 ]);
 
 /**
  * This includes the comment_id but not the action_id or case_id
  */
-const CaseUserActionInjectedAttributesWithoutActionIdRt = rt.intersection([
+const CaseUserActionInjectedAttributesRt = rt.intersection([
   CaseUserActionBasicRt,
   CaseUserActionInjectedIdsRt,
 ]);
 
-/**
- * Rename to CaseUserActionResponseRt when the UI is switching to the new user action _find API
- */
-const CaseUserActionResponseWithoutActionIdRt = rt.intersection([
-  CaseUserActionInjectedAttributesWithoutActionIdRt,
+const CaseUserActionResponseRt = rt.intersection([
+  CaseUserActionInjectedAttributesRt,
   rt.type({
     id: rt.string,
     version: rt.string,
   }),
 ]);
 
-export const CaseUserActionAttributesRt = CaseUserActionBasicRt;
+const CaseUserActionAttributesRt = CaseUserActionBasicRt;
 export const CaseUserActionsResponseRt = rt.array(CaseUserActionResponseRt);
-export const CaseUserActionsResponseWithoutActionIdRt = rt.array(
-  CaseUserActionResponseWithoutActionIdRt
-);
+export const CaseUserActionsDeprecatedResponseRt = rt.array(CaseUserActionDeprecatedResponseRt);
+export const CaseUserActionStatsResponseRt = CaseUserActionStatsRt;
 
 export type CaseUserActionAttributes = rt.TypeOf<typeof CaseUserActionAttributesRt>;
 export type CaseUserActionAttributesWithoutConnectorId = rt.TypeOf<
-  typeof CaseUserActionAttributesRt
+  typeof CaseUserActionBasicWithoutConnectorIdRt
 >;
+export type CaseUserActionStatsResponse = rt.TypeOf<typeof CaseUserActionStatsRt>;
 export type CaseUserActionsResponse = rt.TypeOf<typeof CaseUserActionsResponseRt>;
 export type CaseUserActionResponse = rt.TypeOf<typeof CaseUserActionResponseRt>;
-export type CaseUserActionInjectedAttributesWithoutActionId = rt.TypeOf<
-  typeof CaseUserActionInjectedAttributesWithoutActionIdRt
+export type CaseUserActionsDeprecatedResponse = rt.TypeOf<
+  typeof CaseUserActionsDeprecatedResponseRt
 >;
-export type CaseUserActionsResponseWithoutActionId = rt.TypeOf<
-  typeof CaseUserActionsResponseWithoutActionIdRt
->;
+export type CaseUserActionDeprecatedResponse = rt.TypeOf<typeof CaseUserActionDeprecatedResponseRt>;
+export type CaseUserActionInjectedAttributes = rt.TypeOf<typeof CaseUserActionInjectedAttributesRt>;
 
 export type UserAction = rt.TypeOf<typeof ActionsRt>;
 export type UserActionTypes = ActionTypeValues;
 
 export type CaseUserAction = rt.TypeOf<typeof CaseUserActionBasicRt>;
-export type CaseUserActionWithoutConnectorId = rt.TypeOf<
-  typeof CaseUserActionBasicWithoutConnectorIdRt
->;

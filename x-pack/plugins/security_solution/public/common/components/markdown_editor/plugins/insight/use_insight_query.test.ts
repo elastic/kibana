@@ -33,6 +33,7 @@ describe('useInsightQuery', () => {
       () =>
         useInsightQuery({
           dataProviders: [mockProvider],
+          filters: [],
         }),
       {
         wrapper: TestProviders,

@@ -46,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const transctionsGroupsPrimaryStatistics =
           response.body as TransactionsGroupsPrimaryStatistics;
         expect(transctionsGroupsPrimaryStatistics.transactionGroups).to.empty();
-        expect(transctionsGroupsPrimaryStatistics.isAggregationAccurate).to.be(true);
+        expect(transctionsGroupsPrimaryStatistics.maxTransactionGroupsExceeded).to.be(false);
       });
     }
   );

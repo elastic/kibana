@@ -193,7 +193,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     });
 
     await page.click(byTestId('alert-status-filter-active-button'));
-    await page.waitForTimeout(5 * 1000);
+    await syntheticsApp.waitForLoadingToFinish();
 
     await page.click('[aria-label="View in app"]');
     await page.click(byTestId('syntheticsMonitorOverviewTab'));

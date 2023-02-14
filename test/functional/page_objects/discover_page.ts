@@ -406,7 +406,9 @@ export class DiscoverPageObject extends FtrService {
   public async removeField(field: string) {
     await this.clickFieldListItem(field);
     await this.testSubjects.click(`discoverFieldListPanelDelete-${field}`);
-    await this.testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
+    await this.retry.waitFor('modal to open', async () => {
+      return await this.testSubjects.exists('runtimeFieldDeleteConfirmModal');
+    });
     await this.fieldEditor.confirmDelete();
   }
 
@@ -441,6 +443,9 @@ export class DiscoverPageObject extends FtrService {
   async createAdHocDataView(name: string, hasTimeField = false) {
     await this.testSubjects.click('discover-dataView-switch-link');
     await this.unifiedSearch.createNewDataView(name, true, hasTimeField);
+    await this.retry.waitFor('flyout to get closed', async () => {
+      return !(await this.testSubjects.exists('indexPatternEditor__form'));
+    });
   }
 
   async clickAddField() {
@@ -455,6 +460,13 @@ export class DiscoverPageObject extends FtrService {
 
   public async hasNoResultsTimepicker() {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
+  }
+
+  public async expandTimeRangeAsSuggestedInNoResultsMessage() {
+    await this.retry.waitFor('the button before pressing it', async () => {
+      return await this.testSubjects.exists('discoverNoResultsViewAllMatches');
+    });
+    return await this.testSubjects.click('discoverNoResultsViewAllMatches');
   }
 
   public async getSidebarAriaDescription(): Promise<string> {
@@ -598,7 +610,13 @@ export class DiscoverPageObject extends FtrService {
     }
 
     await this.waitUntilFieldPopoverIsOpen();
-    await this.testSubjects.click(`fieldVisualize-${fieldName}`);
+    const visualizeButtonTestSubject = `fieldVisualize-${fieldName}`;
+    // wrap visualize button click in retry to ensure button is clicked and retry if button click is not registered
+    await this.retry.try(async () => {
+      await this.testSubjects.click(visualizeButtonTestSubject);
+      await this.testSubjects.waitForDeleted(visualizeButtonTestSubject);
+      await this.testSubjects.missingOrFail(visualizeButtonTestSubject);
+    });
     await this.header.waitUntilLoadingHasFinished();
   }
 

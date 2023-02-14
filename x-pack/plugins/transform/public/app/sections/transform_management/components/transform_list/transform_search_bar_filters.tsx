@@ -13,10 +13,13 @@ import {
   TRANSFORM_FUNCTION,
   TRANSFORM_MODE,
   TRANSFORM_STATE,
+  TRANSFORM_HEALTH,
+  TRANSFORM_HEALTH_COLOR,
+  TRANSFORM_HEALTH_LABEL,
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import { TransformListRow } from '../../../../common';
-import { getTaskStateBadge } from './use_columns';
+import { TransformTaskStateBadge } from './transform_task_state_badge';
 
 export const transformFilters: SearchFilterConfig[] = [
   {
@@ -27,7 +30,7 @@ export const transformFilters: SearchFilterConfig[] = [
     options: Object.values(TRANSFORM_STATE).map((val) => ({
       value: val,
       name: val,
-      view: getTaskStateBadge(val),
+      view: <TransformTaskStateBadge state={val} />,
     })),
   },
   {
@@ -41,6 +44,25 @@ export const transformFilters: SearchFilterConfig[] = [
       view: (
         <EuiBadge className="transform__TaskModeBadge" color="hollow">
           {val}
+        </EuiBadge>
+      ),
+    })),
+  },
+  {
+    type: 'field_value_selection',
+    field: 'health',
+    name: i18n.translate('xpack.transform.healthFilter', { defaultMessage: 'Health' }),
+    multiSelect: false,
+    options: Object.values(TRANSFORM_HEALTH).map((val) => ({
+      value: val,
+      name: val,
+      view: (
+        <EuiBadge
+          className="transform__TaskHealthBadge"
+          // For the color icon 'subdued' is used but for the badge we need 'hollow' instead.
+          color={TRANSFORM_HEALTH_COLOR[val] === 'subdued' ? 'hollow' : TRANSFORM_HEALTH_COLOR[val]}
+        >
+          {TRANSFORM_HEALTH_LABEL[val]}
         </EuiBadge>
       ),
     })),
@@ -96,6 +118,9 @@ export const filterTransforms = (transforms: TransformListRow[], clauses: Clause
         ts = transforms.filter((transform) => (c.value as Value[]).includes(transform.stats.state));
       } else {
         ts = transforms.filter((transform) => {
+          if (c.type === 'field' && c.field === 'health') {
+            return transform.stats.health?.status === c.value;
+          }
           if (c.type === 'field' && c.field === 'mode') {
             return transform.mode === c.value;
           }

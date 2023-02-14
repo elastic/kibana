@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { isMetricsTabHidden, isInfraTabHidden } from '.';
+import { ServerlessType } from '../../../../../common/serverless';
 
 describe('APM service template', () => {
   describe('isMetricsTabHidden', () => {
@@ -14,7 +15,8 @@ describe('APM service template', () => {
         { agentName: 'js-base' },
         { agentName: 'rum-js' },
         { agentName: 'opentelemetry/webjs' },
-        { runtimeName: 'aws_lambda' },
+        { serverlessType: ServerlessType.AWS_LAMBDA },
+        { serverlessType: ServerlessType.AZURE_FUNCTIONS },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isMetricsTabHidden(input)).toBeTruthy();
@@ -47,8 +49,8 @@ describe('APM service template', () => {
         { agentName: 'js-base' },
         { agentName: 'rum-js' },
         { agentName: 'opentelemetry/webjs' },
-
-        { runtimeName: 'aws_lambda' },
+        { serverlessType: ServerlessType.AWS_LAMBDA },
+        { serverlessType: ServerlessType.AZURE_FUNCTIONS },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isInfraTabHidden(input)).toBeTruthy();

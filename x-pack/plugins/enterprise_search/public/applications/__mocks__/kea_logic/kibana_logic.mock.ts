@@ -29,6 +29,7 @@ export const mockKibanaValues = {
   navigateToUrl: jest.fn(),
   productAccess: {
     hasAppSearchAccess: true,
+    hasSearchEnginesAccess: false,
     hasWorkplaceSearchAccess: true,
   },
   uiSettings: uiSettingsServiceMock.createStartContract(),

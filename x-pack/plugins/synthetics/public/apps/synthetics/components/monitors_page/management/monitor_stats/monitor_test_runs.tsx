@@ -11,22 +11,17 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
 
+import { useAbsoluteDate } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import * as labels from '../labels';
 
-interface MonitorCompleteCountProps {
-  from?: string;
-  to?: string;
-}
-
-export const MonitorTestRunsCount = ({
-  from = 'now-30d',
-  to = 'now',
-}: MonitorCompleteCountProps) => {
+export const MonitorTestRunsCount = ({ monitorIds }: { monitorIds: string[] }) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
   const theme = useTheme();
 
   const { ExploratoryViewEmbeddable } = observability;
+
+  const { from: absFrom, to: absTo } = useAbsoluteDate({ from: 'now-30d', to: 'now' });
 
   return (
     <ExploratoryViewEmbeddable
@@ -34,13 +29,13 @@ export const MonitorTestRunsCount = ({
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
         {
-          time: { from, to },
+          time: { from: absFrom, to: absTo },
           reportDefinitions: {
-            'monitor.id': [],
-            'observer.geo.name': [],
+            'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'], // Show no data when monitorIds is empty
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_total_runs',
+          filters: [],
           name: labels.TEST_RUNS_LABEL,
           color: theme.eui.euiColorVis1,
         },

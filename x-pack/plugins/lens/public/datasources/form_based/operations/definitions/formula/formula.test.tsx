@@ -1081,7 +1081,7 @@ invalid: "
             undefined,
             operationDefinitionMap
           )
-        ).toEqual(['Field noField not found']);
+        ).toMatchSnapshot();
       }
     });
 
@@ -1097,7 +1097,7 @@ invalid: "
             undefined,
             operationDefinitionMap
           )
-        ).toEqual(['Fields noField, noField2 not found']);
+        ).toMatchSnapshot();
       }
     });
 

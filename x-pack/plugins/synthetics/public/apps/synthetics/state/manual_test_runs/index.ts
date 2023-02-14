@@ -33,6 +33,7 @@ export enum TestRunStatus {
 
 export interface ManualTestRun {
   configId: string;
+  name: string;
   testRunId?: string;
   status: TestRunStatus;
   schedule: SyntheticsMonitorSchedule;
@@ -53,7 +54,10 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(
       String(manualTestMonitorAction.get),
-      (state: WritableDraft<ManualTestRunsState>, action: PayloadAction<string>) => {
+      (
+        state: WritableDraft<ManualTestRunsState>,
+        action: PayloadAction<{ configId: string; name: string }>
+      ) => {
         state = Object.values(state).reduce((acc, curr) => {
           acc[curr.configId] = {
             ...curr,
@@ -63,8 +67,9 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
           return acc;
         }, state);
 
-        state[action.payload] = {
-          configId: action.payload,
+        state[action.payload.configId] = {
+          configId: action.payload.configId,
+          name: action.payload.name,
           status: TestRunStatus.LOADING,
           schedule: { unit: ScheduleUnit.MINUTES, number: '3' },
           locations: [],
@@ -84,6 +89,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
           locations: payload.locations,
           isTestNowFlyoutOpen: true,
           monitor: payload.monitor,
+          name: payload.monitor.name,
         };
       }
     )

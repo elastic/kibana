@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 
 import {
   DEFAULT_CONTINUOUS_MODE_DELAY,
@@ -47,9 +48,15 @@ export interface SimpleQuery {
   };
 }
 
-export type PivotQuery = SimpleQuery | SavedSearchQuery;
+export interface FilterBasedSimpleQuery {
+  bool: {
+    filter: [SimpleQuery];
+  };
+}
 
-export function getPivotQuery(search: string | SavedSearchQuery): PivotQuery {
+export type TransformConfigQuery = FilterBasedSimpleQuery | SimpleQuery | SavedSearchQuery;
+
+export function getTransformConfigQuery(search: string | SavedSearchQuery): TransformConfigQuery {
   if (typeof search === 'string') {
     return {
       query_string: {
@@ -66,6 +73,16 @@ export function isSimpleQuery(arg: unknown): arg is SimpleQuery {
   return isPopulatedObject(arg, ['query_string']);
 }
 
+export function isFilterBasedSimpleQuery(arg: unknown): arg is FilterBasedSimpleQuery {
+  return (
+    isPopulatedObject(arg, ['bool']) &&
+    isPopulatedObject(arg.bool, ['filter']) &&
+    Array.isArray(arg.bool.filter) &&
+    arg.bool.filter.length === 1 &&
+    isSimpleQuery(arg.bool.filter[0])
+  );
+}
+
 export const matchAllQuery = { match_all: {} };
 export function isMatchAllQuery(query: unknown): boolean {
   return (
@@ -76,9 +93,14 @@ export function isMatchAllQuery(query: unknown): boolean {
   );
 }
 
-export const defaultQuery: PivotQuery = { query_string: { query: '*' } };
-export function isDefaultQuery(query: PivotQuery): boolean {
-  return isSimpleQuery(query) && query.query_string.query === '*';
+export const defaultQuery: TransformConfigQuery = { query_string: { query: '*' } };
+export function isDefaultQuery(query: TransformConfigQuery): boolean {
+  return (
+    isMatchAllQuery(query) ||
+    (isSimpleQuery(query) && query.query_string.query === '*') ||
+    (isFilterBasedSimpleQuery(query) &&
+      (query.bool.filter[0].query_string.query === '*' || isMatchAllQuery(query.bool.filter[0])))
+  );
 }
 
 export function getCombinedRuntimeMappings(
@@ -171,17 +193,36 @@ export const getRequestPayload = (
 };
 
 export function getPreviewTransformRequestBody(
-  dataViewTitle: DataView['title'],
-  query: PivotQuery,
-  partialRequest?: StepDefineExposedState['previewRequest'] | undefined,
-  runtimeMappings?: StepDefineExposedState['runtimeMappings']
+  dataView: DataView,
+  transformConfigQuery: TransformConfigQuery,
+  partialRequest?: StepDefineExposedState['previewRequest'],
+  runtimeMappings?: StepDefineExposedState['runtimeMappings'],
+  timeRangeMs?: StepDefineExposedState['timeRangeMs']
 ): PostTransformsPreviewRequestSchema {
+  const dataViewTitle = dataView.getIndexPattern();
   const index = dataViewTitle.split(',').map((name: string) => name.trim());
+
+  const hasValidTimeField = dataView.timeFieldName !== undefined && dataView.timeFieldName !== '';
+
+  const baseFilterCriteria = buildBaseFilterCriteria(
+    dataView.timeFieldName,
+    timeRangeMs?.from,
+    timeRangeMs?.to,
+    isDefaultQuery(transformConfigQuery) ? undefined : transformConfigQuery
+  );
+
+  const queryWithBaseFilterCriteria = {
+    bool: {
+      filter: baseFilterCriteria,
+    },
+  };
+
+  const query = hasValidTimeField ? queryWithBaseFilterCriteria : transformConfigQuery;
 
   return {
     source: {
       index,
-      ...(!isDefaultQuery(query) && !isMatchAllQuery(query) ? { query } : {}),
+      ...(isDefaultQuery(query) ? {} : { query }),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     },
     ...(partialRequest ?? {}),
@@ -212,15 +253,18 @@ export const getCreateTransformSettingsRequestBody = (
 };
 
 export const getCreateTransformRequestBody = (
-  dataViewTitle: DataView['title'],
-  pivotState: StepDefineExposedState,
+  dataView: DataView,
+  transformConfigState: StepDefineExposedState,
   transformDetailsState: StepDetailsExposedState
 ): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
   ...getPreviewTransformRequestBody(
-    dataViewTitle,
-    getPivotQuery(pivotState.searchQuery),
-    pivotState.previewRequest,
-    pivotState.runtimeMappings
+    dataView,
+    getTransformConfigQuery(transformConfigState.searchQuery),
+    transformConfigState.previewRequest,
+    transformConfigState.runtimeMappings,
+    transformConfigState.isDatePickerApplyEnabled && transformConfigState.timeRangeMs
+      ? transformConfigState.timeRangeMs
+      : undefined
   ),
   // conditionally add optional description
   ...(transformDetailsState.transformDescription !== ''

@@ -4966,6 +4966,21 @@
     "misc": [
       {
         "parentPluginId": "spaces",
+        "id": "def-common.DEFAULT_SPACE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_SPACE_ID",
+        "description": [],
+        "signature": [
+          "\"default\""
+        ],
+        "path": "x-pack/plugins/spaces/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spaces",
         "id": "def-common.ENTER_SPACE_PATH",
         "type": "string",
         "tags": [],

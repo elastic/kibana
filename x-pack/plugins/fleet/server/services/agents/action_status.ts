@@ -23,7 +23,7 @@ export async function getActionStatuses(
   options: ListWithKuery
 ): Promise<ActionStatus[]> {
   const actions = await _getActions(esClient, options);
-  const cancelledActions = await _getCancelledActions(esClient);
+  const cancelledActions = await getCancelledActions(esClient);
   let acks: any;
 
   try {
@@ -119,14 +119,13 @@ export async function getActionStatuses(
       ...action,
       nbAgentsAck: nbAgentsAck - errorCount,
       nbAgentsFailed: errorCount,
-      status:
-        errorCount > 0
-          ? 'FAILED'
-          : complete
-          ? 'COMPLETE'
-          : cancelledAction
-          ? 'CANCELLED'
-          : action.status,
+      status: cancelledAction
+        ? 'CANCELLED'
+        : errorCount > 0 && complete
+        ? 'FAILED'
+        : complete
+        ? 'COMPLETE'
+        : action.status,
       nbAgentsActioned,
       cancellationTime: cancelledAction?.timestamp,
       completionTime,
@@ -136,7 +135,7 @@ export async function getActionStatuses(
   return results;
 }
 
-async function _getCancelledActions(
+export async function getCancelledActions(
   esClient: ElasticsearchClient
 ): Promise<Array<{ actionId: string; timestamp?: string }>> {
   const res = await esClient.search<FleetServerAgentAction>({
@@ -145,7 +144,7 @@ async function _getCancelledActions(
     size: SO_SEARCH_LIMIT,
     query: {
       bool: {
-        must: [
+        filter: [
           {
             term: {
               type: 'CANCEL',
@@ -196,7 +195,10 @@ async function _getActions(
       const source = hit._source!;
 
       if (!acc[source.action_id!]) {
-        const isExpired = source.expiration ? Date.parse(source.expiration) < Date.now() : false;
+        const isExpired =
+          source.expiration && source.type !== 'UPGRADE'
+            ? Date.parse(source.expiration) < Date.now()
+            : false;
         acc[hit._source.action_id] = {
           actionId: hit._source.action_id,
           nbAgentsActionCreated: 0,
@@ -214,6 +216,7 @@ async function _getActions(
           newPolicyId: source.data?.policy_id as string,
           creationTime: source['@timestamp']!,
           nbAgentsFailed: 0,
+          hasRolloutPeriod: !!source.rollout_duration_seconds,
         };
       }
 

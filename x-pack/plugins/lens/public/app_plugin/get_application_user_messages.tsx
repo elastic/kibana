@@ -33,9 +33,9 @@ export const getApplicationUserMessages = ({
   core,
 }: {
   visualizationType: string | null | undefined;
-  visualization: VisualizationState;
+  visualization: VisualizationState | undefined;
   visualizationMap: VisualizationMap;
-  activeDatasource: Datasource | null;
+  activeDatasource: Datasource | null | undefined;
   activeDatasourceState: { state: unknown } | null;
   dataViews: DataViewsState;
   core: CoreStart;
@@ -46,7 +46,7 @@ export const getApplicationUserMessages = ({
     messages.push(getMissingVisTypeError());
   }
 
-  if (visualization.activeId && !visualizationMap[visualization.activeId]) {
+  if (visualization?.activeId && !visualizationMap[visualization.activeId]) {
     messages.push(getUnknownVisualizationTypeError(visualization.activeId));
   }
 
@@ -69,8 +69,8 @@ export const getApplicationUserMessages = ({
 
 function getMissingVisTypeError(): UserMessage {
   return {
-    severity: 'warning',
-    displayLocations: [{ id: 'visualization' }],
+    severity: 'error',
+    displayLocations: [{ id: 'visualizationOnEmbeddable' }],
     fixableInEditor: true,
     shortMessage: '',
     longMessage: i18n.translate('xpack.lens.editorFrame.expressionMissingVisualizationType', {
@@ -180,7 +180,7 @@ function getMissingIndexPatternsErrors(
   ];
 }
 
-export const filterUserMessages = (
+export const filterAndSortUserMessages = (
   userMessages: UserMessage[],
   locationId: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
   { dimensionId, severity }: UserMessageFilters
@@ -191,14 +191,14 @@ export const filterUserMessages = (
     ? [locationId]
     : [];
 
-  return userMessages.filter((message) => {
+  const filteredMessages = userMessages.filter((message) => {
     if (locationIds.length) {
       const hasMatch = message.displayLocations.some((location) => {
         if (!locationIds.includes(location.id)) {
           return false;
         }
 
-        if (location.id === 'dimensionTrigger' && location.dimensionId !== dimensionId) {
+        if (location.id === 'dimensionButton' && location.dimensionId !== dimensionId) {
           return false;
         }
 
@@ -216,4 +216,16 @@ export const filterUserMessages = (
 
     return true;
   });
+
+  return filteredMessages.sort(bySeverity);
 };
+
+function bySeverity(a: UserMessage, b: UserMessage) {
+  if (a.severity === 'warning' && b.severity === 'error') {
+    return 1;
+  } else if (a.severity === 'error' && b.severity === 'warning') {
+    return -1;
+  } else {
+    return 0;
+  }
+}

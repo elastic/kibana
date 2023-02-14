@@ -71,7 +71,9 @@ describe('getSupportedUrlParams', () => {
       statusFilter: STATUS_FILTER,
       query: '',
       locations: [],
-      monitorType: [],
+      monitorTypes: [],
+      projects: [],
+      schedules: [],
       tags: [],
     });
   });

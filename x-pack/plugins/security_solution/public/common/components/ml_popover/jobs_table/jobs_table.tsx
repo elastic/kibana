@@ -37,27 +37,33 @@ const truncateThreshold = 200;
 
 interface JobNameProps {
   id: string;
+  name?: string;
   description: string;
   basePath: string;
 }
 
-const JobName = ({ id, description, basePath }: JobNameProps) => {
+const JobName = ({ id, name, description, basePath }: JobNameProps) => {
   const {
     services: { ml },
   } = useKibana();
 
-  const jobUrl = useMlHref(ml, basePath, {
-    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-    pageState: {
-      jobId: id,
+  const jobUrl = useMlHref(
+    ml,
+    basePath,
+    {
+      page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+      pageState: {
+        jobId: id,
+      },
     },
-  });
+    [id]
+  );
 
   return (
     <JobNameWrapper>
       <EuiText size="s">
         <EuiLink data-test-subj="jobs-table-link" href={jobUrl} target="_blank">
-          {id}
+          {name ?? id}
         </EuiLink>
       </EuiText>
       <EuiText color="subdued" size="xs">
@@ -77,7 +83,8 @@ const getJobsTableColumns = (
     name: i18n.COLUMN_JOB_NAME,
     render: ({ id, description, customSettings }: SecurityJob) => (
       <JobName
-        id={customSettings?.security_app_display_name ?? id}
+        id={id}
+        name={customSettings?.security_app_display_name ?? id}
         description={description}
         basePath={basePath}
       />
