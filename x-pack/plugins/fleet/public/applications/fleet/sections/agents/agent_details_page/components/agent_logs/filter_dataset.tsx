@@ -8,8 +8,7 @@
 import React, { memo, useState, useEffect, useCallback } from 'react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField, DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
+import type { DataViewField, FieldSpec } from '@kbn/data-views-plugin/public';
 
 import { useStartServices } from '../../../../../hooks';
 
@@ -19,7 +18,7 @@ export const DatasetFilter: React.FunctionComponent<{
   selectedDatasets: string[];
   onToggleDataset: (dataset: string) => void;
 }> = memo(({ selectedDatasets, onToggleDataset }) => {
-  const { unifiedSearch, dataViews } = useStartServices();
+  const { unifiedSearch, data } = useStartServices();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [datasetValues, setDatasetValues] = useState<string[]>([AGENT_DATASET]);
@@ -31,11 +30,17 @@ export const DatasetFilter: React.FunctionComponent<{
     const fetchValues = async () => {
       setIsLoading(true);
       try {
-        const newFields: DataViewFieldMap = {
-          dataset: DATASET_FIELD,
-        };
-        const newDataViewSpec: DataViewSpec = { title: AGENT_LOG_INDEX_PATTERN, fields: newFields };
-        const newDataView = await dataViews.create(newDataViewSpec);
+        const fields: FieldSpec[] = await data.dataViews.getFieldsForWildcard({
+          pattern: AGENT_LOG_INDEX_PATTERN,
+        });
+        const fieldsMap = fields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
+          acc[curr.name] = curr;
+          return acc;
+        }, {});
+        const newDataView = await data.dataViews.create({
+          title: AGENT_LOG_INDEX_PATTERN,
+          fields: fieldsMap,
+        });
 
         const values = await unifiedSearch.autocomplete.getValueSuggestions({
           indexPattern: newDataView,
@@ -49,7 +54,7 @@ export const DatasetFilter: React.FunctionComponent<{
       setIsLoading(false);
     };
     fetchValues();
-  }, [unifiedSearch.autocomplete, dataViews]);
+  }, [data.dataViews, unifiedSearch.autocomplete]);
 
   return (
     <EuiPopover

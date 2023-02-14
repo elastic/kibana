@@ -24,13 +24,13 @@ export const DATASET_FIELD = {
   name: 'data_stream.dataset',
   type: 'string',
   aggregatable: true,
-  searchable: false,
+  searchable: true,
 };
 export const LOG_LEVEL_FIELD = {
   name: 'log.level',
   type: 'string',
   aggregatable: true,
-  searchable: false,
+  searchable: true,
 };
 export const DEFAULT_DATE_RANGE = {
   start: 'now-1d',
