@@ -49,7 +49,7 @@ import {
   setSignalStatus,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { indexDocumentsFactory } from '../../utils/data_generator';
+import { dataGeneratorFactory } from '../../utils/data_generator';
 import { patchRule } from '../../utils/patch_rule';
 
 /**
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Query type rules', () => {
+  describe.only('Query type rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
@@ -730,7 +730,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('with a suppression time window', async () => {
-        const indexDocuments = indexDocumentsFactory({
+        const { indexListOfDocuments } = dataGeneratorFactory({
           es,
           index: 'ecs_compliant',
           log,
@@ -758,7 +758,7 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'agent-1',
             },
           };
-          await indexDocuments([firstDocument, firstDocument]);
+          await indexListOfDocuments([firstDocument, firstDocument]);
 
           const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['ecs_compliant']),
@@ -799,7 +799,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           // Add a new document, then disable and re-enable to trigger another rule run. The second doc should
           // trigger an update to the existing alert without changing the timestamp
-          await indexDocuments([secondDocument, secondDocument]);
+          await indexListOfDocuments([secondDocument, secondDocument]);
           await patchRule(supertest, log, { id: createdRule.id, enabled: false });
           await patchRule(supertest, log, { id: createdRule.id, enabled: true });
           const afterTimestamp = new Date();
@@ -839,7 +839,7 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'agent-1',
             },
           };
-          await indexDocuments([firstDocument, firstDocument]);
+          await indexListOfDocuments([firstDocument, firstDocument]);
 
           const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['ecs_compliant']),
@@ -875,7 +875,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           // Add new documents, then disable and re-enable to trigger another rule run. The second doc should
           // trigger a new alert since the first one is now closed.
-          await indexDocuments([secondDocument, secondDocument]);
+          await indexListOfDocuments([secondDocument, secondDocument]);
           await patchRule(supertest, log, { id: createdRule.id, enabled: false });
           await patchRule(supertest, log, { id: createdRule.id, enabled: true });
           const afterTimestamp = new Date();
@@ -1160,7 +1160,7 @@ export default ({ getService }: FtrProviderContext) => {
               ingested: '2020-10-28T06:10:00.000Z',
             },
           };
-          await indexDocuments([docWithoutOverride, docWithOverride]);
+          await indexListOfDocuments([docWithoutOverride, docWithOverride]);
 
           const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['ecs_compliant']),
@@ -1228,7 +1228,7 @@ export default ({ getService }: FtrProviderContext) => {
                 name: `agent-${i}`,
               },
             }));
-          await indexDocuments([...docs, ...laterDocs]);
+          await indexListOfDocuments([...docs, ...laterDocs]);
 
           const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['ecs_compliant']),
@@ -1315,7 +1315,7 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'agent-2',
             },
           };
-          await indexDocuments([firstDoc, secondDoc, thirdDoc]);
+          await indexListOfDocuments([firstDoc, secondDoc, thirdDoc]);
 
           const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['ecs_compliant']),

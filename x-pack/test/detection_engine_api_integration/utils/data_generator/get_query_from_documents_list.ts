@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Document } from './types';
 
-export * from './data_generator_factory';
-export * from './enhance_document';
+export const getKQLQueryFromDocumentList = (documents: Document[]) =>
+  documents.map(({ id }) => `id: "${id}"`).join(' or ');

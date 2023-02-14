@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './data_generator_factory';
-export * from './enhance_document';
+export type Document = Record<string, unknown>;
