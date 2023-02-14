@@ -345,6 +345,50 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      describe('export with saved filters, job params timerange filter, and query from unsaved state', () => {
+        let job: ReportApiJSON;
+        let path: string;
+        let csvFile: string;
+
+        before(async () => {
+          const { text, status } = await requestCsvFromSavedSearch(
+            LOGS_SAVED_SEARCH_DATE_FILTER_ID,
+            {
+              state: {
+                query: [{ multi_match: { type: 'best_fields', query: 'css', lenient: true } }],
+              },
+              timerange: { min: '2015-09-20 10:23:36.052', max: '2015-09-20 10:25:55.744' },
+            }
+          );
+          expect(status).to.eql(200);
+          const { payload } = JSON.parse(text);
+          job = payload.job;
+          path = payload.path;
+          await reportingAPI.waitForJobToFinish(path);
+          const response = await supertest.get(path);
+          expect(response.header['content-disposition']).to.equal(
+            'inline; filename="A Saved Search with a date filter.csv"'
+          );
+          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
+          csvFile = response.text;
+        });
+
+        it('job response data is correct', () => {
+          expect(path).to.be.a('string');
+          expect(job).to.be.an('object');
+          expect(job.attempts).equal(0);
+          expect(job.created_by).equal('elastic');
+          expect(job.jobtype).equal('csv_saved_object');
+          expect(job.payload.objectType).equal('saved search');
+          expect(job.payload.title).equal('A Saved Search with a date filter');
+          expect(job.payload.version).equal('7.17');
+        });
+
+        it('csv file matches', () => {
+          expectSnapshot(csvFile).toMatch();
+        });
+      });
+
       describe('export with no saved filters and job post params', () => {
         let job: ReportApiJSON;
         let path: string;

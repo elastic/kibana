@@ -83,6 +83,15 @@ export class LogInterceptor extends Stream.Transform {
     super({
       readableObjectMode: true,
       writableObjectMode: true,
+      // Ideally, the writer to this stream should handle the backpressure
+      // and hold any writes until the 'drain' event is emitted.
+      // More info: https://nodejs.org/docs/latest-v16.x/api/stream.html#writablewritechunk-encoding-callback
+      //
+      // However, the writer (@elastic/good) doesn't apply such control,
+      // so we need to add extra room in this buffer to handle peaks.
+      //
+      // Note that, in objectMode, this number refers to the number of objects instead of the bytes.
+      readableHighWaterMark: 1000,
     });
   }
 

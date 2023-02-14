@@ -151,6 +151,49 @@ describe('get_sharing_data', () => {
     ]);
   });
 
+  it('with saved search containing a filter', async () => {
+    mockIndexPattern = createMockIndexPattern();
+    mockSearchSource.getField = jest.fn((fieldName) => {
+      if (fieldName === 'filter') {
+        return {
+          query: {
+            range: {
+              '@timestamp': { gte: '2015-09-20T10:19:40.307Z', lt: '2015-09-20T10:26:56.221Z' },
+            },
+          },
+        };
+      }
+      return mockSearchSourceGetField(fieldName);
+    });
+
+    const sharingData = await getSharingData({ uiSettings }, mockSearchSource, mockSavedSearch);
+    expect(sharingData.columns).toMatchInlineSnapshot(`
+      Array [
+        "@timestamp",
+        "clientip",
+        "extension",
+      ]
+    `);
+    expect(mockSearchSource.setField).toBeCalledTimes(3);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(1, 'sort', [
+      { '@timestamp': 'desc' },
+    ]);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(2, 'fields', [
+      '@timestamp',
+      'clientip',
+      'extension',
+    ]);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(3, 'filter', [
+      {
+        query: {
+          range: {
+            '@timestamp': { gte: '2015-09-20T10:19:40.307Z', lt: '2015-09-20T10:26:56.221Z' },
+          },
+        },
+      },
+    ]);
+  });
+
   it('with saved search containing filters', async () => {
     mockIndexPattern = createMockIndexPattern();
     mockSearchSource.getField = jest.fn((fieldName) => {
@@ -317,6 +360,90 @@ describe('get_sharing_data', () => {
         },
       },
       { query: { match_phrase: { 'extension.raw': 'gif' } } },
+    ]);
+  });
+
+  it('with saved search containing a filter from external state in job params', async () => {
+    mockIndexPattern = createMockIndexPattern();
+    const mockJobParamsUnsavedState = {
+      query: { multi_match: { type: 'best_fields' as const, query: 'cognac', lenient: true } },
+    };
+    await getSharingData(
+      { uiSettings },
+      mockSearchSource,
+      mockSavedSearch,
+      undefined,
+      mockJobParamsUnsavedState
+    );
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(3, 'filter', [
+      { multi_match: { lenient: true, query: 'cognac', type: 'best_fields' } },
+    ]);
+  });
+
+  it('with saved search containing multiple filters from external state in job params', async () => {
+    mockIndexPattern = createMockIndexPattern();
+    const mockJobParamsUnsavedState = {
+      query: [
+        { multi_match: { type: 'best_fields' as const, query: 'cognac', lenient: true } },
+        {
+          bool: {
+            must_not: {
+              multi_match: { type: 'best_fields' as const, query: 'Pyramidustries', lenient: true },
+            },
+          },
+        },
+      ],
+    };
+    await getSharingData(
+      { uiSettings },
+      mockSearchSource,
+      mockSavedSearch,
+      undefined,
+      mockJobParamsUnsavedState
+    );
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(3, 'filter', [
+      { multi_match: { lenient: true, query: 'cognac', type: 'best_fields' } },
+      {
+        bool: {
+          must_not: {
+            multi_match: { lenient: true, query: 'Pyramidustries', type: 'best_fields' },
+          },
+        },
+      },
+    ]);
+  });
+
+  it('with saved search containing a filter from external state in job params to be combined with a given time filter', async () => {
+    mockIndexPattern = createMockIndexPattern();
+    const mockTimeRangeFilterFromRequest = {
+      min: '2023-01-04T21:26:18.620Z',
+      max: '2023-01-05T09:21:21.543Z',
+    };
+    const mockJobParamsUnsavedState = {
+      query: [{ multi_match: { type: 'best_fields' as const, query: 'cognac', lenient: true } }],
+    };
+
+    await getSharingData(
+      { uiSettings },
+      mockSearchSource,
+      mockSavedSearch,
+      mockTimeRangeFilterFromRequest,
+      mockJobParamsUnsavedState
+    );
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(3, 'filter', [
+      {
+        meta: { index: 'logstash-*' },
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: '2023-01-04T21:26:18.620Z',
+              lte: '2023-01-05T09:21:21.543Z',
+            },
+          },
+        },
+      },
+      { multi_match: { lenient: true, query: 'cognac', type: 'best_fields' } },
     ]);
   });
 });
