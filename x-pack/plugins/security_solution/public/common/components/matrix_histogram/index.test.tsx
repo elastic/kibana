@@ -16,6 +16,7 @@ import { TestProviders } from '../../mock';
 import { mockRuntimeMappings } from '../../containers/source/mock';
 import { dnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
 import { useQueryToggle } from '../../containers/query_toggle';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 jest.mock('../../containers/query_toggle');
 
@@ -30,6 +31,11 @@ jest.mock('../charts/barchart', () => ({
 jest.mock('../../containers/matrix_histogram');
 
 jest.mock('../visualization_actions/actions');
+jest.mock('../visualization_actions/visualization_embeddable');
+
+jest.mock('../../hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
 
 jest.mock('./utils', () => ({
   getBarchartConfigs: jest.fn(),
@@ -37,6 +43,7 @@ jest.mock('./utils', () => ({
 }));
 
 const mockLocation = jest.fn().mockReturnValue({ pathname: '/test' });
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -85,6 +92,7 @@ describe('Matrix Histogram Component', () => {
         totalCount: null,
       },
     ]);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
 
   describe('on initial load', () => {
@@ -246,6 +254,27 @@ describe('Matrix Histogram Component', () => {
       });
 
       expect(mockUseMatrix.mock.calls[0][0].skip).toEqual(true);
+    });
+  });
+
+  describe('useIsExperimentalFeatureEnabled = true', () => {
+    beforeEach(() => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+      wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />, {
+        wrappingComponent: TestProviders,
+      });
+    });
+    test('it should not render VisualizationActions', () => {
+      expect(wrapper.find(`[data-test-subj="visualizationActions"]`).exists()).toEqual(false);
+    });
+
+    test('it should not fetch Matrix Histogram data', () => {
+      expect(mockUseMatrix.mock.calls[0][0].skip).toEqual(true);
+    });
+
+    test('it should render Lens Embeddable', () => {
+      expect(wrapper.find(`[data-test-subj="visualization-embeddable"]`).exists()).toEqual(true);
     });
   });
 });
