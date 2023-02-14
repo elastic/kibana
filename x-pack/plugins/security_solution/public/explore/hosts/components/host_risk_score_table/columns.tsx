@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
 import type { HostRiskScoreColumns } from '.';
@@ -16,7 +20,6 @@ import { HostsTableType } from '../../store/model';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreFields } from '../../../../../common/search_strategy';
 import { RiskScore } from '../../../components/risk_score/severity/common';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../actions/constants';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -32,11 +35,11 @@ export const getHostRiskScoreColumns = ({
     render: (hostName) => {
       if (hostName != null && hostName.length > 0) {
         return (
-          <CellActions
+          <SecurityCellActions
             mode={CellActionsMode.HOVER}
             visibleCellActions={5}
             showActionTooltips
-            triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+            triggerId={SecurityCellActionsTrigger.DEFAULT}
             field={{
               name: 'host.name',
               value: hostName,
@@ -44,7 +47,7 @@ export const getHostRiskScoreColumns = ({
             }}
           >
             <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />
-          </CellActions>
+          </SecurityCellActions>
         );
       }
       return getEmptyTagValue();

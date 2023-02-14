@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../cell_actions';
 import type { Anomaly } from '../types';
 import { Spacer } from '../../page';
 import { getScoreString } from './score_health';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../actions/constants';
 
 export const ScoreComponent = ({
   index = 0,
@@ -22,7 +25,7 @@ export const ScoreComponent = ({
   const scoreString = getScoreString(score.severity);
 
   return (
-    <CellActions
+    <SecurityCellActions
       mode={CellActionsMode.HOVER}
       field={{
         name: score.entityName,
@@ -30,7 +33,7 @@ export const ScoreComponent = ({
         type: 'keyword',
         aggregatable: true,
       }}
-      triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+      triggerId={SecurityCellActionsTrigger.DEFAULT}
       visibleCellActions={5}
     >
       <>
@@ -42,7 +45,7 @@ export const ScoreComponent = ({
         )}
         {scoreString}
       </>
-    </CellActions>
+    </SecurityCellActions>
   );
 };
 

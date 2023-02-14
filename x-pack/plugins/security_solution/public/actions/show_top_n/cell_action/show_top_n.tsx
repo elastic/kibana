@@ -19,7 +19,7 @@ import { fieldHasCellActions } from '../../utils';
 import { TopNAction } from '../show_top_n_component';
 import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
-import { SHOW_TOP_N_ACTION_TYPE } from '../../constants';
+import { SecurityCellActionType } from '../../constants';
 
 const SHOW_TOP = (fieldName: string) =>
   i18n.translate('xpack.securitySolution.actions.showTopTooltip', {
@@ -40,7 +40,7 @@ export const createShowTopNCellActionFactory = createCellActionFactory(
     history: H.History;
     services: StartServices;
   }): CellActionTemplate<SecurityCellAction> => ({
-    type: SHOW_TOP_N_ACTION_TYPE,
+    type: SecurityCellActionType.SHOW_TOP_N,
     getIconType: () => ICON,
     getDisplayName: ({ field }) => SHOW_TOP(field.name),
     getDisplayNameTooltip: ({ field }) => SHOW_TOP(field.name),

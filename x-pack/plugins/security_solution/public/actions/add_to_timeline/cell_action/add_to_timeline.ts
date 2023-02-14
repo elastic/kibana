@@ -19,7 +19,7 @@ import {
   ADD_TO_TIMELINE_SUCCESS_TITLE,
 } from '../constants';
 import { createDataProviders } from '../data_provider';
-import { ADD_TO_TIMELINE_ACTION_TYPE } from '../../constants';
+import { SecurityCellActionType } from '../../constants';
 import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
 
@@ -34,7 +34,7 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
     const { notifications: notificationsService } = services;
 
     return {
-      type: ADD_TO_TIMELINE_ACTION_TYPE,
+      type: SecurityCellActionType.ADD_TO_TIMELINE,
       getIconType: () => ADD_TO_TIMELINE_ICON,
       getDisplayName: () => ADD_TO_TIMELINE,
       getDisplayNameTooltip: () => ADD_TO_TIMELINE,

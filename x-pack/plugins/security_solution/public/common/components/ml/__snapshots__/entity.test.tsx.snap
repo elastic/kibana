@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`entity_draggable renders correctly against snapshot 1`] = `
-<CellActions
+<SecurityCellActions
   field={
     Object {
       "aggregatable": true,
@@ -15,5 +15,5 @@ exports[`entity_draggable renders correctly against snapshot 1`] = `
   visibleCellActions={5}
 >
   entity-name: "entity-value"
-</CellActions>
+</SecurityCellActions>
 `;

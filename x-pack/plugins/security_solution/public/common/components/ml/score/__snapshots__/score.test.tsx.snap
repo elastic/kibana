@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`draggable_score renders correctly against snapshot 1`] = `
-<CellActions
+<SecurityCellActions
   field={
     Object {
       "aggregatable": true,
@@ -15,11 +15,11 @@ exports[`draggable_score renders correctly against snapshot 1`] = `
   visibleCellActions={5}
 >
   17
-</CellActions>
+</SecurityCellActions>
 `;
 
 exports[`draggable_score renders correctly against snapshot when the index is not included 1`] = `
-<CellActions
+<SecurityCellActions
   field={
     Object {
       "aggregatable": true,
@@ -33,5 +33,5 @@ exports[`draggable_score renders correctly against snapshot when the index is no
   visibleCellActions={5}
 >
   17
-</CellActions>
+</SecurityCellActions>
 `;

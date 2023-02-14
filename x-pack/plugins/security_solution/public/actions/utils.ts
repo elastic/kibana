@@ -8,7 +8,14 @@ import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import type { Serializable } from '@kbn/utility-types';
 import { APP_UI_ID } from '../../common/constants';
-import { FIELDS_WITHOUT_CELL_ACTIONS } from './constants';
+
+// All cell actions are disabled for these fields in Security
+const FIELDS_WITHOUT_CELL_ACTIONS = [
+  'signal.rule.risk_score',
+  'kibana.alert.risk_score',
+  'signal.reason',
+  'kibana.alert.reason',
+];
 
 export const isInSecurityApp = (currentAppId?: string): boolean => {
   return !!currentAppId && currentAppId === APP_UI_ID;

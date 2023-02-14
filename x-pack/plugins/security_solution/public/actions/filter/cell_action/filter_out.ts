@@ -13,7 +13,7 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types';
 import { isTimelineScope } from '../../../helpers';
 import type { SecurityCellAction } from '../../types';
-import { FILTER_ACTION_TYPE } from '../../constants';
+import { SecurityCellActionType } from '../../constants';
 
 export const createFilterOutCellActionFactory = ({
   store,
@@ -28,7 +28,7 @@ export const createFilterOutCellActionFactory = ({
   const genericFilterOutActionFactory = createFilterOutActionFactory({ filterManager });
 
   return genericFilterOutActionFactory.combine<SecurityCellAction>({
-    type: FILTER_ACTION_TYPE,
+    type: SecurityCellActionType.FILTER,
     isCompatible: async ({ field }) => fieldHasCellActions(field.name),
     execute: async ({ field, metadata }) => {
       // if negateFilters is true we have to perform the opposite operation, we can just execute filterIn with the same params

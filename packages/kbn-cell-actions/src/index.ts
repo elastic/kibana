@@ -9,13 +9,14 @@
 // Types and enums
 export type {
   CellAction,
+  CellActionsProps,
   CellActionExecutionContext,
   CellActionCompatibilityContext,
   CellActionTemplate,
   CellActionFactory,
   CellActionExtend,
 } from './types';
-export type { UseDataGridColumnsCellActionsProps } from './hooks';
+export type { UseDataGridColumnsCellActions, UseDataGridColumnsCellActionsProps } from './hooks';
 
 // Constants
 export { CellActionsMode, FILTER_CELL_ACTION_TYPE, COPY_CELL_ACTION_TYPE } from './constants';

@@ -7,15 +7,18 @@
 import React from 'react';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
 import type { AlertsTypeData, AlertType } from './types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { ALERTS_HEADERS_RULE_NAME } from '../../alerts_table/translations';
 import { ALERT_TYPE_COLOR, ALERT_TYPE_LABEL } from './helpers';
 import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../actions/constants';
 import * as i18n from './translations';
 
 export const getAlertsTypeTableColumns = (): Array<EuiBasicTableColumn<AlertsTypeData>> => [
@@ -48,11 +51,11 @@ export const getAlertsTypeTableColumns = (): Array<EuiBasicTableColumn<AlertsTyp
       return (
         <EuiHealth color={ALERT_TYPE_COLOR[type as AlertType]}>
           <EuiText grow={false} size="xs">
-            <CellActions
+            <SecurityCellActions
               mode={CellActionsMode.HOVER}
               visibleCellActions={4}
               showActionTooltips
-              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
               field={{
                 name: 'event.type',
                 value: 'denied',
@@ -61,7 +64,7 @@ export const getAlertsTypeTableColumns = (): Array<EuiBasicTableColumn<AlertsTyp
               metadata={{ negateFilters: type === 'Detection' }} // Detection: event.type != denied
             >
               {ALERT_TYPE_LABEL[type as AlertType]}
-            </CellActions>
+            </SecurityCellActions>
           </EuiText>
         </EuiHealth>
       );

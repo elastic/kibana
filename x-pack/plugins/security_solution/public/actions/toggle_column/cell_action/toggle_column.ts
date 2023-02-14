@@ -16,7 +16,7 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { dataTableSelectors } from '../../../common/store/data_table';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { SecurityCellAction } from '../../types';
-import { TOGGLE_COLUMN_ACTION_TYPE } from '../../constants';
+import { SecurityCellActionType } from '../../constants';
 
 const ICON = 'listAdd';
 const COLUMN_TOGGLE = i18n.translate('xpack.securitySolution.actions.toggleColumnToggle.label', {
@@ -31,7 +31,7 @@ const NESTED_COLUMN = (field: string) =>
 
 export const createToggleColumnCellActionFactory = createCellActionFactory(
   ({ store }: { store: SecurityAppStore }): CellActionTemplate<SecurityCellAction> => ({
-    type: TOGGLE_COLUMN_ACTION_TYPE,
+    type: SecurityCellActionType.TOGGLE_COLUMN,
     getIconType: () => ICON,
     getDisplayName: () => COLUMN_TOGGLE,
     getDisplayNameTooltip: ({ field, metadata }) =>

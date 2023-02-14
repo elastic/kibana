@@ -9,7 +9,7 @@ import { createCopyToClipboardActionFactory as genericCreateCopyToClipboardActio
 import { fieldHasCellActions } from '../../utils';
 import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
-import { COPY_ACTION_TYPE } from '../../constants';
+import { SecurityCellActionType } from '../../constants';
 
 export const createCopyToClipboardCellActionFactory = ({
   services,
@@ -21,7 +21,7 @@ export const createCopyToClipboardCellActionFactory = ({
     notifications,
   });
   return genericCopyToClipboardActionFactory.combine<SecurityCellAction>({
-    type: COPY_ACTION_TYPE,
+    type: SecurityCellActionType.COPY,
     isCompatible: async ({ field }) => fieldHasCellActions(field.name),
   });
 };

@@ -21,7 +21,7 @@ import {
   createCopyToClipboardCellActionFactory,
 } from './copy_to_clipboard';
 import { createToggleColumnCellActionFactory } from './toggle_column';
-import { CELL_ACTIONS_DEFAULT_TRIGGER, CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER } from './constants';
+import { SecurityCellActionsTrigger } from './constants';
 import type { SecurityCellActionName, SecurityCellActions } from './types';
 
 export const registerUIActions = (
@@ -57,7 +57,7 @@ const registerCellActions = (
     toggleColumn: createToggleColumnCellActionFactory({ store }),
   };
 
-  registerCellActionsTrigger(uiActions, CELL_ACTIONS_DEFAULT_TRIGGER, cellActions, [
+  registerCellActionsTrigger(uiActions, SecurityCellActionsTrigger.DEFAULT, cellActions, [
     'filterIn',
     'filterOut',
     'addToTimeline',
@@ -65,7 +65,7 @@ const registerCellActions = (
     'copyToClipboard',
   ]);
 
-  registerCellActionsTrigger(uiActions, CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, cellActions, [
+  registerCellActionsTrigger(uiActions, SecurityCellActionsTrigger.DETAILS_FLYOUT, cellActions, [
     'filterIn',
     'filterOut',
     'addToTimeline',
@@ -77,7 +77,7 @@ const registerCellActions = (
 
 const registerCellActionsTrigger = (
   uiActions: UiActionsStart,
-  triggerId: string,
+  triggerId: SecurityCellActionsTrigger,
   cellActions: SecurityCellActions,
   actionsOrder: SecurityCellActionName[]
 ) => {

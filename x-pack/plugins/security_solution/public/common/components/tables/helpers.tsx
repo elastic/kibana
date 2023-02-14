@@ -8,11 +8,10 @@ import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
 import styled from 'styled-components';
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
+import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../actions/constants';
 import { MoreContainer } from '../../../timelines/components/field_renderers/field_renderers';
 
 const Subtext = styled.div`
@@ -44,12 +43,12 @@ export const getRowItemsWithActions = ({
     const visibleItems = values.slice(0, displayCount).map((value, index) => {
       const id = escapeDataProviderId(`${idPrefix}-${fieldName}-${value}-${index}`);
       return (
-        <CellActions
+        <SecurityCellActions
           key={id}
           mode={CellActionsMode.HOVER}
           visibleCellActions={5}
           showActionTooltips
-          triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+          triggerId={SecurityCellActionsTrigger.DEFAULT}
           field={{
             name: fieldName,
             value,
@@ -58,7 +57,7 @@ export const getRowItemsWithActions = ({
           }}
         >
           <>{render ? render(value) : defaultToEmptyTag(value)}</>
-        </CellActions>
+        </SecurityCellActions>
       );
     });
 
