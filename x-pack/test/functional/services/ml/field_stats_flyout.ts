@@ -95,6 +95,7 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
         await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`);
 
         await this.assertFieldStatContentByType(parentComboBoxSelector, fieldName, fieldType);
+        await this.ensureFieldStatsFlyoutClosed();
       });
     },
 
@@ -122,6 +123,16 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
           );
         }
       });
+    },
+
+    async ensureFieldStatsFlyoutClosed() {
+      const flyoutIsOpen = await testSubjects.exists('mlFieldStatsFlyout');
+      if (flyoutIsOpen) {
+        await retry.tryForTime(2000, async () => {
+          await testSubjects.click('mlFieldStatsFlyout > euiFlyoutCloseButton');
+          await testSubjects.missingOrFail('mlFieldStatsFlyout');
+        });
+      }
     },
   };
 }
