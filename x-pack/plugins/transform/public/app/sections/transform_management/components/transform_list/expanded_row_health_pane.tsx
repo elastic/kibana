@@ -38,7 +38,7 @@ export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }
       name: i18n.translate(
         'xpack.transform.transformList.transformDetails.healthPane.firstOccurrenceLabel',
         {
-          defaultMessage: 'First Occurrence',
+          defaultMessage: 'First occurrence',
         }
       ),
       render: (firstOccurrence: number) => formatDate(firstOccurrence, TIME_FORMAT),

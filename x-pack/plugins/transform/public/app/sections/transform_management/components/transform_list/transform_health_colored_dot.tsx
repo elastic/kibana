@@ -33,7 +33,7 @@ export const TransformHealthColoredDot: FC<TransformHealthProps> = ({
     </EuiToolTip>
   ) : (
     <EuiHealth color={TRANSFORM_HEALTH_COLOR[healthStatus]}>
-      {TRANSFORM_HEALTH_DESCRIPTION[healthStatus]}
+      {TRANSFORM_HEALTH_LABEL[healthStatus]} {TRANSFORM_HEALTH_DESCRIPTION[healthStatus]}
     </EuiHealth>
   );
 };

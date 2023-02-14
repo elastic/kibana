@@ -130,7 +130,7 @@ export const TRANSFORM_HEALTH_LABEL = {
 
 export const TRANSFORM_HEALTH_DESCRIPTION = {
   green: i18n.translate('xpack.transform.transformHealth.greenDescription', {
-    defaultMessage: 'The transform is healthy.',
+    defaultMessage: 'The transform is running as expected.',
   }),
   unknown: i18n.translate('xpack.transform.transformHealth.unknownDescription', {
     defaultMessage: 'The health of the transform could not be determined.',

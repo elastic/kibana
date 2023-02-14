@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useMemo } from 'react';
+import { css } from '@emotion/react';
 import moment from 'moment-timezone';
 
 import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
@@ -309,7 +310,13 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       initialSelectedTab={tabs[0]}
       onTabClick={() => {}}
       expand={false}
-      style={{ width: '100%' }}
+      css={css`
+        width: 100%;
+
+        .euiTable {
+          background-color: transparent;
+        }
+      `}
       data-test-subj="transformExpandedRowTabbedContent"
     />
   );
