@@ -27,7 +27,6 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'explain',
         'row',
         'limit',
-        'project',
         'ws',
         'assign',
         'comma',
@@ -56,6 +55,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
       [
         'from',
         'stats',
+        'project',
         'eval',
         'sort',
         'by',
