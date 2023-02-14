@@ -234,13 +234,24 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it('should not work with empty string in `withOutputs` list', () => {
+    it('should not work with only spaces for a string in `withOutputs` list', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({
           startDate: 'now-1d', // yesterday
           endDate: 'now', // today
           statuses: ['failed', 'pending', 'successful'],
           withOutputs: '  ',
+        });
+      }).toThrow();
+    });
+
+    it('should not work with empty string in `withOutputs` list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'pending', 'successful'],
+          withOutputs: '',
         });
       }).toThrow();
     });
