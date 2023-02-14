@@ -103,6 +103,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     const collectorSet = new CollectorSet({
       logger: this.logger.get('usage-collection', 'collector-set'),
       executionContext: core.executionContext,
+      collectorsFetchConcurrency: config.collectorsFetchConcurrency,
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { withTimeout } from '@kbn/std';
+import { withTimeout, asyncMapWithLimit } from '@kbn/std';
 import { snakeCase } from 'lodash';
 
 import type {
@@ -34,6 +34,7 @@ interface CollectorWithStatus {
 export interface CollectorSetConfig {
   logger: Logger;
   executionContext: ExecutionContextSetup;
+  collectorsFetchConcurrency?: number;
   maximumWaitTimeForAllCollectorsInS?: number;
   collectors?: AnyCollector[];
 }
@@ -41,11 +42,13 @@ export interface CollectorSetConfig {
 export class CollectorSet {
   private readonly logger: Logger;
   private readonly executionContext: ExecutionContextSetup;
+  private readonly collectorsFetchConcurrency: number;
   private readonly maximumWaitTimeForAllCollectorsInS: number;
   private readonly collectors: Map<string, AnyCollector>;
   constructor({
     logger,
     executionContext,
+    collectorsFetchConcurrency = Infinity,
     maximumWaitTimeForAllCollectorsInS = DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S,
     collectors = [],
   }: CollectorSetConfig) {
@@ -53,6 +56,7 @@ export class CollectorSet {
     this.executionContext = executionContext;
     this.collectors = new Map(collectors.map((collector) => [collector.type, collector]));
     this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS;
+    this.collectorsFetchConcurrency = collectorsFetchConcurrency;
   }
 
   /**
@@ -229,15 +233,17 @@ export class CollectorSet {
     // freeze object to prevent collectors from mutating it.
     const context = Object.freeze({ esClient, soClient });
 
-    const fetchExecutions = await Promise.all(
-      readyCollectors.map(async (collector) => {
+    const fetchExecutions = await asyncMapWithLimit(
+      readyCollectors,
+      this.collectorsFetchConcurrency,
+      async (collector) => {
         const wrappedPromise = perfTimerify(
           `fetch_${collector.type}`,
           async () => await this.fetchCollector(collector, context)
         );
 
         return await wrappedPromise();
-      })
+      }
     );
     const durationMarks = getMarks();
 
@@ -359,6 +365,7 @@ export class CollectorSet {
       logger: this.logger,
       executionContext: this.executionContext,
       maximumWaitTimeForAllCollectorsInS: this.maximumWaitTimeForAllCollectorsInS,
+      collectorsFetchConcurrency: this.collectorsFetchConcurrency,
       collectors,
     });
   };
