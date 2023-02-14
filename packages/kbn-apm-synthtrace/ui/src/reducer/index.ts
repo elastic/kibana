@@ -1,5 +1,6 @@
 import { SynthtraceScenario, Transaction } from '../typings';
 import { Action } from './actions';
+import { v4 as uuidv4 } from 'uuid';
 
 export const INITIAL_STATE: SynthtraceScenario = {
   instanceName: 'instance_1',
@@ -16,12 +17,14 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
       };
     }
     case 'change_top_level_service': {
+      const id = uuidv4();
       return {
         ...state,
         service: {
           agentName: action.payload.agentName,
           name: `synth-${action.payload.agentName}`,
-          children: [{ name: 'tx1' } as Transaction],
+          children: [{ name: 'tx1', serviceId: id, id: uuidv4() } as Transaction],
+          id,
         },
       };
     }

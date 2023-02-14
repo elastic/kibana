@@ -19,6 +19,7 @@ export type ElasticAgentName =
   | 'android/java';
 
 export type Service = {
+  id: string;
   environment?: string;
   name: string;
   agentName: ElasticAgentName;
@@ -26,12 +27,16 @@ export type Service = {
 };
 
 export interface Transaction {
+  id: string;
+  serviceId: string;
   name: string;
   repeat?: number;
   children: Array<Transaction | Span | Service>;
 }
 
 export interface Span {
+  id: string;
+  serviceId: string;
   name: string;
   type: string;
   subtype: string;
