@@ -69,6 +69,54 @@
       },
       {
         "parentPluginId": "@kbn/json-ast",
+        "id": "def-common.getPropFromSource",
+        "type": "Function",
+        "tags": [],
+        "label": "getPropFromSource",
+        "description": [],
+        "signature": [
+          "(source: string, name: string) => (babel.types.ObjectProperty & { key: babel.types.StringLiteral; }) | undefined"
+        ],
+        "path": "packages/kbn-json-ast/src/props.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/json-ast",
+            "id": "def-common.getPropFromSource.$1",
+            "type": "string",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-json-ast/src/props.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/json-ast",
+            "id": "def-common.getPropFromSource.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-json-ast/src/props.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/json-ast",
         "id": "def-common.removeAllReferences",
         "type": "Function",
         "tags": [],
@@ -143,6 +191,83 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/json-ast",
+        "id": "def-common.removeProp",
+        "type": "Function",
+        "tags": [],
+        "label": "removeProp",
+        "description": [
+          "\nRemoves a property from a JSONc object. If the property does not exist the source is just returned"
+        ],
+        "signature": [
+          "(source: string, key: string, opts: { node?: babel.types.ObjectExpression | undefined; } | undefined) => string"
+        ],
+        "path": "packages/kbn-json-ast/src/props.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/json-ast",
+            "id": "def-common.removeProp.$1",
+            "type": "string",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-json-ast/src/props.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/json-ast",
+            "id": "def-common.removeProp.$2",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-json-ast/src/props.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/json-ast",
+            "id": "def-common.removeProp.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "path": "packages/kbn-json-ast/src/props.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/json-ast",
+                "id": "def-common.removeProp.$3.node",
+                "type": "Object",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  "babel.types.ObjectExpression | undefined"
+                ],
+                "path": "packages/kbn-json-ast/src/props.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -363,7 +488,7 @@
         "label": "setProp",
         "description": [],
         "signature": [
-          "(source: string, key: string, value: any, opts: { insertAtTop?: boolean | undefined; node?: babel.types.ObjectExpression | undefined; spaces?: string | undefined; } | undefined) => string"
+          "(source: string, key: string, value: any, opts: { insertAtTop?: boolean | undefined; insertAfter?: babel.types.ObjectProperty | undefined; node?: babel.types.ObjectExpression | undefined; spaces?: string | undefined; } | undefined) => string"
         ],
         "path": "packages/kbn-json-ast/src/props.ts",
         "deprecated": false,
@@ -436,6 +561,22 @@
                 ],
                 "signature": [
                   "boolean | undefined"
+                ],
+                "path": "packages/kbn-json-ast/src/props.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/json-ast",
+                "id": "def-common.setProp.$4.insertAfter",
+                "type": "Object",
+                "tags": [],
+                "label": "insertAfter",
+                "description": [
+                  "by default, if the key isn't already in the json, it will be added at the bottom. Set this to an existing property node to have the key added after this node"
+                ],
+                "signature": [
+                  "babel.types.ObjectProperty | undefined"
                 ],
                 "path": "packages/kbn-json-ast/src/props.ts",
                 "deprecated": false,

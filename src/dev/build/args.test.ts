@@ -28,7 +28,6 @@ it('build default and oss dist for current platform, without packages, by defaul
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
-        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCloud": false,
@@ -51,6 +50,8 @@ it('build default and oss dist for current platform, without packages, by defaul
         "isRelease": false,
         "targetAllPlatforms": false,
         "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
       },
       "log": <ToolingLog>,
       "showHelp": false,
@@ -64,7 +65,6 @@ it('builds packages if --all-platforms is passed', () => {
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
-        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerCloud": true,
@@ -87,6 +87,8 @@ it('builds packages if --all-platforms is passed', () => {
         "isRelease": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
       },
       "log": <ToolingLog>,
       "showHelp": false,
@@ -100,7 +102,6 @@ it('limits packages if --rpm passed with --all-platforms', () => {
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
-        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCloud": false,
@@ -123,6 +124,8 @@ it('limits packages if --rpm passed with --all-platforms', () => {
         "isRelease": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
       },
       "log": <ToolingLog>,
       "showHelp": false,
@@ -136,7 +139,6 @@ it('limits packages if --deb passed with --all-platforms', () => {
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
-        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerCloud": false,
@@ -159,6 +161,8 @@ it('limits packages if --deb passed with --all-platforms', () => {
         "isRelease": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
       },
       "log": <ToolingLog>,
       "showHelp": false,
@@ -173,7 +177,6 @@ it('limits packages if --docker passed with --all-platforms', () => {
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
-        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCloud": true,
@@ -196,6 +199,8 @@ it('limits packages if --docker passed with --all-platforms', () => {
         "isRelease": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
       },
       "log": <ToolingLog>,
       "showHelp": false,
@@ -217,7 +222,6 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
-        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCloud": true,
@@ -240,6 +244,8 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
         "isRelease": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
       },
       "log": <ToolingLog>,
       "showHelp": false,
@@ -254,7 +260,6 @@ it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => 
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
-        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerCloud": true,
@@ -277,6 +282,8 @@ it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => 
         "isRelease": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
       },
       "log": <ToolingLog>,
       "showHelp": false,

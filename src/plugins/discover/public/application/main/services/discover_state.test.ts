@@ -18,10 +18,16 @@ import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks_
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
+import { DiscoverAppStateContainer } from './discover_app_state_container';
 
 let history: History;
 let state: DiscoverStateContainer;
 const getCurrentUrl = () => history.createHref(history.location);
+const startSync = (appState: DiscoverAppStateContainer) => {
+  const { start, stop } = appState.syncState();
+  start();
+  return stop;
+};
 
 describe('Test discover state', () => {
   let stopSync = () => {};
@@ -34,8 +40,8 @@ describe('Test discover state', () => {
       services: discoverServiceMock,
       history,
     });
-    await state.replaceUrlAppState({});
-    stopSync = state.startSync();
+    await state.appState.update({}, true);
+    stopSync = startSync(state.appState);
   });
   afterEach(() => {
     stopSync();
@@ -43,7 +49,7 @@ describe('Test discover state', () => {
   });
   test('setting app state and syncing to URL', async () => {
     state.setAppState({ index: 'modified' });
-    state.flushToUrl();
+    state.kbnUrlStateStorage.kbnUrlControls.flush();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`
     );
@@ -67,16 +73,16 @@ describe('Test discover state', () => {
 
   test('isAppStateDirty returns  whether the current state has changed', async () => {
     state.setAppState({ index: 'modified' });
-    expect(state.isAppStateDirty()).toBeTruthy();
-    state.resetInitialAppState();
-    expect(state.isAppStateDirty()).toBeFalsy();
+    expect(state.appState.hasChanged()).toBeTruthy();
+    state.appState.resetInitialState();
+    expect(state.appState.hasChanged()).toBeFalsy();
   });
 
   test('getPreviousAppState returns the state before the current', async () => {
     state.setAppState({ index: 'first' });
     const stateA = state.appState.getState();
     state.setAppState({ index: 'second' });
-    expect(state.getPreviousAppState()).toEqual(stateA);
+    expect(state.appState.getPrevious()).toEqual(stateA);
   });
 
   test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {
@@ -96,8 +102,8 @@ describe('Test discover initial state sort handling', () => {
       services: discoverServiceMock,
       history,
     });
-    await state.replaceUrlAppState({});
-    const stopSync = state.startSync();
+    await state.appState.update({}, true);
+    const stopSync = startSync(state.appState);
     expect(state.appState.getState().sort).toEqual([['order_date', 'desc']]);
     stopSync();
   });
@@ -110,8 +116,8 @@ describe('Test discover initial state sort handling', () => {
       services: discoverServiceMock,
       history,
     });
-    await state.replaceUrlAppState({});
-    const stopSync = state.startSync();
+    await state.appState.update({}, true);
+    const stopSync = startSync(state.appState);
     expect(state.appState.getState().sort).toEqual([['bytes', 'desc']]);
     stopSync();
   });
@@ -123,8 +129,8 @@ describe('Test discover initial state sort handling', () => {
       services: discoverServiceMock,
       history,
     });
-    await state.replaceUrlAppState({});
-    const stopSync = state.startSync();
+    await state.appState.update({}, true);
+    const stopSync = startSync(state.appState);
     expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
     stopSync();
   });

@@ -52,6 +52,7 @@ import type {
   ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
 import type { ActiveMigrations, TransformResult } from './types';
+import { maxVersion } from './utils';
 import { buildActiveMigrations } from './build_active_migrations';
 import { validateMigrationDefinition } from './validate_migrations';
 
@@ -119,8 +120,9 @@ export class DocumentMigrator implements VersionedTransformer {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
     }
 
-    return Object.entries(this.migrations).reduce((acc, [prop, { latestMigrationVersion }]) => {
-      // some migration objects won't have a latestMigrationVersion (they only contain reference transforms that are applied from other types)
+    return Object.entries(this.migrations).reduce((acc, [prop, { latestVersion }]) => {
+      // some migration objects won't have a latest migration version (they only contain reference transforms that are applied from other types)
+      const latestMigrationVersion = maxVersion(latestVersion.migrate, latestVersion.convert);
       if (latestMigrationVersion) {
         return { ...acc, [prop]: latestMigrationVersion };
       }
@@ -208,13 +210,13 @@ function buildDocumentTransform({
     let transformedDoc: SavedObjectUnsanitizedDoc;
     let additionalDocs: SavedObjectUnsanitizedDoc[] = [];
     if (doc.migrationVersion) {
-      const result = applyMigrations(doc, migrations, kibanaVersion, convertNamespaceTypes);
+      const result = applyMigrations(doc, migrations, convertNamespaceTypes);
       transformedDoc = result.transformedDoc;
       additionalDocs = additionalDocs.concat(
-        result.additionalDocs.map((x) => markAsUpToDate(x, migrations, kibanaVersion))
+        result.additionalDocs.map((x) => markAsUpToDate(x, migrations))
       );
     } else {
-      transformedDoc = markAsUpToDate(doc, migrations, kibanaVersion);
+      transformedDoc = markAsUpToDate(doc, migrations);
     }
 
     // In order to keep tests a bit more stable, we won't
@@ -244,7 +246,7 @@ function validateCoreMigrationVersion(doc: SavedObjectUnsanitizedDoc, kibanaVers
     );
   }
 
-  if (doc.coreMigrationVersion && Semver.gt(docVersion, kibanaVersion)) {
+  if (docVersion && Semver.gt(docVersion, kibanaVersion)) {
     throw Boom.badData(
       `Document "${id}" has a "coreMigrationVersion" which belongs to a more recent version` +
         ` of Kibana [${docVersion}]. The current version is [${kibanaVersion}].`,
@@ -256,17 +258,22 @@ function validateCoreMigrationVersion(doc: SavedObjectUnsanitizedDoc, kibanaVers
 function applyMigrations(
   doc: SavedObjectUnsanitizedDoc,
   migrations: ActiveMigrations,
-  kibanaVersion: string,
   convertNamespaceTypes: boolean
 ) {
   let additionalDocs: SavedObjectUnsanitizedDoc[] = [];
   while (true) {
-    const prop = nextUnmigratedProp(doc, migrations);
+    const prop = nextUnmigratedProp(doc, migrations, convertNamespaceTypes);
+
     if (!prop) {
-      // regardless of whether or not any reference transform was applied, update the coreMigrationVersion
-      // this is needed to ensure that newly created documents have an up-to-date coreMigrationVersion field
+      // Ensure that newly created documents have an up-to-date coreMigrationVersion field
+      const { coreMigrationVersion = getLatestCoreVersion(doc, migrations), ...transformedDoc } =
+        doc;
+
       return {
-        transformedDoc: { ...doc, coreMigrationVersion: kibanaVersion },
+        transformedDoc: {
+          ...transformedDoc,
+          ...(coreMigrationVersion ? { coreMigrationVersion } : {}),
+        },
         additionalDocs,
       };
     }
@@ -286,28 +293,27 @@ function props(doc: SavedObjectUnsanitizedDoc) {
 /**
  * Looks up the prop version in a saved object document or in our latest migrations.
  */
-function propVersion(doc: SavedObjectUnsanitizedDoc | ActiveMigrations, prop: string) {
-  return (
-    ((doc as any)[prop] && (doc as any)[prop].latestMigrationVersion) ||
-    (doc.migrationVersion && (doc as any).migrationVersion[prop])
-  );
+function propVersion(doc: SavedObjectUnsanitizedDoc, prop: string) {
+  return doc.migrationVersion && (doc as any).migrationVersion[prop];
 }
 
 /**
  * Sets the doc's migrationVersion to be the most recent version
  */
-function markAsUpToDate(
-  doc: SavedObjectUnsanitizedDoc,
-  migrations: ActiveMigrations,
-  kibanaVersion: string
-) {
+function markAsUpToDate(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
+  const { coreMigrationVersion = getLatestCoreVersion(doc, migrations), ...rest } = doc;
+
   return {
-    ...doc,
+    ...rest,
     migrationVersion: props(doc).reduce((acc, prop) => {
-      const version = propVersion(migrations, prop);
+      const version = maxVersion(
+        migrations[prop]?.latestVersion.migrate,
+        migrations[prop]?.latestVersion.convert
+      );
+
       return version ? set(acc, prop, version) : acc;
     }, {}),
-    coreMigrationVersion: kibanaVersion,
+    ...(coreMigrationVersion ? { coreMigrationVersion } : {}),
   };
 }
 
@@ -315,7 +321,7 @@ function markAsUpToDate(
  * Determines whether or not a document has any pending transforms that should be applied based on its coreMigrationVersion field.
  * Currently, only reference transforms qualify.
  */
-function getHasPendingCoreMigrationVersionTransform(
+function hasPendingCoreTransform(
   doc: SavedObjectUnsanitizedDoc,
   migrations: ActiveMigrations,
   prop: string
@@ -324,7 +330,7 @@ function getHasPendingCoreMigrationVersionTransform(
     return false;
   }
 
-  const { latestCoreMigrationVersion } = migrations[prop];
+  const latestCoreMigrationVersion = migrations[prop].latestVersion.reference;
   const { coreMigrationVersion } = doc;
   return (
     latestCoreMigrationVersion &&
@@ -333,11 +339,66 @@ function getHasPendingCoreMigrationVersionTransform(
 }
 
 /**
+ * Determines whether or not a document has any pending conversion transforms that should be applied.
+ * Currently, only reference transforms qualify.
+ */
+function hasPendingConversionTransform(
+  doc: SavedObjectUnsanitizedDoc,
+  migrations: ActiveMigrations,
+  prop: string
+) {
+  if (!migrations.hasOwnProperty(prop)) {
+    return false;
+  }
+
+  const latestVersion = migrations[prop].latestVersion.convert;
+  const migrationVersion = doc.migrationVersion?.[prop];
+
+  return latestVersion && (!migrationVersion || Semver.gt(latestVersion, migrationVersion));
+}
+
+/**
+ * Determines whether or not a document has any pending transforms that should be applied based on its coreMigrationVersion field.
+ * Currently, only reference transforms qualify.
+ */
+function hasPendingMigrationTransform(
+  doc: SavedObjectUnsanitizedDoc,
+  migrations: ActiveMigrations,
+  prop: string
+) {
+  if (!migrations.hasOwnProperty(prop)) {
+    return false;
+  }
+
+  const latestVersion = migrations[prop].latestVersion.migrate;
+  const migrationVersion = doc.migrationVersion?.[prop];
+
+  return latestVersion && (!migrationVersion || Semver.gt(latestVersion, migrationVersion));
+}
+
+function getLatestCoreVersion(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
+  let latestVersion: string | undefined;
+
+  for (const prop of props(doc)) {
+    latestVersion = maxVersion(latestVersion, migrations[prop]?.latestVersion.reference);
+  }
+
+  return latestVersion;
+}
+
+/**
  * Finds the first unmigrated property in the specified document.
  */
-function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
+function nextUnmigratedProp(
+  doc: SavedObjectUnsanitizedDoc,
+  migrations: ActiveMigrations,
+  convertNamespaceTypes: boolean
+) {
   return props(doc).find((p) => {
-    const latestMigrationVersion = propVersion(migrations, p);
+    const latestMigrationVersion = maxVersion(
+      migrations[p]?.latestVersion.migrate,
+      migrations[p]?.latestVersion.convert
+    );
     const docVersion = propVersion(doc, p);
 
     // We verify that the version is not greater than the version supported by Kibana.
@@ -354,8 +415,10 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
     }
 
     return (
-      (latestMigrationVersion && latestMigrationVersion !== docVersion) ||
-      getHasPendingCoreMigrationVersionTransform(doc, migrations, p) // If the object itself is up-to-date, check if its references are up-to-date too
+      hasPendingMigrationTransform(doc, migrations, p) ||
+      (convertNamespaceTypes && // If the object itself is up-to-date, check if its references are up-to-date too
+        (hasPendingCoreTransform(doc, migrations, p) ||
+          hasPendingConversionTransform(doc, migrations, p)))
     );
   });
 }
@@ -373,13 +436,16 @@ function migrateProp(
   let migrationVersion = _.clone(doc.migrationVersion) || {};
   let additionalDocs: SavedObjectUnsanitizedDoc[] = [];
 
-  for (const { version, transform, transformType } of applicableTransforms(migrations, doc, prop)) {
-    if (convertNamespaceTypes || (transformType !== 'convert' && transformType !== 'reference')) {
-      // migrate transforms are always applied, but conversion transforms and reference transforms are only applied during index migrations
-      const result = transform(doc);
-      doc = result.transformedDoc;
-      additionalDocs = [...additionalDocs, ...result.additionalDocs];
-    }
+  for (const { version, transform, transformType } of applicableTransforms(
+    doc,
+    prop,
+    migrations,
+    convertNamespaceTypes
+  )) {
+    const result = transform(doc);
+    doc = result.transformedDoc;
+    additionalDocs = [...additionalDocs, ...result.additionalDocs];
+
     if (transformType === 'reference') {
       // regardless of whether or not the reference transform was applied, update the object's coreMigrationVersion
       // this is needed to ensure that we don't have an endless migration loop
@@ -402,20 +468,28 @@ function migrateProp(
  * Retrieves any prop transforms that have not been applied to doc.
  */
 function applicableTransforms(
-  migrations: ActiveMigrations,
   doc: SavedObjectUnsanitizedDoc,
-  prop: string
+  prop: string,
+  migrations: ActiveMigrations,
+  convertNamespaceTypes: boolean
 ) {
-  const minVersion = propVersion(doc, prop);
-  const minReferenceVersion = doc.coreMigrationVersion || '0.0.0';
+  const minMigrationVersion = propVersion(doc, prop);
+  const minCoreMigrationVersion = doc.coreMigrationVersion || '0.0.0';
   const { transforms } = migrations[prop];
-  return minVersion
-    ? transforms.filter(({ version, transformType }) =>
-        transformType === 'reference'
-          ? Semver.gt(version, minReferenceVersion)
-          : Semver.gt(version, minVersion)
-      )
-    : transforms;
+
+  return transforms
+    .filter(
+      ({ transformType }) =>
+        convertNamespaceTypes || !['convert', 'reference'].includes(transformType)
+    )
+    .filter(
+      ({ transformType, version }) =>
+        !minMigrationVersion ||
+        Semver.gt(
+          version,
+          transformType === 'reference' ? minCoreMigrationVersion : minMigrationVersion
+        )
+    );
 }
 
 /**
@@ -429,9 +503,10 @@ function updateMigrationVersion(
   version: string
 ) {
   assertNoDowngrades(doc, migrationVersion, prop, version);
-  const docVersion = propVersion(doc, prop) || '0.0.0';
-  const maxVersion = Semver.gt(docVersion, version) ? docVersion : version;
-  return { ...(doc.migrationVersion || migrationVersion), [prop]: maxVersion };
+  return {
+    ...(doc.migrationVersion || migrationVersion),
+    [prop]: maxVersion(propVersion(doc, prop), version) ?? '0.0.0',
+  };
 }
 
 /**

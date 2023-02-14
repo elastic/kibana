@@ -1,5 +1,5 @@
 {
-  "name": "cases-fixture",
+  "name": "@kbn/cases-api-integration-test-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",
