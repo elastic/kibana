@@ -124,6 +124,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   const eventsCountViewEventsButton = useMemo(
     () => (
       <StyledLinkButton
+        data-test-subj="events-histogram-panel-go-to-events-page"
         onClick={goToHostEvents}
         href={formatUrl(getTabsOnHostsUrl(HostsTableType.events))}
       >

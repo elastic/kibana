@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import { HOST_STATS, NETWORK_STATS, OVERVIEW_EMPTY_PAGE } from '../../screens/overview';
+import {
+  HOST_STATS,
+  NETWORK_STATS,
+  OVERVIEW_EMPTY_PAGE,
+  OVERVIEW_VIEW_ALERTS_BUTTON,
+  OVERVIEW_VIEW_EVENTS_BUTTON,
+} from '../../screens/overview';
 
 import { expandHostStats, expandNetworkStats } from '../../tasks/overview';
 import { login, visit } from '../../tasks/login';
 
-import { OVERVIEW_URL } from '../../urls/navigation';
+import { ALERTS_URL, HOSTS_PAGE_TAB_URLS, OVERVIEW_URL } from '../../urls/navigation';
 
 import { cleanKibana } from '../../tasks/common';
 import { createTimeline, favoriteTimeline } from '../../tasks/api_calls/timelines';
 import { getTimeline } from '../../objects/timeline';
+import { PAGE_TITLE } from '../../screens/common/page';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 before(() => {
@@ -65,6 +72,20 @@ describe('Overview Page', () => {
           });
         });
     });
+  });
+
+  it('should navigate to the events page when View events is clicked', () => {
+    cy.get(OVERVIEW_VIEW_EVENTS_BUTTON).click();
+
+    cy.get(PAGE_TITLE).should('contain.text', 'Hosts');
+    cy.url().should('include', HOSTS_PAGE_TAB_URLS.events);
+  });
+
+  it('should navigate to the alerts page when View alerts is clicked', () => {
+    cy.get(OVERVIEW_VIEW_ALERTS_BUTTON).click();
+
+    cy.get(PAGE_TITLE).should('contain.text', 'Alerts');
+    cy.url().should('include', ALERTS_URL);
   });
 });
 

@@ -152,3 +152,9 @@ export const OVERVIEW_CTI_TOTAL_EVENT_COUNT = `${OVERVIEW_CTI_LINKS} [data-test-
 export const OVERVIEW_CTI_ENABLE_MODULE_BUTTON = '[data-test-subj="cti-enable-module-button"]';
 
 export const OVERVIEW_ALERTS_HISTOGRAM = '[data-test-subj="alerts-histogram-panel"]';
+
+export const OVERVIEW_VIEW_EVENTS_BUTTON =
+  '[data-test-subj="events-histogram-panel-go-to-events-page"]';
+
+export const OVERVIEW_VIEW_ALERTS_BUTTON =
+  '[data-test-subj="alerts-histogram-panel-go-to-alerts-page"]';
