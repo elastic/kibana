@@ -40,6 +40,7 @@ export const RandomSamplerRangeSlider = ({
     <EuiFlexItem grow={true}>
       <EuiSpacer size="m" />
       <EuiFormRow
+        fullWidth
         label={i18n.translate(
           'xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerPercentageRowLabel',
           {
@@ -53,59 +54,58 @@ export const RandomSamplerRangeSlider = ({
           }
         )}
       >
-        <>
-          <EuiRange
-            fullWidth
-            showTicks
-            showRange
-            showInput="inputWithPopover"
-            min={RANDOM_SAMPLER_STEP}
-            max={50}
-            // Rounding to 0 decimal place because sometimes js results in weird number when multiplying fractions
-            // e.g. 0.07 * 100 yields 7.000000000000001
-            value={
-              inputValue >= 1
-                ? roundToDecimalPlace(inputValue, 0)
-                : roundToDecimalPlace(inputValue, 3)
-            }
-            ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({
-              value: d,
-              label: d === 0.001 || d >= 5 ? `${d}` : '',
-            }))}
-            isInvalid={isInvalidSamplingProbabilityInput}
-            onChange={(e) => {
-              const value = parseFloat((e.target as HTMLInputElement).value);
-              const prevValue = samplingProbabilityInput ? samplingProbabilityInput * 100 : value;
+        <EuiRange
+          fullWidth
+          showValue
+          showRange
+          showLabels
+          showInput="inputWithPopover"
+          min={RANDOM_SAMPLER_STEP}
+          max={50}
+          // Rounding to 0 decimal place because sometimes js results in weird number when multiplying fractions
+          // e.g. 0.07 * 100 yields 7.000000000000001
+          value={
+            inputValue >= 1
+              ? roundToDecimalPlace(inputValue, 0)
+              : roundToDecimalPlace(inputValue, 3)
+          }
+          ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({
+            value: d,
+            label: d === 0.001 || d >= 5 ? `${d}` : '',
+          }))}
+          isInvalid={isInvalidSamplingProbabilityInput}
+          onChange={(e) => {
+            const value = parseFloat((e.target as HTMLInputElement).value);
+            const prevValue = samplingProbabilityInput ? samplingProbabilityInput * 100 : value;
 
-              if (value > 0 && value <= 1) {
-                setSamplingProbabilityInput(value / 100);
-              } else {
-                // Because the incremental step is very small (0.0001),
-                // everytime user clicks the ^/∨ in the numerical input
-                // we need to make sure it rounds up or down to the next whole number
-                const nearestInt = value > prevValue ? Math.ceil(value) : Math.floor(value);
-                setSamplingProbabilityInput(nearestInt / 100);
-              }
-            }}
-            step={RANDOM_SAMPLER_STEP}
-            data-test-subj="dvRandomSamplerProbabilityRange"
-            append={
-              <EuiButton
-                disabled={isInvalidSamplingProbabilityInput}
-                onClick={() => {
-                  if (setSamplingProbability && isDefined(samplingProbabilityInput)) {
-                    setSamplingProbability(samplingProbabilityInput);
-                  }
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerPercentageApply"
-                  defaultMessage="Apply"
-                />
-              </EuiButton>
+            if (value > 0 && value <= 1) {
+              setSamplingProbabilityInput(value / 100);
+            } else {
+              // Because the incremental step is very small (0.0001),
+              // everytime user clicks the ^/∨ in the numerical input
+              // we need to make sure it rounds up or down to the next whole number
+              const nearestInt = value > prevValue ? Math.ceil(value) : Math.floor(value);
+              setSamplingProbabilityInput(nearestInt / 100);
             }
-          />
-        </>
+          }}
+          step={RANDOM_SAMPLER_STEP}
+          data-test-subj="dvRandomSamplerProbabilityRange"
+          append={
+            <EuiButton
+              disabled={isInvalidSamplingProbabilityInput}
+              onClick={() => {
+                if (setSamplingProbability && isDefined(samplingProbabilityInput)) {
+                  setSamplingProbability(samplingProbabilityInput);
+                }
+              }}
+            >
+              <FormattedMessage
+                id="xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerPercentageApply"
+                defaultMessage="Apply"
+              />
+            </EuiButton>
+          }
+        />
       </EuiFormRow>
     </EuiFlexItem>
   );
