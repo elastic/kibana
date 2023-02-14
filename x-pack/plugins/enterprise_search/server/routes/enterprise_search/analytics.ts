@@ -207,7 +207,7 @@ export function registerAnalyticsRoutes({
           request.params.id
         );
 
-        return response.ok({ body: { data_view_id: dataViewId } });
+        return response.ok({ body: dataViewId });
       } catch (error) {
         if ((error as Error).message === ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND) {
           return createIndexNotFoundError(error, response);

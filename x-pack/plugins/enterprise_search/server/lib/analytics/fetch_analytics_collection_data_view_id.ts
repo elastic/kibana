@@ -8,6 +8,8 @@
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
 
+import { AnalyticsCollectionDataViewId } from '../../../common/types/analytics';
+
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { fetchAnalyticsCollectionById } from './fetch_analytics_collection';
@@ -16,7 +18,7 @@ export const fetchAnalyticsCollectionDataViewId = async (
   elasticsearchClient: IScopedClusterClient,
   dataViewsService: DataViewsService,
   collectionId: string
-): Promise<string | null> => {
+): Promise<AnalyticsCollectionDataViewId> => {
   const collection = await fetchAnalyticsCollectionById(elasticsearchClient, collectionId);
 
   if (!collection) {
@@ -25,9 +27,5 @@ export const fetchAnalyticsCollectionDataViewId = async (
 
   const collectionDataView = await dataViewsService.find(collection.events_datastream, 1);
 
-  if (!collectionDataView) {
-    throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
-  }
-
-  return collectionDataView?.[0].id || null;
+  return { data_view_id: collectionDataView?.[0]?.id || null };
 };
