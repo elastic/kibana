@@ -124,7 +124,7 @@ Refer to the corresponding {es} logs for potential write errors.
 | `failure` | User is not authorized to update a saved object.
 
 .2+| `saved_object_update_objects_spaces`
-| `unknown` | User is adding or removing a saved object to/from other spaces.
+| `unknown` | User is adding and/or removing a saved object to/from other spaces.
 | `failure` | User is not authorized to add or remove a saved object to or from other spaces.
 
 .2+| `saved_object_remove_references`
