@@ -12,7 +12,7 @@ import { TSESTree } from '@typescript-eslint/typescript-estree';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
 import { getAppName } from '../helpers/get_app_name';
 
-const EVENT_GENERATING_ELEMENTS = [
+export const EVENT_GENERATING_ELEMENTS = [
   'EuiButton',
   'EuiButtonEmpty',
   'EuiLink',
@@ -24,7 +24,7 @@ const EVENT_GENERATING_ELEMENTS = [
   'EuiTextArea',
 ];
 
-export const eventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
+export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
     fixable: 'code',
@@ -80,7 +80,7 @@ export const eventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         // 6. Report feedback to engineer
         report({
           node: node as any,
-          message: `<${name}> should have a \`data-test-subj\` for telemetry purposes. Consider adding them.`,
+          message: `<${name}> should have a \`data-test-subj\` for telemetry purposes. Consider adding it.`,
           fix(fixer) {
             return fixer.insertTextAfterRange(
               range,

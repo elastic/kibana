@@ -12,7 +12,7 @@ import camelCase from 'lodash/camelCase';
     Attempts to get a string representation of the intent
     out of an array of nodes.
     
-    Currently supported:
+    Currently supported node types in the array:
     * String literal text (JSXText)
     * Translated text via <FormattedMessage> component -> uses prop `defaultMessage`
     * Translated text via {i18n.translate} call -> uses passed options object key `defaultMessage` 
@@ -27,7 +27,8 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
   /*
     In order to satisfy TS we need to do quite a bit of defensive programming.
     This is my best attempt at providing the minimum amount of typeguards and
-    keeping the code readable.
+    keeping the code readable. In the cases where types are explicitly set to
+    variables, it was done to help the compiler along.
     */
   return node.reduce((acc: string, currentNode) => {
     switch (currentNode.type) {

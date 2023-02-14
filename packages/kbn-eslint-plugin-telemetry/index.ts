@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { eventGeneratingElementsShouldBeInstrumented } from './rules/event_generating_elements_should_be_instrumented';
+import { EventGeneratingElementsShouldBeInstrumented } from './rules/event_generating_elements_should_be_instrumented';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-telemetry'` to your eslint config to use them
  * @internal
  */
 export const rules = {
-  event_generating_elements_should_be_instrumented: eventGeneratingElementsShouldBeInstrumented,
+  event_generating_elements_should_be_instrumented: EventGeneratingElementsShouldBeInstrumented,
 };

@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { camelCase } from 'lodash';
 import path from 'path';
 
 const XPACK_DIR_ROOT = '/x-pack/plugins';
+const PACKAGES_ROOT = '/packages';
 
 export function getAppName(fileName: string, cwd: string) {
   const { dir } = path.parse(fileName);
@@ -16,7 +18,9 @@ export function getAppName(fileName: string, cwd: string) {
 
   const appName = relativePathToFile.includes(XPACK_DIR_ROOT)
     ? relativePathToFile.split(XPACK_DIR_ROOT)[1].split('/')[1]
+    : relativePathToFile.includes(PACKAGES_ROOT)
+    ? relativePathToFile.split(PACKAGES_ROOT)[1].split('/')[1]
     : '';
 
-  return appName === 'observability' ? 'o11y' : appName;
+  return appName === 'observability' ? 'o11y' : camelCase(appName);
 }
