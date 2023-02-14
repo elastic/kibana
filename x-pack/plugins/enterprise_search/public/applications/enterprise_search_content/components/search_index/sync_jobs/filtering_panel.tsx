@@ -35,7 +35,7 @@ export const FilteringPanel: React.FC<FilteringPanelProps> = ({
       >
         <FilteringRulesTable filteringRules={filteringRules} showOrder={false} />
       </FlyoutPanel>
-      {!!advancedSnippet?.value ? (
+      {!!advancedSnippet ? (
         <>
           <EuiSpacer />
           <FlyoutPanel
@@ -48,7 +48,7 @@ export const FilteringPanel: React.FC<FilteringPanelProps> = ({
           >
             <EuiPanel hasShadow={false}>
               <EuiCodeBlock transparentBackground language="json">
-                {JSON.stringify(advancedSnippet.value, undefined, 2)}
+                {JSON.stringify(advancedSnippet, undefined, 2)}
               </EuiCodeBlock>
             </EuiPanel>
           </FlyoutPanel>
