@@ -14,25 +14,26 @@ import { fieldHasCellActions } from '../../utils';
 export const FILTER_OUT = i18n.translate('xpack.securitySolution.actions.filterOut', {
   defaultMessage: 'Filter Out',
 });
-const ID = 'security_filterOut';
+export const ACTION_ID = 'security_filterOut';
 const ICON = 'minusInCircle';
 
 export const createFilterOutAction = ({ order }: { order?: number }): CellAction => ({
-  id: ID,
-  type: ID,
+  id: ACTION_ID,
+  type: ACTION_ID,
   order,
   getIconType: (): string => ICON,
   getDisplayName: () => FILTER_OUT,
   getDisplayNameTooltip: () => FILTER_OUT,
   isCompatible: async ({ field }) => fieldHasCellActions(field.name),
-  execute: async ({ field }) => {
+  execute: async ({ field, metadata }) => {
     const services = KibanaServices.get();
     const filterManager = services.data.query.filterManager;
+    const negate = !metadata?.negateFilters;
 
     const makeFilter = (currentVal: string | string[] | null | undefined) =>
       currentVal == null || currentVal?.length === 0
         ? createFilter(field.name, null, false)
-        : createFilter(field.name, currentVal, true);
+        : createFilter(field.name, currentVal, negate);
 
     if (filterManager != null) {
       filterManager.addFilters(makeFilter(field.value));
