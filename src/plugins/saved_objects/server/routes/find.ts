@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { toSavedObjectWithMeta } from '@kbn/saved-objects-management-plugin/server/lib';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsRouter } from '../types';
-import { FindResponseHTTP } from '../../common/types';
+import { SavedObjectCommon, FindResponseHTTP } from '../../common/types';
 
 export const registerFindRoute = (router: SavedObjectsRouter) => {
   router.get(
@@ -41,13 +40,13 @@ export const registerFindRoute = (router: SavedObjectsRouter) => {
       const searchTypes = Array.isArray(query.type) ? query.type : [query.type];
       const includedFields = Array.isArray(query.fields) ? query.fields : [query.fields];
 
-      const findResponse = await savedObjectsClient.find<any>({
+      const findResponse = await savedObjectsClient.find<SavedObjectCommon>({
         ...query,
         type: searchTypes,
         fields: includedFields,
       });
 
-      const savedObjects = findResponse.saved_objects.map(toSavedObjectWithMeta);
+      const savedObjects = findResponse.saved_objects;
 
       const response: FindResponseHTTP = {
         saved_objects: savedObjects,

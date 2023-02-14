@@ -5,27 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { SavedObject } from '@kbn/core-saved-objects-server';
 
-import {
-  FindSearchOperatorHTTP,
-  FindSortOrderHTTP,
-  ReferenceHTTP,
-  SavedObjectWithMetadata,
-} from '@kbn/saved-objects-management-plugin/common/types/v1';
+export type SavedObjectCommon<T> = SavedObject;
 
 export interface FindQueryHTTP {
   perPage?: number;
   page?: number;
   type: string | string[];
-  // TODO: Fix. this API allows writing an arbitrary query that is passed straight to our persistence layer, thus leaking SO attributes to the public...
   search?: string;
-  defaultSearchOperator?: FindSearchOperatorHTTP;
-  // TODO: Fix. this API allows sorting by any field, thus leaking SO attributes to the public...
+  defaultSearchOperator?: 'OR';
   sortField?: string;
-  sortOrder?: FindSortOrderHTTP;
-  hasReference?: ReferenceHTTP | ReferenceHTTP[];
-  hasReferenceOperator?: FindSearchOperatorHTTP;
-  // TODO: Fix. This exposes attribute schemas to clients.
+  sortOrder?: 'asc' | 'desc';
   fields?: string | string[];
 }
 
@@ -35,8 +26,8 @@ export interface FinderAttributes {
   type: string;
 }
 
-export interface FindResponseHTTP {
-  saved_objects: Array<SavedObjectWithMetadata<FinderAttributes>>;
+export interface FindResponseHTTP<T> {
+  saved_objects: Array<SavedObjectCommon<T>>;
   total: number;
   page: number;
   per_page: number;

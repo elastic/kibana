@@ -34,17 +34,16 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
 
 import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectWithMetadata } from '@kbn/saved-objects-management-plugin/common';
-import { FinderAttributes, FindResponseHTTP } from '../../common/types';
+import { FinderAttributes, FindResponseHTTP, SavedObjectCommon } from '../../common/types';
 import { LISTING_LIMIT_SETTING } from '../../common';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
   name: string;
-  getIconForSavedObject(savedObject: SavedObjectWithMetadata<T>): IconType;
-  getTooltipForSavedObject?(savedObject: SavedObjectWithMetadata<T>): string;
-  showSavedObject?(savedObject: SavedObjectWithMetadata<T>): boolean;
-  getSavedObjectSubType?(savedObject: SavedObjectWithMetadata<T>): string;
+  getIconForSavedObject(savedObject: SavedObjectCommon<T>): IconType;
+  getTooltipForSavedObject?(savedObject: SavedObjectCommon<T>): string;
+  showSavedObject?(savedObject: SavedObjectCommon<T>): boolean;
+  getSavedObjectSubType?(savedObject: SavedObjectCommon<T>): string;
   includeFields?: string[];
   defaultSearchField?: string;
 }
@@ -53,9 +52,9 @@ interface SavedObjectFinderState {
   items: Array<{
     title: string | null;
     name: string | null;
-    id: SavedObjectWithMetadata['id'];
-    type: SavedObjectWithMetadata['type'];
-    savedObject: SavedObjectWithMetadata<FinderAttributes>;
+    id: SavedObjectCommon<FinderAttributes>['id'];
+    type: SavedObjectCommon<FinderAttributes>['type'];
+    savedObject: SavedObjectCommon<FinderAttributes>;
   }>;
   query: string;
   isFetchingItems: boolean;
@@ -69,10 +68,10 @@ interface SavedObjectFinderState {
 
 interface BaseSavedObjectFinder {
   onChoose?: (
-    id: SavedObjectWithMetadata['id'],
-    type: SavedObjectWithMetadata['type'],
+    id: SavedObjectCommon<FinderAttributes>['id'],
+    type: SavedObjectCommon<FinderAttributes>['type'],
     name: string,
-    savedObject: SavedObjectWithMetadata
+    savedObject: SavedObjectCommon<FinderAttributes>
   ) => void;
   noItemsMessage?: React.ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
@@ -137,7 +136,7 @@ class SavedObjectFinderUi extends React.Component<
     };
     const resp = (await this.props.http.get('/api/saved-objects/find', {
       query: params as Record<string, any>,
-    })) as FindResponseHTTP;
+    })) as FindResponseHTTP<FinderAttributes>;
 
     resp.saved_objects = resp.saved_objects.filter((savedObject) => {
       const metaData = metaDataMap[savedObject.type];
@@ -158,11 +157,8 @@ class SavedObjectFinderUi extends React.Component<
         isFetchingItems: false,
         page: 0,
         items: resp.saved_objects.map((savedObject) => {
-          const {
-            attributes: { name, title },
-            id,
-            type,
-          } = savedObject;
+          const { attributes, id, type } = savedObject;
+          const { name, title } = attributes as FinderAttributes;
           const titleToUse = typeof title === 'string' ? title : '';
           const nameToUse = name ? name : titleToUse;
           return {
