@@ -7,11 +7,15 @@
  */
 
 import { CoreSetup, Plugin } from '@kbn/core/server';
+import { registerRoutes } from './routes';
 import { uiSettings } from './ui_settings';
+import { SavedObjectsRequestHandlerContext } from './types';
 
 export class SavedObjectsServerPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup) {
     core.uiSettings.register(uiSettings);
+    const router = core.http.createRouter<SavedObjectsRequestHandlerContext>();
+    registerRoutes(router);
     return {};
   }
 

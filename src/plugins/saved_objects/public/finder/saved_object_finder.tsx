@@ -31,39 +31,31 @@ import {
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
-import {
-  SimpleSavedObject,
-  CoreStart,
-  IUiSettingsClient,
-  SavedObjectsStart,
-} from '@kbn/core/public';
+import { CoreStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
 
+import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectWithMetadata } from '@kbn/saved-objects-management-plugin/common';
+import { FinderAttributes, FindResponseHTTP } from '../../common/types';
 import { LISTING_LIMIT_SETTING } from '../../common';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
   name: string;
-  getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
-  getTooltipForSavedObject?(savedObject: SimpleSavedObject<T>): string;
-  showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
-  getSavedObjectSubType?(savedObject: SimpleSavedObject<T>): string;
+  getIconForSavedObject(savedObject: SavedObjectWithMetadata<T>): IconType;
+  getTooltipForSavedObject?(savedObject: SavedObjectWithMetadata<T>): string;
+  showSavedObject?(savedObject: SavedObjectWithMetadata<T>): boolean;
+  getSavedObjectSubType?(savedObject: SavedObjectWithMetadata<T>): string;
   includeFields?: string[];
   defaultSearchField?: string;
-}
-
-export interface FinderAttributes {
-  title?: string;
-  name?: string;
-  type: string;
 }
 
 interface SavedObjectFinderState {
   items: Array<{
     title: string | null;
     name: string | null;
-    id: SimpleSavedObject['id'];
-    type: SimpleSavedObject['type'];
-    savedObject: SimpleSavedObject<FinderAttributes>;
+    id: SavedObjectWithMetadata['id'];
+    type: SavedObjectWithMetadata['type'];
+    savedObject: SavedObjectWithMetadata<FinderAttributes>;
   }>;
   query: string;
   isFetchingItems: boolean;
@@ -77,10 +69,10 @@ interface SavedObjectFinderState {
 
 interface BaseSavedObjectFinder {
   onChoose?: (
-    id: SimpleSavedObject['id'],
-    type: SimpleSavedObject['type'],
+    id: SavedObjectWithMetadata['id'],
+    type: SavedObjectWithMetadata['type'],
     name: string,
-    savedObject: SimpleSavedObject
+    savedObject: SavedObjectWithMetadata
   ) => void;
   noItemsMessage?: React.ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
@@ -100,8 +92,8 @@ interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
 export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize;
 
 export type SavedObjectFinderUiProps = {
-  savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
+  http: CoreStart['http'];
 } & SavedObjectFinderProps;
 
 class SavedObjectFinderUi extends React.Component<
@@ -134,7 +126,7 @@ class SavedObjectFinderUi extends React.Component<
     }, []);
 
     const perPage = this.props.uiSettings.get(LISTING_LIMIT_SETTING);
-    const resp = await this.props.savedObjects.client.find<FinderAttributes>({
+    const params: SavedObjectsFindOptions = {
       type: Object.keys(metaDataMap),
       fields: [...new Set(fields)],
       search: query ? `${query}*` : undefined,
@@ -142,15 +134,17 @@ class SavedObjectFinderUi extends React.Component<
       perPage,
       searchFields: ['title^3', 'description', ...additionalSearchFields],
       defaultSearchOperator: 'AND',
-    });
+    };
+    const resp = (await this.props.http.get('/api/saved-objects/find', {
+      query: params as Record<string, any>,
+    })) as FindResponseHTTP;
 
-    resp.savedObjects = resp.savedObjects.filter((savedObject) => {
+    resp.saved_objects = resp.saved_objects.filter((savedObject) => {
       const metaData = metaDataMap[savedObject.type];
       if (metaData.showSavedObject) {
         return metaData.showSavedObject(savedObject);
-      } else {
-        return true;
       }
+      return true;
     });
 
     if (!this.isComponentMounted) {
@@ -163,14 +157,14 @@ class SavedObjectFinderUi extends React.Component<
       this.setState({
         isFetchingItems: false,
         page: 0,
-        items: resp.savedObjects.map((savedObject) => {
+        items: resp.saved_objects.map((savedObject) => {
           const {
             attributes: { name, title },
             id,
             type,
           } = savedObject;
           const titleToUse = typeof title === 'string' ? title : '';
-          const nameToUse = name && typeof name === 'string' ? name : titleToUse;
+          const nameToUse = name ? name : titleToUse;
           return {
             title: titleToUse,
             name: nameToUse,
@@ -533,9 +527,9 @@ class SavedObjectFinderUi extends React.Component<
   }
 }
 
-const getSavedObjectFinder = (savedObject: SavedObjectsStart, uiSettings: IUiSettingsClient) => {
+const getSavedObjectFinder = (uiSettings: IUiSettingsClient, http: HttpStart) => {
   return (props: SavedObjectFinderProps) => (
-    <SavedObjectFinderUi {...props} savedObjects={savedObject} uiSettings={uiSettings} />
+    <SavedObjectFinderUi {...props} uiSettings={uiSettings} http={http} />
   );
 };
 

@@ -18,14 +18,14 @@ export function addFromLibrary(this: DashboardContainer) {
     notifications,
     usageCollection,
     settings: { uiSettings, theme },
-    dashboardSavedObject: { savedObjectsClient },
     embeddable: { getEmbeddableFactories, getEmbeddableFactory },
+    http,
   } = pluginServices.getServices();
 
   if (isErrorEmbeddable(this)) return;
   this.openOverlay(
     openAddPanelFlyout({
-      SavedObjectFinder: getSavedObjectFinder({ client: savedObjectsClient }, uiSettings),
+      SavedObjectFinder: getSavedObjectFinder(uiSettings, http),
       reportUiCounter: usageCollection.reportUiCounter,
       getAllFactories: getEmbeddableFactories,
       getFactory: getEmbeddableFactory,
