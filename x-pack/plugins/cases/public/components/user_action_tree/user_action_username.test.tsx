@@ -38,7 +38,7 @@ describe('UserActionUsername ', () => {
     wrapper.find('[data-test-subj="user-action-username-tooltip"]').first().simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe('Elastic');
@@ -58,7 +58,7 @@ describe('UserActionUsername ', () => {
       .simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     newWrapper.update();
     expect(newWrapper.find('.euiToolTipPopover').text()).toBe('elastic');

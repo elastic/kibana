@@ -102,7 +102,7 @@ describe('Configuration button', () => {
     newWrapper.find('[data-test-subj="configure-case-button"]').first().simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     newWrapper.update();
     expect(newWrapper.find('.euiToolTipPopover').text()).toBe(`${titleTooltip}${msgTooltip}`);
