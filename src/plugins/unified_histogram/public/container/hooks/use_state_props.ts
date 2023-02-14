@@ -40,7 +40,11 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
    */
 
   const isPlainRecord = useMemo(() => {
-    return query && isOfAggregateQueryType(query) && (getAggregateQueryMode(query) === 'sql' || getAggregateQueryMode(query) === 'esql');
+    return (
+      query &&
+      isOfAggregateQueryType(query) &&
+      (getAggregateQueryMode(query) === 'sql' || getAggregateQueryMode(query) === 'esql')
+    );
   }, [query]);
 
   const isTimeBased = useMemo(() => {
