@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
 import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
-import { updateFlappingSettings } from '../lib/rule_api';
+import { updateFlappingSettings } from '../lib/rule_api/update_flapping_settings';
 
 interface UseUpdateFlappingSettingsProps {
   onClose: () => void;
