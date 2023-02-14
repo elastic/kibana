@@ -3645,15 +3645,7 @@
   version "0.0.0"
   uid ""
 
-<<<<<<< HEAD
-"@kbn/eslint-plugin-telemetry@link:bazel-bin/packages/kbn-eslint-plugin-telemetry":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expect@link:bazel-bin/packages/kbn-expect":
-=======
 "@kbn/core-rendering-browser-mocks@link:packages/core/rendering/core-rendering-browser-mocks":
->>>>>>> 27f112650a5fc85b5ea9efeb1e47c55887d8e824
   version "0.0.0"
   uid ""
 
@@ -4046,6 +4038,10 @@
   uid ""
 
 "@kbn/eslint-plugin-imports@link:packages/kbn-eslint-plugin-imports":
+  version "0.0.0"
+  uid ""
+
+"@kbn/eslint-plugin-telemetry@link:packages/kbn-eslint-plugin-telemetry":
   version "0.0.0"
   uid ""
 

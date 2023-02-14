@@ -5,59 +5,108 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { TSESTree } from '@typescript-eslint/typescript-estree';
 import camelCase from 'lodash/camelCase';
 
 /*
     Attempts to get a string representation of the intent
     out of an array of nodes.
     
-    It currently only works through the array of nodes that
-    it has been passed. It does not recursively traverse the
-    AST tree.
-
     Currently supported:
-        - flat text (JSXText)
-        - translated text via <FormattedMessage> component -> uses `defaultMessage`
-        - translated text via {i18n.translate} call -> uses `defaultMessage` 
+    * String literal text (JSXText)
+    * Translated text via <FormattedMessage> component -> uses prop `defaultMessage`
+    * Translated text via {i18n.translate} call -> uses passed options object key `defaultMessage` 
 */
-export function getIntentFromNodeArray(node: any): string {
+export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): string {
+  const parent = originalNode.parent as TSESTree.JSXElement;
+
+  const node = Array.isArray(parent.children) ? parent.children : [];
+
   if (node.length === 0) return '';
 
-  return node.reduce((acc: string, currentNode: any) => {
+  /*
+    In order to satisfy TS we need to do quite a bit of defensive programming.
+    This is my best attempt at providing the minimum amount of typeguards and
+    keeping the code readable.
+    */
+  return node.reduce((acc: string, currentNode) => {
     switch (currentNode.type) {
       case 'JSXText':
+        // When node is a literal string
         return `${acc}${strip(currentNode.value)}`;
 
       case 'JSXElement':
-        const {
-          openingElement: { name, attributes },
-        } = currentNode;
+        // When node is a <FormattedMessage />
+        const name = currentNode.openingElement.name;
+        const attributes: Array<TSESTree.JSXAttribute | TSESTree.JSXSpreadAttribute> =
+          currentNode.openingElement.attributes;
 
-        if (name.name === 'FormattedMessage') {
-          const { value } = attributes.find((attrib: any) => attrib.name.name === 'defaultMessage');
-
-          return `${acc}${strip(value.value)}`;
+        if (!('name' in name) || name.name !== 'FormattedMessage') {
+          return '';
         }
-        return acc;
+
+        const defaultMessageProp = attributes.find(
+          (attribute) => 'name' in attribute && attribute.name.name === 'defaultMessage'
+        );
+
+        if (
+          !defaultMessageProp ||
+          !('value' in defaultMessageProp) ||
+          !('type' in defaultMessageProp.value!) ||
+          defaultMessageProp.value.type !== 'Literal' ||
+          typeof defaultMessageProp.value.value !== 'string'
+        ) {
+          return '';
+        }
+
+        return `${acc}${strip(defaultMessageProp.value.value)}`;
 
       case 'JSXExpressionContainer':
-        const {
-          expression: {
-            arguments: args,
-            callee: { object, property },
-          },
-        } = currentNode;
+        // When node is a {i18n.translate}
+        const { expression } = currentNode;
 
-        if (object.name === 'i18n' && property.name === 'translate') {
-          const { properties } = args.find((arg: any) => arg.type === 'ObjectExpression');
-
-          const { value } = properties.find(
-            (prop: any) => prop.type === 'Property' && prop.key.name === 'defaultMessage'
-          );
-
-          return `${acc}${strip(value.value)}`;
+        if (!('arguments' in expression)) {
+          return '';
         }
-        return acc;
+
+        const args: TSESTree.CallExpressionArgument[] = expression.arguments;
+        const callee = expression.callee;
+
+        if (!('object' in callee)) {
+          return '';
+        }
+
+        const { object, property } = callee;
+
+        if (!('name' in object) || !('name' in property)) {
+          return '';
+        }
+
+        if (object.name !== 'i18n' || property.name !== 'translate') {
+          return '';
+        }
+
+        const callExpressionArgument = args.find((arg) => arg.type === 'ObjectExpression');
+
+        if (!callExpressionArgument || callExpressionArgument.type !== 'ObjectExpression') {
+          return '';
+        }
+
+        const defaultMessageValue = callExpressionArgument.properties.find(
+          (prop) =>
+            prop.type === 'Property' && 'name' in prop.key && prop.key.name === 'defaultMessage'
+        );
+
+        if (
+          !defaultMessageValue ||
+          !('value' in defaultMessageValue) ||
+          defaultMessageValue.value.type !== 'Literal' ||
+          typeof defaultMessageValue.value.value !== 'string'
+        ) {
+          return '';
+        }
+
+        return `${acc}${strip(defaultMessageValue.value.value)}`;
 
       default:
         break;
