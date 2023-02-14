@@ -1,9 +1,7 @@
-- command: .buildkite/scripts/steps/code_coverage/ingest.sh
-  label: 'Merge and Ingest'
-  agents:
-    queue: c2-16
-  depends_on:
-    - jest
-    - jest-integration
-  timeout_in_minutes: 30
-  key: ingest
+steps:
+  - command: .buildkite/scripts/steps/code_coverage/ingest.sh
+    label: 'Merge and Ingest'
+    agents:
+      queue: c2-16
+    timeout_in_minutes: 30
+    key: ingest
