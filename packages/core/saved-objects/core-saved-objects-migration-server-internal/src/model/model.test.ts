@@ -1393,6 +1393,7 @@ describe('migrations v2 model', () => {
         const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.right({
           type: 'cleanup_successful' as const,
           unknownDocs: [],
+          errorsByType: {},
         });
 
         test('it resets retry count and delay', () => {
