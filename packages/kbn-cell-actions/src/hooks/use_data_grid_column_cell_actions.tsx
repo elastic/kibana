@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useRef } from 'react';
-import { EuiLoadingSpinner, type EuiDataGridColumnCellAction } from '@elastic/eui';
+import React, { MutableRefObject, useCallback, useMemo, useRef } from 'react';
+import {
+  EuiDataGridRefProps,
+  EuiLoadingSpinner,
+  type EuiDataGridColumnCellAction,
+} from '@elastic/eui';
 import type {
   CellAction,
   CellActionCompatibilityContext,
@@ -27,11 +31,13 @@ interface BulkField extends Pick<CellActionField, 'name' | 'type'> {
 export interface UseDataGridColumnsCellActionsProps
   extends Pick<CellActionsProps, 'triggerId' | 'metadata' | 'disabledActions'> {
   fields: BulkField[];
+  dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }
 export const useDataGridColumnsCellActions = ({
   fields,
   triggerId,
   metadata,
+  dataGridRef,
   disabledActions = [],
 }: UseDataGridColumnsCellActionsProps): EuiDataGridColumnCellAction[][] => {
   const bulkContexts: CellActionCompatibilityContext[] = useMemo(
@@ -57,15 +63,22 @@ export const useDataGridColumnsCellActions = ({
     }
     return columnsActions.map((actions, columnIndex) =>
       actions.map((action) =>
-        createColumnCellAction({ action, metadata, triggerId, field: fields[columnIndex] })
+        createColumnCellAction({
+          action,
+          metadata,
+          triggerId,
+          field: fields[columnIndex],
+          dataGridRef,
+        })
       )
     );
-  }, [columnsActions, fields, loading, metadata, triggerId]);
+  }, [columnsActions, fields, loading, metadata, triggerId, dataGridRef]);
 
   return columnsCellActions;
 };
 
-interface CreateColumnCellActionParams extends Pick<CellActionsProps, 'triggerId' | 'metadata'> {
+interface CreateColumnCellActionParams
+  extends Pick<UseDataGridColumnsCellActionsProps, 'triggerId' | 'metadata' | 'dataGridRef'> {
   field: BulkField;
   action: CellAction;
 }
@@ -74,36 +87,76 @@ const createColumnCellAction = ({
   action,
   metadata,
   triggerId,
+  dataGridRef,
 }: CreateColumnCellActionParams): EuiDataGridColumnCellAction =>
-  function ColumnCellAction({ Component, rowIndex }) {
+  function ColumnCellAction({ Component, rowIndex, isExpanded }) {
     const nodeRef = useRef<HTMLAnchorElement | null>(null);
-    const extraContentNodeRef = useRef<HTMLDivElement | null>(null);
+    const buttonRef = useRef<HTMLAnchorElement | null>(null);
 
-    const { name, type, values } = field;
-    // rowIndex refers to all pages, we need to use the row index relative to the page to get the value
-    const value = values[rowIndex % values.length];
+    const actionContext: CellActionExecutionContext = useMemo(() => {
+      const { name, type, values } = field;
+      // rowIndex refers to all pages, we need to use the row index relative to the page to get the value
+      const value = values[rowIndex % values.length];
+      return {
+        field: { name, type, value },
+        trigger: { id: triggerId },
+        nodeRef,
+        metadata,
+      };
+    }, [rowIndex]);
 
-    const actionContext: CellActionExecutionContext = {
-      field: { name, type, value },
-      trigger: { id: triggerId },
-      extraContentNodeRef,
-      nodeRef,
-      metadata,
-    };
+    const onClick = useCallback(async () => {
+      actionContext.nodeRef.current = await closeAndGetCellElement({
+        dataGrid: dataGridRef.current,
+        isExpanded,
+        buttonRef,
+      });
+      action.execute(actionContext);
+    }, [actionContext, isExpanded]);
 
     return (
       <Component
-        buttonRef={nodeRef}
+        buttonRef={buttonRef}
         aria-label={action.getDisplayName(actionContext)}
         title={action.getDisplayName(actionContext)}
         data-test-subj={`dataGridColumnCellAction-${action.id}`}
         iconType={action.getIconType(actionContext)!}
-        onClick={() => {
-          action.execute(actionContext);
-        }}
+        onClick={onClick}
       >
         {action.getDisplayName(actionContext)}
-        <div ref={extraContentNodeRef} />
       </Component>
     );
   };
+
+const closeAndGetCellElement = ({
+  dataGrid,
+  isExpanded,
+  buttonRef,
+}: {
+  dataGrid?: EuiDataGridRefProps | null;
+  isExpanded: boolean;
+  buttonRef: MutableRefObject<HTMLAnchorElement | null>;
+}): Promise<HTMLElement | null> =>
+  new Promise((resolve) => {
+    const gridCellElement = isExpanded
+      ? // if actions popover is expanded the button is outside dataGrid, using euiDataGridRowCell--open class
+        document.querySelector('div[role="gridcell"].euiDataGridRowCell--open')
+      : // if not expanded the button is inside the cell, get the parent cell from the button
+        getParentCellElement(buttonRef.current);
+    // close the popover if needed
+    dataGrid?.closeCellPopover();
+    // closing the popover updates the cell content, get the first child after all updates
+    setTimeout(() => {
+      resolve((gridCellElement?.firstElementChild as HTMLElement) ?? null);
+    });
+  });
+
+const getParentCellElement = (element?: HTMLElement | null): HTMLElement | null => {
+  if (element == null) {
+    return null;
+  }
+  if (element.nodeName === 'div' && element.getAttribute('role') === 'gridcell') {
+    return element;
+  }
+  return getParentCellElement(element.parentElement);
+};

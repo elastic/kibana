@@ -96,15 +96,9 @@ type Metadata = Record<string, unknown> | undefined;
 export interface CellActionExecutionContext extends ActionExecutionContext {
   field: CellActionField;
   /**
-   * Ref to a DOM node where the action can add custom HTML.
-   */
-  extraContentNodeRef: React.MutableRefObject<HTMLDivElement | null>;
-
-  /**
    * Ref to the node where the cell action are rendered.
    */
   nodeRef: React.MutableRefObject<HTMLElement | null>;
-
   /**
    * Extra configurations for actions.
    */
