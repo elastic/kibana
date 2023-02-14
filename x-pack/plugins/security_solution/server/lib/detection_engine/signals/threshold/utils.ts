@@ -23,11 +23,11 @@ export const getRuleEssentialsHash = (completeRule: CompleteRule<ThresholdRulePa
     dataViewId: ruleParams.dataViewId,
     exceptionsList: ruleParams.exceptionsList,
     filters: ruleParams.filters,
-    index: ruleParams.index?.sort(),
+    index: [...(ruleParams.index ?? [])].sort(),
     query: ruleParams.query,
     from: ruleParams.from,
     to: ruleParams.to,
-    thresholdField: ruleParams.threshold.field.sort(),
+    thresholdField: [...ruleParams.threshold.field].sort(),
     thresholdCardinalityField: ruleParams.threshold.cardinality?.map((val) => val.field).sort(),
   };
   const ruleEssentialsHash = createHash('sha256')
