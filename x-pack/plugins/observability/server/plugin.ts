@@ -17,7 +17,7 @@ import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { createUICapabilities } from '@kbn/cases-plugin/common';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
@@ -48,7 +48,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 interface PluginSetup {
   features: FeaturesSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginSetup;
   alerting: PluginSetupContract;
   guidedOnboarding: GuidedOnboardingPluginSetup;
   usageCollection?: UsageCollectionSetup;
