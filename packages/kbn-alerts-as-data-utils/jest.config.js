@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './alert_field_map';
-export * from './legacy_alert_field_map';
-export * from './ecs_field_map';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-alerts-as-data-utils'],
+};
