@@ -218,7 +218,7 @@ const InsightComponent = ({
         toStr,
       };
     }
-  }, [oldestTimestamp, relativeFrom, relativeTo, timestamp]);
+  }, [oldestTimestamp, relativeTimerange, timestamp]);
 
   if (isQueryLoading) {
     return <EuiLoadingSpinner size="l" />;
