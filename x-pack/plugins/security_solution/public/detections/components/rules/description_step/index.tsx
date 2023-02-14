@@ -70,6 +70,7 @@ interface StepRuleDescriptionProps<T> {
   data: unknown;
   indexPatterns?: DataViewBase;
   schema: FormSchema<T>;
+  jobInstallationDisabled?: boolean;
 }
 
 export const StepRuleDescriptionComponent = <T,>({
@@ -77,6 +78,7 @@ export const StepRuleDescriptionComponent = <T,>({
   columns = 'multi',
   indexPatterns,
   schema,
+  jobInstallationDisabled,
 }: StepRuleDescriptionProps<T>) => {
   const kibana = useKibana();
   const license = useLicense();
@@ -89,7 +91,8 @@ export const StepRuleDescriptionComponent = <T,>({
         ...acc,
         buildMlJobsDescription(
           get(key, data) as string[],
-          (get(key, schema) as { label: string }).label
+          (get(key, schema) as { label: string }).label,
+          !!jobInstallationDisabled
         ),
       ];
     }

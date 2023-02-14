@@ -47,6 +47,7 @@ describe('MlAdminJobDescription', () => {
         job={securityJobNotStarted}
         refreshJob={refreshJobSpy}
         loading={false}
+        readOnly={false}
       />,
       {
         wrapper: TestProviders,
@@ -71,7 +72,12 @@ describe('MlAdminJobDescription', () => {
     });
 
     render(
-      <MlAdminJobDescription job={securityJobNotStarted} refreshJob={noop} loading={false} />,
+      <MlAdminJobDescription
+        job={securityJobNotStarted}
+        refreshJob={noop}
+        loading={false}
+        readOnly={false}
+      />,
       {
         wrapper: TestProviders,
       }
@@ -84,9 +90,17 @@ describe('MlAdminJobDescription', () => {
   });
 
   it('should render loading spinner when loading property passed', async () => {
-    render(<MlAdminJobDescription job={securityJobNotStarted} refreshJob={noop} loading />, {
-      wrapper: TestProviders,
-    });
+    render(
+      <MlAdminJobDescription
+        job={securityJobNotStarted}
+        refreshJob={noop}
+        loading
+        readOnly={false}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     expect(screen.getByTestId('job-switch-loader')).toBeInTheDocument();
     await waitFor(() => {
@@ -95,9 +109,17 @@ describe('MlAdminJobDescription', () => {
   });
 
   it('should render job details correctly', async () => {
-    render(<MlAdminJobDescription job={securityJobNotStarted} refreshJob={noop} loading />, {
-      wrapper: TestProviders,
-    });
+    render(
+      <MlAdminJobDescription
+        job={securityJobNotStarted}
+        refreshJob={noop}
+        loading
+        readOnly={false}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     // link to job
     const linkElement = screen.getByTestId('machineLearningJobLink');
@@ -116,6 +138,27 @@ describe('MlAdminJobDescription', () => {
     // job action label
     await waitFor(() => {
       expect(screen.getByTestId('mlJobActionLabel')).toHaveTextContent('Run job');
+    });
+  });
+
+  it('should not render toggle if readOnly is true', async () => {
+    useEnableDataFeedMock.mockReturnValueOnce({
+      enableDatafeed: noop,
+    });
+
+    render(
+      <MlAdminJobDescription
+        job={securityJobNotStarted}
+        refreshJob={noop}
+        loading={false}
+        readOnly
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
+    await waitFor(() => {
+      expect(screen.queryByTestId('job-switch')).not.toBeInTheDocument();
     });
   });
 });

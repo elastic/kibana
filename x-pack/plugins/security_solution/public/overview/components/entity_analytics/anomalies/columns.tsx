@@ -35,7 +35,7 @@ const MediumShadeText = styled.span`
 
 export const useAnomaliesColumns = (
   loading: boolean,
-  onJobStateChange: (job: SecurityJob) => Promise<void>
+  onJobStateChange: (job: SecurityJob) => Promise<{ enabledJobId: string }>
 ): AnomaliesColumns => {
   const columns: AnomaliesColumns = useMemo(
     () => [
@@ -101,7 +101,7 @@ const EnableJob = ({
 }: {
   job: SecurityJob;
   isLoading: boolean;
-  onJobStateChange: (job: SecurityJob) => Promise<void>;
+  onJobStateChange: (job: SecurityJob) => Promise<{ enabledJobId: string }>;
 }) => {
   const handleChange = useCallback(() => onJobStateChange(job), [job, onJobStateChange]);
 

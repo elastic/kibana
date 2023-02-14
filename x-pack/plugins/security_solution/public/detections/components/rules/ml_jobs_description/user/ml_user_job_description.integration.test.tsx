@@ -18,14 +18,18 @@ import { mockOpenedJob } from '../../../../../common/components/ml_popover/api.m
 
 describe('MlUserJobDescription', () => {
   it('should render switch component disabled', async () => {
-    render(<MlUserJobDescription job={mockOpenedJob} />, { wrapper: TestProviders });
+    render(<MlUserJobDescription job={mockOpenedJob} readOnly={false} />, {
+      wrapper: TestProviders,
+    });
     await waitFor(() => {
       expect(screen.getByTestId('mlUserJobSwitch')).toBeDisabled();
     });
   });
 
   it('should render toast that shows admin permissions required', async () => {
-    render(<MlUserJobDescription job={mockOpenedJob} />, { wrapper: TestProviders });
+    render(<MlUserJobDescription job={mockOpenedJob} readOnly={false} />, {
+      wrapper: TestProviders,
+    });
 
     userEvent.hover(screen.getByTestId('mlUserJobSwitch').parentNode as Element);
 
@@ -37,7 +41,7 @@ describe('MlUserJobDescription', () => {
   });
 
   it('should render job details correctly', async () => {
-    render(<MlUserJobDescription job={mockOpenedJob} />, {
+    render(<MlUserJobDescription job={mockOpenedJob} readOnly={false} />, {
       wrapper: TestProviders,
     });
 
@@ -56,6 +60,16 @@ describe('MlUserJobDescription', () => {
     // job action label
     await waitFor(() => {
       expect(screen.getByTestId('mlJobActionLabel')).toHaveTextContent('Stop job');
+    });
+  });
+
+  it('should not render switch if readOnly is true', async () => {
+    render(<MlUserJobDescription job={mockOpenedJob} readOnly={true} />, {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('mlUserJobSwitch')).not.toBeInTheDocument();
     });
   });
 });

@@ -52,7 +52,7 @@ interface ColumnsProps {
   hasCRUDPermissions: boolean;
   isLoadingJobs: boolean;
   mlJobs: SecurityJob[];
-  startMlJobs: (jobIds: string[] | undefined) => Promise<void>;
+  startMlJobs: (jobIds: string[] | undefined) => Promise<string[] | undefined>;
 }
 
 interface ActionColumnsProps {

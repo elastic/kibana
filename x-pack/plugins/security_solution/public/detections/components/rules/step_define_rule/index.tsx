@@ -103,6 +103,7 @@ interface StepDefineRuleProps extends RuleStepProps {
   onRuleDataChange?: (data: DefineStepRule) => void;
   onPreviewDisabledStateChange?: (isDisabled: boolean) => void;
   defaultSavedQuery?: SavedQuery;
+  jobInstallationDisabled?: boolean;
 }
 
 export const MyLabelButton = styled(EuiButtonEmpty)`
@@ -140,6 +141,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   onRuleDataChange,
   onPreviewDisabledStateChange,
   defaultSavedQuery,
+  jobInstallationDisabled,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -781,6 +783,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         indexPatterns={indexPattern}
         schema={filterRuleFieldsForType(schema, ruleType)}
         data={filterRuleFieldsForType(dataForDescription, ruleType)}
+        jobInstallationDisabled={jobInstallationDisabled}
       />
     </StepContentWrapper>
   ) : (

@@ -14,9 +14,10 @@ import { MlUserJobDescription } from './ml_user_job_description';
 
 interface MlUserJobsDescriptionProps {
   jobIds: string[];
+  readOnly: boolean;
 }
 
-const MlUserJobsDescriptionComponent: FC<MlUserJobsDescriptionProps> = ({ jobIds }) => {
+const MlUserJobsDescriptionComponent: FC<MlUserJobsDescriptionProps> = ({ jobIds, readOnly }) => {
   const { isMlUser, jobs } = useInstalledSecurityJobs();
 
   if (!isMlUser) {
@@ -28,7 +29,7 @@ const MlUserJobsDescriptionComponent: FC<MlUserJobsDescriptionProps> = ({ jobIds
   return (
     <>
       {relevantJobs.map((job) => (
-        <MlUserJobDescription key={job.id} job={job} />
+        <MlUserJobDescription key={job.id} job={job} readOnly={readOnly} />
       ))}
     </>
   );

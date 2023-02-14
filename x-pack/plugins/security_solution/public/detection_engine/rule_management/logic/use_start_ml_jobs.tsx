@@ -16,7 +16,7 @@ export interface ReturnUseStartMlJobs {
   loading: boolean;
   starting: boolean;
   jobs: SecurityJob[];
-  startMlJobs: (jobIds: string[] | undefined) => Promise<void>;
+  startMlJobs: (jobIds: string[] | undefined) => Promise<string[] | undefined>;
 }
 
 export const useStartMlJobs = (): ReturnUseStartMlJobs => {
@@ -36,21 +36,28 @@ export const useStartMlJobs = (): ReturnUseStartMlJobs => {
       // The error handling happens inside `enableDatafeed`, so no need to do try/catch here
       setIsStartingJobs(true);
       const ruleJobs = mlJobs.filter((job) => jobIds.includes(job.id));
-      await Promise.all(
+      const enabledJobIds = await Promise.all(
         ruleJobs.map(async (job) => {
           if (isJobStarted(job.jobState, job.datafeedState)) {
-            return true;
+            return job.id;
           }
 
           const latestTimestampMs = job.latestTimestampMs ?? 0;
-          await enableDatafeed(job, latestTimestampMs, true);
+          const { enabledJobId } = await enableDatafeed(job, latestTimestampMs, true);
+          return enabledJobId;
         })
       );
       refetchJobs();
       setIsStartingJobs(false);
+      return enabledJobIds;
     },
     [enableDatafeed, isLoadingEnableDataFeed, isLoadingJobs, mlJobs, refetchJobs]
   );
 
-  return { loading: isLoadingJobs, jobs: mlJobs, starting: isStartingJobs, startMlJobs };
+  return {
+    loading: isLoadingJobs,
+    jobs: mlJobs,
+    starting: isStartingJobs,
+    startMlJobs,
+  };
 };

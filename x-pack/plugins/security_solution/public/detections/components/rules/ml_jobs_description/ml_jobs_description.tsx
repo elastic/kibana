@@ -17,20 +17,21 @@ import { MlUserJobsDescription } from './user/ml_user_jobs_description';
 
 interface MlJobsDescriptionProps {
   jobIds: string[];
+  readOnly: boolean;
 }
 
-const MlJobsDescriptionComponent: FC<MlJobsDescriptionProps> = ({ jobIds }) => {
+const MlJobsDescriptionComponent: FC<MlJobsDescriptionProps> = ({ jobIds, readOnly }) => {
   const mlCapabilities = useMlCapabilities();
 
   const isMlUser = hasMlUserPermissions(mlCapabilities);
   const isMlAdmin = hasMlAdminPermissions(mlCapabilities);
 
   if (isMlAdmin) {
-    return <MlAdminJobsDescription jobIds={jobIds} />;
+    return <MlAdminJobsDescription jobIds={jobIds} readOnly={readOnly} />;
   }
 
   if (isMlUser) {
-    return <MlUserJobsDescription jobIds={jobIds} />;
+    return <MlUserJobsDescription jobIds={jobIds} readOnly={readOnly} />;
   }
 
   return null;

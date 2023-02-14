@@ -294,19 +294,19 @@ const CreateRulePageComponent: React.FC = () => {
               if (!isMlRule(defineStep.data.ruleType) || !actionsStep.data.enabled) {
                 return;
               }
-              await startMlJobs(defineStep.data.machineLearningJobId);
+              return startMlJobs(defineStep.data.machineLearningJobId);
             };
-            const [, createdRule] = await Promise.all([
-              startMlJobsIfNeeded(),
-              createRule(
-                formatRule<RuleCreateProps>(
-                  defineStep.data,
-                  aboutStep.data,
-                  scheduleStep.data,
-                  actionsStep.data
-                )
-              ),
-            ]);
+            // Update machineLearningJobId because after created they receive the space prefix
+            const createdJobIds = await startMlJobsIfNeeded();
+
+            const createdRule = await createRule(
+              formatRule<RuleCreateProps>(
+                { ...defineStep.data, machineLearningJobId: createdJobIds ?? [] },
+                aboutStep.data,
+                scheduleStep.data,
+                actionsStep.data
+              )
+            );
 
             addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
 
@@ -447,6 +447,7 @@ const CreateRulePageComponent: React.FC = () => {
                             onSubmit={() => submitStep(RuleStep.defineRule)}
                             kibanaDataViews={dataViewOptions}
                             descriptionColumns="singleSplit"
+                            jobInstallationDisabled
                             // We need a key to make this component remount when edit/view mode is toggled
                             // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
                             key={isShouldRerenderStep(RuleStep.defineRule, activeStep)}

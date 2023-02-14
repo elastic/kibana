@@ -25,6 +25,7 @@ export const useEnableDataFeed = () => {
 
   const enableDatafeed = useCallback(
     async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
+      let enabledJobId: string;
       submitTelemetry(job, enable);
 
       if (!job.isInstalled) {
@@ -37,12 +38,15 @@ export const useEnableDataFeed = () => {
             groups: job.groups,
             prefix: installedJobPrefix(spaceId),
           });
+          enabledJobId = uninstalledJobIdToInstalledJobId(job.id, spaceId);
           setIsLoading(false);
         } catch (error) {
           addError(error, { title: i18n.CREATE_JOB_FAILURE });
           setIsLoading(false);
-          return;
+          return { enabledJobId: job.id };
         }
+      } else {
+        enabledJobId = job.id;
       }
 
       // Max start time for job is no more than two weeks ago to ensure job performance
@@ -74,6 +78,8 @@ export const useEnableDataFeed = () => {
         }
       }
       setIsLoading(false);
+
+      return { enabledJobId };
     },
     [addError, spaceId]
   );

@@ -14,9 +14,10 @@ import { MlAdminJobDescription } from './ml_admin_job_description';
 
 interface MlAdminJobsDescriptionProps {
   jobIds: string[];
+  readOnly: boolean;
 }
 
-const MlAdminJobsDescriptionComponent: FC<MlAdminJobsDescriptionProps> = ({ jobIds }) => {
+const MlAdminJobsDescriptionComponent: FC<MlAdminJobsDescriptionProps> = ({ jobIds, readOnly }) => {
   const { loading, jobs, refetch: refreshJobs, isMlAdmin } = useSecurityJobs();
 
   if (!isMlAdmin) {
@@ -28,7 +29,13 @@ const MlAdminJobsDescriptionComponent: FC<MlAdminJobsDescriptionProps> = ({ jobI
   return (
     <>
       {relevantJobs.map((job) => (
-        <MlAdminJobDescription key={job.id} job={job} loading={loading} refreshJob={refreshJobs} />
+        <MlAdminJobDescription
+          key={job.id}
+          job={job}
+          loading={loading}
+          refreshJob={refreshJobs}
+          readOnly={readOnly}
+        />
       ))}
     </>
   );

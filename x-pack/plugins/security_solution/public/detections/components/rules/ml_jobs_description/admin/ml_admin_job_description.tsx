@@ -18,12 +18,14 @@ interface MlAdminJobDescriptionProps {
   job: SecurityJob;
   loading: boolean;
   refreshJob: (job: SecurityJob) => void;
+  readOnly: boolean;
 }
 
 const MlAdminJobDescriptionComponent: FC<MlAdminJobDescriptionProps> = ({
   job,
   loading,
   refreshJob,
+  readOnly,
 }) => {
   const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
 
@@ -46,7 +48,7 @@ const MlAdminJobDescriptionComponent: FC<MlAdminJobDescriptionProps> = ({
     [handleJobStateChange, isLoadingEnableDataFeed, job, loading]
   );
 
-  return <MlJobItem job={job} switchComponent={switchComponent} />;
+  return <MlJobItem job={job} switchComponent={readOnly ? undefined : switchComponent} />;
 };
 
 export const MlAdminJobDescription = memo(MlAdminJobDescriptionComponent);

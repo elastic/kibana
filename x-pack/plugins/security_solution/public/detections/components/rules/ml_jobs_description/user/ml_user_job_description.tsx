@@ -19,7 +19,8 @@ import { MlJobItem } from '../ml_job_item';
 
 const MlUserJobDescriptionComponent: FC<{
   job: MlSummaryJob;
-}> = ({ job }) => {
+  readOnly: boolean;
+}> = ({ job, readOnly }) => {
   const switchComponent = useMemo(
     () => (
       <EuiToolTip content={i18n.ML_ADMIN_REQUIRED}>
@@ -36,7 +37,7 @@ const MlUserJobDescriptionComponent: FC<{
     [job]
   );
 
-  return <MlJobItem job={job} switchComponent={switchComponent} />;
+  return <MlJobItem job={job} switchComponent={readOnly ? undefined : switchComponent} />;
 };
 
 export const MlUserJobDescription = memo(MlUserJobDescriptionComponent);

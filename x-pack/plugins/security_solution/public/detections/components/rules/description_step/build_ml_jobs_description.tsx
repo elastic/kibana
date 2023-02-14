@@ -8,7 +8,11 @@ import React from 'react';
 import type { ListItems } from './types';
 import { MlJobsDescription } from '../ml_jobs_description';
 
-export const buildMlJobsDescription = (jobIds: string[], label: string): ListItems => ({
+export const buildMlJobsDescription = (
+  jobIds: string[],
+  label: string,
+  readOnly: boolean
+): ListItems => ({
   title: label,
-  description: <MlJobsDescription jobIds={jobIds} />,
+  description: <MlJobsDescription jobIds={jobIds} readOnly={readOnly} />,
 });

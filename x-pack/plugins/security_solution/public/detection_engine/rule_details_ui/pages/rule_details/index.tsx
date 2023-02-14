@@ -246,9 +246,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const isLoading = ruleLoading && rule == null;
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
-  const startMlJobsIfNeeded = useCallback(async () => {
-    await startMlJobs(rule?.machine_learning_job_id);
-  }, [rule, startMlJobs]);
+  const startMlJobsIfNeeded = useCallback(
+    () => startMlJobs(rule?.machine_learning_job_id),
+    [rule, startMlJobs]
+  );
 
   const ruleDetailTabs = useMemo(
     (): Record<RuleDetailTabs, NavTab> => ({

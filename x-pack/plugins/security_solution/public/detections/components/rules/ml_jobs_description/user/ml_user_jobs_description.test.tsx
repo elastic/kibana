@@ -29,7 +29,7 @@ const useInstalledSecurityJobsMock = useInstalledSecurityJobs as jest.Mock;
 describe('MlUsersJobDescription', () => {
   it('should render null if user permissions absent', () => {
     useInstalledSecurityJobsMock.mockReturnValueOnce({ jobs: [], isMlUser: false });
-    const { container } = render(<MlUserJobsDescription jobIds={['mock-1']} />);
+    const { container } = render(<MlUserJobsDescription jobIds={['mock-1']} readOnly={false} />);
 
     expect(container.firstChild).toBeNull();
   });
@@ -39,7 +39,7 @@ describe('MlUsersJobDescription', () => {
       jobs: [{ id: 'mock-1' }, { id: 'mock-2' }, { id: 'mock-3' }],
       isMlUser: true,
     });
-    render(<MlUserJobsDescription jobIds={['mock-1', 'mock-2', 'mock-4']} />);
+    render(<MlUserJobsDescription jobIds={['mock-1', 'mock-2', 'mock-4']} readOnly={false} />);
 
     const expectedJobs = screen.getAllByTestId('userMock');
     expect(expectedJobs).toHaveLength(2);

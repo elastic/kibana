@@ -25,7 +25,7 @@ const Wrapper = styled.div`
 
 const MlJobItemComponent: FC<{
   job: MlSummaryJob;
-  switchComponent: ReactNode;
+  switchComponent?: ReactNode;
 }> = ({ job, switchComponent, ...props }) => {
   const isStarted = isJobStarted(job.jobState, job.datafeedState);
 
@@ -39,10 +39,14 @@ const MlJobItemComponent: FC<{
         <EuiFlexItem grow={false} style={{ marginRight: '0' }}>
           <MlJobStatusBadge job={job} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{switchComponent}</EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ marginLeft: '0' }} data-test-subj="mlJobActionLabel">
-          {isStarted ? i18n.ML_STOP_JOB_LABEL : i18n.ML_RUN_JOB_LABEL}
-        </EuiFlexItem>
+        {switchComponent ? (
+          <>
+            <EuiFlexItem grow={false}>{switchComponent}</EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ marginLeft: '0' }} data-test-subj="mlJobActionLabel">
+              {isStarted ? i18n.ML_STOP_JOB_LABEL : i18n.ML_RUN_JOB_LABEL}
+            </EuiFlexItem>
+          </>
+        ) : null}
       </EuiFlexGroup>
     </Wrapper>
   );

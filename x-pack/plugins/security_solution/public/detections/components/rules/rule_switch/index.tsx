@@ -29,7 +29,7 @@ export interface RuleSwitchProps {
   enabled: boolean;
   isDisabled?: boolean;
   isLoading?: boolean;
-  startMlJobsIfNeeded?: () => Promise<void>;
+  startMlJobsIfNeeded?: () => Promise<string[] | undefined>;
   onChange?: (enabled: boolean) => void;
 }
 
