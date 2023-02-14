@@ -73,7 +73,9 @@ export const useInsightQuery = ({
     language: 'kuery',
     limit: 1,
     runtimeMappings: {},
-    ...(relativeTimerange ? { startDate: relativeTimerange?.from, endDate: relativeTimerange?.to } : {}),
+    ...(relativeTimerange
+      ? { startDate: relativeTimerange?.from, endDate: relativeTimerange?.to }
+      : {}),
   });
   const [oldestEvent] = events;
   const timestamp =
