@@ -1253,8 +1253,8 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('when upgrading from an integration package to an input package where no required variable has been added', function () {
       withTestPackage('integration_to_input', '3.0.0');
-      const packagePolicyIds = [];
-      const expectedAssets = [];
+      const packagePolicyIds: string[] = [];
+      const expectedAssets: string[] = [];
       const POLICY_COUNT = 5;
       beforeEach(async function () {
         const { body: agentPolicyResponse } = await supertest
