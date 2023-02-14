@@ -15,7 +15,10 @@ import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/rule-data-utils';
 import { type FieldMap } from '../../common';
-import { ILM_POLICY_NAME, DEFAULT_ILM_POLICY } from './default_lifecycle_policy';
+import {
+  DEFAULT_ALERTS_ILM_POLICY_NAME,
+  DEFAULT_ALERTS_ILM_POLICY,
+} from './default_lifecycle_policy';
 import {
   getComponentTemplate,
   getComponentTemplateName,
@@ -207,19 +210,21 @@ export class AlertsService implements IAlertsService {
    * Creates ILM policy if it doesn't already exist, updates it if it does
    */
   private async createOrUpdateIlmPolicy(esClient: ElasticsearchClient) {
-    this.options.logger.info(`Installing ILM policy ${ILM_POLICY_NAME}`);
+    this.options.logger.info(`Installing ILM policy ${DEFAULT_ALERTS_ILM_POLICY_NAME}`);
 
     try {
       await retryTransientEsErrors(
         () =>
           esClient.ilm.putLifecycle({
-            name: ILM_POLICY_NAME,
-            body: DEFAULT_ILM_POLICY,
+            name: DEFAULT_ALERTS_ILM_POLICY_NAME,
+            body: DEFAULT_ALERTS_ILM_POLICY,
           }),
         { logger: this.options.logger }
       );
     } catch (err) {
-      this.options.logger.error(`Error installing ILM policy ${ILM_POLICY_NAME} - ${err.message}`);
+      this.options.logger.error(
+        `Error installing ILM policy ${DEFAULT_ALERTS_ILM_POLICY_NAME} - ${err.message}`
+      );
       throw err;
     }
   }
@@ -265,7 +270,7 @@ export class AlertsService implements IAlertsService {
             auto_expand_replicas: '0-1',
             hidden: true,
             'index.lifecycle': {
-              name: ILM_POLICY_NAME,
+              name: DEFAULT_ALERTS_ILM_POLICY_NAME,
               rollover_alias: indexPatterns.alias,
             },
             'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,

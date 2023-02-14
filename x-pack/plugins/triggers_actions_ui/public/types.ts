@@ -666,3 +666,7 @@ export interface UpdateRulesToBulkEditProps {
   rules?: RuleTableItem[];
   filter?: KueryNode | null;
 }
+
+export interface LazyLoadProps {
+  hideLazyLoader?: boolean;
+}

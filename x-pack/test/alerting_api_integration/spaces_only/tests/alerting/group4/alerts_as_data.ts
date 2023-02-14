@@ -19,7 +19,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
 
   describe('alerts as data', () => {
     it('should install common alerts as data resources on startup', async () => {
-      const ilmPolicyName = 'alerts-default-ilm-policy';
+      const ilmPolicyName = '.alerts-ilm-policy';
       const frameworkComponentTemplateName = '.alerts-framework-mappings';
       const legacyComponentTemplateName = '.alerts-legacy-alert-mappings';
       const ecsComponentTemplateName = '.alerts-ecs-mappings';
@@ -169,7 +169,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       expect(contextIndexTemplate.index_template.template!.settings).to.eql({
         index: {
           lifecycle: {
-            name: 'alerts-default-ilm-policy',
+            name: '.alerts-ilm-policy',
             rollover_alias: '.alerts-test.always-firing-default',
           },
           mapping: {
@@ -201,7 +201,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       });
 
       expect(contextIndex[indexName].settings?.index?.lifecycle).to.eql({
-        name: 'alerts-default-ilm-policy',
+        name: '.alerts-ilm-policy',
         rollover_alias: '.alerts-test.always-firing-default',
       });
 
