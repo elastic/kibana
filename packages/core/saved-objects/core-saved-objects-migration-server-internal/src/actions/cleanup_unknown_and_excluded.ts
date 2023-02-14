@@ -11,15 +11,11 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/function';
 import type {
   BulkIndexByScrollFailure,
-  DeleteByQueryResponse,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '@kbn/core-saved-objects-server';
-import {
-  catchRetryableEsClientErrors,
-  type RetryableEsClientError,
-} from './catch_retryable_es_client_errors';
+import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import {
   checkForUnknownDocs,
   type DocumentIdAndType,
@@ -27,7 +23,7 @@ import {
 } from './check_for_unknown_docs';
 import { isTypeof } from '.';
 import { CalculatedExcludeFilter, calculateExcludeFilters } from './calculate_exclude_filters';
-import { REMOVED_TYPES } from '../core/unused_types';
+import { deleteByQuery } from './delete_by_query';
 
 /** @internal */
 export interface CleanupUnknownAndExcludedParams {
@@ -38,6 +34,7 @@ export interface CleanupUnknownAndExcludedParams {
   excludeFromUpgradeFilterHooks: Record<string, SavedObjectTypeExcludeFromUpgradeFilterHook>;
   hookTimeoutMs?: number;
   knownTypes: string[];
+  removedTypes: string[];
 }
 
 /** @internal */
@@ -56,39 +53,11 @@ export interface DeleteByQueryErrorResponse {
 /** @internal */
 export interface CleanupSuccessful {
   type: 'cleanup_successful';
-  unknownDocs?: DocumentIdAndType[];
+  /** Sample (1000 types * 100 docs per type) of the unknown documents that have been found and discarded */
+  unknownDocs: DocumentIdAndType[];
+  /** Any errors that were encountered during filter calculation, keyed by the type name */
+  errorsByType: Record<string, Error>;
 }
-
-/** @internal */
-export const deleteByQuery = ({
-  client,
-  indexName,
-  query,
-}: DeleteByQueryParams): TaskEither.TaskEither<
-  RetryableEsClientError | DeleteByQueryErrorResponse,
-  void
-> => {
-  return () => {
-    return client
-      .deleteByQuery({
-        index: indexName,
-        query,
-        wait_for_completion: true,
-        refresh: true,
-      })
-      .then((response: DeleteByQueryResponse) => {
-        if (!response.failures || !response.failures.length) {
-          return Either.right(undefined);
-        } else {
-          return Either.left({
-            type: 'delete_failed' as const,
-            conflictingDocuments: response.failures,
-          });
-        }
-      })
-      .catch(catchRetryableEsClientErrors);
-  };
-};
 
 /**
  * Cleans up unknown and excluded types from the specified index.
@@ -101,12 +70,14 @@ export const cleanupUnknownAndExcluded = ({
   excludeFromUpgradeFilterHooks,
   hookTimeoutMs,
   knownTypes,
+  removedTypes,
 }: CleanupUnknownAndExcludedParams): TaskEither.TaskEither<
   RetryableEsClientError | UnknownDocsFound | DeleteByQueryErrorResponse,
   CleanupSuccessful
 > => {
-  let unknownDocs: DocumentIdAndType[];
+  let unknownDocs: DocumentIdAndType[] = [];
   let unknownDocTypes: string[] = [];
+  let errorsByType: Record<string, Error> = {};
 
   return pipe(
     // check if there are unknown docs
@@ -135,6 +106,8 @@ export const cleanupUnknownAndExcluded = ({
 
     // actively delete unwanted documents
     TaskEither.chainW((excludeFiltersRes) => {
+      errorsByType = excludeFiltersRes.errorsByType;
+
       // we must delete everything that matches:
       // - any of the plugin-defined exclude filters
       // - OR any of the unknown types
@@ -142,7 +115,7 @@ export const cleanupUnknownAndExcluded = ({
         bool: {
           should: [
             ...excludeFiltersRes.filterClauses,
-            ...REMOVED_TYPES.map((type) => ({ term: { type } })),
+            ...removedTypes.map((type) => ({ term: { type } })),
             ...unknownDocTypes.map((type) => ({ term: { type } })),
           ],
         },
@@ -156,6 +129,7 @@ export const cleanupUnknownAndExcluded = ({
       return Either.right({
         type: 'cleanup_successful' as const,
         unknownDocs,
+        errorsByType,
       });
     })
   );
