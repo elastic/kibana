@@ -97,9 +97,11 @@ export function registerStatsRoute({
         // to know about the change; however, to support legacy use cases where this
         // wasn't true, we need to be backwards compatible with how the legacy data
         // looked and support those use cases here.
-        extended = isLegacy ? { clusterUuid, } : collectorSet.toApiFieldNames({
-            clusterUuid,
-        });
+        extended = isLegacy
+          ? { clusterUuid }
+          : collectorSet.toApiFieldNames({
+              clusterUuid,
+            });
       }
 
       // Guaranteed to resolve immediately due to replay effect on getOpsMetrics$
