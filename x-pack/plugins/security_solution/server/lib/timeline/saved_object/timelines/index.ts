@@ -381,7 +381,6 @@ export const persistTimeline = async (
     if (timelineId == null) {
       return await createTimeline({ timelineId, timeline, userInfo, savedObjectsClient });
     }
-    console.log({timeline, request});
     return await updateTimeline({
       request,
       timelineId,

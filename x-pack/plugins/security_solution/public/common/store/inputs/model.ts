@@ -21,8 +21,8 @@ export interface AbsoluteTimeRange {
 
 export interface RelativeTimeRange {
   kind: 'relative';
-  fromStr?: string;
-  toStr?: string;
+  fromStr: string;
+  toStr: string;
   from: string;
   to: string;
 }

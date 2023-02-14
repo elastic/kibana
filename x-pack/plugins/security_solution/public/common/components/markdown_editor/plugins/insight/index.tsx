@@ -183,7 +183,7 @@ const InsightComponent = ({
         alertRelativeDate.toDate()
       ).toISOString();
       return {
-        kind: 'relative',
+        kind: 'absolute',
         from,
         to,
         fromStr: undefined,
