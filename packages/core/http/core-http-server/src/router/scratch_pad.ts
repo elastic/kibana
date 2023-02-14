@@ -403,6 +403,9 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
  *  2. We can treat the versioning implementation as an open source protocol.
  *     Consumers can choose to create their own implementation (but increase maintenance).
  *  3. Removes only the boilerplate regarding versions
+ *  4. Could also implement a simplified version that just takeas in a bunch of validations
+ *     and passes them all to one handler, then the consumer must specify if-else/map/switch
+ *     to correctly handle versions.
  * WEAKNESSES:
  *  1. Whole new API to design and implement
  *  2. Will it actually be used since this is only a recommendation?
