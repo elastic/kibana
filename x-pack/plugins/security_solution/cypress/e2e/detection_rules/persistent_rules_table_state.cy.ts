@@ -69,7 +69,7 @@ function createTestRules(): void {
   createRule('8', 'rule 7', ['tag-b'], true);
 }
 
-function visitWithState(urlTableState: Record<string, unknown>): void {
+function visitRulesTableWithState(urlTableState: Record<string, unknown>): void {
   visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL, { qs: { rulesTable: encode(urlTableState) } });
 }
 
@@ -152,7 +152,7 @@ describe('Persistent rules table state', () => {
         perPage: 10,
       });
 
-      visitWithState({
+      visitRulesTableWithState({
         searchTerm: 'rule',
         tags: ['tag-b'],
         source: 'custom',
@@ -281,7 +281,7 @@ describe('Persistent rules table state', () => {
   describe('upon state format upgrade', async () => {
     describe('and having state in the url', () => {
       it('ignores unsupported state key', () => {
-        visitWithState({
+        visitRulesTableWithState({
           someKey: 10,
           searchTerm: 'rule',
           tags: ['tag-b'],
@@ -299,7 +299,7 @@ describe('Persistent rules table state', () => {
       });
 
       it('ignores negative page number (uses default pagination settings)', () => {
-        visitWithState({
+        visitRulesTableWithState({
           searchTerm: 'rule',
           tags: ['tag-b'],
           source: 'custom',
@@ -321,7 +321,7 @@ describe('Persistent rules table state', () => {
       });
 
       it('ignores negative per page (uses default pagination settings)', () => {
-        visitWithState({
+        visitRulesTableWithState({
           searchTerm: 'rule',
           tags: ['tag-b'],
           source: 'custom',
@@ -343,7 +343,7 @@ describe('Persistent rules table state', () => {
       });
 
       it('ignores invalid prebuilt vs custom filter value (uses default filter settings)', () => {
-        visitWithState({
+        visitRulesTableWithState({
           searchTerm: 'rule',
           tags: ['tag-b'],
           source: 'invalid',
