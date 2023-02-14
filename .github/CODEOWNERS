@@ -309,7 +309,7 @@ src/plugins/discover @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/kibana-docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-ebt-tools @elastic/kibana-core
-packages/kbn-ecs @elastic/kibana-core
+packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investigations
 x-pack/packages/kbn-ecs-data-quality-dashboard @elastic/security-threat-hunting-investigations
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
