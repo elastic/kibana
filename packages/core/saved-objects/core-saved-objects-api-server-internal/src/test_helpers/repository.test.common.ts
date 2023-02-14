@@ -596,7 +596,6 @@ export const expectCreateResult = (obj: {
 }) => ({
   ...obj,
   migrationVersion: { [obj.type]: '1.1.1' },
-  coreMigrationVersion: KIBANA_VERSION,
   version: mockVersion,
   namespaces: obj.namespaces ?? [obj.namespace ?? 'default'],
   ...mockTimestampFieldsWithCreated,

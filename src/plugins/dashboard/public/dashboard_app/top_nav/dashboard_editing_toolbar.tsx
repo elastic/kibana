@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
@@ -19,9 +18,11 @@ import {
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import React from 'react';
 import { useCallback } from 'react';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
-import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
+import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
 import { pluginServices } from '../../services/plugin_services';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
@@ -36,6 +37,7 @@ export function DashboardEditingToolbar() {
     embeddable: { getStateTransfer, getEmbeddableFactory },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
+  const { euiTheme } = useEuiTheme();
 
   const { embeddableInstance: dashboardContainer } = useDashboardContainerContext();
 
@@ -178,8 +180,11 @@ export function DashboardEditingToolbar() {
   }
 
   return (
-    <>
-      <EuiHorizontalRule margin="none" />
+    <div
+      css={css`
+        padding: 0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};
+      `}
+    >
       <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>
         {{
           primaryActionButton: (
@@ -195,6 +200,6 @@ export function DashboardEditingToolbar() {
           extraButtons,
         }}
       </SolutionToolbar>
-    </>
+    </div>
   );
 }

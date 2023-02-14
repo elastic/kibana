@@ -53,6 +53,10 @@ export {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
+export {
+  DEFAULT_ALERTS_ILM_POLICY,
+  DEFAULT_ALERTS_ILM_POLICY_NAME,
+} from './alerts_service/default_lifecycle_policy';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 
