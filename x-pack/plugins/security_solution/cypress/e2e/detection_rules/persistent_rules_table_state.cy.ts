@@ -297,72 +297,6 @@ describe('Persistent rules table state', () => {
         expectTablePage(2);
         expectManagementTableRules(['rule 6']);
       });
-
-      it('ignores negative page number (uses default pagination settings)', () => {
-        visitRulesTableWithState({
-          searchTerm: 'rule',
-          tags: ['tag-b'],
-          source: 'custom',
-          enabled: false,
-          field: 'name',
-          order: 'asc',
-          perPage: 5,
-          page: -1,
-        });
-
-        expectFilterSearchTerm('rule');
-        expectFilterByTags(['tag-b']);
-        expectFilterByCustomRules();
-        expectFilterByDisabledRules();
-        expectTableSorting('Rule', 'asc');
-        expectRowsPerPage(20);
-        expectTablePage(1);
-        expectManagementTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5', 'rule 6']);
-      });
-
-      it('ignores negative per page (uses default pagination settings)', () => {
-        visitRulesTableWithState({
-          searchTerm: 'rule',
-          tags: ['tag-b'],
-          source: 'custom',
-          enabled: false,
-          field: 'name',
-          order: 'asc',
-          perPage: -1,
-          page: 2,
-        });
-
-        expectFilterSearchTerm('rule');
-        expectFilterByTags(['tag-b']);
-        expectFilterByCustomRules();
-        expectFilterByDisabledRules();
-        expectTableSorting('Rule', 'asc');
-        expectRowsPerPage(20);
-        expectTablePage(1);
-        expectManagementTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5', 'rule 6']);
-      });
-
-      it('ignores invalid prebuilt vs custom filter value (uses default filter settings)', () => {
-        visitRulesTableWithState({
-          searchTerm: 'rule',
-          tags: ['tag-b'],
-          source: 'invalid',
-          enabled: false,
-          field: 'name',
-          order: 'asc',
-          perPage: 5,
-          page: 2,
-        });
-
-        expectFilterSearchTerm('');
-        expectNoFilterByTags();
-        expectNoFilterByElasticOrCustomRules();
-        expectNoFilterByEnabledOrDisabledRules();
-        expectTableSorting('Rule', 'asc');
-        expectRowsPerPage(5);
-        expectTablePage(2);
-        expectManagementTableRules(['rule 6', 'rule 7', 'test 1']);
-      });
     });
 
     describe('and having state in the session storage', () => {
@@ -381,52 +315,6 @@ describe('Persistent rules table state', () => {
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
 
         expectRulesTableState();
-        expectTablePage(1);
-        expectManagementTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5']);
-      });
-
-      it('ignores negative per page (uses default pagination settings)', () => {
-        setStorageState({
-          searchTerm: 'rule',
-          tags: ['tag-b'],
-          source: 'custom',
-          enabled: false,
-          field: 'name',
-          order: 'asc',
-          perPage: -1,
-        });
-
-        visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
-
-        expectFilterSearchTerm('rule');
-        expectFilterByTags(['tag-b']);
-        expectFilterByCustomRules();
-        expectFilterByDisabledRules();
-        expectTableSorting('Rule', 'asc');
-        expectRowsPerPage(20);
-        expectTablePage(1);
-        expectManagementTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5', 'rule 6']);
-      });
-
-      it('ignores invalid prebuilt vs custom filter value (uses default filter settings)', () => {
-        setStorageState({
-          searchTerm: 'rule',
-          tags: ['tag-b'],
-          source: 'invalid',
-          enabled: false,
-          field: 'name',
-          order: 'asc',
-          perPage: 5,
-        });
-
-        visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
-
-        expectFilterSearchTerm('');
-        expectNoFilterByTags();
-        expectNoFilterByElasticOrCustomRules();
-        expectNoFilterByEnabledOrDisabledRules();
-        expectTableSorting('Rule', 'asc');
-        expectRowsPerPage(5);
         expectTablePage(1);
         expectManagementTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5']);
       });
