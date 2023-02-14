@@ -10,6 +10,8 @@ export { Core } from './core';
 
 export type { CoreApi } from './core';
 
-export type { ContentStorage, ContentConfig, StorageContext } from './types';
+export type { ContentType } from './content_type';
+
+export type { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
 
 export type { ContentRegistry } from './registry';

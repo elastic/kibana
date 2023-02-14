@@ -43,7 +43,7 @@ export class EventBus {
 
       if (eventListeners) {
         const listeners = [
-          ...(eventListeners[event.contentType] ?? []),
+          ...(eventListeners[event.contentTypeId] ?? []),
           ...(eventListeners[ALL_TYPES_KEY] ?? []),
         ];
         listeners.forEach((cb) => {

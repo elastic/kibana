@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ContentCrud } from './crud';
+import { ContentType } from './content_type';
 import { EventBus } from './event_bus';
-import type { ContentStorage, ContentConfig, Content } from './types';
+import type { ContentStorage, ContentTypeDefinition } from './types';
 
 export class ContentRegistry {
-  private contents = new Map<string, Content>();
+  private types = new Map<string, ContentType>();
 
   constructor(private eventBus: EventBus) {}
 
@@ -21,43 +21,36 @@ export class ContentRegistry {
    * @param contentType The content type to register
    * @param config The content configuration
    */
-  register<S extends ContentStorage = ContentStorage>(
-    contentType: string,
-    config: ContentConfig<S>
-  ) {
-    if (this.contents.has(contentType)) {
-      throw new Error(`Content [${contentType}] is already registered`);
+  register<S extends ContentStorage = ContentStorage>(definition: ContentTypeDefinition<S>) {
+    if (this.types.has(definition.id)) {
+      throw new Error(`Content [${definition.id}] is already registered`);
     }
 
-    this.contents.set(contentType, {
-      config,
-      crud: new ContentCrud(contentType, config.storage, {
-        eventBus: this.eventBus,
-      }),
-    });
+    const contentType = new ContentType(definition, this.eventBus);
+
+    this.types.set(contentType.id, contentType);
   }
 
-  getContent(contentType: string): Content {
-    const content = this.contents.get(contentType);
-    if (!content) {
-      throw new Error(`Content [${contentType}] is not registered.`);
+  getContentType(id: string): ContentType {
+    const contentType = this.types.get(id);
+    if (!contentType) {
+      throw new Error(`Content [${id}] is not registered.`);
     }
-    return content;
+    return contentType;
   }
 
-  getStorage(contentType: string) {
-    return this.getContent(contentType).config.storage;
+  /** Get the definition for a specific content type */
+  getDefinition(id: string) {
+    return this.getContentType(id).definition;
   }
 
-  getConfig(contentType: string) {
-    return this.getContent(contentType).config;
+  /** Get the crud instance of a content type */
+  getCrud(id: string) {
+    return this.getContentType(id).crud;
   }
 
-  getCrud(contentType: string) {
-    return this.getContent(contentType).crud;
-  }
-
-  isContentRegistered(contentType: string): boolean {
-    return this.contents.has(contentType);
+  /** Helper to validate if a content type has been registered */
+  isContentRegistered(id: string): boolean {
+    return this.types.has(id);
   }
 }

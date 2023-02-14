@@ -27,13 +27,15 @@ import type {
 
 const logger = loggingSystemMock.createLogger();
 
+const FOO_CONTENT_ID = 'foo';
+
 const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) => {
-  const FOO_CONTENT_ID = 'foo';
   const ctx = {};
 
   const core = new Core({ logger });
   const coreSetup = core.setup();
-  const contentConfig = {
+  const contentDefinition = {
+    id: FOO_CONTENT_ID,
     storage: createMemoryStorage(),
   };
   const cleanUp = () => {
@@ -43,15 +45,14 @@ const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) 
   let fooContentCrud: ContentCrud | undefined;
 
   if (registerFooType) {
-    coreSetup.api.register(FOO_CONTENT_ID, contentConfig);
+    coreSetup.api.register(contentDefinition);
     fooContentCrud = coreSetup.api.crud(FOO_CONTENT_ID);
   }
 
   return {
     core,
     coreSetup,
-    contentConfig,
-    FOO_CONTENT_ID,
+    contentDefinition,
     ctx,
     fooContentCrud,
     cleanUp,
@@ -73,21 +74,21 @@ describe('Content Core', () => {
     describe('api', () => {
       describe('register()', () => {
         test('should expose the register handler from the registry instance', () => {
-          const { coreSetup, cleanUp, contentConfig } = setup();
+          const { coreSetup, cleanUp, contentDefinition } = setup();
 
           const {
             contentRegistry,
             api: { register },
           } = coreSetup;
 
-          expect(contentRegistry.isContentRegistered('foo')).toBe(false);
+          expect(contentRegistry.isContentRegistered(FOO_CONTENT_ID)).toBe(false);
 
-          register('foo', contentConfig);
+          register(contentDefinition);
 
           // Make sure the "register" exposed by the api is indeed registring
           // the content into our "contentRegistry" instance
-          expect(contentRegistry.isContentRegistered('foo')).toBe(true);
-          expect(contentRegistry.getConfig('foo')).toBe(contentConfig);
+          expect(contentRegistry.isContentRegistered(FOO_CONTENT_ID)).toBe(true);
+          expect(contentRegistry.getDefinition(FOO_CONTENT_ID)).toBe(contentDefinition);
 
           cleanUp();
         });
@@ -98,7 +99,7 @@ describe('Content Core', () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
           const res = await fooContentCrud!.get(ctx, '1');
-          expect(res).toBeUndefined();
+          expect(res.item).toBeUndefined();
 
           cleanUp();
         });
@@ -108,8 +109,11 @@ describe('Content Core', () => {
 
           const res = await fooContentCrud!.get(ctx, '1', { forwardInResponse: { foo: 'bar' } });
           expect(res).toEqual({
-            // Options forwared in response
-            options: { foo: 'bar' },
+            contentTypeId: FOO_CONTENT_ID,
+            item: {
+              // Options forwared in response
+              options: { foo: 'bar' },
+            },
           });
 
           cleanUp();
@@ -119,13 +123,19 @@ describe('Content Core', () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
           const res = await fooContentCrud!.get(ctx, '1234');
-          expect(res).toBeUndefined();
+          expect(res.item).toBeUndefined();
           await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
             ctx,
             { title: 'Hello' },
             { id: '1234' } // We send this "id" option to specify the id of the content created
           );
-          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({ id: '1234', title: 'Hello' });
+          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+            contentTypeId: FOO_CONTENT_ID,
+            item: {
+              id: '1234',
+              title: 'Hello',
+            },
+          });
 
           cleanUp();
         });
@@ -140,8 +150,11 @@ describe('Content Core', () => {
           );
           await fooContentCrud!.update<Omit<MockContent, 'id'>>(ctx, '1234', { title: 'changed' });
           expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
-            id: '1234',
-            title: 'changed',
+            contentTypeId: FOO_CONTENT_ID,
+            item: {
+              id: '1234',
+              title: 'changed',
+            },
           });
 
           cleanUp();
@@ -163,15 +176,21 @@ describe('Content Core', () => {
           );
 
           expect(res).toEqual({
-            id: '1234',
-            title: 'changed',
-            // Options forwared in response
-            options: { foo: 'bar' },
+            contentTypeId: FOO_CONTENT_ID,
+            result: {
+              id: '1234',
+              title: 'changed',
+              // Options forwared in response
+              options: { foo: 'bar' },
+            },
           });
 
           expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
-            id: '1234',
-            title: 'changed',
+            contentTypeId: FOO_CONTENT_ID,
+            item: {
+              id: '1234',
+              title: 'changed',
+            },
           });
 
           cleanUp();
@@ -185,9 +204,15 @@ describe('Content Core', () => {
             { title: 'Hello' },
             { id: '1234' }
           );
-          expect(fooContentCrud!.get(ctx, '1234')).resolves.not.toBeUndefined();
+          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+            contentTypeId: FOO_CONTENT_ID,
+            item: expect.any(Object),
+          });
           await fooContentCrud!.delete(ctx, '1234');
-          expect(fooContentCrud!.get(ctx, '1234')).resolves.toBeUndefined();
+          expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
+            contentTypeId: FOO_CONTENT_ID,
+            item: undefined,
+          });
 
           cleanUp();
         });
@@ -203,7 +228,7 @@ describe('Content Core', () => {
           const res = await fooContentCrud!.delete(ctx, '1234', {
             forwardInResponse: { foo: 'bar' },
           });
-          expect(res).toMatchObject({ options: { foo: 'bar' } });
+          expect(res).toMatchObject({ result: { options: { foo: 'bar' } } });
 
           cleanUp();
         });
@@ -223,7 +248,7 @@ describe('Content Core', () => {
           const event: GetItemStart = {
             type: 'getItemStart',
             contentId: '123',
-            contentType: 'foo',
+            contentTypeId: FOO_CONTENT_ID,
           };
           eventBus.emit(event);
 
@@ -247,7 +272,7 @@ describe('Content Core', () => {
           const event: GetItemStart = {
             type: 'getItemStart',
             contentId: '123',
-            contentType: 'foo',
+            contentTypeId: FOO_CONTENT_ID,
           };
           eventBus.emit(event);
 
@@ -271,20 +296,20 @@ describe('Content Core', () => {
           } = coreSetup;
 
           expect(() => {
-            eventBus.on('getItemStart', 'foo', jest.fn());
+            eventBus.on('getItemStart', FOO_CONTENT_ID, jest.fn());
           }).toThrow('Invalid content type [foo].');
 
           cleanUp();
         });
 
         test('should allow to subscribe to a single event for a single content type', async () => {
-          const { coreSetup, ctx, contentConfig, FOO_CONTENT_ID, cleanUp } = setup();
+          const { coreSetup, ctx, contentDefinition, cleanUp } = setup();
 
           const {
             api: { eventBus, register, crud },
           } = coreSetup;
 
-          register(FOO_CONTENT_ID, contentConfig);
+          register(contentDefinition);
 
           await crud(FOO_CONTENT_ID).create<Omit<MockContent, 'id'>, { id: string }>(
             ctx,
@@ -300,7 +325,7 @@ describe('Content Core', () => {
           let event: GetItemStart = {
             type: 'getItemStart',
             contentId: '123',
-            contentType: 'other', // other type should not call listener
+            contentTypeId: 'other', // other type should not call listener
           };
           eventBus.emit(event);
 
@@ -309,7 +334,7 @@ describe('Content Core', () => {
           event = {
             type: 'getItemStart',
             contentId: '123',
-            contentType: 'foo',
+            contentTypeId: FOO_CONTENT_ID,
           };
           eventBus.emit(event);
 
@@ -320,7 +345,7 @@ describe('Content Core', () => {
 
         describe('crud operations should emit start|success|error events', () => {
           test('get()', async () => {
-            const { fooContentCrud, eventBus, ctx, FOO_CONTENT_ID, cleanUp } = setup({
+            const { fooContentCrud, eventBus, ctx, cleanUp } = setup({
               registerFooType: true,
             });
 
@@ -338,7 +363,7 @@ describe('Content Core', () => {
             const getItemStart: GetItemStart = {
               type: 'getItemStart',
               contentId: '1234',
-              contentType: FOO_CONTENT_ID,
+              contentTypeId: FOO_CONTENT_ID,
               options: { someOption: 'baz' },
             };
 
@@ -353,7 +378,7 @@ describe('Content Core', () => {
                 id: '1234',
                 ...data,
               },
-              contentType: FOO_CONTENT_ID,
+              contentTypeId: FOO_CONTENT_ID,
             };
 
             expect(listener).toHaveBeenCalledWith(getItemSuccess);
@@ -367,7 +392,7 @@ describe('Content Core', () => {
             const getItemError: GetItemError = {
               type: 'getItemError',
               contentId: '1234',
-              contentType: FOO_CONTENT_ID,
+              contentTypeId: FOO_CONTENT_ID,
               error: errorMessage,
               options: { errorToThrow: errorMessage },
             };
@@ -382,7 +407,7 @@ describe('Content Core', () => {
           });
 
           test('create()', async () => {
-            const { fooContentCrud, ctx, FOO_CONTENT_ID, eventBus, cleanUp } = setup({
+            const { fooContentCrud, ctx, eventBus, cleanUp } = setup({
               registerFooType: true,
             });
 
@@ -401,7 +426,7 @@ describe('Content Core', () => {
 
             const createItemStart: CreateItemStart = {
               type: 'createItemStart',
-              contentType: FOO_CONTENT_ID,
+              contentTypeId: FOO_CONTENT_ID,
               data,
               options: { id: '1234' },
             };
@@ -416,7 +441,7 @@ describe('Content Core', () => {
                 id: '1234',
                 ...data,
               },
-              contentType: FOO_CONTENT_ID,
+              contentTypeId: FOO_CONTENT_ID,
               options: { id: '1234' },
             };
 
@@ -435,7 +460,7 @@ describe('Content Core', () => {
 
             const createItemError: CreateItemError = {
               type: 'createItemError',
-              contentType: FOO_CONTENT_ID,
+              contentTypeId: FOO_CONTENT_ID,
               data,
               error: errorMessage,
               options: { id: '1234', errorToThrow: errorMessage },
@@ -450,7 +475,7 @@ describe('Content Core', () => {
           });
 
           test('update()', async () => {
-            const { fooContentCrud, ctx, eventBus, FOO_CONTENT_ID, cleanUp } = setup({
+            const { fooContentCrud, ctx, eventBus, cleanUp } = setup({
               registerFooType: true,
             });
 
@@ -472,7 +497,7 @@ describe('Content Core', () => {
             const updateItemStart: UpdateItemStart = {
               type: 'updateItemStart',
               contentId: '1234',
-              contentType: FOO_CONTENT_ID,
+              contentTypeId: FOO_CONTENT_ID,
               data,
               options: { someOptions: 'baz' },
             };
@@ -484,7 +509,7 @@ describe('Content Core', () => {
             const updateItemSuccess: UpdateItemSuccess = {
               type: 'updateItemSuccess',
               contentId: '1234',
-              contentType: FOO_CONTENT_ID,
+              contentTypeId: FOO_CONTENT_ID,
               data: {
                 id: '1234',
                 ...data,
@@ -506,7 +531,7 @@ describe('Content Core', () => {
 
             const updateItemError: UpdateItemError = {
               type: 'updateItemError',
-              contentType: FOO_CONTENT_ID,
+              contentTypeId: FOO_CONTENT_ID,
               contentId: '1234',
               data,
               error: errorMessage,
@@ -522,7 +547,7 @@ describe('Content Core', () => {
           });
 
           test('delete()', async () => {
-            const { fooContentCrud, ctx, FOO_CONTENT_ID, eventBus, cleanUp } = setup({
+            const { fooContentCrud, ctx, eventBus, cleanUp } = setup({
               registerFooType: true,
             });
 
@@ -542,7 +567,7 @@ describe('Content Core', () => {
             const deleteItemStart: DeleteItemStart = {
               type: 'deleteItemStart',
               contentId: '1234',
-              contentType: FOO_CONTENT_ID,
+              contentTypeId: FOO_CONTENT_ID,
               options: { someOptions: 'baz' },
             };
 
@@ -553,7 +578,7 @@ describe('Content Core', () => {
             const deleteItemSuccess: DeleteItemSuccess = {
               type: 'deleteItemSuccess',
               contentId: '1234',
-              contentType: FOO_CONTENT_ID,
+              contentTypeId: FOO_CONTENT_ID,
               options: { someOptions: 'baz' },
             };
 
@@ -571,7 +596,7 @@ describe('Content Core', () => {
 
             const deleteItemError: DeleteItemError = {
               type: 'deleteItemError',
-              contentType: FOO_CONTENT_ID,
+              contentTypeId: FOO_CONTENT_ID,
               contentId: '1234',
               error: errorMessage,
               options: { errorToThrow: errorMessage },

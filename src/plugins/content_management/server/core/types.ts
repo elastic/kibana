@@ -7,7 +7,6 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { ContentCrud } from './crud';
 
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
@@ -31,14 +30,9 @@ export interface ContentStorage {
   delete(ctx: StorageContext, id: string, options: unknown): Promise<any>;
 }
 
-export interface ContentConfig<S extends ContentStorage = ContentStorage> {
+export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage> {
+  /** Unique id for the content type */
+  id: string;
   /** The storage layer for the content. It must implment the ContentStorage interface. */
   storage: S;
-}
-
-export interface Content {
-  /** Content configuration. */
-  config: ContentConfig<ContentStorage>;
-  /** Content crud instance. */
-  crud: ContentCrud;
 }

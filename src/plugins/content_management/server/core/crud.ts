@@ -9,32 +9,37 @@ import type { EventBus } from './event_bus';
 import type { ContentStorage, StorageContext } from './types';
 
 export interface GetResponse<T = any> {
-  item: T;
+  contentTypeId: string;
+  item?: T;
 }
 
 export interface BulkGetResponse<T = any> {
+  contentTypeId: string;
   items: T;
 }
 
 export interface CreateItemResponse<T = any> {
+  contentTypeId: string;
   result: T;
 }
 
 export interface UpdateItemResponse<T = any> {
+  contentTypeId: string;
   result: T;
 }
 
 export interface DeleteItemResponse<T = any> {
+  contentTypeId: string;
   result: T;
 }
 
 export class ContentCrud implements ContentStorage {
   private storage: ContentStorage;
   private eventBus: EventBus;
-  public contentType: string;
+  public contentTypeId: string;
 
   constructor(
-    contentType: string,
+    contentTypeId: string,
     contentStorage: ContentStorage,
     {
       eventBus,
@@ -42,7 +47,7 @@ export class ContentCrud implements ContentStorage {
       eventBus: EventBus;
     }
   ) {
-    this.contentType = contentType;
+    this.contentTypeId = contentTypeId;
     this.storage = contentStorage;
     this.eventBus = eventBus;
   }
@@ -55,7 +60,7 @@ export class ContentCrud implements ContentStorage {
     this.eventBus.emit({
       type: 'getItemStart',
       contentId,
-      contentType: this.contentType,
+      contentTypeId: this.contentTypeId,
       options,
     });
 
@@ -65,16 +70,16 @@ export class ContentCrud implements ContentStorage {
       this.eventBus.emit({
         type: 'getItemSuccess',
         contentId,
-        contentType: this.contentType,
+        contentTypeId: this.contentTypeId,
         data: item,
       });
 
-      return { item };
+      return { contentTypeId: this.contentTypeId, item };
     } catch (e) {
       this.eventBus.emit({
         type: 'getItemError',
         contentId,
-        contentType: this.contentType,
+        contentTypeId: this.contentTypeId,
         options,
         error: e.message,
       });
@@ -90,7 +95,7 @@ export class ContentCrud implements ContentStorage {
   ): Promise<BulkGetResponse<O>> {
     this.eventBus.emit({
       type: 'bulkGetItemStart',
-      contentType: this.contentType,
+      contentTypeId: this.contentTypeId,
       ids,
       options,
     });
@@ -101,18 +106,19 @@ export class ContentCrud implements ContentStorage {
       this.eventBus.emit({
         type: 'bulkGetItemSuccess',
         ids,
-        contentType: this.contentType,
+        contentTypeId: this.contentTypeId,
         data: items,
       });
 
       return {
+        contentTypeId: this.contentTypeId,
         items,
       };
     } catch (e) {
       this.eventBus.emit({
         type: 'bulkGetItemError',
         ids,
-        contentType: this.contentType,
+        contentTypeId: this.contentTypeId,
         options,
         error: e,
       });
@@ -128,7 +134,7 @@ export class ContentCrud implements ContentStorage {
   ): Promise<CreateItemResponse<O>> {
     this.eventBus.emit({
       type: 'createItemStart',
-      contentType: this.contentType,
+      contentTypeId: this.contentTypeId,
       data,
       options,
     });
@@ -138,16 +144,16 @@ export class ContentCrud implements ContentStorage {
 
       this.eventBus.emit({
         type: 'createItemSuccess',
-        contentType: this.contentType,
+        contentTypeId: this.contentTypeId,
         data: result,
         options,
       });
 
-      return { result };
+      return { contentTypeId: this.contentTypeId, result };
     } catch (e) {
       this.eventBus.emit({
         type: 'createItemError',
-        contentType: this.contentType,
+        contentTypeId: this.contentTypeId,
         data,
         options,
         error: e.message,
@@ -166,7 +172,7 @@ export class ContentCrud implements ContentStorage {
     this.eventBus.emit({
       type: 'updateItemStart',
       contentId: id,
-      contentType: this.contentType,
+      contentTypeId: this.contentTypeId,
       data,
       options,
     });
@@ -177,17 +183,17 @@ export class ContentCrud implements ContentStorage {
       this.eventBus.emit({
         type: 'updateItemSuccess',
         contentId: id,
-        contentType: this.contentType,
+        contentTypeId: this.contentTypeId,
         data: result,
         options,
       });
 
-      return { result };
+      return { contentTypeId: this.contentTypeId, result };
     } catch (e) {
       this.eventBus.emit({
         type: 'updateItemError',
         contentId: id,
-        contentType: this.contentType,
+        contentTypeId: this.contentTypeId,
         data,
         options,
         error: e.message,
@@ -205,7 +211,7 @@ export class ContentCrud implements ContentStorage {
     this.eventBus.emit({
       type: 'deleteItemStart',
       contentId: id,
-      contentType: this.contentType,
+      contentTypeId: this.contentTypeId,
       options,
     });
 
@@ -215,16 +221,16 @@ export class ContentCrud implements ContentStorage {
       this.eventBus.emit({
         type: 'deleteItemSuccess',
         contentId: id,
-        contentType: this.contentType,
+        contentTypeId: this.contentTypeId,
         options,
       });
 
-      return { result };
+      return { contentTypeId: this.contentTypeId, result };
     } catch (e) {
       this.eventBus.emit({
         type: 'deleteItemError',
         contentId: id,
-        contentType: this.contentType,
+        contentTypeId: this.contentTypeId,
         options,
         error: e.message,
       });
