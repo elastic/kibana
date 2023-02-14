@@ -377,8 +377,6 @@ describe('#stop', () => {
   });
 
   it('stops pollEsNodeVersions even if there are active subscriptions', async () => {
-    expect.assertions(3);
-
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
@@ -394,6 +392,7 @@ describe('#stop', () => {
       await elasticsearchService.stop();
       await delay(100);
       expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
+      expect.assertions(3);
     });
   });
 });

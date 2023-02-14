@@ -368,7 +368,7 @@ describe('alerts_list component with items', () => {
       .simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers()
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last execution.');
@@ -403,7 +403,7 @@ describe('alerts_list component with items', () => {
       .simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers()
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe(

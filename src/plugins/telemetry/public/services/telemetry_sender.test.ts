@@ -354,7 +354,7 @@ describe('TelemetrySender', () => {
   });
 
   describe('startChecking', () => {
-    beforeEach(() => jest.useFakeTimers());
+    beforeEach(() => jest.useFakeTimers('legacy'));
     afterAll(() => jest.useRealTimers());
 
     it('calls sendIfDue every 60000 ms', () => {

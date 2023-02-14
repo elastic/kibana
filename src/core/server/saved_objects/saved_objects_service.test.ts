@@ -306,7 +306,6 @@ describe('SavedObjectsService', () => {
     });
 
     it('waits for all es nodes to be compatible before running migrations', async () => {
-      expect.assertions(2);
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
       const setupDeps = createSetupDeps();
@@ -332,6 +331,7 @@ describe('SavedObjectsService', () => {
       });
       setImmediate(() => {
         expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
+        expect.assertions(2);
       });
     });
 
