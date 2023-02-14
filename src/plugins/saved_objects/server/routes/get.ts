@@ -9,9 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 
-export const registerGetRoute = (
-  router: IRouter,
-) => {
+export const registerGetRoute = (router: IRouter) => {
   router.get(
     {
       path: '/api/kibana/saved_objects/get',

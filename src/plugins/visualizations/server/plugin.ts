@@ -29,7 +29,7 @@ export class VisualizationsPlugin
   implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart>
 {
   private readonly logger: Logger;
-  
+
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }

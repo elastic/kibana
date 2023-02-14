@@ -57,6 +57,7 @@ import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/publ
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { KibanaUtilsStart } from '@kbn/kibana-utils-plugin/public/plugin';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -101,7 +102,6 @@ import {
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
-import { KibanaUtilsStart } from '@kbn/kibana-utils-plugin/public/plugin';
 
 /**
  * Interface for this plugin's returned setup/start contracts.

@@ -82,7 +82,8 @@ export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
   input: VisualizeInput
 ) => {
-  const { data, savedObjects, spaces, savedObjectsTagging, core, getKibanaVersion } = visualizeServices;
+  const { data, savedObjects, spaces, savedObjectsTagging, core, getKibanaVersion } =
+    visualizeServices;
   const visState = input.savedVis as SerializedVis;
 
   /**
@@ -133,7 +134,8 @@ export const getVisualizationInstance = async (
    */
   opts?: Record<string, unknown> | string
 ) => {
-  const { data, savedObjects, spaces, savedObjectsTagging, core, getKibanaVersion } = visualizeServices;
+  const { data, savedObjects, spaces, savedObjectsTagging, core, getKibanaVersion } =
+    visualizeServices;
 
   const savedVis: VisSavedObject = await getSavedVisualization(
     {

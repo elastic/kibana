@@ -12,7 +12,8 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsClientContract,
   SavedObjectAttributes,
-  SavedObjectReference, HttpStart,
+  SavedObjectReference,
+  HttpStart,
 } from '@kbn/core/public';
 import type { OverlayStart } from '@kbn/core/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
