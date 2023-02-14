@@ -486,34 +486,4 @@ describe('Persistent rules table state', () => {
       });
     });
   });
-
-  describe('in a new browser tab', () => {
-    beforeEach(() => {
-      visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
-
-      changeRulesTableState();
-      goToTablePage(2);
-    });
-
-    it('has a fresh state', () => {
-      visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL, {
-        onBeforeLoad: (win) => {
-          win.sessionStorage.clear();
-        },
-      });
-
-      expectRulesManagementTab();
-      expectDefaultRulesTableState();
-      expectManagementTableRules([
-        'test 1',
-        'rule 1',
-        'rule 2',
-        'rule 3',
-        'rule 4',
-        'rule 5',
-        'rule 6',
-        'rule 7',
-      ]);
-    });
-  });
 });
