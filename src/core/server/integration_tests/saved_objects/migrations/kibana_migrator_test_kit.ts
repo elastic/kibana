@@ -20,6 +20,8 @@ import {
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
   SavedObjectTypeRegistry,
+  IKibanaMigrator,
+  MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
@@ -35,6 +37,7 @@ import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { LoggerFactory } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { registerServiceConfig } from '@kbn/core-root-server-internal';
+import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
@@ -49,13 +52,21 @@ export interface KibanaMigratorTestKitParams {
   logFilePath?: string;
 }
 
+export interface KibanaMigratorTestKit {
+  client: ElasticsearchClient;
+  migrator: IKibanaMigrator;
+  runMigrations: (rerun?: boolean) => Promise<MigrationResult[]>;
+  typeRegistry: ISavedObjectTypeRegistry;
+  savedObjectsRepository: ISavedObjectsRepository;
+}
+
 export const getKibanaMigratorTestKit = async ({
   settings = {},
   kibanaIndex = '.kibana',
   kibanaVersion = currentVersion,
   types = [],
   logFilePath = defaultLogFilePath,
-}: KibanaMigratorTestKitParams = {}) => {
+}: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
   const loggingSystem = new LoggingSystem();
   const loggerFactory = loggingSystem.asLoggerFactory();
 
@@ -81,6 +92,11 @@ export const getKibanaMigratorTestKit = async ({
     kibanaVersion
   );
 
+  const runMigrations = async (rerun?: boolean) => {
+    migrator.prepareMigrations();
+    return await migrator.runMigrations({ rerun });
+  };
+
   const savedObjectsRepository = SavedObjectsRepository.createRepository(
     migrator,
     typeRegistry,
@@ -92,9 +108,9 @@ export const getKibanaMigratorTestKit = async ({
   return {
     client,
     migrator,
+    runMigrations,
     typeRegistry,
     savedObjectsRepository,
-    kibanaVersion,
   };
 };
 

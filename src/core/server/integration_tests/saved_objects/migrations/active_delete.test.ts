@@ -42,13 +42,12 @@ describe('when upgrading to a new stack version', () => {
   };
 
   const createBaseline = async () => {
-    const { client, migrator, savedObjectsRepository } = await getKibanaMigratorTestKit({
+    const { client, runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
       kibanaIndex,
       types: baselineTypes,
     });
 
-    migrator.prepareMigrations();
-    await migrator.runMigrations();
+    await runMigrations();
 
     await savedObjectsRepository.bulkCreate(baselineDocuments, {
       refresh: 'wait_for',
@@ -76,7 +75,7 @@ describe('when upgrading to a new stack version', () => {
         await fs.unlink(logFilePath).catch(() => {});
         // remove the 'deprecated' type from the mappings, so that it is considered unknown
         const types = baselineTypes.filter((type) => type.name !== 'deprecated');
-        const { migrator, client } = await getKibanaMigratorTestKit({
+        const { client, runMigrations } = await getKibanaMigratorTestKit({
           settings: {
             migrations: {
               discardUnknownObjects: nextMinor,
@@ -88,8 +87,7 @@ describe('when upgrading to a new stack version', () => {
           logFilePath,
         });
 
-        migrator.prepareMigrations();
-        await migrator.runMigrations();
+        await runMigrations();
 
         indexContents = await client.search({ index: kibanaIndex, size: 100 });
       });
@@ -189,19 +187,17 @@ describe('when upgrading to a new stack version', () => {
       });
 
       it('fails if unknown documents exist', async () => {
-        // remove the 'deprecated' type from the mappings, so that it is considered unknown
+        // remove the 'deprecated' type from the mappings, so that SO of this type are considered unknown
         const types = baselineTypes.filter((type) => type.name !== 'deprecated');
-        const { migrator } = await getKibanaMigratorTestKit({
+        const { runMigrations } = await getKibanaMigratorTestKit({
           kibanaIndex,
           types,
           kibanaVersion: nextMinor,
           logFilePath,
         });
 
-        migrator.prepareMigrations();
-
         try {
-          await migrator.runMigrations();
+          await runMigrations();
         } catch (err) {
           const errorMessage = err.message;
           expect(errorMessage).toMatch(
@@ -222,15 +218,14 @@ describe('when upgrading to a new stack version', () => {
       });
 
       it('proceeds if there are no unknown documents', async () => {
-        const { migrator, client } = await getKibanaMigratorTestKit({
+        const { client, runMigrations } = await getKibanaMigratorTestKit({
           kibanaIndex,
           types: baselineTypes,
           kibanaVersion: nextMinor,
           logFilePath,
         });
 
-        migrator.prepareMigrations();
-        await migrator.runMigrations();
+        await runMigrations();
 
         const logs = await fs.readFile(logFilePath, 'utf-8');
         expect(logs).toMatch('[.kibana_migrator_tests] INIT -> WAIT_FOR_YELLOW_SOURCE');
@@ -283,15 +278,14 @@ describe('when upgrading to a new stack version', () => {
         }
       });
 
-      const { migrator, client } = await getKibanaMigratorTestKit({
+      const { client, runMigrations } = await getKibanaMigratorTestKit({
         kibanaIndex,
         types: incompatibleTypes,
         kibanaVersion: nextMinor,
         logFilePath,
       });
 
-      migrator.prepareMigrations();
-      await migrator.runMigrations();
+      await runMigrations();
 
       const logs = await fs.readFile(logFilePath, 'utf-8');
       expect(logs).toMatch('[.kibana_migrator_tests] INIT -> WAIT_FOR_YELLOW_SOURCE');
