@@ -120,6 +120,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private dashboardSavedObjectService: DashboardSavedObjectService;
   private theme$;
   private chrome;
+  private customBranding;
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -152,6 +153,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         theme: { theme$: this.theme$ },
       },
       chrome: this.chrome,
+      customBranding: this.customBranding,
     } = pluginServices.getServices());
 
     this.initialSavedDashboardId = dashboardContainerInputIsByValue(this.input)
@@ -417,10 +419,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
     this.domNode = dom;
 
+    this.domNode.className = 'dashboardContainer';
+
     const { Wrapper: DashboardReduxWrapper } = this.reduxEmbeddableTools;
     ReactDOM.render(
       <I18nProvider>
-        <ExitFullScreenButtonKibanaProvider coreStart={{ chrome: this.chrome }}>
+        <ExitFullScreenButtonKibanaProvider
+          coreStart={{ chrome: this.chrome, customBranding: this.customBranding }}
+        >
           <KibanaThemeProvider theme$={this.theme$}>
             <DashboardReduxWrapper>
               <DashboardViewport />

@@ -10,9 +10,7 @@ import { CoreEditor, Position } from '../../types';
 import { getCurrentMethodAndTokenPaths } from './autocomplete';
 import type RowParser from '../row_parser';
 
-// @ts-ignore
 import { getTopLevelUrlCompleteComponents } from '../kb/kb';
-// @ts-ignore
 import { populateContext } from './engine';
 
 export function getEndpointFromPosition(editor: CoreEditor, pos: Position, parser: RowParser) {

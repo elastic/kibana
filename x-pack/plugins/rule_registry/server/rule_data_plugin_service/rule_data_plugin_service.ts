@@ -91,6 +91,7 @@ interface ConstructorOptions {
   isWriteEnabled: boolean;
   isWriterCacheEnabled: boolean;
   disabledRegistrationContexts: string[];
+  areFrameworkAlertsEnabled: boolean;
   pluginStop$: Observable<void>;
 }
 
@@ -112,6 +113,7 @@ export class RuleDataService implements IRuleDataService {
       logger: options.logger,
       disabledRegistrationContexts: options.disabledRegistrationContexts,
       isWriteEnabled: options.isWriteEnabled,
+      areFrameworkAlertsEnabled: options.areFrameworkAlertsEnabled,
       pluginStop$: options.pluginStop$,
     });
 

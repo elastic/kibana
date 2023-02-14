@@ -7910,7 +7910,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"loading\" | \"loaded\" | \"rendered\""
+              "\"error\" | \"loading\" | \"rendered\" | \"loaded\""
             ],
             "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
             "deprecated": false,
@@ -10399,7 +10399,7 @@
         "label": "EmbeddablePhase",
         "description": [],
         "signature": [
-          "\"error\" | \"loading\" | \"loaded\" | \"rendered\""
+          "\"error\" | \"loading\" | \"rendered\" | \"loaded\""
         ],
         "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
         "deprecated": false,

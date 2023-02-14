@@ -501,3 +501,4 @@ export const DEFAULT_DETECTION_PAGE_FILTERS = [
 
 export const CELL_ACTIONS_DEFAULT_TRIGGER = 'security-solution-default-cellActions';
 export const CELL_ACTIONS_TIMELINE_TRIGGER = 'security-solution-timeline-cellActions';
+export const CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER = 'security-solution-details-flyout-cellActions';

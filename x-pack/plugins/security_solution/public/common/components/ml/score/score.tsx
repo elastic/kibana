@@ -28,6 +28,7 @@ export const ScoreComponent = ({
         name: score.entityName,
         value: score.entityValue,
         type: 'keyword',
+        aggregatable: true,
       }}
       triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
       visibleCellActions={5}
