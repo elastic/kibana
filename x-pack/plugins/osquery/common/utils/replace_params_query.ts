@@ -7,9 +7,10 @@
 
 import { each, get } from 'lodash';
 
+const CONTAINS_DYNAMIC_PARAMETER_REGEX = /\{{([^}]+)\}}/g; // when there are 2 opening and 2 closing curly brackets (including brackets)
+
 export const replaceParamsQuery = (query: string, data: object) => {
-  const regex = /\{{([^}]+)\}}/g; // when there are 2 opening and 2 closing curly brackets (including brackets)
-  const matchedBrackets = query.match(regex);
+  const matchedBrackets = query.match(new RegExp(CONTAINS_DYNAMIC_PARAMETER_REGEX));
   let resultQuery = query;
 
   if (matchedBrackets) {
@@ -24,10 +25,13 @@ export const replaceParamsQuery = (query: string, data: object) => {
     });
   }
 
-  const skipped = regex.test(resultQuery);
+  const skipped = new RegExp(CONTAINS_DYNAMIC_PARAMETER_REGEX).test(resultQuery);
 
   return {
     result: resultQuery,
     skipped,
   };
 };
+
+export const containsDynamicQuery = (query: string) =>
+  new RegExp(CONTAINS_DYNAMIC_PARAMETER_REGEX).test(query);
