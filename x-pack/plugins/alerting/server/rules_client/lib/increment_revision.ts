@@ -26,9 +26,8 @@ export function incrementRevision<Params extends RuleTypeParams>(
 
   // Diff rule params
   for (const [field, value] of Object.entries(updatedParams)) {
-    // TODO: Remove 'version' from SecuritySolution (and maybe have a way for
-    // TODO: RuleTypes to declare fields that can be revision skipped as well?)
-    if (!fieldsToExcludeFromRevisionUpdates.map(toString).includes(field) && field !== 'version') {
+    // TODO: Should RuleTypes have a way to declare fields that should be revision skipped as well?
+    if (!fieldsToExcludeFromRevisionUpdates.map(toString).includes(field)) {
       if (!isEqual(value, get(currentRule.attributes.params, field))) {
         return currentRule.attributes.revision + 1;
       }
