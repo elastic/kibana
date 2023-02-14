@@ -13,7 +13,6 @@ import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getSlackServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
