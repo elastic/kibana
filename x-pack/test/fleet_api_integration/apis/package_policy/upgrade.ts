@@ -13,6 +13,10 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
+const expectIdArraysEqual = (arr1: any[], arr2: any[]) => {
+  expect(sortBy(arr1, 'id')).to.eql(sortBy(arr2, 'id'));
+};
+
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -29,6 +33,11 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.delete(pkgRoute).set('kbn-xsrf', 'xxxx').send({ force: true }).expect(200);
     });
   }
+
+  const getInstallationSavedObject = async (name: string, version: string) => {
+    const res = await supertest.get(`/api/fleet/epm/packages/${name}-${version}`).expect(200);
+    return res.body.item.savedObject.attributes;
+  };
 
   describe('Package Policy - upgrade', async function () {
     skipIfNoDockerRegistry(providerContext);
@@ -1223,6 +1232,112 @@ export default function (providerContext: FtrProviderContext) {
               packagePolicyIds: [packagePolicyId],
             })
             .expect(400);
+        });
+      });
+    });
+
+    describe('when upgrading from an integration package to an input package where no required variable has been added', function () {
+      withTestPackage('integration_to_input', '3.0.0');
+
+      beforeEach(async function () {
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        const { body: packagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            policy_id: agentPolicyId,
+            package: {
+              name: 'integration_to_input',
+              version: '1.0.0',
+            },
+            name: 'integration_to_input-1',
+            description: '',
+            namespace: 'default',
+            inputs: {
+              'logs-logfile': {
+                enabled: true,
+                streams: {
+                  'integration_to_input.log': {
+                    enabled: true,
+                    vars: {
+                      paths: ['/tmp/test.log'],
+                      'data_stream.dataset': 'somedataset',
+                      custom: '',
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+        packagePolicyId = packagePolicyResponse.item.id;
+      });
+
+      afterEach(async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .expect(200);
+      });
+
+      describe('dry run', function () {
+        it('returns a diff with no errors', async function () {
+          const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
+            .post(`/api/fleet/package_policies/upgrade/dryrun`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packagePolicyIds: [packagePolicyId],
+            })
+            .expect(200);
+          expect(body[0].hasErrors).to.be(false);
+        });
+      });
+
+      describe('upgrade', function () {
+        it('upgrades the package policy and creates the correct templates', async function () {
+          await supertest
+            .post(`/api/fleet/package_policies/upgrade`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packagePolicyIds: [packagePolicyId],
+            })
+            .expect(200);
+
+          const installation = await getInstallationSavedObject('integration_to_input', '2.0.0');
+          expectIdArraysEqual(installation.installed_es, [
+            // assets from version 1.0.0
+            { id: 'logs-integration_to_input.log', type: 'index_template' },
+            { id: 'logs-integration_to_input.log-1.0.0', type: 'ingest_pipeline' },
+            { id: 'logs-integration_to_input.log@custom', type: 'component_template' },
+            { id: 'logs-integration_to_input.log@package', type: 'component_template' },
+            // assets from version 3.0.0 for new package policy
+            { id: 'logs-somedataset-3.0.0', type: 'ingest_pipeline' },
+            { id: 'logs-somedataset', type: 'index_template' },
+            { id: 'logs-somedataset@package', type: 'component_template' },
+            { id: 'logs-somedataset@custom', type: 'component_template' },
+          ]);
+
+          const dataset3PkgComponentTemplate = await getComponentTemplate(
+            'logs-somedataset@package'
+          );
+          expect(dataset3PkgComponentTemplate).not.to.be(null);
         });
       });
     });
