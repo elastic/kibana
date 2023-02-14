@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiIcon, EuiListGroupItemProps, EuiScreenReaderLive } from '@elastic/eui';
+import { EuiIcon, EuiListGroupItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -51,15 +51,6 @@ export function createEuiListItem({
     /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
     onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       if (!isModifiedOrPrevented(event)) {
-        <EuiScreenReaderLive focusRegionOnTextChange>
-          {i18n.translate('core.ui.recentLinks.linkItem.screenReaderAnnouncement', {
-            defaultMessage: '{url}, type: {title}',
-            values: {
-              url,
-              title,
-            },
-          })}
-        </EuiScreenReaderLive>;
         onClick();
       }
 
@@ -69,15 +60,6 @@ export function createEuiListItem({
         !isModifiedOrPrevented(event)
       ) {
         event.preventDefault();
-        <EuiScreenReaderLive focusRegionOnTextChange>
-          {i18n.translate('core.ui.recentLinks.linkItem.screenReaderAnnouncement', {
-            defaultMessage: '{url}, type: {title}',
-            values: {
-              url,
-              title,
-            },
-          })}
-        </EuiScreenReaderLive>;
         navigateToUrl(url);
       }
     },
