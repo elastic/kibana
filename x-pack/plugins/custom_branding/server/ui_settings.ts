@@ -15,7 +15,7 @@ export const UI_SETTINGS_CUSTOMIZED_LOGO = 'xpackCustomBranding:customizedLogo';
 export const UI_SETTINGS_PAGE_TITLE = 'xpackCustomBranding:pageTitle';
 export const UI_SETTINGS_FAVICON_PNG = 'xpackCustomBranding:faviconPNG';
 export const UI_SETTINGS_FAVICON_SVG = 'xpackCustomBranding:faviconSVG';
-export const PLUGIN_ID = 'custom Branding';
+export const PLUGIN_ID = 'Custom Branding';
 
 const kbToBase64Length = (kb: number) => Math.floor((kb * 1024 * 8) / 6);
 const maxLogoSizeInBase64 = kbToBase64Length(200);
@@ -67,7 +67,7 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.customLogoDescription', {
-        defaultMessage: `An image that represents your brand.  {subscriptionLink}`,
+        defaultMessage: `Replaces the Elastic logo.  Logos look best when they are no larger than 128 x 128 pixels and have a transparent background. {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
@@ -83,7 +83,7 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.customizedLogoDescription', {
-        defaultMessage: `An image of your organization's name.  {subscriptionLink}`,
+        defaultMessage: `Replaces the Elastic text. Images look best when they are no larger than 200 x 84 pixels and have a transparent background. {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
@@ -115,7 +115,7 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.faviconSVGDescription', {
-        defaultMessage: `An icon to appear on browser tabs.  {subscriptionLink}`,
+        defaultMessage: `A link to an icon that will appear on browser tabs. Recommended size is 16 x 16 pixels.  {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
