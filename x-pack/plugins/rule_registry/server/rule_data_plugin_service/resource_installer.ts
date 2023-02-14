@@ -13,13 +13,15 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  DEFAULT_ILM_POLICY_ID,
+  DEFAULT_ALERTS_ILM_POLICY,
+  DEFAULT_ALERTS_ILM_POLICY_NAME,
+} from '@kbn/alerting-plugin/server';
+import {
   ECS_COMPONENT_TEMPLATE_NAME,
   TECHNICAL_COMPONENT_TEMPLATE_NAME,
 } from '../../common/assets';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
-import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
 
 import type { IndexInfo } from './index_info';
 
@@ -31,6 +33,7 @@ interface ConstructorOptions {
   logger: Logger;
   isWriteEnabled: boolean;
   disabledRegistrationContexts: string[];
+  areFrameworkAlertsEnabled: boolean;
   pluginStop$: Observable<void>;
 }
 
@@ -95,16 +98,21 @@ export class ResourceInstaller {
    */
   public async installCommonResources(): Promise<void> {
     await this.installWithTimeout('common resources shared between all indices', async () => {
-      const { getResourceName, logger } = this.options;
+      const { getResourceName, logger, areFrameworkAlertsEnabled } = this.options;
 
       try {
         // We can install them in parallel
         await Promise.all([
-          this.createOrUpdateLifecyclePolicy({
-            name: getResourceName(DEFAULT_ILM_POLICY_ID),
-            body: defaultLifecyclePolicy,
-          }),
-
+          // Install ILM policy only if framework alerts are not enabled
+          // If framework alerts are enabled, the alerting framework will install this ILM policy
+          ...(areFrameworkAlertsEnabled
+            ? []
+            : [
+                this.createOrUpdateLifecyclePolicy({
+                  name: DEFAULT_ALERTS_ILM_POLICY_NAME,
+                  body: DEFAULT_ALERTS_ILM_POLICY,
+                }),
+              ]),
           this.createOrUpdateComponentTemplate({
             name: getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
             body: technicalComponentTemplate,
@@ -326,9 +334,7 @@ export class ResourceInstaller {
     const ownComponentNames = componentTemplates.map((template) =>
       indexInfo.getComponentTemplateName(template.name)
     );
-    const ilmPolicyName = ilmPolicy
-      ? indexInfo.getIlmPolicyName()
-      : getResourceName(DEFAULT_ILM_POLICY_ID);
+    const ilmPolicyName = ilmPolicy ? indexInfo.getIlmPolicyName() : DEFAULT_ALERTS_ILM_POLICY_NAME;
 
     const indexMetadata: estypes.Metadata = {
       ...indexTemplate._meta,
