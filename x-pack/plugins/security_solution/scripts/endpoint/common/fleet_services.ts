@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { filter, pick } from 'lodash';
-import axios from 'axios';
-import semver from 'semver';
+import { pick } from 'lodash';
 import type { Client, estypes } from '@elastic/elasticsearch';
 import type {
   Agent,
