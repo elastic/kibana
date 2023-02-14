@@ -36,8 +36,7 @@ const buildPrimitiveProvider = (filter: Filter): Provider => {
     queryType,
   };
   if (isRangeFilter(filter)) {
-    const gte = filter.query.range[field].gte;
-    const lt = filter.query.range[field].lt;
+    const { gte, lt } = filter.query.range[field];
     const value = JSON.stringify({ gte, lt });
     return {
       ...baseFilter,
@@ -81,6 +80,12 @@ const nonCombinedToProvider = (filters: Filter[]): Provider[] => {
   });
 };
 
+/**
+ * This function takes an array of Filter types and returns a 2d array
+ * of an intermediate data structure called a Provider, which can map from
+ * Filter <-> DataProvider. Items in each inner array of the Provider[][]
+ * return value are AND'ed together, items in the outer arrays are OR'ed.
+ */
 export const filtersToInsightProviders = (filters: Filter[]): Provider[][] => {
   const hasCombined = filters.some(isCombinedFilter);
   if (hasCombined === false) {
