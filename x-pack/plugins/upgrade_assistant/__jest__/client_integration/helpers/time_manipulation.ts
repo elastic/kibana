@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 
 /**
- * These helpers are intended to be used in conjunction with jest.useFakeTimers().
+ * These helpers are intended to be used in conjunction with jest.useFakeTimers('legacy').
  */
 
 const flushPromiseJobQueue = async () => {

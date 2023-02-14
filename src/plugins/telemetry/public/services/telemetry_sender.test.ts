@@ -335,7 +335,7 @@ describe('TelemetrySender', () => {
   });
 
   describe('getRetryDelay', () => {
-    beforeEach(() => jest.useFakeTimers());
+    beforeEach(() => jest.useFakeTimers('legacy'));
     afterAll(() => jest.useRealTimers());
 
     it('sets a minimum retry delay of 60 seconds', () => {
