@@ -8,7 +8,7 @@
 
 import { QueryClient } from '@tanstack/react-query';
 import { createQueryObservable } from './query_observable';
-import type { RpcClient } from '../rpc_client';
+import type { CrudClient } from '../crud_client';
 import type { CreateIn, GetIn } from '../../common';
 
 const queryKeyBuilder = {
@@ -18,12 +18,16 @@ const queryKeyBuilder = {
   },
 };
 
-const createQueryOptionBuilder = ({ rpcClient }: { rpcClient: RpcClient }) => {
+const createQueryOptionBuilder = ({
+  crudClientProvider,
+}: {
+  crudClientProvider: (contentType: string) => CrudClient;
+}) => {
   return {
     get: <I extends GetIn = GetIn, O = unknown>(input: I) => {
       return {
         queryKey: queryKeyBuilder.item(input.contentType, input.id),
-        queryFn: () => rpcClient.get<I, O>(input),
+        queryFn: () => crudClientProvider(input.contentType).get<I, O>(input),
       };
     },
   };
@@ -33,10 +37,10 @@ export class ContentClient {
   readonly queryClient: QueryClient;
   readonly queryOptionBuilder: ReturnType<typeof createQueryOptionBuilder>;
 
-  constructor(private readonly rpcClient: RpcClient) {
+  constructor(private readonly crudClientProvider: (contentType: string) => CrudClient) {
     this.queryClient = new QueryClient();
     this.queryOptionBuilder = createQueryOptionBuilder({
-      rpcClient: this.rpcClient,
+      crudClientProvider: this.crudClientProvider,
     });
   }
 
@@ -48,7 +52,7 @@ export class ContentClient {
     return createQueryObservable(this.queryClient, this.queryOptionBuilder.get<I, O>(input));
   }
 
-  create<I extends CreateIn, O = any>(input: I): Promise<O> {
-    return this.rpcClient.create(input);
+  create<I extends CreateIn, O = unknown>(input: I): Promise<O> {
+    return this.crudClientProvider(input.contentType).create(input);
   }
 }

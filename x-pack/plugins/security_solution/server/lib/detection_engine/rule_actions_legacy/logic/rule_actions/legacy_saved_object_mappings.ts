@@ -44,8 +44,8 @@ const legacyRuleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
           type: 'keyword',
         },
         params: {
-          type: 'object',
-          enabled: false,
+          dynamic: false,
+          properties: {},
         },
       },
     },

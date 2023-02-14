@@ -7,6 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 import { FAILED_TESTS_LABEL } from './failed_tests';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
@@ -18,7 +19,9 @@ export const FailedTestsCount = (time: { to: string; from: string }) => {
 
   const monitorId = useMonitorQueryId();
 
-  if (!monitorId) {
+  const selectedLocation = useSelectedLocation();
+
+  if (!monitorId || !selectedLocation) {
     return null;
   }
 
@@ -30,6 +33,7 @@ export const FailedTestsCount = (time: { to: string; from: string }) => {
           time,
           reportDefinitions: {
             'monitor.id': [monitorId],
+            'observer.geo.name': [selectedLocation?.label],
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_failed_tests',

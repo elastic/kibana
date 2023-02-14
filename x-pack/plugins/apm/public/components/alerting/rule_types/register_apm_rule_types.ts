@@ -14,6 +14,12 @@ import {
   getAlertUrlTransaction,
 } from '../../../../common/utils/formatters';
 import { ApmRuleType } from '../../../../common/rules/apm_rule_types';
+import {
+  anomalyMessage,
+  errorCountMessage,
+  transactionDurationMessage,
+  transactionErrorRateMessage,
+} from '../../../../common/rules/default_action_message';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
@@ -48,17 +54,7 @@ export function registerApmRuleTypes(
       errors: [],
     }),
     requiresAppContext: false,
-    defaultActionMessage: i18n.translate(
-      'xpack.apm.alertTypes.errorCount.defaultActionMessage',
-      {
-        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
-
-- Service name: \\{\\{context.serviceName\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\} errors
-- Triggered value: \\{\\{context.triggerValue\\}\\} errors over the last \\{\\{context.interval\\}\\}`,
-      }
-    ),
+    defaultActionMessage: errorCountMessage,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -98,18 +94,7 @@ export function registerApmRuleTypes(
         )
     ),
     requiresAppContext: false,
-    defaultActionMessage: i18n.translate(
-      'xpack.apm.alertTypes.transactionDuration.defaultActionMessage',
-      {
-        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
-
-- Service name: \\{\\{context.serviceName\\}\\}
-- Type: \\{\\{context.transactionType\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Latency threshold: \\{\\{context.threshold\\}\\}ms
-- Latency observed: \\{\\{context.triggerValue\\}\\} over the last \\{\\{context.interval\\}\\}`,
-      }
-    ),
+    defaultActionMessage: transactionDurationMessage,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -141,18 +126,7 @@ export function registerApmRuleTypes(
       errors: [],
     }),
     requiresAppContext: false,
-    defaultActionMessage: i18n.translate(
-      'xpack.apm.alertTypes.transactionErrorRate.defaultActionMessage',
-      {
-        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
-
-- Service name: \\{\\{context.serviceName\\}\\}
-- Type: \\{\\{context.transactionType\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\}%
-- Triggered value: \\{\\{context.triggerValue\\}\\}% of errors over the last \\{\\{context.interval\\}\\}`,
-      }
-    ),
+    defaultActionMessage: transactionErrorRateMessage,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -181,18 +155,6 @@ export function registerApmRuleTypes(
       errors: [],
     }),
     requiresAppContext: false,
-    defaultActionMessage: i18n.translate(
-      'xpack.apm.alertTypes.transactionDurationAnomaly.defaultActionMessage',
-      {
-        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
-
-- Service name: \\{\\{context.serviceName\\}\\}
-- Type: \\{\\{context.transactionType\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Severity threshold: \\{\\{context.threshold\\}\\}
-- Severity value: \\{\\{context.triggerValue\\}\\}
-`,
-      }
-    ),
+    defaultActionMessage: anomalyMessage,
   });
 }

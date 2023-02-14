@@ -19,16 +19,14 @@ import {
   EuiFieldText,
   EuiSuperSelect,
   EuiToolTip,
-  EuiBadge,
   EuiRadioGroup,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-
-import styled from 'styled-components';
 
 import { dataTypes } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
@@ -47,10 +45,6 @@ import {
   DEFAULT_SELECT_VALUE,
   useFleetServerHostsOptions,
 } from './hooks';
-
-const LeftPaddedEUIBadge = styled(EuiBadge)`
-  margin-left: 5px;
-`;
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -476,18 +470,20 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
               defaultMessage="Unenrollment timeout"
             />
+            &nbsp;
             <EuiToolTip
               content={i18n.translate('xpack.fleet.agentPolicyForm.unenrollmentTimeoutTooltip', {
                 defaultMessage:
                   'This setting is deprecated and will be removed in a future release. Consider using inactivity timeout instead',
               })}
             >
-              <LeftPaddedEUIBadge color="hollow">
-                <FormattedMessage
-                  id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel"
-                  defaultMessage="Deprecated"
-                />
-              </LeftPaddedEUIBadge>
+              <EuiBetaBadge
+                label={i18n.translate(
+                  'xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel',
+                  { defaultMessage: 'Deprecated' }
+                )}
+                size="s"
+              />
             </EuiToolTip>
           </h4>
         }
@@ -530,6 +526,8 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 id="xpack.fleet.agentPolicyForm.hostnameFormatLabel"
                 defaultMessage="Host name format"
               />
+              &nbsp;
+              <EuiBetaBadge label="beta" size="s" color="accent" />
             </h4>
           }
           description={
