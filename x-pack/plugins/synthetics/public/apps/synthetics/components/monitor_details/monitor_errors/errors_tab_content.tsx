@@ -37,11 +37,16 @@ export const ErrorsTabContent = ({
             <EuiFlexGroup>
               <EuiFlexItem>
                 {monitorId && (
-                  <MonitorErrorsCount from={time.from} to={time.to} monitorId={[monitorId]} />
+                  <MonitorErrorsCount
+                    from={time.from}
+                    to={time.to}
+                    monitorId={[monitorId]}
+                    id="monitorsErrorsCountErrors"
+                  />
                 )}
               </EuiFlexItem>
               <EuiFlexItem>
-                <FailedTestsCount from={time.from} to={time.to} />
+                <FailedTestsCount from={time.from} to={time.to} id="failedTestsCountErrors" />
               </EuiFlexItem>
             </EuiFlexGroup>
           </PanelWithTitle>

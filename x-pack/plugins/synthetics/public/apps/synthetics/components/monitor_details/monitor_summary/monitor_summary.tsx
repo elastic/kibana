@@ -10,6 +10,7 @@ import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } fro
 import { i18n } from '@kbn/i18n';
 import { LoadWhenInView } from '@kbn/observability-plugin/public';
 
+import { useMonitorDetailsPage } from '../use_monitor_details_page';
 import { useMonitorRangeFrom } from '../hooks/use_monitor_range_from';
 import { MonitorAlerts } from './monitor_alerts';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
@@ -32,6 +33,11 @@ export const MonitorSummary = () => {
   const monitorId = useMonitorQueryId();
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
+
+  const redirect = useMonitorDetailsPage();
+  if (redirect) {
+    return redirect;
+  }
 
   return (
     <>

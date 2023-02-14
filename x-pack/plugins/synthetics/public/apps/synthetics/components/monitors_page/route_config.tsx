@@ -11,7 +11,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { RefreshButton } from '../common/components/refresh_button';
-import { LastRefreshed } from '../common/components/last_refreshed';
 import { OverviewPage } from './overview/overview_page';
 import { MonitorsPageHeader } from './management/page_header/monitors_page_header';
 import { CreateMonitorButton } from './create_monitor_button';
@@ -27,7 +26,7 @@ export const getMonitorsRoute = (
 ): RouteProps[] => {
   const sharedProps = {
     pageTitle: <MonitorsPageHeader />,
-    rightSideItems: [<CreateMonitorButton />, <RefreshButton />, <LastRefreshed />],
+    rightSideItems: [<RefreshButton />, <CreateMonitorButton />],
   };
   return [
     {

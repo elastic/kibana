@@ -24,14 +24,8 @@ export function useAbsoluteDate({ from, to }: { from: string; to: string }) {
   );
 }
 
-export function useRefreshedRange(
-  inp: DurationInputArg1,
-  unit: DurationInputArg2,
-  refreshId?: string
-) {
+export function useRefreshedRange(inp: DurationInputArg1, unit: DurationInputArg2) {
   const { lastRefresh } = useSyntheticsRefreshContext();
-
-  // useEffect(() => {}, [refreshId]);
 
   return useMemo(
     () => ({

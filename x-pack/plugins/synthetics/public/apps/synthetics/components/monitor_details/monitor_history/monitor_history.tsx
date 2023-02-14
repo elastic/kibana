@@ -7,6 +7,7 @@
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
+import { useMonitorDetailsPage } from '../use_monitor_details_page';
 import { useRefreshedRangeFromUrl, useUrlParams } from '../../../hooks';
 import { useDimensions } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
@@ -41,6 +42,10 @@ export const MonitorHistory = () => {
   );
 
   const monitorId = useMonitorQueryId();
+  const redirect = useMonitorDetailsPage();
+  if (redirect) {
+    return redirect;
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">

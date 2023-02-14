@@ -41,7 +41,7 @@ export interface SyntheticsUrlParams {
 const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
   CLIENT_DEFAULTS;
 
-const { DATE_RANGE_START, DATE_RANGE_END, AUTOREFRESH_INTERVAL, AUTOREFRESH_IS_PAUSED } =
+const { DATE_RANGE_START, DATE_RANGE_END, AUTOREFRESH_INTERVAL_SECONDS, AUTOREFRESH_IS_PAUSED } =
   CLIENT_DEFAULTS_SYNTHETICS;
 
 /**
@@ -108,7 +108,7 @@ export const getSupportedUrlParams = (params: {
       ABSOLUTE_DATE_RANGE_END,
       { roundUp: true }
     ),
-    refreshInterval: parseUrlInt(refreshInterval, AUTOREFRESH_INTERVAL),
+    refreshInterval: parseUrlInt(refreshInterval, AUTOREFRESH_INTERVAL_SECONDS),
     refreshPaused: parseIsPaused(refreshPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,

@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
+import { LastRefreshed } from '../components/last_refreshed';
 import { AutoRefreshButton } from '../components/auto_refresh_button';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
@@ -67,6 +68,7 @@ export function ActionMenuContent(): React.ReactElement {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
+      <LastRefreshed />
       <AutoRefreshButton />
       <ToggleAlertFlyoutButton />
 

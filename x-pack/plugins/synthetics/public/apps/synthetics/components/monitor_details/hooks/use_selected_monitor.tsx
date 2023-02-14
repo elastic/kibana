@@ -60,7 +60,7 @@ export const useSelectedMonitor = (monId?: string) => {
       !syntheticsMonitorLoading &&
       !monitorListLoading &&
       syntheticsMonitorDispatchedAt > 0 &&
-      Date.now() - syntheticsMonitorDispatchedAt > refreshInterval
+      Date.now() - syntheticsMonitorDispatchedAt > refreshInterval * 1000
     ) {
       dispatch(getMonitorAction.get({ monitorId }));
     }

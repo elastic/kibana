@@ -9,12 +9,16 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSelector } from 'react-redux';
 import { SHORT_TIMESPAN_LOCALE, SHORT_TS_LOCALE } from '../../../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../../../contexts';
+import { selectRefreshPaused } from '../../../state';
 
 export function LastRefreshed() {
   const { lastRefresh: lastRefreshed } = useSyntheticsRefreshContext();
   const [refresh, setRefresh] = useState(() => Date.now());
+
+  const refreshPaused = useSelector(selectRefreshPaused);
 
   useEffect(() => {
     const interVal = setInterval(() => {
@@ -30,12 +34,12 @@ export function LastRefreshed() {
     setRefresh(Date.now());
   }, [lastRefreshed]);
 
-  if (!lastRefreshed) {
+  if (!lastRefreshed || refreshPaused) {
     return null;
   }
 
-  const isWarning = moment().diff(moment(lastRefreshed), 'minutes') > 5;
-  const isDanger = moment().diff(moment(lastRefreshed), 'minutes') > 10;
+  const isWarning = moment().diff(moment(lastRefreshed), 'minutes') > 1;
+  const isDanger = moment().diff(moment(lastRefreshed), 'minutes') > 5;
 
   const prevLocal: string = moment.locale() ?? 'en';
 

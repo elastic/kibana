@@ -31,3 +31,12 @@ export const selectEsKuery = createSelector(uiStateSelector, ({ esKuery }) => es
 export const selectSearchText = createSelector(uiStateSelector, ({ searchText }) => searchText);
 
 export const selectMonitorId = createSelector(uiStateSelector, ({ monitorId }) => monitorId);
+
+export const selectRefreshPaused = createSelector(
+  uiStateSelector,
+  ({ refreshPaused }) => refreshPaused
+);
+export const selectRefreshInterval = createSelector(
+  uiStateSelector,
+  ({ refreshInterval }) => refreshInterval
+);
