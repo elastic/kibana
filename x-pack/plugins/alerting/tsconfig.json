@@ -39,7 +39,6 @@
     "@kbn/data-views-plugin",
     "@kbn/share-plugin",
     "@kbn/safer-lodash-set",
-    "@kbn/ecs",
   ],
   "exclude": [
     "target/**/*",

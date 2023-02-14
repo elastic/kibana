@@ -11,7 +11,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/ecs"
   ],
   "exclude": [
     "target/**/*",
