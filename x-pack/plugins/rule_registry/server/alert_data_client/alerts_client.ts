@@ -626,7 +626,6 @@ export class AlertsClient {
         throw Boom.badRequest('No featureIds were provided for getting alerts count.');
       }
 
-      // first search for the alert by id, then use the alert info to check if user has access to it
       const responseAlertSum = await this.singleSearchAfterAndAudit({
         index: (indexToUse ?? []).join(),
         operation: ReadOperations.Get,
