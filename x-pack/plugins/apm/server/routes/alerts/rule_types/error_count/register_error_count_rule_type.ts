@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import {
   formatDurationFromTimeUnitChar,
   ProcessorEvent,
