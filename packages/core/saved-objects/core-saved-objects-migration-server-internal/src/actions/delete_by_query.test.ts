@@ -91,7 +91,7 @@ describe('deleteByQuery', () => {
     const result = await task();
 
     expect(Either.isRight(result)).toBe(true);
-    expect((result as Either.Right<any>).right).toBeUndefined();
+    expect((result as Either.Right<any>).right).toEqual('delete_successful' as const);
   });
 
   it('resolves with `Either.left`, if the delete query fails', async () => {
