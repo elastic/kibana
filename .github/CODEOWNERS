@@ -115,7 +115,7 @@ packages/core/capabilities/core-capabilities-server-internal @elastic/kibana-cor
 packages/core/capabilities/core-capabilities-server-mocks @elastic/kibana-core
 packages/core/chrome/core-chrome-browser @elastic/appex-sharedux
 packages/core/chrome/core-chrome-browser-internal @elastic/appex-sharedux
-packages/core/chrome/core-chrome-browser-mocks @elastic/@elastic/appex-sharedux
+packages/core/chrome/core-chrome-browser-mocks @elastic/appex-sharedux
 packages/core/config/core-config-server-internal @elastic/kibana-core
 packages/core/custom-branding/core-custom-branding-browser @elastic/appex-sharedux
 packages/core/custom-branding/core-custom-branding-browser-internal @elastic/appex-sharedux
@@ -376,7 +376,7 @@ packages/kbn-get-repo-files @elastic/kibana-operations
 x-pack/plugins/global_search_bar @elastic/appex-sharedux
 x-pack/plugins/global_search @elastic/appex-sharedux
 x-pack/plugins/global_search_providers @elastic/appex-sharedux
-x-pack/test/plugin_functional/plugins/global_search_test @elastic/appex-sharedux
+x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/plugins/graph @elastic/kibana-visualizations
 x-pack/plugins/grokdebugger @elastic/platform-deployment-management
 packages/kbn-guided-onboarding @elastic/platform-onboarding
