@@ -10,7 +10,7 @@ import type { CspBenchmarksPage, CspPage, CspPageNavigationItem } from './types'
 
 const NAV_ITEMS_NAMES = {
   DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
-    defaultMessage: 'Cloud Posture',
+    defaultMessage: 'Cloud Security Posture',
   }),
   FINDINGS: i18n.translate('xpack.csp.navigation.findingsNavItemLabel', {
     defaultMessage: 'Findings',

@@ -292,7 +292,7 @@ export const ComplianceDashboard = () => {
         pageTitle={
           <CloudPosturePageTitle
             title={i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
-              defaultMessage: 'Cloud Posture',
+              defaultMessage: 'Cloud Security Posture',
             })}
           />
         }

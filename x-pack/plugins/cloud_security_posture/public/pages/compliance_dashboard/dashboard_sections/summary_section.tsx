@@ -123,6 +123,15 @@ export const SummarySection = ({
     ]
   );
 
+  const chartTitle =
+    dashboardType === KSPM_POLICY_TEMPLATE
+      ? i18n.translate('xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle', {
+          defaultMessage: 'Overall Kubernetes Posture Score',
+        })
+      : i18n.translate('xpack.csp.dashboard.summarySection.kubernetesPostureScorePanelTitle', {
+          defaultMessage: 'Overall Cloud Posture Score',
+        });
+
   return (
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem grow={dashboardColumnsGrow.first}>
@@ -135,11 +144,7 @@ export const SummarySection = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={dashboardColumnsGrow.second}>
-        <ChartPanel
-          title={i18n.translate('xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle', {
-            defaultMessage: 'Cloud Posture Score',
-          })}
-        >
+        <ChartPanel title={chartTitle}>
           <CloudPostureScoreChart
             id="cloud_posture_score_chart"
             data={complianceData.stats}
