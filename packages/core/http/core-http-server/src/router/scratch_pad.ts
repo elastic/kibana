@@ -336,7 +336,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
   const vtk: VersionedAPIToolkit = {} as any;
   const myRouter: IRouter<{ test: number } & RequestHandlerContextBase> = {} as any;
 
-  const vRouter = vtk
+  const versionedRoute = vtk
     .defineRoute(myRouter.post, { path: '/api/my-plugin/my-route', options: {} })
     .addVersion(
       '1',
@@ -372,6 +372,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     (versionedRouter: VersionedRoute<C>) =>
       versionedRouter;
 
+  // Route declaration
   pipe(
     vtk.defineRoute(myRouter.post, { path: '/api/my-plugin/my-route', options: {} }),
 
