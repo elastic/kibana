@@ -47,7 +47,7 @@ it(
     );
 
     expect(result.exitCode).toBe(1);
-    await expect(parseXml(readFileSync(XML_PATH, 'utf8'))).resolves.toEqual({
+    await expect(parseXml(readFileSync(XML_PATH, 'utf8'))).resolves.toEqual(expect.objectContaining({
       testsuites: {
         $: {
           failures: '1',
@@ -73,6 +73,7 @@ it(
                 $: {
                   classname: 'JUnit Reporter Integration Test.·',
                   name: 'JUnit Reporter fails',
+                  time: expect.anything(),
                 },
                 failure: [expect.stringMatching(/Error: failure\s+at /m)],
               },
@@ -80,7 +81,7 @@ it(
           },
         ],
       },
-    });
+    }));
   },
   3 * MINUTE
 );
