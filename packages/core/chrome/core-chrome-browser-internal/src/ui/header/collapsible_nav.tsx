@@ -17,6 +17,7 @@ import {
   EuiListGroupItem,
   EuiCollapsibleNavProps,
   EuiButton,
+  EuiScreenReaderLive,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
@@ -148,7 +149,6 @@ export function CollapsibleNav({
       ...(needsIcon && { basePath }),
     });
   };
-
   return (
     <EuiCollapsibleNav
       data-test-subj="collapsibleNav"
@@ -165,6 +165,14 @@ export function CollapsibleNav({
       {customNavLink && (
         <>
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+            <EuiScreenReaderLive focusRegionOnTextChange>
+              {i18n.translate('core.ui.primaryNav.screenReaderAnnouncement', {
+                defaultMessage: '{title} visited',
+                values: {
+                  title: appId,
+                },
+              })}
+            </EuiScreenReaderLive>
             <EuiCollapsibleNavGroup
               background="dark"
               className="eui-yScroll"
