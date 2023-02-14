@@ -30,7 +30,6 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../explore/users/pages/navigation/types';
 import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../explore/hosts/pages/navigation/types';
@@ -182,7 +181,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
       )}
       <StatefulEventsViewer
         additionalFilters={toggleExternalAlertsCheckbox}
-        defaultCellActions={defaultCellActions}
         start={startDate}
         end={endDate}
         leadingControlColumns={leadingControlColumns}
