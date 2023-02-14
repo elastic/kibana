@@ -91,11 +91,33 @@ export const HistogramRT = rt.type({
 export const MetricsBucketRT = rt.intersection([BucketRT, rt.type({ metricsets: MetricsetRT })]);
 export const HistogramBucketRT = rt.intersection([
   rt.type({
-    key: rt.record(rt.string, rt.string),
+    key: rt.union([rt.record(rt.string, rt.string), rt.string]),
     doc_count: rt.number,
   }),
   HistogramRT,
 ]);
+
+export const TestHistogramBucketRT = rt.intersection([
+  rt.type({
+    key: rt.union([rt.record(rt.string, rt.string), rt.string]),
+    doc_count: rt.number,
+  }),
+  HistogramRT,
+]);
+
+export const TermsAggregationResponseRT = rt.type({
+  // sample: rt.type({
+  groupings: rt.type({
+    buckets: rt.array(rt.union([HistogramBucketRT, MetricsBucketRT])),
+  }),
+  // }),
+});
+
+export const TermsAggregationResponsesRT = rt.type({
+  groupings: rt.type({
+    buckets: rt.array(rt.union([HistogramBucketRT, MetricsBucketRT])),
+  }),
+});
 
 export const AggregationResponseRT = HistogramRT;
 
@@ -112,6 +134,7 @@ export const CompositeResponseRT = rt.type({
 
 export type Bucket = rt.TypeOf<typeof BucketRT>;
 export type HistogramBucket = rt.TypeOf<typeof HistogramBucketRT>;
+export type TermsAggregationResponse = rt.TypeOf<typeof TermsAggregationResponseRT>;
 export type CompositeResponse = rt.TypeOf<typeof CompositeResponseRT>;
 export type AggregationResponse = rt.TypeOf<typeof AggregationResponseRT>;
 export type MetricsESResponse = AggregationResponse | CompositeResponse;

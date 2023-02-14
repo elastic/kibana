@@ -44,6 +44,14 @@ const createMetricHistogramAggs = (options: MetricsAPIRequest): HistogramAggrega
           min: options.timerange.from,
           max: options.timerange.to,
         },
+        // fixed_interval: '3h',
+        // time_zone: 'Europe/Amsterdam',
+        // min_doc_count: 1,
+        // offset: options.alignDataToEnd ? calculateDateHistogramOffset(options.timerange) : '0s',
+        // extended_bounds: {
+        //   min: options.timerange.from,
+        //   max: options.timerange.to,
+        // },
       },
       aggregations: createMetricsAggregations(options),
     },
@@ -60,6 +68,40 @@ const getAfterKey = (options: MetricsAPIRequest) => {
     return { groupBy0: options.afterKey };
   }
 };
+
+export const createTermsAggregations = (options: MetricsAPIRequest) => {
+  if (!options.includeTimeseries && !!options.metrics.find((p) => p.id === 'logRate')) {
+    throw Boom.badRequest('logRate metric is not supported without time series');
+  }
+
+  return {
+    // sample: {
+    //   random_sampler: {
+    //     probability: 1,
+    //     seed: 1,
+    //   },
+    //   aggs: {
+    groupings: {
+      terms: {
+        field: 'host.name',
+        order: {
+          _key: 'asc',
+        },
+        size: 100,
+        min_doc_count: 1,
+      },
+      aggs: {
+        ...(options.includeTimeseries
+          ? createMetricHistogramAggs(options)
+          : createMetricsAggregations(options)),
+        ...METRICSET_AGGS,
+      },
+    },
+    //   },
+    // },
+  };
+};
+
 export const createCompositeAggregations = (options: MetricsAPIRequest) => {
   if (!Array.isArray(options.groupBy) || !options.groupBy.length) {
     throw Boom.badRequest('groupBy must be informed.');

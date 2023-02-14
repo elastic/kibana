@@ -12,8 +12,17 @@ import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Tile } from './tile';
 import { HostsTile } from './hosts_tile';
+import { useHostsViewContext } from '../../hooks/use_hosts_view';
+import { useSnapshot } from '../../../inventory_view/hooks/use_snaphot';
 
 export const KPICharts = () => {
+  const { baseRequest } = useHostsViewContext();
+  const { nodes, loading } = useSnapshot({
+    ...baseRequest,
+    metrics: [{ type: 'cpu' }, { type: 'memory' }, { type: 'tx' }, { type: 'rx' }],
+    groupBy: null,
+    includeTimeseries: true,
+  });
   return (
     <EuiFlexGroup
       direction="row"
@@ -46,6 +55,8 @@ export const KPICharts = () => {
           type="cpu"
           metricType="avg"
           color="#F1D86F"
+          nodes={nodes}
+          loading={loading}
           title={i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpu.title', {
             defaultMessage: 'CPU usage',
           })}
@@ -73,6 +84,8 @@ export const KPICharts = () => {
           type="memory"
           metricType="avg"
           color="#A987D1"
+          nodes={nodes}
+          loading={loading}
           title={i18n.translate('xpack.infra.hostsViewPage.metricTrend.memory.title', {
             defaultMessage: 'Memory usage',
           })}
@@ -100,6 +113,8 @@ export const KPICharts = () => {
           type="rx"
           metricType="avg"
           color="#79AAD9"
+          nodes={nodes}
+          loading={loading}
           title={i18n.translate('xpack.infra.hostsViewPage.metricTrend.rx.title', {
             defaultMessage: 'Network inbound (RX)',
           })}
@@ -127,6 +142,8 @@ export const KPICharts = () => {
           type="tx"
           metricType="avg"
           color="#F5A35C"
+          nodes={nodes}
+          loading={loading}
           title={i18n.translate('xpack.infra.hostsViewPage.metricTrend.tx.title', {
             defaultMessage: 'Network outbound (TX)',
           })}

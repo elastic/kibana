@@ -76,6 +76,16 @@ export const query = async (
 
     const { bucketSize } = calculateBucketSize({ ...options.timerange, interval });
 
+    // const aggregations = decodeOrThrow(TermsAggregationResponseRT)(response.aggregations);
+    // const { groupings } = aggregations;
+    // return {
+    //   series: getSeriesFromTermsAggregationAggregations(groupings, options, bucketSize * 1000),
+    //   info: {
+    //     afterKey: null,
+    //     interval: rawOptions.includeTimeseries ? bucketSize : undefined,
+    //   },
+    // };
+
     if (hasGroupBy) {
       const aggregations = decodeOrThrow(CompositeResponseRT)(response.aggregations);
       const { groupings } = aggregations;
@@ -114,6 +124,22 @@ const getSeriesFromHistogram = (
     convertBucketsToMetricsApiSeries(['*'], options, aggregations.histogram.buckets, bucketSize),
   ];
 };
+
+// const getSeriesFromTermsAggregationAggregations = (
+//   groupings: TermsAggregationResponse['groupings'],
+//   options: MetricsAPIRequest,
+//   bucketSize: number
+// ): MetricsAPIResponse['series'] => {
+//   return groupings.buckets.map((bucket) => {
+//     const metrics = convertBucketsToMetricsApiSeries(
+//       ['*'],
+//       options,
+//       HistogramBucketRT.is(bucket) ? bucket.histogram.buckets : [bucket],
+//       bucketSize
+//     );
+//     return metrics;
+//   });
+// };
 
 const getSeriesFromCompositeAggregations = (
   groupings: CompositeResponse['groupings'],
