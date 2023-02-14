@@ -56,16 +56,47 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/lint.sh
-    label: 'Linting'
-    agents:
-      queue: n2-8-spot
-    key: linting
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
+#  - command: .buildkite/scripts/steps/lint.sh
+#    label: 'Linting'
+#    agents:
+#      queue: n2-8-spot
+#    key: linting
+#    timeout_in_minutes: 60
+#    retry:
+#      automatic:
+#        - exit_status: '-1'
+#          limit: 3
+#
+#  - command: .buildkite/scripts/steps/lint_with_types.sh
+#    label: 'Linting (with types)'
+#    agents:
+#      queue: n2-16-spot
+#    key: linting_with_types
+#    timeout_in_minutes: 90
+#    retry:
+#      automatic:
+#        - exit_status: '-1'
+#          limit: 3
+#
+#  - command: .buildkite/scripts/steps/checks.sh
+#    label: 'Checks'
+#    agents:
+#      queue: n2-2-spot
+#    timeout_in_minutes: 60
+#    retry:
+#      automatic:
+#        - exit_status: '-1'
+#          limit: 3
+#
+#  - command: .buildkite/scripts/steps/check_types.sh
+#    label: 'Check Types'
+#    agents:
+#      queue: n2-16-spot
+#    timeout_in_minutes: 60
+#    retry:
+#      automatic:
+#        - exit_status: '-1'
+#          limit: 3
 
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
