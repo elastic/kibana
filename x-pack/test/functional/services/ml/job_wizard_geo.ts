@@ -33,25 +33,6 @@ export function MachineLearningJobWizardGeoProvider({ getService }: FtrProviderC
       await this.assertGeoFieldSelection([identifier]);
     },
 
-    async assertSplitFieldInputExists() {
-      await testSubjects.existOrFail('mlSplitFieldSelect > comboBoxInput');
-    },
-
-    async assertSplitFieldSelection(expectedIdentifier: string[]) {
-      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlSplitFieldSelect > comboBoxInput'
-      );
-      expect(comboBoxSelectedOptions).to.eql(
-        expectedIdentifier,
-        `Expected split field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
-      );
-    },
-
-    async selectSplitField(identifier: string) {
-      await comboBox.set('mlSplitFieldSelect > comboBoxInput', identifier);
-      await this.assertSplitFieldSelection([identifier]);
-    },
-
     async assertSplitCardWithMapExampleExists() {
       await testSubjects.existOrFail('mlGeoJobWizardMap');
     },
@@ -66,29 +47,6 @@ export function MachineLearningJobWizardGeoProvider({ getService }: FtrProviderC
 
       await testSubjects.existOrFail('mlGeoJobWizardMap');
       await testSubjects.existOrFail('mlEmbeddedMapContent');
-    },
-
-    async assertDetectorSplitExists(splitField: string) {
-      await testSubjects.existOrFail(`mlDataSplit > mlDataSplitTitle ${splitField}`);
-      await testSubjects.existOrFail('mlDataSplit > mlSplitCard front');
-    },
-
-    async assertDetectorSplitFrontCardTitle(expectedFrontCardTitle: string) {
-      const actualFrontCardTitle = await testSubjects.getVisibleText(
-        'mlDataSplit > mlSplitCard front > mlSplitCardTitle'
-      );
-      expect(actualFrontCardTitle).to.eql(
-        expectedFrontCardTitle,
-        `Expected front card title to be '${expectedFrontCardTitle}' (got '${actualFrontCardTitle}')`
-      );
-    },
-
-    async assertDetectorSplitNumberOfBackCards(expectedNumberOfBackCards: number) {
-      const allBackCards = await testSubjects.findAll('mlDataSplit > mlSplitCard back');
-      expect(allBackCards).to.have.length(
-        expectedNumberOfBackCards,
-        `Expected number of back cards to be '${expectedNumberOfBackCards}' (got '${allBackCards.length}')`
-      );
     },
   };
 }

@@ -140,12 +140,12 @@ export default function ({ getService }: FtrProviderContext) {
         'job creation inputs the split field and displays split cards'
       );
 
-      await ml.jobWizardGeo.assertSplitFieldInputExists();
-      await ml.jobWizardGeo.selectSplitField(splitField);
+      await ml.jobWizardMultiMetric.assertSplitFieldInputExists();
+      await ml.jobWizardMultiMetric.selectSplitField(splitField);
 
-      await ml.jobWizardGeo.assertDetectorSplitExists(splitField);
-      await ml.jobWizardGeo.assertDetectorSplitFrontCardTitle('FEMALE');
-      await ml.jobWizardGeo.assertDetectorSplitNumberOfBackCards(1);
+      await ml.jobWizardMultiMetric.assertDetectorSplitExists(splitField);
+      await ml.jobWizardMultiMetric.assertDetectorSplitFrontCardTitle('FEMALE');
+      await ml.jobWizardMultiMetric.assertDetectorSplitNumberOfBackCards(1);
 
       await ml.testExecution.logTestStep('job creation displays the influencer field');
       await ml.jobWizardCommon.assertInfluencerInputExists();
