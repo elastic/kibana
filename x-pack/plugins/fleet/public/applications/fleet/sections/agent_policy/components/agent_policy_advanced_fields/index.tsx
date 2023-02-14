@@ -77,7 +77,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const { data: agentPoliciesData } = useGetAgentPolicies({
     page: 1,
     perPage: 0,
-    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout: *`,
+    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout:*`,
   });
 
   const totalAgentPoliciesWithInactivityTimeout = agentPoliciesData?.total ?? 0;
