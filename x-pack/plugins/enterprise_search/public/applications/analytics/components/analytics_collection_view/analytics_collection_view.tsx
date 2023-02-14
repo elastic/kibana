@@ -122,26 +122,26 @@ export const AnalyticsCollectionView: React.FC = () => {
             }
           ),
           pageTitle: analyticsCollection?.name,
-          rightSideItems: [
-            dataViewId && (
-              <EuiLink
-                href={application.getUrlForApp('discover', {
-                  path: `#/?_a=(index:'${dataViewId}')`,
-                })}
-              >
-                <EuiIconTip
-                  position="bottom"
-                  content={
-                    <FormattedMessage
-                      id="xpack.enterpriseSearch.analytics.collectionsView.exploreTooltip"
-                      defaultMessage="For a deeper analysis, explore event logs on Discover."
-                    />
-                  }
-                  type="inspect"
-                />
-              </EuiLink>
-            ),
-          ],
+          rightSideItems: dataViewId
+            ? [
+                <EuiLink
+                  href={application.getUrlForApp('discover', {
+                    path: `#/?_a=(index:'${dataViewId}')`,
+                  })}
+                >
+                  <EuiIconTip
+                    position="bottom"
+                    content={
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.analytics.collectionsView.exploreTooltip"
+                        defaultMessage="For a deeper analysis, explore event logs on Discover."
+                      />
+                    }
+                    type="inspect"
+                  />
+                </EuiLink>,
+              ]
+            : undefined,
           tabs: [...collectionViewTabs],
         }}
       >
