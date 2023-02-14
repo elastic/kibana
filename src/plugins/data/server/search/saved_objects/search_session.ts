@@ -35,16 +35,16 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
         type: 'keyword',
       },
       initialState: {
-        type: 'object',
-        enabled: false,
+        dynamic: false,
+        properties: {},
       },
       restoreState: {
-        type: 'object',
-        enabled: false,
+        dynamic: false,
+        properties: {},
       },
       idMapping: {
-        type: 'object',
-        enabled: false,
+        dynamic: false,
+        properties: {},
       },
       realmType: {
         type: 'keyword',

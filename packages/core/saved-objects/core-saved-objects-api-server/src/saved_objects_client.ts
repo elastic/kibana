@@ -210,7 +210,9 @@ export interface SavedObjectsClientContract {
   ): Promise<SavedObject<T>>;
 
   /**
-   * Resolves an array of objects by id, using any legacy URL aliases if they exist
+   * Resolves an array of objects by id.
+   *
+   * See documentation for `.resolve`.
    *
    * @param objects - an array of objects to resolve (contains id and type)
    * @param options {@link SavedObjectsBaseOptions} - options for the bulk resolve operation
@@ -232,7 +234,15 @@ export interface SavedObjectsClientContract {
   ): Promise<SavedObjectsBulkResolveResponse<T>>;
 
   /**
-   * Resolves a single object, using any legacy URL alias if it exists
+   * Resolves a single object.
+   *
+   * After 8.0.0, saved objects are provided a unique ID _across_ spaces.
+   * A subset of existing saved objects may have IDs regenerated while upgrading to 8+.
+   * `.resolve` provides a way for clients with legacy IDs to still retrieve the correct
+   * saved object.
+   *
+   * An example of a client with a "legacy ID" is a bookmarked dashboard in a
+   * non-default space.
    *
    * @param type - The type of SavedObject to retrieve
    * @param id - The ID of the SavedObject to retrieve
