@@ -163,11 +163,7 @@ const InsightComponent = ({
     providers: parsedProviders,
     alertData,
   });
-  const { totalCount, isQueryLoading, oldestTimestamp, hasError } = useInsightQuery({
-    dataProviders,
-    filters,
-  });
-  const timerange: TimeRange = useMemo(() => {
+  const relativeTimerange: TimeRange | null = useMemo(() => {
     if (relativeFrom && relativeTo) {
       const fromStr = relativeFrom;
       const toStr = relativeTo;
@@ -193,6 +189,19 @@ const InsightComponent = ({
         fromStr: undefined,
         toStr: undefined,
       };
+    } else {
+      return null;
+    }
+  }, [relativeFrom, relativeTo, timestamp]);
+
+  const { totalCount, isQueryLoading, oldestTimestamp, hasError } = useInsightQuery({
+    dataProviders,
+    filters,
+    relativeTimerange,
+  });
+  const timerange: TimeRange = useMemo(() => {
+    if (relativeTimerange) {
+      return relativeTimerange;
     } else if (oldestTimestamp != null) {
       return {
         kind: 'absolute',
@@ -210,6 +219,7 @@ const InsightComponent = ({
       };
     }
   }, [oldestTimestamp, relativeFrom, relativeTo, timestamp]);
+
   if (isQueryLoading) {
     return <EuiLoadingSpinner size="l" />;
   } else {
