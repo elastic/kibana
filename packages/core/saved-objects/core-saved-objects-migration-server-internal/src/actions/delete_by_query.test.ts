@@ -10,7 +10,7 @@ import * as Either from 'fp-ts/lib/Either';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { deleteByQuery } from './cleanup_unknown_and_excluded';
+import { deleteByQuery } from './delete_by_query';
 import { createDeleteByQueryResponse } from './delete_by_query.mocks';
 
 jest.mock('./catch_retryable_es_client_errors');
