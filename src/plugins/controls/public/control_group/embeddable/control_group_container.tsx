@@ -152,8 +152,6 @@ export class ControlGroupContainer extends Container<
     this.onFiltersPublished$ = new Subject<Filter[]>();
     this.onControlRemoved$ = new Subject<string>();
 
-    console.log('settings', settings);
-
     // build redux embeddable tools
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       ControlGroupReduxState,

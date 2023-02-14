@@ -70,7 +70,6 @@ export const ControlGroupRenderer = ({
           getDefaultControlGroupInput(),
           controlGroupInputBuilder
         );
-        console.log('settings', settings);
         const newControlGroup = (await factory?.create(
           {
             id,
