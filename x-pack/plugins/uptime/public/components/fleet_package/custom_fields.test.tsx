@@ -223,7 +223,7 @@ describe('<CustomFields />', () => {
     fireEvent.change(monitorType, { target: { value: DataStream.BROWSER } });
 
     // expect browser fields to be in the DOM
-    getAllByLabelText('Zip URL').forEach((node) => {
+    getAllByLabelText('Zip URL').forEach((node: any) => {
       expect(node).toBeInTheDocument();
     });
     expect(

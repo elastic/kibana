@@ -65,7 +65,7 @@ describe('<FieldEditor />', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {

@@ -11,7 +11,7 @@ import { shallow, mount } from 'enzyme';
 import { AlertsUtilityBar, AlertsUtilityBarProps } from './index';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-jest.useFakeTimers();
+jest.useFakeTimers('legacy');
 jest.mock('../../../../common/lib/kibana');
 
 describe('AlertsUtilityBar', () => {
