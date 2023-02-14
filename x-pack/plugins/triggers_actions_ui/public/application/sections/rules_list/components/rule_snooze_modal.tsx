@@ -9,7 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiModal, EuiModalBody, EuiSpacer } from '@elastic/eui';
 
 import { useKibana } from '../../../../common/lib/kibana';
-import { snoozeRule, unsnoozeRule } from '../../../lib/rule_api';
+import { snoozeRule } from '../../../lib/rule_api/snooze';
+import { unsnoozeRule } from '../../../lib/rule_api/unsnooze';
 import {
   SNOOZE_FAILED_MESSAGE,
   SNOOZE_SUCCESS_MESSAGE,

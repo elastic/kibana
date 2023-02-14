@@ -1538,7 +1538,7 @@
             "section": "def-server.GetSummarizedAlertsFnOpts",
             "text": "GetSummarizedAlertsFnOpts"
           },
-          ") => Promise<{ new: { count: number; data: {}[]; }; ongoing: { count: number; data: {}[]; }; recovered: { count: number; data: {}[]; }; }>"
+          ") => Promise<{ new: { count: number; data: { _id: string; _index: string; }[]; }; ongoing: { count: number; data: { _id: string; _index: string; }[]; }; recovered: { count: number; data: { _id: string; _index: string; }[]; }; }>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_get_summarized_alerts_fn.ts",
         "deprecated": false,
@@ -1883,7 +1883,7 @@
             "section": "def-server.GetSummarizedAlertsFnOpts",
             "text": "GetSummarizedAlertsFnOpts"
           },
-          ") => Promise<{ new: { count: number; data: {}[]; }; ongoing: { count: number; data: {}[]; }; recovered: { count: number; data: {}[]; }; }>; id: string; name: string; validate?: { params?: ",
+          ") => Promise<{ new: { count: number; data: { _id: string; _index: string; }[]; }; ongoing: { count: number; data: { _id: string; _index: string; }[]; }; recovered: { count: number; data: { _id: string; _index: string; }[]; }; }>; id: string; name: string; validate?: { params?: ",
           "RuleTypeParamsValidator",
           "<TParams> | undefined; } | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; alerts?: ",
           "IRuleTypeAlerts",

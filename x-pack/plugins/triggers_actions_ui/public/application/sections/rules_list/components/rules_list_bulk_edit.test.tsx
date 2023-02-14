@@ -30,15 +30,31 @@ jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
 }));
 
-jest.mock('../../../lib/rule_api', () => ({
+jest.mock('../../../lib/rule_api/rules_kuery_filter', () => ({
   loadRulesWithKueryFilter: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/rule_types', () => ({
   loadRuleTypes: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
   loadRuleAggregationsWithKueryFilter: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/update_api_key', () => ({
   updateAPIKey: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/aggregate', () => ({
   loadRuleTags: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/snooze', () => ({
   bulkSnoozeRules: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/unsnooze', () => ({
   bulkUnsnoozeRules: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/update_api_key', () => ({
   bulkUpdateAPIKey: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/health', () => ({
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
@@ -75,8 +91,10 @@ jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
-const { loadRuleTypes, bulkSnoozeRules, bulkUnsnoozeRules, bulkUpdateAPIKey } =
-  jest.requireMock('../../../lib/rule_api');
+const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
+const { bulkSnoozeRules } = jest.requireMock('../../../lib/rule_api/snooze');
+const { bulkUnsnoozeRules } = jest.requireMock('../../../lib/rule_api/unsnooze');
+const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
 
 const { loadRulesWithKueryFilter } = jest.requireMock('../../../lib/rule_api/rules_kuery_filter');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
