@@ -66,7 +66,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...baseConfig.kbnTestServer.serverArgs,
         `--logging.loggers=${JSON.stringify([
-          ...getKibanaCliLoggers(baseConfig.kbnTestServer.sourceArgs),
+          ...getKibanaCliLoggers(baseConfig.kbnTestServer.serverArgs),
           // Enable logger for the Ops Metrics
           {
             name: 'metrics.ops',
