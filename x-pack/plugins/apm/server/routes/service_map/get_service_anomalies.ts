@@ -19,10 +19,7 @@ import {
 import { getApmMlModuleFromJob } from '../../../common/anomaly_detection/apm_ml_module';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../common/transaction_types';
+import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import { MlClient } from '../../lib/helpers/get_ml_client';
 import { withApmSpan } from '../../utils/with_apm_span';
@@ -63,8 +60,8 @@ export async function getServiceAnomalies({
               ),
               {
                 terms: {
-                  // Only retrieving anomalies for transaction types "request" and "page-load"
-                  by_field_value: [TRANSACTION_REQUEST, TRANSACTION_PAGE_LOAD],
+                  // Only retrieving anomalies for default transaction types
+                  by_field_value: defaultTransactionTypes,
                 },
               },
             ] as estypes.QueryDslQueryContainer[],
@@ -125,17 +122,6 @@ export async function getServiceAnomalies({
       ),
       // return one bucket per service
       (bucket) => bucket.key.serviceName
-    );
-
-    console.log(
-      JSON.stringify(
-        {
-          params,
-          anomalyResponse,
-        },
-        null,
-        2
-      )
     );
 
     return {

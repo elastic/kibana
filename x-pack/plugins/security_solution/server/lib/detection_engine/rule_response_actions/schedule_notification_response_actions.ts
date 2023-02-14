@@ -52,7 +52,7 @@ export const scheduleNotificationResponseActions = (
         ? responseAction.params.queries
         : [{ query: responseAction.params.query }];
       const containsDynamicQueries = some(temporaryQueries, (query) => {
-        return query.query ? CONTAINS_DYNAMIC_PARAMETER_REGEX.test(query.query) : false;
+        return query.query ? new RegExp(CONTAINS_DYNAMIC_PARAMETER_REGEX).test(query.query) : false;
       });
       const { savedQueryId, packId, queries, ecsMapping, ...rest } = responseAction.params;
 

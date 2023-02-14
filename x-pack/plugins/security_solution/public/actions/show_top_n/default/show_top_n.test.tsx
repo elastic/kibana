@@ -51,11 +51,8 @@ describe('createShowTopNAction', () => {
     services: mockServices,
   });
   const context = {
-    field: { name: 'user.name', value: 'the-value', type: 'keyword' },
+    field: { name: 'user.name', value: 'the-value', type: 'keyword', aggregatable: true },
     trigger: { id: 'trigger' },
-    extraContentNodeRef: {
-      current: element,
-    },
     nodeRef: {
       current: element,
     },
@@ -88,6 +85,15 @@ describe('createShowTopNAction', () => {
       currentAppId$.next('not security');
       expect(
         await showTopNAction.isCompatible({ ...context, field: { ...context.field, type: 'text' } })
+      ).toEqual(false);
+    });
+
+    it('should return false if field is not aggregatable', async () => {
+      expect(
+        await showTopNAction.isCompatible({
+          ...context,
+          field: { ...context.field, aggregatable: false },
+        })
       ).toEqual(false);
     });
   });
