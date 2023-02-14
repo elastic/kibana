@@ -27,6 +27,8 @@ export const getSecurityTag = async ({
   return tagResponse.saved_objects.find(({ attributes }) => attributes.name === SECURITY_TAG_NAME);
 };
 
+export const initialDashboardMetrics = {};
+
 export const getDashboardMetrics = async ({
   savedObjectsClient,
   logger,
@@ -35,7 +37,7 @@ export const getDashboardMetrics = async ({
   const tagId = tag?.id;
   if (!tagId) {
     logger.debug(`No ${SECURITY_TAG_NAME} tag found, therefore not collecting telemetry from it`);
-    return {};
+    return initialDashboardMetrics;
   }
   const dashboardsResponse = await savedObjectsClient.find({
     type: 'dashboard',
