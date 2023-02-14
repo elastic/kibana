@@ -105,6 +105,7 @@ export interface FieldMap {
   [ConfigKey.TAGS]: FieldMeta<ConfigKey.TAGS>;
   [ConfigKey.TIMEOUT]: FieldMeta<ConfigKey.TIMEOUT>;
   [ConfigKey.APM_SERVICE_NAME]: FieldMeta<ConfigKey.APM_SERVICE_NAME>;
+  [ConfigKey.APM_TRACE_URL_PATTERNS]: FieldMeta<ConfigKey.APM_TRACE_URL_PATTERNS>;
   [ConfigKey.LOCATIONS]: FieldMeta<ConfigKey.LOCATIONS>;
   ['isTLSEnabled']: FieldMeta<'isTLSEnabled'>;
   [ConfigKey.TLS_VERSION]: FieldMeta<ConfigKey.TLS_VERSION>;

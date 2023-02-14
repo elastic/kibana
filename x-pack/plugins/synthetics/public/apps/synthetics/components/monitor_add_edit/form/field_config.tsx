@@ -51,7 +51,11 @@ import {
   ResponseBodyIndexField,
   ResponseBodyIndexFieldProps,
   ControlledFieldProp,
+  UrlPatternsField,
+  UrlPatternsFieldProps,
+  urlPatternsFieldHelpText,
 } from './field_wrappers';
+
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
 import {
@@ -541,6 +545,29 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     controlled: true,
     props: (): EuiFieldTextProps => ({
       'data-test-subj': 'syntheticsMonitorConfigAPMServiceName',
+      readOnly,
+    }),
+  },
+  [ConfigKey.APM_TRACE_URL_PATTERNS]: {
+    fieldKey: ConfigKey.APM_TRACE_URL_PATTERNS,
+    component: UrlPatternsField,
+    label: i18n.translate('xpack.synthetics.monitorConfig.apmUrlPatterns.label', {
+      defaultMessage: 'URL patterns to trace',
+    }),
+    helpText: urlPatternsFieldHelpText,
+    controlled: true,
+    validation: () => ({
+      validate: (urlPatterns) => {
+        return (
+          urlPatterns.length === 0 ||
+          urlPatterns.some((pattern: string) => pattern.trim().length > 0)
+        );
+      },
+    }),
+    error: i18n.translate('xpack.synthetics.monitorConfig.apmUrlPatterns.error', {
+      defaultMessage: 'URL pattern must be a non empty string',
+    }),
+    props: (): UrlPatternsFieldProps => ({
       readOnly,
     }),
   },

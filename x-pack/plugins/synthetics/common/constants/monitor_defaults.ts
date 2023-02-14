@@ -63,6 +63,7 @@ export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
   [ConfigKey.UPLOAD_SPEED]: '3',
   [ConfigKey.LATENCY]: '20',
   [ConfigKey.THROTTLING_CONFIG]: '5d/3u/20l',
+  [ConfigKey.APM_TRACE_URL_PATTERNS]: [],
 };
 
 export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {

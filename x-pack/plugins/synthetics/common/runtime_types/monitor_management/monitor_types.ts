@@ -218,6 +218,12 @@ export const ThrottlingConfigKeyCodec = t.union([
 
 export type ThrottlingConfigKey = t.TypeOf<typeof ThrottlingConfigKeyCodec>;
 
+export const APMFieldsCodec = t.partial({
+  [ConfigKey.APM_TRACE_URL_PATTERNS]: t.array(t.string),
+});
+
+export type APMFields = t.TypeOf<typeof APMFieldsCodec>;
+
 export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
   t.intersection([
     t.interface({
@@ -250,17 +256,20 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   CommonFieldsCodec,
 ]);
 
-export const EncryptedBrowserAdvancedFieldsCodec = t.interface({
-  [ConfigKey.SCREENSHOTS]: t.string,
-  [ConfigKey.JOURNEY_FILTERS_MATCH]: t.string,
-  [ConfigKey.JOURNEY_FILTERS_TAGS]: t.array(t.string),
-  [ConfigKey.IGNORE_HTTPS_ERRORS]: t.boolean,
-  [ConfigKey.IS_THROTTLING_ENABLED]: t.boolean,
-  [ConfigKey.DOWNLOAD_SPEED]: t.string,
-  [ConfigKey.UPLOAD_SPEED]: t.string,
-  [ConfigKey.LATENCY]: t.string,
-  [ConfigKey.THROTTLING_CONFIG]: t.string,
-});
+export const EncryptedBrowserAdvancedFieldsCodec = t.intersection([
+  t.interface({
+    [ConfigKey.SCREENSHOTS]: t.string,
+    [ConfigKey.JOURNEY_FILTERS_MATCH]: t.string,
+    [ConfigKey.JOURNEY_FILTERS_TAGS]: t.array(t.string),
+    [ConfigKey.IGNORE_HTTPS_ERRORS]: t.boolean,
+    [ConfigKey.IS_THROTTLING_ENABLED]: t.boolean,
+    [ConfigKey.DOWNLOAD_SPEED]: t.string,
+    [ConfigKey.UPLOAD_SPEED]: t.string,
+    [ConfigKey.LATENCY]: t.string,
+    [ConfigKey.THROTTLING_CONFIG]: t.string,
+  }),
+  APMFieldsCodec,
+]);
 
 export const BrowserSimpleFieldsCodec = t.intersection([
   EncryptedBrowserSimpleFieldsCodec,
