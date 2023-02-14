@@ -15,6 +15,7 @@ import { SolutionNavPanel } from './solution_grouped_nav_panel';
 import type { DefaultSideNavItem } from './types';
 import { bottomNavOffset } from '../../../lib/helpers';
 import { BETA } from '@kbn/kubernetes-security-plugin/common/translations';
+import * as telemetry from '../../../lib/telemetry';
 
 const mockUseIsWithinMinBreakpoint = jest.fn(() => true);
 jest.mock('@elastic/eui', () => {
@@ -24,6 +25,8 @@ jest.mock('@elastic/eui', () => {
     useIsWithinMinBreakpoint: () => mockUseIsWithinMinBreakpoint(),
   };
 });
+
+const spyTrack = jest.spyOn(telemetry, 'track');
 
 const mockItems: DefaultSideNavItem[] = [
   {
@@ -138,6 +141,27 @@ describe('SolutionGroupedNav', () => {
       const result = renderNavPanel({ items });
       result.getByTestId(`groupedNavPanelLink-${SecurityPageName.users}`).click();
       expect(mockOnClick).toHaveBeenCalled();
+    });
+
+    it('should send telemetry if link clicked', () => {
+      const mockOnClick = jest.fn((ev) => {
+        ev.preventDefault();
+      });
+      const items = [
+        ...mockItems,
+        {
+          id: SecurityPageName.users,
+          label: 'Users',
+          href: '/users',
+          onClick: mockOnClick,
+        },
+      ];
+      const result = renderNavPanel({ items });
+      result.getByTestId(`groupedNavPanelLink-${SecurityPageName.users}`).click();
+      expect(spyTrack).toHaveBeenCalledWith(
+        telemetry.METRIC_TYPE.CLICK,
+        `${telemetry.TELEMETRY_EVENT.GROUPED_NAVIGATION}${SecurityPageName.users}`
+      );
     });
   });
 

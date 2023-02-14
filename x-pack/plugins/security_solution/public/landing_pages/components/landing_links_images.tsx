@@ -150,7 +150,7 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
           }
           description={<LandingCardDescription>{description}</LandingCardDescription>}
           onClick={() => {
-            track(METRIC_TYPE.COUNT, `${TELEMETRY_EVENT.LANDING_CARD}${id}`);
+            track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.LANDING_CARD}${id}`);
           }}
         />
       </LandingImageCardItem>

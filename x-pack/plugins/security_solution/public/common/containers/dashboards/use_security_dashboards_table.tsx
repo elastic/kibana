@@ -64,7 +64,7 @@ export const useSecurityDashboardsTableColumns = (): Array<
     (href: string): MouseEventHandler =>
       (ev) => {
         ev.preventDefault();
-        track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.DASHBOARD}`);
+        track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
         navigateTo({ url: href });
       },
     [navigateTo]
