@@ -18,13 +18,13 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { PosturePolicyTemplate } from '../../../common/types';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
-import { PostureType } from '../../common/navigation/types';
 
 interface AWSSetupInfoContentProps {
-  policyTemplate: PostureType;
+  policyTemplate: PosturePolicyTemplate;
 }
 
 const AWSSetupInfoContent = ({ policyTemplate }: AWSSetupInfoContentProps) => {
