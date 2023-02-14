@@ -35,7 +35,7 @@ async function createAndRunApmMlJob({
   ml: MlApi;
   environment: string;
 }) {
-  const jobId = `apm-tx-metrics-${environment}`;
+  const jobId = `apm_tx_metrics-${environment}`;
   await ml.createAndRunAnomalyDetectionLookbackJob(
     // @ts-expect-error not entire job config
     {
@@ -54,7 +54,7 @@ async function createAndRunApmMlJob({
       indices_options: { allow_no_indices: true },
       job_id: jobId,
       indices: ['metrics-apm*', 'apm-*'],
-      datafeed_id: `apm-tx-metrics-${environment}-datafeed`,
+      datafeed_id: `apm_tx_metrics-${environment}-datafeed`,
       query: {
         bool: {
           filter: [...datafeed.query.bool.filter, { term: { 'service.environment': environment } }],

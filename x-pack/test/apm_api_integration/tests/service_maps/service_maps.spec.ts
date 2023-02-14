@@ -229,6 +229,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                           "serviceAnomalyStats": Object {
                             "actualValue": 868025.86875,
                             "anomalyScore": 0,
+                            "detectorType": "txLatency",
                             "healthStatus": "healthy",
                             "jobId": "apm-production-6117-high_mean_transaction_duration",
                             "serviceName": "opbeans-dotnet",
@@ -245,6 +246,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                           "serviceAnomalyStats": Object {
                             "actualValue": 102786.319148936,
                             "anomalyScore": 0,
+                            "detectorType": "txLatency",
                             "healthStatus": "healthy",
                             "jobId": "apm-testing-41e5-high_mean_transaction_duration",
                             "serviceName": "opbeans-go",
@@ -261,6 +263,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                           "serviceAnomalyStats": Object {
                             "actualValue": 175568.855769231,
                             "anomalyScore": 0,
+                            "detectorType": "txLatency",
                             "healthStatus": "healthy",
                             "jobId": "apm-production-6117-high_mean_transaction_duration",
                             "serviceName": "opbeans-java",

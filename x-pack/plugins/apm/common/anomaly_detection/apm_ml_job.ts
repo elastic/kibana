@@ -6,6 +6,7 @@
  */
 import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
 import { Environment } from '../environment_rt';
+import { ApmMlModule } from './apm_ml_module';
 
 export interface ApmMlJob {
   environment: Environment;
@@ -15,4 +16,5 @@ export interface ApmMlJob {
   datafeedId?: string;
   datafeedState?: DATAFEED_STATE;
   bucketSpan?: string;
+  module: ApmMlModule;
 }

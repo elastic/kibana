@@ -23,6 +23,7 @@ import type { MlClient } from '../helpers/get_ml_client';
 import { anomalySearch } from './anomaly_search';
 import { getAnomalyResultBucketSize } from './get_anomaly_result_bucket_size';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
+import { getApmMlModuleFromJob } from '../../../common/anomaly_detection/apm_ml_module';
 
 const FALLBACK_ML_BUCKET_SPAN = 15; // minutes
 
@@ -203,7 +204,12 @@ export async function getAnomalyTimeseries({
         return undefined;
       }
 
-      const type = getApmMlDetectorType(Number(bucket.key.detectorIndex));
+      const module = getApmMlModuleFromJob(job.jobId);
+
+      const type = getApmMlDetectorType({
+        detectorIndex: Number(bucket.key.detectorIndex),
+        module,
+      });
 
       // ml failure rate is stored as 0-100, we calculate failure rate as 0-1
       const divider = type === ApmMlDetectorType.txFailureRate ? 100 : 1;
@@ -211,6 +217,7 @@ export async function getAnomalyTimeseries({
       return {
         jobId,
         type,
+        module,
         serviceName: bucket.key.serviceName as string,
         environment: job.environment,
         transactionType: bucket.key.transactionType as string,

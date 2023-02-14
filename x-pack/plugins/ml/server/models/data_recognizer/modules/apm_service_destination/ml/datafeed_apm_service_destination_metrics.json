@@ -16,7 +16,7 @@
         },
         {
           "term": {
-            "metricset.name": "transaction"
+            "metricset.name": "service_destination"
           }
         }
       ]
@@ -36,9 +36,9 @@
             }
           },
           {
-            "transaction.type": {
+            "span.destination.service.resource": {
               "terms": {
-                "field": "transaction.type"
+                "field": "span.destination.service.resource"
               }
             }
           },
@@ -57,14 +57,28 @@
             "field": "@timestamp"
           }
         },
-        "transaction_throughput": {
+        "exit_span_throughput": {
           "rate": {
             "unit": "minute"
           }
         },
-        "transaction_latency": {
-          "avg": {
-            "field": "transaction.duration.histogram"
+        "exit_span_latency_sum": {
+          "sum": {
+            "field": "span.destination.service.response_time.sum.us"
+          }
+        },
+        "exit_span_latency_count": {
+          "sum": {
+            "field": "span.destination.service.response_time.count"
+          }
+        },
+        "exit_span_latency": {
+          "bucket_script": {
+            "buckets_path": {
+              "latency_sum": "exit_span_latency_sum",
+              "latency_count": "exit_span_latency_count"
+            },
+            "script": "return params.latency_sum / params.latency_count;"
           }
         },
         "error_count": {
@@ -81,7 +95,7 @@
             }
           }
         },
-        "failed_transaction_rate": {
+        "failed_exit_span_rate": {
           "bucket_script": {
             "buckets_path": {
               "failure_count": "error_count>_count",

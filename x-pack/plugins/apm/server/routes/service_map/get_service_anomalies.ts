@@ -5,27 +5,29 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { sortBy, uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import Boom from '@hapi/boom';
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { compact, sortBy, uniqBy } from 'lodash';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
+import {
+  ApmMlDetectorType,
+  getApmMlDetectorType,
+} from '../../../common/anomaly_detection/apm_ml_detectors';
+import { getApmMlModuleFromJob } from '../../../common/anomaly_detection/apm_ml_module';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import { MlClient } from '../../lib/helpers/get_ml_client';
-import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
-import { ApmMlDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
-  mlJobIds: [],
   serviceAnomalies: [],
 };
 
@@ -54,9 +56,6 @@ export async function getServiceAnomalies({
         query: {
           bool: {
             filter: [
-              ...apmMlAnomalyQuery({
-                detectorTypes: [ApmMlDetectorType.txLatency],
-              }),
               ...rangeQuery(
                 Math.min(end - 30 * 60 * 1000, start),
                 end,
@@ -86,10 +85,11 @@ export async function getServiceAnomalies({
               metrics: {
                 top_metrics: {
                   metrics: [
-                    { field: 'actual' },
-                    { field: 'by_field_value' },
-                    { field: 'result_type' },
-                    { field: 'record_score' },
+                    { field: 'actual' } as const,
+                    { field: 'by_field_value' } as const,
+                    { field: 'result_type' } as const,
+                    { field: 'record_score' } as const,
+                    { field: 'detector_index' } as const,
                   ],
                   sort: {
                     record_score: 'desc' as const,
@@ -127,28 +127,56 @@ export async function getServiceAnomalies({
       (bucket) => bucket.key.serviceName
     );
 
+    console.log(
+      JSON.stringify(
+        {
+          params,
+          anomalyResponse,
+        },
+        null,
+        2
+      )
+    );
+
     return {
-      mlJobIds: jobIds,
-      serviceAnomalies: relevantBuckets.map((bucket) => {
-        const metrics = bucket.metrics.top[0].metrics;
+      serviceAnomalies: compact(
+        relevantBuckets.map((bucket) => {
+          const metrics = bucket.metrics.top[0].metrics;
 
-        const anomalyScore =
-          metrics.result_type === 'record' && metrics.record_score
-            ? (metrics.record_score as number)
-            : 0;
+          const anomalyScore =
+            metrics.result_type === 'record' && metrics.record_score
+              ? (metrics.record_score as number)
+              : 0;
 
-        const severity = getSeverity(anomalyScore);
-        const healthStatus = getServiceHealthStatus({ severity });
+          const severity = getSeverity(anomalyScore);
+          const healthStatus = getServiceHealthStatus({ severity });
 
-        return {
-          serviceName: bucket.key.serviceName as string,
-          jobId: bucket.key.jobId as string,
-          transactionType: metrics.by_field_value as string,
-          actualValue: metrics.actual as number | null,
-          anomalyScore,
-          healthStatus,
-        };
-      }),
+          const jobId = bucket.key.jobId as string;
+
+          if (!jobIds.includes(jobId)) {
+            return undefined;
+          }
+
+          const module = getApmMlModuleFromJob(jobId);
+
+          const detectorType = getApmMlDetectorType({
+            detectorIndex: Number(metrics.detector_index),
+            module,
+          });
+
+          return detectorType === ApmMlDetectorType.txLatency
+            ? {
+                serviceName: bucket.key.serviceName as string,
+                jobId,
+                transactionType: metrics.by_field_value as string,
+                actualValue: metrics.actual as number | null,
+                anomalyScore,
+                healthStatus,
+                detectorType,
+              }
+            : undefined;
+        })
+      ),
     };
   });
 }

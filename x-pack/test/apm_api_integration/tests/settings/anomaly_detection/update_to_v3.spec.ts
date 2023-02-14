@@ -83,7 +83,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
             .filter((job) => job.version === 3)
             .map((job) => job.environment)
             .sort()
-        ).to.eql(['development', 'production']);
+        ).to.eql(['development', 'development', 'production', 'production']);
       });
 
       after(() => ml.cleanMlIndices());
@@ -112,7 +112,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
             .filter((job) => job.version === 3)
             .map((job) => job.environment)
             .sort()
-        ).to.eql(['development', 'production']);
+        ).to.eql(['development', 'development', 'production', 'production']);
       });
     });
   });

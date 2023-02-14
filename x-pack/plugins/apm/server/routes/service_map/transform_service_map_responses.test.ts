@@ -39,7 +39,6 @@ const javaService = {
 };
 
 const anomalies = {
-  mlJobIds: ['apm-test-1234-ml-module-name'],
   serviceAnomalies: [
     {
       serviceName: 'opbeans-test',

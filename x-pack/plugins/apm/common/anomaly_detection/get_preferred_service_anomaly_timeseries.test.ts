@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ENVIRONMENT_ALL } from '../environment_filter_values';
 import { Environment } from '../environment_rt';
 import { ApmMlDetectorType } from './apm_ml_detectors';
+import { ApmMlModule } from './apm_ml_module';
 import { getPreferredServiceAnomalyTimeseries } from './get_preferred_service_anomaly_timeseries';
 import { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
 
@@ -32,6 +33,7 @@ function createMockAnomalyTimeseries({
     serviceName: 'opbeans-java',
     transactionType: 'request',
     version,
+    module: ApmMlModule.Transaction,
   };
 }
 

@@ -12,15 +12,17 @@ import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { waitForIndexStatus } from '@kbn/core-saved-objects-migration-server-internal';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { METRICSET_NAME, PROCESSOR_EVENT } from '../../../common/es_fields/apm';
 import { Environment } from '../../../common/environment_rt';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { MlClient } from '../helpers/get_ml_client';
-import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
+import { APM_ML_JOB_GROUP } from './constants';
 import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
 import { ApmIndicesConfig } from '../../routes/settings/apm_indices/get_apm_indices';
+import { ApmMlModule } from '../../../common/anomaly_detection/apm_ml_module';
 
 const DEFAULT_TIMEOUT = '60s';
 
@@ -63,12 +65,12 @@ export async function createAnomalyDetectionJobs({
     for (const environment of uniqueMlJobEnvs) {
       try {
         responses.push(
-          await createAnomalyDetectionJob({
+          ...(await createAnomalyDetectionJob({
             mlClient,
             esClient,
             environment,
             apmMetricIndex,
-          })
+          }))
         );
       } catch (e) {
         if (!e.id || !e.error) {
@@ -103,48 +105,89 @@ async function createAnomalyDetectionJob({
   environment: string;
   apmMetricIndex: string;
 }) {
-  return withApmSpan('create_anomaly_detection_job', async () => {
-    const randomToken = uuidv4().substr(-4);
+  function createAnomalyDetectionJob({
+    moduleId,
+    query,
+  }: {
+    moduleId: string;
+    query: QueryDslQueryContainer;
+  }) {
+    return withApmSpan('create_anomaly_detection_job', async () => {
+      const randomToken = uuidv4().substr(-4);
 
-    const anomalyDetectionJob = mlClient.modules.setup({
-      moduleId: ML_MODULE_ID_APM_TRANSACTION,
-      prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
-      groups: [APM_ML_JOB_GROUP],
-      indexPatternName: apmMetricIndex,
-      applyToAllSpaces: true,
-      start: moment().subtract(4, 'weeks').valueOf(),
-      query: {
-        bool: {
-          filter: [
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
-            { term: { [METRICSET_NAME]: 'transaction' } },
-            ...environmentQuery(environment),
-          ],
-        },
-      },
-      startDatafeed: true,
-      jobOverrides: [
-        {
-          custom_settings: {
-            job_tags: {
-              environment,
-              // identifies this as an APM ML job & facilitates future migrations
-              apm_ml_version: 3,
+      const job = await mlClient.modules.setup({
+        moduleId,
+        prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
+        groups: [APM_ML_JOB_GROUP],
+        indexPatternName: apmMetricIndex,
+        applyToAllSpaces: true,
+        start: moment().subtract(4, 'weeks').valueOf(),
+        startDatafeed: true,
+        jobOverrides: [
+          {
+            custom_settings: {
+              job_tags: {
+                environment,
+                // identifies this as an APM ML job & facilitates future migrations
+                apm_ml_version: 3,
+              },
             },
           },
-        },
-      ],
-    });
+        ],
+        query,
+      });
 
-    waitForIndexStatus({
-      client: esClient,
-      index: '.ml-*',
-      timeout: DEFAULT_TIMEOUT,
-      status: 'yellow',
-    });
+      const task = waitForIndexStatus({
+        client: esClient,
+        index: '.ml-*',
+        timeout: DEFAULT_TIMEOUT,
+        status: 'yellow',
+      });
 
-    return anomalyDetectionJob;
+      await task();
+
+      return job;
+    });
+  }
+
+  const serviceDestinationJob = await createAnomalyDetectionJob({
+    moduleId: ApmMlModule.ServiceDestination,
+    query: {
+      bool: {
+        filter: [
+          { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
+          { term: { [METRICSET_NAME]: 'service_destination' } },
+          ...environmentQuery(environment),
+        ],
+      },
+    },
   });
+
+  const transactionJob = await createAnomalyDetectionJob({
+    moduleId: ApmMlModule.Transaction,
+    query: {
+      bool: {
+        filter: [
+          { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
+          { term: { [METRICSET_NAME]: 'transaction' } },
+          ...environmentQuery(environment),
+        ],
+      },
+    },
+  });
+
+  console.log(
+    JSON.stringify(
+      {
+        serviceDestinationJob,
+        transactionJob,
+      },
+      null,
+      2
+    )
+  );
+
+  return [transactionJob, serviceDestinationJob];
 }
 
 async function getUniqueMlJobEnvs(

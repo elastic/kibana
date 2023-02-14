@@ -7,9 +7,11 @@
 
 import { Coordinate } from '../../typings/timeseries';
 import { ApmMlDetectorType } from './apm_ml_detectors';
+import { ApmMlModule } from './apm_ml_module';
 
 export interface ServiceAnomalyTimeseries {
   jobId: string;
+  module: ApmMlModule;
   type: ApmMlDetectorType;
   environment: string;
   serviceName: string;

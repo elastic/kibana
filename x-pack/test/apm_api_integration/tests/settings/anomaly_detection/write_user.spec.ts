@@ -56,8 +56,8 @@ export default function apiTest({ getService }: FtrProviderContext) {
           const { body } = await getJobs();
           expect(body.hasLegacyJobs).to.be(false);
           expect(countBy(body.jobs, 'environment')).to.eql({
-            production: 1,
-            staging: 1,
+            production: 2,
+            staging: 2,
           });
         });
 
@@ -70,9 +70,9 @@ export default function apiTest({ getService }: FtrProviderContext) {
 
             const { body } = await getJobs();
             expect(countBy(body.jobs, 'environment')).to.eql({
-              production: 1,
-              staging: 1,
-              test: 1,
+              production: 2,
+              staging: 2,
+              test: 2,
             });
           });
         });

@@ -11,6 +11,7 @@ import { Environment } from '@kbn/apm-plugin/common/environment_rt';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { last, omit, range } from 'lodash';
+import { ApmMlModule } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_module';
 import { ApmApiError } from '../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
@@ -261,7 +262,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expect(omitTimeseriesData(latencySeries)).to.eql({
               type: ApmMlDetectorType.txLatency,
-              jobId: 'apm-tx-metrics-production',
+              jobId: 'apm_tx_metrics-production',
+              module: ApmMlModule.Transaction,
               serviceName: 'a',
               environment: 'production',
               transactionType: 'request',
@@ -270,7 +272,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expect(omitTimeseriesData(throughputSeries)).to.eql({
               type: ApmMlDetectorType.txThroughput,
-              jobId: 'apm-tx-metrics-production',
+              jobId: 'apm_tx_metrics-production',
+              module: ApmMlModule.Transaction,
               serviceName: 'a',
               environment: 'production',
               transactionType: 'request',
@@ -279,7 +282,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expect(omitTimeseriesData(failureRateSeries)).to.eql({
               type: ApmMlDetectorType.txFailureRate,
-              jobId: 'apm-tx-metrics-production',
+              jobId: 'apm_tx_metrics-production',
+              module: ApmMlModule.Transaction,
               serviceName: 'a',
               environment: 'production',
               transactionType: 'request',

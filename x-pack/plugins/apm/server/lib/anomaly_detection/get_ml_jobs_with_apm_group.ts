@@ -8,6 +8,7 @@
 import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
 import { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';
+import { getApmMlModuleFromJob } from '../../../common/anomaly_detection/apm_ml_module';
 import { Environment } from '../../../common/environment_rt';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { APM_ML_JOB_GROUP } from './constants';
@@ -53,16 +54,18 @@ export function getMlJobsWithAPMGroup(
       return jobs.map((job): ApmMlJob => {
         const jobId = job.job_id;
         const datafeedId = job.datafeed_config?.datafeed_id;
+
         return {
           jobId,
           jobState: jobStateMap[jobId],
           datafeedId,
           datafeedState: datafeedId ? datafeedStateMap[datafeedId] : undefined,
-          version: Number(job?.custom_settings?.job_tags?.apm_ml_version ?? 1),
+          version: Number(job.custom_settings?.job_tags?.apm_ml_version ?? 1),
           environment: String(
-            job?.custom_settings?.job_tags?.environment
+            job.custom_settings?.job_tags?.environment
           ) as Environment,
-          bucketSpan: job?.analysis_config.bucket_span as string,
+          bucketSpan: job.analysis_config.bucket_span as string,
+          module: getApmMlModuleFromJob(job.job_id),
         };
       });
     } catch (e) {

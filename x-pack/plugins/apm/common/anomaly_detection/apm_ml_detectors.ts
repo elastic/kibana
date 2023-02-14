@@ -5,28 +5,57 @@
  * 2.0.
  */
 
+import { ApmMlModule } from './apm_ml_module';
+
 export enum ApmMlDetectorType {
   txLatency = 'txLatency',
   txThroughput = 'txThroughput',
   txFailureRate = 'txFailureRate',
+  serviceDestinationLatency = 'serviceDestinationLatency',
+  serviceDestinationThroughput = 'serviceDestinationThroughput',
+  serviceDestinationFailureRate = 'serviceDestinationFailureRate',
 }
 
-const detectorIndices = {
-  [ApmMlDetectorType.txLatency]: 0,
-  [ApmMlDetectorType.txThroughput]: 1,
-  [ApmMlDetectorType.txFailureRate]: 2,
+const DETECTOR_INDICES_BY_MODULE = {
+  [ApmMlModule.ServiceDestination]: [
+    ApmMlDetectorType.serviceDestinationLatency,
+    ApmMlDetectorType.serviceDestinationThroughput,
+    ApmMlDetectorType.serviceDestinationFailureRate,
+  ],
+  [ApmMlModule.Transaction]: [
+    ApmMlDetectorType.txLatency,
+    ApmMlDetectorType.txThroughput,
+    ApmMlDetectorType.txFailureRate,
+  ],
 };
 
 export function getApmMlDetectorIndex(type: ApmMlDetectorType) {
-  return detectorIndices[type];
-}
+  const entries = Object.entries(DETECTOR_INDICES_BY_MODULE);
 
-export function getApmMlDetectorType(detectorIndex: number) {
-  let type: ApmMlDetectorType;
-  for (type in detectorIndices) {
-    if (detectorIndices[type] === detectorIndex) {
-      return type;
+  for (const [_, detectors] of entries) {
+    const index = detectors.indexOf(type);
+    if (index !== -1) {
+      return index;
     }
   }
-  throw new Error('Could not map detector index to type');
+
+  throw new Error(`Could not find detector index for ${type}`);
+}
+
+export function getApmMlDetectorType({
+  detectorIndex,
+  module,
+}: {
+  detectorIndex: number;
+  module: ApmMlModule;
+}) {
+  const detectorType = DETECTOR_INDICES_BY_MODULE[module][detectorIndex];
+
+  if (!detectorType) {
+    throw new Error(
+      `Could not determine detector type for detectorIndex ${detectorIndex} of module ${module}`
+    );
+  }
+
+  return detectorType;
 }
