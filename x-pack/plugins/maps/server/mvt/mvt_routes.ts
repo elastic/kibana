@@ -13,6 +13,7 @@ import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/co
 import { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { errors } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
@@ -43,6 +44,7 @@ export function initMVTRoutes({
           z: schema.number(),
         }),
         query: schema.object({
+          buffer: schema.maybe(schema.number()),
           geometryFieldName: schema.string(),
           hasLabels: schema.boolean(),
           requestBody: schema.string(),
@@ -61,9 +63,13 @@ export function initMVTRoutes({
       const y = parseInt((params as any).y, 10) as number;
       const z = parseInt((params as any).z, 10) as number;
 
-      let tileRequest: { path: string; body: object } | undefined;
+      let tileRequest: { path: string; body: estypes.SearchMvtRequest['body'] } = {
+        path: '',
+        body: {},
+      };
       try {
         tileRequest = getHitsTileRequest({
+          buffer: 'buffer' in query ? parseInt(query.buffer, 10) : 5,
           encodedRequestBody: query.requestBody as string,
           geometryFieldName: query.geometryFieldName as string,
           hasLabels: query.hasLabels as boolean,
@@ -103,6 +109,7 @@ export function initMVTRoutes({
           z: schema.number(),
         }),
         query: schema.object({
+          buffer: schema.maybe(schema.number()),
           geometryFieldName: schema.string(),
           hasLabels: schema.boolean(),
           requestBody: schema.string(),
@@ -123,9 +130,13 @@ export function initMVTRoutes({
       const y = parseInt((params as any).y, 10) as number;
       const z = parseInt((params as any).z, 10) as number;
 
-      let tileRequest: { path: string; body: object } | undefined;
+      let tileRequest: { path: string; body: estypes.SearchMvtRequest['body'] } = {
+        path: '',
+        body: {},
+      };
       try {
         tileRequest = getAggsTileRequest({
+          buffer: 'buffer' in query ? parseInt(query.buffer, 10) : 5,
           encodedRequestBody: query.requestBody as string,
           geometryFieldName: query.geometryFieldName as string,
           gridPrecision: parseInt(query.gridPrecision, 10),
@@ -168,7 +179,7 @@ async function getTile({
   path,
 }: {
   abortController: AbortController;
-  body: object;
+  body: estypes.SearchMvtRequest['body'];
   context: DataRequestHandlerContext;
   core: CoreStart;
   executionContext: KibanaExecutionContext;

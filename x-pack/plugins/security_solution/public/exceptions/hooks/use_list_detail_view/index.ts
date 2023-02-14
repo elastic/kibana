@@ -163,28 +163,36 @@ export const useListDetailsView = (exceptionListId: string) => {
     },
     [exceptionListId, handleErrorStatus, http, list]
   );
-  const onExportList = useCallback(async () => {
-    try {
-      if (!list) return;
-      await exportExceptionList({
-        id: list.id,
-        listId: list.list_id,
-        namespaceType: list.namespace_type,
-        onError: (error: Error) => handleErrorStatus(error),
-        onSuccess: (blob) => {
-          setExportedList(blob);
-          toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(list.list_id));
-        },
-      });
-    } catch (error) {
-      handleErrorStatus(
-        error,
-        undefined,
-        i18n.EXCEPTION_EXPORT_ERROR,
-        i18n.EXCEPTION_EXPORT_ERROR_DESCRIPTION
-      );
-    }
-  }, [list, exportExceptionList, handleErrorStatus, toasts]);
+  const onExportList = useCallback(
+    async (includeExpiredExceptions: boolean) => {
+      try {
+        if (!list) return;
+        await exportExceptionList({
+          id: list.id,
+          listId: list.list_id,
+          includeExpiredExceptions,
+          namespaceType: list.namespace_type,
+          onError: (error: Error) => handleErrorStatus(error),
+          onSuccess: (blob) => {
+            setExportedList(blob);
+            toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(list.list_id));
+          },
+        });
+      } catch (error) {
+        handleErrorStatus(
+          error,
+          undefined,
+          i18n.EXCEPTION_EXPORT_ERROR,
+          i18n.EXCEPTION_EXPORT_ERROR_DESCRIPTION
+        );
+      }
+    },
+    [list, exportExceptionList, handleErrorStatus, toasts]
+  );
+
+  const handleOnDownload = useCallback(() => {
+    setExportedList(undefined);
+  }, []);
 
   // #region DeleteList
 
@@ -362,6 +370,7 @@ export const useListDetailsView = (exceptionListId: string) => {
     canUserEditList,
     linkedRules,
     exportedList,
+    handleOnDownload,
     viewerStatus,
     showManageRulesFlyout,
     headerBackOptions,

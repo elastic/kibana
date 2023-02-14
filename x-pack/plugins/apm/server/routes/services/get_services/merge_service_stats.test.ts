@@ -40,7 +40,7 @@ describe('mergeServiceStats', () => {
             throughput: 4,
           }),
         ],
-        servicesFromErrorAndMetricDocuments: [
+        servicesWithoutTransactions: [
           {
             environments: ['production'],
             serviceName: 'opbeans-java',
@@ -93,7 +93,7 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        servicesFromErrorAndMetricDocuments: [
+        servicesWithoutTransactions: [
           {
             environments: ['production'],
             serviceName: 'opbeans-java',
@@ -142,7 +142,7 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        servicesFromErrorAndMetricDocuments: [],
+        servicesWithoutTransactions: [],
         healthStatuses: [
           {
             healthStatus: ServiceHealthStatus.healthy,
@@ -179,7 +179,7 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        servicesFromErrorAndMetricDocuments: [
+        servicesWithoutTransactions: [
           {
             environments: ['production'],
             serviceName: 'opbeans-java',

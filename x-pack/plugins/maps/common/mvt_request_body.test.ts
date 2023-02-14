@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   decodeMvtResponseBody,
   encodeMvtResponseBody,
@@ -23,7 +24,7 @@ describe('decodeMvtResponseBody', () => {
       stored_fields: ['geopoint'],
       runtime_mappings: {
         'day of week': {
-          type: 'keyword',
+          type: 'keyword' as estypes.MappingRuntimeFieldType,
           script: {
             source:
               "ZonedDateTime input = doc['ISSUE_DATE'].value;\nString output = input.format(DateTimeFormatter.ofPattern('e')) + ' ' + input.format(DateTimeFormatter.ofPattern('E'));\nemit(output);",
@@ -64,7 +65,7 @@ describe('decodeMvtResponseBody', () => {
       _source: false,
       runtime_mappings: {
         price_as_number: {
-          type: 'keyword',
+          type: 'keyword' as estypes.MappingRuntimeFieldType,
           script: {
             source: runtimeFieldScript,
           },
@@ -92,6 +93,7 @@ describe('getAggsTileRequest', () => {
       query: {},
     };
     const { path } = getAggsTileRequest({
+      buffer: 5,
       encodedRequestBody: encodeMvtResponseBody(searchRequest),
       geometryFieldName: 'my location',
       gridPrecision: 8,
@@ -114,6 +116,7 @@ describe('getHitsTileRequest', () => {
       query: {},
     };
     const { path } = getHitsTileRequest({
+      buffer: 5,
       encodedRequestBody: encodeMvtResponseBody(searchRequest),
       geometryFieldName: 'my location',
       hasLabels: true,
@@ -123,5 +126,46 @@ describe('getHitsTileRequest', () => {
       z: 0,
     });
     expect(path).toEqual('/my%20index/_mvt/my%20location/0/0/0');
+  });
+
+  describe('sort', () => {
+    test(`Should include sort`, () => {
+      const searchRequest = {
+        size: 10000,
+        runtime_mappings: {},
+        query: {},
+        sort: ['timestamp'],
+      };
+      const { body } = getHitsTileRequest({
+        buffer: 5,
+        encodedRequestBody: encodeMvtResponseBody(searchRequest),
+        geometryFieldName: 'my location',
+        hasLabels: true,
+        index: 'my index',
+        x: 0,
+        y: 0,
+        z: 0,
+      });
+      expect(body).toHaveProperty('sort');
+    });
+
+    test(`Should not include sort when sort not provided`, () => {
+      const searchRequest = {
+        size: 10000,
+        runtime_mappings: {},
+        query: {},
+      };
+      const { body } = getHitsTileRequest({
+        buffer: 5,
+        encodedRequestBody: encodeMvtResponseBody(searchRequest),
+        geometryFieldName: 'my location',
+        hasLabels: true,
+        index: 'my index',
+        x: 0,
+        y: 0,
+        z: 0,
+      });
+      expect(body).not.toHaveProperty('sort');
+    });
   });
 });

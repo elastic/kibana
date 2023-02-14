@@ -55,7 +55,7 @@
             "path": "packages/core/plugins/core-plugins-server-internal/src/plugin.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/server/index.ts"
           }
         ],
