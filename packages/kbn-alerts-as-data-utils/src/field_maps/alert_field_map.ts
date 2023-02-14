@@ -33,7 +33,7 @@ import {
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
-} from '../default_alerts_as_data';
+} from '@kbn/rule-data-utils';
 
 export const alertFieldMap = {
   [ALERT_ACTION_GROUP]: {

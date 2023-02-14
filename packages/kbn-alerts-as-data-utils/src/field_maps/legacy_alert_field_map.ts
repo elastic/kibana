@@ -38,7 +38,7 @@ import {
   EVENT_ACTION,
   EVENT_KIND,
   TAGS,
-} from '../legacy_alerts_as_data';
+} from '@kbn/rule-data-utils';
 
 export const legacyAlertFieldMap = {
   [ALERT_RISK_SCORE]: {
