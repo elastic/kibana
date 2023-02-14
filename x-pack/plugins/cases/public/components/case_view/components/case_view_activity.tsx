@@ -210,7 +210,7 @@ export const CaseViewActivity = ({
             isLoading={isLoadingUserActionsStats}
           />
         </EuiFlexItem>
-        <EuiSpacer size='l' />
+        <EuiSpacer size="l" />
         {(isLoadingUserActions || isLoadingCaseConnectors) && (
           <EuiSkeletonText lines={8} data-test-subj="case-view-loading-content" />
         )}
