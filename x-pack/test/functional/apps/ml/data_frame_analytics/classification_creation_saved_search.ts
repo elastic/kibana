@@ -358,10 +358,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep('opens field stats flyout from include fields input');
           for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
             (e) => e.isIncludeFieldInput
           )) {
-            await ml.dataFrameAnalyticsCreation.clickDependentVariableInputFieldStatTrigger(
+            await ml.dataFrameAnalyticsCreation.clickIncludeFieldsInputFieldStatTrigger(
               fieldName,
               fieldType
             );

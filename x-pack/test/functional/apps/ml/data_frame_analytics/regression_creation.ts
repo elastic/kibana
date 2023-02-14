@@ -178,7 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
           for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
             (e) => e.isIncludeFieldInput
           )) {
-            await ml.dataFrameAnalyticsCreation.clickDependentVariableInputFieldStatTrigger(
+            await ml.dataFrameAnalyticsCreation.clickIncludeFieldsInputFieldStatTrigger(
               fieldName,
               fieldType
             );

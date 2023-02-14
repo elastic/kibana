@@ -151,7 +151,9 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.runtimeFieldsEditorContent
           );
 
-          await ml.testExecution.logTestStep('opens field stats flyout');
+          await ml.testExecution.logTestStep(
+            'opens field stats flyout from dependent variable input'
+          );
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
           for (const { fieldName, type: fieldType } of testData.fieldStatsEntries.filter(
             (e) => e.isDependentVariableInput

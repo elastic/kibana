@@ -19,7 +19,7 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
   const testSubjects = getService('testSubjects');
 
   return {
-    async clickFieldStatContentByType(
+    async assertFieldStatContentByType(
       testSubj: string,
       fieldName: string,
       fieldType?: 'keyword' | 'date' | 'number'
@@ -73,11 +73,9 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
         await testSubjects.existOrFail(selector);
         await testSubjects.click(selector);
         await testSubjects.existOrFail('mlFieldStatsFlyout');
-
         await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`);
-
-        await this.clickFieldStatContentByType(testSubj, fieldName, fieldType);
       });
+      await this.assertFieldStatContentByType(testSubj, fieldName, fieldType);
     },
     async clickFieldStatComboBoxTrigger(
       parentComboBoxSelector: string,
@@ -96,7 +94,7 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
 
         await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`);
 
-        await this.clickFieldStatContentByType(parentComboBoxSelector, fieldName, fieldType);
+        await this.assertFieldStatContentByType(parentComboBoxSelector, fieldName, fieldType);
       });
     },
 
