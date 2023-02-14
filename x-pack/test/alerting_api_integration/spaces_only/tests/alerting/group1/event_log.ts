@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { Spaces } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -585,6 +586,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     params: {},
                   },
                 ],
+                notify_when: RuleNotifyWhen.CHANGE,
               })
             );
 
@@ -604,7 +606,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 // make sure the counts of the # of events per type are as expected
                 ['execute-start', { gte: 6 }],
                 ['execute', { gte: 6 }],
-                ['execute-action', { equal: 7 }],
+                ['execute-action', { equal: 1 }],
                 ['new-instance', { equal: 1 }],
                 ['active-instance', { gte: 6 }],
                 ['recovered-instance', { equal: 1 }],
@@ -669,6 +671,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     params: {},
                   },
                 ],
+                notify_when: RuleNotifyWhen.CHANGE,
               })
             );
 
@@ -688,7 +691,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 // make sure the counts of the # of events per type are as expected
                 ['execute-start', { gte: 6 }],
                 ['execute', { gte: 6 }],
-                ['execute-action', { equal: 6 }],
+                ['execute-action', { equal: 2 }],
                 ['new-instance', { equal: 2 }],
                 ['active-instance', { gte: 6 }],
                 ['recovered-instance', { equal: 2 }],
