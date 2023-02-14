@@ -58,6 +58,7 @@ export const createAppContextStartContractMock = (
     elasticsearch: elasticsearchServiceMock.createStart(),
     data: dataPluginMock.createStartContract(),
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
+    encryptedSavedObjectsSetup: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
@@ -74,6 +75,11 @@ export const createAppContextStartContractMock = (
     kibanaBranch: 'main',
     telemetryEventsSender: createMockTelemetryEventsSender(),
     bulkActionsResolver: {} as any,
+    messageSigningService: {
+      generateKeyPair: jest.fn(),
+      sign: jest.fn(),
+      getPublicKey: jest.fn(),
+    },
   };
 };
 
