@@ -22,10 +22,10 @@ test('registering a content type', () => {
     description: 'Test description',
   });
 
-  expect(type.id()).toBe('test');
-  expect(type.name()).toBe('Test');
-  expect(type.icon()).toBe('test');
-  expect(type.description()).toBe('Test description');
+  expect(type.id).toBe('test');
+  expect(type.name).toBe('Test');
+  expect(type.icon).toBe('test');
+  expect(type.description).toBe('Test description');
 });
 
 test('registering already registered content type throws', () => {

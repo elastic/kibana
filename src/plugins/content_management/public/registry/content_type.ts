@@ -12,23 +12,23 @@ import type { CrudClient } from '../crud_client';
 export class ContentType {
   constructor(public readonly definition: ContentTypeDefinition) {}
 
-  id(): string {
+  public get id(): string {
     return this.definition.id;
   }
 
-  name(): string {
-    return this.definition.name ?? this.id();
+  public get name(): string {
+    return this.definition.name ?? this.id;
   }
 
-  description(): string {
+  public get description(): string {
     return this.definition.description ?? '';
   }
 
-  icon(): string {
+  public get icon(): string {
     return this.definition.icon ?? 'questionInCircle';
   }
 
-  crud(): CrudClient | undefined {
+  public get crud(): CrudClient | undefined {
     return this.definition.crud;
   }
 }
