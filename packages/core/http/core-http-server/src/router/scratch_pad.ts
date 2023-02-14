@@ -7,14 +7,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { pipe } from 'fp-ts/lib/function';
-import { RequestHandler } from './request_handler';
-import { RequestHandlerContextBase } from './request_handler_context';
-import { RouteConfig, RouteMethod } from './route';
-import { IRouter, RouteRegistrar } from './router';
-import { RouteValidatorFullConfig } from './route_validator';
-import { HttpServiceSetup } from '../..';
+import type { RequestHandler } from './request_handler';
+import type { RequestHandlerContextBase } from './request_handler_context';
+import type { RouteConfig, RouteMethod } from './route';
+import type { IRouter, RouteRegistrar } from './router';
+import type { RouteValidatorFullConfig } from './route_validator';
+import type { HttpServiceSetup } from '../..';
 
 /**
  * Constituents of a route in Kibana
@@ -304,35 +304,53 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
  */
 
 {
+  /**
+   * We must omit "validate" because we are going to declare multiple validations per route.
+   */
   type VersionedRouteOpts = Omit<RouteConfig<unknown, unknown, unknown, RouteMethod>, 'validate'>;
-  type Registrar = RouteRegistrar<RouteMethod, RequestHandlerContextBase>;
-
-  type CreateVersionedRoute = (registrar: Registrar, opts: VersionedRouteOpts) => VersionedRoute;
-  interface VersionedRoute {
-    add<P, Q, B>(
-      opts: { validation: RouteValidatorFullConfig<P, Q, B> },
-      handler: RequestHandler<P, Q, B>
-    ): VersionedRoute;
-  }
-
+  /**
+   * Simplify the Registrar type by pre assigning the RouteMethod generic type
+   */
+  type Registrar<Context extends RequestHandlerContextBase> = RouteRegistrar<RouteMethod, Context>;
+  /**
+   * This is the primary interface for the toolkit
+   */
   interface VersionedAPIToolkit {
-    createRoute: CreateVersionedRoute;
+    defineRoute<Context extends RequestHandlerContextBase>(
+      registrar: Registrar<Context>,
+      opts: VersionedRouteOpts
+    ): VersionedRoute<Context>;
+  }
+  /**
+   * The toolkit defines versioned routes, taking care of all the versioning shenanigans
+   * in the background.
+   */
+  interface VersionedRoute<Context extends RequestHandlerContextBase = RequestHandlerContextBase> {
+    addVersion<P, Q, B>(
+      version: Version,
+      opts: { validation: RouteValidatorFullConfig<P, Q, B> },
+      handler: RequestHandler<P, Q, B, Context>
+    ): VersionedRoute<Context>;
   }
 
   const vtk: VersionedAPIToolkit = {} as any;
+  const myRouter: IRouter<{ test: number } & RequestHandlerContextBase> = {} as any;
 
   const vRouter = vtk
-    .createRoute(router.post, { path: '/api/my-plugin/my-route', options: {} })
-    .add(
+    .defineRoute(myRouter.post, { path: '/api/my-plugin/my-route', options: {} })
+    .addVersion(
+      '1',
       {
         validation: { body: schema.object({ n: schema.number({ min: 0, max: 1 }) }) },
       },
       async (ctx, req, res) => {
+        logger.info(String(ctx.test));
         logger.info(String(req.body.n));
         return res.ok();
       }
     )
-    .add(
+    .addVersion(
+      '2',
       {
         validation: { body: schema.object({ b: schema.number({ min: 2, max: 3 }) }) },
       },
@@ -343,26 +361,32 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     );
 
   // OR point-free style
-  const add =
-    <P, Q, B>(
+
+  // `addVersion` utility
+  const addVersion =
+    <P, Q, B, C extends RequestHandlerContextBase>(
+      version: Version,
       opts: { validation: RouteValidatorFullConfig<P, Q, B> },
-      handler: RequestHandler<P, Q, B>
+      handler: RequestHandler<P, Q, B, C>
     ) =>
-    (versionedRouter: VersionedRoute) =>
+    (versionedRouter: VersionedRoute<C>) =>
       versionedRouter;
 
   pipe(
-    vtk.createRoute(router.post, { path: '/api/my-plugin/my-route', options: {} }),
+    vtk.defineRoute(myRouter.post, { path: '/api/my-plugin/my-route', options: {} }),
 
-    add(
+    addVersion(
+      '1',
       { validation: { body: schema.object({ n: schema.number({ min: 0, max: 1 }) }) } },
       async (ctx, req, res) => {
+        logger.info(String(ctx.test));
         logger.info(String(req.body.n));
         return res.ok();
       }
     ),
 
-    add(
+    addVersion(
+      '2',
       { validation: { body: schema.object({ b: schema.number({ min: 2, max: 3 }) }) } },
       async (ctx, req, res) => {
         logger.info(String(req.body.b));
@@ -372,5 +396,14 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
   );
 }
 /**
+ * STRENGTHS:
+ *  1. Does not change the current router implementation and does not force
+ *     consumers to change anything
+ *  2. We can treat the versioning implementation as an open source protocol.
+ *     Consumers can choose to create their own implementation (but increase maintenance).
+ *  3. Removes only the boilerplate regarding versions
+ * WEAKNESSES:
+ *  1. Whole new API to design and implement
+ *  2. Will it actually be used since this is only a recommendation?
  * ===================== End fourth design =====================
  */
