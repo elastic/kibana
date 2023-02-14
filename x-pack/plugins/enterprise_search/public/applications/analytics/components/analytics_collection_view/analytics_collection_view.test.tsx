@@ -89,9 +89,7 @@ describe('AnalyticsOverview', () => {
 
       const wrapper = shallow(<AnalyticsCollectionView />);
 
-      expect(wrapper.find(EnterpriseSearchAnalyticsPageTemplate).prop('pageViewTelemetry')).toBe(
-        'View Analytics Collection - settings'
-      );
+      expect(wrapper.prop('pageViewTelemetry')).toBe('View Analytics Collection - settings');
     });
 
     it('send correct pageHeader rightSideItems when dataViewId exists', async () => {
@@ -104,7 +102,7 @@ describe('AnalyticsOverview', () => {
 
       expect(rightSideItems).toHaveLength(1);
 
-      expect((rightSideItems?.[0] as ReactElement).props?.href).toBe(
+      expect((rightSideItems?.[0] as ReactElement).props?.children?.props?.href).toBe(
         "/app/discover#/?_a=(index:'1234-1234-1234')"
       );
     });
