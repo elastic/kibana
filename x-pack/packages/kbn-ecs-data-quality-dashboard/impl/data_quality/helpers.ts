@@ -71,8 +71,8 @@ const getNextPathWithoutProperties = ({
     return key;
   }
 
-  if (shouldReadKeys(value) && key === 'properties') {
-    return `${pathWithoutProperties}`; // TODO: wrap required?
+  if (shouldReadKeys(value) && (key === 'properties' || key === 'fields')) {
+    return `${pathWithoutProperties}`;
   } else {
     return `${pathWithoutProperties}.${key}`;
   }
