@@ -27,6 +27,7 @@ import { CspLoadingState } from './csp_loading_state';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
+import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
@@ -131,7 +132,7 @@ const packageNotInstalledRenderer = ({
               defaultMessage="Detect and remediate potential configuration risks in your cloud infrastructure, like publicly accessible s3 buckets, with our Cloud and Kubernetes security posture management solutions. {learnMore}"
               values={{
                 learnMore: (
-                  <EuiLink href="https://ela.st/cspm ">
+                  <EuiLink href={cspIntegrationDocsNavigation.cspm?.overviewPath}>
                     <FormattedMessage
                       id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
                       defaultMessage="Learn more about Cloud Security Posture"
