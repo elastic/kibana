@@ -10,8 +10,20 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiLink,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { RedirectAppLinks, useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -19,6 +31,8 @@ import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { COLLECTION_CREATION_PATH, COLLECTION_VIEW_PATH } from '../../routes';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
+
+import { AnalyticsCollectionDataViewIdLogic } from './analytics_collection_data_view_id_logic';
 
 import { AnalyticsCollectionEvents } from './analytics_collection_events';
 import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate/analytics_collection_integrate';
@@ -34,9 +48,14 @@ export const collectionViewBreadcrumbs = [
 
 export const AnalyticsCollectionView: React.FC = () => {
   const { fetchAnalyticsCollection } = useActions(FetchAnalyticsCollectionLogic);
+  const { fetchAnalyticsCollectionDataViewId } = useActions(AnalyticsCollectionDataViewIdLogic);
   const { analyticsCollection, isLoading } = useValues(FetchAnalyticsCollectionLogic);
+  const { dataViewId } = useValues(AnalyticsCollectionDataViewIdLogic);
   const { id, section } = useParams<{ id: string; section: string }>();
   const { navigateToUrl } = useValues(KibanaLogic);
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
   const collectionViewTabs = [
     {
       id: 'events',
@@ -84,100 +103,123 @@ export const AnalyticsCollectionView: React.FC = () => {
 
   useEffect(() => {
     fetchAnalyticsCollection(id);
+    fetchAnalyticsCollectionDataViewId(id);
   }, []);
 
   return (
-    <EnterpriseSearchAnalyticsPageTemplate
-      restrictWidth
-      isLoading={isLoading}
-      pageChrome={[...collectionViewBreadcrumbs]}
-      pageViewTelemetry={`View Analytics Collection - ${section}`}
-      pageHeader={{
-        description: i18n.translate(
-          'xpack.enterpriseSearch.analytics.collectionsView.pageDescription',
-          {
-            defaultMessage:
-              'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications. Track trends over time, identify and investigate anomalies, and make optimizations.',
-          }
-        ),
-        pageTitle: analyticsCollection?.name,
-        tabs: [...collectionViewTabs],
-      }}
-    >
-      {!analyticsCollection && (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle>
+    <RedirectAppLinks application={application}>
+      <EnterpriseSearchAnalyticsPageTemplate
+        restrictWidth
+        isLoading={isLoading}
+        pageChrome={[...collectionViewBreadcrumbs]}
+        pageViewTelemetry={`View Analytics Collection - ${section}`}
+        pageHeader={{
+          description: i18n.translate(
+            'xpack.enterpriseSearch.analytics.collectionsView.pageDescription',
+            {
+              defaultMessage:
+                'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications. Track trends over time, identify and investigate anomalies, and make optimizations.',
+            }
+          ),
+          pageTitle: analyticsCollection?.name,
+          rightSideItems: [
+            dataViewId && (
+              <EuiLink
+                href={application.getUrlForApp('discover', {
+                  path: `#/?_a=(index:'${dataViewId}')`,
+                })}
+              >
+                <EuiIconTip
+                  position="bottom"
+                  content={
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.analytics.collectionsView.exploreTooltip"
+                      defaultMessage="For a deeper analysis, explore event logs on Discover."
+                    />
+                  }
+                  type="inspect"
+                />
+              </EuiLink>
+            ),
+          ],
+          tabs: [...collectionViewTabs],
+        }}
+      >
+        {!analyticsCollection && (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiTitle>
+                <h2>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.analytics.collections.collectionsView.headingTitle',
+                    {
+                      defaultMessage: 'Collections',
+                    }
+                  )}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonTo fill iconType="plusInCircle" to={COLLECTION_CREATION_PATH}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.analytics.collections.collectionsView.create.buttonTitle',
+                  {
+                    defaultMessage: 'Create new collection',
+                  }
+                )}
+              </EuiButtonTo>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+
+        <EuiSpacer size="l" />
+        {analyticsCollection ? (
+          <>
+            {section === 'settings' && (
+              <AnalyticsCollectionSettings collection={analyticsCollection} />
+            )}
+            {section === 'integrate' && (
+              <AnalyticsCollectionIntegrate collection={analyticsCollection} />
+            )}
+            {section === 'events' && <AnalyticsCollectionEvents collection={analyticsCollection} />}
+          </>
+        ) : (
+          <EuiEmptyPrompt
+            iconType="search"
+            title={
               <h2>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.analytics.collections.collectionsView.headingTitle',
+                  'xpack.enterpriseSearch.analytics.collections.collectionsView.collectionNotFoundState.headingTitle',
                   {
-                    defaultMessage: 'Collections',
+                    defaultMessage: 'You may have deleted this analytics collection',
                   }
                 )}
               </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonTo fill iconType="plusInCircle" to={COLLECTION_CREATION_PATH}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.analytics.collections.collectionsView.create.buttonTitle',
-                {
-                  defaultMessage: 'Create new collection',
-                }
-              )}
-            </EuiButtonTo>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-
-      <EuiSpacer size="l" />
-      {analyticsCollection ? (
-        <>
-          {section === 'settings' && (
-            <AnalyticsCollectionSettings collection={analyticsCollection} />
-          )}
-          {section === 'integrate' && (
-            <AnalyticsCollectionIntegrate collection={analyticsCollection} />
-          )}
-          {section === 'events' && <AnalyticsCollectionEvents collection={analyticsCollection} />}
-        </>
-      ) : (
-        <EuiEmptyPrompt
-          iconType="search"
-          title={
-            <h2>
-              {i18n.translate(
-                'xpack.enterpriseSearch.analytics.collections.collectionsView.collectionNotFoundState.headingTitle',
-                {
-                  defaultMessage: 'You may have deleted this analytics collection',
-                }
-              )}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.analytics.collections.collectionsView.collectionNotFoundState.subHeading',
-                {
-                  defaultMessage:
-                    'An analytics collection provides a place to store the analytics events for any given search application you are building. Create a new collection to get started.',
-                }
-              )}
-            </p>
-          }
-          actions={[
-            <EuiButtonTo fill iconType="plusInCircle" to={COLLECTION_CREATION_PATH}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.analytics.collections.collectionsView.create.buttonTitle',
-                {
-                  defaultMessage: 'Create new collection',
-                }
-              )}
-            </EuiButtonTo>,
-          ]}
-        />
-      )}
-    </EnterpriseSearchAnalyticsPageTemplate>
+            }
+            body={
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.analytics.collections.collectionsView.collectionNotFoundState.subHeading',
+                  {
+                    defaultMessage:
+                      'An analytics collection provides a place to store the analytics events for any given search application you are building. Create a new collection to get started.',
+                  }
+                )}
+              </p>
+            }
+            actions={[
+              <EuiButtonTo fill iconType="plusInCircle" to={COLLECTION_CREATION_PATH}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.analytics.collections.collectionsView.create.buttonTitle',
+                  {
+                    defaultMessage: 'Create new collection',
+                  }
+                )}
+              </EuiButtonTo>,
+            ]}
+          />
+        )}
+      </EnterpriseSearchAnalyticsPageTemplate>
+    </RedirectAppLinks>
   );
 };
