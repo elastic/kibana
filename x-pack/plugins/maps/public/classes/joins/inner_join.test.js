@@ -44,9 +44,11 @@ describe('createJoinTermSource', () => {
   });
 
   test('Should return undefined with unmatched source type', () => {
-    expect(createJoinTermSource({
-      type: SOURCE_TYPES.WMS,
-    })).toBe(undefined);
+    expect(
+      createJoinTermSource({
+        type: SOURCE_TYPES.WMS,
+      })
+    ).toBe(undefined);
   });
 
   describe('EsTermSource', () => {
@@ -55,25 +57,31 @@ describe('createJoinTermSource', () => {
     });
 
     test('Should return undefined when indexPatternId is undefined', () => {
-      expect(createJoinTermSource({
-        ...rightSource,
-        indexPatternId: undefined,
-      })).toBe(undefined);
+      expect(
+        createJoinTermSource({
+          ...rightSource,
+          indexPatternId: undefined,
+        })
+      ).toBe(undefined);
     });
 
     test('Should return undefined when term is undefined', () => {
-      expect(createJoinTermSource({
-        ...rightSource,
-        term: undefined,
-      })).toBe(undefined);
+      expect(
+        createJoinTermSource({
+          ...rightSource,
+          term: undefined,
+        })
+      ).toBe(undefined);
     });
   });
 
   describe('TableSource', () => {
     test('Should return TableSource', () => {
-      expect(createJoinTermSource({
-        type: SOURCE_TYPES.TABLE_SOURCE
-      }).constructor.name).toBe('TableSource');
+      expect(
+        createJoinTermSource({
+          type: SOURCE_TYPES.TABLE_SOURCE,
+        }).constructor.name
+      ).toBe('TableSource');
     });
   });
 });
