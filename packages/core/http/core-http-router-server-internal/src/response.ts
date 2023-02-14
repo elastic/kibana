@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Stream } from 'stream';
 import type {
   IKibanaResponse,
@@ -83,16 +82,19 @@ export const kibanaResponseFactory: KibanaResponseFactory = {
   ...redirectionResponseFactory,
   ...errorResponseFactory,
   file: <T extends HttpResponsePayload | ResponseError>(options: FileHttpResponseOptions<T>) => {
-    const { body, bypassErrorFormat, headers, filename, fileContentType, bypassFileFormat } =
-      options;
+    const {
+      body,
+      bypassErrorFormat,
+      fileContentSize,
+      headers,
+      filename,
+      fileContentType,
+      bypassFileFormat,
+    } = options;
 
     const reponseFilename = bypassFileFormat ? filename : encodeURIComponent(filename);
+    const responseBody = typeof body === 'string' && !bypassFileFormat ? Buffer.from(body) : body;
 
-    const responseBody = bypassFileFormat
-      ? body
-      : typeof body === 'string'
-      ? Buffer.from(body)
-      : body;
     const responseContentType =
       mime.getType(filename) ?? fileContentType ?? 'application/octet-stream';
 
@@ -101,7 +103,7 @@ export const kibanaResponseFactory: KibanaResponseFactory = {
       headers: {
         ...headers,
         'content-type': `${responseContentType}`,
-        'Content-Length': `${responseBody?.size ?? ''}`,
+        'Content-Length': `${fileContentSize ?? ''}`,
         'Content-Disposition': `attachment; filename=${reponseFilename}`,
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
         'x-content-type-options': 'nosniff',

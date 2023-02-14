@@ -80,6 +80,8 @@ export interface FileHttpResponseOptions<T extends HttpResponsePayload | Respons
   filename: string;
   /** attachment content type defaults to text/plain */
   fileContentType?: string | null;
+  /** attachment content size in bytes */
+  fileContentSize?: number;
   /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;
   /** Bypass the default error formatting */
