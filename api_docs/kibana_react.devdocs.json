@@ -1779,6 +1779,106 @@
       },
       {
         "parentPluginId": "kibanaReact",
+        "id": "def-public.useGlobalUiSetting",
+        "type": "Function",
+        "tags": [],
+        "label": "useGlobalUiSetting",
+        "description": [
+          "\nReturns the current global UI-settings value.\n\nUsage:\n\n```js\nconst customBranding = useGlobalUiSetting('customBranding:pageTitle');\n```"
+        ],
+        "signature": [
+          "<T>(key: string, defaultValue?: T | undefined) => T"
+        ],
+        "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.useGlobalUiSetting.$1",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.useGlobalUiSetting.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.useGlobalUiSetting$",
+        "type": "Function",
+        "tags": [],
+        "label": "useGlobalUiSetting$",
+        "description": [
+          "\nReturns a 2-tuple, where first entry is the setting value and second is a\nfunction to update the setting value.\n\nSynchronously returns the most current value of the setting and subscribes\nto all subsequent updates, which will re-render your component on new values.\n\nUsage:\n\n```js\nconst [customBranding, setCustomBranding] = useGlobalUiSetting$('customBranding:pageTitle');\n```"
+        ],
+        "signature": [
+          "<T>(key: string, defaultValue?: T | undefined) => [T, Setter<T>]"
+        ],
+        "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.useGlobalUiSetting$.$1",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.useGlobalUiSetting$.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
         "id": "def-public.useKibana",
         "type": "Function",
         "tags": [],
