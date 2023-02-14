@@ -37,6 +37,13 @@ export function TransformAlertingProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async openAddRuleVariable() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('messageAddVariableButton');
+        await testSubjects.existOrFail('variableMenuButton-alert.actionGroup', { timeout: 1000 });
+      });
+    },
+
     async setRuleName(rulename: string) {
       await testSubjects.setValue('ruleNameInput', rulename);
     },

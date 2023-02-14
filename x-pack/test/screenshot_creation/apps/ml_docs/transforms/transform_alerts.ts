@@ -50,7 +50,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await transform.alerting.selectTransforms([testTransformId]);
       await transform.testExecution.logTestStep('take screenshot');
       await commonScreenshots.takeScreenshot('transform-check-config', screenshotDirectories);
-
+      await transform.testExecution.logTestStep('choose server log connector');
+      await testSubjects.click('.server-log-alerting-ActionTypeSelectOption');
+      await transform.testExecution.logTestStep('open action variables list');
+      await transform.alerting.openAddRuleVariable();
+      await commonScreenshots.takeScreenshot('transform-alert-actions', screenshotDirectories);
       await transform.alerting.clickCancelSaveRuleButton();
     });
 
