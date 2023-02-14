@@ -92,7 +92,7 @@ steps:
         SERVICE: kibana-controller
         NAMESPACE: kibana-ci
         IMAGE_NAME: kibana
-        COMMIT_MESSAGE: "gitops: update kibana tag to elastic/kibana@$BUILDKITE_COMMIT"
+        COMMIT_MESSAGE: "gitops: update kibana tag to elastic/kibana@$GIT_ABBREV_COMMIT"
 EOF
 
 else
