@@ -9,12 +9,18 @@
 import { useMutation } from '@tanstack/react-query';
 import { useContentClient } from './content_client_context';
 import type { CreateIn, UpdateIn, DeleteIn } from '../../common';
+import { queryKeyBuilder } from './content_client';
 
 export const useCreateContentMutation = <I extends CreateIn = CreateIn, O = unknown>() => {
   const contentClient = useContentClient();
   return useMutation({
     mutationFn: (input: I) => {
       return contentClient.create(input);
+    },
+    onSuccess: (data, variables) => {
+      contentClient.queryClient.invalidateQueries({
+        queryKey: queryKeyBuilder.all(variables.contentType),
+      });
     },
   });
 };
@@ -25,6 +31,11 @@ export const useUpdateContentMutation = <I extends UpdateIn = UpdateIn, O = unkn
     mutationFn: (input: I) => {
       return contentClient.update(input);
     },
+    onSuccess: (data, variables) => {
+      contentClient.queryClient.invalidateQueries({
+        queryKey: queryKeyBuilder.all(variables.contentType),
+      });
+    },
   });
 };
 
@@ -33,6 +44,11 @@ export const useDeleteContentMutation = <I extends DeleteIn = DeleteIn, O = unkn
   return useMutation({
     mutationFn: (input: I) => {
       return contentClient.delete(input);
+    },
+    onSuccess: (data, variables) => {
+      contentClient.queryClient.invalidateQueries({
+        queryKey: queryKeyBuilder.all(variables.contentType),
+      });
     },
   });
 };

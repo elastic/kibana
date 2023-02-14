@@ -79,7 +79,7 @@ const updateSchemas: ProcedureSchemas = {
 
 export interface UpdateIn<
   T extends string = string,
-  Data extends object = Record<string, unknown>,
+  Data extends object = object,
   Options extends object = any
 > {
   contentType: T;
@@ -102,7 +102,7 @@ const deleteSchemas: ProcedureSchemas = {
 
 export interface DeleteIn<
   T extends string = string,
-  Data extends object = Record<string, unknown>,
+  Data extends object = object,
   Options extends object = any
 > {
   contentType: T;
@@ -133,7 +133,7 @@ export interface SearchIn<
   options?: Options;
 }
 
-export interface SearchOut<Data extends object = Record<string, unknown>> {
+export interface SearchOut<Data extends object = object> {
   hits: Data[];
 }
 

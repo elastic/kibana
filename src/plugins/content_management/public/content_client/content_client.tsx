@@ -11,7 +11,7 @@ import { createQueryObservable } from './query_observable';
 import type { CrudClient } from '../crud_client';
 import type { CreateIn, GetIn, UpdateIn, DeleteIn, SearchIn, SearchOut } from '../../common';
 
-const queryKeyBuilder = {
+export const queryKeyBuilder = {
   all: (type: string) => [type] as const,
   item: (type: string, id: string) => {
     return [...queryKeyBuilder.all(type), id] as const;
