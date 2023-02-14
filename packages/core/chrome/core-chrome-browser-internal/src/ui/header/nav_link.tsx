@@ -189,14 +189,6 @@ export function createRecentNavLink(
     onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       if (event.button === 0 && !isModifiedOrPrevented(event)) {
         event.preventDefault();
-        <EuiScreenReaderLive focusRegionOnTextChange>
-          {i18n.translate('core.ui.recentLinks.linkItem.screenReaderAnnouncement.title', {
-            defaultMessage: 'type: {title}',
-            values: {
-              title: navLink?.title,
-            },
-          })}
-        </EuiScreenReaderLive>;
         navigateToUrl(href);
       }
     },
