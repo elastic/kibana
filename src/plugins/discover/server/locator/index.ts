@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject, SavedObjectAttributeSingle } from '@kbn/core/server';
-import type { VisualizationSavedObjectAttributes } from '@kbn/visualizations-plugin/common';
 import { CoreStart, IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { DiscoverServerPluginLocatorService, DiscoverServerPluginStartDeps } from '..';
@@ -16,16 +14,6 @@ import { getScopedClient } from './service';
 export type { ColumnsFromLocatorFn } from './columns_from_locator';
 export type { SearchSourceFromLocatorFn } from './searchsource_from_locator';
 export type { TitleFromLocatorFn } from './title_from_locator';
-
-/**
- * @internal
- */
-export type SavedSearchObjectType = SavedObject<
-  VisualizationSavedObjectAttributes & {
-    columns?: string[];
-    sort?: Array<[SavedObjectAttributeSingle, SavedObjectAttributeSingle]>;
-  }
->;
 
 /**
  * @internal

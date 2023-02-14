@@ -7,13 +7,3 @@
  */
 
 export { getSavedSearch } from './get_saved_searches';
-export {
-  getSavedSearchUrl,
-  getSavedSearchFullPathUrl,
-  getSavedSearchUrlConflictMessage,
-  throwErrorOnSavedSearchUrlConflict,
-} from './saved_searches_utils';
-export type { SaveSavedSearchOptions } from './save_saved_searches';
-export { saveSavedSearch } from './save_saved_searches';
-export { SAVED_SEARCH_TYPE } from './constants';
-export type { SavedSearch } from './types';

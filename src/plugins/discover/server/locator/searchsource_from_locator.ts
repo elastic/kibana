@@ -9,11 +9,12 @@
 import { SearchSource, TimeRange } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { LocatorServicesDeps, SavedSearchObjectType } from '.';
+import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import { getSavedSearch } from '@kbn/saved-search-plugin/server';
+import { LocatorServicesDeps } from '.';
 import { DiscoverAppLocatorParams } from '../../common';
 import { getSortForSearchSource } from '../../common/utils/sorting';
 import { getColumns } from './columns_from_locator';
-import { getSearchObjects } from './lib/get_search_objects';
 
 // Shortcut for return type of searchSource.getField('filter');
 type FilterResponse = undefined | Filter | Filter[] | (() => Filter | Filter[] | undefined);
@@ -37,7 +38,7 @@ function normalizeFilter(savedSearchFilterTmp?: FilterResponse) {
 const getFilters = (
   timeFieldName: string | undefined,
   index: DataView,
-  savedSearch: SavedSearchObjectType,
+  savedSearch: SavedSearch,
   searchSource: SearchSource,
   params: DiscoverAppLocatorParams
 ) => {
@@ -47,8 +48,8 @@ const getFilters = (
   if (timeFieldName) {
     const timeRange = params.timeRange
       ? params.timeRange
-      : savedSearch.attributes.timeRange
-      ? (savedSearch.attributes.timeRange as TimeRange)
+      : savedSearch.timeRange
+      ? (savedSearch.timeRange as TimeRange)
       : null;
 
     if (timeRange) {
@@ -108,12 +109,13 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
   const searchSourceFromLocator = async (
     params: DiscoverAppLocatorParams
   ): Promise<SearchSource> => {
-    const { savedSearch, searchSource: currentSearchSource } = await getSearchObjects(
-      services,
-      params
-    );
+    if (!params.savedSearchId) {
+      throw new Error(`Saved Search ID is required in DiscoverAppLocatorParams`);
+    }
 
-    const searchSource = currentSearchSource.createCopy();
+    const savedSearch = await getSavedSearch(params.savedSearchId, services);
+
+    const searchSource = savedSearch.searchSource.createCopy();
     const index = searchSource.getField('index');
 
     if (!index) {
@@ -144,11 +146,8 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
     }
 
     // Inject sort
-    if (savedSearch.attributes.sort) {
-      const sort = getSortForSearchSource(
-        savedSearch.attributes.sort as Array<[string, string]>,
-        index
-      );
+    if (savedSearch.sort) {
+      const sort = getSortForSearchSource(savedSearch.sort as Array<[string, string]>, index);
       searchSource.setField('sort', sort);
     }
 

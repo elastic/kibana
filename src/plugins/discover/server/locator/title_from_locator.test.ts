@@ -9,32 +9,21 @@
 import { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { LocatorServicesDeps as Services, SavedSearchObjectType } from '.';
+import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import { LocatorServicesDeps as Services } from '.';
 import { DiscoverAppLocatorParams, DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
 import { titleFromLocatorFactory } from './title_from_locator';
 
 const mockSavedSearchId = 'abc-test-123';
-const defaultSavedSearch: SavedSearchObjectType = {
-  type: 'search',
+const defaultSavedSearch: SavedSearch = {
   id: mockSavedSearchId,
-  references: [
-    { id: '90943e30-9a47-11e8-b64d-95841ca0b247', name: 'testIndexRefName', type: 'index-pattern' },
-  ],
-  attributes: {
-    title: '[Logs] Visits',
-    description: '',
-    columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
-    sort: [['test', '134']] as unknown as [],
-    hits: 0,
-    kibanaSavedObjectMeta: {
-      searchSourceJSON:
-        '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"testIndexRefName"}',
-    },
-    version: 42,
-    visState: '',
-    uiStateJSON: '',
-  },
+  title: '[Logs] Visits',
+  description: '',
+  columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
+  sort: [['test', '134']] as unknown as [],
+  searchSource: createSearchSourceMock(),
 };
 
 const coreStart = coreMock.createStart();
@@ -42,7 +31,7 @@ let uiSettingsClient: IUiSettingsClient;
 let soClient: SavedObjectsClientContract;
 let searchSourceStart: ISearchStartSearchSource;
 let mockServices: Services;
-let mockSavedSearch: SavedSearchObjectType;
+let mockSavedSearch: SavedSearch;
 
 // mock params containing the discover app locator
 let mockPayload: Array<{ params: DiscoverAppLocatorParams }>;
@@ -69,7 +58,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   mockPayload = [{ params: { savedSearchId: mockSavedSearchId } }];
-  mockSavedSearch = { ...defaultSavedSearch, attributes: { ...defaultSavedSearch.attributes } };
+  mockSavedSearch = { ...defaultSavedSearch };
   const uiSettingsGet = uiSettingsClient.get;
   uiSettingsClient.get = jest.fn().mockImplementation((key: string) => {
     if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
@@ -92,7 +81,7 @@ test(`retrieves title from saved search contents`, async () => {
   const testTitle = 'Test Title from Saved Search Contents';
   mockSavedSearch = {
     ...defaultSavedSearch,
-    attributes: { ...defaultSavedSearch.attributes, title: testTitle } as any, // FIXME
+    title: testTitle,
   };
 
   const provider = titleFromLocatorFactory(mockServices);

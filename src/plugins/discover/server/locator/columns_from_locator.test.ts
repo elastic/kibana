@@ -13,31 +13,19 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
-import { LocatorServicesDeps as Services, SavedSearchObjectType } from '.';
+import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import { LocatorServicesDeps as Services } from '.';
 import { DiscoverAppLocatorParams, DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
 import { columnsFromLocatorFactory } from './columns_from_locator';
 
 const mockSavedSearchId = 'abc-test-123';
-const defaultSavedSearch: SavedSearchObjectType = {
-  type: 'search',
+const defaultSavedSearch: SavedSearch = {
   id: mockSavedSearchId,
-  references: [
-    { id: '90943e30-9a47-11e8-b64d-95841ca0b247', name: 'testIndexRefName', type: 'index-pattern' },
-  ],
-  attributes: {
-    title: '[Logs] Visits',
-    description: '',
-    columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
-    sort: [['test', '134']] as unknown as [],
-    hits: 0,
-    kibanaSavedObjectMeta: {
-      searchSourceJSON:
-        '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"testIndexRefName"}',
-    },
-    version: 42,
-    visState: '',
-    uiStateJSON: '',
-  },
+  title: '[Logs] Visits',
+  description: '',
+  columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
+  sort: [['test', '134']] as unknown as [],
+  searchSource: createSearchSourceMock(),
 };
 
 const coreStart = coreMock.createStart();
@@ -45,7 +33,7 @@ let uiSettingsClient: IUiSettingsClient;
 let soClient: SavedObjectsClientContract;
 let searchSourceStart: ISearchStartSearchSource;
 let mockServices: Services;
-let mockSavedSearch: SavedSearchObjectType;
+let mockSavedSearch: SavedSearch;
 let mockDataView: DataView;
 
 // mock search source belonging to the saved search
@@ -76,7 +64,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   mockPayload = [{ params: { savedSearchId: mockSavedSearchId } }];
-  mockSavedSearch = { ...defaultSavedSearch, attributes: { ...defaultSavedSearch.attributes } };
+  mockSavedSearch = { ...defaultSavedSearch };
 
   mockDataView = createStubDataView({
     spec: {
@@ -135,7 +123,7 @@ test('with search source using columns when DOC_HIDE_TIME_COLUMN_SETTING is true
 });
 
 test('with saved search containing ["_source"]', async () => {
-  mockSavedSearch.attributes.columns = ['_source'];
+  mockSavedSearch.columns = ['_source'];
 
   const provider = columnsFromLocatorFactory(mockServices);
   const columns = await provider(mockPayload[0].params);

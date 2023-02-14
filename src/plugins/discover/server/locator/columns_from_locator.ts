@@ -7,13 +7,14 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { LocatorServicesDeps, SavedSearchObjectType } from '.';
+import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import { getSavedSearch } from '@kbn/saved-search-plugin/server';
+import { LocatorServicesDeps } from '.';
 import {
   DiscoverAppLocatorParams,
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../common';
-import { getSearchObjects } from './lib/get_search_objects';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -25,7 +26,7 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
 export const getColumns = async (
   services: LocatorServicesDeps,
   index: DataView,
-  savedSearch: SavedSearchObjectType
+  savedSearch: SavedSearch
 ) => {
   const [hideTimeColumn, useFieldsFromSource] = await Promise.all([
     services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
@@ -37,7 +38,7 @@ export const getColumns = async (
   let columnsNext: string[] | undefined;
   let timeFieldName: string | undefined;
   // ignore '_source' column: it may be the only column when the user wishes to export all fields
-  const columnsTemp = savedSearch.attributes?.columns?.filter((col) => col !== '_source');
+  const columnsTemp = savedSearch.columns?.filter((col) => col !== '_source');
 
   if (typeof columnsTemp !== 'undefined' && columnsTemp.length > 0 && isStringArray(columnsTemp)) {
     columns = columnsTemp;
@@ -78,9 +79,13 @@ export function columnsFromLocatorFactory(services: LocatorServicesDeps) {
   const columnsFromLocator = async (
     params: DiscoverAppLocatorParams
   ): Promise<string[] | undefined> => {
-    const { savedSearch, searchSource } = await getSearchObjects(services, params);
+    if (!params.savedSearchId) {
+      throw new Error(`Saved Search ID is required in DiscoverAppLocatorParams`);
+    }
 
-    const index = searchSource.getField('index');
+    const savedSearch = await getSavedSearch(params.savedSearchId, services);
+
+    const index = savedSearch.searchSource.getField('index');
 
     if (!index) {
       throw new Error(`Search Source is missing the "index" field`);
