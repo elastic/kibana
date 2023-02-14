@@ -4,8 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useIsMutating } from '@tanstack/react-query';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useCreatePrebuiltRulesMutation } from '../api/hooks/use_create_prebuilt_rules_mutation';
+import {
+  CREATE_PREBUILT_RULES_MUTATION_KEY,
+  useCreatePrebuiltRulesMutation,
+} from '../api/hooks/use_create_prebuilt_rules_mutation';
 import * as i18n from './translations';
 
 export const useInstallPrePackagedRules = () => {
@@ -19,6 +23,11 @@ export const useInstallPrePackagedRules = () => {
       addSuccess(getSuccessToastMessage(result));
     },
   });
+};
+
+export const useIsInstallingPrePackagedRules = () => {
+  const mutationsCount = useIsMutating(CREATE_PREBUILT_RULES_MUTATION_KEY);
+  return mutationsCount > 0;
 };
 
 const getSuccessToastMessage = (result: {
