@@ -409,5 +409,6 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
  * WEAKNESSES:
  *  1. Whole new API to design and implement
  *  2. Will it actually be used since this is only a recommendation?
+ *  3. Requires some refactoring to adopt
  * ===================== End fourth design =====================
  */
