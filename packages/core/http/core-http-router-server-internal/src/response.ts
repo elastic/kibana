@@ -82,22 +82,19 @@ export const kibanaResponseFactory: KibanaResponseFactory = {
   ...successResponseFactory,
   ...redirectionResponseFactory,
   ...errorResponseFactory,
-  file: <T extends HttpResponsePayload | ResponseError>(
-    options: FileHttpResponseOptions<T>
-  ) => {
-    const {
-      body,
-      bypassErrorFormat,
-      headers,
-      filename,
-      fileContentType,
-      bypassFileFormat,
-    } = options;
+  file: <T extends HttpResponsePayload | ResponseError>(options: FileHttpResponseOptions<T>) => {
+    const { body, bypassErrorFormat, headers, filename, fileContentType, bypassFileFormat } =
+      options;
 
-    const reponseFilename = bypassFileFormat? filename : encodeURIComponent(filename);
+    const reponseFilename = bypassFileFormat ? filename : encodeURIComponent(filename);
 
-    const responseBody = bypassFileFormat? body : typeof body === 'string' ? Buffer.from(body) : body;
-    const responseContentType = mime.getType(filename) ?? fileContentType ?? 'application/octet-stream';
+    const responseBody = bypassFileFormat
+      ? body
+      : typeof body === 'string'
+      ? Buffer.from(body)
+      : body;
+    const responseContentType =
+      mime.getType(filename) ?? fileContentType ?? 'application/octet-stream';
 
     return new KibanaResponse(200, responseBody, {
       bypassErrorFormat,
@@ -108,7 +105,7 @@ export const kibanaResponseFactory: KibanaResponseFactory = {
         'Content-Disposition': `attachment; filename=${reponseFilename}`,
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
         'x-content-type-options': 'nosniff',
-      }
+      },
     });
   },
   custom: <T extends HttpResponsePayload | ResponseError>(

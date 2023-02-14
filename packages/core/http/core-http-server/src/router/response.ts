@@ -79,7 +79,7 @@ export interface FileHttpResponseOptions<T extends HttpResponsePayload | Respons
   /** attachment name, encoded and added to the headers to send to the client */
   filename: string;
   /** attachment content type defaults to text/plain */
-  fileContentType?: string | null,
+  fileContentType?: string | null;
   /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;
   /** Bypass the default error formatting */
