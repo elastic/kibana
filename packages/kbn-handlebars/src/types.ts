@@ -21,7 +21,7 @@ interface HandlebarsCompileOptions {
 }
 
 /**
- * A custom version of the Handlesbars module with an extra `compileAST` function and fixed typings.
+ * A custom version of the Handlebars module with an extra `compileAST` function and fixed typings.
  */
 declare module 'handlebars' {
   /**
