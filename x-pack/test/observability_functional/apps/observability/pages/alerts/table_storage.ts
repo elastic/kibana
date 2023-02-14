@@ -20,8 +20,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
-
-      await observability.alerts.common.navigateToTimeWithData();
     });
 
     after(async () => {
@@ -30,6 +28,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     });
 
     it('remembers column changes', async () => {
+      await observability.alerts.common.navigateToTimeWithData();
       const durationColumnButton = await testSubjects.find(
         'dataGridHeaderCellActionButton-kibana.alert.duration.us'
       );
@@ -50,6 +49,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     });
 
     it('remembers sorting changes', async () => {
+      await observability.alerts.common.navigateToTimeWithData();
       const timestampColumnButton = await testSubjects.find(
         'dataGridHeaderCellActionButton-@timestamp'
       );
