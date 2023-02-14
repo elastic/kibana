@@ -40,7 +40,8 @@ let mockCoreSetup: MockedKeys<CoreSetup>;
 let bfetchSetup: jest.Mocked<BfetchPublicSetup>;
 let fetchMock: jest.Mock<any>;
 
-const flushPromises = () => new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
+const flushPromises = () =>
+  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 jest.useFakeTimers('legacy');
 
 const timeTravel = async (msToRun = 0) => {

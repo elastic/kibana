@@ -10,7 +10,8 @@ import { AbortError, abortSignalToPromise } from './abort_utils';
 
 jest.useFakeTimers('legacy');
 
-const flushPromises = () => new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
+const flushPromises = () =>
+  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 
 describe('AbortUtils', () => {
   describe('AbortError', () => {

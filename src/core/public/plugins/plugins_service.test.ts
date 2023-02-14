@@ -247,7 +247,8 @@ describe('PluginsService', () => {
     });
 
     describe('timeout', () => {
-      const flushPromises = () => new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
+      const flushPromises = () =>
+        new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
       beforeAll(() => {
         jest.useFakeTimers('legacy');
       });
