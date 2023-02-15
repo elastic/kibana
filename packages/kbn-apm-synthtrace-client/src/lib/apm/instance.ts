@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createHash } from 'crypto';
 import { ApmError } from './apm_error';
 import { Entity } from '../entity';
 import { Metricset } from './metricset';
@@ -75,7 +76,7 @@ export class Instance extends Entity<ApmFields> {
     return new ApmError({
       ...this.fields,
       'error.exception': [{ message, ...(type ? { type } : {}) }],
-      'error.grouping_name': groupingName || message,
+      'error.grouping_name': groupingName || sha256(message),
     });
   }
 
@@ -96,4 +97,8 @@ export class Instance extends Entity<ApmFields> {
       ...metrics,
     });
   }
+}
+
+function sha256(content: string) {
+  return createHash('sha256').update(content).digest('hex');
 }
