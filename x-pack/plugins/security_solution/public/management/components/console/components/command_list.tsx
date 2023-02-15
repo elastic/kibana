@@ -33,6 +33,21 @@ import { getCommandNameWithArgs } from '../service/utils';
 import { ConsoleCodeBlock } from './console_code_block';
 import { useKibana } from '../../../../common/lib/kibana';
 
+const otherCommandsGroupLabel = i18n.translate(
+  'xpack.securitySolution.console.commandList.otherCommandsGroup.label',
+  {
+    defaultMessage: 'Other commands',
+  }
+);
+
+/**
+ * Take a string and removes all non-letters/number from it.
+ * @param value
+ */
+const convertToTestId = (value: string): string => {
+  return value.replace(/[^A-Za-z0-9]/g, '');
+};
+
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
   margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
@@ -78,7 +93,7 @@ export interface CommandListProps {
 }
 
 export const CommandList = memo<CommandListProps>(({ commands, display = 'default' }) => {
-  const getTestId = useTestIdGenerator(useDataTestSubj());
+  const getTestId = useTestIdGenerator(useDataTestSubj('commandList'));
   const dispatch = useConsoleStateDispatch();
   const { docLinks } = useKibana().services;
 
@@ -110,13 +125,6 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
       />
     );
   }, []);
-
-  const otherCommandsGroupLabel = i18n.translate(
-    'xpack.securitySolution.console.commandList.otherCommandsGroup.label',
-    {
-      defaultMessage: 'Other commands',
-    }
-  );
 
   const updateInputText = useCallback(
     (text) => () => {
@@ -169,19 +177,25 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         [commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel]: command,
       }));
     },
-    [otherCommandsGroupLabel]
+    []
   );
 
   const getTableColumns = useCallback(
     (commandsByGroup) => {
+      const groupLabel = commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel;
+      const groupTestIdSuffix = convertToTestId(groupLabel);
+
       return [
         {
-          field: commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel,
-          name: commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel,
+          field: groupLabel,
+          name: <div data-test-subj={getTestId('group')}>{groupLabel}</div>,
           render: (command: CommandDefinition) => {
             const commandNameWithArgs = getCommandNameWithArgs(command);
             return (
-              <StyledEuiFlexGroup alignItems="center">
+              <StyledEuiFlexGroup
+                alignItems="center"
+                data-test-subj={getTestId(`${groupTestIdSuffix}-${command.name}`)}
+              >
                 <EuiFlexItem grow={1}>
                   <EuiDescriptionList
                     listItems={[
@@ -197,7 +211,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                         ),
                       },
                     ]}
-                    data-test-subj={getTestId('commandList-command')}
+                    data-test-subj={getTestId('command')}
                   />
                 </EuiFlexItem>
                 {command.helpGroupLabel !== HELP_GROUPS.supporting.label &&
@@ -232,7 +246,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         },
       ];
     },
-    [getTestId, otherCommandsGroupLabel, updateInputText]
+    [getTestId, updateInputText]
   );
 
   const getFilteredCommands = useCallback(
@@ -258,7 +272,11 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         defaultMessage="{learnMore} about response actions and using the console."
         values={{
           learnMore: (
-            <EuiLink href={docLinks.links.securitySolution.responseActions} target="_blank">
+            <EuiLink
+              href={docLinks.links.securitySolution.responseActions}
+              target="_blank"
+              data-test-subj={getTestId('helpfulHintDocLink')}
+            >
               <FormattedMessage
                 id="xpack.securitySolution.console.commandList.callout.readMoreLink"
                 defaultMessage="Learn more"
@@ -277,6 +295,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
             defaultMessage="Helpful tips:"
           />
         }
+        data-test-subj={getTestId('helpfulTips')}
       >
         <ul>
           {calloutItems.map((item, index) => (
@@ -289,21 +308,24 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     );
 
     return (
-      <>
+      <div data-test-subj={getTestId()}>
         {commandsByGroups.map((commandsByGroup, i) => (
           <StyledEuiBasicTable
+            data-test-subj={getTestId(
+              convertToTestId(commandsByGroup[0].helpGroupLabel ?? otherCommandsGroupLabel)
+            )}
             key={`styledEuiBasicTable-${i}`}
             items={getTableItems(commandsByGroup)}
             columns={getTableColumns(commandsByGroup)}
           />
         ))}
         {callout}
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div data-test-subj={getTestId()}>
       <EuiSpacer size="s" />
       {commandsByGroups.map((commandsByGroup) => {
         const groupLabel = commandsByGroup[0].helpGroupLabel;
@@ -345,7 +367,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                         ),
                       },
                     ]}
-                    data-test-subj={getTestId('commandList-command')}
+                    data-test-subj={getTestId('command')}
                   />
                 </EuiFlexItem>
               );
@@ -355,7 +377,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
       })}
       <EuiSpacer size="xl" />
       {footerMessage}
-    </>
+    </div>
   );
 });
 CommandList.displayName = 'CommandList';

@@ -10,6 +10,7 @@ import type { ConsoleProps } from '..';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../mocks';
 import { act } from '@testing-library/react';
+import { HELP_LABEL } from './console_header';
 
 describe('Console header area', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
@@ -24,7 +25,7 @@ describe('Console header area', () => {
   it('should display the help button', async () => {
     render();
 
-    expect(renderResult.getByTestId('test-header-helpButton')).toBeTruthy();
+    expect(renderResult.getByTestId('test-header-helpButton').textContent).toEqual(HELP_LABEL);
   });
 
   it('should not display a title component', async () => {

@@ -16,7 +16,12 @@ import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_st
 import { useWithSidePanel } from '../hooks/state_selectors/use_with_side_panel';
 import type { ConsoleProps } from '..';
 
-const HELP_LABEL = i18n.translate('xpack.securitySolution.console.layoutHeader.helpButtonLabel', {
+export const HELP_LABEL = i18n.translate(
+  'xpack.securitySolution.console.layoutHeader.helpButtonTitle',
+  { defaultMessage: 'Help' }
+);
+
+const HELP_TOOLTIP = i18n.translate('xpack.securitySolution.console.layoutHeader.helpButtonLabel', {
   defaultMessage: 'Show help',
 });
 
@@ -60,8 +65,8 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
             style={{ marginLeft: 'auto' }}
             onClick={handleHelpButtonOnClick}
             iconType="help"
-            title={HELP_LABEL}
-            aria-label={HELP_LABEL}
+            title={HELP_TOOLTIP}
+            aria-label={HELP_TOOLTIP}
             isSelected={isHelpOpen}
             data-test-subj={getTestId('helpButton')}
           >
