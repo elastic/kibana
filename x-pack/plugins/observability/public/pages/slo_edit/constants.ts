@@ -8,11 +8,20 @@
 import { i18n } from '@kbn/i18n';
 import { BudgetingMethod, CreateSLOInput } from '@kbn/slo-schema';
 
-export const SLI_OPTIONS = [
+export const SLI_OPTIONS: Array<{
+  value: CreateSLOInput['indicator']['type'];
+  text: string;
+}> = [
   {
-    value: 'sli.kql.custom' as const,
-    text: i18n.translate('xpack.observability.slos.sloTypes.kqlCustomIndicator', {
-      defaultMessage: 'KQL custom indicator',
+    value: 'sli.kql.custom',
+    text: i18n.translate('xpack.observability.slos.sliTypes.kqlCustomIndicator', {
+      defaultMessage: 'KQL custom',
+    }),
+  },
+  {
+    value: 'sli.apm.transactionDuration',
+    text: i18n.translate('xpack.observability.slos.sliTypes.apmLatencyIndicator', {
+      defaultMessage: 'APM latency',
     }),
   },
 ];
@@ -44,7 +53,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
   name: '',
   description: '',
   indicator: {
-    type: SLI_OPTIONS[0].value,
+    type: 'sli.kql.custom',
     params: {
       index: '',
       filter: '',
