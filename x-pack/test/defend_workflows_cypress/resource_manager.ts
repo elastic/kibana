@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
-
-export interface StartRuntimeServicesOptions {
-  kibanaUrl: string;
-  elasticUrl: string;
-  username: string;
-  password: string;
-  version?: string;
-  policy?: string;
-  log?: ToolingLog;
+const CLEANUP_EVENTS = ['SIGINT', 'exit', 'uncaughtException', 'unhandledRejection'];
+export class Manager {
+  constructor() {
+    const cleanup = () => this.cleanup();
+    CLEANUP_EVENTS.forEach((ev) => process.on(ev, cleanup));
+  }
+  cleanup() {}
 }
