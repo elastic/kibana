@@ -25,6 +25,10 @@ export const useLogStreamPageState = ({
 }: {
   useDevTools?: boolean;
 } & LogStreamPageStateMachineDependencies) => {
+  // eslint-disable-next-line no-console
+  console.log(
+    "A warning in console stating: 'The result of getSnapshot should be cached to avoid an infinite loop' is expected. This will be fixed once we can upgrade versions."
+  );
   const logStreamPageStateService = useInterpret(
     () =>
       createLogStreamPageStateMachine({
