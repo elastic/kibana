@@ -64,19 +64,11 @@ export class Instance extends Entity<ApmFields> {
     });
   }
 
-  error({
-    message,
-    type,
-    groupingName,
-  }: {
-    message: string;
-    type?: string;
-    groupingName?: string;
-  }) {
+  error({ message, type }: { message: string; type?: string }) {
     return new ApmError({
       ...this.fields,
       'error.exception': [{ message, ...(type ? { type } : {}) }],
-      'error.grouping_name': groupingName || sha256(message),
+      'error.grouping_name': sha256(message),
     });
   }
 
