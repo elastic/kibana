@@ -29,15 +29,6 @@ describe('When displaying the command list', () => {
       };
     });
 
-    it('should display the help panel header', async () => {
-      renderAndOpenHelpPanel();
-
-      expect(renderResult.getByTestId('test-sidePanel-header')).toHaveTextContent(
-        'HelpUse the add () button to populate a response action to the text bar. Add ' +
-          'additional parameters or comments as necessary.'
-      );
-    });
-
     it('should display helpful tips', async () => {
       renderAndOpenHelpPanel();
 
@@ -61,6 +52,8 @@ describe('When displaying the command list', () => {
 
     it('should group commands by group label', async () => {
       renderAndOpenHelpPanel();
+      // FYI: we're collapsing the labels here because EUI includes mobile elements
+      // in the DOM that have the same test ids
       const groups = Array.from(
         new Set(
           renderResult
@@ -70,15 +63,17 @@ describe('When displaying the command list', () => {
       );
 
       expect(groups).toEqual([
-        'Supporting commands & parameters',
-        'Other commands',
-        'group 2',
         'group 1',
+        'Other commands',
+        'Supporting commands & parameters',
+        'group 2',
       ]);
     });
 
+    it.todo('should display the list of command in the expected order');
+
     it.todo('should hide command if command definition helpHidden is true');
 
-    it.todo('should disable command if command definition helpHidden is true');
+    it.todo('should disable "add to text bar" button if command definition helpHidden is true');
   });
 });

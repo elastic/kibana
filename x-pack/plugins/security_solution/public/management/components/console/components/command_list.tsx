@@ -97,8 +97,6 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   const dispatch = useConsoleStateDispatch();
   const { docLinks } = useKibana().services;
 
-  const allowedCommands = commands.filter((command) => command.helpHidden !== true);
-
   const footerMessage = useMemo(() => {
     return (
       <EuiDescriptionList
@@ -144,23 +142,34 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   );
 
   const commandsByGroups = useMemo(() => {
-    return Object.values(groupBy(allowedCommands, 'helpGroupLabel')).reduce<CommandDefinition[][]>(
-      (acc, current) => {
-        if (current[0].helpGroupPosition !== undefined) {
-          // If it already exists just move it to the end
-          if (acc[current[0].helpGroupPosition]) {
-            acc[acc.length] = acc[current[0].helpGroupPosition];
-          }
+    const sortedGroupLabels = new Set<string>();
+    const allowedCommands = sortBy(
+      // We only show commands that are no hidden
+      commands.filter((command) => command.helpHidden !== true),
+      'helpGroupPosition'
+    ).map((command) => {
+      let updatedCommand = command;
 
-          acc[current[0].helpGroupPosition] = sortBy(current, 'helpCommandPosition');
-        } else if (current.length) {
-          acc.push(sortBy(current, 'helpCommandPosition'));
-        }
-        return acc;
-      },
-      []
-    );
-  }, [allowedCommands]);
+      // Both Help Group label and position are optional, so assign defaults if they are not defined
+      if (command.helpGroupPosition === undefined || command.helpGroupLabel === undefined) {
+        updatedCommand = {
+          ...command,
+          helpGroupLabel: command.helpGroupLabel ?? otherCommandsGroupLabel,
+          helpGroupPosition: command.helpGroupPosition ?? Infinity,
+        };
+      }
+
+      sortedGroupLabels.add(updatedCommand.helpGroupLabel as string);
+
+      return updatedCommand;
+    });
+
+    const commandsGroupedByLabel = groupBy(allowedCommands, 'helpGroupLabel');
+
+    return Array.from(sortedGroupLabels).map((groupLabel) => {
+      return commandsGroupedByLabel[groupLabel];
+    });
+  }, [commands]);
 
   const getTableItems = useCallback(
     (
