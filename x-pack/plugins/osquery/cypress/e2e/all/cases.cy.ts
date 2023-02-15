@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { addLastLiveQueryToCase, checkResults } from '../../tasks/live_query';
+import {
+  addLastLiveQueryToCase,
+  checkActionItemsInResults,
+  checkResults,
+} from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
@@ -30,10 +34,12 @@ describe('Add to Cases', () => {
       checkResults();
       cy.contains('attached Osquery results');
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");
-      cy.contains('View in Discover').should('exist');
-      cy.contains('View in Lens').should('exist');
-      cy.contains('Add to Case').should('not.exist');
-      cy.contains('Add to timeline investigation').should('not.exist');
+      checkActionItemsInResults({
+        lens: true,
+        discover: true,
+        cases: false,
+        timeline: false,
+      });
     });
   });
   describe('security', () => {
@@ -55,10 +61,12 @@ describe('Add to Cases', () => {
       checkResults();
       cy.contains('attached Osquery results');
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");
-      cy.contains('View in Discover').should('exist');
-      cy.contains('View in Lens').should('exist');
-      cy.contains('Add to Case').should('not.exist');
-      cy.contains('Add to timeline investigation').should('exist');
+      checkActionItemsInResults({
+        lens: true,
+        discover: true,
+        cases: false,
+        timeline: true,
+      });
     });
   });
 });

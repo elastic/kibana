@@ -8,7 +8,13 @@
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
-import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../../tasks/live_query';
+import {
+  checkActionItemsInResults,
+  checkResults,
+  inputQuery,
+  selectAllAgents,
+  submitQuery,
+} from '../../tasks/live_query';
 import { ROLES } from '../../test';
 
 describe('ALL - Custom space', () => {
@@ -57,7 +63,18 @@ describe('ALL - Custom space', () => {
         inputQuery('select * from uptime; ');
         submitQuery();
         checkResults();
-        cy.contains('View in Lens').should('exist');
+        checkActionItemsInResults({
+          lens: true,
+          discover: true,
+          cases: false,
+          timeline: false,
+        });
+        checkActionItemsInResults({
+          lens: true,
+          discover: true,
+          cases: false,
+          timeline: false,
+        });
         cy.contains('View in Discover')
           .should('exist')
           .should('have.attr', 'href')

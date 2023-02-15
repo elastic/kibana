@@ -104,3 +104,20 @@ export const addLastLiveQueryToCase = () => {
   cy.contains('Select case');
   cy.contains(/Select$/).click();
 };
+
+export const checkActionItemsInResults = ({
+  lens,
+  discover,
+  timeline,
+  cases,
+}: {
+  discover: boolean;
+  lens: boolean;
+  cases: boolean;
+  timeline: boolean;
+}) => {
+  cy.contains('View in Discover').should(discover ? 'exist' : 'not.exist');
+  cy.contains('View in Lens').should(lens ? 'exist' : 'not.exist');
+  cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');
+  cy.contains('Add to timeline investigation').should(timeline ? 'exist' : 'not.exist');
+};

@@ -9,6 +9,7 @@ import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
+  checkActionItemsInResults,
   checkResults,
   inputQuery,
   selectAllAgents,
@@ -61,6 +62,10 @@ describe('ALL - Live Query', () => {
     cy.contains('ECS field is required.').should('not.exist');
 
     checkResults();
+    cy.react('Cell', { props: { columnIndex: 0 } })
+      .should('exist')
+      .click();
+    cy.url().should('include', 'app/fleet/agents/');
   });
 
   it('should run query and enable ecs mapping', () => {
@@ -72,8 +77,12 @@ describe('ALL - Live Query', () => {
     // checking submit by clicking cmd+enter
     inputQuery(cmd);
     checkResults();
-    cy.contains('View in Discover').should('exist');
-    cy.contains('View in Lens').should('exist');
+    checkActionItemsInResults({
+      lens: true,
+      discover: true,
+      cases: true,
+      timeline: false,
+    });
     cy.react(RESULTS_TABLE_CELL_WRRAPER, {
       props: { id: 'osquery.days.number', index: 1 },
     }).should('exist');
@@ -133,6 +142,12 @@ describe('ALL - Live Query', () => {
     cy.getBySel('live-query-loading', { timeout: 10000 }).should('not.exist');
     cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
     checkResults();
+    checkActionItemsInResults({
+      lens: true,
+      discover: true,
+      cases: true,
+      timeline: false,
+    });
     cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
     cy.getBySel('toggleIcon-failingQuery').click();
     cy.contains('Status').click();

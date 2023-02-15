@@ -11,6 +11,10 @@ import { login } from '../../tasks/login';
 import { ROLES } from '../../test';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import { getRandomInt } from '../../tasks/helpers';
+import {
+  findFormFieldByRowsLabelAndType,
+  inputQuery,
+} from '@kbn/osquery-plugin/cypress/tasks/live_query';
 
 describe('ALL - Saved queries', () => {
   const randomNumber = getRandomInt();
@@ -23,6 +27,17 @@ describe('ALL - Saved queries', () => {
   });
 
   getSavedQueriesComplexTest(SAVED_QUERY_ID, SAVED_QUERY_DESCRIPTION);
+
+  it('checks that user cant add a saved query with an ID that already exists', () => {
+    cy.contains('Saved queries').click();
+    cy.contains('Add saved query').click();
+
+    findFormFieldByRowsLabelAndType('ID', 'users_elastic');
+    cy.contains('ID must be unique').should('not.exist');
+    inputQuery('test');
+    cy.contains('Save query').click();
+    cy.contains('ID must be unique').should('exist');
+  });
 
   it('checks default values on new saved query', () => {
     cy.contains('Saved queries').click();

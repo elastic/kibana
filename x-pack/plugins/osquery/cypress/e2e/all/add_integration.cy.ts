@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { FLEET_AGENT_POLICIES, navigateTo, OLD_OSQUERY_MANAGER } from '../../tasks/navigation';
+import {
+  FLEET_AGENT_POLICIES,
+  navigateTo,
+  OLD_OSQUERY_MANAGER,
+  OSQUERY,
+} from '../../tasks/navigation';
 import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
 
 import { login } from '../../tasks/login';
@@ -26,6 +31,16 @@ describe('ALL - Add Integration', () => {
 
   after(() => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
+  });
+
+  it('validate osquery is not available and nav search links to integration', () => {
+    cy.visit(OSQUERY);
+    cy.contains('Add this integration to run and schedule queries for Elastic Agent.');
+    cy.contains('Add Osquery Manager');
+    cy.getBySel('nav-search-input').type('Osquery');
+    cy.get('[title="Osquery • Management"]').should('exist');
+    cy.get('[title="Osquery Logs • Integration"]').should('exist');
+    cy.get('[title="Osquery Manager • Integration"]').click();
   });
 
   it.skip('should add the old integration and be able to upgrade it', () => {
@@ -76,6 +91,9 @@ describe('ALL - Add Integration', () => {
     cy.contains(integration).click();
     addIntegration();
     cy.contains('osquery_manager-');
+    cy.getBySel('nav-search-input').type('Osquery');
+    cy.get('[title="Osquery • Management"]').click();
+    cy.contains('Live queries history');
   });
 
   it.skip('should have integration and packs copied when upgrading integration', () => {
