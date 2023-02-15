@@ -25,6 +25,7 @@
 // force ESM in this module
 export {};
 
+import '@cypress/code-coverage/support';
 import 'cypress-react-selector';
 
 declare global {

@@ -222,6 +222,7 @@ export function getWebpackConfig(
               babelrc: false,
               envName: worker.dist ? 'production' : 'development',
               presets: [BABEL_PRESET],
+              plugins: ['babel-plugin-istanbul'],
             },
           },
         },
