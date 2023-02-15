@@ -16,7 +16,6 @@ import { chunk } from 'lodash';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { parseDuration, RawRule, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { buildViewInAppUrl } from '../lib';
 import { injectActionParams } from './inject_action_params';
 import { ExecutionHandlerOptions, RuleTaskInstance } from './types';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -223,14 +222,7 @@ export class ExecutionHandler<
                 actionsPlugin,
                 actionTypeId,
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                ruleUrl:
-                  buildViewInAppUrl({
-                    kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                    spaceId,
-                    getViewInAppRelativeUrl: this.ruleType.getViewInAppRelativeUrl,
-                    opts: { rule: this.rule },
-                    logger: this.logger,
-                  }) || this.buildRuleUrl(spaceId),
+                ruleUrl: this.buildRuleUrl(spaceId),
               }),
             }),
           };
@@ -279,14 +271,7 @@ export class ExecutionHandler<
                 alertParams: this.rule.params,
                 actionParams: action.params,
                 flapping: executableAlert.getFlapping(),
-                ruleUrl:
-                  buildViewInAppUrl({
-                    kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                    spaceId,
-                    getViewInAppRelativeUrl: this.ruleType.getViewInAppRelativeUrl,
-                    opts: { rule: this.rule },
-                    logger: this.logger,
-                  }) || this.buildRuleUrl(spaceId),
+                ruleUrl: this.buildRuleUrl(spaceId),
               }),
             }),
           };
@@ -424,11 +409,13 @@ export class ExecutionHandler<
       return;
     }
 
+    const relativePath = this.ruleType.getViewInAppRelativeUrl
+      ? this.ruleType.getViewInAppRelativeUrl({ rule: this.rule })
+      : `${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`;
+
     try {
       const ruleUrl = new URL(
-        `${
-          spaceId !== 'default' ? `/s/${spaceId}` : ''
-        }${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`,
+        `${spaceId !== 'default' ? `/s/${spaceId}` : ''}${relativePath}`,
         this.taskRunnerContext.kibanaBaseUrl
       );
 
