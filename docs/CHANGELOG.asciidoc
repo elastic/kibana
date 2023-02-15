@@ -176,8 +176,7 @@ Kibana Home & Add Data::
 Self-managed {kib} instances now have a link to instructions for migrating self-managed clusters to Elastic Cloud {kibana-pull}145523[#145523]
 
 Lens & Visualizations::
-* Adds the share link feature in *Lens* {kibana-pull}148829[#148829]
-* Adds the ability to support complex filters with AND/OR relationships {kibana-pull}143928[#143928]
+Adds the share link feature in *Lens* {kibana-pull}148829[#148829]
 
 Machine Learning::
 * Adds change point detection feature {kibana-pull}150308[#150308]
@@ -210,7 +209,8 @@ Platform::
 New trigger actions for chart legends and table cell actions {kibana-pull}146779[#146779]
 
 Querying & Filtering::
-Insight filter builder form as markdown plugin {kibana-pull}150363[#150363]
+* Insight filter builder form as markdown plugin {kibana-pull}150363[#150363]
+* Adds the ability to support complex filters with AND/OR relationships {kibana-pull}143928[#143928]
 
 Security::
 * Adds the ability to allow administrators to limit the number of concurrent user sessions with `xpack.security.session.сoncurrentSessions.maxSessions` {kibana-pull}147442[#147442]
@@ -297,7 +297,6 @@ Kibana UI::
 The list view in Dashboard, Visualize Library, Maps, and Graph now stores the latest state of the table in the URL {kibana-pull}145517[#145517]
 
 Lens & Visualizations::
-* Allows case sensitive option on multiselection filters input {kibana-pull}149570[#149570]
 * Enable nice rounding for scalar axis in *Lens* {kibana-pull}149388[#149388]
 * Don't block render on missing field in *Lens* {kibana-pull}149262[#149262]
 * Enable previous time shift when using a date histogram in *Lens* {kibana-pull}149126[#149126]
@@ -340,6 +339,9 @@ Monitoring::
 Observability::
 * Custom equation editor for Metric Threshold Rule {kibana-pull}148732[#148732]
 * Adds context.originalAlertState to the Metric Threshold and Inventory Threshold recovery context {kibana-pull}147928[#147928]
+
+Querying & Filtering::
+Allows case sensitive option on multiselection filters input {kibana-pull}149570[#149570]
 
 Security::
 * The default `csp.disableUnsafeEval` value is now `true`, so now the `unsafe-eval` source expression isn't present by default in the Kibana Content Security Policy (CSP) {kibana-pull}150157[#150157]
