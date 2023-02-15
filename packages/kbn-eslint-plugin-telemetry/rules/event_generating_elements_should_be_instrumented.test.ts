@@ -61,7 +61,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
               message: `<${element}> should have a \`data-test-subj\` for telemetry purposes. Consider adding it.`,
             },
           ],
-          output: `<${element} data-test-subj="undefinedundefinedValue${element.replace(
+          output: `<${element} data-test-subj="Value${element.replace(
             'Eui',
             ''
           )}">Value</${element}>`,
