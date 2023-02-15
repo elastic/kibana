@@ -261,7 +261,7 @@ APM::
 * Ability to offset point labels on maps {kibana-pull}145773[#145773]
 
 Dashboard::
-* Unified panel options pane {kibana-pull}148301[#148301]
+* Add new panel settings option to change the title, description, and time range for panels {kibana-pull}148301[#148301]
 * Anchor time slider to start {kibana-pull}148028[#148028]
 * Show document count beside options list suggestions {kibana-pull}146241[#146241]
 
