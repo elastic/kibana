@@ -360,6 +360,71 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
+    describe('filter activity', () => {
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+      it('filters by history successfully', async () => {
+        await cases.common.selectSeverity(CaseSeverity.MEDIUM);
+
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('user-actions-filter-activity-button-history');
+
+        const historyBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
+        );
+
+        expect(await historyBadge.getVisibleText()).equal('2');
+      });
+
+      it('filters by comment successfully', async () => {
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+        await commentArea.focus();
+        await commentArea.type('Test comment from automation');
+        await testSubjects.click('submit-comment');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('user-actions-filter-activity-button-comments');
+
+        const commentBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
+        );
+
+        expect(await commentBadge.getVisibleText()).equal('1');
+      });
+
+      it('sorts by newest first successfully', async () => {
+        await testSubjects.click('user-actions-filter-activity-button-all');
+
+        const AllBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
+        );
+
+        expect(await AllBadge.getVisibleText()).equal('3');
+
+        const sortDesc = await find.byCssSelector(
+          '[data-test-subj="user-actions-sort-select"] [value="desc"]'
+        );
+
+        await sortDesc.click();
+
+        await header.waitUntilLoadingHasFinished();
+
+        const userActions = await find.byCssSelector('[data-test-subj="user-actions"]');
+
+        const actionsList = await userActions.findAllByClassName('euiComment');
+
+        expect(await actionsList[0].getAttribute('data-test-subj')).contain(
+          'comment-create-action'
+        );
+      });
+    });
+
     describe('Assignees field', () => {
       before(async () => {
         await createUsersAndRoles(getService, users, roles);
