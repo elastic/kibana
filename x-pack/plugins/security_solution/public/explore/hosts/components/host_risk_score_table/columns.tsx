@@ -87,7 +87,10 @@ export const getHostRiskScoreColumns = ({
         return (
           <RiskScore
             toolTipContent={
-              <EuiLink onClick={() => dispatchSeverityUpdate(risk)}>
+              <EuiLink
+                data-test-subj="securitySolutionGetHostRiskScoreColumnsLink"
+                onClick={() => dispatchSeverityUpdate(risk)}
+              >
                 <EuiText size="xs">{i18n.VIEW_HOSTS_BY_SEVERITY(risk.toLowerCase())}</EuiText>
               </EuiLink>
             }
