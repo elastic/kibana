@@ -294,7 +294,7 @@ export const ExtractionRulesLogic = kea<
       },
     ],
     fieldRuleToEditIsNew: [
-      true,
+      false,
       {
         closeEditRuleFlyout: () => true,
         openEditRuleFlyout: (_, { isNewRule }) => isNewRule,
