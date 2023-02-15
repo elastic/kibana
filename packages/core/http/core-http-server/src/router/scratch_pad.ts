@@ -7,7 +7,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
 import { pipe } from 'fp-ts/lib/function';
 import type { RequestHandler } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
@@ -15,7 +14,7 @@ import type { RouteConfig, RouteMethod } from './route';
 import type { IRouter, RouteRegistrar } from './router';
 import type { RouteValidatorFullConfig } from './route_validator';
 
-const logger: Logger = {} as any;
+const logger: { info(message: string): void } = {} as any;
 /** Definitely subject to revision, just used for examples */
 type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
 
@@ -39,13 +38,12 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
    * This is the primary interface for the toolkit
    */
   interface VersionedAPIToolkit {
-    createVersionedAPI<Context extends RequestHandlerContextBase>(opts: { router: IRouter<Context> }): VersionedRouter<Context>;
+    createVersionedAPI<Context extends RequestHandlerContextBase>(opts: {
+      router: IRouter<Context>;
+    }): VersionedRouter<Context>;
   }
   interface VersionedRouter<Context extends RequestHandlerContextBase> {
-    defineRoute(
-      registrar: Registrar<Context>,
-      opts: VersionedRouteOpts
-    ): VersionedRoute<Context>;
+    defineRoute(registrar: Registrar<Context>, opts: VersionedRouteOpts): VersionedRoute<Context>;
   }
   /**
    * The toolkit defines versioned routes, taking care of all the versioning shenanigans
@@ -53,13 +51,14 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
    */
   interface VersionedRoute<Context extends RequestHandlerContextBase = RequestHandlerContextBase> {
     addVersion<P, Q, B>(
-      version: Version,
-      opts: { validation: RouteValidatorFullConfig<P, Q, B> },
+      opts: { version: Version; validation: RouteValidatorFullConfig<P, Q, B> },
       handler: RequestHandler<P, Q, B, Context>
     ): VersionedRoute<Context>;
   }
 
-  const vtk: VersionedAPIToolkit = { /* TODO: implement */ } as any;
+  const vtk: VersionedAPIToolkit = {
+    /* TODO: implement */
+  } as any;
   /** A router with some custom context */
   const myRouter: IRouter<{ test: number } & RequestHandlerContextBase> = {} as any;
   const myVersionedRouter = vtk.createVersionedAPI({ router: myRouter });
@@ -67,8 +66,8 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
   const versionedRoute = myVersionedRouter
     .defineRoute(myRouter.post, { path: '/api/my-plugin/my-route', options: {} })
     .addVersion(
-      '1',
       {
+        version: '1',
         validation: { body: schema.object({ n: schema.number({ min: 0, max: 1 }) }) },
       },
       async (ctx, req, res) => {
@@ -78,8 +77,8 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
       }
     )
     .addVersion(
-      '2',
       {
+        version: '2',
         validation: { body: schema.object({ b: schema.number({ min: 2, max: 3 }) }) },
       },
       async (ctx, req, res) => {
@@ -93,8 +92,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
   // `addVersion` utility
   const addVersion =
     <P, Q, B, C extends RequestHandlerContextBase>(
-      version: Version,
-      opts: { validation: RouteValidatorFullConfig<P, Q, B> },
+      opts: { version: Version; validation: RouteValidatorFullConfig<P, Q, B> },
       handler: RequestHandler<P, Q, B, C>
     ) =>
     (versionedRouter: VersionedRoute<C>) =>
@@ -105,8 +103,10 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     myVersionedRouter.defineRoute(myRouter.post, { path: '/api/my-plugin/my-route', options: {} }),
 
     addVersion(
-      '1',
-      { validation: { body: schema.object({ n: schema.number({ min: 0, max: 1 }) }) } },
+      {
+        version: '1',
+        validation: { body: schema.object({ n: schema.number({ min: 0, max: 1 }) }) },
+      },
       async (ctx, req, res) => {
         logger.info(String(ctx.test));
         logger.info(String(req.body.n));
@@ -115,8 +115,10 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     ),
 
     addVersion(
-      '2',
-      { validation: { body: schema.object({ b: schema.number({ min: 2, max: 3 }) }) } },
+      {
+        version: '2',
+        validation: { body: schema.object({ b: schema.number({ min: 2, max: 3 }) }) },
+      },
       async (ctx, req, res) => {
         logger.info(String(req.body.b));
         return res.ok();
@@ -131,8 +133,9 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
  *  2. We can treat the versioning implementation as an open source protocol.
  *     Consumers can choose to create their own implementation (but increase maintenance).
  *  3. Removes only the boilerplate regarding versions
- *  4. Could also implement a simplified version that just takeas in a bunch of validations
- *     and passes them all to one handler, then the consumer must specify if-else/map/switch
+ *  4. Allows for alternative approaches. For example: Could also implement a
+ *     simplified version that just takeas in a bunch of validations and passes
+ *     them all to one handler, then the consumer must specify if-else/map/switch
  *     to correctly handle versions and map to the correct return type...
  * WEAKNESSES:
  *  1. Whole new API to design and implement
