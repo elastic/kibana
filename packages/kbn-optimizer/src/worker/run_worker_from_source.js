@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-require('@kbn/optimizer').registerNodeAutoTranspilation();
+require('@kbn/babel-register').registerNodeAutoTranspilation();
 require('./run_worker');

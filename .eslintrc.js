@@ -101,6 +101,7 @@ const VENN_DIAGRAM_HEADER = `
 /** Packages which should not be included within production code. */
 const DEV_PACKAGES = [
   'kbn-babel-code-parser',
+  'kbn-babel-register',
   'kbn-dev-utils',
   'kbn-cli-dev-mode',
   'kbn-docs-utils',
