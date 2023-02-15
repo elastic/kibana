@@ -62,6 +62,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
   const myRouter: IRouter<{ test: number } & RequestHandlerContextBase> = {} as any;
   const myVersionedRouter = vtk.createVersionedAPI({ router: myRouter });
 
+  // @ts-ignore unused variable
   const versionedRoute = myVersionedRouter
     .defineRoute({ method: 'post', path: '/api/my-plugin/my-route', options: {} })
     .addVersion(
