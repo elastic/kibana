@@ -18,7 +18,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { lens, dashboard, canvas } = getPageObjects(['lens', 'dashboard', 'canvas']);
 
-const testSubjects = getService('testSubjects');
+  const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const panelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -85,7 +85,7 @@ const testSubjects = getService('testSubjects');
       await testSubjects.exists('visualizesaveAndReturnButton');
       await testSubjects.click('visualizesaveAndReturnButton');
       await dashboard.waitForRenderComplete();
-      
+
       expect(await dashboard.isNotificationExists(2)).to.be(true);
       const panel = (await dashboard.getDashboardPanels())[2];
       await panelActions.convertToLens(panel);
