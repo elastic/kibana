@@ -9,7 +9,6 @@ import React from 'react';
 import type { ConsoleProps } from '..';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../mocks';
-import { act } from '@testing-library/react';
 import { HELP_LABEL } from './console_header';
 
 describe('Console header area', () => {
@@ -44,10 +43,19 @@ describe('Console header area', () => {
 
   it('should open the side panel when help button is clicked', async () => {
     render();
-    act(() => {
-      renderResult.getByTestId('test-header-helpButton').click();
-    });
+    renderResult.getByTestId('test-header-helpButton').click();
 
     expect(renderResult.getByTestId('test-sidePanel')).toBeTruthy();
+  });
+
+  it('should close the side panel when close button is clicked', async () => {
+    render();
+    renderResult.getByTestId('test-header-helpButton').click();
+
+    expect(renderResult.getByTestId('test-sidePanel')).toBeTruthy();
+
+    renderResult.getByTestId('test-sidePanel-headerCloseButton').click();
+
+    expect(renderResult.queryByTestId('test-sidePanel')).toBeNull();
   });
 });
