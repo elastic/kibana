@@ -163,11 +163,7 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
               'Open the URL below and download the right DEB package for your CPU architecture:',
           }),
           content: (
-            <EuiLink
-              data-test-subj="profilingNoDataPageHttpsElaStPfHostAgentLinuxLink"
-              target="_blank"
-              href={`https://ela.st/pf-host-agent-linux`}
-            >
+            <EuiLink target="_blank" href={`https://ela.st/pf-host-agent-linux`}>
               https://ela.st/pf-host-agent-linux
             </EuiLink>
           ),
@@ -217,11 +213,7 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
               'Open the URL below and download the right RPM package for your CPU architecture:',
           }),
           content: (
-            <EuiLink
-              data-test-subj="profilingNoDataPageHttpsElaStPfHostAgentLinuxLink"
-              target="_blank"
-              href={`https://ela.st/pf-host-agent-linux`}
-            >
+            <EuiLink target="_blank" href={`https://ela.st/pf-host-agent-linux`}>
               https://ela.st/pf-host-agent-linux
             </EuiLink>
           ),

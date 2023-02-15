@@ -90,10 +90,7 @@ export const getUserRiskScoreColumns = ({
         return (
           <RiskScore
             toolTipContent={
-              <EuiLink
-                data-test-subj="securitySolutionGetUserRiskScoreColumnsLink"
-                onClick={() => dispatchSeverityUpdate(risk)}
-              >
+              <EuiLink onClick={() => dispatchSeverityUpdate(risk)}>
                 <EuiText size="xs">{i18n.VIEW_USERS_BY_SEVERITY(risk.toLowerCase())}</EuiText>
               </EuiLink>
             }
