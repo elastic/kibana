@@ -6,7 +6,6 @@
  */
 
 import React, { memo } from 'react';
-import { camelCase, mapKeys } from 'lodash';
 import { EuiLink, EuiSkeletonText } from '@elastic/eui';
 import { Tooltip as CaseTooltip } from '@kbn/cases-components';
 import type { CaseTooltipContentProps } from '@kbn/cases-components';
@@ -14,30 +13,37 @@ import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import { Case } from '../hooks/use_bulk_get_cases';
 import { CellComponentProps } from '../types';
 
+const formatCase = (theCase: Case): CaseTooltipContentProps => ({
+  title: theCase.title,
+  description: theCase.description,
+  createdAt: theCase.created_at,
+  createdBy: {
+    username: theCase.created_by.username ?? undefined,
+    fullName: theCase.created_by.full_name ?? undefined,
+  },
+  status: theCase.status,
+  totalComments: theCase.totalComment,
+});
+
 const CasesCellComponent: React.FC<CellComponentProps> = ({ isLoading, alert, cases }) => {
   const caseIds = alert[ALERT_CASE_IDS] ?? [];
 
-  const alertCases = caseIds
+  const validCases = caseIds
     .map((id) => cases.get(id))
     .filter((theCase): theCase is Case => theCase != null);
 
-  if (alertCases.length === 0) {
+  if (validCases.length === 0) {
     return null;
   }
 
-  const firstCase = alertCases[0];
-  const firstCaseAsCamel = mapKeys(firstCase, (_, key) =>
-    camelCase(key)
-  ) as unknown as CaseTooltipContentProps;
-
   return (
     <EuiSkeletonText lines={1} isLoading={isLoading} size="s">
-      <CaseTooltip
-        loading={false}
-        content={{ ...firstCaseAsCamel, totalComments: firstCase.totalComment }}
-      >
-        <EuiLink onClick={() => {}}>{firstCase.title}</EuiLink>
-      </CaseTooltip>
+      {validCases.map((theCase, index) => [
+        index > 0 && index < validCases.length && ', ',
+        <CaseTooltip loading={false} content={formatCase(theCase)} key={theCase.id}>
+          <EuiLink onClick={() => {}}>{theCase.title}</EuiLink>
+        </CaseTooltip>,
+      ])}
     </EuiSkeletonText>
   );
 };
