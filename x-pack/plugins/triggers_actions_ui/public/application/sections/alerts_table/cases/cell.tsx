@@ -12,6 +12,7 @@ import type { CaseTooltipContentProps } from '@kbn/cases-components';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import { Case } from '../hooks/use_bulk_get_cases';
 import { CellComponentProps } from '../types';
+import { useCaseViewNavigation } from './use_case_view_navigation';
 
 const formatCase = (theCase: Case): CaseTooltipContentProps => ({
   title: theCase.title,
@@ -26,6 +27,8 @@ const formatCase = (theCase: Case): CaseTooltipContentProps => ({
 });
 
 const CasesCellComponent: React.FC<CellComponentProps> = ({ isLoading, alert, cases }) => {
+  const { navigateToCaseView } = useCaseViewNavigation();
+
   const caseIds = alert[ALERT_CASE_IDS] ?? [];
 
   const validCases = caseIds
@@ -41,7 +44,9 @@ const CasesCellComponent: React.FC<CellComponentProps> = ({ isLoading, alert, ca
       {validCases.map((theCase, index) => [
         index > 0 && index < validCases.length && ', ',
         <CaseTooltip loading={false} content={formatCase(theCase)} key={theCase.id}>
-          <EuiLink onClick={() => {}}>{theCase.title}</EuiLink>
+          <EuiLink onClick={() => navigateToCaseView({ caseId: theCase.id })}>
+            {theCase.title}
+          </EuiLink>
         </CaseTooltip>,
       ])}
     </EuiSkeletonText>
