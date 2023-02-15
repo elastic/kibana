@@ -14,6 +14,7 @@ import type {
   FetchCasesProps,
   ResolvedCase,
   FindCaseUserActions,
+  CaseUsers,
 } from '../../common/ui/types';
 import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
 import type {
@@ -39,6 +40,7 @@ import {
   getCaseFindUserActionsUrl,
   getCaseCommentDeleteUrl,
   getCaseConnectorsUrl,
+  getCaseUsersUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -405,4 +407,11 @@ export const getCaseConnectors = async (
     }),
     {}
   );
+};
+
+export const getCaseUsers = async (caseId: string, signal: AbortSignal): Promise<CaseUsers> => {
+  return KibanaServices.get().http.fetch<CaseUsers>(getCaseUsersUrl(caseId), {
+    method: 'GET',
+    signal,
+  });
 };

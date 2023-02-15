@@ -4544,7 +4544,7 @@
                 "section": "def-common.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
-              ", options: Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; }) => Promise<{ items: ",
+              ", options: Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; }) => Promise<{ items: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -4587,7 +4587,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; }"
+                  "Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; }"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
                 "deprecated": false,
@@ -5466,6 +5466,100 @@
             "path": "x-pack/plugins/fleet/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-server.MessageSigningServiceInterface",
+        "type": "Interface",
+        "tags": [],
+        "label": "MessageSigningServiceInterface",
+        "description": [],
+        "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.MessageSigningServiceInterface.generateKeyPair",
+            "type": "Function",
+            "tags": [],
+            "label": "generateKeyPair",
+            "description": [],
+            "signature": [
+              "(providedPassphrase?: string | undefined) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.MessageSigningServiceInterface.generateKeyPair.$1",
+                "type": "string",
+                "tags": [],
+                "label": "providedPassphrase",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.MessageSigningServiceInterface.sign",
+            "type": "Function",
+            "tags": [],
+            "label": "sign",
+            "description": [],
+            "signature": [
+              "(serializedMessage: object | Buffer) => Promise<{ data: Buffer; signature: string; }>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.MessageSigningServiceInterface.sign.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "serializedMessage",
+                "description": [],
+                "signature": [
+                  "object | Buffer"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.MessageSigningServiceInterface.getPublicKey",
+            "type": "Function",
+            "tags": [],
+            "label": "getPublicKey",
+            "description": [],
+            "signature": [
+              "() => Promise<string>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -15630,6 +15724,26 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "fleet",
+          "id": "def-server.FleetStartContract.messageSigningService",
+          "type": "Object",
+          "tags": [],
+          "label": "messageSigningService",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "fleet",
+              "scope": "server",
+              "docId": "kibFleetPluginApi",
+              "section": "def-server.MessageSigningServiceInterface",
+              "text": "MessageSigningServiceInterface"
+            }
+          ],
+          "path": "x-pack/plugins/fleet/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -17904,7 +18018,7 @@
                 "section": "def-common.ListWithKuery",
                 "text": "ListWithKuery"
               },
-              " & { full?: boolean | undefined; }"
+              " & { noAgentCount?: boolean | undefined; full?: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/agent_policy.ts",
             "deprecated": false,
@@ -22357,7 +22471,7 @@
         "label": "FleetServerAgentComponentStatus",
         "description": [],
         "signature": [
-          "\"failed\" | \"degraded\" | \"starting\" | \"configuring\" | \"healthy\" | \"stopping\" | \"stopped\""
+          "\"STARTING\" | \"CONFIGURING\" | \"HEALTHY\" | \"DEGRADED\" | \"FAILED\" | \"STOPPING\" | \"STOPPED\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
         "deprecated": false,
@@ -22827,6 +22941,21 @@
           "[]; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"fleet-message-signing-keys\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/message_signing_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -25206,7 +25335,7 @@
         "label": "FleetServerAgentComponentStatuses",
         "description": [],
         "signature": [
-          "readonly [\"starting\", \"configuring\", \"healthy\", \"degraded\", \"failed\", \"stopping\", \"stopped\"]"
+          "readonly [\"STARTING\", \"CONFIGURING\", \"HEALTHY\", \"DEGRADED\", \"FAILED\", \"STOPPING\", \"STOPPED\"]"
         ],
         "path": "x-pack/plugins/fleet/common/constants/agent.ts",
         "deprecated": false,

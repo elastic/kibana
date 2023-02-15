@@ -1815,5 +1815,42 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       }
     });
+
+    it('project monitors - handles alert config without adding arbitrary fields', async () => {
+      const project = `test-project-${uuidv4()}`;
+      const testAlert = {
+        status: { enabled: false, doesnotexit: true },
+      };
+      try {
+        await supertest
+          .put(`${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [
+              {
+                ...httpProjectMonitors.monitors[1],
+                alert: testAlert,
+              },
+            ],
+          })
+          .expect(200);
+        const getResponse = await supertest
+          .get(`${API_URLS.SYNTHETICS_MONITORS}`)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${httpProjectMonitors.monitors[1].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { monitors } = getResponse.body;
+        expect(monitors.length).eql(1);
+        expect(monitors[0].attributes[ConfigKey.ALERT_CONFIG]).eql({
+          status: {
+            enabled: testAlert.status.enabled,
+          },
+        });
+      } finally {
+        await deleteMonitor(httpProjectMonitors.monitors[1].id, project);
+      }
+    });
   });
 }

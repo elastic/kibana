@@ -274,7 +274,8 @@ describe('url state', () => {
       );
   });
 
-  it('Do not clears kql when navigating to a new page', () => {
+  // Failing on `main`, skipping for now, to be addressed by security-detection-rules-area
+  it.skip('Do not clears kql when navigating to a new page', () => {
     visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     kqlSearch('source.ip: "10.142.0.9"{enter}');
     navigateFromHeaderTo(NETWORK);

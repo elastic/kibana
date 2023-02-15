@@ -7,11 +7,12 @@
 
 import React from 'react';
 
-import { ActionCell } from './action_cell';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { FieldValueCell } from './field_value_cell';
 import type { AlertSummaryRow } from '../helpers';
 import { hasHoverOrRowActions } from '../helpers';
 import { TimelineId } from '../../../../../common/types';
+import { CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER } from '../../../../../common/constants';
 
 const style = { flexGrow: 0 };
 
@@ -40,16 +41,17 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
         values={values}
       />
       {scopeId !== TimelineId.active && !isReadOnly && hoverActionsEnabled && (
-        <ActionCell
-          contextId={scopeId}
-          data={data}
-          eventId={eventId}
-          fieldFromBrowserField={fieldFromBrowserField}
-          linkValue={linkValue}
-          scopeId={scopeId}
-          values={values}
-          applyWidthAndPadding={false}
-          hideAddToTimeline={false}
+        <CellActions
+          field={{
+            name: data.field,
+            value: values && values.length > 0 ? values[0] : '',
+            type: data.type,
+            aggregatable: fieldFromBrowserField?.aggregatable,
+          }}
+          triggerId={CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER}
+          mode={CellActionsMode.INLINE}
+          visibleCellActions={3}
+          metadata={{ scopeId }}
         />
       )}
     </>
