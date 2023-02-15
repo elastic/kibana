@@ -48,11 +48,6 @@ const expectedTransformResult = [
       'The URL to the Stack Management rule page that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
     name: 'rule.url',
   },
-  {
-    name: 'rule.viewInAppUrl',
-    description:
-      'The URL to the associated application that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
-  },
   { description: 'The date the rule scheduled the action.', name: 'date' },
   { description: 'The ID of the alert that scheduled actions for the rule.', name: 'alert.id' },
   {

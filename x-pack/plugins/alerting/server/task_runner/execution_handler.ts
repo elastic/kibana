@@ -223,14 +223,14 @@ export class ExecutionHandler<
                 actionsPlugin,
                 actionTypeId,
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                ruleUrl: this.buildRuleUrl(spaceId),
-                viewInAppUrl: buildViewInAppUrl({
-                  kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                  spaceId,
-                  getViewInAppRelativeUrl: this.ruleType.getViewInAppRelativeUrl,
-                  opts: { rule: this.rule },
-                  logger: this.logger,
-                }),
+                ruleUrl:
+                  buildViewInAppUrl({
+                    kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+                    spaceId,
+                    getViewInAppRelativeUrl: this.ruleType.getViewInAppRelativeUrl,
+                    opts: { rule: this.rule },
+                    logger: this.logger,
+                  }) || this.buildRuleUrl(spaceId),
               }),
             }),
           };
@@ -278,15 +278,15 @@ export class ExecutionHandler<
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
                 alertParams: this.rule.params,
                 actionParams: action.params,
-                ruleUrl: this.buildRuleUrl(spaceId),
                 flapping: executableAlert.getFlapping(),
-                viewInAppUrl: buildViewInAppUrl({
-                  kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                  spaceId,
-                  getViewInAppRelativeUrl: this.ruleType.getViewInAppRelativeUrl,
-                  opts: { rule: this.rule },
-                  logger: this.logger,
-                }),
+                ruleUrl:
+                  buildViewInAppUrl({
+                    kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+                    spaceId,
+                    getViewInAppRelativeUrl: this.ruleType.getViewInAppRelativeUrl,
+                    opts: { rule: this.rule },
+                    logger: this.logger,
+                  }) || this.buildRuleUrl(spaceId),
               }),
             }),
           };
