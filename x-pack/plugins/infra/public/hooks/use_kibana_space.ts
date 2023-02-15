@@ -5,19 +5,26 @@
  * 2.0.
  */
 
+import type { Space } from '@kbn/spaces-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
 import { useKibanaContextForPlugin } from './use_kibana';
 
 export type ActiveSpace =
   | { isLoading: true; error: undefined; space: undefined }
   | { isLoading: false; error: Error; space: undefined }
-  | { isLoading: false; error: undefined; space: {id: string} | undefined };
+  | { isLoading: false; error: undefined; space: Space };
 
 export const useActiveKibanaSpace = (): ActiveSpace => {
   const kibana = useKibanaContextForPlugin();
   // Fallback to default if spaces plugin is not available
-  const getDefaultSpaceAsPromise = (async () => await ({id: 'default'}));
-  const getActiveSpaceOrDefault = kibana.services?.spaces?.getActiveSpace ?? getDefaultSpaceAsPromise
+  const getDefaultSpaceAsPromise = async () =>
+    await {
+      id: 'default',
+      name: 'Default',
+      disabledFeatures: [],
+    };
+  const getActiveSpaceOrDefault =
+    kibana.services?.spaces?.getActiveSpace ?? getDefaultSpaceAsPromise;
 
   const asyncActiveSpace = useAsync(getActiveSpaceOrDefault);
 
@@ -37,7 +44,7 @@ export const useActiveKibanaSpace = (): ActiveSpace => {
     return {
       isLoading: false,
       error: undefined,
-      space: asyncActiveSpace.value!
+      space: asyncActiveSpace.value!,
     };
   }
 };
