@@ -10022,8 +10022,6 @@
     "xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundForNameTitle": " 对于“{name}”",
     "xpack.csp.benchmarks.totalIntegrationsCountMessage": "正在显示 {pageCount}/{totalCount, plural, other {# 个集成}}",
     "xpack.csp.cloudPosturePage.errorRenderer.errorDescription": "{error} {statusCode}：{body}",
-    "xpack.csp.dashboard.benchmarkSection.clusterTitle": "{title} - {shortId}",
-    "xpack.csp.dashboard.benchmarkSection.clusterTitleTooltip.clusterTitle": "{title} - {shortId}",
     "xpack.csp.dashboard.benchmarkSection.lastEvaluatedTitle": "上次评估于 {dateFromNow}",
     "xpack.csp.findings.distributionBar.showingPageOfTotalLabel": "正在显示第 {pageStart}-{pageEnd} 个（共 {total} 个）{type}",
     "xpack.csp.findings.findingsTableCell.addFilterButton": "添加 {field} 筛选",
