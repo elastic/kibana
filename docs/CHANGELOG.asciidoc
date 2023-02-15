@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.6.x releases.
 
+* <<release-notes-8.6.2>>
 * <<release-notes-8.6.1>>
 * <<release-notes-8.6.0>>
 //* <<release-notes-8.5.2>>
@@ -41,6 +42,67 @@ Review important information about the {kib} 8.6.x releases.
 
 --
 
+[[release-notes-8.6.2]]
+== {kib} 8.6.2
+
+coming::[8.6.2]
+
+Review the following information about the {kib} 8.6.2 release.
+
+[float]
+[[breaking-changes-8.6.2]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in {kib} 8.6.2.
+// end::notable-breaking-changes[]
+
+{kibana-ref-all}/8.5/release-notes-8.5.0.html#breaking-changes-8.5.0[8.5.0] | {kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[enhancement-v8.6.2]]
+=== Enhancements
+Alerting::
+Adds the open API specification for create rule {kibana-pull}149565[#149565]
+
+Fleet::
+Adds the ability to run agent policy schema in batches during {fleet} setup. Also adds `xpack.fleet.setup.agentPolicySchemaUpgradeBatchSize` config {kibana-pull}150688[#150688]
+
+Security::
+Adds support for handlebars template "inline partials" without requiring `unsafe-eval` source expression in the {kib} Content Security Policy (CSP) {kibana-pull}150151[#150151]
+
+[float]
+[[fixes-v8.6.2]]
+=== Bug fixes
+Dashboard::
+Fixes the banner overlap in dashboard embed and fullscreen mode {kibana-pull}150012[#150012]
+
+Elastic Security::
+For the Elastic Security 8.6.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Enterprise Search::
+For the Elastic Enterprise Search 8.6.2 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
+
+Fleet::
+* Fixes max 20 installed integrations returned from Fleet API {kibana-pull}150780[#150780]
+* Fixes updates available when beta integrations are off {kibana-pull}149515[#149515] {kibana-pull}149486[#149486]
+
+Lens & Visualizations::
+* Fixes a formula validation issue with non-default locale in *Lens* {kibana-pull}149806[#149806]
+* Improves how JS Object method names are handled as field names {kibana-pull}148118[#148118]
+
+Machine Learning::
+Fixes datafeed of auth_high_count_logon_events_for_a_source_ip anomaly detection job {kibana-pull}149524[#149524]
+
+Observability Home::
+Fixes newsfeed by using dynamic kibana version {kibana-pull}150053[#150053]
+
+Uptime::
+Omit or include `ssl` keys when appropriate for project monitors and private locations {kibana-pull}149298[#149298]
+
 [[release-notes-8.6.1]]
 == {kib} 8.6.1
 
@@ -53,9 +115,7 @@ Review the following information about the {kib} 8.6.1 release.
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade, review the breaking change, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
 There are no breaking changes in {kib} 8.6.1.
-// end::notable-breaking-changes[]
 
 {kibana-ref-all}/8.5/release-notes-8.5.0.html#breaking-changes-8.5.0[8.5.0] | {kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
