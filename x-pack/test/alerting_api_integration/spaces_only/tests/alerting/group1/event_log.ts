@@ -546,8 +546,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .auth('superuser', 'superuser')
             .send({
               enabled: true,
-              lookBackWindow: 3,
-              statusChangeThreshold: 2,
+              look_back_window: 3,
+              status_change_threshold: 2,
             })
             .expect(200);
           const { body: createdAction } = await supertest
@@ -630,8 +630,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .auth('superuser', 'superuser')
             .send({
               enabled: true,
-              lookBackWindow: 3,
-              statusChangeThreshold: 2,
+              look_back_window: 3,
+              status_change_threshold: 2,
             })
             .expect(200);
           const { body: createdAction } = await supertest
