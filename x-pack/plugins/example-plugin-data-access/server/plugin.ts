@@ -29,7 +29,7 @@ export interface ExampleDataAccessPluginSetupContract {}
 export interface ExampleDataAccessPluginStartContract {}
 
 export type ExampleDataAccessPluginRequestHandlerContext = CustomRequestHandlerContext<{
-  topology: {
+  example: {
     getScopedDataClient: () => Promise<IScopedSearchClient>;
     basicDataClientSearch: <T>(params: ISearchRequestParams) => Promise<IEsSearchResponse<T>>;
   };
@@ -66,8 +66,8 @@ export class ExampleDataAccessPlugin
     // ROUTES
     const router = core.http.createRouter<ExampleDataAccessPluginRequestHandlerContext>();
 
-    core.http.registerRouteHandlerContext<ExampleDataAccessPluginRequestHandlerContext, 'topology'>(
-      'topology',
+    core.http.registerRouteHandlerContext<ExampleDataAccessPluginRequestHandlerContext, 'example'>(
+      'example',
       (context, request) => {
         async function getScopedDataClient() {
           const [, plugins] = await core.getStartServices();
@@ -91,7 +91,7 @@ export class ExampleDataAccessPlugin
         validate: {},
       },
       async (context, request, response) => {
-        const client = await (await context.topology).getScopedDataClient();
+        const client = await (await context.example).getScopedDataClient();
         client
           .search({
             params: BASIC_QUERY,
@@ -124,7 +124,7 @@ export class ExampleDataAccessPlugin
       },
       async (context, request, response) => {
         try {
-          const result = await (await context.topology).basicDataClientSearch<any>(BASIC_QUERY);
+          const result = await (await context.example).basicDataClientSearch<any>(BASIC_QUERY);
           return response.ok({
             body: {
               message: result.rawResponse,
