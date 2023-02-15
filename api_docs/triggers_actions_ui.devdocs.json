@@ -2137,6 +2137,20 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionParamsProps.useDefaultMessage",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useDefaultMessage",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.ActionParamsProps.actionConnector",
             "type": "CompoundType",
             "tags": [],
@@ -7504,6 +7518,8 @@
           "signature": [
             "(props: ",
             "AlertsTableStateProps",
+            " & ",
+            "LazyLoadProps",
             ") => React.ReactElement<",
             "AlertsTableStateProps",
             ", string | React.JSXElementConstructor<any>>"
@@ -7515,12 +7531,14 @@
             {
               "parentPluginId": "triggersActionsUi",
               "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAlertsStateTable.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "AlertsTableStateProps"
+                "AlertsTableStateProps",
+                " & ",
+                "LazyLoadProps"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
