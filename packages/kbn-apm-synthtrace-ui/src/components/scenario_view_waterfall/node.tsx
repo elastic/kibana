@@ -5,6 +5,7 @@ import {
   EuiText,
   EuiPopover,
   EuiButton,
+  EuiBadge,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { useScenarioContext } from '../../context/use_scenario_context';
@@ -30,11 +31,18 @@ const Node = ({ item, level }: { item: Transaction | Span; level: number }) => {
     setIsPopoverOpen(false);
   };
 
+  const shouldRepeat = item.repeat && item.repeat > 0;
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
         <EuiText style={{ display: 'flex', paddingLeft: `${level * 30}px` }}>{item.name}</EuiText>
       </EuiFlexItem>
+      {shouldRepeat && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="green">{item.repeat}</EuiBadge>
+        </EuiFlexItem>
+      )}
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiPopover
