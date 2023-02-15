@@ -118,7 +118,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         {isEditPage && <EditScreenStepTitle />}
 
         {/* Defines the enabled policy template */}
-        {!integration && (
+        {!integration && !isEditPage && (
           <>
             <PolicyTemplateSelector
               selectedTemplate={input.policy_template}
