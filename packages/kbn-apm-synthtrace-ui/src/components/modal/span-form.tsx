@@ -54,7 +54,11 @@ const SpanForm = ({
     if (value?.length) {
       setIsInvalid({ ...isInvalid, [name]: false });
     }
-    setFormState({ ...formState, [name]: value });
+    if (name === 'repeat') {
+      setFormState({ ...formState, [name]: parseInt(value, 10) });
+    } else {
+      setFormState({ ...formState, [name]: value });
+    }
   };
 
   const onSaveClick = () => {
@@ -73,7 +77,6 @@ const SpanForm = ({
     <EuiModal onClose={onClose} initialFocus="[name=name]">
       <EuiModalHeader>
         <EuiModalHeaderTitle>Create Span</EuiModalHeaderTitle>
-        <p>{JSON.stringify(formState, null, 2)}</p>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiForm id={formId} component="form">

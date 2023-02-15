@@ -9,36 +9,27 @@ import {
 import { ElasticAgentName } from '../../typings';
 import { AgentIcon } from '../agent_icon';
 
-const serviceOptions: Array<EuiComboBoxOptionOption<ElasticAgentName>> = [
-  'go',
-  'java',
-  'js-base',
-  'iOS/swift',
-  'rum-js',
-  'nodejs',
-  'python',
-  'dotnet',
-  'ruby',
-  'php',
-  'android/java',
-].map((agentName) => ({
-  key: agentName,
-  label: agentName,
-  value: agentName as ElasticAgentName,
-}));
-
 interface Props {
   onChange: (selectItem: ElasticAgentName) => void;
   value?: ElasticAgentName;
+  options: Array<EuiComboBoxOptionOption<ElasticAgentName>>;
+  optionType: 'single' | 'grouped';
 }
-export function ServiceSelector({ onChange, value }: Props) {
-  const selectedOption = value && serviceOptions.find((item) => item.key === value);
+export function ServiceSelector({ onChange, value, options, optionType }: Props) {
+  let selectedOption;
+
+  if (optionType === 'single') {
+    selectedOption = value && options.find((item) => item.key === value);
+  } else {
+    selectedOption =
+      value && options.flatMap((item) => item.options?.find((option) => option.key === value))[0];
+  }
 
   return (
     <EuiComboBox
       placeholder="Select a single option"
       singleSelection={{ asPlainText: true }}
-      options={serviceOptions}
+      options={options}
       selectedOptions={selectedOption ? [selectedOption] : []}
       isClearable={false}
       onChange={(newOptions) => {
