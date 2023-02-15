@@ -3733,17 +3733,31 @@ describe(`#authorizeOpenPointInTime`, () => {
     privileges: {
       kibana: [
         { privilege: 'mock-saved_object:a/open_point_in_time', authorized: true },
+        { privilege: 'mock-saved_object:b/open_point_in_time', authorized: true },
+        { privilege: 'mock-saved_object:c/open_point_in_time', authorized: true },
         { privilege: 'login:', authorized: true },
       ],
     },
   } as CheckPrivilegesResponse;
 
-  const expectedTypes = new Set([obj1.type]);
-  const expectedSpaces = new Set([namespace]);
-  const expectedTypeMap = new Map().set('a', {
-    open_point_in_time: { isGloballyAuthorized: true, authorizedSpaces: [] },
-    ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
-  });
+  const multipleSpaces = [namespace, 'foo', 'bar'];
+  const multipleTypes = ['a', 'b', 'c'];
+
+  const expectedTypes = new Set(multipleTypes);
+  const expectedSpaces = new Set(multipleSpaces);
+  const expectedTypeMap = new Map()
+    .set('a', {
+      open_point_in_time: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    })
+    .set('b', {
+      open_point_in_time: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    })
+    .set('c', {
+      open_point_in_time: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    });
 
   test('throws an error when `namespaces` is empty', async () => {
     const { securityExtension, checkPrivileges } = setup();
@@ -3785,7 +3799,7 @@ describe(`#authorizeOpenPointInTime`, () => {
 
   test(`calls authorize methods with expected actions, types, spaces, and no enforce map`, async () => {
     const { securityExtension, checkPrivileges } = setup();
-    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
     await securityExtension.authorizeOpenPointInTime({
       namespaces: expectedSpaces,
@@ -3809,8 +3823,13 @@ describe(`#authorizeOpenPointInTime`, () => {
 
     expect(checkPrivileges).toHaveBeenCalledTimes(1);
     expect(checkPrivileges).toHaveBeenCalledWith(
-      [`mock-saved_object:${obj1.type}/${actionString}`, 'login:'],
-      [...expectedSpaces]
+      [
+        `mock-saved_object:a/${actionString}`,
+        `mock-saved_object:b/${actionString}`,
+        `mock-saved_object:c/${actionString}`,
+        'login:',
+      ],
+      multipleSpaces
     );
 
     expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
@@ -3861,8 +3880,8 @@ describe(`#authorizeOpenPointInTime`, () => {
     checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
     await securityExtension.authorizeOpenPointInTime({
-      namespaces: expectedSpaces,
-      types: expectedTypes,
+      namespaces: new Set(multipleSpaces),
+      types: new Set(multipleTypes),
     });
 
     expect(auditHelperSpy).not.toHaveBeenCalled(); // The helper is not called, as open PIT calls the addAudit method directly
@@ -3880,6 +3899,8 @@ describe(`#authorizeOpenPointInTime`, () => {
         add_to_spaces: undefined,
         delete_from_spaces: undefined,
         saved_object: undefined,
+        requested_spaces: multipleSpaces,
+        requested_types: multipleTypes,
       },
       message: `User is opening point-in-time saved objects`,
     });
@@ -3922,6 +3943,8 @@ describe(`#authorizeOpenPointInTime`, () => {
         add_to_spaces: undefined,
         delete_from_spaces: undefined,
         saved_object: undefined,
+        requested_spaces: multipleSpaces,
+        requested_types: multipleTypes,
       },
       message: `Failed attempt to open point-in-time saved objects`,
     });
@@ -5558,6 +5581,8 @@ describe('find', () => {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
           saved_object: undefined,
+          requested_spaces: [namespace],
+          requested_types: [obj1.type],
         },
         message: `Failed attempt to access saved objects`,
       });

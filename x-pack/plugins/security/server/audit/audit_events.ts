@@ -59,6 +59,14 @@ export interface AuditKibana {
    * Set of space IDs that a saved object was removed from.
    */
   delete_from_spaces?: readonly string[];
+  /**
+   * Set of types that are being requested for an action.
+   */
+  requested_types?: readonly string[];
+  /**
+   * Set of space IDs that are being requested for an action.
+   */
+  requested_spaces?: readonly string[];
 }
 
 type EcsHttp = Required<LogMeta>['http'];
@@ -375,6 +383,8 @@ export function savedObjectEvent({
   savedObject,
   addToSpaces,
   deleteFromSpaces,
+  requestedTypes,
+  requestedSpaces,
   outcome,
   error,
 }: SavedObjectEventParams): AuditEvent | undefined {
@@ -407,6 +417,8 @@ export function savedObjectEvent({
       saved_object: savedObject,
       add_to_spaces: addToSpaces,
       delete_from_spaces: deleteFromSpaces,
+      requested_types: requestedTypes,
+      requested_spaces: requestedSpaces,
     },
     error: error && {
       code: error.name,

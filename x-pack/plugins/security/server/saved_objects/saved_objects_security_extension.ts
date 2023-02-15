@@ -128,6 +128,16 @@ export interface AddAuditEventParams {
    */
   deleteFromSpaces?: readonly string[];
   /**
+   * Array of types being requested for authorization.
+   * FIND and OPEN_POINT_IN_TIME_FOR_TYPE actions only
+   */
+  requestedTypes?: readonly string[];
+  /**
+   * Array of spaces being requested for authorization.
+   * FIND and OPEN_POINT_IN_TIME_FOR_TYPE actions only
+   */
+  requestedSpaces?: readonly string[];
+  /**
    * Relevant error information to add to
    * the audit event
    */
@@ -205,22 +215,33 @@ interface AuditHelperParams {
   /** Whether or not to use success as the non-failure outcome. Default is 'unknown' */
   useSuccessOutcome?: boolean;
   /**
-   * The spaces in which to add the objects.
-   * Used only with the AuditAction.UPDATE_OBJECTS_SPACES.
+   * The spaces in which to add the objects
+   * Used only with the AuditAction.UPDATE_OBJECTS_SPACES
    * Default is none
    */
   addToSpaces?: string[];
   /**
-   * The spaces from which to remove the objects.
-   * Used only with the AuditAction.UPDATE_OBJECTS_SPACES.
+   * The spaces from which to remove the objects
+   * Used only with the AuditAction.UPDATE_OBJECTS_SPACES
    * Default is none
    */
   deleteFromSpaces?: string[];
+  /**
+   * The spaces requested for the action
+   * Used with AuditAction.FIND and AuditAction.OPEN_POINT_IN_TIME
+   */
+  requestedSpaces?: string[];
+  /**
+   * The types requested for the action
+   * Used with AuditAction.FIND and AuditAction.OPEN_POINT_IN_TIME
+   */
+  requestedTypes?: string[];
   /** Error information produced by the action */
   error?: Error;
 }
 
 /**
+>>>>>>> Stashed changes
  * The AuditOptions interface contains optional settings for audit
  * logging within the ISavedObjectsSecurityExtension.
  */
@@ -479,7 +500,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   }
 
   private auditHelper(params: AuditHelperParams) {
-    const { action, useSuccessOutcome, objects, error, addToSpaces, deleteFromSpaces } = params;
+    const {
+      action,
+      useSuccessOutcome,
+      objects,
+      error,
+      addToSpaces,
+      deleteFromSpaces,
+      requestedTypes,
+      requestedSpaces,
+    } = params;
 
     // If there are no objects, we at least want to add a single audit log for the action
     const toAudit = !!objects && objects?.length > 0 ? objects : ([undefined] as undefined[]);
@@ -493,6 +523,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         ...(!error && { outcome: useSuccessOutcome ? 'success' : 'unknown' }),
         addToSpaces,
         deleteFromSpaces,
+        requestedTypes,
+        requestedSpaces,
       });
     }
   }
@@ -944,18 +976,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       this.addAuditEvent({
         action: AuditAction.OPEN_POINT_IN_TIME,
         error: new Error('User is unauthorized for any requested types/spaces'),
-        // TODO: include object type(s) that were requested?
-        // requestedTypes: types,
-        // requestedSpaces: namespaces,
+        requestedTypes: [...types],
+        requestedSpaces: [...namespaces],
       });
       throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('unauthorized'));
     }
     this.addAuditEvent({
       action: AuditAction.OPEN_POINT_IN_TIME,
       outcome: 'unknown',
-      // TODO: include object type(s) that were requested?
-      // requestedTypes: types,
-      // requestedSpaces: namespaces,
+      requestedTypes: [...types],
+      requestedSpaces: [...namespaces],
     });
 
     return preAuthorizationResult;
@@ -1258,8 +1288,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const preAuthorizationResult = await this.authorize({
       actions: new Set([SecurityAction.FIND]),
-      types: new Set(types),
-      spaces: new Set(namespaces),
+      types,
+      spaces: namespaces,
     });
     if (preAuthorizationResult?.status === 'unauthorized') {
       // If the user is unauthorized to find *anything* they requested, audit but don't throw
@@ -1267,10 +1297,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       this.addAuditEvent({
         action: AuditAction.FIND,
         error: new Error(`User is unauthorized for any requested types/spaces`),
-        // TODO: Improve authorization and auditing (https://github.com/elastic/kibana/issues/135259)
-        // include object type(s) that were requested?
-        // requestedTypes: types,
-        // requestedSpaces: namespaces,
+        requestedTypes: [...types],
+        requestedSpaces: [...namespaces],
       });
     }
     return preAuthorizationResult;
