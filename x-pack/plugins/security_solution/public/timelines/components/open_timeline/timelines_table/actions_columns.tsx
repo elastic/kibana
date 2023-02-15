@@ -151,14 +151,11 @@ export const getActionsColumns = ({
       timeline.status !== TimelineStatus.immutable,
     description: i18n.CREATE_RULE_FROM_TIMELINE,
     'data-test-subj': 'create-rule-from-timeline',
-    available: ({ queryType }: OpenTimelineResult) => {
-      return (
-        actionTimelineToShow.includes('createRule') &&
-        onCreateRule != null &&
-        queryType != null &&
-        queryType.hasQuery
-      );
-    },
+    available: ({ queryType }: OpenTimelineResult) =>
+      actionTimelineToShow.includes('createRule') &&
+      onCreateRule != null &&
+      queryType != null &&
+      queryType.hasQuery,
   };
 
   const createRuleFromTimelineCorrelation = {
@@ -173,15 +170,12 @@ export const getActionsColumns = ({
       timeline.savedObjectId != null &&
       timeline.status !== TimelineStatus.immutable,
     description: i18n.CREATE_RULE_FROM_TIMELINE,
-    'data-test-subj': 'create-rule-from-timeline',
-    available: ({ queryType }: OpenTimelineResult) => {
-      return (
-        actionTimelineToShow.includes('createRuleFromEql') &&
-        onCreateRuleFromEql != null &&
-        queryType != null &&
-        queryType.hasEql
-      );
-    },
+    'data-test-subj': 'create-rule-from-eql',
+    available: ({ queryType }: OpenTimelineResult) =>
+      actionTimelineToShow.includes('createRuleFromEql') &&
+      onCreateRuleFromEql != null &&
+      queryType != null &&
+      queryType.hasEql,
   };
   return [
     {

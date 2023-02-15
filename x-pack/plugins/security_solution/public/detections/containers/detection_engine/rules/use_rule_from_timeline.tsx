@@ -104,7 +104,10 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   // start set rule
   const handleSetRuleFromTimeline = useCallback(() => {
     if (selectedTimeline == null || selectedDataViewBrowserFields == null) return;
-
+    console.log({
+      timelineIdFromUrl,
+      timelineIdFromUrlEql,
+    });
     const isEql = timelineIdFromUrlEql != null;
     const newQuery = isEql
       ? {
