@@ -4,7 +4,7 @@ export type SynthtraceScenario = {
   isDistributedTracing: boolean;
   topLevelService?: Service;
   services?: Record<string, Service>;
-  items?: Omit<Transaction, 'repeat'>;
+  items?: Transaction;
   createModal?: Partial<CreateModal>;
 };
 
@@ -41,7 +41,7 @@ export interface Transaction {
   id: string;
   serviceId: string;
   name: string;
-  repeat: number;
+  repeat?: number;
   children?: Array<Transaction | Span>;
 }
 
@@ -51,7 +51,7 @@ export interface Span {
   name: string;
   type: string;
   subtype: string;
-  repeat: number;
+  repeat?: number;
   children?: Array<Transaction | Span>;
 }
 
