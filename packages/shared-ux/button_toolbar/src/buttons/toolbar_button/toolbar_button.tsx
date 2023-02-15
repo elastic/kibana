@@ -12,7 +12,7 @@ import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/butt
 
 import { ToolbarButtonStyles } from './toolbar_button.styles';
 
-export type ToolbarButtonTypes = 'primary' | 'empty';
+type ToolbarButtonTypes = 'primary' | 'empty';
 
 /**
  * Props for `PrimaryButton`.

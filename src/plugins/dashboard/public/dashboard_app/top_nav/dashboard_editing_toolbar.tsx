@@ -8,11 +8,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import {
-  AddFromLibraryButton,
-  PrimaryButton as PrimaryActionButton,
-  Toolbar,
-} from '@kbn/shared-ux-button-toolbar';
+import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { IconButton, IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import React from 'react';
@@ -183,7 +179,8 @@ export function DashboardEditingToolbar() {
       <Toolbar>
         {{
           primaryButton: (
-            <PrimaryActionButton
+            <ToolbarButton
+              type="primary"
               iconType="lensApp"
               onClick={createNewVisType(lensAlias)}
               label={getCreateVisualizationButtonTitle()}

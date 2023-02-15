@@ -12,11 +12,8 @@ import { Shortcuts } from 'react-shortcuts';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
-  AddFromLibraryButton,
-  QuickButtonGroup,
-  SolutionToolbar,
-} from '@kbn/presentation-util-plugin/public';
+import { AddFromLibraryButton, IconButtonGroup, Toolbar } from '@kbn/shared-ux-button-toolbar';
+
 import { getElementStrings } from '../../../i18n';
 import { CommitFn, ElementSpec } from '../../../types';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
@@ -159,17 +156,13 @@ export const WorkpadHeader: FC<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup
-        gutterSize="none"
-        alignItems="center"
-        className="canvasLayout__stageHeaderInner"
-      >
+      <EuiFlexGroup gutterSize="m" alignItems="center" className="canvasLayout__stageHeaderInner">
         {isWriteable && (
           <EuiFlexItem grow={false}>
-            <SolutionToolbar>
+            <Toolbar>
               {{
-                primaryActionButton: <ElementMenu addElement={addElement} elements={elements} />,
-                quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
+                primaryButton: <ElementMenu addElement={addElement} elements={elements} />,
+                iconButtonGroup: <IconButtonGroup buttons={quickButtons} legend={'Test'} />,
                 extraButtons: [
                   <AddFromLibraryButton
                     onClick={showEmbedPanel}
@@ -178,7 +171,7 @@ export const WorkpadHeader: FC<Props> = ({
                   <EditorMenu addElement={addElement} />,
                 ],
               }}
-            </SolutionToolbar>
+            </Toolbar>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
