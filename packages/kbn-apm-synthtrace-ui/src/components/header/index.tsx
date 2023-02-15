@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   EuiHeader,
   EuiHeaderSectionItem,
@@ -5,7 +6,6 @@ import {
   EuiHeaderLinks,
   EuiHeaderLink,
 } from '@elastic/eui';
-import React from 'react';
 
 export function Header() {
   return (

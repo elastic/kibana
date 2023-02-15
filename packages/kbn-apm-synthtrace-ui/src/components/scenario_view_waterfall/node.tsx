@@ -1,18 +1,21 @@
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiText,
+  EuiPopover,
+  EuiButton,
+} from '@elastic/eui';
+import React, { useState } from 'react';
 import { Span, Service, Transaction } from '../../typings';
 import { AgentIcon } from '../agent_icon';
-import React from 'react';
 
-const Node = ({
-  item,
-  hasChildren,
-  level,
-}: {
-  item: Transaction | Span | Service;
-  hasChildren: boolean;
-  level: number;
-}) => {
+const Node = ({ item, level }: { item: Transaction | Span | Service; level: number }) => {
   const shouldDisplayActions = !(item as Service).agentName;
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onButtonClick = () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
+  const closePopover = () => setIsPopoverOpen(false);
   return (
     <EuiFlexGroup>
       {!shouldDisplayActions && (
@@ -26,7 +29,22 @@ const Node = ({
       {shouldDisplayActions && (
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon onClick={() => {}} iconType="plus" aria-label="Add" />
+            <EuiPopover
+              button={<EuiButtonIcon onClick={onButtonClick} iconType="plus" aria-label="Add" />}
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+            >
+              <EuiText>Add New</EuiText>
+              <EuiButton fullWidth size="s">
+                Service
+              </EuiButton>
+              <EuiButton fullWidth size="s">
+                Transaction
+              </EuiButton>
+              <EuiButton fullWidth size="s">
+                Span
+              </EuiButton>
+            </EuiPopover>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon onClick={() => {}} iconType="gear" aria-label="Add" />

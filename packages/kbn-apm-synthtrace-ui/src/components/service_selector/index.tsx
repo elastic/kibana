@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -7,7 +8,6 @@ import {
 } from '@elastic/eui';
 import { ElasticAgentName } from '../../typings';
 import { AgentIcon } from '../agent_icon';
-import React from 'react';
 
 const serviceOptions: Array<EuiComboBoxOptionOption<ElasticAgentName>> = [
   'go',

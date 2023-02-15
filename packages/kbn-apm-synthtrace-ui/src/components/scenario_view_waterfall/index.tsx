@@ -1,7 +1,8 @@
+import React from 'react';
+
 import Branch from './branch';
 import { useScenarioContext } from '../../context/use_scenario_context';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React from 'react';
 
 export const ScenarioViewWaterfall = () => {
   const { state } = useScenarioContext();
@@ -15,7 +16,7 @@ export const ScenarioViewWaterfall = () => {
     <EuiPanel>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <Branch key={service.name} item={service} level={0} />
+          <Branch key={service.id} item={service} level={0} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

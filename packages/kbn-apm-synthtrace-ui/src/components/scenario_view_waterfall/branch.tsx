@@ -1,6 +1,7 @@
-import { Service, Span, Transaction } from '../../typings';
-import Node from './node';
 import React from 'react';
+
+import Node from './node';
+import { Span, Service, Transaction } from '../../typings';
 
 const Branch = ({ item, level }: { item: Transaction | Span | Service; level: number }) => {
   const hasChildren = item.children?.length !== 0;
@@ -10,7 +11,7 @@ const Branch = ({ item, level }: { item: Transaction | Span | Service; level: nu
       const newLevel = level + 1;
 
       return item.children?.map((child) => {
-        return <Branch key={child.name} item={child} level={newLevel} />;
+        return <Branch key={child.id} item={child} level={newLevel} />;
       });
     }
 
@@ -19,7 +20,7 @@ const Branch = ({ item, level }: { item: Transaction | Span | Service; level: nu
 
   return (
     <>
-      <Node item={item} hasChildren={hasChildren} level={level} />
+      <Node item={item} level={level} />
 
       {renderBranches()}
     </>

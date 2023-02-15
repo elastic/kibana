@@ -1,7 +1,7 @@
 import { EuiFieldText, EuiForm, EuiFormRow, EuiPanel, EuiSwitch } from '@elastic/eui';
+import React from 'react';
 import { useScenarioContext } from '../../context/use_scenario_context';
 import { ServiceSelector } from '../service_selector';
-import React from 'react';
 
 export function NewScenarioForm() {
   const { state, dispatch } = useScenarioContext();

@@ -1,7 +1,7 @@
 import { EuiButtonEmpty, EuiCard, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import React from 'react';
 import { useScenarioContext } from '../../context/use_scenario_context';
 import { AgentIcon } from '../agent_icon';
-import React from 'react';
 
 export function ScenarioView() {
   const { state } = useScenarioContext();
