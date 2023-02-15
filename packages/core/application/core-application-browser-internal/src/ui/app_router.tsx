@@ -7,7 +7,8 @@
  */
 
 import React, { FunctionComponent, useMemo } from 'react';
-import { Route, RouteComponentProps, Router, Switch } from 'react-router-dom';
+// eslint-disable-next-line no-restricted-imports
+import { RouteComponentProps, Router, Route, Switch } from 'react-router-dom';
 import { History } from 'history';
 import { EMPTY, Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
