@@ -39,7 +39,10 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
    * This is the primary interface for the toolkit
    */
   interface VersionedAPIToolkit {
-    defineRoute<Context extends RequestHandlerContextBase>(
+    createVersionedAPI<Context extends RequestHandlerContextBase>(opts: { router: IRouter<Context> }): VersionedRouter<Context>;
+  }
+  interface VersionedRouter<Context extends RequestHandlerContextBase> {
+    defineRoute(
       registrar: Registrar<Context>,
       opts: VersionedRouteOpts
     ): VersionedRoute<Context>;
@@ -56,11 +59,12 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     ): VersionedRoute<Context>;
   }
 
-  const vtk: VersionedAPIToolkit = {} as any;
+  const vtk: VersionedAPIToolkit = { /* TODO: implement */ } as any;
   /** A router with some custom context */
   const myRouter: IRouter<{ test: number } & RequestHandlerContextBase> = {} as any;
+  const myVersionedRouter = vtk.createVersionedAPI({ router: myRouter });
 
-  const versionedRoute = vtk
+  const versionedRoute = myVersionedRouter
     .defineRoute(myRouter.post, { path: '/api/my-plugin/my-route', options: {} })
     .addVersion(
       '1',
