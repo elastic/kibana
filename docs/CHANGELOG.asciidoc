@@ -342,9 +342,8 @@ Observability::
 
 Security::
 * The default `csp.disableUnsafeEval` value is now `true`, so now the `unsafe-eval` source expression isn't present by default in the Kibana Content Security Policy (CSP) {kibana-pull}150157[#150157]
-* Include IP address in audit log {kibana-pull}148055[#148055]
-* Include Cross-Origin-Opener-Policy in default response headers {kibana-pull}147874[#147874]
-* Include IP address in audit log {kibana-pull}147526[#147526]
+* Adds client IP address to Kibana audit log {kibana-pull}148055[#148055]
+* Adds `Cross-Origin-Opener-Policy: same-origin` HTTP header to Kibana default response headers {kibana-pull}147874[#147874]
 
 Sharing::
 Enables multiple values filtering on tooltip actions {kibana-pull}148372[#148372]
