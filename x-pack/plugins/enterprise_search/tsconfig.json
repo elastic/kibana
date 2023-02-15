@@ -48,5 +48,6 @@
     "@kbn/discover-plugin",
     "@kbn/guided-onboarding",
     "@kbn/safer-lodash-set",
+    "@kbn/shared-ux-router",
   ]
 }

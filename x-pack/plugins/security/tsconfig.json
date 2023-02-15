@@ -53,6 +53,7 @@
     "@kbn/core-custom-branding-common",
     "@kbn/core-custom-branding-server-mocks",
     "@kbn/safer-lodash-set",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

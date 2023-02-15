@@ -64,6 +64,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/safer-lodash-set",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",
