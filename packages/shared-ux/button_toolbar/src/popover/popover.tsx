@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
 
-import { PrimaryButton, Props as ButtonProps } from '../buttons/primary/primary';
+import { ButtonProps, ToolbarButton } from '../buttons';
 
 type AllowedButtonProps = Omit<ButtonProps, 'onClick' | 'fill'>;
 type AllowedPopoverProps = Omit<
@@ -35,7 +35,7 @@ export const ToolbarPopover = ({ label, iconType, children, iconSide, ...popover
   const onButtonClick = () => setIsOpen((status) => !status);
   const closePopover = () => setIsOpen(false);
 
-  const button = <PrimaryButton onClick={onButtonClick} {...{ label, iconSide, iconType }} />;
+  const button = <ToolbarButton onClick={onButtonClick} {...{ label, iconSide, iconType }} />;
 
   return (
     // the following ts-ignore is needed until typings/* directory is exposed for consumption to packages

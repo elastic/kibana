@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { SolutionToolbarButton } from './button';
-export { SolutionToolbarPopover } from './popover';
-export { AddFromLibraryButton } from './add_from_library';
-export { PrimaryActionButton } from './primary_button';
-export { PrimaryActionPopover } from './primary_popover';
+export { ToolbarButton } from './toolbar_button';
+export type { Props as ToolbarButtonProps } from './toolbar_button';

@@ -8,7 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { PrimaryButton, Props as ToolbarButtonProps } from '../primary/primary';
+import { ToolbarButton } from '../toolbar_button';
+import { Props as ToolbarButtonProps } from '../primary/primary';
 
 export type Props = Omit<ToolbarButtonProps, 'iconType' | 'label'>;
 
@@ -23,5 +24,10 @@ const label = {
  * A button that acts to add an item from the library to a solution, typically through a modal.
  */
 export const AddFromLibraryButton = ({ onClick, ...rest }: Props) => (
-  <PrimaryButton {...rest} iconType="folderOpen" label={label.getLibraryButtonLabel()} />
+  <ToolbarButton
+    {...rest}
+    onClick={onClick}
+    iconType="folderOpen"
+    label={label.getLibraryButtonLabel()}
+  />
 );

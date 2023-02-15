@@ -15,10 +15,12 @@ export const IconButtonGroupStyles = ({ euiTheme }: UseEuiTheme) => {
         backgroundColor: euiTheme.colors.emptyShade,
         border: `${euiTheme.border.thin} !important`,
         '&:first-of-type': {
+          borderRight: 'none !important',
           borderTopLeftRadius: `${euiTheme.border.radius.medium} !important`,
           borderBottomLeftRadius: `${euiTheme.border.radius.medium} !important`,
         },
         '&:last-of-type': {
+          borderLeft: 'none !important',
           borderTopRightRadius: `${euiTheme.border.radius.medium} !important`,
           borderBottomRightRadius: `${euiTheme.border.radius.medium} !important`,
         },

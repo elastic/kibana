@@ -8,19 +8,12 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
-
-/**
- * Props for `PrimaryButton`.
- */
-export interface Props extends Pick<EuiButtonPropsForButton, 'onClick' | 'iconType' | 'iconSide'> {
-  label: string;
-}
+import { ToolbarButtonProps } from '../toolbar_button';
 
 /**
  * A primary action button, usually appearing first in the toolbar.
  */
-export const PrimaryButton = ({ label, iconSide = 'left', ...rest }: Props) => {
+export const PrimaryButton = ({ label, iconSide = 'left', ...rest }: ToolbarButtonProps) => {
   return (
     <EuiButton size="m" color="primary" fill={true} {...{ iconSide, ...rest }}>
       {label}

@@ -59,14 +59,17 @@ const primaryButtonConfigs = {
                 {
                   name: 'Lens',
                   icon: 'lensApp',
+                  onClick: action('Lens'),
                 },
                 {
                   name: 'Maps',
                   icon: 'logoMaps',
+                  onClick: action('Maps'),
                 },
                 {
                   name: 'TSVB',
                   icon: 'visVisualBuilder',
+                  onClick: action('TSVB'),
                 },
               ],
             },
@@ -96,14 +99,17 @@ const extraButtonConfigs = {
                 {
                   name: 'Lens',
                   icon: 'lensApp',
+                  onClick: action('Lens'),
                 },
                 {
                   name: 'Maps',
                   icon: 'logoMaps',
+                  onClick: action('Maps'),
                 },
                 {
                   name: 'TSVB',
                   icon: 'visVisualBuilder',
+                  onClick: action('TSVB'),
                 },
               ],
             },

@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { SolutionToolbarButton } from './button';
-export { SolutionToolbarPopover } from './popover';
-export { AddFromLibraryButton } from './add_from_library';
-export { PrimaryActionButton } from './primary_button';
-export { PrimaryActionPopover } from './primary_popover';
+import { UseEuiTheme } from '@elastic/eui';
+
+export const ToolbarButtonStyles = ({ euiTheme }: UseEuiTheme) => {
+  return {
+    backgroundColor: euiTheme.colors.emptyShade,
+    border: `${euiTheme.border.thin} !important`,
+    color: `${euiTheme.colors.text}`,
+  };
+};

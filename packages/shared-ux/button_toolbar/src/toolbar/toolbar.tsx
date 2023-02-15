@@ -10,11 +10,11 @@ import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { IconButtonGroup, PrimaryButton } from '../buttons';
+import { IconButtonGroup, PrimaryButton, ToolbarButton as Button } from '../buttons';
 import { ToolbarPopover } from '../popover';
 
 /** type for cases with both button or a popover could be used */
-export type ToolbarButton = typeof PrimaryButton | typeof ToolbarPopover;
+export type ToolbarButton = typeof PrimaryButton | typeof Button | typeof ToolbarPopover;
 
 /** Specific type for the toolbar children in its props */
 interface NamedSlots {
