@@ -93,6 +93,8 @@ export function makeFtrConfigProvider(
           `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
           '--csp.strict=false',
           '--csp.warnLegacyBrowsers=false',
+          `--xpack.fleet.packages.0.name=cloud_security_posture`,
+          `--xpack.fleet.packages.0.version=1.2.8`,
         ],
 
         env: {
