@@ -7,15 +7,31 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { Span, Service, Transaction } from '../../typings';
+import { useScenarioContext } from '../../context/use_scenario_context';
+import { Span, Service, Transaction, ModalType } from '../../typings';
 import { AgentIcon } from '../agent_icon';
 
 const Node = ({ item, level }: { item: Transaction | Span | Service; level: number }) => {
   const shouldDisplayActions = !(item as Service).agentName;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { dispatch } = useScenarioContext();
 
   const onButtonClick = () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
+
+  const onPopOverOptionSelected = (type: ModalType) => {
+    dispatch({
+      type: 'toggle_create_modal',
+      payload: {
+        isOpen: true,
+        type,
+        id: item.id,
+        serviceId: (item as Transaction | Span).serviceId,
+      },
+    });
+    setIsPopoverOpen(false);
+  };
+
   return (
     <EuiFlexGroup>
       {!shouldDisplayActions && (
@@ -35,14 +51,14 @@ const Node = ({ item, level }: { item: Transaction | Span | Service; level: numb
               closePopover={closePopover}
             >
               <EuiText>Add New</EuiText>
-              <EuiButton fullWidth size="s">
-                Service
-              </EuiButton>
-              <EuiButton fullWidth size="s">
+              <EuiButton fullWidth size="s" onClick={() => onPopOverOptionSelected('transaction')}>
                 Transaction
               </EuiButton>
-              <EuiButton fullWidth size="s">
+              <EuiButton fullWidth size="s" onClick={() => onPopOverOptionSelected('span')}>
                 Span
+              </EuiButton>
+              <EuiButton fullWidth size="s" onClick={() => onPopOverOptionSelected('service')}>
+                Service
               </EuiButton>
             </EuiPopover>
           </EuiFlexItem>
