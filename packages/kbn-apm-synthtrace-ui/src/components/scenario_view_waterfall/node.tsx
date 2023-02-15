@@ -31,7 +31,7 @@ const Node = ({ item, level }: { item: Transaction | Span; level: number }) => {
     setIsPopoverOpen(false);
   };
 
-  const shouldRepeat = item.repeat && item.repeat > 0;
+  const shouldRepeat = item?.repeat ? item.repeat > 0 : false;
 
   return (
     <EuiFlexGroup>
@@ -40,7 +40,7 @@ const Node = ({ item, level }: { item: Transaction | Span; level: number }) => {
       </EuiFlexItem>
       {shouldRepeat && (
         <EuiFlexItem grow={false}>
-          <EuiBadge color="green">{item.repeat}</EuiBadge>
+          <EuiBadge color="green">{item.repeat}x</EuiBadge>
         </EuiFlexItem>
       )}
       <EuiFlexGroup>
