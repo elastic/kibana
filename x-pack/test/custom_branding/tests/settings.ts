@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const settingName = 'xpackCustomBranding:logo';
       await PageObjects.settings.setAdvancedSettingsImage(
         settingName,
-        require.resolve('./mcdonalds_logo.png')
+        require.resolve('./acme_logo.png')
       );
       await goToSettings();
       const img = await find.byCssSelector('img[alt="logo"]');
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const settingName = 'xpackCustomBranding:customizedLogo';
       await PageObjects.settings.setAdvancedSettingsImage(
         settingName,
-        require.resolve('./mcdonalds_text.png')
+        require.resolve('./acme_text.png')
       );
       await goToSettings();
       const logo = await testSubjects.find('logo');

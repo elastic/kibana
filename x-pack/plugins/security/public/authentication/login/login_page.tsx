@@ -146,6 +146,7 @@ export class LoginPage extends Component<Props, State> {
     ) : (
       <EuiIcon type="logoElastic" size="xxl" />
     );
+    // custom logo needs to be centered
     const logoStyle = customLogo ? { padding: 0 } : {};
     return (
       <div className="loginWelcome login-form">
