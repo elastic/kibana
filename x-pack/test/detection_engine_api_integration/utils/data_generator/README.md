@@ -106,11 +106,10 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
     })
  ```
 
-    <details>
+<details>
+<summary>Generated docs</summary>
 
-    <summary>Generated docs</summary>
-
-    ```
+    ```JSON
         [
             {
                 "foo": "bar"
@@ -124,7 +123,7 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
         ]
     ```
 
-    </details>
+</details>
 
 * #### **Use of seed callback**
 
@@ -146,11 +145,10 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
     })
  ```
 
-    <details>
+<details>
+<summary>Generated docs</summary>
 
-    <summary>Generated docs</summary>
-
-    ```
+    ```JSON
         [
             {
                 "id": "87d3d231-13c8-4d03-9ae4-d40781b3b2d1",
@@ -205,7 +203,7 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
         ]
     ```
 
-    </details>
+</details>
 
  2. Generate 3 identical documents `{foo: bar}`
 
@@ -217,11 +215,10 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
     })
  ```
 
-    <details>
+<details>
+<summary>Generated docs</summary>
 
-    <summary>Generated docs</summary>
-
-    ```
+    ```JSON
         [
             {
                 "foo": "bar"
@@ -235,7 +232,7 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
         ]
     ```
 
-    </details>
+</details>
  
  3. Generate 5 documents with custom ingested timestamp, with no interval. If interval not defined, timestamp will be current time
 
@@ -247,11 +244,10 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
     })
  ```
 
-    <details>
+<details>
+<summary>Generated docs</summary>
 
-    <summary>Generated docs</summary>
-
-    ```
+    ```JSON
     [
         {
             "foo": "bar",
@@ -286,7 +282,7 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
     ]
     ```
 
-    </details>
+</details>
 
   4. Generate 4 documents with custom if based on sequential number id
 
@@ -298,11 +294,10 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
     })
  ```
 
-    <details>
+<details>
+<summary>Generated docs</summary>
 
-    <summary>Generated docs</summary>
-
-    ```
+    ```JSON
         [
             {
                 "foo": "bar",
@@ -323,4 +318,4 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
         ]
     ```
 
-    </details>
+</details>
