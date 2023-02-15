@@ -7,7 +7,6 @@
 
 import { GeoJsonImporter, createChunks, toEsDoc } from './geojson_importer';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
-import '@loaders.gl/polyfills';
 
 const FEATURE_COLLECTION = {
   type: 'FeatureCollection',
