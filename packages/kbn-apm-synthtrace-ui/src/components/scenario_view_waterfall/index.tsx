@@ -6,9 +6,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 export const ScenarioViewWaterfall = () => {
   const { state } = useScenarioContext();
-  const { service } = state;
-  const { children } = service || {};
-  if (!service || !children) {
+  const { items } = state;
+  const { children } = items || {};
+  if (!items || !children) {
     return null;
   }
 
@@ -16,7 +16,7 @@ export const ScenarioViewWaterfall = () => {
     <EuiPanel>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <Branch key={service.id} item={service} level={0} />
+          <Branch key={items.id} item={items} level={0} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

@@ -15,7 +15,7 @@ import React from 'react';
 
 export type TransactionFormState = {
   name: string;
-  repeat: number;
+  repeat?: number;
   type: 'transaction';
 };
 const TransactionForm = ({
@@ -30,7 +30,7 @@ const TransactionForm = ({
   const [isInvalid, setIsInvalid] = React.useState<boolean>(false);
   const [formState, setFormState] = React.useState<TransactionFormState>({
     name: '',
-    repeat: 1,
+    repeat: 0,
     type: 'transaction',
   });
 

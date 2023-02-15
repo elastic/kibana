@@ -30,7 +30,7 @@ export function NewScenarioForm() {
         </EuiFormRow>
         <EuiFormRow label="Top level service">
           <ServiceSelector
-            value={state.service?.agentName}
+            value={state.topLevelService?.agentName}
             onChange={(agentName) => {
               dispatch({
                 type: 'change_top_level_service',

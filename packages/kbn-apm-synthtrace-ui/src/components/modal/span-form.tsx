@@ -45,7 +45,7 @@ const SpanForm = ({
     name: '',
     span_type: '',
     sub_type: '',
-    repeat: 1,
+    repeat: 0,
     type: 'span',
   });
 

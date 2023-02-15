@@ -1,4 +1,4 @@
-import { Service, SynthtraceScenario, Transaction } from '../typings';
+import { SynthtraceScenario } from '../typings';
 import { Action } from './actions';
 import { v4 as uuidv4 } from 'uuid';
 import { insertNodeInATree } from '../common/helpers';
@@ -22,13 +22,26 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
     }
     case 'change_top_level_service': {
       const id = uuidv4();
+      const transactionId = uuidv4();
       return {
         ...state,
-        service: {
-          agentName: action.payload.agentName,
+        topLevelService: {
           name: `synth-${action.payload.agentName}`,
-          children: [{ name: 'tx1', serviceId: id, id: uuidv4(), children: [] } as Transaction],
+          agentName: action.payload.agentName,
           id,
+        },
+        services: {
+          [id]: {
+            agentName: action.payload.agentName,
+            name: `synth-${action.payload.agentName}`,
+            id,
+          },
+        },
+        items: {
+          id: transactionId,
+          serviceId: id,
+          name: '1rpm/1100ms',
+          children: [],
         },
       };
     }
@@ -44,7 +57,7 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
       };
     }
     case 'insert_node': {
-      let clonedRoot = Object.assign({}, state.service);
+      let clonedRoot = Object.assign({}, state.items);
       const updatedTree = insertNodeInATree(action.payload.id, action.payload.node, clonedRoot);
 
       return {
@@ -55,7 +68,7 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
           serviceId: '',
           id: '',
         },
-        service: updatedTree as Service,
+        items: updatedTree,
       };
     }
   }
