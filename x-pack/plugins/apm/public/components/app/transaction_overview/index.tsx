@@ -32,8 +32,12 @@ export function TransactionOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType, fallbackToTransactions, serverlessType } =
-    useApmServiceContext();
+  const {
+    transactionType,
+    fallbackToTransactions,
+    serverlessType,
+    serviceName,
+  } = useApmServiceContext();
 
   const history = useHistory();
 
@@ -57,6 +61,7 @@ export function TransactionOverview() {
         </>
       )}
       <TransactionCharts
+        serviceName={serviceName}
         kuery={kuery}
         environment={environment}
         start={start}
