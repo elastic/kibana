@@ -25,9 +25,9 @@ import { useCallback } from 'react';
  * const getTestId = useTestIdGenerator(props['data-test-subj']);
  * getTestId('body'); // undefined
  */
-export const useTestIdGenerator = (prefix?: string): ((suffix: string) => string | undefined) => {
+export const useTestIdGenerator = (prefix?: string): ((suffix?: string) => string | undefined) => {
   return useCallback(
-    (suffix: string): string | undefined => {
+    (suffix: string = ''): string | undefined => {
       if (prefix) {
         return `${prefix}${suffix ? `-${suffix}` : ''}`;
       }
