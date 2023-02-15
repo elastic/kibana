@@ -31,6 +31,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
+      this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildCommonGroupBy(slo),

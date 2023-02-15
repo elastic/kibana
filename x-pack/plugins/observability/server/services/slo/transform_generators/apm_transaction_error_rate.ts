@@ -35,6 +35,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
+      this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildCommonGroupBy(slo),
