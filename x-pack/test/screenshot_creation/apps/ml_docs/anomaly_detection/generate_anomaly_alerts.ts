@@ -110,7 +110,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await searchBox.click();
         await searchBox.clearValue();
         await searchBox.type('ml');
-        await searchBox.pressKeys(ENTER_KEY);
+        await searchBox.pressKeys(browser.keys.ENTER);
         await ml.testExecution.logTestStep('take screenshot');
         await commonScreenshots.takeScreenshot('ml-rule', screenshotDirectories, 1920, 1400);
 
