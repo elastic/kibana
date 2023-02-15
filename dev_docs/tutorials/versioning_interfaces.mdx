@@ -21,7 +21,7 @@ Characteristics of this strategy:
 
 1. Avoid the `extends` keyword for referencing past interfaces. This results in cleaner API docs being generated.
 2. Leverage `* as` to create versioned namespaces rather than versioned interfaces.
-3. It is verbose, for a single change in a collection, we create a new version of the related collection.
+3. Although it is verbose, for a single change in a collection, we create a new version of the related collection.
 
 ### An example: Weather insights unversioned
 Consider a fictional Kibana plugin called "Weather insights". It allows users to easily create and curate dashboards that house visualisations and metrics for weather data. The domain contains the following:
