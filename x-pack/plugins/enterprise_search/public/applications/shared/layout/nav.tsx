@@ -179,6 +179,16 @@ export const useEnterpriseSearchNav = () => {
               to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
             }),
           },
+          {
+            id: 'searchExperiences',
+            name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+              defaultMessage: 'Search Experiences',
+            }),
+            ...generateNavLink({
+              shouldNotCreateHref: true,
+              to: SEARCH_EXPERIENCES_PLUGIN.URL,
+            }),
+          },
         ],
         name: i18n.translate('xpack.enterpriseSearch.nav.searchTitle', {
           defaultMessage: 'Search',

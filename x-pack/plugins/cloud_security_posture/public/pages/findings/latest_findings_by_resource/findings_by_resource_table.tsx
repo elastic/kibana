@@ -64,7 +64,10 @@ const FindingsByResourceTableComponent = ({
 
   const columns = useMemo(
     () => [
-      getNonSortableColumn(findingsByResourceColumns.resource_id),
+      {
+        ...getNonSortableColumn(findingsByResourceColumns.resource_id),
+        ['data-test-subj']: TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE_RESOURCE_ID_COLUMN,
+      },
       createColumnWithFilters(
         getNonSortableColumn(findingsByResourceColumns['resource.sub_type']),
         { onAddFilter }
@@ -102,6 +105,7 @@ const FindingsByResourceTableComponent = ({
 
   return (
     <EuiBasicTable
+      data-test-subj={TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE}
       loading={loading}
       items={items}
       columns={columns}

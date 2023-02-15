@@ -71,8 +71,8 @@ const getNextPathWithoutProperties = ({
     return key;
   }
 
-  if (shouldReadKeys(value) && key === 'properties') {
-    return `${pathWithoutProperties}`; // TODO: wrap required?
+  if (shouldReadKeys(value) && (key === 'properties' || key === 'fields')) {
+    return `${pathWithoutProperties}`;
   } else {
     return `${pathWithoutProperties}.${key}`;
   }
@@ -200,7 +200,7 @@ export const getDocsCount = ({
 }: {
   indexName: string;
   stats: Record<string, IndicesStatsIndicesStats> | null;
-}): number => (stats && stats[indexName]?.total?.docs?.count) ?? 0;
+}): number => (stats && stats[indexName]?.primaries?.docs?.count) ?? 0;
 
 export const getTotalDocsCount = ({
   indexNames,

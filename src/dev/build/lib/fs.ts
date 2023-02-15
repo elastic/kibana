@@ -8,6 +8,7 @@
 
 import fs from 'fs';
 import Fsp from 'fs/promises';
+import * as Rx from 'rxjs';
 import { createHash } from 'crypto';
 import { pipeline } from 'stream/promises';
 import { resolve, dirname, isAbsolute, sep } from 'path';
@@ -18,7 +19,6 @@ import archiver from 'archiver';
 import globby from 'globby';
 import cpy from 'cpy';
 import del from 'del';
-import deleteEmpty from 'delete-empty';
 import tar, { ExtractOptions } from 'tar';
 import { ToolingLog } from '@kbn/tooling-log';
 
@@ -29,6 +29,13 @@ export function assertAbsolute(path: string) {
     );
   }
 }
+
+export const rmdir$ = Rx.bindNodeCallback(fs.rmdir);
+export const fsReadDir$ = Rx.bindNodeCallback(
+  (path: string, cb: (err: Error | null, ents: fs.Dirent[]) => void) => {
+    fs.readdir(path, { withFileTypes: true }, cb);
+  }
+);
 
 export function isFileAccessible(path: string) {
   assertAbsolute(path);
@@ -101,28 +108,34 @@ export async function deleteEmptyFolders(
     throw new TypeError('Expected root folder to be a string path');
   }
 
+  assertAbsolute(rootFolderPath);
   log.debug(
     'Deleting all empty folders and their children recursively starting on ',
     rootFolderPath
   );
-  assertAbsolute(rootFolderPath.startsWith('!') ? rootFolderPath.slice(1) : rootFolderPath);
 
-  // Delete empty is used to gather all the empty folders and
-  // then we use del to actually delete them
-  const emptyFoldersList = (await deleteEmpty(rootFolderPath, {
-    // @ts-expect-error DT package has incorrect types https://github.com/jonschlinkert/delete-empty/blob/6ae34547663e6845c3c98b184c606fa90ef79c0a/index.js#L160
-    dryRun: true,
-  })) as unknown as string[]; // DT package has incorrect types
+  const handleDir$ = (path: string): Rx.Observable<string> => {
+    if (foldersToKeep.includes(path)) {
+      return Rx.EMPTY;
+    }
 
-  const foldersToDelete = emptyFoldersList.filter((folderToDelete) => {
-    return !foldersToKeep.some((folderToKeep) => folderToDelete.includes(folderToKeep));
-  });
-  const deletedEmptyFolders = await del(foldersToDelete, {
-    concurrency: 4,
-  });
+    return fsReadDir$(path).pipe(
+      Rx.mergeMap((stats) => {
+        if (stats.length === 0) {
+          return rmdir$(path, { maxRetries: 1 }).pipe(Rx.map(() => path));
+        }
 
-  log.debug('Deleted %d empty folders', deletedEmptyFolders.length);
-  log.verbose('Deleted:', longInspect(deletedEmptyFolders));
+        return Rx.from(stats).pipe(
+          Rx.mergeMap((s) => (s.isDirectory() ? handleDir$(resolve(path, s.name)) : []))
+        );
+      })
+    );
+  };
+
+  const deleted = await Rx.lastValueFrom(handleDir$(rootFolderPath).pipe(Rx.toArray()));
+
+  log.debug('Deleted %d empty folders', deleted.length);
+  log.verbose('Deleted:', longInspect(deleted));
 }
 
 interface CopyOptions {
@@ -178,16 +191,8 @@ export async function copyAll(
 
 export async function getFileHash(path: string, algo: string) {
   assertAbsolute(path);
-
   const hash = createHash(algo);
-  const readStream = fs.createReadStream(path);
-  await new Promise((res, rej) => {
-    readStream
-      .on('data', (chunk) => hash.update(chunk))
-      .on('error', rej)
-      .on('end', res);
-  });
-
+  await pipeline(fs.createReadStream(path), hash);
   return hash.digest('hex');
 }
 

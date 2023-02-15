@@ -21,8 +21,6 @@ import {
 import { AceTokensProvider } from '../../../lib/ace_token_provider';
 import * as curl from '../sense_editor/curl';
 import smartResize from './smart_resize';
-
-// @ts-ignore
 import * as InputMode from './mode/input';
 
 const _AceRange = ace.acequire('ace/range').Range;
@@ -40,6 +38,9 @@ export class LegacyCoreEditor implements CoreEditor {
     this.editor.setShowPrintMargin(false);
 
     const session = this.editor.getSession();
+    // @ts-expect-error
+    // ignore ts error here due to type definition mistake in brace for setMode(mode: string): void;
+    // this method accepts string or SyntaxMode which is an object. See https://github.com/ajaxorg/ace/blob/13dc911dbc0ea31ca343d5744b3f472767458fc3/ace.d.ts#L467
     session.setMode(new InputMode.Mode());
     (session as unknown as { setFoldStyle: (style: string) => void }).setFoldStyle('markbeginend');
     session.setTabSize(2);
