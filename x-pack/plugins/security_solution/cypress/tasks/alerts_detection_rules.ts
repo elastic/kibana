@@ -171,6 +171,7 @@ export const exportFirstRule = () => {
 export const filterBySearchTerm = (term: string) => {
   cy.log(`Filter rules by search term: "${term}"`);
   cy.get(RULE_SEARCH_FIELD)
+    .click()
     .type(term, { waitForAnimations: true })
     .trigger('search', { waitForAnimations: true });
 };
