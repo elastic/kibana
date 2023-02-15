@@ -20,6 +20,7 @@ import {
   TIMELINE_ITEM_ACTION_BTN,
 } from '../screens/timelines';
 import { SELECT_ALL_CHECKBOX } from '../screens/shared';
+import { CREATE_NEW_TIMELINE_WITH_BORDER } from '../screens/timeline';
 
 export const expandNotes = () => {
   cy.get(EXPAND_NOTES_BTN).click();
@@ -65,3 +66,5 @@ export const exportSelectedTimelines = () => {
   cy.get(EXPORT_TIMELINE_ACTION).should('not.be.disabled');
   cy.get(EXPORT_TIMELINE_ACTION).click();
 };
+
+export const createTimeline = () => cy.get(CREATE_NEW_TIMELINE_WITH_BORDER).click();
