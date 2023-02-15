@@ -7,7 +7,7 @@
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { set } from '@kbn/safer-lodash-set';
-import { FieldMap, MultiField } from './types';
+import type { FieldMap, MultiField } from '@kbn/alerts-as-data-utils';
 
 export function mappingFromFieldMap(
   fieldMap: FieldMap,

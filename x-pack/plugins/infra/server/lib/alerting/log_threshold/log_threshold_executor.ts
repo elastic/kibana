@@ -23,10 +23,10 @@ import {
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-
+import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
-import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+
 import {
   RuleParams,
   ruleParamsRT,

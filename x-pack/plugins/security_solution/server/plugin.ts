@@ -21,8 +21,9 @@ import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
-import { mappingFromFieldMap, type FieldMap } from '@kbn/alerting-plugin/common';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';

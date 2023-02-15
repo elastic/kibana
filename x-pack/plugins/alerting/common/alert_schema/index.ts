@@ -6,5 +6,4 @@
  */
 
 export { mappingFromFieldMap } from './field_maps/mapping_from_field_map';
-export { type FieldMap } from './field_maps/types';
 export { getComponentTemplateFromFieldMap } from './field_maps/component_template_from_field_map';

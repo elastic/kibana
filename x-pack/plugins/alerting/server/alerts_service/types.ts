@@ -6,7 +6,8 @@
  */
 
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { FieldMap, getComponentTemplateFromFieldMap } from '../../common';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import { getComponentTemplateFromFieldMap } from '../../common';
 
 export const getComponentTemplateName = (context?: string) =>
   `.alerts-${context ? `${context}` : 'framework'}-mappings`;
@@ -39,5 +40,5 @@ export const getComponentTemplate = (
     name: getComponentTemplateName(context),
     fieldMap,
     // set field limit slightly higher than actual number of fields
-    fieldLimit: Math.ceil(Object.keys(fieldMap).length / 1000) * 1000,
+    fieldLimit: Math.ceil(Object.keys(fieldMap).length / 1000) * 1000 + 500,
   });

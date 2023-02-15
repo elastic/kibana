@@ -7,38 +7,9 @@
  */
 
 import { EcsFlat } from '@kbn/ecs';
+import { EcsMetadata, FieldMap } from './types';
 
-export interface AllowedValue {
-  description?: string;
-  name?: string;
-}
-
-export interface MultiField {
-  flat_name: string;
-  name: string;
-  type: string;
-}
-
-export interface EcsMetadata {
-  allowed_values?: AllowedValue[];
-  dashed_name: string;
-  description: string;
-  doc_values?: boolean;
-  example?: string | number | boolean;
-  flat_name: string;
-  ignore_above?: number;
-  index?: boolean;
-  level: string;
-  multi_fields?: MultiField[];
-  name: string;
-  normalize: string[];
-  required?: boolean;
-  scaling_factor?: number;
-  short: string;
-  type: string;
-}
-
-export const ecsFieldMap = Object.keys(EcsFlat).reduce((acc, currKey) => {
+export const ecsFieldMap: FieldMap = Object.keys(EcsFlat).reduce((acc, currKey) => {
   const value: EcsMetadata = EcsFlat[currKey as keyof typeof EcsFlat];
   return {
     ...acc,

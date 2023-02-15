@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldMap } from '@kbn/alerting-plugin/common';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
 
 export function mergeFieldMaps<T1 extends FieldMap, T2 extends FieldMap>(
   first: T1,
