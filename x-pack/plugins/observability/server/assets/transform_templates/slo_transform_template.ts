@@ -28,6 +28,7 @@ export const getSLOTransformTemplate = (
   settings: TransformSettings
 ): TransformPutTransformRequest => ({
   transform_id: transformId,
+  description: 'Rolled-up SLI data',
   source,
   frequency: settings.frequency,
   dest: destination,

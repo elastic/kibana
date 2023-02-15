@@ -120,6 +120,7 @@ Object {
   "_meta": Object {
     "version": 1,
   },
+  "description": "Rolled-up SLI data",
   "dest": Object {
     "index": "slo-observability.sli-v1",
     "pipeline": "slo-observability.sli.monthly",
@@ -257,6 +258,7 @@ Object {
   "_meta": Object {
     "version": 1,
   },
+  "description": "Rolled-up SLI data",
   "dest": Object {
     "index": "slo-observability.sli-v1",
     "pipeline": "slo-observability.sli.monthly",
