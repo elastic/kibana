@@ -2,9 +2,10 @@ export type SynthtraceScenario = {
   instanceName: string;
   environment: string;
   isDistributedTracing: boolean;
-  services?: Service[];
-  items?: Array<Transaction | Span>;
-  createModal: Partial<CreateModal>;
+  topLevelService?: Service;
+  services?: Record<string, Service>;
+  items?: Omit<Transaction, 'repeat'>;
+  createModal?: Partial<CreateModal>;
 };
 
 // TODO: Rename this type to something more generic
@@ -32,7 +33,6 @@ export type ElasticAgentName =
 
 export type Service = {
   id: string;
-  environment?: string;
   name: string;
   agentName: ElasticAgentName;
 };
@@ -41,7 +41,7 @@ export interface Transaction {
   id: string;
   serviceId: string;
   name: string;
-  repeat?: number;
+  repeat: number;
   children?: Array<Transaction | Span>;
 }
 
@@ -51,7 +51,7 @@ export interface Span {
   name: string;
   type: string;
   subtype: string;
-  repeat?: number;
+  repeat: number;
   children?: Array<Transaction | Span>;
 }
 
@@ -59,47 +59,57 @@ export const example: SynthtraceScenario = {
   instanceName: '1',
   environment: 'prod',
   isDistributedTracing: false,
-  createModal: { isOpen: false },
-  services: [
-    { name: 'synth-rum', agentName: 'rum-js', id: '1' },
-    { name: 'synth-node', agentName: 'nodejs', id: '2' },
-  ],
-  items: [
-    {
-      id: 't1',
-      name: '1rpm/1100ms',
-      serviceId: '1',
-      children: [
-        {
-          id: 't1.1',
-          name: 'GET /nodejs/users',
-          serviceId: '1',
-          repeat: 10,
-          children: [
-            {
-              name: 'GET /nodejs/users',
-              id: 't3',
-              serviceId: '2',
-              children: [
-                {
-                  serviceId: '2',
-                  id: 's1',
-                  name: 'GET user*/_search',
-                  type: 'DB',
-                  subtype: 'elasticsearc',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          id: 't1.2',
-          name: 'GET nodejs/products',
-          repeat: 10,
-          serviceId: '1',
-          children: [],
-        },
-      ],
+  createModal: {
+    isOpen: false,
+  },
+  topLevelService: {
+    name: 'synth-rum',
+    id: '1',
+    agentName: 'rum-js',
+  },
+  services: {
+    '1': {
+      name: 'synth-rum',
+      agentName: 'rum-js',
+      id: '1',
     },
-  ],
+    '2': {
+      name: 'synth-node',
+      agentName: 'nodejs',
+      id: '2',
+    },
+  },
+  items: {
+    //transaction
+    id: 't1',
+    name: '1rpm/1100ms',
+    serviceId: '1',
+    children: [
+      {
+        name: 'foo-tx1',
+        id: 't1.1',
+        serviceId: '1',
+        repeat: 1,
+        children: [
+          {
+            name: 'foo-tx2',
+            serviceId: '1',
+            id: 't1.1.1',
+            repeat: 2,
+            children: [
+              {
+                //SPAN
+                serviceId: '2',
+                id: 's1',
+                name: 'GET user*/_search',
+                type: 'DB',
+                subtype: 'elasticsearc',
+                repeat: 1,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
 };
