@@ -9,9 +9,11 @@ import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { GroupRouter } from './group_router';
 import { Groups } from './groups';

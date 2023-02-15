@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiStat, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -21,8 +21,17 @@ import { EngineOverviewLogic } from './engine_overview_logic';
 import { EngineViewHeaderActions } from './engine_view_header_actions';
 
 export const EngineOverview: React.FC = () => {
-  const { engineName, indicesCount, documentsCount, fieldsCount, isLoadingEngine } =
-    useValues(EngineOverviewLogic);
+  const {
+    euiTheme: { colors: colors },
+  } = useEuiTheme();
+  const {
+    documentsCount,
+    engineName,
+    fieldsCount,
+    hasUnknownIndices,
+    indicesCount,
+    isLoadingEngine,
+  } = useValues(EngineOverviewLogic);
 
   return (
     <EnterpriseSearchEnginesPageTemplate
@@ -49,7 +58,11 @@ export const EngineOverview: React.FC = () => {
                 color="text"
               >
                 <EuiFlexGroup alignItems="center">
-                  <EuiIcon size="xxl" type="visTable" color="#98A2B3" />
+                  {hasUnknownIndices ? (
+                    <EuiIcon size="xxl" type="alert" color={colors.warning} />
+                  ) : (
+                    <EuiIcon size="xxl" type="visTable" color={colors.mediumShade} />
+                  )}
                   <EuiStat
                     titleSize="l"
                     isLoading={isLoadingEngine}
@@ -58,14 +71,14 @@ export const EngineOverview: React.FC = () => {
                       'xpack.enterpriseSearch.content.engine.overview.indicesDescription',
                       { defaultMessage: 'Indices' }
                     )}
-                    titleColor="primary"
+                    titleColor={hasUnknownIndices ? colors.warningText : 'primary'}
                   />
                 </EuiFlexGroup>
               </EuiLinkTo>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center">
-                <EuiIcon size="xxl" type="documents" color="#98A2B3" />
+                <EuiIcon size="xxl" type="documents" color={colors.mediumShade} />
                 <EuiStat
                   titleSize="l"
                   isLoading={isLoadingEngine}
@@ -79,19 +92,27 @@ export const EngineOverview: React.FC = () => {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
-                <EuiIcon size="xxl" type="documents" color="#98A2B3" />
-                <EuiStat
-                  titleSize="l"
-                  isLoading={false}
-                  title={fieldsCount.toLocaleString()}
-                  description={i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.overview.fieldsDescription',
-                    { defaultMessage: 'Fields' }
-                  )}
-                  titleColor="primary"
-                />
-              </EuiFlexGroup>
+              <EuiLinkTo
+                to={generateEncodedPath(ENGINE_TAB_PATH, {
+                  engineName,
+                  tabId: EngineViewTabs.SCHEMA,
+                })}
+                color="text"
+              >
+                <EuiFlexGroup alignItems="center">
+                  <EuiIcon size="xxl" type="documents" color={colors.mediumShade} />
+                  <EuiStat
+                    titleSize="l"
+                    isLoading={false}
+                    title={fieldsCount.toLocaleString()}
+                    description={i18n.translate(
+                      'xpack.enterpriseSearch.content.engine.overview.fieldsDescription',
+                      { defaultMessage: 'Fields' }
+                    )}
+                    titleColor="primary"
+                  />
+                </EuiFlexGroup>
+              </EuiLinkTo>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

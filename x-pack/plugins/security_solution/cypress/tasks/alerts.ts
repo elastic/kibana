@@ -31,12 +31,13 @@ import {
   SELECT_ALL_ALERTS,
   SELECT_ALL_VISIBLE_ALERTS,
   ACKNOWLEDGED_ALERTS_FILTER_BTN,
+  CELL_ADD_TO_TIMELINE_BUTTON,
+  CELL_FILTER_IN_BUTTON,
+  CELL_SHOW_TOP_FIELD_BUTTON,
+  ACTIONS_EXPAND_BUTTON,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
-import {
-  ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE,
-  TIMELINE_COLUMN_SPINNER,
-} from '../screens/timeline';
+import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 import {
   UPDATE_ENRICHMENT_RANGE_BUTTON,
   ENRICHMENT_QUERY_END_INPUT,
@@ -305,9 +306,22 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
   cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
-export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: number) => {
+const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
   cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
-  cy.get(ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE).first().click({ force: true });
+  cy.get(actionSelector).first().click({ force: true });
+};
+export const clickExpandActions = (propertySelector: string, rowIndex: number) => {
+  clickAction(propertySelector, rowIndex, ACTIONS_EXPAND_BUTTON);
+};
+export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: number) => {
+  clickAction(propertySelector, rowIndex, CELL_ADD_TO_TIMELINE_BUTTON);
+};
+export const filterForAlertProperty = (propertySelector: string, rowIndex: number) => {
+  clickAction(propertySelector, rowIndex, CELL_FILTER_IN_BUTTON);
+};
+export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
+  clickExpandActions(propertySelector, rowIndex);
+  cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click({ force: true });
 };
 
 export const waitForAlerts = () => {

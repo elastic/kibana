@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import { get } from 'lodash';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { BrowserField, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useCallback, useMemo } from 'react';
+import { getAllFieldsByName } from '../../../common/containers/source';
+import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
+import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
+import { SecurityCellActionsTrigger } from '../../../actions/constants';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
 import type { TableId } from '../../../../common/types';
-import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../common/lib/cell_actions/constants';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { dataTableSelectors } from '../../../common/store/data_table';
@@ -24,9 +24,7 @@ export const getUseCellActionsHook = (tableId: TableId) => {
   const useCellActions: AlertsTableConfigurationRegistry['useCellActions'] = ({
     columns,
     data,
-    ecsData,
     dataGridRef,
-    pageSize,
   }) => {
     const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
     /**
@@ -38,6 +36,8 @@ export const getUseCellActionsHook = (tableId: TableId) => {
      *
      *
      */
+
+    const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const finalData = useMemo(
       () =>
         (data as TimelineNonEcsData[][]).map((row) =>
@@ -62,48 +62,46 @@ export const getUseCellActionsHook = (tableId: TableId) => {
       useShallowEqualSelector((state) => (getTable(state, tableId) ?? tableDefaults).viewMode) ??
       tableDefaults.viewMode;
 
-    const getCellActions = useCallback(
-      (columnId: string) => {
-        if (viewMode === VIEW_SELECTION.eventRenderedView) {
-          // No cell actions are needed when eventRenderedView
-          return [];
-        }
+    const cellActionProps = useMemo<UseDataGridColumnsSecurityCellActionsProps>(() => {
+      const fields =
+        viewMode === VIEW_SELECTION.eventRenderedView
+          ? []
+          : columns.map((col) => {
+              const fieldMeta: Partial<BrowserField> | undefined = browserFieldsByName[col.id];
+              return {
+                name: col.id,
+                type: fieldMeta?.type ?? 'keyword',
+                values: (finalData as TimelineNonEcsData[][]).map(
+                  (row) => row.find((rowData) => rowData.field === col.id)?.value ?? []
+                ),
+                aggregatable: fieldMeta?.aggregatable ?? false,
+              };
+            });
 
-        return defaultCellActions.map((dca) => {
-          return dca({
-            browserFields,
-            data: finalData,
-            ecsData: ecsData as Ecs[],
-            header: columns
-              .filter((col) => col.id === columnId)
-              .map((col) => {
-                const splitCol = col.id.split('.');
-                const fields =
-                  splitCol.length > 0
-                    ? get(browserFields, [
-                        splitCol.length === 1 ? 'base' : splitCol[0],
-                        'fields',
-                        col.id,
-                      ])
-                    : {};
-                return {
-                  ...col,
-                  ...fields,
-                };
-              })[0],
-            scopeId: SourcererScopeName.default,
-            pageSize,
-            closeCellPopover: dataGridRef?.current?.closeCellPopover,
-          });
-        });
+      return {
+        triggerId: SecurityCellActionsTrigger.DEFAULT,
+        fields,
+        metadata: {
+          // cell actions scope
+          scopeId: tableId,
+        },
+        dataGridRef,
+      };
+    }, [viewMode, browserFieldsByName, columns, finalData, dataGridRef]);
+
+    const cellActions = useDataGridColumnsSecurityCellActions(cellActionProps);
+
+    const getCellActions = useCallback(
+      (_columnId: string, columnIndex: number) => {
+        if (cellActions.length === 0) return [];
+        return cellActions[columnIndex];
       },
-      [browserFields, columns, finalData, dataGridRef, ecsData, pageSize, viewMode]
+      [cellActions]
     );
 
     return {
       getCellActions,
       visibleCellActions: 3,
-      disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
     };
   };
 

@@ -13,10 +13,8 @@ import { ObservabilityApp } from '../../typings/common';
 
 /**
  * Note: The usage_collection plugin will take care of sending this data to the telemetry server.
- * You can find these metrics stored at:
- * stack_stats.kibana.plugins.ui_metric.{app}.{metric}(__delayed_{n}ms)?
- * which will be an array of objects each containing a key, representing the metric, and
- * a value, which will be a counter
+ * You can find the metrics that are collected by these hooks in Stack Telemetry.
+ * Search the index `kibana-ui-counter`. You can filter for `eventName` and/or `appName`.
  */
 
 interface TrackOptions {

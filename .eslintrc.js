@@ -249,6 +249,16 @@ const RESTRICTED_IMPORTS = [
     name: 'react-use',
     message: 'Please use react-use/lib/{method} instead.',
   },
+  {
+    name: 'react-router-dom',
+    importNames: ['Route'],
+    message: 'Please use @kbn/shared-ux-router instead',
+  },
+  {
+    name: '@kbn/kibana-react-plugin/public',
+    importNames: ['Route'],
+    message: 'Please use @kbn/shared-ux-router instead',
+  },
 ];
 
 module.exports = {
@@ -1736,6 +1746,7 @@ module.exports = {
     {
       files: [
         'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+        'packages/kbn-validate-next-docs-cli/**/*',
         'packages/kbn-find-used-node-modules/**/*',
       ],
       rules: {

@@ -215,6 +215,7 @@ export interface ActionParamsProps<TParams> {
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
+  useDefaultMessage?: boolean;
   actionConnector?: ActionConnector;
   isLoading?: boolean;
   isDisabled?: boolean;
@@ -557,12 +558,12 @@ export type UseBulkActionsRegistry = (
 export type UseCellActions = (props: {
   columns: EuiDataGridColumn[];
   data: unknown[][];
-  dataGridRef?: RefObject<EuiDataGridRefProps>;
+  dataGridRef: RefObject<EuiDataGridRefProps>;
   ecsData: unknown[];
   pageSize: number;
 }) => {
   // getCellAction function for system to return cell actions per Id
-  getCellActions: (columnId: string) => EuiDataGridColumnCellAction[];
+  getCellActions: (columnId: string, columnIndex: number) => EuiDataGridColumnCellAction[];
   visibleCellActions?: number;
   disabledCellActions?: string[];
 };
@@ -723,4 +724,8 @@ export interface TableUpdateHandlerArgs {
   totalCount: number;
   isLoading: boolean;
   refresh: () => void;
+}
+
+export interface LazyLoadProps {
+  hideLazyLoader?: boolean;
 }

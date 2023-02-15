@@ -310,7 +310,7 @@
           "MlLocator",
           " | undefined; } | undefined, basePath: string | undefined, params: ",
           "MlLocatorParams",
-          ") => string"
+          ", dependencies?: React.DependencyList | undefined) => string"
         ],
         "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
         "deprecated": false,
@@ -362,6 +362,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.useMlHref.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "dependencies",
+            "description": [],
+            "signature": [
+              "React.DependencyList | undefined"
+            ],
+            "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

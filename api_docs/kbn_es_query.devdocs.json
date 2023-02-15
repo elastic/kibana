@@ -4231,20 +4231,6 @@
           },
           "; } | { query: ",
           "FilterMetaParams",
-          " | undefined; from?: string | number | undefined; to?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; gte?: string | number | undefined; lte?: string | number | undefined; format?: string | undefined; } | { query: ",
-          "FilterMetaParams",
-          " | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type: \"range\"; key?: string | undefined; params?: (",
-          "FilterMetaParams",
-          " & ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.RangeFilterParams",
-            "text": "RangeFilterParams"
-          },
-          ") | undefined; value?: string | undefined; field?: string | undefined; formattedValue?: string | undefined; } | { query: ",
-          "FilterMetaParams",
           " | undefined; length: number; toString(): string; toLocaleString(): string; pop(): ",
           {
             "pluginId": "@kbn/es-query",
@@ -4886,6 +4872,20 @@
             "text": "Filter"
           },
           " | undefined; } | { query: ",
+          "FilterMetaParams",
+          " | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type: \"range\"; key?: string | undefined; params?: (",
+          "FilterMetaParams",
+          " & ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.RangeFilterParams",
+            "text": "RangeFilterParams"
+          },
+          ") | undefined; value?: string | undefined; field?: string | undefined; formattedValue?: string | undefined; } | { query: ",
+          "FilterMetaParams",
+          " | undefined; from?: string | number | undefined; to?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; gte?: string | number | undefined; lte?: string | number | undefined; format?: string | undefined; } | { query: ",
           "FilterMetaParams",
           " | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: (",
           "FilterMetaParams",

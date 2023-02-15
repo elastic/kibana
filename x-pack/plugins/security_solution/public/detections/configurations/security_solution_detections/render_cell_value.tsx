@@ -9,8 +9,12 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
-import { find } from 'lodash/fp';
+import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { useLicense } from '../../../common/hooks/use_license';
+import { dataTableSelectors } from '../../../common/store/data_table';
+import type { TableId } from '../../../../common/types';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
@@ -26,6 +30,10 @@ import type { CellValueElementProps } from '../../../timelines/components/timeli
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
 import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
+import { tableDefaults } from '../../../common/store/data_table/defaults';
+import { VIEW_SELECTION } from '../../../../common/constants';
+import { getAllFieldsByName } from '../../../common/containers/source';
+import { eventRenderedViewColumns, getColumns } from './columns';
 
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
@@ -81,9 +89,25 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
   );
 };
 
-export const getRenderCellValueHook = ({ scopeId }: { scopeId: SourcererScopeName }) => {
+export const getRenderCellValueHook = ({
+  scopeId,
+  tableId,
+}: {
+  scopeId: SourcererScopeName;
+  tableId: TableId;
+}) => {
   const useRenderCellValue: GetRenderCellValue = () => {
     const { browserFields } = useSourcererDataView(scopeId);
+    const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
+    const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
+    const license = useLicense();
+
+    const viewMode =
+      useShallowEqualSelector((state) => (getTable(state, tableId) ?? tableDefaults).viewMode) ??
+      tableDefaults.viewMode;
+
+    const columnHeaders =
+      viewMode === VIEW_SELECTION.gridView ? getColumns(license) : eventRenderedViewColumns;
 
     const result = useCallback(
       ({
@@ -92,29 +116,18 @@ export const getRenderCellValueHook = ({ scopeId }: { scopeId: SourcererScopeNam
         data,
         ecsData,
         eventId,
-        globalFilters,
         header,
         isDetails = false,
         isDraggable = false,
         isExpandable,
         isExpanded,
-        linkValues,
         rowIndex,
         rowRenderers,
         setCellProps,
+        linkValues,
         truncate = true,
       }) => {
-        const splitColumnId = columnId.split('.');
-        let myHeader = header ?? { id: columnId };
-
-        if (splitColumnId.length > 1 && browserFields[splitColumnId[0]]) {
-          const attr = (browserFields[splitColumnId[0]].fields ?? {})[columnId] ?? {};
-          myHeader = { ...myHeader, ...attr };
-        } else if (splitColumnId.length === 1) {
-          const attr = (browserFields.base.fields ?? {})[columnId] ?? {};
-          myHeader = { ...myHeader, ...attr };
-        }
-
+        const myHeader = header ?? { id: columnId, ...browserFieldsByName[columnId] };
         /**
          * There is difference between how `triggers actions` fetched data v/s
          * how security solution fetches data via timelineSearchStrategy
@@ -124,6 +137,7 @@ export const getRenderCellValueHook = ({ scopeId }: { scopeId: SourcererScopeNam
          *
          *
          */
+
         const finalData = (data as TimelineNonEcsData[]).map((field) => {
           let localField = field;
           if (['_id', '_index'].includes(field.field)) {
@@ -136,6 +150,10 @@ export const getRenderCellValueHook = ({ scopeId }: { scopeId: SourcererScopeNam
           return localField;
         });
 
+        const colHeader = columnHeaders.find((col) => col.id === columnId);
+
+        const localLinkValues = getOr([], colHeader?.linkField ?? '', ecsData);
+
         return (
           <DefaultCellRenderer
             browserFields={browserFields}
@@ -143,23 +161,23 @@ export const getRenderCellValueHook = ({ scopeId }: { scopeId: SourcererScopeNam
             data={finalData}
             ecsData={ecsData}
             eventId={eventId}
-            globalFilters={globalFilters}
             header={myHeader}
             isDetails={isDetails}
             isDraggable={isDraggable}
             isExpandable={isExpandable}
             isExpanded={isExpanded}
-            linkValues={linkValues}
+            linkValues={linkValues ?? localLinkValues}
             rowIndex={rowIndex}
             colIndex={colIndex}
-            rowRenderers={defaultRowRenderers}
+            rowRenderers={rowRenderers ?? defaultRowRenderers}
             setCellProps={setCellProps}
             scopeId={scopeId}
             truncate={truncate}
+            asPlainText={false}
           />
         );
       },
-      [browserFields]
+      [browserFieldsByName, browserFields, columnHeaders]
     );
     return result;
   };

@@ -114,7 +114,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
 
   const getGlobalInputs = inputsSelectors.globalSelector();
   const globalInputs = useSelector((state: State) => getGlobalInputs(state));
-  const { query: globalQuery, filters: globalFilters, queries: globalQueries } = globalInputs;
+  const { query: globalQuery, filters: globalFilters } = globalInputs;
 
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 

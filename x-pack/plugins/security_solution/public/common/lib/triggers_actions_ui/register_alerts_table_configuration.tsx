@@ -41,10 +41,12 @@ const registerAlertsTableConfiguration = (
 
   const renderCellValueHookAlertPage = getRenderCellValueHook({
     scopeId: SourcererScopeName.detections,
+    tableId: TableId.alertsOnAlertsPage,
   });
 
   const renderCellValueHookCasePage = getRenderCellValueHook({
     scopeId: SourcererScopeName.detections,
+    tableId: TableId.alertsOnCasePage,
   });
 
   const sort: AlertsTableConfigurationRegistry['sort'] = [

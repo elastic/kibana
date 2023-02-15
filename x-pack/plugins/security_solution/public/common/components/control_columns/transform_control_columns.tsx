@@ -34,7 +34,6 @@ export interface TransformColumnsProps {
   columnHeaders: ColumnHeaderOptions[];
   controlColumns: ControlColumnProps[];
   data: TimelineItem[];
-  disabledCellActions: string[];
   fieldBrowserOptions?: FieldBrowserOptions;
   loadingEventIds: string[];
   onRowSelected: OnRowSelected;

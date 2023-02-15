@@ -360,11 +360,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const columnsWithCellActions = useMemo(() => {
     if (getCellActions) {
-      return props.columns.map((col) => ({
+      return props.columns.map((col, idx) => ({
         ...col,
         ...(!(disabledCellActions ?? []).includes(col.id)
           ? {
-              cellActions: getCellActions(col.id) ?? [],
+              cellActions: getCellActions(col.id, idx) ?? [],
               visibleCellActions,
             }
           : {}),

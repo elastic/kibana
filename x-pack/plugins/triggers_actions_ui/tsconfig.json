@@ -45,6 +45,7 @@
     "@kbn/datemath",
     "@kbn/core-capabilities-common",
     "@kbn/safer-lodash-set",
+    "@kbn/shared-ux-router",
     "@kbn/alerts-ui-shared"
   ],
   "exclude": [
