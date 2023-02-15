@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import {
   EuiAvatar,
   EuiButton,
+  EuiFlexGroup,
   EuiFormLabel,
   EuiPanel,
   EuiSelect,
@@ -228,22 +229,34 @@ export function SloEditForm({ slo }: Props) {
 
           <EuiSpacer size="xl" />
 
-          <EuiButton
-            fill
-            color="primary"
-            data-test-subj="sloFormSubmitButton"
-            onClick={handleSubmit}
-            disabled={!formState.isValid}
-            isLoading={loading && !error}
-          >
-            {isEditMode
-              ? i18n.translate('xpack.observability.slos.sloEdit.editSloButton', {
-                  defaultMessage: 'Update SLO',
-                })
-              : i18n.translate('xpack.observability.slos.sloEdit.createSloButton', {
-                  defaultMessage: 'Create SLO',
-                })}
-          </EuiButton>
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiButton
+              fill
+              color="primary"
+              data-test-subj="sloFormSubmitButton"
+              onClick={handleSubmit}
+              disabled={!formState.isValid}
+              isLoading={loading && !error}
+            >
+              {isEditMode
+                ? i18n.translate('xpack.observability.slos.sloEdit.editSloButton', {
+                    defaultMessage: 'Update SLO',
+                  })
+                : i18n.translate('xpack.observability.slos.sloEdit.createSloButton', {
+                    defaultMessage: 'Create SLO',
+                  })}
+            </EuiButton>
+            <EuiButton
+              fill
+              color="ghost"
+              data-test-subj="sloFormCancelButton"
+              onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
+            >
+              {i18n.translate('xpack.observability.slos.sloEdit.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButton>
+          </EuiFlexGroup>
 
           <EuiSpacer size="xl" />
         </EuiPanel>
