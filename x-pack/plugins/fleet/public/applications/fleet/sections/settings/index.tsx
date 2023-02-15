@@ -7,7 +7,8 @@
 
 import React, { useCallback } from 'react';
 import { EuiPortal } from '@elastic/eui';
-import { Router, Route, Switch, useHistory, Redirect } from 'react-router-dom';
+import { Router, Switch, useHistory, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import {
   useBreadcrumbs,
