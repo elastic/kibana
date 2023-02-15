@@ -214,7 +214,7 @@ Insight filter builder form as markdown plugin {kibana-pull}150363[#150363]
 
 Security::
 * Adds the ability to allow administrators to limit the number of concurrent user sessions with `xpack.security.session.сoncurrentSessions.maxSessions` {kibana-pull}147442[#147442]
-* API Keys can now be updated with new Role Descriptors and Metadata via the API Keys Management screen {kibana-pull}146237[#146237]
+* API Keys can now be updated with new role descriptors and metadata in the API Keys Management screen {kibana-pull}146237[#146237]
 
 For more information about the features introduced in 8.7.0, refer to <<whats-new,What's new in 8.7>>.
 
