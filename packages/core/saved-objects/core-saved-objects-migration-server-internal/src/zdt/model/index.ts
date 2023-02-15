@@ -6,14 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type {
-  BaseState,
-  InitState,
-  DoneState,
-  FatalState,
-  State,
-  AllActionStates,
-  AllControlStates,
-  StateFromActionState,
-} from './types';
-export { createInitialState } from './create_initial_state';
+export { model } from './model';

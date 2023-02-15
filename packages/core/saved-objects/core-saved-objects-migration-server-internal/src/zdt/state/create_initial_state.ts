@@ -5,3 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import type { InitState, State } from './types';
+import type { MigratorContext } from '../context';
+
+export const createInitialState = (context: MigratorContext): State => {
+  const initialState: InitState = {
+    controlState: 'INIT',
+    logs: [],
+    retryCount: 0,
+    retryDelay: 0,
+  };
+  return initialState;
+};

@@ -14,7 +14,6 @@ export interface LogAwareState {
   logs: MigrationLog[];
 }
 
-
 interface StateTransitionLogMeta extends LogMeta {
   kibana: {
     migrations: {

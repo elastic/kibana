@@ -152,6 +152,7 @@ export class KibanaMigrator implements IKibanaMigrator {
       migrationConfig: this.soMigrationsConfig,
       docLinks: this.docLinks,
       serializer: this.serializer,
+      elasticsearchClient: this.client,
     });
   }
 

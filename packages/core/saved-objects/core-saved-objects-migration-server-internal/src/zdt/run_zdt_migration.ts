@@ -8,6 +8,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
@@ -33,8 +34,10 @@ export interface RunZeroDowntimeMigrationOpts {
   migrationConfig: SavedObjectsMigrationConfigType;
   /** docLinks contract to use to link to documentation */
   docLinks: DocLinksServiceStart;
-  /** */
+  /** SO serializer to use for migration */
   serializer: ISavedObjectsSerializer;
+  /** The client to use for communications with ES */
+  elasticsearchClient: ElasticsearchClient;
 }
 
 export const runZeroDowntimeMigration = async (

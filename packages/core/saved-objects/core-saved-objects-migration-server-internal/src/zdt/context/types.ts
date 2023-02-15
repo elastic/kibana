@@ -7,7 +7,10 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
+import type {
+  ISavedObjectTypeRegistry,
+  ISavedObjectsSerializer,
+} from '@kbn/core-saved-objects-server';
 import type { DocLinks } from '@kbn/doc-links';
 
 /**
@@ -16,12 +19,16 @@ import type { DocLinks } from '@kbn/doc-links';
 export interface MigratorContext {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
   readonly indexPrefix: string;
+  /** Name of the types that are living in the index */
+  readonly types: string[];
   /** The client to use for communications with ES */
   readonly elasticsearchClient: ElasticsearchClient;
-  /** Preconfigured logger to use */
-  readonly logger: Logger;
   /** The maximum number of retries to attempt for a failing action */
   readonly maxRetryAttempts: number;
   /** DocLinks for savedObjects. to reference online documentation */
   readonly migrationDocLinks: DocLinks['kibanaUpgradeSavedObjects'];
+  /** SO serializer to use for migration */
+  readonly serializer: ISavedObjectsSerializer;
+  /** The SO type registry to use for the migration */
+  readonly typeRegistry: ISavedObjectTypeRegistry;
 }

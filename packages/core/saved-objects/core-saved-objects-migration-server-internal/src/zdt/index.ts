@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { runZeroDowntimeMigration } from './run_zdt_migration';
-export type { RunZeroDowntimeMigrationOpts } from './run_zdt_migration';
+export { runZeroDowntimeMigration, type RunZeroDowntimeMigrationOpts } from './run_zdt_migration';

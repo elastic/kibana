@@ -7,14 +7,13 @@
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import * as Option from 'fp-ts/lib/Option';
+import type { Logger } from '@kbn/logging';
 import {
   getErrorMessage,
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
-import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { logStateTransition, logActionResponse } from '../common/utils';
-import { type Model, type Next, stateActionMachine } from '../state_action_machine';
+import { type Next, stateActionMachine } from '../state_action_machine';
 import { cleanup } from '../migrations_state_machine_cleanup';
 import type { State } from './state';
 import type { MigratorContext } from './context';
@@ -33,13 +32,14 @@ export async function migrationStateActionMachine({
   context,
   next,
   model,
+  logger,
 }: {
   initialState: State;
   context: MigratorContext;
   next: Next<State>;
-  model: Model<State>;
+  model: (state: State, res: any, context: MigratorContext) => State;
+  logger: Logger;
 }) {
-  const logger = context.logger;
   const startTime = Date.now();
   // Since saved object index names usually start with a `.` and can be
   // configured by users to include several `.`'s we can't use a logger tag to
@@ -54,12 +54,13 @@ export async function migrationStateActionMachine({
       (state, res) => {
         lastState = state;
         logActionResponse(logger, logMessagePrefix, state, res);
-        const newState = model(state, res);
+        const newState = model(state, res, context);
         // Redact the state to reduce the memory consumption and so that we
         // don't log sensitive information inside documents by only keeping
         // the _id's of documents
         const redactedNewState = {
           ...newState,
+          /* TODO: commented until we have model stages that process outdated docs. (attrs not on model atm)
           ...{
             outdatedDocuments: (
               (newState as ReindexSourceToTempTransform).outdatedDocuments ?? []
@@ -75,6 +76,7 @@ export async function migrationStateActionMachine({
               (newState as ReindexSourceToTempIndexBulk).transformedDocBatches ?? []
             ).map((batches) => batches.map((doc) => ({ _id: doc._id }))) as [SavedObjectsRawDoc[]],
           },
+          */
         };
 
         const now = Date.now();
@@ -93,20 +95,11 @@ export async function migrationStateActionMachine({
     const elapsedMs = Date.now() - startTime;
     if (finalState.controlState === 'DONE') {
       logger.info(logMessagePrefix + `Migration completed after ${Math.round(elapsedMs)}ms`);
-      if (finalState.sourceIndex != null && Option.isSome(finalState.sourceIndex)) {
-        return {
-          status: 'migrated' as const,
-          destIndex: finalState.targetIndex,
-          sourceIndex: finalState.sourceIndex.value,
-          elapsedMs,
-        };
-      } else {
-        return {
-          status: 'patched' as const,
-          destIndex: finalState.targetIndex,
-          elapsedMs,
-        };
-      }
+      return {
+        status: 'patched' as const,
+        destIndex: context.indexPrefix,
+        elapsedMs,
+      };
     } else if (finalState.controlState === 'FATAL') {
       try {
         await cleanup(context.elasticsearchClient, finalState);
@@ -124,7 +117,7 @@ export async function migrationStateActionMachine({
     }
   } catch (e) {
     try {
-      await cleanup(client, lastState);
+      await cleanup(context.elasticsearchClient, lastState);
     } catch (err) {
       logger.warn('Failed to cleanup after migrations:', err.message);
     }

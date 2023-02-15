@@ -7,13 +7,29 @@
  */
 
 import type { MigratorContext } from './types';
+import type { MigrateIndexOptions } from '../migrate_index';
 
-export interface CreateContextOps {
-  // TODO
-}
+export type CreateContextOps = Omit<MigrateIndexOptions, 'logger'>;
 
-export const createContext = ({}: CreateContextOps): MigratorContext => {
+/**
+ * Create the context object that will be used for this index migration.
+ */
+export const createContext = ({
+  types,
+  docLinks,
+  migrationConfig,
+  elasticsearchClient,
+  indexPrefix,
+  typeRegistry,
+  serializer,
+}: CreateContextOps): MigratorContext => {
   return {
-    // TODO
-  }
-}
+    indexPrefix,
+    types,
+    elasticsearchClient,
+    typeRegistry,
+    serializer,
+    maxRetryAttempts: migrationConfig.retryAttempts,
+    migrationDocLinks: docLinks.links.kibanaUpgradeSavedObjects,
+  };
+};

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   type SavedObjectsMigrationConfigType,
   type MigrationResult,
@@ -16,14 +17,16 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import { stateActionMachine } from '../state_action_machine';
+import { migrationStateActionMachine } from './migration_state_action_machine';
 import type { VersionedTransformer } from '../document_migrator';
+import { createContext } from './context';
+import { next } from './next';
+import { model } from './model';
+import { createInitialState } from './state';
 
 export interface MigrateIndexOptions {
   indexPrefix: string;
   types: string[];
-  /** The kibana system index prefix. e.g `.kibana` */
-  kibanaIndexPrefix: string;
   /** The SO type registry to use for the migration */
   typeRegistry: ISavedObjectTypeRegistry;
   /** Logger to use for migration output */
@@ -34,10 +37,24 @@ export interface MigrateIndexOptions {
   migrationConfig: SavedObjectsMigrationConfigType;
   /** docLinks contract to use to link to documentation */
   docLinks: DocLinksServiceStart;
-  /** */
+  /** SO serializer to use for migration */
   serializer: ISavedObjectsSerializer;
+  /** The client to use for communications with ES */
+  elasticsearchClient: ElasticsearchClient;
 }
 
-export const migrateIndex = async ({}: MigrateIndexOptions): Promise<MigrationResult> => {
-  return { status: 'skipped' };
+export const migrateIndex = async ({
+  logger,
+  ...options
+}: MigrateIndexOptions): Promise<MigrationResult> => {
+  const context = createContext(options);
+  const initialState = createInitialState(context);
+
+  return migrationStateActionMachine({
+    initialState,
+    next: next(context),
+    model,
+    context,
+    logger,
+  });
 };
