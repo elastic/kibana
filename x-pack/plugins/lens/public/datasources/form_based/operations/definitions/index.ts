@@ -12,7 +12,7 @@ import {
   CoreStart,
 } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import {
+import type {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
@@ -105,6 +105,7 @@ export type {
 } from './calculations';
 export type { CountIndexPatternColumn } from './count';
 export type { LastValueIndexPatternColumn } from './last_value';
+export type { RateIndexPatternColumn } from './rate';
 export type { RangeIndexPatternColumn } from './ranges';
 export type { FormulaIndexPatternColumn, MathIndexPatternColumn } from './formula';
 export type { StaticValueIndexPatternColumn } from './static_value';

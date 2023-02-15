@@ -31,7 +31,7 @@ const OPERATION_TYPE = 'rate';
 const IS_BUCKETED = false;
 
 function ofName(name: string) {
-  return i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
+  return i18n.translate('xpack.lens.indexPattern.rateOf', {
     defaultMessage: 'Rate of {name}',
     values: {
       name,
@@ -69,7 +69,7 @@ export const rateOperation: OperationDefinition<RateIndexPatternColumn, 'field',
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
-      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      getInvalidFieldMessage(layer, columnId, indexPattern),
       //   getDisallowedPreviousShiftMessage(layer, columnId),
       //   getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
@@ -81,7 +81,7 @@ export const rateOperation: OperationDefinition<RateIndexPatternColumn, 'field',
         supportedTypes.has(newField.type) &&
         newField.aggregatable &&
         isMetricCounterField(newField) &&
-        (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
+        (!newField.aggregationRestrictions || newField.aggregationRestrictions.rate)
     );
   },
   filterable: true,
@@ -105,7 +105,6 @@ export const rateOperation: OperationDefinition<RateIndexPatternColumn, 'field',
       },
     };
   },
-
   toEsAggsFn: (column, columnId) => {
     if (true) {
       // if wrap in timeseries and bucket agg
@@ -158,14 +157,11 @@ Example: Calculate the number of different products from the "clothes" group:
       `,
     }),
   },
-  quickFunctionDocumentation: i18n.translate(
-    'xpack.lens.indexPattern.cardinality.documentation.quick',
-    {
-      defaultMessage: `
+  quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.rate.documentation.quick', {
+    defaultMessage: `
 The number of unique values for a specified number, string, date, or boolean field.
       `,
-    }
-  ),
+  }),
   paramEditor: function RateParamEditor({
     paramEditorUpdater,
     currentColumn,
