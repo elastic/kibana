@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { some } from 'lodash';
+import { flattenDeep, some } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import Mustache from 'mustache';
 
 const publicUrlWarning = i18n.translate(
   'xpack.triggersActionsUI.sections.actionTypeForm.warning.publicUrl',
@@ -21,15 +22,17 @@ export function validateParamsForWarnings(
   publicBaseUrl: string | undefined,
   actionVariables: ActionVariable[] | undefined
 ): string | null {
-  const mustacheRegex = /[^<%\>]+(?=%>)|[^{\}]+(?=}})/g;
   if (!publicBaseUrl && value && typeof value === 'string') {
-    const publicUrlFields = (actionVariables || [])
-      .filter((v) => v.usesPublicBaseUrl)
-      .map((v) => v.name.replace(/^(params\.|context\.|state\.)/, ''));
-    const contextVariables = value.match(mustacheRegex);
-    const hasUrlFields = some(contextVariables, (contextVariable) =>
-      some(publicUrlFields, (publicUrlField) => contextVariable.indexOf(publicUrlField) > -1)
-    );
+    const publicUrlFields = (actionVariables || []).reduce((acc, v) => {
+      if (v.usesPublicBaseUrl) {
+        acc.push(v.name.replace(/^(params\.|context\.|state\.)/, ''));
+        acc.push(v.name);
+      }
+      return acc;
+    }, new Array<string>());
+
+    const variables = new Set(flattenDeep(Mustache.parse(value) as Array<[string, string]>));
+    const hasUrlFields = some(publicUrlFields, (publicUrlField) => variables.has(publicUrlField));
     if (hasUrlFields) {
       return publicUrlWarning;
     }
