@@ -14,6 +14,7 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   PluginSetupContract as ActionsPluginSetup,
@@ -34,7 +35,7 @@ import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 
-import { APP_ID } from '../common/constants';
+import { APP_ID, CASES_FILE_KIND } from '../common/constants';
 import {
   createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
@@ -56,11 +57,13 @@ import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/p
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UserProfileService } from './services';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
+import { registerInternalAttachments } from './internal_attachments';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
   lens: LensServerPluginSetup;
   features: FeaturesPluginSetup;
+  files: FilesSetup;
   security: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
   taskManager?: TaskManagerSetupContract;
@@ -71,6 +74,7 @@ export interface PluginsStart {
   actions: ActionsPluginStart;
   features: FeaturesPluginStart;
   licensing: LicensingPluginStart;
+  files: FilesStart;
   taskManager?: TaskManagerStartContract;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
@@ -103,6 +107,9 @@ export class CasePlugin {
         core
       )}] and plugins [${Object.keys(plugins)}]`
     );
+
+    registerInternalAttachments(this.externalReferenceAttachmentTypeRegistry);
+    registerFileKind(plugins.files);
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -205,6 +212,7 @@ export class CasePlugin {
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       notifications: plugins.notifications,
       ruleRegistry: plugins.ruleRegistry,
+      filesPluginStart: plugins.files,
     });
 
     const client = core.elasticsearch.client;
@@ -247,3 +255,7 @@ export class CasePlugin {
     };
   };
 }
+
+const registerFileKind = (filesSetupPlugin: FilesSetup) => {
+  filesSetupPlugin.registerFileKind(CASES_FILE_KIND);
+};

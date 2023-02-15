@@ -23,6 +23,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { Username } from '../user_profiles/username';
 import { HoverableAvatar } from '../user_profiles/hoverable_avatar';
+import { AddFile } from '../add_file';
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 8px;
@@ -125,15 +126,18 @@ export const UserActions = React.memo(
 
     const MarkdownNewComment = useMemo(
       () => (
-        <AddComment
-          id={NEW_COMMENT_ID}
-          caseId={caseId}
-          ref={(element) => (commentRefs.current[NEW_COMMENT_ID] = element)}
-          onCommentPosted={handleUpdate}
-          onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_COMMENT_ID)}
-          showLoading={false}
-          statusActionButton={statusActionButton}
-        />
+        <>
+          <AddComment
+            id={NEW_COMMENT_ID}
+            caseId={caseId}
+            ref={(element) => (commentRefs.current[NEW_COMMENT_ID] = element)}
+            onCommentPosted={handleUpdate}
+            onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_COMMENT_ID)}
+            showLoading={false}
+            statusActionButton={statusActionButton}
+          />
+          <AddFile caseId={caseId} onFileAdded={handleUpdate} />
+        </>
       ),
       [caseId, handleUpdate, handleManageMarkdownEditId, statusActionButton, commentRefs]
     );

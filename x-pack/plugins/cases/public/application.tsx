@@ -17,10 +17,12 @@ import {
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { FilesContext } from '@kbn/shared-ux-file-context';
 import type { RenderAppProps } from './types';
 import { CasesApp } from './components/app';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import { CASES_FILE_KIND } from '../common/constants';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
@@ -72,12 +74,18 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
             }}
           >
             <Router history={history}>
-              <CasesAppWithContext
-                externalReferenceAttachmentTypeRegistry={
-                  deps.externalReferenceAttachmentTypeRegistry
-                }
-                persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
-              />
+              <FilesContext
+                client={pluginsStart.files.filesClientFactory.asScoped(CASES_FILE_KIND.id)}
+              >
+                <CasesAppWithContext
+                  externalReferenceAttachmentTypeRegistry={
+                    deps.externalReferenceAttachmentTypeRegistry
+                  }
+                  persistableStateAttachmentTypeRegistry={
+                    deps.persistableStateAttachmentTypeRegistry
+                  }
+                />
+              </FilesContext>
             </Router>
           </KibanaContextProvider>
         </KibanaThemeProvider>

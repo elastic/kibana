@@ -35,6 +35,7 @@ import type {
   CommentRequest,
   CommentRequestActionsType,
   CommentRequestAlertType,
+  CommentRequestExternalReferenceNoSOType,
   CommentRequestExternalReferenceSOType,
   CommentRequestUserType,
   CommentResponse,
@@ -261,6 +262,18 @@ export const isCommentRequestTypeExternalReferenceSO = (
   return (
     context.type === CommentType.externalReference &&
     context.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
+  );
+};
+
+/**
+ * A type narrowing function for external reference elasticsearch attachments.
+ */
+export const isCommentRequestTypeExternalReferenceElasticsearch = (
+  context: Partial<CommentRequest>
+): context is CommentRequestExternalReferenceNoSOType => {
+  return (
+    context.type === CommentType.externalReference &&
+    context.externalReferenceStorage?.type === ExternalReferenceStorageType.elasticSearchDoc
   );
 };
 

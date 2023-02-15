@@ -8,10 +8,11 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { FilesSetup } from '@kbn/files-plugin/public';
 import type { CasesUiStart, CasesPluginSetup, CasesPluginStart, CasesUiSetup } from './types';
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
-import { APP_ID, APP_PATH } from '../common/constants';
+import { APP_ID, APP_PATH, CASES_FILE_KIND } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
@@ -27,6 +28,7 @@ import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import { registerInternalAttachments } from './internal_attachments';
 
 /**
  * @public
@@ -51,6 +53,9 @@ export class CasesUiPlugin
     const storage = this.storage;
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
+
+    registerInternalAttachments(externalReferenceAttachmentTypeRegistry);
+    registerFileKind(plugins.files);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
@@ -160,3 +165,7 @@ export class CasesUiPlugin
 
   public stop() {}
 }
+
+const registerFileKind = (filesSetupPlugin: FilesSetup) => {
+  filesSetupPlugin.registerFileKind(CASES_FILE_KIND);
+};

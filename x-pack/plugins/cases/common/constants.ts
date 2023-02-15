@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { FileKind } from '@kbn/files-plugin/common';
 import { CASE_VIEW_PAGE_TABS } from './types';
 import type { CasesFeaturesAllRequired } from './ui/types';
 
@@ -205,4 +206,35 @@ export const SEARCH_DEBOUNCE_MS = 500;
 export const LOCAL_STORAGE_KEYS = {
   casesQueryParams: 'cases.list.queryParams',
   casesFilterOptions: 'cases.list.filterOptions',
+};
+
+const httpTags = {
+  tags: [`access:casesFiles`],
+};
+
+/**
+ * The file kind definition for interacting with the file service
+ */
+export const CASES_FILE_KIND: FileKind = {
+  id: APP_ID,
+  http: {
+    create: httpTags,
+    delete: httpTags,
+    download: httpTags,
+    getById: httpTags,
+    list: httpTags,
+    update: httpTags,
+  },
+  maxSizeBytes: 100 * 1024 * 1024, // 100 MiB
+  allowedMimeTypes: [
+    'image/png',
+    'image/jpeg',
+    'image/webp',
+    'image/avif',
+    'image/jpg',
+    'image/gif',
+    'text/plain',
+    'text/js',
+    'text/json',
+  ],
 };

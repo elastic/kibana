@@ -14,3 +14,4 @@ export * from './constants';
 export * from './alerts';
 export * from './user_profiles';
 export * from './assignee';
+export * from './files';
