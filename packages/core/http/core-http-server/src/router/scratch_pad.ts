@@ -11,7 +11,7 @@ import { pipe } from 'fp-ts/lib/function';
 import type { RequestHandler } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
 import type { RouteConfig, RouteMethod } from './route';
-import type { IRouter, RouteRegistrar } from './router';
+import type { IRouter } from './router';
 import type { RouteValidatorFullConfig } from './route_validator';
 
 const logger: { info(message: string): void } = {} as any;
@@ -29,11 +29,10 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
   /**
    * We must omit "validate" because we are going to declare multiple validations per route.
    */
-  type VersionedRouteOpts = Omit<RouteConfig<unknown, unknown, unknown, RouteMethod>, 'validate'>;
-  /**
-   * Simplify the Registrar type by pre assigning the RouteMethod generic type
-   */
-  type Registrar<Context extends RequestHandlerContextBase> = RouteRegistrar<RouteMethod, Context>;
+  type VersionedRouteOpts = { method: RouteMethod } & Omit<
+    RouteConfig<unknown, unknown, unknown, RouteMethod>,
+    'validate'
+  >;
   /**
    * This is the primary interface for the toolkit
    */
@@ -43,7 +42,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
     }): VersionedRouter<Context>;
   }
   interface VersionedRouter<Context extends RequestHandlerContextBase> {
-    defineRoute(registrar: Registrar<Context>, opts: VersionedRouteOpts): VersionedRoute<Context>;
+    defineRoute(opts: VersionedRouteOpts): VersionedRoute<Context>;
   }
   /**
    * The toolkit defines versioned routes, taking care of all the versioning shenanigans
@@ -64,7 +63,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
   const myVersionedRouter = vtk.createVersionedAPI({ router: myRouter });
 
   const versionedRoute = myVersionedRouter
-    .defineRoute(myRouter.post, { path: '/api/my-plugin/my-route', options: {} })
+    .defineRoute({ method: 'post', path: '/api/my-plugin/my-route', options: {} })
     .addVersion(
       {
         version: '1',
@@ -100,7 +99,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
 
   // Route declaration
   pipe(
-    myVersionedRouter.defineRoute(myRouter.post, { path: '/api/my-plugin/my-route', options: {} }),
+    myVersionedRouter.defineRoute({ method: 'post', path: '/api/my-plugin/my-route', options: {} }),
 
     addVersion(
       {
