@@ -48,10 +48,9 @@ import {
   updateTimeContextFromRefreshIntervalUpdate,
   updateTimeInTimeFilterService,
   updateTimeContextFromUrl,
-  DEFAULT_REFRESH_TIME_RANGE,
 } from './time_filter_state_service';
 import { showValidationErrorToast, validateQuery } from './validate_query_service';
-import { DEFAULT_REFRESH_INTERVAL } from './defaults';
+import { DEFAULT_REFRESH_INTERVAL, DEFAULT_REFRESH_TIME_RANGE } from './defaults';
 
 export const createPureLogStreamQueryStateMachine = (
   initialContext: LogStreamQueryContextWithDataViews & LogStreamQueryContextWithTime

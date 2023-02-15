@@ -10,17 +10,13 @@ import { TimeRange } from '@kbn/es-query';
 import { map, merge } from 'rxjs';
 import { actions, InvokeCreator } from 'xstate';
 import { datemathToEpochMillis } from '../../../utils/datemath';
+import { DEFAULT_REFRESH_TIME_RANGE } from './defaults';
 import { LogStreamQueryContext, LogStreamQueryEvent } from './types';
 
 export interface TimefilterState {
   timeRange: TimeRange;
   refreshInterval: RefreshInterval;
 }
-
-export const DEFAULT_REFRESH_TIME_RANGE = {
-  from: 'now-1d',
-  to: 'now',
-};
 
 export const initializeFromTimeFilterService =
   ({
