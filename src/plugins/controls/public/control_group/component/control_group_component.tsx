@@ -158,6 +158,9 @@ export const ControlGroup = () => {
             {showAddButton && (
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
+                  size="s"
+                  iconSize="m"
+                  display="base"
                   iconType={'plusInCircle'}
                   onClick={() => controlGroup.openAddDataControlFlyout()}
                 />
