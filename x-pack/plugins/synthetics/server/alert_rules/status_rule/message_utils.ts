@@ -18,7 +18,7 @@ import {
   ERROR_MESSAGE,
   AGENT_NAME,
 } from '../../../common/field_names';
-import { Ping } from '../../../common/runtime_types';
+import { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
 import { ALERT_REASON_MSG } from '../../legacy_uptime/lib/alerts/action_variables';
 
@@ -37,14 +37,14 @@ export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule
 });
 
 export const getMonitorSummary = (
-  monitorInfo: Ping & { '@timestamp'?: string },
+  monitorInfo: OverviewPing,
   statusMessage: string,
   locationId: string,
   configId: string
 ): MonitorSummaryStatusRule => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
-  const checkedAt = moment(monitorInfo['@timestamp'] ?? monitorInfo.timestamp).format('LLL');
+  const checkedAt = moment(monitorInfo['@timestamp']).format('LLL');
 
   return {
     checkedAt,
@@ -62,7 +62,7 @@ export const getMonitorSummary = (
       name: monitorName,
       location: observerLocation,
       status: statusMessage,
-      timestamp: monitorInfo['@timestamp'] ?? monitorInfo.timestamp,
+      timestamp: monitorInfo['@timestamp'],
     }),
   };
 };

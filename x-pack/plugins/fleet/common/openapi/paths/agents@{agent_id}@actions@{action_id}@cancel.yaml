@@ -1,6 +1,11 @@
 parameters:
   - schema:
       type: string
+    name: agentId
+    in: path
+    required: true
+  - schema:
+      type: string
     name: actionId
     in: path
     required: true

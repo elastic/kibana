@@ -8,14 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import type { UseFindCaseUserActions } from './use_find_case_user_actions';
 import { useFindCaseUserActions } from './use_find_case_user_actions';
-import {
-  basicCase,
-  caseUserActions,
-  elasticUser,
-  findCaseUserActionsResponse,
-  getUserAction,
-} from './mock';
-import { Actions } from '../../common/api';
+import { basicCase, findCaseUserActionsResponse } from './mock';
 import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { testQueryClient } from '../common/mock';
@@ -53,9 +46,10 @@ describe('UseFindCaseUserActions', () => {
       expect.objectContaining({
         ...initialData,
         data: {
-          caseUserActions: [...findCaseUserActionsResponse.userActions],
-          participants: [elasticUser],
-          profileUids: new Set(),
+          userActions: [...findCaseUserActionsResponse.userActions],
+          total: 20,
+          perPage: 1000,
+          page: 1,
         },
         isError: false,
         isLoading: false,
@@ -79,138 +73,5 @@ describe('UseFindCaseUserActions', () => {
 
     expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
     expect(addError).toHaveBeenCalled();
-  });
-
-  describe('getProfileUids', () => {
-    it('aggregates the uids from the createdBy field of a user action', async () => {
-      jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
-        Promise.resolve({
-          page: 1,
-          perPage: 1000,
-          total: 20,
-          userActions: [getUserAction('pushed', Actions.add, { createdBy: { profileUid: '456' } })],
-        })
-      );
-
-      const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-        () => useFindCaseUserActions(basicCase.id),
-        { wrapper }
-      );
-
-      await waitForNextUpdate();
-
-      expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
-            Set {
-              "456",
-            }
-          `);
-    });
-
-    it('aggregates the uids from a push', async () => {
-      jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
-        Promise.resolve({
-          page: 1,
-          perPage: 1000,
-          total: 20,
-          userActions: [
-            getUserAction('pushed', Actions.add, {
-              payload: { externalService: { pushedBy: { profileUid: '123' } } },
-            }),
-          ],
-        })
-      );
-
-      const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-        () => useFindCaseUserActions(basicCase.id),
-        { wrapper }
-      );
-
-      await waitForNextUpdate();
-
-      expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
-            Set {
-              "123",
-            }
-          `);
-    });
-
-    it('aggregates the uids from an assignment add user action', async () => {
-      jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
-        Promise.resolve({
-          page: 1,
-          perPage: 1000,
-          total: 20,
-          userActions: [...caseUserActions, getUserAction('assignees', Actions.add)],
-        })
-      );
-
-      const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-        () => useFindCaseUserActions(basicCase.id),
-        { wrapper }
-      );
-
-      await waitForNextUpdate();
-
-      expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
-            Set {
-              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
-              "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
-            }
-          `);
-    });
-
-    it('ignores duplicate uids', async () => {
-      jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
-        Promise.resolve({
-          page: 1,
-          perPage: 1000,
-          total: 20,
-          userActions: [
-            ...caseUserActions,
-            getUserAction('assignees', Actions.add),
-            getUserAction('assignees', Actions.add),
-          ],
-        })
-      );
-
-      const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-        () => useFindCaseUserActions(basicCase.id),
-        { wrapper }
-      );
-
-      await waitForNextUpdate();
-
-      expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
-            Set {
-              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
-              "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
-            }
-          `);
-    });
-
-    it('aggregates the uids from an assignment delete user action', async () => {
-      jest.spyOn(api, 'findCaseUserActions').mockReturnValue(
-        Promise.resolve({
-          page: 1,
-          perPage: 1000,
-          total: 20,
-          userActions: [...caseUserActions, getUserAction('assignees', Actions.delete)],
-        })
-      );
-
-      const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-        () => useFindCaseUserActions(basicCase.id),
-        { wrapper }
-      );
-
-      await waitForNextUpdate();
-
-      expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
-            Set {
-              "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
-              "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
-            }
-          `);
-    });
   });
 });

@@ -49,6 +49,7 @@ export const updateEndpointListItemRoute = (router: ListsPluginRouter): void => 
           entries,
           item_id: itemId,
           tags,
+          expire_time: expireTime,
         } = request.body;
         const exceptionLists = await getExceptionListClient(context);
         const exceptionListItem = await exceptionLists.updateEndpointListItem({
@@ -56,6 +57,7 @@ export const updateEndpointListItemRoute = (router: ListsPluginRouter): void => 
           comments,
           description,
           entries,
+          expireTime,
           id,
           itemId,
           meta,

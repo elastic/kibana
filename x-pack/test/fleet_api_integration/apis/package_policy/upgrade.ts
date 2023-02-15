@@ -1141,7 +1141,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('when upgrading from an integration package to an input package where a required variable has been added', function () {
-      withTestPackage('integration_to_input', '0.9.1');
+      withTestPackage('integration_to_input', '2.0.0');
 
       beforeEach(async function () {
         const { body: agentPolicyResponse } = await supertest
@@ -1162,7 +1162,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: agentPolicyId,
             package: {
               name: 'integration_to_input',
-              version: '0.9.0',
+              version: '1.0.0',
             },
             name: 'integration_to_input-1',
             description: '',

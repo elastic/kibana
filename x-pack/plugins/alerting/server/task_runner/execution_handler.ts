@@ -239,8 +239,11 @@ export class ExecutionHandler<
           logActions.push({
             id: action.id,
             typeId: action.actionTypeId,
-            alertId: 'summary',
-            alertGroup: action.group,
+            alertSummary: {
+              new: summarizedAlerts.new.count,
+              ongoing: summarizedAlerts.ongoing.count,
+              recovered: summarizedAlerts.recovered.count,
+            },
           });
         } else {
           const executableAlert = alert!;

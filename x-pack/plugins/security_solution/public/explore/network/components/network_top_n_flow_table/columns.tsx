@@ -9,7 +9,11 @@ import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
 
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
 import { CountryFlag } from '../source_destination/country_flag';
 import type {
   AutonomousSystemItem,
@@ -25,7 +29,6 @@ import type { Columns } from '../../../components/paginated_table';
 import * as i18n from './translations';
 import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
 
 export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>,
@@ -63,12 +66,12 @@ export const getNetworkTopNFlowColumns = (
       if (ip != null) {
         return (
           <>
-            <CellActions
+            <SecurityCellActions
               key={id}
               mode={CellActionsMode.HOVER}
               visibleCellActions={5}
               showActionTooltips
-              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
               field={{
                 name: ipAttr,
                 value: ip,
@@ -76,15 +79,15 @@ export const getNetworkTopNFlowColumns = (
               }}
             >
               <NetworkDetailsLink ip={ip} flowTarget={flowTarget} />
-            </CellActions>
+            </SecurityCellActions>
 
             {geo && (
-              <CellActions
+              <SecurityCellActions
                 key={`${id}-${geo}`}
                 mode={CellActionsMode.HOVER}
                 visibleCellActions={5}
                 showActionTooltips
-                triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+                triggerId={SecurityCellActionsTrigger.DEFAULT}
                 field={{
                   name: geoAttrName,
                   value: geo,
@@ -93,7 +96,7 @@ export const getNetworkTopNFlowColumns = (
               >
                 {' '}
                 <CountryFlag countryCode={geo} /> {geo}
-              </CellActions>
+              </SecurityCellActions>
             )}
           </>
         );
@@ -117,6 +120,7 @@ export const getNetworkTopNFlowColumns = (
           values: domains,
           fieldName: domainAttr,
           fieldType: 'keyword',
+          aggregatable: true,
           idPrefix: id,
           displayCount: 1,
         });
@@ -140,6 +144,7 @@ export const getNetworkTopNFlowColumns = (
                 values: [as.name],
                 fieldName: `${flowTarget}.as.organization.name`,
                 fieldType: 'keyword',
+                aggregatable: true,
                 idPrefix: `${id}-name`,
               })}
 
@@ -151,6 +156,7 @@ export const getNetworkTopNFlowColumns = (
                   fieldName: `${flowTarget}.as.number`,
                   idPrefix: `${id}-number`,
                   fieldType: 'keyword',
+                  aggregatable: true,
                 })}
               </>
             )}

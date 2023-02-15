@@ -1657,7 +1657,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"top\" | \"bottom\" | \"left\" | \"right\")[]"
+                      "(\"right\" | \"left\" | \"top\" | \"bottom\")[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false,

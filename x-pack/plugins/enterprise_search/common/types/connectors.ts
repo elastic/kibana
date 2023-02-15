@@ -7,6 +7,7 @@
 
 export interface KeyValuePair {
   label: string;
+  order?: number | null;
   value: string | null;
 }
 
