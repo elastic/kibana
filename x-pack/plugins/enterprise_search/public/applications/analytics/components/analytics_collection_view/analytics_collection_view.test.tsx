@@ -22,21 +22,6 @@ import { AnalyticsCollectionSettings } from './analytics_collection_settings';
 
 import { AnalyticsCollectionView } from './analytics_collection_view';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        application: {
-          getUrlForApp: (appId: string, options?: { path?: string }) =>
-            `/app/${appId}${options?.path}`,
-        },
-      },
-    }),
-  };
-});
-
 const mockValues = {
   analyticsCollection: {
     event_retention_day_length: 180,

@@ -20,10 +20,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RedirectAppLinks, useKibana } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -52,10 +51,7 @@ export const AnalyticsCollectionView: React.FC = () => {
   const { analyticsCollection, isLoading } = useValues(FetchAnalyticsCollectionLogic);
   const { dataViewId } = useValues(AnalyticsCollectionDataViewIdLogic);
   const { id, section } = useParams<{ id: string; section: string }>();
-  const { navigateToUrl } = useValues(KibanaLogic);
-  const {
-    services: { application },
-  } = useKibana<CoreStart>();
+  const { navigateToUrl, application } = useValues(KibanaLogic);
   const collectionViewTabs = [
     {
       id: 'events',
