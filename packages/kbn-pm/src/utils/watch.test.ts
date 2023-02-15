@@ -14,7 +14,7 @@ describe.skip('#waitUntilWatchIsReady', () => {
   let buildOutputStream: EventEmitter;
   let completionHintPromise: Promise<string>;
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
 
     buildOutputStream = new EventEmitter();
     completionHintPromise = waitUntilWatchIsReady(buildOutputStream, {

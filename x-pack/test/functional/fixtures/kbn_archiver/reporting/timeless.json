@@ -1,0 +1,98 @@
+{
+  "attributes": {
+    "fieldAttrs": "{\"eon\":{\"count\":1},\"epoch\":{\"count\":1},\"era\":{\"count\":1},\"period\":{\"count\":1}}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "title": "timeless-test",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "7.17.9",
+  "id": "58835c20-87a9-11ed-9097-518b57bf82ea",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2022-12-29T21:34:51.992Z",
+  "version": "WzUxLDFd"
+}
+
+{
+  "attributes": {
+    "columns": [],
+    "description": "",
+    "grid": {},
+    "hideChart": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [],
+    "title": "timeless: no filter, no columns selected"
+  },
+  "coreMigrationVersion": "7.17.9",
+  "id": "6eec8310-87a9-11ed-9097-518b57bf82ea",
+  "migrationVersion": {
+    "search": "7.9.3"
+  },
+  "references": [
+    {
+      "id": "58835c20-87a9-11ed-9097-518b57bf82ea",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2022-12-29T21:34:24.401Z",
+  "version": "WzI2LDFd"
+}
+
+{
+  "attributes": {
+    "columns": [
+      "eon",
+      "epoch",
+      "era",
+      "period"
+    ],
+    "description": "",
+    "grid": {},
+    "hideChart": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "eon",
+        "asc"
+      ],
+      [
+        "epoch",
+        "asc"
+      ],
+      [
+        "era",
+        "asc"
+      ],
+      [
+        "period",
+        "asc"
+      ]
+    ],
+    "title": "timeless: no filter, no columns selected, custom sorting"
+  },
+  "coreMigrationVersion": "7.17.9",
+  "id": "b38daaf0-87c0-11ed-9bd8-19b3856630c5",
+  "migrationVersion": {
+    "search": "7.9.3"
+  },
+  "references": [
+    {
+      "id": "58835c20-87a9-11ed-9097-518b57bf82ea",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2022-12-29T21:35:23.426Z",
+  "version": "WzY4LDFd"
+}

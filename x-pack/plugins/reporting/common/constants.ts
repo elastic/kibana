@@ -66,6 +66,8 @@ export const DEFAULT_VIEWPORT = {
 };
 
 // Export Type Definitions
+export const CSV_SAVED_OBJECT_JOB_TYPE = 'csv_saved_object';
+
 export const CSV_REPORT_TYPE = 'CSV';
 export const CSV_JOB_TYPE = 'csv_searchsource';
 

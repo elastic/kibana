@@ -14,7 +14,7 @@ import execa from 'execa';
 import { REPO_ROOT } from '@kbn/utils';
 import stripAnsi from 'strip-ansi';
 
-import jestDiff from 'jest-diff';
+import { diff as jestDiff } from 'jest-diff';
 import jsonStable from 'json-stable-stringify';
 import { ascending, CacheableWorkerConfig } from '../common';
 

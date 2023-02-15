@@ -218,14 +218,14 @@ export function render<ExtraCore>(
   }
 
   return {
-    ...reactTestLibRender(
+    ...(reactTestLibRender(
       <MountWithReduxProvider state={testState} useRealStore={useRealStore}>
         <MockRouter path={path} history={history} kibanaProps={kibanaProps} core={core}>
           {ui}
         </MockRouter>
       </MountWithReduxProvider>,
       renderOptions
-    ),
+    ) as any),
     history,
   };
 }

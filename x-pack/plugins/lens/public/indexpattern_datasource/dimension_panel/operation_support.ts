@@ -12,9 +12,9 @@ import { memoizedGetAvailableOperationsByMetadata, OperationFieldTuple } from '.
 import { IndexPatternPrivateState } from '../types';
 
 export interface OperationSupportMatrix {
-  operationByField: Partial<Record<string, Set<OperationType>>>;
+  operationByField: Map<string, Set<OperationType>>;
   operationWithoutField: Set<OperationType>;
-  fieldByOperation: Partial<Record<OperationType, Set<string>>>;
+  fieldByOperation: Map<OperationType, Set<string>>;
 }
 
 type Props = Pick<
@@ -28,37 +28,30 @@ function computeOperationMatrix(
     operations: OperationFieldTuple[];
   }>,
   filterOperations: (operation: OperationMetadata) => boolean
-) {
-  const filteredOperationsByMetadata = operationsByMetadata.filter((operation) =>
-    filterOperations(operation.operationMetaData)
-  );
-
-  const supportedOperationsByField: Partial<Record<string, Set<OperationType>>> = {};
-  const supportedOperationsWithoutField: Set<OperationType> = new Set();
-  const supportedFieldsByOperation: Partial<Record<OperationType, Set<string>>> = {};
-
-  filteredOperationsByMetadata.forEach(({ operations }) => {
-    operations.forEach((operation) => {
-      if (operation.type === 'field') {
-        if (!supportedOperationsByField[operation.field]) {
-          supportedOperationsByField[operation.field] = new Set();
+): OperationSupportMatrix {
+  return operationsByMetadata
+    .reduce<OperationFieldTuple[]>((opsFieldTuples, { operationMetaData, operations }) => {
+      return filterOperations(operationMetaData)
+        ? [...opsFieldTuples, ...operations]
+        : opsFieldTuples;
+    }, [])
+    .reduce<OperationSupportMatrix>(
+      (matrix, operation) => {
+        if (operation.type === 'field') {
+          const fieldOps = matrix.operationByField.get(operation.field) ?? new Set<OperationType>();
+          fieldOps.add(operation.operationType);
+          matrix.operationByField.set(operation.field, fieldOps);
+          const opFields =
+            matrix.fieldByOperation.get(operation.operationType) ?? new Set<string>();
+          opFields.add(operation.field);
+          matrix.fieldByOperation.set(operation.operationType, opFields);
+        } else {
+          matrix.operationWithoutField.add(operation.operationType);
         }
-        supportedOperationsByField[operation.field]?.add(operation.operationType);
-
-        if (!supportedFieldsByOperation[operation.operationType]) {
-          supportedFieldsByOperation[operation.operationType] = new Set();
-        }
-        supportedFieldsByOperation[operation.operationType]?.add(operation.field);
-      } else {
-        supportedOperationsWithoutField.add(operation.operationType);
-      }
-    });
-  });
-  return {
-    operationByField: supportedOperationsByField,
-    operationWithoutField: supportedOperationsWithoutField,
-    fieldByOperation: supportedFieldsByOperation,
-  };
+        return matrix;
+      },
+      { operationByField: new Map(), operationWithoutField: new Set(), fieldByOperation: new Map() }
+    );
 }
 
 // memoize based on latest execution. It supports multiple args
