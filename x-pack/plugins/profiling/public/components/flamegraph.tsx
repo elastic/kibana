@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Chart, Datum, Flame, FlameLayerValue, PartialTheme, Settings } from '@elastic/charts';
+import { Chart, Datum, Flame, FlameLayerValue, PartialTheme, Settings, TooltipContainer } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,7 +14,6 @@ import {
   EuiText,
   EuiTextColor,
   useEuiTheme,
-  TooltipContainer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
