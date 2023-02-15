@@ -67,7 +67,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const ml = getService('ml');
   const pageObjects = getPageObjects(['triggersActionsUI']);
   const commonScreenshots = getService('commonScreenshots');
-  const browser = getService('browser');
   const actions = getService('actions');
   const testSubjects = getService('testSubjects');
   const ENTER_KEY = '\uE007';
