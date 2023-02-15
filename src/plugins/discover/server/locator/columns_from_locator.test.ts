@@ -6,26 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { IUiSettingsClient, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { ISearchStartSearchSource, SearchSource } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
-import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { LocatorServicesDeps as Services } from '.';
 import { DiscoverAppLocatorParams, DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
 import { columnsFromLocatorFactory } from './columns_from_locator';
 
 const mockSavedSearchId = 'abc-test-123';
-const defaultSavedSearch: SavedSearch = {
+// object returned by savedObjectsClient.get in testing
+const defaultSavedSearch: SavedObject<SavedSearchAttributes> = {
+  type: 'search',
   id: mockSavedSearchId,
-  title: '[Logs] Visits',
-  description: '',
-  columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
-  sort: [['test', '134']] as unknown as [],
-  searchSource: createSearchSourceMock(),
+  references: [
+    { id: '90943e30-9a47-11e8-b64d-95841ca0b247', name: 'testIndexRefName', type: 'index-pattern' },
+  ],
+  attributes: {
+    title: '[Logs] Visits',
+    description: '',
+    columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
+    sort: [['test', '134']] as unknown as [],
+    kibanaSavedObjectMeta: {
+      searchSourceJSON:
+        '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"testIndexRefName"}',
+    },
+  } as unknown as SavedSearchAttributes,
 };
 
 const coreStart = coreMock.createStart();
@@ -33,7 +43,7 @@ let uiSettingsClient: IUiSettingsClient;
 let soClient: SavedObjectsClientContract;
 let searchSourceStart: ISearchStartSearchSource;
 let mockServices: Services;
-let mockSavedSearch: SavedSearch;
+let mockSavedSearch: SavedObject<SavedSearchAttributes>;
 let mockDataView: DataView;
 
 // mock search source belonging to the saved search
@@ -64,7 +74,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   mockPayload = [{ params: { savedSearchId: mockSavedSearchId } }];
-  mockSavedSearch = { ...defaultSavedSearch };
+  mockSavedSearch = { ...defaultSavedSearch, attributes: { ...defaultSavedSearch.attributes } };
 
   mockDataView = createStubDataView({
     spec: {
@@ -123,7 +133,7 @@ test('with search source using columns when DOC_HIDE_TIME_COLUMN_SETTING is true
 });
 
 test('with saved search containing ["_source"]', async () => {
-  mockSavedSearch.columns = ['_source'];
+  mockSavedSearch.attributes.columns = ['_source'];
 
   const provider = columnsFromLocatorFactory(mockServices);
   const columns = await provider(mockPayload[0].params);

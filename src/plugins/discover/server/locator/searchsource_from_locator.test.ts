@@ -6,26 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { IUiSettingsClient, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { ISearchStartSearchSource, SearchSource } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
-import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { LocatorServicesDeps as Services } from '.';
 import { DiscoverAppLocatorParams, DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
 import { searchSourceFromLocatorFactory } from './searchsource_from_locator';
 
 const mockSavedSearchId = 'abc-test-123';
-const defaultSavedSearch: SavedSearch = {
+// object returned by savedObjectsClient.get in testing
+const defaultSavedSearch: SavedObject<SavedSearchAttributes> = {
+  type: 'search',
   id: mockSavedSearchId,
-  title: '[Logs] Visits',
-  description: '',
-  columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
-  sort: [['test', '134']] as unknown as [],
-  searchSource: createSearchSourceMock(),
+  references: [
+    { id: '90943e30-9a47-11e8-b64d-95841ca0b247', name: 'testIndexRefName', type: 'index-pattern' },
+  ],
+  attributes: {
+    title: '[Logs] Visits',
+    description: '',
+    columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
+    sort: [['test', '134']] as unknown as [],
+    kibanaSavedObjectMeta: {
+      searchSourceJSON:
+        '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"testIndexRefName"}',
+    },
+  } as unknown as SavedSearchAttributes,
 };
 
 const coreStart = coreMock.createStart();
@@ -33,8 +43,11 @@ let uiSettingsClient: IUiSettingsClient;
 let soClient: SavedObjectsClientContract;
 let searchSourceStart: ISearchStartSearchSource;
 let mockServices: Services;
-let mockSavedSearch: SavedSearch;
+let mockSavedSearch: SavedObject<SavedSearchAttributes>;
 let mockDataView: DataView;
+
+// mock search source belonging to the saved search
+let mockSearchSource: SearchSource;
 
 // mock params containing the discover app locator
 let mockPayload: Array<{ params: DiscoverAppLocatorParams }>;
@@ -61,7 +74,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   mockPayload = [{ params: { savedSearchId: mockSavedSearchId } }];
-  mockSavedSearch = { ...defaultSavedSearch };
+  mockSavedSearch = { ...defaultSavedSearch, attributes: { ...defaultSavedSearch.attributes } };
 
   mockDataView = createStubDataView({
     spec: {
@@ -71,9 +84,9 @@ beforeEach(() => {
     },
   });
 
-  mockSavedSearch.searchSource = createSearchSourceMock();
-  mockSavedSearch.searchSource.setField('index', mockDataView);
-  searchSourceStart.create = jest.fn().mockResolvedValue(mockSavedSearch.searchSource);
+  mockSearchSource = createSearchSourceMock();
+  mockSearchSource.setField('index', mockDataView);
+  searchSourceStart.create = jest.fn().mockResolvedValue(mockSearchSource);
 
   const uiSettingsGet = uiSettingsClient.get;
   uiSettingsClient.get = jest.fn().mockImplementation((key: string) => {
@@ -89,7 +102,7 @@ test('with saved search containing a filter', async () => {
     meta: { index: 'logstash-*' },
     query: { term: { host: 'elastic.co' } },
   };
-  mockSavedSearch.searchSource.setField('filter', testFilter);
+  mockSearchSource.setField('filter', testFilter);
 
   const provider = searchSourceFromLocatorFactory(mockServices);
   const searchSource = await provider(mockPayload[0].params);
@@ -110,7 +123,7 @@ test('with locator params containing a filter', async () => {
 
 test('with saved search and locator params both containing a filter', async () => {
   // search source belonging to the saved search
-  mockSavedSearch.searchSource.setField('filter', {
+  mockSearchSource.setField('filter', {
     meta: { index: 'logstash-*' },
     query: { term: { host: 'elastic.co' } },
   });
@@ -157,7 +170,7 @@ test('with locator params containing a timeRange', async () => {
 });
 
 test('with saved search containing ["_source"]', async () => {
-  mockSavedSearch.columns = ['_source'];
+  mockSavedSearch.attributes.columns = ['_source'];
 
   const provider = searchSourceFromLocatorFactory(mockServices);
   const searchSource = await provider(mockPayload[0].params);

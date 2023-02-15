@@ -44,7 +44,7 @@ const getFilters = (
 ) => {
   const filters: Filter[] = [];
 
-  // Set a time range filter from (1) DiscoverAppLocatorParams or (2) SavedSearchObjectType
+  // Set a time range filter from (1) DiscoverAppLocatorParams or (2) SavedSearch
   if (timeFieldName) {
     const timeRange = params.timeRange
       ? params.timeRange
