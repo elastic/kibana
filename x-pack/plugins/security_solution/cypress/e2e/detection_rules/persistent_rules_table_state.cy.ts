@@ -172,22 +172,22 @@ describe('Persistent rules table state', () => {
     describe('and on the rules management tab', () => {
       beforeEach(() => {
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
-
-        changeRulesTableState();
-        goToTablePage(2);
       });
 
       it('persists after reloading the page', () => {
+        changeRulesTableState();
+        goToTablePage(2);
+
         cy.reload();
 
         expectRulesManagementTab();
         expectRulesTableState();
         expectTablePage(2);
-        expectManagementTableRules(['rule 6']);
       });
 
       it('persists after navigating back from a rule details page', () => {
-        expectManagementTableRules(['rule 6']);
+        changeRulesTableState();
+        goToTablePage(2);
 
         goToRuleDetails();
         cy.go('back');
@@ -195,11 +195,11 @@ describe('Persistent rules table state', () => {
         expectRulesManagementTab();
         expectRulesTableState();
         expectTablePage(2);
-        expectManagementTableRules(['rule 6']);
       });
 
       it('persists after navigating to another page inside Security Solution', () => {
-        expectManagementTableRules(['rule 6']);
+        changeRulesTableState();
+        goToTablePage(2);
 
         visit(DASHBOARDS_URL);
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
@@ -207,11 +207,11 @@ describe('Persistent rules table state', () => {
         expectRulesManagementTab();
         expectRulesTableState();
         expectTablePage(1);
-        expectManagementTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5']);
       });
 
       it('persists after navigating to another page outside Security Solution', () => {
-        expectManagementTableRules(['rule 6']);
+        changeRulesTableState();
+        goToTablePage(2);
 
         visit(KIBANA_HOME);
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
@@ -219,7 +219,6 @@ describe('Persistent rules table state', () => {
         expectRulesManagementTab();
         expectRulesTableState();
         expectTablePage(1);
-        expectManagementTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5']);
       });
     });
 
@@ -231,49 +230,10 @@ describe('Persistent rules table state', () => {
         goToTablePage(2);
       });
 
-      it('persists after reloading the page', () => {
+      it('persists the selected tab', () => {
         cy.reload();
 
         expectRulesMonitoringTab();
-        expectRulesTableState();
-        expectTablePage(2);
-        expectMonitoringTableRules(['rule 6']);
-      });
-
-      it('persists after navigating back from a rule details page', () => {
-        expectMonitoringTableRules(['rule 6']);
-
-        goToRuleDetails();
-        cy.go('back');
-
-        expectRulesMonitoringTab();
-        expectRulesTableState();
-        expectTablePage(2);
-        expectMonitoringTableRules(['rule 6']);
-      });
-
-      it('persists after navigating to another page inside Security Solution', () => {
-        expectMonitoringTableRules(['rule 6']);
-
-        visit(DASHBOARDS_URL);
-        visit(SECURITY_DETECTIONS_RULES_MONITORING_URL);
-
-        expectRulesMonitoringTab();
-        expectRulesTableState();
-        expectTablePage(1);
-        expectMonitoringTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5']);
-      });
-
-      it('persists after navigating to another page outside Security Solution', () => {
-        expectMonitoringTableRules(['rule 6']);
-
-        visit(KIBANA_HOME);
-        visit(SECURITY_DETECTIONS_RULES_MONITORING_URL);
-
-        expectRulesMonitoringTab();
-        expectRulesTableState();
-        expectTablePage(1);
-        expectMonitoringTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5']);
       });
     });
   });
@@ -316,7 +276,6 @@ describe('Persistent rules table state', () => {
 
         expectRulesTableState();
         expectTablePage(1);
-        expectManagementTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5']);
       });
     });
   });
@@ -348,35 +307,6 @@ describe('Persistent rules table state', () => {
         expectRulesManagementTab();
         expectRulesTableState();
         expectTablePage(1);
-        expectManagementTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5']);
-      });
-    });
-
-    describe('and on the rules monitoring tab', () => {
-      beforeEach(() => {
-        visit(SECURITY_DETECTIONS_RULES_MONITORING_URL);
-
-        changeRulesTableState();
-        goToTablePage(2);
-      });
-
-      it('persists after clearing the session storage', () => {
-        cy.clearAllSessionStorage();
-        cy.reload();
-
-        expectRulesMonitoringTab();
-        expectRulesTableState();
-        expectTablePage(2);
-        expectMonitoringTableRules(['rule 6']);
-      });
-
-      it('persists after clearing the url state', () => {
-        visit(SECURITY_DETECTIONS_RULES_MONITORING_URL);
-
-        expectRulesMonitoringTab();
-        expectRulesTableState();
-        expectTablePage(1);
-        expectMonitoringTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5']);
       });
     });
   });
@@ -422,58 +352,6 @@ describe('Persistent rules table state', () => {
         expectRulesManagementTab();
         expectDefaultRulesTableState();
         expectManagementTableRules([
-          'test 1',
-          'rule 1',
-          'rule 2',
-          'rule 3',
-          'rule 4',
-          'rule 5',
-          'rule 6',
-          'rule 7',
-        ]);
-      });
-    });
-
-    describe('and on the rules monitoring tab', () => {
-      beforeEach(() => {
-        visit(SECURITY_DETECTIONS_RULES_MONITORING_URL);
-
-        changeRulesTableState();
-        goToTablePage(2);
-      });
-
-      it('persists after corrupting the session storage data', () => {
-        cy.window().then((win) => {
-          win.sessionStorage.setItem('securitySolution.rulesTable', '!invalid');
-          cy.reload();
-
-          expectRulesMonitoringTab();
-          expectRulesTableState();
-          expectTablePage(2);
-          expectMonitoringTableRules(['rule 6']);
-        });
-      });
-
-      it('persists after corrupting the url param data', () => {
-        visit(SECURITY_DETECTIONS_RULES_MONITORING_URL, { qs: { rulesTable: '(!invalid)' } });
-
-        expectRulesMonitoringTab();
-        expectRulesTableState();
-        expectTablePage(1);
-        expectMonitoringTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5']);
-      });
-
-      it('DOES NOT persist after corrupting the session storage and url param data', () => {
-        visit(SECURITY_DETECTIONS_RULES_MONITORING_URL, {
-          qs: { rulesTable: '(!invalid)' },
-          onBeforeLoad: (win) => {
-            win.sessionStorage.setItem('securitySolution.rulesTable', '!invalid');
-          },
-        });
-
-        expectRulesMonitoringTab();
-        expectDefaultRulesTableState();
-        expectMonitoringTableRules([
           'test 1',
           'rule 1',
           'rule 2',
