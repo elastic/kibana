@@ -19,7 +19,7 @@ import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { Subscription } from 'rxjs';
-import type { SavedObjectManagementTypeInfo } from '../../../common/types';
+import type { SavedObjectManagementTypeInfo, FindQueryHTTP } from '../../../common/types/latest';
 import {
   parseQuery,
   getSavedObjectCounts,
@@ -232,7 +232,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
-    const findOptions = {
+    const findOptions: FindQueryHTTP = {
       search: queryText ? `${queryText}*` : undefined,
       perPage,
       page: page + 1,
