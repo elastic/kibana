@@ -7,27 +7,13 @@
 
 import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 
-import type { CollectorDependencies } from './types';
+import type { CollectorDependencies, DashboardMetrics } from './types';
 import { getDetectionsMetrics } from './detections/get_metrics';
 import { getInternalSavedObjectsClient } from './get_internal_saved_objects_client';
 import { getEndpointMetrics } from './endpoint/get_metrics';
 import { getDashboardMetrics } from './dashboards/get_dashboards_metrics';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
-
-interface DashboardUsage {
-  created_at: string | undefined;
-  id: string;
-  error_message?: string;
-  error_status_code?: number;
-}
-interface DashboardMetrics {
-  dashboard_tag?: {
-    created_at: string | undefined;
-    linked_dashboards_count: number;
-  };
-  dashboards?: DashboardUsage[];
-}
 
 export interface UsageData {
   detectionMetrics: {};
