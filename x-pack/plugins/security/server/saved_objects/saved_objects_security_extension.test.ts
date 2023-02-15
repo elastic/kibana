@@ -5310,8 +5310,8 @@ describe('#authorizeUpdateSpaces', () => {
           type: ['change'],
         },
         kibana: {
-          add_to_spaces: undefined,
-          delete_from_spaces: undefined,
+          add_to_spaces: spacesToAdd,
+          delete_from_spaces: spacesToRemove,
           saved_object: { type: obj.type, id: obj.id },
         },
         message: `User is updating spaces of ${obj.type} [id=${obj.id}]`,

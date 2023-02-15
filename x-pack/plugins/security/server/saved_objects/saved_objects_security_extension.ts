@@ -575,7 +575,13 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
 
     if (auditAction && bypass !== 'always' && bypass !== 'on_success') {
-      this.auditHelper({ action: auditAction, objects: auditObjects, useSuccessOutcome });
+      this.auditHelper({
+        action: auditAction,
+        objects: auditObjects,
+        useSuccessOutcome,
+        addToSpaces,
+        deleteFromSpaces,
+      });
     }
   }
 
