@@ -18,7 +18,11 @@ export type PositionsChangedEvent = {
   LogStreamPositionContextWithLatestPosition &
   LogStreamPositionContextWithVisiblePositions;
 
-export type LogStreamPositionNotificationEvent = PositionsChangedEvent;
+export interface PageEndBufferReachedEvent {
+  type: 'PAGE_END_BUFFER_REACHED';
+}
+
+export type LogStreamPositionNotificationEvent = PositionsChangedEvent | PageEndBufferReachedEvent;
 
 export const LogStreamPositionNotificationEventSelectors = {
   positionsChanged: (context: LogStreamPositionContext) => {
@@ -33,4 +37,8 @@ export const LogStreamPositionNotificationEventSelectors = {
         } as LogStreamPositionNotificationEvent)
       : undefined;
   },
+  pageEndBufferReached: (context: LogStreamPositionContext) =>
+    ({
+      type: 'PAGE_END_BUFFER_REACHED',
+    } as LogStreamPositionNotificationEvent),
 };

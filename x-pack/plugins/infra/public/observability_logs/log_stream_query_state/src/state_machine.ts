@@ -51,6 +51,7 @@ import {
   DEFAULT_REFRESH_TIME_RANGE,
 } from './time_filter_state_service';
 import { showValidationErrorToast, validateQuery } from './validate_query_service';
+import { DEFAULT_REFRESH_INTERVAL } from './defaults';
 
 export const createPureLogStreamQueryStateMachine = (
   initialContext: LogStreamQueryContextWithDataViews & LogStreamQueryContextWithTime
@@ -178,7 +179,13 @@ export const createPureLogStreamQueryStateMachine = (
                 initialized: {
                   always: [{ target: 'streaming', cond: 'isStreaming' }, { target: 'static' }],
                 },
-                static: {},
+                static: {
+                  on: {
+                    PAGE_END_BUFFER_REACHED: {
+                      actions: ['expandPageEnd'],
+                    },
+                  },
+                },
                 streaming: {
                   after: {
                     refresh: { target: 'streaming', actions: ['refreshTime'] },
@@ -275,6 +282,7 @@ export const createPureLogStreamQueryStateMachine = (
         updateTimeContextFromTimeRangeUpdate,
         updateTimeContextFromRefreshIntervalUpdate,
         refreshTime: send({ type: 'UPDATE_TIME_RANGE', timeRange: DEFAULT_REFRESH_TIME_RANGE }),
+        expandPageEnd: send({ type: 'UPDATE_TIME_RANGE', timeRange: { to: 'now' } }),
         updateTimeContextFromUrl,
       },
       guards: {
@@ -283,7 +291,9 @@ export const createPureLogStreamQueryStateMachine = (
       },
       delays: {
         refresh: (context, event) =>
-          'refreshInterval' in context ? context.refreshInterval.value : 5000,
+          'refreshInterval' in context
+            ? context.refreshInterval.value
+            : DEFAULT_REFRESH_INTERVAL.value,
       },
     }
   );

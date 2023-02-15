@@ -7,6 +7,7 @@
 
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import { AggregateQuery, BoolQuery, DataViewBase, Query, Filter, TimeRange } from '@kbn/es-query';
+import { PageEndBufferReachedEvent } from '../../log_stream_position_state/src/notifications';
 
 export type AnyQuery = Query | AggregateQuery;
 
@@ -148,4 +149,5 @@ export type LogStreamQueryEvent =
       refreshInterval: RefreshInterval;
     }
   | UpdateTimeRangeEvent
-  | UpdateRefreshIntervalEvent;
+  | UpdateRefreshIntervalEvent
+  | PageEndBufferReachedEvent;

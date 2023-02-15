@@ -10,6 +10,7 @@ import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { actions, ActorRefFrom, createMachine, EmittedFrom, SpecialTargets } from 'xstate';
 import { isSameTimeKey } from '../../../../common/time';
 import { OmitDeprecatedState, sendIfDefined } from '../../xstate_helpers';
+import { DESIRED_BUFFER_PAGES, RELATIVE_END_UPDATE_DELAY } from './defaults';
 import { LogStreamPositionNotificationEventSelectors } from './notifications';
 import type {
   LogStreamPositionContext,
@@ -55,19 +56,63 @@ export const createPureLogStreamPositionStateMachine = (initialContext: LogStrea
           },
         },
         initialized: {
-          entry: ['updateContextInUrl', 'notifyPositionsChanged'],
-          on: {
-            JUMP_TO_TARGET_POSITION: {
-              target: 'initialized',
-              actions: ['updateTargetPosition'],
+          type: 'parallel',
+          states: {
+            positions: {
+              initial: 'initialized',
+              states: {
+                initialized: {
+                  entry: ['updateContextInUrl', 'notifyPositionsChanged'],
+                  on: {
+                    JUMP_TO_TARGET_POSITION: {
+                      target: 'initialized',
+                      actions: ['updateTargetPosition'],
+                    },
+                    REPORT_VISIBLE_POSITIONS: {
+                      target: 'initialized',
+                      actions: ['updateVisiblePositions'],
+                    },
+                    TIME_CHANGED: {
+                      target: 'initialized',
+                      actions: ['updatePositionsFromTimeChange'],
+                    },
+                  },
+                },
+              },
             },
-            REPORT_VISIBLE_POSITIONS: {
-              target: 'initialized',
-              actions: ['updateVisiblePositions'],
-            },
-            TIME_CHANGED: {
-              target: 'initialized',
-              actions: ['updatePositionsFromTimeChange'],
+            throttlingPageEndNotifications: {
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    REPORT_VISIBLE_POSITIONS: {
+                      target: 'throttling',
+                    },
+                  },
+                },
+                throttling: {
+                  after: {
+                    [RELATIVE_END_UPDATE_DELAY]: [
+                      {
+                        target: 'notifying',
+                        cond: 'hasReachedPageEndBuffer',
+                      },
+                      {
+                        target: 'idle',
+                      },
+                    ],
+                  },
+                  on: {
+                    REPORT_VISIBLE_POSITIONS: {
+                      target: 'throttling',
+                    },
+                  },
+                },
+                notifying: {
+                  entry: ['notifyPageEndBufferReached'],
+                  always: 'idle',
+                },
+              },
             },
           },
         },
@@ -76,6 +121,7 @@ export const createPureLogStreamPositionStateMachine = (initialContext: LogStrea
     {
       actions: {
         notifyPositionsChanged: actions.pure(() => undefined),
+        notifyPageEndBufferReached: actions.pure(() => undefined),
         storeTargetPosition: actions.assign((_context, event) =>
           'targetPosition' in event
             ? ({
@@ -139,7 +185,11 @@ export const createPureLogStreamPositionStateMachine = (initialContext: LogStrea
             : {}
         ),
       },
-      guards: {},
+      guards: {
+        // User is close to the bottom of the page.
+        hasReachedPageEndBuffer: (context, event) =>
+          context.visiblePositions.pagesAfterEnd < DESIRED_BUFFER_PAGES,
+      },
     }
   );
 
@@ -165,6 +215,9 @@ export const createLogStreamPositionStateMachine = (
       updateContextInUrl: updateContextInUrl({ toastsService, urlStateStorage }),
       notifyPositionsChanged: sendIfDefined(SpecialTargets.Parent)(
         LogStreamPositionNotificationEventSelectors.positionsChanged
+      ),
+      notifyPageEndBufferReached: sendIfDefined(SpecialTargets.Parent)(
+        LogStreamPositionNotificationEventSelectors.pageEndBufferReached
       ),
     },
     services: {

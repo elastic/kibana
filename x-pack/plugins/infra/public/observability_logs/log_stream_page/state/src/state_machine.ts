@@ -142,7 +142,6 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
                   id: 'waitForInitialPositionParameters',
                 },
               ],
-
               on: {
                 RECEIVED_INITIAL_POSITION_PARAMETERS: {
                   target: 'initialized',
@@ -189,6 +188,11 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
                   actions: ['forwardToLogStreamQuery'],
                 },
                 UPDATE_REFRESH_INTERVAL: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['forwardToLogStreamQuery'],
+                },
+                PAGE_END_BUFFER_REACHED: {
                   target: 'initialized',
                   internal: true,
                   actions: ['forwardToLogStreamQuery'],

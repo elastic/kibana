@@ -6,8 +6,7 @@
  */
 
 import createContainer from 'constate';
-import { useCallback, useEffect, useMemo } from 'react';
-import useThrottle from 'react-use/lib/useThrottle';
+import { useCallback, useMemo } from 'react';
 import { VisiblePositions } from '../../../observability_logs/log_stream_position_state/src/types';
 import {
   LogStreamPageActorRef,
@@ -51,9 +50,6 @@ type UpdateDateRangeFn = (
   newDateRange: Partial<Pick<DateRange, 'startDateExpression' | 'endDateExpression'>>
 ) => void;
 
-const DESIRED_BUFFER_PAGES = 2;
-const RELATIVE_END_UPDATE_DELAY = 1000;
-
 export const useLogPositionState = ({
   logStreamPageState,
   logStreamPageSend,
@@ -63,7 +59,7 @@ export const useLogPositionState = ({
 }): LogPositionStateParams & LogPositionCallbacks => {
   const dateRange = useMemo(() => getLegacyDateRange(logStreamPageState), [logStreamPageState]);
 
-  const { refreshInterval, timeRange, targetPosition, visiblePositions, latestPosition } =
+  const { refreshInterval, targetPosition, visiblePositions, latestPosition } =
     logStreamPageState.context;
 
   const updateDateRange = useCallback<UpdateDateRangeFn>(
@@ -82,25 +78,6 @@ export const useLogPositionState = ({
         : null,
     [visiblePositions.startKey, visiblePositions.endKey]
   );
-
-  // `endTimestamp` update conditions
-  const throttledPagesAfterEnd = useThrottle(
-    visiblePositions.pagesAfterEnd,
-    RELATIVE_END_UPDATE_DELAY
-  );
-  useEffect(() => {
-    if (timeRange.to !== 'now') {
-      return;
-    }
-
-    // User is close to the bottom edge of the scroll.
-    if (throttledPagesAfterEnd <= DESIRED_BUFFER_PAGES) {
-      logStreamPageSend({
-        type: 'UPDATE_TIME_RANGE',
-        timeRange: { to: 'now' },
-      });
-    }
-  }, [timeRange.to, throttledPagesAfterEnd, logStreamPageSend]);
 
   const actions = useMemo(
     () => ({
