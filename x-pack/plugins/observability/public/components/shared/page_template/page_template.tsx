@@ -81,9 +81,9 @@ export function ObservabilityPageTemplate({
 
   const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
     () =>
-      sections.map(({ label, entries }, sectionIndex) => ({
+      sections.map(({ label, entries, isBetaFeature }, sectionIndex) => ({
         id: `${sectionIndex}`,
-        name: label,
+        name: isBetaFeature ? <NavNameWithBetaBadge label={label} /> : label,
         items: entries.map((entry, entryIndex) => {
           const href = getUrlForApp(entry.app, {
             path: entry.path,
@@ -102,10 +102,16 @@ export function ObservabilityPageTemplate({
           const navId = entry.label.toLowerCase().split(' ').join('_');
           return {
             id: `${sectionIndex}.${entryIndex}`,
-            name: entry.isNewFeature ? (
+            name: entry.isBetaFeature ? (
+              <NavNameWithBetaBadge label={entry.label} />
+            ) : entry.isNewFeature ? (
               <NavNameWithBadge label={entry.label} localStorageId={badgeLocalStorageId} />
-            ) : entry.isBeta ? (
-              <NavNameWithBetaBadge label={entry.label} iconType="beaker" />
+            ) : entry.isTechnicalPreview ? (
+              <NavNameWithBetaBadge
+                label={entry.label}
+                iconType="beaker"
+                isTechnicalPreview={true}
+              />
             ) : (
               entry.label
             ),

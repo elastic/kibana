@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
-import type {
-  ALERT_SUPPRESSION_TERMS,
-  ALERT_SUPPRESSION_START,
-  ALERT_SUPPRESSION_END,
-  ALERT_SUPPRESSION_DOCS_COUNT,
-} from '@kbn/rule-data-utils';
+import type { AlertWithSuppressionFields860 } from '@kbn/rule-registry-plugin/common/schemas/8.6.0';
 
 import type { BaseFields840, DetectionAlert840 } from '../8.4.0';
 
@@ -23,13 +17,4 @@ Then, update `../index.ts` to import from the new folder that has the latest sch
 new schemas to the union of all alert schemas, and re-export the new schemas as the `*Latest` schemas.
 */
 
-export interface SuppressionFields860 extends BaseFields840 {
-  [ALERT_SUPPRESSION_TERMS]: Array<{ field: string; value: string | number | null }>;
-  [ALERT_SUPPRESSION_START]: Date;
-  [ALERT_SUPPRESSION_END]: Date;
-  [ALERT_SUPPRESSION_DOCS_COUNT]: number;
-}
-
-export type SuppressionAlert860 = AlertWithCommonFields800<SuppressionFields860>;
-
-export type DetectionAlert860 = DetectionAlert840 | SuppressionAlert860;
+export type DetectionAlert860 = DetectionAlert840 | AlertWithSuppressionFields860<BaseFields840>;

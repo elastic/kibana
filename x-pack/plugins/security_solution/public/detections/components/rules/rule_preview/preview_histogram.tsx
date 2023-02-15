@@ -38,6 +38,9 @@ import { useGlobalFullScreen } from '../../../../common/containers/use_full_scre
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { getRulePreviewLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/rule_preview';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -52,6 +55,8 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
 `;
 
 export const ID = 'previewHistogram';
+
+const CHART_HEIGHT = 150;
 
 interface PreviewHistogramProps {
   previewId: string;
@@ -83,11 +88,22 @@ export const PreviewHistogram = ({
   // thus the alerts which have timestamp equal to the end date value are not displayed in the table.
   // To fix that, we extend end date value by 1s to make sure all alerts are included in the table.
   const extendedEndDate = useMemo(
-    () => timeframeOptions.timeframeEnd.add('1', 's').toISOString(),
+    () => timeframeOptions.timeframeEnd.clone().add('1', 's').toISOString(),
     [timeframeOptions]
   );
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
+
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
+
+  const extraVisualizationOptions = useMemo(
+    () => ({
+      ruleId: previewId,
+      spaceId,
+    }),
+    [previewId, spaceId]
+  );
 
   const [isLoading, { data, inspect, totalCount, refetch }] = usePreviewHistogram({
     previewId,
@@ -96,12 +112,14 @@ export const PreviewHistogram = ({
     spaceId,
     indexPattern,
     ruleType,
+    skip: isChartEmbeddablesEnabled,
   });
   const license = useLicense();
   const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
 
   const { globalFullScreen } = useGlobalFullScreen();
   const previousPreviewId = usePrevious(previewId);
+  const previewQueryId = `${ID}-${previewId}`;
 
   useEffect(() => {
     if (previousPreviewId !== previewId && totalCount > 0) {
@@ -113,9 +131,23 @@ export const PreviewHistogram = ({
 
   useEffect((): void => {
     if (!isLoading && !isInitializing) {
-      setQuery({ id: `${ID}-${previewId}`, inspect, loading: isLoading, refetch });
+      setQuery({
+        id: previewQueryId,
+        inspect,
+        loading: isLoading,
+        refetch,
+      });
     }
-  }, [setQuery, inspect, isLoading, isInitializing, refetch, previewId]);
+  }, [
+    setQuery,
+    inspect,
+    isLoading,
+    isInitializing,
+    refetch,
+    previewId,
+    isChartEmbeddablesEnabled,
+    previewQueryId,
+  ]);
 
   const barConfig = useMemo(
     (): ChartSeriesConfigs => getHistogramConfig(endDate, startDate, !isEqlRule),
@@ -158,14 +190,28 @@ export const PreviewHistogram = ({
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
             <HeaderSection
-              id={`${ID}-${previewId}`}
+              id={previewQueryId}
               title={i18n.QUERY_GRAPH_HITS_TITLE}
               titleSize="xs"
+              showInspectButton={!isChartEmbeddablesEnabled}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             {isLoading ? (
               <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
+            ) : isChartEmbeddablesEnabled ? (
+              <VisualizationEmbeddable
+                applyGlobalQueriesAndFilters={false}
+                extraOptions={extraVisualizationOptions}
+                getLensAttributes={getRulePreviewLensAttributes}
+                height={`${CHART_HEIGHT}px`}
+                id={`${previewQueryId}-embeddable`}
+                inspectTitle={i18n.QUERY_GRAPH_HITS_TITLE}
+                scopeId={SourcererScopeName.detections}
+                stackByField={ruleType === 'machine_learning' ? 'host.name' : 'event.category'}
+                timerange={timerange}
+                withActions={false}
+              />
             ) : (
               <BarChart
                 configs={barConfig}
@@ -193,6 +239,7 @@ export const PreviewHistogram = ({
         <StatefulEventsViewer
           pageFilters={pageFilters}
           defaultModel={getAlertsPreviewDefaultModel(license)}
+          disableCellActions={true}
           end={extendedEndDate}
           tableId={TableId.rulePreview}
           leadingControlColumns={getPreviewTableControlColumn(1.5)}

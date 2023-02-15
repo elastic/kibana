@@ -210,10 +210,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 
     getErrorMessage: (layer, columnId, indexPattern) =>
       combineErrorMessages([
-        getInvalidFieldMessage(
-          layer.columns[columnId] as FieldBasedIndexPatternColumn,
-          indexPattern
-        ),
+        getInvalidFieldMessage(layer, columnId, indexPattern),
         getColumnReducedTimeRangeError(layer, columnId, indexPattern),
       ]),
     filterable: true,

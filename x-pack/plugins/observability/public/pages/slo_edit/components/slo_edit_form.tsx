@@ -24,8 +24,8 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useCreateOrUpdateSlo } from '../../../hooks/slo/use_create_slo';
-import { useCheckFormPartialValidities } from '../helpers/use_check_form_partial_validities';
-import { SloEditFormDefinitionCustomKql } from './slo_edit_form_definition_custom_kql';
+import { useSectionFormValidation } from '../helpers/use_section_form_validation';
+import { CustomKqlIndicatorTypeForm } from './custom_kql/custom_kql_indicator_type_form';
 import { SloEditFormDescription } from './slo_edit_form_description';
 import { SloEditFormObjectives } from './slo_edit_form_objectives';
 import {
@@ -35,6 +35,7 @@ import {
 } from '../helpers/process_slo_form_values';
 import { paths } from '../../../config';
 import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
@@ -50,15 +51,19 @@ export function SloEditForm({ slo }: Props) {
     notifications: { toasts },
   } = useKibana().services;
 
-  const { control, watch, getFieldState, getValues, formState, trigger } = useForm({
+  const { control, watch, getFieldState, getValues, formState } = useForm({
     defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
     values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',
   });
 
-  const { isDefinitionValid, isDescriptionValid, isObjectiveValid } = useCheckFormPartialValidities(
-    { getFieldState, formState }
-  );
+  const { isIndicatorSectionValid, isDescriptionSectionValid, isObjectiveSectionValid } =
+    useSectionFormValidation({
+      getFieldState,
+      getValues,
+      formState,
+      watch,
+    });
 
   const { loading, success, error, createSlo, updateSlo } = useCreateOrUpdateSlo();
 
@@ -99,15 +104,28 @@ export function SloEditForm({ slo }: Props) {
     }
   }, [success, error, toasts, isEditMode, getValues, navigateToUrl, basePath]);
 
+  const getIndicatorTypeForm = () => {
+    switch (watch('indicator.type')) {
+      case 'sli.kql.custom':
+        return <CustomKqlIndicatorTypeForm control={control} watch={watch} />;
+      case 'sli.apm.transactionDuration':
+        return <ApmLatencyIndicatorTypeForm control={control} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <EuiTimeline data-test-subj="sloForm">
       <EuiTimelineItem
         verticalAlign="top"
         icon={
           <EuiAvatar
-            name={isDefinitionValid ? 'Check' : '1'}
-            iconType={isDefinitionValid ? 'check' : ''}
-            color={isDefinitionValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary}
+            name={isIndicatorSectionValid ? 'Check' : '1'}
+            iconType={isIndicatorSectionValid ? 'check' : ''}
+            color={
+              isIndicatorSectionValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary
+            }
           />
         }
       >
@@ -132,7 +150,7 @@ export function SloEditForm({ slo }: Props) {
             name="indicator.type"
             control={control}
             rules={{ required: true }}
-            render={({ field }) => (
+            render={({ field: { ref, ...field } }) => (
               <EuiSelect
                 data-test-subj="sloFormIndicatorTypeSelect"
                 {...field}
@@ -143,9 +161,7 @@ export function SloEditForm({ slo }: Props) {
 
           <EuiSpacer size="xxl" />
 
-          {watch('indicator.type') === 'sli.kql.custom' ? (
-            <SloEditFormDefinitionCustomKql control={control} trigger={trigger} />
-          ) : null}
+          {getIndicatorTypeForm()}
 
           <EuiSpacer size="m" />
         </EuiPanel>
@@ -155,9 +171,11 @@ export function SloEditForm({ slo }: Props) {
         verticalAlign="top"
         icon={
           <EuiAvatar
-            name={isObjectiveValid ? 'Check' : '2'}
-            iconType={isObjectiveValid ? 'check' : ''}
-            color={isObjectiveValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary}
+            name={isObjectiveSectionValid ? 'Check' : '2'}
+            iconType={isObjectiveSectionValid ? 'check' : ''}
+            color={
+              isObjectiveSectionValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary
+            }
           />
         }
       >
@@ -182,9 +200,13 @@ export function SloEditForm({ slo }: Props) {
         verticalAlign="top"
         icon={
           <EuiAvatar
-            name={isDescriptionValid ? 'Check' : '3'}
-            iconType={isDescriptionValid ? 'check' : ''}
-            color={isDescriptionValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary}
+            name={isDescriptionSectionValid ? 'Check' : '3'}
+            iconType={isDescriptionSectionValid ? 'check' : ''}
+            color={
+              isDescriptionSectionValid
+                ? euiThemeVars.euiColorSuccess
+                : euiThemeVars.euiColorPrimary
+            }
           />
         }
       >

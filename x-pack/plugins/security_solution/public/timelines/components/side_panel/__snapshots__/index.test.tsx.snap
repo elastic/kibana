@@ -66,42 +66,47 @@ Array [
   <div
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
-  <span
-    aria-label="Loading"
-    class="euiLoadingContent"
-    role="progressbar"
+  <div
+    aria-busy="true"
+    data-test-subj="euiSkeletonLoadingAriaWrapper"
   >
     <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-  </span>,
+      aria-label="Loading "
+      class="euiSkeletonText"
+      role="progressbar"
+    >
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+    </span>
+  </div>,
   <div
     class="euiFlyoutFooter emotion-euiFlyoutFooter"
     data-test-subj="side-panel-flyout-footer"
@@ -175,42 +180,47 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       <div
         class="euiFlyoutBody__overflowContent"
       >
-        <span
-          aria-label="Loading"
-          class="euiLoadingContent"
-          role="progressbar"
+        <div
+          aria-busy="true"
+          data-test-subj="euiSkeletonLoadingAriaWrapper"
         >
           <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-        </span>
+            aria-label="Loading "
+            class="euiSkeletonText"
+            role="progressbar"
+          >
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+          </span>
+        </div>
       </div>
     </div>
   </div>

@@ -64,9 +64,9 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} style={{ width: 210 }}>
+      <EuiFlexItem grow={false} style={{ width: 240 }}>
         <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false} style={{ width: 120 }}>
+          <EuiFlexItem grow={false} style={{ width: 160 }}>
             <EuiStat
               description={i18n.translate('xpack.observability.slos.slo.stats.budgetRemaining', {
                 defaultMessage: 'Budget remaining',

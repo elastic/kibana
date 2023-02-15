@@ -130,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         info: 'list export',
         get path() {
-          return `${EXCEPTION_LIST_URL}/_export?list_id=${hostIsolationExceptionData.artifact.list_id}&namespace_type=${hostIsolationExceptionData.artifact.namespace_type}&id=${hostIsolationExceptionData.artifact.id}`;
+          return `${EXCEPTION_LIST_URL}/_export?list_id=${hostIsolationExceptionData.artifact.list_id}&namespace_type=${hostIsolationExceptionData.artifact.namespace_type}&id=${hostIsolationExceptionData.artifact.id}&include_expired_exceptions=true`;
         },
         getBody: () => undefined,
       },

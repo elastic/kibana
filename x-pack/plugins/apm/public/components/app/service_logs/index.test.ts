@@ -8,48 +8,54 @@ import { getInfrastructureKQLFilter } from '.';
 
 describe('service logs', () => {
   const serviceName = 'opbeans-node';
+  const environment = 'production';
 
   describe('getInfrastructureKQLFilter', () => {
-    it('filter by service name', () => {
+    it('filter by service name and environment', () => {
       expect(
-        getInfrastructureKQLFilter(
-          {
+        getInfrastructureKQLFilter({
+          data: {
             containerIds: [],
             hostNames: [],
             podNames: [],
           },
-          serviceName
-        )
-      ).toEqual('service.name: "opbeans-node"');
+          serviceName,
+          environment,
+        })
+      ).toEqual(
+        '(service.name: "opbeans-node" and service.environment: "production") or (service.name: "opbeans-node" and not service.environment: *)'
+      );
     });
 
     it('filter by container id as fallback', () => {
       expect(
-        getInfrastructureKQLFilter(
-          {
+        getInfrastructureKQLFilter({
+          data: {
             containerIds: ['foo', 'bar'],
             hostNames: ['baz', `quz`],
             podNames: [],
           },
-          serviceName
-        )
+          serviceName,
+          environment,
+        })
       ).toEqual(
-        'service.name: "opbeans-node" or (not service.name and (container.id: "foo" or container.id: "bar"))'
+        '(service.name: "opbeans-node" and service.environment: "production") or (service.name: "opbeans-node" and not service.environment: *) or ((container.id: "foo" or container.id: "bar") and not service.name: *)'
       );
     });
 
-    it('filter by host names as fallback', () => {
+    it('does not filter by host names as fallback', () => {
       expect(
-        getInfrastructureKQLFilter(
-          {
+        getInfrastructureKQLFilter({
+          data: {
             containerIds: [],
             hostNames: ['baz', `quz`],
             podNames: [],
           },
-          serviceName
-        )
+          serviceName,
+          environment,
+        })
       ).toEqual(
-        'service.name: "opbeans-node" or (not service.name and (host.name: "baz" or host.name: "quz"))'
+        '(service.name: "opbeans-node" and service.environment: "production") or (service.name: "opbeans-node" and not service.environment: *)'
       );
     });
   });

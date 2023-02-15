@@ -38,6 +38,7 @@ import { TypeRegistry } from '../../type_registry';
 import { bulkActionsReducer } from './bulk_actions/reducer';
 import { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
 import { useColumns } from './hooks/use_columns';
+import { InspectButtonContainer } from './toolbar/components/inspect';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -59,6 +60,7 @@ export interface AlertsTableStateProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
+  showAlertStatusWithFlapping?: boolean;
 }
 
 export interface AlertsTableStorage {
@@ -96,6 +98,7 @@ const AlertsTableState = ({
   query,
   pageSize,
   showExpandToDetails,
+  showAlertStatusWithFlapping,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
 
@@ -108,6 +111,7 @@ const AlertsTableState = ({
   const storage = useRef(new Storage(window.localStorage));
   const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
   const persistentControls = alertsTableConfiguration?.usePersistentControls?.();
+  const showInspectButton = alertsTableConfiguration?.showInspectButton ?? false;
 
   const columnsLocal =
     localAlertsTableConfig &&
@@ -246,6 +250,7 @@ const AlertsTableState = ({
       id,
       leadingControlColumns: [],
       showExpandToDetails,
+      showAlertStatusWithFlapping,
       trailingControlColumns: [],
       useFetchAlertsData,
       visibleColumns,
@@ -257,6 +262,7 @@ const AlertsTableState = ({
       onColumnsChange,
       onChangeVisibleColumns,
       controls: persistentControls,
+      showInspectButton,
     }),
     [
       alertsTableConfiguration,
@@ -265,6 +271,7 @@ const AlertsTableState = ({
       pagination.pageSize,
       id,
       showExpandToDetails,
+      showAlertStatusWithFlapping,
       useFetchAlertsData,
       visibleColumns,
       updatedAt,
@@ -274,6 +281,7 @@ const AlertsTableState = ({
       onColumnsChange,
       onChangeVisibleColumns,
       persistentControls,
+      showInspectButton,
     ]
   );
 
@@ -282,7 +290,15 @@ const AlertsTableState = ({
 
   return hasAlertsTableConfiguration ? (
     <>
-      {!isLoading && alertsCount === 0 && <EmptyState controls={persistentControls} />}
+      {!isLoading && alertsCount === 0 && (
+        <InspectButtonContainer>
+          <EmptyState
+            controls={persistentControls}
+            getInspectQuery={getInspectQuery}
+            showInpectButton={showInspectButton}
+          />
+        </InspectButtonContainer>
+      )}
       {(isLoading || isBrowserFieldDataLoading) && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}

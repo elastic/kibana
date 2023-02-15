@@ -24,11 +24,11 @@ export function SloList() {
   const [sort, setSort] = useState<SortType>('name');
   const [indicatorTypeFilter, setIndicatorTypeFilter] = useState<FilterType[]>([]);
 
-  const [deleting, setIsDeleting] = useState(false);
+  const [isCloningOrDeleting, setIsCloningOrDeleting] = useState(false);
   const [shouldReload, setShouldReload] = useState(false);
 
   const {
-    loading,
+    loading: isLoadingSloList,
     error,
     sloList: { results: sloList = [], total, perPage },
   } = useFetchSloList({
@@ -42,16 +42,19 @@ export function SloList() {
   useEffect(() => {
     if (shouldReload) {
       setShouldReload(false);
-      setIsDeleting(false);
     }
-  }, [shouldReload]);
 
-  const handleDeleted = () => {
-    setShouldReload(true);
+    if (!isLoadingSloList) {
+      setIsCloningOrDeleting(false);
+    }
+  }, [isLoadingSloList, shouldReload]);
+
+  const handleCloningOrDeleting = () => {
+    setIsCloningOrDeleting(true);
   };
 
-  const handleDeleting = () => {
-    setIsDeleting(true);
+  const handleClonedOrDeleted = () => {
+    setShouldReload(true);
   };
 
   const handlePageClick = (pageNumber: number) => {
@@ -79,7 +82,7 @@ export function SloList() {
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
         <SloListSearchFilterSortBar
-          loading={loading || deleting}
+          loading={isLoadingSloList || isCloningOrDeleting}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
           onChangeIndicatorTypeFilter={handleChangeIndicatorTypeFilter}
@@ -89,10 +92,12 @@ export function SloList() {
       <EuiFlexItem>
         <SloListItems
           sloList={sloList}
-          loading={loading}
+          loading={isLoadingSloList}
           error={error}
-          onDeleting={handleDeleting}
-          onDeleted={handleDeleted}
+          onCloned={handleClonedOrDeleted}
+          onCloning={handleCloningOrDeleting}
+          onDeleting={handleCloningOrDeleting}
+          onDeleted={handleClonedOrDeleted}
         />
       </EuiFlexItem>
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingSpinner, EuiProgress, EuiIcon } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import classNames from 'classnames';
@@ -18,7 +18,7 @@ import './loading_indicator.scss';
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   showAsBar?: boolean;
-  showPlainSpinner?: boolean;
+  customLogo?: string;
 }
 
 export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
@@ -58,10 +58,9 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
   render() {
     const className = classNames(!this.state.visible && 'kbnLoadingIndicator-hidden');
 
-    const testSubj =
-      this.state.visible || this.props.showPlainSpinner
-        ? 'globalLoadingIndicator'
-        : 'globalLoadingIndicator-hidden';
+    const testSubj = this.state.visible
+      ? 'globalLoadingIndicator'
+      : 'globalLoadingIndicator-hidden';
 
     const ariaHidden = !this.state.visible;
 
@@ -69,25 +68,37 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       defaultMessage: 'Loading content',
     });
 
-    const logo =
-      this.state.visible || this.props.showPlainSpinner ? (
-        <EuiLoadingSpinner
-          size="l"
-          data-test-subj={testSubj}
-          aria-hidden={false}
-          aria-label={ariaLabel}
-        />
-      ) : (
-        <EuiIcon
-          type={'logoElastic'}
-          size="l"
-          data-test-subj={testSubj}
-          className="chrHeaderLogo__cluster"
-          aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
-            defaultMessage: 'Elastic Logo',
-          })}
-        />
-      );
+    const logoImage = this.props.customLogo ? (
+      <EuiImage
+        src={this.props.customLogo}
+        size={24}
+        alt="logo"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.customLogoAriaLabel', {
+          defaultMessage: 'User logo',
+        })}
+      />
+    ) : (
+      <EuiIcon
+        type={'logoElastic'}
+        size="l"
+        data-test-subj={testSubj}
+        className="chrHeaderLogo__cluster"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
+          defaultMessage: 'Elastic Logo',
+        })}
+      />
+    );
+
+    const logo = this.state.visible ? (
+      <EuiLoadingSpinner
+        size="l"
+        data-test-subj={testSubj}
+        aria-hidden={false}
+        aria-label={ariaLabel}
+      />
+    ) : (
+      logoImage
+    );
 
     return !this.props.showAsBar ? (
       logo

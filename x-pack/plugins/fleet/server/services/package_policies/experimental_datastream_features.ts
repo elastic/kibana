@@ -13,8 +13,15 @@ import { merge } from 'lodash';
 import { getRegistryDataStreamAssetBaseName } from '../../../common/services';
 
 import type { ExperimentalIndexingFeature } from '../../../common/types';
-import type { NewPackagePolicy, PackagePolicy } from '../../types';
+import type {
+  NewPackagePolicy,
+  PackagePolicy,
+  IndexTemplate,
+  IndexTemplateEntry,
+} from '../../types';
+import { appContextService } from '../app_context';
 import { prepareTemplate } from '../epm/elasticsearch/template/install';
+import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
 import { getInstallation, getPackageInfo } from '../epm/packages';
 import { updateDatastreamExperimentalFeatures } from '../epm/packages/update';
 import {
@@ -71,6 +78,8 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     });
   }
 
+  const updatedIndexTemplates: IndexTemplateEntry[] = [];
+
   for (const featureMapEntry of packagePolicy.package.experimental_data_stream_features) {
     const existingOptIn = installation?.experimental_data_stream_features?.find(
       (optIn) => optIn.data_stream === featureMapEntry.data_stream
@@ -126,6 +135,10 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
     let sourceModeSettings = {};
 
+    const indexTemplateRes = await esClient.indices.getIndexTemplate({
+      name: featureMapEntry.data_stream,
+    });
+
     if (isSyntheticSourceOptInChanged) {
       sourceModeSettings = {
         _source: {
@@ -152,12 +165,10 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       });
     }
 
-    if (isTSDBOptInChanged && featureMapEntry.features.tsdb) {
-      const indexTemplateRes = await esClient.indices.getIndexTemplate({
-        name: featureMapEntry.data_stream,
-      });
-      const indexTemplate = indexTemplateRes.index_templates[0].index_template;
+    const indexTemplate = indexTemplateRes.index_templates[0].index_template;
+    let updatedIndexTemplate = indexTemplate as IndexTemplate;
 
+    if (isTSDBOptInChanged) {
       const indexTemplateBody = {
         ...indexTemplate,
         template: {
@@ -165,17 +176,30 @@ export async function handleExperimentalDatastreamFeatureOptIn({
           settings: {
             ...(indexTemplate.template?.settings ?? {}),
             index: {
-              mode: 'time_series',
+              mode: featureMapEntry.features.tsdb ? 'time_series' : null,
             },
           },
         },
       };
 
+      updatedIndexTemplate = indexTemplateBody as IndexTemplate;
+
       await esClient.indices.putIndexTemplate({
         name: featureMapEntry.data_stream,
+        // @ts-expect-error
         body: indexTemplateBody,
       });
     }
+
+    updatedIndexTemplates.push({
+      templateName: featureMapEntry.data_stream,
+      indexTemplate: updatedIndexTemplate,
+    });
+  }
+
+  // Trigger rollover for updated datastreams
+  if (updatedIndexTemplates.length > 0) {
+    await updateCurrentWriteIndices(esClient, appContextService.getLogger(), updatedIndexTemplates);
   }
 
   // Update the installation object to persist the experimental feature map

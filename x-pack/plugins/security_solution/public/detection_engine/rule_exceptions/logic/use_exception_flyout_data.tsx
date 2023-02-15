@@ -80,8 +80,12 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
     }
   }, [jobs, isMLRule, memoDataViewId, memoNonDataViewIndexPatterns]);
 
-  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
-    useFetchIndex(memoRuleIndices);
+  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] = useFetchIndex(
+    memoRuleIndices,
+    false,
+    'indexFields',
+    true
+  );
 
   // Data view logic
   const [dataViewIndexPatterns, setDataViewIndexPatterns] = useState<DataViewBase | null>(null);
@@ -93,8 +97,15 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
       if (activeSpaceId !== '' && memoDataViewId) {
         setDataViewLoading(true);
         const dv = await data.dataViews.get(memoDataViewId);
+        const fieldsWithUnmappedInfo = await data.dataViews.getFieldsForIndexPattern(dv, {
+          pattern: '',
+          includeUnmapped: true,
+        });
         setDataViewLoading(false);
-        setDataViewIndexPatterns(dv);
+        setDataViewIndexPatterns({
+          ...dv,
+          fields: fieldsWithUnmappedInfo,
+        });
       }
     };
 

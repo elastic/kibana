@@ -20,6 +20,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   KibanaRequest,
@@ -125,6 +126,7 @@ export interface PluginSetupContract {
   ): void;
   getSecurityHealth: () => Promise<SecurityHealth>;
   getConfig: () => AlertingRulesConfig;
+  getFrameworkAlertsEnabled: () => boolean;
 }
 
 export interface PluginStartContract {
@@ -162,7 +164,7 @@ export interface AlertingPluginsStart {
   features: FeaturesPluginStart;
   eventLog: IEventLogClientService;
   licensing: LicensingPluginStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
@@ -384,6 +386,7 @@ export class AlertingPlugin {
           isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
         };
       },
+      getFrameworkAlertsEnabled: () => this.config.enableFrameworkAlerts,
     };
   }
 
@@ -417,10 +420,10 @@ export class AlertingPlugin {
       securityPluginSetup: security,
       securityPluginStart: plugins.security,
       async getSpace(request: KibanaRequest) {
-        return plugins.spaces.spacesService.getActiveSpace(request);
+        return plugins.spaces?.spacesService.getActiveSpace(request);
       },
       getSpaceId(request: KibanaRequest) {
-        return plugins.spaces.spacesService.getSpaceId(request);
+        return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       },
       features: plugins.features,
     });
@@ -434,7 +437,7 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getSpaceId(request);
+        return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       },
       actions: plugins.actions,
       eventLog: plugins.eventLog,
@@ -463,6 +466,10 @@ export class AlertingPlugin {
       return alertingAuthorizationClientFactory!.create(request);
     };
 
+    const getRulesSettingsClientWithRequest = (request: KibanaRequest) => {
+      return rulesSettingsClientFactory!.create(request);
+    };
+
     taskRunnerFactory.initialize({
       logger,
       data: plugins.data,
@@ -487,6 +494,7 @@ export class AlertingPlugin {
       maxAlerts: this.config.rules.run.alerts.max,
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       usageCounter: this.usageCounter,
+      getRulesSettingsClientWithRequest,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

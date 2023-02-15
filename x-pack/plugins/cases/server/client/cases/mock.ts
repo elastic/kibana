@@ -7,9 +7,9 @@
 
 import type {
   CommentResponse,
-  CaseUserActionsResponse,
   CommentResponseAlertsType,
   ConnectorMappingsAttributes,
+  CaseUserActionsDeprecatedResponse,
 } from '../../../common/api';
 import {
   CommentType,
@@ -260,7 +260,7 @@ export const mappings: ConnectorMappingsAttributes[] = [
   },
 ];
 
-export const userActions: CaseUserActionsResponse = [
+export const userActions: CaseUserActionsDeprecatedResponse = [
   {
     action: Actions.create,
     type: 'create_case',

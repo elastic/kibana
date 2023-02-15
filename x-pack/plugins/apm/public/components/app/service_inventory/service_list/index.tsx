@@ -17,16 +17,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
   ServiceInventoryFieldName,
   ServiceListItem,
 } from '../../../../../common/service_inventory';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../../common/transaction_types';
+import { isDefaultTransactionType } from '../../../../../common/transaction_types';
 import {
   asMillisecondDuration,
   asPercent,
@@ -47,16 +43,11 @@ import {
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ListMetric } from '../../../shared/list_metric';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
-import { ServiceLink } from '../../../shared/service_link';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { HealthBadge } from './health_badge';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
-
-function formatString(value?: string | null) {
-  return value || NOT_AVAILABLE_LABEL;
-}
 
 export function getServiceColumns({
   query,
@@ -67,6 +58,7 @@ export function getServiceColumns({
   showHealthStatusColumn,
   showAlertsColumn,
   link,
+  serviceOverflowCount,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
@@ -76,6 +68,7 @@ export function getServiceColumns({
   breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   link: any;
+  serviceOverflowCount: number;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
@@ -86,8 +79,10 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.AlertsCount,
-            name: '',
-            width: `${unit * 5}px`,
+            name: i18n.translate('xpack.apm.servicesTable.alertsColumnLabel', {
+              defaultMessage: 'Active alerts',
+            }),
+            width: `${unit * 8}px`,
             sortable: true,
             render: (_, { serviceName, alertsCount }) => {
               if (!alertsCount) {
@@ -95,16 +90,26 @@ export function getServiceColumns({
               }
 
               return (
-                <EuiBadge
-                  iconType="alert"
-                  color="danger"
-                  href={link('/services/{serviceName}/alerts', {
-                    path: { serviceName },
-                    query,
-                  })}
+                <EuiToolTip
+                  position="bottom"
+                  content={i18n.translate(
+                    'xpack.apm.home.servicesTable.tooltip.activeAlertsExplanation',
+                    {
+                      defaultMessage: 'Active alerts',
+                    }
+                  )}
                 >
-                  {alertsCount}
-                </EuiBadge>
+                  <EuiBadge
+                    iconType="alert"
+                    color="danger"
+                    href={link('/services/{serviceName}/alerts', {
+                      path: { serviceName },
+                      query,
+                    })}
+                  >
+                    {alertsCount}
+                  </EuiBadge>
+                </EuiToolTip>
               );
             },
           } as ITableColumn<ServiceListItem>,
@@ -136,16 +141,11 @@ export function getServiceColumns({
       }),
       sortable: true,
       render: (_, { serviceName, agentName, transactionType }) => (
-        <TruncateWithTooltip
-          data-test-subj="apmServiceListAppLink"
-          text={formatString(serviceName)}
-          content={
-            <ServiceLink
-              agentName={agentName}
-              query={{ ...query, transactionType }}
-              serviceName={serviceName}
-            />
-          }
+        <ServiceLink
+          agentName={agentName}
+          query={{ ...query, transactionType }}
+          serviceName={serviceName}
+          serviceOverflowCount={serviceOverflowCount}
         />
       ),
     },
@@ -159,7 +159,7 @@ export function getServiceColumns({
                 defaultMessage: 'Environment',
               }
             ),
-            width: `${unit * 10}px`,
+            width: `${unit * 9}px`,
             sortable: true,
             render: (_, { environments }) => (
               <EnvironmentBadge environments={environments ?? []} />
@@ -175,7 +175,7 @@ export function getServiceColumns({
               'xpack.apm.servicesTable.transactionColumnLabel',
               { defaultMessage: 'Transaction type' }
             ),
-            width: `${unit * 10}px`,
+            width: `${unit * 8}px`,
             sortable: true,
           },
         ]
@@ -285,8 +285,9 @@ interface Props {
     sortField: ServiceInventoryFieldName,
     sortDirection: 'asc' | 'desc'
   ) => ServiceListItem[];
-}
 
+  serviceOverflowCount: number;
+}
 export function ServiceList({
   items,
   noItemsMessage,
@@ -300,14 +301,14 @@ export function ServiceList({
   initialSortDirection,
   initialPageSize,
   sortFn,
+  serviceOverflowCount,
 }: Props) {
   const breakpoints = useBreakpoints();
   const { link } = useApmRouter();
 
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) =>
-      transactionType !== TRANSACTION_REQUEST &&
-      transactionType !== TRANSACTION_PAGE_LOAD
+      transactionType && !isDefaultTransactionType(transactionType)
   );
 
   const {
@@ -337,6 +338,7 @@ export function ServiceList({
         showHealthStatusColumn: displayHealthStatus,
         showAlertsColumn: displayAlerts,
         link,
+        serviceOverflowCount,
       }),
     [
       query,
@@ -347,6 +349,7 @@ export function ServiceList({
       displayHealthStatus,
       displayAlerts,
       link,
+      serviceOverflowCount,
     ]
   );
 

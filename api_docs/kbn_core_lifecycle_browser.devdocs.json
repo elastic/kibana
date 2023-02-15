@@ -710,6 +710,10 @@
                 "path": "x-pack/plugins/ml/public/application/app.tsx"
               },
               {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/app.tsx"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
               },
@@ -786,6 +790,14 @@
                 "path": "x-pack/plugins/graph/public/plugin.ts"
               },
               {
+                "plugin": "monitoring",
+                "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/monitor_management/monitor_config/use_monitor_name.ts"
               },
@@ -803,6 +815,10 @@
               },
               {
                 "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_details/monitor_selector/use_recently_viewed_monitors.ts"
+              },
+              {
+                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
               },
               {
@@ -816,14 +832,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_name.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_details/monitor_selector/use_recently_viewed_monitors.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/list_filters/use_filters.ts"
               },
               {
                 "plugin": "synthetics",

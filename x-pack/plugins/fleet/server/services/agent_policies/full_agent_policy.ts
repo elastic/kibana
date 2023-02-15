@@ -120,6 +120,10 @@ export async function getFullAgentPolicy(
               metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
             }
           : { enabled: false, logs: false, metrics: false },
+      features: (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
+        acc[name] = featureConfig;
+        return acc;
+      }, {} as NonNullable<FullAgentPolicy['agent']>['features']),
     },
   };
 

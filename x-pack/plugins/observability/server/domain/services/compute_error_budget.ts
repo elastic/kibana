@@ -95,7 +95,7 @@ export function toErrorBudget(
   return {
     initial: toHighPrecision(initial),
     consumed: toHighPrecision(consumed),
-    remaining: Math.max(toHighPrecision(1 - consumed), 0),
+    remaining: toHighPrecision(1 - consumed),
     isEstimated,
   };
 }

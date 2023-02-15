@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { CaseUserActionInjectedAttributesWithoutActionId } from '../../../common/api';
+import type { CaseUserActionInjectedAttributes } from '../../../common/api';
 import { CaseStatuses } from '../../../common/api';
 import { getStatusInfo } from './lifespan';
 import { createStatusChangeSavedObject } from './test_utils/lifespan';
@@ -120,7 +120,7 @@ describe('lifespan', () => {
         [
           {
             attributes: { payload: { hello: 1, status: CaseStatuses.closed }, type: 'status' },
-          } as unknown as SavedObject<CaseUserActionInjectedAttributesWithoutActionId>,
+          } as unknown as SavedObject<CaseUserActionInjectedAttributes>,
         ],
         new Date(0)
       );
@@ -133,7 +133,7 @@ describe('lifespan', () => {
         [
           {
             attributes: { payload: { status: CaseStatuses.closed }, type: 'awesome' },
-          } as unknown as SavedObject<CaseUserActionInjectedAttributesWithoutActionId>,
+          } as unknown as SavedObject<CaseUserActionInjectedAttributes>,
         ],
         new Date(0)
       );
@@ -149,7 +149,7 @@ describe('lifespan', () => {
               payload: { status: CaseStatuses.closed, created_at: 'blah' },
               type: 'status',
             },
-          } as unknown as SavedObject<CaseUserActionInjectedAttributesWithoutActionId>,
+          } as unknown as SavedObject<CaseUserActionInjectedAttributes>,
         ],
         new Date(0)
       );

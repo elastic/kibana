@@ -180,7 +180,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
         </div>
       </div>
       <table
-        class="euiTable euiTable--responsive"
+        class="euiTable css-0 euiTable--responsive"
         id="__table_generated-id"
         tabindex="-1"
       >
@@ -346,7 +346,9 @@ exports[`Authentication User Table Component rendering it renders the user authe
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody
+          class="css-0"
+        >
           <tr
             class="euiTableRow"
           >

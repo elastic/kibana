@@ -10,6 +10,7 @@ const { inspect } = require('util');
 const Path = require('path');
 
 const { readPackageJson } = require('./parse_package_json');
+const { PLUGIN_CATEGORY } = require('./plugin_category_info');
 const { readPackageManifest } = require('./parse_package_manifest');
 
 /**
@@ -37,12 +38,12 @@ class Package {
   }
 
   /**
-   * Sort an array of bazel packages
+   * Sort an array of packages
    * @param {Package} a
    * @param {Package} b
    */
   static sorter(a, b) {
-    return a.normalizedRepoRelativeDir.localeCompare(b.normalizedRepoRelativeDir);
+    return a.manifest.id.localeCompare(b.manifest.id);
   }
 
   /**
@@ -114,30 +115,42 @@ class Package {
      * @readonly
      */
     this.id = manifest.id;
+  }
 
-    /**
-     * Does this package expose a plugin, is it of one of the plugin types?
-     * @type {boolean}
-     * @readonly
-     */
-    this.isPlugin = manifest.type === 'plugin-browser' || manifest.type === 'plugin-server';
+  /**
+   * Is this package highlighted as a "dev only" package? If so it will always
+   * be listed in the devDependencies and will never end up in the build
+   * @returns {boolean}
+   */
+  isDevOnly() {
+    return (
+      !!this.manifest.devOnly ||
+      this.manifest.type === 'functional-tests' ||
+      this.manifest.type === 'test-helper'
+    );
+  }
 
-    /**
-     * Is this package highlighted as a "dev only" package? If so it will always
-     * be listed in the devDependencies and will never end up in the build
-     * @type {boolean}
-     * @readonly
-     */
-    this.isDevOnly = !!this.manifest.devOnly;
+  /**
+   * Does this package expose a plugin, is it of one of the plugin types?
+   * @readonly
+   * @returns {this is import('./types').PluginPackage}
+   */
+  isPlugin() {
+    return this.manifest.type === 'plugin';
   }
 
   /**
    * Returns true if the package represents some type of plugin
-   * @returns {import('./types').PluginTypeInfo}
+   * @returns {import('./types').PluginCategoryInfo}
    */
-  getPlguinType() {
-    if (!this.isPlugin) {
+  getPluginCategories() {
+    if (!this.isPlugin()) {
       throw new Error('package is not a plugin, check pkg.isPlugin before calling this method');
+    }
+
+    const preCalculated = this.manifest.plugin[PLUGIN_CATEGORY];
+    if (preCalculated) {
+      return { ...preCalculated };
     }
 
     const dir = this.normalizedRepoRelativeDir;
@@ -156,7 +169,7 @@ class Package {
    * print all the BUILD.bazel files
    */
   [inspect.custom]() {
-    return `${this.isPlugin ? `PluginPackage` : `Package`}<${this.normalizedRepoRelativeDir}>`;
+    return `${this.isPlugin() ? `PluginPackage` : `Package`}<${this.normalizedRepoRelativeDir}>`;
   }
 }
 

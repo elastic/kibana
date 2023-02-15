@@ -33,14 +33,14 @@ export const WaterfallTooltipContent: React.FC<Props> = ({ text, url }) => {
       datum.config.showTooltip
   );
   return (
-    <>
-      <StyledText>{text}</StyledText>
+    <div style={{ maxWidth: 500, height: '100%' }}>
+      <StyledText size="xs">{text}</StyledText>
       <StyledHorizontalRule margin="none" />
       <EuiFlexGroup direction="column" gutterSize="none">
         {tooltipMetrics.map((item, idx) => (
           <EuiFlexItem key={idx}>{renderTooltipItem(item.config.tooltipProps)}</EuiFlexItem>
         ))}
       </EuiFlexGroup>
-    </>
+    </div>
   );
 };

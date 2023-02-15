@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiFieldPassword,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -41,17 +42,30 @@ export const ConnectorConfigurationForm = () => {
       }}
       component="form"
     >
-      {localConfigView.map(({ key, label, value }) => (
-        <EuiFormRow label={label ?? ''} key={key}>
-          <EuiFieldText
-            value={value}
-            disabled={status === Status.LOADING}
-            onChange={(event) => {
-              setLocalConfigEntry({ key, label, value: event.target.value });
-            }}
-          />
-        </EuiFormRow>
-      ))}
+      {localConfigView.map((configEntry) => {
+        const { key, isPasswordField, label, value } = configEntry;
+        return (
+          <EuiFormRow label={label ?? ''} key={key}>
+            {isPasswordField ? (
+              <EuiFieldPassword
+                value={value}
+                disabled={status === Status.LOADING}
+                onChange={(event) => {
+                  setLocalConfigEntry({ ...configEntry, value: event.target.value });
+                }}
+              />
+            ) : (
+              <EuiFieldText
+                value={value}
+                disabled={status === Status.LOADING}
+                onChange={(event) => {
+                  setLocalConfigEntry({ ...configEntry, value: event.target.value });
+                }}
+              />
+            )}
+          </EuiFormRow>
+        );
+      })}
       <EuiFormRow>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>

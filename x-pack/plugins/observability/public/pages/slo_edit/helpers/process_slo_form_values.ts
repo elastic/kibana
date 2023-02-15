@@ -16,7 +16,7 @@ export function transformSloResponseToCreateSloInput(
   if (!values) return undefined;
 
   return {
-    ...omit(values, ['id', 'revision', 'createdAt', 'updatedAt', 'summary']),
+    ...omit(values, ['id', 'revision', 'createdAt', 'updatedAt', 'summary', 'enabled']),
     objective: {
       target: values.objective.target * 100,
       ...(values.objective.timesliceTarget && {

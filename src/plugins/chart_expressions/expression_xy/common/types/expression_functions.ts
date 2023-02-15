@@ -72,6 +72,7 @@ export interface AxisExtentConfig {
   lowerBound?: number;
   upperBound?: number;
   enforce?: boolean;
+  niceValues?: boolean;
 }
 
 export interface AxisConfig {
@@ -328,8 +329,7 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
   layerType: typeof LayerTypes.ANNOTATIONS;
 };
 
-export interface ReferenceLineArgs
-  extends Omit<ReferenceLineDecorationConfig, 'forAccessor' | 'fill'> {
+export interface ReferenceLineArgs extends Omit<ReferenceLineDecorationConfig, 'fill'> {
   name?: string;
   value: number;
   fill: FillStyle;
@@ -364,6 +364,7 @@ export interface ReferenceLineConfigResult {
   type: typeof REFERENCE_LINE;
   layerType: typeof LayerTypes.REFERENCELINE;
   lineLength: number;
+  columnToLabel?: string;
   decorations: [ExtendedReferenceLineDecorationConfig];
 }
 

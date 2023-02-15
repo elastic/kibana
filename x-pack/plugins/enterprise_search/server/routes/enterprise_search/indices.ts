@@ -120,7 +120,7 @@ export function registerIndexRoutes({
           meta: {
             page: {
               current: page,
-              size: indices.length,
+              size,
               total_pages: totalPages,
               total_results: totalResults,
             },

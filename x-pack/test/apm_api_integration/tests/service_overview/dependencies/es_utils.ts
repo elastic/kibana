@@ -57,6 +57,9 @@ export function createServiceDependencyDocs({
       event: {
         outcome,
       },
+      metricset: {
+        name: 'service_destination',
+      },
       span: {
         destination: {
           service: {
@@ -121,6 +124,14 @@ export const apmDependenciesMapping: MappingTypeMapping = {
   properties: {
     '@timestamp': {
       type: 'date',
+    },
+    metricset: {
+      dynamic: false,
+      properties: {
+        name: {
+          type: 'keyword',
+        },
+      },
     },
     event: {
       dynamic: false,

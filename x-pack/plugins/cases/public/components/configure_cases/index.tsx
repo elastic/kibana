@@ -29,7 +29,7 @@ import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -77,18 +77,22 @@ export const ConfigureCases: React.FC = React.memo(() => {
     isLoading: isLoadingConnectors,
     data: connectors = [],
     refetch: refetchConnectors,
-  } = useGetConnectors();
+  } = useGetSupportedActionConnectors();
   const {
     isLoading: isLoadingActionTypes,
     data: actionTypes = [],
     refetch: refetchActionTypes,
   } = useGetActionTypes();
 
-  const onConnectorUpdated = useCallback(async () => {
-    refetchConnectors();
-    refetchActionTypes();
-    refetchCaseConfigure();
-  }, [refetchActionTypes, refetchCaseConfigure, refetchConnectors]);
+  const onConnectorUpdated = useCallback(
+    async (updatedConnector) => {
+      setEditedConnectorItem(updatedConnector);
+      refetchConnectors();
+      refetchActionTypes();
+      refetchCaseConfigure();
+    },
+    [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
+  );
 
   const isLoadingAny =
     isLoadingConnectors || persistLoading || loadingCaseConfigure || isLoadingActionTypes;
@@ -181,7 +185,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connector.id, editFlyoutVisible]
+    [connector.id, editedConnectorItem, editFlyoutVisible]
   );
 
   return (

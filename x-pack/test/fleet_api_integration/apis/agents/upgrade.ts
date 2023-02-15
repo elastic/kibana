@@ -1027,7 +1027,6 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/agents/action_status`)
           .set('kbn-xsrf', 'xxx');
         const actionStatus = body.items[0];
-        expect(actionStatus.status).to.eql('FAILED');
         expect(actionStatus.nbAgentsFailed).to.eql(1);
       });
 

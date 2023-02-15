@@ -2622,7 +2622,7 @@ describe('xy_visualization', () => {
                 "displayLocations": Array [
                   Object {
                     "dimensionId": "an1",
-                    "id": "dimensionTrigger",
+                    "id": "dimensionButton",
                   },
                 ],
                 "fixableInEditor": true,

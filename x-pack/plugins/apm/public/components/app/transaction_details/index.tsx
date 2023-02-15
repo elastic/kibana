@@ -35,8 +35,12 @@ export function TransactionDetails() {
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
-  const { transactionType, fallbackToTransactions, runtimeName } =
-    useApmServiceContext();
+  const {
+    transactionType,
+    fallbackToTransactions,
+    serverlessType,
+    serviceName,
+  } = useApmServiceContext();
 
   const history = useHistory();
 
@@ -56,7 +60,7 @@ export function TransactionDetails() {
     [apmRouter, path, query, transactionName]
   );
 
-  const isServerless = isServerlessAgent(runtimeName);
+  const isServerless = isServerlessAgent(serverlessType);
 
   return (
     <>
@@ -71,6 +75,7 @@ export function TransactionDetails() {
 
       <ChartPointerEventContextProvider>
         <TransactionCharts
+          serviceName={serviceName}
           kuery={query.kuery}
           environment={query.environment}
           start={start}

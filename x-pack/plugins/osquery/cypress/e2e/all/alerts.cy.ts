@@ -18,7 +18,9 @@ import {
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
+  loadAlertsEvents,
   submitQuery,
+  toggleRuleOffAndOn,
   typeInECSFieldInput,
 } from '../../tasks/live_query';
 import { preparePack } from '../../tasks/packs';
@@ -61,17 +63,10 @@ describe('Alert Event Details', () => {
     cy.contains(`Successfully updated "${PACK_NAME}" pack`);
     cy.getBySel('toastCloseButton').click();
 
-    cy.visit('/app/security/rules');
-    cy.contains(RULE_NAME);
-    cy.wait(2000);
-    cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
-    cy.getBySel('ruleSwitch').click();
-    cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
-    cy.getBySel('ruleSwitch').click();
-    cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+    toggleRuleOffAndOn(RULE_NAME);
   });
 
-  it('adds response actations with osquery with proper validation and form values', () => {
+  it('adds response actions with osquery with proper validation and form values', () => {
     cy.visit('/app/security/rules');
     cy.contains(RULE_NAME).click();
     cy.contains('Edit rule settings').click();
@@ -200,7 +195,7 @@ describe('Alert Event Details', () => {
 
   it('should be able to add investigation guides to response actions', () => {
     const investigationGuideNote =
-      'It seems that you have suggested queries in investigation guide, would you like to add them as response actions?';
+      'You have queries in the investigation guide. Add them as response actions?';
     cy.visit('/app/security/rules');
     cy.contains(RULE_NAME).click();
     cy.contains('Edit rule settings').click();
@@ -225,27 +220,19 @@ describe('Alert Event Details', () => {
       cy.contains('select * from uptime');
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_2).within(() => {
-      cy.contains('SELECT * FROM processes;');
+      cy.contains("SELECT * FROM os_version where name='{{host.os.name}}';");
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_3).within(() => {
       cy.contains('select * from users');
     });
+    cy.contains('Save changes').click();
+    cy.contains(`${RULE_NAME} was saved`).should('exist');
+    cy.getBySel('toastCloseButton').click();
   });
 
   it('should be able to run live query and add to timeline (-depending on the previous test)', () => {
     const TIMELINE_NAME = 'Untitled timeline';
-    cy.visit('/app/security/alerts');
-    cy.getBySel('header-page-title').contains('Alerts').should('exist');
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('exist');
-      });
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('not.exist');
-      });
+    loadAlertsEvents();
     cy.getBySel('timeline-context-menu-button').first().click({ force: true });
     cy.contains('Run Osquery');
     cy.getBySel('expand-event').first().click({ force: true });
@@ -272,16 +259,60 @@ describe('Alert Event Details', () => {
     cy.visit('/app/osquery');
     closeModalIfVisible();
   });
-  // TODO think on how to get these actions triggered faster (because now they are not triggered during the test).
-  // it.skip('sees osquery results from last action', () => {
-  //   cy.visit('/app/security/alerts');
-  //   cy.getBySel('header-page-title').contains('Alerts').should('exist');
-  //   cy.getBySel('expand-event').first().click({ force: true });
-  //   cy.contains('Osquery Results').click();
-  //   cy.getBySel('osquery-results').should('exist');
-  //   cy.contains('select * from uptime');
-  //   cy.getBySel('osqueryResultsTable').within(() => {
-  //     checkResults();
-  //   });
-  // });
+
+  it('should substitute parameters in investigation guide', () => {
+    loadAlertsEvents();
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.contains('Get processes').click();
+    cy.contains("SELECT * FROM os_version where name='Ubuntu';");
+  });
+
+  it('should substitute parameters in live query', () => {
+    loadAlertsEvents();
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.getBySel('take-action-dropdown-btn').click();
+    cy.getBySel('osquery-action-item').click();
+    cy.contains('1 agent selected.');
+    inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
+      parseSpecialCharSequences: false,
+    });
+    cy.contains('Advanced').click();
+    typeInECSFieldInput('tags{downArrow}{enter}');
+    cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
+    cy.wait(1000);
+    submitQuery();
+    cy.getBySel('dataGridHeader').within(() => {
+      cy.contains('tags');
+    });
+  });
+
+  it('sees osquery results from last action', () => {
+    toggleRuleOffAndOn(RULE_NAME);
+    cy.wait(2000);
+    cy.visit('/app/security/alerts');
+    cy.getBySel('header-page-title').contains('Alerts').should('exist');
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.contains('Osquery Results').click();
+    cy.getBySel('osquery-results').should('exist');
+    cy.contains('select * from uptime');
+    cy.contains('select * from users;');
+    cy.contains("SELECT * FROM os_version where name='Ubuntu';");
+    cy.getBySel('osquery-results-comment').each(($comment) => {
+      cy.wrap($comment).within(() => {
+        // On initial load result table might not render due to displayed error
+        if ($comment.find('div .euiDataGridRow').length <= 0) {
+          // If tabs are present try clicking between status and results to get rid of the error message
+          if ($comment.find('div .euiTabs').length > 0) {
+            cy.getBySel('osquery-status-tab').click();
+            cy.getBySel('osquery-results-tab').click();
+            cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+          }
+        } else {
+          // Result tab was rendered successfully
+          cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+        }
+        // }
+      });
+    });
+  });
 });

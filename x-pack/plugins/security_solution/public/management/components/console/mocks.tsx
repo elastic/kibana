@@ -13,10 +13,10 @@ import userEvent from '@testing-library/user-event';
 import { act } from '@testing-library/react';
 import { Console } from './console';
 import type {
-  ConsoleProps,
+  CommandArgumentValueSelectorProps,
   CommandDefinition,
   CommandExecutionComponent,
-  CommandArgumentValueSelectorProps,
+  ConsoleProps,
 } from './types';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';

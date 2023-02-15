@@ -14,11 +14,12 @@ import type { CasesByAlertId } from '@kbn/cases-plugin/common/api/cases/case';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { CommentType } from '@kbn/cases-plugin/common';
 
-import type { ResponseActionBodySchema } from '../../../../common/endpoint/schema/actions';
 import {
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
   EndpointActionGetFileSchema,
+  ExecuteActionRequestSchema,
+  type ResponseActionBodySchema,
 } from '../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../common/constants';
 import {
@@ -34,6 +35,7 @@ import {
   UNISOLATE_HOST_ROUTE,
   ENDPOINT_ACTIONS_INDEX,
   GET_FILE_ROUTE,
+  EXECUTE_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -43,8 +45,10 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionParametersWithPidOrEntityId,
+  ResponseActionsExecuteParameters,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -175,6 +179,22 @@ export function registerResponseActionRoutes(
       )
     );
   }
+
+  // `execute` currently behind FF (planned for 8.8)
+  if (endpointContext.experimentalFeatures.responseActionExecuteEnabled) {
+    router.post(
+      {
+        path: EXECUTE_ROUTE,
+        validate: ExecuteActionRequestSchema,
+        options: { authRequired: true, tags: ['access:securitySolution'] },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteExecuteOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
+      )
+    );
+  }
 }
 
 const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKeys>([
@@ -184,6 +204,7 @@ const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKe
   ['suspend-process', 'SUSPEND_PROCESS'],
   ['running-processes', 'RUNNING_PROCESSES'],
   ['get-file', 'GET_FILE'],
+  ['execute', 'EXECUTE'],
 ]);
 
 const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'unisolate'];
@@ -234,6 +255,20 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     let fleetActionIndexResult;
     let logsEndpointActionsResult;
 
+    const getActionParameters = () => {
+      // set timeout to 4h (if not specified or when timeout is specified as 0) when command is `execute`
+      if (command === 'execute') {
+        const actionRequestParams = req.body.parameters as ResponseActionsExecuteParameters;
+        if (typeof actionRequestParams?.timeout === 'undefined') {
+          return { ...actionRequestParams, timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT };
+        }
+        return actionRequestParams;
+      }
+
+      // for all other commands return the parameters as is
+      return req.body.parameters ?? undefined;
+    };
+
     const agents = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
     const doc = {
       '@timestamp': moment().toISOString(),
@@ -248,7 +283,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         data: {
           command,
           comment: req.body.comment ?? undefined,
-          parameters: req.body.parameters ?? undefined,
+          parameters: getActionParameters(),
         } as EndpointActionData<T>,
       } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,
       user: {

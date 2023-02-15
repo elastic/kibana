@@ -41,6 +41,7 @@ export const bulkCreateExceptionListItems = async ({
         created_by: user,
         description: item.description,
         entries: item.entries,
+        expire_time: item.expire_time,
         immutable: false,
         item_id: item.item_id,
         list_id: item.list_id,

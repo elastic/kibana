@@ -42,7 +42,6 @@ const STORYBOOKS = [
   'security_solution',
   'shared_ux',
   'triggers_actions_ui',
-  'ui_actions',
   'ui_actions_enhanced',
   'language_documentation_popover',
   'unified_search',

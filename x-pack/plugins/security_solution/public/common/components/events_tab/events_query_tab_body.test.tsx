@@ -47,6 +47,9 @@ jest.mock('../../lib/kibana', () => {
   };
 });
 
+jest.mock('../visualization_actions/actions');
+jest.mock('../visualization_actions/lens_embeddable');
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => mockHistory,

@@ -103,7 +103,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=&probability=1`,
+        url: `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=&probability=1&documentType=transactionMetric&rollupInterval=1m`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

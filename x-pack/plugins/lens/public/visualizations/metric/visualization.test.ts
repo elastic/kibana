@@ -1099,7 +1099,7 @@ describe('metric visualization', () => {
 
   it('implements custom display options', () => {
     expect(visualization.getDisplayOptions!()).toEqual({
-      noPanelTitle: true,
+      noPanelTitle: false,
       noPadding: true,
     });
   });

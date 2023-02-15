@@ -294,7 +294,7 @@ const formattedTime = (time?: string) => {
 const inProgressTitle = (action: ActionStatus) => (
   <FormattedMessage
     id="xpack.fleet.agentActivity.inProgressTitle"
-    defaultMessage="{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}"
+    defaultMessage="{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}{failuresText}"
     values={{
       nbAgents:
         action.nbAgentsAck >= action.nbAgentsActioned
@@ -307,6 +307,7 @@ const inProgressTitle = (action: ActionStatus) => (
       reassignText:
         action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
       upgradeText: action.type === 'UPGRADE' ? `to version ${action.version}` : '',
+      failuresText: action.nbAgentsFailed > 0 ? `, has ${action.nbAgentsFailed} failure(s)` : '',
     }}
   />
 );
@@ -531,6 +532,10 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
     return startDate > now;
   }, [action]);
 
+  const showCancelButton = useMemo(() => {
+    return isScheduled || action.hasRolloutPeriod;
+  }, [action, isScheduled]);
+
   return (
     <EuiPanel hasBorder={true} borderRadius="none">
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -591,17 +596,19 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                onClick={onClickAbortUpgrade}
-                isLoading={isAborting}
-                data-test-subj="abortBtn"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.agentActivityFlyout.abortUpgradeButtom"
-                  defaultMessage="Cancel"
-                />
-              </EuiButton>
+              {showCancelButton ? (
+                <EuiButton
+                  size="s"
+                  onClick={onClickAbortUpgrade}
+                  isLoading={isAborting}
+                  data-test-subj="abortBtn"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentActivityFlyout.abortUpgradeButtom"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButton>
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

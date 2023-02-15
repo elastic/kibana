@@ -12,7 +12,7 @@ import moment from 'moment';
 import { Status } from '../../../../../../common/types/api';
 
 import { ConnectorSyncJob } from '../../../../../../common/types/connectors';
-import { Paginate } from '../../../../../../common/types/pagination';
+import { Page, Paginate } from '../../../../../../common/types/pagination';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
   FetchSyncJobsApiLogic,
@@ -37,7 +37,7 @@ export interface IndexViewValues {
   syncJobs: SyncJobView[];
   syncJobsData: Paginate<ConnectorSyncJob> | null;
   syncJobsLoading: boolean;
-  syncJobsPagination: Paginate<undefined>;
+  syncJobsPagination: Page;
   syncJobsStatus: Status;
 }
 
@@ -85,13 +85,11 @@ export const SyncJobsViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAct
       () => [selectors.syncJobsData],
       (data?: Paginate<ConnectorSyncJob>) =>
         data
-          ? { ...data, data: undefined }
+          ? data._meta.page
           : {
-              data: [],
+              from: 0,
               has_more_hits_than_total: false,
-              pageIndex: 0,
-              pageSize: 10,
-              size: 0,
+              size: 10,
               total: 0,
             },
     ],

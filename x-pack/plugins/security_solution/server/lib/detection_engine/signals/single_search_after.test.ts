@@ -14,6 +14,10 @@ import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ruleExecutionLogMock } from '../rule_monitoring/mocks';
+import { buildEventsSearchQuery } from './build_events_query';
+
+jest.mock('./build_events_query');
+const mockBuildEventsSearchQuery = buildEventsSearchQuery as jest.Mock;
 
 describe('singleSearchAfter', () => {
   const mockService: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
@@ -156,5 +160,48 @@ describe('singleSearchAfter', () => {
         runtimeMappings: undefined,
       })
     ).rejects.toThrow('Fake Error');
+  });
+
+  test('singleSearchAfter passes overrideBody to buildEventsSearchQuery', async () => {
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
+    );
+    await singleSearchAfter({
+      searchAfterSortIds: undefined,
+      index: [],
+      from: 'now-360s',
+      to: 'now',
+      services: mockService,
+      ruleExecutionLogger,
+      pageSize: 1,
+      filter: {},
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
+      runtimeMappings: undefined,
+      overrideBody: {
+        _source: false,
+        fields: ['@timestamp'],
+      },
+    });
+
+    expect(mockBuildEventsSearchQuery).toHaveBeenCalledWith({
+      additionalFilters: undefined,
+      aggregations: undefined,
+      filter: {},
+      from: 'now-360s',
+      index: [],
+      primaryTimestamp: '@timestamp',
+      runtimeMappings: undefined,
+      searchAfterSortIds: undefined,
+      secondaryTimestamp: undefined,
+      size: 1,
+      sortOrder: undefined,
+      to: 'now',
+      trackTotalHits: undefined,
+      overrideBody: {
+        _source: false,
+        fields: ['@timestamp'],
+      },
+    });
   });
 });

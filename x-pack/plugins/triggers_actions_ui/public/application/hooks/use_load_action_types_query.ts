@@ -35,6 +35,7 @@ export const useLoadActionTypesQuery = () => {
     queryKey: ['loadActionTypes'],
     queryFn,
     onError: onErrorFn,
+    refetchOnWindowFocus: false,
   });
 
   const sortedResult = data

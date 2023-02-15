@@ -22,7 +22,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const dataViewPattern = 'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*';
 
   function createDataViewWithWriteUser() {
-    return apmApiClient.writeUser({ endpoint: 'POST /internal/apm/data_view/static' });
+    return apmApiClient.writeUser({
+      endpoint: 'POST /internal/apm/data_view/static',
+    });
   }
 
   function createDataViewWithReadUser() {
