@@ -5,14 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import {
-  APIClientRequestParamsOf,
-  APIReturnType,
-} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { timerange } from '@kbn/apm-synthtrace-client';
 import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
 import { orderBy } from 'lodash';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { config, generateData } from './generate_data';
 
@@ -31,25 +27,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function callErrorGroupSamplesApi(
-    overrides?: RecursivePartial<
-      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>['params']
-    >
-  ) {
+  async function callErrorGroupSamplesApi({ groupId }: { groupId: string }) {
     const response = await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples',
       params: {
         path: {
           serviceName,
-          groupId: 'foo',
-          ...overrides?.path,
+          groupId,
         },
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
           environment: 'ENVIRONMENT_ALL',
           kuery: '',
-          ...overrides?.query,
         },
       },
     });
@@ -78,7 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
-      const response = await callErrorGroupSamplesApi();
+      const response = await callErrorGroupSamplesApi({ groupId: 'foo' });
       expect(response.status).to.be(200);
       expect(response.body.occurrencesCount).to.be(0);
     });
@@ -97,7 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let errorsSamplesResponse: ErrorGroupSamples;
         before(async () => {
           const response = await callErrorGroupSamplesApi({
-            path: { groupId: '0000000000000000000000000Error 1' },
+            groupId: '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
           });
           errorsSamplesResponse = response.body;
         });
@@ -124,7 +114,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let errorSampleDetailsResponse: ErrorSampleDetails;
         before(async () => {
           const errorsSamplesResponse = await callErrorGroupSamplesApi({
-            path: { groupId: '0000000000000000000000000Error 1' },
+            groupId: '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
           });
 
           const errorId = errorsSamplesResponse.body.errorSampleIds[0];
@@ -133,10 +123,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           errorSampleDetailsResponse = response.body;
         });
 
-        it('displays correct error sample data', () => {
+        it('displays correct error grouping_key', () => {
           expect(errorSampleDetailsResponse.error.error.grouping_key).to.equal(
-            '0000000000000000000000000Error 1'
+            '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03'
           );
+        });
+
+        it('displays correct error message', () => {
           expect(errorSampleDetailsResponse.error.error.exception?.[0].message).to.equal('Error 1');
         });
       });
