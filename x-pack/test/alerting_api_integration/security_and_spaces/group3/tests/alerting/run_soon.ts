@@ -32,7 +32,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle run soon rule request appropriately', async () => {
           const responseRule = await supertest
-            .post(`${getUrlPrefix(``)}/api/alerting/rule`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestRuleData());
 
@@ -46,27 +46,20 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
-            case 'global_read at space1':
             case 'space_1_all at space2':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
-                  'create',
+                  'runSoon',
                   'test.noop',
                   'alertsFixture'
                 ),
                 statusCode: 403,
               });
               break;
+            case 'global_read at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: `Unauthorized to get actions`,
-                statusCode: 403,
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
