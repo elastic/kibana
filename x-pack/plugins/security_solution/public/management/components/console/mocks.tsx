@@ -142,11 +142,13 @@ export const getCommandListMock = (): CommandDefinition[] => {
       name: 'cmd1',
       about: 'a command with no options',
       RenderComponent: jest.fn(RenderComponent),
+      helpGroupLabel: 'group 1',
     },
     {
       name: 'cmd2',
       about: 'runs cmd 2',
       RenderComponent: jest.fn(RenderComponent),
+      helpGroupLabel: 'group 2',
       args: {
         file: {
           about: 'Includes file in the run',
@@ -173,6 +175,7 @@ export const getCommandListMock = (): CommandDefinition[] => {
       name: 'cmd3',
       about: 'allows argument to be used multiple times',
       RenderComponent: jest.fn(RenderComponent),
+      helpGroupPosition: 1,
       args: {
         foo: {
           about: 'foo stuff',
@@ -226,6 +229,8 @@ export const getCommandListMock = (): CommandDefinition[] => {
       mustHaveArgs: true,
       exampleUsage: 'cmd6 --foo 123',
       exampleInstruction: 'Enter --foo to execute',
+      helpGroupLabel: 'group 1',
+      helpGroupPosition: 0,
       args: {
         foo: {
           about: 'foo stuff',
@@ -245,6 +250,7 @@ export const getCommandListMock = (): CommandDefinition[] => {
       name: 'cmd7',
       about: 'Command with argument selector',
       RenderComponent: jest.fn(RenderComponent),
+      helpGroupLabel: 'group 2',
       args: {
         foo: {
           about: 'foo stuff',
