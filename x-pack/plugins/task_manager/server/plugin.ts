@@ -226,7 +226,8 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
-      const taskPartitioner = new TaskPartitioner('dep-fcaa0795577348e9ba367c5b1189e613', 'kibana.k8s.elastic.co/name=kb');
+      // TODO: Pass the namespace and selectors in the config
+      const taskPartitioner = new TaskPartitioner('serverless', 'kibana.k8s.elastic.co/name=kb');
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
