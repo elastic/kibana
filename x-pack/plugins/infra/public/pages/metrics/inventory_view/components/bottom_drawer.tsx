@@ -76,11 +76,11 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
   }, [isOpen, trackDrawerOpen, changeTimelineOpen]);
 
   return view === 'table' ? (
-    nodeType === 'pod' && (
+    nodeType === 'pod' ? (
       <BottomPanel hasBorder={false} hasShadow={false} borderRadius="none" paddingSize="s">
         <KubernetesButton />
       </BottomPanel>
-    )
+    ) : null
   ) : (
     <BottomActionContainer>
       <StickyPanel borderRadius="none" paddingSize="s">
