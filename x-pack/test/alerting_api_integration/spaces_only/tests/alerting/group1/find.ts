@@ -9,7 +9,13 @@ import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
 import { fromKueryExpression } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import {
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  getExpectedRule,
+  getExpectedActions,
+} from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 async function createAlert(
@@ -50,20 +56,7 @@ const findTestUtils = (
         .set('kbn-xsrf', 'foo')
         .send(
           getTestRuleData({
-            actions: [
-              {
-                group: 'default',
-                id: createdAction.id,
-                params: {},
-                frequency: {
-                  summary: false,
-                  notify_when: 'onThrottleInterval',
-                  throttle: '1m',
-                },
-              },
-            ],
-            notify_when: undefined,
-            throttle: undefined,
+            actions: getExpectedActions(createdAction),
           })
         )
         .expect(200);
@@ -82,50 +75,22 @@ const findTestUtils = (
       const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
       const activeSnoozes = match.active_snoozes;
       const hasActiveSnoozes = !!(activeSnoozes || []).filter((obj: any) => obj).length;
-      expect(match).to.eql({
-        id: createdAlert.id,
-        name: 'abc',
-        tags: ['foo'],
-        rule_type_id: 'test.noop',
-        running: false,
-        consumer: 'alertsFixture',
-        schedule: { interval: '1m' },
-        enabled: true,
-        actions: [
-          {
-            group: 'default',
-            id: createdAction.id,
-            connector_type_id: 'test.noop',
-            params: {},
-            frequency: {
-              summary: false,
-              notify_when: 'onThrottleInterval',
-              throttle: '1m',
-            },
+      expect(match).to.eql(
+        getExpectedRule({
+          responseBody: match,
+          username: 'elastic',
+          overrides: {
+            actions: getExpectedActions(createdAction),
+            ...(describeType === 'internal'
+              ? {
+                  monitoring: match.monitoring,
+                  snooze_schedule: match.snooze_schedule,
+                  ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                }
+              : {}),
           },
-        ],
-        params: {},
-        created_by: null,
-        api_key_owner: null,
-        scheduled_task_id: match.scheduled_task_id,
-        updated_by: null,
-        throttle: null,
-        notify_when: null,
-        mute_all: false,
-        muted_alert_ids: [],
-        created_at: match.created_at,
-        updated_at: match.updated_at,
-        execution_status: match.execution_status,
-        ...(match.next_run ? { next_run: match.next_run } : {}),
-        ...(match.last_run ? { last_run: match.last_run } : {}),
-        ...(describeType === 'internal'
-          ? {
-              monitoring: match.monitoring,
-              snooze_schedule: match.snooze_schedule,
-              ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
-            }
-          : {}),
-      });
+        })
+      );
       expect(Date.parse(match.created_at)).to.be.greaterThan(0);
       expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
     });
@@ -347,31 +312,12 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.body.perPage).to.be.greaterThan(0);
         expect(response.body.total).to.be.greaterThan(0);
         const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
-        expect(match).to.eql({
-          id: createdAlert.id,
-          name: 'abc',
-          tags: ['foo'],
-          alertTypeId: 'test.noop',
-          consumer: 'alertsFixture',
-          schedule: { interval: '1m' },
-          enabled: true,
-          actions: [],
-          params: {},
-          createdBy: null,
-          apiKeyOwner: null,
-          scheduledTaskId: match.scheduledTaskId,
-          updatedBy: null,
-          throttle: '1m',
-          notifyWhen: 'onThrottleInterval',
-          muteAll: false,
-          mutedInstanceIds: [],
-          createdAt: match.createdAt,
-          updatedAt: match.updatedAt,
-          executionStatus: match.executionStatus,
-          running: false,
-          ...(match.nextRun ? { nextRun: match.nextRun } : {}),
-          ...(match.lastRun ? { lastRun: match.lastRun } : {}),
-        });
+        expect(match).to.eql(
+          getExpectedRule({
+            responseBody: match,
+            username: 'elastic',
+          })
+        );
         expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
         expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
       });

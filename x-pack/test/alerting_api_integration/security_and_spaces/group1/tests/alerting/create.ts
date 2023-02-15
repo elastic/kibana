@@ -15,6 +15,8 @@ import {
   ObjectRemover,
   getProducerUnauthorizedErrorMessage,
   TaskManagerDoc,
+  getExpectedRule,
+  getExpectedActions,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -58,13 +60,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .send(
               getTestRuleData({
-                actions: [
-                  {
-                    id: createdAction.id,
-                    group: 'default',
-                    params: {},
-                  },
-                ],
+                actions: getExpectedActions(createdAction),
               })
             );
 
@@ -96,38 +92,15 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
-              expect(response.body).to.eql({
-                id: response.body.id,
-                name: 'abc',
-                tags: ['foo'],
-                actions: [
-                  {
-                    id: createdAction.id,
-                    connector_type_id: createdAction.connector_type_id,
-                    group: 'default',
-                    params: {},
+              expect(response.body).to.eql(
+                getExpectedRule({
+                  responseBody: response.body,
+                  username: user.username,
+                  overrides: {
+                    actions: getExpectedActions(createdAction),
                   },
-                ],
-                enabled: true,
-                rule_type_id: 'test.noop',
-                running: false,
-                consumer: 'alertsFixture',
-                params: {},
-                created_by: user.username,
-                schedule: { interval: '1m' },
-                scheduled_task_id: response.body.scheduled_task_id,
-                created_at: response.body.created_at,
-                updated_at: response.body.updated_at,
-                throttle: '1m',
-                notify_when: 'onThrottleInterval',
-                updated_by: user.username,
-                api_key_owner: user.username,
-                mute_all: false,
-                muted_alert_ids: [],
-                execution_status: response.body.execution_status,
-                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
-                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
-              });
+                })
+              );
               expect(typeof response.body.scheduled_task_id).to.be('string');
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);

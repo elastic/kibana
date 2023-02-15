@@ -20,3 +20,4 @@ export { checkAAD } from './check_aad';
 export { getEventLog } from './get_event_log';
 export { createWaitForExecutionCount } from './wait_for_execution_count';
 export { resetRulesSettings } from './reset_rules_settings';
+export { getExpectedRule, getExpectedActions } from './expected_mocks';

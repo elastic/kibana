@@ -10,7 +10,12 @@ import { SuperTest, Test } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { UserAtSpaceScenarios } from '../../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import {
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  getExpectedRule,
+} from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 const findTestUtils = (
@@ -69,38 +74,21 @@ const findTestUtils = (
               const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
               const activeSnoozes = match.active_snoozes;
               const hasActiveSnoozes = !!(activeSnoozes || []).filter((obj: any) => obj).length;
-              expect(match).to.eql({
-                id: createdAlert.id,
-                name: 'abc',
-                tags: ['foo'],
-                rule_type_id: 'test.noop',
-                running: false,
-                consumer: 'alertsFixture',
-                schedule: { interval: '1m' },
-                enabled: true,
-                actions: [],
-                params: {},
-                created_by: 'elastic',
-                scheduled_task_id: match.scheduled_task_id,
-                created_at: match.created_at,
-                updated_at: match.updated_at,
-                throttle: '1m',
-                notify_when: 'onThrottleInterval',
-                updated_by: 'elastic',
-                api_key_owner: 'elastic',
-                mute_all: false,
-                muted_alert_ids: [],
-                execution_status: match.execution_status,
-                ...(match.next_run ? { next_run: match.next_run } : {}),
-                ...(match.last_run ? { last_run: match.last_run } : {}),
-                ...(describeType === 'internal'
-                  ? {
-                      monitoring: match.monitoring,
-                      snooze_schedule: match.snooze_schedule,
-                      ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
-                    }
-                  : {}),
-              });
+              expect(match).to.eql(
+                getExpectedRule({
+                  responseBody: match,
+                  username: 'elastic',
+                  overrides: {
+                    ...(describeType === 'internal'
+                      ? {
+                          monitoring: match.monitoring,
+                          snooze_schedule: match.snooze_schedule,
+                          ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                        }
+                      : {}),
+                  },
+                })
+              );
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
               break;

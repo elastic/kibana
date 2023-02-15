@@ -16,6 +16,8 @@ import {
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
   TaskManagerDoc,
+  getExpectedRule,
+  getExpectedActions,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -54,13 +56,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send(
           getTestRuleData({
-            actions: [
-              {
-                id: createdAction.id,
-                group: 'default',
-                params: {},
-              },
-            ],
+            actions: getExpectedActions(createdAction),
           })
         );
 
@@ -469,38 +465,16 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(200);
         objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
-        expect(response.body).to.eql({
-          id: response.body.id,
-          name: 'abc',
-          tags: ['foo'],
-          actions: [
-            {
-              id: createdAction.id,
-              actionTypeId: createdAction.connector_type_id,
-              group: 'default',
-              params: {},
-            },
-          ],
-          enabled: true,
-          alertTypeId: 'test.noop',
-          consumer: 'alertsFixture',
-          params: {},
-          createdBy: null,
-          schedule: { interval: '1m' },
-          scheduledTaskId: response.body.scheduledTaskId,
-          updatedBy: null,
-          apiKeyOwner: null,
-          throttle: '1m',
-          notifyWhen: 'onThrottleInterval',
-          muteAll: false,
-          mutedInstanceIds: [],
-          createdAt: response.body.createdAt,
-          updatedAt: response.body.updatedAt,
-          executionStatus: response.body.executionStatus,
-          running: false,
-          ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
-          ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
-        });
+        expect(response.body).to.eql(
+          expect(response.body).to.eql(
+            getExpectedRule({
+              responseBody: response.body,
+              overrides: {
+                actions: getExpectedActions(createdAction),
+              },
+            })
+          )
+        );
         expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
         expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
         expect(Date.parse(response.body.updatedAt)).to.eql(Date.parse(response.body.createdAt));

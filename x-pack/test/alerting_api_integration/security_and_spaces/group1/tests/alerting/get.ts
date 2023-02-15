@@ -14,6 +14,7 @@ import {
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
+  getExpectedRule,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -60,38 +61,21 @@ const getTestUtils = (
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql({
-                id: createdAlert.id,
-                name: 'abc',
-                tags: ['foo'],
-                rule_type_id: 'test.noop',
-                running: false,
-                consumer: 'alertsFixture',
-                schedule: { interval: '1m' },
-                enabled: true,
-                actions: [],
-                params: {},
-                created_by: 'elastic',
-                scheduled_task_id: response.body.scheduled_task_id,
-                updated_at: response.body.updated_at,
-                created_at: response.body.created_at,
-                throttle: '1m',
-                notify_when: 'onThrottleInterval',
-                updated_by: 'elastic',
-                api_key_owner: 'elastic',
-                mute_all: false,
-                muted_alert_ids: [],
-                execution_status: response.body.execution_status,
-                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
-                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
-                ...(describeType === 'internal'
-                  ? {
-                      monitoring: response.body.monitoring,
-                      snooze_schedule: response.body.snooze_schedule,
-                      is_snoozed_until: response.body.is_snoozed_until,
-                    }
-                  : {}),
-              });
+              expect(response.body).to.eql(
+                getExpectedRule({
+                  responseBody: response.body,
+                  username: 'elastic',
+                  overrides: {
+                    ...(describeType === 'internal'
+                      ? {
+                          monitoring: response.body.monitoring,
+                          snooze_schedule: response.body.snooze_schedule,
+                          is_snoozed_until: response.body.is_snoozed_until,
+                        }
+                      : {}),
+                  },
+                })
+              );
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               if (response.body.next_run) {
