@@ -88,8 +88,7 @@ For the Elastic Enterprise Search 8.6.2 release information, refer to {enterpris
 
 Fleet::
 * Fixes max 20 installed integrations returned from Fleet API {kibana-pull}150780[#150780]
-* Fixes updates available when beta integrations are off {kibana-pull}149515[#149515]
-* Fixes updates available when beta integrations are off {kibana-pull}149486[#149486]
+* Fixes updates available when beta integrations are off {kibana-pull}149515[#149515] {kibana-pull}149486[#149486]
 
 Lens & Visualizations::
 Fixes a formula validation issue with non-default locale in *Lens* {kibana-pull}149806[#149806]
