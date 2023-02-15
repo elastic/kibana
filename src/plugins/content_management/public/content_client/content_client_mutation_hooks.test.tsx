@@ -10,16 +10,16 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { ContentClientProvider } from './content_client_context';
 import { ContentClient } from './content_client';
-import { RpcClient } from '../rpc_client';
-import { createRpcClientMock } from '../rpc_client/rpc_client.mock';
+import { CrudClient } from '../crud_client';
+import { createCrudClientMock } from '../crud_client/crud_client.mock';
 import { useCreateContentMutation } from './content_client_mutation_hooks';
 import type { CreateIn } from '../../common';
 
 let contentClient: ContentClient;
-let rpcClient: jest.Mocked<RpcClient>;
+let crudClient: jest.Mocked<CrudClient>;
 beforeEach(() => {
-  rpcClient = createRpcClientMock();
-  contentClient = new ContentClient(rpcClient);
+  crudClient = createCrudClientMock();
+  contentClient = new ContentClient(() => crudClient);
 });
 
 const Wrapper: React.FC = ({ children }) => (
@@ -30,7 +30,7 @@ describe('useCreateContentMutation', () => {
   test('should call rpcClient.create with input and resolve with output', async () => {
     const input: CreateIn = { contentType: 'testType', data: { foo: 'bar' } };
     const output = { test: 'test' };
-    rpcClient.create.mockImplementation(() => Promise.resolve(output));
+    crudClient.create.mockResolvedValueOnce(output);
     const { result, waitFor } = renderHook(() => useCreateContentMutation(), { wrapper: Wrapper });
     result.current.mutate(input);
 

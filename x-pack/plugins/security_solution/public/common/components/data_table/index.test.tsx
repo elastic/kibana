@@ -14,21 +14,32 @@ import { REMOVE_COLUMN } from './column_headers/translations';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { defaultHeaders, mockGlobalState, mockTimelineData, TestProviders } from '../../mock';
-import { defaultColumnHeaderType } from '../../store/data_table/defaults';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { getMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import type { CellValueElementProps } from '../../../../common/types';
 import { TableId } from '../../../../common/types';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../common/constants';
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useDispatch: () => mockDispatch,
+}));
 
-  return {
-    ...original,
-    useDispatch: () => mockDispatch,
-  };
-});
+const mockUseDataGridColumnsCellActions = jest.fn(
+  (_: object): Array<Array<() => JSX.Element>> => []
+);
+jest.mock('@kbn/cell-actions', () => ({
+  ...jest.requireActual('@kbn/cell-actions'),
+  useDataGridColumnsCellActions: (params: object) => mockUseDataGridColumnsCellActions(params),
+}));
+
+const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
+const mockGetColumnHeaders = jest.fn(() => headersJustTimestamp);
+jest.mock('./column_headers/helpers', () => ({
+  ...jest.requireActual('./column_headers/helpers'),
+  getColumnHeaders: () => mockGetColumnHeaders(),
+}));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -80,8 +91,6 @@ describe('DataTable', () => {
   const props: DataTableProps = {
     browserFields: mockBrowserFields,
     data: mockTimelineData,
-    defaultCellActions: [],
-    disabledCellActions: ['signal.rule.risk_score', 'signal.reason'],
     id: TableId.test,
     loadPage: jest.fn(),
     renderCellValue: TestCellRenderer,
@@ -98,7 +107,8 @@ describe('DataTable', () => {
   };
 
   beforeEach(() => {
-    mockDispatch.mockReset();
+    mockDispatch.mockClear();
+    mockUseDataGridColumnsCellActions.mockClear();
   });
 
   describe('rendering', () => {
@@ -142,10 +152,8 @@ describe('DataTable', () => {
     });
 
     test('it renders cell value', () => {
-      const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
       const testProps = {
         ...props,
-        columnHeaders: headersJustTimestamp,
         data: mockTimelineData.slice(0, 1),
       };
       const wrapper = mount(
@@ -163,17 +171,55 @@ describe('DataTable', () => {
           .text()
       ).toEqual(mockTimelineData[0].ecs.timestamp);
     });
+  });
 
-    test('timestamp column renders cell actions', () => {
-      const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
-      const testProps = {
-        ...props,
-        columnHeaders: headersJustTimestamp,
-        data: mockTimelineData.slice(0, 1),
-      };
+  describe('cellActions', () => {
+    test('calls useDataGridColumnsCellActions properly', () => {
+      const data = mockTimelineData.slice(0, 1);
       const wrapper = mount(
         <TestProviders>
-          <DataTableComponent {...testProps} />
+          <DataTableComponent {...props} data={data} />
+        </TestProviders>
+      );
+      wrapper.update();
+
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
+        triggerId: CELL_ACTIONS_DEFAULT_TRIGGER,
+        fields: [
+          {
+            name: '@timestamp',
+            values: [data[0]?.data[0]?.value],
+            type: 'date',
+            aggregatable: true,
+          },
+        ],
+        metadata: {
+          scopeId: 'table-test',
+        },
+        dataGridRef: expect.any(Object),
+      });
+    });
+
+    test('does not render cell actions if disableCellActions is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <DataTableComponent {...props} data={mockTimelineData.slice(0, 1)} disableCellActions />
+        </TestProviders>
+      );
+      wrapper.update();
+
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fields: [],
+        })
+      );
+    });
+
+    test('does not render cell actions if empty actions returned', () => {
+      mockUseDataGridColumnsCellActions.mockReturnValueOnce([]);
+      const wrapper = mount(
+        <TestProviders>
+          <DataTableComponent {...props} data={mockTimelineData.slice(0, 1)} />
         </TestProviders>
       );
       wrapper.update();
@@ -184,28 +230,14 @@ describe('DataTable', () => {
           .first()
           .prop<EuiDataGridColumn[]>('columns')
           .find((c) => c.id === '@timestamp')?.cellActions
-      ).toBeDefined();
+      ).toHaveLength(0);
     });
 
-    test("signal.rule.risk_score column doesn't render cell actions", () => {
-      const columnHeaders = [
-        {
-          category: 'signal',
-          columnHeaderType: defaultColumnHeaderType,
-          id: 'signal.rule.risk_score',
-          type: 'number',
-          aggregatable: true,
-          initialWidth: 105,
-        },
-      ];
-      const testProps = {
-        ...props,
-        columnHeaders,
-        data: mockTimelineData.slice(0, 1),
-      };
+    test('renders returned cell actions', () => {
+      mockUseDataGridColumnsCellActions.mockReturnValueOnce([[() => <div />]]);
       const wrapper = mount(
         <TestProviders>
-          <DataTableComponent {...testProps} />
+          <DataTableComponent {...props} data={mockTimelineData.slice(0, 1)} />
         </TestProviders>
       );
       wrapper.update();
@@ -215,73 +247,9 @@ describe('DataTable', () => {
           .find('[data-test-subj="body-data-grid"]')
           .first()
           .prop<EuiDataGridColumn[]>('columns')
-          .find((c) => c.id === 'signal.rule.risk_score')?.cellActions
-      ).toBeUndefined();
+          .find((c) => c.id === '@timestamp')?.cellActions
+      ).toHaveLength(1);
     });
-
-    test("signal.reason column doesn't render cell actions", () => {
-      const columnHeaders = [
-        {
-          category: 'signal',
-          columnHeaderType: defaultColumnHeaderType,
-          id: 'signal.reason',
-          type: 'string',
-          aggregatable: true,
-          initialWidth: 450,
-        },
-      ];
-      const testProps = {
-        ...props,
-        columnHeaders,
-        data: mockTimelineData.slice(0, 1),
-      };
-      const wrapper = mount(
-        <TestProviders>
-          <DataTableComponent {...testProps} />
-        </TestProviders>
-      );
-      wrapper.update();
-
-      expect(
-        wrapper
-          .find('[data-test-subj="body-data-grid"]')
-          .first()
-          .prop<EuiDataGridColumn[]>('columns')
-          .find((c) => c.id === 'signal.reason')?.cellActions
-      ).toBeUndefined();
-    });
-  });
-
-  test("signal.rule.risk_score column doesn't render cell actions", () => {
-    const columnHeaders = [
-      {
-        category: 'signal',
-        columnHeaderType: defaultColumnHeaderType,
-        id: 'signal.rule.risk_score',
-        type: 'number',
-        aggregatable: true,
-        initialWidth: 105,
-      },
-    ];
-    const testProps = {
-      ...props,
-      columnHeaders,
-      data: mockTimelineData.slice(0, 1),
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <DataTableComponent {...testProps} />
-      </TestProviders>
-    );
-    wrapper.update();
-
-    expect(
-      wrapper
-        .find('[data-test-subj="body-data-grid"]')
-        .first()
-        .prop<EuiDataGridColumn[]>('columns')
-        .find((c) => c.id === 'signal.rule.risk_score')?.cellActions
-    ).toBeUndefined();
   });
 
   test('it does NOT render switches for hiding columns in the `EuiDataGrid` `Columns` popover', async () => {

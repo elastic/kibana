@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import ReactRouterDom, { Route } from 'react-router-dom';
+import ReactRouterDom from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { fireEvent, screen } from '@testing-library/dom';
 import { renderHook, act as hooksAct } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
