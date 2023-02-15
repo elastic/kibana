@@ -17,6 +17,7 @@ import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('../../../../services/policies/policies');
 jest.mock('../../../../../common/components/user_privileges');
@@ -192,8 +193,8 @@ describe('When on the policy list page', () => {
         expect(renderResult.getByTestId('tablePaginationPopoverButton')).toBeTruthy();
       });
       userEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
-      const pageSize20 = renderResult.getByTestId('tablePagination-20-rows');
-      userEvent.click(pageSize20, undefined, { skipPointerEventsCheck: true });
+      await waitForEuiPopoverOpen();
+      userEvent.click(renderResult.getByTestId('tablePagination-20-rows'));
 
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalledTimes(2);
@@ -229,8 +230,8 @@ describe('When on the policy list page', () => {
 
       // change pageSize
       userEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
-      const pageSize10 = renderResult.getByTestId('tablePagination-10-rows');
-      userEvent.click(pageSize10, undefined, { skipPointerEventsCheck: true });
+      await waitForEuiPopoverOpen();
+      userEvent.click(renderResult.getByTestId('tablePagination-10-rows'));
 
       await waitFor(() => {
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenLastCalledWith(
