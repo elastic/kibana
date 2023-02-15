@@ -18,6 +18,9 @@ export type StateActionResponse<T extends AllActionStates> = ExcludeRetryableEsE
   ResponseType<T>
 >;
 
+/**
+ * Defines a stage delegation function for the model
+ */
 export type ModelStage<T extends AllActionStates> = (
   state: StateFromActionState<T>,
   res: StateActionResponse<T>,

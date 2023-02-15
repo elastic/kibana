@@ -48,7 +48,7 @@ export const runZeroDowntimeMigration = async (
     typeRegistry: options.typeRegistry,
   });
 
-  return Promise.all(
+  return await Promise.all(
     migratorConfigs.map((migratorConfig) => {
       return migrateIndex({
         ...options,

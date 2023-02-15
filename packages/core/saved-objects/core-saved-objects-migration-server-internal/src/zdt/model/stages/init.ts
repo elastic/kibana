@@ -24,6 +24,7 @@ export const init: ModelStage<'INIT'> = (state, res, context): State => {
     }
   }
 
+  // nothing implemented yet, just going to 'DONE'
   return {
     ...state,
     controlState: 'DONE',
