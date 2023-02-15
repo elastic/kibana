@@ -152,6 +152,11 @@ export async function updateTagsBatch(
         actionId,
       }))
     );
+    appContextService
+      .getLogger()
+      .info(
+        `action updated result wrote on ${agentIds.length} agentIds, updated: ${res.updated} 1st agentId: ${agentIds[0]}`
+      );
   }
 
   // writing failures from es update
@@ -164,6 +169,11 @@ export async function updateTagsBatch(
         error: failure.cause.reason,
       }))
     );
+    appContextService
+      .getLogger()
+      .info(
+        `action failed result wrote on ${res.failures.length} agents, 1st agentId: ${res.failures[0].id}`
+      );
   }
 
   if (res.version_conflicts ?? 0 > 0) {
@@ -177,6 +187,9 @@ export async function updateTagsBatch(
           error: 'version conflict on last retry',
         }))
       );
+      appContextService
+        .getLogger()
+        .info(`action conflict result wrote on ${res.version_conflicts!} agents`);
     }
     throw new Error(`version conflict of ${res.version_conflicts} agents`);
   }
