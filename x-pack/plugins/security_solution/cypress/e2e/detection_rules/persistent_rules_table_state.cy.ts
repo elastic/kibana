@@ -115,14 +115,6 @@ function expectManagementTableRules(ruleNames: string[]): void {
   }
 }
 
-function expectMonitoringTableRules(ruleNames: string[]): void {
-  expectNumberOfRules(RULES_MONITORING_TABLE, ruleNames.length);
-
-  for (const ruleName of ruleNames) {
-    expectToContainRule(RULES_MONITORING_TABLE, ruleName);
-  }
-}
-
 describe('Persistent rules table state', () => {
   before(() => {
     cleanKibana();
