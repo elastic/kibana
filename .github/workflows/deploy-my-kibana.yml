@@ -1,0 +1,51 @@
+---
+## This the automation to let Observability team members to deploy a kibana instance
+## using the observability test environments.
+## It will deploy a new instance for those who add a comment /deploy-my-kibana
+## only supported for Elasticians.
+##
+## Owner
+name: deploy-my-kibana
+
+on:
+  issue_comment:
+    types:
+      - created
+
+jobs:
+  is-elastician:
+    if: ${{ github.event.comment.body == '/deploy-my-kibana'}}
+    runs-on: ubuntu-latest
+    outputs:
+      member: ${{ steps.is-member.outputs.member }}
+    steps:
+      ## TODO: is the user a member of the elastic org? If so then output true
+      - id: is-member
+        run: |
+          echo "member=true" >> $GITHUB_OUTPUT
+
+  deploy-my-kibana:
+    if: ${{ github.event.comment.body == '/deploy-my-kibana'}}
+    runs-on: ubuntu-latest
+    needs:
+      - is-elastician-supported
+    steps:
+      ## TODO, notify with an emoji that the event has been listened then it will deploy-my-kibana
+      - if: ${{ needs.is-elastician.outputs.member == 'true'
+        uses: elastic/apm-pipeline-library/.github/actions/github-token@current
+        with:
+          url: ${{ secrets.OBLT_VAULT_ADDR }}
+          roleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
+          secretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
+
+      - if: ${{ needs.is-elastician.outputs.member == 'true'
+        name: trigger deploy my kibana
+        env:
+          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+          PROJECT: observability-test-environments
+        run: |-
+          gh api \
+            -H 'Accept: application/vnd.github.everest-preview+json' \
+            repos/elastic/${{ env.PROJECT }}/dispatches \
+            -X POST \
+            --input - <<< "{\"event_type\":\"deploy-my-kibana\",\"client_payload\":{ \"ref\": \"${{ github.event.pull_request.head.sha }}\", \"repository\": \"${{ github.repository }}\"}}"

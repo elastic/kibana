@@ -772,6 +772,9 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/plugins/observability/public/pages/rule_details  @elastic/actionable-observability
 /x-pack/test/observability_functional @elastic/actionable-observability
 
+# Observability robots
+/.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
+
 # Infra Monitoring
 /x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui
 /x-pack/test/api_integration/apis/infra @elastic/infra-monitoring-ui
