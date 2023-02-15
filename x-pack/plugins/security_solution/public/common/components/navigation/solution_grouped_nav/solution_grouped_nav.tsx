@@ -22,7 +22,8 @@ import type { DefaultSideNavItem, SideNavItem, Tracker } from './types';
 import { isCustomItem, isDefaultItem } from './types';
 import { EuiIconSpaces } from './icons/spaces';
 import type { LinkCategories } from '../../../links';
-import { TELEMETRY_EVENT } from './telemetry';
+import { TELEMETRY_EVENT } from './telemetry/const';
+import { TelemetryContextProvider, useTelemetryContext } from './telemetry/telemetry_context';
 
 export interface SolutionGroupedNavProps {
   items: SideNavItem[];
@@ -40,7 +41,6 @@ export interface SolutionNavItemsProps {
   isMobileSize: boolean;
   navItemsById: NavItemsById;
   onOpenPanelNav: (id: string) => void;
-  tracker: Tracker | undefined;
 }
 export interface SolutionNavItemProps {
   item: SideNavItem;
@@ -48,7 +48,6 @@ export interface SolutionNavItemProps {
   isActive: boolean;
   hasPanelNav: boolean;
   onOpenPanelNav: (id: string) => void;
-  tracker: Tracker | undefined;
 }
 
 type ActivePanelNav = string | null;
@@ -120,13 +119,12 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
         title={title}
         categories={categories}
         bottomOffset={bottomOffset}
-        tracker={tracker}
       />
     );
-  }, [activePanelNavId, bottomOffset, navItemsById, onClosePanelNav, onOutsidePanelClick, tracker]);
+  }, [activePanelNavId, bottomOffset, navItemsById, onClosePanelNav, onOutsidePanelClick]);
 
   return (
-    <>
+    <TelemetryContextProvider tracker={tracker}>
       <EuiFlexGroup gutterSize="none" direction="column">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" direction="column">
@@ -139,7 +137,6 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
                   isMobileSize={isMobileSize}
                   navItemsById={navItemsById}
                   onOpenPanelNav={openPanelNav}
-                  tracker={tracker}
                 />
               </EuiListGroup>
             </EuiFlexItem>
@@ -152,7 +149,6 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
                   isMobileSize={isMobileSize}
                   navItemsById={navItemsById}
                   onOpenPanelNav={openPanelNav}
-                  tracker={tracker}
                 />
               </EuiListGroup>
             </EuiFlexItem>
@@ -161,7 +157,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
       </EuiFlexGroup>
 
       {portalNav}
-    </>
+    </TelemetryContextProvider>
   );
 };
 export const SolutionGroupedNav = React.memo(SolutionGroupedNavComponent);
@@ -173,7 +169,6 @@ const SolutionNavItems: React.FC<SolutionNavItemsProps> = ({
   isMobileSize,
   navItemsById,
   onOpenPanelNav,
-  tracker,
 }) => (
   <>
     {items.map((item) => (
@@ -184,7 +179,6 @@ const SolutionNavItems: React.FC<SolutionNavItemsProps> = ({
         isActive={activePanelNavId === item.id}
         hasPanelNav={!isMobileSize && item.id in navItemsById}
         onOpenPanelNav={onOpenPanelNav}
-        tracker={tracker}
       />
     ))}
   </>
@@ -196,8 +190,9 @@ const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
   isActive,
   hasPanelNav,
   onOpenPanelNav,
-  tracker,
 }) => {
+  const { tracker } = useTelemetryContext();
+
   if (isCustomItem(item)) {
     return <Fragment key={item.id}>{item.render(isSelected)}</Fragment>;
   }

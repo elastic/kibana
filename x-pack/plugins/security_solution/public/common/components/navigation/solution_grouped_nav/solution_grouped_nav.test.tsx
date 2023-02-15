@@ -12,8 +12,8 @@ import { TestProviders } from '../../../mock';
 import type { SolutionGroupedNavProps } from './solution_grouped_nav';
 import { SolutionGroupedNav } from './solution_grouped_nav';
 import type { SideNavItem } from './types';
-import * as telemetry from './telemetry';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { TELEMETRY_EVENT } from './telemetry/const';
 
 const mockTrack = jest.fn();
 
@@ -106,7 +106,7 @@ describe('SolutionGroupedNav', () => {
       result.getByTestId(`groupedNavItemLink-${SecurityPageName.exploreLanding}`).click();
       expect(mockTrack).toHaveBeenCalledWith(
         METRIC_TYPE.CLICK,
-        `${telemetry.TELEMETRY_EVENT.NAVIGATION}${SecurityPageName.exploreLanding}`
+        `${TELEMETRY_EVENT.NAVIGATION}${SecurityPageName.exploreLanding}`
       );
     });
   });
@@ -138,7 +138,7 @@ describe('SolutionGroupedNav', () => {
       result.getByTestId(`groupedNavItemButton-${SecurityPageName.dashboardsLanding}`).click();
       expect(mockTrack).toHaveBeenCalledWith(
         METRIC_TYPE.CLICK,
-        `${telemetry.TELEMETRY_EVENT.GROUPED_NAVIGATION_TOGGLE}${SecurityPageName.dashboardsLanding}`
+        `${TELEMETRY_EVENT.GROUPED_NAVIGATION_TOGGLE}${SecurityPageName.dashboardsLanding}`
       );
     });
 

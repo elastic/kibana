@@ -30,10 +30,11 @@ import {
   GlobalPanelStyle,
   panelClass,
 } from './solution_grouped_nav_panel.styles';
-import type { DefaultSideNavItem, Tracker } from './types';
+import type { DefaultSideNavItem } from './types';
 import type { LinkCategories } from '../../../links/types';
 import { NavItemBetaBadge } from '../nav_item_beta_badge';
-import { TELEMETRY_EVENT } from './telemetry';
+import { TELEMETRY_EVENT } from './telemetry/const';
+import { useTelemetryContext } from './telemetry/telemetry_context';
 
 export interface SolutionNavPanelProps {
   onClose: () => void;
@@ -42,7 +43,6 @@ export interface SolutionNavPanelProps {
   items: DefaultSideNavItem[];
   categories?: LinkCategories;
   bottomOffset?: string;
-  tracker?: Tracker;
 }
 export interface SolutionNavPanelCategoriesProps {
   categories: LinkCategories;
@@ -52,7 +52,6 @@ export interface SolutionNavPanelCategoriesProps {
 export interface SolutionNavPanelItemsProps {
   items: DefaultSideNavItem[];
   onClose: () => void;
-  tracker?: Tracker;
 }
 
 /**
@@ -65,7 +64,6 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
   categories,
   items,
   bottomOffset,
-  tracker,
 }) => {
   const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
   const panelClasses = classNames(panelClass, 'eui-yScroll');
@@ -165,13 +163,10 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
   );
 };
 
-const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({
-  items,
-  onClose,
-  tracker,
-}) => {
+const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => {
   const panelLinkClassNames = classNames('solutionGroupedNavPanelLink');
   const panelLinkItemClassNames = classNames('solutionGroupedNavPanelLinkItem');
+  const { tracker } = useTelemetryContext();
   return (
     <>
       {items.map(({ id, href, onClick, label, description, isBeta, betaOptions }) => (

@@ -15,8 +15,9 @@ import { SolutionNavPanel } from './solution_grouped_nav_panel';
 import type { DefaultSideNavItem } from './types';
 import { bottomNavOffset } from '../../../lib/helpers';
 import { BETA } from '@kbn/kubernetes-security-plugin/common/translations';
-import { TELEMETRY_EVENT } from './telemetry';
+import { TELEMETRY_EVENT } from './telemetry/const';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { TelemetryContextProvider } from './telemetry/telemetry_context';
 
 const mockUseIsWithinMinBreakpoint = jest.fn(() => true);
 jest.mock('@elastic/eui', () => {
@@ -71,14 +72,15 @@ const renderNavPanel = (props: Partial<SolutionNavPanelProps> = {}) =>
   render(
     <>
       <div data-test-subj="outsideClickDummy" />
-      <SolutionNavPanel
-        items={mockItems}
-        title={PANEL_TITLE}
-        onClose={mockOnClose}
-        onOutsideClick={mockOnOutsideClick}
-        tracker={mockTrack}
-        {...props}
-      />
+      <TelemetryContextProvider tracker={mockTrack}>
+        <SolutionNavPanel
+          items={mockItems}
+          title={PANEL_TITLE}
+          onClose={mockOnClose}
+          onOutsideClick={mockOnOutsideClick}
+          {...props}
+        />
+      </TelemetryContextProvider>
     </>,
     {
       wrapper: TestProviders,
