@@ -4,6 +4,7 @@ exports[`entity_draggable renders correctly against snapshot 1`] = `
 <CellActions
   field={
     Object {
+      "aggregatable": true,
       "name": "entity-name",
       "type": "keyword",
       "value": "entity-value",

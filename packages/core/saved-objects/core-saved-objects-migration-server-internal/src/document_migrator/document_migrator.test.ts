@@ -255,7 +255,6 @@ describe('DocumentMigrator', () => {
         type: 'user',
         attributes: { name: 'Chris' },
         migrationVersion: { user: '1.2.3' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -308,7 +307,6 @@ describe('DocumentMigrator', () => {
         attributes: { name: 'Tyler' },
         migrationVersion: { acl: '2.3.5' },
         acl: 'admins-only, sucka!',
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -347,7 +345,6 @@ describe('DocumentMigrator', () => {
         id: 'me',
         type: 'user',
         attributes: { name: 'Tyler' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -420,7 +417,6 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { name: 'Callie', b: 'B', c: 'C' },
         migrationVersion: { dog: '2.0.1' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -525,7 +521,6 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { name: 'Callie', a: 1, b: 2, c: 3 },
         migrationVersion: { dog: '10.0.1' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -560,7 +555,6 @@ describe('DocumentMigrator', () => {
         attributes: { name: 'Callie' },
         animal: 'Animal: Doggie',
         migrationVersion: { animal: '1.0.0', dog: '2.2.4' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -588,7 +582,6 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { title: 'Title: Name: Callie' },
         migrationVersion: { dog: '1.0.2' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -622,7 +615,6 @@ describe('DocumentMigrator', () => {
         type: 'cat',
         attributes: { name: 'Kitty Callie' },
         migrationVersion: { dog: '2.2.4', cat: '1.0.0' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -694,7 +686,6 @@ describe('DocumentMigrator', () => {
         type: 'cat',
         attributes: { name: 'Boo' },
         migrationVersion: { cat: '1.0.0', foo: '5.6.7' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -824,6 +815,35 @@ describe('DocumentMigrator', () => {
         ]);
       });
 
+      it('does not fail when encountering documents with coreMigrationVersion higher than the latest known', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry(
+            { name: 'dog', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
+            // no migration transforms are defined, the migrationVersion will be derived from 'convertToMultiNamespaceTypeVersion'
+          ),
+        });
+        migrator.prepareMigrations();
+        const obj = {
+          id: 'mischievous',
+          type: 'dog',
+          attributes: { name: 'Ann' },
+          migrationVersion: { dog: '0.1.0' },
+          coreMigrationVersion: '2.0.0',
+        } as SavedObjectUnsanitizedDoc;
+        const actual = migrator.migrateAndConvert(obj);
+        expect(actual).toEqual([
+          {
+            id: 'mischievous',
+            type: 'dog',
+            attributes: { name: 'Ann' },
+            migrationVersion: { dog: '1.0.0' },
+            coreMigrationVersion: '2.0.0',
+            namespaces: ['default'],
+          },
+        ]);
+      });
+
       it('skips reference transforms and conversion transforms when using `migrate`', () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),
@@ -847,9 +867,43 @@ describe('DocumentMigrator', () => {
           id: 'cowardly',
           type: 'dog',
           attributes: { name: 'Leslie' },
-          migrationVersion: { dog: '1.0.0' },
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
-          coreMigrationVersion: kibanaVersion,
+          coreMigrationVersion: '1.0.0',
+          namespace: 'foo-namespace',
+          // there is no 'namespaces' field because no conversion transform was applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
+        });
+      });
+
+      it('should keep the same `migrationVersion` when the conversion transforms are skipped', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry({
+            name: 'dog',
+            namespaceType: 'multiple',
+            convertToMultiNamespaceTypeVersion: '3.0.0',
+            migrations: {
+              '1.0.0': (doc: SavedObjectUnsanitizedDoc) => doc,
+            },
+          }),
+        });
+        migrator.prepareMigrations();
+        const obj = {
+          id: 'cowardly',
+          type: 'dog',
+          attributes: { name: 'Leslie' },
+          migrationVersion: { dog: '2.0.0' },
+          references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+          namespace: 'foo-namespace',
+        };
+        const actual = migrator.migrate(obj);
+        expect(mockGetConvertedObjectId).not.toHaveBeenCalled();
+        expect(actual).toEqual({
+          id: 'cowardly',
+          type: 'dog',
+          attributes: { name: 'Leslie' },
+          migrationVersion: { dog: '2.0.0' },
+          references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+          coreMigrationVersion: '3.0.0',
           namespace: 'foo-namespace',
           // there is no 'namespaces' field because no conversion transform was applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
         });
@@ -881,7 +935,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Sweet Peach' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });
@@ -896,7 +950,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Sweet Peach' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespace: 'foo-namespace',
             },
           ]);
@@ -929,7 +983,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Wally' },
               migrationVersion: { dog: '1.0.0' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['default'],
             },
           ]);
@@ -945,7 +999,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Wally' },
               migrationVersion: { dog: '1.0.0' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['foo-namespace'],
               originId: 'loud',
             },
@@ -960,7 +1014,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });
@@ -993,7 +1047,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Too' },
               migrationVersion: { dog: '1.0.0' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['default'],
             },
           ]);
@@ -1021,7 +1075,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Too' },
               migrationVersion: { dog: '1.0.0' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['foo-namespace'],
               originId: 'cute',
             },
@@ -1036,7 +1090,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });
@@ -1078,7 +1132,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Patches', age: '11', color: 'tri-color' },
               migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });
@@ -1094,7 +1148,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Patches', age: '11', color: 'tri-color' },
               migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespace: 'foo-namespace',
             },
           ]);
@@ -1131,7 +1185,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Remy' },
               migrationVersion: { dog: '2.0.0' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['default'],
             },
           ]);
@@ -1147,7 +1201,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Remy' },
               migrationVersion: { dog: '2.0.0' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['foo-namespace'],
               originId: 'hungry',
             },
@@ -1162,7 +1216,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });
@@ -1203,7 +1257,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Sasha' },
               migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['default'],
             },
           ]);
@@ -1231,7 +1285,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Sasha' },
               migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['foo-namespace'],
               originId: 'pretty',
             },
@@ -1246,7 +1300,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });

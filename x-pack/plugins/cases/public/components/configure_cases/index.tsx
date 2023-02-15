@@ -84,11 +84,15 @@ export const ConfigureCases: React.FC = React.memo(() => {
     refetch: refetchActionTypes,
   } = useGetActionTypes();
 
-  const onConnectorUpdated = useCallback(async () => {
-    refetchConnectors();
-    refetchActionTypes();
-    refetchCaseConfigure();
-  }, [refetchActionTypes, refetchCaseConfigure, refetchConnectors]);
+  const onConnectorUpdated = useCallback(
+    async (updatedConnector) => {
+      setEditedConnectorItem(updatedConnector);
+      refetchConnectors();
+      refetchActionTypes();
+      refetchCaseConfigure();
+    },
+    [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
+  );
 
   const isLoadingAny =
     isLoadingConnectors || persistLoading || loadingCaseConfigure || isLoadingActionTypes;
@@ -181,7 +185,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connector.id, editFlyoutVisible]
+    [connector.id, editedConnectorItem, editFlyoutVisible]
   );
 
   return (

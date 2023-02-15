@@ -32,7 +32,6 @@ export const makeActionContext = (
     type: 'keyword',
     value: 'some value',
   },
-  extraContentNodeRef: {} as MutableRefObject<HTMLDivElement>,
   nodeRef: {} as MutableRefObject<HTMLElement>,
   ...override,
 });
