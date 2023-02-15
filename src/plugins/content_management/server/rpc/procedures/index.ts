@@ -9,10 +9,17 @@
 import type { ProcedureName } from '../../../common';
 import type { RpcService } from '../rpc_service';
 import type { Context } from '../types';
-import { registerGet } from './get';
-import { registerCreate } from './create';
+import { procedures } from './all_procedures';
+
+// Type utility to correclty set the type of JS Object.entries()
+type Entries<T> = Array<
+  {
+    [K in keyof T]: [K, T[K]];
+  }[keyof T]
+>;
 
 export function registerProcedures(rpc: RpcService<Context, ProcedureName>) {
-  registerGet(rpc);
-  registerCreate(rpc);
+  (Object.entries(procedures) as Entries<typeof procedures>).forEach(([name, definition]) => {
+    rpc.register(name, definition);
+  });
 }

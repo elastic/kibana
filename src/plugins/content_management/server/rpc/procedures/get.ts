@@ -7,61 +7,59 @@
  */
 
 import { rpcSchemas } from '../../../common';
-import type { GetIn, ProcedureName } from '../../../common';
+import type { GetIn } from '../../../common';
 import type { ContentCrud, StorageContext } from '../../core';
-import type { RpcService } from '../rpc_service';
+import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
 
-export function registerGet(rpc: RpcService<Context, ProcedureName>) {
-  rpc.register<GetIn<string>>('get', {
-    schemas: rpcSchemas.get,
-    fn: async (ctx, input) => {
-      if (!input) {
-        throw new Error(`Input data missing for procedur [get].`);
+export const get: ProcedureDefinition<Context, GetIn<string>> = {
+  schemas: rpcSchemas.get,
+  fn: async (ctx, input) => {
+    if (!input) {
+      throw new Error(`Input data missing for procedur [get].`);
+    }
+
+    if (!input.contentTypeId) {
+      throw new Error(`Content type not provided in input procedure [get].`);
+    }
+
+    const contentDefinition = ctx.contentRegistry.getDefinition(input.contentTypeId);
+
+    if (!contentDefinition) {
+      // TODO: Improve error handling
+      throw new Error(`Invalid contentType [${input.contentTypeId}]`);
+    }
+
+    const { get: schemas } = contentDefinition.schemas.content;
+
+    if (input.options) {
+      // Validate the options provided
+      if (!schemas?.in?.options) {
+        throw new Error(`Schema missing for rpc procedure [get.in.options].`);
       }
-
-      if (!input.contentTypeId) {
-        throw new Error(`Content type not provided in input procedure [get].`);
-      }
-
-      const contentDefinition = ctx.contentRegistry.getDefinition(input.contentTypeId);
-
-      if (!contentDefinition) {
+      const validation = schemas.in.options.getSchema().validate(input.options);
+      if (validation.error) {
         // TODO: Improve error handling
-        throw new Error(`Invalid contentType [${input.contentTypeId}]`);
+        throw validation.error;
       }
+    }
 
-      const { get: schemas } = contentDefinition.schemas.content;
+    // Execute CRUD
+    const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(input.contentTypeId);
+    const storageContext: StorageContext = {
+      requestHandlerContext: ctx.requestHandlerContext,
+    };
+    const result = await crudInstance.get(storageContext, input.id, input.options);
 
-      if (input.options) {
-        // Validate the options provided
-        if (!schemas.in?.options) {
-          throw new Error(`Schema missing for rpc procedure [get.in.options].`);
-        }
-        const validation = schemas.in.options.getSchema().validate(input.options);
-        if (validation.error) {
-          // TODO: Improve error handling
-          throw validation.error;
-        }
+    // Validate result
+    const resultSchema = schemas?.out?.result;
+    if (resultSchema) {
+      const validation = resultSchema.getSchema().validate(result);
+      if (validation.error) {
+        throw validation.error;
       }
+    }
 
-      // Execute CRUD
-      const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(input.contentTypeId);
-      const storageContext: StorageContext = {
-        requestHandlerContext: ctx.requestHandlerContext,
-      };
-      const result = await crudInstance.get(storageContext, input.id, input.options);
-
-      // Validate result
-      const resultSchema = schemas.out?.result;
-      if (resultSchema) {
-        const validation = resultSchema.getSchema().validate(result);
-        if (validation.error) {
-          throw validation.error;
-        }
-      }
-
-      return result;
-    },
-  });
-}
+    return result;
+  },
+};

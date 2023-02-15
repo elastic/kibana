@@ -23,18 +23,20 @@ import {
 } from './types';
 import { procedureNames } from '../common';
 
+type CreateRouterFn = CoreSetup['http']['createRouter'];
+
 export class ContentManagementPlugin
   implements Plugin<ContentManagementServerSetup, ContentManagementServerStart, SetupDependencies>
 {
   private readonly logger: Logger;
   private readonly core: Core;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: { logger: PluginInitializerContext['logger'] }) {
     this.logger = initializerContext.logger.get();
     this.core = new Core({ logger: this.logger });
   }
 
-  public setup(core: { http: CoreSetup['http'] }) {
+  public setup(core: { http: { createRouter: CreateRouterFn } }) {
     const { api: coreApi, contentRegistry } = this.core.setup();
 
     const rpc = new RpcService<RpcContext>();

@@ -64,6 +64,14 @@ describe('RpcService', () => {
       expect(result).toEqual(output);
     });
 
+    test('should throw an error if the procedure is not registered', () => {
+      const rpc = new RpcService();
+
+      expect(() => {
+        return rpc.call(undefined, 'unknown');
+      }).rejects.toEqual(new Error('Procedure [unknown] is not registered.'));
+    });
+
     test('should validate that the input is valid', () => {
       const rpc = new RpcService<{}, 'foo'>();
 

@@ -33,7 +33,7 @@ export class RpcService<Context extends object | void = void, Names extends stri
   ): Promise<{ result: O }> {
     const procedure: ProcedureDefinition<Context, I, O> | undefined = this.registry.get(name);
 
-    if (!procedure) throw new Error(`Procedure ${name} is not registered.`);
+    if (!procedure) throw new Error(`Procedure [${name}] is not registered.`);
 
     const { fn, schemas } = procedure;
 
