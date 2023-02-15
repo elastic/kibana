@@ -18,7 +18,7 @@ export type CloudDefendStatusCode =
   | 'unprivileged' // user lacks privileges for the latest findings index
   | 'index-timeout' // index timeout was surpassed since installation
   | 'not-deployed' // no healthy agents were deployed
-  | 'not-installed'; // number of installed csp integrations is 0;
+  | 'not-installed'; // number of installed integrations is 0;
 
 export interface IndexDetails {
   index: string;
@@ -30,8 +30,6 @@ interface BaseCloudDefendSetupStatus {
   latestPackageVersion: string;
   installedPackagePolicies: number;
   healthyAgents: number;
-  isPluginInitialized: boolean;
-  //  installedPolicyTemplates: PosturePolicyTemplate[];
 }
 
 interface CloudDefendSetupNotInstalledStatus extends BaseCloudDefendSetupStatus {
@@ -51,7 +49,7 @@ export type CloudDefendSetupStatus =
 
 export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
 
-export interface ControlPolicy {
+export interface CloudDefendPolicy {
   package_policy: PackagePolicy;
   agent_policy: AgentPolicyStatus;
 }

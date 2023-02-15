@@ -7,18 +7,18 @@
 
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { useKibana } from '../hooks/use_kibana';
-import { CspSetupStatus } from '../../../common/types';
+import { CloudDefendSetupStatus } from '../../../common/types';
 import { STATUS_ROUTE_PATH } from '../../../common/constants';
 
-const getCspSetupStatusQueryKey = 'csp_status_key';
+const getCloudDefendSetupStatusQueryKey = 'cloud_defend_status_key';
 
-export const useCspSetupStatusApi = ({
+export const useCloudDefendSetupStatusApi = ({
   options,
-}: { options?: UseQueryOptions<CspSetupStatus, unknown, CspSetupStatus> } = {}) => {
+}: { options?: UseQueryOptions<CloudDefendSetupStatus, unknown, CloudDefendSetupStatus> } = {}) => {
   const { http } = useKibana().services;
-  return useQuery<CspSetupStatus, unknown, CspSetupStatus>(
-    [getCspSetupStatusQueryKey],
-    () => http.get<CspSetupStatus>(STATUS_ROUTE_PATH),
+  return useQuery<CloudDefendSetupStatus, unknown, CloudDefendSetupStatus>(
+    [getCloudDefendSetupStatusQueryKey],
+    () => http.get<CloudDefendSetupStatus>(STATUS_ROUTE_PATH),
     options
   );
 };

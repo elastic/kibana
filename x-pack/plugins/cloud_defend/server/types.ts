@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   IRouter,
@@ -33,6 +34,7 @@ export interface CloudDefendPluginStart {}
 export interface CloudDefendPluginSetupDeps {
   data: DataPluginSetup;
   security: SecurityPluginSetup;
+  cloud: CloudSetup;
 }
 export interface CloudDefendPluginStartDeps {
   data: DataPluginStart;
@@ -49,7 +51,6 @@ export interface CloudDefendApiRequestHandlerContext {
   agentService: AgentService;
   packagePolicyService: PackagePolicyClient;
   packageService: PackageService;
-  isPluginInitialized(): boolean;
 }
 
 export type CloudDefendRequestHandlerContext = CustomRequestHandlerContext<{

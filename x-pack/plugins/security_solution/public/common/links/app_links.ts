@@ -14,6 +14,7 @@ import { links as managementLinks, getManagementFilteredLinks } from '../../mana
 import { dashboardsLandingLinks, threatHuntingLandingLinks } from '../../landing_pages/links';
 import { gettingStartedLinks } from '../../overview/links';
 import { rootLinks as cloudSecurityPostureRootLinks } from '../../cloud_security_posture/links';
+import { rootLinks as cloudDefendRootLinks } from '../../cloud_defend/links';
 import type { StartPlugins } from '../../types';
 
 const casesLinks = getCasesLinkItems();
@@ -21,6 +22,7 @@ const casesLinks = getCasesLinkItems();
 export const links = Object.freeze([
   dashboardsLandingLinks,
   detectionLinks,
+  cloudDefendRootLinks,
   cloudSecurityPostureRootLinks,
   timelinesLinks,
   casesLinks,

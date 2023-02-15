@@ -8,8 +8,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { POLICIES_ROUTE_PATH, INTEGRATION_PACKAGE_NAME } from '../../../common/constants';
 import { policiesQueryParamsSchema } from '../../../common/schemas/policy';
-import type { ControlPolicy } from '../../../common/types';
-import { getControlPolicyFromPackagePolicy, isNonNullable } from '../../../common/utils/helpers';
+import type { CloudDefendPolicy } from '../../../common/types';
+import { isNonNullable } from '../../../common/utils/helpers';
 import { CloudDefendRouter } from '../../types';
 import {
   getAgentStatusesByAgentPolicies,
@@ -24,7 +24,7 @@ const createPolicies = (
   agentPolicies: AgentPolicy[],
   agentStatusByAgentPolicyId: AgentStatusByAgentPolicyMap,
   cloudDefendPackagePolicies: PackagePolicy[]
-): Promise<ControlPolicy[]> => {
+): Promise<CloudDefendPolicy[]> => {
   const cloudDefendPackagePoliciesMap = new Map(
     cloudDefendPackagePolicies.map((packagePolicy) => [packagePolicy.id, packagePolicy])
   );
@@ -39,7 +39,6 @@ const createPolicies = (
           .filter(isNonNullable) ?? [];
 
       const policies = cloudDefendPackagesOnAgent.map(async (cloudDefendPackage) => {
-        const policyId = getControlPolicyFromPackagePolicy(cloudDefendPackage.inputs);
         const agentPolicyStatus = {
           id: agentPolicy.id,
           name: agentPolicy.name,

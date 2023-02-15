@@ -14,6 +14,7 @@ import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../..
 import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../explore/network/pages/details';
 import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getTrailingBreadcrumbs as geExceptionsBreadcrumbs } from '../../../../exceptions/utils/pages.utils';
+import { getTrailingBreadcrumbs as getCloudDefendBreadcrumbs } from '../../../../cloud_defend/breadcrumbs';
 import { getTrailingBreadcrumbs as getCSPBreadcrumbs } from '../../../../cloud_security_posture/breadcrumbs';
 import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../explore/users/pages/details/utils';
 import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
@@ -131,6 +132,8 @@ const getTrailingBreadcrumbsForRoutes = (
       return getAlertDetailBreadcrumbs(spyState, getSecuritySolutionUrl);
     case SecurityPageName.cloudSecurityPostureBenchmarks:
       return getCSPBreadcrumbs(spyState, getSecuritySolutionUrl);
+    case SecurityPageName.cloudDefendPolicies:
+      return getCloudDefendBreadcrumbs(spyState, getSecuritySolutionUrl);
   }
 
   return [];

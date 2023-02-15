@@ -18,9 +18,8 @@ import type {
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import { errors } from '@elastic/elasticsearch';
-import { INPUT_CONTROL } from '../../common/constants';
-import { CLOUD_DEFEND_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
-import { PoliciesQueryParams } from '../../common/schemas/policy';
+import { INPUT_CONTROL, CLOUD_DEFEND_FLEET_PACKAGE_KUERY } from '../../common/constants';
+import { POLICIES_PACKAGE_POLICY_PREFIX, PoliciesQueryParams } from '../../common/schemas/policy';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
@@ -83,8 +82,7 @@ export const getCloudDefendPackagePolicies = (
   packageName: string,
   queryParams: Partial<PoliciesQueryParams>
 ): Promise<ListResult<PackagePolicy>> => {
-  // const sortField = queryParams.sort_field?.replaceAll(POLICIES_PACKAGE_POLICY_PREFIX, '');
-  const sortField = queryParams.sort_field;
+  const sortField = queryParams.sort_field?.replaceAll(POLICIES_PACKAGE_POLICY_PREFIX, '');
 
   return packagePolicyService.list(soClient, {
     kuery: getPackageNameQuery(packageName, queryParams.policy_name),

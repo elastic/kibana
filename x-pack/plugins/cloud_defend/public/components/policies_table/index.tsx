@@ -18,18 +18,18 @@ import { generatePath } from 'react-router-dom';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { TimestampTableCell } from '../timestamp_table_cell';
-import type { ControlPolicy } from '../../../common/types';
+import type { CloudDefendPolicy } from '../../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import * as TEST_SUBJ from '../../pages/policies/test_subjects';
 
 interface PoliciesTableProps
   extends Pick<
-      EuiBasicTableProps<ControlPolicy>,
+      EuiBasicTableProps<CloudDefendPolicy>,
       'loading' | 'error' | 'noItemsMessage' | 'sorting'
     >,
     Pagination {
-  policies: ControlPolicy[];
-  setQuery(pagination: CriteriaWithPagination<ControlPolicy>): void;
+  policies: CloudDefendPolicy[];
+  setQuery(pagination: CriteriaWithPagination<CloudDefendPolicy>): void;
   'data-test-subj'?: string;
 }
 
@@ -49,23 +49,17 @@ const IntegrationButtonLink = ({
   packagePolicyId: string;
   policyId: string;
 }) => {
-  const { application } = useKibana().services;
+  const editIntegrationLink = pagePathGetters
+    .edit_integration({
+      packagePolicyId,
+      policyId,
+    })
+    .join('');
 
-  return (
-    <EuiLink
-      href={application.getUrlForApp('security', {
-        path: generatePath('/todo', {
-          packagePolicyId,
-          policyId,
-        }),
-      })}
-    >
-      {packageName}
-    </EuiLink>
-  );
+  return <EuiLink href={editIntegrationLink}>{packageName}</EuiLink>;
 };
 
-const POLICIES_TABLE_COLUMNS: Array<EuiBasicTableColumn<ControlPolicy>> = [
+const POLICIES_TABLE_COLUMNS: Array<EuiBasicTableColumn<CloudDefendPolicy>> = [
   {
     field: 'package_policy.name',
     name: i18n.translate('xpack.cloudDefend.policies.policiesTable.integrationNameColumnTitle', {
@@ -81,14 +75,6 @@ const POLICIES_TABLE_COLUMNS: Array<EuiBasicTableColumn<ControlPolicy>> = [
     truncateText: true,
     sortable: true,
     'data-test-subj': TEST_SUBJ.POLICIES_TABLE_COLUMNS.INTEGRATION_NAME,
-  },
-  {
-    field: 'rules_count',
-    name: i18n.translate('xpack.cloudDefend.policies.policiesTable.rulesColumnTitle', {
-      defaultMessage: 'Rules',
-    }),
-    truncateText: true,
-    'data-test-subj': TEST_SUBJ.POLICIES_TABLE_COLUMNS.RULES,
   },
   {
     field: 'agent_policy.name',
@@ -124,7 +110,7 @@ const POLICIES_TABLE_COLUMNS: Array<EuiBasicTableColumn<ControlPolicy>> = [
     }),
     dataType: 'date',
     truncateText: true,
-    render: (timestamp: ControlPolicy['package_policy']['created_at']) => (
+    render: (timestamp: CloudDefendPolicy['package_policy']['created_at']) => (
       <TimestampTableCell timestamp={timestamp} />
     ),
     sortable: true,
@@ -150,7 +136,7 @@ export const PoliciesTable = ({
     totalItemCount,
   };
 
-  const onChange = ({ page, sort }: CriteriaWithPagination<ControlPolicy>) => {
+  const onChange = ({ page, sort }: CriteriaWithPagination<CloudDefendPolicy>) => {
     setQuery({ page: { ...page, index: page.index + 1 }, sort });
   };
 

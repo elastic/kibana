@@ -533,7 +533,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         ...getCloudPostureSecuritySolutionLink<SecurityPageName>('benchmarks'),
       },
       {
-        ...getCloudDefendSecuritySolutionLink<SecurityPageName>('benchmarks'),
+        ...getCloudDefendSecuritySolutionLink<SecurityPageName>('policies'),
       },
     ],
   },

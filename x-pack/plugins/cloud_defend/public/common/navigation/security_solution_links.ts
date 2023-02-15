@@ -27,11 +27,13 @@ interface CloudDefendNavTab<TId extends string = CloudDefendPageId> {
  */
 export const getSecuritySolutionLink = <TId extends string = CloudDefendPageId>(
   cloudDefendPage: CloudDefendPage
-): CloudDefendLinkItem<TId> => ({
-  id: cloudDefendPages[cloudDefendPage].id as TId,
-  title: cloudDefendPages[cloudDefendPage].name,
-  path: cloudDefendPages[cloudDefendPage].path,
-});
+): CloudDefendLinkItem<TId> => {
+  return {
+    id: cloudDefendPages[cloudDefendPage].id as TId,
+    title: cloudDefendPages[cloudDefendPage].name,
+    path: cloudDefendPages[cloudDefendPage].path,
+  };
+};
 
 /**
  * Gets the link properties of a Cloud Defend page for navigation in the old security solution navigation.

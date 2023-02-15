@@ -14,7 +14,7 @@ import type {
 } from '../types';
 import { PLUGIN_ID } from '../../common/constants';
 import { defineGetPoliciesRoute } from './policies/policies';
-// import { defineGetCloudDefendStatusRoute } from './status/status';
+import { defineGetCloudDefendStatusRoute } from './status/status';
 
 /**
  * 1. Registers routes
@@ -29,7 +29,7 @@ export function setupRoutes({
 }) {
   const router = core.http.createRouter<CloudDefendRequestHandlerContext>();
   defineGetPoliciesRoute(router);
-  // defineGetCloudDefendStatusRoute(router);
+  defineGetCloudDefendStatusRoute(router);
 
   core.http.registerRouteHandlerContext<CloudDefendRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,

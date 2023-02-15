@@ -20,8 +20,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
-import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { INTEGRATION_PACKAGE_NAME } from '../../../common/constants';
 import { CloudDefendPageTitle } from '../../components/cloud_defend_page_title';
 import { CloudDefendPage } from '../../components/cloud_defend_page';
 import { PoliciesTable } from '../../components/policies_table';
@@ -30,28 +28,22 @@ import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
 import { LOCAL_STORAGE_PAGE_SIZE } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
-import { useKibana } from '../../common/hooks/use_kibana';
+import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_link';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
 const AddIntegrationButton = () => {
-  const { http } = useKibana().services;
-
-  const integrationsPath = pagePathGetters
-    .integrations_all({
-      searchTerm: INTEGRATION_PACKAGE_NAME,
-    })
-    .join('');
+  const { addIntegrationLink } = useCloudDefendIntegrationLinks();
 
   return (
     <EuiButton
       data-test-subj={TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ}
       fill
       iconType="plusInCircle"
-      href={http.basePath.prepend(integrationsPath)}
+      href={addIntegrationLink}
     >
       <FormattedMessage
-        id="xpack.csp.benchmarks.benchmarksPageHeader.addIntegrationButtonLabel"
+        id="xpack.cloudDefend.policies.policiesPageHeader.addIntegrationButtonLabel"
         defaultMessage="Add Integration"
       />
     </EuiButton>
@@ -65,12 +57,12 @@ const EmptyState = ({ name }: { name: string }) => (
       <EuiText>
         <strong>
           <FormattedMessage
-            id="xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundTitle"
-            defaultMessage="No benchmark integrations found"
+            id="xpack.cloudDefend.policies.policyEmptyState.integrationsNotFoundTitle"
+            defaultMessage="No integrations found"
           />
           {name && (
             <FormattedMessage
-              id="xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundForNameTitle"
+              id="xpack.cloudDefend.policies.policyEmptyState.integrationsNotFoundForNameTitle"
               defaultMessage=' for "{name}"'
               values={{ name }}
             />
@@ -82,8 +74,8 @@ const EmptyState = ({ name }: { name: string }) => (
     <EuiText>
       <EuiTextColor color="subdued">
         <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundWithFiltersTitle"
-          defaultMessage="We weren't able to find any benchmark integrations with the above filters."
+          id="xpack.cloudDefend.policies.policyEmptyState.integrationsNotFoundWithFiltersTitle"
+          defaultMessage="We weren't able to find any integrations with the above filters."
         />
       </EuiTextColor>
     </EuiText>
@@ -98,7 +90,7 @@ const TotalIntegrationsCount = ({
   <EuiText size="xs" style={{ marginLeft: 8 }}>
     <EuiTextColor color="subdued">
       <FormattedMessage
-        id="xpack.csp.benchmarks.totalIntegrationsCountMessage"
+        id="xpack.cloudDefend.policies.totalIntegrationsCountMessage"
         defaultMessage="Showing {pageCount} of {totalCount, plural, one {# integration} other {# integrations}}"
         values={{ pageCount, totalCount }}
       />
@@ -122,7 +114,7 @@ const SearchField = ({
           onSearch={setLocalValue}
           isLoading={isLoading}
           placeholder={i18n.translate(
-            'xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder',
+            'xpack.cloudDefend.policies.policySearchField.searchPlaceholder',
             { defaultMessage: 'Search integration name' }
           )}
           incremental

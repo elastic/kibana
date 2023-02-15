@@ -21,19 +21,17 @@ import { css } from '@emotion/react';
 // import { SubscriptionNotAllowed } from './subscription_not_allowed';
 // import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
 import { FullSizeCenteredPage } from '../full_size_page';
-// import { useCloudDefendSetupStatusApi } from '../common/api/use_setup_status_api';
-import { CloudDefendLoadingState } from '../loading_state';
-// import { useCloudDefendIntegrationLink } from '../common/navigation/use_cloud_defend_integration_link';
+import { useCloudDefendSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { LoadingState } from '../loading_state';
+import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_link';
 
-// import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
+import noDataIllustration from '../../assets/icons/logo.svg';
 
-export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
-export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
-export const PACKAGE_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_package_not_installed';
-export const CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_cspm_not_installed';
-export const KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_kspm_not_installed';
-export const DEFAULT_NO_DATA_TEST_SUBJECT = 'cloud_posture_page_no_data';
-export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';
+export const LOADING_STATE_TEST_SUBJECT = 'cloud_defend_page_loading';
+export const ERROR_STATE_TEST_SUBJECT = 'cloud_defend_page_error';
+export const PACKAGE_NOT_INSTALLED_TEST_SUBJECT = 'cloud_defend_page_package_not_installed';
+export const DEFAULT_NO_DATA_TEST_SUBJECT = 'cloud_defend_page_no_data';
+export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_defend_page_subscription_not_allowed';
 
 interface CommonError {
   body: {
@@ -84,9 +82,12 @@ export const CloudDefendNoDataPage = ({
         }
       `}
       pageTitle={pageTitle}
-      solution={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel', {
-        defaultMessage: 'Cloud Security Posture',
-      })}
+      solution={i18n.translate(
+        'xpack.cloudDefend.cloudDefendPage.packageNotInstalled.solutionNameLabel',
+        {
+          defaultMessage: 'Defend for containers (D4C)',
+        }
+      )}
       docsLink={docsLink}
       logo="logoSecurity"
       actions={{
@@ -102,22 +103,22 @@ export const CloudDefendNoDataPage = ({
 };
 
 const packageNotInstalledRenderer = ({
-  kspmIntegrationLink,
-  cspmIntegrationLink,
+  addIntegrationLink,
+  docsLink,
 }: {
-  kspmIntegrationLink?: string;
-  cspmIntegrationLink?: string;
+  addIntegrationLink?: string;
+  docsLink?: string;
 }) => {
   return (
     <FullSizeCenteredPage>
       <EuiEmptyPrompt
         data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
-        icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
+        icon={<EuiImage size="m" margin="m" src={noDataIllustration} alt="no-data-illustration" />}
         title={
           <h2>
             <FormattedMessage
-              id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
-              defaultMessage="Detect security misconfigurations in your cloud resources!"
+              id="xpack.cloudDefend.cloudDefendPage.packageNotInstalledRenderer.promptTitle"
+              defaultMessage="Detect container drift and block malicious behavior at the source!"
             />
           </h2>
         }
@@ -126,15 +127,14 @@ const packageNotInstalledRenderer = ({
         body={
           <p>
             <FormattedMessage
-              id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
-              defaultMessage="Add the Cloud and or Kubernetes Security Posture Management (K/CSPM) integration to begin. {learnMore}."
+              id="xpack.cloudDefend.cloudDefendPage.packageNotInstalledRenderer.promptDescription"
+              defaultMessage="Add the Defend for containers (D4C) integration to begin. {learnMore}."
               values={{
                 learnMore: (
-                  // TODO: CIS AWS - replace link with general doc for both integartions
-                  <EuiLink href="https://ela.st/getting-started-with-kspm">
+                  <EuiLink href={docsLink}>
                     <FormattedMessage
-                      id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
-                      defaultMessage="Learn more about Cloud Security Posture"
+                      id="xpack.cloudDefend.cloudDefendPage.packageNotInstalledRenderer.learnMoreTitle"
+                      defaultMessage="Learn more about Defend for containers (D4C)"
                     />
                   </EuiLink>
                 ),
@@ -145,18 +145,10 @@ const packageNotInstalledRenderer = ({
         actions={
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill href={cspmIntegrationLink}>
+              <EuiButton color="primary" fill href={addIntegrationLink}>
                 <FormattedMessage
-                  id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCloudDefendmIntegrationButtonTitle"
-                  defaultMessage="Add CSPM Integration"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill href={kspmIntegrationLink}>
-                <FormattedMessage
-                  id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
-                  defaultMessage="Add KSPM Integration"
+                  id="xpack.cloudDefend.cloudDefendPage.packageNotInstalledRenderer.addCloudDefendmIntegrationButtonTitle"
+                  defaultMessage="Add D4C Integration"
                 />
               </EuiButton>
             </EuiFlexItem>
@@ -168,12 +160,12 @@ const packageNotInstalledRenderer = ({
 };
 
 const defaultLoadingRenderer = () => (
-  <CloudDefendLoadingState data-test-subj={LOADING_STATE_TEST_SUBJECT}>
+  <LoadingState data-test-subj={LOADING_STATE_TEST_SUBJECT}>
     <FormattedMessage
-      id="xpack.csp.cloudPosturePage.loadingDescription"
+      id="xpack.cloudDefend.cloudDefendPage.loadingDescription"
       defaultMessage="Loading..."
     />
-  </CloudDefendLoadingState>
+  </LoadingState>
 );
 
 const defaultErrorRenderer = (error: unknown) => (
@@ -185,8 +177,8 @@ const defaultErrorRenderer = (error: unknown) => (
       title={
         <h2>
           <FormattedMessage
-            id="xpack.csp.cloudPosturePage.errorRenderer.errorTitle"
-            defaultMessage="We couldn't fetch your cloud security posture data"
+            id="xpack.cloudDefend.cloudDefendPage.errorRenderer.errorTitle"
+            defaultMessage="We couldn't fetch your cloud defend data"
           />
         </h2>
       }
@@ -194,7 +186,7 @@ const defaultErrorRenderer = (error: unknown) => (
         isCommonError(error) ? (
           <p>
             <FormattedMessage
-              id="xpack.csp.cloudPosturePage.errorRenderer.errorDescription"
+              id="xpack.cloudDefend.cloudDefendPage.errorRenderer.errorDescription"
               defaultMessage="{error} {statusCode}: {body}"
               values={{
                 error: error.body.error,
@@ -209,18 +201,20 @@ const defaultErrorRenderer = (error: unknown) => (
   </FullSizeCenteredPage>
 );
 
-const defaultNoDataRenderer = () => (
+const defaultNoDataRenderer = (docsLink: string) => (
   <FullSizeCenteredPage>
     <NoDataPage
       data-test-subj={DEFAULT_NO_DATA_TEST_SUBJECT}
-      pageTitle={i18n.translate('xpack.csp.cloudPosturePage.defaultNoDataConfig.pageTitle', {
+      pageTitle={i18n.translate('xpack.cloudDefend.cloudDefendPage.defaultNoDataConfig.pageTitle', {
         defaultMessage: 'No data found',
       })}
-      solution={i18n.translate('xpack.csp.cloudPosturePage.defaultNoDataConfig.solutionNameLabel', {
-        defaultMessage: 'Cloud Security Posture',
-      })}
-      // TODO: Add real docs link once we have it
-      docsLink={'https://www.elastic.co/guide/index.html'}
+      solution={i18n.translate(
+        'xpack.cloudDefend.cloudDefendPage.defaultNoDataConfig.solutionNameLabel',
+        {
+          defaultMessage: 'Defend for containers',
+        }
+      )}
+      docsLink={docsLink}
       logo={'logoSecurity'}
       actions={{}}
     />
@@ -231,14 +225,14 @@ const defaultNoDataRenderer = () => (
   <FullSizeCenteredPage data-test-subj={SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT}>
     <SubscriptionNotAllowed />
   </FullSizeCenteredPage>
-);*/
+); */
 
 interface CloudPosturePageProps<TData, TError> {
   children: React.ReactNode;
   query?: UseQueryResult<TData, TError>;
   loadingRender?: () => React.ReactNode;
   errorRender?: (error: TError) => React.ReactNode;
-  noDataRenderer?: () => React.ReactNode;
+  noDataRenderer?: (docsLink: string) => React.ReactNode;
 }
 
 export const CloudDefendPage = <TData, TError>({
@@ -248,11 +242,12 @@ export const CloudDefendPage = <TData, TError>({
   errorRender = defaultErrorRenderer,
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
-  const subscriptionStatus = useSubscriptionStatus();
+  // const subscriptionStatus = useSubscriptionStatus();
   const getSetupStatus = useCloudDefendSetupStatusApi();
-  const integrationLink = useCloudDefendIntegrationLink(CONTROL_POLICY_TEMPLATE);
+  const { addIntegrationLink, docsLink } = useCloudDefendIntegrationLinks();
 
   const render = () => {
+    // TODO: subscription status work..
     /* if (subscriptionStatus.isError) {
       return defaultErrorRenderer(subscriptionStatus.error);
     }
@@ -274,7 +269,7 @@ export const CloudDefendPage = <TData, TError>({
     }
 
     if (getSetupStatus.data.status === 'not-installed') {
-      return packageNotInstalledRenderer({ kspmIntegrationLink, cspmIntegrationLink });
+      return packageNotInstalledRenderer({ addIntegrationLink, docsLink });
     }
 
     if (!query) {
@@ -290,7 +285,7 @@ export const CloudDefendPage = <TData, TError>({
     }
 
     if (!query.data) {
-      return noDataRenderer();
+      return noDataRenderer(docsLink);
     }
 
     return children;

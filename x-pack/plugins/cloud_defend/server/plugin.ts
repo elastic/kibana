@@ -9,25 +9,31 @@ import {
   CloudDefendPluginSetup,
   CloudDefendPluginStart,
   CloudDefendPluginStartDeps,
+  CloudDefendPluginSetupDeps,
 } from './types';
 import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
 import { setupRoutes } from './routes/setup_routes';
 
 export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDefendPluginStart> {
   private readonly logger: Logger;
+  private isCloudEnabled?: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup<CloudDefendPluginStartDeps, CloudDefendPluginStart>) {
+  public setup(
+    core: CoreSetup<CloudDefendPluginStartDeps, CloudDefendPluginStart>,
+    plugins: CloudDefendPluginSetupDeps
+  ) {
     this.logger.debug('cloudDefend: Setup');
-    const router = core.http.createRouter();
 
     setupRoutes({
       core,
       logger: this.logger,
     });
+
+    this.isCloudEnabled = plugins.cloud.isCloudEnabled;
 
     return {};
   }
@@ -39,8 +45,6 @@ export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDe
       const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
         INTEGRATION_PACKAGE_NAME
       );
-
-      console.log(packageInfo);
     });
 
     return {};
