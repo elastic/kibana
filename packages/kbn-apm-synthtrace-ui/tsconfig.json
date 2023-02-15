@@ -34,6 +34,8 @@
   "kbn_references": [
     "@kbn/datemath",
     "@kbn/apm-synthtrace-client",
-    "@kbn/apm-plugin"
+    "@kbn/apm-plugin",
+    "@kbn/test",
+    "@kbn/apm-synthtrace",
   ],
 }

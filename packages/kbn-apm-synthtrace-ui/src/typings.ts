@@ -4,8 +4,8 @@ export type SynthtraceScenario = {
   isDistributedTracing: boolean;
   topLevelService?: Service;
   services?: Record<string, Service>;
-  items?: Transaction;
-  createModal: Partial<CreateModal>;
+  entryTransaction?: Transaction;
+  createModal?: Partial<CreateModal>;
 };
 
 // TODO: Rename this type to something more generic
@@ -38,6 +38,7 @@ export type Service = {
 };
 
 export interface Transaction {
+  docType: 'transaction';
   id: string;
   serviceId: string;
   name: string;
@@ -46,6 +47,7 @@ export interface Transaction {
 }
 
 export interface Span {
+  docType: 'span';
   id: string;
   serviceId: string;
   name: string;
@@ -79,25 +81,29 @@ export const example: SynthtraceScenario = {
       id: '2',
     },
   },
-  items: {
+  entryTransaction: {
     //transaction
+    docType: 'transaction',
     id: 't1',
     name: '1rpm/1100ms',
     serviceId: '1',
     children: [
       {
+        docType: 'transaction',
         name: 'foo-tx1',
         id: 't1.1',
         serviceId: '1',
         repeat: 1,
         children: [
           {
+            docType: 'transaction',
             name: 'foo-tx2',
             serviceId: '1',
             id: 't1.1.1',
             repeat: 2,
             children: [
               {
+                docType: 'span',
                 //SPAN
                 serviceId: '2',
                 id: 's1',
