@@ -18,6 +18,8 @@ Helper to generate and index documents for using in Kibana functional tests
         - [Examples](#examples-1)
     - [**enhanceDocument**](#enhancedocument)
       - [Examples](#examples-2)
+  - [Usage](#usage)
+    - [create test query rule that queries indexed documents within a test](#create-test-query-rule-that-queries-indexed-documents-within-a-test)
 
 ## DataGenerator
 
@@ -583,3 +585,57 @@ Adds generated `uuidv4` id and current time as `@timestamp` to document if `id`,
         }
     ```
     </details>
+
+## Usage
+
+### create test query rule that queries indexed documents within a test
+
+When documents generated and indexed, there might be a need to create a test rule that targets only this documents. So, documents generated in the test, will be used only in context of this test.
+
+There are few possible ways to do this
+
+1. Create new index every time for a new test. Thus, newly indexed documents, will be the only documents present in test index. It might be costly operation, as it will require to create new index for each test, that re-initialize dataGeneratorFactory, or delete index after rule's run
+
+2. Use the same id or specific field in documents.
+   For example:
+
+    ```ts
+
+          const id = uuidv4();
+          const firstTimestamp = new Date().toISOString();
+          const firstDocument = {
+            id,
+            '@timestamp': firstTimestamp,
+            agent: {
+              name: 'agent-1',
+            },
+          };
+          await indexListOfDocuments([firstDocument, firstDocument]);
+
+          const rule: QueryRuleCreateProps = {
+            ...getRuleForSignalTesting(['ecs_compliant']),
+            query: `id:${id}`,
+          };
+
+
+    ```
+
+    All documents will have the same `id` and can be queried by following `id:${id}` 
+
+3. Use utility method `getKQLQueryFromDocumentList` that will create query from all ids in generated documents
+
+```ts
+     const { documents } = await indexGeneratedDocuments({
+        docsCount: 4,
+        document: { foo: 'bar' },
+        enhance: true,
+      });
+
+      const query = getKQLQueryFromDocumentList(documents);
+      const rule = {
+        ...getRuleForSignalTesting(['ecs_non_compliant']),
+        query,
+      };
+```
+
+util will generate the following query: `(id: "f6ca3ee1-407c-4685-a94b-11ef4ed5136b" or id: "2a7358b2-8cad-47ce-83b7-e4418c266f3e" or id: "9daec569-0ba1-4c46-a0c6-e340cee1c5fb" or id: "b03c2fdf-0ca1-447c-b8c6-2cc5a663ffe2")`, that will include all generated documents

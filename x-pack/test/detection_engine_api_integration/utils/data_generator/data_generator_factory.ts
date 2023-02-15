@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { indexDocuments } from './index_documents';
 import { generateDocuments } from './generate_documents';
 import type { GenerateDocumentsParams } from './generate_documents';
@@ -20,8 +21,14 @@ interface DataGeneratorParams {
 }
 
 interface DataGenerator {
-  indexListOfDocuments: (docs: Document[]) => ReturnType<typeof indexDocuments>;
-  indexGeneratedDocuments: (params: GenerateDocumentsParams) => ReturnType<typeof indexDocuments>;
+  indexListOfDocuments: (docs: Document[]) => Promise<{
+    response: BulkResponse;
+    documents: Document[];
+  }>;
+  indexGeneratedDocuments: (params: GenerateDocumentsParams) => Promise<{
+    response: BulkResponse;
+    documents: Document[];
+  }>;
 }
 
 /**
@@ -37,12 +44,22 @@ export const dataGeneratorFactory = ({
   log,
 }: Omit<DataGeneratorParams, 'documents'>): DataGenerator => {
   return {
-    indexListOfDocuments: (documents: DataGeneratorParams['documents']) => {
-      return indexDocuments({ es, index, documents, log });
+    indexListOfDocuments: async (documents: DataGeneratorParams['documents']) => {
+      const response = await indexDocuments({ es, index, documents, log });
+
+      return {
+        documents,
+        response,
+      };
     },
-    indexGeneratedDocuments: (params: GenerateDocumentsParams) => {
+    indexGeneratedDocuments: async (params: GenerateDocumentsParams) => {
       const documents = generateDocuments(params);
-      return indexDocuments({ es, index, documents, log });
+      const response = await indexDocuments({ es, index, documents, log });
+
+      return {
+        documents,
+        response,
+      };
     },
   };
 };
