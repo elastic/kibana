@@ -33,9 +33,9 @@ export const getApplicationUserMessages = ({
   core,
 }: {
   visualizationType: string | null | undefined;
-  visualization: VisualizationState;
+  visualization: VisualizationState | undefined;
   visualizationMap: VisualizationMap;
-  activeDatasource: Datasource | null;
+  activeDatasource: Datasource | null | undefined;
   activeDatasourceState: { state: unknown } | null;
   dataViews: DataViewsState;
   core: CoreStart;
@@ -46,7 +46,7 @@ export const getApplicationUserMessages = ({
     messages.push(getMissingVisTypeError());
   }
 
-  if (visualization.activeId && !visualizationMap[visualization.activeId]) {
+  if (visualization?.activeId && !visualizationMap[visualization.activeId]) {
     messages.push(getUnknownVisualizationTypeError(visualization.activeId));
   }
 
@@ -69,8 +69,8 @@ export const getApplicationUserMessages = ({
 
 function getMissingVisTypeError(): UserMessage {
   return {
-    severity: 'warning',
-    displayLocations: [{ id: 'visualization' }],
+    severity: 'error',
+    displayLocations: [{ id: 'visualizationOnEmbeddable' }],
     fixableInEditor: true,
     shortMessage: '',
     longMessage: i18n.translate('xpack.lens.editorFrame.expressionMissingVisualizationType', {

@@ -10,6 +10,7 @@ import {
   CreateExceptionListItemSchema,
   EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { useBlockListContext } from '../../indicators/hooks/use_block_list_context';
 import { ADD_TO_BLOCKLIST_FLYOUT_TITLE } from './translations';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 
@@ -27,6 +28,7 @@ export interface BlockListFlyoutProps {
  * - the form component: https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/public/management/pages/blocklist/view/components/blocklist_form.tsx
  */
 export const BlockListFlyout: VFC<BlockListFlyoutProps> = ({ indicatorFileHash }) => {
+  const { setBlockListIndicatorValue } = useBlockListContext();
   const { blockList } = useSecurityContext();
   const Component = blockList.getFlyoutComponent();
   const exceptionListApiClient = blockList.exceptionListApiClient;
@@ -59,13 +61,15 @@ export const BlockListFlyout: VFC<BlockListFlyoutProps> = ({ indicatorFileHash }
     flyoutCreateTitle: ADD_TO_BLOCKLIST_FLYOUT_TITLE,
   };
 
+  const clearBlockListIndicatorValue = () => setBlockListIndicatorValue('');
+
   const props = {
     apiClient: exceptionListApiClient,
     labels,
     item,
     policies: [],
     FormComponent,
-    onClose: () => {},
+    onClose: clearBlockListIndicatorValue,
   };
 
   return <Component {...props} />;
