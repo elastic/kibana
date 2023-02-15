@@ -22,9 +22,15 @@ interface DataGeneratorParams {
 interface DataGenerator {
   indexListOfDocuments: (docs: Document[]) => ReturnType<typeof indexDocuments>;
   indexGeneratedDocuments: (params: GenerateDocumentsParams) => ReturnType<typeof indexDocuments>;
-  indexGeneratedLogs: (params: GenerateDocumentsParams) => ReturnType<typeof indexDocuments>;
 }
 
+/**
+ * initialize {@link DataGenerator}
+ * @param param.es - ES client
+ * @param params.index - index where document should be added
+ * @param params - logClient
+ * @returns methods of {@link DataGenerator}
+ */
 export const dataGeneratorFactory = ({
   es,
   index,
@@ -35,10 +41,6 @@ export const dataGeneratorFactory = ({
       return indexDocuments({ es, index, documents, log });
     },
     indexGeneratedDocuments: (params: GenerateDocumentsParams) => {
-      const documents = generateDocuments(params);
-      return indexDocuments({ es, index, documents, log });
-    },
-    indexGeneratedLogs: (params: GenerateDocumentsParams) => {
       const documents = generateDocuments(params);
       return indexDocuments({ es, index, documents, log });
     },

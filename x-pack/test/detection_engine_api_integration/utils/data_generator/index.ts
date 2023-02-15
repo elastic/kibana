@@ -7,3 +7,4 @@
 
 export * from './data_generator_factory';
 export * from './enhance_document';
+export * from './generate_documents';

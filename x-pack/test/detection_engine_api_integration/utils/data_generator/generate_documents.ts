@@ -9,10 +9,31 @@ import { isFunction } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { enhanceDocument } from './enhance_document';
 
-type Document = Record<string, unknown>;
-type DocumentSeedFunc = (index: number, id: string, timestamp: string) => Document;
+import type { Document } from './types';
 
-const getTimestamp = (interval?: [string | Date, string | Date]) => {
+type DocumentSeedFunc = (index: number, id: string, timestamp: string) => Document;
+type IndexInterval = [string | Date, string | Date];
+
+interface GenerateDocumentsParamsSeed {
+  interval?: IndexInterval;
+  docsCount: number;
+  seed: DocumentSeedFunc;
+}
+
+interface GenerateDocumentsParamsDoc {
+  interval?: IndexInterval;
+  docsCount: number;
+  document: Document;
+  enhance?: boolean;
+}
+
+export type GenerateDocumentsParams = GenerateDocumentsParamsSeed | GenerateDocumentsParamsDoc;
+
+const isSeedDefined = (params: GenerateDocumentsParams): params is GenerateDocumentsParamsSeed => {
+  return isFunction((params as GenerateDocumentsParamsSeed).seed);
+};
+
+const getTimestamp = (interval?: IndexInterval) => {
   if (interval) {
     return faker.date.between(...interval).toISOString();
   }
@@ -20,38 +41,28 @@ const getTimestamp = (interval?: [string | Date, string | Date]) => {
   return new Date().toISOString();
 };
 
-export interface GenerateDocumentsParams {
-  interval?: [string | Date, string | Date];
-  docsCount: number;
-  seed: DocumentSeedFunc | Document;
-  enhance?: boolean;
-}
-
 /**
  *
  * @param param.interval - interval in which generate documents, defined by '@timestamp' field
- * @param param.docsCount - number of document ot generate
- * @param param.seed - seed document fields. Function that receives
- * @param param0
- * @param param0
+ * @param param.docsCount - number of document to generate
+ * @param param.seed - seed function. Function that receives index of document, generated id, timestamp as arguments and can used it create a document
+ * @param param.document - JSON of document to replicate
+ * @param param.enhance - enhance document with {@link enhanceDocument} function if true
  * @returns
  */
-export const generateDocuments = ({
-  docsCount,
-  interval,
-  seed,
-  enhance = true,
-}: GenerateDocumentsParams) => {
+export const generateDocuments = (params: GenerateDocumentsParams) => {
+  const { docsCount, interval } = params;
   const documents = [];
 
   for (let i = 0; i < docsCount; i++) {
     const id = uuidv4();
     const timestamp = getTimestamp(interval);
 
-    if (isFunction(seed)) {
-      documents.push(seed(i, id, timestamp));
+    if (isSeedDefined(params)) {
+      documents.push(params.seed(i, id, timestamp));
     } else {
-      documents.push(enhance ? enhanceDocument({ id, timestamp, document: seed }) : seed);
+      const { document, enhance = false } = params;
+      documents.push(enhance ? enhanceDocument({ id, timestamp, document }) : document);
     }
   }
 
