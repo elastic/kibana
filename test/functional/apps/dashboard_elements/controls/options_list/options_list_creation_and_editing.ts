@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  describe.only('Dashboard options list creation and editing', () => {
+  describe('Dashboard options list creation and editing', () => {
     before(async () => {
       await dashboard.ensureDashboardIsInEditMode();
     });
