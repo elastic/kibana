@@ -743,6 +743,23 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFlyout.closeAriaLabel': i18n.translate('core.euiFlyout.closeAriaLabel', {
       defaultMessage: 'Close this dialog',
     }),
+    'euiFlyout.screenReaderModalDialog': i18n.translate('core.euiFlyout.screenReaderModalDialog', {
+      defaultMessage:
+        'You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.',
+    }),
+    'euiFlyout.screenReaderNonModalDialog': i18n.translate(
+      'core.euiFlyout.screenReaderNonModalDialog',
+      {
+        defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
+      }
+    ),
+    'euiFlyout.screenReaderFixedHeaders': i18n.translate(
+      'core.euiFlyout.screenReaderFixedHeaders',
+      {
+        defaultMessage:
+          'You can still continue tabbing through the page headers in addition to the dialog.',
+      }
+    ),
     'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
       defaultMessage: 'Please address the highlighted errors.',
     }),

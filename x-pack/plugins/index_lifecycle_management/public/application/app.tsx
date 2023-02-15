@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Router, Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { useKibana, useExecutionContext } from '../shared_imports';
 import { UIM_APP_LOAD } from './constants';
 import { EditPolicy } from './sections/edit_policy';
 import { PolicyList } from './sections/policy_list';
@@ -18,16 +18,7 @@ import { trackUiMetric } from './services/ui_metric';
 import { ROUTES } from './services/navigation';
 
 export const App = ({ history }: { history: ScopedHistory }) => {
-  const {
-    services: { executionContext },
-  } = useKibana();
-
   useEffect(() => trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD), []);
-
-  useExecutionContext(executionContext!, {
-    type: 'application',
-    page: 'indexLifecycleManagement',
-  });
 
   return (
     <Router history={history}>
