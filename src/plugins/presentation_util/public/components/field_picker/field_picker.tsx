@@ -99,6 +99,7 @@ export const FieldPicker = ({
         if (field) onSelectField?.(field);
       }}
       searchProps={{
+        'data-test-subj': 'field-search-input',
         placeholder: i18n.translate('presentationUtil.fieldSearch.searchPlaceHolder', {
           defaultMessage: 'Search field names',
         }),

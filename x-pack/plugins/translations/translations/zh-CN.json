@@ -4487,7 +4487,6 @@
     "presentationUtil.solutionToolbar.quickButton.ariaButtonLabel": "创建新的 {createType}",
     "presentationUtil.dashboardPicker.searchDashboardPlaceholder": "搜索仪表板......",
     "presentationUtil.dataViewPicker.changeDataViewTitle": "数据视图",
-    "presentationUtil.fieldPicker.noDataViewLabel": "未选择数据视图",
     "presentationUtil.fieldPicker.noFieldsLabel": "无匹配字段",
     "presentationUtil.fieldSearch.fieldFilterButtonLabel": "按类型筛选",
     "presentationUtil.fieldSearch.filterByTypeLabel": "按类型筛选",
