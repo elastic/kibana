@@ -25,7 +25,13 @@ expect.addSnapshotSerializer(createAnyInstanceSerializer(TestLog));
 jest.mock('./watcher');
 const { Watcher } = jest.requireMock('./watcher');
 
-jest.mock('./optimizer');
+jest.mock('./optimizer', () => {
+  return {
+    Optimizer: jest.fn().mockImplementation(() => {
+      return {};
+    }),
+  };
+});
 const { Optimizer } = jest.requireMock('./optimizer');
 
 jest.mock('./dev_server');
