@@ -153,12 +153,15 @@ describe('DocumentMigrator', () => {
         id: 'me',
         type: 'user',
         attributes: { name: 'Christopher' },
+        migrationVersion: '',
+        coreMigrationVersion: '8.8.0',
       });
       expect(actual).toEqual({
         id: 'me',
         type: 'user',
         attributes: { name: 'Chris' },
         migrationVersion: '1.2.3',
+        coreMigrationVersion: '8.8.0',
       });
     });
 
@@ -180,36 +183,12 @@ describe('DocumentMigrator', () => {
         id: 'me',
         type: 'user',
         attributes: {},
+        migrationVersion: '',
+        coreMigrationVersion: '8.8.0',
       };
       const migratedDoc = migrator.migrate(originalDoc);
       expect(_.get(originalDoc, 'attributes.name')).toBeUndefined();
       expect(_.get(migratedDoc, 'attributes.name')).toBe('Mike');
-    });
-
-    it('migrates root properties', () => {
-      const migrator = new DocumentMigrator({
-        ...testOpts(),
-        typeRegistry: createRegistry({
-          name: 'acl',
-          migrations: {
-            '2.3.5': setAttr('acl', 'admins-only, sucka!'),
-          },
-        }),
-      });
-      migrator.prepareMigrations();
-      const actual = migrator.migrate({
-        id: 'me',
-        type: 'user',
-        attributes: { name: 'Tyler' },
-        acl: 'anyone',
-      } as SavedObjectUnsanitizedDoc);
-      expect(actual).toEqual({
-        id: 'me',
-        type: 'user',
-        attributes: { name: 'Tyler' },
-        migrationVersion: '2.3.5',
-        acl: 'admins-only, sucka!',
-      });
     });
 
     it('does not apply migrations to unrelated docs', () => {
@@ -315,6 +294,7 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { name: 'Callie', b: 'B', c: 'C' },
         migrationVersion: '2.0.1',
+        coreMigrationVersion: '8.8.0',
       });
     });
 
@@ -331,11 +311,11 @@ describe('DocumentMigrator', () => {
           migrationVersion: '10.2.0',
         })
       ).toThrow(
-        /Document "smelly" has property "dog" which belongs to a more recent version of Kibana \[10\.2\.0\]\. The last known version is \[undefined\]/i
+        /Document "smelly" belongs to a more recent version of Kibana \[10\.2\.0\] when the last known version is \[undefined\]/i
       );
     });
 
-    it('rejects docs with a migrationVersion[type] for a type that does not have a migration >= that version defined', () => {
+    it('rejects docs with a migrationVersion for a type that does not have a migration >= that version defined', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry({
@@ -354,7 +334,7 @@ describe('DocumentMigrator', () => {
           migrationVersion: '1.2.4',
         })
       ).toThrow(
-        /Document "fleabag" has property "dawg" which belongs to a more recent version of Kibana \[1\.2\.4\]\. The last known version is \[1\.2\.3\]/i
+        /Document "fleabag" belongs to a more recent version of Kibana \[1\.2\.4\]\ when the last known version is \[1\.2\.3\]/i
       );
     });
 
@@ -419,26 +399,19 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { name: 'Callie', a: 1, b: 2, c: 3 },
         migrationVersion: '10.0.1',
+        coreMigrationVersion: '8.8.0',
       });
     });
 
     it('allows props to be added', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
-        typeRegistry: createRegistry(
-          {
-            name: 'animal',
-            migrations: {
-              '1.0.0': setAttr('animal', (name: string) => `Animal: ${name}`),
-            },
+        typeRegistry: createRegistry({
+          name: 'dog',
+          migrations: {
+            '2.2.4': setAttr('animal', 'Doggie'),
           },
-          {
-            name: 'dog',
-            migrations: {
-              '2.2.4': setAttr('animal', 'Doggie'),
-            },
-          }
-        ),
+        }),
       });
       migrator.prepareMigrations();
       const actual = migrator.migrate({
@@ -451,8 +424,9 @@ describe('DocumentMigrator', () => {
         id: 'smelly',
         type: 'dog',
         attributes: { name: 'Callie' },
-        animal: 'Animal: Doggie',
+        animal: 'Doggie',
         migrationVersion: '2.2.4',
+        coreMigrationVersion: '8.8.0',
       });
     });
 
@@ -473,12 +447,14 @@ describe('DocumentMigrator', () => {
         id: 'smelly',
         type: 'dog',
         attributes: { name: 'Callie' },
+        migrationVersion: '',
       });
       expect(actual).toEqual({
         id: 'smelly',
         type: 'dog',
         attributes: { title: 'Title: Name: Callie' },
         migrationVersion: '1.0.2',
+        coreMigrationVersion: '8.8.0',
       });
     });
 
@@ -505,12 +481,14 @@ describe('DocumentMigrator', () => {
         id: 'smelly',
         type: 'dog',
         attributes: { name: 'Callie' },
+        migrationVersion: '',
       });
       expect(actual).toEqual({
         id: 'smelly',
         type: 'cat',
         attributes: { name: 'Kitty Callie' },
-        migrationVersion: '2.2.4',
+        migrationVersion: '1.0.0',
+        coreMigrationVersion: '8.8.0',
       });
     });
 
@@ -520,7 +498,7 @@ describe('DocumentMigrator', () => {
         typeRegistry: createRegistry({
           name: 'cat',
           migrations: {
-            '1.0.0': setAttr('migrationVersion.foo', '3.2.1'),
+            '4.5.7': setAttr('migrationVersion', '3.2.1'),
           },
         }),
       });
@@ -533,7 +511,7 @@ describe('DocumentMigrator', () => {
           migrationVersion: '4.5.6',
         })
       ).toThrow(
-        /Migration "cat v 1.0.0" attempted to downgrade "migrationVersion" from 4.5.6 to 3.2.1./
+        /Migration "cat v4.5.7" attempted to downgrade "migrationVersion" from 4.5.6 to 3.2.1./
       );
     });
 
@@ -543,7 +521,7 @@ describe('DocumentMigrator', () => {
         typeRegistry: createRegistry({
           name: 'cat',
           migrations: {
-            '1.0.0': setAttr('migrationVersion', {}),
+            '4.5.7': setAttr('migrationVersion', undefined),
           },
         }),
       });
@@ -556,32 +534,8 @@ describe('DocumentMigrator', () => {
           migrationVersion: '4.5.6',
         })
       ).toThrow(
-        /Migration "cat v 1.0.0" attempted to downgrade "migrationVersion.foo" from 4.5.6 to undefined./
+        /Migration "cat v4.5.7" attempted to downgrade "migrationVersion" from 4.5.6 to undefined./
       );
-    });
-
-    it('allows adding props to migrationVersion', () => {
-      const migrator = new DocumentMigrator({
-        ...testOpts(),
-        typeRegistry: createRegistry({
-          name: 'cat',
-          migrations: {
-            '1.0.0': setAttr('migrationVersion.foo', '5.6.7'),
-          },
-        }),
-      });
-      migrator.prepareMigrations();
-      const actual = migrator.migrate({
-        id: 'smelly',
-        type: 'cat',
-        attributes: { name: 'Boo' },
-      });
-      expect(actual).toEqual({
-        id: 'smelly',
-        type: 'cat',
-        attributes: { name: 'Boo' },
-        migrationVersion: '1.0.0',
-      });
     });
 
     it('logs the original error and throws a transform error if a document transform fails', () => {
@@ -590,6 +544,7 @@ describe('DocumentMigrator', () => {
         id: 'smelly',
         type: 'dog',
         attributes: {},
+        migrationVersion: '',
       };
       const migrator = new DocumentMigrator({
         ...testOpts(),
@@ -635,6 +590,7 @@ describe('DocumentMigrator', () => {
         id: 'joker',
         type: 'dog',
         attributes: {},
+        migrationVersion: '',
       };
       migrator.migrate(doc);
       expect(loggingSystemMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
@@ -721,8 +677,8 @@ describe('DocumentMigrator', () => {
           id: 'mischievous',
           type: 'dog',
           attributes: { name: 'Ann' },
-          migrationVersion: { dog: '0.1.0' },
-          coreMigrationVersion: '2.0.0',
+          migrationVersion: '0.1.0',
+          coreMigrationVersion: '20.0.0',
         } as SavedObjectUnsanitizedDoc;
         const actual = migrator.migrateAndConvert(obj);
         expect(actual).toEqual([
@@ -730,8 +686,8 @@ describe('DocumentMigrator', () => {
             id: 'mischievous',
             type: 'dog',
             attributes: { name: 'Ann' },
-            migrationVersion: { dog: '1.0.0' },
-            coreMigrationVersion: '2.0.0',
+            migrationVersion: '1.0.0',
+            coreMigrationVersion: '20.0.0',
             namespaces: ['default'],
           },
         ]);
@@ -741,8 +697,8 @@ describe('DocumentMigrator', () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),
           typeRegistry: createRegistry(
-            { name: 'dog', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' },
-            { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
+            { name: 'dog', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '8.8.0' },
+            { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '8.8.0' }
           ),
         });
         migrator.prepareMigrations();
@@ -750,8 +706,10 @@ describe('DocumentMigrator', () => {
           id: 'cowardly',
           type: 'dog',
           attributes: { name: 'Leslie' },
+          migrationVersion: '',
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
           namespace: 'foo-namespace',
+          coreMigrationVersion: '8.8.0',
         };
         const actual = migrator.migrate(obj);
         expect(mockGetConvertedObjectId).not.toHaveBeenCalled();
@@ -759,8 +717,9 @@ describe('DocumentMigrator', () => {
           id: 'cowardly',
           type: 'dog',
           attributes: { name: 'Leslie' },
+          migrationVersion: '8.8.0',
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
-          coreMigrationVersion: '1.0.0',
+          coreMigrationVersion: '8.8.0',
           namespace: 'foo-namespace',
           // there is no 'namespaces' field because no conversion transform was applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
         });
@@ -795,7 +754,7 @@ describe('DocumentMigrator', () => {
           attributes: { name: 'Leslie' },
           migrationVersion: '2.0.0',
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
-          coreMigrationVersion: '3.0.0',
+          coreMigrationVersion: '8.8.0',
           namespace: 'foo-namespace',
           // there is no 'namespaces' field because no conversion transform was applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
         });
@@ -814,6 +773,7 @@ describe('DocumentMigrator', () => {
           id: 'bad',
           type: 'dog',
           attributes: { name: 'Sweet Peach' },
+          migrationVersion: '',
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
         };
 
@@ -826,7 +786,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Sweet Peach' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
             },
           ]);
         });
@@ -841,7 +801,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Sweet Peach' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
               namespace: 'foo-namespace',
             },
           ]);
@@ -862,6 +822,7 @@ describe('DocumentMigrator', () => {
           id: 'loud',
           type: 'dog',
           attributes: { name: 'Wally' },
+          migrationVersion: '',
         };
 
         it('in the default space', () => {
@@ -873,7 +834,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Wally' },
               migrationVersion: '1.0.0',
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
               namespaces: ['default'],
             },
           ]);
@@ -889,7 +850,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Wally' },
               migrationVersion: '1.0.0',
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
               namespaces: ['foo-namespace'],
               originId: 'loud',
             },
@@ -904,7 +865,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: '0.1.2',
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
             },
           ]);
         });
@@ -923,6 +884,7 @@ describe('DocumentMigrator', () => {
           id: 'cute',
           type: 'dog',
           attributes: { name: 'Too' },
+          migrationVersion: '',
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
         };
 
@@ -936,7 +898,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Too' },
               migrationVersion: '1.0.0',
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
               namespaces: ['default'],
             },
           ]);
@@ -964,7 +926,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Too' },
               migrationVersion: '1.0.0',
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
               namespaces: ['foo-namespace'],
               originId: 'cute',
             },
@@ -979,7 +941,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: '0.1.2',
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
             },
           ]);
         });
@@ -1021,7 +983,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Patches', age: '11', color: 'tri-color' },
               migrationVersion: '2.0.0',
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
             },
           ]);
         });
@@ -1037,7 +999,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Patches', age: '11', color: 'tri-color' },
               migrationVersion: '2.0.0',
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
               namespace: 'foo-namespace',
             },
           ]);
@@ -1051,7 +1013,7 @@ describe('DocumentMigrator', () => {
             name: 'dog',
             namespaceType: 'multiple',
             migrations: {
-              '1.0.0': setAttr('migrationVersion.dog', '2.0.0'),
+              '1.0.0': setAttr('migrationVersion', '2.0.0'),
               '2.0.0': (doc) => doc, // noop
             },
             convertToMultiNamespaceTypeVersion: '1.0.0', // the conversion transform occurs before the migration transform above
@@ -1062,6 +1024,7 @@ describe('DocumentMigrator', () => {
           id: 'hungry',
           type: 'dog',
           attributes: { name: 'Remy' },
+          migrationVersion: '',
         };
 
         it('in the default space', () => {
@@ -1073,7 +1036,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Remy' },
               migrationVersion: '2.0.0',
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
               namespaces: ['default'],
             },
           ]);
@@ -1089,7 +1052,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Remy' },
               migrationVersion: '2.0.0',
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
               namespaces: ['foo-namespace'],
               originId: 'hungry',
             },
@@ -1104,7 +1067,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: '0.1.2',
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
             },
           ]);
         });
@@ -1118,7 +1081,7 @@ describe('DocumentMigrator', () => {
               name: 'dog',
               namespaceType: 'multiple',
               migrations: {
-                '1.0.0': setAttr('migrationVersion.dog', '2.0.0'),
+                '1.0.0': setAttr('migrationVersion', '2.0.0'),
                 '2.0.0': (doc) => doc, // noop
               },
               convertToMultiNamespaceTypeVersion: '1.0.0',
@@ -1131,6 +1094,7 @@ describe('DocumentMigrator', () => {
           id: 'pretty',
           type: 'dog',
           attributes: { name: 'Sasha' },
+          migrationVersion: '',
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
         };
 
@@ -1144,7 +1108,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Sasha' },
               migrationVersion: '2.0.0',
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
               namespaces: ['default'],
             },
           ]);
@@ -1172,7 +1136,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Sasha' },
               migrationVersion: '2.0.0',
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
               namespaces: ['foo-namespace'],
               originId: 'pretty',
             },
@@ -1187,7 +1151,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: '0.1.2',
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
             },
           ]);
         });

@@ -73,7 +73,7 @@ const buildTypeTransforms = ({
     ([version, transform]) => ({
       version,
       transform: convertMigrationFunction(version, type, transform, log),
-      transformType: TransformType.Reference,
+      transformType: TransformType.Core,
     })
   );
   const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(

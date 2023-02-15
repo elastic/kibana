@@ -48,7 +48,7 @@ import { ActiveMigrations, Transform, TransformType } from './types';
 import { maxVersion } from './utils';
 
 function isGreater(a?: string, b?: string) {
-  return !!a && (!b || Semver.gt(a, b));
+  return !!a && Semver.valid(a) && (!b || (Semver.valid(b) && Semver.gt(a, b)));
 }
 
 export class DocumentMigratorPipeline {
@@ -69,6 +69,10 @@ export class DocumentMigratorPipeline {
         yield transform;
 
         if (type !== this.document.type) {
+          // In the initial implementation, all the transforms for the new type should be applied.
+          // And at the same time, documents with `undefined` in `migrationVersion` are treated as the most recent ones.
+          // This is a workaround to get into the loop again and apply all the migrations for the new type.
+          this.document.migrationVersion = '';
           break;
         }
       }
@@ -77,12 +81,15 @@ export class DocumentMigratorPipeline {
 
   private hasPendingTransforms() {
     const { coreMigrationVersion, migrationVersion, type } = this.document;
+    const latestVersion = this.migrations[type]?.latestVersion;
+
+    if (isGreater(latestVersion?.core, coreMigrationVersion)) {
+      return true;
+    }
 
     if (migrationVersion == null) {
       return false;
     }
-
-    const latestVersion = this.migrations[type]?.latestVersion;
 
     return (
       isGreater(latestVersion?.migrate, migrationVersion) ||
@@ -98,16 +105,26 @@ export class DocumentMigratorPipeline {
   }
 
   private isPendingTransform({ transformType, version }: Transform) {
-    if (!this.convertNamespaceTypes && transformType !== TransformType.Migrate) {
-      return false;
+    const { coreMigrationVersion, migrationVersion, type } = this.document;
+    const latestVersion = this.migrations[type]?.latestVersion;
+
+    switch (transformType) {
+      case TransformType.Core:
+        return isGreater(version, coreMigrationVersion);
+      case TransformType.Reference:
+        return (
+          (this.convertNamespaceTypes || isGreater(latestVersion.core, coreMigrationVersion)) &&
+          isGreater(version, coreMigrationVersion)
+        );
+      case TransformType.Convert:
+        return (
+          migrationVersion != null &&
+          this.convertNamespaceTypes &&
+          isGreater(version, migrationVersion)
+        );
+      case TransformType.Migrate:
+        return migrationVersion != null && isGreater(version, migrationVersion);
     }
-
-    const currentVersion =
-      transformType === TransformType.Reference
-        ? this.document.coreMigrationVersion
-        : this.document.migrationVersion;
-
-    return isGreater(version, currentVersion);
   }
 
   /**
@@ -161,13 +178,13 @@ export class DocumentMigratorPipeline {
    * as this could get us into an infinite loop. So, we explicitly check for that here.
    */
   private assertUpgrade({ transformType, version }: Transform, previousVersion?: string) {
-    if (transformType === TransformType.Reference) {
+    if ([TransformType.Core, TransformType.Reference].includes(transformType)) {
       return;
     }
 
     const { migrationVersion: currentVersion, type } = this.document;
 
-    if (previousVersion && currentVersion && Semver.lt(currentVersion, previousVersion)) {
+    if (isGreater(previousVersion, currentVersion)) {
       throw new Error(
         `Migration "${type} v${version}" attempted to downgrade "migrationVersion" from ${previousVersion} to ${currentVersion}.`
       );
@@ -175,8 +192,8 @@ export class DocumentMigratorPipeline {
   }
 
   private bumpVersion({ transformType, version }: Transform) {
-    if (transformType === TransformType.Reference) {
-      this.document.coreMigrationVersion = version;
+    if ([TransformType.Core, TransformType.Reference].includes(transformType)) {
+      this.document.coreMigrationVersion = maxVersion(this.document.coreMigrationVersion, version);
 
       return;
     }
@@ -191,9 +208,10 @@ export class DocumentMigratorPipeline {
   }: SavedObjectUnsanitizedDoc) {
     const { type } = document;
     const latestVersion = this.migrations[type]?.latestVersion;
-    const coreMigrationVersion = currentCoreMigrationVersion ?? latestVersion?.reference;
+    const coreMigrationVersion =
+      currentCoreMigrationVersion || maxVersion(latestVersion?.core, latestVersion?.reference);
     const migrationVersion =
-      currentMigrationVersion ?? maxVersion(latestVersion?.migrate, latestVersion?.convert);
+      currentMigrationVersion || maxVersion(latestVersion?.migrate, latestVersion?.convert);
 
     return {
       ...document,

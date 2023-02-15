@@ -130,6 +130,7 @@ describe('buildActiveMigrations', () => {
 
       expect(Object.keys(migrations).sort()).toEqual(['foo']);
       expect(migrations.foo.transforms).toEqual([
+        expectTransform(TransformType.Core, '8.8.0'),
         expectTransform(TransformType.Migrate, '7.12.0'),
         expectTransform(TransformType.Migrate, '7.16.0'),
         expectTransform(TransformType.Migrate, '8.3.0'),
@@ -178,8 +179,14 @@ describe('buildActiveMigrations', () => {
       const migrations = buildMigrations();
 
       expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
-      expect(migrations.foo.transforms).toEqual([expectTransform(TransformType.Migrate, '7.12.0')]);
-      expect(migrations.bar.transforms).toEqual([expectTransform(TransformType.Migrate, '8.3.0')]);
+      expect(migrations.foo.transforms).toEqual([
+        expectTransform(TransformType.Core, '8.8.0'),
+        expectTransform(TransformType.Migrate, '7.12.0'),
+      ]);
+      expect(migrations.bar.transforms).toEqual([
+        expectTransform(TransformType.Core, '8.8.0'),
+        expectTransform(TransformType.Migrate, '8.3.0'),
+      ]);
     });
   });
 
@@ -212,10 +219,12 @@ describe('buildActiveMigrations', () => {
       const migrations = buildMigrations();
       expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
       expect(migrations.foo.transforms).toEqual([
+        expectTransform(TransformType.Core, '8.8.0'),
         expectTransform(TransformType.Reference, '7.12.0'),
         expectTransform(TransformType.Reference, '7.17.0'),
       ]);
       expect(migrations.bar.transforms).toEqual([
+        expectTransform(TransformType.Core, '8.8.0'),
         expectTransform(TransformType.Reference, '7.12.0'),
         expectTransform(TransformType.Reference, '7.17.0'),
       ]);
@@ -252,8 +261,14 @@ describe('buildActiveMigrations', () => {
 
       const migrations = buildMigrations();
       expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
-      expect(migrations.foo.transforms).toEqual([expectTransform(TransformType.Convert, '7.12.0')]);
-      expect(migrations.bar.transforms).toEqual([expectTransform(TransformType.Convert, '8.7.0')]);
+      expect(migrations.foo.transforms).toEqual([
+        expectTransform(TransformType.Core, '8.8.0'),
+        expectTransform(TransformType.Convert, '7.12.0'),
+      ]);
+      expect(migrations.bar.transforms).toEqual([
+        expectTransform(TransformType.Core, '8.8.0'),
+        expectTransform(TransformType.Convert, '8.7.0'),
+      ]);
     });
   });
 
@@ -302,6 +317,7 @@ describe('buildActiveMigrations', () => {
 
       expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
       expect(migrations.foo.transforms).toEqual([
+        expectTransform(TransformType.Core, '8.8.0'),
         expectTransform(TransformType.Reference, '7.12.0'),
         expectTransform(TransformType.Migrate, '7.12.0'),
         expectTransform(TransformType.Convert, '7.14.0'),
@@ -310,6 +326,7 @@ describe('buildActiveMigrations', () => {
         expectTransform(TransformType.Migrate, '7.18.2'),
       ]);
       expect(migrations.bar.transforms).toEqual([
+        expectTransform(TransformType.Core, '8.8.0'),
         expectTransform(TransformType.Reference, '7.12.0'),
         expectTransform(TransformType.Migrate, '7.17.0'),
         expectTransform(TransformType.Reference, '7.17.3'),

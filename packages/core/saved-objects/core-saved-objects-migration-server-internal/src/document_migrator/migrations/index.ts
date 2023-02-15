@@ -10,5 +10,5 @@ import type { SavedObjectMigrationMap } from '@kbn/core-saved-objects-server';
 import { transformMigrationVersion } from './transform_migration_version';
 
 export const migrations = {
-  '8.7.0': transformMigrationVersion,
+  '8.8.0': transformMigrationVersion,
 } as SavedObjectMigrationMap;
