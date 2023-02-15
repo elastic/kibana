@@ -18,7 +18,7 @@ const apmTransactionDurationIndicatorSchema = t.type({
       service: allOrAnyString,
       transactionType: allOrAnyString,
       transactionName: allOrAnyString,
-      'threshold.us': t.number,
+      threshold: t.number,
     }),
     t.partial({
       index: t.string,

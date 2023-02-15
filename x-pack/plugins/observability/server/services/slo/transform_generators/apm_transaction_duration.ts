@@ -111,7 +111,8 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
   }
 
   private buildAggregations(slo: SLO, indicator: APMTransactionDurationIndicator) {
-    const truncatedThreshold = Math.trunc(indicator.params['threshold.us']);
+    // threshold is in ms (milliseconds), but apm data is stored in us (microseconds)
+    const truncatedThreshold = Math.trunc(indicator.params.threshold * 1000);
 
     return {
       _numerator: {
