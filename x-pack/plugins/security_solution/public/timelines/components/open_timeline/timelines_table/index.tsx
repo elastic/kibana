@@ -208,6 +208,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         itemIdToExpandedNotesRowMap,
         enableExportTimelineDownloader,
         onCreateRule,
+        onCreateRuleFromEql,
         onOpenDeleteTimelineModal,
         onOpenTimeline,
         onSelectionChange,
