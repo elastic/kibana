@@ -1627,7 +1627,7 @@
     rc-pagination "^1.20.1"
     react-select "^5.0.0"
 
-"@elastic/react-search-ui@^1.19.0":
+"@elastic/react-search-ui@^1.19.1":
   version "1.19.1"
   resolved "https://registry.yarnpkg.com/@elastic/react-search-ui/-/react-search-ui-1.19.1.tgz#57e68e2e8c34cc8ac99d8f3825b4034db90e5b97"
   integrity sha512-cB3tsDgVmp6fSrNJH8qmTZVDab4M0qKa0pyxrDSALJK8J7RFS9P4tO8Pb31R0jn4dtt1JDcy+e3JhHv/RABwlQ==
@@ -1644,7 +1644,7 @@
     "@types/node-jose" "1.1.10"
     node-jose "2.1.0"
 
-"@elastic/search-ui-app-search-connector@^1.19.0":
+"@elastic/search-ui-app-search-connector@^1.19.1":
   version "1.19.1"
   resolved "https://registry.yarnpkg.com/@elastic/search-ui-app-search-connector/-/search-ui-app-search-connector-1.19.1.tgz#beb6b317207ace9480fc8cd0a16e63e3c4657e0d"
   integrity sha512-cHYtk2M6F1OdkJSXdb6EMvn6p4oE2duNZ/Il+W++6l5NXzyqPrVnh+6uGEPN64j+CxvTwxAEdV2uQbUpEKBrtw==
@@ -1652,7 +1652,7 @@
     "@elastic/app-search-javascript" "^8.1.2"
     "@elastic/search-ui" "1.19.1"
 
-"@elastic/search-ui-engines-connector@^1.19.0":
+"@elastic/search-ui-engines-connector@^1.19.1":
   version "1.19.1"
   resolved "https://registry.yarnpkg.com/@elastic/search-ui-engines-connector/-/search-ui-engines-connector-1.19.1.tgz#5efab4f405e7bfb573fb0a81ad776d02e2248d23"
   integrity sha512-LHTeSmDGOR5T5Y/9K1AngedHp3KAgdMhUq7KgvJnRkYogOCCfqWizcVXdURKXp8A+t6Gocg24o1TMWOSBR+3+w==
@@ -1660,7 +1660,7 @@
     "@elastic/search-ui" "1.19.1"
     "@searchkit/sdk" "^3.0.0"
 
-"@elastic/search-ui@1.19.1", "@elastic/search-ui@^1.19.0":
+"@elastic/search-ui@1.19.1", "@elastic/search-ui@^1.19.1":
   version "1.19.1"
   resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.19.1.tgz#76c1c72248e42f326970a6f3b0b445ab5f581847"
   integrity sha512-2DcZ1b4fiL0vjRhVFU1OnqGKOy7aVJr563VO9FDpUUFCXlMySKWnuwh0kcUatqeNO4Sxw9GyJZbtzOgnTyQaag==
