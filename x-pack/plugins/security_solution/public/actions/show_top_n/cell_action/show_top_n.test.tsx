@@ -6,8 +6,6 @@
  */
 
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
-import { Subject } from 'rxjs';
-import { APP_UI_ID } from '../../../../common/constants';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -16,7 +14,7 @@ import {
 } from '../../../common/mock';
 import { mockHistory } from '../../../common/mock/router';
 import { createStore } from '../../../common/store';
-import { createShowTopNAction } from './show_top_n';
+import { createShowTopNCellActionFactory } from './show_top_n';
 import React from 'react';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
@@ -26,41 +24,32 @@ jest.mock('../show_top_n_component', () => ({
   TopNAction: () => <span>{'TEST COMPONENT'}</span>,
 }));
 
-const currentAppId$ = new Subject<string | undefined>();
-const startServices = createStartServicesMock();
-
-const mockServices = {
-  ...startServices,
-  application: {
-    ...startServices.application,
-    currentAppId$: currentAppId$.asObservable(),
-  },
-};
-
+const mockServices = createStartServicesMock();
 const { storage } = createSecuritySolutionStorageMock();
 const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 const element = document.createElement('div');
 document.body.appendChild(element);
 
-describe('createShowTopNAction', () => {
-  const showTopNAction = createShowTopNAction({
+describe('createShowTopNCellActionFactory', () => {
+  const showTopNActionFactory = createShowTopNCellActionFactory({
     store: mockStore,
     history: mockHistory,
-    order: 1,
     services: mockServices,
   });
+  const showTopNAction = showTopNActionFactory({ id: 'testAction' });
+
   const context = {
     field: { name: 'user.name', value: 'the-value', type: 'keyword', aggregatable: true },
     trigger: { id: 'trigger' },
     nodeRef: {
       current: element,
     },
+    metadata: undefined,
   } as CellActionExecutionContext;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    currentAppId$.next(APP_UI_ID);
   });
 
   it('should return display name', () => {
@@ -76,13 +65,7 @@ describe('createShowTopNAction', () => {
       expect(await showTopNAction.isCompatible(context)).toEqual(true);
     });
 
-    it('should return false if not in Security', async () => {
-      currentAppId$.next('not security');
-      expect(await showTopNAction.isCompatible(context)).toEqual(false);
-    });
-
     it('should return false if field type does not support aggregations', async () => {
-      currentAppId$.next('not security');
       expect(
         await showTopNAction.isCompatible({ ...context, field: { ...context.field, type: 'text' } })
       ).toEqual(false);

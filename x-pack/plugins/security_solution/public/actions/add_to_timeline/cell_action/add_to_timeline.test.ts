@@ -6,20 +6,15 @@
  */
 
 import type { SecurityAppStore } from '../../../common/store/types';
-import { KibanaServices } from '../../../common/lib/kibana';
-import { APP_UI_ID } from '../../../../common/constants';
-import { Subject } from 'rxjs';
 import { TimelineId } from '../../../../common/types';
 import { addProvider } from '../../../timelines/store/timeline/actions';
-import { createAddToTimelineAction } from './add_to_timeline';
+import { createAddToTimelineCellActionFactory } from './add_to_timeline';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { GEO_FIELD_TYPE } from '../../../timelines/components/timeline/body/renderers/constants';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
-jest.mock('../../../common/lib/kibana');
-const currentAppId$ = new Subject<string | undefined>();
-KibanaServices.get().application.currentAppId$ = currentAppId$.asObservable();
-const mockWarningToast = jest.fn();
-KibanaServices.get().notifications.toasts.addWarning = mockWarningToast;
+const services = createStartServicesMock();
+const mockWarningToast = services.notifications.toasts.addWarning;
 
 const mockDispatch = jest.fn();
 const store = {
@@ -54,11 +49,11 @@ const defaultDataProvider = {
   },
 };
 
-describe('Default createAddToTimelineAction', () => {
-  const addToTimelineAction = createAddToTimelineAction({ store, order: 1 });
+describe('createAddToTimelineCellAction', () => {
+  const addToTimelineCellActionFactory = createAddToTimelineCellActionFactory({ store, services });
+  const addToTimelineAction = addToTimelineCellActionFactory({ id: 'testAddToTimeline', order: 1 });
 
   beforeEach(() => {
-    currentAppId$.next(APP_UI_ID);
     jest.clearAllMocks();
   });
 
@@ -71,13 +66,16 @@ describe('Default createAddToTimelineAction', () => {
   });
 
   describe('isCompatible', () => {
-    it('should return false if not in Security', async () => {
-      currentAppId$.next('not security');
-      expect(await addToTimelineAction.isCompatible(context)).toEqual(false);
-    });
-
     it('should return true if everything is okay', async () => {
       expect(await addToTimelineAction.isCompatible(context)).toEqual(true);
+    });
+    it('should return false if field not allowed', async () => {
+      expect(
+        await addToTimelineAction.isCompatible({
+          ...context,
+          field: { ...context.field, name: 'signal.reason' },
+        })
+      ).toEqual(false);
     });
   });
 

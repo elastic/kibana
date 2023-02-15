@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { KibanaServices } from '../../../common/lib/kibana';
-import { createCopyToClipboardAction } from './copy_to_clipboard';
-import type { CellActionExecutionContext } from '@kbn/cell-actions';
+import { createCopyToClipboardActionFactory } from './copy_to_clipboard';
+import type { CellActionExecutionContext } from '../../types';
+import type { NotificationsStart } from '@kbn/core/public';
 
-jest.mock('../../../common/lib/kibana');
 const mockSuccessToast = jest.fn();
-KibanaServices.get().notifications.toasts.addSuccess = mockSuccessToast;
 
 const mockCopy = jest.fn((text: string) => true);
 jest.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
 
-describe('Default createCopyToClipboardAction', () => {
-  const copyToClipboardAction = createCopyToClipboardAction({ order: 1 });
+describe('Default createCopyToClipboardActionFactory', () => {
+  const copyToClipboardActionFactory = createCopyToClipboardActionFactory({
+    notifications: { toasts: { addSuccess: mockSuccessToast } } as unknown as NotificationsStart,
+  });
+  const copyToClipboardAction = copyToClipboardActionFactory({ id: 'testAction' });
   const context = {
     field: { name: 'user.name', value: 'the value', type: 'text' },
   } as CellActionExecutionContext;
