@@ -72,7 +72,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     embeddable,
     lens,
     storage,
-    http,
+    savedObjects,
     uiSettings,
     data: {
       query: {
@@ -362,7 +362,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
           savedObjectMetaData={savedObjectMetaData}
           fixedPageSize={10}
           uiSettings={uiSettings}
-          http={http}
+          savedObjects={savedObjects}
           euiFieldSearchProps={euiFieldSearchProps}
           // @ts-expect-error update types
           euiFormRowProps={euiFormRowProps}
