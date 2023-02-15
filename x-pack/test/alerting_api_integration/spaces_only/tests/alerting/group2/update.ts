@@ -126,8 +126,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         });
     });
 
-    // TODO: Port over SecuritySolution `version` update() FTR tests
-
     describe('legacy', () => {
       it('should handle update alert request appropriately', async () => {
         const { body: createdAlert } = await supertest

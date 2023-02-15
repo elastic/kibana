@@ -70,7 +70,10 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const outputRule = getSimpleMlRuleOutput();
-        outputRule.version = 2; // NOTE: Revision is not updated as `machine_learning_job_id` value doesn't actually change
+        outputRule.version = 2;
+        // TODO: Followup to #147398
+        // NOTE: Once we remove `version` increment, revision will not be updated as `machine_learning_job_id` value doesn't actually change
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });

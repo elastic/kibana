@@ -76,6 +76,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
       expect(updatedRule.tags).to.eql(['default', 'tag-1']);
 
+      // Ensure revision is updated
+      expect(updatedRule.revision).to.eql(1);
+
       // Ensure AAD isn't broken
       await checkAAD({
         supertest,
@@ -137,6 +140,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
       updatedRules.forEach((rule) => {
         expect(rule.tags).to.eql([`rewritten`]);
+        expect(rule.revision).to.eql(1);
       });
     });
 
@@ -173,6 +177,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo');
 
       expect(updatedRule.schedule).to.eql({ interval: '1h' });
+
+      // Ensure revision is updated
+      expect(updatedRule.revision).to.eql(1);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -217,6 +224,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
       expect(updatedRule).property('throttle', '1h');
 
+      // Ensure revision is updated
+      expect(updatedRule.revision).to.eql(1);
+
       // Ensure AAD isn't broken
       await checkAAD({
         supertest,
@@ -259,6 +269,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo');
 
       expect(updatedRule).property('notify_when', 'onActionGroupChange');
+
+      // Ensure revision is updated
+      expect(updatedRule.revision).to.eql(1);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -305,6 +318,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(bulkSnoozeResponse.body.rules[0].snooze_schedule.length).to.eql(1);
       expect(bulkSnoozeResponse.body.rules[0].snooze_schedule[0].duration).to.eql(28800000);
 
+      // Ensure revision is updated TODO: TBD on if snooze actually should increment revision
+      expect(bulkSnoozeResponse.body.rules[0].revision).to.eql(1);
+
       const bulkUnsnoozeResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
         .set('kbn-xsrf', 'foo')
@@ -321,6 +337,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(bulkUnsnoozeResponse.body.errors).to.have.length(0);
       expect(bulkUnsnoozeResponse.body.rules).to.have.length(1);
       expect(bulkUnsnoozeResponse.body.rules[0].snooze_schedule).empty();
+
+      // Ensure revision is updated TODO: TBD on if snooze actually should increment revision
+      expect(bulkSnoozeResponse.body.rules[0].revision).to.eql(2);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -378,6 +397,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(bulkSnoozeResponse.body.errors).to.have.length(0);
       expect(bulkSnoozeResponse.body.rules).to.have.length(1);
       expect(bulkSnoozeResponse.body.rules[0].snooze_schedule.length).to.eql(5);
+      // Ensure revision is updated TODO: TBD on if snooze actually should increment revision
+      expect(bulkSnoozeResponse.body.rules[0].revision).to.eql(1);
 
       // Try adding more than 5 schedules
       const bulkSnoozeError = await supertest
@@ -433,6 +454,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(bulkSnoozeResponse.body.errors).to.have.length(0);
       expect(bulkSnoozeResponse.body.rules).to.have.length(1);
       expect(bulkSnoozeResponse.body.rules[0].snooze_schedule).empty();
+      // Ensure revision isn't updated
+      expect(bulkSnoozeResponse.body.rules[0].revision).to.eql(0);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -473,6 +496,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(bulkApiKeyResponse.body.errors).to.have.length(0);
       expect(bulkApiKeyResponse.body.rules).to.have.length(1);
       expect(bulkApiKeyResponse.body.rules[0].api_key_owner).to.eql(null);
+      // Ensure revision is updated
+      expect(bulkApiKeyResponse.body.rules[0].revision).to.eql(1);
     });
 
     it(`shouldn't bulk edit rule from another space`, async () => {

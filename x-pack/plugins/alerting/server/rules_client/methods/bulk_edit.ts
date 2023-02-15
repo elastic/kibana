@@ -437,6 +437,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
       return;
     } else {
       // All BulkEditOperation's result in a revision increment, so no need to check which fields have changed
+      // TODO: Open question on if snooze should increment revision
       attributes.revision = rule.attributes.revision + 1;
     }
 

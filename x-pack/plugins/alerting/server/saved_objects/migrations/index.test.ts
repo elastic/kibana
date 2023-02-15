@@ -2630,6 +2630,16 @@ describe('successful migrations', () => {
     });
   });
 
+  describe('8.8.0', () => {
+    test('migrates rule to include revision and defaults revision to 0', () => {
+      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+
+      const rule = getMockData();
+      const migratedAlert880 = migration880(rule, migrationContext);
+      expect(migratedAlert880.attributes.revision).toEqual(0);
+    });
+  });
+
   describe('Metrics Inventory Threshold rule', () => {
     test('Migrates incorrect action group spelling', () => {
       const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0'];
