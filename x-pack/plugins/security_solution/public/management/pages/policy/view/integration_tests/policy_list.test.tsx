@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, waitFor, fireEvent } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../../services/policies/policies';
@@ -16,6 +16,7 @@ import type { GetPolicyListResponse } from '../../types';
 import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../../../services/policies/policies');
 jest.mock('../../../../../common/components/user_privileges');
@@ -140,7 +141,7 @@ describe('When on the policy list page', () => {
         },
       };
       const endpointCount = renderResult.getAllByTestId('policyEndpointCountLink')[0];
-      fireEvent.click(endpointCount);
+      userEvent.click(endpointCount);
 
       expect(history.location.pathname).toEqual(getEndpointListPath({ name: 'endpointList' }));
       expect(history.location.search).toEqual(filterByPolicyQuery);
@@ -175,9 +176,7 @@ describe('When on the policy list page', () => {
       await waitFor(() => {
         expect(renderResult.getByTestId('pagination-button-next')).toBeTruthy();
       });
-      act(() => {
-        renderResult.getByTestId('pagination-button-next').click();
-      });
+      userEvent.click(renderResult.getByTestId('pagination-button-next'));
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalledTimes(2);
       });
@@ -192,13 +191,9 @@ describe('When on the policy list page', () => {
       await waitFor(() => {
         expect(renderResult.getByTestId('tablePaginationPopoverButton')).toBeTruthy();
       });
-      act(() => {
-        renderResult.getByTestId('tablePaginationPopoverButton').click();
-      });
-      const pageSize20 = await renderResult.findByTestId('tablePagination-20-rows');
-      act(() => {
-        pageSize20.click();
-      });
+      userEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
+      const pageSize20 = renderResult.getByTestId('tablePagination-20-rows');
+      userEvent.click(pageSize20, undefined, { skipPointerEventsCheck: true });
 
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalledTimes(2);
@@ -233,13 +228,9 @@ describe('When on the policy list page', () => {
       });
 
       // change pageSize
-      act(() => {
-        renderResult.getByTestId('tablePaginationPopoverButton').click();
-      });
+      userEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
       const pageSize10 = renderResult.getByTestId('tablePagination-10-rows');
-      act(() => {
-        pageSize10.click();
-      });
+      userEvent.click(pageSize10, undefined, { skipPointerEventsCheck: true });
 
       await waitFor(() => {
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenLastCalledWith(
