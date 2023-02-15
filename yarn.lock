@@ -9704,10 +9704,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^109.0.0:
-  version "109.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-109.0.0.tgz#9407af72f2a01bb19e6db1b85cfc87eb3acd4f6b"
-  integrity sha512-jdmBq11IUwfThLFiygGTZ89qbROSQI4bICQjvOVQy2Bqr1LwC+MFkhwyZp3YG99eehQbZuTlQmmfCZBfpewTNA==
+chromedriver@^110.0.0:
+  version "110.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-110.0.0.tgz#d00a1a2976592d933faa8e9839e97692922834a4"
+  integrity sha512-Le6q8xrA/3fAt+g8qiN0YjsYxINIhQMC6wj9X3W5L77uN4NspEzklDrqYNwBcEVn7PcAEJ73nLlS7mTyZRspHA==
   dependencies:
     "@testim/chrome-version" "^1.1.3"
     axios "^1.2.1"
