@@ -2919,6 +2919,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/babel-register@link:bazel-bin/packages/kbn-babel-register":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cli-dev-mode@link:bazel-bin/packages/kbn-cli-dev-mode":
   version "0.0.0"
   uid ""

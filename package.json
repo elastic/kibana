@@ -449,6 +449,7 @@
     "@jest/reporters": "^27.5.1",
     "@kbn/babel-code-parser": "link:bazel-bin/packages/kbn-babel-code-parser",
     "@kbn/babel-preset": "link:bazel-bin/packages/kbn-babel-preset",
+    "@kbn/babel-register": "link:bazel-bin/packages/kbn-babel-register",
     "@kbn/cli-dev-mode": "link:bazel-bin/packages/kbn-cli-dev-mode",
     "@kbn/dev-utils": "link:bazel-bin/packages/kbn-dev-utils",
     "@kbn/docs-utils": "link:bazel-bin/packages/kbn-docs-utils",

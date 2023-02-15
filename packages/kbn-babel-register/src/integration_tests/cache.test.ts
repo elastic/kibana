@@ -47,6 +47,10 @@ afterEach(async () => {
   instances.length = 0;
 });
 
+afterAll(async () => {
+  await del(Path.dirname(DIR));
+});
+
 it('returns undefined until values are set', async () => {
   const path = '/foo/bar.js';
   const mtime = new Date().toJSON();
