@@ -29,6 +29,7 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/doc-links",
     "@kbn/safer-lodash-set",
+    "@kbn/logging-mocks",
     "@kbn/core-saved-objects-server-mocks",
   ],
   "exclude": [
