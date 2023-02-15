@@ -137,7 +137,8 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
  *     them all to one handler, then the consumer must specify if-else/map/switch
  *     to correctly handle versions and map to the correct return type...
  * WEAKNESSES:
- *  1. Whole new API to design and implement
+ *  1. Assumes that versioning system will _never_ need to access non-public values
+ *     or functionality of the IRouter. Is this assumption too strong?
  *  2. Will it actually be used since this is only a recommendation?
  *  3. Requires some refactoring to adopt
  */
