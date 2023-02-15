@@ -105,6 +105,11 @@ export const referenceLineFunction: ReferenceLineFn = {
       default: FillStyles.NONE,
       strict: true,
     },
+    forAccessor: {
+      types: ['string'],
+      help: '',
+      default: '',
+    },
   },
   fn(table, args) {
     const textVisibility =

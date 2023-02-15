@@ -655,6 +655,8 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
 
+          await es.indices.refresh({ index: defaultSignalsIndex });
+
           await createComment({
             supertest,
             caseId: postedCase.id,
@@ -666,6 +668,8 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
             },
           });
+
+          await es.indices.refresh({ index: defaultSignalsIndex });
 
           await pushCase({
             supertest,
