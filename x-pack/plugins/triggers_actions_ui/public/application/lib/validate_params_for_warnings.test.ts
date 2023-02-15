@@ -28,18 +28,6 @@ describe('validateParamsForWarnings', () => {
     ).toEqual(warning);
 
     expect(
-      validateParamsForWarnings('{{#context}}link: {{url}}{{/context}}', undefined, actionVariables)
-    ).toEqual(warning);
-
-    expect(
-      validateParamsForWarnings(
-        '{{#context.url}}link: {{.}}{{/context.url}}',
-        undefined,
-        actionVariables
-      )
-    ).toEqual(warning);
-
-    expect(
       validateParamsForWarnings('link: {{ context.url }}', undefined, actionVariables)
     ).toEqual(warning);
 

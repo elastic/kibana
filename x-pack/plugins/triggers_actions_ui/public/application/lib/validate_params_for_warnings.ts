@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { flattenDeep, some } from 'lodash';
+import { some } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import Mustache from 'mustache';
@@ -31,7 +31,11 @@ export function validateParamsForWarnings(
       return acc;
     }, new Array<string>());
 
-    const variables = new Set(flattenDeep(Mustache.parse(value) as Array<[string, string]>));
+    const variables = new Set(
+      (Mustache.parse(value) as Array<[string, string]>)
+        .filter(([type]) => type === 'name')
+        .map(([, v]) => v)
+    );
     const hasUrlFields = some(publicUrlFields, (publicUrlField) => variables.has(publicUrlField));
     if (hasUrlFields) {
       return publicUrlWarning;
