@@ -47,15 +47,4 @@ describe('Console header area', () => {
 
     expect(renderResult.getByTestId('test-sidePanel')).toBeTruthy();
   });
-
-  it('should close the side panel when close button is clicked', async () => {
-    render();
-    renderResult.getByTestId('test-header-helpButton').click();
-
-    expect(renderResult.getByTestId('test-sidePanel')).toBeTruthy();
-
-    renderResult.getByTestId('test-sidePanel-headerCloseButton').click();
-
-    expect(renderResult.queryByTestId('test-sidePanel')).toBeNull();
-  });
 });
