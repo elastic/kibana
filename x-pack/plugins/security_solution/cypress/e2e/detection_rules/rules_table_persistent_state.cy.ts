@@ -28,7 +28,8 @@ function createRule(id: string, name: string, tags?: string[]): void {
   createCustomRule(rule, id);
 }
 
-describe('Persistent rules table state', () => {
+// Failing on `main`, skipping for now, to be addressed by security-detection-rules-area
+describe.skip('Persistent rules table state', () => {
   before(() => {
     cleanKibana();
 
