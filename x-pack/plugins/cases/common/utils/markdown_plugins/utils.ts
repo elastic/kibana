@@ -9,7 +9,7 @@ import { filter } from 'lodash';
 import type { Node } from 'unist';
 import markdown from 'remark-parse';
 import remarkStringify from 'remark-stringify';
-import unified from 'unified';
+import { unified } from 'unified';
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { TimeRange } from '@kbn/es-query';

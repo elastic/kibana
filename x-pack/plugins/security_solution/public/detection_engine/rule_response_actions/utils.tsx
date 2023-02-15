@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import unified from 'unified';
+import { unified } from 'unified';
 import markdown from 'remark-parse';
 import { filter, reduce } from 'lodash';
 

@@ -6,7 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import unified from 'unified';
+import { unified } from 'unified';
 import markdown from 'remark-parse';
 import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
