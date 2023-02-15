@@ -141,7 +141,7 @@ export class JobsList extends Component {
         render: (item) => (
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
-            isDisabled={item.blocked !== undefined}
+            // isDisabled={item.blocked !== undefined}
             iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
             aria-label={
               this.state.itemIdToExpandedRowMap[item.id]
