@@ -36,12 +36,11 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
     })
  ```
 
-    <details>
+<details>
+<summary>Generated docs</summary>
 
-    <summary>Generated docs</summary>
-
-    ```
-      [
+```JSON
+    [
         {
             "foo": "bar",
             "id": "f07df596-65ec-4ab1-b0b2-f3b69558ed26",
@@ -92,10 +91,10 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
             "id": "06dbbaf9-0e56-49f6-b6e9-e7c0968be77c",
             "@timestamp": "2020-10-29T17:58:09.648Z"
         }
-        ]
-    ```
+    ]
+```
 
-    </details>
+</details>
 
  2. Generate 3 identical documents `{foo: bar}` by using default `enhance=false`
 
