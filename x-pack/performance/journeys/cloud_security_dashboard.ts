@@ -10,13 +10,13 @@ import { Journey } from '@kbn/journeys';
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/kspm_findings'],
 })
-  .step('wait for installation', async () => {
-    await sleep(10000);
-  })
+  // .step('wait for installation', async () => {
+  //   await sleep(10000);
+  // })
 
   .step('Go to cloud security dashboards Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/security/cloud_security_posture/dashboard`));
     await page.waitForSelector(`[data-test-subj="csp:dashboard-sections-table-header-score"]`);
   });
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+// const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
