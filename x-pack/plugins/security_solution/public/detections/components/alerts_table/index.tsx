@@ -15,6 +15,7 @@ import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/publ
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { useLicense } from '../../../common/hooks/use_license';
 import { updateIsLoading, updateTotalCount } from '../../../common/store/data_table/actions';
@@ -83,9 +84,7 @@ interface DetectionEngineAlertTableProps {
   inputFilters: Filter[];
   tableId: TableId;
   sourcererScope?: SourcererScopeName;
-  from: string;
-  to: string;
-  isLoading: boolean;
+  isLoading?: boolean;
 }
 export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   configId,
@@ -93,11 +92,11 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   inputFilters,
   tableId = TableId.alertsOnAlertsPage,
   sourcererScope = SourcererScopeName.detections,
-  from,
-  to,
   isLoading,
 }) => {
   const { triggersActionsUi, uiSettings } = useKibana().services;
+
+  const { from, to, setQuery } = useGlobalTime();
 
   const alertTableRefreshHandlerRef = useRef<(() => void) | null>(null);
 
@@ -122,12 +121,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   const isDataTableInitialized = useShallowEqualSelector(
     (state) => (getTable(state, tableId) ?? tableDefaults).initialized
   );
-
-  useEffect(() => {
-    if (globalQueries && alertTableRefreshHandlerRef.current) {
-      alertTableRefreshHandlerRef.current();
-    }
-  }, [globalQueries, alertTableRefreshHandlerRef]);
 
   const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
 
@@ -232,8 +225,16 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       );
 
       alertTableRefreshHandlerRef.current = refresh;
+
+      // setting Query
+      setQuery({
+        id: tableId,
+        loading: isAlertTableLoading,
+        refetch: refresh,
+        inspect: null,
+      });
     },
-    [dispatch, tableId, alertTableRefreshHandlerRef]
+    [dispatch, tableId, alertTableRefreshHandlerRef, setQuery]
   );
 
   const alertStateProps: AlertsTableStateProps = useMemo(

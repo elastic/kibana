@@ -174,8 +174,6 @@ const renderChildComponent = (groupingFilters: Filter[]) => (
     flyoutSize="m"
     inputFilters={[...[], ...groupingFilters]}
     tableId={TableId.alertsOnAlertsPage}
-    from={from}
-    to={to}
     isLoading={false}
   />
 );

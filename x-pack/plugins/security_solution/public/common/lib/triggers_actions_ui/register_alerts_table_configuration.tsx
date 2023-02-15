@@ -56,7 +56,7 @@ const registerAlertsTableConfiguration = (
   ];
 
   // register Alert Table on Alert Page
-  registry.register({
+  registerIfNotAlready(registry, {
     id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE,
     app_id: APP_ID,
     casesFeatureId: CASES_FEATURE_ID,
@@ -73,7 +73,7 @@ const registerAlertsTableConfiguration = (
   });
 
   // register Alert Table on RuleDetails Page
-  registry.register({
+  registerIfNotAlready(registry, {
     id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS,
     app_id: APP_ID,
     casesFeatureId: CASES_FEATURE_ID,
@@ -89,7 +89,7 @@ const registerAlertsTableConfiguration = (
     showInspectButton: true,
   });
 
-  registry.register({
+  registerIfNotAlready(registry, {
     id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.CASE,
     app_id: APP_ID,
     casesFeatureId: CASES_FEATURE_ID,
@@ -101,6 +101,15 @@ const registerAlertsTableConfiguration = (
     sort,
     showInspectButton: true,
   });
+};
+
+const registerIfNotAlready = (
+  registry: AlertsTableConfigurationRegistryContract,
+  registryArgs: AlertsTableConfigurationRegistry
+) => {
+  if (!registry.has(registryArgs.id)) {
+    registry.register(registryArgs);
+  }
 };
 
 export { registerAlertsTableConfiguration };

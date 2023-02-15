@@ -366,13 +366,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           flyoutSize="m"
           inputFilters={[...alertsTableDefaultFilters, ...groupingFilters]}
           tableId={TableId.alertsOnAlertsPage}
-          from={from}
-          to={to}
-          isLoading={false}
+          isLoading={isAlertTableLoading}
         />
       );
     },
-    [alertsTableDefaultFilters, from, to]
+    [alertsTableDefaultFilters, isAlertTableLoading]
   );
 
   if (loading) {

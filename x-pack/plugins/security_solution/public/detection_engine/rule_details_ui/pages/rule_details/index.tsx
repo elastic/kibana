@@ -616,13 +616,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           flyoutSize="m"
           inputFilters={[...alertMergedFilters, ...groupingFilters]}
           tableId={TableId.alertsOnRuleDetailsPage}
-          from={from}
-          to={to}
-          isLoading={false}
         />
       );
     },
-    [alertMergedFilters, from, to]
+    [alertMergedFilters]
   );
 
   const {
