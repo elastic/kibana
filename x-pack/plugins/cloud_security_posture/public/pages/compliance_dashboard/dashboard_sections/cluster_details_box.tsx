@@ -37,7 +37,7 @@ const getClusterTitle = (cluster: Cluster) => {
 
 const getClusterId = (cluster: Cluster) => {
   const assetIdentifierId = cluster.meta.assetIdentifierId;
-  if (cluster.meta.benchmark.posture_type === 'cspm') return assetIdentifierId;
+  if (cluster.meta.benchmark.posture_type === 'cspm') return assetIdentifierId.slice(0, 6);
   return assetIdentifierId.slice(0, 6);
 };
 
@@ -45,7 +45,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
 
-  const shortId = getClusterId(cluster);
+  const assetId = getClusterId(cluster);
   const title = getClusterTitle(cluster) || defaultClusterTitle;
 
   const handleClusterTitleClick = () => {
@@ -66,10 +66,10 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
               <strong>
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.clusterTitleTooltip.clusterTitle"
-                  defaultMessage="{title} - {shortId}"
+                  defaultMessage="{title} - {assetId}"
                   values={{
                     title,
-                    shortId,
+                    assetId,
                   }}
                 />
               </strong>
@@ -81,10 +81,10 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
               <h5>
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.clusterTitle"
-                  defaultMessage="{title} - {shortId}"
+                  defaultMessage="{title} - {assetId}"
                   values={{
                     title,
-                    shortId,
+                    assetId,
                   }}
                 />
               </h5>
