@@ -34,6 +34,7 @@ function toMonitorManagementListQueryArgs(
     monitorTypes: pageState.monitorTypes,
     projects: pageState.projects,
     schedules: pageState.schedules,
+    serviceNames: pageState.serviceNames,
     searchFields: [],
   };
 }

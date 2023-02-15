@@ -9,7 +9,7 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -31,9 +31,9 @@ export const OverviewAlerts = () => {
 
   const theme = useTheme();
 
-  const { status } = useSelector(selectOverviewStatus);
+  const { status, loaded, loading } = useSelector(selectOverviewStatus);
 
-  const loading = !status?.allIds || status?.allIds.length === 0;
+  const statusLoading = loading || (!loaded && (!status?.allIds || status?.allIds.length === 0));
 
   return (
     <EuiPanel hasShadow={false} paddingSize="m" hasBorder>
@@ -41,8 +41,8 @@ export const OverviewAlerts = () => {
         <h3>{headingText}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {loading ? (
-        <EuiLoadingContent lines={3} />
+      {statusLoading ? (
+        <EuiSkeletonText lines={3} />
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>

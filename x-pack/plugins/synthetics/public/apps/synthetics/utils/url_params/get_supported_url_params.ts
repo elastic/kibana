@@ -34,6 +34,7 @@ export interface SyntheticsUrlParams {
   locationId?: string;
   projects?: string[];
   schedules?: string[];
+  serviceNames?: string[];
   groupBy?: MonitorOverviewState['groupBy']['field'];
   groupOrderBy?: MonitorOverviewState['groupBy']['order'];
 }
@@ -97,6 +98,7 @@ export const getSupportedUrlParams = (params: {
     locationId,
     projects,
     schedules,
+    serviceNames,
     groupBy,
     groupOrderBy,
   } = filteredParams;
@@ -129,6 +131,7 @@ export const getSupportedUrlParams = (params: {
     locations: locations ? JSON.parse(locations) : [],
     projects: projects ? JSON.parse(projects) : [],
     schedules: schedules ? JSON.parse(schedules) : [],
+    serviceNames: serviceNames ? JSON.parse(serviceNames) : [],
     locationId: locationId || undefined,
   };
 };

@@ -10,3 +10,5 @@ import { UptimePlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new UptimePlugin(initializerContext);
+
+export { SyntheticsOverviewEmbeddable } from './shared';

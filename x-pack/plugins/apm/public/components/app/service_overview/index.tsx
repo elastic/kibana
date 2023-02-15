@@ -29,6 +29,7 @@ import { FailedTransactionRateChart } from '../../shared/charts/failed_transacti
 import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from './service_overview_instances_chart_and_table';
+import { ServiceOverviewSyntheticsOverview } from './service_overview_synthetics_overview';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { TransactionsTable } from '../../shared/transactions_table';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
@@ -198,6 +199,8 @@ export function ServiceOverview() {
                   chartHeight={nonLatencyChartHeight}
                   serviceName={serviceName}
                 />
+
+                <ServiceOverviewSyntheticsOverview serviceName={serviceName} />
               </EuiFlexGroup>
             </EuiFlexItem>
           )}

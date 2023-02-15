@@ -133,6 +133,14 @@ export const getSyntheticsMonitorSavedObjectType = (
         enabled: {
           type: 'boolean',
         },
+        service: {
+          properties: {
+            name: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+          },
+        },
       },
     },
     management: {

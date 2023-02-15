@@ -47,7 +47,7 @@ export const urlPatternsFieldHelpText = (
   <FormattedMessage
     id="xpack.synthetics.monitorConfig.apmUrlPatterns.helpText"
     defaultMessage={
-      'Specify the URL matchers using the wildcard {wildcard} pattern or a segment of a URL. For example a value of {patternExample1} will match all /img/ urls on all subdomains of elastic.co. and a value of {patternExample2} will match any URL containing the segment "img".'
+      'Matching URLs will be traced and linked with APM data. You can specify the URLs using the glob pattern {wildcard} or a segment of a URL. For example a value of {patternExample1} will match all /img/ urls on all subdomains of elastic.co. and a value of {patternExample2} will match any URL containing the segment "img".'
     }
     values={{
       wildcard: <EuiCode>{'*'}</EuiCode>,

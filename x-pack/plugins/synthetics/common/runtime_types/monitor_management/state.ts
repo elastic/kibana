@@ -19,6 +19,7 @@ export const FetchMonitorManagementListQueryArgsCodec = t.partial({
   monitorTypes: t.array(t.string),
   projects: t.array(t.string),
   schedules: t.array(t.string),
+  serviceNames: t.array(t.string),
 });
 
 export type FetchMonitorManagementListQueryArgs = t.TypeOf<
@@ -35,6 +36,7 @@ export const FetchMonitorOverviewQueryArgsCodec = t.partial({
   monitorTypes: t.array(t.string),
   sortField: t.string,
   sortOrder: t.string,
+  serviceNames: t.array(t.string),
 });
 
 export type FetchMonitorOverviewQueryArgs = t.TypeOf<typeof FetchMonitorOverviewQueryArgsCodec>;

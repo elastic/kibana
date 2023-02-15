@@ -7,9 +7,10 @@
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from 'react-router-dom';
+import { Observable } from 'rxjs';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS, CoreStart, CoreTheme } from '@kbn/core/public';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
@@ -17,6 +18,7 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-plugin/public';
+import { ClientPluginsStart } from '../../plugin';
 import { SyntheticsAppProps } from './contexts';
 
 import {
@@ -31,6 +33,26 @@ import { store, storage, setBasePath } from './state';
 import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
 import { TestNowModeFlyoutContainer } from './components/test_now_mode/test_now_mode_flyout_container';
+
+export function initKibanaService({
+  coreStart,
+  clientPluginStart,
+  coreTheme$,
+}: {
+  coreStart: CoreStart;
+  clientPluginStart?: ClientPluginsStart;
+  coreTheme$?: Observable<CoreTheme>;
+}) {
+  kibanaService.core = coreStart;
+
+  if (clientPluginStart) {
+    kibanaService.startPlugins = clientPluginStart;
+  }
+
+  if (coreTheme$) {
+    kibanaService.theme = coreTheme$;
+  }
+}
 
 const Application = (props: SyntheticsAppProps) => {
   const {
@@ -63,9 +85,11 @@ const Application = (props: SyntheticsAppProps) => {
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
-  kibanaService.core = core;
-  kibanaService.startPlugins = startPlugins;
-  kibanaService.theme = props.appMountParameters.theme$;
+  initKibanaService({
+    coreStart: core,
+    clientPluginStart: startPlugins,
+    coreTheme$: props.appMountParameters.theme$,
+  });
 
   store.dispatch(setBasePath(basePath));
 
