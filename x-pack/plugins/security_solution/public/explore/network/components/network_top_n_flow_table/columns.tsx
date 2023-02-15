@@ -92,7 +92,7 @@ export const getNetworkTopNFlowColumns = (
                 field={{
                   name: geoAttrName,
                   value: geo,
-                  type: 'geo_point',
+                  type: 'keyword',
                   aggregatable: true,
                 }}
               >
