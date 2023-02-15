@@ -7,7 +7,8 @@
  */
 
 import React, { memo } from 'react';
-import { Route, Router, Switch, Redirect } from 'react-router-dom';
+import { Router, Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
