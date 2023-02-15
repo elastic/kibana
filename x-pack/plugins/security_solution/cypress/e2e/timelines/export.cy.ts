@@ -5,26 +5,32 @@
  * 2.0.
  */
 
-import { exportTimeline } from '../../tasks/timelines';
+import { exportTimeline, selectAllTimelines, exportSelectedTimelines } from '../../tasks/timelines';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { TIMELINES_URL } from '../../urls/navigation';
+import { TOASTER } from '../../screens/alerts_detection_rules';
+import { TIMELINE_CHECKBOX } from '../../screens/timelines';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { expectedExportedTimeline, getTimeline } from '../../objects/timeline';
 import { cleanKibana } from '../../tasks/common';
 
 describe('Export timelines', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
-    cy.intercept({
-      method: 'POST',
-      path: '/api/timeline/_export?file_name=timelines_export.ndjson',
-    }).as('export');
+    login();
     createTimeline(getTimeline()).then((response) => {
       cy.wrap(response).as('timelineResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId');
     });
-    login();
+    createTimeline(getTimeline());
+  });
+
+  beforeEach(() => {
+    cy.intercept({
+      method: 'POST',
+      path: '/api/timeline/_export?file_name=timelines_export.ndjson',
+    }).as('export');
   });
 
   it('Exports a custom timeline', function () {
@@ -35,6 +41,25 @@ describe('Export timelines', () => {
       cy.wrap(response?.statusCode).should('eql', 200);
 
       cy.wrap(response?.body).should('eql', expectedExportedTimeline(this.timelineResponse));
+    });
+  });
+
+  it('Bulk export all created timeline', function () {
+    visitWithoutDateRange(TIMELINES_URL);
+    cy.get(TIMELINE_CHECKBOX(this.timelineId)).should('exist'); // wait for all timelines to be loaded
+    selectAllTimelines();
+    exportSelectedTimelines();
+
+    const expectedNumberCustomRulesToBeExported = 2;
+
+    cy.get(TOASTER).should(
+      'contain',
+      `Successfully exported ${expectedNumberCustomRulesToBeExported} timelines`
+    );
+
+    cy.wait('@export').then(({ response }) => {
+      cy.wrap(response?.statusCode).should('eql', 200);
+      cy.wrap(response?.body).should('not.be.empty');
     });
   });
 });
