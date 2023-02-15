@@ -10,19 +10,22 @@ import { camelCase, mapKeys } from 'lodash';
 import { EuiLink, EuiSkeletonText } from '@elastic/eui';
 import { Tooltip as CaseTooltip } from '@kbn/cases-components';
 import type { CaseTooltipContentProps } from '@kbn/cases-components';
+import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import { Case } from '../hooks/use_bulk_get_cases';
+import { CellComponentProps } from '../types';
 
-interface Props {
-  isLoading: boolean;
-  cases: Case[];
-}
+const CasesCellComponent: React.FC<CellComponentProps> = ({ isLoading, alert, cases }) => {
+  const caseIds = alert[ALERT_CASE_IDS] ?? [];
 
-const CellValueComponent: React.FC<Props> = ({ isLoading, cases }) => {
-  if (cases.length === 0) {
+  const alertCases = caseIds
+    .map((id) => cases.get(id))
+    .filter((theCase): theCase is Case => theCase != null);
+
+  if (alertCases.length === 0) {
     return null;
   }
 
-  const firstCase = cases[0];
+  const firstCase = alertCases[0];
   const firstCaseAsCamel = mapKeys(firstCase, (_, key) =>
     camelCase(key)
   ) as unknown as CaseTooltipContentProps;
@@ -39,6 +42,6 @@ const CellValueComponent: React.FC<Props> = ({ isLoading, cases }) => {
   );
 };
 
-CellValueComponent.displayName = 'CellValue';
+CasesCellComponent.displayName = 'CasesCell';
 
-export const CellValue = memo(CellValueComponent);
+export const CasesCell = memo(CasesCellComponent);

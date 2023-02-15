@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, ALERT_CASE_IDS, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { Alert, AlertsTableProps } from '../../../types';
 
 export interface Consumer {
   id: AlertConsumers;
@@ -13,3 +14,20 @@ export interface Consumer {
 }
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
+
+export interface CellComponentProps {
+  alert: Alert;
+  cases: AlertsTableProps['casesData']['cases'];
+  columnId: SystemCellId;
+  isLoading: boolean;
+  showAlertStatusWithFlapping: boolean;
+}
+
+export type CellComponent = React.FC<CellComponentProps>;
+
+export interface SystemCellComponentMap {
+  [ALERT_STATUS]: CellComponent;
+  [ALERT_CASE_IDS]: CellComponent;
+}
+
+export type SystemCellId = keyof SystemCellComponentMap;
