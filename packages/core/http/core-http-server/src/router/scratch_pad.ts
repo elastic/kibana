@@ -102,7 +102,7 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
 
   // Route declaration
   pipe(
-    vtk.defineRoute(myRouter.post, { path: '/api/my-plugin/my-route', options: {} }),
+    myVersionedRouter.defineRoute(myRouter.post, { path: '/api/my-plugin/my-route', options: {} }),
 
     addVersion(
       '1',
