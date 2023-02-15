@@ -75,13 +75,15 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
     changeTimelineOpen(!isOpen);
   }, [isOpen, trackDrawerOpen, changeTimelineOpen]);
 
-  return view === 'table' ? (
-    nodeType === 'pod' ? (
+  if (view === 'table') {
+    return nodeType === 'pod' ? (
       <BottomPanel hasBorder={false} hasShadow={false} borderRadius="none" paddingSize="s">
         <KubernetesButton />
       </BottomPanel>
-    ) : null
-  ) : (
+    ) : null;
+  }
+
+  return (
     <BottomActionContainer>
       <StickyPanel borderRadius="none" paddingSize="s">
         <EuiFlexGroup responsive={false} justifyContent="flexStart" alignItems="center">
