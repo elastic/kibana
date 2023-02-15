@@ -157,6 +157,7 @@ export class TooltipPopover extends Component<Props, State> {
           pointerEvents: 'none',
           transform: `translate(${this.state.x - 13 - offset}px, ${this.state.y - 13}px)`,
         }}
+        repositionOnScroll
       >
         {this._renderTooltipContent()}
       </EuiPopover>

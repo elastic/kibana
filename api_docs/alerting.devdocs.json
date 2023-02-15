@@ -1711,6 +1711,22 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.PluginSetupContract.getFrameworkAlertsEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "getFrameworkAlertsEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/alerting/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2505,7 +2521,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ">; getDefaultDataView: (refreshFields?: boolean | undefined) => Promise<",
+              ">; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3179,6 +3195,23 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-server.DEFAULT_ALERTS_ILM_POLICY_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_ALERTS_ILM_POLICY_NAME",
+        "description": [
+          "\nDefault alert index ILM policy\n- _meta.managed: notify users this is a managed policy and should be modified\n    at their own risk\n- no delete phase as we want to keep these indices around indefinitely\n\nThis should be used by all alerts-as-data indices"
+        ],
+        "signature": [
+          "\".alerts-ilm-policy\""
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT",
         "type": "number",
         "tags": [],
@@ -3648,7 +3681,133 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.DEFAULT_ALERTS_ILM_POLICY",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_ALERTS_ILM_POLICY",
+        "description": [],
+        "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy",
+            "type": "Object",
+            "tags": [],
+            "label": "policy",
+            "description": [],
+            "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy._meta",
+                "type": "Object",
+                "tags": [],
+                "label": "_meta",
+                "description": [],
+                "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "alerting",
+                    "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy._meta.managed",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "managed",
+                    "description": [],
+                    "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy.phases",
+                "type": "Object",
+                "tags": [],
+                "label": "phases",
+                "description": [],
+                "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "alerting",
+                    "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy.phases.hot",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "hot",
+                    "description": [],
+                    "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "alerting",
+                        "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy.phases.hot.actions",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "actions",
+                        "description": [],
+                        "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "alerting",
+                            "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy.phases.hot.actions.rollover",
+                            "type": "Object",
+                            "tags": [],
+                            "label": "rollover",
+                            "description": [],
+                            "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
+                            "deprecated": false,
+                            "trackAdoption": false,
+                            "children": [
+                              {
+                                "parentPluginId": "alerting",
+                                "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy.phases.hot.actions.rollover.max_age",
+                                "type": "string",
+                                "tags": [],
+                                "label": "max_age",
+                                "description": [],
+                                "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
+                                "deprecated": false,
+                                "trackAdoption": false
+                              },
+                              {
+                                "parentPluginId": "alerting",
+                                "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy.phases.hot.actions.rollover.max_primary_shard_size",
+                                "type": "string",
+                                "tags": [],
+                                "label": "max_primary_shard_size",
+                                "description": [],
+                                "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
+                                "deprecated": false,
+                                "trackAdoption": false
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "common": {
     "classes": [],

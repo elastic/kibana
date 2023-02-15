@@ -743,6 +743,23 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFlyout.closeAriaLabel': i18n.translate('core.euiFlyout.closeAriaLabel', {
       defaultMessage: 'Close this dialog',
     }),
+    'euiFlyout.screenReaderModalDialog': i18n.translate('core.euiFlyout.screenReaderModalDialog', {
+      defaultMessage:
+        'You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.',
+    }),
+    'euiFlyout.screenReaderNonModalDialog': i18n.translate(
+      'core.euiFlyout.screenReaderNonModalDialog',
+      {
+        defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
+      }
+    ),
+    'euiFlyout.screenReaderFixedHeaders': i18n.translate(
+      'core.euiFlyout.screenReaderFixedHeaders',
+      {
+        defaultMessage:
+          'You can still continue tabbing through the page headers in addition to the dialog.',
+      }
+    ),
     'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
       defaultMessage: 'Please address the highlighted errors.',
     }),
@@ -1019,7 +1036,8 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiPopover.screenReaderAnnouncement': i18n.translate(
       'core.euiPopover.screenReaderAnnouncement',
       {
-        defaultMessage: 'You are in a dialog. To close this dialog, hit escape.',
+        defaultMessage:
+          'You are in a dialog. Press Escape, or tap/click outside the dialog to close.',
       }
     ),
     'euiProgress.valueText': ({ value }: EuiValues) =>
@@ -1636,7 +1654,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiSuperSelect.screenReaderAnnouncement',
       {
         defaultMessage:
-          'You are in a form selector and must select a single option. Use the up and down keys to navigate or escape to close.',
+          'You are in a form selector and must select a single option. Use the Up and Down arrow keys to navigate or Escape to close.',
       }
     ),
     'euiSuperSelectControl.selectAnOption': ({ selectedValue }: EuiValues) =>
@@ -1776,6 +1794,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       i18n.translate('core.euiNotificationEventReadIcon.unreadAria', {
         defaultMessage: '{eventName} is unread',
         values: { eventName },
+      }),
+    'euiSkeletonLoading.loadingAriaText': ({ contentAriaLabel }: EuiValues) =>
+      i18n.translate('core.euiSkeletonLoading.loadingAriaText', {
+        defaultMessage: 'Loading {contentAriaLabel}',
+        values: { contentAriaLabel },
+      }),
+    'euiSkeletonLoading.loadedAriaText': ({ contentAriaLabel }: EuiValues) =>
+      i18n.translate('core.euiSkeletonLoading.loadedAriaText', {
+        defaultMessage: 'Loaded {contentAriaLabel}',
+        values: { contentAriaLabel },
       }),
   };
 };
