@@ -34,9 +34,11 @@ export const createFilter = (
           },
         },
       }
-    : ({
-        exists: {
-          field: key,
+    : {
+        query: {
+          exists: {
+            field: key,
+          },
         },
         meta: {
           alias: null,
@@ -46,5 +48,5 @@ export const createFilter = (
           type: 'exists',
           value: 'exists',
         },
-      } as Filter);
+      };
 };
