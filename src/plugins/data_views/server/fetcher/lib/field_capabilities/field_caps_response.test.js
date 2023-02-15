@@ -26,7 +26,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
     describe('conflicts', () => {
       it('returns a field for each in response, no filtering', () => {
         const fields = readFieldCapsResponse(esResponse);
-        expect(fields).toHaveLength(24);
+        expect(fields).toHaveLength(25);
       });
 
       it(
@@ -163,6 +163,11 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         const fields = readFieldCapsResponse(esResponse);
         const child = fields.find((f) => f.name === 'object_parent.child');
         expect(child).not.toHaveProperty('subType');
+      });
+      it('reports time series metrics counter as aggregatable: false', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        const counter = fields.find((f) => f.name === 'hits');
+        expect(counter).toHaveProperty('aggregatable', false);
       });
     });
   });
