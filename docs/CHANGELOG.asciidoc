@@ -72,7 +72,7 @@ Fleet::
 Adds the ability to run agent policy schema in batches during fleet setup + add `xpack.fleet.setup.agentPolicySchemaUpgradeBatchSize` config {kibana-pull}150688[#150688]
 
 Security::
-Adds support for handlebars template "inline partials" when `csp.disableUnsafeEval` is set to `true`, allowing you to use inline partials to remove the `unsafe-eval` source expression in the {kib} Content Security Policy (CSP) {kibana-pull}150151[#150151]
+Adds support for handlebars template "inline partials" without requiring `unsafe-eval` source expression in the {kib} Content Security Policy (CSP) {kibana-pull}150151[#150151]
 
 [float]
 [[fixes-v8.6.2]]
