@@ -37,6 +37,7 @@ export function getAlertsForNotification(
           trackedEvent.event[EVENT_ACTION] = 'active';
           delete trackedEvent.event[ALERT_END];
 
+          // rules with "on status change" should return notifications
           if (notifyWhen === RuleNotifyWhen.CHANGE) {
             trackedEventsToNotify.push(trackedEvent);
           }
