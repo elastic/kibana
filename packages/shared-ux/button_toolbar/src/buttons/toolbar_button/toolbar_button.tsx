@@ -12,24 +12,31 @@ import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/butt
 
 import { ToolbarButtonStyles } from './toolbar_button.styles';
 
+export type ToolbarButtonTypes = 'primary' | 'empty';
+
 /**
  * Props for `PrimaryButton`.
  */
 export interface Props
   extends Pick<EuiButtonPropsForButton, 'onClick' | 'iconType' | 'iconSide' | 'data-test-subj'> {
   label: string;
+  type?: ToolbarButtonTypes;
 }
 
 export const ToolbarButton: React.FunctionComponent<Props> = ({
   label,
+  type = 'empty',
   iconSide = 'left',
   ...rest
 }) => {
   const euiTheme = useEuiTheme();
-  const toolbarButtonStyles = ToolbarButtonStyles(euiTheme);
+  const toolbarButtonStyleProps: EuiButtonPropsForButton =
+    type === 'primary'
+      ? { fill: true, color: 'primary' }
+      : { css: ToolbarButtonStyles(euiTheme).emptyButton };
 
   return (
-    <EuiButton size="m" css={toolbarButtonStyles} {...{ iconSide, ...rest }}>
+    <EuiButton size="m" {...toolbarButtonStyleProps} {...{ iconSide, ...rest }}>
       {label}
     </EuiButton>
   );

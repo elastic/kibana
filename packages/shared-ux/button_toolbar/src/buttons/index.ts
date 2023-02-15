@@ -16,4 +16,4 @@ export { AddFromLibraryButton } from './add_from_library';
 export type { AddFromLibraryButtonProps } from './add_from_library';
 
 export { ToolbarButton } from './toolbar_button';
-export type { ButtonProps } from './toolbar_button';
+export type { ToolbarButtonProps, ToolbarButtonTypes } from './toolbar_button';

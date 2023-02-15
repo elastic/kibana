@@ -10,8 +10,10 @@ import { UseEuiTheme } from '@elastic/eui';
 
 export const ToolbarButtonStyles = ({ euiTheme }: UseEuiTheme) => {
   return {
-    backgroundColor: euiTheme.colors.emptyShade,
-    border: `${euiTheme.border.thin} !important`,
-    color: `${euiTheme.colors.text}`,
+    emptyButton: {
+      backgroundColor: euiTheme.colors.emptyShade,
+      border: `${euiTheme.border.thin} !important`,
+      color: `${euiTheme.colors.text}`,
+    },
   };
 };

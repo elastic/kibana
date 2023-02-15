@@ -20,6 +20,29 @@ export default {
   },
 };
 
-export const ToolbarButton = () => {
-  return <Component label={'Toolbar button'} iconType={'lensApp'} />;
+const argTypes = {
+  buttonType: {
+    defaultValue: 'empty',
+    control: {
+      type: 'radio',
+      options: ['empty', 'primary'],
+    },
+  },
+  iconSide: {
+    defaultValue: 'left',
+    control: {
+      type: 'radio',
+      options: ['left', 'right', 'undefined'],
+    },
+  },
 };
+
+type Params = Record<keyof typeof argTypes, any>;
+
+export const ToolbarButton = ({ buttonType, iconSide }: Params) => {
+  return (
+    <Component label="Toolbar button" iconType="lensApp" type={buttonType} iconSide={iconSide} />
+  );
+};
+
+ToolbarButton.argTypes = argTypes;

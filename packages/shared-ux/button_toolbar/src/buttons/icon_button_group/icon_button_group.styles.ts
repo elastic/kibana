@@ -14,13 +14,13 @@ export const IconButtonGroupStyles = ({ euiTheme }: UseEuiTheme) => {
       '&.euiButtonGroupButton': {
         backgroundColor: euiTheme.colors.emptyShade,
         border: `${euiTheme.border.thin} !important`,
+        borderRight: 'none !important',
         '&:first-of-type': {
-          borderRight: 'none !important',
           borderTopLeftRadius: `${euiTheme.border.radius.medium} !important`,
           borderBottomLeftRadius: `${euiTheme.border.radius.medium} !important`,
         },
         '&:last-of-type': {
-          borderLeft: 'none !important',
+          borderRight: `${euiTheme.border.thin} !important`,
           borderTopRightRadius: `${euiTheme.border.radius.medium} !important`,
           borderBottomRightRadius: `${euiTheme.border.radius.medium} !important`,
         },
