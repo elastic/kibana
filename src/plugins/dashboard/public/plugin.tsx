@@ -63,6 +63,7 @@ import {
 } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './placeholder_embeddable';
 import { DashboardMountContextProps } from './dashboard_app/types';
+import type { FindDashboardsService } from './services/dashboard_saved_object/types';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -108,6 +109,7 @@ export interface DashboardSetup {
 export interface DashboardStart {
   locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
+  findDashboardsService: () => Promise<FindDashboardsService>;
 }
 
 export class DashboardPlugin
@@ -306,6 +308,13 @@ export class DashboardPlugin
     return {
       locator: this.locator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
+      findDashboardsService: async () => {
+        const { pluginServices } = await import('./services/plugin_services');
+        const {
+          dashboardSavedObject: { findDashboards },
+        } = pluginServices.getServices();
+        return findDashboards;
+      },
     };
   }
 

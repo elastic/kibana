@@ -27,13 +27,13 @@ import { ParsedExperimentalFields } from '../../common/parse_experimental_fields
 import { IRuleDataClient, IRuleDataReader } from '../rule_data_client';
 
 const MAX_ALERT_DOCS_TO_RETURN = 100;
-type AlertDocument = Partial<ParsedTechnicalFields & ParsedExperimentalFields>;
+export type AlertDocument = Partial<ParsedTechnicalFields & ParsedExperimentalFields>;
 
 interface CreateGetSummarizedAlertsFnOpts {
   ruleDataClient: PublicContract<IRuleDataClient>;
   useNamespace: boolean;
   isLifecycleAlert: boolean;
-  formatAlert?: (alert: unknown) => unknown;
+  formatAlert?: (alert: AlertDocument) => AlertDocument;
 }
 
 export const createGetSummarizedAlertsFn =
@@ -95,8 +95,8 @@ interface GetAlertsByExecutionUuidOpts {
   ruleId: string;
   ruleDataClientReader: IRuleDataReader;
   isLifecycleAlert: boolean;
-  formatAlert?: (alert: unknown) => unknown;
   excludedAlertInstanceIds: string[];
+  formatAlert?: (alert: AlertDocument) => AlertDocument;
 }
 
 const getAlertsByExecutionUuid = async ({
@@ -104,8 +104,8 @@ const getAlertsByExecutionUuid = async ({
   ruleId,
   ruleDataClientReader,
   isLifecycleAlert,
-  formatAlert,
   excludedAlertInstanceIds,
+  formatAlert,
 }: GetAlertsByExecutionUuidOpts) => {
   if (isLifecycleAlert) {
     return getLifecycleAlertsByExecutionUuid({
@@ -130,27 +130,24 @@ interface GetAlertsByExecutionUuidHelperOpts {
   executionUuid: string;
   ruleId: string;
   ruleDataClientReader: IRuleDataReader;
-  formatAlert?: (alert: unknown) => unknown;
   excludedAlertInstanceIds: string[];
+  formatAlert?: (alert: AlertDocument) => AlertDocument;
 }
 
 const getPersistentAlertsByExecutionUuid = async <TSearchRequest extends ESSearchRequest>({
   executionUuid,
   ruleId,
   ruleDataClientReader,
-  formatAlert,
   excludedAlertInstanceIds,
+  formatAlert,
 }: GetAlertsByExecutionUuidHelperOpts) => {
   // persistent alerts only create new alerts so query by execution UUID to
   // get all alerts created during an execution
   const request = getQueryByExecutionUuid(executionUuid, ruleId, excludedAlertInstanceIds);
-  const response = (await ruleDataClientReader.search(request)) as ESSearchResponse<
-    AlertDocument,
-    TSearchRequest
-  >;
+  const response = await doSearch(ruleDataClientReader, request, formatAlert);
 
   return {
-    new: getHitsWithCount(response, formatAlert),
+    new: response,
     ongoing: {
       count: 0,
       data: [],
@@ -166,8 +163,8 @@ const getLifecycleAlertsByExecutionUuid = async ({
   executionUuid,
   ruleId,
   ruleDataClientReader,
-  formatAlert,
   excludedAlertInstanceIds,
+  formatAlert,
 }: GetAlertsByExecutionUuidHelperOpts) => {
   // lifecycle alerts assign a different action to an alert depending
   // on whether it is new/ongoing/recovered. query for each action in order
@@ -180,13 +177,13 @@ const getLifecycleAlertsByExecutionUuid = async ({
   ];
 
   const responses = await Promise.all(
-    requests.map((request) => ruleDataClientReader.search(request))
+    requests.map((request) => doSearch(ruleDataClientReader, request, formatAlert))
   );
 
   return {
-    new: getHitsWithCount(responses[0], formatAlert),
-    ongoing: getHitsWithCount(responses[1], formatAlert),
-    recovered: getHitsWithCount(responses[2], formatAlert),
+    new: responses[0],
+    ongoing: responses[1],
+    recovered: responses[2],
   };
 };
 
@@ -208,25 +205,34 @@ const expandFlattenedAlert = (alert: object) => {
 
 const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
   response: ESSearchResponse<AlertDocument, TSearchRequest>,
-  formatAlert?: (alert: unknown) => unknown
+  formatAlert?: (alert: AlertDocument) => AlertDocument
 ) => {
   const toReturn = {
     count: (response.hits.total as SearchTotalHits).value,
     data: response.hits.hits.map((hit) => {
       const { _id, _index, _source } = hit;
 
-      const rawAlert = {
+      const formattedSource = formatAlert ? formatAlert(_source) : _source;
+
+      const expandedSource = expandFlattenedAlert(formattedSource as object);
+      return {
         _id,
         _index,
-        ..._source,
+        ...expandedSource,
       };
-
-      const formattedAlert = formatAlert ? formatAlert(rawAlert) : rawAlert;
-      return expandFlattenedAlert(formattedAlert as object);
     }),
   };
   console.log(`${JSON.stringify(toReturn.data[0])}`);
   return toReturn;
+};
+
+const doSearch = async (
+  ruleDataClientReader: IRuleDataReader,
+  request: ESSearchRequest,
+  formatAlert?: (alert: AlertDocument) => AlertDocument
+) => {
+  const response = await ruleDataClientReader.search(request);
+  return getHitsWithCount(response, formatAlert);
 };
 
 const getQueryByExecutionUuid = (
@@ -285,8 +291,8 @@ interface GetAlertsByTimeRangeOpts {
   ruleId: string;
   ruleDataClientReader: IRuleDataReader;
   isLifecycleAlert: boolean;
-  formatAlert?: (alert: unknown) => unknown;
   excludedAlertInstanceIds: string[];
+  formatAlert?: (alert: AlertDocument) => AlertDocument;
 }
 
 const getAlertsByTimeRange = async ({
@@ -295,8 +301,8 @@ const getAlertsByTimeRange = async ({
   ruleId,
   ruleDataClientReader,
   isLifecycleAlert,
-  formatAlert,
   excludedAlertInstanceIds,
+  formatAlert,
 }: GetAlertsByTimeRangeOpts) => {
   if (isLifecycleAlert) {
     return getLifecycleAlertsByTimeRange({
@@ -324,7 +330,7 @@ interface GetAlertsByTimeRangeHelperOpts {
   end: Date;
   ruleId: string;
   ruleDataClientReader: IRuleDataReader;
-  formatAlert?: (alert: unknown) => unknown;
+  formatAlert?: (alert: AlertDocument) => AlertDocument;
   excludedAlertInstanceIds: string[];
 }
 
@@ -345,13 +351,10 @@ const getPersistentAlertsByTimeRange = async <TSearchRequest extends ESSearchReq
   // persistent alerts only create new alerts so query for all alerts within the time
   // range and treat them as NEW
   const request = getQueryByTimeRange(start, end, ruleId, excludedAlertInstanceIds);
-  const response = (await ruleDataClientReader.search(request)) as ESSearchResponse<
-    AlertDocument,
-    TSearchRequest
-  >;
+  const response = await doSearch(ruleDataClientReader, request, formatAlert);
 
   return {
-    new: getHitsWithCount(response, formatAlert),
+    new: response,
     ongoing: {
       count: 0,
       data: [],
@@ -378,13 +381,13 @@ const getLifecycleAlertsByTimeRange = async ({
   ];
 
   const responses = await Promise.all(
-    requests.map((request) => ruleDataClientReader.search(request))
+    requests.map((request) => doSearch(ruleDataClientReader, request, formatAlert))
   );
 
   return {
-    new: getHitsWithCount(responses[0], formatAlert),
-    ongoing: getHitsWithCount(responses[1], formatAlert),
-    recovered: getHitsWithCount(responses[2], formatAlert),
+    new: responses[0],
+    ongoing: responses[1],
+    recovered: responses[2],
   };
 };
 
