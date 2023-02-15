@@ -207,7 +207,7 @@ const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
   response: ESSearchResponse<AlertDocument, TSearchRequest>,
   formatAlert?: (alert: AlertDocument) => AlertDocument
 ) => {
-  const toReturn = {
+  return {
     count: (response.hits.total as SearchTotalHits).value,
     data: response.hits.hits.map((hit) => {
       const { _id, _index, _source } = hit;
@@ -222,8 +222,6 @@ const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
       };
     }),
   };
-  console.log(`${JSON.stringify(toReturn.data[0])}`);
-  return toReturn;
 };
 
 const doSearch = async (
