@@ -50,6 +50,8 @@ export const deleteByQuery = ({
         query,
         wait_for_completion: true,
         refresh: true,
+        // we want to delete as many docs as we can in the current attempt
+        conflicts: 'proceed',
       })
       .then((response: DeleteByQueryResponse) => {
         if (!response.failures || !response.failures.length) {

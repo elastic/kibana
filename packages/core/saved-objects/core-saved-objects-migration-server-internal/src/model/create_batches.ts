@@ -59,18 +59,24 @@ export function createBatches({
    */
   const NDJSON_NEW_LINE_BYTES = 1;
 
+  const BASE_DELETE_OPERATION_SIZE = Buffer.byteLength(
+    JSON.stringify(createBulkDeleteOperationBody('')),
+    'utf8'
+  );
+
   const batches: BulkOperation[][] = [[]];
   let currBatch = 0;
   let currBatchSizeBytes = 0;
 
+  // group operations in batches of at most maxBatchSize
   const assignToBatch = (
-    documentId: string,
     operation: BulkOperationContainer | BulkIndexOperationTuple,
     operationSizeBytes: number
   ): boolean => {
     operationSizeBytes += NDJSON_NEW_LINE_BYTES;
 
     if (operationSizeBytes > maxBatchSizeBytes) {
+      // the current operation (+ payload) does not even fit a single batch, fail!
       return false;
     } else if (currBatchSizeBytes + operationSizeBytes <= maxBatchSizeBytes) {
       batches[currBatch].push(operation);
@@ -83,12 +89,13 @@ export function createBatches({
     return true;
   };
 
+  // create index (update) operations for all transformed documents
   for (const document of documents) {
     const bulkIndexOperationBody = createBulkIndexOperationTuple(document);
     // take into account that this tuple's surrounding brackets `[]` won't be present in the NDJSON
     const docSizeBytes =
       Buffer.byteLength(JSON.stringify(bulkIndexOperationBody), 'utf8') - BRACKETS_BYTES;
-    if (!assignToBatch(document._id, bulkIndexOperationBody, docSizeBytes)) {
+    if (!assignToBatch(bulkIndexOperationBody, docSizeBytes)) {
       return Either.left({
         documentId: document._id,
         type: 'document_exceeds_batch_size_bytes' as const,
@@ -98,23 +105,16 @@ export function createBatches({
     }
   }
 
-  corruptDocumentIds.forEach((documentId) => {
-    const bulkDeleteOperationBody = createBulkDeleteOperationBody(documentId);
-    const docSizeBytes = Buffer.byteLength(JSON.stringify(bulkDeleteOperationBody), 'utf8');
-    if (!assignToBatch(documentId, bulkDeleteOperationBody, docSizeBytes)) {
-      return Either.left({
-        documentId,
-        type: 'document_exceeds_batch_size_bytes' as const,
-        docSizeBytes,
-        maxBatchSizeBytes,
-      });
-    }
-  });
+  // create delete operations for all corrupt documents + transform errors
+  const unwantedDocumentIds = [
+    ...corruptDocumentIds,
+    ...transformErrors.map(({ rawId: documentId }) => documentId),
+  ];
 
-  transformErrors.forEach(({ rawId: documentId }) => {
+  for (const documentId of unwantedDocumentIds) {
     const bulkDeleteOperationBody = createBulkDeleteOperationBody(documentId);
-    const docSizeBytes = Buffer.byteLength(JSON.stringify(bulkDeleteOperationBody), 'utf8');
-    if (!assignToBatch(documentId, bulkDeleteOperationBody, docSizeBytes)) {
+    const docSizeBytes = BASE_DELETE_OPERATION_SIZE + Buffer.byteLength(documentId, 'utf8');
+    if (!assignToBatch(bulkDeleteOperationBody, docSizeBytes)) {
       return Either.left({
         documentId,
         type: 'document_exceeds_batch_size_bytes' as const,
@@ -122,6 +122,7 @@ export function createBatches({
         maxBatchSizeBytes,
       });
     }
-  });
+  }
+
   return Either.right(batches);
 }
