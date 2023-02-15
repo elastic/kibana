@@ -7,10 +7,11 @@
  */
 
 import type { Rule } from 'eslint';
-import { TSESTree } from '@typescript-eslint/typescript-estree';
+import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
 import { getAppName } from '../helpers/get_app_name';
+import { getFunctionName } from '../helpers/get_function_name';
 
 export const EVENT_GENERATING_ELEMENTS = [
   'EuiButton',
@@ -42,12 +43,15 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         const range = node.range;
         const parent = node.parent;
 
-        if (parent?.type !== 'JSXOpeningElement' || !EVENT_GENERATING_ELEMENTS.includes(name)) {
+        if (
+          parent?.type !== AST_NODE_TYPES.JSXOpeningElement ||
+          !EVENT_GENERATING_ELEMENTS.includes(name)
+        ) {
           return;
         }
 
         const hasDataTestSubj = (parent.attributes || []).find(
-          (attr) => attr.type === 'JSXAttribute' && attr.name.name === 'data-test-subj'
+          (attr) => attr.type === AST_NODE_TYPES.JSXAttribute && attr.name.name === 'data-test-subj'
         );
 
         if (hasDataTestSubj) {
@@ -64,9 +68,9 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
 
         // 2. Component name
         const functionDeclaration = getScope().block as TSESTree.FunctionDeclaration;
-        const componentName = `${functionDeclaration.id?.name
-          .charAt(0)
-          .toUpperCase()}${functionDeclaration.id?.name.slice(1)}`;
+
+        const functionName = getFunctionName(functionDeclaration);
+        const componentName = `${functionName.charAt(0).toUpperCase()}${functionName.slice(1)}`;
 
         // 3. The intention of the element (i.e. "Select date", "Submit", "Cancel")
         const intent = getIntentFromNode(parent);

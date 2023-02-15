@@ -22,13 +22,15 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
 
   const node = Array.isArray(parent.children) ? parent.children : [];
 
-  if (node.length === 0) return '';
+  if (node.length === 0) {
+    return '';
+  }
 
   /*
     In order to satisfy TS we need to do quite a bit of defensive programming.
     This is my best attempt at providing the minimum amount of typeguards and
     keeping the code readable. In the cases where types are explicitly set to
-    variables, it was done to help the compiler along.
+    variables, it was done to help the compiler whn it couldn't infer the type.
     */
   return node.reduce((acc: string, currentNode) => {
     switch (currentNode.type) {
