@@ -70,6 +70,8 @@
       "@kbn/apm-synthtrace/*": ["packages/kbn-apm-synthtrace/*"],
       "@kbn/apm-synthtrace-client": ["packages/kbn-apm-synthtrace-client"],
       "@kbn/apm-synthtrace-client/*": ["packages/kbn-apm-synthtrace-client/*"],
+      "@kbn/apm-synthtrace-ui": ["packages/kbn-apm-synthtrace-ui"],
+      "@kbn/apm-synthtrace-ui/*": ["packages/kbn-apm-synthtrace-ui/*"],
       "@kbn/apm-utils": ["packages/kbn-apm-utils"],
       "@kbn/apm-utils/*": ["packages/kbn-apm-utils/*"],
       "@kbn/app-link-test-plugin": ["test/plugin_functional/plugins/app_link_test"],

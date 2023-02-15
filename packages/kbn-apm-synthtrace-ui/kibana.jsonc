@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/apm-synthtrace-ui",
+  "devOnly": true,
+  "owner": "@elastic/apm-ui"
+}

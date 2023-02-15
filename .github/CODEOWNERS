@@ -38,6 +38,7 @@ packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 x-pack/plugins/apm @elastic/apm-ui
 packages/kbn-apm-synthtrace @elastic/apm-ui
 packages/kbn-apm-synthtrace-client @elastic/apm-ui
+packages/kbn-apm-synthtrace-ui @elastic/apm-ui
 packages/kbn-apm-utils @elastic/apm-ui
 test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
