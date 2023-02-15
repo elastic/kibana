@@ -51,7 +51,7 @@ export const EngineSearchPreviewLogic = kea<
   selectors: ({ selectors }) => ({
     resultFields: [
       () => [selectors.engineFieldCapabilitiesData],
-      (data) => {
+      (data: EngineSearchPreviewValues['engineFieldCapabilitiesData']) => {
         if (!data) return {};
 
         const resultFields = Object.fromEntries(
@@ -69,7 +69,7 @@ export const EngineSearchPreviewLogic = kea<
     ],
     searchableFields: [
       () => [selectors.engineFieldCapabilitiesData],
-      (data) => {
+      (data: EngineSearchPreviewValues['engineFieldCapabilitiesData']) => {
         if (!data) return {};
 
         const searchableFields = Object.fromEntries(

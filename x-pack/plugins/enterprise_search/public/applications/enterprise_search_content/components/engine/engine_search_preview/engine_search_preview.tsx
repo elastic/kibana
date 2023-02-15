@@ -33,7 +33,7 @@ import {
 import { SearchDriverOptions, SearchResult } from '@elastic/search-ui';
 import EnginesAPIConnector, {
   Transporter,
-  SearchReqest,
+  SearchRequest,
   SearchResponse,
 } from '@elastic/search-ui-engines-connector';
 import { HttpSetup } from '@kbn/core-http-browser';
@@ -51,7 +51,7 @@ import { EngineSearchPreviewLogic } from './engine_search_preview_logic';
 class InternalEngineTransporter implements Transporter {
   constructor(private http: HttpSetup, private engineName: string) {}
 
-  async performRequest(request: SearchReqest) {
+  async performRequest(request: SearchRequest) {
     const url = `/internal/enterprise_search/engines/${this.engineName}/search`;
 
     const response = await this.http.post<SearchResponse>(url, {
