@@ -4,12 +4,114 @@
 
 ### Initialization
 
-### Use **indexListOfDocuments**
-### Use **indexGeneratedDocuments**
+#### Prerequisites
+1. Create index mappings in `x-pack/test/functional/es_archives/security_solution`
+    - create folder for index `foo_bar`
+    - add mappings file `mappings.json` in it
+
+        <details>
+        <summary>x-pack/test/functional/es_archives/security_solution/foo_bar/mappings.json</summary>
+
+        ```JSON
+            {
+                "type": "index",
+                "value": {
+                    "index": "foo_bar",
+                    "mappings": {
+                        "properties": {
+                            "id": {
+                                "type": "keyword"
+                            },
+                            "@timestamp": {
+                                "type": "date"
+                            },
+                            "foo": {
+                                "type": "keyword"
+                            },
+                        }
+                    },
+                    "settings": {
+                        "index": {
+                            "number_of_replicas": "1",
+                            "number_of_shards": "1"
+                        }
+                    }
+                }
+            }
+        ```
+        </details>
+2. Add in `before` of the test file index initialization
+
+    ```ts
+        const esArchiver = getService('esArchiver');
+
+        before(async () => {
+            await esArchiver.load(
+                'x-pack/test/functional/es_archives/security_solution/foo_bar'
+            );
+        });
+
+    ```
+
+3. Add in `after` of the test file index removal
+
+    ```ts
+        const esArchiver = getService('esArchiver');
+        
+        before(async () => {
+            await esArchiver.unload(
+                'x-pack/test/functional/es_archives/security_solution/foo_bar'
+            );
+        });
+
+    ```
+
+#### dataGeneratorFactory
+
+**DataGeneratorParams**
+
+| Property        | Description                                            | Type   |
+| --------------- | ------------------------------------------------------ | ------ |
+| es       | ES client                      | `ESClient` |
+| index       | index where document will be added           | `string` |
+| log       | log client      | `LogClient`|
+
+1. import and initialize factory
+
+    ```ts
+        import { dataGeneratorFactory } from '../../utils/data_generator';
+
+        const es = getService('es');
+        const log = getService('log');
+
+        const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
+            es,
+            index: 'foo_bar',
+            log,
+        });
+
+    ```
+2. Factory will return 2 methods which can be used to index documents into `foo_bar`
+
+
+### **indexListOfDocuments**
+### **indexGeneratedDocuments**
+
+Will generate 10 documents in defined interval and index them in `foo_bar` index as defined in `dataGeneratorFactory` params
+Method receives same parameters as <a name="generateDocuments">generateDocuments</a> util.
+
+```ts
+    await indexGeneratedDocuments({
+        docsCount: 10,
+        interval: ['2020-10-28T07:30:00.000Z', '2020-10-30T07:30:00.000Z'],
+        seed: (i, id, timestamp) => ({ id, '@timestamp': timestamp, seq: i })
+    })
+
+```
 
 ## Utils
 
-### Use **generateDocuments**
+### **generateDocuments**
 
 Util `generateDocuments` can generate list of documents based on basic seed JSON or callback
 

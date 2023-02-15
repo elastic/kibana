@@ -27,8 +27,8 @@ interface DataGenerator {
 /**
  * initialize {@link DataGenerator}
  * @param param.es - ES client
- * @param params.index - index where document should be added
- * @param params - logClient
+ * @param params.index - index where document will be added
+ * @param params.log - logClient
  * @returns methods of {@link DataGenerator}
  */
 export const dataGeneratorFactory = ({
