@@ -208,6 +208,10 @@ describe('Legacy Alerts Client', () => {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
+      currentActiveAlerts: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      },
       currentRecoveredAlerts: {},
       recoveredAlerts: {},
     });
