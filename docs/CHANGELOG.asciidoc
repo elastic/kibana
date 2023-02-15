@@ -419,7 +419,7 @@ Lens & Visualizations::
 * Automatically enable show array values for non-numeric runtime fields in *Lens* {kibana-pull}149025[#149025]
 * Always display the major label {kibana-pull}148999[#148999]
 * Adds multi fields support to selected fields list in *Lens* {kibana-pull}148899[#148899]
-* Allows cleaning up of the filters agg custom label in *Lens* {kibana-pull}148535[#148535]
+* Allows cleaning up of the filters aggregatiob custom label in *Lens* {kibana-pull}148535[#148535]
 * Order date fields first on discover drilldown in *Lens* {kibana-pull}146786[#146786]
 * Fixes the syncing of other series color in *Lens* {kibana-pull}146785[#146785]
 
