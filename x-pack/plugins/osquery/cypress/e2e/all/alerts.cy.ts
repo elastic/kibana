@@ -76,14 +76,12 @@ describe('Alert Event Details', () => {
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.get(LIVE_QUERY_EDITOR);
     });
-    cy.contains('Save changes').click();
+    cy.contains('Save changes').wait(500).click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('Query is a required field');
       inputQuery('select * from uptime1');
     });
-
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
-
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('Run a set of queries in a pack').click();
     });
@@ -267,25 +265,6 @@ describe('Alert Event Details', () => {
     cy.contains("SELECT * FROM os_version where name='Ubuntu';");
   });
 
-  it('should substitute parameters in live query', () => {
-    loadAlertsEvents();
-    cy.getBySel('expand-event').first().click({ force: true });
-    cy.getBySel('take-action-dropdown-btn').click();
-    cy.getBySel('osquery-action-item').click();
-    cy.contains('1 agent selected.');
-    inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
-      parseSpecialCharSequences: false,
-    });
-    cy.contains('Advanced').click();
-    typeInECSFieldInput('tags{downArrow}{enter}');
-    cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
-    cy.wait(1000);
-    submitQuery();
-    cy.getBySel('dataGridHeader').within(() => {
-      cy.contains('tags');
-    });
-  });
-
   it('sees osquery results from last action', () => {
     toggleRuleOffAndOn(RULE_NAME);
     cy.wait(2000);
@@ -314,5 +293,47 @@ describe('Alert Event Details', () => {
         // }
       });
     });
+  });
+
+  it('should substitute parameters in live query and increase number of ran queries', () => {
+    let initialNotificationCount: number;
+    let updatedNotificationCount: number;
+    loadAlertsEvents();
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.getBySel('osquery-actions-notification')
+      .should('not.have.text', '0')
+      .then((element) => {
+        initialNotificationCount = parseInt(element.text(), 10);
+      });
+    cy.getBySel('take-action-dropdown-btn').click();
+    cy.getBySel('osquery-action-item').click();
+    cy.contains('1 agent selected.');
+    inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
+      parseSpecialCharSequences: false,
+    });
+    cy.contains('Advanced').click();
+    typeInECSFieldInput('tags{downArrow}{enter}');
+    cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
+    cy.wait(1000);
+    submitQuery();
+    cy.getBySel('dataGridHeader').within(() => {
+      cy.contains('tags');
+    });
+    cy.getBySel('osquery-empty-button').click();
+    cy.getBySel('osquery-actions-notification')
+      .should('not.have.text', '0')
+      .then((element) => {
+        updatedNotificationCount = parseInt(element.text(), 10);
+        expect(initialNotificationCount).to.be.equal(updatedNotificationCount - 1);
+      })
+      .then(() => {
+        cy.contains('Osquery Results').click();
+        cy.getBySel('osquery-results')
+          .within(() => {
+            cy.contains('tags');
+          })
+          .find(`[data-test-subj="osquery-results-comment"]`)
+          .should('have.length', updatedNotificationCount);
+      });
   });
 });
