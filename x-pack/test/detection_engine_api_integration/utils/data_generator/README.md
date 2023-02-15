@@ -16,6 +16,8 @@ Helper to generate and index documents for using in Kibana functional tests
         - [Examples](#examples)
       - [Seed callback](#seed-callback)
         - [Examples](#examples-1)
+    - [**enhanceDocument**](#enhancedocument)
+      - [Examples](#examples-2)
 
 ## DataGenerator
 
@@ -263,6 +265,47 @@ Option `enhance` will randomly generated `id` and `@timestamp` in specified inte
 
 </details>
 
+ 3. Generate 4 documents `{foo: bar}` by using `enhance=true` without interval
+
+ ```ts
+
+    const documents = generateDocuments({
+        enhance: true,
+        docsCount: 4,
+        document: { foo: "bar" }
+    })
+ ```
+
+<details>
+<summary>Generated docs</summary>
+
+    ```JSON
+        [
+            {
+                "foo": "bar",
+                "id": "73ec5c8d-3123-4faa-966c-9c6ef7c812b6",
+                "@timestamp": "2023-02-15T17:37:50.824Z"
+            },
+            {
+                "foo": "bar",
+                "id": "f9435e8b-faa8-415f-a3af-cf4ecfaca1cf",
+                "@timestamp": "2023-02-15T17:37:50.824Z"
+            },
+            {
+                "foo": "bar",
+                "id": "55b526ce-d2f2-47c7-a01e-0b23d6bc7de1",
+                "@timestamp": "2023-02-15T17:37:50.824Z"
+            },
+            {
+                "foo": "bar",
+                "id": "eb4a33d1-fa7b-4a57-8ab5-ba245fac5c20",
+                "@timestamp": "2023-02-15T17:37:50.824Z"
+            }
+        ]
+    ```
+
+</details>
+
 #### Seed callback
 
  Seed callback will receive sequential number of document of document, generated id, timestamp.
@@ -461,3 +504,82 @@ Option `enhance` will randomly generated `id` and `@timestamp` in specified inte
     ```
 
 </details>
+
+
+### **enhanceDocument**
+
+Adds generated `uuidv4` id and current time as `@timestamp` to document if `id`, `timestamp` params are not specified
+
+
+`EnhanceDocumentOptions`
+
+| Property        | Description                                            | Type   |
+| --------------- | ------------------------------------------------------ | ------ |
+| id       | id for document                      | `string` _(optional)_ |
+| timestamp       | timestamp for document                   | `string` _(optional)_ |
+| document        | document to enhance | `Record<string, unknown>` |
+
+#### Examples
+
+1. Enhance document with generated `uuidv4` id and current time as `@timestamp`
+
+    ```ts
+        const document = enhanceDocument({
+            document: { foo: 'bar' },
+        });
+    ```
+    <details>
+    <summary>document</summary>
+
+    ```JSON
+        {
+            "foo": "bar",
+            "id": "b501a64f-0dd4-4275-a38c-889be6a15a4d",
+            "@timestamp": "2023-02-15T17:21:21.429Z"
+        }
+    ```
+
+    </details>
+
+2. Enhance document with generated `uuidv4` id and predefined timestamp
+
+
+    ```ts
+        const document = enhanceDocument({
+            timestamp: '1996-02-15T13:02:37.531Z',
+            document: { foo: 'bar' },
+        });
+    ```
+    <details>
+    <summary>document</summary>
+
+    ```JSON
+        {
+            "foo": "bar",
+            "id": "7b7460bf-e173-4744-af15-2c01ac52963b",
+            "@timestamp": "1996-02-15T13:02:37.531Z"
+        }
+    ```
+
+    </details>
+    
+3. Enhance document with predefined id `uuidv4` id and and current time as `@timestamp` 
+
+
+    ```ts
+        const document = enhanceDocument({
+            id: 'test-id',
+            document: { foo: 'bar' },
+        });   
+    ```
+    <details>
+    <summary>document</summary>
+
+    ```JSON
+        {
+            "foo": "bar",
+            "id": "test-id",
+            "@timestamp": "2023-02-15T17:21:21.429Z"
+        }
+    ```
+    </details>
