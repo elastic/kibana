@@ -413,7 +413,7 @@ Remove ts-ignore annotation {kibana-pull}145759[#145759]
 Lens & Visualizations::
 * Always use resolved time range when computing Top values order agg with timeshifts in *Lens* {kibana-pull}150418[#150418]
 * Fixes problem with timeshift in formula and breakdown in *Lens* {kibana-pull}150406[#150406]
-* Fixes Nested other bucket for empty string {kibana-pull}150321[#150321]
+* Fixes nested other bucket for empty string {kibana-pull}150321[#150321]
 * Fixes chart padding on reference lines/annotations icon on the left side in *Lens* {kibana-pull}149573[#149573]
 * Fixes the partition legend actions header format problem in *Lens* {kibana-pull}149114[#149114]
 * Automatically enable show array values for non-numeric runtime fields in *Lens* {kibana-pull}149025[#149025]
