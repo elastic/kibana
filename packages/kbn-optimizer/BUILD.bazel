@@ -46,7 +46,6 @@ RUNTIME_DEPS = [
   "@npm//execa",
   "@npm//jest-diff",
   "@npm//json-stable-stringify",
-  "@npm//js-yaml",
   "@npm//lmdb",
   "@npm//loader-utils",
   "@npm//node-sass",
