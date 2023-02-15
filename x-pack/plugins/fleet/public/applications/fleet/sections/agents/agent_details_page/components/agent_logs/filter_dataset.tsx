@@ -60,6 +60,7 @@ export const DatasetFilter: React.FunctionComponent<{
     <EuiPopover
       button={
         <EuiFilterButton
+          data-test-subj="agentList.datasetFilterBtn"
           iconType="arrowDown"
           onClick={togglePopover}
           isSelected={isOpen}
