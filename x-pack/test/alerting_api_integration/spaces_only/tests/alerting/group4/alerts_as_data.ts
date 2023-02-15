@@ -61,7 +61,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
           number_of_shards: 1,
           mapping: {
             total_fields: {
-              limit: 1000,
+              limit: 1500,
             },
           },
         },
@@ -83,7 +83,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
           number_of_shards: 1,
           mapping: {
             total_fields: {
-              limit: 1000,
+              limit: 1500,
             },
           },
         },
@@ -103,7 +103,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
           number_of_shards: 1,
           mapping: {
             total_fields: {
-              limit: 2000,
+              limit: 2500,
             },
           },
         },
@@ -144,7 +144,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
           number_of_shards: 1,
           mapping: {
             total_fields: {
-              limit: 1000,
+              limit: 1500,
             },
           },
         },
