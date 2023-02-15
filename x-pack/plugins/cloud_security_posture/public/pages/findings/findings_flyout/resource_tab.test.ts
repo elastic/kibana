@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { prepareDescriptionList } from './resource_tab';
 
 const mockData = {
   a: 'string',
@@ -18,7 +17,6 @@ const mockData = {
 
 describe('prepareDescriptionList', () => {
   it('create description lists accordingly', () => {
-    const descriptionList = prepareDescriptionList(mockData);
     expect(descriptionList).toMatchSnapshot();
   });
 });
