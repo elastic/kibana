@@ -1,8 +1,26 @@
 # Data Generator for functional tests
 
+Helper to generate and index documents for using in Kibana functional tests
+
+- [Data Generator for functional tests](#data-generator-for-functional-tests)
+  - [DataGenerator](#datagenerator)
+    - [Initialization](#initialization)
+      - [Prerequisites](#prerequisites)
+      - [dataGeneratorFactory](#datageneratorfactory)
+    - [methods](#methods)
+      - [**indexListOfDocuments**](#indexlistofdocuments)
+      - [**indexGeneratedDocuments**](#indexgenerateddocuments)
+  - [Utils](#utils)
+    - [**generateDocuments**](#generatedocuments)
+      - [Simple JSON object](#simple-json-object)
+        - [Examples](#examples)
+      - [Seed callback](#seed-callback)
+        - [Examples](#examples-1)
+
 ## DataGenerator
 
 ### Initialization
+
 
 #### Prerequisites
 1. Create index mappings in `x-pack/test/functional/es_archives/security_solution`
@@ -68,7 +86,7 @@
 
 #### dataGeneratorFactory
 
-**DataGeneratorParams**
+`DataGeneratorParams`
 
 | Property        | Description                                            | Type   |
 | --------------- | ------------------------------------------------------ | ------ |
@@ -94,11 +112,25 @@
 2. Factory will return 2 methods which can be used to index documents into `foo_bar`
 
 
-### **indexListOfDocuments**
-### **indexGeneratedDocuments**
+### methods
+
+#### **indexListOfDocuments**
+
+| Property        | Description                                            | Type   |
+| --------------- | ------------------------------------------------------ | ------ |
+| documents       | list of documents to index                     | `Record<string, unknown>` |
+
+Will index list of documents to `foo_bar` index as defined in `dataGeneratorFactory` params
+
+```ts
+    await indexListOfDocuments([{ foo: "bar" }, { id: "test-1" }])
+
+```
+
+#### **indexGeneratedDocuments**
 
 Will generate 10 documents in defined interval and index them in `foo_bar` index as defined in `dataGeneratorFactory` params
-Method receives same parameters as <a name="generateDocuments">generateDocuments</a> util.
+Method receives same parameters as [generateDocuments](#generateDocuments) util.
 
 ```ts
     await indexGeneratedDocuments({
@@ -115,7 +147,10 @@ Method receives same parameters as <a name="generateDocuments">generateDocuments
 
 Util `generateDocuments` can generate list of documents based on basic seed JSON or callback
 
-* #### **Use of simple JSON object**
+#### Simple JSON object
+
+Pass json object as document example and it will generate specified number of these documents.
+Option `enhance` will randomly generated `id` and `@timestamp` in specified interval or current time
 
  | Property        | Description                                            | Type   |
  | --------------- | ------------------------------------------------------ | ------ |
@@ -125,7 +160,8 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
  | interval        | interval in which generate documents, defined by '@timestamp' field | `[string | Date, string | Date]` _(optional)_ |
 
 
- #### Examples:
+ ##### Examples
+
  1. Generate 10 documents with random id, timestamp in interval between '2020-10-28T07:30:00.000Z', '2020-10-30T07:30:00.000Z', by using `enhance=true`
 
  ```ts
@@ -227,15 +263,19 @@ Util `generateDocuments` can generate list of documents based on basic seed JSON
 
 </details>
 
-* #### **Use of seed callback**
+#### Seed callback
+
+ Seed callback will receive sequential number of document of document, generated id, timestamp.
+ Can be used to generate custom document with large set of options depends on needs. See examples below.
 
  | Property        | Description                                            | Type   |
  | --------------- | ------------------------------------------------------ | ------ |
  | docsCount       | number of documents to generate                        | `number` |
- | seed       | function that receives index of document, generated id, timestamp as arguments and can used it create a document                    | `(index: number, id: string, timestamp: string) => Document` |
+ | seed       | function that receives sequential number of document, generated id, timestamp as arguments and can used it create a document                    | `(index: number, id: string, timestamp: string) => Document` |
  | interval        | interval in which generate documents, defined by '@timestamp' field | `[string | Date, string | Date]` _(optional)_ |
 
- #### Examples:
+ ##### Examples
+
  1. Generate 10 documents with random id, timestamp in interval between '2020-10-28T07:30:00.000Z', '2020-10-30T07:30:00.000Z', and field `seq` that represents sequential number of document
 
  ```ts
