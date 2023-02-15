@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { alertFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
+import { alertFieldMap, legacyAlertFieldMap, type FieldMap } from '@kbn/alerts-as-data-utils';
 import { mappingFromFieldMap } from './mapping_from_field_map';
-import type { FieldMap } from '@kbn/alerts-as-data-utils';
 
 describe('mappingFromFieldMap', () => {
   const fieldMap: FieldMap = {
@@ -25,19 +24,6 @@ describe('mappingFromFieldMap', () => {
       type: 'long',
       array: false,
       required: false,
-    },
-    multifield_field: {
-      type: 'keyword',
-      array: false,
-      required: false,
-      ignore_above: 1024,
-      multi_fields: [
-        {
-          flat_name: 'multifield_field.text',
-          name: 'text',
-          type: 'match_only_text',
-        },
-      ],
     },
     geopoint_field: {
       type: 'geo_point',
@@ -130,15 +116,6 @@ describe('mappingFromFieldMap', () => {
       },
       long_field: {
         type: 'long',
-      },
-      multifield_field: {
-        fields: {
-          text: {
-            type: 'match_only_text',
-          },
-        },
-        ignore_above: 1024,
-        type: 'keyword',
       },
       nested_array_field: {
         properties: {
