@@ -23,16 +23,17 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import classNames from 'classnames';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiPanelStyled,
   EuiTitleStyled,
   GlobalPanelStyle,
   panelClass,
 } from './solution_grouped_nav_panel.styles';
-import type { DefaultSideNavItem } from './types';
+import type { DefaultSideNavItem, Tracker } from './types';
 import type { LinkCategories } from '../../../links/types';
 import { NavItemBetaBadge } from '../nav_item_beta_badge';
-import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
+import { TELEMETRY_EVENT } from './telemetry';
 
 export interface SolutionNavPanelProps {
   onClose: () => void;
@@ -41,6 +42,7 @@ export interface SolutionNavPanelProps {
   items: DefaultSideNavItem[];
   categories?: LinkCategories;
   bottomOffset?: string;
+  tracker?: Tracker;
 }
 export interface SolutionNavPanelCategoriesProps {
   categories: LinkCategories;
@@ -50,6 +52,7 @@ export interface SolutionNavPanelCategoriesProps {
 export interface SolutionNavPanelItemsProps {
   items: DefaultSideNavItem[];
   onClose: () => void;
+  tracker?: Tracker;
 }
 
 /**
@@ -62,6 +65,7 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
   categories,
   items,
   bottomOffset,
+  tracker,
 }) => {
   const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
   const panelClasses = classNames(panelClass, 'eui-yScroll');
@@ -161,7 +165,11 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
   );
 };
 
-const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => {
+const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({
+  items,
+  onClose,
+  tracker,
+}) => {
   const panelLinkClassNames = classNames('solutionGroupedNavPanelLink');
   const panelLinkItemClassNames = classNames('solutionGroupedNavPanelLinkItem');
   return (
@@ -173,7 +181,7 @@ const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, on
           data-test-subj={`groupedNavPanelLink-${id}`}
           href={href}
           onClick={(ev) => {
-            track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.GROUPED_NAVIGATION}${id}`);
+            tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.GROUPED_NAVIGATION}${id}`);
             onClose();
             onClick?.(ev);
           }}

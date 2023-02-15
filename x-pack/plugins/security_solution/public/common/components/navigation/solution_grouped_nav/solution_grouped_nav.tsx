@@ -15,19 +15,23 @@ import {
 } from '@elastic/eui';
 
 import classNames from 'classnames';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { SolutionNavPanel } from './solution_grouped_nav_panel';
 import { EuiListGroupItemStyled } from './solution_grouped_nav.styles';
-import type { DefaultSideNavItem, SideNavItem } from './types';
+import type { DefaultSideNavItem, SideNavItem, Tracker } from './types';
 import { isCustomItem, isDefaultItem } from './types';
 import { EuiIconSpaces } from './icons/spaces';
 import type { LinkCategories } from '../../../links';
-import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
+import { TELEMETRY_EVENT } from './telemetry';
 
 export interface SolutionGroupedNavProps {
   items: SideNavItem[];
   selectedId: string;
   footerItems?: SideNavItem[];
   bottomOffset?: string;
+  // this enable Telemetry tracking inside group nav, this has to be binded with appId
+  // e.g.: usageCollection?.reportUiCounter?.bind(null, appId)
+  tracker?: Tracker;
 }
 export interface SolutionNavItemsProps {
   items: SideNavItem[];
@@ -36,6 +40,7 @@ export interface SolutionNavItemsProps {
   isMobileSize: boolean;
   navItemsById: NavItemsById;
   onOpenPanelNav: (id: string) => void;
+  tracker: Tracker | undefined;
 }
 export interface SolutionNavItemProps {
   item: SideNavItem;
@@ -43,6 +48,7 @@ export interface SolutionNavItemProps {
   isActive: boolean;
   hasPanelNav: boolean;
   onOpenPanelNav: (id: string) => void;
+  tracker: Tracker | undefined;
 }
 
 type ActivePanelNav = string | null;
@@ -56,6 +62,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
   selectedId,
   footerItems = [],
   bottomOffset,
+  tracker,
 }) => {
   const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
 
@@ -113,9 +120,10 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
         title={title}
         categories={categories}
         bottomOffset={bottomOffset}
+        tracker={tracker}
       />
     );
-  }, [activePanelNavId, bottomOffset, navItemsById, onClosePanelNav, onOutsidePanelClick]);
+  }, [activePanelNavId, bottomOffset, navItemsById, onClosePanelNav, onOutsidePanelClick, tracker]);
 
   return (
     <>
@@ -131,6 +139,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
                   isMobileSize={isMobileSize}
                   navItemsById={navItemsById}
                   onOpenPanelNav={openPanelNav}
+                  tracker={tracker}
                 />
               </EuiListGroup>
             </EuiFlexItem>
@@ -143,6 +152,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
                   isMobileSize={isMobileSize}
                   navItemsById={navItemsById}
                   onOpenPanelNav={openPanelNav}
+                  tracker={tracker}
                 />
               </EuiListGroup>
             </EuiFlexItem>
@@ -163,6 +173,7 @@ const SolutionNavItems: React.FC<SolutionNavItemsProps> = ({
   isMobileSize,
   navItemsById,
   onOpenPanelNav,
+  tracker,
 }) => (
   <>
     {items.map((item) => (
@@ -173,6 +184,7 @@ const SolutionNavItems: React.FC<SolutionNavItemsProps> = ({
         isActive={activePanelNavId === item.id}
         hasPanelNav={!isMobileSize && item.id in navItemsById}
         onOpenPanelNav={onOpenPanelNav}
+        tracker={tracker}
       />
     ))}
   </>
@@ -184,12 +196,18 @@ const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
   isActive,
   hasPanelNav,
   onOpenPanelNav,
+  tracker,
 }) => {
   if (isCustomItem(item)) {
     return <Fragment key={item.id}>{item.render(isSelected)}</Fragment>;
   }
+
   const { id, href, label, onClick } = item;
 
+  const onLinkClicked: React.MouseEventHandler = (ev) => {
+    tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.NAVIGATION}${id}`);
+    onClick?.(ev);
+  };
   const itemClassNames = classNames('solutionGroupedNavItem', {
     'solutionGroupedNavItem--isActive': isActive,
     'solutionGroupedNavItem--isPrimary': isSelected,
@@ -199,7 +217,7 @@ const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
   const onButtonClick: React.MouseEventHandler = (ev) => {
     ev.preventDefault();
     ev.stopPropagation();
-    track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.GROUPED_NAVIGATION_TOGGLE}${id}`);
+    tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.GROUPED_NAVIGATION_TOGGLE}${id}`);
     onOpenPanelNav(id);
   };
 
@@ -208,7 +226,7 @@ const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
     <EuiLink
       key={id}
       href={href}
-      onClick={onClick}
+      onClick={onLinkClicked}
       color={isSelected ? 'primary' : 'text'}
       data-test-subj={`groupedNavItemLink-${id}`}
     >

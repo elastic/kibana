@@ -12,9 +12,10 @@ import { TestProviders } from '../../../mock';
 import type { SolutionGroupedNavProps } from './solution_grouped_nav';
 import { SolutionGroupedNav } from './solution_grouped_nav';
 import type { SideNavItem } from './types';
-import * as telemetry from '../../../lib/telemetry';
+import * as telemetry from './telemetry';
+import { METRIC_TYPE } from '@kbn/analytics';
 
-const spyTrack = jest.spyOn(telemetry, 'track');
+const mockTrack = jest.fn();
 
 const mockItems: SideNavItem[] = [
   {
@@ -38,9 +39,17 @@ const mockItems: SideNavItem[] = [
 ];
 
 const renderNav = (props: Partial<SolutionGroupedNavProps> = {}) =>
-  render(<SolutionGroupedNav items={mockItems} selectedId={SecurityPageName.alerts} {...props} />, {
-    wrapper: TestProviders,
-  });
+  render(
+    <SolutionGroupedNav
+      items={mockItems}
+      selectedId={SecurityPageName.alerts}
+      tracker={mockTrack}
+      {...props}
+    />,
+    {
+      wrapper: TestProviders,
+    }
+  );
 
 describe('SolutionGroupedNav', () => {
   beforeEach(() => {
@@ -83,6 +92,23 @@ describe('SolutionGroupedNav', () => {
       result.getByTestId(`groupedNavItemLink-${SecurityPageName.exploreLanding}`).click();
       expect(mockOnClick).toHaveBeenCalled();
     });
+
+    it('should send telemetry if link clicked', () => {
+      const items = [
+        ...mockItems,
+        {
+          id: SecurityPageName.exploreLanding,
+          label: 'Explore',
+          href: '/explore',
+        },
+      ];
+      const result = renderNav({ items });
+      result.getByTestId(`groupedNavItemLink-${SecurityPageName.exploreLanding}`).click();
+      expect(mockTrack).toHaveBeenCalledWith(
+        METRIC_TYPE.CLICK,
+        `${telemetry.TELEMETRY_EVENT.NAVIGATION}${SecurityPageName.exploreLanding}`
+      );
+    });
   });
 
   describe('panel button toggle', () => {
@@ -110,8 +136,8 @@ describe('SolutionGroupedNav', () => {
       expect(result.queryByTestId('groupedNavPanel')).not.toBeInTheDocument();
 
       result.getByTestId(`groupedNavItemButton-${SecurityPageName.dashboardsLanding}`).click();
-      expect(spyTrack).toHaveBeenCalledWith(
-        telemetry.METRIC_TYPE.CLICK,
+      expect(mockTrack).toHaveBeenCalledWith(
+        METRIC_TYPE.CLICK,
         `${telemetry.TELEMETRY_EVENT.GROUPED_NAVIGATION_TOGGLE}${SecurityPageName.dashboardsLanding}`
       );
     });

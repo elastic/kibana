@@ -23,7 +23,7 @@ import { EuiIconLaunch } from './icons/launch';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
 import { bottomNavOffset } from '../../../lib/helpers';
-import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
+import { track } from '../../../lib/telemetry';
 
 const isFooterNavItem = (id: SecurityPageName) =>
   id === SecurityPageName.landing || id === SecurityPageName.administration;
@@ -36,29 +36,23 @@ type FormatSideNavItems = (navItems: NavLinkItem) => SideNavItem;
 const GetStartedCustomLinkComponent: React.FC<{
   isSelected: boolean;
   title: string;
-}> = ({ isSelected, title }) => {
-  const onClick = useCallback(() => {
-    track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.NAVIGATION}${SecurityPageName.landing}`);
-  }, []);
-  return (
-    <SecuritySolutionLinkAnchor
-      deepLinkId={SecurityPageName.landing}
+}> = ({ isSelected, title }) => (
+  <SecuritySolutionLinkAnchor
+    deepLinkId={SecurityPageName.landing}
+    color={isSelected ? 'primary' : 'text'}
+  >
+    <EuiListGroupItem
+      label={title.toUpperCase()}
+      size="xs"
       color={isSelected ? 'primary' : 'text'}
-      onClick={onClick}
-    >
-      <EuiListGroupItem
-        label={title.toUpperCase()}
-        size="xs"
-        color={isSelected ? 'primary' : 'text'}
-        iconType={EuiIconLaunch}
-        iconProps={{
-          color: isSelected ? 'primary' : 'text',
-        }}
-      />
-      <EuiHorizontalRule margin="xs" />
-    </SecuritySolutionLinkAnchor>
-  );
-};
+      iconType={EuiIconLaunch}
+      iconProps={{
+        color: isSelected ? 'primary' : 'text',
+      }}
+    />
+    <EuiHorizontalRule margin="xs" />
+  </SecuritySolutionLinkAnchor>
+);
 const GetStartedCustomLink = React.memo(GetStartedCustomLinkComponent);
 
 /**
@@ -74,9 +68,6 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
         label: navItem.title,
         ...getSecuritySolutionLinkProps({
           deepLinkId: navItem.id,
-          onClick: () => {
-            track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.NAVIGATION}${navItem.id}`);
-          },
         }),
         ...(navItem.categories && navItem.categories.length > 0
           ? { categories: navItem.categories }
@@ -178,6 +169,7 @@ export const SecuritySideNav: React.FC = () => {
       footerItems={footerItems}
       selectedId={selectedId}
       bottomOffset={bottomOffset}
+      tracker={track}
     />
   );
 };

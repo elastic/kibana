@@ -65,8 +65,5 @@ export enum TELEMETRY_EVENT {
 
   // Breadcrumbs
   BREADCRUMB = 'breadcrumb_',
-  // Navigation
-  NAVIGATION = 'navigation_',
-  GROUPED_NAVIGATION = 'grouped_navigation_',
-  GROUPED_NAVIGATION_TOGGLE = 'grouped_navigation_toggle_',
+  LEGACY_NAVIGATION = 'legacy_navigation_',
 }
