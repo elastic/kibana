@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiPanel } from '@elastic/eu
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { TryItButton } from '../../../../components/try_it_button';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { InfraFormatter } from '../../../../lib/lib';
@@ -27,6 +28,7 @@ interface Props {
   interval: string;
   formatter: InfraFormatter;
   view: string;
+  nodeType: InventoryItemType;
 }
 
 const LOCAL_STORAGE_KEY = 'inventoryUI:k8sDashboardClicked';
@@ -57,7 +59,7 @@ const KubernetesButton = () => {
     />
   );
 };
-export const BottomDrawer = ({ interval, formatter, view }: Props) => {
+export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => {
   const { timelineOpen, changeTimelineOpen } = useWaffleOptionsContext();
 
   const [isOpen, setIsOpen] = useState(Boolean(timelineOpen));
@@ -73,11 +75,15 @@ export const BottomDrawer = ({ interval, formatter, view }: Props) => {
     changeTimelineOpen(!isOpen);
   }, [isOpen, trackDrawerOpen, changeTimelineOpen]);
 
-  return view === 'table' ? (
-    <BottomPanel hasBorder={false} hasShadow={false} borderRadius="none" paddingSize="s">
-      <KubernetesButton />
-    </BottomPanel>
-  ) : (
+  if (view === 'table') {
+    return nodeType === 'pod' ? (
+      <BottomPanel hasBorder={false} hasShadow={false} borderRadius="none" paddingSize="s">
+        <KubernetesButton />
+      </BottomPanel>
+    ) : null;
+  }
+
+  return (
     <BottomActionContainer>
       <StickyPanel borderRadius="none" paddingSize="s">
         <EuiFlexGroup responsive={false} justifyContent="flexStart" alignItems="center">
@@ -91,9 +97,11 @@ export const BottomDrawer = ({ interval, formatter, view }: Props) => {
               {isOpen ? hideHistory : showHistory}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <KubernetesButton />
-          </EuiFlexItem>
+          {nodeType === 'pod' && (
+            <EuiFlexItem grow={false}>
+              <KubernetesButton />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </StickyPanel>
       <EuiFlexGroup
