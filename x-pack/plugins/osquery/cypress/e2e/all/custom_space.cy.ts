@@ -69,12 +69,6 @@ describe('ALL - Custom space', () => {
           cases: false,
           timeline: false,
         });
-        checkActionItemsInResults({
-          lens: true,
-          discover: true,
-          cases: false,
-          timeline: false,
-        });
         cy.contains('View in Discover')
           .should('exist')
           .should('have.attr', 'href')
