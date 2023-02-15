@@ -122,7 +122,10 @@ const IndexTimeout = () => (
           defaultMessage="Collecting findings is taking longer than expected, please review our {docs} or reach out to support"
           values={{
             docs: (
-              <EuiLink href="https://ela.st/kspm" target="_blank">
+              <EuiLink
+                href="https://www.elastic.co/guide/en/security/current/cloud-native-security-overview.html"
+                target="_blank"
+              >
                 <FormattedMessage
                   id="xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDocLink"
                   defaultMessage="docs"
