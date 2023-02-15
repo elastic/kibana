@@ -115,6 +115,7 @@ Helper to generate and index documents for using in Kibana functional tests
     ```
 2. Factory will return 2 methods which can be used to index documents into `foo_bar`
 
+where `getService` is method from `FtrProviderContext`
 
 ### methods
 
