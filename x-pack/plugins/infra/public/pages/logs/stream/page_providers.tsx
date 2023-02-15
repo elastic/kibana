@@ -66,7 +66,7 @@ const LogEntriesStateProvider: React.FC<{
   );
 };
 
-export const LogHighlightsState: React.FC<{
+const LogHighlightsState: React.FC<{
   logStreamPageState: InitializedLogStreamPageState;
 }> = ({ children, logStreamPageState }) => {
   const { logViewId, logView } = useLogViewContext();
@@ -97,7 +97,9 @@ export const LogStreamPageContentProviders: React.FC<{
         <LogPositionStateProvider>
           <ViewLogInContext>
             <LogEntriesStateProvider logStreamPageState={logStreamPageState}>
-              {children}
+              <LogHighlightsState logStreamPageState={logStreamPageState}>
+                {children}
+              </LogHighlightsState>
             </LogEntriesStateProvider>
           </ViewLogInContext>
         </LogPositionStateProvider>
