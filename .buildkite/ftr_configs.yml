@@ -11,6 +11,7 @@ disabled:
   - x-pack/test/localization/config.base.ts
   - test/server_integration/config.base.js
   - x-pack/test/functional_with_es_ssl/config.base.ts
+  - x-pack/test/api_integration/config.ts
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
@@ -143,7 +144,36 @@ enabled:
   - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/api_integration/config_security_basic.ts
   - x-pack/test/api_integration/config_security_trial.ts
-  - x-pack/test/api_integration/config.ts
+  - x-pack/test/api_integration/apis/aiops/config.ts
+  - x-pack/test/api_integration/apis/cases/config.ts
+  - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
+  - x-pack/test/api_integration/apis/console/config.ts
+  - x-pack/test/api_integration/apis/es/config.ts
+  - x-pack/test/api_integration/apis/features/config.ts
+  - x-pack/test/api_integration/apis/file_upload/config.ts
+  - x-pack/test/api_integration/apis/kibana/config.ts
+  - x-pack/test/api_integration/apis/lists/config.ts
+  - x-pack/test/api_integration/apis/logs_ui/config.ts
+  - x-pack/test/api_integration/apis/logstash/config.ts
+  - x-pack/test/api_integration/apis/management/config.ts
+  - x-pack/test/api_integration/apis/maps/config.ts
+  - x-pack/test/api_integration/apis/metrics_ui/config.ts
+  - x-pack/test/api_integration/apis/ml/config.ts
+  - x-pack/test/api_integration/apis/monitoring/config.ts
+  - x-pack/test/api_integration/apis/monitoring_collection/config.ts
+  - x-pack/test/api_integration/apis/osquery/config.ts
+  - x-pack/test/api_integration/apis/painless_lab/config.ts
+  - x-pack/test/api_integration/apis/search/config.ts
+  - x-pack/test/api_integration/apis/searchprofiler/config.ts
+  - x-pack/test/api_integration/apis/security/config.ts
+  - x-pack/test/api_integration/apis/security_solution/config.ts
+  - x-pack/test/api_integration/apis/spaces/config.ts
+  - x-pack/test/api_integration/apis/synthetics/config.ts
+  - x-pack/test/api_integration/apis/telemetry/config.ts
+  - x-pack/test/api_integration/apis/transform/config.ts
+  - x-pack/test/api_integration/apis/upgrade_assistant/config.ts
+  - x-pack/test/api_integration/apis/uptime/config.ts
+  - x-pack/test/api_integration/apis/watcher/config.ts
   - x-pack/test/apm_api_integration/basic/config.ts
   - x-pack/test/apm_api_integration/rules/config.ts
   - x-pack/test/apm_api_integration/trial/config.ts
