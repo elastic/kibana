@@ -137,7 +137,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       }
 
       if (editData && editData.getIndexPattern() !== formData.title) {
-        editDataViewModal({
+        await editDataViewModal({
           dataViewName: formData.name || formData.title,
           overlays,
           onEdit: async () => {
