@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { Chart, Datum, Flame, FlameLayerValue, PartialTheme, Settings, TooltipContainer } from '@elastic/charts';
+import {
+  Chart,
+  Datum,
+  Flame,
+  FlameLayerValue,
+  PartialTheme,
+  Settings,
+  TooltipContainer,
+} from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
