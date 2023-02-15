@@ -69,7 +69,7 @@ Alerting::
 Adds the open API specification for create rule {kibana-pull}149565[#149565]
 
 Fleet::
-Adds the ability to run agent policy schema in batches during fleet setup + add `xpack.fleet.setup.agentPolicySchemaUpgradeBatchSize` config {kibana-pull}150688[#150688]
+Adds the ability to run agent policy schema in batches during {fleet} setup. Also adds `xpack.fleet.setup.agentPolicySchemaUpgradeBatchSize` config {kibana-pull}150688[#150688]
 
 Security::
 Adds support for handlebars template "inline partials" without requiring `unsafe-eval` source expression in the {kib} Content Security Policy (CSP) {kibana-pull}150151[#150151]
