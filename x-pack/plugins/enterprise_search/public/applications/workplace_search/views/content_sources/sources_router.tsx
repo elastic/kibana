@@ -6,10 +6,12 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
+import { Redirect, Switch, useLocation } from 'react-router-dom';
 
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { AppLogic } from '../../app_logic';
 import {
