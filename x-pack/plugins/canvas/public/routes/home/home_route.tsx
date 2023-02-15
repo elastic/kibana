@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { HomeApp } from '../../components/home_app';
 
 export const HomeRoute = () => (
