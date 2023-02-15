@@ -10147,7 +10147,6 @@
     "xpack.csp.navigation.rulesNavItemLabel": "规则",
     "xpack.csp.noFindingsStates.indexing.indexingButtonTitle": "尚无结果",
     "xpack.csp.noFindingsStates.indexing.indexingDescription": "正在等待要收集和索引的数据。请稍后返回检查以查看结果",
-    "xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDescription": "收集结果所需的时间长于预期，请稍后再回来检查",
     "xpack.csp.noFindingsStates.indexTimeout.indexTimeoutTitle": "已推迟结果",
     "xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedButtonTitle": "安装代理",
     "xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedDescription": "要查看结果，请通过在 Kubernetes 集群上安装 Elastic 代理来完成设置过程。",
