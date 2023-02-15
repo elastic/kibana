@@ -14,15 +14,16 @@ export type ActiveSpace =
   | { isLoading: false; error: Error; space: undefined }
   | { isLoading: false; error: undefined; space: Space };
 
+// Fallback to default if spaces plugin is not available
+const getDefaultSpaceAsPromise = () =>
+  Promise.resolve({
+    id: 'default',
+    name: 'Default',
+    disabledFeatures: [],
+  });
+
 export const useActiveKibanaSpace = (): ActiveSpace => {
   const kibana = useKibanaContextForPlugin();
-  // Fallback to default if spaces plugin is not available
-  const getDefaultSpaceAsPromise = async () =>
-    await {
-      id: 'default',
-      name: 'Default',
-      disabledFeatures: [],
-    };
   const getActiveSpaceOrDefault =
     kibana.services?.spaces?.getActiveSpace ?? getDefaultSpaceAsPromise;
 
