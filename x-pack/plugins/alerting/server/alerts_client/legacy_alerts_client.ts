@@ -50,6 +50,7 @@ export class LegacyAlertsClient<
   private processedAlerts: {
     new: Record<string, Alert<State, Context, ActionGroupIds>>;
     active: Record<string, Alert<State, Context, ActionGroupIds>>;
+    activeCurrent: Record<string, Alert<State, Context, ActionGroupIds>>;
     recovered: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
     recoveredCurrent: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   };
@@ -66,6 +67,7 @@ export class LegacyAlertsClient<
     this.processedAlerts = {
       new: {},
       active: {},
+      activeCurrent: {},
       recovered: {},
       recoveredCurrent: {},
     };
@@ -166,6 +168,7 @@ export class LegacyAlertsClient<
 
     this.processedAlerts.new = alerts.newAlerts;
     this.processedAlerts.active = alerts.activeAlerts;
+    this.processedAlerts.activeCurrent = alerts.currentActiveAlerts;
     this.processedAlerts.recovered = alerts.recoveredAlerts;
     this.processedAlerts.recoveredCurrent = alerts.currentRecoveredAlerts;
 
@@ -173,7 +176,7 @@ export class LegacyAlertsClient<
       logger: this.options.logger,
       alertingEventLogger: eventLogger,
       newAlerts: alerts.newAlerts,
-      activeAlerts: alerts.activeAlerts,
+      activeAlerts: alerts.currentActiveAlerts,
       recoveredAlerts: alerts.currentRecoveredAlerts,
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
@@ -182,7 +185,9 @@ export class LegacyAlertsClient<
     });
   }
 
-  public getProcessedAlerts(type: 'new' | 'active' | 'recovered' | 'recoveredCurrent') {
+  public getProcessedAlerts(
+    type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
+  ) {
     if (this.processedAlerts.hasOwnProperty(type)) {
       return this.processedAlerts[type];
     }

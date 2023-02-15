@@ -20,18 +20,14 @@ export function getAlertsForNotification(
   trackedEventsToIndex: any[],
   notifyWhen?: RuleNotifyWhenType | null
 ) {
-  return trackedEventsToIndex.map((trackedEvent) => {
-    if (
-      !flappingSettings.enabled ||
-      trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_ACTIVE ||
-      notifyWhen !== RuleNotifyWhen.CHANGE
-    ) {
+  const trackedEventsToNotify: any[] = [];
+  trackedEventsToIndex.map((trackedEvent) => {
+    if (!flappingSettings.enabled || trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_ACTIVE) {
       trackedEvent.pendingRecoveredCount = 0;
+      trackedEventsToNotify.push(trackedEvent);
     } else if (
       flappingSettings.enabled &&
-      trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_RECOVERED &&
-      // rules with "on status change" should only be subject to flapping changes
-      notifyWhen === RuleNotifyWhen.CHANGE
+      trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_RECOVERED
     ) {
       if (trackedEvent.flapping) {
         const count = trackedEvent.pendingRecoveredCount || 0;
@@ -40,11 +36,18 @@ export function getAlertsForNotification(
           trackedEvent.event[ALERT_STATUS] = ALERT_STATUS_ACTIVE;
           trackedEvent.event[EVENT_ACTION] = 'active';
           delete trackedEvent.event[ALERT_END];
+
+          if (notifyWhen === RuleNotifyWhen.CHANGE) {
+            trackedEventsToNotify.push(trackedEvent);
+          }
         } else {
           trackedEvent.pendingRecoveredCount = 0;
+          trackedEventsToNotify.push(trackedEvent);
         }
+      } else {
+        trackedEventsToNotify.push(trackedEvent);
       }
     }
-    return trackedEvent;
   });
+  return trackedEventsToNotify;
 }

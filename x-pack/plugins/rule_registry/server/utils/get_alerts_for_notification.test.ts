@@ -44,114 +44,128 @@ describe('getAlertsForNotification', () => {
 
   test('should set pendingRecoveredCount to zero for all active alerts', () => {
     const trackedEvents = [alert4];
-    expect(
-      getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, trackedEvents, RuleNotifyWhen.CHANGE)
-    ).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "event": Object {
-            "kibana.alert.status": "active",
-          },
-          "flappingHistory": Array [
-            true,
-            true,
-          ],
-          "pendingRecoveredCount": 0,
+    const expected = [
+      {
+        event: {
+          'kibana.alert.status': 'active',
         },
-      ]
-    `);
+        flappingHistory: [true, true],
+        pendingRecoveredCount: 0,
+      },
+    ];
+    const alertsToNotify = getAlertsForNotification(
+      DEFAULT_FLAPPING_SETTINGS,
+      trackedEvents,
+      RuleNotifyWhen.CHANGE
+    );
+    expect(alertsToNotify).toEqual(expected);
+    expect(trackedEvents).toEqual(expected);
   });
 
-  test('should not remove alerts if the num of recovered alerts is not at the limit', () => {
+  test('should return flapping pending recovered alerts as active if the num of recovered alerts is not at the limit', () => {
     const trackedEvents = cloneDeep([alert1, alert2, alert3]);
-    expect(
-      getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, trackedEvents, RuleNotifyWhen.CHANGE)
-    ).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "event": Object {
-            "kibana.alert.status": "recovered",
-          },
-          "flapping": true,
-          "pendingRecoveredCount": 0,
+    const expected = [
+      {
+        event: {
+          'kibana.alert.status': 'recovered',
         },
-        Object {
-          "event": Object {
-            "kibana.alert.status": "recovered",
-          },
-          "flapping": false,
+        flapping: true,
+        pendingRecoveredCount: 0,
+      },
+      {
+        event: {
+          'kibana.alert.status': 'recovered',
         },
-        Object {
-          "event": Object {
-            "event.action": "active",
-            "kibana.alert.status": "active",
-          },
-          "flapping": true,
-          "pendingRecoveredCount": 1,
+        flapping: false,
+      },
+      {
+        event: {
+          'event.action': 'active',
+          'kibana.alert.status': 'active',
         },
-      ]
-    `);
+        flapping: true,
+        pendingRecoveredCount: 1,
+      },
+    ];
+    const alertsToNotify = getAlertsForNotification(
+      DEFAULT_FLAPPING_SETTINGS,
+      trackedEvents,
+      RuleNotifyWhen.CHANGE
+    );
+
+    expect(alertsToNotify).toEqual(expected);
+    expect(trackedEvents).toEqual(expected);
   });
 
   test('should reset counts and not modify alerts if flapping is disabled', () => {
     const trackedEvents = cloneDeep([alert1, alert2, alert3]);
-    expect(
-      getAlertsForNotification(DISABLE_FLAPPING_SETTINGS, trackedEvents, RuleNotifyWhen.CHANGE)
-    ).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "event": Object {
-            "kibana.alert.status": "recovered",
-          },
-          "flapping": true,
-          "pendingRecoveredCount": 0,
+    const expected = [
+      {
+        event: {
+          'kibana.alert.status': 'recovered',
         },
-        Object {
-          "event": Object {
-            "kibana.alert.status": "recovered",
-          },
-          "flapping": false,
-          "pendingRecoveredCount": 0,
+        flapping: true,
+        pendingRecoveredCount: 0,
+      },
+      {
+        event: {
+          'kibana.alert.status': 'recovered',
         },
-        Object {
-          "event": Object {
-            "kibana.alert.status": "recovered",
-          },
-          "flapping": true,
-          "pendingRecoveredCount": 0,
+        flapping: false,
+        pendingRecoveredCount: 0,
+      },
+      {
+        event: {
+          'kibana.alert.status': 'recovered',
         },
-      ]
-    `);
+        flapping: true,
+        pendingRecoveredCount: 0,
+      },
+    ];
+
+    const alertsToNotify = getAlertsForNotification(
+      DISABLE_FLAPPING_SETTINGS,
+      trackedEvents,
+      RuleNotifyWhen.CHANGE
+    );
+    expect(alertsToNotify).toEqual(expected);
+    expect(trackedEvents).toEqual(expected);
   });
 
-  test('should reset counts and not modify alerts if the rule has "notify on every run" set', () => {
+  test('should not return flapping pending recovered alerts as active when notifyWhen is not onActionGroupChange', () => {
     const trackedEvents = cloneDeep([alert1, alert2, alert3]);
-    expect(
-      getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, trackedEvents, RuleNotifyWhen.ACTIVE)
-    ).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "event": Object {
-            "kibana.alert.status": "recovered",
-          },
-          "flapping": true,
-          "pendingRecoveredCount": 0,
+    const expected = [
+      {
+        event: {
+          'kibana.alert.status': 'recovered',
         },
-        Object {
-          "event": Object {
-            "kibana.alert.status": "recovered",
-          },
-          "flapping": false,
-          "pendingRecoveredCount": 0,
+        flapping: true,
+        pendingRecoveredCount: 0,
+      },
+      {
+        event: {
+          'kibana.alert.status': 'recovered',
         },
-        Object {
-          "event": Object {
-            "kibana.alert.status": "recovered",
-          },
-          "flapping": true,
-          "pendingRecoveredCount": 0,
+        flapping: false,
+      },
+    ];
+    const alertsToNotify = getAlertsForNotification(
+      DEFAULT_FLAPPING_SETTINGS,
+      trackedEvents,
+      RuleNotifyWhen.ACTIVE
+    );
+
+    expect(alertsToNotify).toEqual(expected);
+    expect(trackedEvents).toEqual([
+      ...expected,
+      {
+        event: {
+          'event.action': 'active',
+          'kibana.alert.status': 'active',
         },
-      ]
-    `);
+        flapping: true,
+        pendingRecoveredCount: 1,
+      },
+    ]);
   });
 });

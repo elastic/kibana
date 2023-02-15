@@ -29,15 +29,17 @@ export function getAlertsForNotification<
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
   currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
 ) {
+  const currentActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
+
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
     alert.resetPendingRecoveredCount();
+    currentActiveAlerts[id] = alert;
   }
 
   for (const id of keys(currentRecoveredAlerts)) {
     const alert = recoveredAlerts[id];
-    // rules with "on status change" should only be subject to flapping changes
-    if (flappingSettings.enabled && notifyWhen === RuleNotifyWhen.CHANGE) {
+    if (flappingSettings.enabled) {
       const flapping = alert.getFlapping();
       if (flapping) {
         alert.incrementPendingRecoveredCount();
@@ -60,6 +62,11 @@ export function getAlertsForNotification<
           );
           activeAlerts[id] = newAlert;
 
+          // rules with "on status change" should return notifications
+          if (notifyWhen === RuleNotifyWhen.CHANGE) {
+            currentActiveAlerts[id] = newAlert;
+          }
+
           // remove from recovered alerts
           delete recoveredAlerts[id];
           delete currentRecoveredAlerts[id];
@@ -75,6 +82,7 @@ export function getAlertsForNotification<
   return {
     newAlerts,
     activeAlerts,
+    currentActiveAlerts,
     recoveredAlerts,
     currentRecoveredAlerts,
   };
