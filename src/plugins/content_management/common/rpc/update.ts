@@ -24,7 +24,7 @@ export const updateSchemas: ProcedureSchemas = {
 };
 
 export interface UpdateIn<
-  T extends string,
+  T extends string = string,
   Data extends object = Record<string, unknown>,
   Options extends object = any
 > {

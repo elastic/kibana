@@ -23,7 +23,7 @@ export const searchSchemas: ProcedureSchemas = {
 };
 
 export interface SearchIn<
-  T extends string,
+  T extends string = string,
   Query extends object = object,
   Options extends object = any
 > {

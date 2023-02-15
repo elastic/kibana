@@ -22,7 +22,7 @@ export const getSchemas: ProcedureSchemas = {
   out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 };
 
-export interface GetIn<T extends string, Options extends object = any> {
+export interface GetIn<T extends string = string, Options extends object = any> {
   id: string;
   contentTypeId: T;
   options?: Options;
