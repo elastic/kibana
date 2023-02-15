@@ -273,7 +273,7 @@ Discover::
 * Adds a way to quickly expand time range from "No results" screen {kibana-pull}147195[#147195]
 * Optimize checking for multifields during grid rendering {kibana-pull}145698[#145698]
 * Align field list sections between Discover and Lens {kibana-pull}144412[#144412]
-* Update unified histogram to use Lens {kibana-pull}143117[#143117]
+* Update Discover's histogram to use Lens, and add support for breaking down the histogram by top values of a selected field {kibana-pull}143117[#143117]
 
 Elastic Security::
 For the Elastic Security 8.7.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
