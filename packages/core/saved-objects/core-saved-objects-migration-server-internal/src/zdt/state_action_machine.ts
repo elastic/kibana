@@ -8,17 +8,16 @@
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
-import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   getErrorMessage,
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import { logActionResponse, logStateTransition } from './common/utils/logs';
-import { type Model, type Next, stateActionMachine } from './state_action_machine';
-import { cleanup } from './migrations_state_machine_cleanup';
-import type { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';
+import { logStateTransition, logActionResponse } from '../common/utils';
+import { type Model, type Next, stateActionMachine } from '../state_action_machine';
+import { cleanup } from '../migrations_state_machine_cleanup';
+import type { State } from './state';
+import type { MigratorContext } from './context';
 
 /**
  * A specialized migrations-specific state-action machine that:
@@ -31,22 +30,21 @@ import type { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State 
  */
 export async function migrationStateActionMachine({
   initialState,
-  logger,
+  context,
   next,
   model,
-  client,
 }: {
   initialState: State;
-  logger: Logger;
+  context: MigratorContext;
   next: Next<State>;
   model: Model<State>;
-  client: ElasticsearchClient;
 }) {
+  const logger = context.logger;
   const startTime = Date.now();
   // Since saved object index names usually start with a `.` and can be
   // configured by users to include several `.`'s we can't use a logger tag to
   // indicate which messages come from which index upgrade.
-  const logMessagePrefix = `[${initialState.indexPrefix}] `;
+  const logMessagePrefix = `[${context.indexPrefix}] `;
   let prevTimestamp = startTime;
   let lastState: State | undefined;
   try {
@@ -111,13 +109,13 @@ export async function migrationStateActionMachine({
       }
     } else if (finalState.controlState === 'FATAL') {
       try {
-        await cleanup(client, finalState);
+        await cleanup(context.elasticsearchClient, finalState);
       } catch (e) {
         logger.warn('Failed to cleanup after migrations:', e.message);
       }
       return Promise.reject(
         new Error(
-          `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index: ` +
+          `Unable to complete saved object migrations for the [${context.indexPrefix}] index: ` +
             finalState.reason
         )
       );
@@ -142,13 +140,13 @@ export async function migrationStateActionMachine({
       }, method: ${req.method}, url: ${req.url} error: ${getErrorMessage(e)},`;
       logger.error(logMessagePrefix + failedRequestMessage);
       throw new Error(
-        `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. Please check the health of your Elasticsearch cluster and try again. ${failedRequestMessage}`
+        `Unable to complete saved object migrations for the [${context.indexPrefix}] index. Please check the health of your Elasticsearch cluster and try again. ${failedRequestMessage}`
       );
     } else {
       logger.error(e);
 
       const newError = new Error(
-        `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index. ${e}`
+        `Unable to complete saved object migrations for the [${context.indexPrefix}] index. ${e}`
       );
 
       // restore error stack to point to a source of the problem.
