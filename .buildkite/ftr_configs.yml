@@ -26,6 +26,7 @@ disabled:
   - x-pack/test/functional_enterprise_search/cypress.config.ts
   - x-pack/test/defend_workflows_cypress/cli_config.ts
   - x-pack/test/defend_workflows_cypress/config.ts
+  - x-pack/test/defend_workflows_cypress/endpoint_config.ts
   - x-pack/test/defend_workflows_cypress/visual_config.ts
   - x-pack/test/osquery_cypress/cli_config.ts
   - x-pack/test/osquery_cypress/config.ts
