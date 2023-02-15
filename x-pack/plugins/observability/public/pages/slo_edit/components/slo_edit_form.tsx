@@ -36,6 +36,7 @@ import {
 import { paths } from '../../../config';
 import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
+import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
@@ -110,6 +111,8 @@ export function SloEditForm({ slo }: Props) {
         return <CustomKqlIndicatorTypeForm control={control} watch={watch} />;
       case 'sli.apm.transactionDuration':
         return <ApmLatencyIndicatorTypeForm control={control} />;
+      case 'sli.apm.transactionErrorRate':
+        return <ApmAvailabilityIndicatorTypeForm control={control} />;
       default:
         return null;
     }
