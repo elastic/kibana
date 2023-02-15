@@ -10028,8 +10028,6 @@
     "xpack.csp.findings.distributionBar.showingPageOfTotalLabel": "正在显示第 {pageStart}-{pageEnd} 个（共 {total} 个）{type}",
     "xpack.csp.findings.findingsTableCell.addFilterButton": "添加 {field} 筛选",
     "xpack.csp.findings.findingsTableCell.addNegateFilterButton": "添加 {field} 作废筛选",
-    "xpack.csp.rules.header.rulesCountLabel": "{count, plural, other { 规则}}",
-    "xpack.csp.rules.header.totalRulesCount": "正在显示 {rules}",
     "xpack.csp.rules.rulePageHeader.pageHeaderTitle": "规则 - {integrationName}",
     "xpack.csp.subscriptionNotAllowed.promptDescription": "要使用这些云安全功能，您必须 {link}。",
     "xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundTitle": "找不到基准集成",

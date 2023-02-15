@@ -10,28 +10,66 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { ContentClientProvider } from './content_client_context';
 import { ContentClient } from './content_client';
-import { CrudClient } from '../crud_client';
 import { createCrudClientMock } from '../crud_client/crud_client.mock';
-import { useCreateContentMutation } from './content_client_mutation_hooks';
-import type { CreateIn } from '../../common';
+import {
+  useCreateContentMutation,
+  useUpdateContentMutation,
+  useDeleteContentMutation,
+} from './content_client_mutation_hooks';
+import type { CreateIn, UpdateIn, DeleteIn } from '../../common';
 
-let contentClient: ContentClient;
-let crudClient: jest.Mocked<CrudClient>;
-beforeEach(() => {
-  crudClient = createCrudClientMock();
-  contentClient = new ContentClient(() => crudClient);
-});
+const setup = () => {
+  const crudClient = createCrudClientMock();
+  const contentClient = new ContentClient(() => crudClient);
 
-const Wrapper: React.FC = ({ children }) => (
-  <ContentClientProvider contentClient={contentClient}>{children}</ContentClientProvider>
-);
+  const Wrapper: React.FC = ({ children }) => (
+    <ContentClientProvider contentClient={contentClient}>{children}</ContentClientProvider>
+  );
+
+  return {
+    Wrapper,
+    contentClient,
+    crudClient,
+  };
+};
 
 describe('useCreateContentMutation', () => {
   test('should call rpcClient.create with input and resolve with output', async () => {
+    const { Wrapper, crudClient } = setup();
     const input: CreateIn = { contentType: 'testType', data: { foo: 'bar' } };
     const output = { test: 'test' };
     crudClient.create.mockResolvedValueOnce(output);
     const { result, waitFor } = renderHook(() => useCreateContentMutation(), { wrapper: Wrapper });
+    result.current.mutate(input);
+
+    await waitFor(() => result.current.isSuccess);
+
+    expect(result.current.data).toEqual(output);
+  });
+});
+
+describe('useUpdateContentMutation', () => {
+  test('should call rpcClient.update with input and resolve with output', async () => {
+    const { Wrapper, crudClient } = setup();
+    const input: UpdateIn = { contentType: 'testType', data: { foo: 'bar' } };
+    const output = { test: 'test' };
+    crudClient.update.mockResolvedValueOnce(output);
+    const { result, waitFor } = renderHook(() => useUpdateContentMutation(), { wrapper: Wrapper });
+    result.current.mutate(input);
+
+    await waitFor(() => result.current.isSuccess);
+
+    expect(result.current.data).toEqual(output);
+  });
+});
+
+describe('useDeleteContentMutation', () => {
+  test('should call rpcClient.delete with input and resolve with output', async () => {
+    const { Wrapper, crudClient } = setup();
+    const input: DeleteIn = { contentType: 'testType', data: { foo: 'bar' } };
+    const output = { test: 'test' };
+    crudClient.delete.mockResolvedValueOnce(output);
+    const { result, waitFor } = renderHook(() => useDeleteContentMutation(), { wrapper: Wrapper });
     result.current.mutate(input);
 
     await waitFor(() => result.current.isSuccess);
