@@ -71,7 +71,8 @@ export const rateOperation: OperationDefinition<RateIndexPatternColumn, 'field',
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
       getInvalidFieldMessage(layer, columnId, indexPattern),
-      getErrorForRateReference(layer, columnId, 'rate', indexPattern),
+      //   getDisallowedPreviousShiftMessage(layer, columnId),
+      //   getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);

@@ -12,7 +12,7 @@ import {
   CoreStart,
 } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import {
+import type {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
