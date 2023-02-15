@@ -37,7 +37,7 @@ const getClusterTitle = (cluster: Cluster) => {
 
 const getClusterId = (cluster: Cluster) => {
   const assetIdentifierId = cluster.meta.assetIdentifierId;
-  if (cluster.meta.benchmark.posture_type === 'cspm') return assetIdentifierId.slice(0, 6);
+  if (cluster.meta.benchmark.posture_type === 'cspm') return assetIdentifierId;
   return assetIdentifierId.slice(0, 6);
 };
 
