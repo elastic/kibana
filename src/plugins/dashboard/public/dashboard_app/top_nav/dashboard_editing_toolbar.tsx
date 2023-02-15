@@ -28,7 +28,6 @@ export function DashboardEditingToolbar() {
     usageCollection,
     data: { search },
     notifications: { toasts },
-    settings: { uiSettings },
     embeddable: { getStateTransfer, getEmbeddableFactory },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
@@ -37,7 +36,6 @@ export function DashboardEditingToolbar() {
   const { embeddableInstance: dashboardContainer } = useDashboardContainerContext();
 
   const stateTransferService = getStateTransfer();
-  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
   const lensAlias = getVisTypeAliases().find(({ name }) => name === 'lens');
   const quickButtonVisTypes: Array<
@@ -115,7 +113,9 @@ export function DashboardEditingToolbar() {
     [trackUiMetric, dashboardContainer, toasts]
   );
 
-  const getVisTypeQuickButton = (quickButtonForType: typeof quickButtonVisTypes[0]): IconButton => {
+  const getVisTypeQuickButton = (
+    quickButtonForType: typeof quickButtonVisTypes[0]
+  ): IconButton | undefined => {
     if (quickButtonForType.type === 'vis') {
       const visTypeName = quickButtonForType.visType;
       const visType =
@@ -124,16 +124,14 @@ export function DashboardEditingToolbar() {
 
       if (visType) {
         if ('aliasPath' in visType) {
-          const { name, icon, title } = visType as VisTypeAlias;
-
+          const { icon, title } = visType as VisTypeAlias;
           return {
             label: title,
             iconType: icon,
             onClick: createNewVisType(visType as VisTypeAlias),
           };
         } else {
-          const { name, icon, title, titleInWizard } = visType as BaseVisType & { icon: IconType };
-
+          const { icon, title, titleInWizard } = visType as BaseVisType & { icon: IconType };
           return {
             label: titleInWizard || title,
             iconType: icon,
@@ -144,20 +142,25 @@ export function DashboardEditingToolbar() {
     } else {
       const embeddableType = quickButtonForType.embeddableType;
       const embeddableFactory = getEmbeddableFactory(embeddableType);
-      return {
-        label: embeddableFactory?.getDisplayName(),
-        iconType: embeddableFactory?.getIconType(),
-        onClick: () => {
-          if (embeddableFactory) {
-            createNewEmbeddable(embeddableFactory);
-          }
-        },
-        'data-test-subj': `dashboardQuickButton${embeddableType}`,
-      };
+      if (embeddableFactory) {
+        return {
+          label: embeddableFactory.getDisplayName(),
+          iconType: embeddableFactory.getIconType(),
+          onClick: () => {
+            if (embeddableFactory) {
+              createNewEmbeddable(embeddableFactory);
+            }
+          },
+          'data-test-subj': `dashboardQuickButton${embeddableType}`,
+        };
+      }
     }
   };
 
-  const quickButtons = quickButtonVisTypes.map(getVisTypeQuickButton);
+  const quickButtons: IconButton[] = quickButtonVisTypes.reduce((accumulator, type) => {
+    const button = getVisTypeQuickButton(type);
+    return button ? [...accumulator, button] : accumulator;
+  }, [] as IconButton[]);
 
   const extraButtons = [
     <EditorMenu createNewVisType={createNewVisType} createNewEmbeddable={createNewEmbeddable} />,
