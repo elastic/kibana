@@ -1253,15 +1253,17 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('when upgrading from an integration package to an input package where no required variable has been added', function () {
       withTestPackage('integration_to_input', '3.0.0');
-      const packagePolicyIds: string[] = [];
-      const expectedAssets: Array<{ type: string; id: string }> = [];
       const POLICY_COUNT = 5;
+      let packagePolicyIds: string[] = [];
+      let expectedAssets: Array<{ type: string; id: string }> = [];
       beforeEach(async function () {
+        packagePolicyIds = [];
+        expectedAssets = [];
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'Test policy',
+            name: 'Another Test policy',
             namespace: 'default',
           })
           .expect(200);
