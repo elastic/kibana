@@ -267,7 +267,7 @@ Dashboard::
 
 Discover::
 * Show "Copy value" button for any grid cell {kibana-pull}149525[#149525]
-* Integrate unified field list filters into Discover {kibana-pull}148547[#148547]
+* Align field list filters UI between Discover and Lens {kibana-pull}148547[#148547]
 * Persist field list sections state in local storage {kibana-pull}148373[#148373]
 * Enable adhoc data views creation from no data views state {kibana-pull}147850[#147850]
 * Adds a way to quickly expand time range from "No results" screen {kibana-pull}147195[#147195]
