@@ -29,6 +29,7 @@ export const EmailParamsFields = ({
   isDisabled,
   onBlur = noop,
   showEmailSubjectAndMessage = true,
+  useDefaultMessage,
 }: ActionParamsProps<EmailActionParams>) => {
   const { to, cc, bcc, subject, message } = actionParams;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
@@ -42,6 +43,7 @@ export const EmailParamsFields = ({
   >([false, defaultMessage]);
   useEffect(() => {
     if (
+      useDefaultMessage ||
       !actionParams?.message ||
       (isUsingDefault &&
         actionParams?.message === defaultMessageUsed &&
