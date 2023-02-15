@@ -33,7 +33,6 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
 
-import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { FinderAttributes, FindResponseHTTP, SavedObjectCommon } from '../../common';
 import { LISTING_LIMIT_SETTING } from '../../common';
 
@@ -125,7 +124,7 @@ class SavedObjectFinderUi extends React.Component<
     }, []);
 
     const perPage = this.props.uiSettings.get(LISTING_LIMIT_SETTING);
-    const params: SavedObjectsFindOptions = {
+    const params = {
       type: Object.keys(metaDataMap),
       fields: [...new Set(fields)],
       search: query ? `${query}*` : undefined,
