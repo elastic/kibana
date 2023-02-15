@@ -17,19 +17,11 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import { SearchProvider, SearchBox, Results, Sorting } from '@elastic/react-search-ui';
-import {
-  ResultsViewProps,
-  ResultViewProps,
-  InputViewProps,
-  SortingViewProps,
-} from '@elastic/react-search-ui-views';
+import { SearchProvider, SearchBox, Results } from '@elastic/react-search-ui';
+import { ResultsViewProps, ResultViewProps, InputViewProps } from '@elastic/react-search-ui-views';
 import { SearchDriverOptions, SearchResult } from '@elastic/search-ui';
 import EnginesAPIConnector, {
   Transporter,
@@ -148,20 +140,6 @@ const InputView: React.FC<InputViewProps> = ({ getInputProps }) => {
   );
 };
 
-const SortingView: React.FC<SortingViewProps> = ({ options = [], value, onChange }) => {
-  return (
-    <EuiSelect
-      options={options.map((option) => ({
-        text: option.label,
-        value: option.value,
-      }))}
-      value={value}
-      onChange={(e) => onChange(e.currentTarget.value)}
-      aria-label="Use aria labels when no actual label is in use"
-    />
-  );
-};
-
 export const EngineSearchPreview: React.FC = () => {
   const { http } = useValues(HttpLogic);
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
@@ -205,21 +183,7 @@ export const EngineSearchPreview: React.FC = () => {
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiFlexGroup>
-          <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
-            <EuiForm component="div">
-              <EuiFormRow label="Sorting">
-                <Sorting
-                  view={SortingView}
-                  sortOptions={[
-                    {
-                      name: 'Relevance',
-                      value: [],
-                    },
-                  ]}
-                />
-              </EuiFormRow>
-            </EuiForm>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={{ minWidth: '240px' }} />
           <EuiFlexItem>
             <Results view={ResultsView} resultView={ResultView} />
           </EuiFlexItem>
