@@ -30,7 +30,7 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
     In order to satisfy TS we need to do quite a bit of defensive programming.
     This is my best attempt at providing the minimum amount of typeguards and
     keeping the code readable. In the cases where types are explicitly set to
-    variables, it was done to help the compiler whn it couldn't infer the type.
+    variables, it was done to help the compiler when it couldn't infer the type.
     */
   return node.reduce((acc: string, currentNode) => {
     switch (currentNode.type) {
@@ -39,8 +39,8 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
         return `${acc}${strip(currentNode.value)}`;
 
       case 'JSXElement':
-        // When node is a <FormattedMessage />
-        const name = currentNode.openingElement.name;
+        // Determining whether node is of form `<FormattedMessage defaultMessage="message" />`
+        const name: TSESTree.JSXTagNameExpression = currentNode.openingElement.name;
         const attributes: Array<TSESTree.JSXAttribute | TSESTree.JSXSpreadAttribute> =
           currentNode.openingElement.attributes;
 
@@ -65,21 +65,23 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
         return `${acc}${strip(defaultMessageProp.value.value)}`;
 
       case 'JSXExpressionContainer':
-        // When node is a {i18n.translate}
-        const { expression } = currentNode;
+        // Determining whether node is of form `{i18n.translate('foo', { defaultMessage: 'message'})}`
+        const expression: TSESTree.JSXEmptyExpression | TSESTree.Expression =
+          currentNode.expression;
 
         if (!('arguments' in expression)) {
           return '';
         }
 
         const args: TSESTree.CallExpressionArgument[] = expression.arguments;
-        const callee = expression.callee;
+        const callee: TSESTree.LeftHandSideExpression = expression.callee;
 
         if (!('object' in callee)) {
           return '';
         }
 
-        const { object, property } = callee;
+        const object: TSESTree.LeftHandSideExpression = callee.object;
+        const property: TSESTree.Expression | TSESTree.PrivateIdentifier = callee.property;
 
         if (!('name' in object) || !('name' in property)) {
           return '';
@@ -89,16 +91,19 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
           return '';
         }
 
-        const callExpressionArgument = args.find((arg) => arg.type === 'ObjectExpression');
+        const callExpressionArgument: TSESTree.CallExpressionArgument | undefined = args.find(
+          (arg) => arg.type === 'ObjectExpression'
+        );
 
         if (!callExpressionArgument || callExpressionArgument.type !== 'ObjectExpression') {
           return '';
         }
 
-        const defaultMessageValue = callExpressionArgument.properties.find(
-          (prop) =>
-            prop.type === 'Property' && 'name' in prop.key && prop.key.name === 'defaultMessage'
-        );
+        const defaultMessageValue: TSESTree.ObjectLiteralElement | undefined =
+          callExpressionArgument.properties.find(
+            (prop) =>
+              prop.type === 'Property' && 'name' in prop.key && prop.key.name === 'defaultMessage'
+          );
 
         if (
           !defaultMessageValue ||

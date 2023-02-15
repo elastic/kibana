@@ -50,7 +50,7 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
           return;
         }
 
-        const hasDataTestSubj = (parent.attributes || []).find(
+        const hasDataTestSubj = parent.attributes.find(
           (attr) => attr.type === AST_NODE_TYPES.JSXAttribute && attr.name.name === 'data-test-subj'
         );
 
@@ -59,7 +59,7 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
           return;
         }
 
-        // Start building the autosuggestion.
+        // Start building the suggestion.
 
         // 1. The app name
         const cwd = getCwd();
@@ -68,7 +68,6 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
 
         // 2. Component name
         const functionDeclaration = getScope().block as TSESTree.FunctionDeclaration;
-
         const functionName = getFunctionName(functionDeclaration);
         const componentName = `${functionName.charAt(0).toUpperCase()}${functionName.slice(1)}`;
 
@@ -76,20 +75,16 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         const intent = getIntentFromNode(parent);
 
         // 4. The element name that generates the events
-        const eventGeneratingElement = name.replace('Eui', '');
+        const element = name.replace('Eui', '');
 
-        // 5. Putting it together
-        const dataTestSubjectSuggestion = `${appName}${componentName}${intent}${eventGeneratingElement}`;
+        const suggestion = `${appName}${componentName}${intent}${element}`; // 'o11yHeaderActionsSubmitButton'
 
         // 6. Report feedback to engineer
         report({
           node: node as any,
           message: `<${name}> should have a \`data-test-subj\` for telemetry purposes. Consider adding it.`,
           fix(fixer) {
-            return fixer.insertTextAfterRange(
-              range,
-              ` data-test-subj="${dataTestSubjectSuggestion}"`
-            );
+            return fixer.insertTextAfterRange(range, ` data-test-subj="${suggestion}"`);
           },
         });
       },
