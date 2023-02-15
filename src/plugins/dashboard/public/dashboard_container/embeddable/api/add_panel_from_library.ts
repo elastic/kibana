@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { HttpStart } from '@kbn/core/public';
 import { isErrorEmbeddable, openAddPanelFlyout } from '@kbn/embeddable-plugin/public';
 import { getSavedObjectFinder } from '@kbn/saved-objects-plugin/public';
 
@@ -25,7 +26,7 @@ export function addFromLibrary(this: DashboardContainer) {
   if (isErrorEmbeddable(this)) return;
   this.openOverlay(
     openAddPanelFlyout({
-      SavedObjectFinder: getSavedObjectFinder(uiSettings, http),
+      SavedObjectFinder: getSavedObjectFinder(uiSettings, http as HttpStart),
       reportUiCounter: usageCollection.reportUiCounter,
       getAllFactories: getEmbeddableFactories,
       getFactory: getEmbeddableFactory,

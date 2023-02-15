@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsRouter } from '../types';
-import { SavedObjectCommon, FindResponseHTTP } from '../../common/types';
+import type { SavedObjectCommon, FindResponseHTTP } from '../../common';
 
 export const registerFindRoute = (router: SavedObjectsRouter) => {
   router.get(
@@ -40,7 +40,7 @@ export const registerFindRoute = (router: SavedObjectsRouter) => {
       const searchTypes = Array.isArray(query.type) ? query.type : [query.type];
       const includedFields = Array.isArray(query.fields) ? query.fields : [query.fields];
 
-      const findResponse = await savedObjectsClient.find<SavedObjectCommon>({
+      const findResponse = await savedObjectsClient.find<SavedObjectCommon<any>>({
         ...query,
         type: searchTypes,
         fields: includedFields,
@@ -48,7 +48,7 @@ export const registerFindRoute = (router: SavedObjectsRouter) => {
 
       const savedObjects = findResponse.saved_objects;
 
-      const response: FindResponseHTTP = {
+      const response: FindResponseHTTP<any> = {
         saved_objects: savedObjects,
         total: findResponse.total,
         per_page: findResponse.per_page,

@@ -7,7 +7,7 @@
  */
 import { SavedObject } from '@kbn/core-saved-objects-server';
 
-export type SavedObjectCommon<T> = SavedObject;
+export type SavedObjectCommon<T = unknown> = SavedObject<T>;
 
 export interface FindQueryHTTP {
   perPage?: number;

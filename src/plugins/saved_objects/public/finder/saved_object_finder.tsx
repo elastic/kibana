@@ -34,7 +34,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
 
 import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
-import { FinderAttributes, FindResponseHTTP, SavedObjectCommon } from '../../common/types';
+import type { FinderAttributes, FindResponseHTTP, SavedObjectCommon } from '../../common';
 import { LISTING_LIMIT_SETTING } from '../../common';
 
 export interface SavedObjectMetaData<T = unknown> {
@@ -52,8 +52,8 @@ interface SavedObjectFinderState {
   items: Array<{
     title: string | null;
     name: string | null;
-    id: SavedObjectCommon<FinderAttributes>['id'];
-    type: SavedObjectCommon<FinderAttributes>['type'];
+    id: SavedObjectCommon['id'];
+    type: SavedObjectCommon['type'];
     savedObject: SavedObjectCommon<FinderAttributes>;
   }>;
   query: string;
@@ -68,10 +68,10 @@ interface SavedObjectFinderState {
 
 interface BaseSavedObjectFinder {
   onChoose?: (
-    id: SavedObjectCommon<FinderAttributes>['id'],
-    type: SavedObjectCommon<FinderAttributes>['type'],
+    id: SavedObjectCommon['id'],
+    type: SavedObjectCommon['type'],
     name: string,
-    savedObject: SavedObjectCommon<FinderAttributes>
+    savedObject: SavedObjectCommon
   ) => void;
   noItemsMessage?: React.ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;

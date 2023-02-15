@@ -38,5 +38,5 @@ export interface CanvasPlatformService {
   getSavedObjects: () => SavedObjectsStart;
   getSavedObjectsClient: () => SavedObjectsClientContract;
   getUISettings: () => IUiSettingsClient;
-  http: HttpStart;
+  getHttp: () => HttpStart;
 }
