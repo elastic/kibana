@@ -34,7 +34,7 @@ export class ContentManagementPlugin
     this.core = new Core({ logger: this.logger });
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: { http: CoreSetup['http'] }) {
     const { api: coreApi, contentRegistry } = this.core.setup();
 
     const rpc = new RpcService<RpcContext>();
@@ -43,7 +43,6 @@ export class ContentManagementPlugin
     const router = core.http.createRouter();
     initRpcRoutes(procedureNames, router, {
       rpc,
-      core: coreApi,
       contentRegistry,
     });
 

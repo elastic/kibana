@@ -8,18 +8,22 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
+import { ProcedureName } from '../../../common';
+import type { ContentRegistry } from '../../core';
+
 import type { RpcService } from '../rpc_service';
 import type { Context as RpcContext } from '../types';
 import { wrapError } from './error_wrapper';
 
-interface RouteContext extends Omit<RpcContext, 'requestHandlerContext'> {
-  rpc: RpcService<RpcContext>;
+interface RouteContext {
+  rpc: RpcService<RpcContext, ProcedureName>;
+  contentRegistry: ContentRegistry;
 }
 
 export function initRpcRoutes(
-  procedureNames: readonly string[],
+  procedureNames: readonly ProcedureName[],
   router: IRouter,
-  { rpc, contentRegistry, core }: RouteContext
+  { rpc, contentRegistry }: RouteContext
 ) {
   if (procedureNames.length === 0) {
     throw new Error(`No procedure names provided.`);
@@ -48,18 +52,11 @@ export function initRpcRoutes(
       try {
         const context: RpcContext = {
           contentRegistry,
-          core,
           requestHandlerContext,
         };
-        const { name } = request.params as { name: string };
+        const { name } = request.params as { name: ProcedureName };
 
-        const result = await rpc.call(
-          {
-            name,
-            input: request.body,
-          },
-          context
-        );
+        const result = await rpc.call(context, name, request.body);
 
         return response.ok({
           body: result,

@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { CoreApi, ContentRegistry } from '../core';
+import type { ContentRegistry } from '../core';
 
 export interface Context {
-  core: CoreApi;
   contentRegistry: ContentRegistry;
   requestHandlerContext: RequestHandlerContext;
 }

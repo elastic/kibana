@@ -32,7 +32,7 @@ export interface ContentStorage {
 }
 
 interface RpcSchemas {
-  get: {
+  get?: {
     in?: {
       options?: Type<any>;
     };
@@ -58,7 +58,7 @@ interface RpcSchemas {
       result: Type<any>;
     };
   };
-  delete: {
+  delete?: {
     in?: {
       options?: Type<any>;
     };
