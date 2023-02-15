@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-export * from './errors';
-export * from './state_machine';
-export * from './types';
-export * from './url_state_storage_service';
-export * from './time_filter_state_service';
-export * from './defaults';
+export const DEFAULT_QUERY = {
+  language: 'kuery',
+  query: '',
+};
+
+export const DEFAULT_FILTERS = [];
+
+export const DEFAULT_TIMERANGE = {
+  from: 'now-1d',
+  to: 'now',
+};
+
+export const DEFAULT_REFRESH_INTERVAL = { pause: true, value: 5000 };

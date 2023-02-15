@@ -20,6 +20,12 @@ import { datemathStringRT } from '../../../utils/datemath';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';
 import { replaceStateKeyInQueryString } from '../../../utils/url_state';
 import type { LogStreamQueryContext, LogStreamQueryEvent, ParsedQuery } from './types';
+import {
+  DEFAULT_FILTERS,
+  DEFAULT_QUERY,
+  DEFAULT_REFRESH_INTERVAL,
+  DEFAULT_TIMERANGE,
+} from './defaults';
 
 interface LogStreamQueryUrlStateDependencies {
   filterStateKey?: string;
@@ -37,19 +43,13 @@ type OptionalDefaults = Pick<FilterStateInUrl, 'timeRange' | 'refreshInterval'>;
 type FullDefaults = Required<RequiredDefaults & OptionalDefaults>;
 
 const requiredDefaultFilterStateValue: RequiredDefaults = {
-  query: {
-    language: 'kuery',
-    query: '',
-  },
-  filters: [],
+  query: DEFAULT_QUERY,
+  filters: DEFAULT_FILTERS,
 };
 
 const optionalDefaultFilterStateValue = {
-  timeRange: {
-    from: 'now-1d',
-    to: 'now',
-  },
-  refreshInterval: { pause: true, value: 5000 },
+  timeRange: DEFAULT_TIMERANGE,
+  refreshInterval: DEFAULT_REFRESH_INTERVAL,
 };
 
 const defaultFilterStateValue: FullDefaults = {

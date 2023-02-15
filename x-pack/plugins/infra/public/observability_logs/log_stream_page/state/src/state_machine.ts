@@ -12,6 +12,8 @@ import { datemathToEpochMillis } from '../../../../utils/datemath';
 import { createLogStreamPositionStateMachine } from '../../../log_stream_position_state/src/state_machine';
 import {
   createLogStreamQueryStateMachine,
+  DEFAULT_REFRESH_INTERVAL,
+  DEFAULT_TIMERANGE,
   LogStreamQueryStateMachineDependencies,
 } from '../../../log_stream_query_state';
 import type { LogViewNotificationChannel } from '../../../log_view_state';
@@ -295,16 +297,8 @@ export const createLogStreamPageStateMachine = ({
         }
 
         const nowTimestamp = Date.now();
-
-        const initialTimeRangeExpression: TimeRange = {
-          from: 'now-1d',
-          to: 'now',
-        };
-
-        const initialRefreshInterval: RefreshInterval = {
-          pause: true,
-          value: 5000,
-        };
+        const initialTimeRangeExpression: TimeRange = DEFAULT_TIMERANGE;
+        const initialRefreshInterval: RefreshInterval = DEFAULT_REFRESH_INTERVAL;
 
         return createLogStreamQueryStateMachine(
           {
