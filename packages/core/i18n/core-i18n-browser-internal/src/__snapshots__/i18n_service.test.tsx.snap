@@ -27,6 +27,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiCardSelect.select": "Select",
           "euiCardSelect.selected": "Selected",
           "euiCardSelect.unavailable": "Unavailable",
+          "euiCodeBlockAnnotations.ariaLabel": [Function],
           "euiCodeBlockCopy.copy": "Copy",
           "euiCodeBlockFullScreen.fullscreenCollapse": "Collapse",
           "euiCodeBlockFullScreen.fullscreenExpand": "Expand",
