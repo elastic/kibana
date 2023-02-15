@@ -13,7 +13,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const screenshotDirectories = ['ml_docs', 'transforms'];
   const pageObjects = getPageObjects(['triggersActionsUI']);
   const testSubjects = getService('testSubjects');
-  const ENTER_KEY = '\uE007';
   const browser = getService('browser');
   const actions = getService('actions');
 
@@ -40,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await searchBox.click();
       await searchBox.clearValue();
       await searchBox.type('transform');
-      await searchBox.pressKeys(ENTER_KEY);
+      await searchBox.pressKeys(browser.keys.ENTER);
       await transform.testExecution.logTestStep('take screenshot');
       await commonScreenshots.takeScreenshot('transform-rule', screenshotDirectories);
       await transform.testExecution.logTestStep('select transform rule type');
