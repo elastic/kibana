@@ -563,7 +563,7 @@ Adds generated `uuidv4` id and current time as `@timestamp` to document if `id`,
 
     </details>
     
-3. Enhance document with predefined id `uuidv4` id and and current time as `@timestamp` 
+3. Enhance document with predefined id and and current time as `@timestamp` 
 
 
     ```ts
