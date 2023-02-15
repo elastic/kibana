@@ -10,16 +10,16 @@ import { IconType } from '@elastic/eui';
 import { EuiHeaderLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
+import { AnomalyDetectionSetupState } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import {
   ENVIRONMENT_ALL,
   getEnvironmentLabel,
-} from '../../../../common/environment_filter_values';
-import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { useTheme } from '../../../hooks/use_theme';
-import { getLegacyApmHref } from '../links/apm/apm_link';
+} from '../../../../../common/environment_filter_values';
+import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTheme } from '../../../../hooks/use_theme';
+import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
 
 export function AnomalyDetectionSetupLink() {
   const { query } = useApmParams('/*');

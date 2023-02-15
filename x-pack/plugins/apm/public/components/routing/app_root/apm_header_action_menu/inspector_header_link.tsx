@@ -13,7 +13,7 @@ import {
   enableInspectEsQueries,
   useInspectorContext,
 } from '@kbn/observability-plugin/public';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 export function InspectorHeaderLink() {
   const { inspector } = useApmPluginContext();
