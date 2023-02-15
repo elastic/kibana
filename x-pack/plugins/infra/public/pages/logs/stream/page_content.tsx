@@ -14,7 +14,7 @@ import {
 } from '../../../observability_logs/log_stream_page/state';
 import { InvalidStateCallout } from '../../../observability_logs/xstate_helpers';
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
-import { StreamPageLogsContentForState } from './page_logs_content';
+import { StreamPageLogsForState } from './page_logs';
 import { StreamPageMissingIndicesContent } from './page_missing_indices_content';
 import { LogStreamPageContentProviders } from './page_providers';
 
@@ -38,7 +38,7 @@ export const StreamPageContentForState: React.FC<{ logStreamPageState: LogStream
   } else if (logStreamPageState.matches({ hasLogViewIndices: 'initialized' })) {
     return (
       <LogStreamPageContentProviders logStreamPageState={logStreamPageState}>
-        <StreamPageLogsContentForState logStreamPageState={logStreamPageState} />
+        <StreamPageLogsForState logStreamPageState={logStreamPageState} />
       </LogStreamPageContentProviders>
     );
   } else {
