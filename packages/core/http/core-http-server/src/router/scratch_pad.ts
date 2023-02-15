@@ -20,7 +20,6 @@ const logger: Logger = {} as any;
 type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
 
 /**
- * ===================== Fourth design =====================
  * Take the lib/toolkit approach. Instead of baking the idea of versioning into
  * the router we can expose a toolkit for building a versioned API that uses our
  * HTTP router. The toolkit just wraps the router ensuring that the spec for
@@ -135,5 +134,4 @@ type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
  *  1. Whole new API to design and implement
  *  2. Will it actually be used since this is only a recommendation?
  *  3. Requires some refactoring to adopt
- * ===================== End fourth design =====================
  */
