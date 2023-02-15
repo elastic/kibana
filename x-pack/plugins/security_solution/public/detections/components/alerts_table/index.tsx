@@ -39,7 +39,6 @@ import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
 import { useKibana } from '../../../common/lib/kibana';
 import type { inputsModel, State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
@@ -416,7 +415,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     <StatefulEventsViewer
       additionalFilters={additionalFiltersComponent}
       currentFilter={filterGroup as AlertWorkflowStatus}
-      defaultCellActions={defaultCellActions}
       defaultModel={getAlertsDefaultModel(license)}
       end={to}
       bulkActions={bulkActions}
@@ -449,7 +447,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
               <StatefulEventsViewer
                 additionalFilters={additionalFiltersComponent}
                 currentFilter={filterGroup as AlertWorkflowStatus}
-                defaultCellActions={defaultCellActions}
                 defaultModel={getAlertsDefaultModel(license)}
                 end={to}
                 bulkActions={bulkActions}

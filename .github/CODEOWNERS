@@ -310,7 +310,7 @@ src/plugins/discover @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/kibana-docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-ebt-tools @elastic/kibana-core
-packages/kbn-ecs @elastic/kibana-core
+packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investigations
 x-pack/packages/kbn-ecs-data-quality-dashboard @elastic/security-threat-hunting-investigations
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
@@ -912,6 +912,8 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 #CC# /x-pack/plugins/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # Kibana Platform Security
+/.github/codeql @elastic/kibana-security
+/.github/workflows/codeql.yml @elastic/kibana-security
 /src/plugins/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
 /test/interactive_setup_api_integration/ @elastic/kibana-security
 /test/interactive_setup_functional/ @elastic/kibana-security
