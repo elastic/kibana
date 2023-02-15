@@ -40,6 +40,10 @@ import {
   LOADING_SPINNER,
   EXCEPTION_ITEM_CONTAINER,
   EXCEPTION_FIELD_LIST,
+  EXCEPTION_FIELD_MAPPING_CONFLICTS_ICON,
+  EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP,
+  EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON,
+  EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION,
   EXCEPTION_EDIT_FLYOUT_SAVE_BTN,
   EXCEPTION_FLYOUT_VERSION_CONFLICT,
   EXCEPTION_FLYOUT_LIST_DELETED_ERROR,
@@ -70,11 +74,16 @@ describe('Exceptions flyout', () => {
     // mappings to conduct tests, avoiding loading large
     // amounts of data like in auditbeat_exceptions
     esArchiverLoad('exceptions');
+    esArchiverLoad('conflicts_1');
+    esArchiverLoad('conflicts_2');
     login();
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
       createCustomRule({
         ...getNewRule(),
-        dataSource: { index: ['auditbeat-*', 'exceptions-*'], type: 'indexPatterns' },
+        dataSource: {
+          index: ['auditbeat-*', 'exceptions-*', 'conflicts-*'],
+          type: 'indexPatterns',
+        },
         exceptionLists: [
           {
             id: response.body.id,
@@ -307,6 +316,39 @@ describe('Exceptions flyout', () => {
     cy.get(VALUES_INPUT).eq(0).type(`{enter}`);
     cy.get(VALUES_INPUT).eq(0).type(`{downarrow}{enter}`);
     cy.get(CONFIRM_BTN).should('be.enabled');
+
+    closeExceptionBuilderFlyout();
+  });
+
+  it('Warns users about mapping conflicts on problematic field selection', async () => {
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // find 'doc_id' field which has mapping conflicts accross different indices
+    cy.get(FIELD_INPUT).eq(0).click({ force: true });
+    cy.get(FIELD_INPUT).eq(0).type('doc_id');
+
+    // hovering field should show warning tooltip
+    cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_ICON).eq(0).trigger('mouseover');
+    cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP).should('be.visible');
+    cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP).should(
+      'have.text',
+      'This field is defined as several types across different indices.boolean: conflicts-0002long: conflicts-0001'
+    );
+
+    // select problematic field
+    cy.get(FIELD_INPUT).eq(0).type(`{downarrow}{enter}`);
+
+    // check that we show warning after the field selection in form of accordion component
+    // underneath the field component and clicking on which reveals the extended warning message
+    // with conflicts details
+    cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON).eq(0).click({ force: true });
+    cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION)
+      .eq(0)
+      .should(
+        'have.text',
+        'This field is defined as several types across different indices.boolean: conflicts-0002long: conflicts-0001'
+      );
 
     closeExceptionBuilderFlyout();
   });
