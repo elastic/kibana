@@ -76,6 +76,7 @@ export const getNetworkTopNFlowColumns = (
                 name: ipAttr,
                 value: ip,
                 type: 'keyword',
+                aggregatable: true,
               }}
             >
               <NetworkDetailsLink ip={ip} flowTarget={flowTarget} />
@@ -92,6 +93,7 @@ export const getNetworkTopNFlowColumns = (
                   name: geoAttrName,
                   value: geo,
                   type: 'geo_point',
+                  aggregatable: true,
                 }}
               >
                 {' '}
