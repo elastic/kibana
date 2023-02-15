@@ -30,7 +30,7 @@ export interface SolutionGroupedNavProps {
   selectedId: string;
   footerItems?: SideNavItem[];
   bottomOffset?: string;
-  // this enable Telemetry tracking inside group nav, this has to be binded with appId
+  // This enables Telemetry tracking inside group nav, this has to be binded with appId
   // e.g.: usageCollection?.reportUiCounter?.bind(null, appId)
   tracker?: Tracker;
 }
