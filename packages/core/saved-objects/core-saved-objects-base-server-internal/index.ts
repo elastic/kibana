@@ -39,3 +39,10 @@ export type {
   MigrationStatus,
 } from './src/migration';
 export { parseObjectKey, getObjectKey, getIndexForType } from './src/utils';
+export {
+  modelVersionVirtualMajor,
+  assertValidModelVersion,
+  isVirtualModelVersion,
+  virtualVersionToModelVersion,
+  modelVersionToVirtualVersion,
+} from './src/model_version';
