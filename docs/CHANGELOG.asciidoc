@@ -272,7 +272,7 @@ Discover::
 * Enable adhoc data views creation from no data views state {kibana-pull}147850[#147850]
 * Adds a way to quickly expand time range from "No results" screen {kibana-pull}147195[#147195]
 * Optimize checking for multifields during grid rendering {kibana-pull}145698[#145698]
-* Integrate unified field list sections into Discover {kibana-pull}144412[#144412]
+* Align field list sections between Discover and Lens {kibana-pull}144412[#144412]
 * Update unified histogram to use Lens {kibana-pull}143117[#143117]
 
 Elastic Security::
