@@ -39,7 +39,11 @@ const TransactionForm = ({
     if (value?.length) {
       setIsInvalid(false);
     }
-    setFormState({ ...formState, [name]: value });
+    if (name === 'repeat') {
+      setFormState({ ...formState, [name]: parseInt(value, 10) });
+    } else {
+      setFormState({ ...formState, [name]: value });
+    }
   };
 
   const onSaveClick = () => {
