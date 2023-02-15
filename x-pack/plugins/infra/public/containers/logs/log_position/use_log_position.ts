@@ -65,7 +65,6 @@ export const useLogPositionState = ({
 
   const { refreshInterval, timeRange, targetPosition, visiblePositions, latestPosition } =
     logStreamPageState.context;
-  const isStreaming = useMemo(() => !refreshInterval.pause, [refreshInterval]);
 
   const updateDateRange = useCallback<UpdateDateRangeFn>(
     (newDateRange: Partial<Pick<DateRange, 'startDateExpression' | 'endDateExpression'>>) =>
@@ -130,7 +129,7 @@ export const useLogPositionState = ({
   return {
     // position state
     targetPosition,
-    isStreaming,
+    isStreaming: !refreshInterval.pause,
     ...dateRange,
 
     // visible positions state
