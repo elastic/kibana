@@ -91,7 +91,8 @@ Fleet::
 * Fixes updates available when beta integrations are off {kibana-pull}149515[#149515] {kibana-pull}149486[#149486]
 
 Lens & Visualizations::
-Fixes a formula validation issue with non-default locale in *Lens* {kibana-pull}149806[#149806]
+* Fixes a formula validation issue with non-default locale in *Lens* {kibana-pull}149806[#149806]
+* Improves how JS Object method names are handled as field names {kibana-pull}148118[#148118]
 
 Machine Learning::
 Fixes datafeed of auth_high_count_logon_events_for_a_source_ip anomaly detection job {kibana-pull}149524[#149524]
