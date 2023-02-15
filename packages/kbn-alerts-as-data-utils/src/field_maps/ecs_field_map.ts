@@ -19,8 +19,6 @@ export const ecsFieldMap: FieldMap = Object.keys(EcsFlat).reduce((acc, currKey) 
       required: !!value.required,
       ...(value.scaling_factor ? { scaling_factor: value.scaling_factor } : {}),
       ...(value.ignore_above ? { ignore_above: value.ignore_above } : {}),
-      ...(value.doc_values != null ? { doc_values: value.doc_values } : {}),
-      ...(value.index != null ? { index: value.index } : {}),
     },
   };
 }, {});
