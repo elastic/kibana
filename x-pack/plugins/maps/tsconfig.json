@@ -64,6 +64,7 @@
     "@kbn/config-schema",
     "@kbn/field-types",
     "@kbn/controls-plugin",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

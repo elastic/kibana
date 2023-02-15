@@ -13870,10 +13870,6 @@
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/no_results/no_results_suggestions/use_fetch_occurances_range.ts"
-              },
-              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
@@ -17478,7 +17474,7 @@
               "\nReturns the default data view as an object.\nIf no default is found, or it is missing\nanother data view is selected as default and returned.\nIf no possible data view found to become a default returns null.\n"
             ],
             "signature": [
-              "(refreshFields?: boolean | undefined) => Promise<",
+              "(options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -17495,19 +17491,43 @@
               {
                 "parentPluginId": "data",
                 "id": "def-server.DataViewsService.getDefaultDataView.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
-                "label": "refreshFields",
-                "description": [
-                  "- if true, will refresh the fields of the default data view"
-                ],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "label": "options",
+                "description": [],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.DataViewsService.getDefaultDataView.$1.displayErrors",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "displayErrors",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.DataViewsService.getDefaultDataView.$1.refreshFields",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "refreshFields",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": [
@@ -21479,10 +21499,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/no_results/no_results_suggestions/use_fetch_occurances_range.ts"
               },
               {
                 "plugin": "aiops",
@@ -25957,7 +25973,7 @@
               "\nReturns the default data view as an object.\nIf no default is found, or it is missing\nanother data view is selected as default and returned.\nIf no possible data view found to become a default returns null.\n"
             ],
             "signature": [
-              "(refreshFields?: boolean | undefined) => Promise<",
+              "(options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -25974,19 +25990,43 @@
               {
                 "parentPluginId": "data",
                 "id": "def-common.DataViewsService.getDefaultDataView.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
-                "label": "refreshFields",
-                "description": [
-                  "- if true, will refresh the fields of the default data view"
-                ],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "label": "options",
+                "description": [],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.DataViewsService.getDefaultDataView.$1.displayErrors",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "displayErrors",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.DataViewsService.getDefaultDataView.$1.refreshFields",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "refreshFields",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": [
@@ -27949,7 +27989,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; getDefaultDataView: (refreshFields?: boolean | undefined) => Promise<",
+          ">; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
