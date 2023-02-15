@@ -6,18 +6,12 @@
  */
 
 import type { SecurityAppStore } from '../../../common/store/types';
-import { KibanaServices } from '../../../common/lib/kibana';
 import { TableId } from '../../../../common/types';
-import { createToggleColumnAction } from './toggle_column';
+import { createToggleColumnCellActionFactory } from './toggle_column';
 
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { mockGlobalState } from '../../../common/mock';
 import { dataTableActions } from '../../../common/store/data_table';
-
-jest.mock('../../../common/lib/kibana');
-
-const mockWarningToast = jest.fn();
-KibanaServices.get().notifications.toasts.addWarning = mockWarningToast;
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn().mockReturnValue(mockGlobalState);
@@ -35,8 +29,9 @@ const context = {
   },
 } as unknown as CellActionExecutionContext;
 
-describe('Default createToggleColumnAction', () => {
-  const toggleColumnAction = createToggleColumnAction({ store, order: 1 });
+describe('createToggleColumnCellActionFactory', () => {
+  const toggleColumnActionFactory = createToggleColumnCellActionFactory({ store });
+  const toggleColumnAction = toggleColumnActionFactory({ id: 'testAction' });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -80,7 +75,6 @@ describe('Default createToggleColumnAction', () => {
           id: TableId.test,
         })
       );
-      expect(mockWarningToast).not.toHaveBeenCalled();
     });
 
     it('should add column', async () => {
@@ -97,7 +91,6 @@ describe('Default createToggleColumnAction', () => {
           index: 1,
         })
       );
-      expect(mockWarningToast).not.toHaveBeenCalled();
     });
   });
 });
