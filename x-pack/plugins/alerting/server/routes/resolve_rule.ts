@@ -5,63 +5,14 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
-import {
-  verifyAccessAndContext,
-  RewriteResponseCase,
-  rewriteRuleLastRun,
-  rewriteActionsRes,
-} from './lib';
-import {
-  RuleTypeParams,
-  AlertingRequestHandlerContext,
-  INTERNAL_BASE_ALERTING_API_PATH,
-  ResolvedSanitizedRule,
-} from '../types';
+import { verifyAccessAndContext, rewriteRule } from './lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
-});
-
-const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>> = ({
-  alertTypeId,
-  createdBy,
-  updatedBy,
-  createdAt,
-  updatedAt,
-  apiKeyOwner,
-  notifyWhen,
-  muteAll,
-  mutedInstanceIds,
-  executionStatus,
-  actions,
-  scheduledTaskId,
-  lastRun,
-  nextRun,
-  ...rest
-}) => ({
-  ...rest,
-  rule_type_id: alertTypeId,
-  created_by: createdBy,
-  updated_by: updatedBy,
-  created_at: createdAt,
-  updated_at: updatedAt,
-  api_key_owner: apiKeyOwner,
-  notify_when: notifyWhen,
-  mute_all: muteAll,
-  muted_alert_ids: mutedInstanceIds,
-  scheduled_task_id: scheduledTaskId,
-  execution_status: executionStatus && {
-    ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
-    last_execution_date: executionStatus.lastExecutionDate,
-    last_duration: executionStatus.lastDuration,
-  },
-  actions: rewriteActionsRes(actions),
-  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
-  ...(nextRun ? { next_run: nextRun } : {}),
 });
 
 export const resolveRuleRoute = (
@@ -81,7 +32,7 @@ export const resolveRuleRoute = (
         const { id } = req.params;
         const rule = await rulesClient.resolve({ id, includeSnoozeData: true });
         return res.ok({
-          body: rewriteBodyRes(rule),
+          body: rewriteRule(rule),
         });
       })
     )

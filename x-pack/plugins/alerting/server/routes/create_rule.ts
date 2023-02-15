@@ -10,14 +10,12 @@ import { validateDurationSchema, RuleTypeDisabledError } from '../lib';
 import { CreateOptions } from '../rules_client';
 import {
   RewriteRequestCase,
-  RewriteResponseCase,
   rewriteActionsReq,
-  rewriteActionsRes,
   handleDisabledApiKeysError,
   verifyAccessAndContext,
   countUsageOfPredefinedIds,
   actionsSchema,
-  rewriteRuleLastRun,
+  rewriteRule,
 } from './lib';
 import {
   SanitizedRule,
@@ -53,46 +51,6 @@ const rewriteBodyReq: RewriteRequestCase<CreateOptions<RuleTypeParams>['data']> 
   alertTypeId,
   notifyWhen,
   actions: rewriteActionsReq(actions),
-});
-
-const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
-  actions,
-  alertTypeId,
-  scheduledTaskId,
-  createdBy,
-  updatedBy,
-  createdAt,
-  updatedAt,
-  apiKeyOwner,
-  notifyWhen,
-  muteAll,
-  mutedInstanceIds,
-  snoozeSchedule,
-  lastRun,
-  nextRun,
-  executionStatus: { lastExecutionDate, lastDuration, ...executionStatus },
-  ...rest
-}) => ({
-  ...rest,
-  rule_type_id: alertTypeId,
-  scheduled_task_id: scheduledTaskId,
-  snooze_schedule: snoozeSchedule,
-  created_by: createdBy,
-  updated_by: updatedBy,
-  created_at: createdAt,
-  updated_at: updatedAt,
-  api_key_owner: apiKeyOwner,
-  notify_when: notifyWhen,
-  mute_all: muteAll,
-  muted_alert_ids: mutedInstanceIds,
-  execution_status: {
-    ...executionStatus,
-    last_execution_date: lastExecutionDate,
-    last_duration: lastDuration,
-  },
-  actions: rewriteActionsRes(actions),
-  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
-  ...(nextRun ? { next_run: nextRun } : {}),
 });
 
 export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
@@ -131,7 +89,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
                 options: { id: params?.id },
               });
             return res.ok({
-              body: rewriteBodyRes(createdRule),
+              body: rewriteRule(createdRule),
             });
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {

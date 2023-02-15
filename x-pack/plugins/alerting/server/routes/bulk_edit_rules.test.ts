@@ -14,6 +14,8 @@ import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { SanitizedRule } from '../types';
+import { createMockedRule } from '../test_utils';
+import { rewriteRule } from './lib';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -24,43 +26,10 @@ beforeEach(() => {
 });
 
 describe('bulkEditInternalRulesRoute', () => {
-  const mockedAlert: SanitizedRule<{}> = {
-    id: '1',
-    alertTypeId: '1',
-    schedule: { interval: '10s' },
-    params: {
-      bar: true,
-    },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    actions: [
-      {
-        group: 'default',
-        id: '2',
-        actionTypeId: 'test',
-        params: {
-          foo: true,
-        },
-      },
-    ],
-    consumer: 'bar',
-    name: 'abc',
-    tags: ['foo'],
-    enabled: true,
-    muteAll: false,
-    notifyWhen: 'onActionGroupChange',
-    createdBy: '',
-    updatedBy: '',
-    apiKeyOwner: '',
-    throttle: '30s',
-    mutedInstanceIds: [],
-    executionStatus: {
-      status: 'unknown',
-      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-    },
-  };
+  const mockedRule = createMockedRule();
+  const rewrittenMockedRule = rewriteRule(mockedRule);
 
-  const mockedAlerts: Array<SanitizedRule<{}>> = [mockedAlert];
+  const mockedRules: Array<SanitizedRule<{}>> = [mockedRule];
   const bulkEditRequest = {
     filter: '',
     operations: [
@@ -71,7 +40,7 @@ describe('bulkEditInternalRulesRoute', () => {
       },
     ],
   };
-  const bulkEditResult = { rules: mockedAlerts, errors: [], total: 1, skipped: [] };
+  const bulkEditResult = { rules: mockedRules, errors: [], total: 1, skipped: [] };
 
   it('bulk edits rules with tags action', async () => {
     const licenseState = licenseStateMock.create();
@@ -103,16 +72,7 @@ describe('bulkEditInternalRulesRoute', () => {
             id: '1',
             name: 'abc',
             tags: ['foo'],
-            actions: [
-              {
-                group: 'default',
-                id: '2',
-                connector_type_id: 'test',
-                params: {
-                  foo: true,
-                },
-              },
-            ],
+            actions: rewrittenMockedRule.actions,
           }),
         ],
       },

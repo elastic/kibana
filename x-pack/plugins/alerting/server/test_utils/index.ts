@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export { createMockedRule } from './create_mocked_rule';
+
 interface Resolvable<T> {
   resolve: (arg: T) => void;
 }

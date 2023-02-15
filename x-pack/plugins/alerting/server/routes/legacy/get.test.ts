@@ -12,8 +12,8 @@ import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
-import { Rule } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { createMockedRule } from '../../test_utils';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../lib/license_api_access', () => ({
@@ -29,44 +29,7 @@ beforeEach(() => {
 });
 
 describe('getAlertRoute', () => {
-  const mockedAlert: Rule<{
-    bar: true;
-  }> = {
-    id: '1',
-    alertTypeId: '1',
-    schedule: { interval: '10s' },
-    params: {
-      bar: true,
-    },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    actions: [
-      {
-        group: 'default',
-        id: '2',
-        actionTypeId: 'test',
-        params: {
-          foo: true,
-        },
-      },
-    ],
-    consumer: 'bar',
-    name: 'abc',
-    tags: ['foo'],
-    enabled: true,
-    muteAll: false,
-    notifyWhen: 'onActionGroupChange',
-    createdBy: '',
-    updatedBy: '',
-    apiKey: '',
-    apiKeyOwner: '',
-    throttle: '30s',
-    mutedInstanceIds: [],
-    executionStatus: {
-      status: 'unknown',
-      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-    },
-  };
+  const mockedAlert = createMockedRule();
 
   it('gets an alert with proper parameters', async () => {
     const licenseState = licenseStateMock.create();

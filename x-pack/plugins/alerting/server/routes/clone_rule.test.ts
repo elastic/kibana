@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
@@ -13,9 +12,9 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { cloneRuleRoute } from './clone_rule';
-import { SanitizedRule } from '../types';
-import { AsApiContract } from './lib';
-import { CreateOptions } from '../rules_client';
+import { rewriteRule } from './lib';
+import { createMockedRule } from '../test_utils';
+import {} from './lib';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -27,79 +26,8 @@ beforeEach(() => {
 });
 
 describe('cloneRuleRoute', () => {
-  const createdAt = new Date();
-  const updatedAt = new Date();
-
-  const mockedRule: SanitizedRule<{ bar: boolean }> = {
-    alertTypeId: '1',
-    consumer: 'bar',
-    name: 'abc',
-    schedule: { interval: '10s' },
-    tags: ['foo'],
-    params: {
-      bar: true,
-    },
-    throttle: '30s',
-    actions: [
-      {
-        actionTypeId: 'test',
-        group: 'default',
-        id: '2',
-        params: {
-          foo: true,
-        },
-      },
-    ],
-    enabled: true,
-    muteAll: false,
-    createdBy: '',
-    updatedBy: '',
-    apiKeyOwner: '',
-    mutedInstanceIds: [],
-    notifyWhen: 'onActionGroupChange',
-    createdAt,
-    updatedAt,
-    id: '123',
-    executionStatus: {
-      status: 'unknown',
-      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-    },
-  };
-
-  const ruleToClone: AsApiContract<CreateOptions<{ bar: boolean }>['data']> = {
-    ...pick(mockedRule, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
-    rule_type_id: mockedRule.alertTypeId,
-    notify_when: mockedRule.notifyWhen,
-    actions: [
-      {
-        group: mockedRule.actions[0].group,
-        id: mockedRule.actions[0].id,
-        params: mockedRule.actions[0].params,
-      },
-    ],
-  };
-
-  const cloneResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
-    ...ruleToClone,
-    mute_all: mockedRule.muteAll,
-    created_by: mockedRule.createdBy,
-    updated_by: mockedRule.updatedBy,
-    api_key_owner: mockedRule.apiKeyOwner,
-    muted_alert_ids: mockedRule.mutedInstanceIds,
-    created_at: mockedRule.createdAt,
-    updated_at: mockedRule.updatedAt,
-    id: mockedRule.id,
-    execution_status: {
-      status: mockedRule.executionStatus.status,
-      last_execution_date: mockedRule.executionStatus.lastExecutionDate,
-    },
-    actions: [
-      {
-        ...ruleToClone.actions[0],
-        connector_type_id: 'test',
-      },
-    ],
-  };
+  const mockedRule = createMockedRule();
+  const cloneResult = rewriteRule(mockedRule);
 
   it('clone a rule with proper parameters', async () => {
     const licenseState = licenseStateMock.create();

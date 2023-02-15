@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
 import { createRuleRoute } from './create_rule';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { CreateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib';
-import { AsApiContract } from './lib';
-import { SanitizedRule } from '../types';
+import { rewriteRule } from './lib';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { createMockedRule } from '../test_utils';
 
 const rulesClient = rulesClientMock.create();
 
@@ -30,79 +28,11 @@ beforeEach(() => {
 });
 
 describe('createRuleRoute', () => {
-  const createdAt = new Date();
-  const updatedAt = new Date();
+  const mockedRule = createMockedRule();
 
-  const mockedAlert: SanitizedRule<{ bar: boolean }> = {
-    alertTypeId: '1',
-    consumer: 'bar',
-    name: 'abc',
-    schedule: { interval: '10s' },
-    tags: ['foo'],
-    params: {
-      bar: true,
-    },
-    throttle: '30s',
-    actions: [
-      {
-        actionTypeId: 'test',
-        group: 'default',
-        id: '2',
-        params: {
-          foo: true,
-        },
-      },
-    ],
-    enabled: true,
-    muteAll: false,
-    createdBy: '',
-    updatedBy: '',
-    apiKeyOwner: '',
-    mutedInstanceIds: [],
-    notifyWhen: 'onActionGroupChange',
-    createdAt,
-    updatedAt,
-    id: '123',
-    executionStatus: {
-      status: 'unknown',
-      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-    },
-  };
+  const ruleToCreate = rewriteRule(mockedRule);
 
-  const ruleToCreate: AsApiContract<CreateOptions<{ bar: boolean }>['data']> = {
-    ...pick(mockedAlert, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
-    rule_type_id: mockedAlert.alertTypeId,
-    notify_when: mockedAlert.notifyWhen,
-    actions: [
-      {
-        group: mockedAlert.actions[0].group,
-        id: mockedAlert.actions[0].id,
-        params: mockedAlert.actions[0].params,
-      },
-    ],
-  };
-
-  const createResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
-    ...ruleToCreate,
-    mute_all: mockedAlert.muteAll,
-    created_by: mockedAlert.createdBy,
-    updated_by: mockedAlert.updatedBy,
-    api_key_owner: mockedAlert.apiKeyOwner,
-    muted_alert_ids: mockedAlert.mutedInstanceIds,
-    created_at: mockedAlert.createdAt,
-    updated_at: mockedAlert.updatedAt,
-    id: mockedAlert.id,
-    execution_status: {
-      status: mockedAlert.executionStatus.status,
-      last_execution_date: mockedAlert.executionStatus.lastExecutionDate,
-    },
-    actions: [
-      {
-        ...ruleToCreate.actions[0],
-        connector_type_id: 'test',
-      },
-    ],
-  };
+  const createResult = rewriteRule(mockedRule);
 
   it('creates a rule with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
@@ -122,7 +52,7 @@ describe('createRuleRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id?}"`);
 
-    rulesClient.create.mockResolvedValueOnce(mockedAlert);
+    rulesClient.create.mockResolvedValueOnce(mockedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -142,6 +72,12 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "connector_type_id": "test",
+                "frequency": Object {
+                  "notifyWhen": "onActionGroupChange",
+                  "summary": false,
+                  "throttle": null,
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -150,20 +86,35 @@ describe('createRuleRoute', () => {
               },
             ],
             "alertTypeId": "1",
+            "api_key_owner": "",
             "consumer": "bar",
+            "created_at": 2020-01-01T00:00:00.000Z,
+            "created_by": "",
             "enabled": true,
+            "execution_status": Object {
+              "last_duration": undefined,
+              "last_execution_date": 2020-01-01T00:00:00.000Z,
+              "status": "unknown",
+            },
+            "id": "1",
+            "mute_all": false,
+            "muted_alert_ids": Array [],
             "name": "abc",
-            "notifyWhen": "onActionGroupChange",
+            "notifyWhen": undefined,
             "params": Object {
               "bar": true,
             },
             "schedule": Object {
               "interval": "10s",
             },
+            "scheduled_task_id": undefined,
+            "snooze_schedule": undefined,
             "tags": Array [
               "foo",
             ],
-            "throttle": "30s",
+            "throttle": null,
+            "updated_at": 2020-01-01T00:00:00.000Z,
+            "updated_by": "",
           },
           "options": Object {
             "id": undefined,
@@ -200,7 +151,7 @@ describe('createRuleRoute', () => {
     expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id?}"`);
 
     rulesClient.create.mockResolvedValueOnce({
-      ...mockedAlert,
+      ...mockedRule,
       id: 'custom-id',
     });
 
@@ -223,6 +174,12 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "connector_type_id": "test",
+                "frequency": Object {
+                  "notifyWhen": "onActionGroupChange",
+                  "summary": false,
+                  "throttle": null,
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -231,20 +188,35 @@ describe('createRuleRoute', () => {
               },
             ],
             "alertTypeId": "1",
+            "api_key_owner": "",
             "consumer": "bar",
+            "created_at": 2020-01-01T00:00:00.000Z,
+            "created_by": "",
             "enabled": true,
+            "execution_status": Object {
+              "last_duration": undefined,
+              "last_execution_date": 2020-01-01T00:00:00.000Z,
+              "status": "unknown",
+            },
+            "id": "1",
+            "mute_all": false,
+            "muted_alert_ids": Array [],
             "name": "abc",
-            "notifyWhen": "onActionGroupChange",
+            "notifyWhen": undefined,
             "params": Object {
               "bar": true,
             },
             "schedule": Object {
               "interval": "10s",
             },
+            "scheduled_task_id": undefined,
+            "snooze_schedule": undefined,
             "tags": Array [
               "foo",
             ],
-            "throttle": "30s",
+            "throttle": null,
+            "updated_at": 2020-01-01T00:00:00.000Z,
+            "updated_by": "",
           },
           "options": Object {
             "id": "custom-id",
@@ -281,7 +253,7 @@ describe('createRuleRoute', () => {
     expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id?}"`);
 
     rulesClient.create.mockResolvedValueOnce({
-      ...mockedAlert,
+      ...mockedRule,
       id: 'custom-id',
     });
     rulesClient.getSpaceId.mockReturnValueOnce('default');
@@ -305,6 +277,12 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "connector_type_id": "test",
+                "frequency": Object {
+                  "notifyWhen": "onActionGroupChange",
+                  "summary": false,
+                  "throttle": null,
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -313,20 +291,35 @@ describe('createRuleRoute', () => {
               },
             ],
             "alertTypeId": "1",
+            "api_key_owner": "",
             "consumer": "bar",
+            "created_at": 2020-01-01T00:00:00.000Z,
+            "created_by": "",
             "enabled": true,
+            "execution_status": Object {
+              "last_duration": undefined,
+              "last_execution_date": 2020-01-01T00:00:00.000Z,
+              "status": "unknown",
+            },
+            "id": "1",
+            "mute_all": false,
+            "muted_alert_ids": Array [],
             "name": "abc",
-            "notifyWhen": "onActionGroupChange",
+            "notifyWhen": undefined,
             "params": Object {
               "bar": true,
             },
             "schedule": Object {
               "interval": "10s",
             },
+            "scheduled_task_id": undefined,
+            "snooze_schedule": undefined,
             "tags": Array [
               "foo",
             ],
-            "throttle": "30s",
+            "throttle": null,
+            "updated_at": 2020-01-01T00:00:00.000Z,
+            "updated_by": "",
           },
           "options": Object {
             "id": "custom-id",
@@ -363,7 +356,7 @@ describe('createRuleRoute', () => {
     expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id?}"`);
 
     rulesClient.create.mockResolvedValueOnce({
-      ...mockedAlert,
+      ...mockedRule,
       id: 'custom-id',
     });
     rulesClient.getSpaceId.mockReturnValueOnce('another-space');
@@ -387,6 +380,12 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "connector_type_id": "test",
+                "frequency": Object {
+                  "notifyWhen": "onActionGroupChange",
+                  "summary": false,
+                  "throttle": null,
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -395,20 +394,35 @@ describe('createRuleRoute', () => {
               },
             ],
             "alertTypeId": "1",
+            "api_key_owner": "",
             "consumer": "bar",
+            "created_at": 2020-01-01T00:00:00.000Z,
+            "created_by": "",
             "enabled": true,
+            "execution_status": Object {
+              "last_duration": undefined,
+              "last_execution_date": 2020-01-01T00:00:00.000Z,
+              "status": "unknown",
+            },
+            "id": "1",
+            "mute_all": false,
+            "muted_alert_ids": Array [],
             "name": "abc",
-            "notifyWhen": "onActionGroupChange",
+            "notifyWhen": undefined,
             "params": Object {
               "bar": true,
             },
             "schedule": Object {
               "interval": "10s",
             },
+            "scheduled_task_id": undefined,
+            "snooze_schedule": undefined,
             "tags": Array [
               "foo",
             ],
-            "throttle": "30s",
+            "throttle": null,
+            "updated_at": 2020-01-01T00:00:00.000Z,
+            "updated_by": "",
           },
           "options": Object {
             "id": "custom-id",
@@ -431,7 +445,7 @@ describe('createRuleRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.create.mockResolvedValueOnce(mockedAlert);
+    rulesClient.create.mockResolvedValueOnce(mockedRule);
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: ruleToCreate });
 
@@ -453,7 +467,7 @@ describe('createRuleRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.create.mockResolvedValueOnce(mockedAlert);
+    rulesClient.create.mockResolvedValueOnce(mockedRule);
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, {});
 

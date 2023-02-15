@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-
+import { PartialRule } from '../..';
 import { RuleTypeParams, SanitizedRule, RuleLastRun } from '../../types';
+import { rewriteActionsRes } from './rewrite_actions';
 
 export const rewriteRuleLastRun = (lastRun: RuleLastRun) => {
   const { outcomeMsg, outcomeOrder, alertsCount, ...rest } = lastRun;
@@ -57,21 +58,15 @@ export const rewriteRule = ({
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params, frequency }) => ({
-    group,
-    id,
-    params,
-    connector_type_id: actionTypeId,
-    ...(frequency
-      ? {
-          frequency: {
-            summary: frequency.summary,
-            notify_when: frequency.notifyWhen,
-            throttle: frequency.throttle,
-          },
-        }
-      : {}),
-  })),
+  actions: rewriteActionsRes(actions),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
 });
+
+export const rewritePartialRule = (rule: PartialRule<RuleTypeParams>) => {
+  const rewrittenRule = rewriteRule(rule as SanitizedRule);
+  return Object.entries(rewrittenRule).reduce((result, [key, val]) => {
+    if (val) return { ...result, [key]: val };
+    return result;
+  }, {}) as PartialRule<RuleTypeParams>;
+};
