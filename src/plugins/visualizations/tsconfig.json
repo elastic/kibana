@@ -51,6 +51,7 @@
     "@kbn/config-schema",
     "@kbn/usage-collection-plugin",
     "@kbn/core-http-browser-mocks",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",
