@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { PrimaryButton } from './primary';
-export type { PrimaryButtonProps } from './primary';
-
 export { IconButtonGroup } from './icon_button_group';
 export type { IconButtonGroupProps, IconButton } from './icon_button_group';
 

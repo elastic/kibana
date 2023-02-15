@@ -29,13 +29,20 @@ export type Props = AllowedButtonProps &
 /**
  * A button which opens a popover of additional actions within the toolbar.
  */
-export const ToolbarPopover = ({ label, iconType, children, iconSide, ...popover }: Props) => {
+export const ToolbarPopover = ({
+  type,
+  label,
+  iconType,
+  children,
+  iconSide,
+  ...popover
+}: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onButtonClick = () => setIsOpen((status) => !status);
   const closePopover = () => setIsOpen(false);
 
-  const button = <ToolbarButton onClick={onButtonClick} {...{ label, iconSide, iconType }} />;
+  const button = <ToolbarButton onClick={onButtonClick} {...{ type, label, iconSide, iconType }} />;
 
   return (
     // the following ts-ignore is needed until typings/* directory is exposed for consumption to packages
