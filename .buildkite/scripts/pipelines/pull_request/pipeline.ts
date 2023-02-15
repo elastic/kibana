@@ -69,6 +69,8 @@ const uploadPipeline = (pipelineContent: string | object) => {
         /^x-pack\/test\/defend_workflows_cypress/,
         /^x-pack\/test\/security_solution_cypress/,
         /^fleet_packages\.json/, // It contains reference to prebuilt detection rules, we want to run security solution tests if it changes
+        /^package\.json/,
+        /^packages\/*/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
