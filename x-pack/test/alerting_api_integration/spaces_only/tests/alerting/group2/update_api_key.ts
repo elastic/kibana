@@ -46,8 +46,8 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
         .expect(200);
       expect(updatedAlert.api_key_owner).to.eql(null);
 
-      // Ensure revision is incremented when API key is updated
-      expect(updatedAlert.revision).to.eql(1);
+      // Ensure revision is not incremented when API key is updated
+      expect(updatedAlert.revision).to.eql(0);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -95,8 +95,8 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
           .expect(200);
         expect(updatedAlert.api_key_owner).to.eql(null);
 
-        // Ensure revision is incremented when API key is updated
-        expect(updatedAlert.revision).to.eql(1);
+        // Ensure revision is not incremented when API key is updated
+        expect(updatedAlert.revision).to.eql(0);
 
         // Ensure AAD isn't broken
         await checkAAD({

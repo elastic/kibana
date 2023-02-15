@@ -34,9 +34,6 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
   const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
   const setup = isPrebuilt ? '' : rule.params.setup;
 
-  // TODO: Add logic for bumping `revision` here as well, since it's skipped in the rulesClient.clone variant
-  // https://github.com/elastic/kibana/blob/a3220fe1b6f02f1d5fdd70e0f386cc19058e3f97/x-pack/plugins/alerting/server/rules_client/methods/clone.ts#L49-L61
-
   return {
     name: `${rule.name} [${DUPLICATE_TITLE}]`,
     tags: rule.tags,

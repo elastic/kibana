@@ -67,20 +67,27 @@ const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
 ];
 
 export const fieldsToExcludeFromRevisionUpdates: Array<keyof Rule> = [
-  'id',
-  'enabled',
-  'consumer',
+  'activeSnoozes',
   'alertTypeId',
-  'createdBy',
-  'updatedBy',
+  'apiKey',
+  'apiKeyOwner',
+  'consumer',
   'createdAt',
-  'updatedAt',
+  'createdBy',
+  'enabled',
   'executionStatus',
-  'monitoring',
+  'id',
+  'isSnoozedUntil',
   'lastRun',
+  'monitoring',
+  'muteAll',
+  'mutedInstanceIds',
   'nextRun',
   'revision',
   'running',
+  'snoozeSchedule',
+  'updatedBy',
+  'updatedAt',
 ];
 
 export class RulesClient {

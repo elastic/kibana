@@ -118,7 +118,7 @@ describe('updateApiKey()', () => {
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
-        revision: 1,
+        revision: 0,
         updatedBy: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [
@@ -179,7 +179,7 @@ describe('updateApiKey()', () => {
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
-        revision: 1,
+        revision: 0,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         actions: [

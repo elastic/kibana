@@ -318,8 +318,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(bulkSnoozeResponse.body.rules[0].snooze_schedule.length).to.eql(1);
       expect(bulkSnoozeResponse.body.rules[0].snooze_schedule[0].duration).to.eql(28800000);
 
-      // Ensure revision is updated TODO: TBD on if snooze actually should increment revision
-      expect(bulkSnoozeResponse.body.rules[0].revision).to.eql(1);
+      // Ensure revision is NOT updated
+      expect(bulkSnoozeResponse.body.rules[0].revision).to.eql(0);
 
       const bulkUnsnoozeResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
@@ -397,8 +397,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(bulkSnoozeResponse.body.errors).to.have.length(0);
       expect(bulkSnoozeResponse.body.rules).to.have.length(1);
       expect(bulkSnoozeResponse.body.rules[0].snooze_schedule.length).to.eql(5);
-      // Ensure revision is updated TODO: TBD on if snooze actually should increment revision
-      expect(bulkSnoozeResponse.body.rules[0].revision).to.eql(1);
+      // Ensure revision is NOT updated
+      expect(bulkSnoozeResponse.body.rules[0].revision).to.eql(0);
 
       // Try adding more than 5 schedules
       const bulkSnoozeError = await supertest
@@ -454,7 +454,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(bulkSnoozeResponse.body.errors).to.have.length(0);
       expect(bulkSnoozeResponse.body.rules).to.have.length(1);
       expect(bulkSnoozeResponse.body.rules[0].snooze_schedule).empty();
-      // Ensure revision isn't updated
+      // Ensure revision is NOT updated
       expect(bulkSnoozeResponse.body.rules[0].revision).to.eql(0);
 
       // Ensure AAD isn't broken

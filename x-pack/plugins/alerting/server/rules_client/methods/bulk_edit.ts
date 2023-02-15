@@ -435,10 +435,6 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
         skip_reason: 'RULE_NOT_MODIFIED',
       });
       return;
-    } else {
-      // All BulkEditOperation's result in a revision increment, so no need to check which fields have changed
-      // TODO: Open question on if snooze should increment revision
-      attributes.revision = rule.attributes.revision + 1;
     }
 
     // validate rule params
@@ -566,6 +562,7 @@ async function getUpdatedAttributesFromOperations(
         if (isAttributeModified) {
           ruleActions = modifiedAttributes;
           isAttributesUpdateSkipped = false;
+          attributes.revision = attributes.revision + 1;
         }
 
         // TODO https://github.com/elastic/kibana/issues/148414
@@ -635,6 +632,7 @@ async function getUpdatedAttributesFromOperations(
           attributes = {
             ...attributes,
             ...modifiedAttributes,
+            revision: attributes.revision + 1,
           };
           isAttributesUpdateSkipped = false;
         }
