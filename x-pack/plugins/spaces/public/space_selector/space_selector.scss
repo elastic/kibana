@@ -1,5 +1,6 @@
 .spcSpaceSelector {
   @include kibanaFullScreenGraphics;
+  position: relative;
 }
 
 .spcSpaceSelector__pageContent {
