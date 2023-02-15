@@ -5,16 +5,13 @@
  * 2.0.
  */
 
+import { findFormFieldByRowsLabelAndType, inputQuery } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 
 import { login } from '../../tasks/login';
 import { ROLES } from '../../test';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import { getRandomInt } from '../../tasks/helpers';
-import {
-  findFormFieldByRowsLabelAndType,
-  inputQuery,
-} from '@kbn/osquery-plugin/cypress/tasks/live_query';
 
 describe('ALL - Saved queries', () => {
   const randomNumber = getRandomInt();
