@@ -48,9 +48,9 @@ export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 // Extract current stack version from Env, to use as a default
-const currentVersion = env.packageInfo.version;
+export const currentVersion = env.packageInfo.version;
 export const nextMinor = new SemVer(currentVersion).inc('minor').format();
-const currentBranch = env.packageInfo.branch;
+export const currentBranch = env.packageInfo.branch;
 export const defaultKibanaIndex = '.kibana_migrator_tests';
 
 export interface KibanaMigratorTestKitParams {
