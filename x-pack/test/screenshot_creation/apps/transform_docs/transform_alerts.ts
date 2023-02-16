@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const commonScreenshots = getService('commonScreenshots');
   const testSubjects = getService('testSubjects');
   const transform = getService('transform');
-  const screenshotDirectories = ['ml_docs', 'transforms'];
+  const screenshotDirectories = ['transform_docs'];
   const pageObjects = getPageObjects(['triggersActionsUI']);
 
   let testTransformId = '';
