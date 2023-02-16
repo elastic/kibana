@@ -24,6 +24,8 @@ import type {
   ResultViewProps,
   ResultsViewProps,
 } from '@elastic/react-search-ui-views';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useSelectedDocument } from './document_context';
 
@@ -55,7 +57,10 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
   const columns: Array<EuiBasicTableColumn<{ name: string; value: string }>> = [
     {
       field: 'name',
-      name: 'name',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.engine.searchPreview.result.nameColumn',
+        { defaultMessage: 'Field' }
+      ),
       render: (name: string) => {
         return (
           <EuiText>
@@ -70,7 +75,10 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
     },
     {
       field: 'value',
-      name: 'value',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.engine.searchPreview.result.valueColumn',
+        { defaultMessage: 'Value' }
+      ),
       render: (value: string) => (
         <EuiText>
           <code>{value}</code>
@@ -84,10 +92,21 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
       <EuiPanel paddingSize="m">
         <EuiFlexGroup direction="column">
           <EuiFlexGroup justifyContent="spaceBetween">
-            <code>ID: {id}</code>
+            <code>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.engine.searchPreview.result.id"
+                defaultMessage="ID: {id}"
+                values={{ id }}
+              />
+            </code>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <code>from</code>
+                <code>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.engine.searchPreview.result.fromIndex"
+                    defaultMessage="from"
+                  />
+                </code>
                 <EuiBadge color="hollow">{index}</EuiBadge>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -104,10 +123,16 @@ export const InputView: React.FC<InputViewProps> = ({ getInputProps }) => {
     <EuiFlexGroup gutterSize="s">
       <EuiFieldSearch
         fullWidth
-        placeholder="search"
+        placeholder={i18n.translate(
+          'xpack.enterpriseSearch.content.engine.searchPreview.inputView.placeholder',
+          { defaultMessage: 'Search' }
+        )}
         {...getInputProps({})}
         isClearable
-        aria-label="Search Input"
+        aria-label={i18n.translate(
+          'xpack.enterpriseSearch.content.engine.searchPreview.inputView.label',
+          { defaultMessage: 'Search Input' }
+        )}
       />
       <EuiButton type="submit" color="primary" fill>
         Search
