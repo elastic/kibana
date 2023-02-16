@@ -151,7 +151,7 @@ describe('Background Search Session Management Table', () => {
 
   describe('fetching sessions data', () => {
     test('re-fetches data', async () => {
-      jest.useFakeTimers()
+      jest.useFakeTimers();
       const find = jest.fn();
       sessionsClient.find = find;
       mockConfig = {
