@@ -24,8 +24,9 @@ import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { transformActionVariables } from '../../lib/action_variables';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 
-jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
+
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../lib/action_variables', () => {
   const original = jest.requireActual('../../lib/action_variables');
@@ -36,6 +37,10 @@ jest.mock('../../lib/action_variables', () => {
 });
 
 describe('action_type_form', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   const mockedActionParamsFields = React.lazy(async () => ({
     default() {
       return (
