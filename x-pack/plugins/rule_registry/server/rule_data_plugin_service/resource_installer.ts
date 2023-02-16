@@ -24,7 +24,7 @@ import { ecsComponentTemplate } from '../../common/assets/component_templates/ec
 import type { IndexInfo } from './index_info';
 
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
-const TOTAL_FIELDS_LIMIT = 1900;
+const TOTAL_FIELDS_LIMIT = 2500;
 interface ConstructorOptions {
   getResourceName(relativeName: string): string;
   getClusterClient: () => Promise<ElasticsearchClient>;
@@ -170,7 +170,7 @@ export class ResourceInstaller {
     const aliases = indexInfo.basePattern;
     const backingIndices = indexInfo.getPatternForBackingIndices(namespace);
 
-    logger.debug(`Updating mappings of existing concrete indices for ${indexInfo.baseName}`);
+    logger.info(`Updating mappings of existing concrete indices for ${indexInfo.baseName}`);
 
     // Find all concrete indices for all namespaces of the index.
     const concreteIndices = await this.fetchConcreteIndices(aliases, backingIndices);
@@ -185,6 +185,7 @@ export class ResourceInstaller {
     const clusterClient = await getClusterClient();
 
     try {
+      console.log(`PUTTING updated field limit`);
       await clusterClient.indices.putSettings({
         index,
         body: {
