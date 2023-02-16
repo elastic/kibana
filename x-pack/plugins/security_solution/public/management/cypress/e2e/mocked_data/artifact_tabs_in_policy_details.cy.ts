@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { getEndpointSecurityPolicyManager } from '../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
-import { getArtifactsListTestsData } from '../fixtures/artifacts_page';
+import { getEndpointSecurityPolicyManager } from '../../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
+import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import {
   createPerPolicyArtifact,
   createArtifactList,
   removeAllArtifacts,
   removeExceptionsList,
   yieldFirstPolicyID,
-} from '../tasks/artifacts';
-import { loadEndpointDataForEventFiltersIfNeeded } from '../tasks/load_endpoint_data';
-import { login, loginWithCustomRole, loginWithRole, ROLE } from '../tasks/login';
-import { performUserActions } from '../tasks/perform_user_actions';
+} from '../../tasks/artifacts';
+import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
+import { login, loginWithCustomRole, loginWithRole, ROLE } from '../../tasks/login';
+import { performUserActions } from '../../tasks/perform_user_actions';
 
 const loginWithPrivilegeAll = () => {
   loginWithRole(ROLE.endpoint_security_policy_manager);

@@ -68,6 +68,7 @@ export const getNetworkTopCountriesColumns = (
               name: geoAttr,
               value: geo,
               type: 'keyword',
+              aggregatable: true,
             }}
           >
             <CountryFlagAndName countryCode={geo} />

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { login, loginWithRole, ROLE } from '../tasks/login';
+import { login, loginWithRole, ROLE } from '../../tasks/login';
 
-import { getArtifactsListTestsData } from '../fixtures/artifacts_page';
-import { removeAllArtifacts } from '../tasks/artifacts';
-import { performUserActions } from '../tasks/perform_user_actions';
-import { loadEndpointDataForEventFiltersIfNeeded } from '../tasks/load_endpoint_data';
+import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
+import { removeAllArtifacts } from '../../tasks/artifacts';
+import { performUserActions } from '../../tasks/perform_user_actions';
+import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
 
 const loginWithWriteAccess = (url: string) => {
   loginWithRole(ROLE.analyst_hunter);
