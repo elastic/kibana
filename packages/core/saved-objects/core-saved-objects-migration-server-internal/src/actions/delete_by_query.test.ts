@@ -74,6 +74,7 @@ describe('deleteByQuery', () => {
       query: deleteQuery,
       refresh: true,
       wait_for_completion: true,
+      conflicts: 'proceed',
     });
   });
 
