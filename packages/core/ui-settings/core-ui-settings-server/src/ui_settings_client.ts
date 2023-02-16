@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { UserProvidedValues, PublicUiSettingsParams, UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UserProvidedValues, UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { KibanaRequest } from '@kbn/core-http-server';
 
 /**
