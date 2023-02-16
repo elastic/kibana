@@ -13201,6 +13201,57 @@
               }
             }
           }
+        },
+        "dashboardMetrics": {
+          "properties": {
+            "dashboard_tag": {
+              "properties": {
+                "created_at": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "The time the tab was created"
+                  }
+                },
+                "linked_dashboards_count": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of associated dashboards"
+                  }
+                }
+              }
+            },
+            "dashboards": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "created_at": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The time the dashboard was created"
+                    }
+                  },
+                  "dashboard_id": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The dashboard saved object id"
+                    }
+                  },
+                  "error_message": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The relevant error message"
+                    }
+                  },
+                  "error_status_code": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The relevant error status code"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },

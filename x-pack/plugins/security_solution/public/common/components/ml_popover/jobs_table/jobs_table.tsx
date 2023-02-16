@@ -47,12 +47,17 @@ const JobName = ({ id, name, description, basePath }: JobNameProps) => {
     services: { ml },
   } = useKibana();
 
-  const jobUrl = useMlHref(ml, basePath, {
-    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-    pageState: {
-      jobId: id,
+  const jobUrl = useMlHref(
+    ml,
+    basePath,
+    {
+      page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+      pageState: {
+        jobId: id,
+      },
     },
-  });
+    [id]
+  );
 
   return (
     <JobNameWrapper>

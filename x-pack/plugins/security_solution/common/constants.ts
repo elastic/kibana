@@ -61,6 +61,7 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
 export const SECURITY_FEATURE_ID = 'Security' as const;
+export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
 export const DEFAULT_RELATIVE_DATE_THRESHOLD = 24 as const;
 
@@ -498,7 +499,3 @@ export const DEFAULT_DETECTION_PAGE_FILTERS = [
     fieldName: 'host.name',
   },
 ];
-
-export const CELL_ACTIONS_DEFAULT_TRIGGER = 'security-solution-default-cellActions';
-export const CELL_ACTIONS_TIMELINE_TRIGGER = 'security-solution-timeline-cellActions';
-export const CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER = 'security-solution-details-flyout-cellActions';

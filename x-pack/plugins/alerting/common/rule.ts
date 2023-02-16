@@ -202,6 +202,7 @@ export interface ActionVariable {
   description: string;
   deprecated?: boolean;
   useWithTripleBracesInTemplates?: boolean;
+  usesPublicBaseUrl?: boolean;
 }
 
 export interface RuleMonitoringHistory extends SavedObjectAttributes {
