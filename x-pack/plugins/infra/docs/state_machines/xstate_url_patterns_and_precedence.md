@@ -89,13 +89,21 @@ Within the Log Stream we have the following state held in the URL (and managed b
         - Time
         - Tiebreaker
 
+#### Warning!
+
+Due to legacy reasons the `logFilter` key should be initialised before the `logPosition` key. Otherwise the `logPosition` key might be overwritten before the `logFilter` code has had a chance to read from the key. 
+
 #### Backwards compatibility
 
-The Log Stream does have some legacy URL state that needs to be translated for backwards compatibility. Here is an example of the previous legacy format:
+The Log Stream does have some legacy URL state that needs to be translated for backwards compatibility. Here is an example of the previous legacy formats:
 
 - Log filter
     - Language
     - Query
+
+- Log filter (this version is older than language / query)
+    - Kind
+    - Expression
 
 - Log position
     - Start (now log filter > time range > from)
