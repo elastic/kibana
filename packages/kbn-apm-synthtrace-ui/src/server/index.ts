@@ -6,16 +6,26 @@
  * Side Public License, v 1.
  */
 
-import express from 'express';
+import express, { Request } from 'express';
+import { runSynthraceScenario } from './generator';
+import type { SynthtraceScenario } from '../typings';
 
 const app = express();
+app.use(express.json());
 
 app.get('/api/ping', (req, resp) => {
   resp.send('pong');
 });
 
-app.post('/api/run_scenario', (req, resp) => {
-  resp.send(200);
+app.post('/api/run_scenario', async (req: Request<{}, {}, SynthtraceScenario>, resp, next) => {
+  try {
+    await runSynthraceScenario({ scenario: req.body });
+    resp.sendStatus(200);
+  } catch (e) {
+    const err = e as Error;
+    resp.status(500);
+    resp.send({ error: err.message });
+  }
 });
 
 app.listen(4000, () => console.log('Server is running on port 4000'));

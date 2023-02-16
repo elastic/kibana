@@ -50,7 +50,9 @@ function generateTrace({
 
     const children =
       item.children?.flatMap((child) => {
-        return times(child.repeat ?? 1, () => generate(child));
+        return times(child.repeat || 1, () => {
+          return generate(child);
+        });
       }) || [];
 
     const trace:
@@ -83,6 +85,9 @@ export async function runSynthraceScenario({ scenario }: { scenario: SynthtraceS
   if (!entryTransaction) {
     throw new Error('Entry transaction not found');
   }
+
+  await synthtraceEsClient.clean();
+
   const packageVersion = await kibanaClient.fetchLatestApmPackageVersion();
 
   await kibanaClient.installApmPackage(packageVersion);
@@ -108,13 +113,8 @@ export async function runSynthraceScenario({ scenario }: { scenario: SynthtraceS
     .generator((timestamp) => {
       return generateTrace({ timestamp, entryTransaction, serviceInstances });
     });
-  try {
-    await synthtraceEsClient.index(
-      Readable.from(Array.from(traces).flatMap((event) => event.serialize()))
-    );
-  } catch (e) {
-    console.log('### caue  runSynthrace  e', e);
-  }
 
-  console.log('### caue  serviceInstaces  serviceInstaces', Array.from(traces).length);
+  await synthtraceEsClient.index(
+    Readable.from(Array.from(traces).flatMap((event) => event.serialize()))
+  );
 }
