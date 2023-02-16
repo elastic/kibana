@@ -89,7 +89,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
       url: '',
       anonymousAccessParameters: null,
       showPublicUrlSwitch: false,
-      showWarningButton: true, // this defaults to `true` because `exportUrlAs` defaults to EXPORT_URL_AS_SNAPSHOT
+      showWarningButton: Boolean(this.props.snapshotShareWarning),
     };
   }
 
@@ -315,7 +315,9 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
   private handleExportUrlAs = (optionId: string) => {
     this.setState(
       {
-        showWarningButton: (optionId as ExportUrlAsType) === ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
+        showWarningButton:
+          Boolean(this.props.snapshotShareWarning) &&
+          (optionId as ExportUrlAsType) === ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
         exportUrlAs: optionId as ExportUrlAsType,
       },
       this.setUrl
