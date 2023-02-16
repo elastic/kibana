@@ -10,14 +10,11 @@ Helper to generate and index documents for using in Kibana functional tests
     - [methods](#methods)
       - [**indexListOfDocuments**](#indexlistofdocuments)
       - [**indexGeneratedDocuments**](#indexgenerateddocuments)
+      - [**indexEnhancedDocuments**](#indexenhanceddocuments)
   - [Utils](#utils)
     - [**generateDocuments**](#generatedocuments)
-      - [Simple JSON object](#simple-json-object)
-        - [Examples](#examples)
-      - [Seed callback](#seed-callback)
-        - [Examples](#examples-1)
     - [**enhanceDocument**](#enhancedocument)
-      - [Examples](#examples-2)
+    - [**enhanceDocuments**](#enhancedocuments)
   - [Usage](#usage)
     - [create test query rule that queries indexed documents within a test](#create-test-query-rule-that-queries-indexed-documents-within-a-test)
 
@@ -146,170 +143,24 @@ Method receives same parameters as [generateDocuments](#generateDocuments) util.
 
 ```
 
+#### **indexEnhancedDocuments**
+
+Will index list of enhanced documents to `foo_bar` index as defined in `dataGeneratorFactory` params
+Method receives same parameters as [enhanceDocuments](#enhanceDocuments) util.
+
+```ts
+    await indexEnhancedDocuments({
+        interval: ['1996-02-15T13:02:37.531Z', '2000-02-15T13:02:37.531Z'],
+        documents: [{ foo: 'bar' }, { foo: 'bar-1' }, { foo: 'bar-2' }]
+    })
+
+```
+
 ## Utils
 
 ### **generateDocuments**
 
-Util `generateDocuments` can generate list of documents based on basic seed JSON or callback
-
-#### Simple JSON object
-
-Pass json object as document example and it will generate specified number of these documents.
-Option `enhance` will randomly generated `id` and `@timestamp` in specified interval or current time
-
- | Property        | Description                                            | Type   |
- | --------------- | ------------------------------------------------------ | ------ |
- | docsCount       | number of documents to generate                        | `number` |
- | document       | JSON of document to replicate           | `Record<string, unknown>` |
- | enhance       | enhance document with {@link enhanceDocument} function if true          | `boolean` _(optional)_|
- | interval        | interval in which generate documents, defined by '@timestamp' field | `[string | Date, string | Date]` _(optional)_ |
-
-
- ##### Examples
-
- 1. Generate 10 documents with random id, timestamp in interval between '2020-10-28T07:30:00.000Z', '2020-10-30T07:30:00.000Z', by using `enhance=true`
-
- ```ts
-
-    const documents = generateDocuments({
-        docsCount: 10,
-        interval: ['2020-10-28T07:30:00.000Z', '2020-10-30T07:30:00.000Z'],
-        document: { foo: "bar" },
-        enhance: true
-    })
- ```
-
-<details>
-<summary>Generated docs</summary>
-
-```JSON
-    [
-        {
-            "foo": "bar",
-            "id": "f07df596-65ec-4ab1-b0b2-f3b69558ed26",
-            "@timestamp": "2020-10-29T07:10:51.989Z"
-        },
-        {
-            "foo": "bar",
-            "id": "e07614f9-1dc5-4849-90c4-31362bbdf8d0",
-            "@timestamp": "2020-10-30T00:32:48.987Z"
-        },
-        {
-            "foo": "bar",
-            "id": "e03a5b12-77e6-4aa3-b0be-fbe5b0843f07",
-            "@timestamp": "2020-10-29T03:40:35.318Z"
-        },
-        {
-            "foo": "bar",
-            "id": "7ed3a989-8319-4630-a5b9-78aad1dad61d",
-            "@timestamp": "2020-10-28T14:38:40.180Z"
-        },
-        {
-            "foo": "bar",
-            "id": "9c7c1771-d0dd-41be-b9e1-30537d37472a",
-            "@timestamp": "2020-10-30T05:47:35.240Z"
-        },
-        {
-            "foo": "bar",
-            "id": "bd643e54-47c4-48a5-89e5-8ee84909f81f",
-            "@timestamp": "2020-10-29T07:13:01.925Z"
-        },
-        {
-            "foo": "bar",
-            "id": "fe32029a-52c0-4d3f-8afb-1e8091000ee5",
-            "@timestamp": "2020-10-29T07:26:04.694Z"
-        },
-        {
-            "foo": "bar",
-            "id": "25c705aa-08c6-4201-a236-e8c312c46ede",
-            "@timestamp": "2020-10-29T00:31:39.135Z"
-        },
-        {
-            "foo": "bar",
-            "id": "e03b2e3f-d0f5-4b13-8fa8-0eab0cbcc2fc",
-            "@timestamp": "2020-10-29T12:51:42.669Z"
-        },
-        {
-            "foo": "bar",
-            "id": "06dbbaf9-0e56-49f6-b6e9-e7c0968be77c",
-            "@timestamp": "2020-10-29T17:58:09.648Z"
-        }
-    ]
-```
-
-</details>
-
- 2. Generate 3 identical documents `{foo: bar}` by using default `enhance=false`
-
- ```ts
-
-    const documents = generateDocuments({
-        docsCount: 3,
-        document: { foo: "bar" }
-    })
- ```
-
-<details>
-<summary>Generated docs</summary>
-
-    ```JSON
-        [
-            {
-                "foo": "bar"
-            },
-            {
-                "foo": "bar"
-            },
-            {
-                "foo": "bar"
-            }
-        ]
-    ```
-
-</details>
-
- 3. Generate 4 documents `{foo: bar}` by using `enhance=true` without interval
-
- ```ts
-
-    const documents = generateDocuments({
-        enhance: true,
-        docsCount: 4,
-        document: { foo: "bar" }
-    })
- ```
-
-<details>
-<summary>Generated docs</summary>
-
-    ```JSON
-        [
-            {
-                "foo": "bar",
-                "id": "73ec5c8d-3123-4faa-966c-9c6ef7c812b6",
-                "@timestamp": "2023-02-15T17:37:50.824Z"
-            },
-            {
-                "foo": "bar",
-                "id": "f9435e8b-faa8-415f-a3af-cf4ecfaca1cf",
-                "@timestamp": "2023-02-15T17:37:50.824Z"
-            },
-            {
-                "foo": "bar",
-                "id": "55b526ce-d2f2-47c7-a01e-0b23d6bc7de1",
-                "@timestamp": "2023-02-15T17:37:50.824Z"
-            },
-            {
-                "foo": "bar",
-                "id": "eb4a33d1-fa7b-4a57-8ab5-ba245fac5c20",
-                "@timestamp": "2023-02-15T17:37:50.824Z"
-            }
-        ]
-    ```
-
-</details>
-
-#### Seed callback
+Util `generateDocuments` can generate list of documents based on basic seed function
 
  Seed callback will receive sequential number of document of document, generated id, timestamp.
  Can be used to generate custom document with large set of options depends on needs. See examples below.
@@ -318,9 +169,9 @@ Option `enhance` will randomly generated `id` and `@timestamp` in specified inte
  | --------------- | ------------------------------------------------------ | ------ |
  | docsCount       | number of documents to generate                        | `number` |
  | seed       | function that receives sequential number of document, generated id, timestamp as arguments and can used it create a document                    | `(index: number, id: string, timestamp: string) => Document` |
- | interval        | interval in which generate documents, defined by '@timestamp' field | `[string | Date, string | Date]` _(optional)_ |
+ | interval        | interval in which generate documents, defined by '@timestamp' field | `[string \| Date string \| Date]` _(optional)_ |
 
- ##### Examples
+Examples:
 
  1. Generate 10 documents with random id, timestamp in interval between '2020-10-28T07:30:00.000Z', '2020-10-30T07:30:00.000Z', and field `seq` that represents sequential number of document
 
@@ -522,7 +373,7 @@ Adds generated `uuidv4` id and current time as `@timestamp` to document if `id`,
 | timestamp       | timestamp for document                   | `string` _(optional)_ |
 | document        | document to enhance | `Record<string, unknown>` |
 
-#### Examples
+Examples:
 
 1. Enhance document with generated `uuidv4` id and current time as `@timestamp`
 
@@ -587,6 +438,119 @@ Adds generated `uuidv4` id and current time as `@timestamp` to document if `id`,
     ```
     </details>
 
+### **enhanceDocuments**
+
+
+
+Adds generated `uuidv4` `id` property to list of documents if `id` parameter is not specified.
+Adds `@timestamp` in defined interval to list of documents. If it's not specified,  `@timestamp`  will be added as current time
+
+| Property        | Description                                            | Type   |
+| --------------- | ------------------------------------------------------ | ------ |
+| documents        | documents to enhance | `Record<string, unknown>[]` |
+| id       | id for documents                      | `string` _(optional)_ |
+| interval        | interval in which generate documents, defined by '@timestamp' field | `[string \| Date string \| Date]` _(optional)_ |
+
+Examples:
+
+1. Enhance documents with generated `uuidv4` id and current time as `@timestamp`
+
+    ```ts
+        const documents = enhanceDocuments({
+            documents: [{ foo: 'bar' }, { foo: 'bar-1' }, { foo: 'bar-2' }]
+        });
+    ```
+    <details>
+    <summary>documents</summary>
+
+    ```JSON
+        [
+            {
+                "foo": "bar",
+                "id": "c55ddd6b-3cf2-4ebf-94d6-4eeeb4e5b655",
+                "@timestamp": "2023-02-16T16:43:13.573Z"
+            },
+            {
+                "foo": "bar-1",
+                "id": "61b157b9-5f1f-4d99-a5bf-072069f5139d",
+                "@timestamp": "2023-02-16T16:43:13.573Z"
+            },
+            {
+                "foo": "bar-2",
+                "id": "04929927-6d9e-4ccc-b083-250e3fe2d7a7",
+                "@timestamp": "2023-02-16T16:43:13.573Z"
+            }
+        ]
+    ```
+
+    </details>
+
+2. Enhance document with generated `uuidv4` id and timestamp in predefined interval
+
+    ```ts
+        const documents = enhanceDocuments({
+            interval: ['1996-02-15T13:02:37.531Z', '2000-02-15T13:02:37.531Z'],
+            documents: [{ foo: 'bar' }, { foo: 'bar-1' }, { foo: 'bar-2' }]
+        });
+    ```
+    <details>
+    <summary>documents</summary>
+
+    ```JSON
+        [
+            {
+                "foo": "bar",
+                "id": "883a67cb-0a57-4711-bdf9-e8a394a52460",
+                "@timestamp": "1998-07-04T15:16:46.587Z"
+            },
+            {
+                "foo": "bar-1",
+                "id": "70691d9e-1030-412f-8ae1-c6db50e90e91",
+                "@timestamp": "1998-05-15T07:00:52.339Z"
+            },
+            {
+                "foo": "bar-2",
+                "id": "b2140328-5cc4-4532-947e-30b8fd830ed7",
+                "@timestamp": "1999-09-01T21:50:38.957Z"
+            }
+        ]
+    ```
+
+    </details>
+    
+3. Enhance documents with predefined id and and current time as `@timestamp` 
+
+    ```ts
+        const documents = enhanceDocuments({
+            id: 'test-id',
+            documents: [{ foo: 'bar' }, { foo: 'bar-1' }, { foo: 'bar-2' }]
+        });   
+    ```
+    <details>
+    <summary>documents</summary>
+
+    ```JSON
+        [
+            {
+                "foo": "bar",
+                "id": "test-id",
+                "@timestamp": "2023-02-16T16:43:13.574Z"
+            },
+            {
+                "foo": "bar-1",
+                "id": "test-id",
+                "@timestamp": "2023-02-16T16:43:13.574Z"
+            },
+            {
+                "foo": "bar-2",
+                "id": "test-id",
+                "@timestamp": "2023-02-16T16:43:13.574Z"
+            }
+        ]
+
+    ```
+    </details>
+
 ## Usage
 
 ### create test query rule that queries indexed documents within a test
@@ -625,18 +589,18 @@ There are few possible ways to do this
 
 3. Use utility method `getKQLQueryFromDocumentList` that will create query from all ids in generated documents
 
-```ts
-     const { documents } = await indexGeneratedDocuments({
-        docsCount: 4,
-        document: { foo: 'bar' },
-        enhance: true,
-      });
+    ```ts
+        const { documents } = await indexGeneratedDocuments({
+            docsCount: 4,
+            document: { foo: 'bar' },
+            enhance: true,
+        });
 
-      const query = getKQLQueryFromDocumentList(documents);
-      const rule = {
-        ...getRuleForSignalTesting(['ecs_non_compliant']),
-        query,
-      };
-```
+        const query = getKQLQueryFromDocumentList(documents);
+        const rule = {
+            ...getRuleForSignalTesting(['ecs_non_compliant']),
+            query,
+        };
+    ```
 
-util will generate the following query: `(id: "f6ca3ee1-407c-4685-a94b-11ef4ed5136b" or id: "2a7358b2-8cad-47ce-83b7-e4418c266f3e" or id: "9daec569-0ba1-4c46-a0c6-e340cee1c5fb" or id: "b03c2fdf-0ca1-447c-b8c6-2cc5a663ffe2")`, that will include all generated documents
+    util will generate the following query: `(id: "f6ca3ee1-407c-4685-a94b-11ef4ed5136b" or id: "2a7358b2-8cad-47ce-83b7-e4418c266f3e" or id: "9daec569-0ba1-4c46-a0c6-e340cee1c5fb" or id: "b03c2fdf-0ca1-447c-b8c6-2cc5a663ffe2")`, that will include all generated documents

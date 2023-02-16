@@ -5,4 +5,6 @@
  * 2.0.
  */
 
+export type IndexingInterval = [string | Date, string | Date];
+
 export type Document = Record<string, unknown>;
