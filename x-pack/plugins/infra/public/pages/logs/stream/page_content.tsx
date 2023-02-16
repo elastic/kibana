@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { TimeRange } from '@kbn/es-query';
 import { useActor } from '@xstate/react';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { VisiblePositions } from '../../../observability_logs/log_stream_position_state';
+import { TimeKey } from '../../../../common/time';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import {
-  LogStreamPageSend,
+  LogStreamPageCallbacks,
   LogStreamPageState,
   useLogStreamPageStateContext,
 } from '../../../observability_logs/log_stream_page/state';
@@ -22,18 +25,48 @@ import { LogStreamPageContentProviders } from './page_providers';
 export const ConnectedStreamPageContent: React.FC = () => {
   const logStreamPageStateService = useLogStreamPageStateContext();
   const [logStreamPageState, logStreamPageSend] = useActor(logStreamPageStateService);
+
+  const pageStateCallbacks = useMemo(() => {
+    return {
+      updateTimeRange: (timeRange: Partial<TimeRange>) => {
+        logStreamPageSend({
+          type: 'UPDATE_TIME_RANGE',
+          timeRange,
+        });
+      },
+      jumpToTargetPosition: (targetPosition: TimeKey | null) => {
+        logStreamPageSend({ type: 'JUMP_TO_TARGET_POSITION', targetPosition });
+      },
+      jumpToTargetPositionTime: (time: number) => {
+        logStreamPageSend({ type: 'JUMP_TO_TARGET_POSITION', targetPosition: { time } });
+      },
+      reportVisiblePositions: (visiblePositions: VisiblePositions) => {
+        logStreamPageSend({
+          type: 'REPORT_VISIBLE_POSITIONS',
+          visiblePositions,
+        });
+      },
+      startLiveStreaming: () => {
+        logStreamPageSend({ type: 'UPDATE_REFRESH_INTERVAL', refreshInterval: { pause: false } });
+      },
+      stopLiveStreaming: () => {
+        logStreamPageSend({ type: 'UPDATE_REFRESH_INTERVAL', refreshInterval: { pause: true } });
+      },
+    };
+  }, [logStreamPageSend]);
+
   return (
     <StreamPageContentForState
       logStreamPageState={logStreamPageState}
-      logStreamPageSend={logStreamPageSend}
+      logStreamPageCallbacks={pageStateCallbacks}
     />
   );
 };
 
 export const StreamPageContentForState: React.FC<{
   logStreamPageState: LogStreamPageState;
-  logStreamPageSend: LogStreamPageSend;
-}> = ({ logStreamPageState, logStreamPageSend }) => {
+  logStreamPageCallbacks: LogStreamPageCallbacks;
+}> = ({ logStreamPageState, logStreamPageCallbacks }) => {
   if (
     logStreamPageState.matches('uninitialized') ||
     logStreamPageState.matches({ hasLogViewIndices: 'uninitialized' }) ||
@@ -48,11 +81,11 @@ export const StreamPageContentForState: React.FC<{
     return (
       <LogStreamPageContentProviders
         logStreamPageState={logStreamPageState}
-        logStreamPageSend={logStreamPageSend}
+        logStreamPageCallbacks={logStreamPageCallbacks}
       >
         <StreamPageLogsContentForState
           logStreamPageState={logStreamPageState}
-          logStreamPageSend={logStreamPageSend}
+          logStreamPageCallbacks={logStreamPageCallbacks}
         />
       </LogStreamPageContentProviders>
     );

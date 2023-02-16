@@ -33,7 +33,7 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useLogViewContext } from '../../../hooks/use_log_view';
 import {
   LogStreamPageActorRef,
-  LogStreamPageSend,
+  LogStreamPageCallbacks,
 } from '../../../observability_logs/log_stream_page/state';
 import { type ParsedQuery } from '../../../observability_logs/log_stream_query_state';
 import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
@@ -46,8 +46,8 @@ const PAGE_THRESHOLD = 2;
 
 export const StreamPageLogsContent = React.memo<{
   filterQuery: ParsedQuery;
-  logStreamPageSend: LogStreamPageSend;
-}>(({ filterQuery, logStreamPageSend }) => {
+  logStreamPageCallbacks: LogStreamPageCallbacks;
+}>(({ filterQuery, logStreamPageCallbacks }) => {
   const {
     data: {
       query: { queryString },
@@ -295,13 +295,18 @@ type InitializedLogStreamPageState = MatchedStateFromActor<
 
 export const StreamPageLogsContentForState = React.memo<{
   logStreamPageState: InitializedLogStreamPageState;
-  logStreamPageSend: LogStreamPageSend;
-}>(({ logStreamPageState, logStreamPageSend }) => {
+  logStreamPageCallbacks: LogStreamPageCallbacks;
+}>(({ logStreamPageState, logStreamPageCallbacks }) => {
   const {
     context: { parsedQuery },
   } = logStreamPageState;
 
-  return <StreamPageLogsContent filterQuery={parsedQuery} logStreamPageSend={logStreamPageSend} />;
+  return (
+    <StreamPageLogsContent
+      filterQuery={parsedQuery}
+      logStreamPageCallbacks={logStreamPageCallbacks}
+    />
+  );
 });
 
 const LogPageMinimapColumn = euiStyled.div`

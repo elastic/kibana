@@ -6,11 +6,11 @@
  */
 
 import createContainer from 'constate';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { VisiblePositions } from '../../../observability_logs/log_stream_position_state/src/types';
 import {
   LogStreamPageActorRef,
-  LogStreamPageSend,
+  LogStreamPageCallbacks,
 } from '../../../observability_logs/log_stream_page/state';
 import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
 import { TimeKey } from '../../../../common/time';
@@ -52,24 +52,42 @@ type UpdateDateRangeFn = (
 
 export const useLogPositionState = ({
   logStreamPageState,
-  logStreamPageSend,
+  logStreamPageCallbacks,
 }: {
   logStreamPageState: InitializedLogStreamPageState;
-  logStreamPageSend: LogStreamPageSend;
+  logStreamPageCallbacks: LogStreamPageCallbacks;
 }): LogPositionStateParams & LogPositionCallbacks => {
   const dateRange = useMemo(() => getLegacyDateRange(logStreamPageState), [logStreamPageState]);
 
   const { refreshInterval, targetPosition, visiblePositions, latestPosition } =
     logStreamPageState.context;
 
-  const updateDateRange = useCallback<UpdateDateRangeFn>(
-    (newDateRange: Partial<Pick<DateRange, 'startDateExpression' | 'endDateExpression'>>) =>
-      logStreamPageSend({
-        type: 'UPDATE_TIME_RANGE',
-        timeRange: { from: newDateRange.startDateExpression, to: newDateRange.endDateExpression },
-      }),
-    [logStreamPageSend]
-  );
+  const actions = useMemo(() => {
+    const {
+      updateTimeRange,
+      jumpToTargetPosition,
+      jumpToTargetPositionTime,
+      reportVisiblePositions,
+      startLiveStreaming,
+      stopLiveStreaming,
+    } = logStreamPageCallbacks;
+
+    return {
+      jumpToTargetPosition,
+      jumpToTargetPositionTime,
+      reportVisiblePositions,
+      startLiveStreaming,
+      stopLiveStreaming,
+      updateDateRange: (
+        newDateRange: Partial<Pick<DateRange, 'startDateExpression' | 'endDateExpression'>>
+      ) => {
+        updateTimeRange({
+          from: newDateRange.startDateExpression,
+          to: newDateRange.endDateExpression,
+        });
+      },
+    };
+  }, [logStreamPageCallbacks]);
 
   const visibleTimeInterval = useMemo(
     () =>
@@ -77,30 +95,6 @@ export const useLogPositionState = ({
         ? { start: visiblePositions.startKey.time, end: visiblePositions.endKey.time }
         : null,
     [visiblePositions.startKey, visiblePositions.endKey]
-  );
-
-  const actions = useMemo(
-    () => ({
-      jumpToTargetPosition: (_targetPosition: TimeKey | null) => {
-        logStreamPageSend({ type: 'JUMP_TO_TARGET_POSITION', targetPosition: _targetPosition });
-      },
-      jumpToTargetPositionTime: (time: number) => {
-        logStreamPageSend({ type: 'JUMP_TO_TARGET_POSITION', targetPosition: { time } });
-      },
-      reportVisiblePositions: (_visiblePositions: VisiblePositions) => {
-        logStreamPageSend({
-          type: 'REPORT_VISIBLE_POSITIONS',
-          visiblePositions: _visiblePositions,
-        });
-      },
-      startLiveStreaming: () => {
-        logStreamPageSend({ type: 'UPDATE_REFRESH_INTERVAL', refreshInterval: { pause: false } });
-      },
-      stopLiveStreaming: () => {
-        logStreamPageSend({ type: 'UPDATE_REFRESH_INTERVAL', refreshInterval: { pause: true } });
-      },
-    }),
-    [logStreamPageSend]
   );
 
   return {
@@ -119,7 +113,6 @@ export const useLogPositionState = ({
 
     // actions
     ...actions,
-    updateDateRange,
   };
 };
 

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { TimeRange } from '@kbn/es-query';
+import { TimeKey } from '../../../../../common/time';
 import type { LogViewStatus } from '../../../../../common/log_views';
 import {
   JumpToTargetPositionEvent,
   LogStreamPositionContext,
   ReportVisiblePositionsEvent,
+  VisiblePositions,
 } from '../../../log_stream_position_state';
 import { LogStreamPositionNotificationEvent } from '../../../log_stream_position_state/src/notifications';
 import {
@@ -102,3 +105,12 @@ export type LogStreamPageTypestate =
 
 export type LogStreamPageStateValue = LogStreamPageTypestate['value'];
 export type LogStreamPageContext = LogStreamPageTypestate['context'];
+
+export interface LogStreamPageCallbacks {
+  updateTimeRange: (timeRange: Partial<TimeRange>) => void;
+  jumpToTargetPosition: (targetPosition: TimeKey | null) => void;
+  jumpToTargetPositionTime: (time: number) => void;
+  reportVisiblePositions: (visiblePositions: VisiblePositions) => void;
+  startLiveStreaming: () => void;
+  stopLiveStreaming: () => void;
+}
