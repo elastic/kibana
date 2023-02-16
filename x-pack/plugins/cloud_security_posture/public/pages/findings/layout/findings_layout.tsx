@@ -176,28 +176,6 @@ const baseColumns = [
     ),
   },
   {
-    field: 'cluster_id',
-    name: (
-      <ColumnNameWithTooltip
-        columnName={i18n.translate(
-          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
-          { defaultMessage: 'Belongs To' }
-        )}
-        tooltipContent={i18n.translate(
-          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
-          { defaultMessage: 'Kubernetes Cluster ID or Cloud Account Name' }
-        )}
-      />
-    ),
-    sortable: true,
-    truncateText: true,
-    render: (section: string) => (
-      <EuiToolTip content={section} anchorClassName="eui-textTruncate">
-        <>{section}</>
-      </EuiToolTip>
-    ),
-  },
-  {
     field: '@timestamp',
     align: 'right',
     width: '10%',

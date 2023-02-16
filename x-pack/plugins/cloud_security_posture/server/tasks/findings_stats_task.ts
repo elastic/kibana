@@ -14,7 +14,7 @@ import {
 import { SearchRequest } from '@kbn/data-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import { getIdentifierRuntimeMapping } from '../lib/get_identifier_runtime_mapping';
+import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { FindingsStatsTaskResult, TaskHealthStatus, ScoreByPolicyTemplateBucket } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
