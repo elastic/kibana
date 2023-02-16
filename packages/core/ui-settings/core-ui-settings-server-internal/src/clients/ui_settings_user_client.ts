@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { IUserUiSettingsClient } from '@kbn/core-ui-settings-server/src/ui_settings_client';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
@@ -14,6 +13,7 @@ import { CannotOverrideError } from '../ui_settings_errors';
 import { Cache } from '../cache';
 import { UiSettingsServiceOptions } from '../types';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 interface ReadOptions {
   autoCreateOrUpgradeIfMissing?: boolean;
@@ -27,9 +27,9 @@ interface UserProvidedValue<T = unknown> {
 type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
 
 /**
- * Common logic for setting / removing keys in a {@link IUiSettingsClient} implementation
+ * Common logic for setting / removing keys in a {@link IUserUiSettingsClient} implementation
  */
-export class UiSettingsUserClient extends BaseUiSettingsClient implements IUserUiSettingsClient {
+export class UiSettingsUserClient extends BaseUiSettingsClient {
   private readonly type: UiSettingsServiceOptions['type'];
   private readonly id: UiSettingsServiceOptions['id'];
   private readonly buildNum: UiSettingsServiceOptions['buildNum'];

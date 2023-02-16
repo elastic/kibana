@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { IUiSettingsClient } from './ui_settings_client';
+export type { IUiSettingsClient, IUserUiSettingsClient } from './ui_settings_client';
 export type { UiSettingsServiceSetup, UiSettingsServiceStart } from './contracts';
 export type { UiSettingsRequestHandlerContext } from './request_handler_context';
