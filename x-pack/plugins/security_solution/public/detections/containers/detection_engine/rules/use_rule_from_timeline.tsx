@@ -41,11 +41,6 @@ type SetRuleQuery = ({
   queryBar: FieldValueQueryBar;
 }) => void;
 
-/**
- * When returned property updated === true,
- * the index and queryBar properties have been updated from timeline data
- * queried either from id in the url param or by passing a timeline to returned callback onOpenTimeline
- */
 export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimeline => {
   const dispatch = useDispatch();
   const { addError } = useAppToasts();

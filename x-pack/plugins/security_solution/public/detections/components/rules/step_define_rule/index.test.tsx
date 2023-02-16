@@ -11,7 +11,24 @@ import { shallow } from 'enzyme';
 import { StepDefineRule, aggregatableFields } from '.';
 import { stepDefineDefaultValue } from '../../../pages/detection_engine/rules/utils';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-
+import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
+import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
+import { render } from '@testing-library/react';
+import { TestProviders } from '../../../../common/mock';
+jest.mock('../../../../common/components/query_bar', () => {
+  return {
+    QueryBar: jest.fn(({ filterQuery }) => {
+      return <div data-test-subj="query-bar">{`${filterQuery.query} ${filterQuery.language}`}</div>;
+    }),
+  };
+});
+jest.mock('../eql_query_bar', () => {
+  return {
+    EqlQueryBar: jest.fn(({ filterQuery }) => {
+      return <div data-test-subj="eql-bar">{`${filterQuery.query} ${filterQuery.language}`}</div>;
+    }),
+  };
+});
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector', () => {
   const actual = jest.requireActual('../../../../common/hooks/use_selector');
@@ -61,6 +78,9 @@ jest.mock('react-redux', () => {
   };
 });
 
+jest.mock('../../../../common/utils/use_set_field_value_cb');
+jest.mock('../../../containers/detection_engine/rules/use_rule_from_timeline');
+
 test('aggregatableFields', function () {
   expect(
     aggregatableFields([
@@ -108,7 +128,16 @@ test('aggregatableFields with aggregatable: true', function () {
   ]);
 });
 
+const mockUseSetFieldValueWithCallback = useSetFieldValueWithCallback as jest.Mock;
+const mockUseRuleFromTimeline = useRuleFromTimeline as jest.Mock;
+const setRuleTypeCallback = jest.fn();
+const onOpenTimeline = jest.fn();
 describe('StepDefineRule', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseSetFieldValueWithCallback.mockReturnValue(setRuleTypeCallback);
+    mockUseRuleFromTimeline.mockReturnValue({ onOpenTimeline, loading: false });
+  });
   it('renders correctly', () => {
     const wrapper = shallow(
       <StepDefineRule
@@ -121,5 +150,67 @@ describe('StepDefineRule', () => {
     );
 
     expect(wrapper.find('Form[data-test-subj="stepDefineRule"]')).toHaveLength(1);
+  });
+
+  const kqlQuery = {
+    index: ['.alerts-security.alerts-default', 'logs-*', 'packetbeat-*'],
+    queryBar: {
+      filters: [],
+      query: {
+        query: 'host.name:*',
+        language: 'kuery',
+      },
+      saved_id: null,
+    },
+  };
+  const eqlQuery = {
+    index: ['.alerts-security.alerts-default', 'logs-*', 'packetbeat-*'],
+    queryBar: {
+      filters: [],
+      query: {
+        query: 'process where true',
+        language: 'eql',
+      },
+      saved_id: null,
+    },
+  };
+  it('handleSetRuleFromTimeline correctly updates the query', () => {
+    mockUseRuleFromTimeline.mockImplementation((handleSetRuleFromTimeline) => {
+      handleSetRuleFromTimeline(kqlQuery);
+      return { onOpenTimeline, loading: false };
+    });
+    const { getAllByTestId } = render(
+      <TestProviders>
+        <StepDefineRule
+          isReadOnlyView={false}
+          isLoading={false}
+          indicesConfig={[]}
+          threatIndicesConfig={[]}
+          defaultValues={stepDefineDefaultValue}
+        />
+      </TestProviders>
+    );
+    expect(getAllByTestId('query-bar')[0].textContent).toEqual(
+      `${kqlQuery.queryBar.query.query} ${kqlQuery.queryBar.query.language}`
+    );
+    expect(setRuleTypeCallback).not.toHaveBeenCalledWith();
+  });
+  it('handleSetRuleFromTimeline correctly updates eql query', () => {
+    mockUseRuleFromTimeline.mockImplementation((handleSetRuleFromTimeline) => {
+      handleSetRuleFromTimeline(eqlQuery);
+      return { onOpenTimeline, loading: false };
+    });
+    render(
+      <TestProviders>
+        <StepDefineRule
+          isReadOnlyView={false}
+          isLoading={false}
+          indicesConfig={[]}
+          threatIndicesConfig={[]}
+          defaultValues={stepDefineDefaultValue}
+        />
+      </TestProviders>
+    );
+    expect(setRuleTypeCallback).toHaveBeenCalled();
   });
 });
