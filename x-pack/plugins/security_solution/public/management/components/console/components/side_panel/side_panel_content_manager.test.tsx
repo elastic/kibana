@@ -39,26 +39,10 @@ describe('When displaying the side panel', () => {
       };
     });
 
-    it('should display the help panel header', async () => {
+    it('should display the help panel content', () => {
       renderAndOpenHelp();
 
-      expect(renderResult.getByTestId('test-sidePanel-header')).toHaveTextContent(
-        'HelpUse the add () button to populate a response action to the text bar. Add ' +
-          'additional parameters or comments as necessary.'
-      );
-    });
-
-    it('should display the command list', () => {
-      renderAndOpenHelp();
-
-      expect(renderResult.getByTestId('test-commandList')).toBeTruthy();
-    });
-
-    it('should close the side panel when close button is clicked', async () => {
-      renderAndOpenHelp();
-      renderResult.getByTestId('test-sidePanel-headerCloseButton').click();
-
-      expect(renderResult.queryByTestId('test-sidePanel')).toBeNull();
+      expect(renderResult.getByTestId('test-sidePanel-helpContent')).toBeTruthy();
     });
   });
 });

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { ConsoleTestSetup } from '../mocks';
-import { getCommandListMock, getConsoleTestSetup } from '../mocks';
+import type { ConsoleTestSetup, HelpSidePanelSelectorsAndActions } from '../mocks';
+import {
+  getCommandListMock,
+  getConsoleTestSetup,
+  getHelpSidePanelSelectorsAndActionsMock,
+} from '../mocks';
 
-describe('When displaying the command list', () => {
+describe('When rendering the command list', () => {
   let render: ConsoleTestSetup['renderConsole'];
   let renderResult: ReturnType<typeof render>;
   let consoleSelectors: ConsoleTestSetup['selectors'];
@@ -22,13 +26,38 @@ describe('When displaying the command list', () => {
 
   describe('and its displayed on the side panel', () => {
     let renderAndOpenHelpPanel: typeof render;
+    let helpPanelSelectors: HelpSidePanelSelectorsAndActions;
 
     beforeEach(() => {
       renderAndOpenHelpPanel = (props) => {
         render(props);
-        renderResult.getByTestId('test-header-helpButton').click();
+        helpPanelSelectors = getHelpSidePanelSelectorsAndActionsMock(renderResult);
+        consoleSelectors.openHelpPanel();
+
         return renderResult;
       };
+    });
+
+    it('should display the help panel header', async () => {
+      renderAndOpenHelpPanel();
+
+      expect(renderResult.getByTestId('test-sidePanel-header')).toHaveTextContent(
+        'HelpUse the add () button to populate a response action to the text bar. Add ' +
+          'additional parameters or comments as necessary.'
+      );
+    });
+
+    it('should display the command list', () => {
+      renderAndOpenHelpPanel();
+
+      expect(renderResult.getByTestId('test-commandList')).toBeTruthy();
+    });
+
+    it('should close the side panel when close button is clicked', async () => {
+      renderAndOpenHelpPanel();
+      consoleSelectors.closeHelpPanel();
+
+      expect(renderResult.queryByTestId('test-sidePanel')).toBeNull();
     });
 
     it('should display helpful tips', async () => {
@@ -54,15 +83,7 @@ describe('When displaying the command list', () => {
 
     it('should group commands by group label', async () => {
       renderAndOpenHelpPanel();
-      // FYI: we're collapsing the labels here because EUI includes mobile elements
-      // in the DOM that have the same test ids
-      const groups = Array.from(
-        new Set(
-          renderResult
-            .getAllByTestId('test-commandList-group')
-            .map((element) => element.textContent)
-        )
-      );
+      const groups = helpPanelSelectors.getHelpGroupLabels();
 
       expect(groups).toEqual([
         'group 1',
@@ -74,12 +95,9 @@ describe('When displaying the command list', () => {
 
     it('should display the list of command in the expected order', () => {
       renderAndOpenHelpPanel();
-      const group1Ele = renderResult.getByTestId('test-commandList-group1');
-      const commands = Array.from(group1Ele.querySelectorAll('tbody td .euiTableCellContent')).map(
-        (ele) => ele.textContent
-      );
+      const commands = helpPanelSelectors.getHelpCommandNames('group 1');
 
-      expect(commands).toEqual(['cmd6 --foohas custom hint text', 'cmd1a command with no options']);
+      expect(commands).toEqual(['cmd6 --foo', 'cmd1']);
     });
 
     it('should hide command if command definition helpHidden is true', () => {
