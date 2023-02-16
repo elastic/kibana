@@ -120,6 +120,10 @@ export async function getFullAgentPolicy(
               metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
             }
           : { enabled: false, logs: false, metrics: false },
+      features: (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
+        acc[name] = featureConfig;
+        return acc;
+      }, {} as NonNullable<FullAgentPolicy['agent']>['features']),
     },
   };
 
@@ -217,10 +221,6 @@ export function transformOutputToFullPolicyOutput(
     if (!isShipperDisabled) {
       shipperDiskQueueData = buildShipperQueueData(shipper);
     }
-    /*
-      TODO: Once the Elastic-Shipper is ready,
-      Verify that these parameters have the correct names and structure
-    */
     /* eslint-disable @typescript-eslint/naming-convention */
     const {
       loadbalance,

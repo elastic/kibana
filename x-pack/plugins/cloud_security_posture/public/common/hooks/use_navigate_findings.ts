@@ -5,61 +5,46 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Query } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { findingsNavigation } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
-import { FindingsBaseURLQuery } from '../../pages/findings/types';
+import { useKibana } from './use_kibana';
 
-const getFindingsQuery = (queryValue: Query['query']): Pick<FindingsBaseURLQuery, 'query'> => {
-  const query =
-    typeof queryValue === 'string'
-      ? queryValue
-      : // TODO: use a tested query builder instead ASAP
-        Object.entries(queryValue)
-          .reduce<string[]>((a, [key, value]) => {
-            a.push(`${key}: "${value}"`);
-            return a;
-          }, [])
-          .join(' and ');
+const createFilter = (key: string, value: string, negate = false): Filter => ({
+  meta: {
+    alias: null,
+    negate,
+    disabled: false,
+    type: 'phrase',
+    key,
+    params: { query: value },
+  },
+  query: { match_phrase: { [key]: value } },
+});
 
-  return {
-    query: {
-      language: 'kuery',
-      // NOTE: a query object is valid TS but throws on runtime
-      query,
+const useNavigate = (pathname: string) => {
+  const history = useHistory();
+  const { services } = useKibana();
+
+  return useCallback(
+    (filterParams: Record<string, any> = {}) => {
+      const filters = Object.entries(filterParams).map(([key, value]) => createFilter(key, value));
+      history.push({
+        pathname,
+        search: encodeQuery({
+          // Set query language from user's preference
+          query: services.data.query.queryString.getDefaultQuery(),
+          filters,
+        }),
+      });
     },
-  }!;
+    [pathname, history, services.data.query.queryString]
+  );
 };
 
-export const useNavigateFindings = () => {
-  const history = useHistory();
+export const useNavigateFindings = () => useNavigate(findingsNavigation.findings_default.path);
 
-  return (query: Query['query'] = {}) => {
-    history.push({
-      pathname: findingsNavigation.findings_default.path,
-      ...(query && {
-        search: encodeQuery({
-          ...getFindingsQuery(query),
-          filters: [],
-        }),
-      }),
-    });
-  };
-};
-
-export const useNavigateFindingsByResource = () => {
-  const history = useHistory();
-
-  return (query: Query['query'] = {}) => {
-    history.push({
-      pathname: findingsNavigation.findings_by_resource.path,
-      ...(query && {
-        search: encodeQuery({
-          ...getFindingsQuery(query),
-          filters: [],
-        }),
-      }),
-    });
-  };
-};
+export const useNavigateFindingsByResource = () =>
+  useNavigate(findingsNavigation.findings_by_resource.path);

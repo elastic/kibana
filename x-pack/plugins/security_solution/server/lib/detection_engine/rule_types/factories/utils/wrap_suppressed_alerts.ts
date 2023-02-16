@@ -13,10 +13,11 @@ import {
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_START,
+  ALERT_INSTANCE_ID,
 } from '@kbn/rule-data-utils';
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type {
   BaseFieldsLatest,
-  SuppressionFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../../common/detection_engine/schemas/alerts';
 import type { ConfigType } from '../../../../../config';
@@ -34,6 +35,18 @@ export interface SuppressionBuckets {
   terms: Array<{ field: string; value: string | number | null }>;
 }
 
+export const createSuppressedAlertInstanceId = ({
+  terms,
+  ruleId,
+  spaceId,
+}: {
+  terms: Array<{ field: string; value: string | number | null }>;
+  ruleId: string;
+  spaceId: string;
+}): string => {
+  return objectHash([terms, ruleId, spaceId]);
+};
+
 export const wrapSuppressedAlerts = ({
   suppressionBuckets,
   spaceId,
@@ -45,14 +58,14 @@ export const wrapSuppressedAlerts = ({
   ruleExecutionLogger,
 }: {
   suppressionBuckets: SuppressionBuckets[];
-  spaceId: string | null | undefined;
+  spaceId: string;
   completeRule: CompleteRule<RuleParams>;
   mergeStrategy: ConfigType['alertMergeStrategy'];
   indicesToQuery: string[];
   buildReasonMessage: BuildReasonMessage;
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-}): Array<WrappedFieldsLatest<SuppressionFieldsLatest>> => {
+}): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return suppressionBuckets.map((bucket) => {
     const id = objectHash([
       bucket.event._index,
@@ -63,6 +76,11 @@ export const wrapSuppressedAlerts = ({
       bucket.start,
       bucket.end,
     ]);
+    const instanceId = createSuppressedAlertInstanceId({
+      terms: bucket.terms,
+      ruleId: completeRule.alertId,
+      spaceId,
+    });
     const baseAlert: BaseFieldsLatest = buildBulkBody(
       spaceId,
       completeRule,
@@ -85,6 +103,7 @@ export const wrapSuppressedAlerts = ({
         [ALERT_SUPPRESSION_END]: bucket.end,
         [ALERT_SUPPRESSION_DOCS_COUNT]: bucket.count - 1,
         [ALERT_UUID]: id,
+        [ALERT_INSTANCE_ID]: instanceId,
       },
     };
   });

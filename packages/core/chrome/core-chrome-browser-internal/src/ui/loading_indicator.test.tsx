@@ -28,9 +28,9 @@ describe('kbnLoadingIndicator', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('shows EuiLoadingSpinner when showPlainSpinner is true', () => {
+  it('shows logo image when customLogo is set', () => {
     const wrapper = shallow(
-      <LoadingIndicator loadingCount$={new BehaviorSubject(1)} showPlainSpinner={true} />
+      <LoadingIndicator loadingCount$={new BehaviorSubject(1)} customLogo={'customLogo'} />
     );
     // Pause the check beyond the 250ms delay that it has
     setTimeout(() => {

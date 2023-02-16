@@ -71,7 +71,7 @@ export interface InfraClientStartDeps {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   observability: ObservabilityPublicStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionStart;
   ml: MlPluginStart;
@@ -80,6 +80,7 @@ export interface InfraClientStartDeps {
   share: SharePluginStart;
   storage: IStorageWrapper;
   lens: LensPublicStart;
+  telemetry: ITelemetryClient;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

@@ -20,7 +20,6 @@ import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
   ControlColumnProps,
-  DataTableCellAction,
   OnRowSelected,
   OnSelectAll,
   SetEventsDeleted,
@@ -57,7 +56,6 @@ import { getDefaultViewSelection, getCombinedFilterQuery } from './helpers';
 import { useTimelineEvents } from './use_timelines_events';
 import { TableContext, EmptyTable, TableLoading } from './shared';
 import { DataTableComponent } from '../data_table';
-import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import type { AlertWorkflowStatus } from '../../types';
 import { useQueryInspector } from '../page/manage_query';
 import type { SetQuery } from '../../containers/use_global_time/types';
@@ -77,8 +75,8 @@ const storage = new Storage(localStorage);
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface EventsViewerProps {
-  defaultCellActions?: DataTableCellAction[];
   defaultModel: SubsetDataTableModel;
+  disableCellActions?: boolean;
   end: string;
   entityType?: EntityType;
   tableId: TableId;
@@ -89,13 +87,14 @@ export interface EventsViewerProps {
   pageFilters?: Filter[];
   currentFilter?: AlertWorkflowStatus;
   onRuleChange?: () => void;
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  renderCellValue: React.FC<CellValueElementProps>;
   rowRenderers: RowRenderer[];
   additionalFilters?: React.ReactNode;
   hasCrudPermissions?: boolean;
   unit?: (n: number) => string;
   indexNames?: string[];
   bulkActions: boolean | BulkActionsProp;
+  additionalRightMenuOptions?: React.ReactNode[];
 }
 
 /**
@@ -104,8 +103,8 @@ export interface EventsViewerProps {
  * NOTE: As of writting, it is not used in the Case_View component
  */
 const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux> = ({
-  defaultCellActions,
   defaultModel,
+  disableCellActions,
   end,
   entityType = 'events',
   tableId,
@@ -124,6 +123,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   bulkActions,
   setSelected,
   clearSelected,
+  additionalRightMenuOptions,
 }) => {
   const dispatch = useDispatch();
   const theme: EuiTheme = useContext(ThemeContext);
@@ -439,7 +439,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         columnHeaders,
         controlColumns,
         data: nonDeletedEvents,
-        disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
         fieldBrowserOptions,
         loadingEventIds,
         onRowSelected,
@@ -554,6 +553,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                     onViewChange={(selectedView) => setTableView(selectedView)}
                     additionalFilters={additionalFilters}
                     hasRightOffset={tableView === 'gridView' && nonDeletedEvents.length > 0}
+                    additionalMenuOptions={additionalRightMenuOptions}
                   />
 
                   {!hasAlerts && !loading && !graphOverlay && <EmptyTable height="short" />}
@@ -569,7 +569,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             unitCountText={unitCountText}
                             browserFields={browserFields}
                             data={nonDeletedEvents}
-                            disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
+                            disableCellActions={disableCellActions}
                             id={tableId}
                             loadPage={loadPage}
                             renderCellValue={renderCellValue}
@@ -577,9 +577,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             totalItems={totalCountMinusDeleted}
                             bulkActions={bulkActions}
                             fieldBrowserOptions={fieldBrowserOptions}
-                            defaultCellActions={defaultCellActions}
                             hasCrudPermissions={hasCrudPermissions}
-                            filters={filters}
                             leadingControlColumns={transformedLeadingControlColumns}
                             pagination={pagination}
                             isEventRenderedView={tableView === 'eventRenderedView'}

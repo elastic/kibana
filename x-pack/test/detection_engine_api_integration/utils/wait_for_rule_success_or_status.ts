@@ -48,7 +48,7 @@ export const waitForRuleSuccessOrStatus = async (
           log.debug(
             `Did not get an expected status of ${status} while waiting for a rule success or status for rule id ${id} (waitForRuleSuccessOrStatus). Will continue retrying until status is found. body: ${JSON.stringify(
               response.body
-            )}, status: ${JSON.stringify(response.status)}`
+            )}, status: ${JSON.stringify(ruleStatus)}`
           );
         }
         return (

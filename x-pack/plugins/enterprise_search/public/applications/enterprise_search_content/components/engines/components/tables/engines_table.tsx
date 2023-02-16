@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
   CriteriaWithPagination,
@@ -20,22 +20,24 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
+import { Page } from '../../../../../../../common/types/pagination';
+
 import { MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
 
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { FormattedDateTime } from '../../../../../shared/formatted_date_time';
 import { KibanaLogic } from '../../../../../shared/kibana';
+import { pageToPagination } from '../../../../../shared/pagination/page_to_pagination';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+import { TelemetryLogic } from '../../../../../shared/telemetry/telemetry_logic';
 
 import { ENGINE_PATH } from '../../../../routes';
-
-import { convertMetaToPagination, Meta } from '../../types';
 
 interface EnginesListTableProps {
   enginesList: EnterpriseSearchEngine[];
   isLoading?: boolean;
   loading: boolean;
-  meta: Meta;
+  meta: Page;
   onChange: (criteria: CriteriaWithPagination<EnterpriseSearchEngine>) => void;
   onDelete: (engine: EnterpriseSearchEngine) => void;
   viewEngineIndices: (engineName: string) => void;
@@ -49,6 +51,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   viewEngineIndices,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
+  const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngine>> = [
     {
       field: 'name',
@@ -92,14 +95,13 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
           size="s"
           className="engineListTableFlyoutButton"
           data-test-subj="engineListTableIndicesFlyoutButton"
+          data-telemetry-id="entSearchContent-engines-table-viewEngineIndices"
           onClick={() => viewEngineIndices(engine.name)}
         >
           <FormattedMessage
             id="xpack.enterpriseSearch.content.enginesList.table.column.view.indices"
-            defaultMessage="{indicesLength} indices"
-            values={{
-              indicesLength: indices.length,
-            }}
+            defaultMessage="{indicesCount, number} {indicesCount, plural, one {index} other {indices}}"
+            values={{ indicesCount: indices.length }}
           />
         </EuiButtonEmpty>
       ),
@@ -147,6 +149,10 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
             ),
           onClick: (engine) => {
             onDelete(engine);
+            sendEnterpriseSearchTelemetry({
+              action: 'clicked',
+              metric: 'entSearchContent-engines-table-deleteEngine',
+            });
           },
         },
       ],
@@ -157,7 +163,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
     <EuiBasicTable
       items={enginesList}
       columns={columns}
-      pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
+      pagination={{ ...pageToPagination(meta), showPerPageOptions: false }}
       onChange={onChange}
       loading={isLoading}
     />

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { waitFor } from '@testing-library/dom';
+import { OBSERVABILITY_OWNER } from '../../../../common/constants';
 import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
@@ -54,6 +55,7 @@ describe('Case View Page activity tab', () => {
         },
         flyoutSize: 'm',
         showExpandToDetails: true,
+        showAlertStatusWithFlapping: false,
       });
     });
   });
@@ -61,14 +63,21 @@ describe('Case View Page activity tab', () => {
   it('should call the alerts table with correct props for observability', async () => {
     const getFeatureIdsMock = jest.spyOn(api, 'getFeatureIds');
     getFeatureIdsMock.mockResolvedValueOnce(['observability']);
-    appMockRender.render(<CaseViewAlerts caseData={caseData} />);
+    appMockRender.render(
+      <CaseViewAlerts
+        caseData={{
+          ...caseData,
+          owner: OBSERVABILITY_OWNER,
+        }}
+      />
+    );
 
     await waitFor(async () => {
       expect(getAlertsStateTableMock).toHaveBeenCalledWith({
         alertsTableConfigurationRegistry: expect.anything(),
-        configurationId: 'securitySolution',
+        configurationId: 'observability',
         featureIds: ['observability'],
-        id: 'case-details-alerts-securitySolution',
+        id: 'case-details-alerts-observability',
         query: {
           ids: {
             values: ['alert-id-1'],
@@ -76,6 +85,7 @@ describe('Case View Page activity tab', () => {
         },
         flyoutSize: 's',
         showExpandToDetails: false,
+        showAlertStatusWithFlapping: true,
       });
     });
   });

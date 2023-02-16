@@ -14,7 +14,7 @@ import { useLicense } from '../../hooks/use_license';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from '.';
-import { anSLO } from '../../data/slo/slo';
+import { buildSlo } from '../../data/slo/slo';
 import type { ConfigSchema } from '../../plugin';
 import type { Subset } from '../../typings';
 import { paths } from '../../config';
@@ -64,8 +64,9 @@ describe('SLO Details Page', () => {
 
   describe('when the feature flag is not enabled', () => {
     it('renders the not found page', async () => {
-      useParamsMock.mockReturnValue(anSLO.id);
-      useFetchSloDetailsMock.mockReturnValue({ loading: false, slo: anSLO });
+      const slo = buildSlo();
+      useParamsMock.mockReturnValue(slo.id);
+      useFetchSloDetailsMock.mockReturnValue({ loading: false, slo });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
       render(<SloDetailsPage />, { unsafe: { slo: { enabled: false } } });
@@ -77,8 +78,9 @@ describe('SLO Details Page', () => {
   describe('when the feature flag is enabled', () => {
     describe('when the incorrect license is found', () => {
       it('navigates to the SLO List page', async () => {
-        useParamsMock.mockReturnValue(anSLO.id);
-        useFetchSloDetailsMock.mockReturnValue({ loading: false, slo: anSLO });
+        const slo = buildSlo();
+        useParamsMock.mockReturnValue(slo.id);
+        useFetchSloDetailsMock.mockReturnValue({ loading: false, slo });
         useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
 
         render(<SloDetailsPage />, { unsafe: { slo: { enabled: true } } });
@@ -99,7 +101,8 @@ describe('SLO Details Page', () => {
       });
 
       it('renders the loading spinner when fetching the SLO', async () => {
-        useParamsMock.mockReturnValue(anSLO.id);
+        const slo = buildSlo();
+        useParamsMock.mockReturnValue(slo.id);
         useFetchSloDetailsMock.mockReturnValue({ loading: true, slo: undefined });
         useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
@@ -111,8 +114,9 @@ describe('SLO Details Page', () => {
       });
 
       it('renders the SLO details page', async () => {
-        useParamsMock.mockReturnValue(anSLO.id);
-        useFetchSloDetailsMock.mockReturnValue({ loading: false, slo: anSLO });
+        const slo = buildSlo();
+        useParamsMock.mockReturnValue(slo.id);
+        useFetchSloDetailsMock.mockReturnValue({ loading: false, slo });
         useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
         render(<SloDetailsPage />, config);

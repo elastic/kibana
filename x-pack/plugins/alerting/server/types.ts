@@ -48,9 +48,11 @@ import {
   RuleSnooze,
   IntervalSchedule,
   RuleLastRun,
+  SanitizedRule,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { FieldMap } from '../common/alert_schema/field_maps/types';
+import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -111,6 +113,7 @@ export interface RuleExecutorOptions<
   startedAt: Date;
   state: State;
   namespace?: string;
+  flappingSettings: RulesSettingsFlappingProperties;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -159,6 +162,12 @@ export interface SummarizedAlerts {
   };
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
+export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
+  rule: Omit<SanitizedRule<Params>, 'viewInAppRelativeUrl'>;
+}
+export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
+  opts: GetViewInAppRelativeUrlFnOpts<Params>
+) => string;
 export interface IRuleTypeAlerts {
   context: string;
   namespace?: string;
@@ -216,6 +225,7 @@ export interface RuleType<
    * automatically make recovery determination. Defaults to true.
    */
   autoRecoverAlerts?: boolean;
+  getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

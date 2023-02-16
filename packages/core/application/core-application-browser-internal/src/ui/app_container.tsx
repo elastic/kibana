@@ -126,7 +126,16 @@ export const AppContainer: FC<Props> = ({
 
 const AppLoadingPlaceholder: FC<{ showPlainSpinner: boolean }> = ({ showPlainSpinner }) => {
   if (showPlainSpinner) {
-    return <EuiLoadingSpinner size={'xxl'} data-test-subj="appContainer-loadingSpinner" />;
+    return (
+      <EuiLoadingSpinner
+        size={'xxl'}
+        className="appContainer__loading"
+        data-test-subj="appContainer-loadingSpinner"
+        aria-label={i18n.translate('core.application.appContainer.loadingAriaLabel', {
+          defaultMessage: 'Loading application',
+        })}
+      />
+    );
   }
   return (
     <EuiLoadingElastic

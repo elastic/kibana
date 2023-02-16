@@ -46,7 +46,7 @@ export function AnomalyDetectionSetupLink() {
         defaultMessage: 'Could not determine state of anomaly detection setup.',
       }
     );
-    icon = 'alert';
+    icon = 'machineLearningApp';
   } else if (
     anomalyDetectionSetupState === AnomalyDetectionSetupState.NoJobs ||
     anomalyDetectionSetupState ===
@@ -54,7 +54,7 @@ export function AnomalyDetectionSetupLink() {
   ) {
     color = 'warning';
     tooltipText = getNoJobsMessage(anomalyDetectionSetupState, environment);
-    icon = 'alert';
+    icon = 'machineLearningApp';
   } else if (
     anomalyDetectionSetupState === AnomalyDetectionSetupState.UpgradeableJobs
   ) {

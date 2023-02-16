@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { OverviewGridItemLoader } from './overview_grid_item_loader';
 
-export const OverviewLoader = () => {
-  const ROWS = 4;
+export const OverviewLoader = ({ rows }: { rows?: number }) => {
+  const ROWS = rows ?? 4;
   const COLUMNS = 4;
   const loaders = Array(ROWS * COLUMNS).fill(null);
   return (

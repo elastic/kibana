@@ -107,6 +107,10 @@ describe('Import rules route', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
       });
     });
 
@@ -146,6 +150,10 @@ describe('Import rules route', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
       });
     });
 
@@ -171,6 +179,10 @@ describe('Import rules route', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
       });
     });
 
@@ -196,6 +208,10 @@ describe('Import rules route', () => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
         });
       });
 
@@ -218,6 +234,10 @@ describe('Import rules route', () => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
         });
       });
     });
@@ -242,6 +262,10 @@ describe('Import rules route', () => {
         rules_count: 2,
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
       });
     });
 
@@ -262,6 +286,10 @@ describe('Import rules route', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
       });
     });
 
@@ -302,6 +330,10 @@ describe('Import rules route', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
       });
     });
 
@@ -332,6 +364,10 @@ describe('Import rules route', () => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
         });
       });
 
@@ -353,6 +389,10 @@ describe('Import rules route', () => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
         });
       });
     });
@@ -387,6 +427,10 @@ describe('Import rules route', () => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
         });
       });
 
@@ -407,6 +451,10 @@ describe('Import rules route', () => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
         });
       });
     });

@@ -43,9 +43,9 @@ export const CASES_TAGS = (tagName: string) => {
 
 export const CASE_USER_ACTION = '[data-test-subj="user-action-markdown"]';
 
-export const CONNECTOR_CARD_DETAILS = '[data-test-subj="connector-card"]';
+export const CONNECTOR_CARD_DETAILS = '[data-test-subj="connector-card-details"]';
 
-export const CONNECTOR_TITLE = '[data-test-subj="connector-card"] p.euiTitle';
+export const CONNECTOR_TITLE = '[data-test-subj="connector-card-title"]';
 
 export const DELETE_CASE_CONFIRM_BUTTON = '[data-test-subj="confirmModalConfirmButton"]';
 

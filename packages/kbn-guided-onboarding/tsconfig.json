@@ -13,7 +13,8 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/core-application-browser"
+    "@kbn/core-application-browser",
+    "@kbn/i18n-react"
   ],
   "exclude": [
     "target/**/*",

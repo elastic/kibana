@@ -636,7 +636,7 @@ export const getMetricVisualization = ({
 
   getDisplayOptions() {
     return {
-      noPanelTitle: true,
+      noPanelTitle: false,
       noPadding: true,
     };
   },

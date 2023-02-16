@@ -30,8 +30,6 @@ export const RULES_TABLE_ACTIONS = {
   REFRESH: `${APP_UI_ID} rulesTable refresh`,
   FILTER: `${APP_UI_ID} rulesTable filter`,
   LOAD_PREBUILT: `${APP_UI_ID} rulesTable loadPrebuilt`,
-  PREVIEW_ON: `${APP_UI_ID} rulesTable technicalPreview on`,
-  PREVIEW_OFF: `${APP_UI_ID} rulesTable technicalPreview off`,
 };
 
 export const TIMELINE_ACTIONS = {

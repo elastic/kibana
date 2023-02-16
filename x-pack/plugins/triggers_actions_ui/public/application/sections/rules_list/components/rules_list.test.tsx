@@ -27,6 +27,9 @@ import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experime
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IToasts } from '@kbn/core/public';
+import { CreateRuleButton } from './create_rule_button';
+import { RulesListDocLink } from './rules_list_doc_link';
+import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 
 import {
   mockedRulesData,
@@ -47,21 +50,41 @@ jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
   loadAllActions: jest.fn(),
 }));
-jest.mock('../../../lib/rule_api', () => ({
+
+jest.mock('../../../lib/rule_api/rules_kuery_filter', () => ({
   loadRulesWithKueryFilter: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/rule_types', () => ({
   loadRuleTypes: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
   loadRuleAggregationsWithKueryFilter: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/update_api_key', () => ({
   updateAPIKey: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/aggregate', () => ({
   loadRuleTags: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/snooze', () => ({
   bulkSnoozeRules: jest.fn(),
-  bulkDeleteRules: jest.fn().mockResolvedValue({ errors: [], total: 10 }),
+}));
+jest.mock('../../../lib/rule_api/unsnooze', () => ({
   bulkUnsnoozeRules: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/bulk_delete', () => ({
+  bulkDeleteRules: jest.fn().mockResolvedValue({ errors: [], total: 10 }),
+}));
+jest.mock('../../../lib/rule_api/update_api_key', () => ({
   bulkUpdateAPIKey: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/health', () => ({
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
   })),
 }));
+
 jest.mock('../../../lib/rule_api/aggregate_kuery_filter');
 jest.mock('../../../lib/rule_api/rules_kuery_filter');
 
@@ -93,7 +116,10 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const { loadRuleTypes, bulkUpdateAPIKey, loadRuleTags } = jest.requireMock('../../../lib/rule_api');
+const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
+const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
+const { loadRuleTags } = jest.requireMock('../../../lib/rule_api/aggregate');
+
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
 );
@@ -329,15 +355,14 @@ describe('rules_list ', () => {
     renderWithProviders(
       <RulesList statusFilter={['disabled']} onStatusFilterChange={onStatusFilterChangeMock} />
     );
-    await waitFor(() => screen.getByText('Rule state'));
+    await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleStatusesFilter: ['disabled'],
       })
     );
-
-    fireEvent.click(screen.getAllByTestId('ruleStatusFilterButton')[0]);
-    fireEvent.click(screen.getAllByTestId('ruleStatusFilterOption-enabled')[0]);
+    fireEvent.click((await screen.findAllByTestId('ruleStatusFilterButton'))[0]);
+    fireEvent.click((await screen.findAllByTestId('ruleStatusFilterOption-enabled'))[0]);
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleStatusesFilter: ['disabled', 'enabled'],
@@ -397,17 +422,33 @@ describe('rules_list ', () => {
     });
   });
 
-  describe('showCreateRuleButton prop', () => {
-    it('hides the Create Rule button', async () => {
-      renderWithProviders(<RulesList showCreateRuleButton={false} />);
+  describe('setHeaderActions', () => {
+    it('should not render the Create Rule button', async () => {
+      renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
       expect(screen.queryAllByTestId('createRuleButton')).toHaveLength(0);
     });
 
-    it('shows the Create Rule button by default', async () => {
-      renderWithProviders(<RulesList />);
-      expect(await screen.findAllByTestId('createRuleButton')).toHaveLength(1);
+    it('should set header actions correctly when the user is authorized to create rules', async () => {
+      const setHeaderActionsMock = jest.fn();
+      renderWithProviders(<RulesList setHeaderActions={setHeaderActionsMock} />);
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+      expect(setHeaderActionsMock.mock.lastCall[0][0].type).toEqual(CreateRuleButton);
+      expect(setHeaderActionsMock.mock.lastCall[0][1].type).toEqual(RulesSettingsLink);
+      expect(setHeaderActionsMock.mock.lastCall[0][2].type).toEqual(RulesListDocLink);
+    });
+
+    it('should set header actions correctly when the user is not authorized to creat rules', async () => {
+      loadRuleTypes.mockResolvedValueOnce([]);
+      const setHeaderActionsMock = jest.fn();
+      renderWithProviders(<RulesList setHeaderActions={setHeaderActionsMock} />);
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+      // Do not render the create rule button since the user is not authorized
+      expect(setHeaderActionsMock.mock.lastCall[0][0].type).toEqual(RulesSettingsLink);
+      expect(setHeaderActionsMock.mock.lastCall[0][1].type).toEqual(RulesListDocLink);
     });
   });
 

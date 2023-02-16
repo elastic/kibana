@@ -21,11 +21,12 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { RuleStatusDropdown, RulesListNotifyBadge } from '../..';
+import { RuleStatusDropdown } from '../..';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+import { RulesListNotifyBadge } from '../../rules_list/components/notify_badge';
 
 export interface RuleStatusPanelProps {
   rule: any;

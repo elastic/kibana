@@ -69,6 +69,14 @@ export const editException = (updatedField: string, itemIndex = 0, fieldIndex = 
 };
 
 export const addExceptionFlyoutItemName = (name: string) => {
+  // waitUntil reduces the flakiness of this task because sometimes
+  // there are background process/events happening which prevents cypress
+  // to completely write the name of the exception before it page re-renders
+  // thereby cypress losing the focus on the input element.
+  cy.waitUntil(() => cy.get(EXCEPTION_ITEM_NAME_INPUT).then(($el) => Cypress.dom.isAttached($el)));
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('exist');
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).scrollIntoView();
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('be.visible');
   cy.get(EXCEPTION_ITEM_NAME_INPUT).first().focus();
   cy.get(EXCEPTION_ITEM_NAME_INPUT)
     .type(`${name}{enter}`, { force: true })

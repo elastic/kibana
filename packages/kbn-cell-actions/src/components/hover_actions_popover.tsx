@@ -40,6 +40,7 @@ interface Props {
   visibleCellActions: number;
   actionContext: CellActionExecutionContext;
   showActionTooltips: boolean;
+  disabledActionTypes: string[];
 }
 
 export const HoverActionsPopover: React.FC<Props> = ({
@@ -47,13 +48,13 @@ export const HoverActionsPopover: React.FC<Props> = ({
   visibleCellActions,
   actionContext,
   showActionTooltips,
+  disabledActionTypes,
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
   const [showHoverContent, setShowHoverContent] = useState(false);
-  const popoverRef = useRef<EuiPopover>(null);
 
-  const [{ value: actions, error }, loadActions] = useLoadActionsFn();
+  const [{ value: actions }, loadActions] = useLoadActionsFn({ disabledActionTypes });
 
   const { visibleActions, extraActions } = useMemo(
     () => partitionActions(actions ?? [], visibleCellActions),
@@ -69,6 +70,11 @@ export const HoverActionsPopover: React.FC<Props> = ({
       }, HOVER_INTENT_DELAY),
     []
   );
+  useEffect(() => {
+    return () => {
+      openPopOverDebounced.cancel();
+    };
+  }, [openPopOverDebounced]);
 
   const closePopover = useCallback(() => {
     openPopOverDebounced.cancel();
@@ -85,13 +91,6 @@ export const HoverActionsPopover: React.FC<Props> = ({
     closePopover();
   }, [closePopover, setIsExtraActionsPopoverOpen]);
 
-  // prevent setState on an unMounted component
-  useEffect(() => {
-    return () => {
-      openPopOverDebounced.cancel();
-    };
-  }, [openPopOverDebounced]);
-
   const onMouseEnter = useCallback(async () => {
     // Do not open actions with extra action popover is open
     if (isExtraActionsPopoverOpen) return;
@@ -103,10 +102,6 @@ export const HoverActionsPopover: React.FC<Props> = ({
 
     openPopOverDebounced();
   }, [isExtraActionsPopoverOpen, actions, openPopOverDebounced, loadActions, actionContext]);
-
-  const onMouseLeave = useCallback(() => {
-    closePopover();
-  }, [closePopover]);
 
   const content = useMemo(() => {
     return (
@@ -120,18 +115,11 @@ export const HoverActionsPopover: React.FC<Props> = ({
     );
   }, [onMouseEnter, closeExtraActions, children]);
 
-  useEffect(() => {
-    if (error) {
-      throw error;
-    }
-  }, [error]);
-
   return (
     <>
-      <div onMouseLeave={onMouseLeave}>
+      <div onMouseLeave={closePopover}>
         <EuiPopover
           panelStyle={PANEL_STYLE}
-          ref={popoverRef}
           anchorPosition={'downCenter'}
           button={content}
           closePopover={closePopover}
@@ -143,7 +131,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
           data-test-subj={'hoverActionsPopover'}
           aria-label={ACTIONS_AREA_LABEL}
         >
-          {showHoverContent ? (
+          {showHoverContent && (
             <div css={hoverContentWrapperCSS}>
               <EuiScreenReaderOnly>
                 <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field.name)}</p>
@@ -156,14 +144,14 @@ export const HoverActionsPopover: React.FC<Props> = ({
                   showTooltip={showActionTooltips}
                 />
               ))}
-              {extraActions.length > 0 ? (
+              {extraActions.length > 0 && (
                 <ExtraActionsButton
                   onClick={onShowExtraActionsClick}
                   showTooltip={showActionTooltips}
                 />
-              ) : null}
+              )}
             </div>
-          ) : null}
+          )}
         </EuiPopover>
       </div>
       <ExtraActionsPopOverWithAnchor

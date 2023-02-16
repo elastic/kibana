@@ -26,7 +26,7 @@ import {
   DASHBOARD_CONTAINER,
   KUBERNETES_DASHBOARD_CONTAINER,
 } from './test_subjects';
-import { useCspmStatsApi, useKspmStatsApi } from '../../common/api';
+import { useCspmStatsApi, useKspmStatsApi } from '../../common/api/use_stats_api';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
 import { SummarySection } from './dashboard_sections/summary_section';
@@ -302,7 +302,6 @@ export const ComplianceDashboard = () => {
       <div
         data-test-subj={DASHBOARD_CONTAINER}
         css={css`
-          max-width: 1600px;
           margin-left: auto;
           margin-right: auto;
           height: 100%;

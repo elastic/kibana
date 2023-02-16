@@ -61,6 +61,7 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
 export const SECURITY_FEATURE_ID = 'Security' as const;
+export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
 export const DEFAULT_RELATIVE_DATE_THRESHOLD = 24 as const;
 
@@ -90,7 +91,9 @@ export enum SecurityPageName {
   cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
   cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
   cloudSecurityPostureFindings = 'cloud_security_posture-findings',
+  cloudSecurityPostureRules = 'cloud_security_posture-rules',
   dashboardsLanding = 'dashboards',
+  dataQuality = 'data_quality',
   detections = 'detections',
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
@@ -142,6 +145,7 @@ export const TIMELINES_PATH = '/timelines' as const;
 export const CASES_PATH = '/cases' as const;
 export const OVERVIEW_PATH = '/overview' as const;
 export const LANDING_PATH = '/get_started' as const;
+export const DATA_QUALITY_PATH = '/data_quality' as const;
 export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
@@ -189,6 +193,7 @@ export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
 export const APP_ENTITY_ANALYTICS_PATH = `${APP_PATH}${ENTITY_ANALYTICS_PATH}` as const;
+export const APP_DATA_QUALITY_PATH = `${APP_PATH}${DATA_QUALITY_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -477,11 +482,13 @@ export const DEFAULT_DETECTION_PAGE_FILTERS = [
     title: 'Status',
     fieldName: 'kibana.alert.workflow_status',
     selectedOptions: ['open'],
+    hideActionBar: true,
   },
   {
     title: 'Severity',
     fieldName: 'kibana.alert.severity',
     selectedOptions: [],
+    hideActionBar: true,
   },
   {
     title: 'User',
@@ -492,6 +499,3 @@ export const DEFAULT_DETECTION_PAGE_FILTERS = [
     fieldName: 'host.name',
   },
 ];
-
-export const CELL_ACTIONS_DEFAULT_TRIGGER = 'security-solution-default-cellActions';
-export const CELL_ACTIONS_TIMELINE_TRIGGER = 'security-solution-timeline-cellActions';

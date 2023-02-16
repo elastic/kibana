@@ -52,7 +52,6 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
       try {
         const params = request.body;
         const rulesClient = (await context.alerting).getRulesClient();
-        const ruleExecutionLog = (await context.securitySolution).getRuleExecutionLog();
         const savedObjectsClient = (await context.core).savedObjects.client;
 
         const mlAuthz = buildMlAuthz({
@@ -96,9 +95,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
           nextParams: params,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
-          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-
-          const [validated, errors] = transformValidate(rule, ruleExecutionSummary);
+          const [validated, errors] = transformValidate(rule);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

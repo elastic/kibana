@@ -26,6 +26,7 @@ export interface CodeEditorProps {
   value: string;
   placeholder?: string;
   height?: string;
+  readOnly?: boolean;
 }
 
 export const CodeEditor = ({
@@ -36,6 +37,7 @@ export const CodeEditor = ({
   value,
   placeholder,
   height = '250px',
+  readOnly,
 }: CodeEditorProps) => {
   return (
     <CodeEditorContainer borderRadius="none" hasShadow={false} hasBorder={true}>
@@ -52,6 +54,7 @@ export const CodeEditor = ({
           onChange={onChange}
           options={{
             renderValidationDecorations: value ? 'on' : 'off',
+            readOnly,
           }}
           isCopyable={true}
           allowFullScreen={true}

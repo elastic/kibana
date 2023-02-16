@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/alerts-restricted-fixtures-plugin",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "alertsRestrictedFixtures",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "taskManager",
+      "features",
+      "actions",
+      "alerting"
+    ],
+    "optionalPlugins": [
+      "spaces"
+    ]
+  }
+}

@@ -186,10 +186,10 @@ export const getAgentsHandler: RequestHandler<
       kuery: request.query.kuery,
       sortField: request.query.sortField,
       sortOrder: request.query.sortOrder,
-      getTotalInactive: request.query.showInactive,
+      getStatusSummary: request.query.getStatusSummary,
     });
 
-    const { total, page, perPage, totalInactive = 0 } = agentRes;
+    const { total, page, perPage, statusSummary } = agentRes;
     let { agents } = agentRes;
 
     // Assign metrics
@@ -201,9 +201,9 @@ export const getAgentsHandler: RequestHandler<
       list: agents, // deprecated
       items: agents,
       total,
-      totalInactive,
       page,
       perPage,
+      ...(statusSummary ? { statusSummary } : {}),
     };
     return response.ok({ body });
   } catch (error) {

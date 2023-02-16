@@ -61,7 +61,7 @@ describe('AlertsTable.BulkActions', () => {
     alertsCount: alerts.length,
     isInitializing: false,
     isLoading: false,
-    getInspectQuery: () => ({ request: {}, response: {} }),
+    getInspectQuery: () => ({ request: [], response: [] }),
     onColumnsChange: () => {},
     onPageChange: () => {},
     onSortChange: () => {},

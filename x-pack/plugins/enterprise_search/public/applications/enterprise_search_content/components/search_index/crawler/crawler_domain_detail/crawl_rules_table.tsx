@@ -251,9 +251,7 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
         updateCrawlRules(newCrawlRules as CrawlRule[]);
         clearFlashMessages();
       }}
-      title={i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.title', {
-        defaultMessage: 'Crawl rules',
-      })}
+      title=""
       uneditableItems={defaultCrawlRule ? [defaultCrawlRule] : undefined}
       canRemoveLastItem
     />

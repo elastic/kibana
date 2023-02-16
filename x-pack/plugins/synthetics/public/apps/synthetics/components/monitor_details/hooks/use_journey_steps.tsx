@@ -16,11 +16,18 @@ import {
   selectBrowserJourneyLoading,
 } from '../../../state';
 
-export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
-  const { stepIndex, checkGroupId: urlCheckGroup } = useParams<{
+export const useJourneySteps = (
+  checkGroup?: string,
+  lastRefresh?: number,
+  stepIndexArg?: number
+) => {
+  const { stepIndex: stepIndexUrl, checkGroupId: urlCheckGroup } = useParams<{
     stepIndex: string;
     checkGroupId: string;
   }>();
+
+  const stepIndex = stepIndexArg ?? stepIndexUrl;
+
   const checkGroupId = checkGroup ?? urlCheckGroup;
 
   const journeyData = useSelector(selectBrowserJourney(checkGroupId));

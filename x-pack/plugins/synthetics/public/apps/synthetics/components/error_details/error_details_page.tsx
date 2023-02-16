@@ -36,6 +36,8 @@ export function ErrorDetailsPage() {
 
   const stepDetails = useStepDetails({ checkGroup: lastTestRun?.monitor.check_group });
 
+  const isBrowser = data?.details?.journey.monitor.type === 'browser';
+
   return (
     <div>
       <PanelWithTitle title="Timeline">
@@ -47,8 +49,12 @@ export function ErrorDetailsPage() {
           <PanelWithTitle title="Failed tests">
             <FailedTestsList failedTests={failedTests} loading={loading} />
           </PanelWithTitle>
-          <EuiSpacer size="m" />
-          <StepDetails {...stepDetails} />
+          {isBrowser && (
+            <>
+              <EuiSpacer size="m" />
+              <StepDetails {...stepDetails} />
+            </>
+          )}
           <EuiSpacer size="m" />
           <LastTestRunComponent
             latestPing={lastTestRun}

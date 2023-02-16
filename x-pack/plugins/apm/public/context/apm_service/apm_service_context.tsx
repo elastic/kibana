@@ -8,11 +8,7 @@
 import React, { createContext, ReactNode } from 'react';
 import { useHistory } from 'react-router-dom';
 import { History } from 'history';
-import { isRumAgentName } from '../../../common/agent_name';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../common/transaction_types';
+import { getDefaultTransactionType } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
 import { useServiceAgentFetcher } from './use_service_agent_fetcher';
 import { useAnyOfApmParams } from '../../hooks/use_apm_params';
@@ -20,10 +16,12 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
 import { replace } from '../../components/shared/links/url_helpers';
 import { FETCH_STATUS } from '../../hooks/use_fetcher';
+import { ServerlessType } from '../../../common/serverless';
 
 export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
+  serverlessType?: ServerlessType;
   transactionType?: string;
   transactionTypes: string[];
   runtimeName?: string;
@@ -59,6 +57,7 @@ export function ApmServiceContextProvider({
   const {
     agentName,
     runtimeName,
+    serverlessType,
     status: serviceAgentStatus,
   } = useServiceAgentFetcher({
     serviceName,
@@ -88,6 +87,7 @@ export function ApmServiceContextProvider({
       value={{
         serviceName,
         agentName,
+        serverlessType,
         transactionType: currentTransactionType,
         transactionTypes,
         runtimeName,
@@ -138,10 +138,7 @@ export function getTransactionType({
 
   if (isNoAgentAndNoTransactionTypesExists) return undefined;
 
-  // The default transaction type is "page-load" for RUM agents and "request" for all others
-  const defaultTransactionType = isRumAgentName(agentName)
-    ? TRANSACTION_PAGE_LOAD
-    : TRANSACTION_REQUEST;
+  const defaultTransactionType = getDefaultTransactionType(agentName);
 
   // If the default transaction type is not in transactionTypes the first in the list is returned
   const currentTransactionType = transactionTypes.includes(
