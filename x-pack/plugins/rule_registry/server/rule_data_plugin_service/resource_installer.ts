@@ -185,7 +185,6 @@ export class ResourceInstaller {
     const clusterClient = await getClusterClient();
 
     try {
-      console.log(`PUTTING updated field limit`);
       await clusterClient.indices.putSettings({
         index,
         body: {
