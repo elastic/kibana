@@ -14,7 +14,7 @@ export const createSchemas: ProcedureSchemas = {
     {
       contentTypeId: schema.string(),
       // --> "data" to create a content will be defined by each content type
-      data: schema.object({}, { unknowns: 'allow' }),
+      data: schema.recordOf(schema.string(), schema.any()),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }

@@ -15,7 +15,7 @@ export const updateSchemas: ProcedureSchemas = {
       contentTypeId: schema.string(),
       id: schema.string(),
       // --> "data" to update a content will be defined by each content type
-      data: schema.object({}, { unknowns: 'allow' }),
+      data: schema.recordOf(schema.string(), schema.any()),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }

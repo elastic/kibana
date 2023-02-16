@@ -14,7 +14,7 @@ export const searchSchemas: ProcedureSchemas = {
     {
       contentTypeId: schema.string(),
       // --> "query" that can be executed will be defined by each content type
-      query: schema.object({}, { unknowns: 'allow' }),
+      query: schema.recordOf(schema.string(), schema.any()),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }

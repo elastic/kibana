@@ -16,21 +16,7 @@ import { validate } from '../../utils';
 export const create: ProcedureDefinition<Context, CreateIn<string>> = {
   schemas: rpcSchemas.create,
   fn: async (ctx, input) => {
-    if (!input) {
-      throw new Error(`Input data missing for procedur [create].`);
-    }
-
-    if (!input.contentTypeId) {
-      throw new Error(`Content type not provided in input procedure [create].`);
-    }
-
     const contentDefinition = ctx.contentRegistry.getDefinition(input.contentTypeId);
-
-    if (!contentDefinition) {
-      // TODO: Improve error handling
-      throw new Error(`Invalid contentType [${input.contentTypeId}]`);
-    }
-
     const { create: schemas } = contentDefinition.schemas.content;
 
     // Validate data to be stored
@@ -49,7 +35,7 @@ export const create: ProcedureDefinition<Context, CreateIn<string>> = {
     if (input.options) {
       if (!schemas.in?.options) {
         // TODO: Improve error handling
-        throw new Error('Schema missing for rpc call [create.in.options].');
+        throw new Error('Schema missing for rpc procedure [create.in.options].');
       }
       const error = validate(input.options, schemas.in.options);
       if (error) {

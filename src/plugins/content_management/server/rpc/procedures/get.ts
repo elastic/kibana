@@ -17,12 +17,6 @@ export const get: ProcedureDefinition<Context, GetIn<string>> = {
   schemas: rpcSchemas.get,
   fn: async (ctx, input) => {
     const contentDefinition = ctx.contentRegistry.getDefinition(input.contentTypeId);
-
-    if (!contentDefinition) {
-      // TODO: Improve error handling
-      throw new Error(`Invalid contentType [${input.contentTypeId}]`);
-    }
-
     const { get: schemas } = contentDefinition.schemas.content;
 
     if (input.options) {
