@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { defineGetCspStatusRoute, INDEX_TIMEOUT_IN_MINUTES } from './status';
+import { defineGetCloudDefendStatusRoute, INDEX_TIMEOUT_IN_MINUTES } from './status';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
@@ -23,42 +23,42 @@ import {
   RegistryPackage,
 } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { createCspRequestHandlerContextMock } from '../../mocks';
+import { createCloudDefendRequestHandlerContextMock } from '../../mocks';
 import { errors } from '@elastic/elasticsearch';
 
-const mockCspPackageInfo: Installation = {
+const mockCloudDefendPackageInfo: Installation = {
   verification_status: 'verified',
   installed_kibana: [],
   installed_kibana_space_id: 'default',
   installed_es: [],
   package_assets: [],
-  es_index_patterns: { findings: 'logs-cloud_security_posture.findings-*' },
-  name: 'cloud_security_posture',
-  version: '0.0.14',
-  install_version: '0.0.14',
+  es_index_patterns: { alerts: 'logs-cloud_defend.alerts-*' },
+  name: 'cloud_defend',
+  version: '1.0.0',
+  install_version: '1.0.0',
   install_status: 'installed',
   install_started_at: '2022-06-16T15:24:58.281Z',
   install_source: 'registry',
 };
 
-const mockLatestCspPackageInfo: RegistryPackage = {
+const mockLatestCloudDefendPackageInfo: RegistryPackage = {
   format_version: 'mock',
-  name: 'cloud_security_posture',
-  title: 'CIS Kubernetes Benchmark',
-  version: '0.0.14',
+  name: 'cloud_defend',
+  title: 'Defend for containers (D4C)',
+  version: '1.0.0',
   release: 'experimental',
-  description: 'Check Kubernetes cluster compliance with the Kubernetes CIS benchmark.',
+  description: 'Container drift prevention',
   type: 'integration',
-  download: '/epr/cloud_security_posture/cloud_security_posture-0.0.14.zip',
-  path: '/package/cloud_security_posture/0.0.14',
+  download: '/epr/cloud_defend/cloud_defend-1.0.0.zip',
+  path: '/package/cloud_defend/1.0.0',
   policy_templates: [],
-  owner: { github: 'elastic/cloud-security-posture' },
+  owner: { github: 'elastic/sec-cloudnative-integrations' },
   categories: ['containers', 'kubernetes'],
 };
 
-describe('CspSetupStatus route', () => {
+describe('CloudDefendSetupStatus route', () => {
   const router = httpServiceMock.createRouter();
-  let mockContext: ReturnType<typeof createCspRequestHandlerContextMock>;
+  let mockContext: ReturnType<typeof createCloudDefendRequestHandlerContextMock>;
   let mockPackagePolicyService: jest.Mocked<PackagePolicyClient>;
   let mockAgentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
   let mockAgentService: jest.Mocked<AgentService>;
@@ -69,35 +69,27 @@ describe('CspSetupStatus route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockContext = createCspRequestHandlerContextMock();
-    mockPackagePolicyService = mockContext.csp.packagePolicyService;
-    mockAgentPolicyService = mockContext.csp.agentPolicyService;
-    mockAgentService = mockContext.csp.agentService;
-    mockPackageService = mockContext.csp.packageService;
+    mockContext = createCloudDefendRequestHandlerContextMock();
+    mockPackagePolicyService = mockContext.cloudDefend.packagePolicyService;
+    mockAgentPolicyService = mockContext.cloudDefend.agentPolicyService;
+    mockAgentService = mockContext.cloudDefend.agentService;
+    mockPackageService = mockContext.cloudDefend.packageService;
 
     mockAgentClient = mockAgentService.asInternalUser as jest.Mocked<AgentClient>;
     mockPackageClient = mockPackageService.asInternalUser as jest.Mocked<PackageClient>;
   });
 
   it('validate the API route path', async () => {
-    defineGetCspStatusRoute(router);
+    defineGetCloudDefendStatusRoute(router);
     const [config, _] = router.get.mock.calls[0];
 
-    expect(config.path).toEqual('/internal/cloud_security_posture/status');
+    expect(config.path).toEqual('/internal/cloud_defend/status');
   });
 
   const indices = [
     {
-      index: 'logs-cloud_security_posture.findings-default*',
+      index: 'logs-cloud_defend.alerts-default*',
       expected_status: 'not-installed',
-    },
-    {
-      index: 'logs-cloud_security_posture.findings_latest-default',
-      expected_status: 'unprivileged',
-    },
-    {
-      index: 'logs-cloud_security_posture.scores-default',
-      expected_status: 'unprivileged',
     },
   ];
 
@@ -128,7 +120,9 @@ describe('CspSetupStatus route', () => {
             } as any;
           }
         );
-        mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
+        mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(
+          mockLatestCloudDefendPackageInfo
+        );
 
         mockPackagePolicyService.list.mockResolvedValueOnce({
           items: [],
@@ -138,7 +132,7 @@ describe('CspSetupStatus route', () => {
         });
 
         // Act
-        defineGetCspStatusRoute(router);
+        defineGetCloudDefendStatusRoute(router);
         const [_, handler] = router.get.mock.calls[0];
 
         const mockResponse = httpServerMock.createResponseFactory();
@@ -150,20 +144,22 @@ describe('CspSetupStatus route', () => {
         const body = call[0]?.body;
         expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
-        await expect(body).toMatchObject({
+        expect(body).toMatchObject({
           status: idxTestCase.expected_status,
         });
       }
     );
   });
 
-  it('Verify the API result when there are findings and no installed policies', async () => {
+  it('Verify the API result when there are alerts and no installed policies', async () => {
     mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
-        hits: [{ Findings: 'foo' }],
+        hits: [{ Alerts: 'foo' }],
       },
     } as unknown as ESSearchResponse);
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(
+      mockLatestCloudDefendPackageInfo
+    );
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -173,7 +169,7 @@ describe('CspSetupStatus route', () => {
     });
 
     // Act
-    defineGetCspStatusRoute(router);
+    defineGetCloudDefendStatusRoute(router);
     const [_, handler] = router.get.mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
@@ -187,23 +183,24 @@ describe('CspSetupStatus route', () => {
 
     await expect(body).toMatchObject({
       status: 'indexed',
-      latestPackageVersion: '0.0.14',
+      latestPackageVersion: '1.0.0',
       installedPackagePolicies: 0,
       healthyAgents: 0,
       installedPackageVersion: undefined,
-      isPluginInitialized: false,
     });
   });
 
-  it('Verify the API result when there are findings, installed policies, no running agents', async () => {
+  it('Verify the API result when there are alerts, installed policies, no running agents', async () => {
     mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
-        hits: [{ Findings: 'foo' }],
+        hits: [{ Alerts: 'foo' }],
       },
     } as unknown as ESSearchResponse);
 
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
-    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCspPackageInfo);
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(
+      mockLatestCloudDefendPackageInfo
+    );
+    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCloudDefendPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -213,7 +210,7 @@ describe('CspSetupStatus route', () => {
     });
 
     // Act
-    defineGetCspStatusRoute(router);
+    defineGetCloudDefendStatusRoute(router);
     const [_, handler] = router.get.mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
@@ -228,23 +225,24 @@ describe('CspSetupStatus route', () => {
 
     await expect(body).toMatchObject({
       status: 'indexed',
-      latestPackageVersion: '0.0.14',
+      latestPackageVersion: '1.0.0',
       installedPackagePolicies: 3,
       healthyAgents: 0,
-      installedPackageVersion: '0.0.14',
-      isPluginInitialized: false,
+      installedPackageVersion: '1.0.0',
     });
   });
 
-  it('Verify the API result when there are findings, installed policies, running agents', async () => {
+  it('Verify the API result when there are alerts, installed policies, running agents', async () => {
     mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
-        hits: [{ Findings: 'foo' }],
+        hits: [{ Alerts: 'foo' }],
       },
     } as unknown as ESSearchResponse);
 
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
-    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCspPackageInfo);
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(
+      mockLatestCloudDefendPackageInfo
+    );
+    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCloudDefendPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -263,7 +261,7 @@ describe('CspSetupStatus route', () => {
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
-    defineGetCspStatusRoute(router);
+    defineGetCloudDefendStatusRoute(router);
     const [_, handler] = router.get.mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
@@ -276,23 +274,24 @@ describe('CspSetupStatus route', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
-    await expect(body).toMatchObject({
+    expect(body).toMatchObject({
       status: 'indexed',
-      latestPackageVersion: '0.0.14',
+      latestPackageVersion: '1.0.0',
       installedPackagePolicies: 3,
       healthyAgents: 1,
-      installedPackageVersion: '0.0.14',
-      isPluginInitialized: false,
+      installedPackageVersion: '1.0.0',
     });
   });
 
-  it('Verify the API result when there are no findings and no installed policies', async () => {
+  it('Verify the API result when there are no alerts and no installed policies', async () => {
     mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
         hits: [],
       },
     } as unknown as ESSearchResponse);
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(
+      mockLatestCloudDefendPackageInfo
+    );
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -300,7 +299,7 @@ describe('CspSetupStatus route', () => {
       page: 1,
       perPage: 100,
     });
-    defineGetCspStatusRoute(router);
+    defineGetCloudDefendStatusRoute(router);
     const [_, handler] = router.get.mock.calls[0];
 
     const mockResponse = httpServerMock.createResponseFactory();
@@ -315,24 +314,25 @@ describe('CspSetupStatus route', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
-    await expect(body).toMatchObject({
+    expect(body).toMatchObject({
       status: 'not-installed',
-      latestPackageVersion: '0.0.14',
+      latestPackageVersion: '1.0.0',
       installedPackagePolicies: 0,
       healthyAgents: 0,
-      isPluginInitialized: false,
     });
   });
 
-  it('Verify the API result when there are no findings, installed agent but no deployed agent', async () => {
+  it('Verify the API result when there are no alerts, installed agent but no deployed agent', async () => {
     mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
         hits: [],
       },
     } as unknown as ESSearchResponse);
 
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
-    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCspPackageInfo);
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(
+      mockLatestCloudDefendPackageInfo
+    );
+    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCloudDefendPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -351,7 +351,7 @@ describe('CspSetupStatus route', () => {
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
-    defineGetCspStatusRoute(router);
+    defineGetCloudDefendStatusRoute(router);
 
     const [_, handler] = router.get.mock.calls[0];
 
@@ -365,30 +365,31 @@ describe('CspSetupStatus route', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
-    await expect(body).toMatchObject({
+    expect(body).toMatchObject({
       status: 'not-deployed',
-      latestPackageVersion: '0.0.14',
+      latestPackageVersion: '1.0.0',
       installedPackagePolicies: 1,
       healthyAgents: 0,
-      installedPackageVersion: '0.0.14',
-      isPluginInitialized: false,
+      installedPackageVersion: '1.0.0',
     });
   });
 
-  it('Verify the API result when there are no findings, installed agent, deployed agent, before index timeout', async () => {
+  it('Verify the API result when there are no alerts, installed agent, deployed agent, before index timeout', async () => {
     mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
         hits: [],
       },
     } as unknown as ESSearchResponse);
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(
+      mockLatestCloudDefendPackageInfo
+    );
 
     const currentTime = new Date();
-    mockCspPackageInfo.install_started_at = new Date(
+    mockCloudDefendPackageInfo.install_started_at = new Date(
       currentTime.setMinutes(currentTime.getMinutes() - INDEX_TIMEOUT_IN_MINUTES + 1)
     ).toUTCString();
 
-    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCspPackageInfo);
+    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCloudDefendPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -407,7 +408,7 @@ describe('CspSetupStatus route', () => {
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
-    defineGetCspStatusRoute(router);
+    defineGetCloudDefendStatusRoute(router);
 
     const [_, handler] = router.get.mock.calls[0];
 
@@ -423,30 +424,31 @@ describe('CspSetupStatus route', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
-    await expect(body).toMatchObject({
+    expect(body).toMatchObject({
       status: 'indexing',
-      latestPackageVersion: '0.0.14',
+      latestPackageVersion: '1.0.0',
       installedPackagePolicies: 1,
       healthyAgents: 1,
-      installedPackageVersion: '0.0.14',
-      isPluginInitialized: false,
+      installedPackageVersion: '1.0.0',
     });
   });
 
-  it('Verify the API result when there are no findings, installed agent, deployed agent, after index timeout', async () => {
+  it('Verify the API result when there are no alerts, installed agent, deployed agent, after index timeout', async () => {
     mockContext.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce({
       hits: {
         hits: [],
       },
     } as unknown as ESSearchResponse);
-    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
+    mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(
+      mockLatestCloudDefendPackageInfo
+    );
 
     const currentTime = new Date();
-    mockCspPackageInfo.install_started_at = new Date(
+    mockCloudDefendPackageInfo.install_started_at = new Date(
       currentTime.setMinutes(currentTime.getMinutes() - INDEX_TIMEOUT_IN_MINUTES - 1)
     ).toUTCString();
 
-    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCspPackageInfo);
+    mockPackageClient.getInstallation.mockResolvedValueOnce(mockCloudDefendPackageInfo);
 
     mockPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
@@ -465,7 +467,7 @@ describe('CspSetupStatus route', () => {
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
-    defineGetCspStatusRoute(router);
+    defineGetCloudDefendStatusRoute(router);
 
     const [_, handler] = router.get.mock.calls[0];
 
@@ -480,13 +482,12 @@ describe('CspSetupStatus route', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
-    await expect(body).toMatchObject({
+    expect(body).toMatchObject({
       status: 'index-timeout',
-      latestPackageVersion: '0.0.14',
+      latestPackageVersion: '1.0.0',
       installedPackagePolicies: 1,
       healthyAgents: 1,
-      installedPackageVersion: '0.0.14',
-      isPluginInitialized: false,
+      installedPackageVersion: '1.0.0',
     });
   });
 });

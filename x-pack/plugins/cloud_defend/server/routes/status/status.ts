@@ -72,6 +72,7 @@ const calculateCloudDefendStatusCode = (
 ): CloudDefendStatusCode => {
   // We check privileges only for the relevant indices for our pages to appear
   if (indicesStatus.alerts === 'unprivileged') return 'unprivileged';
+  if (indicesStatus.alerts === 'not-empty') return 'indexed';
   if (installedCloudDefendPackagePolicies === 0) return 'not-installed';
   if (healthyAgents === 0) return 'not-deployed';
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';

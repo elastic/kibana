@@ -6,25 +6,25 @@
  */
 import { httpServerMock, httpServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
-  benchmarksQueryParamsSchema,
-  DEFAULT_BENCHMARKS_PER_PAGE,
-} from '../../../common/schemas/benchmark';
+  policiesQueryParamsSchema,
+  DEFAULT_POLICIES_PER_PAGE,
+} from '../../../common/schemas/policy';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  getCspPackagePolicies,
-  getCspAgentPolicies,
+  getCloudDefendPackagePolicies,
+  getCloudDefendAgentPolicies,
 } from '../../lib/fleet_util';
-import { defineGetBenchmarksRoute, getRulesCountForPolicy } from './benchmarks';
+import { defineGetPoliciesRoute } from './policies';
 
-import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   createMockAgentPolicyService,
   createPackagePolicyServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { createCspRequestHandlerContextMock } from '../../mocks';
+import { createCloudDefendRequestHandlerContextMock } from '../../mocks';
 
-describe('benchmarks API', () => {
+describe('policies API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -32,21 +32,21 @@ describe('benchmarks API', () => {
   it('validate the API route path', async () => {
     const router = httpServiceMock.createRouter();
 
-    defineGetBenchmarksRoute(router);
+    defineGetPoliciesRoute(router);
 
     const [config] = router.get.mock.calls[0];
 
-    expect(config.path).toEqual('/internal/cloud_security_posture/benchmarks');
+    expect(config.path).toEqual('/internal/cloud_defend/policies');
   });
 
   it('should accept to a user with fleet.all privilege', async () => {
     const router = httpServiceMock.createRouter();
 
-    defineGetBenchmarksRoute(router);
+    defineGetPoliciesRoute(router);
 
     const [_, handler] = router.get.mock.calls[0];
 
-    const mockContext = createCspRequestHandlerContextMock();
+    const mockContext = createCloudDefendRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
     const [context, req, res] = [mockContext, mockRequest, mockResponse];
@@ -59,11 +59,11 @@ describe('benchmarks API', () => {
   it('should reject to a user without fleet.all privilege', async () => {
     const router = httpServiceMock.createRouter();
 
-    defineGetBenchmarksRoute(router);
+    defineGetPoliciesRoute(router);
 
     const [_, handler] = router.get.mock.calls[0];
 
-    const mockContext = createCspRequestHandlerContextMock();
+    const mockContext = createCloudDefendRequestHandlerContextMock();
     mockContext.fleet.authz.fleet.all = false;
 
     const mockResponse = httpServerMock.createResponseFactory();
@@ -77,76 +77,76 @@ describe('benchmarks API', () => {
 
   describe('test input schema', () => {
     it('expect to find default values', async () => {
-      const validatedQuery = benchmarksQueryParamsSchema.validate({});
+      const validatedQuery = policiesQueryParamsSchema.validate({});
 
       expect(validatedQuery).toMatchObject({
         page: 1,
-        per_page: DEFAULT_BENCHMARKS_PER_PAGE,
+        per_page: DEFAULT_POLICIES_PER_PAGE,
       });
     });
 
-    it('expect to find benchmark_name', async () => {
-      const validatedQuery = benchmarksQueryParamsSchema.validate({
-        benchmark_name: 'my_cis_benchmark',
+    it('expect to find policy_name', async () => {
+      const validatedQuery = policiesQueryParamsSchema.validate({
+        policy_name: 'my_cis_policy',
       });
 
       expect(validatedQuery).toMatchObject({
         page: 1,
-        per_page: DEFAULT_BENCHMARKS_PER_PAGE,
-        benchmark_name: 'my_cis_benchmark',
+        per_page: DEFAULT_POLICIES_PER_PAGE,
+        policy_name: 'my_cis_policy',
       });
     });
 
     it('should throw when page field is not a positive integer', async () => {
       expect(() => {
-        benchmarksQueryParamsSchema.validate({ page: -2 });
+        policiesQueryParamsSchema.validate({ page: -2 });
       }).toThrow();
     });
 
     it('should throw when per_page field is not a positive integer', async () => {
       expect(() => {
-        benchmarksQueryParamsSchema.validate({ per_page: -2 });
+        policiesQueryParamsSchema.validate({ per_page: -2 });
       }).toThrow();
     });
   });
 
   it('should throw when sort_field is not string', async () => {
     expect(() => {
-      benchmarksQueryParamsSchema.validate({ sort_field: true });
+      policiesQueryParamsSchema.validate({ sort_field: true });
     }).toThrow();
   });
 
   it('should not throw when sort_field is a string', async () => {
     expect(() => {
-      benchmarksQueryParamsSchema.validate({ sort_field: 'package_policy.name' });
+      policiesQueryParamsSchema.validate({ sort_field: 'package_policy.name' });
     }).not.toThrow();
   });
 
   it('should throw when sort_order is not `asc` or `desc`', async () => {
     expect(() => {
-      benchmarksQueryParamsSchema.validate({ sort_order: 'Other Direction' });
+      policiesQueryParamsSchema.validate({ sort_order: 'Other Direction' });
     }).toThrow();
   });
 
   it('should not throw when `asc` is input for sort_order field', async () => {
     expect(() => {
-      benchmarksQueryParamsSchema.validate({ sort_order: 'asc' });
+      policiesQueryParamsSchema.validate({ sort_order: 'asc' });
     }).not.toThrow();
   });
 
   it('should not throw when `desc` is input for sort_order field', async () => {
     expect(() => {
-      benchmarksQueryParamsSchema.validate({ sort_order: 'desc' });
+      policiesQueryParamsSchema.validate({ sort_order: 'desc' });
     }).not.toThrow();
   });
 
   it('should not throw when fields is a known string literal', async () => {
     expect(() => {
-      benchmarksQueryParamsSchema.validate({ sort_field: 'package_policy.name' });
+      policiesQueryParamsSchema.validate({ sort_field: 'package_policy.name' });
     }).not.toThrow();
   });
 
-  describe('test benchmarks utils', () => {
+  describe('test policies utils', () => {
     let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
 
     beforeEach(() => {
@@ -157,7 +157,7 @@ describe('benchmarks API', () => {
       it('should format request by package name', async () => {
         const mockPackagePolicyService = createPackagePolicyServiceMock();
 
-        await getCspPackagePolicies(mockSoClient, mockPackagePolicyService, 'myPackage', {
+        await getCloudDefendPackagePolicies(mockSoClient, mockPackagePolicyService, 'myPackage', {
           page: 1,
           per_page: 100,
           sort_order: 'desc',
@@ -175,7 +175,7 @@ describe('benchmarks API', () => {
       it('should build sort request by `sort_field` and default `sort_order`', async () => {
         const mockAgentPolicyService = createPackagePolicyServiceMock();
 
-        await getCspPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
+        await getCloudDefendPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
           page: 1,
           per_page: 100,
           sort_field: 'package_policy.name',
@@ -196,7 +196,7 @@ describe('benchmarks API', () => {
       it('should build sort request by `sort_field` and asc `sort_order`', async () => {
         const mockAgentPolicyService = createPackagePolicyServiceMock();
 
-        await getCspPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
+        await getCloudDefendPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
           page: 1,
           per_page: 100,
           sort_field: 'package_policy.name',
@@ -215,19 +215,19 @@ describe('benchmarks API', () => {
       });
     });
 
-    it('should format request by benchmark_name', async () => {
+    it('should format request by policy_name', async () => {
       const mockAgentPolicyService = createPackagePolicyServiceMock();
 
-      await getCspPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
+      await getCloudDefendPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
         page: 1,
         per_page: 100,
         sort_order: 'desc',
-        benchmark_name: 'my_cis_benchmark',
+        policy_name: 'cloud_defend_1',
       });
 
       expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
         expect.objectContaining({
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *my_cis_benchmark*`,
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *cloud_defend_1*`,
           page: 1,
           perPage: 100,
         })
@@ -239,7 +239,7 @@ describe('benchmarks API', () => {
         const agentPolicyService = createMockAgentPolicyService();
         const packagePolicies = [createPackagePolicyMock(), createPackagePolicyMock()];
 
-        await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
+        await getCloudDefendAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
         expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(1);
       });
@@ -252,33 +252,9 @@ describe('benchmarks API', () => {
         packagePolicy2.policy_id = 'AnotherId';
         const packagePolicies = [packagePolicy1, packagePolicy2];
 
-        await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
+        await getCloudDefendAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
         expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(2);
-      });
-    });
-
-    describe('test addPackagePolicyCspRuleTemplates', () => {
-      it('should retrieve the rules count by the filtered benchmark type', async () => {
-        const benchmark = 'cis_k8s';
-        mockSoClient.find.mockResolvedValueOnce({
-          aggregations: { enabled_status: { doc_count: 2 } },
-          page: 1,
-          per_page: 10000,
-          total: 3,
-          saved_objects: [
-            {
-              type: 'csp_rule',
-              id: '0af387d0-c933-11ec-b6c8-4f8afc058cc3',
-            },
-          ],
-        } as unknown as SavedObjectsFindResponse);
-
-        const rulesCount = await getRulesCountForPolicy(mockSoClient, benchmark);
-
-        const expectedFilter = `csp-rule-template.attributes.metadata.benchmark.id: "${benchmark}"`;
-        expect(mockSoClient.find.mock.calls[0][0].filter).toEqual(expectedFilter);
-        expect(rulesCount).toEqual(3);
       });
     });
   });
