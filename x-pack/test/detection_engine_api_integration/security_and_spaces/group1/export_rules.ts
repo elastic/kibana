@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
@@ -376,7 +375,7 @@ export default ({ getService }: FtrProviderContext): void => {
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
               },
-            ] as unknown as RuleAction[],
+            ],
             throttle: '1h',
           };
 
@@ -470,6 +469,11 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200)
             .parse(binaryToString);
 
+          const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
+          const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
+          const firstRule = removeServerGeneratedProperties(firstRuleParsed);
+          const secondRule = removeServerGeneratedProperties(secondRuleParsed);
+
           const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
             ...getSimpleRuleOutput('rule-1'),
             actions: [
@@ -491,7 +495,7 @@ export default ({ getService }: FtrProviderContext): void => {
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
               },
-            ] as unknown as RuleAction[],
+            ],
             throttle: '1h',
           };
 
@@ -516,14 +520,9 @@ export default ({ getService }: FtrProviderContext): void => {
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
               },
-            ] as unknown as RuleAction[],
+            ],
             throttle: '1h',
           };
-
-          const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
-          const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
-          const firstRule = removeServerGeneratedProperties(firstRuleParsed);
-          const secondRule = removeServerGeneratedProperties(secondRuleParsed);
 
           expect(firstRule).to.eql(outputRule2);
           expect(secondRule).to.eql(outputRule1);
