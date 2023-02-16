@@ -32,7 +32,6 @@ import { DownloadJson } from './download_json';
 import { LoadingTimelineItem } from './loading_timeline_item';
 
 export function Diagnostics() {
-  const [configStatus, setConfigStatus] = useState(FETCH_STATUS.LOADING);
   const [configData, setConfigData] = useState<'success' | 'error'>();
   const [actionsEnabled, setActionsEnabled] = useState(false);
   const [reportData, setReportData] = useState<Record<string, any>>();
@@ -80,6 +79,12 @@ export function Diagnostics() {
   };
 
   useEffect(() => {
+    if (setupConfigData && apmData) {
+      setActionsEnabled(true);
+    }
+  }, [setupConfigData, apmData]);
+
+  useEffect(() => {
     setReportData((prev) => ({
       ...prev,
       apmData,
@@ -88,9 +93,7 @@ export function Diagnostics() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setConfigStatus(FETCH_STATUS.SUCCESS);
       setConfigData('success');
-      setActionsEnabled(true);
       setReportData((prev) => ({
         ...prev,
         apmConfiguration: {
@@ -133,9 +136,11 @@ export function Diagnostics() {
         <EuiTimelineItem
           verticalAlign="top"
           icon={
-            setupConfigStatus === FETCH_STATUS.LOADING ? (
+            setupConfigStatus === FETCH_STATUS.NOT_INITIATED ? (
+              <EuiAvatar name="Checked" iconType="dot" color="subdued" />
+            ) : setupConfigStatus === FETCH_STATUS.LOADING ? (
               <LoadingTimelineItem />
-            ) : configData === 'success' ? (
+            ) : setupConfigData ? (
               <EuiAvatar name="Checked" iconType="check" color="#6dccb1" />
             ) : (
               <EuiAvatar name="Checked" iconType="alert" color="#ff7f62" />
