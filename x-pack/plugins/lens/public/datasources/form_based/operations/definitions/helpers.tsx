@@ -21,6 +21,10 @@ import {
 } from './column_types';
 import type { FormBasedLayer } from '../../types';
 import { hasField } from '../../pure_utils';
+import {
+  checkForDateHistogram,
+  checkReferences
+} from "@kbn/lens-plugin/public/datasources/form_based/operations/definitions/calculations/utils";
 
 export function getInvalidFieldMessage(
   layer: FormBasedLayer,
@@ -203,4 +207,46 @@ export function getFilter(
     }
   }
   return filter;
+}
+
+export function isMetricCounterField(field?: IndexPatternField) {
+  return field?.timeSeriesMetric === 'counter';
+}
+
+function checkReferencedColumnMetric(
+  layer: FormBasedLayer,
+  columnId: string,
+  indexPattern: IndexPattern
+) {
+  const column = layer.columns[columnId] as ReferenceBasedIndexPatternColumn;
+  return column.references
+    .filter((referencedId) => 'sourceField' in layer.columns[referencedId])
+    .map((referencedId) => {
+      const fieldName = (layer.columns[referencedId] as FieldBasedIndexPatternColumn).sourceField;
+      if (!isMetricCounterField(indexPattern.getFieldByName(fieldName))) {
+        return i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
+          defaultMessage: 'Dimension "{dimensionLabel}" is configured incorrectly',
+          values: {
+            dimensionLabel: layer.columns[referencedId].label,
+          },
+        });
+      }
+    });
+}
+
+export function getErrorForRateReference(
+  layer: FormBasedLayer,
+  columnId: string,
+  name: string,
+  indexPattern: IndexPattern
+) {
+  const dateErrors = checkForDateHistogram(layer, name) ?? [];
+  const referenceErrors = checkReferences(layer, columnId) ?? [];
+  const metricCounterErrors = checkReferencedColumnMetric(layer, columnId, indexPattern) ?? [];
+  if (metricCounterErrors.length) {
+    return metricCounterErrors.concat(referenceErrors);
+  }
+  if (dateErrors.length) {
+    return dateErrors.concat(referenceErrors);
+  }
 }
