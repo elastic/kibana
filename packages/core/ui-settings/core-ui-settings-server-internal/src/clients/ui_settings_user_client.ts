@@ -7,13 +7,12 @@
  */
 
 import { KibanaRequest } from '@kbn/core-http-server';
-import { IUserUiSettingsClient } from '@kbn/core-ui-settings-server/src/ui_settings_client';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { CannotOverrideError } from '../ui_settings_errors';
 import { Cache } from '../cache';
 import { UiSettingsServiceOptions } from '../types';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 interface ReadOptions {
   autoCreateOrUpgradeIfMissing?: boolean;
