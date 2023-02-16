@@ -1,7 +1,7 @@
 import {
   ElasticAgentName,
   SynthtraceScenario,
-  CreateModal,
+  ModalForm,
   Service,
   Span,
   Transaction,
@@ -12,7 +12,8 @@ export type Action =
   | ChangeTopLevelServiceAction
   | ToggleModalAction
   | InsertNodeAction
-  | InsertServiceAction;
+  | InsertServiceAction
+  | EditNodeAction;
 
 interface ToggletDistributedTracingAction {
   type: 'toggle_distributed_tracing';
@@ -25,8 +26,8 @@ interface ChangeTopLevelServiceAction {
 }
 
 interface ToggleModalAction {
-  type: 'toggle_create_modal';
-  payload: CreateModal;
+  type: 'toggle_modal_form';
+  payload: ModalForm;
 }
 
 interface InsertNodeAction {
@@ -37,4 +38,9 @@ interface InsertNodeAction {
 interface InsertServiceAction {
   type: 'insert_service';
   payload: { id: string; node: Transaction | Span; service: Service };
+}
+
+interface EditNodeAction {
+  type: 'edit_node';
+  payload: { id: string; node: Transaction | Span };
 }

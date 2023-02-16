@@ -21,15 +21,29 @@ const Node = ({ item, level }: { item: Transaction | Span; level: number }) => {
 
   const onPopOverOptionSelected = (type: ModalType) => {
     dispatch({
-      type: 'toggle_create_modal',
+      type: 'toggle_modal_form',
       payload: {
         isOpen: true,
         type,
         id: item.id,
         serviceId: item.serviceId,
+        isEdit: false,
       },
     });
     setIsPopoverOpen(false);
+  };
+
+  const onEdit = (type: ModalType) => {
+    dispatch({
+      type: 'toggle_modal_form',
+      payload: {
+        isOpen: true,
+        type,
+        id: item.id,
+        serviceId: item.serviceId,
+        isEdit: true,
+      },
+    });
   };
 
   const shouldRepeat = item?.repeat ? item.repeat > 0 : false;
@@ -51,7 +65,9 @@ const Node = ({ item, level }: { item: Transaction | Span; level: number }) => {
       <EuiPanel paddingSize="s" style={{ backgroundColor: `${panelColor}` }}>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiText>{item.name}</EuiText>
+            <EuiText>
+              [{item.docType.charAt(0).toUpperCase()}] {item.name}
+            </EuiText>
           </EuiFlexItem>
           {shouldRepeat && (
             <EuiFlexItem grow={false}>
@@ -82,7 +98,11 @@ const Node = ({ item, level }: { item: Transaction | Span; level: number }) => {
               </EuiPopover>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon onClick={() => {}} iconType="gear" aria-label="Add" />
+              <EuiButtonIcon
+                onClick={() => onEdit(item.docType)}
+                iconType="gear"
+                aria-label="Edit"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexGroup>

@@ -57,7 +57,7 @@ const ServiceForm = ({
     state.services || {}
   ).map((service: Service) => ({
     key: service.id,
-    label: service.agentName,
+    label: service.name,
     value: service.agentName as ElasticAgentName,
   }));
 

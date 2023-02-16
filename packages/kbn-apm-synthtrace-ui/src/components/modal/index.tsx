@@ -5,21 +5,21 @@ import SpanForm, { SpanFormState } from './span-form';
 import ServiceForm, { ServiceFormState } from './service-form';
 import TransactionForm, { TransactionFormState } from './transaction-form';
 import {
-  createTransactionPayload,
-  createSpanPayload,
+  generateTransactionPayload,
+  generateSpanPayload,
   createDummyTransactionForService,
   createServicePayload,
 } from '../../common/helpers';
 import { v4 as uuidv4 } from 'uuid';
 
-const CreateModal = () => {
+const ModalForm = () => {
   const { state, dispatch } = useScenarioContext();
   const modalFormId = useGeneratedHtmlId({ prefix: 'modalForm' });
 
   const closeModal = () => {
     dispatch({
-      type: 'toggle_create_modal',
-      payload: { isOpen: false, serviceId: '', type: 'transaction', id: '' },
+      type: 'toggle_modal_form',
+      payload: { isOpen: false, serviceId: '', type: 'transaction', id: '', isEdit: false },
     });
   };
 
@@ -28,10 +28,10 @@ const CreateModal = () => {
     const isNewService = payload.type === 'service' && payload.id?.startsWith('new_service');
     switch (payload.type) {
       case 'span':
-        insertPayload = createSpanPayload(payload, state.createModal.serviceId);
+        insertPayload = generateSpanPayload(payload, state.modalForm.serviceId);
         break;
       case 'transaction':
-        insertPayload = createTransactionPayload(payload, state.createModal.serviceId);
+        insertPayload = generateTransactionPayload(payload, state.modalForm.serviceId);
         break;
       case 'service':
         insertPayload = createDummyTransactionForService(payload.id);
@@ -42,7 +42,7 @@ const CreateModal = () => {
         type: 'insert_node',
         payload: {
           node: insertPayload,
-          id: state.createModal.id || '',
+          id: state.modalForm.id || '',
         },
       });
     } else {
@@ -52,7 +52,7 @@ const CreateModal = () => {
       dispatch({
         type: 'insert_service',
         payload: {
-          id: state.createModal.id || '',
+          id: state.modalForm.id || '',
           service: serviceInsertPayload,
           node: insertPayload,
         },
@@ -60,22 +60,50 @@ const CreateModal = () => {
     }
   };
 
+  const editModal = (payload: SpanFormState | TransactionFormState, id: string) => {
+    let editPayload;
+    switch (payload.type) {
+      case 'span':
+        editPayload = generateSpanPayload(payload, state.modalForm.serviceId);
+        break;
+      case 'transaction':
+        editPayload = generateTransactionPayload(payload, state.modalForm.serviceId);
+        break;
+    }
+    dispatch({
+      type: 'edit_node',
+      payload: {
+        node: editPayload,
+        id,
+      },
+    });
+  };
+
   const getForm = (
     formId: string,
     closeModal: () => void,
     saveModal: (payload: SpanFormState | TransactionFormState | ServiceFormState) => void
   ) => {
-    switch (state.createModal.type) {
+    switch (state.modalForm.type) {
       case 'span':
-        return <SpanForm formId={formId} onClose={closeModal} onSave={saveModal} />;
+        return (
+          <SpanForm formId={formId} onClose={closeModal} onSave={saveModal} onEdit={editModal} />
+        );
       case 'service':
         return <ServiceForm formId={formId} onClose={closeModal} onSave={saveModal} />;
       case 'transaction':
-        return <TransactionForm formId={formId} onClose={closeModal} onSave={saveModal} />;
+        return (
+          <TransactionForm
+            formId={formId}
+            onClose={closeModal}
+            onSave={saveModal}
+            onEdit={editModal}
+          />
+        );
     }
   };
 
-  return state.createModal.isOpen ? <>{getForm(modalFormId, closeModal, saveModal)}</> : <div />;
+  return state.modalForm.isOpen ? <>{getForm(modalFormId, closeModal, saveModal)}</> : <div />;
 };
 
-export default CreateModal;
+export default ModalForm;

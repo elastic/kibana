@@ -3,6 +3,10 @@ import React from 'react';
 import Node from './node';
 import { Span, Transaction } from '../../typings';
 
+// This tree rendering logic can be optimised as currently it re-renders the
+// whole tree on any node addition or edit.
+// The whole implementation can be achieved using O(n) if we maintain nodeId
+// and node in a flattened hashmap fashion
 const Branch = ({ item, level }: { item: Transaction | Span; level: number }) => {
   const hasChildren = item.children?.length !== 0;
 

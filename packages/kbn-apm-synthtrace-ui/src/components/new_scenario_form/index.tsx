@@ -40,6 +40,7 @@ export function NewScenarioForm() {
           <EuiSwitch
             label="Distributed tracing"
             checked={state.isDistributedTracing}
+            disabled
             onChange={() => {
               dispatch({
                 type: 'toggle_distributed_tracing',

@@ -1,6 +1,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFieldNumber,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -11,6 +12,8 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import React from 'react';
+import { useScenarioContext } from '@kbn/apm-synthtrace-ui/src/context/use_scenario_context';
+import { findNodeInATree } from '@kbn/apm-synthtrace-ui/src/common/helpers';
 
 type InvalidType = {
   name: boolean;
@@ -26,28 +29,48 @@ export type SpanFormState = {
   type: 'span';
 };
 
+const INITIAL_STATE: SpanFormState = {
+  name: '',
+  span_type: '',
+  sub_type: '',
+  repeat: 0,
+  type: 'span',
+};
+
 const SpanForm = ({
   formId,
   onClose,
   onSave,
+  onEdit,
 }: {
   formId: string;
   onClose: () => void;
   onSave: (payload: SpanFormState) => void;
+  onEdit: (payload: SpanFormState, id: string) => void;
 }) => {
+  const { state } = useScenarioContext();
   const [isInvalid, setIsInvalid] = React.useState<InvalidType>({
     name: false,
     span_type: false,
     sub_type: false,
   });
 
-  const [formState, setFormState] = React.useState<SpanFormState>({
-    name: '',
-    span_type: '',
-    sub_type: '',
-    repeat: 0,
-    type: 'span',
-  });
+  let computedState = INITIAL_STATE;
+
+  if (state.modalForm.isEdit) {
+    const existingSpan = findNodeInATree(state.modalForm.id, state.entryTransaction);
+    if (existingSpan?.docType === 'span') {
+      computedState = {
+        name: existingSpan.name,
+        span_type: existingSpan.type,
+        sub_type: existingSpan.subtype,
+        repeat: existingSpan.repeat || 0,
+        type: 'span',
+      };
+    }
+  }
+
+  const [formState, setFormState] = React.useState<SpanFormState>(computedState);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -69,14 +92,20 @@ const SpanForm = ({
     } else if (formState.sub_type === '') {
       setIsInvalid({ ...isInvalid, sub_type: true });
     } else {
-      onSave(formState);
+      if (state.modalForm.isEdit && state.modalForm.id) {
+        onEdit(formState, state.modalForm.id);
+      } else {
+        onSave(formState);
+      }
     }
   };
 
   return (
     <EuiModal onClose={onClose} initialFocus="[name=name]">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Create Span</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {state.modalForm.isEdit ? 'Edit Span' : 'Create Span'}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiForm id={formId} component="form">
@@ -108,14 +137,14 @@ const SpanForm = ({
           </EuiFormRow>
 
           <EuiFormRow label="Repeat" helpText="# of times">
-            <EuiFieldText name="repeat" value={formState.repeat} onChange={onChange} />
+            <EuiFieldNumber name="repeat" onChange={onChange} value={formState.repeat} />
           </EuiFormRow>
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
         <EuiButton type="submit" form={formId} onClick={onSaveClick} fill>
-          Save
+          {state.modalForm.isEdit ? 'Edit' : 'Save'}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

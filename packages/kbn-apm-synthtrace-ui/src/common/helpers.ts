@@ -4,27 +4,30 @@ import { SpanFormState } from '../components/modal/span-form';
 import { Transaction, Span, Service } from '../typings';
 import { ServiceFormState } from '../components/modal/service-form';
 
-export const createTransactionPayload = (
+export const generateTransactionPayload = (
   payload: TransactionFormState,
-  serviceId: string = ''
+  serviceId: string = '',
+  id?: string
 ): Transaction => ({
   docType: payload.type,
   name: payload.name,
   repeat: payload.repeat,
   serviceId,
-  id: uuidv4(),
-  children: [],
+  id: id || uuidv4(),
 });
 
-export const createSpanPayload = (payload: SpanFormState, serviceId: string = ''): Span => ({
+export const generateSpanPayload = (
+  payload: SpanFormState,
+  serviceId: string = '',
+  id?: string
+): Span => ({
   docType: payload.type,
   name: payload.name,
   type: payload.span_type,
   subtype: payload.sub_type,
   repeat: payload.repeat,
   serviceId,
-  id: uuidv4(),
-  children: [],
+  id: id || uuidv4(),
 });
 
 export const createDummyTransactionForService = (serviceId: string): Transaction => ({
@@ -46,13 +49,11 @@ export const createServicePayload = (
   color: colorCodeGenerator(),
 });
 
-// Function to insert a node in a tree
 export const insertNodeInATree = (
   parentId: string,
   node: Transaction | Span,
   tree: Transaction | Span
 ): Transaction | Span => {
-  // If the tree is empty, return a new tree
   if (tree === null) return tree;
 
   // Otherwise, recur down the tree
@@ -63,6 +64,44 @@ export const insertNodeInATree = (
     tree.children?.forEach((child) => insertNodeInATree(parentId, node, child));
   }
   return tree;
+};
+
+export const findNodeInATree = (
+  id: string,
+  tree?: Transaction | Span
+): Transaction | Span | null => {
+  if (!id || !tree) {
+    return null;
+  }
+  if (tree.id === id) {
+    return tree as Transaction;
+  } else {
+    let i;
+    let result = null;
+    if (tree.children) {
+      for (i = 0; result === null && i < tree.children?.length; i++) {
+        result = findNodeInATree(id, tree.children[i]);
+      }
+    }
+    return result;
+  }
+};
+
+// Since the tree is not flattened, we need to find the node in the tree
+// and then update it. In next version we will flatten the tree and then
+// we can use the index to update the node.
+export const editNodeInATree = (
+  id: string,
+  node: Transaction | Span,
+  tree?: Transaction
+): Transaction => {
+  // Due to Kibana dependency, we need to use Typescript "4.6.3".
+  // With TS 4.7, structuredClone is available and we can use it to clone the tree.
+  const clonedTree = JSON.parse(JSON.stringify(tree));
+  let currentNode = findNodeInATree(id, clonedTree);
+  Object.assign(currentNode, node);
+
+  return clonedTree;
 };
 
 // Function generates only Light colors with HSL - hsl(hue, saturation, lightness).

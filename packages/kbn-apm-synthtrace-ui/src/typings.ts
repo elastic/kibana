@@ -9,12 +9,13 @@ export type SynthtraceScenario = {
     [key: string]: Service;
   };
   entryTransaction?: Transaction;
-  createModal: Partial<CreateModal>;
+  modalForm: ModalForm;
 };
 
 // TODO: Rename this type to something more generic
-export type CreateModal = {
+export type ModalForm = {
   isOpen: boolean;
+  isEdit: boolean;
   type: ModalType;
   serviceId: string;
   id: string;
@@ -71,8 +72,12 @@ export const example: SynthtraceScenario = {
   instanceName: '1',
   environment: 'prod',
   isDistributedTracing: false,
-  createModal: {
+  modalForm: {
     isOpen: false,
+    isEdit: false,
+    type: 'service',
+    serviceId: '',
+    id: '',
   },
   topLevelService: {
     name: 'synth-rum',
