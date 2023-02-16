@@ -12,7 +12,7 @@ import type { SetupPlugins } from '../plugin';
 
 export interface DashboardUsage {
   created_at: string | undefined;
-  id: string;
+  dashboard_id: string;
   error_message?: string;
   error_status_code?: number;
 }

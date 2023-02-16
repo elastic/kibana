@@ -56,7 +56,7 @@ describe('Dashboards Metrics', () => {
         dashboards: [
           {
             created_at: '2023-02-14T09:32:37.515Z',
-            id: '84df7db0-ac4a-11ed-ae40-ff411efc2344',
+            dashboard_id: '84df7db0-ac4a-11ed-ae40-ff411efc2344',
           },
         ],
       });

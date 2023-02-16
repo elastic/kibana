@@ -50,7 +50,7 @@ export const getDashboardMetrics = async ({
     },
     dashboards: dashboardsResponse.saved_objects.map((d) => ({
       created_at: d.created_at,
-      id: d.id,
+      dashboard_id: d.id,
       ...(d?.error?.message ? { error_message: d?.error?.message } : {}),
       ...(d?.error?.statusCode ? { error_status_code: d?.error?.statusCode } : {}),
     })),

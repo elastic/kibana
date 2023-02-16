@@ -2426,7 +2426,7 @@ export const registerCollector: RegisterCollector = ({
               type: 'keyword',
               _meta: { description: 'The time the dashboard was created' },
             },
-            id: {
+            dashboard_id: {
               type: 'keyword',
               _meta: { description: 'The dashboard saved object id' },
             },
