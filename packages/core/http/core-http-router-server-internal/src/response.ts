@@ -90,7 +90,8 @@ export const fileResponseFactory = {
     } = options;
     const reponseFilename = bypassFileFormat ? filename : encodeURIComponent(filename);
     const responseBody = typeof body === 'string' && !bypassFileFormat ? Buffer.from(body) : body;
-    const responseContentType = fileContentType ?? mime.getType(filename) ??  'application/octet-stream';
+    const responseContentType =
+      fileContentType ?? mime.getType(filename) ?? 'application/octet-stream';
 
     return new KibanaResponse(200, responseBody, {
       bypassErrorFormat,
@@ -104,7 +105,7 @@ export const fileResponseFactory = {
       },
     });
   },
-}
+};
 
 export const kibanaResponseFactory: KibanaResponseFactory = {
   ...successResponseFactory,

@@ -47,7 +47,7 @@ describe('fileResponseFactory', () => {
       if (!headers) {
         throw new Error('Missing headers');
       }
-      //@ts-expect-error
+      // @ts-expect-error
       const contentDispositionHeader = headers['Content-Disposition'];
 
       if (!contentDispositionHeader) {
@@ -60,7 +60,9 @@ describe('fileResponseFactory', () => {
         `"attachment; filename=%E6%97%A5%E6%9C%AC%E8%AA%9E%E3%83%80%E3%83%83%E3%82%B7%E3%83%A5%E3%83%9C%E3%83%BC%E3%83%89.pdf"`
       );
       expect(isMultiByte(contentDispositionHeader)).toBe(false);
-      expect(decodeURIComponent(contentDispositionHeader)).toBe(`attachment; filename=${multuByteCharacters}`);
+      expect(decodeURIComponent(contentDispositionHeader)).toBe(
+        `attachment; filename=${multuByteCharacters}`
+      );
     });
 
     it('accepts additional headers but doesnt override file headers', () => {
