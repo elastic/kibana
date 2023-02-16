@@ -24841,7 +24841,7 @@ remark-parse-no-trim@^8.0.4:
     vfile-location "^3.0.0"
     xtend "^4.0.1"
 
-remark-parse@8.0.3, remark-parse@^8.0.3:
+remark-parse@8.0.3:
   version "8.0.3"
   resolved "https://registry.yarnpkg.com/remark-parse/-/remark-parse-8.0.3.tgz#9c62aa3b35b79a486454c690472906075f40c7e1"
   integrity sha512-E1K9+QLGgggHxCQtLt++uXltxEprmWzNfg+MxpfHsZlrddKzZ/hZyWHDbK3/Ap8HJQqYJRXP+jHczdL6q6i85Q==
