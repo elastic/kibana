@@ -19,6 +19,8 @@ import {
   legacyAlertFieldMap,
   type FieldMap,
 } from '@kbn/alerts-as-data-utils';
+import { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { asyncForEach } from '@kbn/std';
 import {
   DEFAULT_ALERTS_ILM_POLICY_NAME,
   DEFAULT_ALERTS_ILM_POLICY,
@@ -234,6 +236,62 @@ export class AlertsService implements IAlertsService {
     }
   }
 
+  private async getIndexTemplatesUsingComponentTemplate(
+    esClient: ElasticsearchClient,
+    componentTemplateName: string
+  ) {
+    // Get all index templates and filter down to just the ones referencing this component template
+    const { index_templates: indexTemplates } = await esClient.indices.getIndexTemplate();
+    const indexTemplatesUsingComponentTemplate = (indexTemplates ?? []).filter(
+      (indexTemplate: IndicesGetIndexTemplateIndexTemplateItem) =>
+        indexTemplate.index_template.composed_of.includes(componentTemplateName)
+    );
+    await asyncForEach(
+      indexTemplatesUsingComponentTemplate,
+      async (template: IndicesGetIndexTemplateIndexTemplateItem) => {
+        await esClient.indices.putIndexTemplate({
+          name: template.name,
+          body: {
+            ...template.index_template,
+            template: {
+              ...template.index_template.template,
+              settings: {
+                ...template.index_template.template?.settings,
+                'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
+              },
+            },
+          },
+        });
+      }
+    );
+  }
+
+  private async createOrUpdateComponentTemplateHelper(
+    esClient: ElasticsearchClient,
+    template: ClusterPutComponentTemplateRequest
+  ) {
+    try {
+      await esClient.cluster.putComponentTemplate(template);
+    } catch (error) {
+      const reason = error?.meta?.body?.error?.caused_by?.caused_by?.caused_by?.reason;
+      if (reason && reason.match(/Limit of total fields \[\d+\] has been exceeded/) != null) {
+        // This error message occurs when there is an index template using this component template
+        // that contains a field limit setting that using this component template exceeds
+        // Specifically, this can happen for the ECS component template when we add new fields
+        // to adhere to the ECS spec. Individual index templates specify field limits so if the
+        // number of new ECS fields pushes the composed mapping above the limit, this error will
+        // occur. We have to update the field limit inside the index template now otherwise we
+        // can never update the component template
+        await this.getIndexTemplatesUsingComponentTemplate(esClient, template.name);
+
+        // Try to update the component template again
+        await esClient.cluster.putComponentTemplate(template);
+      } else {
+        throw error;
+      }
+    }
+  }
+
   private async createOrUpdateComponentTemplate(
     esClient: ElasticsearchClient,
     template: ClusterPutComponentTemplateRequest
@@ -241,9 +299,12 @@ export class AlertsService implements IAlertsService {
     this.options.logger.info(`Installing component template ${template.name}`);
 
     try {
-      await retryTransientEsErrors(() => esClient.cluster.putComponentTemplate(template), {
-        logger: this.options.logger,
-      });
+      await retryTransientEsErrors(
+        () => this.createOrUpdateComponentTemplateHelper(esClient, template),
+        {
+          logger: this.options.logger,
+        }
+      );
     } catch (err) {
       this.options.logger.error(
         `Error installing component template ${template.name} - ${err.message}`

@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
 import { AlertsService } from './alerts_service';
@@ -207,6 +208,98 @@ describe('Alerts Service', () => {
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+    });
+
+    test('should update index template field limit and retry initialization if creating/updating common component template fails with field limit error', async () => {
+      clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(
+        new EsErrors.ResponseError(
+          elasticsearchClientMock.createApiResponse({
+            statusCode: 400,
+            body: {
+              error: {
+                root_cause: [
+                  {
+                    type: 'illegal_argument_exception',
+                    reason:
+                      'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
+                  },
+                ],
+                type: 'illegal_argument_exception',
+                reason:
+                  'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
+                caused_by: {
+                  type: 'illegal_argument_exception',
+                  reason:
+                    'composable template [.alerts-security.alerts-default-index-template] template after composition with component templates [.alerts-ecs-mappings, .alerts-security.alerts-mappings, .alerts-technical-mappings] is invalid',
+                  caused_by: {
+                    type: 'illegal_argument_exception',
+                    reason:
+                      'invalid composite mappings for [.alerts-security.alerts-default-index-template]',
+                    caused_by: {
+                      type: 'illegal_argument_exception',
+                      reason: 'Limit of total fields [1900] has been exceeded',
+                    },
+                  },
+                },
+              },
+            },
+          })
+        )
+      );
+      const existingIndexTemplate = {
+        name: 'test-template',
+        index_template: {
+          index_patterns: ['test*'],
+          composed_of: ['.alerts-framework-mappings'],
+          template: {
+            settings: {
+              auto_expand_replicas: '0-1',
+              hidden: true,
+              'index.lifecycle': {
+                name: '.alerts-ilm-policy',
+                rollover_alias: `.alerts-empty-default`,
+              },
+              'index.mapping.total_fields.limit': 1800,
+            },
+            mappings: {
+              dynamic: false,
+            },
+          },
+        },
+      };
+      clusterClient.indices.getIndexTemplate.mockResolvedValueOnce({
+        index_templates: [existingIndexTemplate],
+      });
+      const alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(alertsService.isInitialized()).toEqual(true);
+      expect(clusterClient.indices.getIndexTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
+        name: existingIndexTemplate.name,
+        body: {
+          ...existingIndexTemplate.index_template,
+          template: {
+            ...existingIndexTemplate.index_template.template,
+            settings: {
+              ...existingIndexTemplate.index_template.template?.settings,
+              'index.mapping.total_fields.limit': 2500,
+            },
+          },
+        },
+      });
+
+      expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
+      // 3x for framework, legacy-alert and ecs mappings, then 1 extra time to update component template
+      // after updating index template field limit
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
     });
 
     test('should install resources for contexts awaiting initialization when common resources are initialized', async () => {
