@@ -76,18 +76,18 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
 export interface FileHttpResponseOptions<T extends HttpResponsePayload | ResponseError> {
   /** Attachment content to send to the client */
   body: T;
-  /** attachment name, encoded and added to the headers to send to the client */
+  /** Attachment name, encoded and added to the headers to send to the client */
   filename: string;
-  /** attachment content type defaults to text/plain */
+  /** Explicitly set the attachment content type. Tries to detect the type based on extension and defaults to application/octet-stream */
   fileContentType?: string | null;
-  /** attachment content size in bytes */
+  /** Attachment content size in bytes, Tries to detect the content size from body */
   fileContentSize?: number;
   /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;
   /** Bypass the default error formatting */
   bypassErrorFormat?: boolean;
-  /** Bypass filename encoding and converting file content to Buffer */
-  bypassFileFormat?: boolean;
+  /** Bypass filename encoding, only set to true if the filename is already encoded */
+  bypassFileNameEncoding?: boolean;
 }
 
 /**

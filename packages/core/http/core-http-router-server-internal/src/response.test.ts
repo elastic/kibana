@@ -21,8 +21,8 @@ describe('fileResponseFactory', () => {
       expect(result.status).toBe(200);
       expect(result.options.headers).toMatchInlineSnapshot(`
         Object {
-          "Content-Disposition": "attachment; filename=myfile.test",
-          "Content-Length": "30",
+          "content-disposition": "attachment; filename=myfile.test",
+          "content-length": "30",
           "content-type": "application/octet-stream",
           "x-content-type-options": "nosniff",
         }
@@ -35,7 +35,7 @@ describe('fileResponseFactory', () => {
       expect(result.payload?.toString()).toBe(body);
     });
 
-    it('doesnt pass utf-16 characters in filename into the Content-Disposition header', () => {
+    it('doesnt pass utf-16 characters in filename into the content-disposition header', () => {
       const isMultiByte = (str: string) => [...str].some((c) => (c.codePointAt(0) || 0) > 255);
       const multuByteCharacters = '日本語ダッシュボード.pdf';
 
@@ -47,11 +47,11 @@ describe('fileResponseFactory', () => {
       if (!headers) {
         throw new Error('Missing headers');
       }
-      //@ts-expect-error
-      const contentDispositionHeader = headers['Content-Disposition'];
 
-      if (!contentDispositionHeader) {
-        throw new Error('Missing Content-Disposition header');
+      const contentDispositionHeader = headers['content-disposition'];
+
+      if (typeof contentDispositionHeader !== 'string') {
+        throw new Error(`Expecting a string content-disposition header`);
       }
 
       expect(typeof contentDispositionHeader).toBe('string');
@@ -66,8 +66,8 @@ describe('fileResponseFactory', () => {
     it('accepts additional headers but doesnt override file headers', () => {
       const extraHeaders = { 'content-language': 'en', 'x-test-header': 'ok' };
       const overrideHeaders = {
-        'Content-Disposition': 'i will not be in the response',
-        'Content-Length': 'i will not be in the response',
+        'content-disposition': 'i will not be in the response',
+        'content-length': 'i will not be in the response',
       };
       const result = fileResponseFactory.file({
         body: 'content',
@@ -77,8 +77,8 @@ describe('fileResponseFactory', () => {
       expect(result.options.headers).toEqual(
         expect.objectContaining({
           ...extraHeaders,
-          'Content-Disposition': 'attachment; filename=myfile.test',
-          'Content-Length': '',
+          'content-disposition': 'attachment; filename=myfile.test',
+          'content-length': '',
         })
       );
     });

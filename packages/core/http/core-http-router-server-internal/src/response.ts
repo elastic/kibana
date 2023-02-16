@@ -86,19 +86,24 @@ export const fileResponseFactory = {
       headers,
       filename,
       fileContentType,
-      bypassFileFormat,
+      bypassFileNameEncoding,
     } = options;
-    const reponseFilename = bypassFileFormat ? filename : encodeURIComponent(filename);
-    const responseBody = typeof body === 'string' && !bypassFileFormat ? Buffer.from(body) : body;
-    const responseContentType = fileContentType ?? mime.getType(filename) ??  'application/octet-stream';
+    const reponseFilename = bypassFileNameEncoding ? filename : encodeURIComponent(filename);
+    const responseBody = typeof body === 'string' ? Buffer.from(body) : body;
+    if (!responseBody) {
+      throw new Error(`options.body is expected to be set.`);
+    }
+
+    const responseContentType = fileContentType ?? mime.getType(filename) ?? 'application/octet-stream';
+    const responseContentLength = typeof fileContentSize === 'number'? fileContentSize : Buffer.isBuffer(responseBody)? responseBody.length : '';
 
     return new KibanaResponse(200, responseBody, {
       bypassErrorFormat,
       headers: {
         ...headers,
         'content-type': `${responseContentType}`,
-        'Content-Length': `${fileContentSize ?? ''}`,
-        'Content-Disposition': `attachment; filename=${reponseFilename}`,
+        'content-length': `${responseContentLength}`,
+        'content-disposition': `attachment; filename=${reponseFilename}`,
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
         'x-content-type-options': 'nosniff',
       },
