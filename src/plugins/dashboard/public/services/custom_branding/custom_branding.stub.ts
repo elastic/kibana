@@ -16,5 +16,6 @@ export const customBrandingServiceFactory: CustomBrandingServiceFactory = () => 
   const pluginMock = coreMock.createStart();
   return {
     hasCustomBranding$: pluginMock.customBranding.hasCustomBranding$,
+    customBranding$: pluginMock.customBranding.customBranding$,
   };
 };

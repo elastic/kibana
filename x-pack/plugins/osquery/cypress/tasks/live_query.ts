@@ -23,7 +23,8 @@ export const selectAllAgents = () => {
 export const clearInputQuery = () =>
   cy.get(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
 
-export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(query);
+export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
+  cy.get(LIVE_QUERY_EDITOR).type(query, options);
 
 export const submitQuery = () => {
   cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
@@ -89,4 +90,17 @@ export const loadAlertsEvents = () => {
     .within(() => {
       cy.get(`[data-is-loading="true"]`).should('not.exist');
     });
+};
+
+export const addLastLiveQueryToCase = () => {
+  cy.waitForReact();
+  cy.react('CustomItemAction', {
+    props: { index: 1 },
+  })
+    .first()
+    .click();
+  cy.contains('Live query details');
+  cy.contains('Add to Case').click();
+  cy.contains('Select case');
+  cy.contains(/Select$/).click();
 };
