@@ -37,6 +37,7 @@ export const rewriteRule = ({
   activeSnoozes,
   lastRun,
   nextRun,
+  viewInAppRelativeUrl,
   ...rest
 }: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] }) => ({
   ...rest,
@@ -61,6 +62,7 @@ export const rewriteRule = ({
   actions: rewriteActionsRes(actions),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
+  ...(viewInAppRelativeUrl ? { view_in_app_relative_url: viewInAppRelativeUrl } : {}),
 });
 
 export const rewritePartialRule = (rule: PartialRule<RuleTypeParams>) => {
