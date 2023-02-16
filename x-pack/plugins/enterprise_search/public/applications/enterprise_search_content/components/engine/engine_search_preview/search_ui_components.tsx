@@ -23,11 +23,15 @@ import type {
   ResultsViewProps,
 } from '@elastic/react-search-ui-views';
 
+import { useSelectedDocument } from './document_context';
+
 export const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
   return <EuiFlexGroup direction="column">{children}</EuiFlexGroup>;
 };
 
 export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
+  const { setSelectedDocument } = useSelectedDocument();
+
   const fields = Object.entries(result)
     .filter(([key]) => !key.startsWith('_') && key !== 'id')
     .map(([key, value]) => {
@@ -64,20 +68,22 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
   ];
 
   return (
-    <EuiPanel paddingSize="m">
-      <EuiFlexGroup direction="column">
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <code>ID: {id}</code>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <code>from</code>
-              <EuiBadge color="hollow">{index}</EuiBadge>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+    <button type="button" onClick={() => setSelectedDocument(result)}>
+      <EuiPanel paddingSize="m">
+        <EuiFlexGroup direction="column">
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <code>ID: {id}</code>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <code>from</code>
+                <EuiBadge color="hollow">{index}</EuiBadge>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiBasicTable items={fields} columns={columns} />
         </EuiFlexGroup>
-        <EuiBasicTable items={fields} columns={columns} />
-      </EuiFlexGroup>
-    </EuiPanel>
+      </EuiPanel>
+    </button>
   );
 };
 

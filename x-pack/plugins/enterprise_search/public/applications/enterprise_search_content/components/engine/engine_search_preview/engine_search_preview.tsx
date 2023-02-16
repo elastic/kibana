@@ -27,6 +27,8 @@ import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_t
 import { EngineIndicesLogic } from '../engine_indices_logic';
 import { EngineViewLogic } from '../engine_view_logic';
 
+import { DocumentProvider } from './document_context';
+import { DocumentFlyout } from './document_flyout';
 import { EngineSearchPreviewLogic } from './engine_search_preview_logic';
 
 import { InputView, ResultView, ResultsView } from './search_ui_components';
@@ -91,20 +93,23 @@ export const EngineSearchPreview: React.FC = () => {
       }}
       engineName={engineName}
     >
-      <SearchProvider config={config}>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <SearchBox inputView={InputView} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false} css={{ minWidth: '240px' }} />
-          <EuiFlexItem>
-            <Results view={ResultsView} resultView={ResultView} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </SearchProvider>
+      <DocumentProvider>
+        <SearchProvider config={config}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <SearchBox inputView={InputView} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false} css={{ minWidth: '240px' }} />
+            <EuiFlexItem>
+              <Results view={ResultsView} resultView={ResultView} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </SearchProvider>
+        <DocumentFlyout />
+      </DocumentProvider>
     </EnterpriseSearchEnginesPageTemplate>
   );
 };
