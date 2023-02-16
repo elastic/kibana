@@ -12,13 +12,13 @@ import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
  * Map containing all the info to convert types
  */
 export interface ActiveMigrations {
-  [type: string]: TypeConversion;
+  [type: string]: TypeTransforms;
 }
 
 /**
  * Structure containing all the required info to perform a type's conversion
  */
-export interface TypeConversion {
+export interface TypeTransforms {
   /** Derived from the related transforms */
   latestVersion: Record<TransformType, string>;
   /** List of transforms registered for the type **/

@@ -8,11 +8,11 @@
 import { defaultCore, WrappedHelper } from '../../../utils/testing/rtl_helpers';
 import { renderHook } from '@testing-library/react-hooks';
 import { useMonitorName } from './use_monitor_name';
-
-import * as reactRouter from 'react-router-dom';
+import { Router, useParams } from 'react-router-dom';
 
 const mockRouter = {
-  ...reactRouter,
+  useParams,
+  ...Router,
 };
 
 jest.mock('react-router-dom', () => ({

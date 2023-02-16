@@ -8,7 +8,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route, Redirect, RouteChildrenProps } from 'react-router-dom';
+import { Router, Switch, Redirect, RouteChildrenProps } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
