@@ -54,7 +54,6 @@
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/shared-ux-router",
-    "@kbn/alerts-as-data-utils"
   ],
   "exclude": ["target/**/*"]
 }
