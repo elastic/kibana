@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
+import { HOSTS_LINK_LOCAL_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/layout';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
@@ -92,6 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const navigateAndEnableHostView = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     await pageObjects.common.navigateToApp('infraOps');
+    await pageObjects.infraHome.clickDismissKubernetesTourButton();
     await pageObjects.infraHostsView.clickTryHostViewLink();
     await pageObjects.infraHostsView.clickEnableHostViewButton();
   };
@@ -112,6 +114,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHostsView.clickTryHostViewBadge();
       });
       after(async () => {
+        await browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
         return esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
 
@@ -133,6 +136,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       after(async () => {
         // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await logoutAndDeleteReadOnlyUser();
+        await browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
         return esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
 
@@ -149,11 +153,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/150143
-    // FLAKY: https://github.com/elastic/kibana/issues/150144
-    // FLAKY: https://github.com/elastic/kibana/issues/150145
-    // FLAKY: https://github.com/elastic/kibana/issues/150146
-    describe.skip('enables hosts view page and checks content', () => {
+    describe('enables hosts view page and checks content', () => {
       before(async () => {
         await navigateAndEnableHostView();
         await pageObjects.timePicker.setAbsoluteRange(
@@ -162,6 +162,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
       after(async () => {
+        await browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
         await navigateAndDisableHostView();
       });
 
@@ -209,6 +210,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       after(async () => {
         // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await logoutAndDeleteReadOnlyUser();
+        await browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
         await navigateAndDisableHostView();
       });
 

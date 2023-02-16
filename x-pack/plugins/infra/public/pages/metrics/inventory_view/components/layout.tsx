@@ -50,7 +50,8 @@ interface LegendControlOptions {
   legend: WaffleLegendOptions;
 }
 
-const LOCAL_STORAGE_KEY = 'inventoryUI:hostsLinkClicked';
+// exported for test purposes
+export const HOSTS_LINK_LOCAL_STORAGE_KEY = 'inventoryUI:hostsLinkClicked';
 
 export const Layout = React.memo(
   ({ shouldLoadDefault, currentView, reload, interval, nodes, loading }: Props) => {
@@ -76,7 +77,7 @@ export const Layout = React.memo(
     const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
 
     const [hostsLinkClicked, setHostsLinkClicked] = useLocalStorage<boolean>(
-      LOCAL_STORAGE_KEY,
+      HOSTS_LINK_LOCAL_STORAGE_KEY,
       false
     );
     const hostsLinkClickedRef = useRef<boolean | undefined>(hostsLinkClicked);
