@@ -461,7 +461,6 @@ src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
 x-pack/plugins/notifications @elastic/appex-sharedux
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
-x-pack/plugins/observability @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/infra-monitoring-ui
 packages/kbn-optimizer @elastic/kibana-operations
@@ -771,6 +770,9 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/plugins/observability/public/pages/rules  @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/rule_details  @elastic/actionable-observability
 /x-pack/test/observability_functional @elastic/actionable-observability
+
+# keep it below actionable observability
+x-pack/plugins/observability @elastic/observability-ui
 
 # Infra Monitoring
 /x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui
