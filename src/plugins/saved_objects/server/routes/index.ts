@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
-export const PER_PAGE_SETTING = 'savedObjects:perPage';
-export const LISTING_LIMIT_SETTING = 'savedObjects:listingLimit';
-export type { SavedObjectCommon, FindQueryHTTP, FindResponseHTTP, FinderAttributes } from './types';
+import { SavedObjectsRouter } from '../types';
+import { registerFindRoute } from './find';
+
+export const registerRoutes = (router: SavedObjectsRouter) => {
+  registerFindRoute(router);
+};

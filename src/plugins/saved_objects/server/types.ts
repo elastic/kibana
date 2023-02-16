@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { IRouter, RequestHandlerContext } from '@kbn/core/server';
 
-export const PER_PAGE_SETTING = 'savedObjects:perPage';
-export const LISTING_LIMIT_SETTING = 'savedObjects:listingLimit';
-export type { SavedObjectCommon, FindQueryHTTP, FindResponseHTTP, FinderAttributes } from './types';
+export type SavedObjectsRouter = IRouter<RequestHandlerContext>;
