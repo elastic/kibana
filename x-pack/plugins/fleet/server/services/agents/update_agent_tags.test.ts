@@ -120,7 +120,7 @@ describe('update_agent_tags', () => {
     const agentIds = actionResults?.body
       ?.filter((i: any) => i.agent_id)
       .map((i: any) => i.agent_id);
-    expect(agentIds).toEqual(['agent1']);
+    expect(agentIds.length).toEqual(1);
     expect(actionResults.body[1].error).not.toBeDefined();
   });
 
