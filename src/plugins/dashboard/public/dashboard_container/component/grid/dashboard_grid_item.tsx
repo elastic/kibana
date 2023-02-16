@@ -96,52 +96,48 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
   }
 );
 
-export const ObservedItem = React.forwardRef<HTMLDivElement, Props>(
-  (props, panelRef) => {
-    const [intersection, updateIntersection] = useState<IntersectionObserverEntry>();
-    const [isRenderable, setIsRenderable] = useState(false);
+export const ObservedItem = React.forwardRef<HTMLDivElement, Props>((props, panelRef) => {
+  const [intersection, updateIntersection] = useState<IntersectionObserverEntry>();
+  const [isRenderable, setIsRenderable] = useState(false);
 
-    const observerRef = useRef(
-      new window.IntersectionObserver(([value]) => updateIntersection(value), {
-        root: (panelRef as React.RefObject<HTMLDivElement>).current,
-      })
-    );
+  const observerRef = useRef(
+    new window.IntersectionObserver(([value]) => updateIntersection(value), {
+      root: (panelRef as React.RefObject<HTMLDivElement>).current,
+    })
+  );
 
-    useEffect(() => {
-      const { current: currentObserver } = observerRef;
-      currentObserver.disconnect();
-      const { current } = panelRef as React.RefObject<HTMLDivElement>;
+  useEffect(() => {
+    const { current: currentObserver } = observerRef;
+    currentObserver.disconnect();
+    const { current } = panelRef as React.RefObject<HTMLDivElement>;
 
-      if (current) {
-        currentObserver.observe(current);
-      }
+    if (current) {
+      currentObserver.observe(current);
+    }
 
-      return () => currentObserver.disconnect();
-    }, [panelRef]);
+    return () => currentObserver.disconnect();
+  }, [panelRef]);
 
-    useEffect(() => {
-      if (intersection?.isIntersecting && !isRenderable) {
-        setIsRenderable(true);
-      }
-    }, [intersection, isRenderable]);
+  useEffect(() => {
+    if (intersection?.isIntersecting && !isRenderable) {
+      setIsRenderable(true);
+    }
+  }, [intersection, isRenderable]);
 
-    return <Item ref={panelRef} isRenderable={isRenderable} {...props} />;
-  }
-);
+  return <Item ref={panelRef} isRenderable={isRenderable} {...props} />;
+});
 
 // ReactGridLayout passes ref to children. Functional component children require forwardRef to avoid react warning
 // https://github.com/react-grid-layout/react-grid-layout#custom-child-components-and-draggable-handles
-export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
-  (props, ref) => {
-    const {
-      settings: { isProjectEnabledInLabs },
-    } = pluginServices.getServices();
+export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props, ref) => {
+  const {
+    settings: { isProjectEnabledInLabs },
+  } = pluginServices.getServices();
 
-    const { useEmbeddableSelector: select } = useDashboardContainerContext();
+  const { useEmbeddableSelector: select } = useDashboardContainerContext();
 
-    const isPrintMode = select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
-    const isEnabled = !isPrintMode && isProjectEnabledInLabs('labs:dashboard:deferBelowFold');
+  const isPrintMode = select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
+  const isEnabled = !isPrintMode && isProjectEnabledInLabs('labs:dashboard:deferBelowFold');
 
-    return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
-  }
-);
+  return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
+});
