@@ -117,7 +117,14 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
   viewMode: () => false, // When compared view mode is always considered unequal so that it gets backed up.
 };
 
+const shouldRefreshFilterCompareOptions = {
+  ...COMPARE_ALL_OPTIONS,
+  // do not compare $state to avoid refreshing when filter is pinned/unpinned (which does not impact results)
+  state: false,
+};
+
 export const shouldRefreshDiffingFunctions: DashboardDiffFunctions = {
   ...unsavedChangesDiffingFunctions,
-  filters: ({ currentValue, lastValue }) => onlyDisabledFiltersChanged(currentValue, lastValue),
+  filters: ({ currentValue, lastValue }) => 
+    onlyDisabledFiltersChanged(lastValue, currentValue, shouldRefreshFilterCompareOptions),
 };

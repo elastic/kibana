@@ -48,4 +48,14 @@ describe('getShouldRefresh', () => {
     };
     expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(false);
   });
+
+  test('should return false when pinned filter changes to unpinned', async () => {
+    const lastInput = {
+      filters: [existsFilter],
+    };
+    const input = {
+      filters: [pinFilter(existsFilter)],
+    };
+    expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(false);
+  });
 });

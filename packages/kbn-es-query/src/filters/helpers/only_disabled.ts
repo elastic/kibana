@@ -18,10 +18,10 @@ const isEnabled = (f: Filter) => f && f.meta && !f.meta.disabled;
  *
  * @public
  */
-export const onlyDisabledFiltersChanged = (newFilters?: Filter[], oldFilters?: Filter[]) => {
+export const onlyDisabledFiltersChanged = (newFilters?: Filter[], oldFilters?: Filter[], comparatorOptions?: FilterCompareOptions = COMPARE_ALL_OPTIONS) => {
   // If it's the same - compare only enabled filters
   const newEnabledFilters = filter(newFilters || [], isEnabled);
   const oldEnabledFilters = filter(oldFilters || [], isEnabled);
 
-  return compareFilters(oldEnabledFilters, newEnabledFilters, COMPARE_ALL_OPTIONS);
+  return compareFilters(oldEnabledFilters, newEnabledFilters, comparatorOptions);
 };
