@@ -14,7 +14,6 @@ import {
   MONITOR,
   OR,
   READ,
-  READ_CROSS_CLUSTER,
   THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED,
   VIEW_INDEX_METADATA,
 } from '../../data_quality_summary/errors_popover/translations';
@@ -178,7 +177,7 @@ ${ERRORS_MAY_OCCUR}
 ${THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED}
 - \`${MONITOR}\` ${OR} \`${MANAGE}\`
 - \`${VIEW_INDEX_METADATA}\`
-- \`${READ}\` ${OR} \`${READ_CROSS_CLUSTER}\`
+- \`${READ}\`
 
 ${getMarkdownTableHeader(headerNames)}
 ${getMarkdownTableRows(errorSummary)}

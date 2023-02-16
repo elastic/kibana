@@ -15,6 +15,7 @@ import { LinkAnchor } from '../../components/links';
 import { useKibana, useNavigateTo } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useFetch, REQUEST_NAMES } from '../../hooks/use_fetch';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
 
 export interface DashboardTableItem extends SavedObject<SavedObjectAttributes> {
   title?: string;
@@ -63,6 +64,7 @@ export const useSecurityDashboardsTableColumns = (): Array<
     (href: string): MouseEventHandler =>
       (ev) => {
         ev.preventDefault();
+        track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
         navigateTo({ url: href });
       },
     [navigateTo]
