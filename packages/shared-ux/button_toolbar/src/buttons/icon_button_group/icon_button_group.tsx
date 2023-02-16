@@ -55,7 +55,6 @@ export const IconButtonGroup = ({ buttons, legend }: Props) => {
 
   const buttonGroupOptions: Option[] = buttons.map((button: IconButton, index) => {
     const { label, title = label, ...rest } = button;
-
     return {
       ...rest,
       'aria-label': title,

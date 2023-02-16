@@ -124,18 +124,20 @@ export function DashboardEditingToolbar() {
 
       if (visType) {
         if ('aliasPath' in visType) {
-          const { icon, title } = visType as VisTypeAlias;
+          const { name, icon, title } = visType as VisTypeAlias;
           return {
             label: title,
             iconType: icon,
             onClick: createNewVisType(visType as VisTypeAlias),
+            'data-test-subj': `dashboardQuickButton${name}`,
           };
         } else {
-          const { icon, title, titleInWizard } = visType as BaseVisType & { icon: IconType };
+          const { name, icon, title, titleInWizard } = visType as BaseVisType & { icon: IconType };
           return {
             label: titleInWizard || title,
             iconType: icon,
             onClick: createNewVisType(visType as BaseVisType),
+            'data-test-subj': `dashboardQuickButton${name}`,
           };
         }
       }
