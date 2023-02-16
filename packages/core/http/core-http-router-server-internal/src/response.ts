@@ -94,8 +94,14 @@ export const fileResponseFactory = {
       throw new Error(`options.body is expected to be set.`);
     }
 
-    const responseContentType = fileContentType ?? mime.getType(filename) ?? 'application/octet-stream';
-    const responseContentLength = typeof fileContentSize === 'number'? fileContentSize : Buffer.isBuffer(responseBody)? responseBody.length : '';
+    const responseContentType =
+      fileContentType ?? mime.getType(filename) ?? 'application/octet-stream';
+    const responseContentLength =
+      typeof fileContentSize === 'number'
+        ? fileContentSize
+        : Buffer.isBuffer(responseBody)
+        ? responseBody.length
+        : '';
 
     return new KibanaResponse(200, responseBody, {
       bypassErrorFormat,
