@@ -71,6 +71,11 @@ export interface ScalabilitySetup {
 
 export interface JourneyConfigOptions<CtxExt> {
   /**
+   * Relative path to FTR config file. Use to override the default ones:
+   * 'x-pack/test/functional/config.base.js', 'test/functional/config.base.js'
+   */
+  ftrConfigPath?: string;
+  /**
    * Set to `true` to skip this journey. should probably be preceded
    * by a link to a Github issue where the reasoning for why this was
    * skipped and not just deleted is outlined.
@@ -120,6 +125,10 @@ export class JourneyConfig<CtxExt extends object> {
     this.#path = path;
     this.#name = Path.basename(this.#path, Path.extname(this.#path));
     this.#opts = opts;
+  }
+
+  getFtrConfigPath() {
+    return this.#opts.ftrConfigPath;
   }
 
   getEsArchives() {
