@@ -26,6 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { DownloadJson } from './download_json';
 import { LoadingTimelineItem } from './loading_timeline_item';
@@ -33,27 +34,13 @@ import { LoadingTimelineItem } from './loading_timeline_item';
 export function Diagnostics() {
   const [configStatus, setConfigStatus] = useState(FETCH_STATUS.LOADING);
   const [configData, setConfigData] = useState<'success' | 'error'>();
-  const [dataStatus, setDataStatus] = useState(FETCH_STATUS.NOT_INITIATED);
-  const [data, setData] = useState<'success' | 'error' | 'warning'>();
   const [actionsEnabled, setActionsEnabled] = useState(false);
   const [reportData, setReportData] = useState<Record<string, any>>();
 
-  useEffect(() => {
-    if (configData === 'success') {
-      setDataStatus(FETCH_STATUS.LOADING);
-      const timer = setTimeout(() => {
-        setDataStatus(FETCH_STATUS.SUCCESS);
-        setData('success');
-        setReportData((prev) => ({
-          ...prev,
-          apmData: {
-            service: 'test-2',
-          },
-        }));
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [configData]);
+  const { start, end } = useTimeRange({
+    rangeFrom: 'now-1d',
+    rangeTo: 'now',
+  });
 
   const buttonElementAccordionId = useGeneratedHtmlId({
     prefix: 'buttonElementAccordion',
@@ -65,6 +52,22 @@ export function Diagnostics() {
     },
     []
   );
+
+  const { data: apmData, status: apmDataStatus } = useFetcher(
+    (callApmApi) => {
+      return callApmApi('GET /internal/apm/diagnostics/services_summary', {
+        params: {
+          query: {
+            start,
+            end,
+            probability: 1,
+          },
+        },
+      });
+    },
+    [start, end]
+  );
+
   const restartDiagnostic = () => {
     console.log('restarting Diagnostic');
   };
@@ -75,6 +78,13 @@ export function Diagnostics() {
       reportData
     );
   };
+
+  useEffect(() => {
+    setReportData((prev) => ({
+      ...prev,
+      apmData,
+    }));
+  }, [apmData]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -170,11 +180,11 @@ export function Diagnostics() {
         <EuiTimelineItem
           verticalAlign="top"
           icon={
-            dataStatus === FETCH_STATUS.NOT_INITIATED ? (
+            apmDataStatus === FETCH_STATUS.NOT_INITIATED ? (
               <EuiAvatar name="Checked" iconType="dot" color="subdued" />
-            ) : dataStatus === FETCH_STATUS.LOADING ? (
+            ) : apmDataStatus === FETCH_STATUS.LOADING ? (
               <LoadingTimelineItem />
-            ) : data === 'success' ? (
+            ) : apmData ? (
               <EuiAvatar name="Checked" iconType="check" color="#6dccb1" />
             ) : (
               <EuiAvatar name="Checked" iconType="alert" color="#ff7f62" />
@@ -184,7 +194,7 @@ export function Diagnostics() {
           <EuiSplitPanel.Outer color="transparent" hasBorder grow>
             <EuiSplitPanel.Inner
               color={
-                dataStatus !== FETCH_STATUS.NOT_INITIATED
+                apmDataStatus !== FETCH_STATUS.NOT_INITIATED
                   ? 'transparent'
                   : 'subdued'
               }

@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { probabilityRt, rangeRt } from '../default_api_types';
 import { getApmPipelines } from './get_apm_pipelines';
+import { getServicesSummaryPerProcessorEvent } from './get_services_summary';
 
 const apmPipelinesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/diagnostics/pipelines',
@@ -27,6 +32,46 @@ const apmPipelinesRoute = createApmServerRoute({
   },
 });
 
+const servicesSummaryRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/diagnostics/services_summary',
+  options: { tags: ['access:apm'] },
+  params: t.type({
+    query: t.intersection([rangeRt, probabilityRt]),
+  }),
+  handler: async (
+    resources
+  ): Promise<{
+    services: Array<{
+      name: string;
+      transactions?: number;
+      errors?: number;
+      metrics?: number;
+      spans?: number;
+    }>;
+  }> => {
+    const {
+      params: {
+        query: { start, end, probability },
+      },
+      request,
+      plugins: { security },
+    } = resources;
+
+    const [apmEventClient, randomSampler] = await Promise.all([
+      getApmEventClient(resources),
+      getRandomSampler({ security, request, probability }),
+    ]);
+
+    return await getServicesSummaryPerProcessorEvent({
+      apmEventClient,
+      randomSampler,
+      start,
+      end,
+    });
+  },
+});
+
 export const apmDiagnosticsRepository = {
   ...apmPipelinesRoute,
+  ...servicesSummaryRoute,
 };
