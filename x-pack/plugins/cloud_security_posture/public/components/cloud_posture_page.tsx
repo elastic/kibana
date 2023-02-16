@@ -132,7 +132,7 @@ const packageNotInstalledRenderer = ({
               defaultMessage="Detect and remediate potential configuration risks in your cloud infrastructure, like publicly accessible s3 buckets, with our Cloud and Kubernetes security posture management solutions. {learnMore}"
               values={{
                 learnMore: (
-                  <EuiLink href={cspIntegrationDocsNavigation.cspm?.overviewPath}>
+                  <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
                     <FormattedMessage
                       id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
                       defaultMessage="Learn more about Cloud Security Posture"

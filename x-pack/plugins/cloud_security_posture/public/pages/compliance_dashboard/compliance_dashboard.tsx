@@ -40,7 +40,7 @@ const noDataOptions: Record<
 > = {
   kspm: {
     testId: KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
-    docsLink: cspIntegrationDocsNavigation.kspm?.overviewPath,
+    docsLink: cspIntegrationDocsNavigation.kspm.overviewPath,
     actionTitle: i18n.translate(
       'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.buttonLabel',
       { defaultMessage: 'Add a KSPM integration' }
@@ -51,7 +51,7 @@ const noDataOptions: Record<
         defaultMessage="Use our {integrationFullName} (KSPM) integration to detect security misconfigurations in your Kubernetes clusters."
         values={{
           integrationFullName: (
-            <EuiLink href={cspIntegrationDocsNavigation.kspm?.overviewPath}>
+            <EuiLink href={cspIntegrationDocsNavigation.kspm.overviewPath} target="_blank">
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.integrationNameLabel"
                 defaultMessage="Kubernetes Security Posture Management"
@@ -65,7 +65,7 @@ const noDataOptions: Record<
   cspm: {
     testId: CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
     // TODO: CIS AWS - replace link or create the docs
-    docsLink: cspIntegrationDocsNavigation.cspm?.overviewPath,
+    docsLink: cspIntegrationDocsNavigation.cspm.overviewPath,
     actionTitle: i18n.translate(
       'xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.buttonLabel',
       { defaultMessage: 'Add a CSPM integration' }
@@ -76,7 +76,7 @@ const noDataOptions: Record<
         defaultMessage="Use our {integrationFullName} (CSPM) integration to detect security misconfigurations in your cloud infrastructure."
         values={{
           integrationFullName: (
-            <EuiLink href={cspIntegrationDocsNavigation.cspm?.overviewPath}>
+            <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.integrationNameLabel"
                 defaultMessage="Cloud Security Posture Management"
