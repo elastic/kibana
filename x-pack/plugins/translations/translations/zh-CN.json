@@ -10094,8 +10094,6 @@
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle": "规则名称",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle": "规则标签",
     "xpack.csp.findings.findingsFlyout.overviewTabTitle": "概览",
-    "xpack.csp.findings.findingsFlyout.resourceTab.hostAccordionTitle": "主机",
-    "xpack.csp.findings.findingsFlyout.resourceTab.resourceAccordionTitle": "资源",
     "xpack.csp.findings.findingsFlyout.resourceTabTitle": "资源",
     "xpack.csp.findings.findingsFlyout.ruleTab.auditTitle": "审计",
     "xpack.csp.findings.findingsFlyout.ruleTab.benchmarkTitle": "基准",
