@@ -12,7 +12,7 @@ import { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/po
 
 import { ToolbarButtonProps, ToolbarButton } from '../buttons';
 
-type AllowedButtonProps = Omit<ToolbarButtonProps, 'onClick' | 'fill'>;
+type AllowedButtonProps = Omit<ToolbarButtonProps, 'iconSide' | 'onClick' | 'fill'>;
 type AllowedPopoverProps = Omit<
   EuiPopoverProps,
   'button' | 'isOpen' | 'closePopover' | 'anchorPosition'
@@ -29,20 +29,18 @@ export type Props = AllowedButtonProps &
 /**
  * A button which opens a popover of additional actions within the toolbar.
  */
-export const ToolbarPopover = ({
-  type,
-  label,
-  iconType,
-  children,
-  iconSide,
-  ...popover
-}: Props) => {
+export const ToolbarPopover = ({ type, label, iconType, children, ...popover }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onButtonClick = () => setIsOpen((status) => !status);
   const closePopover = () => setIsOpen(false);
 
-  const button = <ToolbarButton onClick={onButtonClick} {...{ type, label, iconSide, iconType }} />;
+  const button = (
+    <ToolbarButton
+      onClick={onButtonClick}
+      {...{ type, label, iconType: iconType || 'arrowDown', iconSide: iconType ? 'left' : 'right' }}
+    />
+  );
 
   return (
     // the following ts-ignore is needed until typings/* directory is exposed for consumption to packages

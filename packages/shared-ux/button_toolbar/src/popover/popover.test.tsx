@@ -12,10 +12,17 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ToolbarPopover } from './popover';
 
 describe('<ToolbarPopover />', () => {
-  test('is rendered', () => {
+  test('is rendered - default', () => {
     const isOpen = true;
     const component = mountWithIntl(<ToolbarPopover label="test" children={() => !isOpen} />);
+    expect(component.render()).toMatchSnapshot();
+  });
 
+  test('is rendered - primary', () => {
+    const isOpen = true;
+    const component = mountWithIntl(
+      <ToolbarPopover type="primary" label="test" children={() => !isOpen} />
+    );
     expect(component.render()).toMatchSnapshot();
   });
 

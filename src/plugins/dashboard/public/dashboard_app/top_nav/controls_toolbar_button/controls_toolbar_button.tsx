@@ -21,8 +21,6 @@ export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlG
     <ToolbarPopover
       ownFocus
       label={getControlButtonTitle()}
-      iconType="arrowDown"
-      iconSide="right"
       panelPaddingSize="none"
       data-test-subj="dashboard-controls-menu-button"
     >

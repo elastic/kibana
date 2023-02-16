@@ -33,4 +33,15 @@ describe('<Toolbar />', () => {
     component.find('button').simulate('click');
     expect(mockClickHandler).toHaveBeenCalled();
   });
+
+  // test('onClick works as expected when a popover is clicked', () => {
+  //   const mockClickHandler = jest.fn();
+  //   const primaryButton = (
+  //     <ToolbarPopover type="primary" label="Create chart" onClick={mockClickHandler} />
+  //   );
+  //   const children = { primaryButton };
+  //   const component = mountWithIntl(<Toolbar children={children} />);
+  //   component.find('button').simulate('click');
+  //   expect(mockClickHandler).toHaveBeenCalled();
+  // });
 });

@@ -266,8 +266,6 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
         defaultMessage: 'Select type',
       })}
-      iconType="arrowDown"
-      iconSide="right"
       panelPaddingSize="none"
       data-test-subj="dashboardEditorMenuButton"
     >

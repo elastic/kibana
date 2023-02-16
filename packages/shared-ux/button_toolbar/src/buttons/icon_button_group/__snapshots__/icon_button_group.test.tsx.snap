@@ -37,6 +37,31 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
         </span>
       </span>
     </button>
+    <button
+      aria-label="Vis"
+      aria-pressed="false"
+      class="euiButtonGroupButton euiButtonGroupButton-isIconOnly css-3ca8kv-base-text-EuiButtonGroupButton-EuiButtonGroup"
+      data-test-subj="test-icon-group"
+      id="generated-id"
+      title="Vis"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButton__content"
+      >
+        <span
+          class="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="visArea"
+        />
+        <span
+          class="euiButton__text euiScreenReaderOnly"
+          data-text="Vis"
+        >
+          Vis
+        </span>
+      </span>
+    </button>
   </div>
 </fieldset>
 `;

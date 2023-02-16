@@ -12,10 +12,22 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ToolbarButton } from './toolbar_button';
 
 describe('<ToolbarButton />', () => {
-  test('primary button is rendered', () => {
+  test('is rendered - default', () => {
+    const component = mountWithIntl(<ToolbarButton label="Create chart" onClick={() => 'click'} />);
+    expect(component.render()).toMatchSnapshot();
+  });
+
+  test('is rendered - primary', () => {
     const component = mountWithIntl(
       <ToolbarButton type="primary" label="Create chart" onClick={() => 'click'} />
     );
     expect(component.render()).toMatchSnapshot();
+  });
+
+  test('accepts an onClick handler', () => {
+    const mockHandler = jest.fn();
+    const component = mountWithIntl(<ToolbarButton label="Create chart" onClick={mockHandler} />);
+    component.find('button').simulate('click');
+    expect(mockHandler).toHaveBeenCalled();
   });
 });
