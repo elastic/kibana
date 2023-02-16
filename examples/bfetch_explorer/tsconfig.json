@@ -18,5 +18,6 @@
     "@kbn/developer-examples-plugin",
     "@kbn/bfetch-plugin",
     "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-router",
   ]
 }
