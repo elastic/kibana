@@ -7,18 +7,15 @@
 
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
-import { FormProvider, useForm } from 'react-hook-form';
 
-import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import {
-  SloEditFormDefinitionCustomKql as Component,
-  Props,
-} from './slo_edit_form_definition_custom_kql';
-import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { FormProvider, useForm } from 'react-hook-form';
+import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
+import { FieldSelector as Component, Props } from './field_selector';
+import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../constants';
 
 export default {
   component: Component,
-  title: 'app/SLO/EditPage/SloEditFormDefinitionCustomKql',
+  title: 'app/SLO/EditPage/ApmLatency/FieldSelector',
   decorators: [KibanaReactStorybookDecorator],
 };
 
@@ -31,7 +28,13 @@ const Template: ComponentStory<typeof Component> = (props: Props) => {
   );
 };
 
-const defaultProps = {};
+const defaultProps: Omit<Props, 'control'> = {
+  dataTestSubj: 'dataTestSubj',
+  name: 'name' as const,
+  placeholder: 'Select the APM service',
+  fieldName: 'service.name',
+  label: 'Service name',
+};
 
-export const SloEditFormDefinitionCustomKql = Template.bind({});
-SloEditFormDefinitionCustomKql.args = defaultProps;
+export const FieldSelector = Template.bind({});
+FieldSelector.args = defaultProps;

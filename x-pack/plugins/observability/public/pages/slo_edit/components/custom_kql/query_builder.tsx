@@ -38,6 +38,8 @@ export function QueryBuilder({
   return (
     <EuiFormRow label={label} fullWidth>
       <Controller
+        shouldUnregister={true}
+        defaultValue=""
         name={name}
         control={control}
         render={({ field }) => (
