@@ -214,7 +214,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const queryBar = formQuery ?? initialState.queryBar;
 
-  const setRuleTypeCallback = useSetFieldValueWithCallback('ruleType', setFieldValue, ruleType);
+  const setRuleTypeCallback = useSetFieldValueWithCallback({
+    field: 'ruleType',
+    value: ruleType,
+    setFieldValue,
+  });
 
   const handleSetRuleFromTimeline = useCallback(
     ({ index: timelineIndex, queryBar: timelineQueryBar }) => {

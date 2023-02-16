@@ -8,11 +8,15 @@
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export const useSetFieldValueWithCallback = (
-  field: string,
-  setFieldValue: FormHook['setFieldValue'],
-  value: unknown
-) => {
+export const useSetFieldValueWithCallback = ({
+  field,
+  setFieldValue,
+  value,
+}: {
+  field: string;
+  value: unknown;
+  setFieldValue: FormHook['setFieldValue'];
+}) => {
   const isWaitingRef = useRef(false);
   const valueRef = useRef();
   const [callback, setCallback] = useState<() => void>(() => null);
