@@ -77,10 +77,7 @@ const errorResponseFactory: KibanaErrorResponseFactory = {
   },
 };
 
-export const kibanaResponseFactory: KibanaResponseFactory = {
-  ...successResponseFactory,
-  ...redirectionResponseFactory,
-  ...errorResponseFactory,
+export const fileResponseFactory = {
   file: <T extends HttpResponsePayload | ResponseError>(options: FileHttpResponseOptions<T>) => {
     const {
       body,
@@ -91,12 +88,9 @@ export const kibanaResponseFactory: KibanaResponseFactory = {
       fileContentType,
       bypassFileFormat,
     } = options;
-
     const reponseFilename = bypassFileFormat ? filename : encodeURIComponent(filename);
     const responseBody = typeof body === 'string' && !bypassFileFormat ? Buffer.from(body) : body;
-
-    const responseContentType =
-      mime.getType(filename) ?? fileContentType ?? 'application/octet-stream';
+    const responseContentType = fileContentType ?? mime.getType(filename) ??  'application/octet-stream';
 
     return new KibanaResponse(200, responseBody, {
       bypassErrorFormat,
@@ -110,6 +104,13 @@ export const kibanaResponseFactory: KibanaResponseFactory = {
       },
     });
   },
+}
+
+export const kibanaResponseFactory: KibanaResponseFactory = {
+  ...successResponseFactory,
+  ...redirectionResponseFactory,
+  ...errorResponseFactory,
+  ...fileResponseFactory,
   custom: <T extends HttpResponsePayload | ResponseError>(
     options: CustomHttpResponseOptions<T>
   ) => {

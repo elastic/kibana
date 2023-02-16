@@ -199,7 +199,7 @@ export type KibanaResponseFactory = KibanaSuccessResponseFactory &
   KibanaErrorResponseFactory & {
     /**
      * Creates a response with defined status code and payload.
-     * @param options - {@link CustomHttpResponseOptions} configures HTTP response parameters.
+     * @param options - {@link FileHttpResponseOptions} configures HTTP response parameters.
      */
     file<T extends HttpResponsePayload | ResponseError>(
       options: FileHttpResponseOptions<T>
