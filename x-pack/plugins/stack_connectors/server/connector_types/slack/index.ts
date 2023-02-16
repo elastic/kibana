@@ -21,7 +21,6 @@ import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_re
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import type {
-  PostMessageParams,
   SlackWebApiExecutorOptions,
   SlackWebhookExecutorOptions,
   WebhookParams,
@@ -32,7 +31,6 @@ import type {
 import { SlackSecretsSchema, SlackParamsSchema } from '../../../common/slack/schema';
 import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
-import type { SlackExecutorResultData } from './types';
 import { api } from './api';
 import { createExternalService } from './service';
 import { validate } from './validators';
@@ -237,10 +235,9 @@ const supportedSubActions = ['getChannels', 'postMessage'];
 
 const slackWebApiExecutor = async (
   execOptions: SlackWebApiExecutorOptions
-): Promise<ConnectorTypeExecutorResult<SlackExecutorResultData | {}>> => {
+): Promise<ConnectorTypeExecutorResult<unknown>> => {
   const { actionId, params, secrets, configurationUtilities, logger } = execOptions;
   const { subAction, subActionParams } = params;
-  let data: SlackExecutorResultData | null = null;
 
   const externalService = createExternalService(
     {
@@ -263,18 +260,17 @@ const slackWebApiExecutor = async (
   }
 
   if (subAction === 'getChannels') {
-    data = await api.getChannels({
+    return await api.getChannels({
       externalService,
     });
   }
 
   if (subAction === 'postMessage') {
-    const postMessageParams = subActionParams as PostMessageParams;
-    data = await api.postMessage({
+    return await api.postMessage({
       externalService,
-      params: postMessageParams,
+      params: subActionParams,
     });
   }
 
-  return { status: 'ok', data: data ?? {}, actionId };
+  return { status: 'ok', data: {}, actionId };
 };

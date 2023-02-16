@@ -67,7 +67,8 @@ export type ActionParams = WebhookParams | WebApiParams;
 
 export interface GetChannelsResponse {
   ok: true;
-  channels: Array<{
+  error?: string;
+  channels?: Array<{
     id: string;
     name: string;
     is_channel: boolean;

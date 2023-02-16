@@ -5,14 +5,98 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { request, getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
-import type { SlackService, PostMessageResponse, PostMessageResponseList } from './types';
+import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, getOrElse } from 'fp-ts/lib/Option';
+import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
+import type { SlackService, PostMessageResponse } from './types';
 import { SLACK_CONNECTOR_NAME } from './translations';
-import type { GetChannelsResponse, PostMessageParams } from '../../../common/slack/types';
+import type { PostMessageParams } from '../../../common/slack/types';
 import { SLACK_URL } from '../../../common/slack/constants';
+import {
+  retryResultSeconds,
+  retryResult,
+  serviceErrorResult,
+  errorResult,
+  successResult,
+} from './lib';
+import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
+import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
+
+const buildSlackExecutorErrorResponse = ({
+  slackApiError,
+  logger,
+}: {
+  slackApiError: {
+    message: string;
+    response: {
+      status: number;
+      statusText: string; // ?
+      headers: Record<string, string>;
+    };
+  };
+  logger: Logger;
+}) => {
+  if (!slackApiError.response) {
+    return serviceErrorResult(SLACK_CONNECTOR_ID, slackApiError.message);
+  }
+
+  const { status, statusText, headers } = slackApiError.response;
+
+  // special handling for 5xx
+  if (status >= 500) {
+    return retryResult(SLACK_CONNECTOR_ID, slackApiError.message);
+  }
+
+  // special handling for rate limiting
+  if (status === 429) {
+    return pipe(
+      getRetryAfterIntervalFromHeaders(headers),
+      map((retry) => retryResultSeconds(SLACK_CONNECTOR_ID, slackApiError.message, retry)),
+      getOrElse(() => retryResult(SLACK_CONNECTOR_ID, slackApiError.message))
+    );
+  }
+
+  const errorMessage = i18n.translate(
+    'xpack.stackConnectors.slack.unexpectedHttpResponseErrorMessage',
+    {
+      defaultMessage: 'unexpected http response from slack: {httpStatus} {httpStatusText}',
+      values: {
+        httpStatus: status,
+        httpStatusText: statusText,
+      },
+    }
+  );
+  logger.error(`error on ${SLACK_CONNECTOR_ID} slack action: ${errorMessage}`);
+
+  return errorResult(SLACK_CONNECTOR_ID, errorMessage);
+};
+
+const buildSlackExecutorSuccessResponse = ({
+  slackApiResponseData,
+}: {
+  slackApiResponseData: PostMessageResponse;
+}) => {
+  if (!slackApiResponseData) {
+    const errMessage = i18n.translate(
+      'xpack.stackConnectors.slack.unexpectedNullResponseErrorMessage',
+      {
+        defaultMessage: 'unexpected null response from slack',
+      }
+    );
+    return errorResult(SLACK_CONNECTOR_ID, errMessage);
+  }
+
+  if (!slackApiResponseData.ok) {
+    return serviceErrorResult(SLACK_CONNECTOR_ID, slackApiResponseData.error);
+  }
+
+  return successResult(SLACK_CONNECTOR_ID, slackApiResponseData);
+};
 
 export const createExternalService = (
   { secrets }: { secrets: { token: string } },
@@ -33,9 +117,9 @@ export const createExternalService = (
     },
   });
 
-  const getChannels = async (): Promise<GetChannelsResponse> => {
+  const getChannels = async (): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
-      const res = await request({
+      const result = await request({
         axios: axiosInstance,
         configurationUtilities,
         logger,
@@ -43,14 +127,9 @@ export const createExternalService = (
         url: 'conversations.list?types=public_channel,private_channel',
       });
 
-      return res.data as GetChannelsResponse;
+      return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          SLACK_CONNECTOR_NAME,
-          `Unable to get slack channels. Error: ${error.message}.`
-        )
-      );
+      return buildSlackExecutorErrorResponse({ slackApiError: error, logger });
     }
   };
 
@@ -60,9 +139,9 @@ export const createExternalService = (
   }: {
     channel: string;
     text: string;
-  }): Promise<PostMessageResponse> => {
+  }): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
-      const res = await request({
+      const result: AxiosResponse<PostMessageResponse> = await request({
         axios: axiosInstance,
         method: 'post',
         url: 'chat.postMessage',
@@ -71,24 +150,17 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      return res.data as PostMessageResponse;
+      return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          SLACK_CONNECTOR_NAME,
-          `Unable to post a message in the Slack. Error: ${error.message}.`
-        )
-      );
+      return buildSlackExecutorErrorResponse({ slackApiError: error, logger });
     }
   };
 
   const postMessage = async ({
     channels,
     text,
-  }: PostMessageParams): Promise<PostMessageResponseList> => {
-    return await Promise.all(
-      channels.map(async (channel) => await postMessageInOneChannel({ channel, text }))
-    );
+  }: PostMessageParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
+    return await postMessageInOneChannel({ channel: channels[0], text });
   };
 
   return {
