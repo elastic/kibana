@@ -11,7 +11,6 @@ import { defaultsDeep } from 'lodash';
 import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
 import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
-import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
 
@@ -30,7 +29,6 @@ import {
 } from '@kbn/core-elasticsearch-server-internal';
 import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
-import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 
 import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
@@ -38,15 +36,20 @@ import { LoggerFactory } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { registerServiceConfig } from '@kbn/core-root-server-internal';
 import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
+import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 // Extract current stack version from Env, to use as a default
-const currentVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
+const currentVersion = env.packageInfo.version;
+const currentBranch = env.packageInfo.branch;
 
 export interface KibanaMigratorTestKitParams {
   kibanaIndex?: string;
   kibanaVersion?: string;
+  kibanaBranch?: string;
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
   logFilePath?: string;
@@ -64,6 +67,7 @@ export const getKibanaMigratorTestKit = async ({
   settings = {},
   kibanaIndex = '.kibana',
   kibanaVersion = currentVersion,
+  kibanaBranch = currentBranch,
   types = [],
   logFilePath = defaultLogFilePath,
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
@@ -89,7 +93,8 @@ export const getKibanaMigratorTestKit = async ({
     typeRegistry,
     loggerFactory,
     kibanaIndex,
-    kibanaVersion
+    kibanaVersion,
+    kibanaBranch
   );
 
   const runMigrations = async (rerun?: boolean) => {
@@ -155,21 +160,6 @@ const getConfigService = (
     migrations: { skip: false },
   };
 
-  const env = Env.createDefault(REPO_ROOT, {
-    configs: [],
-    cliArgs: {
-      dev: false,
-      watch: false,
-      basePath: false,
-      runExamples: false,
-      oss: true,
-      disableOptimizer: true,
-      cache: true,
-      dist: false,
-    },
-    repoPackages: getPackages(REPO_ROOT),
-  });
-
   const rawConfigProvider = {
     getConfig$: () => new BehaviorSubject(defaultsDeep({}, settings, DEFAULTS_SETTINGS)),
   };
@@ -204,7 +194,8 @@ const getMigrator = async (
   typeRegistry: ISavedObjectTypeRegistry,
   loggerFactory: LoggerFactory,
   kibanaIndex: string,
-  kibanaVersion: string
+  kibanaVersion: string,
+  kibanaBranch: string
 ) => {
   const savedObjectsConf = await firstValueFrom(
     configService.atPath<SavedObjectsConfigType>('savedObjects')
@@ -214,6 +205,11 @@ const getMigrator = async (
   );
   const soConfig = new SavedObjectConfig(savedObjectsConf, savedObjectsMigrationConf);
 
+  const docLinks: DocLinksServiceStart = {
+    ...getDocLinksMeta({ kibanaBranch }),
+    links: getDocLinks({ kibanaBranch }),
+  };
+
   return new KibanaMigrator({
     client,
     typeRegistry,
@@ -221,8 +217,8 @@ const getMigrator = async (
     soMigrationsConfig: soConfig.migration,
     kibanaVersion,
     logger: loggerFactory.get('savedobjects-service'),
-    docLinks: docLinksServiceMock.createStartContract(),
-    waitForMigrationCompletion: false, // we want the migrator to actually migrate!
+    docLinks,
+    waitForMigrationCompletion: false, // ensure we have an active role in the migration
   });
 };
 
