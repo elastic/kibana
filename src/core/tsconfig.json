@@ -148,7 +148,6 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-custom-branding-browser",
     "@kbn/core-custom-branding-server",
-    "@kbn/repo-packages",
     "@kbn/core-elasticsearch-client-server-internal",
   ],
   "exclude": [
