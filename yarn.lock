@@ -1617,23 +1617,23 @@
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.5.1.tgz#96acf39c3d599950646ef8ccfd24a3f057cf4932"
   integrity sha512-Tby6TKjixRFY+atVNeYUdGr9m0iaOq8230KTwn8BbUhkh7LwozfgKq0U98HRX7n63ZL62szl+cDKTYzh5WPCFQ==
 
-"@elastic/react-search-ui-views@1.19.0":
-  version "1.19.0"
-  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui-views/-/react-search-ui-views-1.19.0.tgz#f425144560c89138725b9532a68c562106662555"
-  integrity sha512-GkDeZl9zwcZR51+kKzAHQ1HzfYXP3nturhU1bKG4vflw5rQgaHuVXfwbjEfrkacyuhdRkx6nIIqULbMbl+kl0g==
+"@elastic/react-search-ui-views@1.19.1", "@elastic/react-search-ui-views@^1.19.1":
+  version "1.19.1"
+  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui-views/-/react-search-ui-views-1.19.1.tgz#c44c5c823de5b5c61cc2f1f6bedbd973af0e78bc"
+  integrity sha512-1IOVoG5GYKvrKoYZL247bd7eKVQAR4iJaYBkA4KOa8CEXdc3+N0Z63uAit+4+pAH6Z6IONNwk2iQPMDf2zjQGA==
   dependencies:
-    "@elastic/search-ui" "1.19.0"
+    "@elastic/search-ui" "1.19.1"
     downshift "^3.2.10"
     rc-pagination "^1.20.1"
     react-select "^5.0.0"
 
-"@elastic/react-search-ui@^1.19.0":
-  version "1.19.0"
-  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui/-/react-search-ui-1.19.0.tgz#89406226556de54c7665a8ec7be0c3a806e1b4b8"
-  integrity sha512-WkoSlvGKpCDTJSskclGFX4NejArgbWNk/FhlzrLwM26UqU6Azyr4oMfNTqYh03CBu/8OaiOShQPX+VREdvqBaA==
+"@elastic/react-search-ui@^1.19.1":
+  version "1.19.1"
+  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui/-/react-search-ui-1.19.1.tgz#57e68e2e8c34cc8ac99d8f3825b4034db90e5b97"
+  integrity sha512-cB3tsDgVmp6fSrNJH8qmTZVDab4M0qKa0pyxrDSALJK8J7RFS9P4tO8Pb31R0jn4dtt1JDcy+e3JhHv/RABwlQ==
   dependencies:
-    "@elastic/react-search-ui-views" "1.19.0"
-    "@elastic/search-ui" "1.19.0"
+    "@elastic/react-search-ui-views" "1.19.1"
+    "@elastic/search-ui" "1.19.1"
 
 "@elastic/request-crypto@2.0.1":
   version "2.0.1"
@@ -1644,26 +1644,26 @@
     "@types/node-jose" "1.1.10"
     node-jose "2.1.0"
 
-"@elastic/search-ui-app-search-connector@^1.19.0":
-  version "1.19.0"
-  resolved "https://registry.yarnpkg.com/@elastic/search-ui-app-search-connector/-/search-ui-app-search-connector-1.19.0.tgz#bc1db3589ab039a1459953374dafceb50629fb0c"
-  integrity sha512-ihjGyYCYV9BRNbjsVpBZNCg3SMr73DNhHq2NekTCxMahMS5TbUs88EH0ggWEqfZDxtEyS2coKmKM4UEHZid7kw==
+"@elastic/search-ui-app-search-connector@^1.19.1":
+  version "1.19.1"
+  resolved "https://registry.yarnpkg.com/@elastic/search-ui-app-search-connector/-/search-ui-app-search-connector-1.19.1.tgz#beb6b317207ace9480fc8cd0a16e63e3c4657e0d"
+  integrity sha512-cHYtk2M6F1OdkJSXdb6EMvn6p4oE2duNZ/Il+W++6l5NXzyqPrVnh+6uGEPN64j+CxvTwxAEdV2uQbUpEKBrtw==
   dependencies:
     "@elastic/app-search-javascript" "^8.1.2"
-    "@elastic/search-ui" "1.19.0"
+    "@elastic/search-ui" "1.19.1"
 
-"@elastic/search-ui-engines-connector@^1.19.0":
-  version "1.19.0"
-  resolved "https://registry.yarnpkg.com/@elastic/search-ui-engines-connector/-/search-ui-engines-connector-1.19.0.tgz#1c1256b3b2d3e52d806f3f309f5193ebe7a8f0a1"
-  integrity sha512-jNoY/j6atD6OD7F3sUD4vSMI/0ehQg058UheW/xkP2qNtB11rOZfBD47Al8tDOF+aKG5/dSxaV2mOfJzY9MzRw==
+"@elastic/search-ui-engines-connector@^1.19.1":
+  version "1.19.1"
+  resolved "https://registry.yarnpkg.com/@elastic/search-ui-engines-connector/-/search-ui-engines-connector-1.19.1.tgz#5efab4f405e7bfb573fb0a81ad776d02e2248d23"
+  integrity sha512-LHTeSmDGOR5T5Y/9K1AngedHp3KAgdMhUq7KgvJnRkYogOCCfqWizcVXdURKXp8A+t6Gocg24o1TMWOSBR+3+w==
   dependencies:
-    "@elastic/search-ui" "1.19.0"
+    "@elastic/search-ui" "1.19.1"
     "@searchkit/sdk" "^3.0.0"
 
-"@elastic/search-ui@1.19.0", "@elastic/search-ui@^1.19.0":
-  version "1.19.0"
-  resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.19.0.tgz#4f5b20856061f9500b307679d190accdfaf9f916"
-  integrity sha512-cShId22JPOkGiyPAmWYjttH/1q8D2Ac14d3lMXfgMNE+98jjWt0Nf/TvrfjLbTpdSVFUaDg/vAVciTRKk1qOVw==
+"@elastic/search-ui@1.19.1", "@elastic/search-ui@^1.19.1":
+  version "1.19.1"
+  resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.19.1.tgz#76c1c72248e42f326970a6f3b0b445ab5f581847"
+  integrity sha512-2DcZ1b4fiL0vjRhVFU1OnqGKOy7aVJr563VO9FDpUUFCXlMySKWnuwh0kcUatqeNO4Sxw9GyJZbtzOgnTyQaag==
   dependencies:
     date-fns "^1.30.1"
     deep-equal "^1.0.1"
@@ -22765,17 +22765,12 @@ playwright-core@1.27.1, playwright-core@=1.27.1:
   resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.27.1.tgz#840ef662e55a3ed759d8b5d3d00a5f885a7184f4"
   integrity sha512-9EmeXDncC2Pmp/z+teoVYlvmPWUC6ejSSYZUln7YaP89Z6lpAaiaAnqroUt/BoLo8tn7WYShcfaCh+xofZa44Q==
 
-playwright-core@1.30.0:
-  version "1.30.0"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.30.0.tgz#de987cea2e86669e3b85732d230c277771873285"
-  integrity sha512-7AnRmTCf+GVYhHbLJsGUtskWTE33SwMZkybJ0v6rqR1boxq2x36U7p1vDRV7HO2IwTZgmycracLxPEJI49wu4g==
-
-playwright@^1.30.0:
-  version "1.30.0"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.30.0.tgz#b1d7be2d45d97fbb59f829f36f521f12010fe072"
-  integrity sha512-ENbW5o75HYB3YhnMTKJLTErIBExrSlX2ZZ1C/FzmHjUYIfxj/UnI+DWpQr992m+OQVSg0rCExAOlRwB+x+yyIg==
+playwright@^1.26.0:
+  version "1.27.1"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.27.1.tgz#4eecac5899566c589d4220ca8acc16abe8a67450"
+  integrity sha512-xXYZ7m36yTtC+oFgqH0eTgullGztKSRMb4yuwLPl8IYSmgBM88QiB+3IWb1mRIC9/NNwcgbG0RwtFlg+EAFQHQ==
   dependencies:
-    playwright-core "1.30.0"
+    playwright-core "1.27.1"
 
 plugin-error@^1.0.1:
   version "1.0.1"
