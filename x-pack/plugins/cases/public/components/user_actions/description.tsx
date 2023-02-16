@@ -18,7 +18,6 @@ import { UserActionTimestamp } from './timestamp';
 import { UserActionMarkdown } from './markdown_form';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import * as i18n from './translations';
-import { HoverableAvatarResolver } from '../user_profiles/hoverable_avatar_resolver';
 import { HoverableUsernameResolver } from '../user_profiles/hoverable_username_resolver';
 import { DescriptionPropertyActions } from './property_actions/description_property_actions';
 
@@ -33,10 +32,9 @@ type GetDescriptionUserActionArgs = Pick<
   | 'manageMarkdownEditIds'
   | 'handleManageMarkdownEditId'
   | 'handleManageQuote'
-  | 'userProfiles'
   | 'appId'
 > &
-  Pick<UserActionTreeProps, 'onUpdateField' | 'isLoadingDescription'>;
+  Pick<UserActionTreeProps, 'onUpdateField'> & { isLoadingDescription: boolean };
 
 const MyEuiCommentFooter = styled(EuiText)`
   ${({ theme }) => `
@@ -53,7 +51,6 @@ const hasDraftComment = (appId = '', caseId: string, commentId: string): boolean
 
 export const getDescriptionUserAction = ({
   appId,
-  userProfiles,
   caseData,
   commentRefs,
   manageMarkdownEditIds,
@@ -64,7 +61,7 @@ export const getDescriptionUserAction = ({
 }: GetDescriptionUserActionArgs): EuiCommentProps => {
   const isEditable = manageMarkdownEditIds.includes(DESCRIPTION_ID);
   return {
-    username: <HoverableUsernameResolver user={caseData.createdBy} userProfiles={userProfiles} />,
+    username: <HoverableUsernameResolver user={caseData.createdBy} />,
     event: i18n.ADDED_DESCRIPTION,
     'data-test-subj': 'description-action',
     timestamp: <UserActionTimestamp createdAt={caseData.createdAt} />,
@@ -95,9 +92,7 @@ export const getDescriptionUserAction = ({
         )}
       </>
     ),
-    timelineAvatar: (
-      <HoverableAvatarResolver user={caseData.createdBy} userProfiles={userProfiles} />
-    ),
+    timelineAvatar: null,
     className: classNames({
       isEdit: manageMarkdownEditIds.includes(DESCRIPTION_ID),
       draftFooter:

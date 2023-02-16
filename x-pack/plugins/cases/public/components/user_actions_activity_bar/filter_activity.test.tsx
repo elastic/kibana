@@ -10,12 +10,18 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { CaseUserActionsStats } from '../../containers/types';
 
 import { FilterActivity } from './filter_activity';
 
 describe('FilterActivity ', () => {
   const onFilterActivityChange = jest.fn();
   let appMockRender: AppMockRenderer;
+  const userActionsStats: CaseUserActionsStats = {
+    total: 20,
+    totalComments: 11,
+    totalOtherActions: 9,
+  };
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
@@ -65,6 +71,24 @@ describe('FilterActivity ', () => {
           .classList.contains('euiFilterButton-hasActiveFilters')
       );
     });
+  });
+
+  it('renders user actions stats correctly', async () => {
+    const res = appMockRender.render(
+      <FilterActivity
+        type="all"
+        onFilterChange={onFilterActivityChange}
+        userActionsStats={userActionsStats}
+      />
+    );
+
+    expect(res.getByLabelText(`${userActionsStats.total - 1} active filters`)).toBeInTheDocument();
+    expect(
+      res.getByLabelText(`${userActionsStats.totalComments} available filters`)
+    ).toBeInTheDocument();
+    expect(
+      res.getByLabelText(`${userActionsStats.totalOtherActions - 1} available filters`)
+    ).toBeInTheDocument();
   });
 
   it('onChange is called with user filter type', async () => {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, waitFor, within } from '@testing-library/react';
+import { act, waitFor, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ConnectorTypes } from '../../../common/api';
@@ -39,6 +39,7 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { waitForComponentToUpdate } from '../../common/test_utils';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -217,12 +218,7 @@ describe('CaseViewPage', () => {
     const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
     await waitFor(() => {
-      expect(
-        within(result.getByTestId('description-action')).getByTestId('user-action-title-loading')
-      ).toBeInTheDocument();
-      expect(
-        within(result.getByTestId('description-action')).queryByTestId('property-actions')
-      ).not.toBeInTheDocument();
+      expect(result.getByTestId('description-loading')).toBeInTheDocument();
     });
   });
 
@@ -584,6 +580,45 @@ describe('CaseViewPage', () => {
       await act(async () => {
         expect(result.queryByTestId('case-view-alerts-table-experimental-badge')).toBeTruthy();
       });
+    });
+  });
+
+  describe('description', () => {
+    it('renders the descriptions user correctly', async () => {
+      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      const description = within(result.getByTestId('description-action'));
+
+      await waitFor(() => {
+        expect(description.getByText('Leslie Knope')).toBeInTheDocument();
+      });
+    });
+
+    it('it should persist the draft of new comment while description is updated', async () => {
+      const newComment = 'another cool comment';
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), newComment);
+
+      userEvent.click(screen.getByTestId('property-actions-description-ellipses'));
+
+      await waitForEuiPopoverOpen();
+
+      userEvent.click(screen.getByTestId('property-actions-description-pencil'));
+
+      userEvent.clear(screen.getAllByTestId('euiMarkdownEditorTextArea')[0]);
+
+      userEvent.type(screen.getAllByTestId('euiMarkdownEditorTextArea')[0], newComment);
+
+      userEvent.click(screen.getByTestId('user-action-save-markdown'));
+
+      await waitForComponentToUpdate();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('user-action-markdown-form')).not.toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('euiMarkdownEditorTextArea')).toHaveTextContent(newComment);
     });
   });
 });

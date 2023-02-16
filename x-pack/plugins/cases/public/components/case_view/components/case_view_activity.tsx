@@ -227,7 +227,6 @@ export const CaseViewActivity = ({
                 caseUserActions={userActionsData.userActions}
                 data={caseData}
                 actionsNavigation={actionsNavigation}
-                isLoadingDescription={isLoading && loadingKey === 'description'}
                 isLoadingUserActions={isLoadingUserActions}
                 onShowAlertDetails={onShowAlertDetails}
                 onUpdateField={onUpdateField}
@@ -240,6 +239,7 @@ export const CaseViewActivity = ({
                     />
                   ) : null
                 }
+                filterOptions={filterOptions}
                 useFetchAlertData={useFetchAlertData}
               />
             )}

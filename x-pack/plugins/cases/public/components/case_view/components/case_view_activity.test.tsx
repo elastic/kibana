@@ -266,9 +266,11 @@ describe('Case View Page activity tab', () => {
       await waitFor(() => {
         expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'all', sortOrder);
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
-        expect(screen.getByLabelText(`${userActionsStats.total} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.total - 1} active filters`));
         expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
-        expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`));
+        expect(
+          screen.getByLabelText(`${userActionsStats.totalOtherActions - 1} available filters`)
+        );
       });
     });
 
@@ -302,7 +304,7 @@ describe('Case View Page activity tab', () => {
       await waitFor(() => {
         expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'action', sortOrder);
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
-        expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.totalOtherActions - 1} active filters`));
       });
     });
 
@@ -321,7 +323,7 @@ describe('Case View Page activity tab', () => {
       await waitFor(() => {
         expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'all', 'desc');
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
-        expect(screen.getByLabelText(`${userActionsStats.total} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.total - 1} active filters`));
       });
     });
   });
@@ -447,17 +449,6 @@ describe('Case View Page activity tab', () => {
     });
 
     describe('User actions', () => {
-      it('renders the descriptions user correctly', async () => {
-        appMockRender = createAppMockRenderer();
-        const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const description = within(result.getByTestId('description-action'));
-
-        await waitFor(() => {
-          expect(description.getByText('Leslie Knope')).toBeInTheDocument();
-        });
-      });
-
       it('renders the unassigned users correctly', async () => {
         useFindCaseUserActionsMock.mockReturnValue({
           ...defaultUseFindCaseUserActions,

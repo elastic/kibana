@@ -18,6 +18,7 @@ import { EXPERIMENTAL_DESC, EXPERIMENTAL_LABEL } from '../header_page/translatio
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { WhitePageWrapperNoBorder } from '../wrappers';
+import { UseDescriptionHandler } from '../user_actions/use_description_handler';
 import { CaseViewActivity } from './components/case_view_activity';
 import { CaseViewAlerts } from './components/case_view_alerts';
 import { CaseViewMetrics } from './metrics';
@@ -154,6 +155,8 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       return tabs.find((obj) => obj.id === activeTabId)?.content;
     }, [activeTabId, tabs]);
 
+    const isLoadingDescription = isLoading && loadingKey === 'description';
+
     const renderTabs = useCallback(() => {
       return tabs.map((tab, index) => (
         <EuiTab
@@ -196,7 +199,15 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="l" />
+
+          <UseDescriptionHandler
+            isLoadingDescription={isLoadingDescription}
+            data={caseData}
+            onUpdateField={onUpdateField}
+          />
+
+          <EuiSpacer size="l" />
 
           <EuiTabs>{renderTabs()}</EuiTabs>
 
