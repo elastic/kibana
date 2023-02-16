@@ -18,7 +18,7 @@ To create the POST URL for PDF reports:
 
 . From the toolbar, click *Share > PDF Reports*, then choose an option:
 
-* If you are using *Dashboard* or *Visulize Library*, click *Copy POST URL*.
+* If you are using *Dashboard* or *Visualize Library*, click *Copy POST URL*.
 
 * If you are using *Canvas*, click *Advanced options > Copy POST URL*.
 
@@ -29,6 +29,12 @@ To create the POST URL for CSV reports:
 . Open the saved search you want to share.
 
 . In the toolbar, click *Share > CSV Reports > Copy POST URL*.
+
+[float]
+[[advanced-post-url]]
+=== Construct your own POST URL
+
+include::advanced-post-url.asciidoc[]
 
 [float]
 [[use-watcher]]
