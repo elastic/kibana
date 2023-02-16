@@ -8,7 +8,8 @@
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
 import { EuiButtonEmpty, EuiLink, useEuiTheme } from '@elastic/eui';
-import { Route, Switch, useHistory, useLocation } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+import { Switch, useHistory, useLocation } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
