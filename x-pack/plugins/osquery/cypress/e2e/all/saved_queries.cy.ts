@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+import { preparePack } from '../../tasks/packs';
 import {
   addToCase,
   checkResults,
   deleteAndConfirm,
+  findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
   selectAllAgents,
@@ -54,8 +57,15 @@ describe('ALL - Saved queries', () => {
     });
   });
   describe.only('prebuilt ', () => {
+    before(() => {
+      runKbnArchiverScript(ArchiverMethod.LOAD, 'pack_with_prebuilt_saved_queries');
+    });
     beforeEach(() => {
       navigateTo('/app/osquery/saved_queries');
+    });
+
+    after(() => {
+      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'pack_with_prebuilt_saved_queries');
     });
 
     it('checks result type on prebuilt saved query', () => {
@@ -95,6 +105,46 @@ describe('ALL - Saved queries', () => {
         props: { index: 1, item: { attributes: { id: 'query-to-delete' } } },
       }).click();
       deleteAndConfirm('query');
+    });
+    it('user can edit prebuilt saved query under pack', () => {
+      const PACK_NAME = 'pack_with_prebuilt_sq';
+      preparePack(PACK_NAME);
+      findAndClickButton('Edit');
+      cy.contains(`Edit ${PACK_NAME}`);
+      findAndClickButton('Add query');
+      cy.contains('Attach next query');
+
+      cy.react('EuiComboBox', {
+        props: { placeholder: 'Search for a query to run, or write a new query below' },
+      })
+        .click()
+        .type('users_elastic{downArrow} {enter}');
+      inputQuery('where name=1');
+      cy.getBySel('resultsTypeField').click();
+      cy.contains('Differential (Ignore removals)').click();
+      cy.contains('Unique identifier of the us').should('exist');
+      cy.contains('User ID').should('exist');
+
+      cy.react('EuiFlyoutBody').within(() => {
+        cy.getBySel('ECSMappingEditorForm')
+          .first()
+          .within(() => {
+            cy.get(`[aria-label="Delete ECS mapping row"]`).first().click();
+          });
+      });
+      cy.contains('Unique identifier of the us').should('not.exist');
+      cy.contains('User ID').should('not.exist');
+      // cy.contains('Save').click();
+      cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
+
+      cy.react('CustomItemAction', {
+        props: { index: 0, item: { id: 'users_elastic' } },
+      }).click();
+      cy.contains('SELECT * FROM users;where name=1');
+      cy.contains('Unique identifier of the us.').should('not.exist');
+      cy.contains('User ID').should('not.exist');
+      cy.contains('Differential (Ignore removals)').should('exist');
+      cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
   });
 });
