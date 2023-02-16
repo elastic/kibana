@@ -8,14 +8,16 @@
 import React from 'react';
 
 import {
-  EuiFieldSearch,
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButton,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import type {
   InputViewProps,
@@ -55,7 +57,13 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
       field: 'name',
       name: 'name',
       render: (name: string) => {
-        return <code>&quot;{name}&quot;</code>;
+        return (
+          <EuiText>
+            <EuiTextColor color="subdued">
+              <code>&quot;{name}&quot;</code>
+            </EuiTextColor>
+          </EuiText>
+        );
       },
       truncateText: true,
       width: '20%',
@@ -63,7 +71,11 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
     {
       field: 'value',
       name: 'value',
-      render: (value: string) => value,
+      render: (value: string) => (
+        <EuiText>
+          <code>{value}</code>
+        </EuiText>
+      ),
     },
   ];
 

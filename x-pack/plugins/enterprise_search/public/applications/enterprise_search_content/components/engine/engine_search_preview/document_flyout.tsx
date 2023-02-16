@@ -7,7 +7,19 @@
 
 import React from 'react';
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiInMemoryTable,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useSelectedDocument } from './document_context';
 
@@ -16,17 +28,73 @@ export const DocumentFlyout: React.FC = () => {
 
   if (selectedDocument === null) return null;
 
+  const {
+    _meta: { id: encodedId },
+    id: _id,
+    ...otherFields
+  } = selectedDocument;
+  const [, id] = JSON.parse(atob(encodedId));
+
+  const fields = [
+    { key: 'id', value: id },
+    ...Object.entries(otherFields).map(([key, { raw: value }]) => ({ key, value })),
+  ];
+
+  const columns: EuiBasicTableColumn = [
+    {
+      field: 'key',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.engine.searchPreview.documentFlyout.fieldLabel',
+        { defaultMessage: 'Field' }
+      ),
+      render: (key: string) => (
+        <EuiText>
+          <EuiTextColor color="subdued">
+            <code>{key}</code>
+          </EuiTextColor>
+        </EuiText>
+      ),
+      truncateText: true,
+    },
+    {
+      field: 'value',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.engine.searchPreview.documentFlyout.valueLabel',
+        { defaultMessage: 'Value' }
+      ),
+      render: (key: string) => (
+        <EuiText>
+          <code>{key}</code>
+        </EuiText>
+      ),
+      truncateText: true,
+    },
+  ];
+
   return (
     <EuiFlyout onClose={() => setSelectedDocument(null)}>
-      <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h2>Document</h2>
-        </EuiTitle>
+      <EuiFlyoutHeader hasBorder>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiTitle size="m">
+            <h2>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.engine.searchPreview.documentFlyout.title"
+                defaultMessage="Document: {id}"
+                values={{ id }}
+              />
+            </h2>
+          </EuiTitle>
+          <EuiTextColor color="subdued">
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.engine.searchPreivew.documentFlyout.fieldCount"
+              defaultMessage="{fieldCount} {fieldCount, plural, one {Field} other {Fields}}"
+              values={{ fieldCount: fields.length }}
+            />
+          </EuiTextColor>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiText>
-          <code>{JSON.stringify(selectedDocument, null, 2)}</code>
-        </EuiText>
+        <EuiInMemoryTable columns={columns} items={fields} />
       </EuiFlyoutBody>
     </EuiFlyout>
   );
