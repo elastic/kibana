@@ -228,7 +228,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         setQuery();
       }
     },
-    [setFieldValue, setFieldValueCb]
+    [setFieldValue, setRuleTypeCallback]
   );
 
   const { onOpenTimeline, loading: timelineQueryLoading } =
