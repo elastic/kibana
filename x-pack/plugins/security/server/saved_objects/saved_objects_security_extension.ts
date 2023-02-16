@@ -123,18 +123,19 @@ export interface AddAuditEventParams {
    */
   addToSpaces?: readonly string[];
   /**
-   * Array of spaces being removed. For
-   * UPDATE_OBJECTS_SPACES action only
+   * Array of spaces being removed.
+   * For the UPDATE_OBJECTS_SPACES action
+   * and the auditObjectsForSpaceDeletions method
    */
   deleteFromSpaces?: readonly string[];
   /**
    * Array of types being requested for authorization.
-   * FIND and OPEN_POINT_IN_TIME_FOR_TYPE actions only
+   * Used with actions that do not audit per object
+   * (FIND and OPEN_POINT_IN_TIME_FOR_TYPE actions)
    */
   requestedTypes?: readonly string[];
   /**
    * Array of spaces being requested for authorization.
-   * FIND and OPEN_POINT_IN_TIME_FOR_TYPE actions only
    */
   requestedSpaces?: readonly string[];
   /**
@@ -180,7 +181,7 @@ interface InternalAuthorizeParams {
     allowGlobalResource?: boolean;
   };
   /** auditOptions - options for audit logging */
-  auditOptions?: AuditOptions | UpdateSpacesAuditOptions;
+  auditOptions?: AuditOptions;
 }
 
 /**
@@ -200,7 +201,7 @@ interface EnforceAuthorizationParams<A extends string> {
    */
   typeMap: AuthorizationTypeMap<A>;
   /** auditOptions - options for audit logging */
-  auditOptions?: AuditOptions | UpdateSpacesAuditOptions;
+  auditOptions?: AuditOptions;
 }
 
 /**
@@ -223,25 +224,19 @@ interface AuditHelperParams {
   /**
    * The spaces from which to remove the objects
    * Used only with the AuditAction.UPDATE_OBJECTS_SPACES
+   * action and the auditObjectsForSpaceDeletions method
    * Default is none
    */
   deleteFromSpaces?: string[];
   /**
-   * The spaces requested for the action
-   * Used with AuditAction.FIND and AuditAction.OPEN_POINT_IN_TIME
+   * The spaces requested for the action per type
    */
-  requestedSpaces?: string[];
-  /**
-   * The types requested for the action
-   * Used with AuditAction.FIND and AuditAction.OPEN_POINT_IN_TIME
-   */
-  requestedTypes?: string[];
+  typesAndSpaces: Map<string, Set<string>>;
   /** Error information produced by the action */
   error?: Error;
 }
 
 /**
->>>>>>> Stashed changes
  * The AuditOptions interface contains optional settings for audit
  * logging within the ISavedObjectsSecurityExtension.
  */
@@ -257,20 +252,9 @@ interface AuditOptions {
   bypass?: 'never' | 'on_success' | 'on_failure' | 'always';
   /** If authz success should be logged as 'success'. Default false */
   useSuccessOutcome?: boolean;
-}
-
-/**
- * The UpdateSpacesAuditOptions interface contains optional settings for
- * auditing the UPDATE_OBJECTS_SPACES action.
- */
-interface UpdateSpacesAuditOptions extends AuditOptions {
-  /**
-   * An array of spaces which to add the objects (used in updateObjectsSpaces)
-   */
+  /** An array of spaces which to add the objects (used in updateObjectsSpaces) */
   addToSpaces?: string[];
-  /**
-   * An array of spaces from which to remove the objects (used in updateObjectsSpaces)
-   */
+  /** An array of spaces from which to remove the objects (used in updateObjectsSpaces) */
   deleteFromSpaces?: string[];
 }
 
@@ -507,13 +491,19 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       error,
       addToSpaces,
       deleteFromSpaces,
-      requestedTypes,
-      requestedSpaces,
+      typesAndSpaces,
     } = params;
 
     // If there are no objects, we at least want to add a single audit log for the action
     const toAudit = !!objects && objects?.length > 0 ? objects : ([undefined] as undefined[]);
+    const masterSpaceList = new Set<string>();
+    for (const [, spaces] of typesAndSpaces) {
+      spaces.forEach((space) => masterSpaceList.add(space));
+    }
+
     for (const obj of toAudit) {
+      const spacesForType =
+        obj && typesAndSpaces.has(obj.type) ? typesAndSpaces.get(obj.type)! : masterSpaceList;
       this.addAuditEvent({
         action,
         ...(!!obj && { savedObject: { type: obj.type, id: obj.id } }),
@@ -523,8 +513,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         ...(!error && { outcome: useSuccessOutcome ? 'success' : 'unknown' }),
         addToSpaces,
         deleteFromSpaces,
-        requestedTypes,
-        requestedSpaces,
+        requestedSpaces: spacesForType.size > 0 ? [...spacesForType] : undefined,
+        requestedTypes: obj ? undefined : [...typesAndSpaces.keys()],
       });
     }
   }
@@ -542,7 +532,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       useSuccessOutcome,
       addToSpaces,
       deleteFromSpaces,
-    } = (auditOptions as UpdateSpacesAuditOptions) ?? {};
+    } = (auditOptions as AuditOptions) ?? {};
 
     const { authzAction, auditAction } = this.decodeSecurityAction(action);
 
@@ -568,6 +558,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           useSuccessOutcome,
           addToSpaces,
           deleteFromSpaces,
+          typesAndSpaces,
           error,
         });
       }
@@ -581,6 +572,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         useSuccessOutcome,
         addToSpaces,
         deleteFromSpaces,
+        typesAndSpaces,
       });
     }
   }
@@ -919,6 +911,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         action: auditAction,
         objects: successAuditObjects.length ? successAuditObjects : undefined,
         useSuccessOutcome: true,
+        typesAndSpaces: enforceMap,
       });
     }
 
@@ -1100,6 +1093,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           this.addAuditEvent({
             action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
             savedObject: { type, id },
+            requestedSpaces: spaces,
           });
         }
         filteredObjectsMap.set(objKey, obj);
@@ -1323,6 +1317,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       this.addAuditEvent({
         action: AuditAction.FIND,
         savedObject: { type, id },
+        requestedSpaces: existingNamespaces,
       });
     }
     if (spacesToAuthorize.size > authorizeNamespaces.size) {
