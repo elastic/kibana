@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { ProcedureSchemas } from '../../common';
+import { validate } from '../utils';
 
 export interface ProcedureDefinition<
   Context extends object | void = void,
@@ -39,11 +40,10 @@ export class RpcService<Context extends object | void = void, Names extends stri
 
     // 1. Validate input
     if (schemas?.in) {
-      const validation = schemas.in.getSchema().validate(input);
-      if (validation.error) {
+      const error = validate(input, schemas.in);
+      if (error) {
         // TODO: Improve error handling
-        const message = `${validation.error.message}. ${JSON.stringify(validation.error)}`;
-        throw new Error(message);
+        throw error;
       }
     } else if (input !== undefined) {
       // TODO: Improve error handling
@@ -55,11 +55,10 @@ export class RpcService<Context extends object | void = void, Names extends stri
 
     // 3. Validate output
     if (schemas?.out) {
-      const validation = schemas.out.getSchema().validate(result);
-      if (validation.error) {
+      const error = validate(result, schemas.out);
+      if (error) {
         // TODO: Improve error handling
-        const message = `${validation.error.message}. ${JSON.stringify(validation.error)}`;
-        throw new Error(message);
+        throw error;
       }
     }
 

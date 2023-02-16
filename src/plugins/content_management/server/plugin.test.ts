@@ -42,9 +42,7 @@ jest.mock('./rpc/procedures/all_procedures', () => ({
       fn: (...args: unknown[]) => mockGet(...args),
       schemas: {
         in: {
-          getSchema: () => ({
-            validate: () => ({}),
-          }),
+          validate: () => undefined,
         } as any,
       },
     },
@@ -52,9 +50,7 @@ jest.mock('./rpc/procedures/all_procedures', () => ({
       fn: (...args: unknown[]) => mockCreate(...args),
       schemas: {
         in: {
-          getSchema: () => ({
-            validate: () => ({}),
-          }),
+          validate: () => undefined,
         } as any,
       },
     },
@@ -62,9 +58,7 @@ jest.mock('./rpc/procedures/all_procedures', () => ({
       fn: (...args: unknown[]) => mockUpdate(...args),
       schemas: {
         in: {
-          getSchema: () => ({
-            validate: () => ({}),
-          }),
+          validate: () => undefined,
         } as any,
       },
     },
@@ -72,9 +66,7 @@ jest.mock('./rpc/procedures/all_procedures', () => ({
       fn: (...args: unknown[]) => mockDelete(...args),
       schemas: {
         in: {
-          getSchema: () => ({
-            validate: () => ({}),
-          }),
+          validate: () => undefined,
         } as any,
       },
     },
@@ -82,9 +74,7 @@ jest.mock('./rpc/procedures/all_procedures', () => ({
       fn: (...args: unknown[]) => mockSearch(...args),
       schemas: {
         in: {
-          getSchema: () => ({
-            validate: () => ({}),
-          }),
+          validate: () => undefined,
         } as any,
       },
     },

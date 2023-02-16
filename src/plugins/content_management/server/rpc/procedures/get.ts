@@ -11,6 +11,7 @@ import type { GetIn } from '../../../common';
 import type { ContentCrud, StorageContext } from '../../core';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
+import { validate } from '../../utils';
 
 export const get: ProcedureDefinition<Context, GetIn<string>> = {
   schemas: rpcSchemas.get,
@@ -37,10 +38,10 @@ export const get: ProcedureDefinition<Context, GetIn<string>> = {
       if (!schemas?.in?.options) {
         throw new Error(`Schema missing for rpc procedure [get.in.options].`);
       }
-      const validation = schemas.in.options.getSchema().validate(input.options);
-      if (validation.error) {
+      const error = validate(input.options, schemas.in.options);
+      if (error) {
         // TODO: Improve error handling
-        throw validation.error;
+        throw error;
       }
     }
 
@@ -54,9 +55,10 @@ export const get: ProcedureDefinition<Context, GetIn<string>> = {
     // Validate result
     const resultSchema = schemas?.out?.result;
     if (resultSchema) {
-      const validation = resultSchema.getSchema().validate(result);
-      if (validation.error) {
-        throw validation.error;
+      const error = validate(result, resultSchema);
+      if (error) {
+        // TODO: Improve error handling
+        throw error;
       }
     }
 

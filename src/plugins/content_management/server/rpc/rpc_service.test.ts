@@ -87,7 +87,7 @@ describe('RpcService', () => {
 
       expect(() => {
         return rpc.call(context, 'foo', input);
-      }).rejects.toEqual(new Error('definition for this key is missing. {"path":["bad"]}'));
+      }).rejects.toEqual(new Error('[foo]: expected value of type [string] but got [undefined]'));
     });
 
     test('should validate the output if schema is provided', () => {
@@ -103,7 +103,7 @@ describe('RpcService', () => {
       const context = {};
       expect(() => {
         return rpc.call(context, 'foo');
-      }).rejects.toEqual(new Error('definition for this key is missing. {"path":["bad"]}'));
+      }).rejects.toEqual(new Error('[foo]: expected value of type [string] but got [undefined]'));
     });
   });
 });

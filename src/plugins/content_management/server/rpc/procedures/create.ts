@@ -11,6 +11,7 @@ import type { CreateIn } from '../../../common';
 import type { StorageContext, ContentCrud } from '../../core';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
+import { validate } from '../../utils';
 
 export const create: ProcedureDefinition<Context, CreateIn<string>> = {
   schemas: rpcSchemas.create,
@@ -34,10 +35,10 @@ export const create: ProcedureDefinition<Context, CreateIn<string>> = {
 
     // Validate data to be stored
     if (schemas.in.data) {
-      const validation = schemas.in.data.getSchema().validate(input.data);
-      if (validation.error) {
-        const message = `${validation.error.message}. ${JSON.stringify(validation.error)}`;
-        throw new Error(message);
+      const error = validate(input.data, schemas.in.data);
+      if (error) {
+        // TODO: Improve error handling
+        throw error;
       }
     } else {
       // TODO: Improve error handling
@@ -50,10 +51,10 @@ export const create: ProcedureDefinition<Context, CreateIn<string>> = {
         // TODO: Improve error handling
         throw new Error('Schema missing for rpc call [create.in.options].');
       }
-      const validation = schemas.in.options.getSchema().validate(input.options);
-      if (validation.error) {
-        const message = `${validation.error.message}. ${JSON.stringify(validation.error)}`;
-        throw new Error(message);
+      const error = validate(input.options, schemas.in.options);
+      if (error) {
+        // TODO: Improve error handling
+        throw error;
       }
     }
 
@@ -67,10 +68,10 @@ export const create: ProcedureDefinition<Context, CreateIn<string>> = {
     // Validate result
     const resultSchema = schemas.out?.result;
     if (resultSchema) {
-      const validation = resultSchema.getSchema().validate(result);
-      if (validation.error) {
+      const error = validate(result, resultSchema);
+      if (error) {
         // TODO: Improve error handling
-        throw validation.error;
+        throw error;
       }
     }
 
