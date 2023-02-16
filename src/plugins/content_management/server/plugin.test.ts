@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import { ContentManagementPlugin } from './plugin';
 import { IRouter } from '@kbn/core/server';
@@ -131,21 +132,23 @@ describe('ContentManagementPlugin', () => {
 
         const [_, handler]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
 
-        const requestHandlerContext = { foo: 'bar' };
+        const mockedRequestHandlerContext: any = { foo: 'bar' };
+        const mockedResponse: any = {
+          ok: jest.fn((data: { body: unknown }) => data.body),
+          customError: jest.fn((e: any) => e),
+        };
+
         const input = { testInput: 'baz' };
 
+        // Call the handler for each of our procedure names
         const result = await Promise.all(
           procedureNames.map((name) => {
-            return handler(
-              requestHandlerContext as any,
-              {
-                params: { name },
-                body: input,
-              } as any,
-              {
-                ok: (response: { body: unknown }) => response.body,
-              } as any
-            );
+            const mockedRequest: any = {
+              params: { name },
+              body: input,
+            };
+
+            return handler(mockedRequestHandlerContext, mockedRequest, mockedResponse);
           })
         );
 
@@ -153,12 +156,39 @@ describe('ContentManagementPlugin', () => {
         expect(result).toEqual(procedureNames.map((name) => ({ result: `${name}Mocked` })));
 
         // Each procedure has been called with the context and input
-        const context = { requestHandlerContext, contentRegistry: 'mockedContentRegistry' };
+        const context = {
+          requestHandlerContext: mockedRequestHandlerContext,
+          contentRegistry: 'mockedContentRegistry',
+        };
         expect(mockGet).toHaveBeenCalledWith(context, input);
         expect(mockCreate).toHaveBeenCalledWith(context, input);
         expect(mockUpdate).toHaveBeenCalledWith(context, input);
         expect(mockDelete).toHaveBeenCalledWith(context, input);
         expect(mockSearch).toHaveBeenCalledWith(context, input);
+      });
+
+      test('should return error in custom error format', async () => {
+        const { plugin, http, router } = setup();
+        plugin.setup({ http });
+
+        const [_, handler]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
+
+        // const mockedRequestHandlerContext: any = { foo: 'bar' };
+        const mockedResponse: any = {
+          ok: jest.fn((response: { body: unknown }) => response.body),
+          customError: jest.fn((e: any) => e),
+        };
+
+        mockGet.mockRejectedValueOnce(new Error('Houston we got a problem.'));
+        const error = await handler({} as any, { params: { name: 'get' } } as any, mockedResponse);
+
+        expect(error).toEqual({
+          body: {
+            message: new Error('Houston we got a problem.'),
+          },
+          headers: {},
+          statusCode: 500,
+        });
       });
     });
   });
