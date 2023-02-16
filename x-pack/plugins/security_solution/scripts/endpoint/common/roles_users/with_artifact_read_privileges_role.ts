@@ -8,7 +8,7 @@
 import type { Role } from '@kbn/security-plugin/common';
 import { getNoResponseActionsRole } from './without_response_actions_role';
 
-export const getT2Analyst: () => Omit<Role, 'name'> = () => {
+export const getWithArtifactReadPrivilegesRole: () => Omit<Role, 'name'> = () => {
   const noResponseActionsRole = getNoResponseActionsRole();
   return {
     ...noResponseActionsRole,
@@ -17,7 +17,13 @@ export const getT2Analyst: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siem: ['minimal_all', 'actions_log_management_read'],
+          siem: [
+            'minimal_all',
+            'blocklist_read',
+            'trusted_applications_read',
+            'host_isolation_exceptions_read',
+            'event_filters_read',
+          ],
         },
       },
     ],
