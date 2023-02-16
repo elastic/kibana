@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { getObserverDefaults } from '../..';
 import { Fields } from '../entity';
 
