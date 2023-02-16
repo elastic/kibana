@@ -10,7 +10,9 @@ import userEvent from '@testing-library/user-event';
 import { render } from '../utils/testing';
 import React, { useState, Fragment } from 'react';
 import { useUrlParams, SyntheticsUrlParamsHook } from './use_url_params';
-import { APP_DEFAULT_REFRESH_INTERVAL, SyntheticsRefreshContext } from '../contexts';
+import { SyntheticsRefreshContext } from '../contexts';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../common/constants/synthetics/client_defaults';
+const { AUTOREFRESH_INTERVAL_SECONDS } = CLIENT_DEFAULTS_SYNTHETICS;
 
 interface MockUrlParamsComponentProps {
   hook: SyntheticsUrlParamsHook;
@@ -58,7 +60,7 @@ describe('useUrlParams', () => {
           {
             lastRefresh: 123,
             refreshApp: jest.fn(),
-            refreshInterval: APP_DEFAULT_REFRESH_INTERVAL,
+            refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
           } as any
         }
       >
@@ -84,7 +86,7 @@ describe('useUrlParams', () => {
           {
             lastRefresh: 123,
             refreshApp: jest.fn(),
-            refreshInterval: APP_DEFAULT_REFRESH_INTERVAL,
+            refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
           } as any
         }
       >

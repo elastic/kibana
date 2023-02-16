@@ -16,6 +16,7 @@ import {
   selectMonitorListState,
   selectorMonitorDetailsState,
   selectorError,
+  selectRefreshInterval,
 } from '../../../state';
 
 export const useSelectedMonitor = (monId?: string) => {
@@ -26,13 +27,14 @@ export const useSelectedMonitor = (monId?: string) => {
   }
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
   const { loading: monitorListLoading } = useSelector(selectMonitorListState);
+  const refreshInterval = useSelector(selectRefreshInterval);
 
   const monitorFromList = useMemo(
     () => monitorsList.find((monitor) => monitor[ConfigKey.CONFIG_ID] === monitorId) ?? null,
     [monitorId, monitorsList]
   );
   const error = useSelector(selectorError);
-  const { lastRefresh, refreshInterval } = useSyntheticsRefreshContext();
+  const { lastRefresh } = useSyntheticsRefreshContext();
   const { syntheticsMonitor, syntheticsMonitorLoading, syntheticsMonitorDispatchedAt } =
     useSelector(selectorMonitorDetailsState);
   const dispatch = useDispatch();
