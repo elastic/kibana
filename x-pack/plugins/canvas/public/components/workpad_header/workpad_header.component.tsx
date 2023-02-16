@@ -139,18 +139,18 @@ export const WorkpadHeader: FC<Props> = ({
   const quickButtons = [
     {
       iconType: 'visText',
-      createType: elementStrings.markdown.displayName,
-      onClick: createElement('markdown'),
+      label: elementStrings.markdown.displayName,
+      onClick: () => createElement('markdown'),
     },
     {
       iconType: 'node',
-      createType: elementStrings.shape.displayName,
-      onClick: createElement('shape'),
+      label: elementStrings.shape.displayName,
+      onClick: () => createElement('shape'),
     },
     {
       iconType: 'image',
-      createType: elementStrings.image.displayName,
-      onClick: createElement('image'),
+      label: elementStrings.image.displayName,
+      onClick: () => createElement('image'),
     },
   ];
 
