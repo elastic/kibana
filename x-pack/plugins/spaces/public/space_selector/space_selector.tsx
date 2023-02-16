@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  EuiPortal,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
@@ -121,6 +122,11 @@ export class SpaceSelector extends Component<Props, State> {
         data-test-subj="kibanaSpaceSelector"
         panelled
       >
+        {/* Portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners */}
+        <EuiPortal>
+          <div className="spcSelectorBackground" role="presentation" />
+        </EuiPortal>
+
         <KibanaPageTemplate.Section className="spcSpaceSelector__pageContent" color="transparent">
           <EuiText textAlign="center" size="s">
             <EuiSpacer size="xxl" />

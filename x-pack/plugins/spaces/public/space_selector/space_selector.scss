@@ -1,6 +1,11 @@
 .spcSpaceSelector {
+  background: transparent;
+}
+
+.spcSelectorBackground {
   @include kibanaFullScreenGraphics;
-  position: relative;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .spcSpaceSelector__pageContent {
