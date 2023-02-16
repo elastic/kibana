@@ -52,7 +52,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
 
   const [, id] = JSON.parse(atob(encodedId));
 
-  const columns: Array<EuiBasicTableColumn<SearchResult>> = [
+  const columns: Array<EuiBasicTableColumn<{ name: string; value: string }>> = [
     {
       field: 'name',
       name: 'name',

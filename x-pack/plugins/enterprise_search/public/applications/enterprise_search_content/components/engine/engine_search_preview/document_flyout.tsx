@@ -40,7 +40,7 @@ export const DocumentFlyout: React.FC = () => {
     ...Object.entries(otherFields).map(([key, { raw: value }]) => ({ key, value })),
   ];
 
-  const columns: EuiBasicTableColumn = [
+  const columns: Array<EuiBasicTableColumn<{ key: string; value: string }>> = [
     {
       field: 'key',
       name: i18n.translate(

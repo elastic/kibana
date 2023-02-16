@@ -7,13 +7,21 @@
 
 import React, { createContext, useMemo, useState, useContext } from 'react';
 
-export const DocumentContext = createContext({
+import { SearchResult } from '@elastic/search-ui';
+
+export type SelectedDocument = SearchResult;
+export interface DocumentContextType {
+  selectedDocument: null | SelectedDocument;
+  setSelectedDocument(select: null | SelectedDocument): void;
+}
+
+export const DocumentContext = createContext<DocumentContextType>({
   selectedDocument: null,
   setSelectedDocument: () => {},
 });
 
-export const DocumentProvider = ({ children }) => {
-  const [selectedDocument, setSelectedDocument] = useState(null);
+export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [selectedDocument, setSelectedDocument] = useState<SelectedDocument | null>(null);
   const value = useMemo(
     () => ({ selectedDocument, setSelectedDocument }),
     [selectedDocument, setSelectedDocument]
