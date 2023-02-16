@@ -262,9 +262,6 @@
           "id": "kibDevDocsDeprecationsByApi"
         },
         {
-          "id": "kibCorePluginApi"
-        },
-        {
           "id": "kibFieldFormatsPluginApi"
         },
         {

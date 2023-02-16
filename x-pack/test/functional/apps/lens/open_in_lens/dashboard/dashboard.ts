@@ -22,6 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const panelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const filterBar = getService('filterBar');
 
   describe('Convert to Lens action on dashboard', function describeIndexTests() {
     before(async () => {
@@ -37,6 +38,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.exists('visualizesaveAndReturnButton');
       await testSubjects.click('visualizesaveAndReturnButton');
       await dashboard.waitForRenderComplete();
+      // define a filter
+      await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'CN' });
+      await dashboard.waitForRenderComplete();
       expect(await dashboard.isNotificationExists(0)).to.be(true);
     });
 
@@ -46,6 +50,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('xyVisChart');
       const lastBreadcrumbdcrumb = await testSubjects.getVisibleText('breadcrumb last');
       expect(lastBreadcrumbdcrumb).to.be('Converting Area visualization');
+      const filterCount = await filterBar.getFilterCount();
+      expect(filterCount).to.equal(0);
       await lens.replaceInDashboard();
 
       await retry.try(async () => {

@@ -529,11 +529,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver
     );
 
-    if (plugins.taskManager) {
-      this.checkMetadataTransformsTask?.start({
-        taskManager: plugins.taskManager,
-      });
-    }
+    plugins.fleet?.fleetSetupCompleted().then(() => {
+      if (plugins.taskManager) {
+        this.checkMetadataTransformsTask?.start({
+          taskManager: plugins.taskManager,
+        });
+      }
+    });
 
     return {};
   }

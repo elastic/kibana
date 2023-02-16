@@ -12,7 +12,7 @@ export interface ProcedureSchemas {
   out?: Type<any> | false;
 }
 
-export const procedureNames = ['get', 'create'] as const;
+export const procedureNames = ['get', 'create', 'update', 'delete', 'search'] as const;
 
 export type ProcedureName = typeof procedureNames[number];
 
@@ -64,9 +64,85 @@ export interface CreateIn<
   options?: Options;
 }
 
+// -- Update content
+const updateSchemas: ProcedureSchemas = {
+  in: schema.object(
+    {
+      contentType: schema.string(),
+      data: schema.object({}, { unknowns: 'allow' }),
+      options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    },
+    { unknowns: 'forbid' }
+  ),
+  out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+};
+
+export interface UpdateIn<
+  T extends string = string,
+  Data extends object = Record<string, unknown>,
+  Options extends object = any
+> {
+  contentType: T;
+  data: Data;
+  options?: Options;
+}
+
+// -- Delete content
+const deleteSchemas: ProcedureSchemas = {
+  in: schema.object(
+    {
+      contentType: schema.string(),
+      data: schema.object({}, { unknowns: 'allow' }),
+      options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    },
+    { unknowns: 'forbid' }
+  ),
+  out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+};
+
+export interface DeleteIn<
+  T extends string = string,
+  Data extends object = Record<string, unknown>,
+  Options extends object = any
+> {
+  contentType: T;
+  data: Data;
+  options?: Options;
+}
+
+// -- Search content
+const searchSchemas: ProcedureSchemas = {
+  in: schema.object(
+    {
+      contentType: schema.string(),
+      data: schema.object({}, { unknowns: 'allow' }),
+      options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    },
+    { unknowns: 'forbid' }
+  ),
+  out: schema.object({ hits: schema.arrayOf(schema.object({}, { unknowns: 'allow' })) }),
+};
+
+export interface SearchIn<
+  T extends string = string,
+  Params extends object = Record<string, unknown>,
+  Options extends object = any
+> {
+  contentType: T;
+  params: Params;
+  options?: Options;
+}
+
+export interface SearchOut<Data extends object = Record<string, unknown>> {
+  hits: Data[];
+}
+
 export const schemas: {
   [key in ProcedureName]: ProcedureSchemas;
 } = {
   get: getSchemas,
   create: createSchemas,
+  update: updateSchemas,
+  delete: deleteSchemas,
+  search: searchSchemas,
 };

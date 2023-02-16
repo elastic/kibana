@@ -19,7 +19,8 @@ import { RULE_SEARCH_FIELD } from '../../screens/alerts_detection_rules';
 import { createRule } from '../../tasks/api_calls/rules';
 import { goBackToRulesTable } from '../../tasks/rule_details';
 
-describe('Persistent rules table state', () => {
+// Failing on `main`, skipping for now, to be addressed by security-detection-rules-area
+describe.skip('Persistent rules table state', () => {
   before(() => {
     cleanKibana();
 

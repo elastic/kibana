@@ -17,8 +17,11 @@ import {
   AggregationsTopHitsAggregate,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
+import {
+  getSAMLRequestId,
+  getSAMLResponse,
+} from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');

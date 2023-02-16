@@ -190,6 +190,10 @@ export const useListDetailsView = (exceptionListId: string) => {
     [list, exportExceptionList, handleErrorStatus, toasts]
   );
 
+  const handleOnDownload = useCallback(() => {
+    setExportedList(undefined);
+  }, []);
+
   // #region DeleteList
 
   const handleDeleteSuccess = useCallback(
@@ -366,6 +370,7 @@ export const useListDetailsView = (exceptionListId: string) => {
     canUserEditList,
     linkedRules,
     exportedList,
+    handleOnDownload,
     viewerStatus,
     showManageRulesFlyout,
     headerBackOptions,
