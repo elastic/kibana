@@ -1,10 +1,11 @@
-import { ElasticAgentName, SynthtraceScenario, CreateModal } from '../typings';
+import { ElasticAgentName, SynthtraceScenario, CreateModal, Service } from '../typings';
 
 export type Action =
   | ToggletDistributedTracingAction
   | ChangeTopLevelServiceAction
   | ToggleModalAction
-  | InsertNodeAction;
+  | InsertNodeAction
+  | InsertServiceAction;
 
 interface ToggletDistributedTracingAction {
   type: 'toggle_distributed_tracing';
@@ -24,4 +25,9 @@ interface ToggleModalAction {
 interface InsertNodeAction {
   type: 'insert_node';
   payload: { id: string; node: any };
+}
+
+interface InsertServiceAction {
+  type: 'insert_service';
+  payload: { id: string; node: any; service: Service };
 }

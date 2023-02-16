@@ -10,7 +10,10 @@ import React from 'react';
 import { useScenarioContext } from '../../context/use_scenario_context';
 import { ServiceSelector } from '../service_selector';
 import { ServiceNames } from '../../common/constants';
-import { ElasticAgentName } from '@kbn/apm-synthtrace-ui/src/typings';
+import {
+  ElasticAgentName,
+  ServiceSelectorSelectedOption,
+} from '@kbn/apm-synthtrace-ui/src/typings';
 
 export function NewScenarioForm() {
   const { state, dispatch } = useScenarioContext();
@@ -50,10 +53,10 @@ export function NewScenarioForm() {
             value={state.topLevelService?.agentName}
             options={serviceOptions}
             optionType={'single'}
-            onChange={(agentName) => {
+            onChange={(selectedAgent: ServiceSelectorSelectedOption) => {
               dispatch({
                 type: 'change_top_level_service',
-                payload: { agentName },
+                payload: { agentName: selectedAgent.value },
               });
             }}
           />

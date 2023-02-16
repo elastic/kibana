@@ -6,12 +6,12 @@ import {
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import { ElasticAgentName } from '../../typings';
+import { ElasticAgentName, ServiceSelectorSelectedOption } from '../../typings';
 import { AgentIcon } from '../agent_icon';
 
 interface Props {
-  onChange: (selectItem: ElasticAgentName) => void;
-  value?: ElasticAgentName;
+  onChange: (selectItem: ServiceSelectorSelectedOption) => void;
+  value?: string;
   options: Array<EuiComboBoxOptionOption<ElasticAgentName>>;
   optionType: 'single' | 'grouped';
 }
@@ -21,8 +21,13 @@ export function ServiceSelector({ onChange, value, options, optionType }: Props)
   if (optionType === 'single') {
     selectedOption = value && options.find((item) => item.key === value);
   } else {
-    selectedOption =
-      value && options.flatMap((item) => item.options?.find((option) => option.key === value))[0];
+    options.forEach((service) => {
+      service.options?.forEach((option) => {
+        if (option.key === value) {
+          selectedOption = option;
+        }
+      });
+    });
   }
 
   return (
@@ -34,7 +39,7 @@ export function ServiceSelector({ onChange, value, options, optionType }: Props)
       isClearable={false}
       onChange={(newOptions) => {
         if (newOptions[0].value) {
-          onChange(newOptions[0].value);
+          onChange(newOptions[0] as ServiceSelectorSelectedOption);
         }
       }}
       renderOption={(option) => {

@@ -1,9 +1,8 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldText,
+  EuiComboBoxOptionOption,
   EuiForm,
-  EuiFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -11,6 +10,21 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import React from 'react';
+import {
+  ElasticAgentName,
+  Service,
+  ServiceSelectorSelectedOption,
+} from '@kbn/apm-synthtrace-ui/src/typings';
+import { ServiceNames } from '@kbn/apm-synthtrace-ui/src/common/constants';
+import { useScenarioContext } from '@kbn/apm-synthtrace-ui/src/context/use_scenario_context';
+import { ServiceSelector } from '@kbn/apm-synthtrace-ui/src/components/service_selector';
+
+export type ServiceFormState = {
+  name: string;
+  agentName: ElasticAgentName;
+  id: string;
+  type: 'service';
+};
 
 const ServiceForm = ({
   formId,
@@ -19,28 +33,75 @@ const ServiceForm = ({
 }: {
   formId: string;
   onClose: () => void;
-  onSave: () => void;
+  onSave: (payload: ServiceFormState) => void;
 }) => {
+  const { state } = useScenarioContext();
+  const [formState, setFormState] = React.useState<ServiceFormState>({
+    name: '',
+    agentName: 'java',
+    id: '',
+    type: 'service',
+  });
+
+  const [isInvalid, setIsInvalid] = React.useState(true);
+
+  const newServiceOptions: Array<EuiComboBoxOptionOption<ElasticAgentName>> = ServiceNames.map(
+    (agentName) => ({
+      key: `new_service-${agentName}`,
+      label: agentName,
+      value: agentName as ElasticAgentName,
+    })
+  );
+
+  const existingServiceOptions: Array<EuiComboBoxOptionOption<ElasticAgentName>> = Object.values(
+    state.services || {}
+  ).map((service: Service) => ({
+    key: service.id,
+    label: service.agentName,
+    value: service.agentName as ElasticAgentName,
+  }));
+
+  const allOptions = [
+    { label: 'Link to Existing Service', options: existingServiceOptions },
+    { label: 'New Service', options: newServiceOptions },
+  ];
+
+  const onOptionSelected = (formState: ServiceSelectorSelectedOption) => {
+    setFormState((prevState) => ({
+      ...prevState,
+      id: formState.key,
+      agentName: formState.value,
+      name: `synth-${formState.value}`,
+    }));
+    setIsInvalid(false);
+  };
+
   return (
     <EuiModal onClose={onClose} initialFocus="[name=name]">
       <EuiModalHeader>
         <EuiModalHeaderTitle>Create Service</EuiModalHeaderTitle>
+        <p>{JSON.stringify(formState, null, 2)}</p>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiForm id={formId} component="form">
-          <EuiFormRow label="Service Name">
-            <EuiFieldText name="name" />
-          </EuiFormRow>
-
-          <EuiFormRow label="Agent Name">
-            <EuiFieldText name="agent_name" />
-          </EuiFormRow>
+          <ServiceSelector
+            value={formState?.id}
+            options={allOptions}
+            optionType={'grouped'}
+            onChange={onOptionSelected}
+          />
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
 
-        <EuiButton type="submit" form={formId} onClick={onSave} fill disabled>
+        <EuiButton
+          type="submit"
+          form={formId}
+          onClick={() => onSave(formState)}
+          fill
+          disabled={isInvalid}
+        >
           Save
         </EuiButton>
       </EuiModalFooter>

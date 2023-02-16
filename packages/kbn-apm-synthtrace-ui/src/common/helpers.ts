@@ -1,7 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { TransactionFormState } from '../components/modal/transaction-form';
 import { SpanFormState } from '../components/modal/span-form';
-import { Transaction, Span } from '../typings';
+import { Transaction, Span, Service } from '../typings';
+import { ServiceFormState } from '../components/modal/service-form';
 
 export const createTransactionPayload = (
   payload: TransactionFormState,
@@ -24,6 +25,24 @@ export const createSpanPayload = (payload: SpanFormState, serviceId: string = ''
   serviceId,
   id: uuidv4(),
   children: [],
+});
+
+export const createDummyTransactionForService = (serviceId: string): Transaction => ({
+  docType: 'transaction',
+  name: 'new transaction',
+  repeat: 0,
+  serviceId,
+  id: uuidv4(),
+  children: [],
+});
+
+export const createServicePayload = (
+  payload: ServiceFormState,
+  serviceId: string = ''
+): Service => ({
+  id: serviceId,
+  name: payload.name,
+  agentName: payload.agentName,
 });
 
 // Function to insert a node in a tree

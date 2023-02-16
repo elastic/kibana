@@ -1,9 +1,13 @@
+import { EuiComboBoxOptionOption } from '@elastic/eui';
+
 export type SynthtraceScenario = {
   instanceName: string;
   environment: string;
   isDistributedTracing: boolean;
   topLevelService?: Service;
-  services?: Record<string, Service>;
+  services?: {
+    [key: string]: Service;
+  };
   entryTransaction?: Transaction;
   createModal: Partial<CreateModal>;
 };
@@ -56,6 +60,11 @@ export interface Span {
   repeat?: number;
   children?: Array<Transaction | Span>;
 }
+
+export type ServiceSelectorSelectedOption = EuiComboBoxOptionOption<ElasticAgentName> & {
+  key: string;
+  value: ElasticAgentName;
+};
 
 export const example: SynthtraceScenario = {
   instanceName: '1',

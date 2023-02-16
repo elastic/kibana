@@ -73,5 +73,25 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
         entryTransaction: updatedTree,
       };
     }
+    case 'insert_service': {
+      let clonedRoot = Object.assign({}, state.entryTransaction);
+      const updatedTree = insertNodeInATree(action.payload.id, action.payload.node, clonedRoot);
+
+      return {
+        ...state,
+        createModal: {
+          isOpen: false,
+          type: 'transaction',
+          serviceId: '',
+          id: '',
+        },
+        //@ts-ignore
+        entryTransaction: updatedTree,
+        services: {
+          ...state.services,
+          [action.payload.service.id]: action.payload.service,
+        },
+      };
+    }
   }
 }
