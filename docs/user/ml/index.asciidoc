@@ -187,7 +187,8 @@ image::user/ml/images/ml-change-point-detection.png[Change point detection UI]
 
 Select a function and a metric field, then pick a date range to start detecting 
 change points in the defined range. Optionally, you can split the data by a 
-field with a maximum cardinality of 10,000.
+field. If the cardinality of the split field is greater than 10,000, then only 
+the first 10,000 partition, sorted by document count, are analyzed.
 
 If at least one change point is detected, a chart visualizes the change point in 
 its context, making the interpretation easier. If you split the analysis by a 
