@@ -116,6 +116,7 @@ const AlertProvidedActionVariableDescriptions = {
       defaultMessage:
         'The URL to the rule that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
     }),
+    usesPublicBaseUrl: true,
   },
   [AlertProvidedActionVariables.date]: {
     name: AlertProvidedActionVariables.date,
