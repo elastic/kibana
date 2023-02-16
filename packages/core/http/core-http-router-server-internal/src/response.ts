@@ -109,7 +109,7 @@ export const fileResponseFactory = {
       },
     });
   },
-}
+};
 
 export const kibanaResponseFactory: KibanaResponseFactory = {
   ...successResponseFactory,

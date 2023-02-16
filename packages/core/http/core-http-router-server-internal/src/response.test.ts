@@ -49,7 +49,6 @@ describe('fileResponseFactory', () => {
       }
 
       const contentDispositionHeader = headers['content-disposition'];
-
       if (typeof contentDispositionHeader !== 'string') {
         throw new Error(`Expecting a string content-disposition header`);
       }
