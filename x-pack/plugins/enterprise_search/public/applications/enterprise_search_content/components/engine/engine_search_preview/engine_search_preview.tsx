@@ -9,20 +9,9 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButton,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { SearchProvider, SearchBox, Results } from '@elastic/react-search-ui';
-import { ResultsViewProps, ResultViewProps, InputViewProps } from '@elastic/react-search-ui-views';
-import { SearchDriverOptions, SearchResult } from '@elastic/search-ui';
+import { SearchDriverOptions } from '@elastic/search-ui';
 import EnginesAPIConnector, {
   Transporter,
   SearchRequest,
@@ -39,6 +28,8 @@ import { EngineIndicesLogic } from '../engine_indices_logic';
 import { EngineViewLogic } from '../engine_view_logic';
 
 import { EngineSearchPreviewLogic } from './engine_search_preview_logic';
+
+import { InputView, ResultView, ResultsView } from './search_ui_components';
 
 class InternalEngineTransporter implements Transporter {
   constructor(private http: HttpSetup, private engineName: string) {}
@@ -64,81 +55,6 @@ class InternalEngineTransporter implements Transporter {
     return withUniqueIds;
   }
 }
-
-const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
-  return <EuiFlexGroup direction="column">{children}</EuiFlexGroup>;
-};
-
-const ResultView: React.FC<ResultViewProps> = ({ result }) => {
-  const fields = Object.entries(result)
-    .filter(([key]) => !key.startsWith('_') && key !== 'id')
-    .map(([key, value]) => {
-      return {
-        name: key,
-        value: value.raw,
-      };
-    });
-
-  const {
-    _meta: {
-      id: encodedId,
-      rawHit: { _index: index },
-    },
-  } = result;
-
-  const [, id] = JSON.parse(atob(encodedId));
-
-  const columns: Array<EuiBasicTableColumn<SearchResult>> = [
-    {
-      field: 'name',
-      name: 'name',
-      render: (name: string) => {
-        return <code>&quot;{name}&quot;</code>;
-      },
-      truncateText: true,
-      width: '20%',
-    },
-    {
-      field: 'value',
-      name: 'value',
-      render: (value: string) => value,
-    },
-  ];
-
-  return (
-    <EuiPanel paddingSize="m">
-      <EuiFlexGroup direction="column">
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <code>ID: {id}</code>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <code>from</code>
-              <EuiBadge color="hollow">{index}</EuiBadge>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiBasicTable items={fields} columns={columns} />
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-};
-
-const InputView: React.FC<InputViewProps> = ({ getInputProps }) => {
-  return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFieldSearch
-        fullWidth
-        placeholder="search"
-        {...getInputProps({})}
-        isClearable
-        aria-label="Search Input"
-      />
-      <EuiButton type="submit" color="primary" fill>
-        Search
-      </EuiButton>
-    </EuiFlexGroup>
-  );
-};
 
 export const EngineSearchPreview: React.FC = () => {
   const { http } = useValues(HttpLogic);
