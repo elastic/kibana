@@ -15,7 +15,7 @@ import { FilePickerState, createFilePickerState } from './file_picker_state';
 interface FilePickerContextValue extends FilesContextValue {
   state: FilePickerState;
   kind: string;
-  meta?: unknown;
+  uploadMeta?: unknown;
   shouldAllowDelete?: (file: FileJSON) => boolean;
 }
 
@@ -27,7 +27,7 @@ interface FilePickerContextProps
   extends Pick<FilePickerContextValue, 'kind' | 'shouldAllowDelete'> {
   pageSize: number;
   multiple: boolean;
-  meta?: unknown;
+  uploadMeta?: unknown;
 }
 
 export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
@@ -36,7 +36,7 @@ export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
   pageSize,
   multiple,
   children,
-  meta,
+  uploadMeta,
 }) => {
   const filesContext = useFilesContext();
   const { client } = filesContext;
@@ -46,7 +46,7 @@ export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
   );
   useEffect(() => state.dispose, [state]);
   return (
-    <FilePickerCtx.Provider value={{ state, kind, shouldAllowDelete, meta, ...filesContext }}>
+    <FilePickerCtx.Provider value={{ state, kind, shouldAllowDelete, uploadMeta, ...filesContext }}>
       {children}
     </FilePickerCtx.Provider>
   );

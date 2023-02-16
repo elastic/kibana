@@ -128,11 +128,11 @@ describe('FilePicker', () => {
   describe('passes "meta" to <FileUpload />', () => {
     it('when empty', async () => {
       // Empty state
-      const { component } = await initTestBed({ meta: { foo: 'bar' } });
+      const { component } = await initTestBed({ uploadMeta: { foo: 'bar' } });
       expect(component.find(FileUpload).props().meta).toEqual({ foo: 'bar' });
     });
     it('when there are files', async () => {
-      const { component } = await initTestBed({ meta: { bar: 'baz' } });
+      const { component } = await initTestBed({ uploadMeta: { bar: 'baz' } });
       client.list.mockImplementation(() =>
         Promise.resolve({ files: [{ id: 'a' }, { id: 'b' }] as FileJSON[], total: 2 })
       );
