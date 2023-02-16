@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/big-data-loader",
+  "devOnly": true,
+  "owner": "@elastic/appex-qa"
+}

@@ -39,6 +39,7 @@
   "scripts": {
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
     "bazel": "bazel",
+    "big-data": "node scripts/big_data_loader",
     "build": "node scripts/build --all-platforms",
     "build:apidocs": "node scripts/build_api_docs",
     "checkLicenses": "node scripts/check_licenses --dev",
@@ -985,6 +986,7 @@
     "@kbn/babel-register": "link:packages/kbn-babel-register",
     "@kbn/babel-transform": "link:packages/kbn-babel-transform",
     "@kbn/bazel-runner": "link:packages/kbn-bazel-runner",
+    "@kbn/big-data-loader": "link:packages/kbn-big-data-loader",
     "@kbn/ci-stats-core": "link:packages/kbn-ci-stats-core",
     "@kbn/ci-stats-performance-metrics": "link:packages/kbn-ci-stats-performance-metrics",
     "@kbn/ci-stats-reporter": "link:packages/kbn-ci-stats-reporter",
