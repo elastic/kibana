@@ -14,7 +14,6 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import React from 'react';
-import { generatePath } from 'react-router-dom';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { TimestampTableCell } from '../timestamp_table_cell';

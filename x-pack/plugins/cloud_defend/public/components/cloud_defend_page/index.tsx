@@ -23,7 +23,7 @@ import { css } from '@emotion/react';
 import { FullSizeCenteredPage } from '../full_size_page';
 import { useCloudDefendSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { LoadingState } from '../loading_state';
-import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_link';
+import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_links';
 
 import noDataIllustration from '../../assets/icons/logo.svg';
 

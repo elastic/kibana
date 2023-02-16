@@ -8,11 +8,11 @@ import React from 'react';
 import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
 import moment from 'moment';
-import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
-import { BenchmarksTable } from './benchmarks_table';
+import { createCloudDefendIntegrationFixture } from '../../test/fixtures/cloud_defend_integration';
+import { PoliciesTable } from '.';
 import { TestProvider } from '../../test/test_provider';
 
-describe('<BenchmarksTable />', () => {
+describe('<PoliciesTable />', () => {
   const chance = new Chance();
 
   const tableProps = {
@@ -24,16 +24,16 @@ describe('<BenchmarksTable />', () => {
   };
 
   it('renders integration name', () => {
-    const item = createCspBenchmarkIntegrationFixture();
-    const benchmarks = [item];
+    const item = createCloudDefendIntegrationFixture();
+    const policies = [item];
 
     render(
       <TestProvider>
-        <BenchmarksTable
+        <PoliciesTable
           {...{
             ...tableProps,
-            benchmarks,
-            totalItemCount: benchmarks.length,
+            policies,
+            totalItemCount: policies.length,
           }}
         />
       </TestProvider>
@@ -49,15 +49,15 @@ describe('<BenchmarksTable />', () => {
       agents: chance.integer({ min: 1 }),
     };
 
-    const benchmarks = [createCspBenchmarkIntegrationFixture({ agent_policy: agentPolicy })];
+    const policies = [createCloudDefendIntegrationFixture({ agent_policy: agentPolicy })];
 
     render(
       <TestProvider>
-        <BenchmarksTable
+        <PoliciesTable
           {...{
             ...tableProps,
-            benchmarks,
-            totalItemCount: benchmarks.length,
+            policies,
+            totalItemCount: policies.length,
           }}
         />
       </TestProvider>
@@ -67,16 +67,16 @@ describe('<BenchmarksTable />', () => {
   });
 
   it('renders number of agents', () => {
-    const item = createCspBenchmarkIntegrationFixture();
-    const benchmarks = [item];
+    const item = createCloudDefendIntegrationFixture();
+    const policies = [item];
 
     render(
       <TestProvider>
-        <BenchmarksTable
+        <PoliciesTable
           {...{
             ...tableProps,
-            benchmarks,
-            totalItemCount: benchmarks.length,
+            policies,
+            totalItemCount: policies.length,
           }}
         />
       </TestProvider>
@@ -87,16 +87,16 @@ describe('<BenchmarksTable />', () => {
   });
 
   it('renders created by', () => {
-    const item = createCspBenchmarkIntegrationFixture();
-    const benchmarks = [item];
+    const item = createCloudDefendIntegrationFixture();
+    const policies = [item];
 
     render(
       <TestProvider>
-        <BenchmarksTable
+        <PoliciesTable
           {...{
             ...tableProps,
-            benchmarks,
-            totalItemCount: benchmarks.length,
+            policies,
+            totalItemCount: policies.length,
           }}
         />
       </TestProvider>
@@ -106,16 +106,16 @@ describe('<BenchmarksTable />', () => {
   });
 
   it('renders created at', () => {
-    const item = createCspBenchmarkIntegrationFixture();
-    const benchmarks = [item];
+    const item = createCloudDefendIntegrationFixture();
+    const policies = [item];
 
     render(
       <TestProvider>
-        <BenchmarksTable
+        <PoliciesTable
           {...{
             ...tableProps,
-            benchmarks,
-            totalItemCount: benchmarks.length,
+            policies,
+            totalItemCount: policies.length,
           }}
         />
       </TestProvider>

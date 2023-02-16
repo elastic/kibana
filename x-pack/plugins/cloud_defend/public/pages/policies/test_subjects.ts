@@ -10,9 +10,6 @@ export const POLICIES_TABLE_DATA_TEST_SUBJ = 'cloud_defend_policies_table';
 export const ADD_INTEGRATION_TEST_SUBJ = 'cloud_defend_add_integration';
 export const POLICIES_TABLE_COLUMNS = {
   INTEGRATION_NAME: 'policies-table-column-integration-name',
-  MONITORING: 'policies-table-column-monitoring',
-  RULES: 'policies-table-column-rules',
-  INTEGRATION: 'policies-table-column-integration',
   AGENT_POLICY: 'policies-table-column-agent-policy',
   NUMBER_OF_AGENTS: 'policies-table-column-number-of-agents',
   CREATED_BY: 'policies-table-column-created-by',

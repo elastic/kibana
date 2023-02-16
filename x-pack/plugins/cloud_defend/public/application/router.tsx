@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { cloudDefendPages } from '../common/navigation/constants';
 import type { CloudDefendSecuritySolutionContext } from '../types';
 import { SecuritySolutionContext } from './security_solution_context';

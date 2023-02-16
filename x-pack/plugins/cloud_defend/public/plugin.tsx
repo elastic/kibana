@@ -48,17 +48,18 @@ export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDe
       Component: LazyEditPolicy,
     });
 
+    const CloudDefendRouter = (props: CloudDefendRouterProps) => (
+      <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <RedirectAppLinks coreStart={core}>
+          <div style={{ width: '100%', height: '100%' }}>
+            <Router {...props} />
+          </div>
+        </RedirectAppLinks>
+      </KibanaContextProvider>
+    );
+
     return {
-      getCloudDefendRouter: () => (props: CloudDefendRouterProps) =>
-        (
-          <KibanaContextProvider services={{ ...core, ...plugins }}>
-            <RedirectAppLinks coreStart={core}>
-              <div style={{ width: '100%', height: '100%' }}>
-                <Router {...props} />
-              </div>
-            </RedirectAppLinks>
-          </KibanaContextProvider>
-        ),
+      getCloudDefendRouter: () => CloudDefendRouter,
     };
   }
 

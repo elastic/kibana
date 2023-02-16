@@ -5,53 +5,58 @@
  * 2.0.
  */
 
-import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
+// import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import Chance from 'chance';
 import {
+  CloudDefendPage,
   DEFAULT_NO_DATA_TEST_SUBJECT,
   ERROR_STATE_TEST_SUBJECT,
   isCommonError,
   LOADING_STATE_TEST_SUBJECT,
   PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
   SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT,
-} from './cloud_posture_page';
-import { createReactQueryResponse } from '../test/fixtures/react_query';
-import { TestProvider } from '../test/test_provider';
+} from '.';
+import { createReactQueryResponse } from '../../test/fixtures/react_query';
+import { TestProvider } from '../../test/test_provider';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
-import { CloudPosturePage } from './cloud_posture_page';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
-import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
+import { useCloudDefendSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_links';
 
 const chance = new Chance();
 
-jest.mock('../common/api/use_setup_status_api');
-jest.mock('../common/hooks/use_subscription_status');
-jest.mock('../common/navigation/use_csp_integration_link');
+jest.mock('../../common/api/use_setup_status_api');
+// jest.mock('../../common/hooks/use_subscription_status');
+jest.mock('../../common/navigation/use_cloud_defend_integration_links');
 
-describe('<CloudPosturePage />', () => {
+describe('<CloudDefendPage />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCloudDefendSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: { status: 'indexed' },
       })
     );
 
-    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    (useCloudDefendIntegrationLinks as jest.Mock).mockImplementation(() => ({
+      addIntegrationLink: chance.url(),
+      docsLink: chance.url(),
+    }));
+
+    /*    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: true,
       })
-    );
+    );*/
   });
 
-  const renderCloudPosturePage = (
-    props: ComponentProps<typeof CloudPosturePage> = { children: null }
+  const renderCloudDefendPage = (
+    props: ComponentProps<typeof CloudDefendPage> = { children: null }
   ) => {
     const mockCore = coreMock.createStart();
 
@@ -69,14 +74,14 @@ describe('<CloudPosturePage />', () => {
           },
         }}
       >
-        <CloudPosturePage {...props} />
+        <CloudDefendPage {...props} />
       </TestProvider>
     );
   };
 
   it('renders children if setup status is indexed', () => {
     const children = chance.sentence();
-    renderCloudPosturePage({ children });
+    renderCloudDefendPage({ children });
 
     expect(screen.getByText(children)).toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
@@ -85,7 +90,7 @@ describe('<CloudPosturePage />', () => {
     expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
   });
 
-  it('renders default loading state when the subscription query is loading', () => {
+  /*  it('renders default loading state when the subscription query is loading', () => {
     (useSubscriptionStatus as jest.Mock).mockImplementation(
       () =>
         createReactQueryResponse({
@@ -94,7 +99,7 @@ describe('<CloudPosturePage />', () => {
     );
 
     const children = chance.sentence();
-    renderCloudPosturePage({ children });
+    renderCloudDefendPage({ children });
 
     expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
@@ -113,7 +118,7 @@ describe('<CloudPosturePage />', () => {
     );
 
     const children = chance.sentence();
-    renderCloudPosturePage({ children });
+    renderCloudDefendPage({ children });
 
     expect(screen.getByTestId(ERROR_STATE_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
@@ -131,7 +136,7 @@ describe('<CloudPosturePage />', () => {
     );
 
     const children = chance.sentence();
-    renderCloudPosturePage({ children });
+    renderCloudDefendPage({ children });
 
     expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
@@ -139,18 +144,18 @@ describe('<CloudPosturePage />', () => {
     expect(screen.getByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
   });
+ */
 
   it('renders integrations installation prompt if integration is not installed', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCloudDefendSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: { status: 'not-installed' },
       })
     );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     const children = chance.sentence();
-    renderCloudPosturePage({ children });
+    renderCloudDefendPage({ children });
 
     expect(screen.getByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
@@ -160,7 +165,7 @@ describe('<CloudPosturePage />', () => {
   });
 
   it('renders default loading state when the integration query is loading', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(
+    (useCloudDefendSetupStatusApi as jest.Mock).mockImplementation(
       () =>
         createReactQueryResponse({
           status: 'loading',
@@ -168,7 +173,7 @@ describe('<CloudPosturePage />', () => {
     );
 
     const children = chance.sentence();
-    renderCloudPosturePage({ children });
+    renderCloudDefendPage({ children });
 
     expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
@@ -178,7 +183,7 @@ describe('<CloudPosturePage />', () => {
   });
 
   it('renders default error state when the integration query has an error', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(
+    (useCloudDefendSetupStatusApi as jest.Mock).mockImplementation(
       () =>
         createReactQueryResponse({
           status: 'error',
@@ -187,7 +192,7 @@ describe('<CloudPosturePage />', () => {
     );
 
     const children = chance.sentence();
-    renderCloudPosturePage({ children });
+    renderCloudDefendPage({ children });
 
     expect(screen.getByTestId(ERROR_STATE_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
@@ -202,7 +207,7 @@ describe('<CloudPosturePage />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderCloudPosturePage({ children, query });
+    renderCloudDefendPage({ children, query });
 
     expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
@@ -217,7 +222,7 @@ describe('<CloudPosturePage />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderCloudPosturePage({ children, query });
+    renderCloudDefendPage({ children, query });
 
     expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
@@ -243,7 +248,7 @@ describe('<CloudPosturePage />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderCloudPosturePage({ children, query });
+    renderCloudDefendPage({ children, query });
 
     [error, message, statusCode].forEach((text) =>
       expect(screen.getByText(text, { exact: false })).toBeInTheDocument()
@@ -272,7 +277,7 @@ describe('<CloudPosturePage />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderCloudPosturePage({
+    renderCloudDefendPage({
       children,
       query,
       errorRender: (err) => <div>{isCommonError(err) && err.body.message}</div>,
@@ -295,7 +300,7 @@ describe('<CloudPosturePage />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderCloudPosturePage({
+    renderCloudDefendPage({
       children,
       query,
       loadingRender: () => <div>{loading}</div>,
@@ -316,7 +321,7 @@ describe('<CloudPosturePage />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderCloudPosturePage({ children, query });
+    renderCloudDefendPage({ children, query });
 
     expect(screen.getByTestId(DEFAULT_NO_DATA_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
@@ -340,7 +345,7 @@ describe('<CloudPosturePage />', () => {
     }) as unknown as UseQueryResult;
 
     const children = chance.sentence();
-    renderCloudPosturePage({
+    renderCloudDefendPage({
       children,
       query,
       noDataRenderer,

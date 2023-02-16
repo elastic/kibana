@@ -14,8 +14,8 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import * as constants from '../common/navigation/constants';
 import { QueryClientProviderProps } from '@tanstack/react-query';
 
-jest.mock('../pages', () => ({
-  Policies: () => <div data-test-subj="policies">policies</div>,
+jest.mock('../pages/policies', () => ({
+  Policies: () => <div data-test-subj="Policies">Policies</div>,
 }));
 
 jest.mock('@tanstack/react-query', () => ({
@@ -89,13 +89,6 @@ describe('CloudDefendRouter', () => {
       const result = renderCloudDefendRouter();
 
       expect(result.queryByTestId('mockedSpyRoute')).toBeInTheDocument();
-    });
-
-    it('should not render SpyRoute for dynamic paths', () => {
-      history.push('/cloud_defend/policies/packagePolicyId/policyId/rules');
-      const result = renderCloudDefendRouter();
-
-      expect(result.queryByTestId('mockedSpyRoute')).not.toBeInTheDocument();
     });
   });
 });

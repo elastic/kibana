@@ -28,7 +28,7 @@ import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
 import { LOCAL_STORAGE_PAGE_SIZE } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
-import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_link';
+import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_links';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
