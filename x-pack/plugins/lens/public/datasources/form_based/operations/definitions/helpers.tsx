@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { checkForDateHistogram, checkReferences } from './calculations/utils';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,
@@ -208,42 +207,4 @@ export function getFilter(
 
 export function isMetricCounterField(field?: IndexPatternField) {
   return field?.timeSeriesMetric === 'counter';
-}
-
-function checkReferencedColumnMetric(
-  layer: FormBasedLayer,
-  columnId: string,
-  indexPattern: IndexPattern
-) {
-  const column = layer.columns[columnId] as ReferenceBasedIndexPatternColumn;
-  return column.references
-    ?.filter((referencedId) => 'sourceField' in layer.columns[referencedId])
-    .map((referencedId) => {
-      const fieldName = (layer.columns[referencedId] as FieldBasedIndexPatternColumn).sourceField;
-      if (!isMetricCounterField(indexPattern.getFieldByName(fieldName))) {
-        return i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
-          defaultMessage: 'Dimension "{dimensionLabel}" is configured incorrectly',
-          values: {
-            dimensionLabel: layer.columns[referencedId].label,
-          },
-        });
-      }
-    });
-}
-
-export function getErrorForRateReference(
-  layer: FormBasedLayer,
-  columnId: string,
-  name: string,
-  indexPattern: IndexPattern
-): string[] | undefined {
-  const dateErrors: string[] = checkForDateHistogram(layer, name) ?? [];
-  const referenceErrors: string[] = checkReferences(layer, columnId) ?? [];
-  const metricCounterErrors = checkReferencedColumnMetric(layer, columnId, indexPattern) ?? [];
-  if (metricCounterErrors.length) {
-    return metricCounterErrors.concat(referenceErrors);
-  }
-  if (dateErrors.length) {
-    return dateErrors.concat(referenceErrors);
-  }
 }
