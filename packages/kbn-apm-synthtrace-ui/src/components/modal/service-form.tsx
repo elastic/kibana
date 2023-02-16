@@ -57,7 +57,7 @@ const ServiceForm = ({
     state.services || {}
   ).map((service: Service) => ({
     key: service.id,
-    label: service.agentName,
+    label: service.name,
     value: service.agentName as ElasticAgentName,
   }));
 
@@ -80,7 +80,6 @@ const ServiceForm = ({
     <EuiModal onClose={onClose} initialFocus="[name=name]">
       <EuiModalHeader>
         <EuiModalHeaderTitle>Create Service</EuiModalHeaderTitle>
-        <p>{JSON.stringify(formState, null, 2)}</p>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiForm id={formId} component="form">

@@ -6758,6 +6758,11 @@ markdown-escapes@^1.0.0:
   resolved "https://registry.yarnpkg.com/markdown-escapes/-/markdown-escapes-1.0.4.tgz#c95415ef451499d7602b91095f3c8e8975f78535"
   integrity sha512-8z4efJYk43E0upd0NbVXwgSTQs6cT3T06etieCMEg7dRbzCbxUCK/GHlX8mhHRDcp+OLlHkPKsvqQTCvsRl2cg==
 
+marvel-dc-name-generator@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/marvel-dc-name-generator/-/marvel-dc-name-generator-1.1.0.tgz#1f878528a4c281c81348a12f0748e87bc2dbbe4b"
+  integrity sha512-wdE8biFXxJ6/RMaQU5fGm6N7s246p2sIwBoiERzwpVvCa2hR6XuqV/s5uO2Jhct8Zz0uwy+n2QovXE3WK/gMJQ==
+
 mdast-util-definitions@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/mdast-util-definitions/-/mdast-util-definitions-4.0.0.tgz#c5c1a84db799173b4dcf7643cda999e440c24db2"

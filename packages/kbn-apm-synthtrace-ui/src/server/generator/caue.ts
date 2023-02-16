@@ -9,7 +9,13 @@ const scenario: SynthtraceScenario = {
     '1': { id: '1', name: 'synth-java-6', agentName: 'java', color: '#000' },
     '2': { id: '2', name: 'synth-node', agentName: 'nodejs', color: '#fff' },
   },
-  createModal: {},
+  modalForm: {
+    isOpen: false,
+    isEdit: false,
+    type: 'transaction',
+    serviceId: '',
+    id: '',
+  },
   entryTransaction: {
     docType: 'transaction',
     id: 'java-tx-1',

@@ -29,7 +29,6 @@ export function NewScenarioForm() {
   return (
     <EuiPanel>
       <EuiForm component="form">
-        <p>{JSON.stringify(state, null, 2)}</p>
         <EuiFormRow label="Instance">
           <EuiFieldText disabled value={state.instanceName} />
         </EuiFormRow>
@@ -40,6 +39,7 @@ export function NewScenarioForm() {
           <EuiSwitch
             label="Distributed tracing"
             checked={state.isDistributedTracing}
+            disabled
             onChange={() => {
               dispatch({
                 type: 'toggle_distributed_tracing',

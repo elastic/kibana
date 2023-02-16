@@ -50,7 +50,7 @@ export function ServiceSelector({ onChange, value, options, optionType }: Props)
                 <AgentIcon agentName={option.value} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiText>{option.value}</EuiText>
+                <EuiText>{option.label}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
