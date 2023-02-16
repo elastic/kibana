@@ -11,6 +11,7 @@ import { SearchSource } from '@kbn/data-plugin/common';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { action } from '@storybook/addon-actions';
+import { createHashHistory } from 'history';
 import { FetchStatus } from '../../../../types';
 import {
   AvailableFields$,
@@ -23,8 +24,10 @@ import { buildDataTableRecordList } from '../../../../../utils/build_data_record
 import { esHits } from '../../../../../__mocks__/es_hits';
 import { SavedSearch } from '../../../../..';
 import { DiscoverLayoutProps } from '../types';
-import {DiscoverStateContainer, getDiscoverStateContainer} from '../../../services/discover_state';
-import {createHashHistory} from "history";
+import {
+  DiscoverStateContainer,
+  getDiscoverStateContainer,
+} from '../../../services/discover_state';
 import { services } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
 
 const plainRecordObservables = {
@@ -97,13 +100,19 @@ function getSavedSearch(dataView: DataView) {
           query: '',
         };
       },
-      createChild: () => {return {} as unknown as SearchSource},
+      createChild: () => {
+        return {} as unknown as SearchSource;
+      },
     },
   } as unknown as SavedSearch;
 }
 
 export function getDocumentsLayoutProps(dataView: DataView) {
-  const stateContainer = getDiscoverStateContainer({ history: createHashHistory(), savedSearch: getSavedSearch(dataView), services  });
+  const stateContainer = getDiscoverStateContainer({
+    history: createHashHistory(),
+    savedSearch: getSavedSearch(dataView),
+    services,
+  });
   stateContainer.appState.set({
     columns: ['name', 'message', 'bytes'],
     sort: [['date', 'desc']],
@@ -112,7 +121,7 @@ export function getDocumentsLayoutProps(dataView: DataView) {
       query: '',
     },
     filters: [],
-  })
+  });
   stateContainer.actions.setDataView(dataView);
   return {
     ...getCommonProps(dataView),

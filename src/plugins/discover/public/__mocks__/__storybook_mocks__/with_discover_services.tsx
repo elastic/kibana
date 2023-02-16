@@ -59,13 +59,13 @@ export const uiSettingsMock = {
 } as unknown as IUiSettingsClient;
 
 const filterManager = {
-    getGlobalFilters: () => [],
-    getAppFilters: () => [],
-    getFetches$: () => ({}),
-  };
+  getGlobalFilters: () => [],
+  getAppFilters: () => [],
+  getFetches$: () => ({}),
+};
 
 export const services = {
-  core: { http: { basePath: { prepend: () => void 0 } }, notifications: { toasts: {}} },
+  core: { http: { basePath: { prepend: () => void 0 } }, notifications: { toasts: {} } },
   storage: new LocalStorageMock({
     [SIDEBAR_CLOSED_KEY]: false,
   }) as unknown as Storage,
@@ -81,7 +81,7 @@ export const services = {
             from: 'now-7d',
             to: 'now',
           }),
-          getRefreshInterval: () => ({ }),
+          getRefreshInterval: () => ({}),
           getFetch$: () => ({}),
           getAutoRefreshFetch$: () => new Observable(),
           calculateBounds: () => ({ min: undefined, max: undefined }),
@@ -92,7 +92,7 @@ export const services = {
         getDefaultQuery: () => {
           return { query: '', language: 'kuery' };
         },
-        getUpdates$: () => new Observable()
+        getUpdates$: () => new Observable(),
       },
       filterManager,
       getState: () => {
@@ -104,12 +104,12 @@ export const services = {
       state$: new Observable(),
     },
     search: {
-      session : {
+      session: {
         getSession$: () => {
-          return new Observable()
+          return new Observable();
         },
         state$: new Observable(),
-      }
+      },
     },
     dataViews: {
       getIdsWithTitle: () => Promise.resolve([]),
