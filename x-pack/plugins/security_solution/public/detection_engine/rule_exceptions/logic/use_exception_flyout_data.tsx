@@ -111,17 +111,17 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
               acc.push(item);
             }
             return acc;
-          }, [] as string[])
+          }, [])
           .join(',');
-        dv.setIndexPattern(newPattern);
+        const fixedDv = await data.dataViews.create({ title: newPattern });
 
-        const fieldsWithUnmappedInfo = await data.dataViews.getFieldsForIndexPattern(dv, {
+        const fieldsWithUnmappedInfo = await data.dataViews.getFieldsForIndexPattern(fixedDv, {
           pattern: '',
           includeUnmapped: true,
         });
         setDataViewLoading(false);
         setDataViewIndexPatterns({
-          ...dv,
+          ...fixedDv,
           fields: fieldsWithUnmappedInfo,
         });
       }
