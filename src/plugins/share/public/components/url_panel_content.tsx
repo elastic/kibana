@@ -20,7 +20,6 @@ import {
   EuiRadioGroup,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
@@ -144,7 +143,6 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
   }
 
   public render() {
-    console.log('render');
     const shortUrlSwitch = this.renderShortUrlSwitch();
     const publicUrlSwitch = this.renderPublicUrlSwitch();
     const copyButton = this.renderCopyButton();
@@ -390,45 +388,36 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     }
   };
 
-  private renderCopyButton = () => {
-    const CopyButton = () => (
-      <EuiCopy textToCopy={this.state.url || ''} anchorClassName="eui-displayBlock">
-        {(copy) => (
-          <EuiButton
-            fill
-            fullWidth
-            onClick={copy}
-            disabled={this.state.isCreatingShortUrl || this.state.url === ''}
-            data-share-url={this.state.url}
-            data-test-subj="copyShareUrlButton"
-            size="s"
-            iconType={this.state.showWarningButton ? 'alert' : undefined}
-            color={this.state.showWarningButton ? 'warning' : 'primary'}
-          >
-            {this.props.isEmbedded ? (
-              <FormattedMessage
-                id="share.urlPanel.copyIframeCodeButtonLabel"
-                defaultMessage="Copy iFrame code"
-              />
-            ) : (
-              <FormattedMessage
-                id="share.urlPanel.copyLinkButtonLabel"
-                defaultMessage="Copy link"
-              />
-            )}
-          </EuiButton>
-        )}
-      </EuiCopy>
-    );
-
-    return this.state.showWarningButton ? (
-      <EuiToolTip position="bottom" content={this.props.snapshotShareWarning} display="block">
-        <CopyButton />
-      </EuiToolTip>
-    ) : (
-      <CopyButton />
-    );
-  };
+  private renderCopyButton = () => (
+    <EuiCopy
+      beforeMessage={this.state.showWarningButton ? this.props.snapshotShareWarning : undefined}
+      textToCopy={this.state.url || ''}
+      anchorClassName="eui-displayBlock"
+    >
+      {(copy) => (
+        <EuiButton
+          fill
+          fullWidth
+          onClick={copy}
+          disabled={this.state.isCreatingShortUrl || this.state.url === ''}
+          data-share-url={this.state.url}
+          data-test-subj="copyShareUrlButton"
+          size="s"
+          iconType={this.state.showWarningButton ? 'alert' : undefined}
+          color={this.state.showWarningButton ? 'warning' : 'primary'}
+        >
+          {this.props.isEmbedded ? (
+            <FormattedMessage
+              id="share.urlPanel.copyIframeCodeButtonLabel"
+              defaultMessage="Copy iFrame code"
+            />
+          ) : (
+            <FormattedMessage id="share.urlPanel.copyLinkButtonLabel" defaultMessage="Copy link" />
+          )}
+        </EuiButton>
+      )}
+    </EuiCopy>
+  );
 
   private renderExportUrlAsOptions = () => {
     const snapshotLabel = (
