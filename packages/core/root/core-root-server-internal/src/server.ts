@@ -368,8 +368,6 @@ export class Server {
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
 
-    const securityContracts = pluginsSetup.contracts.get('security');
-    console.log(securityContracts);
     this.#pluginsInitialized = pluginsSetup.initialized;
 
     this.registerCoreContext(coreSetup);
