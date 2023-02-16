@@ -10547,38 +10547,6 @@
           },
           {
             "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
           },
           {
@@ -10592,18 +10560,6 @@
           {
             "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -10940,18 +10896,6 @@
           {
             "plugin": "@kbn/core-saved-objects-browser-mocks",
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
@@ -14028,14 +13972,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_dataset.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_log_level.tsx"
               },
               {
                 "plugin": "fleet",
@@ -21662,14 +21598,6 @@
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_dataset.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_log_level.tsx"
-              },
-              {
-                "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
@@ -28416,38 +28344,6 @@
           },
           {
             "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
           },
           {
@@ -28461,18 +28357,6 @@
           {
             "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -28809,18 +28693,6 @@
           {
             "plugin": "@kbn/core-saved-objects-browser-mocks",
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",

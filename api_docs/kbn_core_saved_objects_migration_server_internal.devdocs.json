@@ -69,7 +69,7 @@
                 "id": "def-common.DocumentMigrator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ typeRegistry, kibanaVersion, convertVersion, log }",
+                "label": "documentMigratorOptions",
                 "description": [],
                 "signature": [
                   "DocumentMigratorOptions"
