@@ -52,7 +52,13 @@ describe(`UseDescriptionHandler`, () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('Loading spinner when description is loading', () => {
+  it('renders correctly', () => {
+    appMockRender.render(<UseDescriptionHandler {...defaultProps} />);
+
+    expect(screen.getByTestId('description-action')).toBeInTheDocument();
+  });
+
+  it('renders loading state', () => {
     appMockRender.render(<UseDescriptionHandler {...defaultProps} isLoadingDescription={true} />);
 
     expect(screen.getByTestId('description-loading')).toBeInTheDocument();

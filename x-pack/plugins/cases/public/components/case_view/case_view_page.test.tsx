@@ -215,10 +215,11 @@ describe('CaseViewPage', () => {
       updateKey: 'description',
     }));
 
-    const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('description-loading')).toBeInTheDocument();
+      expect(screen.getByTestId('description-loading')).toBeInTheDocument();
+      expect(screen.queryByTestId('description-action')).not.toBeInTheDocument();
     });
   });
 
@@ -585,9 +586,9 @@ describe('CaseViewPage', () => {
 
   describe('description', () => {
     it('renders the descriptions user correctly', async () => {
-      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      const description = within(result.getByTestId('description-action'));
+      const description = within(screen.getByTestId('description-action'));
 
       await waitFor(() => {
         expect(description.getByText('Leslie Knope')).toBeInTheDocument();

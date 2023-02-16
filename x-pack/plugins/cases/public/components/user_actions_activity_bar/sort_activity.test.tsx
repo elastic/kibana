@@ -8,7 +8,7 @@
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { waitFor, fireEvent } from '@testing-library/react';
+import { waitFor, fireEvent, screen } from '@testing-library/react';
 
 import { SortActivity, SortOptions } from './sort_activity';
 
@@ -21,49 +21,41 @@ describe('SortActivity ', () => {
   });
 
   it('renders correctly', () => {
-    const res = appMockRender.render(
-      <SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />
-    );
+    appMockRender.render(<SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />);
 
-    expect(res.getByTestId('user-actions-sort-select')).toBeInTheDocument();
+    expect(screen.getByTestId('user-actions-sort-select')).toBeInTheDocument();
   });
 
   it('renders loading state correctly', () => {
-    const res = appMockRender.render(
+    appMockRender.render(
       <SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} isLoading />
     );
 
-    expect(res.getByLabelText('Loading')).toBeInTheDocument();
-    expect(res.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.getByLabelText('Loading')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('renders options when opened', async () => {
-    const res = appMockRender.render(
-      <SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />
-    );
+    appMockRender.render(<SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />);
 
-    expect(res.getByText(`${SortOptions[0].text}`)).toBeInTheDocument();
-    expect(res.getByText(`${SortOptions[1].text}`)).toBeInTheDocument();
+    expect(screen.getByText(`${SortOptions[0].text}`)).toBeInTheDocument();
+    expect(screen.getByText(`${SortOptions[1].text}`)).toBeInTheDocument();
   });
 
   it('onChange is called with asc value', async () => {
-    const res = appMockRender.render(
-      <SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />
-    );
+    appMockRender.render(<SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />);
 
-    const sortSelect = res.getByTestId('user-actions-sort-select');
+    const sortSelect = screen.getByTestId('user-actions-sort-select');
 
     fireEvent.change(sortSelect, { target: { value: SortOptions[1].value } });
 
     await waitFor(() => expect(onSortActivityChange).toHaveBeenCalledWith(SortOptions[1].value));
   });
 
-  it('onChange is called with dsc value', async () => {
-    const res = appMockRender.render(
-      <SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />
-    );
+  it('onChange is called with desc value', async () => {
+    appMockRender.render(<SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />);
 
-    const sortSelect = res.getByTestId('user-actions-sort-select');
+    const sortSelect = screen.getByTestId('user-actions-sort-select');
 
     fireEvent.change(sortSelect, { target: { value: SortOptions[0].value } });
 

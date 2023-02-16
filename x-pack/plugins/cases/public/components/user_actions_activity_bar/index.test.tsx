@@ -8,7 +8,7 @@
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { waitFor, fireEvent } from '@testing-library/react';
+import { waitFor, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { UserActionsActivityBar } from '.';
@@ -30,25 +30,25 @@ describe('UserActionsActivityBar ', () => {
   });
 
   it('renders correctly', () => {
-    const res = appMockRender.render(
+    appMockRender.render(
       <UserActionsActivityBar
         onUserActionsActivityChanged={onUserActionsActivityChanged}
         params={params}
       />
     );
 
-    expect(res.getByTestId('user-actions-activity-bar')).toBeInTheDocument();
+    expect(screen.getByTestId('user-actions-activity-bar')).toBeInTheDocument();
   });
 
   it('should change filter correctly', async () => {
-    const res = appMockRender.render(
+    appMockRender.render(
       <UserActionsActivityBar
         onUserActionsActivityChanged={onUserActionsActivityChanged}
         params={params}
       />
     );
 
-    const commentsFilter = res.getByTestId('user-actions-filter-activity-button-comments');
+    const commentsFilter = screen.getByTestId('user-actions-filter-activity-button-comments');
 
     userEvent.click(commentsFilter);
 
@@ -56,21 +56,21 @@ describe('UserActionsActivityBar ', () => {
       expect(onUserActionsActivityChanged).toHaveBeenCalledWith({ ...params, type: 'user' })
     );
     expect(
-      res
+      screen
         .getByTestId('user-actions-filter-activity-button-comments')
         .classList.contains('euiFilterButton-hasActiveFilters')
     );
   });
 
   it('should change sort order correctly', async () => {
-    const res = appMockRender.render(
+    appMockRender.render(
       <UserActionsActivityBar
         onUserActionsActivityChanged={onUserActionsActivityChanged}
         params={params}
       />
     );
 
-    const sortSelect = res.getByTestId('user-actions-sort-select');
+    const sortSelect = screen.getByTestId('user-actions-sort-select');
 
     expect(sortSelect).toBeInTheDocument();
 
@@ -82,14 +82,14 @@ describe('UserActionsActivityBar ', () => {
   });
 
   it('should not change filter when sort order changed', async () => {
-    const res = appMockRender.render(
+    appMockRender.render(
       <UserActionsActivityBar
         onUserActionsActivityChanged={onUserActionsActivityChanged}
         params={params}
       />
     );
 
-    const sortSelect = res.getByTestId('user-actions-sort-select');
+    const sortSelect = screen.getByTestId('user-actions-sort-select');
 
     expect(sortSelect).toBeInTheDocument();
 
@@ -100,21 +100,21 @@ describe('UserActionsActivityBar ', () => {
     );
 
     expect(
-      res
+      screen
         .getByTestId('user-actions-filter-activity-button-all')
         .classList.contains('euiFilterButton-hasActiveFilters')
     );
   });
 
   it('should not change sort order when filter changed', async () => {
-    const res = appMockRender.render(
+    appMockRender.render(
       <UserActionsActivityBar
         onUserActionsActivityChanged={onUserActionsActivityChanged}
         params={params}
       />
     );
 
-    const commentsFilter = res.getByTestId('user-actions-filter-activity-button-history');
+    const commentsFilter = screen.getByTestId('user-actions-filter-activity-button-history');
 
     userEvent.click(commentsFilter);
 

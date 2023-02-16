@@ -218,7 +218,7 @@ export const UserActions = React.memo(
     const { permissions } = useCasesContext();
 
     const bottomActions =
-      permissions.create && filterOptions !== 'action' // add-comment is not visible in History filter
+      permissions.create && filterOptions !== 'action' // add-comment markdown is not visible in History filter
         ? [
             {
               username: (

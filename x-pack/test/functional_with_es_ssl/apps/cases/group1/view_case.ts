@@ -376,6 +376,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('filters by comment successfully', async () => {
+        await testSubjects.click('user-actions-filter-activity-button-comments');
+
+        await header.waitUntilLoadingHasFinished();
+
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
         );
@@ -384,8 +388,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('submit-comment');
 
         await header.waitUntilLoadingHasFinished();
-
-        await testSubjects.click('user-actions-filter-activity-button-comments');
 
         const commentBadge = await find.byCssSelector(
           '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'

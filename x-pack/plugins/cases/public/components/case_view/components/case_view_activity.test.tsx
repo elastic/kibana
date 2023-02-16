@@ -253,8 +253,9 @@ describe('Case View Page activity tab', () => {
       });
     });
 
-    it('should render all filter by default', async () => {
+    it('should show all filter as active', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
+
       expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
         caseData.id,
         filterActionType,
@@ -274,49 +275,58 @@ describe('Case View Page activity tab', () => {
       });
     });
 
-    it('should render comment filter', async () => {
-      const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+    it('should show comment filter as active', async () => {
+      appMockRender.render(<CaseViewActivity {...caseProps} />);
+
       expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
         caseData.id,
         filterActionType,
         sortOrder
       );
 
-      userEvent.click(result.getByTestId('user-actions-filter-activity-button-comments'));
+      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-comments'));
 
       await waitFor(() => {
         expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'user', sortOrder);
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(screen.getByLabelText(`${userActionsStats.totalComments} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.total - 1} available filters`));
+        expect(
+          screen.getByLabelText(`${userActionsStats.totalOtherActions - 1} available filters`)
+        );
       });
     });
 
-    it('should render history filter', async () => {
-      const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+    it('should show history filter as active', async () => {
+      appMockRender.render(<CaseViewActivity {...caseProps} />);
+
       expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
         caseData.id,
         filterActionType,
         sortOrder
       );
 
-      userEvent.click(result.getByTestId('user-actions-filter-activity-button-history'));
+      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-history'));
 
       await waitFor(() => {
         expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'action', sortOrder);
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(screen.getByLabelText(`${userActionsStats.totalOtherActions - 1} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
+        expect(screen.getByLabelText(`${userActionsStats.total - 1} available filters`));
       });
     });
 
     it('should render by desc sort order', async () => {
-      const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+      appMockRender.render(<CaseViewActivity {...caseProps} />);
+
       expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
         caseData.id,
         filterActionType,
         sortOrder
       );
 
-      const sortSelect = result.getByTestId('user-actions-sort-select');
+      const sortSelect = screen.getByTestId('user-actions-sort-select');
 
       fireEvent.change(sortSelect, { target: { value: 'desc' } });
 
@@ -324,6 +334,10 @@ describe('Case View Page activity tab', () => {
         expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'all', 'desc');
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(screen.getByLabelText(`${userActionsStats.total - 1} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
+        expect(
+          screen.getByLabelText(`${userActionsStats.totalOtherActions - 1} available filters`)
+        );
       });
     });
   });

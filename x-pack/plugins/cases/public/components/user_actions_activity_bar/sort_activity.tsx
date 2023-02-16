@@ -45,7 +45,7 @@ export const SortActivity = React.memo<FilterActivityProps>(
         isLoading={isLoading}
         onChange={onChange}
         options={SortOptions}
-        value={sortOrder ?? ''}
+        value={sortOrder}
       />
     );
   }
