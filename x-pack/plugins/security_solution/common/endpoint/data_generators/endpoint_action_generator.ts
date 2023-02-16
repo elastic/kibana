@@ -22,9 +22,15 @@ import type {
   ActionResponseOutput,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  ResponseActionsExecuteParameters,
+  ResponseActionExecuteOutputContent,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
+import {
+  DEFAULT_EXECUTE_ACTION_TIMEOUT,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
+} from '../service/response_actions/constants';
+import { getFileDownloadId } from '../service/response_actions/get_file_download_id';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
@@ -80,8 +86,11 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     });
 
     const command = overrides?.EndpointActions?.data?.command ?? this.randomResponseActionCommand();
-    let output: ActionResponseOutput<ResponseActionGetFileOutputContent> = overrides
-      ?.EndpointActions?.data?.output as ActionResponseOutput<ResponseActionGetFileOutputContent>;
+    let output: ActionResponseOutput<
+      ResponseActionGetFileOutputContent | ResponseActionExecuteOutputContent
+    > = overrides?.EndpointActions?.data?.output as ActionResponseOutput<
+      ResponseActionGetFileOutputContent | ResponseActionExecuteOutputContent
+    >;
 
     if (command === 'get-file') {
       if (!output) {
@@ -101,6 +110,12 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             ],
           },
         };
+      }
+    }
+
+    if (command === 'execute') {
+      if (!output) {
+        output = this.generateExecuteActionResponseOutput();
       }
     }
 
@@ -197,6 +212,32 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
     }
 
+    if (details.command === 'execute') {
+      if (!details.parameters) {
+        (
+          details as ActionDetails<
+            ResponseActionExecuteOutputContent,
+            ResponseActionsExecuteParameters
+          >
+        ).parameters = {
+          command: (overrides.parameters as ResponseActionsExecuteParameters).command ?? 'ls -al',
+          timeout:
+            (overrides.parameters as ResponseActionsExecuteParameters).timeout ??
+            DEFAULT_EXECUTE_ACTION_TIMEOUT, // 4hrs
+        };
+      }
+
+      if (!details.outputs || Object.keys(details.outputs).length === 0) {
+        details.outputs = {
+          [details.agents[0]]: this.generateExecuteActionResponseOutput({
+            content: {
+              outputFileId: getFileDownloadId(details, details.agents[0]),
+            },
+          }),
+        };
+      }
+    }
+
     return details as unknown as ActionDetails<TOutputType, TParameters>;
   }
 
@@ -258,6 +299,37 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       },
       overrides
     );
+  }
+
+  generateExecuteActionResponseOutput(
+    overrides?: Partial<ActionResponseOutput<Partial<ResponseActionExecuteOutputContent>>>
+  ): ActionResponseOutput<ResponseActionExecuteOutputContent> {
+    return merge(
+      {
+        type: 'json',
+        content: {
+          stdout: this.randomChoice([
+            this.randomString(1280),
+            `-rw-r--r--    1 elastic  staff      458 Jan 26 09:10 doc.txt\
+          -rw-r--r--     1 elastic  staff  298 Feb  2 09:10 readme.md`,
+          ]),
+          stderr: this.randomChoice([
+            this.randomString(1280),
+            `error line 1\
+          error line 2\
+          error line 3 that is quite very long and will be truncated, and should not be visible in the UI\
+          errorline4thathasalotmoretextthatdoesnotendfortestingpurposesrepeatalotoftexthereandkeepaddingmoreandmoretextwithoutendtheideabeingthatwedonotuseperiodsorcommassothattheconsoleuiisunabletobreakthislinewithoutsomecssrulessowiththislineweshouldbeabletotestthatwithgenerateddata`,
+          ]),
+          stdoutTruncated: true,
+          stderrTruncated: true,
+          shell_code: 0,
+          shell: 'bash',
+          cwd: '/some/path',
+          outputFileId: 'some-output-file-id',
+        },
+      },
+      overrides
+    ) as ActionResponseOutput<ResponseActionExecuteOutputContent>;
   }
 
   randomFloat(): number {

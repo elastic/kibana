@@ -168,4 +168,20 @@ describe('getAggsFormats', () => {
     expect(format.convert(new MultiFieldKey({ key: terms }))).toBe('source - geo.src - geo.dest');
     expect(getFormat).toHaveBeenCalledTimes(terms.length);
   });
+
+  test('not fails for non multiField Key values', () => {
+    const terms = ['source', 'geo.src', 'geo.dest'];
+    const mapping = {
+      id: 'multi_terms',
+      params: {
+        paramsPerField: [{ id: 'terms' }, { id: 'terms' }, { id: 'terms' }],
+        separator: ' - ',
+      },
+    };
+
+    const format = getAggFormat(mapping, getFormat);
+
+    expect(format.convert('text')).toBe('');
+    expect(getFormat).toHaveBeenCalledTimes(terms.length);
+  });
 });

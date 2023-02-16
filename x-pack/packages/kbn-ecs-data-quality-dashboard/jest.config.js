@@ -9,4 +9,5 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/packages/kbn-ecs-data-quality-dashboard'],
+  setupFilesAfterEnv: ['<rootDir>/x-pack/packages/kbn-ecs-data-quality-dashboard/setup_tests.ts'],
 };

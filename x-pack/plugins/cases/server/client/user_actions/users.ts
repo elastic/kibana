@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UserProfile } from '@kbn/security-plugin/common';
-import type { GetCaseUsersResponse, User } from '../../../common/api';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { GetCaseUsersResponse, User, UserWithProfileInfo } from '../../../common/api';
 import { GetCaseUsersResponseRt } from '../../../common/api';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
@@ -51,14 +51,17 @@ export const getUsers = async (
       .map((participant) => participant.user.profile_uid) as string[];
 
     const assigneesUids = theCase.case.assignees.map((assignee) => assignee.uid);
+    const reporter = theCase.case.created_by;
+    const reporterProfileIdAsArray = reporter.profile_uid != null ? [reporter.profile_uid] : [];
 
     const userProfileUids = new Set([
       ...assignedAndUnassignedUsers,
       ...participantsUids,
       ...assigneesUids,
+      ...reporterProfileIdAsArray,
     ]);
 
-    const userProfiles = await getUserProfiles(securityStartPlugin, userProfileUids);
+    const userProfiles = await getUserProfiles(securityStartPlugin, userProfileUids, 'avatar');
 
     const participantsResponse = convertUserInfoToResponse(
       userProfiles,
@@ -69,15 +72,19 @@ export const getUsers = async (
     );
 
     const assigneesResponse = convertUserInfoToResponse(userProfiles, theCase.case.assignees);
+    const reporterResponse = convertUserInfoToResponse(userProfiles, [
+      { uid: reporter.profile_uid, user: reporter },
+    ]);
 
     /**
      * To avoid duplicates, a user that is
-     * a participant or an assignee should not be
+     * a participant or an assignee or a reporter should not be
      *  part of the assignedAndUnassignedUsers Set
      */
     const unassignedUsers = removeAllFromSet(assignedAndUnassignedUsers, [
       ...participantsUids,
       ...assigneesUids,
+      ...reporterProfileIdAsArray,
     ]);
 
     const unassignedUsersResponse = convertUserInfoToResponse(
@@ -91,6 +98,7 @@ export const getUsers = async (
       participants: participantsResponse,
       assignees: assigneesResponse,
       unassignedUsers: unassignedUsersResponse,
+      reporter: reporterResponse[0],
     };
 
     return GetCaseUsersResponseRt.encode(results);
@@ -104,9 +112,9 @@ export const getUsers = async (
 };
 
 const convertUserInfoToResponse = (
-  userProfiles: Map<string, UserProfile>,
+  userProfiles: Map<string, UserProfileWithAvatar>,
   usersInfo: Array<{ uid: string | undefined; user?: User }>
-): User[] => {
+): UserWithProfileInfo[] => {
   const response = [];
 
   for (const info of usersInfo) {
@@ -117,17 +125,20 @@ const convertUserInfoToResponse = (
 };
 
 const getUserInformation = (
-  userProfiles: Map<string, UserProfile>,
+  userProfiles: Map<string, UserProfileWithAvatar>,
   uid: string | undefined,
   userInfo?: User
-): User => {
+): UserWithProfileInfo => {
   const userProfile = uid != null ? userProfiles.get(uid) : undefined;
 
   return {
-    email: userProfile?.user.email ?? userInfo?.email,
-    full_name: userProfile?.user.full_name ?? userInfo?.full_name,
-    username: userProfile?.user.username ?? userInfo?.username,
-    profile_uid: userProfile?.uid ?? uid ?? userInfo?.profile_uid,
+    user: {
+      email: userProfile?.user.email ?? userInfo?.email ?? null,
+      full_name: userProfile?.user.full_name ?? userInfo?.full_name ?? null,
+      username: userProfile?.user.username ?? userInfo?.username ?? null,
+    },
+    avatar: userProfile?.data.avatar,
+    uid: userProfile?.uid ?? uid ?? userInfo?.profile_uid,
   };
 };
 
