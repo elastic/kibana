@@ -47,7 +47,7 @@ Depending upon the {kib} app and context, you might be prompted to choose the ty
 Each rule type provides its own way of defining the conditions to detect, but an expression formed by a series of clauses is a common pattern. Each clause has a UI control that allows you to define the clause. For example, in an index threshold rule, the `WHEN` clause allows you to select an aggregation operation to apply to a numeric field.
 
 [role="screenshot"]
-image::images/rule-flyout-rule-conditions.png[UI for defining rule conditions on an index threshold rule]
+image::images/rule-flyout-rule-conditions.png[UI for defining rule conditions on an index threshold rule,500]
 
 For details on what types of rules are available and how to configure them, refer to <<rule-types>>.
 
@@ -57,23 +57,16 @@ All rules must have a check interval, which defines how often to evaluate the ru
 [[defining-rules-actions-details]]
 ==== Action type and frequency
 
-Actions are optional when you create a rule. However, to receive notifications when a rule meets its conditions, you must add one or more actions.
+You can add one or more actions to your rule to generate notifications when its
+conditions are met and when they are no longer met.
 
-Each action must specify a connector, which provides connection information for {kib} services or integrates with third party systems. If no connectors exist, click **Add connector** to create one. For more information about each type of connector, refer to <<action-types>>.
+Each action uses a connector, which provides connection information for a {kib} service or third party integration, depending on where you want to send the notifications. If no connectors exist, click **Add connector** to create one. For more information about each type of connector, refer to <<action-types>>.
 
-After you select a connector, set the action frequency. If the rule type supports alert summaries, you can choose from the following options:
+After you select a connector, set the action frequency. If the rule type supports alert summaries, you can choose to create a summary of alerts on each check interval or on a custom interval. For example, if you {observability-guide}/metrics-threshold-alert.html[create a metrics threshold rule], you can send email notifications that summarize the new, ongoing, and recovered alerts each day.
 
-* Summary of alerts:
-** *On check intervals*: An alert summary is generated on the check interval if the rule conditions are met.
-** *On custom action intervals*: An alert summary is generated on the specified intervals if the rule conditions are met.
-* For each alert:
-** *On check intervals*: Actions run on the check interval if the rule conditions are met. 
-** *On custom action intervals*: Actions run on the specified intervals if the rule conditions are met.  
-** *On status changes*: Actions run only when the alert status changes.
+TIP: If you choose a custom action interval, it cannot be shorter than the rule's check interval.
 
-If you choose one of the *For each alert* options, you must also choose an action group from the *Run when* dropdown to associate with this action. When the rule conditions are met, it is marked as _active_ and alerts are created and assigned to the action group. When the rule conditions are no longer met, it is marked as _recovered_ and any actions associated with the recovered action group are run.
-
-If the rule type does not support alert summaries, only the *For each alert* options are available. 
+Alternatively, you can set the action frequency such that the action that runs for each alert. If the rule type does not support alert summaries, this is your only available option. You must choose when the action runs (for example, at each check interval, only when the alert status changes, or at a custom action interval). You must also choose an action group, which affects whether the action runs (for example, the action runs when the issue is detected or when it is recovered). Each rule type has a specific set of valid action groups.
 
 [[alerting-concepts-suppressing-duplicate-notifications]]
 [TIP]
