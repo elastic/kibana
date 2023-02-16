@@ -17,10 +17,11 @@ import {
   EuiTimelineItem,
   EuiTitle,
   useGeneratedHtmlId,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { LoadingTimelineItem } from './loading_timeline_item';
 
 export function Diagnostics() {
@@ -52,13 +53,20 @@ export function Diagnostics() {
     prefix: 'buttonElementAccordion',
   });
 
+  const { data: pipelines, status: pipelinesStatus } = useFetcher(
+    (callApmApi) => {
+      return callApmApi('GET /internal/apm/diagnostics/pipelines');
+    },
+    []
+  );
+
   return (
     <>
       <EuiTimeline aria-label="Life cycle of data">
         <EuiTimelineItem
           verticalAlign="top"
           icon={
-            configStatus === FETCH_STATUS.LOADING ? (
+            pipelinesStatus === FETCH_STATUS.LOADING ? (
               <LoadingTimelineItem />
             ) : configData === 'success' ? (
               <EuiAvatar name="Checked" iconType="check" color="#6dccb1" />
@@ -92,6 +100,12 @@ export function Diagnostics() {
                     }
                   )}
                 </p>
+
+                {pipelines && (
+                  <EuiCodeBlock language="json" overflowHeight={300}>
+                    {JSON.stringify(pipelines)}
+                  </EuiCodeBlock>
+                )}
               </EuiText>
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
