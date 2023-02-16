@@ -47,5 +47,7 @@
     "@kbn/cypress-config",
     "@kbn/discover-plugin",
     "@kbn/guided-onboarding",
+    "@kbn/shared-ux-router",
+    "@kbn/core-http-browser",
   ]
 }

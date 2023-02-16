@@ -26,7 +26,7 @@ import { PropertiesMap } from '../../../common/elasticsearch_util';
 import { ITermJoinSource } from '../sources/term_join_source';
 import { TableSource } from '../sources/table_source';
 
-function createJoinTermSource(
+export function createJoinTermSource(
   descriptor: Partial<TermJoinSourceDescriptor> | undefined
 ): ITermJoinSource | undefined {
   if (!descriptor) {
@@ -35,8 +35,8 @@ function createJoinTermSource(
 
   if (
     descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE &&
-    'indexPatternId' in descriptor &&
-    'term' in descriptor
+    descriptor.indexPatternId !== undefined &&
+    descriptor.term !== undefined
   ) {
     return new ESTermSource(descriptor as ESTermSourceDescriptor);
   } else if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
