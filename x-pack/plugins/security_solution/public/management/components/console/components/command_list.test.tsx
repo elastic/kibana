@@ -11,13 +11,13 @@ import { getCommandListMock, getConsoleTestSetup } from '../mocks';
 describe('When displaying the command list', () => {
   let render: ConsoleTestSetup['renderConsole'];
   let renderResult: ReturnType<typeof render>;
-  let selectors: ConsoleTestSetup['selectors'];
+  let consoleSelectors: ConsoleTestSetup['selectors'];
 
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
 
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
-    selectors = testSetup.selectors;
+    consoleSelectors = testSetup.selectors;
   });
 
   describe('and its displayed on the side panel', () => {
@@ -101,7 +101,7 @@ describe('When displaying the command list', () => {
     it('should add command to console input when [+] button is clicked', () => {
       renderAndOpenHelpPanel();
       renderResult.getByTestId('test-commandList-group1-cmd6-addToInput').click();
-      expect(selectors.getInputText()).toEqual('cmd6 --foo ');
+      expect(consoleSelectors.getInputText()).toEqual('cmd6 --foo ');
     });
   });
 });

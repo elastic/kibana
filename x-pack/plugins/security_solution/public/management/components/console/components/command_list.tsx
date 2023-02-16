@@ -44,7 +44,7 @@ const otherCommandsGroupLabel = i18n.translate(
  * Take a string and removes all non-letters/number from it.
  * @param value
  */
-const convertToTestId = (value: string): string => {
+export const convertToTestId = (value: string): string => {
   return value.replace(/[^A-Za-z0-9]/g, '');
 };
 
@@ -235,9 +235,14 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
               >
                 <EuiFlexItem grow={1}>
                   <EuiDescriptionList
+                    data-test-subj={getTestId('command')}
                     listItems={[
                       {
-                        title: <EuiBadge>{commandNameWithArgs}</EuiBadge>,
+                        title: (
+                          <EuiBadge data-test-subj={getTestId('commandName')}>
+                            {commandNameWithArgs}
+                          </EuiBadge>
+                        ),
                         description: (
                           <>
                             <EuiSpacer size="xs" />
@@ -248,7 +253,6 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                         ),
                       },
                     ]}
-                    data-test-subj={getTestId('command')}
                   />
                 </EuiFlexItem>
                 {command.helpGroupLabel !== HELP_GROUPS.supporting.label &&

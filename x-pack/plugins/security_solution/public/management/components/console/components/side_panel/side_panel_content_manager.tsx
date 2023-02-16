@@ -88,11 +88,15 @@ export const SidePanelContentManager = memo(() => {
 
   const panelBody: ReactNode = useMemo(() => {
     if (show === 'help') {
-      return <CommandList commands={commands} display="table" />;
+      return (
+        <div data-test-subj={getTestId('helpContent')}>
+          <CommandList commands={commands} display="table" />
+        </div>
+      );
     }
 
     return null;
-  }, [commands, show]);
+  }, [commands, getTestId, show]);
 
   if (!show) {
     return null;
