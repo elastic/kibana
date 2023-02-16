@@ -34,9 +34,9 @@ const getSchemas: ProcedureSchemas = {
   out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 };
 
-export interface GetIn<Options extends object | undefined = undefined> {
+export interface GetIn<T extends string = string, Options extends object | undefined = undefined> {
   id: string;
-  contentType: string;
+  contentType: T;
   options?: Options;
 }
 
@@ -56,8 +56,8 @@ const createSchemas: ProcedureSchemas = {
 
 export interface CreateIn<
   T extends string = string,
-  Data extends object = Record<string, unknown>,
-  Options extends object = any
+  Data extends object = object,
+  Options extends object = object
 > {
   contentType: T;
   data: Data;
@@ -80,7 +80,7 @@ const updateSchemas: ProcedureSchemas = {
 export interface UpdateIn<
   T extends string = string,
   Data extends object = object,
-  Options extends object = any
+  Options extends object | undefined = undefined
 > {
   contentType: T;
   data: Data;
@@ -125,8 +125,8 @@ const searchSchemas: ProcedureSchemas = {
 
 export interface SearchIn<
   T extends string = string,
-  Params extends object = Record<string, unknown>,
-  Options extends object = any
+  Params extends object = object,
+  Options extends object | undefined = undefined
 > {
   contentType: T;
   params: Params;

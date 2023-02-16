@@ -15,22 +15,31 @@ import {
   useUpdateContentMutation,
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '../../public/content_client';
-import type { Todo } from './todos_client';
-import { SearchIn, SearchOut, CreateIn, DeleteIn, UpdateIn } from '../../common';
+import type {
+  Todo,
+  TodoCreateIn,
+  TodoDeleteIn,
+  TodoSearchIn,
+  TodoUpdateIn,
+  TodoSearchOut,
+} from './todos_client';
+
+const useCreateTodoMutation = () => useCreateContentMutation<TodoCreateIn, Todo>();
+const useDeleteTodoMutation = () => useDeleteContentMutation<TodoDeleteIn, void>();
+const useUpdateTodoMutation = () => useUpdateContentMutation<TodoUpdateIn, Todo>();
+const useSearchTodosQuery = ({ filter }: { filter: TodoSearchIn['params']['filter'] }) =>
+  useSearchContentQuery<TodoSearchIn, TodoSearchOut>({ contentType: 'todos', params: { filter } });
 
 export const Todos = () => {
   const [filterIdSelected, setFilterIdSelected] = React.useState('all');
 
-  const { data, isLoading, isError, error } = useSearchContentQuery<SearchIn, SearchOut<Todo>>({
-    contentType: 'todos',
-    params: {
-      filter: filterIdSelected,
-    },
+  const { data, isLoading, isError, error } = useSearchTodosQuery({
+    filter: filterIdSelected === 'all' ? undefined : (filterIdSelected as 'completed' | 'todo'),
   });
 
-  const addTodoMutation = useCreateContentMutation<CreateIn<'todos', { title: string }, Todo>>();
-  const deleteTodoMutation = useDeleteContentMutation<DeleteIn<'todos', { id: string }, Todo>>();
-  const updateTodoMutation = useUpdateContentMutation<UpdateIn<'todos', Todo, Todo>>();
+  const createTodoMutation = useCreateTodoMutation();
+  const deleteTodoMutation = useDeleteTodoMutation();
+  const updateTodoMutation = useUpdateTodoMutation();
 
   const filters = [
     {
@@ -103,7 +112,7 @@ export const Todos = () => {
           ) as HTMLInputElement;
           if (!inputRef || !inputRef.value) return;
 
-          addTodoMutation.mutate({
+          createTodoMutation.mutate({
             contentType: 'todos',
             data: {
               title: inputRef.value,

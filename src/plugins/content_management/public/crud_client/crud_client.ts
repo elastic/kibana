@@ -9,9 +9,9 @@
 import type { GetIn, CreateIn, UpdateIn, DeleteIn, SearchIn, SearchOut } from '../../common';
 
 export interface CrudClient {
-  get<I extends GetIn = GetIn, O = unknown>(input: I): Promise<O>;
-  create<I extends CreateIn = CreateIn, O = unknown>(input: I): Promise<O>;
-  update<I extends UpdateIn = UpdateIn, O = unknown>(input: I): Promise<O>;
-  delete<I extends DeleteIn = DeleteIn, O = unknown>(input: I): Promise<O>;
-  search<I extends SearchIn = SearchIn, O extends SearchOut = SearchOut>(input: I): Promise<O>;
+  get(input: GetIn): Promise<unknown>;
+  create(input: CreateIn): Promise<unknown>;
+  update(input: UpdateIn): Promise<unknown>;
+  delete(input: DeleteIn): Promise<unknown>;
+  search(input: SearchIn): Promise<SearchOut>;
 }

@@ -16,52 +16,50 @@ export interface Todo {
   completed: boolean;
 }
 
+export type TodoCreateIn = CreateIn<'todos', { title: string }>;
+export type TodoUpdateIn = UpdateIn<'todos', { id: string } & Partial<Todo>>;
+export type TodoDeleteIn = DeleteIn<'todos', { id: string }>;
+export type TodoGetIn = GetIn<'todos'>;
+export type TodoSearchIn = SearchIn<'todos', { filter?: 'todo' | 'completed' }>;
+export type TodoSearchOut = SearchOut<Todo>;
+
 export class TodosClient implements CrudClient {
   private todos: Todo[] = [
     { id: uuidv4(), title: 'Learn Elasticsearch', completed: true },
     { id: uuidv4(), title: 'Learn Kibana', completed: false },
   ];
 
-  async create<I extends CreateIn = CreateIn, O = unknown>(input: I): Promise<O> {
+  async create(input: TodoCreateIn): Promise<Todo> {
     const todo = {
       id: uuidv4(),
       title: input.data.title as string,
       completed: false,
     };
     this.todos.push(todo);
-    return todo as unknown as O;
+    return todo;
   }
 
-  async delete<I extends DeleteIn = DeleteIn, O = unknown>(input: I): Promise<O> {
-    // @ts-ignore
-    const idToDelete = input.data.id;
-    const todoToDelete = this.todos.find((todo) => todo.id === idToDelete);
-    this.todos = this.todos.filter((todo) => todo.id !== idToDelete);
-
-    return todoToDelete as unknown as O;
+  async delete(input: TodoDeleteIn): Promise<void> {
+    this.todos = this.todos.filter((todo) => todo.id !== input.data.id);
   }
 
-  async get<I extends GetIn = GetIn, O = unknown>(input: I): Promise<O> {
-    return this.todos.find((todo) => todo.id === input.id) as unknown as O;
+  async get<I extends GetIn = GetIn, O = unknown>(input: TodoGetIn): Promise<Todo> {
+    return this.todos.find((todo) => todo.id === input.id)!;
   }
 
-  async search<I extends SearchIn = SearchIn, O extends SearchOut = SearchOut>(
-    input: I
-  ): Promise<O> {
+  async search(input: TodoSearchIn): Promise<TodoSearchOut> {
     const filter = input.params.filter as string;
-    if (filter === 'todo') return { hits: this.todos.filter((t) => !t.completed) } as unknown as O;
-    if (filter === 'completed')
-      return { hits: this.todos.filter((t) => t.completed) } as unknown as O;
-    return { hits: [...this.todos] } as unknown as O;
+    if (filter === 'todo') return { hits: this.todos.filter((t) => !t.completed) };
+    if (filter === 'completed') return { hits: this.todos.filter((t) => t.completed) };
+    return { hits: [...this.todos] };
   }
 
-  async update<I extends UpdateIn = UpdateIn, O = unknown>(input: I): Promise<O> {
-    // @ts-ignore
+  async update(input: TodoUpdateIn): Promise<Todo> {
     const idToUpdate = input.data.id;
-    const todoToUpdate = this.todos.find((todo) => todo.id === idToUpdate);
+    const todoToUpdate = this.todos.find((todo) => todo.id === idToUpdate)!;
     if (todoToUpdate) {
       Object.assign(todoToUpdate, input.data);
     }
-    return todoToUpdate as unknown as O;
+    return { ...todoToUpdate };
   }
 }
