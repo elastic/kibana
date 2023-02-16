@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
@@ -21,7 +22,6 @@ import {
   getExpectedActions,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {

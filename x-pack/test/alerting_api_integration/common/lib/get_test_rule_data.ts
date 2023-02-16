@@ -36,5 +36,5 @@ export function getTestRuleActions(createdAction: AsApiContract<RuleAction>) {
         throttle: '1m',
       },
     },
-  ] as AsApiContract<RuleAction>[];
+  ] as Array<AsApiContract<RuleAction>>;
 }

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { Spaces } from '../../../scenarios';
 import {
   checkAAD,
@@ -15,7 +16,6 @@ import {
   getExpectedRule,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
