@@ -164,7 +164,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     if (!combinedQuery || combinedQuery.kqlError || !combinedQuery.filterQuery) {
       return { bool: {} };
     }
-    return JSON.parse(combinedQuery.filterQuery);
+    return { bool: { filter: JSON.parse(combinedQuery.filterQuery) } };
   }, [combinedQuery]);
 
   const isEventRenderedView = tableView === VIEW_SELECTION.eventRenderedView;
