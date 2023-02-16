@@ -13,7 +13,7 @@ export const getSchemas: ProcedureSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
-      id: schema.string(),
+      id: schema.string({ minLength: 1 }),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }

@@ -13,7 +13,7 @@ export const updateSchemas: ProcedureSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
-      id: schema.string(),
+      id: schema.string({ minLength: 1 }),
       // --> "data" to update a content will be defined by each content type
       data: schema.recordOf(schema.string(), schema.any()),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),

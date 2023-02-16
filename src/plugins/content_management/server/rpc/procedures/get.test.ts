@@ -46,6 +46,10 @@ describe('RPC -> get()', () => {
           input: { contentTypeId: 'foo', id: '123', unknown: 'foo' },
           expectedError: '[unknown]: definition for this key is missing',
         },
+        {
+          input: { contentTypeId: 'foo', id: '' }, // id must have min 1 char
+          expectedError: '[id]: value has length [0] but it must have a minimum length of [1].',
+        },
       ].forEach(({ input, expectedError }) => {
         const error = validate(input, inputSchema);
 
