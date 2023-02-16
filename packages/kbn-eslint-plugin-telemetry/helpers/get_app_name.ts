@@ -8,19 +8,40 @@
 
 import { camelCase } from 'lodash';
 import path from 'path';
-
-const XPACK_DIR_ROOT = '/x-pack/plugins';
-const PACKAGES_ROOT = '/packages';
+import { getPkgDirMap } from '@kbn/repo-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 export function getAppName(fileName: string, cwd: string) {
   const { dir } = path.parse(fileName);
   const relativePathToFile = dir.replace(cwd, '');
 
-  const appName = relativePathToFile.includes(XPACK_DIR_ROOT)
-    ? relativePathToFile.split(XPACK_DIR_ROOT)[1].split('/')[1]
-    : relativePathToFile.includes(PACKAGES_ROOT)
-    ? relativePathToFile.split(PACKAGES_ROOT)[1].split('/')[1]
-    : '';
+  const packageDirs = Array.from(
+    Array.from(getPkgDirMap(REPO_ROOT).values()).reduce((acc, currentDir) => {
+      const topDirectory = currentDir.normalizedRepoRelativeDir.split('/')[0];
 
-  return appName === 'observability' ? 'o11y' : camelCase(appName);
+      if (topDirectory) {
+        acc.add(topDirectory);
+      }
+
+      return acc;
+    }, new Set<string>())
+  );
+
+  const relativePathArray = relativePathToFile.split('/');
+
+  const appName = camelCase(
+    packageDirs.reduce((acc, repoPath) => {
+      if (relativePathArray[1] === 'x-pack') {
+        return relativePathArray[3];
+      }
+
+      if (relativePathArray[1].includes(repoPath)) {
+        return relativePathArray[2];
+      }
+
+      return acc;
+    }, '')
+  );
+
+  return appName === 'observability' ? 'o11y' : appName;
 }
