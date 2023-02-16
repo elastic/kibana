@@ -56,7 +56,7 @@ describe('ALL - Saved queries', () => {
       cy.contains('Snapshot');
     });
   });
-  describe.only('prebuilt ', () => {
+  describe('prebuilt ', () => {
     before(() => {
       runKbnArchiverScript(ArchiverMethod.LOAD, 'pack_with_prebuilt_saved_queries');
     });
