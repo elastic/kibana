@@ -591,7 +591,7 @@ Adds generated `uuidv4` id and current time as `@timestamp` to document if `id`,
 
 ### create test query rule that queries indexed documents within a test
 
-When documents generated and indexed, there might be a need to create a test rule that targets only this documents. So, documents generated in the test, will be used only in context of this test.
+When documents generated and indexed, there might be a need to create a test rule that targets only these documents. So, documents generated in the test, will be used only in context of this test.
 
 There are few possible ways to do this
 
