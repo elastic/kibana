@@ -32,6 +32,7 @@ export const TryItButton = ({
   ...props
 }: Props) => {
   const linkProps = useLinkProps({ ...link });
+  const onClickHandler = onClick || linkProps.onClick;
 
   return (
     <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
@@ -40,7 +41,7 @@ export const TryItButton = ({
           <EuiLink
             data-test-subj={`${props['data-test-subj']}-badge`}
             {...linkProps}
-            onClick={onClick}
+            onClick={onClickHandler}
           >
             <EuiBetaBadge
               css={css`
@@ -60,7 +61,7 @@ export const TryItButton = ({
           data-test-subj={props['data-test-subj']}
           {...linkProps}
           color={color}
-          onClick={onClick}
+          onClick={onClickHandler}
         >
           <EuiFlexGroup wrap={false} responsive={false} gutterSize="m" alignItems="center">
             {experimental && (
