@@ -18,7 +18,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiProgress,
   EuiSpacer,
   EuiPageHeader,
   EuiHorizontalRule,
@@ -27,11 +26,9 @@ import {
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
+import { ViewerStatus, EmptyViewerState } from '@kbn/securitysolution-exception-list-components';
 
-import type { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
-import { EmptyViewerState } from '@kbn/securitysolution-exception-list-components';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
-import { Loader } from '../../../common/components/loader';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
@@ -103,7 +100,7 @@ export const SharedLists = React.memo(() => {
   );
   const [filters, setFilters] = useState<ExceptionListFilter | undefined>();
 
-  const [viewerStatus, setViewStatus] = useState<ViewerStatus>('loading');
+  const [viewerStatus, setViewStatus] = useState<ViewerStatus | null>(ViewerStatus.LOADING);
 
   const [
     loadingExceptions,
@@ -237,7 +234,7 @@ export const SharedLists = React.memo(() => {
       query,
       queryText,
     }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]): Promise<void> => {
-      setViewStatus('searching');
+      setViewStatus(ViewerStatus.SEARCHING);
       const filterOptions = {
         name: null,
         list_id: null,
@@ -397,36 +394,35 @@ export const SharedLists = React.memo(() => {
     setDisplayAddExceptionItemFlyout(false);
     setIsCreatePopoverOpen(false);
   };
+  const onCreateExceptionListOpenClick = () => setDisplayCreateSharedListFlyout(true);
 
   const isReadOnly = useMemo(() => {
     return (canUserREAD && !canUserCRUD) ?? true;
   }, [canUserREAD, canUserCRUD]);
 
   useEffect(() => {
-    console.log({
-      loadingTableInfo,
-      initLoading,
-      viewerStatus,
-      loadingExceptions,
-      l: exceptionListsWithRuleRefs.length,
-    });
-    if (loadingTableInfo || initLoading) {
-      setViewStatus('loading');
-    }
-
-    if (viewerStatus === 'searching' && !loadingExceptions && !exceptionListsWithRuleRefs.length) {
-      setViewStatus('empty_search');
-    }
-
+    // If current status is searching and results come up empty,
+    // show empty search screen
     if (
-      viewerStatus === 'searching' &&
+      viewerStatus === ViewerStatus.SEARCHING &&
       !loadingExceptions &&
-      exceptionListsWithRuleRefs.length > 0
+      !exceptionListsWithRuleRefs.length
     ) {
-      setViewStatus(null);
-    }
-
-    if (!loadingTableInfo && !initLoading) {
+      setViewStatus(ViewerStatus.EMPTY_SEARCH);
+      // if loading exceptions or their refs, set to loading
+    } else if (loadingTableInfo || initLoading) {
+      setViewStatus(ViewerStatus.LOADING);
+      // to differentiate between no exception lists and
+      // no exception list search results, check for existing
+      // loading state
+    } else if (
+      viewerStatus === ViewerStatus.LOADING &&
+      !loadingTableInfo &&
+      !initLoading &&
+      !exceptionListsWithRuleRefs.length
+    ) {
+      setViewStatus(ViewerStatus.EMPTY);
+    } else if (viewerStatus === ViewerStatus.LOADING && !loadingTableInfo && !initLoading) {
       setViewStatus(null);
     }
   }, [
@@ -490,7 +486,7 @@ export const SharedLists = React.memo(() => {
                   key={'createList'}
                   onClick={() => {
                     onCloseCreatePopover();
-                    setDisplayCreateSharedListFlyout(true);
+                    onCreateExceptionListOpenClick();
                   }}
                 >
                   {i18n.CREATE_SHARED_LIST_BUTTON}
@@ -526,7 +522,7 @@ export const SharedLists = React.memo(() => {
           isEndpointItem={false}
           isBulkAction={false}
           showAlertCloseOptions
-          onCancel={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
+          onCancel={() => setDisplayAddExceptionItemFlyout(false)}
           onConfirm={(didRuleChange: boolean) => {
             setDisplayAddExceptionItemFlyout(false);
             if (didRuleChange) handleRefresh();
@@ -549,7 +545,6 @@ export const SharedLists = React.memo(() => {
       <div data-test-subj="allExceptionListsPanel">
         {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
         <EuiSpacer size="m" />
-
         {viewerStatus != null ? (
           <EmptyViewerState
             isReadOnly={isReadOnly}
@@ -557,7 +552,7 @@ export const SharedLists = React.memo(() => {
             viewerStatus={viewerStatus}
             buttonText={i18n.CREATE_SHARED_LIST_BUTTON}
             body={i18n.NO_LISTS_BODY}
-            onEmptyButtonStateClick={() => setDisplayCreateSharedListFlyout(true)}
+            onEmptyButtonStateClick={onCreateExceptionListOpenClick}
           />
         ) : (
           <>
