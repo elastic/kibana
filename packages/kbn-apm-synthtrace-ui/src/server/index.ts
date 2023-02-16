@@ -18,4 +18,4 @@ app.post('/api/run_scenario', (req, resp) => {
   resp.send(200);
 });
 
-app.listen(4000, () => console.log('Server is running on port 5000'));
+app.listen(4000, () => console.log('Server is running on port 4000'));
