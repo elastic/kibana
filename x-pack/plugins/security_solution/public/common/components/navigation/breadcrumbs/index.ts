@@ -9,6 +9,7 @@ import { last, omit } from 'lodash/fp';
 
 import { useDispatch } from 'react-redux';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import type { StartServices } from '../../../../types';
 import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../explore/hosts/pages/details/utils';
 import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../explore/network/pages/details';
@@ -27,6 +28,7 @@ import { getLeadingBreadcrumbsForSecurityPage } from './get_breadcrumbs_for_page
 import type { GetSecuritySolutionUrl } from '../../link_to';
 import { useGetSecuritySolutionUrl } from '../../link_to';
 import { useIsGroupedNavigationEnabled } from '../helpers';
+import { TELEMETRY_EVENT, track } from '../../../lib/telemetry';
 
 export interface ObjectWithNavTabs {
   navTabs: GenericNavRecord;
@@ -59,7 +61,8 @@ export const useSetBreadcrumbs = () => {
           ? {
               onClick: (ev) => {
                 ev.preventDefault();
-
+                const trakedPath = breadcrumb.href?.split('?')[0] ?? 'unknown';
+                track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.BREADCRUMB}${trakedPath}`);
                 dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
 
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
