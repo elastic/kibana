@@ -11,7 +11,13 @@ export type SynthtraceScenario = {
   };
   entryTransaction?: Transaction;
   modalForm: ModalForm;
+  credentials: Credentials;
 };
+
+export interface Credentials {
+  esEndpoint: string;
+  kibanaEndpoint: string;
+}
 
 // TODO: Rename this type to something more generic
 export type ModalForm = {
@@ -67,75 +73,4 @@ export interface Span {
 export type ServiceSelectorSelectedOption = EuiComboBoxOptionOption<ElasticAgentName> & {
   key: string;
   value: ElasticAgentName;
-};
-
-export const example: SynthtraceScenario = {
-  instanceName: '1',
-  environment: 'prod',
-  isDistributedTracing: false,
-  cleanApmIndices: true,
-  modalForm: {
-    isOpen: false,
-    isEdit: false,
-    type: 'service',
-    serviceId: '',
-    id: '',
-  },
-  topLevelService: {
-    name: 'synth-rum',
-    id: '1',
-    agentName: 'rum-js',
-    color: '#000',
-  },
-  services: {
-    '1': {
-      name: 'synth-rum',
-      agentName: 'rum-js',
-      id: '1',
-      color: '#000',
-    },
-    '2': {
-      name: 'synth-node',
-      agentName: 'nodejs',
-      id: '2',
-      color: '#000',
-    },
-  },
-  entryTransaction: {
-    //transaction
-    docType: 'transaction',
-    id: 't1',
-    name: '1rpm/1100ms',
-    serviceId: '1',
-    children: [
-      {
-        docType: 'transaction',
-        name: 'foo-tx1',
-        id: 't1.1',
-        serviceId: '1',
-        repeat: 1,
-        children: [
-          {
-            docType: 'transaction',
-            name: 'foo-tx2',
-            serviceId: '1',
-            id: 't1.1.1',
-            repeat: 2,
-            children: [
-              {
-                docType: 'span',
-                //SPAN
-                serviceId: '2',
-                id: 's1',
-                name: 'GET user*/_search',
-                type: 'DB',
-                subtype: 'elasticsearc',
-                repeat: 1,
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
 };

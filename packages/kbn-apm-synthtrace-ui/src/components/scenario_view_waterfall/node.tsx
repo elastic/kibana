@@ -66,11 +66,12 @@ const Node = ({ item, level }: { item: Transaction | Span; level: number }) => {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiText>
-              [{item.docType.charAt(0).toUpperCase()}] {item.name}
+              <EuiBadge style={{ marginRight: 8 }}>{item.docType.charAt(0).toUpperCase()}</EuiBadge>
+              {item.name}
             </EuiText>
           </EuiFlexItem>
           {shouldRepeat && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
               <EuiBadge color="green">{item.repeat}x</EuiBadge>
             </EuiFlexItem>
           )}

@@ -10,42 +10,7 @@ import { times } from 'lodash';
 import { Readable } from 'stream';
 import { Span, SynthtraceScenario, Transaction } from '../../typings';
 
-const client = createEsClientForTesting({
-  esUrl: 'http://elastic:changeme@localhost:9200',
-  requestTimeout: 10000,
-  isCloud: false,
-});
 const logger = createLogger(LogLevel.info);
-
-const synthtraceEsClient = new ApmSynthtraceEsClient({
-  client,
-  logger,
-  refreshAfterIndex: true,
-  version: '8.8.0',
-});
-
-const kibanaClient = new ApmSynthtraceKibanaClient({
-  logger: logger,
-  target: 'http://elastic:changeme@localhost:5601/foo',
-});
-
-async function bootstrap() {
-  try {
-    console.log('Bootstraping...');
-    const packageVersion = await kibanaClient.fetchLatestApmPackageVersion();
-    await kibanaClient.installApmPackage(packageVersion);
-    console.log('Bootstrap done!');
-  } catch (e) {
-    throw new Error(
-      'Something went wrong while install APM package. Are kibana and ES running?',
-      e
-    );
-  }
-}
-
-bootstrap();
-
-synthtraceEsClient.pipeline(synthtraceEsClient.getDefaultPipeline(false));
 
 function generateTrace({
   timestamp,
@@ -100,6 +65,37 @@ export async function runSynthraceScenario({ scenario }: { scenario: SynthtraceS
   }
   if (!entryTransaction) {
     throw new Error('Entry transaction not found');
+  }
+
+  const client = createEsClientForTesting({
+    esUrl: scenario.credentials.esEndpoint,
+    requestTimeout: 10000,
+    isCloud: false,
+  });
+
+  const synthtraceEsClient = new ApmSynthtraceEsClient({
+    client,
+    logger,
+    refreshAfterIndex: true,
+    version: '8.8.0',
+  });
+
+  const kibanaClient = new ApmSynthtraceKibanaClient({
+    logger: logger,
+    target: scenario.credentials.kibanaEndpoint,
+  });
+  synthtraceEsClient.pipeline(synthtraceEsClient.getDefaultPipeline(false));
+
+  try {
+    console.log('Bootstraping...');
+    const packageVersion = await kibanaClient.fetchLatestApmPackageVersion();
+    await kibanaClient.installApmPackage(packageVersion);
+    console.log('Bootstrap done!');
+  } catch (e) {
+    throw new Error(
+      'Something went wrong while install APM package. Are kibana and ES running?',
+      e
+    );
   }
 
   if (scenario.cleanApmIndices) {

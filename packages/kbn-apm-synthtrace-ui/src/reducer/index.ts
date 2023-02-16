@@ -16,6 +16,10 @@ export const INITIAL_STATE: SynthtraceScenario = {
     serviceId: '',
     id: '',
   },
+  credentials: {
+    esEndpoint: 'http://elastic:changeme@localhost:9200',
+    kibanaEndpoint: 'http://elastic:changeme@localhost:5601',
+  },
 };
 
 export function reducer(state: SynthtraceScenario, action: Action): SynthtraceScenario {
@@ -127,6 +131,18 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
       return {
         ...state,
         cleanApmIndices: action.payload.cleanApmIndices,
+      };
+    }
+    case 'update_credentials': {
+      return {
+        ...state,
+        credentials: action.payload.credentials,
+      };
+    }
+    case 'clean_scenario': {
+      return {
+        ...INITIAL_STATE,
+        credentials: state.credentials,
       };
     }
   }

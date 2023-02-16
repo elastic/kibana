@@ -5,6 +5,7 @@ import {
   Service,
   Span,
   Transaction,
+  Credentials,
 } from '../typings';
 
 export type Action =
@@ -14,7 +15,9 @@ export type Action =
   | InsertNodeAction
   | InsertServiceAction
   | EditNodeAction
-  | ToggleCleanApmIndicesAction;
+  | ToggleCleanApmIndicesAction
+  | UpdateCredentialsAction
+  | CleanScenarioAction;
 
 interface ToggletDistributedTracingAction {
   type: 'toggle_distributed_tracing';
@@ -49,4 +52,13 @@ interface EditNodeAction {
 interface ToggleCleanApmIndicesAction {
   type: 'toggle_clean_apm_indices';
   payload: { cleanApmIndices: boolean };
+}
+
+interface UpdateCredentialsAction {
+  type: 'update_credentials';
+  payload: { credentials: Credentials };
+}
+
+interface CleanScenarioAction {
+  type: 'clean_scenario';
 }

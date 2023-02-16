@@ -1,4 +1,11 @@
-import { EuiComboBoxOptionOption, EuiFieldText, EuiForm, EuiFormRow, EuiPanel } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiComboBoxOptionOption,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiPanel,
+} from '@elastic/eui';
 import React from 'react';
 import { useScenarioContext } from '../../context/use_scenario_context';
 import { ServiceSelector } from '../service_selector';
@@ -41,6 +48,13 @@ export function NewScenarioForm() {
             }}
           />
         </EuiFormRow>
+        <EuiButton
+          onClick={() => {
+            dispatch({ type: 'clean_scenario' });
+          }}
+        >
+          Reset scenario
+        </EuiButton>
       </EuiForm>
     </EuiPanel>
   );
