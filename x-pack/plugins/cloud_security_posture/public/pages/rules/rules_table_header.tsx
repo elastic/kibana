@@ -34,7 +34,6 @@ const SearchField = ({
   return (
     <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
       <EuiFieldSearch
-        data-test-subj="cloudSecurityPostureSearchFieldFieldSearch"
         isLoading={isSearching}
         placeholder={i18n.translate('xpack.csp.rules.rulesTable.searchPlaceholder', {
           defaultMessage: 'Search by Rule Name',
