@@ -19,16 +19,16 @@ interface InlineActionsProps {
   actionContext: CellActionExecutionContext;
   showActionTooltips: boolean;
   visibleCellActions: number;
-  disabledActions: string[];
+  disabledActionTypes: string[];
 }
 
 export const InlineActions: React.FC<InlineActionsProps> = ({
   actionContext,
   showActionTooltips,
   visibleCellActions,
-  disabledActions,
+  disabledActionTypes,
 }) => {
-  const { value: actions } = useLoadActions(actionContext, { disabledActions });
+  const { value: actions } = useLoadActions(actionContext, { disabledActionTypes });
   const { extraActions, visibleActions } = usePartitionActions(actions ?? [], visibleCellActions);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

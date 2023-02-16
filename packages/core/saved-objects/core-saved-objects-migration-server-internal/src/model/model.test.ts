@@ -1442,7 +1442,6 @@ describe('migrations v2 model', () => {
         });
 
         const newState = model(cleanupUnknownAndExcluded, res);
-        expect(newState.controlState).toEqual('FATAL');
 
         expect(newState).toMatchObject({
           controlState: 'FATAL',
@@ -1452,7 +1451,7 @@ describe('migrations v2 model', () => {
         });
       });
 
-      test('CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL if the deleteQuery fails', () => {
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED if the deleteQuery fails (and there are retries left)', () => {
         const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.left({
           type: 'delete_failed' as const,
           conflictingDocuments: [
@@ -1477,9 +1476,52 @@ describe('migrations v2 model', () => {
           ],
         });
 
-        const newState = model(cleanupUnknownAndExcluded, res);
-        expect(newState.controlState).toEqual('FATAL');
+        const newState = model(
+          {
+            ...cleanupUnknownAndExcluded,
+            retryCount: 1,
+            retryAttempts: 5,
+          },
+          res
+        );
 
+        expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED');
+        expect(newState.retryCount).toEqual(2);
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL if the deleteQuery fails after N attempts', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.left({
+          type: 'delete_failed' as const,
+          conflictingDocuments: [
+            {
+              index: 'kibana_7.11.0_001',
+              id: 'dashboard:12',
+              type: 'dashboard',
+              cause: {
+                type: 'DocumentVersionChanged',
+              },
+              status: 5,
+            },
+            {
+              index: 'kibana_7.11.0_001',
+              id: 'foo:17',
+              type: 'foo',
+              cause: {
+                type: 'DocumentVersionChanged',
+              },
+              status: 5,
+            },
+          ],
+        });
+
+        const newState = model(
+          {
+            ...cleanupUnknownAndExcluded,
+            retryCount: 5,
+            retryAttempts: 5,
+          },
+          res
+        );
         expect(newState).toMatchObject({
           controlState: 'FATAL',
           reason: expect.stringContaining(

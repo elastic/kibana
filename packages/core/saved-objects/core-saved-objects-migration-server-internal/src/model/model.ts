@@ -533,14 +533,31 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ),
         };
       } else {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: extractDeleteQueryFailureReason(
-            stateP.sourceIndex.value,
-            res.left.conflictingDocuments
-          ),
-        };
+        if (stateP.retryCount >= stateP.retryAttempts) {
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason: extractDeleteQueryFailureReason(
+              stateP.sourceIndex.value,
+              res.left.conflictingDocuments
+            ),
+          };
+        } else {
+          const retryCount = stateP.retryCount + 1;
+          const retryDelay = 1000 * Math.random();
+          return {
+            ...stateP,
+            retryCount,
+            retryDelay,
+            logs: [
+              ...stateP.logs,
+              {
+                level: 'warning',
+                message: `Errors occurred whilst deleting unwanted documents. Another instance is probably updating or deleting documents in the same index. Retrying attempt ${retryCount}.`,
+              },
+            ],
+          };
+        }
       }
     } else {
       return throwBadResponse(stateP, res);
