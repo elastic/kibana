@@ -23,29 +23,9 @@ import { buildDataTableRecordList } from '../../../../../utils/build_data_record
 import { esHits } from '../../../../../__mocks__/es_hits';
 import { SavedSearch } from '../../../../..';
 import { DiscoverLayoutProps } from '../types';
-import { DiscoverStateContainer } from '../../../services/discover_state';
-
-const documentObservables = {
-  main$: new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    foundDocuments: true,
-  }) as DataMain$,
-
-  documents$: new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: buildDataTableRecordList(esHits),
-  }) as DataDocuments$,
-
-  availableFields$: new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    fields: [] as string[],
-  }) as AvailableFields$,
-
-  totalHits$: new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHits.length),
-  }) as DataTotalHits$,
-};
+import {DiscoverStateContainer, getDiscoverStateContainer} from '../../../services/discover_state';
+import {createHashHistory} from "history";
+import { services } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
 
 const plainRecordObservables = {
   main$: new BehaviorSubject({
@@ -104,19 +84,39 @@ const getCommonProps = (dataView: DataView) => {
   };
 };
 
+function getSavedSearch(dataView: DataView) {
+  return {
+    searchSource: {
+      getField: (value: string) => {
+        if (value === 'index') {
+          return dataView;
+        }
+      },
+      getOwnField: () => {
+        return {
+          query: '',
+        };
+      },
+      createChild: () => {return {} as unknown as SearchSource},
+    },
+  } as unknown as SavedSearch;
+}
+
 export function getDocumentsLayoutProps(dataView: DataView) {
+  const stateContainer = getDiscoverStateContainer({ history: createHashHistory(), savedSearch: getSavedSearch(dataView), services  });
+  stateContainer.appState.set({
+    columns: ['name', 'message', 'bytes'],
+    sort: [['date', 'desc']],
+    query: {
+      language: 'kuery',
+      query: '',
+    },
+    filters: [],
+  })
+  stateContainer.actions.setDataView(dataView);
   return {
     ...getCommonProps(dataView),
-    savedSearchData$: documentObservables,
-    state: {
-      columns: ['name', 'message', 'bytes'],
-      sort: [['date', 'desc']],
-      query: {
-        language: 'kuery',
-        query: '',
-      },
-      filters: [],
-    },
+    stateContainer,
   } as unknown as DiscoverLayoutProps;
 }
 

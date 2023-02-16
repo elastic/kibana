@@ -29,6 +29,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Plugin as NavigationPublicPlugin } from '@kbn/navigation-plugin/public';
 import { SearchBar, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/public';
+import { Observable } from 'rxjs';
 
 const NavigationPlugin = new NavigationPublicPlugin({} as PluginInitializerContext);
 
@@ -57,8 +58,14 @@ export const uiSettingsMock = {
   },
 } as unknown as IUiSettingsClient;
 
-const services = {
-  core: { http: { basePath: { prepend: () => void 0 } } },
+const filterManager = {
+    getGlobalFilters: () => [],
+    getAppFilters: () => [],
+    getFetches$: () => ({}),
+  };
+
+export const services = {
+  core: { http: { basePath: { prepend: () => void 0 } }, notifications: { toasts: {}} },
   storage: new LocalStorageMock({
     [SIDEBAR_CLOSED_KEY]: false,
   }) as unknown as Storage,
@@ -74,9 +81,35 @@ const services = {
             from: 'now-7d',
             to: 'now',
           }),
+          getRefreshInterval: () => ({ }),
+          getFetch$: () => ({}),
+          getAutoRefreshFetch$: () => new Observable(),
+          calculateBounds: () => ({ min: undefined, max: undefined }),
         },
       },
       savedQueries: { findSavedQueries: () => Promise.resolve({ queries: [] as SavedQuery[] }) },
+      queryString: {
+        getDefaultQuery: () => {
+          return { query: '', language: 'kuery' };
+        },
+        getUpdates$: () => new Observable()
+      },
+      filterManager,
+      getState: () => {
+        return {
+          filters: [],
+          query: { query: '', language: 'kuery' },
+        };
+      },
+      state$: new Observable(),
+    },
+    search: {
+      session : {
+        getSession$: () => {
+          return new Observable()
+        },
+        state$: new Observable(),
+      }
     },
     dataViews: {
       getIdsWithTitle: () => Promise.resolve([]),
@@ -120,10 +153,7 @@ const services = {
   },
   docLinks: { links: { discover: {} } },
   addBasePath: (path: string) => path,
-  filterManager: {
-    getGlobalFilters: () => [],
-    getAppFilters: () => [],
-  },
+  filterManager,
   history: () => ({}),
   fieldFormats: {
     deserialize: () => {

@@ -83,8 +83,10 @@ export function getDataViewMock(isTimebased = true) {
     getFieldByName: () => {
       return fields[0];
     },
+    getIndexPattern: () => 'test',
     metaFields: [],
     timeFieldName: isTimebased ? 'date' : undefined,
+    isPersisted: () => true,
   } as unknown as DataView;
 
   dataViewMock.fields.getByName = () => fields[0];

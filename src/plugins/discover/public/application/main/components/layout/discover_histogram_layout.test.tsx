@@ -130,9 +130,9 @@ const mountComponent = async ({
     onAddFilter: jest.fn(),
     resetSavedSearch,
     resizeRef: { current: null },
-    searchSessionManager: createSearchSessionMock(session).searchSessionManager,
     inspectorAdapters: { requests: new RequestAdapter() },
   };
+  stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
   const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
 

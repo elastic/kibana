@@ -66,7 +66,6 @@ export function DiscoverLayout({
   stateContainer,
   persistDataView,
   updateAdHocDataViewId,
-  searchSessionManager,
   updateDataViewList,
 }: DiscoverLayoutProps) {
   const {
@@ -245,7 +244,6 @@ export function DiscoverLayout({
           onFieldEdited={onFieldEdited}
           resizeRef={resizeRef}
           inspectorAdapters={inspectorAdapters}
-          searchSessionManager={searchSessionManager}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -266,7 +264,6 @@ export function DiscoverLayout({
     resetSavedSearch,
     resultState,
     savedSearch,
-    searchSessionManager,
     setExpandedDoc,
     stateContainer,
     viewMode,
