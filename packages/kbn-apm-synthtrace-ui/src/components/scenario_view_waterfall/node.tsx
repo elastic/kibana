@@ -14,7 +14,7 @@ import { Span, Transaction, ModalType } from '../../typings';
 
 const Node = ({ item, level }: { item: Transaction | Span; level: number }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { dispatch } = useScenarioContext();
+  const { dispatch, state } = useScenarioContext();
 
   const onButtonClick = () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
@@ -34,9 +34,21 @@ const Node = ({ item, level }: { item: Transaction | Span; level: number }) => {
 
   const shouldRepeat = item?.repeat ? item.repeat > 0 : false;
 
+  let panelColor = '#fff';
+
+  if (state.services) {
+    panelColor = state.services[item.serviceId]?.color;
+  }
+
   return (
-    <EuiFlexGroup style={{ display: 'flex', paddingLeft: `${level * 30}px`, marginBottom: '10px' }}>
-      <EuiPanel paddingSize="s">
+    <EuiFlexGroup
+      style={{
+        display: 'flex',
+        paddingLeft: `${level * 30}px`,
+        marginBottom: '10px',
+      }}
+    >
+      <EuiPanel paddingSize="s" style={{ backgroundColor: `${panelColor}` }}>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiText>{item.name}</EuiText>

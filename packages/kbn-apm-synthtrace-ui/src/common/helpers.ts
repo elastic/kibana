@@ -43,6 +43,7 @@ export const createServicePayload = (
   id: serviceId,
   name: payload.name,
   agentName: payload.agentName,
+  color: colorCodeGenerator(),
 });
 
 // Function to insert a node in a tree
@@ -62,4 +63,9 @@ export const insertNodeInATree = (
     tree.children?.forEach((child) => insertNodeInATree(parentId, node, child));
   }
   return tree;
+};
+
+// Function generates only Light colors with HSL - hsl(hue, saturation, lightness).
+export const colorCodeGenerator = () => {
+  return 'hsl(' + Math.random() * 360 + ', 100%, 75%)';
 };

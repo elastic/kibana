@@ -1,7 +1,7 @@
 import { SynthtraceScenario, Transaction } from '../typings';
 import { Action } from './actions';
 import { v4 as uuidv4 } from 'uuid';
-import { insertNodeInATree } from '../common/helpers';
+import { colorCodeGenerator, insertNodeInATree } from '../common/helpers';
 
 export const INITIAL_STATE: SynthtraceScenario = {
   instanceName: 'instance_1',
@@ -22,6 +22,7 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
     }
     case 'change_top_level_service': {
       const id = uuidv4();
+      const serviceColor = colorCodeGenerator();
       const transactionId = uuidv4();
       return {
         ...state,
@@ -29,12 +30,14 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
           name: `synth-${action.payload.agentName}`,
           agentName: action.payload.agentName,
           id,
+          color: serviceColor,
         },
         services: {
           [id]: {
             agentName: action.payload.agentName,
             name: `synth-${action.payload.agentName}`,
             id,
+            color: serviceColor,
           },
         },
         entryTransaction: {

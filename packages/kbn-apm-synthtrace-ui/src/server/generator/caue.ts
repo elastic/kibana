@@ -6,8 +6,8 @@ const scenario: SynthtraceScenario = {
   instanceName: 'instance-1',
   isDistributedTracing: true,
   services: {
-    '1': { id: '1', name: 'synth-java-6', agentName: 'java' },
-    '2': { id: '2', name: 'synth-node', agentName: 'nodejs' },
+    '1': { id: '1', name: 'synth-java-6', agentName: 'java', color: '#000' },
+    '2': { id: '2', name: 'synth-node', agentName: 'nodejs', color: '#fff' },
   },
   createModal: {},
   entryTransaction: {

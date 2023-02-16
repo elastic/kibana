@@ -39,6 +39,7 @@ export type Service = {
   id: string;
   name: string;
   agentName: ElasticAgentName;
+  color: string;
 };
 
 export interface Transaction {
@@ -77,17 +78,20 @@ export const example: SynthtraceScenario = {
     name: 'synth-rum',
     id: '1',
     agentName: 'rum-js',
+    color: '#000',
   },
   services: {
     '1': {
       name: 'synth-rum',
       agentName: 'rum-js',
       id: '1',
+      color: '#000',
     },
     '2': {
       name: 'synth-node',
       agentName: 'nodejs',
       id: '2',
+      color: '#000',
     },
   },
   entryTransaction: {
