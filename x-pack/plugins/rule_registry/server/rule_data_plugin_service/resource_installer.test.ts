@@ -14,7 +14,6 @@ import { Dataset } from './index_options';
 import { IndexInfo } from './index_info';
 import { elasticsearchServiceMock, ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
-  DEFAULT_ILM_POLICY_ID,
   ECS_COMPONENT_TEMPLATE_NAME,
   TECHNICAL_COMPONENT_TEMPLATE_NAME,
 } from '../../common/assets';
@@ -41,6 +40,7 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: jest.fn(),
         getClusterClient,
+        areFrameworkAlertsEnabled: false,
         pluginStop$,
       });
       installer.installCommonResources();
@@ -57,6 +57,7 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: jest.fn(),
         getClusterClient,
+        areFrameworkAlertsEnabled: false,
         pluginStop$,
       });
       const indexOptions = {
@@ -83,7 +84,6 @@ describe('resourceInstaller', () => {
       const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
       const getResourceNameMock = jest
         .fn()
-        .mockReturnValueOnce(DEFAULT_ILM_POLICY_ID)
         .mockReturnValueOnce(TECHNICAL_COMPONENT_TEMPLATE_NAME)
         .mockReturnValueOnce(ECS_COMPONENT_TEMPLATE_NAME);
       const installer = new ResourceInstaller({
@@ -92,12 +92,45 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: getResourceNameMock,
         getClusterClient,
+        areFrameworkAlertsEnabled: false,
         pluginStop$,
       });
 
       await installer.installCommonResources();
 
       expect(mockClusterClient.ilm.putLifecycle).toHaveBeenCalled();
+      expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
+      expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ name: TECHNICAL_COMPONENT_TEMPLATE_NAME })
+      );
+      expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ name: ECS_COMPONENT_TEMPLATE_NAME })
+      );
+    });
+
+    it('should install common resources when framework alerts are enabled', async () => {
+      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+      const getResourceNameMock = jest
+        .fn()
+        .mockReturnValueOnce(TECHNICAL_COMPONENT_TEMPLATE_NAME)
+        .mockReturnValueOnce(ECS_COMPONENT_TEMPLATE_NAME);
+      const installer = new ResourceInstaller({
+        logger: loggerMock.create(),
+        isWriteEnabled: true,
+        disabledRegistrationContexts: [],
+        getResourceName: getResourceNameMock,
+        getClusterClient,
+        areFrameworkAlertsEnabled: true,
+        pluginStop$,
+      });
+
+      await installer.installCommonResources();
+
+      // ILM policy should be handled by framework
+      expect(mockClusterClient.ilm.putLifecycle).not.toHaveBeenCalled();
       expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
         1,
@@ -117,6 +150,7 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: jest.fn(),
         getClusterClient,
+        areFrameworkAlertsEnabled: false,
         pluginStop$,
       });
 
@@ -188,6 +222,7 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: jest.fn(),
         getClusterClient: async () => mockClusterClient,
+        areFrameworkAlertsEnabled: false,
         pluginStop$,
       };
       const indexOptions = {

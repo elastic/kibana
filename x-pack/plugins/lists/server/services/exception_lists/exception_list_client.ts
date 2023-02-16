@@ -287,6 +287,7 @@ export class ExceptionListClient {
     comments,
     description,
     entries,
+    expireTime,
     itemId,
     meta,
     name,
@@ -300,6 +301,7 @@ export class ExceptionListClient {
       comments,
       description,
       entries,
+      expireTime,
       itemId,
       listId: ENDPOINT_LIST_ID,
       meta,
@@ -356,6 +358,7 @@ export class ExceptionListClient {
     comments,
     description,
     entries,
+    expireTime,
     id,
     itemId,
     meta,
@@ -371,6 +374,7 @@ export class ExceptionListClient {
       comments,
       description,
       entries,
+      expireTime,
       id,
       itemId,
       meta,
@@ -526,6 +530,7 @@ export class ExceptionListClient {
     comments,
     description,
     entries,
+    expireTime,
     itemId,
     listId,
     meta,
@@ -540,6 +545,7 @@ export class ExceptionListClient {
       comments,
       description,
       entries,
+      expireTime,
       itemId,
       listId,
       meta,
@@ -593,6 +599,7 @@ export class ExceptionListClient {
     comments,
     description,
     entries,
+    expireTime,
     id,
     itemId,
     meta,
@@ -608,6 +615,7 @@ export class ExceptionListClient {
       comments,
       description,
       entries,
+      expireTime,
       id,
       itemId,
       meta,
@@ -970,6 +978,7 @@ export class ExceptionListClient {
     listId,
     id,
     namespaceType,
+    includeExpiredExceptions,
   }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
     const { savedObjectsClient } = this;
 
@@ -978,6 +987,7 @@ export class ExceptionListClient {
         'exceptionsListPreExport',
         {
           id,
+          includeExpiredExceptions,
           listId,
           namespaceType,
         },
@@ -987,6 +997,7 @@ export class ExceptionListClient {
 
     return exportExceptionListAndItems({
       id,
+      includeExpiredExceptions,
       listId,
       namespaceType,
       savedObjectsClient,

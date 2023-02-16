@@ -53,13 +53,13 @@ export class ResolutionEditor extends Component<Props, State> {
     const scale = this._getScale();
     const unlabeledTicks = [
       {
-        label: '',
+        label: <span>&nbsp;</span>,
         value: scale[GRID_RESOLUTION.FINE],
       },
     ];
     if (scale[GRID_RESOLUTION.FINE] !== scale[GRID_RESOLUTION.MOST_FINE]) {
       unlabeledTicks.push({
-        label: '',
+        label: <span>&nbsp;</span>,
         value: scale[GRID_RESOLUTION.MOST_FINE],
       });
     }

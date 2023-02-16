@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
+import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import type { RulesTableState } from './rules_table_context';
 import { RulesTableContextProvider, useRulesTableContext } from './rules_table_context';
 import {
@@ -18,17 +19,16 @@ import {
   DEFAULT_SORTING_OPTIONS,
 } from './rules_table_defaults';
 import { RuleSource } from './rules_table_saved_state';
-import { useFindRulesInMemory } from './use_find_rules_in_memory';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('./use_find_rules_in_memory');
+jest.mock('../../../../rule_management/logic/use_find_rules');
 jest.mock('./use_rules_table_saved_state');
 
 function renderUseRulesTableContext(
   savedState: ReturnType<typeof useRulesTableSavedState>
 ): RulesTableState {
-  (useFindRulesInMemory as jest.Mock).mockReturnValue({
+  (useFindRules as jest.Mock).mockReturnValue({
     data: { rules: [], total: 0 },
     refetch: jest.fn(),
     dataUpdatedAt: 0,

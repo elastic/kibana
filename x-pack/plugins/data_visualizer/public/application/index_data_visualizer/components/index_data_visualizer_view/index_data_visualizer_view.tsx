@@ -41,6 +41,7 @@ import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme'
 import {
   DV_FROZEN_TIER_PREFERENCE,
   DV_RANDOM_SAMPLER_PREFERENCE,
+  DV_RANDOM_SAMPLER_P_VALUE,
   type DVKey,
   type DVStorageMapped,
 } from '../../types/storage';
@@ -71,7 +72,11 @@ import { DataVisualizerDataViewManagement } from '../data_view_management';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
-import { RANDOM_SAMPLER_OPTION } from '../../constants/random_sampler';
+import {
+  MIN_SAMPLER_PROBABILITY,
+  RANDOM_SAMPLER_OPTION,
+  RandomSamplerOption,
+} from '../../constants/random_sampler';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -143,6 +148,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     DVStorageMapped<typeof DV_RANDOM_SAMPLER_PREFERENCE>
   >(DV_RANDOM_SAMPLER_PREFERENCE, RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
 
+  const [savedRandomSamplerProbability, saveRandomSamplerProbability] = useStorage<
+    DVKey,
+    DVStorageMapped<typeof DV_RANDOM_SAMPLER_P_VALUE>
+  >(DV_RANDOM_SAMPLER_P_VALUE, MIN_SAMPLER_PROBABILITY);
+
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<
     DVKey,
     DVStorageMapped<typeof DV_FROZEN_TIER_PREFERENCE>
@@ -156,6 +166,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     () =>
       getDefaultDataVisualizerListState({
         rndSamplerPref: savedRandomSamplerPreference,
+        probability: savedRandomSamplerProbability,
       }),
     // We just need to load the saved preference when the page is first loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -316,9 +327,38 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     ]
   );
 
-  const setSamplingProbability = (value: number | null) => {
-    setDataVisualizerListState({ ...dataVisualizerListState, probability: value });
-  };
+  const setSamplingProbability = useCallback(
+    (value: number | null) => {
+      if (savedRandomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_MANUAL && value !== null) {
+        saveRandomSamplerProbability(value);
+      }
+      setDataVisualizerListState({ ...dataVisualizerListState, probability: value });
+    },
+    [
+      dataVisualizerListState,
+      saveRandomSamplerProbability,
+      savedRandomSamplerPreference,
+      setDataVisualizerListState,
+    ]
+  );
+
+  const setRandomSamplerPreference = useCallback(
+    (nextPref: RandomSamplerOption) => {
+      if (nextPref === RANDOM_SAMPLER_OPTION.ON_MANUAL) {
+        // By default, when switching to manual, restore previously chosen probability
+        // else, default to 0.001%
+        setSamplingProbability(
+          savedRandomSamplerProbability &&
+            savedRandomSamplerProbability > 0 &&
+            savedRandomSamplerProbability <= 0.5
+            ? savedRandomSamplerProbability
+            : MIN_SAMPLER_PROBABILITY
+        );
+      }
+      saveRandomSamplerPreference(nextPref);
+    },
+    [savedRandomSamplerProbability, setSamplingProbability, saveRandomSamplerPreference]
+  );
 
   useEffect(
     function clearFiltersOnLeave() {
@@ -469,14 +509,13 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     [currentDataView.timeFieldName]
   );
 
+  const isWithinLargeBreakpoint = useIsWithinMaxBreakpoint('l');
   const dvPageHeader = css({
-    [useEuiBreakpoint(['xs', 's', 'm', 'l', 'xl'])]: {
+    [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
       flexDirection: 'column',
       alignItems: 'flex-start',
     },
   });
-
-  const isWithinXl = useIsWithinMaxBreakpoint('xl');
 
   return (
     <EuiPageBody data-test-subj="dataVisualizerIndexPage" paddingSize="none" panelled={false}>
@@ -500,7 +539,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               </EuiFlexGroup>
             </EuiPageContentHeaderSection>
 
-            {isWithinXl ? <EuiSpacer size="m" /> : null}
+            {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
             <EuiFlexGroup
               alignItems="center"
               justifyContent="flexEnd"
@@ -532,7 +571,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiPageContentBody>
-        <EuiFlexGroup gutterSize="m" direction={isWithinXl ? 'column' : 'row'}>
+        <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder>
               <SearchPanel
@@ -566,7 +605,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                       }
                       loading={overallStatsProgress.loaded < 100}
                       randomSamplerPreference={savedRandomSamplerPreference}
-                      setRandomSamplerPreference={saveRandomSamplerPreference}
+                      setRandomSamplerPreference={setRandomSamplerPreference}
                     />
                   </EuiFlexGroup>
                 </>
@@ -594,7 +633,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               />
             </EuiPanel>
           </EuiFlexItem>
-          {isWithinXl ? <EuiSpacer size="m" /> : null}
+          {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
           <EuiFlexItem grow={false}>
             <ActionsPanel
               dataView={currentDataView}

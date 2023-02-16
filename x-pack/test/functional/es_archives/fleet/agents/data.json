@@ -8,7 +8,11 @@
       "active": true,
       "policy_id": "policy1",
       "type": "PERMANENT",
-      "local_metadata": { "host": {"hostname": "host1"}},
+      "local_metadata": { "host": {"hostname": "host1"}, "elastic": {
+        "agent": {
+          "version": "8.7.0"
+        }
+      }},
       "user_provided_metadata": {},
       "enrolled_at": "2022-06-21T12:14:25Z",
       "last_checkin": "2022-06-27T12:26:29Z",

@@ -333,7 +333,8 @@ In general this plugin provides:
 
 
 |{kib-repo}blob/{branch}/src/plugins/unified_histogram/README.md[unifiedHistogram]
-|The unifiedHistogram plugin provides UI components to create a layout including a resizable histogram and a main display.
+|Unified Histogram is a UX Building Block including a layout with a resizable histogram and a main display.
+It manages its own state and data fetching, and can easily be dropped into pages with minimal setup.
 
 
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]

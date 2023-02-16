@@ -14,7 +14,7 @@ import {
   isLogThresholdRuleType,
   pipeMigrations,
 } from '../utils';
-import { RawRule } from '../../../types';
+import { RawRule, RuleLastRunOutcomeOrderMap } from '../../../types';
 
 function addGroupByToEsQueryRule(
   doc: SavedObjectUnsanitizedDoc<RawRule>
@@ -70,9 +70,29 @@ function addLogViewRefToLogThresholdRule(
   return doc;
 }
 
+function addOutcomeOrder(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  if (!doc.attributes.lastRun) {
+    return doc;
+  }
+
+  const outcome = doc.attributes.lastRun.outcome;
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      lastRun: {
+        ...doc.attributes.lastRun,
+        outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
+      },
+    },
+  };
+}
+
 export const getMigrations870 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(addGroupByToEsQueryRule, addLogViewRefToLogThresholdRule)
+    pipeMigrations(addGroupByToEsQueryRule, addLogViewRefToLogThresholdRule, addOutcomeOrder)
   );

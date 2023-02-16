@@ -146,12 +146,16 @@ export class LoginPage extends Component<Props, State> {
     ) : (
       <EuiIcon type="logoElastic" size="xxl" />
     );
+    // custom logo needs to be centered
+    const logoStyle = customLogo ? { padding: 0 } : {};
     return (
       <div className="loginWelcome login-form">
         <header className="loginWelcome__header">
           <div className={contentHeaderClasses}>
             <EuiSpacer size="xxl" />
-            <span className="loginWelcome__logo">{logo}</span>
+            <span className="loginWelcome__logo" style={logoStyle}>
+              {logo}
+            </span>
             <EuiTitle size="m" className="loginWelcome__title" data-test-subj="loginWelcomeTitle">
               <h1>
                 <FormattedMessage

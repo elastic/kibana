@@ -85,6 +85,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clearUnsavedChanges();
       });
 
+      it('can make selections', async () => {
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.optionsListOpenPopover(firstId);
+        await dashboardControls.optionsListPopoverSelectOption('win xp');
+        await dashboardControls.optionsListPopoverSelectOption('osx');
+        await dashboardControls.optionsListEnsurePopoverIsClosed(firstId);
+
+        const selectionString = await dashboardControls.optionsListGetSelectionsString(firstId);
+        expect(selectionString).to.be('win xp, osx');
+      });
+
       it('can add a second options list control with a non-default data view', async () => {
         await dashboardControls.createControl({
           controlType: OPTIONS_LIST_CONTROL,
@@ -98,18 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clearUnsavedChanges();
       });
 
-      it('renames an existing control', async () => {
-        const secondId = (await dashboardControls.getAllControlIds())[1];
-
-        const newTitle = 'wow! Animal sounds?';
-        await dashboardControls.editExistingControl(secondId);
-        await dashboardControls.controlEditorSetTitle(newTitle);
-        await dashboardControls.controlEditorSave();
-        expect(await dashboardControls.doesControlTitleExist(newTitle)).to.be(true);
-        await dashboard.clearUnsavedChanges();
-      });
-
-      it('can change the data view and field of an existing options list', async () => {
+      it('can change the data view and field of an existing options list and clears selections', async () => {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.editExistingControl(firstId);
 
@@ -120,6 +120,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.controlsEditorSetfield('animal.keyword', OPTIONS_LIST_CONTROL);
         await dashboardControls.controlEditorSave();
 
+        const selectionString = await dashboardControls.optionsListGetSelectionsString(firstId);
+        expect(selectionString).to.be('Any');
+
         // when creating a new filter, the ability to select a data view should be removed, because the dashboard now only has one data view
         await retry.try(async () => {
           await testSubjects.click('addFilter');
@@ -127,37 +130,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await filterBar.ensureFieldEditorModalIsClosed();
           expect(indexPatternSelectExists).to.be(false);
         });
-        await dashboard.clearUnsavedChanges();
       });
 
-      it('editing field clears selections', async () => {
+      it('renames an existing control and retains selection', async () => {
         const secondId = (await dashboardControls.getAllControlIds())[1];
+
         await dashboardControls.optionsListOpenPopover(secondId);
         await dashboardControls.optionsListPopoverSelectOption('hiss');
         await dashboardControls.optionsListEnsurePopoverIsClosed(secondId);
 
+        const newTitle = 'wow! Animal sounds?';
+        await testSubjects.click(`control-action-${secondId}-edit`);
         await dashboardControls.editExistingControl(secondId);
-        await dashboardControls.controlsEditorSetfield('animal.keyword', OPTIONS_LIST_CONTROL);
+        await dashboardControls.controlEditorSetTitle(newTitle);
+        await dashboardControls.controlEditorSetWidth('small');
         await dashboardControls.controlEditorSave();
+        expect(await dashboardControls.doesControlTitleExist(newTitle)).to.be(true);
 
         const selectionString = await dashboardControls.optionsListGetSelectionsString(secondId);
-        expect(selectionString).to.be('Any');
-      });
+        expect(selectionString).to.be('hiss');
 
-      it('editing other control settings keeps selections', async () => {
-        const secondId = (await dashboardControls.getAllControlIds())[1];
-        await dashboardControls.optionsListOpenPopover(secondId);
-        await dashboardControls.optionsListPopoverSelectOption('dog');
-        await dashboardControls.optionsListPopoverSelectOption('cat');
-        await dashboardControls.optionsListEnsurePopoverIsClosed(secondId);
-
-        await dashboardControls.editExistingControl(secondId);
-        await dashboardControls.controlEditorSetTitle('Animal');
-        await dashboardControls.controlEditorSetWidth('large');
-        await dashboardControls.controlEditorSave();
-
-        const selectionString = await dashboardControls.optionsListGetSelectionsString(secondId);
-        expect(selectionString).to.be('dog, cat');
+        await dashboard.clearUnsavedChanges();
       });
 
       it('deletes an existing control', async () => {

@@ -1,5 +1,5 @@
 {
-  "name": "index_patterns_test_plugin",
+  "name": "@kbn/index-patterns-test-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/index_patterns_test_plugin",
   "kibana": {
