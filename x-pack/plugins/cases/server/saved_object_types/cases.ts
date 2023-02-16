@@ -26,6 +26,7 @@ export const createCaseSavedObjectType = (
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
+    dynamic: false,
     properties: {
       assignees: {
         properties: {
@@ -36,22 +37,6 @@ export const createCaseSavedObjectType = (
       },
       closed_at: {
         type: 'date',
-      },
-      closed_by: {
-        properties: {
-          username: {
-            type: 'keyword',
-          },
-          full_name: {
-            type: 'keyword',
-          },
-          email: {
-            type: 'keyword',
-          },
-          profile_uid: {
-            type: 'keyword',
-          },
-        },
       },
       created_at: {
         type: 'date',
@@ -78,61 +63,6 @@ export const createCaseSavedObjectType = (
       description: {
         type: 'text',
       },
-      connector: {
-        properties: {
-          name: {
-            type: 'text',
-          },
-          type: {
-            type: 'keyword',
-          },
-          fields: {
-            properties: {
-              key: {
-                type: 'text',
-              },
-              value: {
-                type: 'text',
-              },
-            },
-          },
-        },
-      },
-      external_service: {
-        properties: {
-          pushed_at: {
-            type: 'date',
-          },
-          pushed_by: {
-            properties: {
-              username: {
-                type: 'keyword',
-              },
-              full_name: {
-                type: 'keyword',
-              },
-              email: {
-                type: 'keyword',
-              },
-              profile_uid: {
-                type: 'keyword',
-              },
-            },
-          },
-          connector_name: {
-            type: 'keyword',
-          },
-          external_id: {
-            type: 'keyword',
-          },
-          external_title: {
-            type: 'text',
-          },
-          external_url: {
-            type: 'text',
-          },
-        },
-      },
       owner: {
         type: 'keyword',
       },
@@ -152,22 +82,6 @@ export const createCaseSavedObjectType = (
       },
       updated_at: {
         type: 'date',
-      },
-      updated_by: {
-        properties: {
-          username: {
-            type: 'keyword',
-          },
-          full_name: {
-            type: 'keyword',
-          },
-          email: {
-            type: 'keyword',
-          },
-          profile_uid: {
-            type: 'keyword',
-          },
-        },
       },
       settings: {
         properties: {
