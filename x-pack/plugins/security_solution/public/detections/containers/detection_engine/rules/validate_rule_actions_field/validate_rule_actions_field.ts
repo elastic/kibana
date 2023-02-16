@@ -7,15 +7,21 @@
 
 /* istanbul ignore file */
 
-import type { ValidationFuncArg } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type {
+  ValidationCancelablePromise,
+  ValidationFuncArg,
+  ValidationResponsePromise,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type {
   RuleAction,
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleActionsFormData } from '../../../../../detection_engine/rule_management_ui/components/rules_table/bulk_actions/forms/rule_actions_form';
 import type { ActionsStepRule } from '../../../../pages/detection_engine/rules/types';
-import type { ValidationFunc, ERROR_CODE, ValidationError } from '../../../../../shared_imports';
+import type { ValidationFunc, ERROR_CODE } from '../../../../../shared_imports';
 import { getActionTypeName, validateMustache, validateActionParams } from './utils';
+
+export const DEFAULT_VALIDATION_TIMEOUT = 100;
 
 export const validateSingleAction = async (
   actionItem: RuleAction,
@@ -29,9 +35,7 @@ export const validateSingleAction = async (
 
 export const validateRuleActionsField =
   (actionTypeRegistry: ActionTypeRegistryContract) =>
-  async (
-    ...data: Parameters<ValidationFunc>
-  ): Promise<ValidationError<ERROR_CODE> | void | undefined> => {
+  async (...data: Parameters<ValidationFunc>): ValidationResponsePromise<ERROR_CODE> => {
     const [{ value, path }] = data as [{ value: RuleAction[]; path: string }];
 
     const errors = [];
@@ -56,32 +60,34 @@ export const validateRuleActionsField =
   };
 
 /**
- * Throttles validation by canceling previous validation requests. Necessary
- * to prevent error validation flashing when first adding an action until root
- * cause of https://github.com/elastic/kibana/issues/142217 is found
+ * Debounces validation by canceling previous validation requests. Essentially leveraging the async validation
+ * cancellation behavior from the hook_form_lib. Necessary to prevent error validation flashing when first adding an
+ * action until root cause of https://github.com/elastic/kibana/issues/142217 is found
  *
  * See docs for details:
  * https://docs.elastic.dev/form-lib/examples/validation#cancel-asynchronous-validation
  *
+ * Note: _.throttle/debounce does not have async support, and so not used https://github.com/lodash/lodash/issues/4815.
+ *
  * @param actionTypeRegistry
+ * @param defaultValidationTimeout
  */
-export const throttledValidateRuleActionsField =
-  (actionTypeRegistry: ActionTypeRegistryContract) =>
+export const debouncedValidateRuleActionsField =
   (
-    data: ValidationFuncArg<ActionsStepRule | RuleActionsFormData>
-  ): Promise<ValidationError | void | undefined> => {
+    actionTypeRegistry: ActionTypeRegistryContract,
+    defaultValidationTimeout = DEFAULT_VALIDATION_TIMEOUT
+  ) =>
+  (data: ValidationFuncArg<ActionsStepRule | RuleActionsFormData>): ValidationResponsePromise => {
     let isCanceled = false;
-    const promise: Promise<ValidationError | void | undefined> & { cancel?(): void } = new Promise(
-      (resolve) => {
-        setTimeout(() => {
-          if (isCanceled) {
-            resolve();
-          } else {
-            resolve(validateRuleActionsField(actionTypeRegistry)(data));
-          }
-        }, 100);
-      }
-    );
+    const promise: ValidationCancelablePromise = new Promise((resolve) => {
+      setTimeout(() => {
+        if (isCanceled) {
+          resolve();
+        } else {
+          resolve(validateRuleActionsField(actionTypeRegistry)(data));
+        }
+      }, defaultValidationTimeout);
+    });
 
     promise.cancel = () => {
       isCanceled = true;
