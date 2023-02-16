@@ -9,6 +9,7 @@
   max-height: $euiSize * 20;
   width: $euiSize * 16;
   overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .lnsWorkspaceWarningList__item {
