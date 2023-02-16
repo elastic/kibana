@@ -22,7 +22,6 @@ import {
   getFilter,
   combineErrorMessages,
   isMetricCounterField,
-  getErrorForRateReference,
 } from './helpers';
 
 const supportedTypes = new Set(['number']);
@@ -71,7 +70,6 @@ export const rateOperation: OperationDefinition<RateIndexPatternColumn, 'field',
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
       getInvalidFieldMessage(layer, columnId, indexPattern),
-      getErrorForRateReference(layer, columnId, 'rate', indexPattern),
     ]),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
