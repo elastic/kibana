@@ -7,7 +7,6 @@
 
 import React, { memo, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
-import { groupBy, sortBy } from 'lodash';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -24,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { sortBy } from 'lodash';
 import type { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
@@ -142,32 +142,60 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   );
 
   const commandsByGroups = useMemo(() => {
-    const sortedGroupLabels = new Set<string>();
-    const allowedCommands = sortBy(
-      // We only show commands that are no hidden
-      commands.filter((command) => command.helpHidden !== true),
-      'helpGroupPosition'
-    ).map((command) => {
-      let updatedCommand = command;
+    const helpGroups = new Map<
+      string,
+      { label: string; position: number; list: CommandDefinition[] }
+    >();
 
-      // Both Help Group label and position are optional, so assign defaults if they are not defined
-      if (command.helpGroupPosition === undefined || command.helpGroupLabel === undefined) {
-        updatedCommand = {
-          ...command,
-          helpGroupLabel: command.helpGroupLabel ?? otherCommandsGroupLabel,
-          helpGroupPosition: command.helpGroupPosition ?? Infinity,
-        };
+    // We only show commands that are no hidden
+    const allowedCommands = commands.filter((command) => command.helpHidden !== true);
+
+    for (const allowedCommand of allowedCommands) {
+      const { helpGroupLabel = otherCommandsGroupLabel, helpGroupPosition = Infinity } =
+        allowedCommand;
+
+      const groupEntry = helpGroups.get(helpGroupLabel);
+
+      if (groupEntry) {
+        groupEntry.list.push(allowedCommand);
+
+        // Its possible (but probably not intentionally) that the same Group Label might
+        // has different positions defined (ex. one has a position, and another does not,
+        // which defaults to `Infinity`. If we detect that here, then update the group
+        // position. In the end, the group label will have the last explicitly defined
+        // position found.
+        if (
+          groupEntry.position === Infinity &&
+          helpGroupPosition !== undefined &&
+          helpGroupPosition !== groupEntry.position
+        ) {
+          groupEntry.position = helpGroupPosition;
+        }
+      } else {
+        helpGroups.set(allowedCommand.helpGroupLabel as string, {
+          label: helpGroupLabel,
+          position: helpGroupPosition,
+          list: [allowedCommand],
+        });
       }
+    }
 
-      sortedGroupLabels.add(updatedCommand.helpGroupLabel as string);
+    // Sort by Group position and return an array of arrays with the list of commands per group
+    return sortBy(Array.from(helpGroups.values()), 'position').map((group) => {
+      // ensure all commands in this group have a `helpCommandPosition`. Those missing one, will
+      // be set to `Infinity` so that they are moved to the end.
+      const groupCommandList = group.list.map((command) => {
+        if (command.helpCommandPosition === undefined) {
+          return {
+            ...command,
+            helpCommandPosition: Infinity,
+          };
+        }
 
-      return updatedCommand;
-    });
+        return command;
+      });
 
-    const commandsGroupedByLabel = groupBy(allowedCommands, 'helpGroupLabel');
-
-    return Array.from(sortedGroupLabels).map((groupLabel) => {
-      return commandsGroupedByLabel[groupLabel];
+      return sortBy(groupCommandList, 'helpCommandPosition');
     });
   }, [commands]);
 
@@ -245,6 +273,9 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                           aria-label={`updateTextInputCommand-${command.name}`}
                           onClick={updateInputText(`${commandNameWithArgs} `)}
                           isDisabled={command.helpDisabled === true}
+                          data-test-subj={getTestId(
+                            `${groupTestIdSuffix}-${command.name}-addToInput`
+                          )}
                         />
                       </EuiToolTip>
                     </EuiFlexItem>

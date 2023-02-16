@@ -429,7 +429,7 @@ export const getEndpointConsoleCommands = ({
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
-      helpCommandPosition: 6,
+      // helpCommandPosition: 6,
       helpDisabled: !doesEndpointSupportCommand('get-file'),
       helpHidden: !getRbacControl({
         commandName: 'get-file',

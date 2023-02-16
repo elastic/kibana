@@ -6,16 +6,18 @@
  */
 
 import type { ConsoleTestSetup } from '../mocks';
-import { getConsoleTestSetup } from '../mocks';
+import { getCommandListMock, getConsoleTestSetup } from '../mocks';
 
 describe('When displaying the command list', () => {
   let render: ConsoleTestSetup['renderConsole'];
   let renderResult: ReturnType<typeof render>;
+  let selectors: ConsoleTestSetup['selectors'];
 
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
 
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
+    selectors = testSetup.selectors;
   });
 
   describe('and its displayed on the side panel', () => {
@@ -64,16 +66,42 @@ describe('When displaying the command list', () => {
 
       expect(groups).toEqual([
         'group 1',
-        'Other commands',
         'Supporting commands & parameters',
         'group 2',
+        'Other commands',
       ]);
     });
 
-    it.todo('should display the list of command in the expected order');
+    it('should display the list of command in the expected order', () => {
+      renderAndOpenHelpPanel();
+      const group1Ele = renderResult.getByTestId('test-commandList-group1');
+      const commands = Array.from(group1Ele.querySelectorAll('tbody td .euiTableCellContent')).map(
+        (ele) => ele.textContent
+      );
 
-    it.todo('should hide command if command definition helpHidden is true');
+      expect(commands).toEqual(['cmd6 --foohas custom hint text', 'cmd1a command with no options']);
+    });
 
-    it.todo('should disable "add to text bar" button if command definition helpHidden is true');
+    it('should hide command if command definition helpHidden is true', () => {
+      const commands = getCommandListMock();
+      commands[0].helpHidden = true;
+      renderAndOpenHelpPanel({ commands });
+
+      expect(renderResult.queryByTestId('test-commandList-group1-cmd1')).toBeNull();
+    });
+
+    it('should disable "add to text bar" button if command definition helpHidden is true', () => {
+      const commands = getCommandListMock();
+      commands[0].helpDisabled = true;
+      renderAndOpenHelpPanel({ commands });
+
+      expect(renderResult.getByTestId('test-commandList-group1-cmd1-addToInput')).toBeDisabled();
+    });
+
+    it('should add command to console input when [+] button is clicked', () => {
+      renderAndOpenHelpPanel();
+      renderResult.getByTestId('test-commandList-group1-cmd6-addToInput').click();
+      expect(selectors.getInputText()).toEqual('cmd6 --foo ');
+    });
   });
 });

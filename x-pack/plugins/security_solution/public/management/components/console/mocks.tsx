@@ -21,6 +21,12 @@ import type {
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 
+interface ConsoleSelectorMock {
+  getLeftOfCursorInputText: () => string;
+  getRightOfCursorInputText: () => string;
+  getInputText: () => string;
+}
+
 export interface ConsoleTestSetup {
   renderConsole(props?: Partial<ConsoleProps>): ReturnType<AppContextTestRender['render']>;
 
@@ -38,7 +44,34 @@ export interface ConsoleTestSetup {
       useKeyboard: boolean;
     }>
   ): void;
+
+  selectors: ConsoleSelectorMock;
 }
+
+/**
+ * A set of jest selectors for interacting with the console
+ * @param dataTestSubj
+ */
+export const getConsoleSelectorsMock = (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  dataTestSubj: string = 'test'
+): ConsoleTestSetup['selectors'] => {
+  const getLeftOfCursorInputText: ConsoleSelectorMock['getLeftOfCursorInputText'] = () => {
+    return renderResult.getByTestId(`${dataTestSubj}-cmdInput-leftOfCursor`).textContent ?? '';
+  };
+  const getRightOfCursorInputText: ConsoleSelectorMock['getRightOfCursorInputText'] = () => {
+    return renderResult.getByTestId(`${dataTestSubj}-cmdInput-rightOfCursor`).textContent ?? '';
+  };
+  const getInputText: ConsoleSelectorMock['getInputText'] = () => {
+    return getLeftOfCursorInputText() + getRightOfCursorInputText();
+  };
+
+  return {
+    getInputText,
+    getLeftOfCursorInputText,
+    getRightOfCursorInputText,
+  };
+};
 
 /**
  * Finds the console in the Render Result and enters the command provided
@@ -80,12 +113,16 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
 
   const commandList = getCommandListMock();
 
+  let testSubj: string;
+
   const renderConsole: ConsoleTestSetup['renderConsole'] = ({
     prompt = '$$>',
     commands = commandList,
     'data-test-subj': dataTestSubj = 'test',
     ...others
   } = {}) => {
+    testSubj = dataTestSubj;
+
     return (renderResult = mockedContext.render(
       <Console prompt={prompt} commands={commands} data-test-subj={dataTestSubj} {...others} />
     ));
@@ -95,10 +132,38 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     enterConsoleCommand(renderResult, cmd, options);
   };
 
+  let selectors: ConsoleSelectorMock;
+  const initSelectorsIfNeeded = () => {
+    if (selectors) {
+      return selectors;
+    }
+
+    if (!testSubj) {
+      throw new Error(`no 'dataTestSubj' provided to 'render()'!`);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    selectors = getConsoleSelectorsMock(renderResult, testSubj!);
+  };
+
   return {
     renderConsole,
     commands: commandList,
     enterCommand,
+    selectors: {
+      getInputText: () => {
+        initSelectorsIfNeeded();
+        return selectors.getInputText();
+      },
+      getLeftOfCursorInputText: () => {
+        initSelectorsIfNeeded();
+        return selectors.getLeftOfCursorInputText();
+      },
+      getRightOfCursorInputText: () => {
+        initSelectorsIfNeeded();
+        return selectors.getRightOfCursorInputText();
+      },
+    },
   };
 };
 
@@ -175,7 +240,7 @@ export const getCommandListMock = (): CommandDefinition[] => {
       name: 'cmd3',
       about: 'allows argument to be used multiple times',
       RenderComponent: jest.fn(RenderComponent),
-      helpGroupPosition: 1,
+      helpGroupPosition: 0,
       args: {
         foo: {
           about: 'foo stuff',
@@ -189,6 +254,7 @@ export const getCommandListMock = (): CommandDefinition[] => {
       about: 'all options optional, but at least one is required',
       RenderComponent: jest.fn(RenderComponent),
       mustHaveArgs: true,
+      helpGroupPosition: 1,
       args: {
         foo: {
           about: 'foo stuff',
@@ -231,6 +297,7 @@ export const getCommandListMock = (): CommandDefinition[] => {
       exampleInstruction: 'Enter --foo to execute',
       helpGroupLabel: 'group 1',
       helpGroupPosition: 0,
+      helpCommandPosition: 0,
       args: {
         foo: {
           about: 'foo stuff',
