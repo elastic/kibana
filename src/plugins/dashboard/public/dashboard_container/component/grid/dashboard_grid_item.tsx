@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useEffect, FC } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
@@ -96,21 +96,21 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
   }
 );
 
-export const ObservedItem: FC<Props> = React.forwardRef<HTMLDivElement, Props>(
+export const ObservedItem = React.forwardRef<HTMLDivElement, Props>(
   (props, panelRef) => {
     const [intersection, updateIntersection] = useState<IntersectionObserverEntry>();
     const [isRenderable, setIsRenderable] = useState(false);
 
     const observerRef = useRef(
       new window.IntersectionObserver(([value]) => updateIntersection(value), {
-        root: panelRef.current,
+        root: (panelRef as React.RefObject<HTMLDivElement>).current,
       })
     );
 
     useEffect(() => {
       const { current: currentObserver } = observerRef;
       currentObserver.disconnect();
-      const { current } = panelRef;
+      const { current } = panelRef as React.RefObject<HTMLDivElement>;
 
       if (current) {
         currentObserver.observe(current);
@@ -131,7 +131,7 @@ export const ObservedItem: FC<Props> = React.forwardRef<HTMLDivElement, Props>(
 
 // ReactGridLayout passes ref to children. Functional component children require forwardRef to avoid react warning
 // https://github.com/react-grid-layout/react-grid-layout#custom-child-components-and-draggable-handles
-export const DashboardGridItem: FC<Props> = React.forwardRef<HTMLDivElement, Props>(
+export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
   (props, ref) => {
     const {
       settings: { isProjectEnabledInLabs },
