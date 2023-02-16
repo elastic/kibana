@@ -28,11 +28,11 @@ import styled from 'styled-components';
 
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
 import { ModalContainer } from './modal_container';
-import { SavedObjectFinderUi } from './saved_objects_finder';
 import { useLensDraftComment } from './use_lens_draft_comment';
 import { VISUALIZATION } from './translations';
 import { useIsMainApplication } from '../../../../common/hooks';
@@ -364,7 +364,6 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
           uiSettings={uiSettings}
           savedObjects={savedObjects}
           euiFieldSearchProps={euiFieldSearchProps}
-          // @ts-expect-error update types
           euiFormRowProps={euiFormRowProps}
         />
       </EuiModalBody>
