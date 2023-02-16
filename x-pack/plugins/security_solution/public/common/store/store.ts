@@ -81,7 +81,10 @@ export const createStoreFactory = async (
     // check for/generate default Security Solution Kibana data view
     const sourcererDataViews = await createSourcererDataView({
       body: {
-        patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
+        patternList: [
+          ...configPatternList,
+          ...(signal.name != null ? [signal.name.concat('*')] : []),
+        ],
       },
       dataViewService: startPlugins.data.dataViews,
       dataViewId: `${DEFAULT_DATA_VIEW_ID}-${(await startPlugins.spaces?.getActiveSpace())?.id}`,
