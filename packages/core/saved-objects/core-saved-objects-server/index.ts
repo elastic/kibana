@@ -122,10 +122,11 @@ export type {
   SavedObjectModelTransformationResult,
 } from './src/model_version';
 
+// We re-export the SavedObject types here for convenience.
 export type {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectReference,
-} from '@kbn/core-saved-objects-common/src/server_types';
+} from '@kbn/core-saved-objects-api-server';
