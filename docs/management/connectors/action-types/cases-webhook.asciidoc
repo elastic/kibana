@@ -102,33 +102,49 @@ NOTE: Due to Mustache template variables (the text enclosed in triple braces, fo
 Use the <<action-settings,action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
-[[Preconfigured-cases-webhook-configuration]]
-=== Preconfigured connector type
+[[define-cases-webhook-ui]]
+=== Create connectors in {kib}
+
+You can create connectors in *{stack-manage-app} > {connectors-ui}*
+or as needed when you're creating a rule. For example:
+
+[role="screenshot"]
+image::management/connectors/images/cases-webhook-connector.gif[{webhook-cm} connector]
+
+
+[float]
+[[preconfigured-cases-webhook-configuration]]
+=== Create preconfigured connectors
+
+If you are running {kib} on-prem, you can define connectors by
+adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
+For example:
 
 [source,text]
 --
- my-case-management-webhook:
-   name: Case Management Webhook Connector
-   actionTypeId: .cases-webhook
-   config:
-     hasAuth: true
-     headers:
-       'content-type': 'application/json'
-     createIncidentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue'
-     createIncidentMethod: 'post'
-     createIncidentJson: '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}}'
-     getIncidentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}'
-     getIncidentResponseExternalTitleKey: 'key'
-     viewIncidentUrl: 'https://testing-jira.atlassian.net/browse/{{{external.system.title}}}'
-     updateIncidentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}'
-     updateIncidentMethod: 'put'
-     updateIncidentJson: '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}}'
-     createCommentMethod: 'post',
-     createCommentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment',
-     createCommentJson: '{"body": {{{case.comment}}}}',
-   secrets:
-     user: testuser
-     password: passwordvalue
+xpack.actions.preconfigured:
+  my-case-management-webhook:
+    name: Case Management Webhook Connector
+    actionTypeId: .cases-webhook
+    config:
+      hasAuth: true
+      headers:
+        'content-type': 'application/json'
+      createIncidentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue'
+      createIncidentMethod: 'post'
+      createIncidentJson: '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}}'
+      getIncidentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}'
+      getIncidentResponseExternalTitleKey: 'key'
+      viewIncidentUrl: 'https://testing-jira.atlassian.net/browse/{{{external.system.title}}}'
+      updateIncidentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}'
+      updateIncidentMethod: 'put'
+      updateIncidentJson: '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}}'
+      createCommentMethod: 'post',
+      createCommentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment',
+      createCommentJson: '{"body": {{{case.comment}}}}',
+    secrets:
+      user: testuser
+      password: passwordvalue
 --
 
 `config`:: Defines information for the connector type.
@@ -153,22 +169,14 @@ Use the <<action-settings,action configuration settings>> to customize connector
 `password`::: A string that corresponds to *Password*. Required if `hasAuth` is set to `true`.
 
 [float]
-[[define-cases-webhook-ui]]
-=== Define connector in {stack-manage-app}
+[[cases-webhook-action-configuration]]
+=== Test connectors
 
-Define {webhook-cm} connector properties:
-
-[role="screenshot"]
-image::management/connectors/images/cases-webhook-connector.gif[{webhook-cm} connector]
-
-Test {webhook-cm} action parameters:
+You can test connectors with the <<execute-connector-api,run connector API>> or
+as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/cases-webhook-test.gif[{webhook-cm} params test]
-
-[float]
-[[cases-webhook-action-configuration]]
-=== Action configuration
 
 {webhook-cm} actions have the following configuration properties:
 
