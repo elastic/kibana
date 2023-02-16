@@ -677,10 +677,9 @@ describe('StatefulOpenTimeline', () => {
   });
 
   describe('Create rule from timeline', () => {
-    const allTimelines = getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []);
-    const lastTimeline = allTimelines.pop();
-
+    const timeline = mockOpenTimelineQueryResults.timeline[0];
     beforeEach(() => {
+      const lastTimeline = getAllTimeline('', [timeline])[0];
       (useGetAllTimeline as jest.Mock).mockReturnValue({
         fetchAllTimeline: jest.fn(),
         timelines: [
@@ -693,7 +692,7 @@ describe('StatefulOpenTimeline', () => {
           },
         ],
         loading: false,
-        totalCount: mockOpenTimelineQueryResults.totalCount,
+        totalCount: 1,
         refetch: jest.fn(),
       });
     });
@@ -712,7 +711,7 @@ describe('StatefulOpenTimeline', () => {
       fireEvent.click(getAllByTestId('euiCollapsedItemActionsButton')[0]);
       fireEvent.click(getAllByTestId('create-rule-from-timeline')[0]);
       expect(mockNavigateTo.mock.calls[0][0].path).toEqual(
-        `?${RULE_FROM_TIMELINE_URL_PARAM}='${lastTimeline?.savedObjectId}'`
+        `?${RULE_FROM_TIMELINE_URL_PARAM}='${timeline?.savedObjectId}'`
       );
     });
     test('navigates to create rule page with timeline id in URL when Create rule from timeline eql click', async () => {
@@ -730,11 +729,12 @@ describe('StatefulOpenTimeline', () => {
       fireEvent.click(getAllByTestId('euiCollapsedItemActionsButton')[0]);
       fireEvent.click(getAllByTestId('create-rule-from-eql')[0]);
       expect(mockNavigateTo.mock.calls[0][0].path).toEqual(
-        `?${RULE_FROM_EQL_URL_PARAM}='${lastTimeline?.savedObjectId}'`
+        `?${RULE_FROM_EQL_URL_PARAM}='${timeline?.savedObjectId}'`
       );
     });
 
     test('Does not display Create rule from timeline/eql when no query', async () => {
+      const lastTimeline = getAllTimeline('', [timeline])[0];
       (useGetAllTimeline as jest.Mock).mockReturnValue({
         fetchAllTimeline: jest.fn(),
         timelines: [
@@ -747,7 +747,7 @@ describe('StatefulOpenTimeline', () => {
           },
         ],
         loading: false,
-        totalCount: mockOpenTimelineQueryResults.totalCount,
+        totalCount: 1,
         refetch: jest.fn(),
       });
       const { getAllByTestId, queryByTestId } = render(
