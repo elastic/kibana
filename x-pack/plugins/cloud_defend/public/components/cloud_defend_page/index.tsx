@@ -18,8 +18,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
-// import { SubscriptionNotAllowed } from './subscription_not_allowed';
-// import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
+import { SubscriptionNotAllowed } from '../subscription_not_allowed';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { FullSizeCenteredPage } from '../full_size_page';
 import { useCloudDefendSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { LoadingState } from '../loading_state';
@@ -221,11 +221,11 @@ const defaultNoDataRenderer = (docsLink: string) => (
   </FullSizeCenteredPage>
 );
 
-/* const subscriptionNotAllowedRenderer = () => (
+const subscriptionNotAllowedRenderer = () => (
   <FullSizeCenteredPage data-test-subj={SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT}>
     <SubscriptionNotAllowed />
   </FullSizeCenteredPage>
-); */
+);
 
 interface CloudPosturePageProps<TData, TError> {
   children: React.ReactNode;
@@ -242,13 +242,12 @@ export const CloudDefendPage = <TData, TError>({
   errorRender = defaultErrorRenderer,
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
-  // const subscriptionStatus = useSubscriptionStatus();
+  const subscriptionStatus = useSubscriptionStatus();
   const getSetupStatus = useCloudDefendSetupStatusApi();
   const { addIntegrationLink, docsLink } = useCloudDefendIntegrationLinks();
 
   const render = () => {
-    // TODO: subscription status work..
-    /* if (subscriptionStatus.isError) {
+    if (subscriptionStatus.isError) {
       return defaultErrorRenderer(subscriptionStatus.error);
     }
 
@@ -258,7 +257,7 @@ export const CloudDefendPage = <TData, TError>({
 
     if (!subscriptionStatus.data) {
       return subscriptionNotAllowedRenderer();
-    }*/
+    }
 
     if (getSetupStatus.isError) {
       return defaultErrorRenderer(getSetupStatus.error);

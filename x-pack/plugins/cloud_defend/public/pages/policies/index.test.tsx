@@ -15,12 +15,12 @@ import { Policies } from '.';
 import * as TEST_SUBJ from './test_subjects';
 import { useCloudDefendPolicies } from './use_cloud_defend_policies';
 import { useCloudDefendSetupStatusApi } from '../../common/api/use_setup_status_api';
-// import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_links';
 
 jest.mock('./use_cloud_defend_policies');
 jest.mock('../../common/api/use_setup_status_api');
-// jest.mock('../../common/hooks/use_subscription_status');
+jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_cloud_defend_integration_links');
 
 const chance = new Chance();
@@ -35,12 +35,12 @@ describe('<Policies />', () => {
       })
     );
 
-    /*    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: true,
       })
-    ); */
+    );
 
     (useCloudDefendIntegrationLinks as jest.Mock).mockImplementation(() => ({
       addIntegrationLink: chance.url(),

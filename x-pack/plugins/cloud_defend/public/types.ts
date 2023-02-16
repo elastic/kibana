@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { ComponentType, ReactNode } from 'react';
@@ -28,10 +29,12 @@ export interface CloudDefendPluginStart {
 
 export interface CloudDefendPluginSetupDeps {
   fleet: FleetSetup;
+  cloud: CloudSetup;
   usageCollection?: UsageCollectionSetup;
 }
 export interface CloudDefendPluginStartDeps {
   fleet: FleetStart;
+  licensing: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
 }
 

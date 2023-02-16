@@ -6,7 +6,7 @@
  */
 
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
-import { PLUGIN_NAME } from '..';
+import { PLUGIN_NAME } from '../constants';
 
 const MINIMUM_NON_CLOUD_LICENSE_TYPE: LicenseType = 'enterprise';
 

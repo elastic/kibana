@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import Chance from 'chance';
 import {
   CloudDefendPage,
@@ -29,7 +29,7 @@ import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_clou
 const chance = new Chance();
 
 jest.mock('../../common/api/use_setup_status_api');
-// jest.mock('../../common/hooks/use_subscription_status');
+jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_cloud_defend_integration_links');
 
 describe('<CloudDefendPage />', () => {
@@ -47,12 +47,12 @@ describe('<CloudDefendPage />', () => {
       docsLink: chance.url(),
     }));
 
-    /*    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: true,
       })
-    );*/
+    );
   });
 
   const renderCloudDefendPage = (
@@ -90,7 +90,7 @@ describe('<CloudDefendPage />', () => {
     expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
   });
 
-  /*  it('renders default loading state when the subscription query is loading', () => {
+  it('renders default loading state when the subscription query is loading', () => {
     (useSubscriptionStatus as jest.Mock).mockImplementation(
       () =>
         createReactQueryResponse({
@@ -144,7 +144,6 @@ describe('<CloudDefendPage />', () => {
     expect(screen.getByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
   });
- */
 
   it('renders integrations installation prompt if integration is not installed', () => {
     (useCloudDefendSetupStatusApi as jest.Mock).mockImplementation(() =>

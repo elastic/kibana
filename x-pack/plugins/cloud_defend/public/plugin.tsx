@@ -13,9 +13,11 @@ import {
   CloudDefendPluginSetup,
   CloudDefendPluginStart,
   CloudDefendPluginStartDeps,
+  CloudDefendPluginSetupDeps,
 } from './types';
 import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
 import { LoadingState } from './components/loading_state';
+import { SetupContext } from './application/setup_context';
 
 const LazyEditPolicy = lazy(() => import('./components/fleet_extensions/policy_extension_edit'));
 const LazyCreatePolicy = lazy(
@@ -29,8 +31,23 @@ const Router = (props: CloudDefendRouterProps) => (
   </Suspense>
 );
 
-export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDefendPluginStart> {
-  public setup(core: CoreSetup): CloudDefendPluginSetup {
+export class CloudDefendPlugin
+  implements
+    Plugin<
+      CloudDefendPluginSetup,
+      CloudDefendPluginStart,
+      CloudDefendPluginSetupDeps,
+      CloudDefendPluginStartDeps
+    >
+{
+  private isCloudEnabled?: boolean;
+
+  public setup(
+    core: CoreSetup<CloudDefendPluginStartDeps, CloudDefendPluginStart>,
+    plugins: CloudDefendPluginSetupDeps
+  ): CloudDefendPluginSetup {
+    this.isCloudEnabled = plugins.cloud.isCloudEnabled;
+
     // Return methods that should be available to other plugins
     return {};
   }
@@ -52,7 +69,9 @@ export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDe
       <KibanaContextProvider services={{ ...core, ...plugins }}>
         <RedirectAppLinks coreStart={core}>
           <div style={{ width: '100%', height: '100%' }}>
-            <Router {...props} />
+            <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
+              <Router {...props} />
+            </SetupContext.Provider>
           </div>
         </RedirectAppLinks>
       </KibanaContextProvider>
