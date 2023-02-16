@@ -108,8 +108,12 @@ describe('Slack service', () => {
       requestMock.mockImplementation(() => getChannelsResponse);
       const res = await service.getChannels();
       expect(res).toEqual({
-        ok: true,
-        channels,
+        actionId: '.slack',
+        data: {
+          ok: true,
+          channels,
+        },
+        status: 'ok',
       });
     });
 
@@ -131,9 +135,12 @@ describe('Slack service', () => {
         throw new Error('request fail');
       });
 
-      await expect(service.getChannels()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"[Action][Slack]: Unable to get slack channels. Error: request fail."`
-      );
+      expect(await service.getChannels()).toEqual({
+        actionId: '.slack',
+        message: 'error posting slack message',
+        serviceMessage: 'request fail',
+        status: 'error',
+      });
     });
   });
 
@@ -143,7 +150,7 @@ describe('Slack service', () => {
 
       await service.postMessage({ channels: ['general', 'privat'], text: 'a message' });
 
-      expect(requestMock).toHaveBeenCalledTimes(2);
+      expect(requestMock).toHaveBeenCalledTimes(1);
       expect(requestMock).toHaveBeenNthCalledWith(1, {
         axios,
         logger,
@@ -152,14 +159,6 @@ describe('Slack service', () => {
         url: 'chat.postMessage',
         data: { channel: 'general', text: 'a message' },
       });
-      expect(requestMock).toHaveBeenNthCalledWith(2, {
-        axios,
-        logger,
-        configurationUtilities,
-        method: 'post',
-        url: 'chat.postMessage',
-        data: { channel: 'privat', text: 'a message' },
-      });
     });
 
     test('should throw an error if request to slack fail', async () => {
@@ -167,11 +166,14 @@ describe('Slack service', () => {
         throw new Error('request fail');
       });
 
-      await expect(
-        service.postMessage({ channels: ['general', 'privat'], text: 'a message' })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"[Action][Slack]: Unable to post a message in the Slack. Error: request fail."`
-      );
+      expect(
+        await service.postMessage({ channels: ['general', 'privat'], text: 'a message' })
+      ).toEqual({
+        actionId: '.slack',
+        message: 'error posting slack message',
+        serviceMessage: 'request fail',
+        status: 'error',
+      });
     });
   });
 });

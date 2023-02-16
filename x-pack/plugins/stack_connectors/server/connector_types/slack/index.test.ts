@@ -223,7 +223,7 @@ describe('execute', () => {
         }),
       }));
       const response = await connectorType.executor({
-        actionId: 'some-id',
+        actionId: '.slack',
         services,
         config: {},
         secrets: { webhookUrl: 'http://example.com' },
@@ -233,7 +233,7 @@ describe('execute', () => {
       });
 
       expect(response).toEqual({
-        actionId: 'some-id',
+        actionId: '.slack',
         data: { text: 'ok' },
         status: 'ok',
       });
@@ -250,7 +250,7 @@ describe('execute', () => {
         }),
       }));
       const response = await connectorType.executor({
-        actionId: 'some-id',
+        actionId: '.slack',
         services,
         config: {},
         secrets: { webhookUrl: 'http://example.com' },
@@ -260,7 +260,7 @@ describe('execute', () => {
       });
 
       expect(response).toEqual({
-        actionId: 'some-id',
+        actionId: '.slack',
         message: 'error posting slack message',
         serviceMessage: 'not ok',
         status: 'error',
@@ -276,7 +276,7 @@ describe('execute', () => {
         send: jest.fn(),
       }));
       const response = await connectorType.executor({
-        actionId: 'some-id',
+        actionId: '.slack',
         services,
         config: {},
         secrets: { webhookUrl: 'http://example.com' },
@@ -286,7 +286,7 @@ describe('execute', () => {
       });
 
       expect(response).toEqual({
-        actionId: 'some-id',
+        actionId: '.slack',
         message: 'unexpected null response from slack',
         status: 'error',
       });
@@ -305,7 +305,7 @@ describe('execute', () => {
 
       expect(
         await connectorType.executor({
-          actionId: 'some-id',
+          actionId: '.slack',
           services,
           config: {},
           secrets: { webhookUrl: 'http://example.com' },
@@ -314,7 +314,7 @@ describe('execute', () => {
           logger: mockedLogger,
         })
       ).toEqual({
-        actionId: 'some-id',
+        actionId: '.slack',
         message: 'error posting slack message',
         serviceMessage: 'sending a message fails',
         status: 'error',
@@ -333,7 +333,7 @@ describe('execute', () => {
       });
       const connectorTypeProxy = getConnectorType();
       await connectorTypeProxy.executor({
-        actionId: 'some-id',
+        actionId: '.slack',
         services,
         config: {},
         secrets: { webhookUrl: 'http://example.com' },
@@ -359,7 +359,7 @@ describe('execute', () => {
       });
       const connectorTypeProxy = getConnectorType();
       await connectorTypeProxy.executor({
-        actionId: 'some-id',
+        actionId: '.slack',
         services,
         config: {},
         secrets: { webhookUrl: 'http://example.com' },
@@ -385,7 +385,7 @@ describe('execute', () => {
       });
       const connectorTypeProxy = getConnectorType();
       await connectorTypeProxy.executor({
-        actionId: 'some-id',
+        actionId: '.slack',
         services,
         config: {},
         secrets: { webhookUrl: 'http://example.com' },
@@ -411,7 +411,7 @@ describe('execute', () => {
       });
       const connectorTypeProxy = getConnectorType();
       await connectorTypeProxy.executor({
-        actionId: 'some-id',
+        actionId: '.slack',
         services,
         config: {},
         secrets: { webhookUrl: 'http://example.com' },
@@ -437,7 +437,7 @@ describe('execute', () => {
       });
       const connectorTypeProxy = getConnectorType();
       await connectorTypeProxy.executor({
-        actionId: 'some-id',
+        actionId: '.slack',
         services,
         config: {},
         secrets: { webhookUrl: 'http://example.com' },
@@ -484,12 +484,13 @@ describe('execute', () => {
       requestMock.mockImplementation(() => ({
         data: {
           ok: true,
-          data: { text: 'some text' },
+          message: { text: 'some text' },
           channel: 'general',
         },
       }));
+
       const response = await connectorType.executor({
-        actionId: 'some-id',
+        actionId: '.slack',
         services,
         config: {},
         secrets: { token: 'some token' },
@@ -511,16 +512,15 @@ describe('execute', () => {
       });
 
       expect(response).toEqual({
-        actionId: 'some-id',
-        data: [
-          {
-            channel: 'general',
-            data: {
-              text: 'some text',
-            },
-            ok: true,
+        actionId: '.slack',
+        data: {
+          channel: 'general',
+          message: {
+            text: 'some text',
           },
-        ],
+          ok: true,
+        },
+
         status: 'ok',
       });
     });
@@ -541,7 +541,7 @@ describe('execute', () => {
         },
       }));
       const response = await connectorType.executor({
-        actionId: 'some-id',
+        actionId: '.slack',
         services,
         config: {},
         secrets: { token: 'some token' },
@@ -562,7 +562,7 @@ describe('execute', () => {
       });
 
       expect(response).toEqual({
-        actionId: 'some-id',
+        actionId: '.slack',
         data: {
           channels: [
             {
@@ -582,7 +582,7 @@ describe('execute', () => {
     test('should fail if subAction is not known', async () => {
       await expect(
         connectorType.executor({
-          actionId: 'some-id',
+          actionId: '.slack',
           services,
           config: {},
           secrets: { token: 'some token' },
