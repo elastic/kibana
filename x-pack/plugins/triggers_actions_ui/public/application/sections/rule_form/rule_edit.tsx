@@ -38,7 +38,8 @@ import {
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { ruleReducer, ConcreteRuleReducer } from './rule_reducer';
-import { updateRule, loadRuleTypes } from '../../lib/rule_api';
+import { updateRule } from '../../lib/rule_api/update';
+import { loadRuleTypes } from '../../lib/rule_api/rule_types';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';

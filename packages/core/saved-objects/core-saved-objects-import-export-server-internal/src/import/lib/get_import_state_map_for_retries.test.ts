@@ -8,6 +8,7 @@
 
 import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
+
 import { getImportStateMapForRetries } from './get_import_state_map_for_retries';
 
 describe('#getImportStateMapForRetries', () => {
