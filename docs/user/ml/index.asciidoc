@@ -190,7 +190,7 @@ change points in the defined range. Optionally, you can split the data by a
 field with a maximum cardinality of 10,000.
 
 If at least one change point is detected, a chart visualizes the change point in 
-its context, making it easier to interpret it. If you split the analysis by a 
+its context, making the interpretation easier. If you split the analysis by a 
 field, a separate chart is displayed for every partition with a detected change 
 point. You can view the type of change point in the chart as well as its value 
 and the time when the change happened. The corresponding `p-value` indicates how 
