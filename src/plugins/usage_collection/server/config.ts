@@ -23,7 +23,6 @@ export const configSchema = schema.object({
   maximumWaitTimeForAllCollectorsInS: schema.number({
     defaultValue: DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S,
   }),
-  collectorsFetchConcurrency: schema.number({ defaultValue: 5 }),
 });
 
 export type ConfigType = TypeOf<typeof configSchema>;
