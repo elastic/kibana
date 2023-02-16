@@ -72,7 +72,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     embeddable,
     lens,
     storage,
-    savedObjects,
+    http,
     uiSettings,
     data: {
       query: {
@@ -362,7 +362,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
           savedObjectMetaData={savedObjectMetaData}
           fixedPageSize={10}
           uiSettings={uiSettings}
-          savedObjects={savedObjects}
+          http={http}
           euiFieldSearchProps={euiFieldSearchProps}
           euiFormRowProps={euiFormRowProps}
         />
