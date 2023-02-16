@@ -85,7 +85,7 @@ export const createDataProviders = ({
       value ? `-${value}` : ''
     }`;
 
-    if (fieldType === GEO_FIELD_TYPE || field === MESSAGE_FIELD_NAME) {
+    if (!isValidDataProviderField(field, fieldType)) {
       return dataProviders;
     }
 
@@ -130,6 +130,9 @@ export const createDataProviders = ({
     return dataProviders;
   }, []);
 };
+
+export const isValidDataProviderField = (fieldName: string, fieldType: string | undefined) =>
+  fieldType !== GEO_FIELD_TYPE && fieldName !== MESSAGE_FIELD_NAME;
 
 const getIdForField = ({
   field,
