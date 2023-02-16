@@ -29,7 +29,6 @@ export function NewScenarioForm() {
   return (
     <EuiPanel>
       <EuiForm component="form">
-        <p>{JSON.stringify(state, null, 2)}</p>
         <EuiFormRow label="Instance">
           <EuiFieldText disabled value={state.instanceName} />
         </EuiFormRow>
