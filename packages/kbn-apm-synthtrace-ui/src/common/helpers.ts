@@ -3,6 +3,7 @@ import { TransactionFormState } from '../components/modal/transaction-form';
 import { SpanFormState } from '../components/modal/span-form';
 import { Transaction, Span, Service } from '../typings';
 import { ServiceFormState } from '../components/modal/service-form';
+import { euiPaletteColorBlind } from '@elastic/eui';
 
 export const generateTransactionPayload = (
   payload: TransactionFormState,
@@ -104,7 +105,7 @@ export const editNodeInATree = (
   return clonedTree;
 };
 
-// Function generates only Light colors with HSL - hsl(hue, saturation, lightness).
 export const colorCodeGenerator = () => {
-  return 'hsl(' + Math.random() * 360 + ', 100%, 75%)';
+  const palette = euiPaletteColorBlind({ rotations: 3 });
+  return palette[Math.floor(Math.random() * palette.length)];
 };
