@@ -127,7 +127,7 @@ export class SpaceSelector extends Component<Props, State> {
           <div className="spcSelectorBackground" role="presentation" />
         </EuiPortal>
 
-        <KibanaPageTemplate.Section className="spcSpaceSelector__pageContent" color="transparent">
+        <KibanaPageTemplate.Section color="transparent">
           <EuiText textAlign="center" size="s">
             <EuiSpacer size="xxl" />
             {this.state.customLogo ? (

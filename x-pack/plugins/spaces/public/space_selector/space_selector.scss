@@ -8,11 +8,6 @@
   pointer-events: none;
 }
 
-.spcSpaceSelector__pageContent {
-  position: relative;
-  z-index: 10;
-}
-
 // Fix forced focus outline on text that isn't a link to just be an underline
 .spcSpaceSelector__pageHeader {
   &:focus {
