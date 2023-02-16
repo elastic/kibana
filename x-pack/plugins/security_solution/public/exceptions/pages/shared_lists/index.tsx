@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import type { EuiSearchBarProps } from '@elastic/eui';
 
 import {
@@ -18,7 +18,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
   EuiProgress,
   EuiSpacer,
   EuiPageHeader,
@@ -29,6 +28,8 @@ import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-i
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 
+import type { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
+import { EmptyViewerState } from '@kbn/securitysolution-exception-list-components';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { Loader } from '../../../common/components/loader';
 import { useKibana } from '../../../common/lib/kibana';
@@ -102,6 +103,8 @@ export const SharedLists = React.memo(() => {
   );
   const [filters, setFilters] = useState<ExceptionListFilter | undefined>();
 
+  const [viewerStatus, setViewStatus] = useState<ViewerStatus>('loading');
+
   const [
     loadingExceptions,
     exceptions,
@@ -151,7 +154,7 @@ export const SharedLists = React.memo(() => {
   );
 
   const handleDelete = useCallback(
-    ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
+    ({ id, namespaceType }: { id: string; namespaceType: NamespaceType }) =>
       async () => {
         try {
           if (exceptionsListsRef[id] != null) {
@@ -234,6 +237,7 @@ export const SharedLists = React.memo(() => {
       query,
       queryText,
     }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]): Promise<void> => {
+      setViewStatus('searching');
       const filterOptions = {
         name: null,
         list_id: null,
@@ -394,6 +398,45 @@ export const SharedLists = React.memo(() => {
     setIsCreatePopoverOpen(false);
   };
 
+  const isReadOnly = useMemo(() => {
+    return (canUserREAD && !canUserCRUD) ?? true;
+  }, [canUserREAD, canUserCRUD]);
+
+  useEffect(() => {
+    console.log({
+      loadingTableInfo,
+      initLoading,
+      viewerStatus,
+      loadingExceptions,
+      l: exceptionListsWithRuleRefs.length,
+    });
+    if (loadingTableInfo || initLoading) {
+      setViewStatus('loading');
+    }
+
+    if (viewerStatus === 'searching' && !loadingExceptions && !exceptionListsWithRuleRefs.length) {
+      setViewStatus('empty_search');
+    }
+
+    if (
+      viewerStatus === 'searching' &&
+      !loadingExceptions &&
+      exceptionListsWithRuleRefs.length > 0
+    ) {
+      setViewStatus(null);
+    }
+
+    if (!loadingTableInfo && !initLoading) {
+      setViewStatus(null);
+    }
+  }, [
+    loadingTableInfo,
+    initLoading,
+    viewerStatus,
+    loadingExceptions,
+    exceptionListsWithRuleRefs.length,
+  ]);
+
   return (
     <>
       <MissingPrivilegesCallOut />
@@ -504,23 +547,18 @@ export const SharedLists = React.memo(() => {
 
       <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
-        {loadingTableInfo && (
-          <EuiProgress
-            data-test-subj="loadingRulesInfoProgress"
-            size="xs"
-            position="absolute"
-            color="accent"
-          />
-        )}
         {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
         <EuiSpacer size="m" />
 
-        {loadingTableInfo && !initLoading && !showReferenceErrorModal && (
-          <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-        )}
-
-        {initLoading || loadingTableInfo ? (
-          <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
+        {viewerStatus != null ? (
+          <EmptyViewerState
+            isReadOnly={isReadOnly}
+            title={i18n.NO_EXCEPTION_LISTS}
+            viewerStatus={viewerStatus}
+            buttonText={i18n.CREATE_SHARED_LIST_BUTTON}
+            body={i18n.NO_LISTS_BODY}
+            onEmptyButtonStateClick={() => setDisplayCreateSharedListFlyout(true)}
+          />
         ) : (
           <>
             <ExceptionsTableUtilityBar
@@ -530,13 +568,13 @@ export const SharedLists = React.memo(() => {
               sort={sort}
               sortFields={SORT_FIELDS}
             />
-            {exceptionListsWithRuleRefs.length > 0 && canUserCRUD !== null && canUserREAD !== null && (
+            {exceptionListsWithRuleRefs.length > 0 && (
               <div data-test-subj="exceptionsTable">
                 {exceptionListsWithRuleRefs.map((excList) => (
                   <ExceptionsListCard
                     key={excList.list_id}
                     data-test-subj="exceptionsListCard"
-                    readOnly={canUserREAD && !canUserCRUD}
+                    readOnly={isReadOnly}
                     exceptionsList={excList}
                     handleDelete={handleDelete}
                     handleExport={handleExport}

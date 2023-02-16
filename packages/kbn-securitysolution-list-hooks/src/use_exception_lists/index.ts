@@ -137,5 +137,5 @@ export const useExceptionLists = ({
     };
   }, [fetchData]);
 
-  return [loading, exceptionLists, pagination, setPagination, fetchData, sort, setSort];
+  return [loading, [], pagination, setPagination, fetchData, sort, setSort];
 };
