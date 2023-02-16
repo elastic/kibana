@@ -13,6 +13,7 @@ import { DashboardContainer } from '../../dashboard_container';
 import { pluginServices } from '../../../../services/plugin_services';
 import { DashboardContainerByValueInput } from '../../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../../dashboard_constants';
+import type { DashboardDiffFunctions } from './dashboard_diffing_functions';
 import {
   isKeyEqual,
   shouldRefreshDiffingFunctions,
@@ -178,7 +179,7 @@ export async function getShouldRefresh(
   this: DashboardContainer,
   lastInput: DashboardContainerByValueInput,
   input: DashboardContainerByValueInput
-): Promise<Partial<DashboardContainerByValueInput>> {
+): Promise<boolean> {
   const inputChanges = await getInputChanges(
     this,
     lastInput,

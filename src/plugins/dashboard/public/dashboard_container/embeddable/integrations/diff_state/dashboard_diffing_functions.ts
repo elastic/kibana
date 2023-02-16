@@ -125,6 +125,6 @@ const shouldRefreshFilterCompareOptions = {
 
 export const shouldRefreshDiffingFunctions: DashboardDiffFunctions = {
   ...unsavedChangesDiffingFunctions,
-  filters: ({ currentValue, lastValue }) => 
+  filters: ({ currentValue, lastValue }) =>
     onlyDisabledFiltersChanged(lastValue, currentValue, shouldRefreshFilterCompareOptions),
 };
