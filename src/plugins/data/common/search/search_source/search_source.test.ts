@@ -163,6 +163,32 @@ describe('SearchSource', () => {
       expect(searchSource.getActiveIndexFilter()).toMatchObject(['auditbeat-*']);
     });
 
+    test('pass _index from filter - phrases filter', () => {
+      const filter: Filter[] = [
+        {
+          meta: {
+            type: 'phrases',
+            key: '_index',
+            params: ['auditbeat-*', 'packetbeat-*'],
+            alias: null,
+            negate: false,
+            disabled: false,
+          },
+          query: {
+            bool: {
+              should: [
+                { match_phrase: { _index: 'auditbeat-*' } },
+                { match_phrase: { _index: 'packetbeat-*' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        },
+      ];
+      searchSource.setField('filter', filter);
+      expect(searchSource.getActiveIndexFilter()).toMatchObject(['auditbeat-*', 'packetbeat-*']);
+    });
+
     test('pass _index from query and filter with negate equals to true', () => {
       const filter = [
         {

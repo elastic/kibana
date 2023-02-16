@@ -138,15 +138,15 @@ export const EVENT_CONTAINER_TABLE_NOT_LOADING =
 export const FILTER_BADGE = '[data-test-subj^="filter-badge"]';
 
 export const CELL_FILTER_IN_BUTTON =
-  '[data-test-subj="dataGridColumnCellAction-security_filterIn"]';
+  '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-filterIn"]';
 export const CELL_FILTER_OUT_BUTTON =
-  '[data-test-subj="dataGridColumnCellAction-security_filterOut"]';
+  '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-filterOut"]';
 export const CELL_ADD_TO_TIMELINE_BUTTON =
-  '[data-test-subj="dataGridColumnCellAction-security_addToTimeline"]';
+  '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-addToTimeline"]';
 export const CELL_SHOW_TOP_FIELD_BUTTON =
-  '[data-test-subj="dataGridColumnCellAction-security_showTopN"]';
+  '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-showTopN"]';
 export const CELL_COPY_BUTTON =
-  '[data-test-subj="dataGridColumnCellAction-security_copyToClipboard"]';
+  '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-copyToClipboard"]';
 
 export const ACTIONS_EXPAND_BUTTON = '[data-test-subj="euiDataGridCellExpandButton"]';
 

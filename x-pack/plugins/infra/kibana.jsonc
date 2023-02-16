@@ -15,7 +15,6 @@
       "share",
       "features",
       "usageCollection",
-      "spaces",
       "embeddable",
       "data",
       "dataViews",
@@ -28,6 +27,7 @@
       "unifiedSearch"
     ],
     "optionalPlugins": [
+      "spaces",
       "ml",
       "home",
       "embeddable",
