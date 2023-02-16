@@ -13,7 +13,7 @@ import type { SavedObjectCommon, FindResponseHTTP } from '../../common';
 export const registerFindRoute = (router: SavedObjectsRouter) => {
   router.get(
     {
-      path: '/api/saved-objects/find',
+      path: '/internal/saved-objects-finder/find',
       validate: {
         query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),

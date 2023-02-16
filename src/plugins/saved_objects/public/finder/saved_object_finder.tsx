@@ -33,7 +33,12 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
 
-import type { FinderAttributes, FindResponseHTTP, SavedObjectCommon } from '../../common';
+import type {
+  FinderAttributes,
+  FindQueryHTTP,
+  FindResponseHTTP,
+  SavedObjectCommon,
+} from '../../common';
 import { LISTING_LIMIT_SETTING } from '../../common';
 
 export interface SavedObjectMetaData<T = unknown> {
@@ -124,7 +129,7 @@ class SavedObjectFinderUi extends React.Component<
     }, []);
 
     const perPage = this.props.uiSettings.get(LISTING_LIMIT_SETTING);
-    const params = {
+    const params: FindQueryHTTP = {
       type: Object.keys(metaDataMap),
       fields: [...new Set(fields)],
       search: query ? `${query}*` : undefined,
@@ -133,7 +138,7 @@ class SavedObjectFinderUi extends React.Component<
       searchFields: ['title^3', 'description', ...additionalSearchFields],
       defaultSearchOperator: 'AND',
     };
-    const resp = (await this.props.http.get('/api/saved-objects/find', {
+    const resp = (await this.props.http.get('/internal/saved-objects-finder/find', {
       query: params as Record<string, any>,
     })) as FindResponseHTTP<FinderAttributes>;
 

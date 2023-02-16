@@ -14,7 +14,8 @@ export interface FindQueryHTTP {
   page?: number;
   type: string | string[];
   search?: string;
-  defaultSearchOperator?: 'OR';
+  searchFields?: string[];
+  defaultSearchOperator?: 'AND' | 'OR';
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   fields?: string | string[];

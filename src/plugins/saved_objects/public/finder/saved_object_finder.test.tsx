@@ -68,7 +68,7 @@ describe('SavedObjectsFinder', () => {
     );
     wrapper.instance().componentDidMount!();
 
-    expect(core.http.get).toHaveBeenCalledWith('/api/saved-objects/find', {
+    expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
       query: {
         type: ['search'],
         fields: ['title', 'name'],
@@ -225,7 +225,7 @@ describe('SavedObjectsFinder', () => {
         .first()
         .simulate('change', { target: { value: 'abc' } });
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/saved-objects/find', {
+      expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
         query: {
           type: ['search'],
           fields: ['title', 'name'],
@@ -270,7 +270,7 @@ describe('SavedObjectsFinder', () => {
         .first()
         .simulate('change', { target: { value: 'abc' } });
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/saved-objects/find', {
+      expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
         query: {
           type: ['type1', 'type2'],
           fields: ['title', 'name', 'field1', 'field2', 'field3'],
@@ -338,7 +338,7 @@ describe('SavedObjectsFinder', () => {
     );
     wrapper.instance().componentDidMount!();
 
-    expect(core.http.get).toHaveBeenCalledWith('/api/saved-objects/find', {
+    expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
       query: {
         type: ['search', 'vis'],
         fields: ['title', 'name'],
