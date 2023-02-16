@@ -13,7 +13,10 @@
       "kibanaReact",
       "navigation",
       "screenshotMode",
-      "share"
+      "discover",
+      "share",
+      "savedObjectsFinder",
+      "savedObjectsManagement"
     ]
   }
 }

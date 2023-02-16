@@ -55,7 +55,7 @@ export default function ({
           screenshotDir,
           updateBaselines
         )
-      ).to.be.lessThan(0.09);
+      ).to.be.lessThan(0.05);
     });
   });
 }

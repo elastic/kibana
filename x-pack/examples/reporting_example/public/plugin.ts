@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import {
-  AppMountParameters,
-  AppNavLinkStatus,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-} from '@kbn/core/public';
+import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, ReportingExampleLocatorDefinition } from '../common';
 import { SetupDeps, StartDeps, MyForwardableState } from './types';
 
-export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
-  public setup(core: CoreSetup, { developerExamples, screenshotMode, share }: SetupDeps): void {
+export class ReportingExamplePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+  public setup(core: CoreSetup<StartDeps>, setupDeps: SetupDeps) {
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -24,20 +18,18 @@ export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');
-        const [coreStart, depsStart] = (await core.getStartServices()) as [
-          CoreStart,
-          StartDeps,
-          unknown
-        ];
+        const [coreStart, startDeps] = await core.getStartServices();
         // Render the application
         return renderApp(
           coreStart,
-          { ...depsStart, screenshotMode, share },
+          { ...startDeps, ...setupDeps },
           params,
           params.history.location.state as MyForwardableState
         );
       },
     });
+
+    const { developerExamples, share } = setupDeps;
 
     // Show the app in Developer Examples
     developerExamples.register({

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { ReportingStart } from '@kbn/reporting-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { ReportingStart } from '@kbn/reporting-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { MyForwardableState } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -21,6 +22,7 @@ export interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
   share: SharePluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 export interface StartDeps {
   navigation: NavigationPublicPluginStart;

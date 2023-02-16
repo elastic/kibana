@@ -73,7 +73,7 @@ export class RequestHandler {
     // 3. call the export type's createJobFn to create the job payload
     const [headers, job] = await Promise.all([
       this.encryptHeaders(),
-      createJob(jobParams, context),
+      createJob(jobParams, context, this.req),
     ]);
 
     const payload = {

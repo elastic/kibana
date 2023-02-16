@@ -1,0 +1,414 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from non-timebased data view columns stored in the saved search csv file matches 1`] = `
+"eon,epoch,era,period
+Phanerozoic, Pliocene,Cenozoic,Neogene
+Phanerozoic, Holocene,Cenozoic,Quaternary
+Phanerozoic,-,Mesozoic,Cretaceous
+Phanerozoic,-,Mesozoic,Jurassic
+Phanerozoic,-,Paleozoic,Cambrian
+Proterozoic,-,Paleozoic,Permian
+Archean,-,-,-
+Hadean,-,-,-
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from non-timebased data view columns stored in the saved search job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=\\"plain search with 4 columns.csv\\"",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "plain search with 4 columns",
+}
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from non-timebased data view query stored in the saved search csv file matches 1`] = `
+"_id,_index,_score,eon,epoch,era,period
+tvJJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic, Pliocene,Cenozoic,Neogene
+t_JJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic, Holocene,Cenozoic,Quaternary
+uPJJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic,-,Mesozoic,Cretaceous
+ufJJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic,-,Mesozoic,Jurassic
+uvJJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic,-,Paleozoic,Cambrian
+u_JJX4UBvD7uFsw9L2x4,timeless-test,1,Proterozoic,-,Paleozoic,Permian
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from non-timebased data view query stored in the saved search job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=\\"*zoic.csv\\"",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "*zoic",
+}
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from non-timebased data view with plain saved search csv file matches 1`] = `
+"_id,_index,_score,eon,epoch,era,period
+tvJJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic, Pliocene,Cenozoic,Neogene
+t_JJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic, Holocene,Cenozoic,Quaternary
+uPJJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic,-,Mesozoic,Cretaceous
+ufJJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic,-,Mesozoic,Jurassic
+uvJJX4UBvD7uFsw9L2x4,timeless-test,1,Phanerozoic,-,Paleozoic,Cambrian
+u_JJX4UBvD7uFsw9L2x4,timeless-test,1,Proterozoic,-,Paleozoic,Permian
+vPJJX4UBvD7uFsw9L2x4,timeless-test,1,Archean,-,-,-
+vfJJX4UBvD7uFsw9L2x4,timeless-test,1,Hadean,-,-,-
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from non-timebased data view with plain saved search job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=\\"plain search.csv\\"",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "plain search",
+}
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view export with "doc_table:hideTimeColumn" = "On" csv file matches 1`] = `
+"@message,@tags,url
+238.171.34.42 - - [2015-09-22T23:50:13.253Z] \\"GET /uploads/karl-henize.jpg HTTP/1.1\\" 200 7124 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/karl-henize.jpg
+155.34.86.215 - - [2015-09-22T23:43:58.175Z] \\"GET /uploads/leonid-kizim.jpg HTTP/1.1\\" 200 5453 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/leonid-kizim.jpg
+231.224.4.183 - - [2015-09-22T23:24:14.970Z] \\"GET /uploads/gordon-cooper.jpg HTTP/1.1\\" 200 8788 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/gordon-cooper.jpg
+17.191.87.129 - - [2015-09-22T23:21:38.312Z] \\"GET /uploads/william-pailes.jpg HTTP/1.1\\" 200 3875 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/william-pailes.jpg
+239.190.189.77 - - [2015-09-22T22:52:43.834Z] \\"GET /uploads/yuri-shargin.jpg HTTP/1.1\\" 200 9448 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/yuri-shargin.jpg
+15.202.168.250 - - [2015-09-22T22:46:45.525Z] \\"GET /uploads/paul-weitz.jpg HTTP/1.1\\" 200 7116 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/paul-weitz.jpg
+103.57.26.210 - - [2015-09-22T22:29:42.029Z] \\"GET /uploads/mikhail-korniyenko.jpg HTTP/1.1\\" 200 9722 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/mikhail-korniyenko.jpg
+97.83.96.39 - - [2015-09-22T22:23:07.177Z] \\"GET /uploads/barbara-morgan.jpg HTTP/1.1\\" 200 4574 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/barbara-morgan.jpg
+98.89.73.11 - - [2015-09-22T22:20:48.857Z] \\"GET /uploads/tracy-caldwell-dyson.jpg HTTP/1.1\\" 404 8356 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/tracy-caldwell-dyson.jpg
+53.64.147.41 - - [2015-09-22T22:09:30.819Z] \\"GET /uploads/tracy-caldwell-dyson.png HTTP/1.1\\" 200 11026 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",error, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/tracy-caldwell-dyson.png
+57.237.11.219 - - [2015-09-22T21:49:36.365Z] \\"GET /uploads/kevin-kregel.png HTTP/1.1\\" 200 6316 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",warning, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/kevin-kregel.png
+51.147.43.175 - - [2015-09-22T21:48:33.421Z] \\"GET /uploads/yuri-malenchenko.jpg HTTP/1.1\\" 200 6834 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/yuri-malenchenko.jpg
+42.72.83.65 - - [2015-09-22T21:48:11.977Z] \\"GET /uploads/leonid-popov.jpg HTTP/1.1\\" 200 5624 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/leonid-popov.jpg
+0.209.80.244 - - [2015-09-22T21:47:34.138Z] \\"GET /uploads/gregory-harbaugh.jpg HTTP/1.1\\" 200 8049 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, security,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/gregory-harbaugh.jpg
+87.66.62.130 - - [2015-09-22T21:46:01.933Z] \\"GET /uploads/ronald-garan.jpg HTTP/1.1\\" 503 0 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/ronald-garan.jpg
+236.90.86.83 - - [2015-09-22T21:45:59.966Z] \\"GET /uploads/alexander-gerst.jpg HTTP/1.1\\" 200 7493 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/alexander-gerst.jpg
+44.138.70.255 - - [2015-09-22T21:44:49.105Z] \\"GET /uploads/chiaki-mukai.jpg HTTP/1.1\\" 200 7118 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, security,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/chiaki-mukai.jpg
+159.230.143.48 - - [2015-09-22T21:40:33.574Z] \\"GET /uploads/vladimir-komarov.jpg HTTP/1.1\\" 200 3523 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/vladimir-komarov.jpg
+51.105.100.214 - - [2015-09-22T21:32:58.944Z] \\"GET /uploads/jean-fran-ois-clervoy.jpg HTTP/1.1\\" 200 8918 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/jean-fran-ois-clervoy.jpg
+16.148.135.166 - - [2015-09-22T21:29:40.042Z] \\"GET /uploads/stephen-g-bowen.jpg HTTP/1.1\\" 200 3807 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/stephen-g-bowen.jpg
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view export with "doc_table:hideTimeColumn" = "On" job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=\\"A saved search with a query.csv\\"",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "A saved search with a query",
+}
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view export with no saved filters and timeRange from locator params csv file matches 1`] = `
+"@timestamp,@message,@tags,url
+2015-09-20 10:25:40.968,89.143.125.181 - - [2015-09-20T10:25:40.968Z] \\"GET /uploads/satoshi-furukawa.jpg HTTP/1.1\\" 200 8025 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/satoshi-furukawa.jpg
+2015-09-20 10:25:34.064,137.205.146.206 - - [2015-09-20T10:25:34.064Z] \\"GET /uploads/apollo-8.jpg HTTP/1.1\\" 200 4087 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/apollo-8.jpg
+2015-09-20 10:25:32.312,53.0.188.251 - - [2015-09-20T10:25:32.312Z] \\"GET /uploads/michael-fincke.jpg HTTP/1.1\\" 200 1525 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/michael-fincke.jpg
+2015-09-20 10:25:27.254,111.214.104.239 - - [2015-09-20T10:25:27.254Z] \\"GET /uploads/anton-shkaplerov.jpg HTTP/1.1\\" 200 2861 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, security,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/anton-shkaplerov.jpg
+2015-09-20 10:25:22.561,111.46.85.146 - - [2015-09-20T10:25:22.561Z] \\"GET /uploads/stephen-g-bowen.jpg HTTP/1.1\\" 503 0 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",warning, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/stephen-g-bowen.jpg
+2015-09-20 10:25:06.674,55.100.60.111 - - [2015-09-20T10:25:06.674Z] \\"GET /uploads/randolph-bresnik.jpg HTTP/1.1\\" 200 6248 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",warning, security,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/randolph-bresnik.jpg
+2015-09-20 10:25:05.114,34.197.178.155 - - [2015-09-20T10:25:05.114Z] \\"GET /uploads/pham-tuan.jpg HTTP/1.1\\" 200 7255 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/pham-tuan.jpg
+2015-09-20 10:24:55.114,163.123.136.118 - - [2015-09-20T10:24:55.114Z] \\"GET /uploads/steven-smith.jpg HTTP/1.1\\" 200 2992 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/steven-smith.jpg
+2015-09-20 10:24:54.818,11.195.163.57 - - [2015-09-20T10:24:54.818Z] \\"GET /uploads/chen-quan.jpg HTTP/1.1\\" 200 9118 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/chen-quan.jpg
+2015-09-20 10:24:53.742,96.222.137.213 - - [2015-09-20T10:24:53.742Z] \\"GET /uploads/bruce-mccandless-ii.png HTTP/1.1\\" 200 17003 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/bruce-mccandless-ii.png
+2015-09-20 10:24:48.798,227.228.214.218 - - [2015-09-20T10:24:48.798Z] \\"GET /uploads/yuri-onufrienko.jpg HTTP/1.1\\" 200 9014 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, security,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/yuri-onufrienko.jpg
+2015-09-20 10:24:20.223,228.53.110.116 - - [2015-09-20T10:24:20.223Z] \\"GET /uploads/nikolai-budarin.jpg HTTP/1.1\\" 200 4419 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, security,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/nikolai-budarin.jpg
+2015-09-20 10:24:01.794,196.131.253.111 - - [2015-09-20T10:24:01.794Z] \\"GET /uploads/leland-d-melvin.png HTTP/1.1\\" 404 4125 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, security,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/leland-d-melvin.png
+2015-09-20 10:23:49.521,125.163.133.47 - - [2015-09-20T10:23:49.521Z] \\"GET /uploads/anthony-w-england.jpg HTTP/1.1\\" 200 5440 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/anthony-w-england.jpg
+2015-09-20 10:23:45.816,148.47.216.255 - - [2015-09-20T10:23:45.816Z] \\"GET /uploads/vladimir-n-dezhurov.jpg HTTP/1.1\\" 200 8565 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/vladimir-n-dezhurov.jpg
+2015-09-20 10:23:36.052,51.105.100.214 - - [2015-09-20T10:23:36.052Z] \\"GET /uploads/boris-volynov.jpg HTTP/1.1\\" 200 6537 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, security,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/boris-volynov.jpg
+2015-09-20 10:23:27.213,248.163.75.193 - - [2015-09-20T10:23:27.213Z] \\"GET /uploads/apollo-12.png HTTP/1.1\\" 200 9574 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",warning, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/apollo-12.png
+2015-09-20 10:23:14.866,48.43.210.167 - - [2015-09-20T10:23:14.866Z] \\"GET /uploads/john-glenn.png HTTP/1.1\\" 200 3913 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, security,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/john-glenn.png
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view export with no saved filters and timeRange from locator params job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=\\"A saved search with a query.csv\\"",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "A saved search with a query",
+}
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view export with saved date and terms filters csv file matches 1`] = `
+"@message,@message.raw,@tags,@tags.raw,@timestamp,_id,_index,_score,agent,agent.raw,bytes,clientip,extension,extension.raw,geo.coordinates,geo.dest,geo.src,geo.srcdest,headings,headings.raw,host,host.raw,index,index.raw,ip,links,links.raw,machine.os,machine.os.raw,machine.ram,machine.ram_range,memory,phpmemory,referer,relatedContent.article:modified_time,relatedContent.article:published_time,relatedContent.article:section,relatedContent.article:section.raw,relatedContent.article:tag,relatedContent.article:tag.raw,relatedContent.og:description,relatedContent.og:description.raw,relatedContent.og:image,relatedContent.og:image.raw,relatedContent.og:image:height,relatedContent.og:image:height.raw,relatedContent.og:image:width,relatedContent.og:image:width.raw,relatedContent.og:site_name,relatedContent.og:site_name.raw,relatedContent.og:title,relatedContent.og:title.raw,relatedContent.og:type,relatedContent.og:type.raw,relatedContent.og:url,relatedContent.og:url.raw,relatedContent.twitter:card,relatedContent.twitter:card.raw,relatedContent.twitter:description,relatedContent.twitter:description.raw,relatedContent.twitter:image,relatedContent.twitter:image.raw,relatedContent.twitter:site,relatedContent.twitter:site.raw,relatedContent.twitter:title,relatedContent.twitter:title.raw,relatedContent.url,relatedContent.url.raw,request,request.raw,response,response.raw,spaces,spaces.raw,type,url,url.raw,utc_time,xss,xss.raw
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view export with saved date and terms filters job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=\\"A saved search with match_phrase filter and no columns selected.csv\\"",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "A saved search with match_phrase filter and no columns selected",
+}
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view export with saved date filter csv file matches 1`] = `
+"@timestamp,@message,url,@tags
+2015-09-22 23:50:13.253,238.171.34.42 - - [2015-09-22T23:50:13.253Z] \\"GET /uploads/karl-henize.jpg HTTP/1.1\\" 200 7124 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/karl-henize.jpg,success, info
+2015-09-22 23:43:58.175,155.34.86.215 - - [2015-09-22T23:43:58.175Z] \\"GET /uploads/leonid-kizim.jpg HTTP/1.1\\" 200 5453 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/leonid-kizim.jpg,success, info
+2015-09-22 23:24:14.970,231.224.4.183 - - [2015-09-22T23:24:14.970Z] \\"GET /uploads/gordon-cooper.jpg HTTP/1.1\\" 200 8788 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/gordon-cooper.jpg,success, info
+2015-09-22 23:21:38.312,17.191.87.129 - - [2015-09-22T23:21:38.312Z] \\"GET /uploads/william-pailes.jpg HTTP/1.1\\" 200 3875 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/william-pailes.jpg,success, info
+2015-09-22 22:52:43.834,239.190.189.77 - - [2015-09-22T22:52:43.834Z] \\"GET /uploads/yuri-shargin.jpg HTTP/1.1\\" 200 9448 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/yuri-shargin.jpg,success, info
+2015-09-22 22:46:45.525,15.202.168.250 - - [2015-09-22T22:46:45.525Z] \\"GET /uploads/paul-weitz.jpg HTTP/1.1\\" 200 7116 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/paul-weitz.jpg,success, info
+2015-09-22 22:29:42.029,103.57.26.210 - - [2015-09-22T22:29:42.029Z] \\"GET /uploads/mikhail-korniyenko.jpg HTTP/1.1\\" 200 9722 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/mikhail-korniyenko.jpg,success, info
+2015-09-22 22:23:07.177,97.83.96.39 - - [2015-09-22T22:23:07.177Z] \\"GET /uploads/barbara-morgan.jpg HTTP/1.1\\" 200 4574 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/barbara-morgan.jpg,success, info
+2015-09-22 22:20:48.857,98.89.73.11 - - [2015-09-22T22:20:48.857Z] \\"GET /uploads/tracy-caldwell-dyson.jpg HTTP/1.1\\" 404 8356 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/tracy-caldwell-dyson.jpg,success, info
+2015-09-22 22:09:30.819,53.64.147.41 - - [2015-09-22T22:09:30.819Z] \\"GET /uploads/tracy-caldwell-dyson.png HTTP/1.1\\" 200 11026 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/tracy-caldwell-dyson.png,error, info
+2015-09-22 21:49:36.365,57.237.11.219 - - [2015-09-22T21:49:36.365Z] \\"GET /uploads/kevin-kregel.png HTTP/1.1\\" 200 6316 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/kevin-kregel.png,warning, info
+2015-09-22 21:48:33.421,51.147.43.175 - - [2015-09-22T21:48:33.421Z] \\"GET /uploads/yuri-malenchenko.jpg HTTP/1.1\\" 200 6834 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/yuri-malenchenko.jpg,success, info
+2015-09-22 21:48:11.977,42.72.83.65 - - [2015-09-22T21:48:11.977Z] \\"GET /uploads/leonid-popov.jpg HTTP/1.1\\" 200 5624 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/leonid-popov.jpg,success, info
+2015-09-22 21:47:34.138,0.209.80.244 - - [2015-09-22T21:47:34.138Z] \\"GET /uploads/gregory-harbaugh.jpg HTTP/1.1\\" 200 8049 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/gregory-harbaugh.jpg,success, security
+2015-09-22 21:46:01.933,87.66.62.130 - - [2015-09-22T21:46:01.933Z] \\"GET /uploads/ronald-garan.jpg HTTP/1.1\\" 503 0 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/ronald-garan.jpg,success, info
+2015-09-22 21:45:59.966,236.90.86.83 - - [2015-09-22T21:45:59.966Z] \\"GET /uploads/alexander-gerst.jpg HTTP/1.1\\" 200 7493 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/alexander-gerst.jpg,success, info
+2015-09-22 21:44:49.105,44.138.70.255 - - [2015-09-22T21:44:49.105Z] \\"GET /uploads/chiaki-mukai.jpg HTTP/1.1\\" 200 7118 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/chiaki-mukai.jpg,success, security
+2015-09-22 21:40:33.574,159.230.143.48 - - [2015-09-22T21:40:33.574Z] \\"GET /uploads/vladimir-komarov.jpg HTTP/1.1\\" 200 3523 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/vladimir-komarov.jpg,success, info
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view export with saved date filter job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=\\"A saved search with the time stored and a query.csv\\"",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "A saved search with the time stored and a query",
+}
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view export with saved filters and timeRange from locator params csv file matches 1`] = `
+"@timestamp,clientip,extension
+2015-09-20 10:25:55.744,116.126.47.226,css
+2015-09-20 10:25:54.701,169.228.188.120,jpg
+2015-09-20 10:25:52.360,74.224.77.232,css
+2015-09-20 10:25:49.913,97.83.96.39,css
+2015-09-20 10:25:44.979,175.188.44.145,css
+2015-09-20 10:25:40.968,89.143.125.181,jpg
+2015-09-20 10:25:36.331,231.169.195.137,css
+2015-09-20 10:25:34.064,137.205.146.206,jpg
+2015-09-20 10:25:32.312,53.0.188.251,jpg
+2015-09-20 10:25:27.254,111.214.104.239,jpg
+2015-09-20 10:25:22.561,111.46.85.146,jpg
+2015-09-20 10:25:06.674,55.100.60.111,jpg
+2015-09-20 10:25:05.114,34.197.178.155,jpg
+2015-09-20 10:24:55.114,163.123.136.118,jpg
+2015-09-20 10:24:54.818,11.195.163.57,jpg
+2015-09-20 10:24:53.742,96.222.137.213,png
+2015-09-20 10:24:48.798,227.228.214.218,jpg
+2015-09-20 10:24:20.223,228.53.110.116,jpg
+2015-09-20 10:24:01.794,196.131.253.111,png
+2015-09-20 10:23:49.521,125.163.133.47,jpg
+2015-09-20 10:23:45.816,148.47.216.255,jpg
+2015-09-20 10:23:36.052,51.105.100.214,jpg
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view export with saved filters and timeRange from locator params job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=\\"A Saved Search With a DATE FILTER.csv\\"",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "A Saved Search With a DATE FILTER",
+}
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view export with set columns and saved date filter csv file matches 1`] = `
+"@timestamp,clientip,extension
+2015-09-20 10:26:48.725,74.214.76.90,jpg
+2015-09-20 10:26:48.540,146.86.123.109,jpg
+2015-09-20 10:26:48.353,233.126.159.144,jpg
+2015-09-20 10:26:45.468,153.139.156.196,png
+2015-09-20 10:26:34.063,25.140.171.133,css
+2015-09-20 10:26:11.181,239.249.202.59,jpg
+2015-09-20 10:26:00.639,95.59.225.31,css
+2015-09-20 10:26:00.094,247.174.57.245,jpg
+2015-09-20 10:25:55.744,116.126.47.226,css
+2015-09-20 10:25:54.701,169.228.188.120,jpg
+2015-09-20 10:25:52.360,74.224.77.232,css
+2015-09-20 10:25:49.913,97.83.96.39,css
+2015-09-20 10:25:44.979,175.188.44.145,css
+2015-09-20 10:25:40.968,89.143.125.181,jpg
+2015-09-20 10:25:36.331,231.169.195.137,css
+2015-09-20 10:25:34.064,137.205.146.206,jpg
+2015-09-20 10:25:32.312,53.0.188.251,jpg
+2015-09-20 10:25:27.254,111.214.104.239,jpg
+2015-09-20 10:25:22.561,111.46.85.146,jpg
+2015-09-20 10:25:06.674,55.100.60.111,jpg
+2015-09-20 10:25:05.114,34.197.178.155,jpg
+2015-09-20 10:24:55.114,163.123.136.118,jpg
+2015-09-20 10:24:54.818,11.195.163.57,jpg
+2015-09-20 10:24:53.742,96.222.137.213,png
+2015-09-20 10:24:48.798,227.228.214.218,jpg
+2015-09-20 10:24:20.223,228.53.110.116,jpg
+2015-09-20 10:24:01.794,196.131.253.111,png
+2015-09-20 10:23:49.521,125.163.133.47,jpg
+2015-09-20 10:23:45.816,148.47.216.255,jpg
+2015-09-20 10:23:36.052,51.105.100.214,jpg
+2015-09-20 10:23:34.323,41.210.252.157,gif
+2015-09-20 10:23:27.213,248.163.75.193,png
+2015-09-20 10:23:14.866,48.43.210.167,png
+2015-09-20 10:23:10.578,33.95.78.209,css
+2015-09-20 10:23:07.001,96.40.73.208,css
+2015-09-20 10:23:02.876,174.32.230.63,jpg
+2015-09-20 10:23:00.019,140.233.207.177,jpg
+2015-09-20 10:22:47.447,37.127.124.65,jpg
+2015-09-20 10:22:45.803,130.171.208.139,png
+2015-09-20 10:22:45.590,39.250.210.253,jpg
+2015-09-20 10:22:43.997,248.239.221.43,css
+2015-09-20 10:22:36.107,232.64.207.109,gif
+2015-09-20 10:22:30.527,24.186.122.118,jpg
+2015-09-20 10:22:25.697,23.3.174.206,jpg
+2015-09-20 10:22:08.272,185.170.80.142,php
+2015-09-20 10:21:40.822,202.22.74.232,png
+2015-09-20 10:21:36.210,39.227.27.167,jpg
+2015-09-20 10:21:19.154,140.233.207.177,jpg
+2015-09-20 10:21:09.852,22.151.97.227,jpg
+2015-09-20 10:21:06.079,157.39.25.197,css
+2015-09-20 10:21:01.357,37.127.124.65,jpg
+2015-09-20 10:20:56.519,23.184.94.58,jpg
+2015-09-20 10:20:40.189,80.83.92.252,jpg
+2015-09-20 10:20:27.012,66.194.157.171,png
+2015-09-20 10:20:24.450,15.191.218.38,jpg
+2015-09-20 10:19:45.764,199.113.69.162,jpg
+2015-09-20 10:19:43.754,171.243.18.67,gif
+2015-09-20 10:19:41.208,126.87.234.213,jpg
+2015-09-20 10:19:40.307,78.216.173.242,css
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view export with set columns and saved date filter job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=\\"A Saved Search With a DATE FILTER.csv\\"",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "A Saved Search With a DATE FILTER",
+}
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view timezone formatting export timeRange from locator params, default timezone csv file matches 1`] = `
+"order_date,category,currency,customer_id,order_id,day_of_week_i,products.created_on,sku
+2019-07-12 00:00:00.000,Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories,EUR,19,716724,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085
+2019-07-12 00:00:00.000,Women's Shoes, Women's Clothing,EUR,45,591503,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0006400064, ZO0150601506
+2019-07-12 00:00:00.000,Women's Clothing,EUR,12,591709,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0638206382, ZO0038800388
+2019-07-12 00:00:00.000,Men's Clothing,EUR,52,590937,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0297602976, ZO0565605656
+2019-07-12 00:00:00.000,Men's Clothing,EUR,29,590976,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0561405614, ZO0281602816
+2019-07-12 00:00:00.000,Men's Shoes, Men's Clothing,EUR,41,591636,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0385003850, ZO0408604086
+2019-07-12 00:00:00.000,Men's Shoes,EUR,30,591539,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0505605056, ZO0513605136
+2019-07-12 00:00:00.000,Men's Clothing,EUR,41,591598,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0276702767, ZO0291702917
+2019-07-12 00:00:00.000,Women's Clothing,EUR,44,590927,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0046600466, ZO0050800508
+2019-07-12 00:00:00.000,Men's Clothing, Men's Shoes,EUR,48,590970,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0455604556, ZO0680806808
+2019-07-12 00:00:00.000,Women's Clothing, Women's Shoes,EUR,46,591299,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0229002290, ZO0674406744
+2019-07-12 00:00:00.000,Men's Clothing,EUR,36,591133,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0529905299, ZO0617006170
+2019-07-12 00:00:00.000,Men's Clothing,EUR,13,591175,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0299402994, ZO0433504335
+2019-07-12 00:00:00.000,Men's Shoes, Men's Clothing,EUR,21,591297,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0257502575, ZO0451704517
+2019-07-12 00:00:00.000,Men's Clothing,EUR,14,591149,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0584905849, ZO0578405784
+2019-07-12 00:00:00.000,Women's Clothing, Women's Shoes,EUR,27,591754,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0335803358, ZO0325903259
+2019-07-12 00:00:00.000,Women's Clothing, Women's Shoes,EUR,42,591803,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0645906459, ZO0324303243
+2019-07-12 00:00:00.000,Women's Clothing,EUR,46,592082,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0034400344, ZO0492904929
+2019-07-12 00:00:00.000,Women's Shoes, Women's Accessories,EUR,27,591283,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0239302393, ZO0198501985
+2019-07-12 00:00:00.000,Men's Clothing, Men's Shoes,EUR,4,591148,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0290302903, ZO0513705137
+2019-07-12 00:00:00.000,Men's Accessories, Men's Clothing,EUR,51,591417,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0464504645, ZO0621006210
+2019-07-12 00:00:00.000,Men's Clothing, Men's Shoes,EUR,14,591562,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0544305443, ZO0108001080
+2019-07-12 00:00:00.000,Women's Clothing, Women's Accessories,EUR,5,590996,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0638106381, ZO0096900969
+2019-07-12 00:00:00.000,Women's Shoes,EUR,27,591317,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0366203662, ZO0139501395
+2019-07-12 00:00:00.000,Men's Clothing,EUR,38,591362,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0541805418, ZO0594105941
+2019-07-12 00:00:00.000,Men's Shoes, Men's Clothing,EUR,30,591411,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0693506935, ZO0532405324
+2019-07-12 00:00:00.000,Men's Clothing, Men's Shoes,EUR,38,722629,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0424204242, ZO0403504035, ZO0506705067, ZO0395603956
+2019-07-12 00:00:00.000,Men's Clothing,EUR,16,591041,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0418704187, ZO0557105571
+2019-07-12 00:00:00.000,Women's Clothing,EUR,6,591074,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0268602686, ZO0484704847
+2019-07-12 00:00:00.000,Men's Clothing,EUR,7,591349,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0474804748, ZO0560705607
+2019-07-12 00:00:00.000,Women's Accessories, Women's Clothing,EUR,44,591374,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0206002060, ZO0268302683
+2019-07-12 00:00:00.000,Women's Clothing,EUR,12,591230,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0226902269, ZO0660106601
+2019-07-12 00:00:00.000,Women's Shoes, Women's Clothing,EUR,17,591717,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0248002480, ZO0646706467
+2019-07-12 00:00:00.000,Women's Shoes,EUR,42,591768,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0005800058, ZO0133901339
+2019-07-12 00:00:00.000,Men's Clothing,EUR,21,591810,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0587405874, ZO0590305903
+2019-07-12 00:00:00.000,Women's Accessories, Women's Shoes,EUR,22,592049,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0186201862, ZO0018800188
+2019-07-12 00:00:00.000,Women's Clothing, Women's Accessories,EUR,28,592097,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0265502655, ZO0201102011
+2019-07-12 00:00:00.000,Men's Clothing,EUR,19,590807,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0582105821, ZO0421304213
+2019-07-12 00:00:00.000,Men's Accessories, Men's Clothing,EUR,13,714827,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0314503145, ZO0444804448, ZO0538405384, ZO0630306303
+2019-07-12 00:00:00.000,Women's Shoes,EUR,22,591735,5,2016-12-31 00:00:00.000, 2016-12-31 00:00:00.000,ZO0248402484, ZO0382603826
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view timezone formatting export timeRange from locator params, default timezone job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=\\"Ecommerce Data.csv\\"",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "Ecommerce Data",
+}
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view timezone formatting export with custom timezone and timeRange from locator params csv file matches 1`] = `
+"order_date,category,currency,customer_id,order_id,day_of_week_i,products.created_on,sku
+2019-07-11 16:00:00.000,Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories,EUR,19,716724,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085
+2019-07-11 16:00:00.000,Women's Shoes, Women's Clothing,EUR,45,591503,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0006400064, ZO0150601506
+2019-07-11 16:00:00.000,Women's Clothing,EUR,12,591709,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0638206382, ZO0038800388
+2019-07-11 16:00:00.000,Men's Clothing,EUR,52,590937,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0297602976, ZO0565605656
+2019-07-11 16:00:00.000,Men's Clothing,EUR,29,590976,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0561405614, ZO0281602816
+2019-07-11 16:00:00.000,Men's Shoes, Men's Clothing,EUR,41,591636,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0385003850, ZO0408604086
+2019-07-11 16:00:00.000,Men's Shoes,EUR,30,591539,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0505605056, ZO0513605136
+2019-07-11 16:00:00.000,Men's Clothing,EUR,41,591598,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0276702767, ZO0291702917
+2019-07-11 16:00:00.000,Women's Clothing,EUR,44,590927,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0046600466, ZO0050800508
+2019-07-11 16:00:00.000,Men's Clothing, Men's Shoes,EUR,48,590970,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0455604556, ZO0680806808
+2019-07-11 16:00:00.000,Women's Clothing, Women's Shoes,EUR,46,591299,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0229002290, ZO0674406744
+2019-07-11 16:00:00.000,Men's Clothing,EUR,36,591133,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0529905299, ZO0617006170
+2019-07-11 16:00:00.000,Men's Clothing,EUR,13,591175,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0299402994, ZO0433504335
+2019-07-11 16:00:00.000,Men's Shoes, Men's Clothing,EUR,21,591297,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0257502575, ZO0451704517
+2019-07-11 16:00:00.000,Men's Clothing,EUR,14,591149,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0584905849, ZO0578405784
+2019-07-11 16:00:00.000,Women's Clothing, Women's Shoes,EUR,27,591754,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0335803358, ZO0325903259
+2019-07-11 16:00:00.000,Women's Clothing, Women's Shoes,EUR,42,591803,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0645906459, ZO0324303243
+2019-07-11 16:00:00.000,Women's Clothing,EUR,46,592082,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0034400344, ZO0492904929
+2019-07-11 16:00:00.000,Women's Shoes, Women's Accessories,EUR,27,591283,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0239302393, ZO0198501985
+2019-07-11 16:00:00.000,Men's Clothing, Men's Shoes,EUR,4,591148,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0290302903, ZO0513705137
+2019-07-11 16:00:00.000,Men's Accessories, Men's Clothing,EUR,51,591417,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0464504645, ZO0621006210
+2019-07-11 16:00:00.000,Men's Clothing, Men's Shoes,EUR,14,591562,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0544305443, ZO0108001080
+2019-07-11 16:00:00.000,Women's Clothing, Women's Accessories,EUR,5,590996,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0638106381, ZO0096900969
+2019-07-11 16:00:00.000,Women's Shoes,EUR,27,591317,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0366203662, ZO0139501395
+2019-07-11 16:00:00.000,Men's Clothing,EUR,38,591362,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0541805418, ZO0594105941
+2019-07-11 16:00:00.000,Men's Shoes, Men's Clothing,EUR,30,591411,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0693506935, ZO0532405324
+2019-07-11 16:00:00.000,Men's Clothing, Men's Shoes,EUR,38,722629,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0424204242, ZO0403504035, ZO0506705067, ZO0395603956
+2019-07-11 16:00:00.000,Men's Clothing,EUR,16,591041,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0418704187, ZO0557105571
+2019-07-11 16:00:00.000,Women's Clothing,EUR,6,591074,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0268602686, ZO0484704847
+2019-07-11 16:00:00.000,Men's Clothing,EUR,7,591349,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0474804748, ZO0560705607
+2019-07-11 16:00:00.000,Women's Accessories, Women's Clothing,EUR,44,591374,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0206002060, ZO0268302683
+2019-07-11 16:00:00.000,Women's Clothing,EUR,12,591230,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0226902269, ZO0660106601
+2019-07-11 16:00:00.000,Women's Shoes, Women's Clothing,EUR,17,591717,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0248002480, ZO0646706467
+2019-07-11 16:00:00.000,Women's Shoes,EUR,42,591768,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0005800058, ZO0133901339
+2019-07-11 16:00:00.000,Men's Clothing,EUR,21,591810,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0587405874, ZO0590305903
+2019-07-11 16:00:00.000,Women's Accessories, Women's Shoes,EUR,22,592049,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0186201862, ZO0018800188
+2019-07-11 16:00:00.000,Women's Clothing, Women's Accessories,EUR,28,592097,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0265502655, ZO0201102011
+2019-07-11 16:00:00.000,Men's Clothing,EUR,19,590807,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0582105821, ZO0421304213
+2019-07-11 16:00:00.000,Men's Accessories, Men's Clothing,EUR,13,714827,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0314503145, ZO0444804448, ZO0538405384, ZO0630306303
+2019-07-11 16:00:00.000,Women's Shoes,EUR,22,591735,5,2016-12-30 15:00:00.000, 2016-12-30 15:00:00.000,ZO0248402484, ZO0382603826
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view timezone formatting export with custom timezone and timeRange from locator params job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=\\"Ecommerce Data.csv\\"",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "Ecommerce Data",
+}
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view with plain saved search csv file matches 1`] = `
+"@timestamp,@message,@tags,url
+2015-09-22 23:50:13.253,238.171.34.42 - - [2015-09-22T23:50:13.253Z] \\"GET /uploads/karl-henize.jpg HTTP/1.1\\" 200 7124 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/karl-henize.jpg
+2015-09-22 23:43:58.175,155.34.86.215 - - [2015-09-22T23:43:58.175Z] \\"GET /uploads/leonid-kizim.jpg HTTP/1.1\\" 200 5453 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/leonid-kizim.jpg
+2015-09-22 23:24:14.970,231.224.4.183 - - [2015-09-22T23:24:14.970Z] \\"GET /uploads/gordon-cooper.jpg HTTP/1.1\\" 200 8788 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/gordon-cooper.jpg
+2015-09-22 23:21:38.312,17.191.87.129 - - [2015-09-22T23:21:38.312Z] \\"GET /uploads/william-pailes.jpg HTTP/1.1\\" 200 3875 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/william-pailes.jpg
+2015-09-22 22:52:43.834,239.190.189.77 - - [2015-09-22T22:52:43.834Z] \\"GET /uploads/yuri-shargin.jpg HTTP/1.1\\" 200 9448 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/yuri-shargin.jpg
+2015-09-22 22:46:45.525,15.202.168.250 - - [2015-09-22T22:46:45.525Z] \\"GET /uploads/paul-weitz.jpg HTTP/1.1\\" 200 7116 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/paul-weitz.jpg
+2015-09-22 22:29:42.029,103.57.26.210 - - [2015-09-22T22:29:42.029Z] \\"GET /uploads/mikhail-korniyenko.jpg HTTP/1.1\\" 200 9722 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/mikhail-korniyenko.jpg
+2015-09-22 22:23:07.177,97.83.96.39 - - [2015-09-22T22:23:07.177Z] \\"GET /uploads/barbara-morgan.jpg HTTP/1.1\\" 200 4574 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/barbara-morgan.jpg
+2015-09-22 22:20:48.857,98.89.73.11 - - [2015-09-22T22:20:48.857Z] \\"GET /uploads/tracy-caldwell-dyson.jpg HTTP/1.1\\" 404 8356 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/tracy-caldwell-dyson.jpg
+2015-09-22 22:09:30.819,53.64.147.41 - - [2015-09-22T22:09:30.819Z] \\"GET /uploads/tracy-caldwell-dyson.png HTTP/1.1\\" 200 11026 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",error, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/tracy-caldwell-dyson.png
+2015-09-22 21:49:36.365,57.237.11.219 - - [2015-09-22T21:49:36.365Z] \\"GET /uploads/kevin-kregel.png HTTP/1.1\\" 200 6316 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",warning, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/kevin-kregel.png
+2015-09-22 21:48:33.421,51.147.43.175 - - [2015-09-22T21:48:33.421Z] \\"GET /uploads/yuri-malenchenko.jpg HTTP/1.1\\" 200 6834 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/yuri-malenchenko.jpg
+2015-09-22 21:48:11.977,42.72.83.65 - - [2015-09-22T21:48:11.977Z] \\"GET /uploads/leonid-popov.jpg HTTP/1.1\\" 200 5624 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/leonid-popov.jpg
+2015-09-22 21:47:34.138,0.209.80.244 - - [2015-09-22T21:47:34.138Z] \\"GET /uploads/gregory-harbaugh.jpg HTTP/1.1\\" 200 8049 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, security,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/gregory-harbaugh.jpg
+2015-09-22 21:46:01.933,87.66.62.130 - - [2015-09-22T21:46:01.933Z] \\"GET /uploads/ronald-garan.jpg HTTP/1.1\\" 503 0 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/ronald-garan.jpg
+2015-09-22 21:45:59.966,236.90.86.83 - - [2015-09-22T21:45:59.966Z] \\"GET /uploads/alexander-gerst.jpg HTTP/1.1\\" 200 7493 \\"-\\" \\"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/alexander-gerst.jpg
+2015-09-22 21:44:49.105,44.138.70.255 - - [2015-09-22T21:44:49.105Z] \\"GET /uploads/chiaki-mukai.jpg HTTP/1.1\\" 200 7118 \\"-\\" \\"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\\",success, security,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/chiaki-mukai.jpg
+2015-09-22 21:40:33.574,159.230.143.48 - - [2015-09-22T21:40:33.574Z] \\"GET /uploads/vladimir-komarov.jpg HTTP/1.1\\" 200 3523 \\"-\\" \\"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\\",success, info,https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/vladimir-komarov.jpg
+"
+`;
+
+exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view with plain saved search job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=\\"A saved search with a query.csv\\"",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "A saved search with a query",
+}
+`;

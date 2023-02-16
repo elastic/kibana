@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-export const VIS = {
-  width: 1950 / 2,
-};
-
-export const ROUTES = {
-  captureTest: '/captureTest',
-  csv: '/csvExplorer',
-  pdf: '/pdfExplorer',
-  main: '/',
-};
+export type {
+  JobParamsCsvFromSavedObject,
+  TaskPayloadCsvFromSavedObject,
+} from '../../../common/types';

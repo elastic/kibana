@@ -11,16 +11,11 @@ import { VIS } from '../constants';
 
 type Props = React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
 
-export const TestImageA: FunctionComponent<Props> = ({
-  width = VIS.width,
-  height = VIS.height,
-  ...restProps
-}) => {
+export const TestImageA: FunctionComponent<Props> = ({ width = VIS.width, ...restProps }) => {
   return (
     <img
       data-shared-item
       width={width}
-      height={height}
       src={`data:image/jpeg;base64, ${testImage}`}
       alt="Test image"
       {...restProps}
