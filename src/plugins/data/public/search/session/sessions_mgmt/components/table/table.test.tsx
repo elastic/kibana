@@ -175,11 +175,13 @@ describe('Background Search Session Management Table', () => {
             />
           </LocaleWrapper>
         );
-        
-        await waitFor(() => {
-          expect(find).toHaveBeenCalledTimes(3);
-        }, { timeout: 10000, interval: 100 });
 
+        await waitFor(
+          () => {
+            expect(find).toHaveBeenCalledTimes(3);
+          },
+          { timeout: 10000, interval: 100 }
+        );
       });
     });
 
