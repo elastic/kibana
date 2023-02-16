@@ -11,7 +11,7 @@ import { Control, Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-import { FieldSelector } from './field_selector';
+import { FieldSelector } from '../common/field_selector';
 
 export interface Props {
   control: Control<CreateSLOInput>;
