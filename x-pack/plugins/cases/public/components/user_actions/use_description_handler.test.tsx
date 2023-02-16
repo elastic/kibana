@@ -8,7 +8,6 @@
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 
@@ -66,11 +65,7 @@ describe(`UseDescriptionHandler`, () => {
 
     appMockRender.render(<UseDescriptionHandler {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('property-actions-description-ellipses'));
-
-    await waitForEuiPopoverOpen();
-
-    userEvent.click(screen.getByTestId('property-actions-description-pencil'));
+    userEvent.click(screen.getByTestId('editable-description-edit-icon'));
 
     userEvent.clear(screen.getAllByTestId('euiMarkdownEditorTextArea')[0]);
 
@@ -85,34 +80,4 @@ describe(`UseDescriptionHandler`, () => {
       expect(onUpdateField).toBeCalledWith({ key: 'description', value: sampleData.content });
     });
   });
-
-  //   it('shows quoted text in last MarkdownEditorTextArea', async () => {
-  //     const quoteableText = `> ${defaultProps.data.description} \n\n`;
-
-  //     const wrapper = mount(
-  //       <TestProviders>
-  //         <UserActions {...defaultProps} />
-  //       </TestProviders>
-  //     );
-
-  //     expect(wrapper.find(`.euiMarkdownEditorTextArea`).text()).not.toContain(quoteableText);
-
-  //     wrapper
-  //       .find(
-  //         `[data-test-subj="description-action"] [data-test-subj="property-actions-description-ellipses"]`
-  //       )
-  //       .first()
-  //       .simulate('click');
-
-  //     wrapper
-  //       .find(
-  //         `[data-test-subj="description-action"] [data-test-subj="property-actions-description-quote"]`
-  //       )
-  //       .first()
-  //       .simulate('click');
-
-  //     await waitFor(() => {
-  //       expect(wrapper.find(`.euiMarkdownEditorTextArea`).text()).toContain(quoteableText);
-  //     });
-  //   });
 });

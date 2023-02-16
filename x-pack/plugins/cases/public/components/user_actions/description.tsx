@@ -9,17 +9,15 @@ import React from 'react';
 import classNames from 'classnames';
 import type { EuiCommentProps } from '@elastic/eui';
 import styled from 'styled-components';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiButtonIcon } from '@elastic/eui';
 
 import type { UserActionBuilder, UserActionBuilderArgs, UserActionTreeProps } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
-import { UserActionContentToolbar } from './content_toolbar';
 import { UserActionTimestamp } from './timestamp';
 import { UserActionMarkdown } from './markdown_form';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import * as i18n from './translations';
 import { HoverableUsernameResolver } from '../user_profiles/hoverable_username_resolver';
-import { DescriptionPropertyActions } from './property_actions/description_property_actions';
 
 const DESCRIPTION_ID = 'description';
 
@@ -27,12 +25,7 @@ const getLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase
 
 type GetDescriptionUserActionArgs = Pick<
   UserActionBuilderArgs,
-  | 'caseData'
-  | 'commentRefs'
-  | 'manageMarkdownEditIds'
-  | 'handleManageMarkdownEditId'
-  | 'handleManageQuote'
-  | 'appId'
+  'caseData' | 'commentRefs' | 'manageMarkdownEditIds' | 'handleManageMarkdownEditId' | 'appId'
 > &
   Pick<UserActionTreeProps, 'onUpdateField'> & { isLoadingDescription: boolean };
 
@@ -57,7 +50,6 @@ export const getDescriptionUserAction = ({
   isLoadingDescription,
   onUpdateField,
   handleManageMarkdownEditId,
-  handleManageQuote,
 }: GetDescriptionUserActionArgs): EuiCommentProps => {
   const isEditable = manageMarkdownEditIds.includes(DESCRIPTION_ID);
   return {
@@ -99,13 +91,12 @@ export const getDescriptionUserAction = ({
         !isEditable && !isLoadingDescription && hasDraftComment(appId, caseData.id, DESCRIPTION_ID),
     }),
     actions: (
-      <UserActionContentToolbar id={DESCRIPTION_ID}>
-        <DescriptionPropertyActions
-          isLoading={isLoadingDescription}
-          onEdit={() => handleManageMarkdownEditId(DESCRIPTION_ID)}
-          onQuote={() => handleManageQuote(caseData.description)}
-        />
-      </UserActionContentToolbar>
+      <EuiButtonIcon
+        aria-label={i18n.EDIT_DESCRIPTION}
+        iconType="pencil"
+        onClick={() => handleManageMarkdownEditId(DESCRIPTION_ID)}
+        data-test-subj="editable-description-edit-icon"
+      />
     ),
   };
 };

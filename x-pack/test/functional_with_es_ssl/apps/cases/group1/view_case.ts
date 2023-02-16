@@ -307,11 +307,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         it('shows unsaved description message when page is refreshed', async () => {
-          await testSubjects.click('property-actions-description-ellipses');
-
-          await header.waitUntilLoadingHasFinished();
-
-          await testSubjects.click('property-actions-description-pencil');
+          await testSubjects.click('editable-description-edit-icon');
 
           await header.waitUntilLoadingHasFinished();
 

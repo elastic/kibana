@@ -75,7 +75,7 @@ export const UseDescriptionHandler = React.memo(
   ({ data: caseData, isLoadingDescription, onUpdateField }: DescriptionHandler) => {
     const { appId } = useCasesContext();
 
-    const { commentRefs, manageMarkdownEditIds, handleManageMarkdownEditId, handleManageQuote } =
+    const { commentRefs, manageMarkdownEditIds, handleManageMarkdownEditId } =
       useUserActionsHandler();
 
     const descriptionCommentListObj: EuiCommentProps = useMemo(
@@ -88,7 +88,6 @@ export const UseDescriptionHandler = React.memo(
           isLoadingDescription,
           onUpdateField,
           handleManageMarkdownEditId,
-          handleManageQuote,
         }),
       [
         appId,
@@ -98,7 +97,6 @@ export const UseDescriptionHandler = React.memo(
         isLoadingDescription,
         onUpdateField,
         handleManageMarkdownEditId,
-        handleManageQuote,
       ]
     );
 

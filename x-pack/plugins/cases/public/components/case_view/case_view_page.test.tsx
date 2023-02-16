@@ -600,11 +600,7 @@ describe('CaseViewPage', () => {
 
       userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), newComment);
 
-      userEvent.click(screen.getByTestId('property-actions-description-ellipses'));
-
-      await waitForEuiPopoverOpen();
-
-      userEvent.click(screen.getByTestId('property-actions-description-pencil'));
+      userEvent.click(screen.getByTestId('editable-description-edit-icon'));
 
       userEvent.clear(screen.getAllByTestId('euiMarkdownEditorTextArea')[0]);
 
