@@ -28,6 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
         secrets: {
           webhookUrl: slackSimulatorURL,
         },
+        config: { type: 'webhook' },
       })
       .expect(200);
 
@@ -51,13 +52,12 @@ export default ({ getService }: FtrProviderContext) => {
     return createdSimulatedAction.id;
   };
 
-  describe('slack action', () => {
+  describe('Slack', () => {
     let slackSimulatorURL = '';
     let slackServer: http.Server;
     let proxyServer: httpProxy | undefined;
     let proxyHaveBeenCalled = false;
 
-    // need to wait for kibanaServer to settle ...
     before(async () => {
       slackServer = await getSlackServer();
       const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
@@ -81,253 +81,261 @@ export default ({ getService }: FtrProviderContext) => {
       }
     });
 
-    it('should return 200 when creating a slack action with webhook type successfully', async () => {
-      const { body: createdAction } = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
+    describe('Slack - Action Creation', () => {
+      it('should return 200 when creating a slack action with webhook type successfully', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A slack action',
+            connector_type_id: '.slack',
+            secrets: {
+              webhookUrl: slackSimulatorURL,
+            },
+          })
+          .expect(200);
+
+        expect(createdAction).to.eql({
+          id: createdAction.id,
+          is_preconfigured: false,
+          is_deprecated: false,
+          is_missing_secrets: false,
           name: 'A slack action',
           connector_type_id: '.slack',
-          secrets: {
-            webhookUrl: slackSimulatorURL,
-          },
-        })
-        .expect(200);
+          config: {},
+        });
 
-      expect(createdAction).to.eql({
-        id: createdAction.id,
-        is_preconfigured: false,
-        is_deprecated: false,
-        is_missing_secrets: false,
-        name: 'A slack action',
-        connector_type_id: '.slack',
-        config: {},
+        expect(typeof createdAction.id).to.be('string');
+
+        const { body: fetchedAction } = await supertest
+          .get(`/api/actions/connector/${createdAction.id}`)
+          .expect(200);
+
+        expect(fetchedAction).to.eql({
+          id: fetchedAction.id,
+          is_preconfigured: false,
+          is_deprecated: false,
+          is_missing_secrets: false,
+          name: 'A slack action',
+          connector_type_id: '.slack',
+          config: {},
+        });
       });
 
-      expect(typeof createdAction.id).to.be('string');
+      it('should return 200 when creating a slack action with web api type successfully', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A slack web api action',
+            connector_type_id: '.slack',
+            secrets: {
+              token: 'some token',
+            },
+          })
+          .expect(200);
 
-      const { body: fetchedAction } = await supertest
-        .get(`/api/actions/connector/${createdAction.id}`)
-        .expect(200);
-
-      expect(fetchedAction).to.eql({
-        id: fetchedAction.id,
-        is_preconfigured: false,
-        is_deprecated: false,
-        is_missing_secrets: false,
-        name: 'A slack action',
-        connector_type_id: '.slack',
-        config: {},
-      });
-    });
-
-    it('should return 200 when creating a slack action with web api type successfully', async () => {
-      const { body: createdAction } = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
+        expect(createdAction).to.eql({
+          id: createdAction.id,
+          is_preconfigured: false,
+          is_deprecated: false,
+          is_missing_secrets: false,
           name: 'A slack web api action',
           connector_type_id: '.slack',
-          secrets: {
-            token: 'some token',
-          },
-        })
-        .expect(200);
+          config: {},
+        });
 
-      expect(createdAction).to.eql({
-        id: createdAction.id,
-        is_preconfigured: false,
-        is_deprecated: false,
-        is_missing_secrets: false,
-        name: 'A slack web api action',
-        connector_type_id: '.slack',
-        config: {},
+        expect(typeof createdAction.id).to.be('string');
+
+        const { body: fetchedAction } = await supertest
+          .get(`/api/actions/connector/${createdAction.id}`)
+          .expect(200);
+
+        expect(fetchedAction).to.eql({
+          id: fetchedAction.id,
+          is_preconfigured: false,
+          is_deprecated: false,
+          is_missing_secrets: false,
+          name: 'A slack web api action',
+          connector_type_id: '.slack',
+          config: {},
+        });
       });
 
-      expect(typeof createdAction.id).to.be('string');
+      it('should respond with a 400 Bad Request when creating a slack action with no webhookUrl', async () => {
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A slack action',
+            connector_type_id: '.slack',
+            secrets: {},
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type secrets: types that failed validation:\n- [0.webhookUrl]: expected value of type [string] but got [undefined]\n- [1.token]: expected value of type [string] but got [undefined]',
+            });
+          });
+      });
 
-      const { body: fetchedAction } = await supertest
-        .get(`/api/actions/connector/${createdAction.id}`)
-        .expect(200);
+      it('should respond with a 400 Bad Request when creating a slack action with not present in allowedHosts webhookUrl', async () => {
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A slack action',
+            connector_type_id: '.slack',
+            secrets: {
+              webhookUrl: 'http://slack.mynonexistent.com/other/stuff/in/the/path',
+            },
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message: `error validating action type secrets: error configuring slack action: target url \"http://slack.mynonexistent.com/other/stuff/in/the/path\" is not added to the Kibana config xpack.actions.allowedHosts`,
+            });
+          });
+      });
 
-      expect(fetchedAction).to.eql({
-        id: fetchedAction.id,
-        is_preconfigured: false,
-        is_deprecated: false,
-        is_missing_secrets: false,
-        name: 'A slack web api action',
-        connector_type_id: '.slack',
-        config: {},
+      it('should respond with a 400 Bad Request when creating a slack action with a webhookUrl with no hostname', async () => {
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A slack action',
+            connector_type_id: '.slack',
+            secrets: {
+              webhookUrl: 'fee-fi-fo-fum',
+            },
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl',
+            });
+          });
       });
     });
 
-    it('should respond with a 400 Bad Request when creating a slack action with no webhookUrl', async () => {
-      await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A slack action',
-          connector_type_id: '.slack',
-          secrets: {},
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'error validating action type secrets: types that failed validation:\n- [0.webhookUrl]: expected value of type [string] but got [undefined]\n- [1.token]: expected value of type [string] but got [undefined]',
-          });
+    describe('Slack - Executor', () => {
+      it('should handle firing with a simulated success', async () => {
+        const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
+
+        const { body: result } = await supertest
+          .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              message: 'success',
+            },
+          })
+          .expect(200);
+        expect(result.status).to.eql('ok');
+        expect(proxyHaveBeenCalled).to.equal(true);
+      });
+
+      it('should handle firing with a simulated success', async () => {
+        const simulatedActionId = await mockedSlackActionIdForWebApi();
+        const { body: result } = await supertest
+          .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              subAction: 'postMessage',
+              subActionParams: { channels: ['general'], text: 'really important text' },
+            },
+          })
+          .expect(200);
+
+        expect(result).to.eql({
+          status: 'error',
+          message: 'error posting slack message',
+          connector_id: '.slack',
+          service_message: 'invalid_auth',
         });
-    });
+      });
 
-    it('should respond with a 400 Bad Request when creating a slack action with not present in allowedHosts webhookUrl', async () => {
-      await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A slack action',
-          connector_type_id: '.slack',
-          secrets: {
-            webhookUrl: 'http://slack.mynonexistent.com/other/stuff/in/the/path',
-          },
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: `error validating action type secrets: error configuring slack action: target url \"http://slack.mynonexistent.com/other/stuff/in/the/path\" is not added to the Kibana config xpack.actions.allowedHosts`,
-          });
-        });
-    });
+      it('should handle an empty message error', async () => {
+        const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
 
-    it('should respond with a 400 Bad Request when creating a slack action with a webhookUrl with no hostname', async () => {
-      await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A slack action',
-          connector_type_id: '.slack',
-          secrets: {
-            webhookUrl: 'fee-fi-fo-fum',
-          },
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl',
-          });
-        });
-    });
+        const { body: result } = await supertest
+          .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              message: '',
+            },
+          })
+          .expect(200);
+        expect(result.status).to.eql('error');
+        expect(result.message).to.equal(
+          "error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined."
+        );
+      });
 
-    it('should handle firing with a simulated success', async () => {
-      const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
+      it('should handle a 40x slack error', async () => {
+        const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
 
-      const { body: result } = await supertest
-        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            message: 'success',
-          },
-        })
-        .expect(200);
-      expect(result.status).to.eql('ok');
-      expect(proxyHaveBeenCalled).to.equal(true);
-    });
+        const { body: result } = await supertest
+          .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              message: 'invalid_payload',
+            },
+          })
+          .expect(200);
+        expect(result.status).to.equal('error');
+        expect(result.message).to.match(/unexpected http response from slack: /);
+      });
 
-    it('should handle firing with a simulated success', async () => {
-      const simulatedActionId = await mockedSlackActionIdForWebApi();
-      const { body: result } = await supertest
-        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            subAction: 'postMessage',
-            subActionParams: { channels: ['general'], text: 'really important text' },
-          },
-        })
-        .expect(200);
+      it('should handle a 429 slack error', async () => {
+        const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
 
-      expect(result.status).to.eql('ok');
-      expect(proxyHaveBeenCalled).to.equal(true);
-    });
+        const dateStart = new Date().getTime();
+        const { body: result } = await supertest
+          .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              message: 'rate_limit',
+            },
+          })
+          .expect(200);
 
-    it('should handle an empty message error', async () => {
-      const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
+        expect(result.status).to.equal('error');
+        expect(result.message).to.match(/error posting a slack message, retry at \d\d\d\d-/);
 
-      const { body: result } = await supertest
-        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            message: '',
-          },
-        })
-        .expect(200);
-      expect(result.status).to.eql('error');
-      expect(result.message).to.equal(
-        "error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined."
-      );
-    });
+        const dateRetry = new Date(result.retry).getTime();
+        expect(dateRetry).to.greaterThan(dateStart);
+      });
 
-    it('should handle a 40x slack error', async () => {
-      const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
+      it('should handle a 500 slack error', async () => {
+        const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
 
-      const { body: result } = await supertest
-        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            message: 'invalid_payload',
-          },
-        })
-        .expect(200);
-      expect(result.status).to.equal('error');
-      expect(result.message).to.match(/unexpected http response from slack: /);
-    });
+        const { body: result } = await supertest
+          .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              message: 'status_500',
+            },
+          })
+          .expect(200);
 
-    it('should handle a 429 slack error', async () => {
-      const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
-
-      const dateStart = new Date().getTime();
-      const { body: result } = await supertest
-        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            message: 'rate_limit',
-          },
-        })
-        .expect(200);
-
-      expect(result.status).to.equal('error');
-      expect(result.message).to.match(/error posting a slack message, retry at \d\d\d\d-/);
-
-      const dateRetry = new Date(result.retry).getTime();
-      expect(dateRetry).to.greaterThan(dateStart);
-    });
-
-    it('should handle a 500 slack error', async () => {
-      const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
-
-      const { body: result } = await supertest
-        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            message: 'status_500',
-          },
-        })
-        .expect(200);
-
-      expect(result.status).to.equal('error');
-      expect(result.message).to.match(/error posting a slack message, retry later/);
-      expect(result.retry).to.equal(true);
+        expect(result.status).to.equal('error');
+        expect(result.message).to.match(/error posting a slack message, retry later/);
+        expect(result.retry).to.equal(true);
+      });
     });
   });
 };
