@@ -236,9 +236,9 @@ export function getErrorForRateReference(
   columnId: string,
   name: string,
   indexPattern: IndexPattern
-) {
-  const dateErrors = checkForDateHistogram(layer, name) ?? [];
-  const referenceErrors = checkReferences(layer, columnId) ?? [];
+): string[] | undefined {
+  const dateErrors: string[] = checkForDateHistogram(layer, name) ?? [];
+  const referenceErrors: string[] = checkReferences(layer, columnId) ?? [];
   const metricCounterErrors = checkReferencedColumnMetric(layer, columnId, indexPattern) ?? [];
   if (metricCounterErrors.length) {
     return metricCounterErrors.concat(referenceErrors);
