@@ -145,6 +145,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const onSubmit = useCallback(
     async (values: LiveQueryFormFields) => {
+      // Temporary, frontend solution for params substitution. To be removed once alert_ids refactored in create_live_query_route
       const query =
         values.query && containsDynamicQuery(values.query) && alertAttachmentContext
           ? replaceParamsQuery(values.query, alertAttachmentContext).result
