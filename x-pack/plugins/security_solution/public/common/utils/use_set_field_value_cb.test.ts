@@ -8,12 +8,10 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useSetFieldValueWithCallback } from './use_set_field_value_cb';
 
-const field = 'theField';
-const setFieldValue = jest.fn();
 const initialValue = 'initial value';
-const initialProps = { field, setFieldValue, value: initialValue };
 const newValue = 'new value';
 const callback = jest.fn();
+const initialProps = { field: 'theField', setFieldValue: () => {}, value: initialValue };
 
 describe('set field value callback', () => {
   beforeEach(() => {
@@ -26,7 +24,7 @@ describe('set field value callback', () => {
     act(() => {
       result.current(newValue, callback);
     });
-    rerender({ field, setFieldValue, value: newValue });
+    rerender({ ...initialProps, value: newValue });
     expect(callback).toHaveBeenCalled();
   });
   it('invokes the callback after value is set to equal value', () => {
