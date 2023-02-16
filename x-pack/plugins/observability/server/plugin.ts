@@ -37,10 +37,11 @@ import {
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
-import { casesFeatureId, observabilityFeatureId } from '../common';
-import { slo } from './saved_objects';
-import { OBSERVABILITY_FEATURE_ID, RULE_REGISTRATION_CONTEXT } from './common/constants';
+import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
+import { slo, SO_SLO_TYPE } from './saved_objects';
+import { SLO_RULE_REGISTRATION_CONTEXT } from './common/constants';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
+import { SLO_BURN_RATE_RULE_ID } from '../common/constants';
 import { registerSloUsageCollector } from './lib/collectors/register';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -161,11 +162,61 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const { ruleDataService } = plugins.ruleRegistry;
 
     if (config.unsafe.slo.enabled) {
+      plugins.features.registerKibanaFeature({
+        id: sloFeatureId,
+        name: i18n.translate('xpack.observability.featureRegistry.linkSloTitle', {
+          defaultMessage: 'SLOs',
+        }),
+        order: 1200,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        app: [sloFeatureId, 'kibana'],
+        catalogue: [sloFeatureId, 'observability'],
+        alerting: [SLO_BURN_RATE_RULE_ID],
+        privileges: {
+          all: {
+            app: [sloFeatureId, 'kibana'],
+            catalogue: [sloFeatureId, 'observability'],
+            api: ['slo_write', 'slo_read', 'rac'],
+            savedObject: {
+              all: [SO_SLO_TYPE],
+              read: [],
+            },
+            alerting: {
+              rule: {
+                all: [SLO_BURN_RATE_RULE_ID],
+              },
+              alert: {
+                all: [SLO_BURN_RATE_RULE_ID],
+              },
+            },
+            ui: ['read', 'write'],
+          },
+          read: {
+            app: [sloFeatureId, 'kibana'],
+            catalogue: [sloFeatureId, 'observability'],
+            api: ['slo_read', 'rac'],
+            savedObject: {
+              all: [],
+              read: [SO_SLO_TYPE],
+            },
+            alerting: {
+              rule: {
+                read: [SLO_BURN_RATE_RULE_ID],
+              },
+              alert: {
+                read: [SLO_BURN_RATE_RULE_ID],
+              },
+            },
+            ui: ['read'],
+          },
+        },
+      });
+
       core.savedObjects.registerType(slo);
 
       const ruleDataClient = ruleDataService.initializeIndex({
-        feature: OBSERVABILITY_FEATURE_ID,
-        registrationContext: RULE_REGISTRATION_CONTEXT,
+        feature: sloFeatureId,
+        registrationContext: SLO_RULE_REGISTRATION_CONTEXT,
         dataset: Dataset.alerts,
         componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
         componentTemplates: [
