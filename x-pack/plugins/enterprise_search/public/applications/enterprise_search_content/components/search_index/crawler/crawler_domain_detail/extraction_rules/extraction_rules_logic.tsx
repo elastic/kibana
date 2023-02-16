@@ -250,6 +250,7 @@ export const ExtractionRulesLogic = kea<
         cancelEditExtractionRule: () => null,
         editExtractionRule: (_, { extractionRule }) => extractionRule,
         updateSuccess: () => null,
+        updateExtractionRuleSuccess: () => false,
       },
     ],
     extractionRuleToEditIsNew: [
