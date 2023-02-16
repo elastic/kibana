@@ -12,7 +12,7 @@ import {
 } from '../../common/helpers';
 import { v4 as uuidv4 } from 'uuid';
 
-export default () => {
+const CreateModal = () => {
   const { state, dispatch } = useScenarioContext();
   const modalFormId = useGeneratedHtmlId({ prefix: 'modalForm' });
 
@@ -77,3 +77,5 @@ export default () => {
 
   return state.createModal.isOpen ? <>{getForm(modalFormId, closeModal, saveModal)}</> : <div />;
 };
+
+export default CreateModal;

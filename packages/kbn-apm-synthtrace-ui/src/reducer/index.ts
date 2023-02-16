@@ -1,4 +1,4 @@
-import { SynthtraceScenario } from '../typings';
+import { SynthtraceScenario, Transaction } from '../typings';
 import { Action } from './actions';
 import { v4 as uuidv4 } from 'uuid';
 import { insertNodeInATree } from '../common/helpers';
@@ -69,8 +69,7 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
           serviceId: '',
           id: '',
         },
-        //@ts-ignore
-        entryTransaction: updatedTree,
+        entryTransaction: updatedTree as Transaction,
       };
     }
     case 'insert_service': {
@@ -85,8 +84,7 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
           serviceId: '',
           id: '',
         },
-        //@ts-ignore
-        entryTransaction: updatedTree,
+        entryTransaction: updatedTree as Transaction,
         services: {
           ...state.services,
           [action.payload.service.id]: action.payload.service,
