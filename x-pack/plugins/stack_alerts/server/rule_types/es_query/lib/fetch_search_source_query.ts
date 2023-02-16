@@ -129,7 +129,14 @@ export function updateSearchSource(
 
   const searchSourceChild = searchSource.createChild();
   searchSourceChild.setField('filter', filters as Filter[]);
-  searchSourceChild.setField('sort', [{ [timeFieldName]: SortDirection.desc }]);
+  searchSourceChild.setField('sort', [
+    {
+      [timeFieldName]: {
+        order: SortDirection.desc,
+        format: 'strict_date_optional_time||epoch_millis',
+      },
+    },
+  ]);
   searchSourceChild.setField(
     'aggs',
     buildAggregation({
