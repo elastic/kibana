@@ -15,6 +15,7 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   EuiText,
   EuiTextColor,
@@ -33,6 +34,8 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
   return <EuiFlexGroup direction="column">{children}</EuiFlexGroup>;
 };
 
+const RESULT_FIELDS_TRUNCATE_AT = 4;
+
 export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
   const { setSelectedDocument } = useSelectedDocument();
 
@@ -44,6 +47,9 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
         value: value.raw,
       };
     });
+
+  const truncatedFields = fields.slice(0, RESULT_FIELDS_TRUNCATE_AT);
+  const hiddenFields = fields.length - truncatedFields.length;
 
   const {
     _meta: {
@@ -90,7 +96,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
   return (
     <button type="button" onClick={() => setSelectedDocument(result)}>
       <EuiPanel paddingSize="m">
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexGroup justifyContent="spaceBetween">
             <code>
               <FormattedMessage
@@ -111,7 +117,21 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiBasicTable items={fields} columns={columns} />
+          <EuiBasicTable items={truncatedFields} columns={columns} />
+          {hiddenFields > 0 && (
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiIcon type="arrowRight" color="subdued" />
+              <EuiTextColor color="subdued">
+                <code>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.engine.searchPreview.result.moreFieldsButton"
+                    defaultMessage="{count} {count, plural, one {More Field} other {More Fields}}"
+                    values={{ count: hiddenFields }}
+                  />
+                </code>
+              </EuiTextColor>
+            </EuiFlexGroup>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
     </button>
