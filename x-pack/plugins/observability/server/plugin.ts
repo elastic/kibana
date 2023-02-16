@@ -176,7 +176,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           all: {
             app: [sloFeatureId, 'kibana'],
             catalogue: [sloFeatureId, 'observability'],
-            api: ['slo_write', 'slo_read'],
+            api: ['slo_write', 'slo_read', 'rac'],
             savedObject: {
               all: [SO_SLO_TYPE],
               read: [],
@@ -194,7 +194,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           read: {
             app: [sloFeatureId, 'kibana'],
             catalogue: [sloFeatureId, 'observability'],
-            api: ['slo_read'],
+            api: ['slo_read', 'rac'],
             savedObject: {
               all: [],
               read: [SO_SLO_TYPE],
