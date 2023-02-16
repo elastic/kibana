@@ -31,7 +31,7 @@ export interface ContentStorage {
   delete(ctx: StorageContext, id: string, options: unknown): Promise<any>;
 }
 
-interface RpcSchemas {
+export interface RpcSchemas {
   get?: {
     in?: {
       options?: Type<any>;

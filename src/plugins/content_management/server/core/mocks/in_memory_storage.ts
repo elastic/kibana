@@ -139,3 +139,11 @@ class InMemoryStorage implements ContentStorage {
 export const createMemoryStorage = () => {
   return new InMemoryStorage();
 };
+
+export const createMockedStorage = (): jest.Mocked<ContentStorage> => ({
+  get: jest.fn(),
+  bulkGet: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+});

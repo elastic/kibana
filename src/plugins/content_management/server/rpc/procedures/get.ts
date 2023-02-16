@@ -9,21 +9,13 @@
 import { rpcSchemas } from '../../../common';
 import type { GetIn } from '../../../common';
 import type { ContentCrud, StorageContext } from '../../core';
+import { validate } from '../../utils';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
-import { validate } from '../../utils';
 
 export const get: ProcedureDefinition<Context, GetIn<string>> = {
   schemas: rpcSchemas.get,
   fn: async (ctx, input) => {
-    if (!input) {
-      throw new Error(`Input data missing for procedur [get].`);
-    }
-
-    if (!input.contentTypeId) {
-      throw new Error(`Content type not provided in input procedure [get].`);
-    }
-
     const contentDefinition = ctx.contentRegistry.getDefinition(input.contentTypeId);
 
     if (!contentDefinition) {
@@ -55,7 +47,7 @@ export const get: ProcedureDefinition<Context, GetIn<string>> = {
     // Validate result
     const resultSchema = schemas?.out?.result;
     if (resultSchema) {
-      const error = validate(result, resultSchema);
+      const error = validate(result.item, resultSchema);
       if (error) {
         // TODO: Improve error handling
         throw error;

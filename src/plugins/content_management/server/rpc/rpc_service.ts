@@ -10,29 +10,22 @@ import { validate } from '../utils';
 
 export interface ProcedureDefinition<
   Context extends object | void = void,
-  I extends object = any,
+  I extends object | void = void,
   O = any
 > {
-  fn: (context: Context, input?: I) => Promise<O>;
+  fn: (context: Context, input: I extends void ? undefined : I) => Promise<O>;
   schemas?: ProcedureSchemas;
 }
 
 export class RpcService<Context extends object | void = void, Names extends string = string> {
   private registry: Map<string, ProcedureDefinition<Context>> = new Map();
 
-  register<I extends object = any, O = any>(
-    name: Names,
-    definition: ProcedureDefinition<Context, I, O>
-  ) {
+  register(name: Names, definition: ProcedureDefinition<Context>) {
     this.registry.set(name, definition);
   }
 
-  async call<I extends object = any, O = any>(
-    context: Context,
-    name: Names,
-    input?: I
-  ): Promise<{ result: O }> {
-    const procedure: ProcedureDefinition<Context, I, O> | undefined = this.registry.get(name);
+  async call(context: Context, name: Names, input?: unknown): Promise<{ result: unknown }> {
+    const procedure: ProcedureDefinition<Context, any> | undefined = this.registry.get(name);
 
     if (!procedure) throw new Error(`Procedure [${name}] is not registered.`);
 

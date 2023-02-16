@@ -63,12 +63,12 @@ export const create: ProcedureDefinition<Context, CreateIn<string>> = {
     const storageContext: StorageContext = {
       requestHandlerContext: ctx.requestHandlerContext,
     };
-    const result = crudInstance.create(storageContext, input.data, input.options);
+    const result = await crudInstance.create(storageContext, input.data, input.options);
 
     // Validate result
     const resultSchema = schemas.out?.result;
     if (resultSchema) {
-      const error = validate(result, resultSchema);
+      const error = validate(result.result, resultSchema);
       if (error) {
         // TODO: Improve error handling
         throw error;

@@ -54,11 +54,7 @@ describe('RpcService', () => {
       const context = {};
       const input = { foo: 'bar' };
 
-      const { result } = await rpc.call<{ foo: string }, { success: boolean }>(
-        context,
-        'foo',
-        input
-      );
+      const { result } = await rpc.call(context, 'foo', input);
 
       expect(fn).toHaveBeenCalledWith(context, input);
       expect(result).toEqual(output);
