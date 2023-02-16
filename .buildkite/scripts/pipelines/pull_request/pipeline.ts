@@ -136,6 +136,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     if (
       await doAnyChangesMatch([
+        /^package\.json/,
         /^x-pack\/plugins\/synthetics/,
         /^x-pack\/plugins\/observability\/public\/components\/shared\/exploratory_view/,
       ])
