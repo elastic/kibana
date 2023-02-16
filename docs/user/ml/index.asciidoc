@@ -188,10 +188,10 @@ image::user/ml/images/ml-change-point-detection.png[Change point detection UI]
 Select a function and a metric field, then pick a date range to start detecting 
 change points in the defined range. Optionally, you can split the data by a 
 field. If the cardinality of the split field is greater than 10,000, then only 
-the first 10,000 partition, sorted by document count, are analyzed.
+the first 10,000, sorted by document count, are analyzed.
 
-If at least one change point is detected, a chart visualizes the change point in 
-its context, making the interpretation easier. If you split the analysis by a 
+If a change point is detected, a chart visualizes where the change point was identified in
+the time window analyzed, making the interpretation easier. If you split the analysis by a 
 field, a separate chart is displayed for every partition with a detected change 
 point. You can view the type of change point in the chart as well as its value 
 and the time when the change happened. The corresponding `p-value` indicates how 
