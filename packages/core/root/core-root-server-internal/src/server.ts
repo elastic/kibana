@@ -264,7 +264,6 @@ export class Server {
     // Configuration could have changed after preboot.
     await ensureValidConfiguration(this.configService);
 
-    // TODO KCG Plugins?
     const { uiPlugins, pluginPaths, pluginTree } = this.discoveredPlugins!.standard;
 
     const contextServiceSetup = this.context.setup({
@@ -330,7 +329,6 @@ export class Server {
 
     const customBrandingSetup = this.customBranding.setup();
 
-    // TODO KCG Rendering service setup
     const renderingSetup = await this.rendering.setup({
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,

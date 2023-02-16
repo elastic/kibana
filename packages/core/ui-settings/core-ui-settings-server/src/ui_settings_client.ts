@@ -60,6 +60,10 @@ export interface IUiSettingsClient {
   isSensitive: (key: string) => boolean;
 }
 
+/**
+ * A server side client that extends the {@link IUiSettingsClient} to include a method of retrieving UserProfile
+ * specific settings
+ */
 export interface IUserUiSettingsClient extends IUiSettingsClient {
-  getUserProfileSettings: (request: KibanaRequest) => Promise<any>;
+  getUserProfileSettings: (request: KibanaRequest) => Promise<Record<string, string>>;
 }

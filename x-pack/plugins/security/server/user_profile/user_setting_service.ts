@@ -14,11 +14,13 @@ export interface UserSettingServiceStart {
   ): Promise<UserProfileWithSecurity<D, L> | null>;
 }
 
+/**
+ * A service that wraps the {@link UserProfileServiceStart} so that only the 'getCurrent' method is made available
+ */
 export class UserSettingService {
   constructor() {}
 
   start(userProfileServiceStart: UserProfileServiceStart): UserSettingServiceStart {
-    console.log('Inside user_settings_service.ts in Security Plugin');
     return {
       getCurrent: (params) => userProfileServiceStart.getCurrent(params),
     };

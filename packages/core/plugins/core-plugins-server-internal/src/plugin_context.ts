@@ -320,7 +320,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       asScopedToClient: deps.uiSettings.asScopedToClient,
       globalAsScopedToClient: deps.uiSettings.globalAsScopedToClient,
       userAsScopedToClient: deps.uiSettings.userAsScopedToClient,
-      setUserProfilesClientFactoryProvider: deps.uiSettings.setUserProfilesClientFactoryProvider, // TODO KCG What is this for?
+      setUserProfilesClientFactoryProvider: deps.uiSettings.setUserProfilesClientFactoryProvider,
     },
     coreUsageData: deps.coreUsageData,
   };

@@ -9,6 +9,7 @@
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { UserProfileGetCurrentParams } from '@kbn/security-plugin/server';
+import { UserProfileWithSecurity } from '@kbn/security-plugin/common';
 import type { IUiSettingsClient, IUserUiSettingsClient } from './ui_settings_client';
 
 /** @public */
@@ -52,16 +53,19 @@ export interface UiSettingsServiceSetup {
 }
 
 /**
- * Provider to invoke to retrieve a {@link SavedObjectsClientFactory}.
+ * Provider to invoke to retrieve a {@link UserProfilesClientFactory}.
  * @public
  */
 export type UserProfilesClientFactoryProvider = () => UserProfilesClientFactory;
 
-// Describes the factory used to create instances of the Saved Objects Client.
+// Describes the factory used to create instances of the UserProfilesClient
 export type UserProfilesClientFactory = () => UserProfilesClientContract;
 
+/**
+ * Describes the functions that will be provided by a UserProfilesClient
+ */
 export interface UserProfilesClientContract {
-  get(params: UserProfileGetCurrentParams): Promise<any>;
+  get(params: UserProfileGetCurrentParams): Promise<UserProfileWithSecurity | null>;
 }
 
 /** @public */
@@ -70,7 +74,7 @@ export interface UiSettingsServiceStart {
    * Creates a {@link IUiSettingsClient} with provided *scoped* saved objects client.
    *
    * This should only be used in the specific case where the client needs to be accessed
-   * from outside of the scope of a {@link RequestHandler}.
+   * from outside the scope of a {@link RequestHandler}.
    *
    * @example
    * ```ts
@@ -86,7 +90,7 @@ export interface UiSettingsServiceStart {
    * Creates a global {@link IUiSettingsClient} with provided *scoped* saved objects client.
    *
    * This should only be used in the specific case where the client needs to be accessed
-   * from outside of the scope of a {@link RequestHandler}.
+   * from outside the scope of a {@link RequestHandler}.
    *
    * @example
    * ```ts
@@ -98,8 +102,23 @@ export interface UiSettingsServiceStart {
    */
   globalAsScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
 
+  /**
+   * Creates an {@link IUserUiSettingsClient} (which extends {@link IUiSettingsClient} so that settings in the user's
+   * profile can be retrieved.
+   *
+   * @param savedObjectsClient This client is not currently used by the underlying UserClient, but is included so that
+   * future user specific settings/migrations will be able to be created in SO, if necessary, rather than UserProfiles
+   */
   userAsScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUserUiSettingsClient;
 
+  /**
+   * This provides a way for downstream plugins to provide the UiSettingsService with a way to create UserProfileClients
+   *
+   * @example The SecurityPlugin currently utilizes this on start to provide the necessary services
+   *
+   * @param userProfilesClientFactoryProvider Provides a factory method that returns a UserProfileClient that satisfies
+   * the {@link UserProfilesClientContract}
+   */
   setUserProfilesClientFactoryProvider(
     userProfilesClientFactoryProvider: UserProfilesClientFactoryProvider
   ): void;

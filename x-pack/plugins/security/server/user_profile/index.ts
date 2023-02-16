@@ -26,13 +26,17 @@ interface SetupUiSettingsServiceParams {
   userSettingsServiceStart: UserSettingServiceStart;
 }
 
+/**
+ * Used to set the provider that contains the factory that creates UserProfileClients
+ *
+ * @param userSettingsServiceStart A service that provides functions to get the current user's profile, that will be
+ * exposed by the {@link UserProfilesClient}
+ * @param uiSettingServiceStart The service that will the input provider to create instances of {@link UserProfilesClient}
+ */
 export function setupUserProfilesClientOnUiSettingsServiceStart({
   userSettingsServiceStart,
   uiSettingServiceStart,
 }: SetupUiSettingsServiceParams) {
-  // TODO oof... there has to be a differnt way
-  console.log('Inside User Profile plugin.ts:');
-  console.log(uiSettingServiceStart);
   uiSettingServiceStart.setUserProfilesClientFactoryProvider(() => () => {
     return new UserProfilesClient(userSettingsServiceStart);
   });

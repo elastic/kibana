@@ -115,9 +115,7 @@ export class UiSettingsService
   private setUserProfilesClientFactoryProvider(): (
     provider: UserProfilesClientFactoryProvider
   ) => void {
-    console.log('The factory provider was called\n');
     return (provider: UserProfilesClientFactoryProvider) => {
-      console.log('The factory provider was set\n');
       this.userProfilesClientFactoryProvider = provider;
     };
   }
@@ -164,13 +162,9 @@ export class UiSettingsService
     return (savedObjectsClient: SavedObjectsClientContract): ClientType<T> => {
       let userProfilesClient: UserProfilesClientContract | undefined;
 
-      console.log('Yes! userProfilesClientFactoryProvider was set!\n');
       if (this.userProfilesClientFactoryProvider) {
         const userProfilesClientFactory = this.userProfilesClientFactoryProvider();
         userProfilesClient = userProfilesClientFactory();
-
-        console.log('the userProfilesClient is:');
-        console.log(userProfilesClient);
       }
 
       const options = {
@@ -179,7 +173,7 @@ export class UiSettingsService
         log: this.log,
         savedObjectsClient,
         type: 'config-user' as 'config' | 'config-global' | 'config-user',
-        defaults: {}, // TODO KCG
+        defaults: {},
         ...(userProfilesClient && { userProfilesClient }),
         overrides: {},
       };

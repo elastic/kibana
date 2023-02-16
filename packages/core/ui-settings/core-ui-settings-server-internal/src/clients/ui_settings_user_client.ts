@@ -8,6 +8,7 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { KibanaRequest } from '@kbn/core-http-server';
+import { IUserUiSettingsClient } from '@kbn/core-ui-settings-server/src/ui_settings_client';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { CannotOverrideError } from '../ui_settings_errors';
 import { Cache } from '../cache';
@@ -28,7 +29,7 @@ type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
 /**
  * Common logic for setting / removing keys in a {@link IUiSettingsClient} implementation
  */
-export class UiSettingsUserClient extends BaseUiSettingsClient {
+export class UiSettingsUserClient extends BaseUiSettingsClient implements IUserUiSettingsClient {
   private readonly type: UiSettingsServiceOptions['type'];
   private readonly id: UiSettingsServiceOptions['id'];
   private readonly buildNum: UiSettingsServiceOptions['buildNum'];
@@ -47,10 +48,9 @@ export class UiSettingsUserClient extends BaseUiSettingsClient {
     this.cache = new Cache();
   }
 
-  async getUserProfileSettings(request: KibanaRequest) {
-    console.log('Inside ui_settings_user_client.ts');
-    console.log(this.userProfilesClient);
-    return this.userProfilesClient?.get({ request, dataPath: '*' });
+  async getUserProfileSettings(request: KibanaRequest): Promise<Record<string, string>> {
+    const userProfile = await this.userProfilesClient?.get({ request, dataPath: '*' });
+    return (userProfile?.data?.userSettings || {}) as Record<string, string>;
   }
 
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {

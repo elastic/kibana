@@ -104,8 +104,6 @@ export class RenderingService {
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
-    // TODO KCG const user: AuthenticatedUser = http.auth.get<AuthenticatedUser>(request).state ?? null;
-
     const settings = {
       defaults: uiSettings.client?.getRegistered() ?? {},
       user: isAnonymousPage ? {} : await uiSettings.client?.getUserProvided(),
@@ -114,10 +112,10 @@ export class RenderingService {
       defaults: uiSettings.globalClient?.getRegistered() ?? {},
       user: isAnonymousPage ? {} : await uiSettings.globalClient?.getUserProvided(),
     };
-
-    const userProfile = await uiSettings.userClient.getUserProfileSettings(request);
-    const userSettingsDarkMode = userProfile.data.userSettings.darkMode;
-    const isDarkMode = userSettingsDarkMode && userSettingsDarkMode === 'dark';
+    const userSettings = {
+      defaults: {},
+      user: isAnonymousPage ? {} : await uiSettings.userClient?.getUserProfileSettings(request),
+    };
 
     let clusterInfo = {};
     let branding: CustomBranding = {};
@@ -136,7 +134,14 @@ export class RenderingService {
       // swallow error
     }
 
-    const darkMode = getSettingValue('theme:darkMode', settings, Boolean) || isDarkMode;
+    // If the user profile switch has been toggled, the value takes precedence
+    const userTheme: string = userSettings.user.darkMode;
+    let darkMode;
+    if (userTheme) {
+      darkMode = userTheme === 'dark';
+    } else {
+      darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+    }
 
     const themeVersion: ThemeVersion = 'v8';
 

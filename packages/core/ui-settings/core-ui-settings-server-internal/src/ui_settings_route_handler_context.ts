@@ -47,9 +47,7 @@ export class CoreUiSettingsRouteHandlerContext implements UiSettingsRequestHandl
   }
 
   public get userClient() {
-    console.log('This is the ui settings route handler context');
     if (this.#userClient == null) {
-      console.log('route handler context calling uiSettingsStart service');
       this.#userClient = this.uiSettingsStart.userAsScopedToClient(
         this.savedObjectsRouterHandlerContext.client
       );

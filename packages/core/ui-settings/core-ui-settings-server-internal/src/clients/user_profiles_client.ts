@@ -9,7 +9,11 @@
 import { UserProfilesClientContract } from '@kbn/core-ui-settings-server/src/contracts';
 import type { UserSettingServiceStart } from '@kbn/security-plugin/server/user_profile/user_setting_service';
 import type { UserProfileGetCurrentParams } from '@kbn/security-plugin/server';
+import { UserProfileWithSecurity } from '@kbn/security-plugin/common';
 
+/**
+ * A wrapper client around {@link UserSettingServiceStart} that exposes a method to get the current user's profile
+ */
 export class UserProfilesClient implements UserProfilesClientContract {
   private userSettingsServiceStart: UserSettingServiceStart;
 
@@ -17,8 +21,13 @@ export class UserProfilesClient implements UserProfilesClientContract {
     this.userSettingsServiceStart = userSettingsServiceStart;
   }
 
-  async get(params: UserProfileGetCurrentParams): Promise<any> {
-    console.log('Inside user_profiles_client.ts');
+  /**
+   * Returns the current user's profile
+   *
+   * @param params the Kibana Request and the 'data path' of the desired values that are stored with in the user's
+   * profile 'data' object
+   */
+  async get(params: UserProfileGetCurrentParams): Promise<UserProfileWithSecurity | null> {
     return await this.userSettingsServiceStart.getCurrent(params);
   }
 }
