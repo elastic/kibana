@@ -342,12 +342,6 @@ export class JobsListView extends Component {
         this.updateFunctions[j](fullJobsList[j]);
       });
 
-      // jobs.forEach((job) => {
-      //   if (job.blocked !== undefined && this.state.itemIdToExpandedRowMap[job.id]) {
-      //     this.toggleRow(job.id);
-      //   }
-      // });
-
       this.isDoneRefreshing();
       if (jobsSummaryList.some((j) => j.blocked !== undefined)) {
         // if there are some jobs in a deleting state, start polling for
