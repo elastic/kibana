@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedSearchServerPlugin } from './plugin';
+import { DiscoverServerPluginStart } from '.';
+import { createLocatorServiceMock } from './locator/mocks';
 
-export { getSavedSearch } from './services/saved_searches';
-
-export const plugin = () => new SavedSearchServerPlugin();
+export const discoverPluginMock = {
+  createStartContract: (): DiscoverServerPluginStart => ({
+    locator: createLocatorServiceMock(),
+  }),
+};
