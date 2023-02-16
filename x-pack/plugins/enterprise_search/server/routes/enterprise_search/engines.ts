@@ -112,7 +112,7 @@ export function registerEnginesRoutes({
     })
   );
 
-  router.get(
+  router.post(
     {
       path: '/internal/enterprise_search/engines/{engine_name}/search',
       validate: {
