@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export const EVENTS_VIEWER_FIELDS_BUTTON =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="show-field-browser"]';
+export const ALERTS_OR_EVENTS_HISTOGRAM = '[data-test-subj="alertsOrEventsHistogramQueryPanel"]';
+
+export const EVENTS_VIEWER_PANEL = '[data-test-subj="events-viewer-panel"]';
+
+export const EVENTS_VIEWER_FIELDS_BUTTON = `${EVENTS_VIEWER_PANEL} [data-test-subj="show-field-browser"]`;
 
 export const FIELDS_BROWSER_CONTAINER = '[data-test-subj="fields-browser-container"]';
 
@@ -22,8 +25,7 @@ export const HOST_GEO_COUNTRY_NAME_HEADER = '[data-test-subj="header-text-host.g
 
 export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
 
-export const INSPECT_QUERY =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="inspect-icon-button"]';
+export const INSPECT_QUERY = `${EVENTS_VIEWER_PANEL} [data-test-subj="inspect-icon-button"]`;
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 

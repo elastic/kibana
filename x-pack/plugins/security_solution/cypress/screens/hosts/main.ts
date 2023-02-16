@@ -16,3 +16,7 @@ export const UNCOMMON_PROCESSES_TAB = '[data-test-subj="navigation-uncommonProce
 export const HOST_OVERVIEW = `[data-test-subj="host-overview"]`;
 
 export const SESSIONS_TAB = `[data-test-subj="navigation-sessions"]`;
+
+export const UNIQUE_HOSTS = `[data-test-subj="stat-hosts"]`;
+
+export const UNIQUE_IPS = `[data-test-subj="stat-uniqueIps"]`;
