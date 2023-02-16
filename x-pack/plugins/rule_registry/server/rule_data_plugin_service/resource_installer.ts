@@ -15,17 +15,16 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,
-  ECS_CONTEXT,
-  getComponentTemplate,
+  ECS_COMPONENT_TEMPLATE_NAME,
 } from '@kbn/alerting-plugin/server';
-import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
+import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 
 import type { IndexInfo } from './index_info';
 
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
-const TOTAL_FIELDS_LIMIT = 2500;
+const TOTAL_FIELDS_LIMIT = 1900;
 interface ConstructorOptions {
   getResourceName(relativeName: string): string;
   getClusterClient: () => Promise<ElasticsearchClient>;
@@ -111,9 +110,10 @@ export class ResourceInstaller {
                   name: DEFAULT_ALERTS_ILM_POLICY_NAME,
                   body: DEFAULT_ALERTS_ILM_POLICY,
                 }),
-                this.createOrUpdateComponentTemplate(
-                  getComponentTemplate(ecsFieldMap, ECS_CONTEXT)
-                ),
+                this.createOrUpdateComponentTemplate({
+                  name: ECS_COMPONENT_TEMPLATE_NAME,
+                  body: ecsComponentTemplate,
+                }),
               ]),
           this.createOrUpdateComponentTemplate({
             name: TECHNICAL_COMPONENT_TEMPLATE_NAME,

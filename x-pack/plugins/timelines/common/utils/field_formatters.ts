@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash/fp';
 
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
+import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 import { EventHit, TimelineEventsDetailsItem } from '../search_strategy';

@@ -17,7 +17,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import type { EcsFieldMap } from '@kbn/alerts-as-data-utils';
+import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import type {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
+import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 
 import { isPlainObject, cloneDeep, isArray } from 'lodash';
 
