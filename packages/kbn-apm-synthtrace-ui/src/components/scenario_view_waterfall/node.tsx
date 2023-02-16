@@ -6,6 +6,7 @@ import {
   EuiPopover,
   EuiButton,
   EuiBadge,
+  EuiPanel,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { useScenarioContext } from '../../context/use_scenario_context';
@@ -34,38 +35,46 @@ const Node = ({ item, level }: { item: Transaction | Span; level: number }) => {
   const shouldRepeat = item?.repeat ? item.repeat > 0 : false;
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <EuiText style={{ display: 'flex', paddingLeft: `${level * 30}px` }}>{item.name}</EuiText>
-      </EuiFlexItem>
-      {shouldRepeat && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="green">{item.repeat}x</EuiBadge>
-        </EuiFlexItem>
-      )}
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={<EuiButtonIcon onClick={onButtonClick} iconType="plus" aria-label="Add" />}
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-          >
-            <EuiText>Add New</EuiText>
-            <EuiButton fullWidth size="s" onClick={() => onPopOverOptionSelected('transaction')}>
-              Transaction
-            </EuiButton>
-            <EuiButton fullWidth size="s" onClick={() => onPopOverOptionSelected('span')}>
-              Span
-            </EuiButton>
-            <EuiButton fullWidth size="s" onClick={() => onPopOverOptionSelected('service')}>
-              Service
-            </EuiButton>
-          </EuiPopover>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon onClick={() => {}} iconType="gear" aria-label="Add" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiFlexGroup style={{ display: 'flex', paddingLeft: `${level * 30}px`, marginBottom: '10px' }}>
+      <EuiPanel paddingSize="s">
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiText>{item.name}</EuiText>
+          </EuiFlexItem>
+          {shouldRepeat && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="green">{item.repeat}x</EuiBadge>
+            </EuiFlexItem>
+          )}
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                button={<EuiButtonIcon onClick={onButtonClick} iconType="plus" aria-label="Add" />}
+                isOpen={isPopoverOpen}
+                closePopover={closePopover}
+              >
+                <EuiText>Add New</EuiText>
+                <EuiButton
+                  fullWidth
+                  size="s"
+                  onClick={() => onPopOverOptionSelected('transaction')}
+                >
+                  Transaction
+                </EuiButton>
+                <EuiButton fullWidth size="s" onClick={() => onPopOverOptionSelected('span')}>
+                  Span
+                </EuiButton>
+                <EuiButton fullWidth size="s" onClick={() => onPopOverOptionSelected('service')}>
+                  Service
+                </EuiButton>
+              </EuiPopover>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon onClick={() => {}} iconType="gear" aria-label="Add" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexGroup>
+      </EuiPanel>
     </EuiFlexGroup>
   );
 };
