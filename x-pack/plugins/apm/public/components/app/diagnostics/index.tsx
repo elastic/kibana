@@ -32,7 +32,6 @@ import { DownloadJson } from './download_json';
 import { LoadingTimelineItem } from './loading_timeline_item';
 
 export function Diagnostics() {
-  const [configData, setConfigData] = useState<'success' | 'error'>();
   const [actionsEnabled, setActionsEnabled] = useState(false);
   const [reportData, setReportData] = useState<Record<string, any>>();
 
@@ -92,17 +91,13 @@ export function Diagnostics() {
   }, [apmData]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setConfigData('success');
-      setReportData((prev) => ({
-        ...prev,
-        apmConfiguration: {
-          pipelines: setupConfigData?.pipelines,
-          templates: setupConfigData?.templates,
-        },
-      }));
-    }, 1000);
-    return () => clearTimeout(timer);
+    setReportData((prev) => ({
+      ...prev,
+      apmConfiguration: {
+        pipelines: setupConfigData?.pipelines,
+        templates: setupConfigData?.templates,
+      },
+    }));
   }, [setupConfigData]);
   return (
     <>
