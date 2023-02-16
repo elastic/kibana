@@ -150,7 +150,13 @@ export async function registerMetricThresholdRuleType(
         { name: 'group', description: groupActionVariableDescription },
         { name: 'groupByKeys', description: groupByKeysActionVariableDescription },
         ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
-          ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
+          ? [
+              {
+                name: 'alertDetailsUrl',
+                description: alertDetailUrlActionVariableDescription,
+                usesPublicBaseUrl: true,
+              },
+            ]
           : []),
         { name: 'alertState', description: alertStateActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
@@ -158,7 +164,11 @@ export async function registerMetricThresholdRuleType(
         { name: 'value', description: valueActionVariableDescription },
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
-        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
+        {
+          name: 'viewInAppUrl',
+          description: viewInAppUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
+        },
         { name: 'cloud', description: cloudActionVariableDescription },
         { name: 'host', description: hostActionVariableDescription },
         { name: 'container', description: containerActionVariableDescription },

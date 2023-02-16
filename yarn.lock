@@ -1539,10 +1539,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@75.0.0":
-  version "75.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-75.0.0.tgz#06f1d41181327d91d6531f240372c01c34505bee"
-  integrity sha512-fgjpF4l+YuMVepnYbiddpVZHkzEVrgwvsmJokaf0OZZ34UCh+OB2z4n01yAhmhQXhrFEKv8+LmQt+OMIpTBevA==
+"@elastic/eui@75.1.0":
+  version "75.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-75.1.0.tgz#6bdb2a12e5dd503258e74d5585803f52b826b83e"
+  integrity sha512-HJgoARNsXeYDIGO9sKV+wwfmFA2IKL9hjOMj8B0PZ4fA6Euprw7KPLkakUbwjTCm0rqYUf/6zmXRafvzvdKLmA==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -11804,10 +11804,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^109.0.0:
-  version "109.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-109.0.0.tgz#9407af72f2a01bb19e6db1b85cfc87eb3acd4f6b"
-  integrity sha512-jdmBq11IUwfThLFiygGTZ89qbROSQI4bICQjvOVQy2Bqr1LwC+MFkhwyZp3YG99eehQbZuTlQmmfCZBfpewTNA==
+chromedriver@^110.0.0:
+  version "110.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-110.0.0.tgz#d00a1a2976592d933faa8e9839e97692922834a4"
+  integrity sha512-Le6q8xrA/3fAt+g8qiN0YjsYxINIhQMC6wj9X3W5L77uN4NspEzklDrqYNwBcEVn7PcAEJ73nLlS7mTyZRspHA==
   dependencies:
     "@testim/chrome-version" "^1.1.3"
     axios "^1.2.1"
@@ -17027,7 +17027,7 @@ heap@^0.2.6:
   resolved "https://registry.yarnpkg.com/heap/-/heap-0.2.6.tgz#087e1f10b046932fc8594dd9e6d378afc9d1e5ac"
   integrity sha1-CH4fELBGky/IWU3Z5tN4r8nR5aw=
 
-highlight.js@^10.1.1, highlight.js@^10.4.1, highlight.js@~10.4.0:
+highlight.js@^10.1.1, highlight.js@~10.4.0:
   version "10.4.1"
   resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-10.4.1.tgz#d48fbcf4a9971c4361b3f95f302747afe19dbad0"
   integrity sha512-yR5lWvNz7c85OhVAEAeFhVCc/GV4C30Fjzc/rCP0aCWzc1UUOPUk55dK/qdwTZHBvMZo+eZ2jpk62ndX/xMFlg==
@@ -22765,12 +22765,17 @@ playwright-core@1.27.1, playwright-core@=1.27.1:
   resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.27.1.tgz#840ef662e55a3ed759d8b5d3d00a5f885a7184f4"
   integrity sha512-9EmeXDncC2Pmp/z+teoVYlvmPWUC6ejSSYZUln7YaP89Z6lpAaiaAnqroUt/BoLo8tn7WYShcfaCh+xofZa44Q==
 
-playwright@^1.26.0:
-  version "1.27.1"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.27.1.tgz#4eecac5899566c589d4220ca8acc16abe8a67450"
-  integrity sha512-xXYZ7m36yTtC+oFgqH0eTgullGztKSRMb4yuwLPl8IYSmgBM88QiB+3IWb1mRIC9/NNwcgbG0RwtFlg+EAFQHQ==
+playwright-core@1.30.0:
+  version "1.30.0"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.30.0.tgz#de987cea2e86669e3b85732d230c277771873285"
+  integrity sha512-7AnRmTCf+GVYhHbLJsGUtskWTE33SwMZkybJ0v6rqR1boxq2x36U7p1vDRV7HO2IwTZgmycracLxPEJI49wu4g==
+
+playwright@^1.30.0:
+  version "1.30.0"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.30.0.tgz#b1d7be2d45d97fbb59f829f36f521f12010fe072"
+  integrity sha512-ENbW5o75HYB3YhnMTKJLTErIBExrSlX2ZZ1C/FzmHjUYIfxj/UnI+DWpQr992m+OQVSg0rCExAOlRwB+x+yyIg==
   dependencies:
-    playwright-core "1.27.1"
+    playwright-core "1.30.0"
 
 plugin-error@^1.0.1:
   version "1.0.1"
