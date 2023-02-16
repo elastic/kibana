@@ -48,7 +48,7 @@ export interface AddAnalyticsCollectionsActions {
 
 interface AddAnalyticsCollectionValues {
   canSubmit: boolean;
-  error: HttpError;
+  error: HttpError | undefined;
   inputError: string | null;
   isLoading: boolean;
   isSuccess: boolean;
