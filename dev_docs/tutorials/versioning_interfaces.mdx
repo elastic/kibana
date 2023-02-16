@@ -21,7 +21,7 @@ Characteristics of this strategy:
 
 1. Avoid the `extends` keyword for referencing past interfaces. This results in cleaner API docs being generated.
 2. Leverage `* as` to create versioned namespaces rather than versioned interfaces.
-3. Although it is verbose, for a single change in a collection, we create a new version of the related collection.
+3. Verbosity is intentional: for a single change in a collection, we create a new version of the related collection.
 
 ### An example: Weather insights unversioned
 Consider a fictional Kibana plugin called "Weather insights". It allows users to easily create and curate dashboards that house visualisations and metrics for weather data. The domain contains the following:
@@ -284,9 +284,9 @@ type TimeFrame = '1d' | '2d' | '3d' | '4d' | '5d' | '6d' | '1w' | '2w';
 
 interface PredictionInput {
   /** How far back we should look in our data */
-  start_date: string;
+  start_date: string; // !! Introduction of inconsistent snake case naming convention, will need a new version to fix
   /** How far out to predict. Note, longer time frames result in lower accuracy */
-  time_frame: TimeFrame;
+  timeFrame: TimeFrame;
   /** Choice of weather model to use */
   model: Model;
   /** Data source for this prediction */
@@ -313,3 +313,106 @@ Both `WeatherDashboard` and `Prediction` reference `DataSource`. Therefore, both
 ## Challenge
 
 Normalize our domain objects by only holding a reference to `DataSource` in `WeatherDashboard` and `Prediction` domain objects.
+
+<details>
+  <summary>Solution</summary>
+  <hr />
+  1. We will add a way to uniquely identify a `DataSource`
+  2. `DataSource` is currently specified in both `WeatherDashboard` and `Prediction`, therefore both will need to be updated as well.
+
+  Let's start by updating our folder structure to introduce the new versions.
+
+  ```
+  common
+   data_source
+     v1.ts
+     v2.ts
+     v3.ts
+   weather_dashboard
+     v1.ts
+     v2.ts
+     v3.ts
+   prediction
+     v1.ts
+     v2.ts
+  ```
+
+  Now, let's add our new types :
+
+  ```ts
+  // common/data_source/v3.ts
+  interface DataSource {
+    /** A string that uniquely identifies a DataSource */
+    id: string;
+    /** Some URL that provides weather data in an expected format for scraping */
+    url: string;
+    /** A user-friendly name */
+    name?: string;
+    /** The data view data is stored in */
+    dataViewId: string;
+    /** Username to use with source URL */
+    username?: string;
+    /** Password to use with source URL */
+    password?: string;
+  }
+  // ...followed by all other HTTP related interfaces
+
+  // common/weather_dashboard/v3.ts
+  interface WeatherDashboard {
+    /** A unqiue ID for this weather dashboard */
+    id: string;
+    /** Definition of a dashboard imported from the `dashboard` plugin */
+    dashboard: PortableDashboard;
+    /** ID of the data source to use with this dashboard */
+    dataSourceId: string;
+  }
+  // ...followed by all other HTTP related interfaces
+
+  // common/prediction/v3.ts
+  interface PredictionInput {
+    /** How far back we should look in our data */
+    startDate: string; // Fixed inconsistent naming
+    /** How far out to predict. Note, longer time frames result in lower accuracy */
+    timeFrame: TimeFrame;
+    /** Choice of weather model to use */
+    model: Model;
+    /** Data source for this prediction */
+    dataSourceId: string;
+  }
+  // ...followed by all other HTTP related interfaces
+  ```
+
+  Next let's update `latest.ts` and `index.ts`:
+
+  ```ts
+  // latest.ts
+  export * from './data_source/v3';
+  export * from './weather_dashboard/v3';
+  export * from './prediction/v3';
+
+  // index.ts
+  export { DataSource, WeatherDashboard, GetWeatherDashboardHTTPResponse, Prediction } from './latest';
+  export * as weatherDashboardV1 from './weather_dashboard/v1';
+  export * as dataSourceV1 from './data_source/v1';
+  export * as predictionV1 from './prediction/v1';
+
+  export * as weatherDashboardV2 from './weather_dashboard/v2';
+  export * as dataSourceV2 from './data_source/v2';
+  export * as predictionV2 from './prediction/v2';
+
+  export * as weatherDashboardV3 from './weather_dashboard/v3';
+  export * as dataSourceV3 from './data_source/v3';
+  ```
+
+  Refactoring interfaces in this way creates a much larger maintenance burden because:
+
+  1. application code must now translate between the denormalized and normalized versions of these interfaces
+  2. code must remember to support both old and new naming conventions
+
+  ...for as long as these APIs are in use. We will not cover deprecation strategies in this tutorial (incoming). Sufficed to
+  say: _take care when designing public APIs_.
+</details>
+
+## Additional resources
+
+* [PR to prepare Saved Objects Management](https://github.com/elastic/kibana/pull/149495) for versioning
