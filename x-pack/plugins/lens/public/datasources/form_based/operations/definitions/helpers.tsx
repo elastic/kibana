@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { checkForDateHistogram, checkReferences } from './calculations/utils';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,
@@ -21,10 +22,6 @@ import {
 } from './column_types';
 import type { FormBasedLayer } from '../../types';
 import { hasField } from '../../pure_utils';
-import {
-  checkForDateHistogram,
-  checkReferences
-} from "@kbn/lens-plugin/public/datasources/form_based/operations/definitions/calculations/utils";
 
 export function getInvalidFieldMessage(
   layer: FormBasedLayer,
