@@ -9,7 +9,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed } from '@kbn/test-jest-helpers';
-
+import { FileUpload } from '@kbn/shared-ux-file-upload';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { FilesContext } from '@kbn/shared-ux-file-context';
@@ -124,5 +124,19 @@ describe('FilePicker', () => {
     const { actions, testSubjects, exists } = await initTestBed();
     await actions.waitUntilLoaded();
     expect(exists(testSubjects.paginationControls)).toBe(false);
+  });
+  describe('passes "meta" to <FileUpload />', () => {
+    it('when empty', async () => {
+      // Empty state
+      const { component } = await initTestBed({ uploadMeta: { foo: 'bar' } });
+      expect(component.find(FileUpload).props().meta).toEqual({ foo: 'bar' });
+    });
+    it('when there are files', async () => {
+      const { component } = await initTestBed({ uploadMeta: { bar: 'baz' } });
+      client.list.mockImplementation(() =>
+        Promise.resolve({ files: [{ id: 'a' }, { id: 'b' }] as FileJSON[], total: 2 })
+      );
+      expect(component.find(FileUpload).props().meta).toEqual({ bar: 'baz' });
+    });
   });
 });
