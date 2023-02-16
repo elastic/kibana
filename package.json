@@ -1143,7 +1143,7 @@
     "pirates": "^4.0.1",
     "piscina": "^3.2.0",
     "pixelmatch": "^5.3.0",
-    "playwright": "^1.30.0",
+    "playwright": "^1.26.0",
     "pngjs": "^3.4.0",
     "postcss": "^8.4.14",
     "postcss-loader": "^4.2.0",
