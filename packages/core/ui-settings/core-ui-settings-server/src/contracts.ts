@@ -53,7 +53,7 @@ export interface UiSettingsServiceSetup {
 }
 
 /**
- * Provider to invoke to retrieve a {@link UserProfilesClientFactory}.
+ * Provider to invoke to retrieve a UserProfilesClientFactory.
  * @public
  */
 export type UserProfilesClientFactoryProvider = () => UserProfilesClientFactory;
@@ -103,7 +103,7 @@ export interface UiSettingsServiceStart {
   globalAsScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
 
   /**
-   * Creates an {@link IUserUiSettingsClient} (which extends {@link IUiSettingsClient} so that settings in the user's
+   * Creates an IUserUiSettingsClient (which extends IUiSettingsClient so that settings in the user's
    * profile can be retrieved.
    *
    * @param savedObjectsClient This client is not currently used by the underlying UserClient, but is included so that
@@ -117,7 +117,7 @@ export interface UiSettingsServiceStart {
    * @example The SecurityPlugin currently utilizes this on start to provide the necessary services
    *
    * @param userProfilesClientFactoryProvider Provides a factory method that returns a UserProfileClient that satisfies
-   * the {@link UserProfilesClientContract}
+   * the UserProfilesClientContract
    */
   setUserProfilesClientFactoryProvider(
     userProfilesClientFactoryProvider: UserProfilesClientFactoryProvider
