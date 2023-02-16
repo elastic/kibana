@@ -6,7 +6,7 @@
  */
 
 import { isString } from 'lodash';
-import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_saved_object';
+import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_v2';
 import { getExportType as getTypeCsvFromSavedObjectImmediate } from '../export_types/csv_searchsource_immediate';
 import { getExportType as getTypeCsv } from '../export_types/csv_searchsource';
 import { getExportType as getTypePng } from '../export_types/png';

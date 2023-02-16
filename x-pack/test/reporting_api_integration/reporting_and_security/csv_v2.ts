@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
     log.info(`sending request for saved search: ${job.locatorParams[0].params.savedSearchId}`);
     const jobParams = rison.encode(job);
     return await supertest
-      .post(`/api/reporting/generate/csv_saved_object`)
+      .post(`/api/reporting/generate/csv_v2`)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };

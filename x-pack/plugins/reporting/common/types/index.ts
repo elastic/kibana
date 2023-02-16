@@ -11,7 +11,7 @@ import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from
 export type {
   JobParamsCsvFromSavedObject,
   TaskPayloadCsvFromSavedObject,
-} from './export_types/csv_saved_object';
+} from './export_types/csv_v2';
 export type { JobParamsPNGDeprecated } from './export_types/png';
 export type { JobParamsPNGV2 } from './export_types/png_v2';
 export type { JobAppParamsPDF, JobParamsPDFDeprecated } from './export_types/printable_pdf';

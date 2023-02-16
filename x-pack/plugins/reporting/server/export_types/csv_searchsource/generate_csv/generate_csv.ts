@@ -305,7 +305,6 @@ export class CsvGenerator {
       ),
       this.dependencies.searchSourceStart.create(this.job.searchSource),
     ]);
-
     let reportingError: undefined | ReportingError;
 
     const index = searchSource.getField('index');
