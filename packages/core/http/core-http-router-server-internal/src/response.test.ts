@@ -70,16 +70,18 @@ describe('fileResponseFactory', () => {
         'content-disposition': 'i will not be in the response',
         'content-length': 'i will not be in the response',
       };
+      const filename = 'myfile.test';
+      const fileContent = 'content';
       const result = fileResponseFactory.file({
-        body: 'content',
-        filename: 'myfile.test',
+        body: fileContent,
+        filename,
         headers: { ...extraHeaders, ...overrideHeaders },
       });
       expect(result.options.headers).toEqual(
         expect.objectContaining({
           ...extraHeaders,
-          'content-disposition': 'attachment; filename=myfile.test',
-          'content-length': '',
+          'content-disposition': `attachment; filename=${filename}`,
+          'content-length': `${fileContent.length}`,
         })
       );
     });
