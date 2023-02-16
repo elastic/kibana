@@ -12,7 +12,7 @@ const DefaultCellComponent: React.FC<CellComponentProps> = ({ columnId, alert })
   const value = alert[columnId] ?? [];
 
   if (Array.isArray(value)) {
-    return <>{value.length ? value.join() : '--'}</>;
+    return <>{value.length ? value.join(', ') : '--'}</>;
   }
 
   return <>{value}</>;

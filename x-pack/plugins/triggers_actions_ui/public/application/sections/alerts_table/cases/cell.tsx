@@ -40,11 +40,14 @@ const CasesCellComponent: React.FC<CellComponentProps> = ({ isLoading, alert, ca
   }
 
   return (
-    <EuiSkeletonText lines={1} isLoading={isLoading} size="s">
+    <EuiSkeletonText lines={1} isLoading={isLoading} size="s" data-test-subj="cases-cell-loading">
       {validCases.map((theCase, index) => [
         index > 0 && index < validCases.length && ', ',
         <CaseTooltip loading={false} content={formatCase(theCase)} key={theCase.id}>
-          <EuiLink onClick={() => navigateToCaseView({ caseId: theCase.id })}>
+          <EuiLink
+            onClick={() => navigateToCaseView({ caseId: theCase.id })}
+            data-test-subj="cases-cell-link"
+          >
             {theCase.title}
           </EuiLink>
         </CaseTooltip>,

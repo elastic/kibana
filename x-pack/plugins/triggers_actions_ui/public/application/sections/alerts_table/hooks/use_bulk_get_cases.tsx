@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core-http-browser';
-import type {
-  CaseResponse,
-  CasesBulkGetRequestCertainFields,
-  CasesBulkGetResponseCertainFields,
-} from '@kbn/cases-plugin/common';
+import type { CasesBulkGetResponseCertainFields } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
-import { INTERNAL_BULK_GET_CASES_URL } from '@kbn/cases-plugin/common';
 import { useKibana } from '../../../../common';
 import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
 import { ServerError } from '../types';
+import { bulkGetCases } from './api';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.cases.api.bulkGet', {
   defaultMessage: 'Error fetching cases data',
@@ -45,22 +40,6 @@ const transformCases = (data: Response): Map<string, Case> => {
   return casesMap;
 };
 
-const bulkGetCases = async <Field extends keyof CaseResponse = keyof CaseResponse>(
-  http: HttpStart,
-  params: CasesBulkGetRequestCertainFields<Field>,
-  signal?: AbortSignal
-): Promise<CasesBulkGetResponseCertainFields<Field>> => {
-  const res = await http.post<CasesBulkGetResponseCertainFields<Field>>(
-    INTERNAL_BULK_GET_CASES_URL,
-    {
-      body: JSON.stringify({ ...params }),
-      signal,
-    }
-  );
-
-  return res;
-};
-
 export const useBulkGetCases = (caseIds: string[]) => {
   const {
     http,
@@ -71,7 +50,7 @@ export const useBulkGetCases = (caseIds: string[]) => {
     triggersActionsUiQueriesKeys.casesBulkGet(),
     () => {
       const abortCtrlRef = new AbortController();
-      // @ts-expect-error: FIX it
+      // @ts-expect-error: fix it
       return bulkGetCases(http, { ids: caseIds, fields: caseFields }, abortCtrlRef.signal);
     },
     {

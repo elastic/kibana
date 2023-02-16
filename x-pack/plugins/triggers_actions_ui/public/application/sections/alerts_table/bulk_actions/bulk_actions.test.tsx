@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useReducer } from 'react';
+import React, { useMemo, useReducer } from 'react';
 
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -20,6 +20,8 @@ import {
 } from '../../../../types';
 import { bulkActionsReducer } from './reducer';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { createAppMockRenderer } from '../../test_utils';
+import { getCasesMockMap } from '../cases/index.mock';
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -85,8 +87,11 @@ describe('AlertsTable.BulkActions', () => {
       }),
   };
 
+  const casesMap = getCasesMockMap();
+
   const tableProps = {
     alertsTableConfiguration,
+    casesData: { cases: casesMap, isLoading: false },
     columns,
     deletedEventIds: [],
     disabledCellActions: [],
@@ -134,17 +139,20 @@ describe('AlertsTable.BulkActions', () => {
   const AlertsTableWithBulkActionsContext: React.FunctionComponent<
     AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
   > = (props) => {
+    const renderer = useMemo(() => createAppMockRenderer(), []);
+    const AppWrapper = renderer.AppWrapper;
+
     const initialBulkActionsState = useReducer(
       bulkActionsReducer,
       props.initialBulkActionsState || defaultBulkActionsState
     );
 
     return (
-      <IntlProvider locale="en">
+      <AppWrapper>
         <BulkActionsContext.Provider value={initialBulkActionsState}>
           <AlertsTable {...props} />
         </BulkActionsContext.Provider>
-      </IntlProvider>
+      </AppWrapper>
     );
   };
 

@@ -5,10 +5,11 @@
  * 2.0.
  */
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
 import { fireEvent, render, waitFor, screen } from '@testing-library/react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
@@ -22,13 +23,20 @@ import { TypeRegistry } from '../../type_registry';
 import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { useFetchBrowserFieldCapabilities } from './hooks/use_fetch_browser_fields_capabilities';
+import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { DefaultSort } from './hooks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { getCasesMockMap } from './cases/index.mock';
 
 jest.mock('./hooks/use_fetch_alerts');
 jest.mock('./hooks/use_fetch_browser_fields_capabilities');
+jest.mock('./hooks/use_bulk_get_cases');
+
 jest.mock('@kbn/kibana-utils-plugin/public');
+
+const mockCurrentAppId$ = new BehaviorSubject<string>('testAppId');
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
     services: {
@@ -42,6 +50,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
             push_cases: true,
           },
         },
+        currentAppId$: mockCurrentAppId$,
       },
       cases: {
         ui: {
@@ -76,6 +85,10 @@ const columns = [
     id: AlertsField.reason,
     displayAsText: 'Reason',
   },
+  {
+    id: ALERT_CASE_IDS,
+    displayAsText: 'Cases',
+  },
 ];
 
 const alerts = [
@@ -83,11 +96,13 @@ const alerts = [
     [AlertsField.name]: ['one'],
     [AlertsField.reason]: ['two'],
     [AlertsField.uuid]: ['1047d115-670d-469e-af7a-86fdd2b2f814'],
+    [ALERT_CASE_IDS]: ['test-id'],
   },
   {
     [AlertsField.name]: ['three'],
     [AlertsField.reason]: ['four'],
     [AlertsField.uuid]: ['bf5f6d63-5afd-48e0-baf6-f28c2b68db46'],
+    [ALERT_CASE_IDS]: ['test-id-2'],
   },
 ] as unknown as Alerts;
 
@@ -104,6 +119,7 @@ const FlyoutBody = ({ alert }: AlertsTableFlyoutBaseProps) => (
 const hasMock = jest.fn().mockImplementation((plugin: string) => {
   return plugin === PLUGIN_ID;
 });
+
 const getMock = jest.fn().mockImplementation((plugin: string) => {
   if (plugin === PLUGIN_ID) {
     return {
@@ -134,21 +150,23 @@ storageMock.mockImplementation(() => {
   return { get: jest.fn(), set: jest.fn() };
 });
 
-const refecthMock = jest.fn();
+const refetchMock = jest.fn();
 const hookUseFetchAlerts = useFetchAlerts as jest.Mock;
-hookUseFetchAlerts.mockImplementation(() => [
-  false,
-  {
-    alerts,
-    isInitializing: false,
-    getInspectQuery: jest.fn(),
-    refetch: refecthMock,
-    totalAlerts: alerts.length,
-  },
-]);
+const fetchAlertsResponse = {
+  alerts,
+  isInitializing: false,
+  getInspectQuery: jest.fn(),
+  refetch: refetchMock,
+  totalAlerts: alerts.length,
+};
+
+hookUseFetchAlerts.mockReturnValue([false, fetchAlertsResponse]);
 
 const hookUseFetchBrowserFieldCapabilities = useFetchBrowserFieldCapabilities as jest.Mock;
 hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [false, {}]);
+
+const casesMap = getCasesMockMap();
+const useBulkGetCasesMock = useBulkGetCases as jest.Mock;
 
 const AlertsTableWithLocale: React.FunctionComponent<AlertsTableStateProps> = (props) => (
   <IntlProvider locale="en">
@@ -176,10 +194,12 @@ describe('AlertsTableState', () => {
         ...customProps,
       };
     });
+
     const alertsTableConfigurationRegistryWithPersistentControlsMock = {
       has: hasMock,
       get: getMockWithUsePersistentControls,
     } as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+
     return {
       ...tableProps,
       alertsTableConfigurationRegistry: alertsTableConfigurationRegistryWithPersistentControlsMock,
@@ -187,9 +207,65 @@ describe('AlertsTableState', () => {
   };
 
   beforeEach(() => {
-    hasMock.mockClear();
-    getMock.mockClear();
-    refecthMock.mockClear();
+    jest.clearAllMocks();
+
+    useBulkGetCasesMock.mockReturnValue({ data: casesMap, isLoading: false });
+  });
+
+  describe('cases column', () => {
+    it('should show the cases column', async () => {
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect(await screen.findByText('Cases')).toBeInTheDocument();
+    });
+
+    it('should show the cases titles correctly', async () => {
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect(await screen.findByText('Test case')).toBeInTheDocument();
+      expect(await screen.findByText('Test case 2')).toBeInTheDocument();
+    });
+
+    it('should pass the correct case ids to useBulkGetCases', async () => {
+      render(<AlertsTableWithLocale {...tableProps} />);
+
+      await waitFor(() => {
+        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2']);
+      });
+    });
+
+    it('remove duplicated case ids', async () => {
+      hookUseFetchAlerts.mockReturnValue([
+        false,
+        {
+          ...fetchAlertsResponse,
+          alerts: [...fetchAlertsResponse.alerts, ...fetchAlertsResponse.alerts],
+        },
+      ]);
+
+      render(<AlertsTableWithLocale {...tableProps} />);
+
+      await waitFor(() => {
+        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2']);
+      });
+    });
+
+    it('skips alerts with empty case ids', async () => {
+      hookUseFetchAlerts.mockReturnValue([
+        false,
+        {
+          ...fetchAlertsResponse,
+          alerts: [
+            { ...fetchAlertsResponse.alerts[0], 'kibana.alert.case_ids': [] },
+            fetchAlertsResponse.alerts[1],
+          ],
+        },
+      ]);
+
+      render(<AlertsTableWithLocale {...tableProps} />);
+
+      await waitFor(() => {
+        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2']);
+      });
+    });
   });
 
   describe('Alerts table configuration registry', () => {
@@ -207,9 +283,6 @@ describe('AlertsTableState', () => {
   });
 
   describe('flyout', () => {
-    beforeEach(() => {
-      hookUseFetchAlerts.mockClear();
-    });
     it('should show a flyout when selecting an alert', async () => {
       const wrapper = render(<AlertsTableWithLocale {...tableProps} />);
       userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
@@ -245,6 +318,7 @@ describe('AlertsTableState', () => {
       expect(result.length).toBe(1);
 
       hookUseFetchAlerts.mockClear();
+
       userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
       expect(hookUseFetchAlerts).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -387,15 +461,14 @@ describe('AlertsTableState', () => {
 
   describe('empty state', () => {
     beforeEach(() => {
-      refecthMock.mockClear();
-      hookUseFetchAlerts.mockClear();
+      refetchMock.mockClear();
       hookUseFetchAlerts.mockImplementation(() => [
         false,
         {
           alerts: [],
           isInitializing: false,
           getInspectQuery: jest.fn(),
-          refetch: refecthMock,
+          refetch: refetchMock,
           totalAlerts: 0,
         },
       ]);
