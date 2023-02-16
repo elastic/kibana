@@ -535,6 +535,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         onChange={(id: string) => {
           groupByRadioSelection.setValue(id);
         }}
+        data-test-subj="groupByDurationOptions"
       />
     ),
     [license, groupByFields]
@@ -847,7 +848,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           )}
 
-          <RuleTypeEuiFormRow $isVisible={isQueryRule(ruleType)}>
+          <RuleTypeEuiFormRow
+            $isVisible={isQueryRule(ruleType)}
+            data-test-subj="alertSuppressionInput"
+          >
             <UseField
               path="groupByFields"
               component={GroupByFields}
@@ -859,7 +863,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               }}
             />
           </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow $isVisible={isQueryRule(ruleType)}>
+          <RuleTypeEuiFormRow
+            $isVisible={isQueryRule(ruleType)}
+            data-test-subj="alertSuppressionDuration"
+          >
             <UseMultiFields
               fields={{
                 groupByRadioSelection: {

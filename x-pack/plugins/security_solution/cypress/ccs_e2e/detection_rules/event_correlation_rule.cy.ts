@@ -15,7 +15,7 @@ import {
   goToRuleDetails,
   waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
-import { createEventCorrelationRule } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate, waitForTheRuleToBeExecuted } from '../../tasks/create_new_rule';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -31,9 +31,9 @@ describe('Detection rules', function () {
 
   it('EQL rule on remote indices generates alerts', function () {
     esArchiverCCSLoad('linux_process');
-    this.rule = getCCSEqlRule();
+    const rule = getCCSEqlRule();
     login();
-    createEventCorrelationRule(this.rule);
+    createRule(rule);
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
     filterByCustomRules();
@@ -46,9 +46,9 @@ describe('Detection rules', function () {
       .invoke('text')
       .then((text) => {
         cy.log('ALERT_DATA_GRID', text);
-        expect(text).contains(this.rule.name);
-        expect(text).contains(this.rule.severity.toLowerCase());
-        expect(text).contains(this.rule.riskScore);
+        expect(text).contains(rule.name);
+        expect(text).contains(rule.severity);
+        expect(text).contains(rule.risk_score);
       });
   });
 });

@@ -41,15 +41,7 @@ import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
-import {
-  createMachineLearningRule,
-  createCustomIndicatorRule,
-  createEventCorrelationRule,
-  createThresholdRule,
-  createNewTermsRule,
-  createSavedQueryRule,
-  createCustomRuleEnabled,
-} from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { createSlackConnector } from '../../tasks/api_calls/connectors';
 
 import {
@@ -93,23 +85,21 @@ describe('Detection rules, bulk edit of rule actions', () => {
         },
       ];
 
-      createCustomRuleEnabled(
-        {
-          ...getNewRule(),
-          name: ruleNameToAssert,
-        },
-        '1',
-        500,
-        actions
-      );
+      createRule({
+        ...getNewRule(),
+        name: ruleNameToAssert,
+        rule_id: '1',
+        max_signals: 500,
+        actions,
+      });
     });
 
-    createEventCorrelationRule(getEqlRule(), '2');
-    createMachineLearningRule(getMachineLearningRule(), '3');
-    createCustomIndicatorRule(getNewThreatIndicatorRule(), '4');
-    createThresholdRule(getNewThresholdRule(), '5');
-    createNewTermsRule(getNewTermsRule(), '6');
-    createSavedQueryRule({ ...getNewRule(), savedId: 'mocked' }, '7');
+    createRule({ ...getEqlRule(), rule_id: '2' });
+    createRule({ ...getMachineLearningRule(), rule_id: '3' });
+    createRule({ ...getNewThreatIndicatorRule(), rule_id: '4' });
+    createRule({ ...getNewThresholdRule(), rule_id: '5' });
+    createRule({ ...getNewTermsRule(), rule_id: '6' });
+    createRule({ ...getNewRule(), saved_id: 'mocked', rule_id: '7' });
 
     createSlackConnector();
   });

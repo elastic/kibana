@@ -16,24 +16,15 @@ import {
   goToRuleDetails,
 } from '../../tasks/alerts_detection_rules';
 import { RULE_SEARCH_FIELD } from '../../screens/alerts_detection_rules';
-import { createCustomRule } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { goBackToRulesTable } from '../../tasks/rule_details';
-
-function createRule(id: string, name: string, tags?: string[]): void {
-  const rule = getNewRule();
-
-  rule.name = name;
-  rule.tags = tags;
-
-  createCustomRule(rule, id);
-}
 
 describe('Persistent rules table state', () => {
   before(() => {
     cleanKibana();
 
-    createRule('1', 'Test rule 1');
-    createRule('2', 'Test rule 2', ['Custom']);
+    createRule({ ...getNewRule(), rule_id: '1', name: 'Test rule 1' });
+    createRule({ ...getNewRule(), rule_id: '2', name: 'Test rule 2', tags: ['Custom'] });
 
     login();
   });

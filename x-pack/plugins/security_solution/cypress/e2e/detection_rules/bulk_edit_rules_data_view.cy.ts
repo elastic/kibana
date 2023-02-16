@@ -32,14 +32,7 @@ import { hasIndexPatterns, getDetails, assertDetailsNotExist } from '../../tasks
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-import {
-  createCustomRule,
-  createCustomIndicatorRule,
-  createEventCorrelationRule,
-  createThresholdRule,
-  createNewTermsRule,
-  createSavedQueryRule,
-} from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules, postDataView } from '../../tasks/common';
 
 import {
@@ -75,12 +68,12 @@ describe('Bulk editing index patterns of rules with a data view only', () => {
 
     postDataView(DATA_VIEW_ID);
 
-    createCustomRule({ ...getNewRule(), ...dataViewRuleData }, '1');
-    createEventCorrelationRule({ ...getEqlRule(), ...dataViewRuleData }, '2');
-    createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...dataViewRuleData }, '3');
-    createThresholdRule({ ...getNewThresholdRule(), ...dataViewRuleData }, '4');
-    createNewTermsRule({ ...getNewTermsRule(), ...dataViewRuleData }, '5');
-    createSavedQueryRule({ ...getNewRule(), ...dataViewRuleData, savedId: 'mocked' }, '6');
+    createRule({ ...getNewRule(), ...dataViewRuleData, rule_id: '1' });
+    createRule({ ...getEqlRule(), ...dataViewRuleData, rule_id: '2' });
+    createRule({ ...getNewThreatIndicatorRule(), ...dataViewRuleData, rule_id: '3' });
+    createRule({ ...getNewThresholdRule(), ...dataViewRuleData, rule_id: '4' });
+    createRule({ ...getNewTermsRule(), ...dataViewRuleData, rule_id: '5' });
+    createRule({ ...getNewRule(), ...dataViewRuleData, saved_id: 'mocked', rule_id: '6' });
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
@@ -197,17 +190,12 @@ describe('Bulk editing index patterns of rules with index patterns and rules wit
 
     postDataView(DATA_VIEW_ID);
 
-    createCustomRule({ ...getNewRule(), ...dataViewRuleData }, '1');
-    createCustomRule(
-      {
-        ...getNewRule(),
-        dataSource: {
-          type: 'indexPatterns',
-          index: ['test-index-1-*'],
-        },
-      },
-      '2'
-    );
+    createRule({ ...getNewRule(), ...dataViewRuleData, rule_id: '1' });
+    createRule({
+      ...getNewRule(),
+      index: ['test-index-1-*'],
+      rule_id: '2',
+    });
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 

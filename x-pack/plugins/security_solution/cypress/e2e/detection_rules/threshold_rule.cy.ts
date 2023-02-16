@@ -6,7 +6,6 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import type { Mitre } from '../../objects/rule';
 import { getNewThresholdRule } from '../../objects/rule';
 
 import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
@@ -45,7 +44,6 @@ import {
 
 import { getDetails } from '../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
   createAndEnableRule,
@@ -57,17 +55,17 @@ import {
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
 import { login, visitWithoutDateRange } from '../../tasks/login';
+import { getHumanizedDuration } from '../../../public/detections/pages/detection_engine/rules/helpers';
 
 import { RULE_CREATION } from '../../urls/navigation';
-import type { CompleteTimeline } from '../../objects/timeline';
 
 describe('Detection rules, threshold', () => {
-  let rule = getNewThresholdRule();
-  const expectedUrls = getNewThresholdRule().referenceUrls?.join('');
-  const expectedFalsePositives = getNewThresholdRule().falsePositivesExamples?.join('');
-  const expectedTags = getNewThresholdRule().tags?.join('');
-  const mitreAttack = getNewThresholdRule().mitre as Mitre[];
-  const expectedMitre = formatMitreAttackDescription(mitreAttack);
+  const rule = getNewThresholdRule();
+  const expectedUrls = rule.references?.join('');
+  const expectedFalsePositives = rule.false_positives?.join('');
+  const expectedTags = rule.tags?.join('');
+  const mitreAttack = rule.threat;
+  const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
 
   before(() => {
     cleanKibana();
@@ -75,12 +73,7 @@ describe('Detection rules, threshold', () => {
   });
 
   beforeEach(() => {
-    rule = getNewThresholdRule();
-    const timeline = rule.timeline as CompleteTimeline;
     deleteAlertsAndRules();
-    createTimeline(timeline).then((response) => {
-      timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
-    });
     visitWithoutDateRange(RULE_CREATION);
   });
 
@@ -96,7 +89,7 @@ describe('Detection rules, threshold', () => {
     expectNumberOfRules(1);
 
     cy.get(RULE_NAME).should('have.text', rule.name);
-    cy.get(RISK_SCORE).should('have.text', rule.riskScore);
+    cy.get(RISK_SCORE).should('have.text', rule.risk_score);
     cy.get(SEVERITY).should('have.text', rule.severity);
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
@@ -106,7 +99,7 @@ describe('Detection rules, threshold', () => {
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', rule.severity);
-      getDetails(RISK_SCORE_DETAILS).should('have.text', rule.riskScore);
+      getDetails(RISK_SCORE_DETAILS).should('have.text', rule.risk_score);
       getDetails(REFERENCE_URLS_DETAILS).should((details) => {
         expect(removeExternalLinkText(details.text())).equal(expectedUrls);
       });
@@ -120,23 +113,18 @@ describe('Detection rules, threshold', () => {
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', 'auditbeat-*');
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.customQuery);
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Threshold');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
       getDetails(THRESHOLD_DETAILS).should(
         'have.text',
-        `Results aggregated by ${rule.thresholdField} >= ${rule.threshold}`
+        `Results aggregated by ${rule.threshold.field[0]} >= ${rule.threshold}`
       );
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
-      getDetails(RUNS_EVERY_DETAILS).should(
-        'have.text',
-        `${rule.runsEvery?.interval}${rule.runsEvery?.type}`
-      );
-      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
-        'have.text',
-        `${rule.lookBack?.interval}${rule.lookBack?.type}`
-      );
+      getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+      const humanizedDuration = getHumanizedDuration(rule.from ?? 'now-6m', rule.interval ?? '5m');
+      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
     });
 
     waitForTheRuleToBeExecuted();
