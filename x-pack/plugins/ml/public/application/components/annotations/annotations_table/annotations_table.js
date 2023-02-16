@@ -482,7 +482,7 @@ class AnnotationsTableUI extends Component {
     }
 
     const actions = [];
-    if (this.props.jobs && this.props.jobs[0]?.blocked === undefined) {
+    if (this.props.jobs === undefined || this.props.jobs[0]?.blocked === undefined) {
       actions.push({
         name: editAnnotationsText,
         description: editAnnotationsText,
