@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleAction, RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { RuleAction, RuleNotifyWhen, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { AsApiContract } from '@kbn/alerting-plugin/server/routes/lib';
 import { SanitizedRule } from '@kbn/triggers-actions-ui-plugin/public/types';
 
@@ -33,7 +33,7 @@ export const getExpectedRule = ({
   created_at: responseBody.created_at,
   updated_at: responseBody.updated_at,
   throttle: '1m',
-  notify_when: 'onThrottleInterval',
+  notify_when: RuleNotifyWhen.THROTTLE,
   updated_by: username,
   api_key_owner: username,
   mute_all: false,
@@ -53,7 +53,7 @@ export const getExpectedActions = (createdAction: AsApiContract<RuleAction>) =>
       params: {},
       frequency: {
         summary: false,
-        notify_when: 'onThrottleInterval',
+        notify_when: RuleNotifyWhen.THROTTLE,
         throttle: '1m',
       },
     },

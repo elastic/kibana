@@ -15,6 +15,7 @@ import {
   ObjectRemover,
   getExpectedRule,
   getExpectedActions,
+  getTestRuleActions,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -56,7 +57,7 @@ const findTestUtils = (
         .set('kbn-xsrf', 'foo')
         .send(
           getTestRuleData({
-            actions: getExpectedActions(createdAction),
+            actions: getTestRuleActions(createdAction),
           })
         )
         .expect(200);

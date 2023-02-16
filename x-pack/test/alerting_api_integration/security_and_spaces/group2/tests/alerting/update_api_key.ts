@@ -16,6 +16,7 @@ import {
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
+  getTestRuleActions,
 } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -51,13 +52,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             .set('kbn-xsrf', 'foo')
             .send(
               getTestRuleData({
-                actions: [
-                  {
-                    id: createdAction.id,
-                    group: 'default',
-                    params: {},
-                  },
-                ],
+                actions: getTestRuleActions(createdAction),
               })
             )
             .expect(200);

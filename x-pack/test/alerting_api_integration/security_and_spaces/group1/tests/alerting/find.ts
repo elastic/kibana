@@ -13,6 +13,7 @@ import { UserAtSpaceScenarios } from '../../../scenarios';
 import {
   getUrlPrefix,
   getTestRuleData,
+  getTestRuleActions,
   ObjectRemover,
   getExpectedRule,
   getExpectedActions,
@@ -49,7 +50,7 @@ const findTestUtils = (
             .set('kbn-xsrf', 'foo')
             .send(
               getTestRuleData({
-                actions: getExpectedActions(createdAction),
+                actions: getTestRuleActions(createdAction),
               })
             )
             .expect(200);

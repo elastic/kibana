@@ -18,6 +18,7 @@ import {
   TaskManagerDoc,
   getExpectedRule,
   getExpectedActions,
+  getTestRuleActions,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -56,44 +57,20 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send(
           getTestRuleData({
-            actions: getExpectedActions(createdAction),
+            actions: getTestRuleActions(createdAction),
           })
         );
 
       expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
-      expect(response.body).to.eql({
-        id: response.body.id,
-        name: 'abc',
-        tags: ['foo'],
-        actions: [
-          {
-            id: createdAction.id,
-            connector_type_id: createdAction.connector_type_id,
-            group: 'default',
-            params: {},
+      expect(response.body).to.eql(
+        getExpectedRule({
+          responseBody: response.body,
+          overrides: {
+            actions: getExpectedActions(createdAction),
           },
-        ],
-        enabled: true,
-        rule_type_id: 'test.noop',
-        running: false,
-        consumer: 'alertsFixture',
-        params: {},
-        created_by: null,
-        schedule: { interval: '1m' },
-        scheduled_task_id: response.body.scheduled_task_id,
-        updated_by: null,
-        api_key_owner: null,
-        throttle: '1m',
-        notify_when: 'onThrottleInterval',
-        mute_all: false,
-        muted_alert_ids: [],
-        created_at: response.body.created_at,
-        updated_at: response.body.updated_at,
-        execution_status: response.body.execution_status,
-        ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
-        ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
-      });
+        })
+      );
       expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updated_at)).to.eql(Date.parse(response.body.created_at));
@@ -155,46 +132,29 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
-      expect(response.body).to.eql({
-        id: response.body.id,
-        name: 'abc',
-        tags: ['foo'],
-        actions: [
-          {
-            id: createdAction.id,
-            connector_type_id: createdAction.connector_type_id,
-            group: 'default',
-            params: {},
+      expect(response.body).to.eql(
+        getExpectedRule({
+          responseBody: response.body,
+          overrides: {
+            actions: [
+              {
+                id: createdAction.id,
+                connector_type_id: createdAction.connector_type_id,
+                group: 'default',
+                params: {},
+              },
+              {
+                id: 'my-slack1',
+                group: 'default',
+                connector_type_id: '.slack',
+                params: {
+                  message: 'something important happened!',
+                },
+              },
+            ],
           },
-          {
-            id: 'my-slack1',
-            group: 'default',
-            connector_type_id: '.slack',
-            params: {
-              message: 'something important happened!',
-            },
-          },
-        ],
-        enabled: true,
-        rule_type_id: 'test.noop',
-        running: false,
-        consumer: 'alertsFixture',
-        params: {},
-        created_by: null,
-        schedule: { interval: '1m' },
-        scheduled_task_id: response.body.scheduled_task_id,
-        updated_by: null,
-        api_key_owner: null,
-        throttle: '1m',
-        notify_when: 'onThrottleInterval',
-        mute_all: false,
-        muted_alert_ids: [],
-        created_at: response.body.created_at,
-        updated_at: response.body.updated_at,
-        execution_status: response.body.execution_status,
-        ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
-        ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
-      });
+        })
+      );
 
       if (response.body.next_run) {
         expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);

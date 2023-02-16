@@ -66,7 +66,7 @@ export const rewriteRule = ({
 export const rewritePartialRule = (rule: PartialRule<RuleTypeParams>) => {
   const rewrittenRule = rewriteRule(rule as SanitizedRule);
   return Object.entries(rewrittenRule).reduce((result, [key, val]) => {
-    if (val) return { ...result, [key]: val };
+    if (typeof val !== 'undefined') return { ...result, [key]: val };
     return result;
   }, {}) as PartialRule<RuleTypeParams>;
 };

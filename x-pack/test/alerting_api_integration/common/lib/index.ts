@@ -7,7 +7,7 @@
 
 export { ObjectRemover } from './object_remover';
 export { getUrlPrefix } from './space_test_utils';
-export { getTestRuleData } from './get_test_rule_data';
+export { getTestRuleData, getTestRuleActions } from './get_test_rule_data';
 export {
   AlertUtils,
   getConsumerUnauthorizedErrorMessage,

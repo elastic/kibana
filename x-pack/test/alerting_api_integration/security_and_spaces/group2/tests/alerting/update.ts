@@ -12,12 +12,16 @@ import {
   checkAAD,
   getUrlPrefix,
   getTestRuleData,
+  getTestRuleActions,
   ObjectRemover,
   ensureDatetimeIsWithinRange,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
+  getExpectedRule,
+  getExpectedActions,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
@@ -66,21 +70,19 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               foo: true,
             },
             schedule: { interval: '12s' },
-            actions: [
-              {
-                id: createdAction.id,
-                group: 'default',
-                params: {},
-              },
-            ],
-            throttle: '1m',
-            notify_when: 'onThrottleInterval',
+            actions: getExpectedActions(createdAction),
+            throttle: null,
+            notify_when: null,
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(updatedData);
+            .send({
+              ...updatedData,
+              actions: getTestRuleActions(createdAction),
+              notify_when: undefined,
+            });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -109,33 +111,16 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql({
-                ...updatedData,
-                id: createdAlert.id,
-                rule_type_id: 'test.noop',
-                running: false,
-                consumer: 'alertsFixture',
-                created_by: 'elastic',
-                enabled: true,
-                updated_by: user.username,
-                api_key_owner: user.username,
-                mute_all: false,
-                muted_alert_ids: [],
-                actions: [
-                  {
-                    id: createdAction.id,
-                    connector_type_id: 'test.noop',
-                    group: 'default',
-                    params: {},
+              expect(response.body).to.eql(
+                getExpectedRule({
+                  responseBody: response.body,
+                  username: user.username,
+                  overrides: {
+                    ...updatedData,
+                    created_by: 'elastic',
                   },
-                ],
-                scheduled_task_id: createdAlert.scheduled_task_id,
-                created_at: response.body.created_at,
-                updated_at: response.body.updated_at,
-                execution_status: response.body.execution_status,
-                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
-                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
-              });
+                })
+              );
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
@@ -179,7 +164,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             schedule: { interval: '12s' },
             actions: [],
             throttle: '1m',
-            notify_when: 'onThrottleInterval',
+            notify_when: RuleNotifyWhen.THROTTLE,
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -207,25 +192,18 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql({
-                ...updatedData,
-                id: createdAlert.id,
-                rule_type_id: 'test.restricted-noop',
-                running: false,
-                consumer: 'alertsRestrictedFixture',
-                created_by: 'elastic',
-                enabled: true,
-                updated_by: user.username,
-                api_key_owner: user.username,
-                mute_all: false,
-                muted_alert_ids: [],
-                scheduled_task_id: createdAlert.scheduled_task_id,
-                created_at: response.body.created_at,
-                updated_at: response.body.updated_at,
-                execution_status: response.body.execution_status,
-                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
-                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
-              });
+              expect(response.body).to.eql(
+                getExpectedRule({
+                  responseBody: response.body,
+                  username: user.username,
+                  overrides: {
+                    ...updatedData,
+                    created_by: 'elastic',
+                    consumer: 'alertsRestrictedFixture',
+                    rule_type_id: 'test.restricted-noop',
+                  },
+                })
+              );
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
@@ -269,7 +247,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             schedule: { interval: '12s' },
             actions: [],
             throttle: '1m',
-            notify_when: 'onThrottleInterval',
+            notify_when: RuleNotifyWhen.THROTTLE,
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -308,25 +286,17 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql({
-                ...updatedData,
-                id: createdAlert.id,
-                rule_type_id: 'test.unrestricted-noop',
-                running: false,
-                consumer: 'alertsFixture',
-                created_by: 'elastic',
-                enabled: true,
-                updated_by: user.username,
-                api_key_owner: user.username,
-                mute_all: false,
-                muted_alert_ids: [],
-                scheduled_task_id: createdAlert.scheduled_task_id,
-                created_at: response.body.created_at,
-                updated_at: response.body.updated_at,
-                execution_status: response.body.execution_status,
-                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
-                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
-              });
+              expect(response.body).to.eql(
+                getExpectedRule({
+                  responseBody: response.body,
+                  username: user.username,
+                  overrides: {
+                    ...updatedData,
+                    created_by: 'elastic',
+                    rule_type_id: 'test.unrestricted-noop',
+                  },
+                })
+              );
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
@@ -370,7 +340,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             schedule: { interval: '12s' },
             actions: [],
             throttle: '1m',
-            notify_when: 'onThrottleInterval',
+            notify_when: RuleNotifyWhen.THROTTLE,
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -409,25 +379,18 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql({
-                ...updatedData,
-                id: createdAlert.id,
-                rule_type_id: 'test.restricted-noop',
-                running: false,
-                consumer: 'alerts',
-                created_by: 'elastic',
-                enabled: true,
-                updated_by: user.username,
-                api_key_owner: user.username,
-                mute_all: false,
-                muted_alert_ids: [],
-                scheduled_task_id: createdAlert.scheduled_task_id,
-                created_at: response.body.created_at,
-                updated_at: response.body.updated_at,
-                execution_status: response.body.execution_status,
-                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
-                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
-              });
+              expect(response.body).to.eql(
+                getExpectedRule({
+                  responseBody: response.body,
+                  username: user.username,
+                  overrides: {
+                    ...updatedData,
+                    created_by: 'elastic',
+                    consumer: 'alerts',
+                    rule_type_id: 'test.restricted-noop',
+                  },
+                })
+              );
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
@@ -480,7 +443,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             schedule: { interval: '12s' },
             actions: [],
             throttle: '1m',
-            notify_when: 'onThrottleInterval',
+            notify_when: RuleNotifyWhen.THROTTLE,
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -508,25 +471,16 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql({
-                ...updatedData,
-                id: createdAlert.id,
-                rule_type_id: 'test.noop',
-                running: false,
-                consumer: 'alertsFixture',
-                created_by: 'elastic',
-                enabled: true,
-                updated_by: user.username,
-                api_key_owner: user.username,
-                mute_all: false,
-                muted_alert_ids: [],
-                scheduled_task_id: createdAlert.scheduled_task_id,
-                created_at: response.body.created_at,
-                updated_at: response.body.updated_at,
-                execution_status: response.body.execution_status,
-                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
-                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
-              });
+              expect(response.body).to.eql(
+                getExpectedRule({
+                  responseBody: response.body,
+                  username: user.username,
+                  overrides: {
+                    ...updatedData,
+                    created_by: 'elastic',
+                  },
+                })
+              );
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(

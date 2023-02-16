@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { RuleAction, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { AsApiContract } from '@kbn/alerting-plugin/server/routes/lib';
+
 export function getTestRuleData(overwrites = {}) {
   return {
     enabled: true,
@@ -19,4 +22,19 @@ export function getTestRuleData(overwrites = {}) {
     params: {},
     ...overwrites,
   };
+}
+
+export function getTestRuleActions(createdAction: AsApiContract<RuleAction>) {
+  return [
+    {
+      id: createdAction.id,
+      group: 'default',
+      params: {},
+      frequency: {
+        summary: false,
+        notify_when: RuleNotifyWhen.THROTTLE,
+        throttle: '1m',
+      },
+    },
+  ] as AsApiContract<RuleAction>[];
 }

@@ -10,6 +10,7 @@ import { UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
   getTestRuleData,
+  getTestRuleActions,
   getConsumerUnauthorizedErrorMessage,
   getUrlPrefix,
   ObjectRemover,
@@ -60,7 +61,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .send(
               getTestRuleData({
-                actions: getExpectedActions(createdAction),
+                actions: getTestRuleActions(createdAction),
               })
             );
 
