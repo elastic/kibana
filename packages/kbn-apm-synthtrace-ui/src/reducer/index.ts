@@ -8,6 +8,7 @@ export const INITIAL_STATE: SynthtraceScenario = {
   instanceName: 'instance_1',
   environment: 'production',
   isDistributedTracing: true,
+  cleanApmIndices: true,
   modalForm: {
     isOpen: false,
     isEdit: false,
@@ -50,7 +51,7 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
           docType: 'transaction',
           id: transactionId,
           serviceId: id,
-          name: '1rpm/1100ms',
+          name: 'new transaction',
           children: [],
         },
       };
@@ -122,5 +123,12 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
         entryTransaction: updatedTree as Transaction,
       };
     }
+    case 'toggle_clean_apm_indices': {
+      return {
+        ...state,
+        cleanApmIndices: action.payload.cleanApmIndices,
+      };
+    }
   }
+  return state;
 }

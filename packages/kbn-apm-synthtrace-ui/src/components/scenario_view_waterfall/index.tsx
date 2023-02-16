@@ -2,7 +2,15 @@ import React from 'react';
 
 import Branch from './branch';
 import { useScenarioContext } from '../../context/use_scenario_context';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSwitch,
+} from '@elastic/eui';
 import { useState } from 'react';
 import axios from 'axios';
 import { AxiosError } from 'axios';
@@ -15,7 +23,7 @@ interface Message {
 export const ScenarioViewWaterfall = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<Message | undefined>();
-  const { state } = useScenarioContext();
+  const { state, dispatch } = useScenarioContext();
   const { entryTransaction } = state;
   const { children } = entryTransaction || {};
   if (!entryTransaction || !children) {
@@ -48,6 +56,7 @@ export const ScenarioViewWaterfall = () => {
         <EuiFlexItem grow={false}>
           <Branch key={entryTransaction.id} item={entryTransaction} level={0} />
         </EuiFlexItem>
+        <EuiHorizontalRule margin="s" />
         {message?.type === 'error' && (
           <EuiFlexItem>
             <EuiCallOut title="Sorry, there was an error 😢" color="danger" iconType="alert">
@@ -62,6 +71,18 @@ export const ScenarioViewWaterfall = () => {
             </EuiCallOut>
           </EuiFlexItem>
         )}
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label="Clean APM indices on every run?"
+            checked={state.cleanApmIndices}
+            onChange={() => {
+              dispatch({
+                type: 'toggle_clean_apm_indices',
+                payload: { cleanApmIndices: !state.cleanApmIndices },
+              });
+            }}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             style={{ width: 100 }}

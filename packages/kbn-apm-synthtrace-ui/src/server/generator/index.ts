@@ -29,6 +29,22 @@ const kibanaClient = new ApmSynthtraceKibanaClient({
   target: 'http://elastic:changeme@localhost:5601/foo',
 });
 
+async function bootstrap() {
+  try {
+    console.log('Bootstraping...');
+    const packageVersion = await kibanaClient.fetchLatestApmPackageVersion();
+    await kibanaClient.installApmPackage(packageVersion);
+    console.log('Bootstrap done!');
+  } catch (e) {
+    throw new Error(
+      'Something went wrong while install APM package. Are kibana and ES running?',
+      e
+    );
+  }
+}
+
+bootstrap();
+
 synthtraceEsClient.pipeline(synthtraceEsClient.getDefaultPipeline(false));
 
 function generateTrace({
@@ -86,11 +102,9 @@ export async function runSynthraceScenario({ scenario }: { scenario: SynthtraceS
     throw new Error('Entry transaction not found');
   }
 
-  await synthtraceEsClient.clean();
-
-  const packageVersion = await kibanaClient.fetchLatestApmPackageVersion();
-
-  await kibanaClient.installApmPackage(packageVersion);
+  if (scenario.cleanApmIndices) {
+    await synthtraceEsClient.clean();
+  }
 
   const serviceInstances = Object.values(services).reduce<Record<string, Instance>>(
     (acc, service) => {

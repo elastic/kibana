@@ -13,7 +13,8 @@ export type Action =
   | ToggleModalAction
   | InsertNodeAction
   | InsertServiceAction
-  | EditNodeAction;
+  | EditNodeAction
+  | ToggleCleanApmIndicesAction;
 
 interface ToggletDistributedTracingAction {
   type: 'toggle_distributed_tracing';
@@ -43,4 +44,9 @@ interface InsertServiceAction {
 interface EditNodeAction {
   type: 'edit_node';
   payload: { id: string; node: Transaction | Span };
+}
+
+interface ToggleCleanApmIndicesAction {
+  type: 'toggle_clean_apm_indices';
+  payload: { cleanApmIndices: boolean };
 }

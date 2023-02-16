@@ -1,11 +1,4 @@
-import {
-  EuiComboBoxOptionOption,
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiPanel,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiComboBoxOptionOption, EuiFieldText, EuiForm, EuiFormRow, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { useScenarioContext } from '../../context/use_scenario_context';
 import { ServiceSelector } from '../service_selector';
@@ -34,19 +27,6 @@ export function NewScenarioForm() {
         </EuiFormRow>
         <EuiFormRow label="Environment">
           <EuiFieldText disabled value={state.environment} />
-        </EuiFormRow>
-        <EuiFormRow>
-          <EuiSwitch
-            label="Distributed tracing"
-            checked={state.isDistributedTracing}
-            disabled
-            onChange={() => {
-              dispatch({
-                type: 'toggle_distributed_tracing',
-                payload: { isDistributedTracing: !state.isDistributedTracing },
-              });
-            }}
-          />
         </EuiFormRow>
         <EuiFormRow label="Top level service">
           <ServiceSelector

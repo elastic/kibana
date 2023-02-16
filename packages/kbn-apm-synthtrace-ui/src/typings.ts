@@ -5,6 +5,7 @@ export type SynthtraceScenario = {
   environment: string;
   isDistributedTracing: boolean;
   topLevelService?: Service;
+  cleanApmIndices: boolean;
   services?: {
     [key: string]: Service;
   };
@@ -72,6 +73,7 @@ export const example: SynthtraceScenario = {
   instanceName: '1',
   environment: 'prod',
   isDistributedTracing: false,
+  cleanApmIndices: true,
   modalForm: {
     isOpen: false,
     isEdit: false,

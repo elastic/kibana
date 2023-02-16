@@ -18,6 +18,7 @@ import {
 import { ServiceNames } from '@kbn/apm-synthtrace-ui/src/common/constants';
 import { useScenarioContext } from '@kbn/apm-synthtrace-ui/src/context/use_scenario_context';
 import { ServiceSelector } from '@kbn/apm-synthtrace-ui/src/components/service_selector';
+import { generate } from 'marvel-dc-name-generator';
 
 export type ServiceFormState = {
   name: string;
@@ -71,7 +72,7 @@ const ServiceForm = ({
       ...prevState,
       id: formState.key,
       agentName: formState.value,
-      name: `synth-${formState.value}`,
+      name: `synth-${formState.value}-${generate()}`,
     }));
     setIsInvalid(false);
   };
