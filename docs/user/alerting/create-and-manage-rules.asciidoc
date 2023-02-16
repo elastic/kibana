@@ -49,9 +49,9 @@ Each rule type provides its own way of defining the conditions to detect, but an
 [role="screenshot"]
 image::images/rule-flyout-rule-conditions.png[UI for defining rule conditions on an index threshold rule,500]
 
-For details on what types of rules are available and how to configure them, refer to <<rule-types>>.
-
 All rules must have a check interval, which defines how often to evaluate the rule conditions. Checks are queued; they run as close to the defined value as capacity allows.
+
+For details on what types of rules are available and how to configure them, refer to <<rule-types>>.
 
 [float]
 [[defining-rules-actions-details]]
@@ -60,13 +60,18 @@ All rules must have a check interval, which defines how often to evaluate the ru
 You can add one or more actions to your rule to generate notifications when its
 conditions are met and when they are no longer met.
 
-Each action uses a connector, which provides connection information for a {kib} service or third party integration, depending on where you want to send the notifications. If no connectors exist, click **Add connector** to create one. For more information about each type of connector, refer to <<action-types>>.
+Each action uses a connector, which provides connection information for a {kib} service or third party integration, depending on where you want to send the notifications. If no connectors exist, click **Add connector** to create one.
 
 After you select a connector, set the action frequency. If the rule type supports alert summaries, you can choose to create a summary of alerts on each check interval or on a custom interval. For example, if you {observability-guide}/metrics-threshold-alert.html[create a metrics threshold rule], you can send email notifications that summarize the new, ongoing, and recovered alerts each day.
 
 TIP: If you choose a custom action interval, it cannot be shorter than the rule's check interval.
 
 Alternatively, you can set the action frequency such that the action that runs for each alert. If the rule type does not support alert summaries, this is your only available option. You must choose when the action runs (for example, at each check interval, only when the alert status changes, or at a custom action interval). You must also choose an action group, which affects whether the action runs (for example, the action runs when the issue is detected or when it is recovered). Each rule type has a specific set of valid action groups.
+
+[role="screenshot"]
+image::images/rule-flyout-action-details.png[UI for defining an email action,500]
+
+Each connector enables different action properties. For example, an email connector enables you to set the recipients, the subject, and a message body in markdown format. For more information about connectors, refer to <<action-types>>.
 
 [[alerting-concepts-suppressing-duplicate-notifications]]
 [TIP]
@@ -88,11 +93,6 @@ servers that continue to exceed the threshold:
 To get notified only once when a server exceeds the threshold, you can set the rule notify setting to `On status changes`.
 ==============================================
 
-Each action type exposes different properties. For example, an email action allows you to set the recipients, the subject, and a message body in markdown format. See <<action-types>> for details on the types of actions provided by {kib} and their properties.
-
-[role="screenshot"]
-image::images/rule-flyout-action-details.png[UI for defining an email action]
-
 [float]
 [[defining-rules-actions-variables]]
 ==== Action variables
@@ -101,7 +101,7 @@ You can pass rule values to an action at the time a condition is detected.
 To view the list of variables available for your rule, click the "add rule variable" button:
 
 [role="screenshot"]
-image::images/rule-flyout-action-variables.png[Passing rule values to an action]
+image::images/rule-flyout-action-variables.png[Passing rule values to an action,500]
 
 For more information about common action variables, refer to <<rule-action-variables>>.
 
@@ -153,7 +153,7 @@ Some rule types cannot be exported through this interface:
 
 Rules are disabled on export. You are prompted to re-enable the rule on successful import.
 [role="screenshot"]
-image::images/rules-imported-banner.png[Rules import banner, width=50%]
+image::images/rules-imported-banner.png[Rules import banner,500]
 
 [float]
 [[rule-details]]
