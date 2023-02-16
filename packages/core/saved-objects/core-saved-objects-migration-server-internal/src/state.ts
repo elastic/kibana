@@ -215,6 +215,7 @@ export interface WaitForYellowSourceState extends BaseState {
   readonly controlState: 'WAIT_FOR_YELLOW_SOURCE';
   readonly sourceIndex: Option.Some<string>;
   readonly sourceIndexMappings: IndexMapping;
+  readonly aliases: Record<string, string | undefined>;
 }
 
 export interface CheckUnknownDocumentsState extends BaseState {

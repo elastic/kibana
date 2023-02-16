@@ -418,10 +418,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:enableNewSyntheticsView': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:maxSuggestions': {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
@@ -435,6 +431,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmEnableServiceMetrics': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmEnableContinuousRollups': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -518,10 +518,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'lens:useFieldExistenceSampling': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'metrics:allowCheckingForFailedShards': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -571,10 +567,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:visualize:legacyGaugeChartsLibrary': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'enterpriseSearch:enableEnginesSection': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

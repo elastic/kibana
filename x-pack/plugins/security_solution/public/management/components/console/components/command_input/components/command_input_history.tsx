@@ -43,7 +43,7 @@ export const CommandInputHistory = memo(() => {
   const selectableHistoryOptions = useMemo(() => {
     return inputHistory.map<EuiSelectableProps['options'][number]>((inputItem, index) => {
       return {
-        label: inputItem.input,
+        label: inputItem.display,
         key: inputItem.id,
         data: inputItem,
       };
@@ -94,7 +94,13 @@ export const CommandInputHistory = memo(() => {
       dispatch({ type: 'updateInputPlaceholderState', payload: { placeholder: '' } });
 
       if (selected) {
-        dispatch({ type: 'updateInputTextEnteredState', payload: { textEntered: selected.label } });
+        dispatch({
+          type: 'updateInputTextEnteredState',
+          payload: {
+            leftOfCursorText: (selected.data as InputHistoryItem).input,
+            rightOfCursorText: '',
+          },
+        });
       }
 
       dispatch({ type: 'addFocusToKeyCapture' });
@@ -124,15 +130,18 @@ export const CommandInputHistory = memo(() => {
   // unloads, if no option from the history was selected, then set the prior text
   // entered back
   useEffect(() => {
-    dispatch({ type: 'updateInputTextEnteredState', payload: { textEntered: '' } });
+    dispatch({
+      type: 'updateInputTextEnteredState',
+      payload: { leftOfCursorText: '', rightOfCursorText: '' },
+    });
 
     return () => {
       if (!optionWasSelected.current) {
         dispatch({
           type: 'updateInputTextEnteredState',
           payload: {
-            textEntered: priorInputState.textEntered,
-            rightOfCursor: priorInputState.rightOfCursor,
+            leftOfCursorText: priorInputState.leftOfCursorText,
+            rightOfCursorText: priorInputState.rightOfCursorText,
           },
         });
         dispatch({ type: 'updateInputPlaceholderState', payload: { placeholder: '' } });

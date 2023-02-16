@@ -39,6 +39,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   isSnoozedUntil,
   lastRun,
   nextRun,
+  viewInAppRelativeUrl,
   ...rest
 }) => ({
   ...rest,
@@ -64,10 +65,17 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     id,
     params,
     connector_type_id: actionTypeId,
-    frequency,
+    frequency: frequency
+      ? {
+          summary: frequency.summary,
+          notify_when: frequency.notifyWhen,
+          throttle: frequency.throttle,
+        }
+      : undefined,
   })),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
+  ...(viewInAppRelativeUrl ? { view_in_app_relative_url: viewInAppRelativeUrl } : {}),
 });
 
 interface BuildGetRulesRouteParams {

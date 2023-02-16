@@ -46,6 +46,8 @@
     "@kbn/ml-local-storage",
     "@kbn/ml-date-picker",
     "@kbn/ml-local-storage",
+    "@kbn/ml-query-utils",
+    "@kbn/ml-is-defined",
   ],
   "exclude": [
     "target/**/*",

@@ -115,6 +115,7 @@ export type ApmFields = Fields<{
     'http.response.status_code': number;
     'kubernetes.pod.name': string;
     'kubernetes.pod.uid': string;
+    'labels.name': string;
     'metricset.name': string;
     'network.carrier.icc': string;
     'network.carrier.mcc': string;
@@ -130,6 +131,7 @@ export type ApmFields = Fields<{
     'processor.name': string;
     'session.id': string;
     'trace.id': string;
+    'transaction.aggregation.overflow_count': number;
     'transaction.duration.us': number;
     'transaction.id': string;
     'transaction.name': string;

@@ -27,10 +27,10 @@ export interface SloListSearchFilterSortBarProps {
   onChangeIndicatorTypeFilter: (filter: FilterType[]) => void;
 }
 
-export type SortType = 'name' | 'indicator_type';
+export type SortType = 'name' | 'indicatorType';
 export type FilterType =
-  | 'sli.apm.transaction_duration'
-  | 'sli.apm.transaction_error_rate'
+  | 'sli.apm.transactionDuration'
+  | 'sli.apm.transactionErrorRate'
   | 'sli.kql.custom';
 
 export type Item<T> = EuiSelectableOption & {
@@ -51,7 +51,7 @@ const SORT_OPTIONS: Array<Item<SortType>> = [
     label: i18n.translate('xpack.observability.slos.list.sortBy.indicatorType', {
       defaultMessage: 'Indicator type',
     }),
-    type: 'indicator_type',
+    type: 'indicatorType',
   },
 ];
 
@@ -60,13 +60,13 @@ const INDICATOR_TYPE_OPTIONS: Array<Item<FilterType>> = [
     label: i18n.translate('xpack.observability.slos.list.indicatorTypeFilter.apmLatency', {
       defaultMessage: 'APM latency',
     }),
-    type: 'sli.apm.transaction_duration',
+    type: 'sli.apm.transactionDuration',
   },
   {
     label: i18n.translate('xpack.observability.slos.list.indicatorTypeFilter.apmAvailability', {
       defaultMessage: 'APM availability',
     }),
-    type: 'sli.apm.transaction_error_rate',
+    type: 'sli.apm.transactionErrorRate',
   },
   {
     label: i18n.translate('xpack.observability.slos.list.indicatorTypeFilter.customKql', {
@@ -109,7 +109,7 @@ export function SloListSearchFilterSortBar({
   };
 
   useEffect(() => {
-    if (selectedSort?.type === 'name' || selectedSort?.type === 'indicator_type') {
+    if (selectedSort?.type === 'name' || selectedSort?.type === 'indicatorType') {
       onChangeSort(selectedSort.type);
     }
   }, [onChangeSort, selectedSort]);

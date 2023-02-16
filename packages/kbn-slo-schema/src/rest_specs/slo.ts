@@ -11,6 +11,7 @@ import * as t from 'io-ts';
 import {
   budgetingMethodSchema,
   dateType,
+  historicalSummarySchema,
   indicatorSchema,
   indicatorTypesArraySchema,
   objectiveSchema,
@@ -74,6 +75,7 @@ const sloResponseSchema = t.type({
   objective: objectiveSchema,
   revision: t.number,
   settings: settingsSchema,
+  enabled: t.boolean,
   createdAt: dateType,
   updatedAt: dateType,
 });
@@ -96,8 +98,12 @@ const updateSLOParamsSchema = t.type({
     timeWindow: timeWindowSchema,
     budgetingMethod: budgetingMethodSchema,
     objective: objectiveSchema,
-    settings: settingsSchema,
+    settings: optionalSettingsSchema,
   }),
+});
+
+const manageSLOParamsSchema = t.type({
+  path: t.type({ id: t.string }),
 });
 
 const updateSLOResponseSchema = sloResponseSchema;
@@ -109,19 +115,30 @@ const findSLOResponseSchema = t.type({
   results: t.array(sloWithSummaryResponseSchema),
 });
 
+const fetchHistoricalSummaryParamsSchema = t.type({ body: t.type({ sloIds: t.array(t.string) }) });
+const fetchHistoricalSummaryResponseSchema = t.record(t.string, t.array(historicalSummarySchema));
+
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
-type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
-type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
+type CreateSLOInput = t.OutputOf<typeof createSLOParamsSchema.props.body>; // Raw payload sent by the frontend
+type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>; // Parsed payload used by the backend
+type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>; // Raw response sent to the frontend
 
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 
+type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
+
+type UpdateSLOInput = t.OutputOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
+
+type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParamsSchema.props.body>;
+type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
+type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
 type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
 
@@ -132,6 +149,9 @@ export {
   findSLOResponseSchema,
   getSLOParamsSchema,
   getSLOResponseSchema,
+  fetchHistoricalSummaryParamsSchema,
+  fetchHistoricalSummaryResponseSchema,
+  manageSLOParamsSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
   updateSLOParamsSchema,
@@ -139,13 +159,19 @@ export {
 };
 export type {
   BudgetingMethod,
+  CreateSLOInput,
   CreateSLOParams,
   CreateSLOResponse,
   FindSLOParams,
   FindSLOResponse,
   GetSLOResponse,
+  FetchHistoricalSummaryParams,
+  FetchHistoricalSummaryResponse,
+  HistoricalSummaryResponse,
+  ManageSLOParams,
   SLOResponse,
   SLOWithSummaryResponse,
+  UpdateSLOInput,
   UpdateSLOParams,
   UpdateSLOResponse,
 };

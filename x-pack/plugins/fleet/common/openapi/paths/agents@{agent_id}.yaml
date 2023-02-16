@@ -20,6 +20,8 @@ get:
             required:
               - item
   operationId: get-agent
+  parameters:
+    - $ref: ../components/parameters/with_metrics.yaml
 put:
   summary: Agent - Update
   tags: []
@@ -45,12 +47,12 @@ put:
         schema:
           type: object
           properties:
-              user_provided_metadata:
-                type: object  
-              tags:
-                type: array
-                items:
-                  type: string  
+            user_provided_metadata:
+              type: object
+            tags:
+              type: array
+              items:
+                type: string
 delete:
   summary: Agent - Delete
   tags: []

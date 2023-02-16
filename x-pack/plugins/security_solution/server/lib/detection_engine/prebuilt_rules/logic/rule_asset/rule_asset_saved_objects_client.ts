@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
-  SavedObjectsFindResponse,
-} from '@kbn/core/server';
+import type { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsTopHitsAggregate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { invariant } from '../../../../../../common/utils/invariant';
+import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { ruleAssetSavedObjectType } from './rule_asset_saved_object_mappings';
 
-const DEFAULT_PAGE_SIZE = 100;
+const MAX_PREBUILT_RULES_COUNT = 10_000;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface IRuleAssetSOAttributes extends Record<string, any> {
+export interface IRuleAssetSOAttributes extends Record<string, unknown> {
   rule_id: string | null | undefined;
   version: string | null | undefined;
   name: string | null | undefined;
@@ -27,33 +26,53 @@ export interface IRuleAssetSavedObject {
   attributes: IRuleAssetSOAttributes;
 }
 
-export interface RuleAssetSavedObjectsClient {
-  find: (
-    options?: Omit<SavedObjectsFindOptions, 'type'>
-  ) => Promise<SavedObjectsFindResponse<IRuleAssetSavedObject>>;
-  all: () => Promise<IRuleAssetSavedObject[]>;
+export interface IRuleAssetsClient {
+  fetchLatestVersions: () => Promise<IRuleAssetSOAttributes[]>;
 }
 
-export const ruleAssetSavedObjectsClientFactory = (
+export const ruleAssetsClientFactory = (
   savedObjectsClient: SavedObjectsClientContract
-): RuleAssetSavedObjectsClient => {
+): IRuleAssetsClient => {
   return {
-    find: (options) =>
-      savedObjectsClient.find<IRuleAssetSavedObject>({
-        ...options,
-        type: ruleAssetSavedObjectType,
-      }),
-    all: async () => {
-      const finder = savedObjectsClient.createPointInTimeFinder({
-        perPage: DEFAULT_PAGE_SIZE,
-        type: ruleAssetSavedObjectType,
+    fetchLatestVersions: () => {
+      return withSecuritySpan('RuleAssetsClient.fetchLatestVersions', async () => {
+        const findResult = await savedObjectsClient.find<
+          IRuleAssetSavedObject,
+          {
+            rules: AggregationsMultiBucketAggregateBase<{
+              latest_version: AggregationsTopHitsAggregate;
+            }>;
+          }
+        >({
+          type: ruleAssetSavedObjectType,
+          aggs: {
+            rules: {
+              terms: {
+                field: `${ruleAssetSavedObjectType}.attributes.rule_id`,
+                size: MAX_PREBUILT_RULES_COUNT,
+              },
+              aggs: {
+                latest_version: {
+                  top_hits: {
+                    size: 1,
+                    sort: {
+                      [`${ruleAssetSavedObjectType}.version`]: 'desc',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+        const buckets = findResult.aggregations?.rules?.buckets ?? [];
+
+        invariant(Array.isArray(buckets), 'Expected buckets to be an array');
+
+        return buckets.map((bucket) => {
+          const hit = bucket.latest_version.hits.hits[0];
+          return hit._source[ruleAssetSavedObjectType];
+        });
       });
-      const responses: IRuleAssetSavedObject[] = [];
-      for await (const response of finder.find()) {
-        responses.push(...response.saved_objects.map((so) => so as IRuleAssetSavedObject));
-      }
-      await finder.close();
-      return responses;
     },
   };
 };

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { Exception } from '../../../../../typings/es_schemas/raw/error_raw';
 import { Stacktrace } from '../../../shared/stacktrace';
 import { CauseStacktrace } from '../../../shared/stacktrace/cause_stacktrace';
+import { ExceptionStacktraceTitle } from './exception_stacktrace_title';
 
 interface ExceptionStacktraceProps {
   codeLanguage?: string;
@@ -20,13 +20,16 @@ export function ExceptionStacktrace({
   codeLanguage,
   exceptions,
 }: ExceptionStacktraceProps) {
-  const title = exceptions[0]?.message;
+  const message = exceptions[0]?.message;
+  const type = exceptions[0]?.type;
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h4>{title}</h4>
-      </EuiTitle>
+      <ExceptionStacktraceTitle
+        type={type}
+        message={message}
+        codeLanguage={codeLanguage}
+      />
       {exceptions.map((ex, index) => {
         return index === 0 ? (
           <Stacktrace

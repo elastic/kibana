@@ -80,6 +80,7 @@ export const mlExecutor = async ({
         ...jobSummaries.map((job) =>
           [
             `job id: "${job.id}"`,
+            `job name: "${job?.customSettings?.security_app_display_name ?? job.id}"`,
             `job status: "${job.jobState}"`,
             `datafeed status: "${job.datafeedState}"`,
           ].join(', ')

@@ -6,7 +6,8 @@
  */
 
 import rison from '@kbn/rison';
-import type { TimeRange } from '@kbn/data-plugin/common/query';
+import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
+import type { Filter } from '@kbn/es-query';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = 'lens';
@@ -53,16 +54,35 @@ export function getBasePath() {
 
 const GLOBAL_RISON_STATE_PARAM = '_g';
 
-export function getEditPath(id: string | undefined, timeRange?: TimeRange) {
-  let timeParam = '';
+export function getEditPath(
+  id: string | undefined,
+  timeRange?: TimeRange,
+  filters?: Filter[],
+  refreshInterval?: RefreshInterval
+) {
+  const searchArgs: {
+    time?: TimeRange;
+    filters?: Filter[];
+    refreshInterval?: RefreshInterval;
+  } = {};
 
   if (timeRange) {
-    timeParam = `?${GLOBAL_RISON_STATE_PARAM}=${rison.encode({ time: timeRange })}`;
+    searchArgs.time = timeRange;
+  }
+  if (filters) {
+    searchArgs.filters = filters;
+  }
+  if (refreshInterval) {
+    searchArgs.refreshInterval = refreshInterval;
   }
 
+  const searchParam = Object.keys(searchArgs).length
+    ? `?${GLOBAL_RISON_STATE_PARAM}=${rison.encode(searchArgs)}`
+    : '';
+
   return id
-    ? `#/edit/${encodeURIComponent(id)}${timeParam}`
-    : `#/${LENS_EDIT_BY_VALUE}${timeParam}`;
+    ? `#/edit/${encodeURIComponent(id)}${searchParam}`
+    : `#/${LENS_EDIT_BY_VALUE}${searchParam}`;
 }
 
 export function getFullPath(id?: string) {

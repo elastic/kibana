@@ -110,6 +110,7 @@ export default function (providerContext: FtrProviderContext) {
       await generateAgent(providerContext, 'healthy', `agent-${++agentCount}`, agentPolicy.id);
       await generateAgent(providerContext, 'offline', `agent-${++agentCount}`, agentPolicy.id);
       await generateAgent(providerContext, 'error', `agent-${++agentCount}`, agentPolicy.id);
+      await generateAgent(providerContext, 'inactive', `agent-${++agentCount}`, agentPolicy.id);
       await generateAgent(providerContext, 'degraded', `agent-${++agentCount}`, agentPolicy.i);
       await generateAgent(
         providerContext,
@@ -137,7 +138,7 @@ export default function (providerContext: FtrProviderContext) {
         unhealthy: 3,
         offline: 1,
         unenrolled: 0,
-        inactive: 0,
+        inactive: 1,
         updating: 1,
         total_all_statuses: 8,
       });

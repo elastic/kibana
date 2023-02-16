@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { DecoratorFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import type { HttpStart, HttpFetchOptions, HttpHandler } from '@kbn/core/public';
@@ -15,7 +15,7 @@ import {
 } from '../../public/application/sections/rule_details/components/test_helpers';
 
 const getMockRule = () => {
-  const id = uuid.v4();
+  const id = uuidv4();
   return {
     id,
     name: `test rule - ${id}`,
@@ -275,6 +275,22 @@ const paginatedEventLogListGetResponse = (path: string) => {
   return baseEventLogListGetResponse(path);
 };
 
+const rulesSettingsGetResponse = (path: string) => {
+  if (path.endsWith('/settings/_flapping')) {
+    return {
+      enabled: true,
+      look_back_window: 20,
+      status_change_threshold: 4,
+    };
+  }
+};
+
+const rulesSettingsIds = [
+  'app-rulessettingslink--with-all-permission',
+  'app-rulessettingslink--with-read-permission',
+  'app-rulessettingslink--with-no-permission',
+];
+
 export const getHttp = (context: Parameters<DecoratorFn>[1]) => {
   return {
     get: (async (path: string, options: HttpFetchOptions) => {
@@ -297,9 +313,13 @@ export const getHttp = (context: Parameters<DecoratorFn>[1]) => {
       if (id === 'app-ruleeventloglist--with-paginated-events') {
         return paginatedEventLogListGetResponse(path);
       }
+      if (rulesSettingsIds.includes(id)) {
+        return rulesSettingsGetResponse(path);
+      }
     }) as HttpHandler,
     post: (async (path: string, options: HttpFetchOptions) => {
       action('POST')(path, options);
+      return Promise.resolve();
     }) as HttpHandler,
   } as unknown as HttpStart;
 };

@@ -23,6 +23,7 @@ import { mockUiSettingsService } from './mock_kibana_ui_settings_service';
 import { mockKibanaTimelinesService } from './mock_kibana_timelines_service';
 import { mockTriggersActionsUiService } from './mock_kibana_triggers_actions_ui_service';
 import { InspectorContext } from '../../containers/inspector';
+import { BlockListProvider } from '../../modules/indicators/containers/block_list_provider';
 
 export interface KibanaContextMock {
   /**
@@ -101,7 +102,9 @@ export const StoryProvidersComponent: VFC<StoryProvidersComponentProps> = ({
           <FieldTypesContext.Provider value={generateFieldTypeMap()}>
             <SecuritySolutionContext.Provider value={securitySolutionContextMock}>
               <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-                <KibanaReactContext.Provider>{children}</KibanaReactContext.Provider>
+                <KibanaReactContext.Provider>
+                  <BlockListProvider>{children}</BlockListProvider>
+                </KibanaReactContext.Provider>
               </IndicatorsFiltersContext.Provider>
             </SecuritySolutionContext.Provider>
           </FieldTypesContext.Provider>

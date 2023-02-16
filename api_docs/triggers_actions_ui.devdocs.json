@@ -933,66 +933,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadActionErrorLog",
-        "type": "Function",
-        "tags": [],
-        "label": "loadActionErrorLog",
-        "description": [],
-        "signature": [
-          "({ id, http, dateStart, dateEnd, runId, message, perPage, page, sort, namespace, withAuth, }: ",
-          "LoadActionErrorLogProps",
-          " & { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.IExecutionErrorsResult",
-            "text": "IExecutionErrorsResult"
-          },
-          ">"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/load_action_error_log.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadActionErrorLog.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  id,\n  http,\n  dateStart,\n  dateEnd,\n  runId,\n  message,\n  perPage = 10,\n  page = 0,\n  sort,\n  namespace,\n  withAuth = false,\n}",
-            "description": [],
-            "signature": [
-              "LoadActionErrorLogProps",
-              " & { http: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
-                "text": "HttpSetup"
-              },
-              "; }"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/load_action_error_log.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.loadActionTypes",
         "type": "Function",
         "tags": [],
@@ -1067,133 +1007,6 @@
                 "trackAdoption": false
               }
             ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadAllActions",
-        "type": "Function",
-        "tags": [],
-        "label": "loadAllActions",
-        "description": [],
-        "signature": [
-          "({ http }: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<",
-          {
-            "pluginId": "triggersActionsUi",
-            "scope": "public",
-            "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.ActionConnector",
-            "text": "ActionConnector"
-          },
-          "<Record<string, unknown>, Record<string, unknown>>[]>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connectors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadAllActions.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ http }",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connectors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.loadAllActions.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connectors.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadExecutionLogAggregations",
-        "type": "Function",
-        "tags": [],
-        "label": "loadExecutionLogAggregations",
-        "description": [],
-        "signature": [
-          "({ id, http, dateStart, dateEnd, outcomeFilter, message, perPage, page, sort, }: ",
-          "LoadExecutionLogAggregationsProps",
-          " & { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.IExecutionLogResult",
-            "text": "IExecutionLogResult"
-          },
-          ">"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/load_execution_log_aggregations.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadExecutionLogAggregations.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  id,\n  http,\n  dateStart,\n  dateEnd,\n  outcomeFilter,\n  message,\n  perPage = 10,\n  page = 0,\n  sort = [],\n}",
-            "description": [],
-            "signature": [
-              "LoadExecutionLogAggregationsProps",
-              " & { http: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
-                "text": "HttpSetup"
-              },
-              "; }"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/load_execution_log_aggregations.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1324,57 +1137,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadRules",
-        "type": "Function",
-        "tags": [],
-        "label": "loadRules",
-        "description": [],
-        "signature": [
-          "({\n  http,\n  page,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n  sort = { field: 'name', direction: 'asc' },\n}: ",
-          "LoadRulesProps",
-          ") => Promise<{ page: number; perPage: number; total: number; data: ",
-          {
-            "pluginId": "triggersActionsUi",
-            "scope": "public",
-            "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.Rule",
-            "text": "Rule"
-          },
-          "<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          ">[]; }>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rules.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadRules.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  http,\n  page,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n  sort = { field: 'name', direction: 'asc' },\n}",
-            "description": [],
-            "signature": [
-              "LoadRulesProps"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rules.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.loadRuleSummary",
         "type": "Function",
         "tags": [],
@@ -1467,134 +1229,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadRuleTags",
-        "type": "Function",
-        "tags": [],
-        "label": "loadRuleTags",
-        "description": [],
-        "signature": [
-          "({ http }: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<",
-          "RuleTagsAggregations",
-          ">"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadRuleTags.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ http }",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.loadRuleTags.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadRuleTypes",
-        "type": "Function",
-        "tags": [],
-        "label": "loadRuleTypes",
-        "description": [],
-        "signature": [
-          "({ http }: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<",
-          {
-            "pluginId": "triggersActionsUi",
-            "scope": "public",
-            "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.RuleType",
-            "text": "RuleType"
-          },
-          "<string, string>[]>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadRuleTypes.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ http }",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.loadRuleTypes.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.MustacheTextFieldWrapper",
         "type": "Function",
         "tags": [],
@@ -1621,76 +1255,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.muteRule",
-        "type": "Function",
-        "tags": [],
-        "label": "muteRule",
-        "description": [],
-        "signature": [
-          "({ id, http }: { id: string; http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<void>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/mute.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.muteRule.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ id, http }",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/mute.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.muteRule.$1.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/mute.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.muteRule.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/mute.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
           }
         ],
         "returnComment": [],
@@ -1825,92 +1389,6 @@
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.snoozeRule",
-        "type": "Function",
-        "tags": [],
-        "label": "snoozeRule",
-        "description": [],
-        "signature": [
-          "({\n  id,\n  snoozeSchedule,\n  http,\n}: { id: string; snoozeSchedule: ",
-          "SnoozeSchedule",
-          "; http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<void>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.snoozeRule.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  id,\n  snoozeSchedule,\n  http,\n}",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.snoozeRule.$1.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.snoozeRule.$1.snoozeSchedule",
-                "type": "Object",
-                "tags": [],
-                "label": "snoozeSchedule",
-                "description": [],
-                "signature": [
-                  "SnoozeSchedule"
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.snoozeRule.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -2110,160 +1588,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.unmuteRule",
-        "type": "Function",
-        "tags": [],
-        "label": "unmuteRule",
-        "description": [],
-        "signature": [
-          "({ id, http }: { id: string; http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<void>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unmute.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.unmuteRule.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ id, http }",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unmute.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.unmuteRule.$1.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unmute.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.unmuteRule.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unmute.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.unsnoozeRule",
-        "type": "Function",
-        "tags": [],
-        "label": "unsnoozeRule",
-        "description": [],
-        "signature": [
-          "({\n  id,\n  http,\n  scheduleIds,\n}: { id: string; http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; scheduleIds?: string[] | undefined; }) => Promise<void>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.unsnoozeRule.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  id,\n  http,\n  scheduleIds,\n}",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.unsnoozeRule.$1.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.unsnoozeRule.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.unsnoozeRule.$1.scheduleIds",
-                "type": "Array",
-                "tags": [],
-                "label": "scheduleIds",
-                "description": [],
-                "signature": [
-                  "string[] | undefined"
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.updateActionConnector",
         "type": "Function",
         "tags": [],
@@ -2280,7 +1604,7 @@
           },
           "; connector: Pick<",
           "ActionConnectorWithoutId",
-          "<Record<string, unknown>, Record<string, unknown>>, \"name\" | \"config\" | \"secrets\">; id: string; }) => Promise<",
+          "<Record<string, unknown>, Record<string, unknown>>, \"config\" | \"secrets\" | \"name\">; id: string; }) => Promise<",
           {
             "pluginId": "triggersActionsUi",
             "scope": "public",
@@ -2333,7 +1657,7 @@
                 "label": "connector",
                 "description": [],
                 "signature": [
-                  "{ name: string; config: Record<string, unknown>; secrets: Record<string, unknown>; }"
+                  "{ config: Record<string, unknown>; secrets: Record<string, unknown>; name: string; }"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/update.ts",
                 "deprecated": false,
@@ -2806,6 +2130,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionParamsProps.useDefaultMessage",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useDefaultMessage",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -3365,7 +2703,7 @@
             "description": [],
             "signature": [
               "BasicFields",
-              " & { tags?: string[] | undefined; kibana?: string[] | undefined; \"@timestamp\"?: string[] | undefined; \"event.action\"?: string[] | undefined; \"kibana.alert.rule.execution.uuid\"?: string[] | undefined; \"kibana.alert.rule.rule_type_id\"?: string[] | undefined; \"kibana.alert.rule.consumer\"?: string[] | undefined; \"kibana.alert\"?: string[] | undefined; \"kibana.alert.rule\"?: string[] | undefined; \"kibana.alert.rule.parameters\"?: string[] | undefined; \"kibana.alert.rule.producer\"?: string[] | undefined; \"kibana.space_ids\"?: string[] | undefined; \"kibana.alert.uuid\"?: string[] | undefined; \"kibana.alert.instance.id\"?: string[] | undefined; \"kibana.alert.start\"?: string[] | undefined; \"kibana.alert.time_range\"?: string[] | undefined; \"kibana.alert.end\"?: string[] | undefined; \"kibana.alert.duration.us\"?: string[] | undefined; \"kibana.alert.severity\"?: string[] | undefined; \"kibana.alert.status\"?: string[] | undefined; \"kibana.alert.flapping\"?: string[] | undefined; \"kibana.version\"?: string[] | undefined; \"ecs.version\"?: string[] | undefined; \"kibana.alert.risk_score\"?: string[] | undefined; \"kibana.alert.workflow_status\"?: string[] | undefined; \"kibana.alert.workflow_user\"?: string[] | undefined; \"kibana.alert.workflow_reason\"?: string[] | undefined; \"kibana.alert.system_status\"?: string[] | undefined; \"kibana.alert.action_group\"?: string[] | undefined; \"kibana.alert.reason\"?: string[] | undefined; \"kibana.alert.case_ids\"?: string[] | undefined; \"kibana.alert.rule.author\"?: string[] | undefined; \"kibana.alert.rule.category\"?: string[] | undefined; \"kibana.alert.rule.uuid\"?: string[] | undefined; \"kibana.alert.rule.created_at\"?: string[] | undefined; \"kibana.alert.rule.created_by\"?: string[] | undefined; \"kibana.alert.rule.description\"?: string[] | undefined; \"kibana.alert.rule.enabled\"?: string[] | undefined; \"kibana.alert.rule.from\"?: string[] | undefined; \"kibana.alert.rule.interval\"?: string[] | undefined; \"kibana.alert.rule.license\"?: string[] | undefined; \"kibana.alert.rule.name\"?: string[] | undefined; \"kibana.alert.rule.note\"?: string[] | undefined; \"kibana.alert.rule.references\"?: string[] | undefined; \"kibana.alert.rule.rule_id\"?: string[] | undefined; \"kibana.alert.rule.rule_name_override\"?: string[] | undefined; \"kibana.alert.rule.tags\"?: string[] | undefined; \"kibana.alert.rule.to\"?: string[] | undefined; \"kibana.alert.rule.type\"?: string[] | undefined; \"kibana.alert.rule.updated_at\"?: string[] | undefined; \"kibana.alert.rule.updated_by\"?: string[] | undefined; \"kibana.alert.rule.version\"?: string[] | undefined; \"kibana.alert.suppression.terms\"?: string[] | undefined; \"kibana.alert.suppression.terms.field\"?: string[] | undefined; \"kibana.alert.suppression.terms.value\"?: string[] | undefined; \"kibana.alert.suppression.start\"?: string[] | undefined; \"kibana.alert.suppression.end\"?: string[] | undefined; \"kibana.alert.suppression.docs_count\"?: string[] | undefined; \"event.kind\"?: string[] | undefined; \"event.module\"?: string[] | undefined; \"kibana.alert.evaluation.threshold\"?: string[] | undefined; \"kibana.alert.evaluation.value\"?: string[] | undefined; \"kibana.alert.building_block_type\"?: string[] | undefined; \"kibana.alert.rule.exceptions_list\"?: string[] | undefined; \"kibana.alert.rule.namespace\"?: string[] | undefined; \"kibana.alert.rule.threat.framework\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.id\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.name\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.reference\"?: string[] | undefined; } & { [x: string]: unknown[]; }"
+              " & { \"@timestamp\"?: string[] | undefined; \"event.action\"?: string[] | undefined; tags?: string[] | undefined; kibana?: string[] | undefined; \"kibana.alert.rule.rule_type_id\"?: string[] | undefined; \"kibana.alert.rule.consumer\"?: string[] | undefined; \"kibana.alert.rule.execution.uuid\"?: string[] | undefined; \"kibana.alert\"?: string[] | undefined; \"kibana.alert.rule\"?: string[] | undefined; \"kibana.alert.rule.parameters\"?: string[] | undefined; \"kibana.alert.rule.producer\"?: string[] | undefined; \"kibana.space_ids\"?: string[] | undefined; \"kibana.alert.uuid\"?: string[] | undefined; \"kibana.alert.instance.id\"?: string[] | undefined; \"kibana.alert.start\"?: string[] | undefined; \"kibana.alert.time_range\"?: string[] | undefined; \"kibana.alert.end\"?: string[] | undefined; \"kibana.alert.duration.us\"?: string[] | undefined; \"kibana.alert.severity\"?: string[] | undefined; \"kibana.alert.status\"?: string[] | undefined; \"kibana.alert.flapping\"?: string[] | undefined; \"kibana.version\"?: string[] | undefined; \"ecs.version\"?: string[] | undefined; \"kibana.alert.risk_score\"?: string[] | undefined; \"kibana.alert.workflow_status\"?: string[] | undefined; \"kibana.alert.workflow_user\"?: string[] | undefined; \"kibana.alert.workflow_reason\"?: string[] | undefined; \"kibana.alert.system_status\"?: string[] | undefined; \"kibana.alert.action_group\"?: string[] | undefined; \"kibana.alert.reason\"?: string[] | undefined; \"kibana.alert.case_ids\"?: string[] | undefined; \"kibana.alert.rule.author\"?: string[] | undefined; \"kibana.alert.rule.category\"?: string[] | undefined; \"kibana.alert.rule.uuid\"?: string[] | undefined; \"kibana.alert.rule.created_at\"?: string[] | undefined; \"kibana.alert.rule.created_by\"?: string[] | undefined; \"kibana.alert.rule.description\"?: string[] | undefined; \"kibana.alert.rule.enabled\"?: string[] | undefined; \"kibana.alert.rule.from\"?: string[] | undefined; \"kibana.alert.rule.interval\"?: string[] | undefined; \"kibana.alert.rule.license\"?: string[] | undefined; \"kibana.alert.rule.name\"?: string[] | undefined; \"kibana.alert.rule.note\"?: string[] | undefined; \"kibana.alert.rule.references\"?: string[] | undefined; \"kibana.alert.rule.rule_id\"?: string[] | undefined; \"kibana.alert.rule.rule_name_override\"?: string[] | undefined; \"kibana.alert.rule.tags\"?: string[] | undefined; \"kibana.alert.rule.to\"?: string[] | undefined; \"kibana.alert.rule.type\"?: string[] | undefined; \"kibana.alert.rule.updated_at\"?: string[] | undefined; \"kibana.alert.rule.updated_by\"?: string[] | undefined; \"kibana.alert.rule.version\"?: string[] | undefined; \"kibana.alert.suppression.terms\"?: string[] | undefined; \"kibana.alert.suppression.terms.field\"?: string[] | undefined; \"kibana.alert.suppression.terms.value\"?: string[] | undefined; \"kibana.alert.suppression.start\"?: string[] | undefined; \"kibana.alert.suppression.end\"?: string[] | undefined; \"kibana.alert.suppression.docs_count\"?: string[] | undefined; \"event.kind\"?: string[] | undefined; \"event.module\"?: string[] | undefined; \"kibana.alert.evaluation.threshold\"?: string[] | undefined; \"kibana.alert.evaluation.value\"?: string[] | undefined; \"kibana.alert.building_block_type\"?: string[] | undefined; \"kibana.alert.rule.exceptions_list\"?: string[] | undefined; \"kibana.alert.rule.namespace\"?: string[] | undefined; \"kibana.alert.rule.threat.framework\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.id\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.name\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.reference\"?: string[] | undefined; } & { [x: string]: unknown[]; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -3542,6 +2880,20 @@
             "tags": [],
             "label": "showExpandToDetails",
             "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.showAlertStatusWithFlapping",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showAlertStatusWithFlapping",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3757,6 +3109,35 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.controls",
+            "type": "Object",
+            "tags": [],
+            "label": "controls",
+            "description": [],
+            "signature": [
+              "EuiDataGridToolBarAdditionalControlsOptions",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.showInspectButton",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showInspectButton",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4047,6 +3428,81 @@
               }
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.AlertSummaryTimeRange",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertSummaryTimeRange",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.utcFrom",
+            "type": "string",
+            "tags": [],
+            "label": "utcFrom",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.utcTo",
+            "type": "string",
+            "tags": [],
+            "label": "utcTo",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.fixedInterval",
+            "type": "string",
+            "tags": [],
+            "label": "fixedInterval",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.title",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | JSX.Element | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertSummaryTimeRange.dateFormat",
+            "type": "string",
+            "tags": [],
+            "label": "dateFormat",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5107,7 +4563,7 @@
             "section": "def-common.RuleType",
             "text": "RuleType"
           },
-          "<ActionGroupIds, RecoveryActionGroupId>, \"name\" | \"id\" | \"actionGroups\" | \"defaultActionGroupId\" | \"recoveryActionGroup\" | \"producer\" | \"minimumLicenseRequired\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
+          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"actionGroups\" | \"defaultActionGroupId\" | \"recoveryActionGroup\" | \"producer\" | \"minimumLicenseRequired\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -5148,6 +4604,20 @@
             "tags": [],
             "label": "enabledInLicense",
             "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleType.hasGetSummarizedAlerts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasGetSummarizedAlerts",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5350,6 +4820,20 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.defaultSummaryMessage",
+            "type": "string",
+            "tags": [],
+            "label": "defaultSummaryMessage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.RuleTypeModel.alertDetailsAppSection",
             "type": "CompoundType",
             "tags": [],
@@ -5491,7 +4975,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"name\" | \"params\" | \"tags\" | \"id\" | \"monitoring\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"running\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"id\" | \"params\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"monitoring\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"running\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
@@ -6518,7 +6002,15 @@
         "label": "AsApiContract",
         "description": [],
         "signature": [
-          "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K]; }"
+          "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends \"frequency\" ? ",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.AsApiContract",
+            "text": "AsApiContract"
+          },
+          "<T[K]> : T[K]; }"
         ],
         "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
         "deprecated": false,
@@ -6578,7 +6070,7 @@
           "UserConfiguredActionConnector",
           "<Config, Secrets>, \"config\" | \"secrets\" | \"actionTypeId\" | \"isDeprecated\"> & Partial<Pick<",
           "UserConfiguredActionConnector",
-          "<Config, Secrets>, \"name\" | \"id\">>"
+          "<Config, Secrets>, \"id\" | \"name\">>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/types.ts",
         "deprecated": false,
@@ -6699,7 +6191,7 @@
         "label": "RuleStatus",
         "description": [],
         "signature": [
-          "\"disabled\" | \"enabled\" | \"snoozed\""
+          "\"enabled\" | \"disabled\" | \"snoozed\""
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -8026,6 +7518,8 @@
           "signature": [
             "(props: ",
             "AlertsTableStateProps",
+            " & ",
+            "LazyLoadProps",
             ") => React.ReactElement<",
             "AlertsTableStateProps",
             ", string | React.JSXElementConstructor<any>>"
@@ -8037,12 +7531,14 @@
             {
               "parentPluginId": "triggersActionsUi",
               "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAlertsStateTable.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "AlertsTableStateProps"
+                "AlertsTableStateProps",
+                " & ",
+                "LazyLoadProps"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -8407,9 +7903,9 @@
           "description": [],
           "signature": [
             "(props: ",
-            "RulesListNotifyBadgeProps",
+            "RulesListNotifyBadgePropsWithApi",
             ") => React.ReactElement<",
-            "RulesListNotifyBadgeProps",
+            "RulesListNotifyBadgePropsWithApi",
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -8424,7 +7920,7 @@
               "label": "props",
               "description": [],
               "signature": [
-                "RulesListNotifyBadgeProps"
+                "RulesListNotifyBadgePropsWithApi"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -8594,6 +8090,22 @@
               "isRequired": true
             }
           ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRulesSettingsLink",
+          "type": "Function",
+          "tags": [],
+          "label": "getRulesSettingsLink",
+          "description": [],
+          "signature": [
+            "() => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
           "returnComment": []
         }
       ],

@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ScopedHistory } from '@kbn/core/public';
 import { getCoreOverlays, getNavigateToApp } from '../../../kibana_services';
-import { goToSpecifiedPath } from '../../../render_app';
 import { getAppTitle } from '../../../../common/i18n_getters';
 
 export const unsavedChangesWarning = i18n.translate(
@@ -27,12 +27,14 @@ export function getBreadcrumbs({
   getHasUnsavedChanges,
   originatingApp,
   getAppNameFromId,
+  history,
 }: {
   pageTitle: string;
   isByValue: boolean;
   getHasUnsavedChanges: () => boolean;
   originatingApp?: string;
   getAppNameFromId?: (id: string) => string | undefined;
+  history: ScopedHistory;
 }) {
   const breadcrumbs = [];
 
@@ -55,10 +57,10 @@ export function getBreadcrumbs({
             'data-test-subj': 'appLeaveConfirmModal',
           });
           if (confirmed) {
-            goToSpecifiedPath('/');
+            history.push('/');
           }
         } else {
-          goToSpecifiedPath('/');
+          history.push('/');
         }
       },
     });

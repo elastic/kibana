@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ControlPanelState, OptionsListEmbeddableInput } from '../../common';
 import {
   DEFAULT_CONTROL_GROW,
@@ -89,7 +89,7 @@ export async function getDataControlPanelState(
     type: await getCompatibleControlType({ dataViewId, fieldName }),
     ...getPanelState(input, controlProps),
     explicitInput: {
-      id: controlId ? controlId : uuid.v4(),
+      id: controlId ? controlId : uuidv4(),
       dataViewId,
       fieldName,
       title: title ?? fieldName,
@@ -106,7 +106,7 @@ export function getOptionsListPanelState(
     type: OPTIONS_LIST_CONTROL,
     ...getPanelState(input, controlProps),
     explicitInput: {
-      id: controlId ? controlId : uuid.v4(),
+      id: controlId ? controlId : uuidv4(),
       dataViewId,
       fieldName,
       title: title ?? fieldName,
@@ -124,7 +124,7 @@ export function getRangeSliderPanelState(
     type: RANGE_SLIDER_CONTROL,
     ...getPanelState(input, controlProps),
     explicitInput: {
-      id: controlId ? controlId : uuid.v4(),
+      id: controlId ? controlId : uuidv4(),
       dataViewId,
       fieldName,
       title: title ?? fieldName,
@@ -140,7 +140,7 @@ export function getTimeSliderPanelState(input: Partial<ControlGroupInput>) {
     grow: true,
     width: 'large',
     explicitInput: {
-      id: uuid.v4(),
+      id: uuidv4(),
       title: i18n.translate('controls.controlGroup.timeSlider.title', {
         defaultMessage: 'Time slider',
       }),

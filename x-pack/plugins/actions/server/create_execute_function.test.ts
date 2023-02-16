@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
   createExecutionEnqueuerFunction,
@@ -256,7 +256,7 @@ describe('execute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuidv4() };
 
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -334,7 +334,7 @@ describe('execute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuidv4() };
 
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -822,7 +822,7 @@ describe('bulkExecute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuidv4() };
 
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -917,7 +917,7 @@ describe('bulkExecute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuidv4() };
 
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [

@@ -26,6 +26,11 @@ export const IndicesStats: React.FC = () => {
     makeRequest({});
   }, []);
 
+  const UNKNOWN_STRING = i18n.translate(
+    'xpack.enterpriseSearch.content.searchIndices.jobStats.unknown',
+    { defaultMessage: 'Unknown' }
+  );
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -44,7 +49,7 @@ export const IndicesStats: React.FC = () => {
                   }
                 )}
                 isLoading={isLoading}
-                title={data?.connected}
+                title={data?.connected ?? UNKNOWN_STRING}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -62,7 +67,7 @@ export const IndicesStats: React.FC = () => {
                   }
                 )}
                 isLoading={isLoading}
-                title={data?.incomplete}
+                title={data?.incomplete ?? UNKNOWN_STRING}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -80,21 +85,21 @@ export const IndicesStats: React.FC = () => {
                   }
                 )}
                 isLoading={isLoading}
-                title={data?.in_progress}
+                title={data?.in_progress ?? UNKNOWN_STRING}
               />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel color={data?.stuck ? 'warning' : 'subdued'} hasShadow={false} paddingSize="l">
+            <EuiPanel color={data?.idle ? 'warning' : 'subdued'} hasShadow={false} paddingSize="l">
               <EuiStat
                 description={i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndices.jobStats.longRunningSyncs',
                   {
-                    defaultMessage: 'Stuck syncs',
+                    defaultMessage: 'Idle syncs',
                   }
                 )}
                 isLoading={isLoading}
-                title={data?.stuck}
+                title={data?.idle ?? UNKNOWN_STRING}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -112,7 +117,7 @@ export const IndicesStats: React.FC = () => {
                   }
                 )}
                 isLoading={isLoading}
-                title={data?.orphaned_jobs}
+                title={data?.orphaned_jobs ?? UNKNOWN_STRING}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -126,7 +131,7 @@ export const IndicesStats: React.FC = () => {
                   }
                 )}
                 isLoading={isLoading}
-                title={data?.errors}
+                title={data?.errors ?? UNKNOWN_STRING}
               />
             </EuiPanel>
           </EuiFlexItem>

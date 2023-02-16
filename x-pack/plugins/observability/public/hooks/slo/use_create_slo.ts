@@ -6,25 +6,31 @@
  */
 
 import { useCallback, useState } from 'react';
-import type { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import type {
+  CreateSLOInput,
+  CreateSLOResponse,
+  UpdateSLOInput,
+  UpdateSLOResponse,
+} from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 
-interface UseCreateSlo {
+interface UseCreateOrUpdateSlo {
   loading: boolean;
   success: boolean;
   error: string | undefined;
-  createSlo: (slo: CreateSLOParams) => void;
+  createSlo: (slo: CreateSLOInput) => void;
+  updateSlo: (sloId: string, slo: UpdateSLOInput) => void;
 }
 
-export function useCreateSlo(): UseCreateSlo {
+export function useCreateOrUpdateSlo(): UseCreateOrUpdateSlo {
   const { http } = useKibana().services;
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
   const createSlo = useCallback(
-    async (slo: CreateSLOParams) => {
+    async (slo: CreateSLOInput) => {
       setLoading(true);
       setError('');
       setSuccess(false);
@@ -35,6 +41,29 @@ export function useCreateSlo(): UseCreateSlo {
         setSuccess(true);
       } catch (e) {
         setError(e);
+      } finally {
+        setSuccess(false);
+        setLoading(false);
+      }
+    },
+    [http]
+  );
+
+  const updateSlo = useCallback(
+    async (sloId: string, slo: UpdateSLOInput) => {
+      setLoading(true);
+      setError('');
+      setSuccess(false);
+      const body = JSON.stringify(slo);
+
+      try {
+        await http.put<UpdateSLOResponse>(`/api/observability/slos/${sloId}`, { body });
+        setSuccess(true);
+      } catch (e) {
+        setError(e);
+      } finally {
+        setSuccess(false);
+        setLoading(false);
       }
     },
     [http]
@@ -45,5 +74,6 @@ export function useCreateSlo(): UseCreateSlo {
     error,
     success,
     createSlo,
+    updateSlo,
   };
 }

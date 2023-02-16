@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { AgentClient } from '@kbn/fleet-plugin/server';
 import { AgentStatusKueryHelper } from '@kbn/fleet-plugin/common/services';
-import type { Agent } from '@kbn/fleet-plugin/common/types/models';
 import { HostStatus } from '../../../../../common/endpoint/types';
 
 const STATUS_QUERY_MAP = new Map([
@@ -29,35 +27,4 @@ export function buildStatusesKuery(statusesToFilter: string[]): string | undefin
   }
 
   return `(${statusQueries.join(' OR ')})`;
-}
-
-export async function findAgentIdsByStatus(
-  agentClient: AgentClient,
-  statuses: string[],
-  pageSize: number = 1000
-): Promise<string[]> {
-  if (!statuses.length) {
-    return [];
-  }
-  const helpers = statuses.map((s) => STATUS_QUERY_MAP.get(s));
-  const searchOptions = (pageNum: number) => {
-    return {
-      page: pageNum,
-      perPage: pageSize,
-      showInactive: true,
-      kuery: `(packages : "endpoint" AND (${helpers.join(' OR ')}))`,
-    };
-  };
-
-  let page = 1;
-
-  const result: string[] = [];
-  let hasMore = true;
-
-  while (hasMore) {
-    const agents = await agentClient.listAgents(searchOptions(page++));
-    result.push(...agents.agents.map((agent: Agent) => agent.id));
-    hasMore = agents.agents.length > 0;
-  }
-  return result;
 }

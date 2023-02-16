@@ -57,6 +57,7 @@ journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => 
       page.waitForNavigation(/* { url: '${kibanaUrl}/app/integrations/browse' }*/),
       page.click('text=Integrations'),
     ]);
+    await page.click('text=Display beta integrations');
     await page.click('text=Installed integrations');
     expect(page.url()).toBe(`${kibanaUrl}/app/integrations/installed`);
     await page.click(`text=Elastic Synthetics`);

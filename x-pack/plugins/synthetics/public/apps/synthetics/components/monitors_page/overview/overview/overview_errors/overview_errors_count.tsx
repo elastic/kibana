@@ -8,18 +8,18 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
-import { EuiLoadingContent } from '@elastic/eui';
+import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
 import { ClientPluginsStart } from '../../../../../../../plugin';
 
 interface MonitorErrorsCountProps {
   from: string;
   to: string;
   locationLabel?: string;
-  monitorId: string[];
+  monitorIds: string[];
 }
 
 export const OverviewErrorsCount = ({
-  monitorId,
+  monitorIds,
   from,
   to,
   locationLabel,
@@ -30,10 +30,6 @@ export const OverviewErrorsCount = ({
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 
-  if (!monitorId) {
-    return <EuiLoadingContent lines={3} />;
-  }
-
   return (
     <ExploratoryViewEmbeddable
       align="left"
@@ -43,12 +39,12 @@ export const OverviewErrorsCount = ({
         {
           time,
           reportDefinitions: {
-            'monitor.id': monitorId,
+            'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'],
             ...(locationLabel ? { 'observer.geo.name': [locationLabel] } : {}),
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',
-          name: 'synthetics-series-1',
+          name: ERRORS_LABEL,
         },
       ]}
     />

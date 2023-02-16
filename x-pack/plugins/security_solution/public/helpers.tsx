@@ -13,6 +13,7 @@ import { matchPath, Redirect } from 'react-router-dom';
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import type { DocLinks } from '@kbn/doc-links';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   ALERTS_PATH,
   APP_UI_ID,
@@ -24,7 +25,6 @@ import {
   SERVER_APP_ID,
   THREAT_INTELLIGENCE_PATH,
 } from '../common/constants';
-import type { Ecs } from '../common/ecs';
 import type {
   FactoryQueryTypes,
   StrategyResponseType,

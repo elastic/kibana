@@ -33,6 +33,7 @@ import fileShareStorageIcon from './icons/file_share_storage.svg';
 import serviceBusIcon from './icons/service_bus.svg';
 import storageQueueIcon from './icons/storage_queue.svg';
 import tableStorageIcon from './icons/table_storage.svg';
+import ldapIcon from './icons/ldap.svg';
 
 const defaultSpanTypeIcons: { [key: string]: string } = {
   cache: databaseIcon,
@@ -64,6 +65,7 @@ export const spanTypeIcons: {
     graphql: graphqlIcon,
     grpc: grpcIcon,
     websocket: websocketIcon,
+    ldap: ldapIcon,
   },
   messaging: {
     azurequeue: storageQueueIcon,

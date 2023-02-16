@@ -28,8 +28,7 @@ const configSchema = schema.object({
   serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
-    maxTraceItems: schema.number({ defaultValue: 1000 }),
+    maxTraceItems: schema.number({ defaultValue: 5000 }),
   }),
   searchAggregatedTransactions: schema.oneOf(
     [
@@ -66,6 +65,9 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     unusedFromRoot,
   }) => [
     unused('indices.sourcemap', { level: 'warning' }),
+    unused('ui.transactionGroupBucketSize', {
+      level: 'warning',
+    }),
     rename('autocreateApmIndexPattern', 'autoCreateApmDataView', {
       level: 'warning',
     }),

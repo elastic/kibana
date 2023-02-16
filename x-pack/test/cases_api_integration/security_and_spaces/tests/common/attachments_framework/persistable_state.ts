@@ -24,14 +24,14 @@ import {
   deleteAllCaseItems,
   createCase,
   createComment,
-  getCaseUserActions,
   removeServerGeneratedPropertiesFromSavedObject,
   getComment,
   getSOFromKibanaIndex,
   getReferenceFromEsResponse,
   bulkCreateAttachments,
   updateComment,
-} from '../../../../common/lib/utils';
+  getCaseUserActions,
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

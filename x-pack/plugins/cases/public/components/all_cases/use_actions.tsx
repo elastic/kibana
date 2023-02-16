@@ -27,6 +27,7 @@ import { useTagsAction } from '../actions/tags/use_tags_action';
 import { EditTagsFlyout } from '../actions/tags/edit_tags_flyout';
 import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
+import { useCopyIDAction } from '../actions/copy_id/use_copy_id_action';
 
 const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }> = ({
   theCase,
@@ -41,6 +42,10 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
     isDisabled: false,
     onAction: closePopover,
     onActionSuccess: refreshCases,
+  });
+
+  const copyIDAction = useCopyIDAction({
+    onActionSuccess: closePopover,
   });
 
   const statusAction = useStatusAction({
@@ -126,6 +131,8 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
       mainPanelItems.push(assigneesAction.getAction([theCase]));
     }
 
+    mainPanelItems.push(copyIDAction.getAction(theCase));
+
     if (canDelete) {
       mainPanelItems.push(deleteAction.getAction([theCase]));
     }
@@ -146,13 +153,14 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
 
     return panelsToBuild;
   }, [
+    assigneesAction,
     canDelete,
     canUpdate,
+    copyIDAction,
     deleteAction,
     severityAction,
     statusAction,
     tagsAction,
-    assigneesAction,
     theCase,
   ]);
 

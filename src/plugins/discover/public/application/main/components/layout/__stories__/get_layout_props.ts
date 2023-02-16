@@ -18,7 +18,7 @@ import {
   DataMain$,
   DataTotalHits$,
   RecordRawType,
-} from '../../../hooks/use_saved_search';
+} from '../../../services/discover_data_state_container';
 import { buildDataTableRecordList } from '../../../../../utils/build_data_record';
 import { esHits } from '../../../../../__mocks__/es_hits';
 import { SavedSearch } from '../../../../..';

@@ -11,17 +11,20 @@ import { useMlKibana } from '../../contexts/kibana';
 
 interface HelpMenuProps {
   docLink: string;
+  appName?: string;
 }
 
 // Component for adding a documentation link to the help menu
-export const HelpMenu: FC<HelpMenuProps> = React.memo(({ docLink }) => {
+export const HelpMenu: FC<HelpMenuProps> = React.memo(({ docLink, appName }) => {
   const { chrome } = useMlKibana().services;
 
   useEffect(() => {
     chrome.setHelpExtension({
-      appName: i18n.translate('xpack.ml.chrome.help.appName', {
-        defaultMessage: 'Machine Learning',
-      }),
+      appName:
+        appName ??
+        i18n.translate('xpack.ml.chrome.help.appName', {
+          defaultMessage: 'Machine Learning',
+        }),
       links: [
         {
           href: docLink,

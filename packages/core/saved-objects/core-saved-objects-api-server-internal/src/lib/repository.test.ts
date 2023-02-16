@@ -23,7 +23,6 @@ import {
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -52,11 +51,12 @@ import type {
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
   SavedObjectUnsanitizedDoc,
+  SavedObject,
+  SavedObjectReference,
+  BulkResolveError,
 } from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectsErrorHelpers,
-  ALL_NAMESPACES_STRING,
-} from '@kbn/core-saved-objects-utils-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { SavedObjectsRepository } from './repository';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -69,10 +69,8 @@ import { kibanaMigratorMock } from '../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import type { InternalBulkResolveError } from './internal_bulk_resolve';
 
 import {
-  KIBANA_VERSION,
   CUSTOM_INDEX_TYPE,
   NAMESPACE_AGNOSTIC_TYPE,
   MULTI_NAMESPACE_TYPE,
@@ -935,7 +933,6 @@ describe('SavedObjectsRepository', () => {
           ...response.items[0].create,
           _source: {
             ...response.items[0].create._source,
-            coreMigrationVersion: '2.0.0', // the document migrator adds this to all objects before creation
             namespaces: response.items[0].create._source.namespaces,
           },
           _id: expect.stringMatching(/^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/),
@@ -944,7 +941,6 @@ describe('SavedObjectsRepository', () => {
           ...response.items[1].create,
           _source: {
             ...response.items[1].create._source,
-            coreMigrationVersion: '2.0.0', // the document migrator adds this to all objects before creation
             namespaces: response.items[1].create._source.namespaces,
           },
         });
@@ -2951,7 +2947,6 @@ describe('SavedObjectsRepository', () => {
           references,
           namespaces: [namespace ?? 'default'],
           migrationVersion: { [MULTI_NAMESPACE_TYPE]: '1.1.1' },
-          coreMigrationVersion: KIBANA_VERSION,
         });
       });
     });
@@ -4073,7 +4068,7 @@ describe('SavedObjectsRepository', () => {
 
     it('throws when internalBulkResolve result is an error', async () => {
       const error = SavedObjectsErrorHelpers.decorateBadRequestError(new Error('Oh no!'));
-      const expectedResult: InternalBulkResolveError = { type: 'obj-type', id: 'obj-id', error };
+      const expectedResult: BulkResolveError = { type: 'obj-type', id: 'obj-id', error };
       mockInternalBulkResolve.mockResolvedValue({ resolved_objects: [expectedResult] });
 
       await expect(repository.resolve('foo', '2')).rejects.toEqual(error);

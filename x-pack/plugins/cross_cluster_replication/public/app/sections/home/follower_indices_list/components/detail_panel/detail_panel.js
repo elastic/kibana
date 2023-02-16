@@ -70,9 +70,9 @@ export class DetailPanel extends Component {
       <Fragment>
         <EuiFlyoutBody>
           <section>
-            <EuiDescriptionList>
-              <EuiFlexGroup>
-                <EuiFlexItem>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiDescriptionList>
                   <EuiDescriptionListTitle>
                     <EuiTitle size="xs">
                       <FormattedMessage
@@ -99,13 +99,15 @@ export class DetailPanel extends Component {
                       </EuiHealth>
                     )}
                   </EuiDescriptionListDescription>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                </EuiDescriptionList>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
-              <EuiSpacer size="s" />
+            <EuiSpacer size="s" />
 
-              <EuiFlexGroup>
-                <EuiFlexItem>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiDescriptionList>
                   <EuiDescriptionListTitle>
                     <EuiTitle size="xs">
                       <FormattedMessage
@@ -118,9 +120,11 @@ export class DetailPanel extends Component {
                   <EuiDescriptionListDescription data-test-subj="remoteCluster">
                     {remoteCluster}
                   </EuiDescriptionListDescription>
-                </EuiFlexItem>
+                </EuiDescriptionList>
+              </EuiFlexItem>
 
-                <EuiFlexItem>
+              <EuiFlexItem>
+                <EuiDescriptionList>
                   <EuiDescriptionListTitle>
                     <EuiTitle size="xs">
                       <FormattedMessage
@@ -133,9 +137,9 @@ export class DetailPanel extends Component {
                   <EuiDescriptionListDescription data-test-subj="leaderIndex">
                     {leaderIndex}
                   </EuiDescriptionListDescription>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiDescriptionList>
+                </EuiDescriptionList>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </section>
 
           <EuiSpacer size="l" />
@@ -166,36 +170,40 @@ export class DetailPanel extends Component {
                 }
               />
             ) : (
-              <EuiDescriptionList data-test-subj="settingsValues">
+              <>
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountTitle"
-                          defaultMessage="Max read request operation count"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountTitle"
+                            defaultMessage="Max read request operation count"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxReadReqOpCount">
-                      {maxReadRequestOperationCount}
-                    </EuiDescriptionListDescription>
+                      <EuiDescriptionListDescription data-test-subj="maxReadReqOpCount">
+                        {maxReadRequestOperationCount}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
                   </EuiFlexItem>
 
                   <EuiFlexItem>
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsTitle"
-                          defaultMessage="Max outstanding read requests"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsTitle"
+                            defaultMessage="Max outstanding read requests"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxOutstandingReadReq">
-                      {maxOutstandingReadRequests}
-                    </EuiDescriptionListDescription>
+                      <EuiDescriptionListDescription data-test-subj="maxOutstandingReadReq">
+                        {maxOutstandingReadRequests}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
@@ -203,33 +211,37 @@ export class DetailPanel extends Component {
 
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeTitle"
-                          defaultMessage="Max read request size"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeTitle"
+                            defaultMessage="Max read request size"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxReadReqSize">
-                      {maxReadRequestSize}
-                    </EuiDescriptionListDescription>
+                      <EuiDescriptionListDescription data-test-subj="maxReadReqSize">
+                        {maxReadRequestSize}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
                   </EuiFlexItem>
 
                   <EuiFlexItem>
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountTitle"
-                          defaultMessage="Max write request operation count"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountTitle"
+                            defaultMessage="Max write request operation count"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxWriteReqOpCount">
-                      {maxWriteRequestOperationCount}
-                    </EuiDescriptionListDescription>
+                      <EuiDescriptionListDescription data-test-subj="maxWriteReqOpCount">
+                        {maxWriteRequestOperationCount}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
@@ -237,33 +249,37 @@ export class DetailPanel extends Component {
 
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeTitle"
-                          defaultMessage="Max write request size"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeTitle"
+                            defaultMessage="Max write request size"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxWriteReqSize">
-                      {maxWriteRequestSize}
-                    </EuiDescriptionListDescription>
+                      <EuiDescriptionListDescription data-test-subj="maxWriteReqSize">
+                        {maxWriteRequestSize}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
                   </EuiFlexItem>
 
                   <EuiFlexItem>
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsTitle"
-                          defaultMessage="Max outstanding write requests"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsTitle"
+                            defaultMessage="Max outstanding write requests"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxOutstandingWriteReq">
-                      {maxOutstandingWriteRequests}
-                    </EuiDescriptionListDescription>
+                      <EuiDescriptionListDescription data-test-subj="maxOutstandingWriteReq">
+                        {maxOutstandingWriteRequests}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
@@ -271,33 +287,37 @@ export class DetailPanel extends Component {
 
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountTitle"
-                          defaultMessage="Max write buffer count"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountTitle"
+                            defaultMessage="Max write buffer count"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxWriteBufferCount">
-                      {maxWriteBufferCount}
-                    </EuiDescriptionListDescription>
+                      <EuiDescriptionListDescription data-test-subj="maxWriteBufferCount">
+                        {maxWriteBufferCount}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
                   </EuiFlexItem>
 
                   <EuiFlexItem>
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeTitle"
-                          defaultMessage="Max write buffer size"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeTitle"
+                            defaultMessage="Max write buffer size"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxWriteBufferSize">
-                      {maxWriteBufferSize}
-                    </EuiDescriptionListDescription>
+                      <EuiDescriptionListDescription data-test-subj="maxWriteBufferSize">
+                        {maxWriteBufferSize}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
@@ -305,36 +325,40 @@ export class DetailPanel extends Component {
 
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayTitle"
-                          defaultMessage="Max retry delay"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayTitle"
+                            defaultMessage="Max retry delay"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="maxRetryDelay">
-                      {maxRetryDelay}
-                    </EuiDescriptionListDescription>
+                      <EuiDescriptionListDescription data-test-subj="maxRetryDelay">
+                        {maxRetryDelay}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
                   </EuiFlexItem>
 
                   <EuiFlexItem>
-                    <EuiDescriptionListTitle>
-                      <EuiTitle size="xs">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutTitle"
-                          defaultMessage="Read poll timeout"
-                        />
-                      </EuiTitle>
-                    </EuiDescriptionListTitle>
+                    <EuiDescriptionList data-test-subj="settingsValues">
+                      <EuiDescriptionListTitle>
+                        <EuiTitle size="xs">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutTitle"
+                            defaultMessage="Read poll timeout"
+                          />
+                        </EuiTitle>
+                      </EuiDescriptionListTitle>
 
-                    <EuiDescriptionListDescription data-test-subj="readPollTimeout">
-                      {readPollTimeout}
-                    </EuiDescriptionListDescription>
+                      <EuiDescriptionListDescription data-test-subj="readPollTimeout">
+                        {readPollTimeout}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiDescriptionList>
+              </>
             )}
           </section>
 

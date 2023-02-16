@@ -21,6 +21,7 @@ import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
+import { SecurityPageName } from '../../../app/types';
 
 jest.mock('../../containers/sourcerer');
 jest.mock('../../utils/route/use_route_spy', () => ({
@@ -68,10 +69,10 @@ describe('useLensAttributes', () => {
 
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,
-      ...filterFromSearchBar,
       ...getDetailsPageFilter('hosts', 'mockHost'),
       ...hostNameExistsFilter,
       ...getIndexFilters(['auditbeat-*']),
+      ...filterFromSearchBar,
     ]);
   });
 
@@ -94,10 +95,10 @@ describe('useLensAttributes', () => {
 
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,
-      ...filterFromSearchBar,
       ...getNetworkDetailsPageFilter('192.168.1.1'),
       ...sourceOrDestinationIpExistsFilter,
       ...getIndexFilters(['auditbeat-*']),
+      ...filterFromSearchBar,
     ]);
   });
 
@@ -120,8 +121,34 @@ describe('useLensAttributes', () => {
 
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,
-      ...filterFromSearchBar,
       ...getDetailsPageFilter('user', 'elastic'),
+      ...getIndexFilters(['auditbeat-*']),
+      ...filterFromSearchBar,
+    ]);
+  });
+
+  it('should not apply global queries and filters - applyGlobalQueriesAndFilters = false', () => {
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: undefined,
+        pageName: SecurityPageName.entityAnalytics,
+        tabName: undefined,
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          applyGlobalQueriesAndFilters: false,
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.query.query).toEqual('');
+
+    expect(result?.current?.state.filters).toEqual([
+      ...getExternalAlertLensAttributes().state.filters,
       ...getIndexFilters(['auditbeat-*']),
     ]);
   });
@@ -171,6 +198,45 @@ describe('useLensAttributes', () => {
         useLensAttributes({
           getLensAttributes: getExternalAlertLensAttributes,
           stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current).toBeNull();
+  });
+
+  it('should return null if stackByField is an empty string', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      dataViewId: 'security-solution-default',
+      indicesExist: false,
+      selectedPatterns: ['auditbeat-*'],
+    });
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: '',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current).toBeNull();
+  });
+
+  it('should return null if extraOptions.breakDownField is an empty string', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      dataViewId: 'security-solution-default',
+      indicesExist: false,
+      selectedPatterns: ['auditbeat-*'],
+    });
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'kibana.alert.rule.name',
+          extraOptions: {
+            breakdownField: '',
+          },
         }),
       { wrapper }
     );

@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { createAPMTransactionErrorRateIndicator, createSLO } from '../fixtures/slo';
+import {
+  createAPMTransactionErrorRateIndicator,
+  createSLO,
+  createSLOWithTimeslicesBudgetingMethod,
+} from '../fixtures/slo';
 import { ApmTransactionErrorRateTransformGenerator } from './apm_transaction_error_rate';
 
 const generator = new ApmTransactionErrorRateTransformGenerator();
 
 describe('APM Transaction Error Rate Transform Generator', () => {
-  it('returns the correct transform params with every specified indicator params', async () => {
+  it('returns the expected transform params with every specified indicator params', async () => {
     const anSLO = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
     const transform = generator.getTransformParams(anSLO);
 
@@ -25,6 +29,18 @@ describe('APM Transaction Error Rate Transform Generator', () => {
     });
     expect(transform.source.runtime_mappings!['slo.revision']).toMatchObject({
       script: { source: `emit(${anSLO.revision})` },
+    });
+  });
+
+  it('returns the expected transform params for timeslices slo', async () => {
+    const anSLO = createSLOWithTimeslicesBudgetingMethod({
+      indicator: createAPMTransactionErrorRateIndicator(),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform).toMatchSnapshot({
+      transform_id: expect.any(String),
+      source: { runtime_mappings: { 'slo.id': { script: { source: expect.any(String) } } } },
     });
   });
 
@@ -61,5 +77,17 @@ describe('APM Transaction Error Rate Transform Generator', () => {
     const transform = generator.getTransformParams(anSLO);
 
     expect(transform.source.index).toEqual(index);
+  });
+
+  it('adds the custom kql filter to the query', async () => {
+    const filter = `"my.field" : "value" and ("foo" >= 12 or "bar" <= 100)`;
+    const anSLO = createSLO({
+      indicator: createAPMTransactionErrorRateIndicator({
+        filter,
+      }),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform.source.query).toMatchSnapshot();
   });
 });

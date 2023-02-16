@@ -5,93 +5,40 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { useDispatch } from 'react-redux';
 import { EnableRiskScore } from '../../../../explore/components/risk_score/enable_risk_score';
-import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
-import { UsersTableType } from '../../../../explore/users/store/model';
-import { SeverityFilterGroup } from '../../../../explore/components/risk_score/severity/severity_filter_group';
-import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
-import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
-import { HostsTableType, HostsType } from '../../../../explore/hosts/store/model';
 import { getRiskScoreColumns } from './columns';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useRiskScore, useRiskScoreKpi } from '../../../../explore/containers/risk_score';
 
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
-import { SecurityPageName } from '../../../../app/types';
-import * as i18n from './translations';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { generateSeverityFilter } from '../../../../explore/hosts/store/helpers';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { hostsActions } from '../../../../explore/hosts/store';
-import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { StyledBasicTable } from '../common/styled_basic_table';
-import { RISKY_HOSTS_DOC_LINK, RISKY_USERS_DOC_LINK } from '../../../../../common/constants';
 import { RiskScoreHeaderTitle } from '../../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import { RiskScoresNoDataDetected } from '../../../../explore/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 import { Loader } from '../../../../common/components/loader';
 import { Panel } from '../../../../common/components/panel';
 import * as commonI18n from '../common/translations';
-import { usersActions } from '../../../../explore/users/store';
 import { useNavigateToTimeline } from '../../detection_response/hooks/use_navigate_to_timeline';
 import type { TimeRange } from '../../../../common/store/inputs/model';
 import { openAlertsFilter } from '../../detection_response/utils';
 
-const HOST_RISK_TABLE_QUERY_ID = 'hostRiskDashboardTable';
-const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
-const USER_RISK_TABLE_QUERY_ID = 'userRiskDashboardTable';
-const USER_RISK_KPI_QUERY_ID = 'headerUserRiskScoreKpiQuery';
+import { useEntityInfo } from './use_entity';
+import { RiskScoreHeaderContent } from './header_content';
+import { ChartContent } from './chart_content';
 
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
-  const dispatch = useDispatch();
-
-  const entity = useMemo(
-    () =>
-      riskEntity === RiskScoreEntity.host
-        ? {
-            docLink: RISKY_HOSTS_DOC_LINK,
-            linkProps: {
-              deepLinkId: SecurityPageName.hosts,
-              path: getTabsOnHostsUrl(HostsTableType.risk),
-              onClick: () => {
-                dispatch(
-                  hostsActions.updateHostRiskScoreSeverityFilter({
-                    severitySelection: [],
-                    hostsType: HostsType.page,
-                  })
-                );
-              },
-            },
-            tableQueryId: HOST_RISK_TABLE_QUERY_ID,
-            kpiQueryId: HOST_RISK_KPI_QUERY_ID,
-          }
-        : {
-            docLink: RISKY_USERS_DOC_LINK,
-            linkProps: {
-              deepLinkId: SecurityPageName.users,
-              path: getTabsOnUsersUrl(UsersTableType.risk),
-              onClick: () => {
-                dispatch(
-                  usersActions.updateUserRiskScoreSeverityFilter({
-                    severitySelection: [],
-                  })
-                );
-              },
-            },
-            tableQueryId: USER_RISK_TABLE_QUERY_ID,
-            kpiQueryId: USER_RISK_KPI_QUERY_ID,
-          },
-    [dispatch, riskEntity]
-  );
+  const entity = useEntityInfo(riskEntity);
 
   const { openTimelineWithFilters } = useNavigateToTimeline();
 
@@ -122,7 +69,10 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     [riskEntity, openEntityInTimeline]
   );
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
-  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+
+  const onSelectSeverityFilterGroup = useCallback((newSelection: RiskSeverity[]) => {
+    setSelectedSeverity(newSelection);
+  }, []);
 
   const severityFilter = useMemo(() => {
     const [filter] = generateSeverityFilter(selectedSeverity, riskEntity);
@@ -191,11 +141,6 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     setUpdatedAt(Date.now());
   }, [isTableLoading, isKpiLoading]); // Update the time when data loads
 
-  const [goToEntityRiskTab, entityRiskTabUrl] = useMemo(() => {
-    const { onClick, href } = getSecuritySolutionLinkProps(entity.linkProps);
-    return [onClick, href];
-  }, [entity.linkProps, getSecuritySolutionLinkProps]);
-
   const refreshPage = useRefetchQueries();
 
   if (!isLicenseValid) {
@@ -236,41 +181,26 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
           toggleQuery={setToggleStatus}
           tooltip={commonI18n.HOST_RISK_TABLE_TOOLTIP}
         >
-          {toggleStatus && (
-            <EuiFlexGroup alignItems="center" gutterSize="m">
-              <EuiFlexItem>
-                <EuiButtonEmpty
-                  rel="noopener nofollow noreferrer"
-                  href={entity.docLink}
-                  target="_blank"
-                >
-                  {i18n.LEARN_MORE}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <SeverityFilterGroup
-                  selectedSeverities={selectedSeverity}
-                  severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
-                  title={i18n.ENTITY_RISK(riskEntity)}
-                  onSelect={setSelectedSeverity}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <LinkButton
-                  data-test-subj="view-all-button"
-                  onClick={goToEntityRiskTab}
-                  href={entityRiskTabUrl}
-                >
-                  {i18n.VIEW_ALL}
-                </LinkButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+          <RiskScoreHeaderContent
+            entityDocLink={entity.docLink}
+            entityLinkProps={entity.linkProps}
+            onSelectSeverityFilterGroup={onSelectSeverityFilterGroup}
+            riskEntity={riskEntity}
+            selectedSeverity={selectedSeverity}
+            severityCount={severityCount}
+            toggleStatus={toggleStatus}
+          />
         </HeaderSection>
         {toggleStatus && (
           <EuiFlexGroup data-test-subj="entity_analytics_content">
             <EuiFlexItem grow={false}>
-              <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
+              <ChartContent
+                dataExists={data && data.length > 0}
+                kpiQueryId={entity.kpiQueryId}
+                riskEntity={riskEntity}
+                severityCount={severityCount}
+                timerange={timerange}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <StyledBasicTable

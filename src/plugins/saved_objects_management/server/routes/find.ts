@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
-import { injectMetaAttributes } from '../lib';
-import { ISavedObjectsManagement } from '../services';
+import { type Type, schema } from '@kbn/config-schema';
+import type { IRouter } from '@kbn/core/server';
+
+import type { v1 } from '../../common';
+import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
+import type { ISavedObjectsManagement } from '../services';
 
 export const registerFindRoute = (
   router: IRouter,
@@ -22,6 +24,11 @@ export const registerFindRoute = (
   const searchOperatorSchema = schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
   });
+  const sortFieldSchema: Type<keyof v1.SavedObjectWithMetadata> = schema.oneOf([
+    schema.literal('created_at'),
+    schema.literal('updated_at'),
+    schema.literal('type'),
+  ]);
 
   router.get(
     {
@@ -33,7 +40,7 @@ export const registerFindRoute = (
           type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
           search: schema.maybe(schema.string()),
           defaultSearchOperator: searchOperatorSchema,
-          sortField: schema.maybe(schema.string()),
+          sortField: schema.maybe(sortFieldSchema),
           sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
           hasReference: schema.maybe(
             schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
@@ -77,22 +84,23 @@ export const registerFindRoute = (
         searchFields: [...searchFields],
       });
 
-      const enhancedSavedObjects = findResponse.saved_objects
-        .map((so) => injectMetaAttributes(so, managementService))
-        .map((obj) => {
-          const result = { ...obj, attributes: {} as Record<string, any> };
+      const savedObjects = findResponse.saved_objects.map(toSavedObjectWithMeta);
+
+      const response: v1.FindResponseHTTP = {
+        saved_objects: savedObjects.map((so) => {
+          const obj = injectMetaAttributes(so, managementService);
+          const result = { ...obj, attributes: {} as Record<string, unknown> };
           for (const field of includedFields) {
-            result.attributes[field] = obj.attributes[field];
+            result.attributes[field] = (obj.attributes as Record<string, unknown>)[field];
           }
           return result;
-        });
+        }),
+        total: findResponse.total,
+        per_page: findResponse.per_page,
+        page: findResponse.page,
+      };
 
-      return res.ok({
-        body: {
-          ...findResponse,
-          saved_objects: enhancedSavedObjects,
-        },
-      });
+      return res.ok({ body: response });
     })
   );
 };

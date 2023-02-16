@@ -1,6 +1,6 @@
 {
-  "name": "kbn_health_gateway_status",
-  "version": "0.1.0",
+  "name": "@kbn/kbn-health-gateway-status-plugin",
+  "version": "1.0.0",
   "main": "target/test/health_gateway/plugins/status",
   "kibana": {
     "version": "kibana",

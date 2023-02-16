@@ -109,16 +109,20 @@ export interface DocLinks {
   };
   readonly enterpriseSearch: {
     readonly apiKeys: string;
+    readonly behavioralAnalytics: string;
+    readonly behavioralAnalyticsEvents: string;
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
     readonly connectorsWorkplaceSearch: string;
+    readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
     readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
+    readonly engines: string;
     readonly ingestPipelines: string;
     readonly languageAnalyzers: string;
     readonly languageClients: string;
@@ -216,6 +220,7 @@ export interface DocLinks {
     readonly std_dev: string;
     readonly sum: string;
     readonly top_hits: string;
+    readonly change_point: string;
   };
   readonly runtimeFields: {
     readonly overview: string;
@@ -432,6 +437,7 @@ export interface DocLinks {
     datastreams: string;
     datastreamsILM: string;
     datastreamsNamingScheme: string;
+    datastreamsManualRollover: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
     packageSignatures: string;

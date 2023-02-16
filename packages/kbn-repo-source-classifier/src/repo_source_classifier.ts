@@ -12,6 +12,10 @@ import { ModuleType } from './module_type';
 import { RANDOM_TEST_FILE_NAMES, TEST_DIR, TEST_TAG } from './config';
 import { RepoPath } from './repo_path';
 
+const STATIC_EXTS = new Set(
+  'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl'.split('|').map((e) => `.${e}`)
+);
+
 export class RepoSourceClassifier {
   constructor(private readonly resolver: ImportResolver) {}
 
@@ -121,10 +125,21 @@ export class RepoSourceClassifier {
   }
 
   /**
+   * Apply screenshotting specific rules
+   * @param root the root dir within the screenshotting plugin
+   * @returns a type, or undefined if the file should be classified as a standard file
+   */
+  private classifyScreenshotting(root: string): ModuleType | undefined {
+    if (root === 'chromium') {
+      return 'non-package';
+    }
+  }
+
+  /**
    * Determine the "type" of a file
    */
   private getType(path: RepoPath): ModuleType {
-    if (path.getExtname() === '.json') {
+    if (STATIC_EXTS.has(path.getExtname())) {
       return 'static';
     }
 
@@ -162,16 +177,17 @@ export class RepoSourceClassifier {
         case 'functional-tests':
         case 'test-helper':
           return 'tests or mocks';
-        case 'plugin-browser':
         case 'shared-browser':
           return 'browser package';
-        case 'plugin-server':
         case 'shared-server':
           return 'server package';
         case 'shared-scss':
           return 'static';
         case 'shared-common':
           return 'common package';
+        case 'plugin':
+          // classification in plugins is more complicated, fall through to remaining logic
+          break;
         default:
           // @ts-expect-error if there isn't an error here we are missing a case for a package type
           throw new Error(`unexpected package type [${manifest.type}]`);
@@ -186,6 +202,13 @@ export class RepoSourceClassifier {
 
     if (pkgId === '@kbn/canvas-plugin') {
       const type = this.classifyCanvas(root, dirs);
+      if (type) {
+        return type;
+      }
+    }
+
+    if (pkgId === '@kbn/screenshotting-plugin') {
+      const type = this.classifyScreenshotting(root);
       if (type) {
         return type;
       }
@@ -214,6 +237,7 @@ export class RepoSourceClassifier {
       type: this.getType(path),
       repoRel: path.getRepoRel(),
       pkgInfo: path.getPkgInfo() ?? undefined,
+      dirs: path.getSegs(),
     };
     this.ids.set(path, id);
     return id;

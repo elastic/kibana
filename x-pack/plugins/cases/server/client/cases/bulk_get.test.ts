@@ -32,7 +32,7 @@ describe('bulkGet', () => {
     const caseSO = mockCases[0];
     const clientArgs = createCasesClientMockArgs();
     clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [caseSO] });
-    clientArgs.services.attachmentService.getCaseCommentStats.mockResolvedValue(new Map());
+    clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
 
     clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
       authorized: [caseSO],

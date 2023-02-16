@@ -30,14 +30,14 @@ import {
   createCase,
   createComment,
   updateCase,
-  getCaseUserActions,
   removeServerGeneratedPropertiesFromCase,
-  removeServerGeneratedPropertiesFromUserAction,
   findCases,
   superUserSpace1Auth,
   delay,
   calculateDuration,
-} from '../../../../common/lib/utils';
+  getCaseUserActions,
+  removeServerGeneratedPropertiesFromUserAction,
+} from '../../../../common/lib/api';
 import {
   createSignalsIndex,
   deleteSignalsIndex,

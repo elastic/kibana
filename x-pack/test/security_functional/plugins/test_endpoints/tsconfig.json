@@ -13,6 +13,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/security-plugin",
+    "@kbn/task-manager-plugin",
     "@kbn/config-schema",
   ]
 }

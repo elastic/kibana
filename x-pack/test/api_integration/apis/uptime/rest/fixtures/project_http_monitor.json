@@ -71,7 +71,8 @@
           ]
         }
       },
-      "hash": "ekrjelkjrelkjre"
+      "hash": "ekrjelkjrelkjre",
+      "ssl.verification_mode": "strict"
     }
   ]
 }

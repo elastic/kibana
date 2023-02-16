@@ -39,7 +39,7 @@ export async function registerFleetUsageLogger(
             } catch (error) {
               appContextService
                 .getLogger()
-                .warn('Error occurred while fetching fleet usage: ' + error);
+                .debug('Error occurred while fetching fleet usage: ' + error);
             }
           },
 

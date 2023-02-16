@@ -15,6 +15,8 @@ get:
           schema:
             type: array
             items:
+              title: Get connectors response body properties
+              description: The properties vary for each connector type.
               type: object
               required:
                 - connector_type_id
@@ -53,6 +55,12 @@ get:
           examples:
             getConnectorsResponse:
               $ref: '../components/examples/get_connectors_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:

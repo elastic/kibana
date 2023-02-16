@@ -26,11 +26,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
             t.partial({
               index: t.string,
               query: t.object,
-              aggs: t.union([
-                t.record(t.string, bucketAggsSchemas),
-                t.record(t.string, metricsAggsSchemas),
-                t.undefined,
-              ]),
+              aggs: t.record(t.string, t.intersection([metricsAggsSchemas, bucketAggsSchemas])),
               sort: t.union([t.array(t.object), t.undefined]),
               search_after: t.union([t.array(t.number), t.array(t.string), t.undefined]),
               size: t.union([PositiveInteger, t.undefined]),
@@ -49,7 +45,6 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { query, aggs, _source, track_total_hits, size, index, sort, search_after } =
           request.body;
-
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
         const alerts = await alertsClient.find({

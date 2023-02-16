@@ -10,6 +10,7 @@ import { EuiButtonEmpty, EuiLoadingContent, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { FormattedError } from '../formatted_error';
 import { useGetFileInfo } from '../../hooks/response_actions/use_get_file_info';
@@ -56,12 +57,13 @@ export interface ResponseActionFileDownloadLinkProps {
  */
 export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLinkProps>(
   ({
-    action,
+    action: _action,
     agentId,
     buttonTitle = DEFAULT_BUTTON_TITLE,
     'data-test-subj': dataTestSubj,
     textSize = 's',
   }) => {
+    const action = _action as ActionDetails; // cast to remove `Immutable`
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
 
@@ -72,9 +74,9 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     const downloadUrl: string = useMemo(() => {
       return resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
         action_id: action.id,
-        agent_id: agentId ?? action.agents[0],
+        file_id: getFileDownloadId(action, agentId),
       });
-    }, [action.agents, action.id, agentId]);
+    }, [action, agentId]);
 
     const {
       isFetching,

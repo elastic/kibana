@@ -224,6 +224,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         if (filtersCount > 0) {
           await filterBar.removeAllFilters();
         }
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       });
 
       const fillSpecAndGo = async (newSpec: string) => {

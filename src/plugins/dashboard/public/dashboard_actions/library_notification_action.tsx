@@ -15,9 +15,7 @@ import {
   isReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { pluginServices } from '../services/plugin_services';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { LibraryNotificationPopover } from './library_notification_popover';
 import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
@@ -33,15 +31,7 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
   public readonly type = ACTION_LIBRARY_NOTIFICATION;
   public readonly order = 1;
 
-  private theme$;
-
-  constructor(private unlinkAction: UnlinkFromLibraryAction) {
-    ({
-      settings: {
-        theme: { theme$: this.theme$ },
-      },
-    } = pluginServices.getServices());
-  }
+  constructor(private unlinkAction: UnlinkFromLibraryAction) {}
 
   private displayName = dashboardLibraryNotificationStrings.getDisplayName();
 
@@ -50,15 +40,13 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
   public readonly MenuItem = ({ context }: { context: LibraryNotificationActionContext }) => {
     const { embeddable } = context;
     return (
-      <KibanaThemeProvider theme$={this.theme$}>
-        <LibraryNotificationPopover
-          unlinkAction={this.unlinkAction}
-          displayName={this.displayName}
-          context={context}
-          icon={this.getIconType({ embeddable })}
-          id={this.id}
-        />
-      </KibanaThemeProvider>
+      <LibraryNotificationPopover
+        unlinkAction={this.unlinkAction}
+        displayName={this.displayName}
+        context={context}
+        icon={this.getIconType({ embeddable })}
+        id={this.id}
+      />
     );
   };
 

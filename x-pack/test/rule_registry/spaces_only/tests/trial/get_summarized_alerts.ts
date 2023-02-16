@@ -8,7 +8,7 @@
 import { type Subject, ReplaySubject } from 'rxjs';
 import type { ElasticsearchClient, Logger, LogMeta } from '@kbn/core/server';
 import sinon from 'sinon';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
 import {
@@ -28,6 +28,7 @@ import {
   RuleDataService,
 } from '@kbn/rule-registry-plugin/server';
 import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import { get } from 'lodash';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -79,6 +80,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         isWriteEnabled: true,
         isWriterCacheEnabled: false,
         disabledRegistrationContexts: [] as string[],
+        areFrameworkAlertsEnabled: false,
         pluginStop$,
       });
 
@@ -171,6 +173,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           alertFactory: { create: sinon.stub() },
           shouldWriteAlerts: sinon.stub().returns(true),
         },
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       } as unknown as RuleExecutorOptions<
         MockRuleParams,
         WrappedLifecycleRuleState<{ shouldTriggerAlert: boolean }>,
@@ -186,7 +189,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
 
       // Execute the rule the first time - this creates a new alert
       const preExecution1Start = new Date();
-      const execution1Uuid = uuid.v4();
+      const execution1Uuid = uuidv4();
       const execution1Result = await executor({
         ...options,
         startedAt: new Date(),
@@ -206,7 +209,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
 
       // Execute again to update the existing alert
       const preExecution2Start = new Date();
-      const execution2Uuid = uuid.v4();
+      const execution2Uuid = uuidv4();
       const execution2Result = await executor({
         ...options,
         startedAt: new Date(),
@@ -225,7 +228,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       expect(execution2SummarizedAlerts.recovered.count).to.eql(0);
 
       // Execute again to recover the alert
-      const execution3Uuid = uuid.v4();
+      const execution3Uuid = uuidv4();
       await executor({
         ...options,
         startedAt: new Date(),
@@ -273,7 +276,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
     });
 
     it(`shouldn't return muted alerts`, async () => {
-      const ruleId = uuid.v4();
+      const ruleId = uuidv4();
       const id1 = 'host-01';
       const id2 = 'host-02';
 
@@ -329,6 +332,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           alertFactory: { create: sinon.stub() },
           shouldWriteAlerts: sinon.stub().returns(true),
         },
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       } as unknown as RuleExecutorOptions<
         MockRuleParams,
         WrappedLifecycleRuleState<{ shouldTriggerAlert: boolean }>,
@@ -343,7 +347,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       ) => ({ wrapped: { shouldTriggerAlert }, trackedAlerts: alerts, trackedAlertsRecovered: {} });
 
       // Execute the rule the first time - this creates a new alert
-      const execution1Uuid = uuid.v4();
+      const execution1Uuid = uuidv4();
       await executor({
         ...options,
         startedAt: new Date(),

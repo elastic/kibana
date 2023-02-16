@@ -26,7 +26,6 @@ import { useTimelineEventsDetails } from '../../../containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
-import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import * as helpers from '../../../../common/lib/kuery';
 import { waitFor } from '@testing-library/react';
 
@@ -54,52 +53,7 @@ const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-const useAddToTimeline = () => ({
-  beginDrag: jest.fn(),
-  cancelDrag: jest.fn(),
-  dragToLocation: jest.fn(),
-  endDrag: jest.fn(),
-  hasDraggableLock: jest.fn(),
-  startDragToTimeline: jest.fn(),
-});
-
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        theme: {
-          theme$: {},
-        },
-        application: {
-          navigateToApp: jest.fn(),
-          getUrlForApp: jest.fn(),
-        },
-        cases: {
-          ui: {
-            getCasesContext: () => mockCasesContext,
-          },
-        },
-        uiSettings: {
-          get: jest.fn(),
-        },
-        savedObjects: {
-          client: {},
-        },
-        triggersActionsUi: {
-          getFieldBrowser: jest.fn(),
-        },
-        timelines: {
-          getLastUpdated: jest.fn(),
-          getLoadingPanel: jest.fn(),
-          getUseAddToTimeline: () => useAddToTimeline,
-        },
-      },
-    }),
-    useGetUserSavedObjectPermissions: jest.fn(),
-  };
-});
+jest.mock('../../../../common/lib/kibana');
 
 describe('Timeline', () => {
   let props = {} as QueryTabContentComponentProps;

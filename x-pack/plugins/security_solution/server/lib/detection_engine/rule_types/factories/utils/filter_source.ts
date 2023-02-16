@@ -25,5 +25,11 @@ export const filterSource = (doc: SignalSourceHit) => {
     [ALERT_THRESHOLD_RESULT]: null,
   };
 
+  Object.keys(filteredSource).forEach((key) => {
+    if (key.startsWith('kibana')) {
+      delete filteredSource[key];
+    }
+  });
+
   return filteredSource;
 };

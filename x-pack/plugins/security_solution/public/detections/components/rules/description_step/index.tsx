@@ -25,6 +25,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type {
   AboutStepRiskScore,
   AboutStepSeverity,
+  Duration,
 } from '../../../pages/detection_engine/rules/types';
 import type { FieldValueTimeline } from '../pick_timeline';
 import type { FormSchema } from '../../../../shared_imports';
@@ -44,6 +45,7 @@ import {
   buildEqlOptionsDescription,
   buildRequiredFieldsDescription,
   buildAlertSuppressionDescription,
+  buildAlertSuppressionWindowDescription,
 } from './helpers';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
 import { buildActionsDescription } from './actions_description';
@@ -199,6 +201,20 @@ export const getDescriptionItem = (
   } else if (field === 'groupByFields') {
     const values: string[] = get(field, data);
     return buildAlertSuppressionDescription(label, values, license);
+  } else if (field === 'groupByRadioSelection') {
+    return [];
+  } else if (field === 'groupByDuration') {
+    if (get('groupByFields', data).length > 0) {
+      const value: Duration = get(field, data);
+      return buildAlertSuppressionWindowDescription(
+        label,
+        value,
+        license,
+        get('groupByRadioSelection', data)
+      );
+    } else {
+      return [];
+    }
   } else if (field === 'eqlOptions') {
     const eqlOptions: EqlOptionsSelected = get(field, data);
     return buildEqlOptionsDescription(eqlOptions);

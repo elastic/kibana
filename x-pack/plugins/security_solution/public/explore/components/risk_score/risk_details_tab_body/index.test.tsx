@@ -15,10 +15,16 @@ import { RiskDetailsTabBody } from '.';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { HostsType } from '../../../hosts/store/model';
 import { UsersType } from '../../../users/store/model';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../containers/risk_score');
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+
 describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
   'Risk Tab Body entityType: %s',
   (riskEntity) => {
@@ -37,6 +43,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
     const mockUseQueryToggle = useQueryToggle as jest.Mock;
     beforeEach(() => {
       jest.clearAllMocks();
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
 
       mockUseRiskScore.mockReturnValue({
         loading: false,
@@ -81,6 +88,17 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
         </TestProviders>
       );
       expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
+    });
+
+    it('skips when isChartEmbeddablesEnabled is true', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+      render(
+        <TestProviders>
+          <RiskDetailsTabBody {...defaultProps} />
+        </TestProviders>
+      );
+      expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
     });
 
     it("doesn't skip when at least one toggleStatus is true", () => {

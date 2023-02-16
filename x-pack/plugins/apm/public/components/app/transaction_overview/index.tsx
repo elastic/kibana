@@ -32,8 +32,12 @@ export function TransactionOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType, fallbackToTransactions, runtimeName } =
-    useApmServiceContext();
+  const {
+    transactionType,
+    fallbackToTransactions,
+    serverlessType,
+    serviceName,
+  } = useApmServiceContext();
 
   const history = useHistory();
 
@@ -42,7 +46,7 @@ export function TransactionOverview() {
     replace(history, { query: { transactionType } });
   }
 
-  const isServerless = isServerlessAgent(runtimeName);
+  const isServerless = isServerlessAgent(serverlessType);
 
   return (
     <>
@@ -57,6 +61,7 @@ export function TransactionOverview() {
         </>
       )}
       <TransactionCharts
+        serviceName={serviceName}
         kuery={kuery}
         environment={environment}
         start={start}
@@ -70,7 +75,7 @@ export function TransactionOverview() {
         <TransactionsTable
           hideViewTransactionsLink
           numberOfTransactionsPerPage={25}
-          showAggregationAccurateCallout
+          showMaxTransactionGroupsExceededWarning
           environment={environment}
           kuery={kuery}
           start={start}

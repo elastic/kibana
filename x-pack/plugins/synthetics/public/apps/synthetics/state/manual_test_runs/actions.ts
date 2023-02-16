@@ -13,9 +13,10 @@ import { createAsyncAction } from '../utils/actions';
 export const toggleTestNowFlyoutAction = createAction<string>('TOGGLE TEST NOW FLYOUT ACTION');
 export const hideTestNowFlyoutAction = createAction('HIDE ALL TEST NOW FLYOUT ACTION');
 
-export const manualTestMonitorAction = createAsyncAction<string, TestNowResponse | undefined>(
-  'TEST_NOW_MONITOR_ACTION'
-);
+export const manualTestMonitorAction = createAsyncAction<
+  { configId: string; name: string },
+  TestNowResponse | undefined
+>('TEST_NOW_MONITOR_ACTION');
 
 export const manualTestRunUpdateAction = createAction<
   Partial<ManualTestRun> & { testRunId: string }

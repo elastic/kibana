@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "groups": [
     "endpoint",
     "event-log",

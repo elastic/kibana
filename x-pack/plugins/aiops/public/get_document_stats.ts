@@ -13,7 +13,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 
-import { buildBaseFilterCriteria } from './application/utils/query_utils';
+import { buildExtendedBaseFilterCriteria } from './application/utils/build_extended_base_filter_criteria';
 import { GroupTableItem } from './components/spike_analysis_table/types';
 
 export interface DocumentCountStats {
@@ -54,7 +54,7 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
   } = params;
 
   const size = 0;
-  const filterCriteria = buildBaseFilterCriteria(
+  const filterCriteria = buildExtendedBaseFilterCriteria(
     timeFieldName,
     earliestMs,
     latestMs,

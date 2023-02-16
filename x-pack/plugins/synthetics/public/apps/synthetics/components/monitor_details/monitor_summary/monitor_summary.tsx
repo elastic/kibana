@@ -20,7 +20,7 @@ import { MonitorDurationTrend } from './duration_trend';
 import { StepDurationPanel } from './step_duration_panel';
 import { AvailabilityPanel } from './availability_panel';
 import { DurationPanel } from './duration_panel';
-import { MonitorDetailsPanel } from './monitor_details_panel';
+import { MonitorDetailsPanelContainer } from './monitor_details_panel';
 import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
 import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
@@ -41,7 +41,7 @@ export const MonitorSummary = () => {
     <>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <MonitorDetailsPanel />
+          <MonitorDetailsPanelContainer />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder paddingSize="m" css={{ height: 120 }}>
@@ -58,19 +58,19 @@ export const MonitorSummary = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <AvailabilityPanel from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <AvailabilitySparklines from={from} to={to} />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false} style={{ marginLeft: 40 }}>
                 <DurationPanel from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <DurationSparklines from={from} to={to} />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false} style={{ marginLeft: 40 }}>
                 {monitorId && <MonitorErrorsCount from={from} to={to} monitorId={[monitorId]} />}
               </EuiFlexItem>
               <EuiFlexItem>

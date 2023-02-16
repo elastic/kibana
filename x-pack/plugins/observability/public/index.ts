@@ -27,7 +27,6 @@ export type {
 export {
   enableInspectEsQueries,
   enableComparisonByDefault,
-  enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
   enableInfrastructureHostsView,
   enableAgentExplorerView,
@@ -121,3 +120,4 @@ export { ExploratoryViewContextProvider } from './components/shared/exploratory_
 export { fromQuery, toQuery } from './utils/url';
 
 export type { NavigationSection } from './services/navigation_registry';
+export { convertTo } from '../common/utils/formatters/duration';

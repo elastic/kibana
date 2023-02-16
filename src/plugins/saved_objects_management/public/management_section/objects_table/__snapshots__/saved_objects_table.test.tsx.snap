@@ -47,6 +47,7 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
       },
     ]
   }
+  showPlainSpinner={false}
 />
 `;
 

@@ -65,6 +65,10 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/std",
-    "@kbn/ecs",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/logging",
+    "@kbn/safer-lodash-set",
+    "@kbn/shared-ux-router",
   ]
 }

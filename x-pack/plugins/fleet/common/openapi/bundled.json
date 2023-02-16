@@ -325,44 +325,120 @@
             }
           }
         },
-        "operationId": "list-all-packages"
+        "operationId": "list-all-packages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "excludeInstallStatus",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to exclude the install status of each package. Enabling this option will opt in to caching for the response via `cache-control` headers. If you don't need up-to-date installation info for a package, and are querying for a list of available packages, providing this flag can improve performance substantially."
+          },
+          {
+            "in": "query",
+            "name": "prerelease",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+          },
+          {
+            "in": "query",
+            "name": "experimental",
+            "deprecated": true,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       },
-      "parameters": [
-        {
-          "in": "query",
-          "name": "excludeInstallStatus",
-          "schema": {
-            "type": "boolean",
-            "default": false
-          },
-          "description": "Whether to exclude the install status of each package. Enabling this option will opt in to caching for the response via `cache-control` headers. If you don't need up-to-date installation info for a package, and are querying for a list of available packages, providing this flag can improve performance substantially."
-        },
-        {
-          "in": "query",
-          "name": "prerelease",
-          "schema": {
-            "type": "boolean",
-            "default": false
-          },
-          "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
-        },
-        {
-          "in": "query",
-          "name": "experimental",
-          "deprecated": true,
-          "schema": {
-            "type": "boolean",
-            "default": false
+      "post": {
+        "summary": "Packages - Install by upload",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/components/schemas/kibana_saved_object_type"
+                              },
+                              {
+                                "$ref": "#/components/schemas/elasticsearch_asset_type"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type"
+                        ]
+                      }
+                    },
+                    "_meta": {
+                      "type": "object",
+                      "properties": {
+                        "install_source": {
+                          "type": "string",
+                          "enum": [
+                            "upload",
+                            "registry",
+                            "bundled"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
           }
         },
-        {
-          "in": "query",
-          "name": "category",
-          "schema": {
-            "type": "string"
+        "operationId": "install-package-by-upload",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/zip": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
           }
         }
-      ]
+      }
     },
     "/epm/packages/_bulk": {
       "post": {
@@ -380,9 +456,44 @@
             }
           }
         },
-        "operationId": "bulk-install-packages"
-      },
-      "parameters": []
+        "operationId": "bulk-install-packages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "prerelease",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "list of package names to install"
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "force install to ignore package verification errors"
+                  }
+                },
+                "required": [
+                  "packages"
+                ]
+              }
+            }
+          }
+        }
+      }
     },
     "/epm/packages/{pkgkey}": {
       "get": {
@@ -443,6 +554,15 @@
             "name": "pkgkey",
             "in": "path",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "prerelease",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
           }
         ],
         "deprecated": true
@@ -695,6 +815,15 @@
           "name": "full",
           "description": "Return all fields from the package manifest, not just those supported by the Elastic Package Registry",
           "in": "query"
+        },
+        {
+          "in": "query",
+          "name": "prerelease",
+          "schema": {
+            "type": "boolean",
+            "default": false
+          },
+          "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
         }
       ],
       "post": {
@@ -827,24 +956,6 @@
         },
         "operationId": "update-package",
         "description": "",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "pkgName",
-            "in": "path",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "pkgVersion",
-            "in": "path",
-            "required": true
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1269,7 +1380,10 @@
         "parameters": [
           {
             "schema": {
-              "type": "array"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             "name": "agentsIds",
             "in": "query",
@@ -1316,6 +1430,17 @@
           },
           {
             "$ref": "#/components/parameters/sort_order"
+          },
+          {
+            "$ref": "#/components/parameters/with_metrics"
+          },
+          {
+            "name": "getStatusSummary",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "security": [
@@ -1516,7 +1641,12 @@
             }
           }
         },
-        "operationId": "get-agent"
+        "operationId": "get-agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/with_metrics"
+          }
+        ]
       },
       "put": {
         "summary": "Agent - Update",
@@ -1668,6 +1798,14 @@
     },
     "/agents/{agentId}/actions/{actionId}/cancel": {
       "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        },
         {
           "schema": {
             "type": "string"
@@ -2384,6 +2522,14 @@
             "in": "query",
             "name": "full",
             "description": "When set to true, retrieve the related package policies for each agent policy."
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "noAgentCount",
+            "description": "When set to true, do not count how many agents are in the agent policy, this can improve performance if you are searching over a large number of agent policies. The \"agents\" property will always be 0 if set to true."
           }
         ],
         "description": ""
@@ -3558,14 +3704,6 @@
         "parameters": [
           {
             "schema": {
-              "type": "string"
-            },
-            "name": "packagePolicyId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "schema": {
               "type": "boolean"
             },
             "name": "force",
@@ -4205,14 +4343,6 @@
         },
         "parameters": [
           {
-            "schema": {
-              "type": "string"
-            },
-            "name": "itemId",
-            "in": "path",
-            "required": true
-          },
-          {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
@@ -4264,14 +4394,6 @@
           }
         },
         "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "itemId",
-            "in": "path",
-            "required": true
-          },
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
@@ -4435,14 +4557,6 @@
         },
         "parameters": [
           {
-            "schema": {
-              "type": "string"
-            },
-            "name": "itemId",
-            "in": "path",
-            "required": true
-          },
-          {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
@@ -4500,14 +4614,6 @@
           }
         },
         "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "itemId",
-            "in": "path",
-            "required": true
-          },
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
@@ -4591,7 +4697,8 @@
         },
         "in": "header",
         "name": "kbn-xsrf",
-        "required": true
+        "required": true,
+        "description": "Kibana's anti Cross-Site Request Forgery token. Can be any string value."
       },
       "page_size": {
         "name": "perPage",
@@ -4654,6 +4761,15 @@
             "asc",
             "desc"
           ]
+        }
+      },
+      "with_metrics": {
+        "name": "withMetrics",
+        "in": "query",
+        "description": "Return agent metrics, false by default",
+        "required": false,
+        "schema": {
+          "type": "boolean"
         }
       }
     },
@@ -4848,6 +4964,33 @@
         },
         "required": [
           "items"
+        ]
+      },
+      "kibana_saved_object_type": {
+        "title": "Kibana saved object asset type",
+        "type": "string",
+        "enum": [
+          "dashboard",
+          "visualization",
+          "search",
+          "index-pattern",
+          "map",
+          "lens",
+          "ml-module",
+          "security-rule",
+          "csp_rule_template"
+        ]
+      },
+      "elasticsearch_asset_type": {
+        "title": "Elasticsearch asset type",
+        "type": "string",
+        "enum": [
+          "component_template",
+          "ingest_pipeline",
+          "index_template",
+          "ilm_policy",
+          "transform",
+          "data_stream_ilm_policy"
         ]
       },
       "bulk_install_packages_response": {
@@ -5099,33 +5242,6 @@
           "path"
         ]
       },
-      "kibana_saved_object_type": {
-        "title": "Kibana saved object asset type",
-        "type": "string",
-        "enum": [
-          "dashboard",
-          "visualization",
-          "search",
-          "index-pattern",
-          "map",
-          "lens",
-          "ml-module",
-          "security-rule",
-          "csp_rule_template"
-        ]
-      },
-      "elasticsearch_asset_type": {
-        "title": "Elasticsearch asset type",
-        "type": "string",
-        "enum": [
-          "component_template",
-          "ingest_pipeline",
-          "index_template",
-          "ilm_policy",
-          "transform",
-          "data_stream_ilm_policy"
-        ]
-      },
       "package_usage_stats": {
         "title": "Package usage stats",
         "type": "object",
@@ -5323,6 +5439,19 @@
             "items": {
               "$ref": "#/components/schemas/agent_component"
             }
+          },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "cpu_avg": {
+                "type": "number",
+                "description": "Average agent CPU usage during the last 5 minutes, number between 0-1"
+              },
+              "memory_size_byte_avg": {
+                "type": "number",
+                "description": "Average agent memory consumption during the last 5 minutes"
+              }
+            }
           }
         },
         "required": [
@@ -5358,6 +5487,38 @@
           },
           "perPage": {
             "type": "number"
+          },
+          "statusSummary": {
+            "type": "object",
+            "properties": {
+              "offline": {
+                "type": "number"
+              },
+              "error": {
+                "type": "number"
+              },
+              "online": {
+                "type": "number"
+              },
+              "inactive": {
+                "type": "number"
+              },
+              "enrolling": {
+                "type": "number"
+              },
+              "unenrolling": {
+                "type": "number"
+              },
+              "unenrolled": {
+                "type": "number"
+              },
+              "updating": {
+                "type": "number"
+              },
+              "degraded'": {
+                "type": "number"
+              }
+            }
           }
         },
         "required": [
@@ -5742,6 +5903,24 @@
               },
               "agents": {
                 "type": "number"
+              },
+              "agent_features": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "enabled"
+                  ]
+                }
               }
             },
             "required": [

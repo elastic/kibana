@@ -11,12 +11,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const commonScreenshots = getService('commonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
   const pageObjects = getPageObjects(['common', 'header']);
-  const actions = getService('actions');
   const rules = getService('rules');
   const testSubjects = getService('testSubjects');
 
   describe('list view', function () {
-    let serverLogConnectorId: string;
     let ruleId: string;
     const indexThresholdRule = {
       consumer: 'alerts',
@@ -38,13 +36,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
-      const connectorName = `server-log-connector`;
-      ({ id: serverLogConnectorId } = await createServerLogConnector(connectorName));
       ({ id: ruleId } = await rules.api.createRule(indexThresholdRule));
     });
 
     after(async () => {
-      await actions.api.deleteConnector(serverLogConnectorId);
       await rules.api.deleteRule(ruleId);
     });
 
@@ -87,13 +82,4 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('snooze-panel', screenshotDirectories, 1400, 1024);
     });
   });
-
-  const createServerLogConnector = async (name: string) => {
-    return actions.api.createConnector({
-      name,
-      config: {},
-      secrets: {},
-      connectorTypeId: '.server-log',
-    });
-  };
 }

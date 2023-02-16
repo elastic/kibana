@@ -245,26 +245,16 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [layerFields]
   );
 
-  const onOverrideFieldGroupDetails = useCallback(
-    (groupName) => {
-      if (groupName === FieldsGroupNames.AvailableFields) {
-        const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
-
-        return {
-          helpText: isUsingSampling
-            ? i18n.translate('xpack.lens.indexPattern.allFieldsSamplingLabelHelp', {
-                defaultMessage:
-                  'Available fields contain the data in the first 500 documents that match your filters. To view all fields, expand Empty fields. You are unable to create visualizations with full text, geographic, flattened, and object fields.',
-              })
-            : i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
-                defaultMessage:
-                  'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
-              }),
-        };
-      }
-    },
-    [core.uiSettings]
-  );
+  const onOverrideFieldGroupDetails = useCallback((groupName) => {
+    if (groupName === FieldsGroupNames.AvailableFields) {
+      return {
+        helpText: i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
+          defaultMessage:
+            'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
+        }),
+      };
+    }
+  }, []);
 
   const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<IndexPatternField>({
     dataViewId: currentIndexPatternId,

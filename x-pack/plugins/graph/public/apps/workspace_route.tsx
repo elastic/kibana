@@ -10,7 +10,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { Workspace } from '../types';
 import { createGraphStore } from '../state_management';
 import { createWorkspace } from '../services/workspace/graph_client_workspace';
@@ -108,12 +107,10 @@ export const WorkspaceRoute = ({
       http: coreStart.http,
       overlays: coreStart.overlays,
       savedObjectsClient,
-      showSaveModal,
       savePolicy: graphSavePolicy,
       changeUrl: (newUrl) => history.push(newUrl),
       notifyReact: () => setRenderCounter((cur) => cur + 1),
       chrome,
-      I18nContext: coreStart.i18n.Context,
       handleSearchQueryError,
     })
   );

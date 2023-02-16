@@ -12,7 +12,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { Rule } from '../../../../types';
-import { RefineSearchPrompt } from '../refine_search_prompt';
+import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
 import { RuleErrorLog } from './rule_error_log';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;

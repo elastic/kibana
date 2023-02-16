@@ -25,6 +25,7 @@ import type {
   Suggestion,
   VisualizeEditorContext,
   VisualizationInfo,
+  UserMessage,
 } from '../../types';
 import {
   getColumnToLabelMap,
@@ -508,66 +509,6 @@ export const getPieVisualization = ({
     );
   },
 
-  getWarningMessages(state, frame) {
-    if (state?.layers.length === 0 || !frame.activeData) {
-      return;
-    }
-    const warningMessages = [];
-
-    for (const layer of state.layers) {
-      const { layerId, metrics } = layer;
-      const rows = frame.activeData[layerId]?.rows;
-      const numericColumn = frame.activeData[layerId]?.columns.find(
-        ({ meta }) => meta?.type === 'number'
-      );
-
-      if (!rows || !metrics.length) {
-        break;
-      }
-
-      if (
-        numericColumn &&
-        state.shape === 'waffle' &&
-        layer.primaryGroups.length &&
-        checkTableForContainsSmallValues(frame.activeData[layerId], numericColumn.id, 1)
-      ) {
-        warningMessages.push(
-          <FormattedMessage
-            id="xpack.lens.pie.smallValuesWarningMessage"
-            defaultMessage="Waffle charts are unable to effectively display small field values. To display all field values, use the Data table or Treemap."
-          />
-        );
-      }
-
-      const metricsWithArrayValues = metrics
-        .map((metricColId) => {
-          if (rows.some((row) => Array.isArray(row[metricColId]))) {
-            return metricColId;
-          }
-        })
-        .filter(Boolean) as string[];
-
-      if (metricsWithArrayValues.length) {
-        const labels = metricsWithArrayValues.map(
-          (colId) => frame.datasourceLayers[layerId]?.getOperationForColumnId(colId)?.label || colId
-        );
-        warningMessages.push(
-          <FormattedMessage
-            key={labels.join(',')}
-            id="xpack.lens.pie.arrayValues"
-            defaultMessage="The following dimensions contain array values: {label}. Your visualization may not render as
-        expected."
-            values={{
-              label: <strong>{labels.join(', ')}</strong>,
-            }}
-          />
-        );
-      }
-    }
-
-    return warningMessages;
-  },
-
   getSuggestionFromConvertToLensContext(props) {
     const context = props.context;
     if (!isPartitionVisConfiguration(context)) {
@@ -592,7 +533,7 @@ export const getPieVisualization = ({
     return suggestion;
   },
 
-  getErrorMessages(state) {
+  getUserMessages(state, { frame }) {
     const hasTooManyBucketDimensions = state.layers
       .map((layer) => {
         const totalBucketDimensions =
@@ -605,9 +546,12 @@ export const getPieVisualization = ({
       })
       .some(Boolean);
 
-    return hasTooManyBucketDimensions
+    const errors: UserMessage[] = hasTooManyBucketDimensions
       ? [
           {
+            severity: 'error',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'visualization' }],
             shortMessage: i18n.translate('xpack.lens.pie.tooManyDimensions', {
               defaultMessage: 'Your visualization has too many dimensions.',
             }),
@@ -626,6 +570,75 @@ export const getPieVisualization = ({
           },
         ]
       : [];
+
+    const warningMessages: UserMessage[] = [];
+    if (state?.layers.length > 0 && frame.activeData) {
+      for (const layer of state.layers) {
+        const { layerId, metrics } = layer;
+        const rows = frame.activeData[layerId]?.rows;
+        const numericColumn = frame.activeData[layerId]?.columns.find(
+          ({ meta }) => meta?.type === 'number'
+        );
+
+        if (!rows || !metrics.length) {
+          break;
+        }
+
+        if (
+          numericColumn &&
+          state.shape === 'waffle' &&
+          layer.primaryGroups.length &&
+          checkTableForContainsSmallValues(frame.activeData[layerId], numericColumn.id, 1)
+        ) {
+          warningMessages.push({
+            severity: 'warning',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'toolbar' }],
+            shortMessage: '',
+            longMessage: (
+              <FormattedMessage
+                id="xpack.lens.pie.smallValuesWarningMessage"
+                defaultMessage="Waffle charts are unable to effectively display small field values. To display all field values, use the Data table or Treemap."
+              />
+            ),
+          });
+        }
+
+        const metricsWithArrayValues = metrics
+          .map((metricColId) => {
+            if (rows.some((row) => Array.isArray(row[metricColId]))) {
+              return metricColId;
+            }
+          })
+          .filter(Boolean) as string[];
+
+        if (metricsWithArrayValues.length) {
+          const labels = metricsWithArrayValues.map(
+            (colId) =>
+              frame.datasourceLayers[layerId]?.getOperationForColumnId(colId)?.label || colId
+          );
+          warningMessages.push({
+            severity: 'warning',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'toolbar' }],
+            shortMessage: '',
+            longMessage: (
+              <FormattedMessage
+                key={labels.join(',')}
+                id="xpack.lens.pie.arrayValues"
+                defaultMessage="The following dimensions contain array values: {label}. Your visualization may not render as
+          expected."
+                values={{
+                  label: <strong>{labels.join(', ')}</strong>,
+                }}
+              />
+            ),
+          });
+        }
+      }
+    }
+
+    return [...errors, ...warningMessages];
   },
 
   getVisualizationInfo(state: PieVisualizationState) {

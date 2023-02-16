@@ -11,11 +11,8 @@ import { Query } from '@kbn/es-query';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { AggCardinality } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
 import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
-import {
-  buildBaseFilterCriteria,
-  getSafeAggregationName,
-} from '../../../../../common/utils/query_utils';
 import { getDatafeedAggregations } from '../../../../../common/utils/datafeed_utils';
 import { AggregatableField, NonAggregatableField } from '../../types/overall_stats';
 import { Aggs, SamplingOption } from '../../../../../common/types/field_stats';

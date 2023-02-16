@@ -159,7 +159,11 @@ export function Waterfall({
                 flyoutDetailTab: string
               ) => toggleFlyout({ history, item, flyoutDetailTab })}
               showCriticalPath={showCriticalPath}
-              maxLevelOpen={maxLevelOpen}
+              maxLevelOpen={
+                waterfall.traceItemCount > 500
+                  ? maxLevelOpen
+                  : waterfall.traceItemCount
+              }
             />
           )}
         </WaterfallItemsContainer>

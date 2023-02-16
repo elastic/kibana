@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ONE_MILLISECOND_AS_NANOSECONDS } from '../../timelines/components/formatted_duration/helpers';
-import type { Ecs } from '../../../common/ecs';
 
 /** Returns mock data for testing the Netflow component */
 export const getDemoNetflowData = (): Ecs => ({

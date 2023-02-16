@@ -26,6 +26,13 @@ import {
   PluginSetup as DataPluginSetup,
 } from '@kbn/data-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { AlertsService } from './alerts_service/alerts_service';
+import { alertsServiceMock } from './alerts_service/alerts_service.mock';
+
+const mockAlertService = alertsServiceMock.create();
+jest.mock('./alerts_service/alerts_service', () => ({
+  AlertsService: jest.fn().mockImplementation(() => mockAlertService),
+}));
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
@@ -33,6 +40,7 @@ const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
     interval: '5m',
   },
+  enableFrameworkAlerts: false,
   invalidateApiKeysTask: {
     interval: '5m',
     removalDelay: '1h',
@@ -78,6 +86,7 @@ describe('Alerting Plugin', () => {
       statusService: statusServiceMock.createSetupContract(),
       monitoringCollection: monitoringCollectionMock.createSetup(),
       data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+      features: featuresPluginMock.createSetup(),
     };
 
     let plugin: AlertingPlugin;
@@ -115,6 +124,22 @@ describe('Alerting Plugin', () => {
       expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
     });
 
+    it('should initialize AlertsService if enableFrameworkAlerts config is true', async () => {
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
+        ...generateAlertingConfig(),
+        enableFrameworkAlerts: true,
+      });
+      plugin = new AlertingPlugin(context);
+
+      // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
+      const setupContract = await plugin.setup(setupMocks, mockPlugins);
+
+      expect(AlertsService).toHaveBeenCalled();
+      expect(mockAlertService.initialize).toHaveBeenCalled();
+
+      expect(setupContract.getFrameworkAlertsEnabled()).toEqual(true);
+    });
+
     it(`exposes configured minimumScheduleInterval()`, async () => {
       const context = coreMock.createPluginInitializerContext<AlertingConfig>(
         generateAlertingConfig()
@@ -127,6 +152,8 @@ describe('Alerting Plugin', () => {
         isUsingSecurity: false,
         minimumScheduleInterval: { value: '1m', enforce: false },
       });
+
+      expect(setupContract.getFrameworkAlertsEnabled()).toEqual(false);
     });
 
     describe('registerType()', () => {
@@ -221,6 +248,7 @@ describe('Alerting Plugin', () => {
           statusService: statusServiceMock.createSetupContract(),
           monitoringCollection: monitoringCollectionMock.createSetup(),
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+          features: featuresPluginMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -267,6 +295,7 @@ describe('Alerting Plugin', () => {
           statusService: statusServiceMock.createSetupContract(),
           monitoringCollection: monitoringCollectionMock.createSetup(),
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+          features: featuresPluginMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -324,6 +353,7 @@ describe('Alerting Plugin', () => {
         statusService: statusServiceMock.createSetupContract(),
         monitoringCollection: monitoringCollectionMock.createSetup(),
         data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
+        features: featuresPluginMock.createSetup(),
       });
 
       const startContract = plugin.start(coreMock.createStart(), {

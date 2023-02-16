@@ -41,6 +41,7 @@ export type {
   FieldBrowserProps,
   RuleDefinitionProps,
   RulesListVisibleColumns,
+  AlertSummaryTimeRange,
 } from './types';
 
 export type {
@@ -129,19 +130,10 @@ export type {
 export { Plugin } from './plugin';
 
 // TODO remove this import when we expose the Rules tables as a component
-export { loadRules } from './application/lib/rule_api/rules';
-export { loadExecutionLogAggregations } from './application/lib/rule_api/load_execution_log_aggregations';
-export { loadActionErrorLog } from './application/lib/rule_api/load_action_error_log';
-export { loadRuleTypes } from './application/lib/rule_api/rule_types';
 export { loadRuleSummary } from './application/lib/rule_api/rule_summary';
-export { muteRule } from './application/lib/rule_api/mute';
 export { bulkDeleteRules } from './application/lib/rule_api/bulk_delete';
-export { unmuteRule } from './application/lib/rule_api/unmute';
-export { snoozeRule } from './application/lib/rule_api/snooze';
-export { unsnoozeRule } from './application/lib/rule_api/unsnooze';
-export { loadRuleAggregations, loadRuleTags } from './application/lib/rule_api/aggregate';
+export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
 export { loadRule } from './application/lib/rule_api/get_rule';
-export { loadAllActions } from './application/lib/action_connector_api';
 export { suspendedComponentWithProps } from './application/lib/suspended_component_with_props';
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 export { TIME_UNITS } from './application/constants';

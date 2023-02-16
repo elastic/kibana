@@ -8,12 +8,13 @@
 
 import './_dashboard_container.scss';
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
-import { EuiLoadingElastic } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+import { EuiLoadingElastic, EuiLoadingSpinner, useEuiOverflowScroll } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import {
   DashboardContainerFactory,
@@ -21,15 +22,13 @@ import {
   DashboardCreationOptions,
 } from './embeddable/dashboard_container_factory';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
-import { DashboardReduxState } from './types';
 import { pluginServices } from '../services/plugin_services';
 import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 import { DashboardContainer } from './embeddable/dashboard_container';
-import { dashboardContainerReducers } from './state/dashboard_container_reducers';
 
 export interface DashboardContainerRendererProps {
   savedObjectId?: string;
-  getCreationOptions?: () => DashboardCreationOptions;
+  getCreationOptions?: () => Promise<DashboardCreationOptions>;
   onDashboardContainerLoaded?: (dashboardContainer: DashboardContainer) => void;
 }
 
@@ -41,12 +40,14 @@ export const DashboardContainerRenderer = ({
   const {
     embeddable,
     screenshotMode: { isScreenshotMode },
+    customBranding,
   } = pluginServices.getServices();
 
   const dashboardRoot = useRef(null);
   const [dashboardIdToBuild, setDashboardIdToBuild] = useState<string | undefined>(savedObjectId);
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
   const [loading, setLoading] = useState(true);
+  const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
 
   useEffect(() => {
     // check if dashboard container is expecting id change... if not, update dashboardIdToBuild to force it to rebuild the container.
@@ -57,14 +58,14 @@ export const DashboardContainerRenderer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
 
-  const id = useMemo(() => uuid.v4(), []);
+  const id = useMemo(() => uuidv4(), []);
 
   useEffect(() => {
     let canceled = false;
     let destroyContainer: () => void;
 
     (async () => {
-      const creationOptions = getCreationOptions?.();
+      const creationOptions = await getCreationOptions?.();
       const dashboardFactory = embeddable.getEmbeddableFactory(
         DASHBOARD_CONTAINER_TYPE
       ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };
@@ -107,19 +108,22 @@ export const DashboardContainerRenderer = ({
     { 'dashboardViewport--screenshotMode': isScreenshotMode() },
     { 'dashboardViewport--loading': loading }
   );
+
+  const viewportStyles = css`
+    ${useEuiOverflowScroll('y', false)}
+  `;
+
+  const loadingSpinner = showPlainSpinner ? (
+    <EuiLoadingSpinner size="xxl" />
+  ) : (
+    <EuiLoadingElastic size="xxl" />
+  );
   return (
-    <div className={viewportClasses}>
-      {loading ? <EuiLoadingElastic size="xxl" /> : <div ref={dashboardRoot} />}
+    <div className={viewportClasses} css={viewportStyles}>
+      {loading ? loadingSpinner : <div ref={dashboardRoot} />}
     </div>
   );
 };
-
-export const useDashboardContainerContext = () =>
-  useReduxEmbeddableContext<
-    DashboardReduxState,
-    typeof dashboardContainerReducers,
-    DashboardContainer
-  >();
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export

@@ -138,6 +138,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         await testSubjects.click('euiFlyoutCloseButton');
+      });
+
+      await retry.try(async () => {
         await toasts.dismissAllToasts();
       });
 

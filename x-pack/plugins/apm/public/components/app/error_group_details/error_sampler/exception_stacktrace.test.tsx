@@ -9,6 +9,7 @@ import { composeStories } from '@storybook/testing-react';
 import React from 'react';
 import { mount } from 'enzyme';
 import * as stories from './exception_stacktrace.stories';
+import { ExceptionStackTraceTitleProps } from './exception_stacktrace_title';
 
 const { JavaWithLongLines } = composeStories(stories);
 
@@ -17,6 +18,15 @@ describe('ExceptionStacktrace', () => {
     describe('with stacktraces', () => {
       it('renders the stacktraces', () => {
         expect(mount(<JavaWithLongLines />).find('Stacktrace')).toHaveLength(3);
+      });
+      it('should have the title in a specific format', function () {
+        const wrapper = mount(<JavaWithLongLines />).find(
+          'ExceptionStacktraceTitle'
+        );
+        expect(wrapper).toHaveLength(1);
+        const { type, message } =
+          wrapper.props() as ExceptionStackTraceTitleProps;
+        expect(wrapper.text()).toContain(`${type}: ${message}`);
       });
     });
 

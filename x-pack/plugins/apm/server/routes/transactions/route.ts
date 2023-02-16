@@ -53,8 +53,8 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       errorRate: number;
       impact: number;
     }>;
-    isAggregationAccurate: boolean;
-    bucketSize: number;
+    transactionOverflowCount: number;
+    maxTransactionGroupsExceeded: boolean;
   }> => {
     const { params, config } = resources;
     const apmEventClient = await getApmEventClient(resources);

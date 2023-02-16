@@ -25,16 +25,12 @@ export function makeFtrConfigProvider(
   steps: AnyStep[]
 ): FtrConfigProvider {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const baseConfig = (
-      await readConfigFile(
-        Path.resolve(
-          REPO_ROOT,
-          config.isXpack()
-            ? 'x-pack/test/functional/config.base.js'
-            : 'test/functional/config.base.js'
-        )
-      )
-    ).getAll();
+    const configPath = config.getFtrConfigPath();
+    const defaultConfigPath = config.isXpack()
+      ? 'x-pack/test/functional/config.base.js'
+      : 'test/functional/config.base.js';
+    const ftrConfigPath = configPath ?? defaultConfigPath;
+    const baseConfig = (await readConfigFile(Path.resolve(REPO_ROOT, ftrConfigPath))).getAll();
 
     const testBuildId = process.env.BUILDKITE_BUILD_ID ?? `local-${uuidV4()}`;
     const testJobId = process.env.BUILDKITE_JOB_ID ?? `local-${uuidV4()}`;
@@ -45,6 +41,9 @@ export function makeFtrConfigProvider(
     if (Number.isNaN(prId)) {
       throw new Error('invalid GITHUB_PR_NUMBER environment variable');
     }
+
+    // Set variable to collect performance events using EBT
+    const enableTelemetry = !!process.env.PERFORMANCE_ENABLE_TELEMETRY;
 
     const telemetryLabels: Record<string, string | boolean | undefined | number> = {
       branch: process.env.BUILDKITE_BRANCH,
@@ -86,7 +85,7 @@ export function makeFtrConfigProvider(
 
         serverArgs: [
           ...baseConfig.kbnTestServer.serverArgs,
-          `--telemetry.optIn=${process.env.TEST_PERFORMANCE_PHASE === 'TEST'}`,
+          `--telemetry.optIn=${enableTelemetry && process.env.TEST_PERFORMANCE_PHASE === 'TEST'}`,
           `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
           '--csp.strict=false',
           '--csp.warnLegacyBrowsers=false',

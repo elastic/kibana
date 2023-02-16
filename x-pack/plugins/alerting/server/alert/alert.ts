@@ -225,4 +225,19 @@ export class Alert<
   getFlapping() {
     return this.meta.flapping || false;
   }
+
+  incrementPendingRecoveredCount() {
+    if (!this.meta.pendingRecoveredCount) {
+      this.meta.pendingRecoveredCount = 0;
+    }
+    this.meta.pendingRecoveredCount++;
+  }
+
+  getPendingRecoveredCount() {
+    return this.meta.pendingRecoveredCount || 0;
+  }
+
+  resetPendingRecoveredCount() {
+    this.meta.pendingRecoveredCount = 0;
+  }
 }

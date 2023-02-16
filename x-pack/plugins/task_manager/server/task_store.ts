@@ -10,12 +10,12 @@
  */
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
 
 import {
-  Logger,
   SavedObject,
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
@@ -36,10 +36,8 @@ import {
 
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
-import { retryOnBulkUpdateConflict } from './lib/retry_on_bulk_update_conflict';
 
 export interface StoreOpts {
-  logger: Logger;
   esClient: ElasticsearchClient;
   index: string;
   taskManagerId: string;
@@ -78,7 +76,11 @@ export interface FetchResult {
 
 export type BulkUpdateResult = Result<
   ConcreteTaskInstance,
-  { entity: ConcreteTaskInstance; error: Error }
+  { type: string; id: string; error: SavedObjectError }
+>;
+
+export type BulkGetResult = Array<
+  Result<ConcreteTaskInstance, { type: string; id: string; error: SavedObjectError }>
 >;
 
 export interface UpdateByQueryResult {
@@ -97,7 +99,6 @@ export class TaskStore {
   public readonly errors$ = new Subject<Error>();
 
   private esClient: ElasticsearchClient;
-  private logger: Logger;
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
@@ -115,7 +116,6 @@ export class TaskStore {
   constructor(opts: StoreOpts) {
     this.esClient = opts.esClient;
     this.index = opts.index;
-    this.logger = opts.logger;
     this.taskManagerId = opts.taskManagerId;
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
@@ -251,10 +251,7 @@ export class TaskStore {
    * @param {Array<TaskDoc>} docs
    * @returns {Promise<Array<TaskDoc>>}
    */
-  public async bulkUpdate(
-    docs: ConcreteTaskInstance[],
-    retries: number = 0
-  ): Promise<BulkUpdateResult[]> {
+  public async bulkUpdate(docs: ConcreteTaskInstance[]): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
       attrsById.set(doc.id, taskInstanceToAttributes(doc));
       return attrsById;
@@ -262,32 +259,29 @@ export class TaskStore {
 
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
     try {
-      ({ savedObjects: updatedSavedObjects } =
-        await retryOnBulkUpdateConflict<SerializedConcreteTaskInstance>({
-          logger: this.logger,
-          savedObjectsRepository: this.savedObjectsRepository,
-          objects: docs.map((doc) => ({
+      ({ saved_objects: updatedSavedObjects } =
+        await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+          docs.map((doc) => ({
             type: 'task',
             id: doc.id,
-            options: { version: doc.version },
+            version: doc.version,
             attributes: attributesByDocId.get(doc.id)!,
           })),
-          options: {
+          {
             refresh: false,
-          },
-          retries,
-        }));
+          }
+        ));
     } catch (e) {
       this.errors$.next(e);
       throw e;
     }
 
     return updatedSavedObjects.map((updatedSavedObject) => {
-      const doc = docs.find((d) => d.id === updatedSavedObject.id);
       return updatedSavedObject.error !== undefined
         ? asErr({
-            entity: doc,
-            error: updatedSavedObject,
+            type: 'task',
+            id: updatedSavedObject.id,
+            error: updatedSavedObject.error,
           })
         : asOk(
             savedObjectToConcreteTaskInstance({
@@ -298,7 +292,7 @@ export class TaskStore {
               ),
             })
           );
-    }) as BulkUpdateResult[];
+    });
   }
 
   /**
@@ -347,6 +341,30 @@ export class TaskStore {
       throw e;
     }
     return savedObjectToConcreteTaskInstance(result);
+  }
+
+  /**
+   * Gets tasks by ids
+   *
+   * @param {Array<string>} ids
+   * @returns {Promise<ConcreteTaskInstance[]>}
+   */
+  public async bulkGet(ids: string[]): Promise<BulkGetResult> {
+    let result;
+    try {
+      result = await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
+        ids.map((id) => ({ type: 'task', id }))
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+    return result.saved_objects.map((task) => {
+      if (task.error) {
+        return asErr({ id: task.id, type: task.type, error: task.error });
+      }
+      return asOk(savedObjectToConcreteTaskInstance(task));
+    });
   }
 
   /**

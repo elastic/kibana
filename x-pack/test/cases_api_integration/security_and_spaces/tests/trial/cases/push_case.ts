@@ -11,6 +11,7 @@ import http from 'http';
 
 import expect from '@kbn/expect';
 import { CaseConnector, CaseStatuses, CommentType, User } from '@kbn/cases-plugin/common/api';
+import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -34,20 +35,22 @@ import {
   updateCase,
   deleteAllCaseItems,
   superUserSpace1Auth,
-  createCaseWithConnector,
-  createConnector,
-  getServiceNowConnector,
   getConnectorMappingsFromES,
   getCase,
-  getServiceNowSimulationServer,
   createConfiguration,
   getSignalsWithES,
   delay,
   calculateDuration,
-  getRecordingServiceNowSimulatorServer,
   getComment,
   bulkCreateAttachments,
-} from '../../../../common/lib/utils';
+  loginUsers,
+  setupSuperUserProfile,
+  getServiceNowConnector,
+  createCaseWithConnector,
+  getRecordingServiceNowSimulatorServer,
+  getServiceNowSimulationServer,
+  createConnector,
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -57,8 +60,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { RecordingServiceNowSimulator } from '../../../../../alerting_api_integration/common/plugins/actions_simulators/server/servicenow_simulation';
-import { loginUsers, setupSuperUserProfile } from '../../../../common/lib/user_profiles';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -654,6 +655,8 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
 
+          await es.indices.refresh({ index: defaultSignalsIndex });
+
           await createComment({
             supertest,
             caseId: postedCase.id,
@@ -665,6 +668,8 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
             },
           });
+
+          await es.indices.refresh({ index: defaultSignalsIndex });
 
           await pushCase({
             supertest,

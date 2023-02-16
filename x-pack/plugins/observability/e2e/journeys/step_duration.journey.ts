@@ -6,6 +6,7 @@
  */
 
 import { journey, step, before, after } from '@elastic/synthetics';
+import moment from 'moment';
 import { recordVideo } from '../record_video';
 import { createExploratoryViewUrl } from '../../public/components/shared/exploratory_view/configurations/exploratory_view_url';
 import { loginToKibana, TIMEOUT_60_SEC, waitForLoadingToFinish } from '../utils';
@@ -28,8 +29,8 @@ journey('Exploratory view', async ({ page, params }) => {
       {
         dataType: 'synthetics',
         time: {
-          from: 'now-10y',
-          to: 'now',
+          from: moment().subtract(10, 'y').toISOString(),
+          to: moment().toISOString(),
         },
         name: 'synthetics-series-1',
         breakdown: 'monitor.type',

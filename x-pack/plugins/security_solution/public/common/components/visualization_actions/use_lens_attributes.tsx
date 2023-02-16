@@ -24,6 +24,7 @@ import {
 } from './utils';
 
 export const useLensAttributes = ({
+  applyGlobalQueriesAndFilters = true,
   extraOptions,
   getLensAttributes,
   lensAttributes,
@@ -31,6 +32,7 @@ export const useLensAttributes = ({
   stackByField,
   title,
 }: {
+  applyGlobalQueriesAndFilters?: boolean;
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   lensAttributes?: LensAttributes | null;
@@ -87,7 +89,13 @@ export const useLensAttributes = ({
   const hasAdHocDataViews = Object.values(attrs?.state?.adHocDataViews ?? {}).length > 0;
 
   const lensAttrsWithInjectedData = useMemo(() => {
-    if (lensAttributes == null && (getLensAttributes == null || stackByField == null)) {
+    if (
+      lensAttributes == null &&
+      (getLensAttributes == null ||
+        stackByField == null ||
+        stackByField?.length === 0 ||
+        (extraOptions?.breakdownField != null && extraOptions?.breakdownField.length === 0))
+    ) {
       return null;
     }
 
@@ -97,13 +105,13 @@ export const useLensAttributes = ({
       ...(title != null ? { title } : {}),
       state: {
         ...attrs.state,
-        query,
+        ...(applyGlobalQueriesAndFilters ? { query } : {}),
         filters: [
           ...attrs.state.filters,
-          ...filters,
           ...pageFilters,
           ...tabsFilters,
           ...indexFilters,
+          ...(applyGlobalQueriesAndFilters ? filters : []),
         ],
       },
       references: attrs?.references?.map((ref: { id: string; name: string; type: string }) => ({
@@ -112,8 +120,10 @@ export const useLensAttributes = ({
       })),
     } as LensAttributes;
   }, [
+    applyGlobalQueriesAndFilters,
     attrs,
     dataViewId,
+    extraOptions?.breakdownField,
     filters,
     getLensAttributes,
     hasAdHocDataViews,

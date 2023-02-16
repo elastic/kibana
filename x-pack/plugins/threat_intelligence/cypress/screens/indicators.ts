@@ -17,6 +17,7 @@ import {
 } from '../../public/modules/indicators/components/barchart/legend_action/test_ids';
 import { DROPDOWN_TEST_ID } from '../../public/modules/indicators/components/barchart/field_selector/test_ids';
 import {
+  ADD_TO_BLOCK_LIST_TEST_ID as INDICATOR_FLYOUT_TAKE_ACTION_ADD_TO_BLOCK_LIST_TEST_ID,
   ADD_TO_EXISTING_CASE_TEST_ID as INDICATOR_FLYOUT_TAKE_ACTION_ADD_TO_EXISTING_CASE_TEST_ID,
   ADD_TO_NEW_CASE_TEST_ID as INDICATOR_FLYOUT_TAKE_ACTION_ADD_TO_NEW_CASE_TEST_ID,
   INVESTIGATE_IN_TIMELINE_TEST_ID as INDICATOR_FLYOUT_TAKE_ACTION_INVESTIGATE_IN_TIMELINE_TEST_ID,
@@ -33,6 +34,7 @@ import {
   INDICATORS_FLYOUT_TITLE_TEST_ID,
 } from '../../public/modules/indicators/components/flyout/test_ids';
 import {
+  ADD_TO_BLOCK_LIST_TEST_ID as INDICATORS_TABLE_ADD_TO_BLOCK_LIST_TEST_ID,
   ADD_TO_EXISTING_TEST_ID as INDICATORS_TABLE_ADD_TO_EXISTING_TEST_ID,
   ADD_TO_NEW_CASE_TEST_ID as INDICATORS_TABLE_ADD_TO_NEW_CASE_TEST_ID,
   MORE_ACTIONS_TEST_ID as INDICATORS_TABLE_MORE_ACTIONS_TEST_ID,
@@ -101,6 +103,8 @@ export const INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON = `[data-test-subj="${
 
 export const INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON = `[data-test-subj="${INDICATORS_TABLE_ADD_TO_EXISTING_TEST_ID}"]`;
 
+export const INDICATORS_TABLE_ADD_TO_BLOCK_LIST_BUTTON_ICON = `[data-test-subj="${INDICATORS_TABLE_ADD_TO_BLOCK_LIST_TEST_ID}"]`;
+
 /* Flyout */
 
 export const TOGGLE_FLYOUT_BUTTON = `[data-test-subj="${BUTTON_TEST_ID}"]`;
@@ -147,6 +151,8 @@ export const FLYOUT_ADD_TO_NEW_CASE_ITEM = `[data-test-subj="${INDICATOR_FLYOUT_
 
 export const FLYOUT_INVESTIGATE_IN_TIMELINE_ITEM = `[data-test-subj="${INDICATOR_FLYOUT_TAKE_ACTION_INVESTIGATE_IN_TIMELINE_TEST_ID}"]`;
 
+export const FLYOUT_ADD_TO_BLOCK_LIST_ITEM = `[data-test-subj="${INDICATOR_FLYOUT_TAKE_ACTION_ADD_TO_BLOCK_LIST_TEST_ID}"]`;
+
 /* Field selector */
 
 export const FIELD_SELECTOR = `[data-test-subj="${DROPDOWN_TEST_ID}"]`;
@@ -185,9 +191,9 @@ export const CASE_COMMENT_EXTERNAL_REFERENCE = `[data-test-subj="comment-externa
 
 export const CASE_ACTION_WRAPPER = `[data-test-subj="case-action-bar-wrapper"]`;
 
-export const CASE_ELLIPSE_BUTTON = `[data-test-subj="property-actions-ellipses"]`;
+export const CASE_ELLIPSE_BUTTON = `[data-test-subj="property-actions-case-ellipses"]`;
 
-export const CASE_ELLIPSE_DELETE_CASE_OPTION = `[data-test-subj="property-actions-trash"]`;
+export const CASE_ELLIPSE_DELETE_CASE_OPTION = `[data-test-subj="property-actions-case-trash"]`;
 
 export const CASE_ELLIPSE_DELETE_CASE_CONFIRMATION_BUTTON = `[data-test-subj="confirmModalConfirmButton"]`;
 
@@ -196,6 +202,21 @@ export const NEW_CASE_NAME_INPUT = `[data-test-subj="input"][aria-describedby="c
 export const NEW_CASE_DESCRIPTION_INPUT = `[data-test-subj="euiMarkdownEditorTextArea"]`;
 
 export const NEW_CASE_CREATE_BUTTON = `[data-test-subj="create-case-submit"]`;
+
+/* Block list */
+
+export const BLOCK_LIST_NAME = `[data-test-subj="blocklist-form-name-input"]`;
+
+export const BLOCK_LIST_DESCRIPTION = `[data-test-subj="blocklist-form-description-input"]`;
+
+export const BLOCK_LIST_ADD_BUTTON = `[class="eui-textTruncate"]`;
+
+export const BLOCK_LIST_FLYOUT_CLOSE_BUTTON = `[data-test-subj="euiFlyoutCloseButton"]`;
+
+export const BLOCK_LIST_TOAST_LIST = `[data-test-subj="globalToastList"]`;
+
+export const BLOCK_LIST_VALUE_INPUT = (iocId: string) =>
+  `[data-test-subj="blocklist-form-values-input-${iocId}"]`;
 
 /* Miscellaneous */
 

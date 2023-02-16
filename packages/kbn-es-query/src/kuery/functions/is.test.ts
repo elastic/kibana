@@ -212,7 +212,7 @@ describe('kuery functions', () => {
             should: [
               {
                 wildcard: {
-                  'machine.os.keyword': 'win*',
+                  'machine.os.keyword': { value: 'win*' },
                 },
               },
             ],
@@ -221,6 +221,25 @@ describe('kuery functions', () => {
         };
         const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'win*');
         const result = is.toElasticsearchQuery(node, indexPattern);
+
+        expect(result).toEqual(expected);
+      });
+
+      test('should create a case-insensitive wildcard query for keyword fields', () => {
+        const expected = {
+          bool: {
+            should: [
+              {
+                wildcard: {
+                  'machine.os.keyword': { value: 'win*', case_insensitive: true },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'win*');
+        const result = is.toElasticsearchQuery(node, indexPattern, { caseInsensitive: true });
 
         expect(result).toEqual(expected);
       });
@@ -370,7 +389,24 @@ describe('kuery functions', () => {
             should: [
               {
                 term: {
-                  'machine.os.keyword': 'Win 7',
+                  'machine.os.keyword': { value: 'Win 7' },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      });
+
+      test('should use a case-insensitive term query for keyword fields', () => {
+        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'Win 7');
+        const result = is.toElasticsearchQuery(node, indexPattern, { caseInsensitive: true });
+        expect(result).toEqual({
+          bool: {
+            should: [
+              {
+                term: {
+                  'machine.os.keyword': { value: 'Win 7', case_insensitive: true },
                 },
               },
             ],

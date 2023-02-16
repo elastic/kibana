@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { snakeCase } from 'lodash';
 import moment from 'moment';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { waitForIndexStatus } from '@kbn/core-saved-objects-migration-server-internal';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
@@ -104,7 +104,7 @@ async function createAnomalyDetectionJob({
   apmMetricIndex: string;
 }) {
   return withApmSpan('create_anomaly_detection_job', async () => {
-    const randomToken = uuid().substr(-4);
+    const randomToken = uuidv4().substr(-4);
 
     const anomalyDetectionJob = mlClient.modules.setup({
       moduleId: ML_MODULE_ID_APM_TRANSACTION,

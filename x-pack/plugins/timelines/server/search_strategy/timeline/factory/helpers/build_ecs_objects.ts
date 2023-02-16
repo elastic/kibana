@@ -6,9 +6,9 @@
  */
 
 import { has, merge } from 'lodash/fp';
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EventHit } from '../../../../../common/search_strategy';
 import { ECS_METADATA_FIELDS, TIMELINE_EVENTS_FIELDS } from './constants';
-import { Ecs } from '../../../../../common/ecs';
 import { getTimestamp } from './get_timestamp';
 import { buildObjectRecursive } from './build_object_recursive';
 import { getNestedParentPath } from './get_nested_parent_path';

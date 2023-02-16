@@ -34,7 +34,7 @@ export const GroupByListForm: React.FC<ListProps> = ({
 }) => {
   const listKeys = Object.keys(list);
   return (
-    <Fragment>
+    <>
       {listKeys.map((aggName: AggName, i) => {
         const otherAggNames = listKeys.filter((k) => k !== aggName);
         return (
@@ -52,6 +52,6 @@ export const GroupByListForm: React.FC<ListProps> = ({
           </Fragment>
         );
       })}
-    </Fragment>
+    </>
   );
 };

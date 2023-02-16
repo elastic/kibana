@@ -11,11 +11,9 @@ import { shallow } from 'enzyme';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 
-jest.mock('uuid/v4', () => {
-  return function () {
-    return '12345';
-  };
-});
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('12345'),
+}));
 
 const defaultProps = {
   currentLayerType: LAYER_TYPE.GEOJSON_VECTOR,

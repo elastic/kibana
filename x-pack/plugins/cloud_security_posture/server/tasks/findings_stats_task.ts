@@ -14,6 +14,7 @@ import {
 import { SearchRequest } from '@kbn/data-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
+import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { FindingsStatsTaskResult, TaskHealthStatus, ScoreByPolicyTemplateBucket } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
@@ -107,14 +108,14 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
 const getScoreQuery = (): SearchRequest => ({
   index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   size: 0,
+  runtime_mappings: getIdentifierRuntimeMapping(),
   query: {
     match_all: {},
   },
   aggs: {
     score_by_policy_template: {
       terms: {
-        // TODO: CIS AWS - replace with policy_template when available
-        field: 'rule.benchmark.id',
+        field: 'rule.benchmark.posture_type',
       },
       aggs: {
         total_findings: {
@@ -138,7 +139,7 @@ const getScoreQuery = (): SearchRequest => ({
         },
         score_by_cluster_id: {
           terms: {
-            field: 'cluster_id',
+            field: 'asset_identifier',
           },
           aggregations: {
             total_findings: {

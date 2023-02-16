@@ -6,10 +6,10 @@
  */
 
 import { isEmpty, map, pickBy } from 'lodash';
-import uuid from 'uuid';
-import type { Ecs } from '@kbn/core/server';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
@@ -25,7 +25,7 @@ export const createQueries = async (
         pickBy(
           {
             ...query,
-            action_id: uuid.v4(),
+            action_id: uuidv4(),
             agents,
           },
           (value) => !isEmpty(value) || value === true
@@ -34,8 +34,8 @@ export const createQueries = async (
     : [
         pickBy(
           {
-            action_id: uuid.v4(),
-            id: uuid.v4(),
+            action_id: uuidv4(),
+            id: uuidv4(),
             query: params.query,
             saved_query_id: params.saved_query_id,
             saved_query_prebuilt: params.saved_query_id
@@ -53,18 +53,18 @@ export const createQueries = async (
 
 export const createDynamicQueries = async (
   params: CreateLiveQueryRequestBodySchema,
-  alert: Ecs,
+  alertData: ParsedTechnicalFields,
   osqueryContext: OsqueryAppContext
 ) =>
   params.queries?.length
     ? map(params.queries, ({ query, ...restQuery }) => {
-        const replacedQuery = replacedQueries(query, alert);
+        const replacedQuery = replacedQueries(query, alertData);
 
         return pickBy(
           {
             ...replacedQuery,
             ...restQuery,
-            action_id: uuid.v4(),
+            action_id: uuidv4(),
             alert_ids: params.alert_ids,
             agents: params.agent_ids,
           },
@@ -74,9 +74,9 @@ export const createDynamicQueries = async (
     : [
         pickBy(
           {
-            action_id: uuid.v4(),
-            id: uuid.v4(),
-            ...replacedQueries(params.query, alert),
+            action_id: uuidv4(),
+            id: uuidv4(),
+            ...replacedQueries(params.query, alertData),
             // just for single queries - we need to overwrite the error property
             error: undefined,
             saved_query_id: params.saved_query_id,
@@ -96,10 +96,10 @@ export const createDynamicQueries = async (
 
 const replacedQueries = (
   query: string | undefined,
-  ecsData?: Ecs
+  alertData?: ParsedTechnicalFields
 ): { query: string | undefined; error?: string } => {
-  if (ecsData && query) {
-    const { result, skipped } = replaceParamsQuery(query, ecsData);
+  if (alertData && query) {
+    const { result, skipped } = replaceParamsQuery(query, alertData);
 
     return {
       query: result,

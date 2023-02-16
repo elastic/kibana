@@ -31,6 +31,7 @@ export const RunTestButton = () => {
       setInProgress(true);
       setTestRun({
         id: uuidv4(),
+        name: config.name,
         monitor: format(config) as MonitorFieldsType,
       });
     }
@@ -80,6 +81,7 @@ export const RunTestButton = () => {
           errors={data?.errors ?? []}
           isPushing={Boolean(isPushing)}
           testRun={testRun}
+          name={testRun.name}
           inProgress={inProgress}
           onClose={() => {
             setTestRun(undefined);
@@ -118,20 +120,26 @@ const TEST_NOW_DESCRIPTION = i18n.translate('xpack.synthetics.testRun.descriptio
   defaultMessage: 'Test your monitor and verify the results before saving',
 });
 
-const TEST_SCHEDULED_LABEL = i18n.translate('xpack.synthetics.monitorList.testNow.scheduled', {
-  defaultMessage: 'Test is already scheduled',
-});
-
-const PRIVATE_AVAILABLE_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.testNow.available.private',
+export const TEST_SCHEDULED_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.testNow.scheduled',
   {
-    defaultMessage: `You can't currently test monitors running on private locations on demand.`,
+    defaultMessage: 'Test is already scheduled',
   }
 );
 
-const TEST_NOW_ARIA_LABEL = i18n.translate('xpack.synthetics.monitorList.testNow.AriaLabel', {
-  defaultMessage: 'Click to run test now',
-});
+export const PRIVATE_AVAILABLE_LABEL = i18n.translate(
+  'xpack.synthetics.app.testNow.available.private',
+  {
+    defaultMessage: `You can't manually start tests on a private location.`,
+  }
+);
+
+export const TEST_NOW_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.testNow.AriaLabel',
+  {
+    defaultMessage: 'Click to run test now',
+  }
+);
 
 const RUN_TEST = i18n.translate('xpack.synthetics.monitorList.runTest.label', {
   defaultMessage: 'Run test',

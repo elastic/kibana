@@ -20,6 +20,7 @@ export type {
   ArtifactsClientInterface,
   Artifact,
   ListArtifactsProps,
+  MessageSigningServiceInterface,
 } from './services';
 export { getRegistryUrl } from './services';
 

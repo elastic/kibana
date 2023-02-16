@@ -50,6 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions_log_management_read',
         'host_isolation_all',
         'process_operations_all',
+        'file_operations_all',
       ],
       uptime: ['all', 'read', 'minimal_all', 'minimal_read'],
       securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_delete'],
@@ -92,6 +93,14 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
       filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
+      rulesSettings: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'allFlappingSettings',
+        'readFlappingSettings',
+      ],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
   };

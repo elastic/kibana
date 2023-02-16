@@ -46,5 +46,9 @@
     "@kbn/data-views-plugin",
     "@kbn/cypress-config",
     "@kbn/discover-plugin",
+    "@kbn/guided-onboarding",
+    "@kbn/safer-lodash-set",
+    "@kbn/shared-ux-router",
+    "@kbn/core-http-browser",
   ]
 }

@@ -15,6 +15,7 @@ import type {
   CellValueContext,
   RangeSelectContext,
   ValueClickContext,
+  MultiValueClickContext,
 } from '@kbn/embeddable-plugin/public';
 import { ExpressionsServiceStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
 
@@ -35,6 +36,11 @@ export type ExpressionXyPluginStart = void;
 export interface FilterEvent {
   name: 'filter';
   data: ValueClickContext['data'];
+}
+
+export interface MultiFilterEvent {
+  name: 'multiFilter';
+  data: MultiValueClickContext['data'];
 }
 
 export interface BrushEvent {

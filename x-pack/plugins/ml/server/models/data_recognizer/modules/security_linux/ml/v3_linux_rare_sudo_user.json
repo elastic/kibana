@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Linux - Looks for sudo activity from an unusual user context. Unusual user context changes can be due to privilege escalation.",
   "groups": [
     "security",

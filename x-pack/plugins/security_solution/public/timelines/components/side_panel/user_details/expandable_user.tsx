@@ -90,7 +90,7 @@ export const ExpandableUserDetails = ({
       endDate={to}
       skip={isInitializing}
     >
-      {({ isLoadingAnomaliesData, anomaliesData }) => (
+      {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
         <UserOverview
           userName={userName}
           isInDetailsSidePanel={true}
@@ -105,6 +105,7 @@ export const ExpandableUserDetails = ({
           endDate={to}
           narrowDateRange={narrowDateRange}
           indexPatterns={selectedPatterns}
+          jobNameById={jobNameById}
         />
       )}
     </AnomalyTableProvider>

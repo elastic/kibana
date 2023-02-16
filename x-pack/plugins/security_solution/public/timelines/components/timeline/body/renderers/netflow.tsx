@@ -8,7 +8,7 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import type { Ecs } from '../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { asArrayIfExists } from '../../../../../common/lib/helpers';
 import {
   TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,

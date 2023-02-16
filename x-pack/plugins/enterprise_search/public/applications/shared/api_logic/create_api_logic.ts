@@ -26,6 +26,7 @@ export interface Actions<Args, Result> {
 
 export interface CreateApiOptions<Result> {
   clearFlashMessagesOnMakeRequest: boolean;
+  requestBreakpointMS?: number;
   showErrorFlash: boolean;
   showSuccessFlashFn?: (result: Result) => string;
 }
@@ -60,9 +61,12 @@ export const createApiLogic = <Result, Args>(
           flashSuccessToast(options.showSuccessFlashFn(result));
         }
       },
-      makeRequest: async (args) => {
+      makeRequest: async (args, breakpoint) => {
         if (options.clearFlashMessagesOnMakeRequest) {
           clearFlashMessages();
+        }
+        if (options.requestBreakpointMS) {
+          await breakpoint(options.requestBreakpointMS);
         }
         try {
           const result = await apiFunction(args);

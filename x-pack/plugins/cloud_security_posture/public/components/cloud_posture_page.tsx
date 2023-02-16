@@ -73,28 +73,34 @@ export const CspNoDataPage = ({
   actionTitle,
   actionDescription,
   testId,
-}: CspNoDataPageProps) => (
-  <NoDataPage
-    data-test-subj={testId}
-    css={css`
-      max-width: 950px;
-    `}
-    pageTitle={pageTitle}
-    solution={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel', {
-      defaultMessage: 'Cloud Security Posture',
-    })}
-    docsLink={docsLink}
-    logo="logoSecurity"
-    actions={{
-      elasticAgent: {
-        href: actionHref,
-        isDisabled: !actionHref,
-        title: actionTitle,
-        description: actionDescription,
-      },
-    }}
-  />
-);
+}: CspNoDataPageProps) => {
+  return (
+    <NoDataPage
+      data-test-subj={testId}
+      css={css`
+        > :nth-child(3) {
+          display: block;
+          margin: auto;
+          width: 450px;
+        }
+      `}
+      pageTitle={pageTitle}
+      solution={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel', {
+        defaultMessage: 'Cloud Security Posture',
+      })}
+      docsLink={docsLink}
+      logo="logoSecurity"
+      actions={{
+        elasticAgent: {
+          href: actionHref,
+          isDisabled: !actionHref,
+          title: actionTitle,
+          description: actionDescription,
+        },
+      }}
+    />
+  );
+};
 
 const packageNotInstalledRenderer = ({
   kspmIntegrationLink,

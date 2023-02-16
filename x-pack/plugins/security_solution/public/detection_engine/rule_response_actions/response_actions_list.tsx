@@ -54,7 +54,10 @@ export const ResponseActionsList = React.memo<ResponseActionsListProps>(({ items
       })}
       <EuiSpacer size="m" />
       {osqueryNoteQueries.length ? (
-        <OsqueryInvestigationGuidePanel onClick={handleInvestigationGuideClick} />
+        <OsqueryInvestigationGuidePanel
+          onClick={handleInvestigationGuideClick}
+          queriesLength={osqueryNoteQueries.length}
+        />
       ) : null}
     </div>
   );

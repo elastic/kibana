@@ -16,7 +16,7 @@ import {
 } from '../types/fields';
 import { ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 
-const categoryFieldTypes = [
+export const categoryFieldTypes = [
   ES_FIELD_TYPES.TEXT,
   ES_FIELD_TYPES.KEYWORD,
   ES_FIELD_TYPES.IP,

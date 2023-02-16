@@ -13,6 +13,7 @@ import type {
   PackageInfo,
   RegistryVarsEntry,
   RegistryDataStream,
+  InstallablePackage,
 } from '../types';
 
 const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
@@ -52,7 +53,10 @@ export const getNormalizedInputs = (policyTemplate: RegistryPolicyTemplate): Reg
   return [input];
 };
 
-export const getNormalizedDataStreams = (packageInfo: PackageInfo): RegistryDataStream[] => {
+export const getNormalizedDataStreams = (
+  packageInfo: PackageInfo | InstallablePackage,
+  datasetName?: string
+): RegistryDataStream[] => {
   if (packageInfo.type !== 'input') {
     return packageInfo.data_streams || [];
   }
@@ -66,15 +70,16 @@ export const getNormalizedDataStreams = (packageInfo: PackageInfo): RegistryData
   return policyTemplates.map((policyTemplate) => {
     const dataStream: RegistryDataStream = {
       type: policyTemplate.type,
-      dataset: createDefaultDatasetName(packageInfo, policyTemplate),
+      dataset: datasetName || createDefaultDatasetName(packageInfo, policyTemplate),
       title: policyTemplate.title + ' Dataset',
       release: packageInfo.release || 'ga',
       package: packageInfo.name,
       path: packageInfo.name,
+      elasticsearch: packageInfo.elasticsearch,
       streams: [
         {
           input: policyTemplate.input,
-          vars: addDatasetVarIfNotPresent(policyTemplate.vars),
+          vars: addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name),
           template_path: policyTemplate.template_path,
           title: policyTemplate.title,
           description: policyTemplate.title,
@@ -89,7 +94,10 @@ export const getNormalizedDataStreams = (packageInfo: PackageInfo): RegistryData
 
 // Input only packages must provide a dataset name in order to differentiate their data streams
 // here we add the dataset var if it is not defined in the package already.
-const addDatasetVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntry[] => {
+const addDatasetVarIfNotPresent = (
+  vars?: RegistryVarsEntry[],
+  datasetName?: string
+): RegistryVarsEntry[] => {
   const newVars = vars ?? [];
 
   const isDatasetAlreadyAdded = newVars.find(
@@ -99,11 +107,14 @@ const addDatasetVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntr
   if (isDatasetAlreadyAdded) {
     return newVars;
   } else {
-    return [...newVars, DATA_STREAM_DATASET_VAR];
+    return [
+      ...newVars,
+      { ...DATA_STREAM_DATASET_VAR, ...(datasetName && { default: datasetName }) },
+    ];
   }
 };
 
 const createDefaultDatasetName = (
-  packageInfo: PackageInfo,
-  policyTemplate: RegistryPolicyInputOnlyTemplate
+  packageInfo: { name: string },
+  policyTemplate: { name: string }
 ): string => packageInfo.name + '.' + policyTemplate.name;

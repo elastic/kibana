@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
+import { CHART_ANNOTATION_RED_COLOR } from '../constants';
 
 export function AlertThresholdAnnotation({
   threshold,
@@ -29,7 +30,7 @@ export function AlertThresholdAnnotation({
         line: {
           opacity: 0.5,
           strokeWidth: 1,
-          stroke: 'red',
+          stroke: CHART_ANNOTATION_RED_COLOR,
         },
       }}
     />

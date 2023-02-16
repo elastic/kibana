@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -17,6 +17,7 @@ import { JobSelector } from '../components/job_selector';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 import { MlPageHeader } from '../components/page_header';
+import { PageTitle } from '../components/page_title';
 
 interface TimeSeriesExplorerPageProps {
   dateFormatTz?: string;
@@ -47,9 +48,10 @@ export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
               <AnomalyResultsViewSelector viewId="timeseriesexplorer" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.ml.timeSeriesExplorer.pageTitle"
-                defaultMessage="Single Metric Viewer"
+              <PageTitle
+                title={i18n.translate('xpack.ml.timeSeriesExplorer.pageTitle', {
+                  defaultMessage: 'Single Metric Viewer',
+                })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -280,14 +280,14 @@ describe('UnifiedFieldList <FieldStats />', () => {
     expect(wrapper.text()).toBe('Analysis is not available for this field.');
   });
 
-  it('should not request field stats for geo fields', async () => {
+  it('should request field examples for geo fields', async () => {
     const wrapper = await mountComponent(
       <FieldStats {...defaultProps} field={dataView.fields.find((f) => f.name === 'geo_shape')!} />
     );
 
     expect(loadFieldStats).toHaveBeenCalled();
 
-    expect(wrapper.text()).toBe('Analysis is not available for this field.');
+    expect(wrapper.text()).toBe('No field data for the current search.');
   });
 
   it('should render a message if no data is found', async () => {

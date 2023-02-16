@@ -65,6 +65,7 @@ export type NarrowDateRange = (score: Anomaly, interval: string) => void;
 
 export interface AnomaliesBy {
   anomaly: Anomaly;
+  jobName: string | undefined;
 }
 
 export interface AnomaliesByHost extends AnomaliesBy {

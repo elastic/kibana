@@ -8,17 +8,19 @@
 
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors } from './utils';
+import { catchAndReturnBoomErrors, throwIfTypeNotVisibleByAPI } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerUpdateRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { coreUsageData, logger }: RouteDependencies
 ) => {
   router.put(
     {
@@ -45,14 +47,17 @@ export const registerUpdateRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      logger.warn("The update saved object API '/api/saved_objects/{type}/{id}' is deprecated.");
       const { type, id } = req.params;
       const { attributes, version, references, upsert } = req.body;
       const options: SavedObjectsUpdateOptions = { version, references, upsert };
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsUpdate({ request: req }).catch(() => {});
-
       const { savedObjects } = await context.core;
+
+      throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
+
       const result = await savedObjects.client.update(type, id, attributes, options);
       return res.ok({ body: result });
     })

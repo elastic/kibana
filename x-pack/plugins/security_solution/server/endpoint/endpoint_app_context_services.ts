@@ -12,11 +12,7 @@ import type {
   PluginStartContract as CasesPluginStartContract,
 } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type {
-  AgentService,
-  FleetStartContract,
-  AgentPolicyServiceInterface,
-} from '@kbn/fleet-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import {
@@ -37,7 +33,6 @@ import {
 import type {
   EndpointFleetServicesFactoryInterface,
   EndpointInternalFleetServicesInterface,
-  EndpointScopedFleetServicesInterface,
 } from './services/fleet/endpoint_fleet_services_factory';
 import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
@@ -50,12 +45,7 @@ export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
 }
 
-export type EndpointAppContextServiceStartContract = Partial<
-  Pick<
-    FleetStartContract,
-    'agentService' | 'packageService' | 'packagePolicyService' | 'agentPolicyService'
-  >
-> & {
+export interface EndpointAppContextServiceStartContract {
   fleetAuthzService?: FleetStartContract['authz'];
   logger: Logger;
   endpointMetadataService: EndpointMetadataService;
@@ -71,7 +61,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   cases: CasesPluginStartContract | undefined;
   featureUsageService: FeatureUsageService;
   experimentalFeatures: ExperimentalFeatures;
-};
+}
 
 /**
  * A singleton that holds shared services that are initialized during the start up phase
@@ -96,11 +86,7 @@ export class EndpointAppContextService {
     this.security = dependencies.security;
     this.fleetServicesFactory = dependencies.endpointFleetServicesFactory;
 
-    if (
-      dependencies.registerIngestCallback &&
-      dependencies.manifestManager &&
-      dependencies.packagePolicyService
-    ) {
+    if (dependencies.registerIngestCallback && dependencies.manifestManager) {
       const {
         registerIngestCallback,
         logger,
@@ -189,30 +175,12 @@ export class EndpointAppContextService {
     return this.startDependencies.endpointMetadataService;
   }
 
-  public getScopedFleetServices(req: KibanaRequest): EndpointScopedFleetServicesInterface {
-    if (this.fleetServicesFactory === null) {
-      throw new EndpointAppContentServicesNotStartedError();
-    }
-
-    return this.fleetServicesFactory.asScoped(req);
-  }
-
   public getInternalFleetServices(): EndpointInternalFleetServicesInterface {
     if (this.fleetServicesFactory === null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
     return this.fleetServicesFactory.asInternalUser();
-  }
-
-  /** @deprecated use `getScopedFleetServices()` instead */
-  public getAgentService(): AgentService | undefined {
-    return this.startDependencies?.agentService;
-  }
-
-  /** @deprecated use `getScopedFleetServices()` instead */
-  public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
-    return this.startDependencies?.agentPolicyService;
   }
 
   public getManifestManager(): ManifestManager | undefined {

@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
+import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePager } from '../../../../hooks/use_pager';
 import { FieldName } from '../../../../components/field_name/field_name';
@@ -166,7 +166,7 @@ export const DocViewerTable = ({
       const fieldType = isNestedFieldParent(field, dataView)
         ? 'nested'
         : fieldMapping
-        ? getTypeForFieldIcon(fieldMapping)
+        ? getFieldIconType(fieldMapping)
         : undefined;
 
       const ignored = getIgnoredReason(fieldMapping ?? field, hit.raw._ignored);

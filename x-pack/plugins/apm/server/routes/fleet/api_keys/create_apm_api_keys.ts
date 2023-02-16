@@ -6,6 +6,10 @@
  */
 
 import { CoreStart, Logger } from '@kbn/core/server';
+import {
+  APM_AGENT_CONFIGURATION_INDEX,
+  APM_SOURCE_MAP_INDEX,
+} from '../../settings/apm_indices/get_apm_indices';
 
 const apiKeyMetadata = {
   application: 'apm',
@@ -41,7 +45,7 @@ export async function createApmSourceMapApiKey({
           apmSystemIndices: {
             index: [
               {
-                names: ['.apm-source-map'],
+                names: [APM_SOURCE_MAP_INDEX],
                 privileges: indexLevelPrivileges,
                 allow_restricted_indices: true,
               },
@@ -82,7 +86,7 @@ export async function createApmAgentConfigApiKey({
           apmSystemIndices: {
             index: [
               {
-                names: ['.apm-agent-configuration'],
+                names: [APM_AGENT_CONFIGURATION_INDEX],
                 privileges: indexLevelPrivileges,
                 allow_restricted_indices: true,
               },

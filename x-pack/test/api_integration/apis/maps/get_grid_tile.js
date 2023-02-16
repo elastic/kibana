@@ -151,13 +151,13 @@ export default function ({ getService }) {
       // assert feature geometry is hex
       expect(gridFeature.loadGeometry()).to.eql([
         [
-          { x: 111, y: 698 },
           { x: 89, y: 710 },
           { x: 67, y: 696 },
           { x: 67, y: 669 },
           { x: 89, y: 657 },
           { x: 112, y: 672 },
           { x: 111, y: 698 },
+          { x: 89, y: 710 },
         ],
       ]);
     });

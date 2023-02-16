@@ -99,6 +99,11 @@ interface AgentBase {
   components?: FleetServerAgentComponent[];
 }
 
+export interface AgentMetrics {
+  cpu_avg?: number;
+  memory_size_byte_avg?: number;
+}
+
 export interface Agent extends AgentBase {
   id: string;
   access_api_key?: string;
@@ -114,6 +119,7 @@ export interface Agent extends AgentBase {
   status?: AgentStatus;
   packages: string[];
   sort?: Array<number | string | null>;
+  metrics?: AgentMetrics;
 }
 
 export interface AgentSOAttributes extends AgentBase {
@@ -148,6 +154,7 @@ export interface ActionStatus {
   cancellationTime?: string;
   newPolicyId?: string;
   creationTime: string;
+  hasRolloutPeriod?: boolean;
 }
 
 export interface AgentDiagnostics {
@@ -155,8 +162,9 @@ export interface AgentDiagnostics {
   name: string;
   createTime: string;
   filePath: string;
-  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS';
+  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS' | 'FAILED';
   actionId: string;
+  error?: string;
 }
 
 // Generated from FleetServer schema.json

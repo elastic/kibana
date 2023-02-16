@@ -16,7 +16,7 @@ import { CasesFindRequestRt, throwErrors, CasesFindResponseRt, excess } from '..
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
-import { constructQueryOptions } from '../utils';
+import { constructQueryOptions, constructSearch } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import type { CasesClientArgs } from '..';
@@ -36,6 +36,8 @@ export const find = async (
     services: { caseService, licensingService },
     authorization,
     logger,
+    savedObjectsSerializer,
+    spaceId,
   } = clientArgs;
 
   try {
@@ -85,11 +87,14 @@ export const find = async (
 
     const caseQueryOptions = constructQueryOptions({ ...queryArgs, authorizationFilter });
 
+    const caseSearch = constructSearch(queryParams.search, spaceId, savedObjectsSerializer);
+
     const [cases, statusStats] = await Promise.all([
       caseService.findCasesGroupedByID({
         caseOptions: {
           ...queryParams,
           ...caseQueryOptions,
+          ...caseSearch,
           searchFields: asArray(queryParams.searchFields),
           fields: includeFieldsRequiredForAuthentication(fields),
         },

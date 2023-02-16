@@ -61,8 +61,9 @@ journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
 
     await page.click(byTestId('"xpack.synthetics.alerts.monitorStatus.filterBar"'));
 
-    await assertText({ page, text: 'browser' });
-    await assertText({ page, text: 'http' });
+    await page.waitForSelector(`text=browser`);
+    await page.waitForSelector(`text=http`);
+
     await retry.tryForTime(30 * 1000, async () => {
       await page.click('text=browser');
 
@@ -86,7 +87,11 @@ journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
   });
 
   step('Tls alert flyout has setting values', async () => {
-    await assertText({ page, text: '30 days' });
-    await assertText({ page, text: '730 days' });
+    expect(await page.locator(byTestId('tlsExpirationThreshold')).textContent()).toBe(
+      'has a certificate expiring within days:  30'
+    );
+    expect(await page.locator(byTestId('tlsAgeExpirationThreshold')).textContent()).toBe(
+      'or older than days:  730'
+    );
   });
 });

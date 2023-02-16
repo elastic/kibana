@@ -9,9 +9,9 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { Filter } from '@kbn/es-query';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 import { OptionsListReduxState, OptionsListComponentState } from './types';
-import { OptionsListField } from '../../common/options_list/types';
 import { getIpRangeQuery } from '../../common/options_list/ip_search';
 import {
   OPTIONS_LIST_DEFAULT_SORT,
@@ -19,6 +19,8 @@ import {
 } from '../../common/options_list/suggestions_sorting';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
+  popoverOpen: false,
+  allowExpensiveQueries: true,
   searchString: { value: '', valid: true },
 });
 
@@ -40,6 +42,15 @@ export const optionsListReducers = {
     ) {
       state.componentState.searchString.valid = getIpRangeQuery(action.payload).validSearch;
     }
+  },
+  setAllowExpensiveQueries: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<boolean>
+  ) => {
+    state.componentState.allowExpensiveQueries = action.payload;
+  },
+  setPopoverOpen: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
+    state.componentState.popoverOpen = action.payload;
   },
   setSort: (
     state: WritableDraft<OptionsListReduxState>,
@@ -68,6 +79,7 @@ export const optionsListReducers = {
     action: PayloadAction<string>
   ) => {
     state.explicitInput.selectedOptions = [action.payload];
+    if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
   },
   clearSelections: (state: WritableDraft<OptionsListReduxState>) => {
     if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
@@ -96,7 +108,7 @@ export const optionsListReducers = {
   },
   setField: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<OptionsListField | undefined>
+    action: PayloadAction<FieldSpec | undefined>
   ) => {
     state.componentState.field = action.payload;
   },
@@ -109,7 +121,10 @@ export const optionsListReducers = {
       >
     >
   ) => {
-    state.componentState = { ...(state.componentState ?? {}), ...action.payload };
+    state.componentState = {
+      ...(state.componentState ?? {}),
+      ...action.payload,
+    };
   },
   publishFilters: (
     state: WritableDraft<OptionsListReduxState>,

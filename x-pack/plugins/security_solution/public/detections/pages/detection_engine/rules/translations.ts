@@ -46,28 +46,6 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine
   defaultMessage: 'Rules',
 });
 
-export const EXPERIMENTAL_ON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalOn',
-  {
-    defaultMessage: 'Advanced sorting',
-  }
-);
-
-export const EXPERIMENTAL_OFF = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalOff',
-  {
-    defaultMessage: 'Advanced sorting',
-  }
-);
-
-export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalDescription',
-  {
-    defaultMessage:
-      'Turn this on to enable sorting for all table columns. You can turn it off if you encounter table performance issues.',
-  }
-);
-
 export const ADD_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addPageTitle',
   {
@@ -561,13 +539,6 @@ export const COLUMN_LAST_RESPONSE = i18n.translate(
   }
 );
 
-export const COLUMN_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.versionTitle',
-  {
-    defaultMessage: 'Version',
-  }
-);
-
 export const COLUMN_TAGS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsTitle',
   {
@@ -638,6 +609,20 @@ export const MONITORING_TAB = i18n.translate(
   }
 );
 
+export const ENABLED_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.enabledRulesTitle',
+  {
+    defaultMessage: 'Enabled rules',
+  }
+);
+
+export const DISABLED_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.disabledRulesTitle',
+  {
+    defaultMessage: 'Disabled rules',
+  }
+);
+
 export const CUSTOM_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.customRulesTitle',
   {
@@ -656,6 +641,20 @@ export const TAGS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.tagsLabel',
   {
     defaultMessage: 'Tags',
+  }
+);
+
+export const SEARCH_TAGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.searchTagsPlaceholder',
+  {
+    defaultMessage: 'Search tags',
+  }
+);
+
+export const RULES_TAG_SEARCH = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.rulesTagSearchText',
+  {
+    defaultMessage: 'Rules tag search',
   }
 );
 
@@ -858,6 +857,13 @@ export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverLabel',
   {
     defaultMessage: 'Refresh settings',
+  }
+);
+
+export const CLEAR_RULES_TABLE_FILTERS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.clearRulesTableFilters',
+  {
+    defaultMessage: 'Clear filters',
   }
 );
 
@@ -1111,14 +1117,6 @@ export const RULE_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
   {
     defaultMessage: 'Rule preview',
-  }
-);
-
-export const RULE_PREVIEW_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.rulePreviewDescription',
-  {
-    defaultMessage:
-      'Rule preview reflects the current configuration of your rule settings and exceptions, click refresh icon to see the updated preview.',
   }
 );
 

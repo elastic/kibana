@@ -135,9 +135,8 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
       }),
     });
   };
-
   return (
-    <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
+    <div data-test-subj={TEST_SUBJECTS.RESOURCES_FINDINGS_CONTAINER}>
       <FindingsSearchBar
         dataView={dataView}
         setQuery={(query) => {
@@ -153,8 +152,11 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
               title={i18n.translate(
                 'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
                 {
-                  defaultMessage: '{resourceName} - Findings',
-                  values: { resourceName: resourceFindings.data?.resourceName },
+                  defaultMessage: '{resourceName} {hyphen} Findings',
+                  values: {
+                    resourceName: resourceFindings.data?.resourceName,
+                    hyphen: resourceFindings.data?.resourceName ? '-' : '',
+                  },
                 }
               )}
             />
@@ -167,9 +169,9 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             <CspInlineDescriptionList
               listItems={getResourceFindingSharedValues({
                 resourceId: params.resourceId,
-                resourceName: resourceFindings.data.resourceName,
-                resourceSubType: resourceFindings.data.resourceSubType,
-                clusterId: resourceFindings.data.clusterId,
+                resourceName: resourceFindings.data?.resourceName || '',
+                resourceSubType: resourceFindings.data?.resourceSubType || '',
+                clusterId: resourceFindings.data?.clusterId || '',
               })}
             />
           )

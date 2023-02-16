@@ -12,7 +12,7 @@ import {
   getFindResultWithSingleHit,
   getPrepackagedRulesStatusRequest,
 } from '../../../routes/__mocks__/request_responses';
-import { requestContextMock, serverMock, createMockConfig } from '../../../routes/__mocks__';
+import { requestContextMock, serverMock } from '../../../routes/__mocks__';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { checkTimelinesStatus } from '../../../../timeline/utils/check_timelines_status';
 import {
@@ -82,7 +82,7 @@ describe('get_prepackaged_rule_status_route', () => {
       prepackagedTimelines: [],
     });
 
-    getPrebuiltRulesAndTimelinesStatusRoute(server.router, createMockConfig(), securitySetup);
+    getPrebuiltRulesAndTimelinesStatusRoute(server.router, securitySetup);
   });
 
   describe('status codes', () => {

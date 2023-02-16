@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
+  EuiResizableContainer,
 } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
@@ -70,7 +71,7 @@ import {
 } from '../../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { PreviewFlyout } from '../../../../detections/pages/detection_engine/rules/preview';
+import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
@@ -169,7 +170,8 @@ const CreateRulePageComponent: React.FC = () => {
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
   const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
-  const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(false);
+  const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
+  const collapseFn = useRef<() => void | undefined>();
 
   const [defineRuleData, setDefineRuleData] = useState<DefineStepRule>({
     ...stepDefineDefaultValue,
@@ -384,190 +386,214 @@ const CreateRulePageComponent: React.FC = () => {
   return (
     <>
       <SecuritySolutionPageWrapper>
-        <EuiFlexGroup direction="row" justifyContent="spaceAround">
-          <MaxWidthEuiFlexItem>
-            <HeaderPage
-              backOptions={{
-                path: getRulesUrl(),
-                text: i18n.BACK_TO_RULES,
-                pageId: SecurityPageName.rules,
-              }}
-              isLoading={isLoading || loading}
-              title={i18n.PAGE_TITLE}
-            >
-              <EuiButton
-                data-test-subj="preview-flyout"
-                iconType="visBarVerticalStacked"
-                onClick={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
-              >
-                {i18n.RULE_PREVIEW_TITLE}
-              </EuiButton>
-            </HeaderPage>
-            <MyEuiPanel zindex={4} hasBorder>
-              <EuiAccordion
-                initialIsOpen={true}
-                id={RuleStep.defineRule}
-                buttonContent={defineRuleButton}
-                paddingSize="xs"
-                ref={defineRuleRef}
-                onToggle={handleAccordionToggle.bind(null, RuleStep.defineRule)}
-                extraAction={
-                  stepsData.current[RuleStep.defineRule].isValid && (
-                    <EuiButtonEmpty
-                      data-test-subj="edit-define-rule"
-                      iconType="pencil"
-                      size="xs"
-                      onClick={() => editStep(RuleStep.defineRule)}
-                    >
-                      {i18n.EDIT_RULE}
-                    </EuiButtonEmpty>
-                  )
-                }
-              >
-                <EuiHorizontalRule margin="m" />
-                <StepDefineRule
-                  addPadding={true}
-                  defaultValues={defineRuleData}
-                  isReadOnlyView={activeStep !== RuleStep.defineRule}
-                  isLoading={isLoading || loading}
-                  setForm={setFormHook}
-                  onSubmit={() => submitStep(RuleStep.defineRule)}
-                  kibanaDataViews={dataViewOptions}
-                  descriptionColumns="singleSplit"
-                  // We need a key to make this component remount when edit/view mode is toggled
-                  // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
-                  key={isShouldRerenderStep(RuleStep.defineRule, activeStep)}
-                  indicesConfig={indicesConfig}
-                  threatIndicesConfig={threatIndicesConfig}
-                  onRuleDataChange={updateCurrentDataState}
-                  onPreviewDisabledStateChange={setIsPreviewDisabled}
-                />
-              </EuiAccordion>
-            </MyEuiPanel>
-            <EuiSpacer size="l" />
-            <MyEuiPanel hasBorder zindex={3}>
-              <EuiAccordion
-                initialIsOpen={false}
-                id={RuleStep.aboutRule}
-                buttonContent={aboutRuleButton}
-                paddingSize="xs"
-                ref={aboutRuleRef}
-                onToggle={handleAccordionToggle.bind(null, RuleStep.aboutRule)}
-                extraAction={
-                  stepsData.current[RuleStep.aboutRule].isValid && (
-                    <EuiButtonEmpty
-                      data-test-subj="edit-about-rule"
-                      iconType="pencil"
-                      size="xs"
-                      onClick={() => editStep(RuleStep.aboutRule)}
-                    >
-                      {i18n.EDIT_RULE}
-                    </EuiButtonEmpty>
-                  )
-                }
-              >
-                <EuiHorizontalRule margin="m" />
-                <StepAboutRule
-                  addPadding={true}
-                  defaultValues={aboutRuleData}
-                  defineRuleData={defineRuleData}
-                  descriptionColumns="singleSplit"
-                  isReadOnlyView={activeStep !== RuleStep.aboutRule}
-                  isLoading={isLoading || loading}
-                  setForm={setFormHook}
-                  onSubmit={() => submitStep(RuleStep.aboutRule)}
-                  // We need a key to make this component remount when edit/view mode is toggled
-                  // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
-                  key={isShouldRerenderStep(RuleStep.aboutRule, activeStep)}
-                  onRuleDataChange={updateCurrentDataState}
-                />
-              </EuiAccordion>
-            </MyEuiPanel>
-            <EuiSpacer size="l" />
-            <MyEuiPanel hasBorder zindex={2}>
-              <EuiAccordion
-                initialIsOpen={false}
-                id={RuleStep.scheduleRule}
-                buttonContent={scheduleRuleButton}
-                paddingSize="xs"
-                ref={scheduleRuleRef}
-                onToggle={handleAccordionToggle.bind(null, RuleStep.scheduleRule)}
-                extraAction={
-                  stepsData.current[RuleStep.scheduleRule].isValid && (
-                    <EuiButtonEmpty
-                      iconType="pencil"
-                      size="xs"
-                      onClick={() => editStep(RuleStep.scheduleRule)}
-                    >
-                      {i18n.EDIT_RULE}
-                    </EuiButtonEmpty>
-                  )
-                }
-              >
-                <EuiHorizontalRule margin="m" />
-                <StepScheduleRule
-                  addPadding={true}
-                  defaultValues={scheduleRuleData}
-                  descriptionColumns="singleSplit"
-                  isReadOnlyView={activeStep !== RuleStep.scheduleRule}
-                  isLoading={isLoading || loading}
-                  setForm={setFormHook}
-                  onSubmit={() => submitStep(RuleStep.scheduleRule)}
-                  // We need a key to make this component remount when edit/view mode is toggled
-                  // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
-                  key={isShouldRerenderStep(RuleStep.scheduleRule, activeStep)}
-                  onRuleDataChange={updateCurrentDataState}
-                />
-              </EuiAccordion>
-            </MyEuiPanel>
-            <EuiSpacer size="l" />
-            <MyEuiPanel hasBorder zindex={1}>
-              <EuiAccordion
-                initialIsOpen={false}
-                id={RuleStep.ruleActions}
-                buttonContent={ruleActionsButton}
-                paddingSize="xs"
-                ref={ruleActionsRef}
-                onToggle={handleAccordionToggle.bind(null, RuleStep.ruleActions)}
-                extraAction={
-                  stepsData.current[RuleStep.ruleActions].isValid && (
-                    <EuiButtonEmpty
-                      iconType="pencil"
-                      size="xs"
-                      onClick={() => editStep(RuleStep.ruleActions)}
-                    >
-                      {i18n.EDIT_RULE}
-                    </EuiButtonEmpty>
-                  )
-                }
-              >
-                <EuiHorizontalRule margin="m" />
-                <StepRuleActions
-                  addPadding={true}
-                  defaultValues={stepsData.current[RuleStep.ruleActions].data}
-                  isReadOnlyView={activeStep !== RuleStep.ruleActions}
-                  isLoading={isLoading || loading || isStartingJobs}
-                  setForm={setFormHook}
-                  onSubmit={() => submitStep(RuleStep.ruleActions)}
-                  actionMessageParams={actionMessageParams}
-                  // We need a key to make this component remount when edit/view mode is toggled
-                  // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
-                  key={isShouldRerenderStep(RuleStep.ruleActions, activeStep)}
-                  ruleType={ruleType}
-                />
-              </EuiAccordion>
-            </MyEuiPanel>
-            {isRulePreviewVisible && (
-              <PreviewFlyout
-                isDisabled={isPreviewDisabled && activeStep === RuleStep.defineRule}
-                defineStepData={defineRuleData}
-                aboutStepData={aboutRuleData}
-                scheduleStepData={scheduleRuleData}
-                onClose={() => setIsRulePreviewVisible(false)}
-              />
-            )}
-          </MaxWidthEuiFlexItem>
-        </EuiFlexGroup>
+        <EuiResizableContainer>
+          {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
+            collapseFn.current = () => togglePanel?.('preview', { direction: 'left' });
+            return (
+              <>
+                <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
+                  <EuiFlexGroup direction="row" justifyContent="spaceAround">
+                    <MaxWidthEuiFlexItem>
+                      <HeaderPage
+                        backOptions={{
+                          path: getRulesUrl(),
+                          text: i18n.BACK_TO_RULES,
+                          pageId: SecurityPageName.rules,
+                        }}
+                        isLoading={isLoading || loading}
+                        title={i18n.PAGE_TITLE}
+                      >
+                        <EuiButton
+                          data-test-subj="preview-container"
+                          isSelected={isRulePreviewVisible}
+                          fill={isRulePreviewVisible}
+                          iconType="visBarVerticalStacked"
+                          onClick={() => {
+                            collapseFn.current?.();
+                            setIsRulePreviewVisible((isVisible) => !isVisible);
+                          }}
+                        >
+                          {i18n.RULE_PREVIEW_TITLE}
+                        </EuiButton>
+                      </HeaderPage>
+                      <MyEuiPanel zindex={4} hasBorder>
+                        <EuiAccordion
+                          initialIsOpen={true}
+                          id={RuleStep.defineRule}
+                          buttonContent={defineRuleButton}
+                          paddingSize="xs"
+                          ref={defineRuleRef}
+                          onToggle={handleAccordionToggle.bind(null, RuleStep.defineRule)}
+                          extraAction={
+                            stepsData.current[RuleStep.defineRule].isValid && (
+                              <EuiButtonEmpty
+                                data-test-subj="edit-define-rule"
+                                iconType="pencil"
+                                size="xs"
+                                onClick={() => editStep(RuleStep.defineRule)}
+                              >
+                                {i18n.EDIT_RULE}
+                              </EuiButtonEmpty>
+                            )
+                          }
+                        >
+                          <EuiHorizontalRule margin="m" />
+                          <StepDefineRule
+                            addPadding={true}
+                            defaultValues={defineRuleData}
+                            isReadOnlyView={activeStep !== RuleStep.defineRule}
+                            isLoading={isLoading || loading}
+                            setForm={setFormHook}
+                            onSubmit={() => submitStep(RuleStep.defineRule)}
+                            kibanaDataViews={dataViewOptions}
+                            descriptionColumns="singleSplit"
+                            // We need a key to make this component remount when edit/view mode is toggled
+                            // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
+                            key={isShouldRerenderStep(RuleStep.defineRule, activeStep)}
+                            indicesConfig={indicesConfig}
+                            threatIndicesConfig={threatIndicesConfig}
+                            onRuleDataChange={updateCurrentDataState}
+                            onPreviewDisabledStateChange={setIsPreviewDisabled}
+                          />
+                        </EuiAccordion>
+                      </MyEuiPanel>
+                      <EuiSpacer size="l" />
+                      <MyEuiPanel hasBorder zindex={3}>
+                        <EuiAccordion
+                          initialIsOpen={false}
+                          id={RuleStep.aboutRule}
+                          buttonContent={aboutRuleButton}
+                          paddingSize="xs"
+                          ref={aboutRuleRef}
+                          onToggle={handleAccordionToggle.bind(null, RuleStep.aboutRule)}
+                          extraAction={
+                            stepsData.current[RuleStep.aboutRule].isValid && (
+                              <EuiButtonEmpty
+                                data-test-subj="edit-about-rule"
+                                iconType="pencil"
+                                size="xs"
+                                onClick={() => editStep(RuleStep.aboutRule)}
+                              >
+                                {i18n.EDIT_RULE}
+                              </EuiButtonEmpty>
+                            )
+                          }
+                        >
+                          <EuiHorizontalRule margin="m" />
+                          <StepAboutRule
+                            addPadding={true}
+                            defaultValues={aboutRuleData}
+                            defineRuleData={defineRuleData}
+                            descriptionColumns="singleSplit"
+                            isReadOnlyView={activeStep !== RuleStep.aboutRule}
+                            isLoading={isLoading || loading}
+                            setForm={setFormHook}
+                            onSubmit={() => submitStep(RuleStep.aboutRule)}
+                            // We need a key to make this component remount when edit/view mode is toggled
+                            // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
+                            key={isShouldRerenderStep(RuleStep.aboutRule, activeStep)}
+                            onRuleDataChange={updateCurrentDataState}
+                          />
+                        </EuiAccordion>
+                      </MyEuiPanel>
+                      <EuiSpacer size="l" />
+                      <MyEuiPanel hasBorder zindex={2}>
+                        <EuiAccordion
+                          initialIsOpen={false}
+                          id={RuleStep.scheduleRule}
+                          buttonContent={scheduleRuleButton}
+                          paddingSize="xs"
+                          ref={scheduleRuleRef}
+                          onToggle={handleAccordionToggle.bind(null, RuleStep.scheduleRule)}
+                          extraAction={
+                            stepsData.current[RuleStep.scheduleRule].isValid && (
+                              <EuiButtonEmpty
+                                iconType="pencil"
+                                size="xs"
+                                onClick={() => editStep(RuleStep.scheduleRule)}
+                              >
+                                {i18n.EDIT_RULE}
+                              </EuiButtonEmpty>
+                            )
+                          }
+                        >
+                          <EuiHorizontalRule margin="m" />
+                          <StepScheduleRule
+                            addPadding={true}
+                            defaultValues={scheduleRuleData}
+                            descriptionColumns="singleSplit"
+                            isReadOnlyView={activeStep !== RuleStep.scheduleRule}
+                            isLoading={isLoading || loading}
+                            setForm={setFormHook}
+                            onSubmit={() => submitStep(RuleStep.scheduleRule)}
+                            // We need a key to make this component remount when edit/view mode is toggled
+                            // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
+                            key={isShouldRerenderStep(RuleStep.scheduleRule, activeStep)}
+                            onRuleDataChange={updateCurrentDataState}
+                          />
+                        </EuiAccordion>
+                      </MyEuiPanel>
+                      <EuiSpacer size="l" />
+                      <MyEuiPanel hasBorder zindex={1}>
+                        <EuiAccordion
+                          initialIsOpen={false}
+                          id={RuleStep.ruleActions}
+                          buttonContent={ruleActionsButton}
+                          paddingSize="xs"
+                          ref={ruleActionsRef}
+                          onToggle={handleAccordionToggle.bind(null, RuleStep.ruleActions)}
+                          extraAction={
+                            stepsData.current[RuleStep.ruleActions].isValid && (
+                              <EuiButtonEmpty
+                                iconType="pencil"
+                                size="xs"
+                                onClick={() => editStep(RuleStep.ruleActions)}
+                              >
+                                {i18n.EDIT_RULE}
+                              </EuiButtonEmpty>
+                            )
+                          }
+                        >
+                          <EuiHorizontalRule margin="m" />
+                          <StepRuleActions
+                            addPadding={true}
+                            defaultValues={stepsData.current[RuleStep.ruleActions].data}
+                            isReadOnlyView={activeStep !== RuleStep.ruleActions}
+                            isLoading={isLoading || loading || isStartingJobs}
+                            setForm={setFormHook}
+                            onSubmit={() => submitStep(RuleStep.ruleActions)}
+                            actionMessageParams={actionMessageParams}
+                            // We need a key to make this component remount when edit/view mode is toggled
+                            // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
+                            key={isShouldRerenderStep(RuleStep.ruleActions, activeStep)}
+                            ruleType={ruleType}
+                          />
+                        </EuiAccordion>
+                      </MyEuiPanel>
+                    </MaxWidthEuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiResizablePanel>
+
+                <EuiResizableButton />
+
+                <EuiResizablePanel
+                  id={'preview'}
+                  mode="collapsible"
+                  initialSize={30}
+                  minSize={'20%'}
+                  onToggleCollapsed={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
+                >
+                  <RulePreview
+                    isDisabled={isPreviewDisabled && activeStep === RuleStep.defineRule}
+                    defineRuleData={defineRuleData}
+                    aboutRuleData={aboutRuleData}
+                    scheduleRuleData={scheduleRuleData}
+                  />
+                </EuiResizablePanel>
+              </>
+            );
+          }}
+        </EuiResizableContainer>
       </SecuritySolutionPageWrapper>
 
       <SpyRoute pageName={SecurityPageName.rulesCreate} />

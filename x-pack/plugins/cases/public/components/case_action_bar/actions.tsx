@@ -13,19 +13,20 @@ import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { PropertyActions } from '../property_actions';
 import type { Case } from '../../../common/ui/types';
-import type { CaseService } from '../../containers/use_get_case_user_actions';
 import { useAllCasesNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesToast } from '../../common/use_cases_toast';
 
 interface CaseViewActions {
   caseData: Case;
-  currentExternalIncident: CaseService | null;
+  currentExternalIncident: Case['externalService'];
 }
 
 const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternalIncident }) => {
   const { mutate: deleteCases } = useDeleteCases();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { permissions } = useCasesContext();
+  const { showSuccessToast } = useCasesToast();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
   const openModal = useCallback(() => {
@@ -38,15 +39,14 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
 
   const propertyActions = useMemo(
     () => [
-      ...(permissions.delete
-        ? [
-            {
-              iconType: 'trash',
-              label: i18n.DELETE_CASE(),
-              onClick: openModal,
-            },
-          ]
-        : []),
+      {
+        iconType: 'copyClipboard',
+        label: i18n.COPY_ID_ACTION_LABEL,
+        onClick: () => {
+          navigator.clipboard.writeText(caseData.id);
+          showSuccessToast(i18n.COPY_ID_ACTION_SUCCESS);
+        },
+      },
       ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
         ? [
             {
@@ -56,8 +56,18 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
             },
           ]
         : []),
+      ...(permissions.delete
+        ? [
+            {
+              iconType: 'trash',
+              label: i18n.DELETE_CASE(),
+              color: 'danger' as const,
+              onClick: openModal,
+            },
+          ]
+        : []),
     ],
-    [permissions.delete, openModal, currentExternalIncident]
+    [permissions.delete, openModal, currentExternalIncident, caseData.id, showSuccessToast]
   );
 
   const onConfirmDeletion = useCallback(() => {
@@ -74,7 +84,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
 
   return (
     <EuiFlexItem grow={false} data-test-subj="case-view-actions">
-      <PropertyActions propertyActions={propertyActions} />
+      <PropertyActions propertyActions={propertyActions} customDataTestSubj={'case'} />
       {isModalVisible ? (
         <ConfirmDeleteCaseModal
           totalCasesToBeDeleted={1}

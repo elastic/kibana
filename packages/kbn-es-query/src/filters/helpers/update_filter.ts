@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { identity, pickBy } from 'lodash';
-
+import { get } from 'lodash';
+import { isRangeFilterParams } from '../build_filters/range_filter';
 import type { Filter, FilterMeta } from '..';
-
-type FilterOperator = Pick<FilterMeta, 'type' | 'negate'>;
 
 export const updateFilter = (
   filter: Filter,
   field?: string,
-  operator?: FilterOperator,
-  params?: Filter['meta']['params']
+  operator?: FilterMeta,
+  params?: Filter['meta']['params'],
+  fieldType?: string
 ) => {
   if (!field || !operator) {
     return updateField(filter, field);
@@ -32,7 +31,7 @@ export const updateFilter = (
     return updateWithIsOneOfOperator(filter, operator, params);
   }
 
-  return updateWithIsOperator(filter, operator, params);
+  return updateWithIsOperator(filter, operator, params, fieldType);
 };
 
 function updateField(filter: Filter, field?: string) {
@@ -51,7 +50,7 @@ function updateField(filter: Filter, field?: string) {
   };
 }
 
-function updateWithExistsOperator(filter: Filter, operator?: FilterOperator) {
+function updateWithExistsOperator(filter: Filter, operator?: FilterMeta) {
   return {
     ...filter,
     meta: {
@@ -67,72 +66,114 @@ function updateWithExistsOperator(filter: Filter, operator?: FilterOperator) {
 
 function updateWithIsOperator(
   filter: Filter,
-  operator?: FilterOperator,
-  params?: Filter['meta']['params']
+  operator?: FilterMeta,
+  params?: Filter['meta']['params'],
+  fieldType?: string
 ) {
-  return {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      negate: operator?.negate,
-      type: operator?.type,
-      params: { ...filter.meta.params, query: params },
-    },
-    query: { match_phrase: { [filter.meta.key!]: params ?? '' } },
-  };
+  const safeParams = fieldType === 'number' && !params ? 0 : params;
+  if (typeof filter.meta.params === 'object') {
+    return {
+      ...filter,
+      meta: {
+        ...filter.meta,
+        negate: operator?.negate,
+        type: operator?.type,
+        params: { ...filter.meta.params, query: params },
+        value: undefined,
+      },
+      query: { match_phrase: { [filter.meta.key!]: safeParams ?? '' } },
+    };
+  } else {
+    return {
+      ...filter,
+      meta: {
+        ...filter.meta,
+        negate: operator?.negate,
+        type: operator?.type,
+        params: { query: params },
+        value: undefined,
+      },
+      query: { match_phrase: { [filter.meta.key!]: safeParams ?? '' } },
+    };
+  }
 }
 
 function updateWithRangeOperator(
   filter: Filter,
-  operator: FilterOperator,
-  rawParams: Array<Filter['meta']['params']>,
+  operator: FilterMeta,
+  rawParams: Filter['meta']['params'] | undefined,
   field: string
 ) {
-  const params = {
-    ...filter.meta.params,
-    ...pickBy(rawParams, identity),
-  };
-
-  params.gte = params.from;
-  params.lt = params.to;
-
-  const updatedFilter = {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      negate: operator?.negate,
-      type: operator?.type,
-      params,
-    },
-    query: {
-      range: {
-        [field]: params,
+  if (isRangeFilterParams(rawParams)) {
+    const { from, to } = rawParams;
+    const params = {
+      gte: from,
+      lt: to,
+    };
+    const updatedFilter = {
+      ...filter,
+      meta: {
+        ...filter.meta,
+        negate: operator?.negate,
+        type: operator?.type,
+        params,
       },
-    },
-  };
+      query: {
+        range: {
+          [field]: params,
+        },
+      },
+    };
 
-  return updatedFilter;
+    return updatedFilter;
+  } else {
+    const from = get(rawParams, 'from', undefined);
+    const to = get(rawParams, 'to', undefined);
+    const params = {
+      gte: from,
+      lt: to,
+    };
+    const updatedFilter = {
+      ...filter,
+      meta: {
+        ...filter.meta,
+        negate: operator?.negate,
+        type: operator?.type,
+        params,
+      },
+      query: {
+        range: {
+          [field]: params,
+        },
+      },
+    };
+    return updatedFilter;
+  }
 }
 
 function updateWithIsOneOfOperator(
   filter: Filter,
-  operator?: FilterOperator,
-  params?: Array<Filter['meta']['params']>
+  operator?: FilterMeta,
+  params?: Filter['meta']['params']
 ) {
-  return {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      negate: operator?.negate,
-      type: operator?.type,
-      params,
-    },
-    query: {
-      bool: {
-        minimum_should_match: 1,
-        ...filter!.query?.should,
-        should: params?.map((param) => ({ match_phrase: { [filter.meta.key!]: param } })),
+  if (Array.isArray(params)) {
+    return {
+      ...filter,
+      meta: {
+        ...filter.meta,
+        negate: operator?.negate,
+        type: operator?.type,
+        params,
       },
-    },
-  };
+      query: {
+        bool: {
+          minimum_should_match: 1,
+          ...filter!.query?.should,
+          should: params?.map((param) => ({ match_phrase: { [filter.meta.key!]: param } })),
+        },
+      },
+    };
+  } else {
+    return filter;
+  }
 }

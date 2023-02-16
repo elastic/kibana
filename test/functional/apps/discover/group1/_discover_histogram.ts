@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('test/functional/fixtures/es_archiver/long_window_logstash');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
@@ -94,6 +95,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`The first timestamp value in doc table after brushing: ${rowData}`);
         return prevRowData !== rowData;
       });
+    });
+
+    it('should update correctly when switching data views and brushing the histogram', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.selectIndexPattern('logstash-*');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.brushHistogram();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      expect(await PageObjects.discover.getHitCount()).to.be('7');
     });
 
     it('should update the histogram timerange when the query is resubmitted', async function () {

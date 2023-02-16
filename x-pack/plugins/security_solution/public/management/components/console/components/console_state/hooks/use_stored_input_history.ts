@@ -17,10 +17,12 @@ interface InputHistoryOfflineStorage {
 const COMMAND_INPUT_HISTORY_KEY = 'commandInputHistory';
 
 /**
- * The current version of the input history offline storage. Will help in the future
- * if we ever need to "migrate" stored data to a new format
+ * The current version of the input history offline storage.
+ *
+ * NOTE:  Changes to this value will likely require some migration to be added
+ *        to `migrateHistoryData()` down below.
  */
-const CURRENT_VERSION = 1;
+const CURRENT_VERSION = 2;
 
 const getDefaultInputHistoryStorage = (): InputHistoryOfflineStorage => {
   return {
@@ -40,6 +42,10 @@ export const useStoredInputHistory = (
         (storage.get(
           `${storagePrefix}.${COMMAND_INPUT_HISTORY_KEY}`
         ) as InputHistoryOfflineStorage) ?? getDefaultInputHistoryStorage();
+
+      if (storedData.version !== CURRENT_VERSION) {
+        migrateHistoryData(storedData);
+      }
 
       return storedData.data;
     }
@@ -68,4 +74,20 @@ export const useSaveInputHistoryToStorage = (
     },
     [storage, storagePrefix]
   );
+};
+
+const migrateHistoryData = (storedData: InputHistoryOfflineStorage) => {
+  const { data, version } = storedData;
+
+  for (const historyItem of data) {
+    // -------------------------------------------
+    // V2:
+    //    - adds `display` property
+    // -------------------------------------------
+    if (version < 2) {
+      historyItem.display = historyItem.input;
+    }
+  }
+
+  storedData.version = CURRENT_VERSION;
 };

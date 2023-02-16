@@ -111,23 +111,89 @@ describe('useOutputOptions', () => {
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
-          "disabled": false,
+          "disabled": undefined,
           "inputDisplay": "Default (currently Output 1)",
           "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
-          "disabled": false,
-          "inputDisplay": "Output 1",
+          "disabled": true,
+          "inputDisplay": <React.Fragment>
+            <EuiText
+              size="s"
+            >
+              Output 1
+            </EuiText>
+            <EuiSpacer
+              size="xs"
+            />
+            <EuiText
+              size="s"
+            >
+              <FormattedMessage
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
+                values={
+                  Object {
+                    "outputType": undefined,
+                  }
+                }
+              />
+            </EuiText>
+          </React.Fragment>,
           "value": "output1",
         },
         Object {
-          "disabled": false,
-          "inputDisplay": "Output 2",
+          "disabled": true,
+          "inputDisplay": <React.Fragment>
+            <EuiText
+              size="s"
+            >
+              Output 2
+            </EuiText>
+            <EuiSpacer
+              size="xs"
+            />
+            <EuiText
+              size="s"
+            >
+              <FormattedMessage
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
+                values={
+                  Object {
+                    "outputType": undefined,
+                  }
+                }
+              />
+            </EuiText>
+          </React.Fragment>,
           "value": "output2",
         },
         Object {
-          "disabled": false,
-          "inputDisplay": "Output 3",
+          "disabled": true,
+          "inputDisplay": <React.Fragment>
+            <EuiText
+              size="s"
+            >
+              Output 3
+            </EuiText>
+            <EuiSpacer
+              size="xs"
+            />
+            <EuiText
+              size="s"
+            >
+              <FormattedMessage
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
+                values={
+                  Object {
+                    "outputType": undefined,
+                  }
+                }
+              />
+            </EuiText>
+          </React.Fragment>,
           "value": "output3",
         },
       ]
@@ -173,23 +239,89 @@ describe('useOutputOptions', () => {
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
-          "disabled": false,
+          "disabled": undefined,
           "inputDisplay": "Default (currently Output 1)",
           "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
           "disabled": true,
-          "inputDisplay": "Output 1",
+          "inputDisplay": <React.Fragment>
+            <EuiText
+              size="s"
+            >
+              Output 1
+            </EuiText>
+            <EuiSpacer
+              size="xs"
+            />
+            <EuiText
+              size="s"
+            >
+              <FormattedMessage
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
+                values={
+                  Object {
+                    "outputType": undefined,
+                  }
+                }
+              />
+            </EuiText>
+          </React.Fragment>,
           "value": "output1",
         },
         Object {
           "disabled": true,
-          "inputDisplay": "Output 2",
+          "inputDisplay": <React.Fragment>
+            <EuiText
+              size="s"
+            >
+              Output 2
+            </EuiText>
+            <EuiSpacer
+              size="xs"
+            />
+            <EuiText
+              size="s"
+            >
+              <FormattedMessage
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
+                values={
+                  Object {
+                    "outputType": undefined,
+                  }
+                }
+              />
+            </EuiText>
+          </React.Fragment>,
           "value": "output2",
         },
         Object {
           "disabled": true,
-          "inputDisplay": "Output 3",
+          "inputDisplay": <React.Fragment>
+            <EuiText
+              size="s"
+            >
+              Output 3
+            </EuiText>
+            <EuiSpacer
+              size="xs"
+            />
+            <EuiText
+              size="s"
+            >
+              <FormattedMessage
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
+                values={
+                  Object {
+                    "outputType": undefined,
+                  }
+                }
+              />
+            </EuiText>
+          </React.Fragment>,
           "value": "output3",
         },
       ]
@@ -309,9 +441,13 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="Logstash output for agent integration is not supported for APM"
-                id="xpack.fleet.agentPolicyForm.outputOptionDisabledAPMAndLogstashText"
-                values={Object {}}
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                id="xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText"
+                values={
+                  Object {
+                    "outputType": "logstash",
+                  }
+                }
               />
             </EuiText>
           </React.Fragment>,
@@ -337,9 +473,13 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="Logstash output for agent integration is not supported for APM"
-                id="xpack.fleet.agentPolicyForm.outputOptionDisabledAPMAndLogstashText"
-                values={Object {}}
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
+                values={
+                  Object {
+                    "outputType": "logstash",
+                  }
+                }
               />
             </EuiText>
           </React.Fragment>,

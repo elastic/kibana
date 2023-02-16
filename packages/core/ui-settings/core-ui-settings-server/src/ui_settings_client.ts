@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { UserProvidedValues, PublicUiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UserProvidedValues, PublicUiSettingsParams, UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { KibanaRequest } from '@kbn/core-http-server';
 
 /**
@@ -21,7 +21,7 @@ export interface IUiSettingsClient {
   /**
    * Returns registered uiSettings values {@link UiSettingsParams}
    */
-  getRegistered: () => Readonly<Record<string, PublicUiSettingsParams>>;
+  getRegistered: () => Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>;
   /**
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */

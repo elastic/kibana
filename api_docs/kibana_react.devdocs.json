@@ -581,18 +581,6 @@
             "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
           },
@@ -1318,18 +1306,6 @@
           },
           {
             "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/components/ml_page/ml_page.tsx"
-          },
-          {
-            "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
           },
           {
@@ -1387,6 +1363,18 @@
           {
             "plugin": "apm",
             "path": "x-pack/plugins/apm/public/components/routing/app_root.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_view.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_view.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_view.tsx"
           },
           {
             "plugin": "indexLifecycleManagement",
@@ -1796,6 +1784,106 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.useGlobalUiSetting",
+        "type": "Function",
+        "tags": [],
+        "label": "useGlobalUiSetting",
+        "description": [
+          "\nReturns the current global UI-settings value.\n\nUsage:\n\n```js\nconst customBranding = useGlobalUiSetting('customBranding:pageTitle');\n```"
+        ],
+        "signature": [
+          "<T>(key: string, defaultValue?: T | undefined) => T"
+        ],
+        "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.useGlobalUiSetting.$1",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.useGlobalUiSetting.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.useGlobalUiSetting$",
+        "type": "Function",
+        "tags": [],
+        "label": "useGlobalUiSetting$",
+        "description": [
+          "\nReturns a 2-tuple, where first entry is the setting value and second is a\nfunction to update the setting value.\n\nSynchronously returns the most current value of the setting and subscribes\nto all subsequent updates, which will re-render your component on new values.\n\nUsage:\n\n```js\nconst [customBranding, setCustomBranding] = useGlobalUiSetting$('customBranding:pageTitle');\n```"
+        ],
+        "signature": [
+          "<T>(key: string, defaultValue?: T | undefined) => [T, Setter<T>]"
+        ],
+        "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.useGlobalUiSetting$.$1",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.useGlobalUiSetting$.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2686,7 +2774,7 @@
             "label": "color",
             "description": [],
             "signature": [
-              "\"warning\" | \"primary\" | \"success\" | \"danger\" | undefined"
+              "\"warning\" | \"success\" | \"primary\" | \"danger\" | undefined"
             ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
             "deprecated": false,
@@ -3052,7 +3140,7 @@
         "signature": [
           "Omit<",
           "EuiPageProps",
-          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"m\" | \"none\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
           "EuiPageSideBarProps_Deprecated",
           " | undefined; pageHeader?: ",
           "EuiPageHeaderProps",
@@ -3380,7 +3468,7 @@
         "label": "POSITIONS",
         "description": [],
         "signature": [
-          "(\"none\" | \"left\" | \"right\" | \"center\")[]"
+          "(\"none\" | \"right\" | \"left\" | \"center\")[]"
         ],
         "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
@@ -3426,7 +3514,7 @@
           "EuiButtonPropsForAnchor",
           "> & ",
           "EuiButtonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })) & { fontWeight?: Weights | undefined; size?: \"m\" | \"s\" | undefined; hasArrow?: boolean | undefined; groupPosition?: \"none\" | \"left\" | \"right\" | \"center\" | undefined; dataTestSubj?: string | undefined; }"
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })) & { fontWeight?: Weights | undefined; size?: \"m\" | \"s\" | undefined; hasArrow?: boolean | undefined; groupPosition?: \"none\" | \"right\" | \"left\" | \"center\" | undefined; dataTestSubj?: string | undefined; }"
         ],
         "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,

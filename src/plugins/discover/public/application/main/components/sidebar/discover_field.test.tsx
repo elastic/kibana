@@ -19,7 +19,7 @@ import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { FetchStatus } from '../../../types';
-import { DataDocuments$ } from '../../hooks/use_saved_search';
+import { DataDocuments$ } from '../../services/discover_data_state_container';
 import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import * as DetailsUtil from './deprecated_stats/get_details';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';

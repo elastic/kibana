@@ -8,16 +8,18 @@
 
 import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors } from './utils';
+import { catchAndReturnBoomErrors, throwIfAnyTypeNotVisibleByAPI } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerBulkGetRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { coreUsageData, logger }: RouteDependencies
 ) => {
   router.post(
     {
@@ -34,10 +36,14 @@ export const registerBulkGetRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      logger.warn("The bulk get saved object API '/api/saved_objects/_bulk_get' is deprecated.");
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsBulkGet({ request: req }).catch(() => {});
 
       const { savedObjects } = await context.core;
+      const typesToCheck = [...new Set(req.body.map(({ type }) => type))];
+      throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
+
       const result = await savedObjects.client.bulkGet(req.body);
       return res.ok({ body: result });
     })

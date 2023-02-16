@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
+import { Router, Switch, Redirect, RouteComponentProps } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
@@ -27,8 +28,6 @@ import { ListPage, MapPage } from './routes';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 import { APP_ID } from '../common/constants';
 import { registerLayerWizards } from './classes/layers/wizards/load_layer_wizards';
-
-export let goToSpecifiedPath: (path: string) => void;
 
 function setAppChrome() {
   if (!getMapsCapabilities().save) {
@@ -73,8 +72,6 @@ export async function renderApp(
     AppUsageTracker: React.FC;
   }
 ) {
-  goToSpecifiedPath = (path) => history.push(path);
-
   const stateTransfer = getEmbeddableService().getStateTransfer();
 
   registerLayerWizards();
@@ -137,7 +134,7 @@ export async function renderApp(
                       const newPath = hash.substr(1);
                       return <Redirect to={newPath} />;
                     } else if (pathname === '/' || pathname === '') {
-                      return <ListPage stateTransfer={stateTransfer} />;
+                      return <ListPage history={history} stateTransfer={stateTransfer} />;
                     } else {
                       return <Redirect to="/" />;
                     }

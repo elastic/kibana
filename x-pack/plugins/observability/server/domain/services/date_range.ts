@@ -23,7 +23,12 @@ export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date
       throw new Error('Cannot compute date range with future starting time');
     }
 
-    const from = startTime.clone().add(differenceInUnit, unit);
+    const from = startTime
+      .clone()
+      .add(
+        Math.floor(differenceInUnit / timeWindow.duration.value) * timeWindow.duration.value,
+        unit
+      );
     const to = from.clone().add(timeWindow.duration.value, unit);
 
     return { from: from.toDate(), to: to.toDate() };

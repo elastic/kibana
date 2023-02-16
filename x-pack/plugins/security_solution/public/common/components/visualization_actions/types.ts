@@ -21,6 +21,7 @@ export type GetLensAttributes = (
 
 export interface VisualizationActionsProps {
   className?: string;
+  extraActions?: Action[];
   getLensAttributes?: GetLensAttributes;
   inputId?: InputsModelId.global | InputsModelId.timeline;
   inspectIndex?: number;
@@ -32,6 +33,7 @@ export interface VisualizationActionsProps {
   stackByField?: string;
   timerange: { from: string; to: string };
   title: React.ReactNode;
+  withDefaultActions?: boolean;
 }
 
 export interface EmbeddableData {
@@ -43,7 +45,7 @@ export interface EmbeddableData {
 export type OnEmbeddableLoaded = (data: EmbeddableData) => void;
 
 export interface LensEmbeddableComponentProps {
-  adHocDataViews?: string[];
+  applyGlobalQueriesAndFilters?: boolean;
   extraActions?: Action[];
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
@@ -57,6 +59,7 @@ export interface LensEmbeddableComponentProps {
   stackByField?: string;
   timerange: { from: string; to: string };
   width?: string;
+  withActions?: boolean;
 }
 
 export enum RequestStatus {
@@ -103,4 +106,11 @@ export interface ExtraOptions {
   ruleId?: string;
   spaceId?: string;
   status?: Status;
+}
+
+export interface VisualizationEmbeddableProps extends LensEmbeddableComponentProps {
+  donutTextWrapperClassName?: string;
+  inputId?: InputsModelId.global | InputsModelId.timeline;
+  isDonut?: boolean;
+  label?: string;
 }

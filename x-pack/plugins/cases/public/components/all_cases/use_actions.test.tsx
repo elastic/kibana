@@ -73,6 +73,7 @@ describe('useActions', () => {
       expect(res.getByText('Actions')).toBeInTheDocument();
       expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
       expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+      expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
     });
   });
 
@@ -140,6 +141,40 @@ describe('useActions', () => {
 
     await waitFor(() => {
       expect(updateCasesSpy).toHaveBeenCalled();
+    });
+  });
+
+  it('copies the case id to the clipboard', async () => {
+    const originalClipboard = global.window.navigator.clipboard;
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: jest.fn().mockImplementation(() => Promise.resolve()),
+      },
+      writable: true,
+    });
+
+    const { result } = renderHook(() => useActions({ disableActions: false }), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+    const res = appMockRender.render(comp);
+
+    userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+
+    await waitFor(() => {
+      expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
+    });
+
+    userEvent.click(res.getByTestId('cases-action-copy-id'), undefined, {
+      skipPointerEventsCheck: true,
+    });
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
     });
   });
 
@@ -304,6 +339,7 @@ describe('useActions', () => {
         expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
         expect(res.getByTestId(`actions-separator-${basicCase.id}`)).toBeInTheDocument();
+        expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
       });
     });
 
@@ -321,6 +357,7 @@ describe('useActions', () => {
       await waitFor(() => {
         expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
         expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
+        expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
         expect(res.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
         expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
       });
@@ -340,6 +377,7 @@ describe('useActions', () => {
       await waitFor(() => {
         expect(res.queryByTestId(`case-action-status-panel-${basicCase.id}`)).toBeFalsy();
         expect(res.queryByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeFalsy();
+        expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
         expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
       });

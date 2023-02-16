@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { ChartLoader } from '../chart_loader';
 import { Field, SplitField } from '../../../../../../common/types/fields';
 const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
@@ -29,18 +30,23 @@ export class MapLoader extends ChartLoader {
     geoField: Field,
     splitField: SplitField,
     fieldValues: string[],
-    filters?: any[]
+    filters?: any[],
+    savedSearchQuery?: Query
   ) {
     const layerList: LayerDescriptor[] = [];
     if (this._dataView.id !== undefined && geoField) {
+      const { query } = savedSearchQuery ?? {};
+      const queryString =
+        fieldValues.length && splitField
+          ? `${splitField.name}:${fieldValues[0]} ${query ? `and ${query}` : ''}`
+          : `${query ? query : ''}`;
+
       const params: any = {
         indexPatternId: this._dataView.id,
         geoFieldName: geoField.name,
         geoFieldType: geoField.type as unknown as ES_GEO_FIELD_TYPE,
         filters: filters ?? [],
-        ...(fieldValues.length && splitField
-          ? { query: { query: `${splitField.name}:${fieldValues[0]}`, language: 'kuery' } }
-          : {}),
+        query: { query: queryString, language: 'kuery' },
       };
 
       const searchLayerDescriptor = this._getMapData ? await this._getMapData(params) : null;

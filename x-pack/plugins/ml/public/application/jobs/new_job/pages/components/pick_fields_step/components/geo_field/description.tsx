@@ -8,7 +8,7 @@
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiDescribedFormGroup } from '@elastic/eui';
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.geoField.title', {
@@ -20,13 +20,11 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.geoField.description"
-          defaultMessage="Select a geo field to detect anomalies in the geographic location of the input data."
+          defaultMessage="A geo field to detect anomalies in the geographic location of the input data."
         />
       }
     >
-      <EuiFormRow label={title}>
-        <>{children}</>
-      </EuiFormRow>
+      <>{children}</>
     </EuiDescribedFormGroup>
   );
 });

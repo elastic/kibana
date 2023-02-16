@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import uuid from 'uuid/v5';
+import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
 import { safeLoad } from 'js-yaml';
 
@@ -64,7 +64,7 @@ export function outputIdToUuid(id: string) {
   }
 
   // UUID v5 need a namespace (uuid.DNS), changing this params will result in loosing the ability to generate predicable uuid
-  return uuid(id, uuid.DNS);
+  return uuidv5(id, uuidv5.DNS);
 }
 
 function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {

@@ -35,7 +35,11 @@ export class SyntheticsServices {
     }
   }
 
-  async addTestMonitor(name: string, data: Record<string, any> = { type: 'browser' }) {
+  async addTestMonitor(
+    name: string,
+    data: Record<string, any> = { type: 'browser' },
+    configId?: string
+  ) {
     const testData = {
       alert: { status: { enabled: true } },
       locations: [{ id: 'us_central', isServiceManaged: true }],
@@ -45,7 +49,10 @@ export class SyntheticsServices {
     };
     try {
       const response = await axios.post(
-        this.kibanaUrl + '/internal/uptime/service/monitors',
+        this.kibanaUrl +
+          (configId
+            ? `/internal/uptime/service/monitors?id=${configId}`
+            : `/internal/uptime/service/monitors`),
         testData,
         {
           auth: { username: 'elastic', password: 'changeme' },

@@ -1,3 +1,4 @@
+title: Connector types
 type: string
 description: The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.
 enum:

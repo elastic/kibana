@@ -98,8 +98,8 @@ export function CopyToDashboardModal({
         >
           <PresentationUtilContext>
             <EuiModalHeader>
-              <EuiModalHeaderTitle>
-                <h2 id={titleId}>{dashboardCopyToDashboardActionStrings.getDisplayName()}</h2>
+              <EuiModalHeaderTitle id={titleId} component="h2">
+                {dashboardCopyToDashboardActionStrings.getDisplayName()}
               </EuiModalHeaderTitle>
             </EuiModalHeader>
 

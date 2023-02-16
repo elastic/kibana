@@ -8,16 +8,18 @@
 
 import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors } from './utils';
+import { catchAndReturnBoomErrors, throwIfAnyTypeNotVisibleByAPI } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerBulkDeleteRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { coreUsageData, logger }: RouteDependencies
 ) => {
   router.post(
     {
@@ -35,11 +37,17 @@ export const registerBulkDeleteRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      logger.warn(
+        "The bulk update saved object API '/api/saved_objects/_bulk_update' is deprecated."
+      );
       const { force } = req.query;
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsBulkDelete({ request: req }).catch(() => {});
 
       const { savedObjects } = await context.core;
+
+      const typesToCheck = [...new Set(req.body.map(({ type }) => type))];
+      throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
 
       const statuses = await savedObjects.client.bulkDelete(req.body, { force });
       return res.ok({ body: statuses });

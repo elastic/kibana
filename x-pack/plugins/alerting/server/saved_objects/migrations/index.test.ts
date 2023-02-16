@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from '.';
 import { RawRule } from '../../types';
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
@@ -2509,37 +2509,124 @@ describe('successful migrations', () => {
   });
 
   describe('8.7.0', () => {
-    test('migrates es_query rule params and adds group by fields', () => {
-      const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0'];
-      const rule = getMockData(
-        {
-          params: { esQuery: '{ "query": "test-query" }', searchType: 'esQuery' },
-          alertTypeId: '.es-query',
-        },
-        true
-      );
-      const migratedAlert870 = migration870(rule, migrationContext);
+    describe('es_query rule', () => {
+      test('migrates es_query rule params and adds group by fields', () => {
+        const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.7.0'
+        ];
+        const rule = getMockData(
+          {
+            params: { esQuery: '{ "query": "test-query" }', searchType: 'esQuery' },
+            alertTypeId: '.es-query',
+          },
+          true
+        );
+        const migratedAlert870 = migration870(rule, migrationContext);
 
-      expect(migratedAlert870.attributes.params).toEqual({
-        esQuery: '{ "query": "test-query" }',
-        searchType: 'esQuery',
-        aggType: 'count',
-        groupBy: 'all',
+        expect(migratedAlert870.attributes.params).toEqual({
+          esQuery: '{ "query": "test-query" }',
+          searchType: 'esQuery',
+          aggType: 'count',
+          groupBy: 'all',
+        });
+      });
+
+      test('does not migrate rule params if rule is not es query', () => {
+        const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.7.0'
+        ];
+        const rule = getMockData(
+          {
+            params: { foo: true },
+            alertTypeId: '.not-es-query',
+          },
+          true
+        );
+        const migratedAlert870 = migration870(rule, migrationContext);
+
+        expect(migratedAlert870.attributes.params).toEqual({ foo: true });
       });
     });
 
-    test('does not migrate rule params if rule is not es query', () => {
-      const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0'];
-      const rule = getMockData(
-        {
-          params: { foo: true },
-          alertTypeId: '.not-es-query',
-        },
-        true
-      );
-      const migratedAlert870 = migration870(rule, migrationContext);
+    describe('log threshold rule', () => {
+      const logThresholdAlertTypeId = 'logs.alert.document.count';
+      const logViewId = 'log-view-reference-0';
 
-      expect(migratedAlert870.attributes.params).toEqual({ foo: true });
+      const params = {
+        timeSize: 5,
+        timeUnit: 'm',
+        count: {
+          value: 75,
+          comparator: 'more than',
+        },
+        criteria: [
+          {
+            field: 'log.level',
+            comparator: 'equals',
+            value: 'error',
+          },
+        ],
+      };
+
+      const logView = {
+        logViewId,
+        type: 'log-view-reference',
+      };
+
+      const references = [
+        {
+          name: `param:${logViewId}`,
+          type: 'infrastructure-monitoring-log-view',
+          id: 'default',
+        },
+      ];
+
+      test('should migrate and add the logView param and its reference', () => {
+        const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.7.0'
+        ];
+        const rule = getMockData({ params, alertTypeId: logThresholdAlertTypeId }, true);
+        const migratedAlert870 = migration870(rule, migrationContext);
+
+        expect(migratedAlert870.attributes.params).toEqual({
+          ...params,
+          logView,
+        });
+        expect(migratedAlert870.references).toEqual(references);
+      });
+
+      test('should not migrate the rule if is not of type logs.alert.document.count', () => {
+        const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.7.0'
+        ];
+        const rule = getMockData({ params, alertTypeId: `not-${logThresholdAlertTypeId}` }, true);
+        const migratedAlert870 = migration870(rule, migrationContext);
+
+        expect(migratedAlert870.attributes.params).toEqual(params);
+        expect(migratedAlert870.references).toEqual([]);
+      });
+    });
+
+    test('migrates last run outcome order', () => {
+      const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0'];
+
+      // Failed rule
+      const failedRule = getMockData({ lastRun: { outcome: 'failed' } });
+      const failedRule870 = migration870(failedRule, migrationContext);
+      expect(failedRule870.attributes.lastRun).toEqual({ outcome: 'failed', outcomeOrder: 20 });
+
+      // Rule with warnings
+      const warningRule = getMockData({ lastRun: { outcome: 'warning' } });
+      const warningRule870 = migration870(warningRule, migrationContext);
+      expect(warningRule870.attributes.lastRun).toEqual({ outcome: 'warning', outcomeOrder: 10 });
+
+      // Succeeded rule
+      const succeededRule = getMockData({ lastRun: { outcome: 'succeeded' } });
+      const succeededRule870 = migration870(succeededRule, migrationContext);
+      expect(succeededRule870.attributes.lastRun).toEqual({
+        outcome: 'succeeded',
+        outcomeOrder: 0,
+      });
     });
   });
 
@@ -2891,8 +2978,9 @@ function getMockData(
       ],
       ...overwrites,
     },
+    references: [],
     updated_at: withSavedObjectUpdatedAt ? getUpdatedAt() : undefined,
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'alert',
   };
 }

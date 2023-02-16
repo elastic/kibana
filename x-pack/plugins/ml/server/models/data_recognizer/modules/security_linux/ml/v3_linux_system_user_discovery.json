@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Linux - Looks for commands related to system user or owner discovery from an unusual user context. This can be due to uncommon troubleshooting activity or due to a compromised account. A compromised account may be used to engage in system owner or user discovery to identify currently active or primary users of a system. This may be a precursor to additional discovery, credential dumping, or privilege elevation activity.",
   "groups": [
     "security",

@@ -19,7 +19,15 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   id,
   params,
   actionTypeId,
-  frequency,
+  ...(frequency
+    ? {
+        frequency: {
+          summary: frequency.summary,
+          notifyWhen: frequency.notify_when,
+          throttle: frequency.throttle,
+        },
+      }
+    : {}),
 });
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
@@ -34,10 +42,12 @@ const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
 
 const transformLastRun: RewriteRequestCase<RuleLastRun> = ({
   outcome_msg: outcomeMsg,
+  outcome_order: outcomeOrder,
   alerts_count: alertsCount,
   ...rest
 }) => ({
   outcomeMsg,
+  outcomeOrder,
   alertsCount,
   ...rest,
 });

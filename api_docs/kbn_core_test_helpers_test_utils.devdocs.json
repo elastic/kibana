@@ -62,6 +62,84 @@
       },
       {
         "parentPluginId": "@kbn/core-test-helpers-test-utils",
+        "id": "def-common.createHiddenTypeVariants",
+        "type": "Function",
+        "tags": [],
+        "label": "createHiddenTypeVariants",
+        "description": [],
+        "signature": [
+          "(createOptions: { name: string; hide?: boolean | undefined; hideFromHttpApis?: boolean | undefined; }) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsType",
+            "text": "SavedObjectsType"
+          },
+          "<any>"
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-test-utils",
+            "id": "def-common.createHiddenTypeVariants.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "createOptions",
+            "description": [],
+            "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-test-utils",
+                "id": "def-common.createHiddenTypeVariants.$1.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-test-utils",
+                "id": "def-common.createHiddenTypeVariants.$1.hide",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "hide",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-test-utils",
+                "id": "def-common.createHiddenTypeVariants.$1.hideFromHttpApis",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "hideFromHttpApis",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-test-utils",
         "id": "def-common.setupServer",
         "type": "Function",
         "tags": [],

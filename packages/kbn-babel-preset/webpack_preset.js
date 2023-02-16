@@ -19,7 +19,7 @@ module.exports = (api, options = {}) => {
           modules: false,
           // Please read the explanation for this
           // in node_preset.js
-          corejs: '3.27.1',
+          corejs: '3.27.2',
           bugfixes: true,
           browserslistEnv: api.env('production') ? 'production' : 'dev',
         },

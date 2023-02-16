@@ -15,7 +15,7 @@ import { DataViewField } from '@kbn/data-views-plugin/public';
 import { stubDataView, stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../../types';
-import { DataDocuments$ } from '../../../hooks/use_saved_search';
+import { DataDocuments$ } from '../../../services/discover_data_state_container';
 import { getDataTableRecords } from '../../../../../__fixtures__/real_hits';
 
 describe('discover sidebar field details', function () {

@@ -462,6 +462,14 @@ class BrowserService extends FtrService {
   }
 
   /**
+   * Opens a blank new tab.
+   * @return {Promise<string>}
+   */
+  public async openNewTab() {
+    await this.driver.switchTo().newWindow('tab');
+  }
+
+  /**
    * Sets a value in local storage for the focused window/frame.
    *
    * @param {string} key

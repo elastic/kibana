@@ -5,37 +5,58 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiPopover,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../utils/kibana_react';
-import { SloSummaryStats } from './slo_summary_stats';
+import { useCreateOrUpdateSlo } from '../../../hooks/slo/use_create_slo';
+import { SloSummary } from './slo_summary';
 import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
-import { SloBadges } from './slo_badges';
+import { SloBadges } from './badges/slo_badges';
+import {
+  transformSloResponseToCreateSloInput,
+  transformValuesToCreateSLOInput,
+} from '../../slo_edit/helpers/process_slo_form_values';
 import { paths } from '../../../config';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
+  historicalSummary?: HistoricalSummaryResponse[];
+  historicalSummaryLoading: boolean;
+  onCloned: () => void;
+  onCloning: () => void;
   onDeleted: () => void;
   onDeleting: () => void;
 }
 
-export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
+export function SloListItem({
+  slo,
+  historicalSummary = [],
+  historicalSummaryLoading,
+  onCloned,
+  onCloning,
+  onDeleted,
+  onDeleting,
+}: SloListItemProps) {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
+  const { hasWriteCapabilities } = useCapabilities();
+
+  const { createSlo, loading: isCloning, success: isCloned } = useCreateOrUpdateSlo();
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
@@ -49,14 +70,19 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
     navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
   };
 
+  const handleClone = () => {
+    const newSlo = transformValuesToCreateSLOInput(
+      transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
+    );
+
+    createSlo(newSlo);
+    setIsActionsPopoverOpen(false);
+  };
+
   const handleDelete = () => {
     setDeleteConfirmationModalOpen(true);
     setIsDeleting(true);
     setIsActionsPopoverOpen(false);
-  };
-
-  const handleNavigate = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloDetails(slo.id)));
   };
 
   const handleDeleteCancel = () => {
@@ -69,12 +95,23 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
     onDeleted();
   };
 
+  useEffect(() => {
+    if (isCloning) {
+      onCloning();
+    }
+
+    if (isCloned) {
+      onCloned();
+    }
+  }, [isCloned, isCloning, onCloned, onCloning]);
+
   return (
     <EuiPanel
+      data-test-subj="sloItem"
       hasBorder
       hasShadow={false}
-      color={isDeleting ? 'subdued' : undefined}
-      style={{ opacity: isDeleting ? 0.3 : 1, transition: 'opacity 0.15s ease-in' }}
+      color={isCloning || isDeleting ? 'subdued' : undefined}
+      style={{ opacity: isCloning || isDeleting ? 0.3 : 1, transition: 'opacity 0.15s ease-in' }}
     >
       <EuiFlexGroup responsive={false} alignItems="center">
         {/* CONTENT */}
@@ -83,14 +120,18 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
             <EuiFlexItem grow>
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
-                  <EuiLink onClick={handleNavigate}>{slo.name}</EuiLink>
+                  <EuiText size="s">{slo.name}</EuiText>
                 </EuiFlexItem>
                 <SloBadges slo={slo} />
               </EuiFlexGroup>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <SloSummaryStats slo={slo} />
+              <SloSummary
+                slo={slo}
+                historicalSummary={historicalSummary}
+                historicalSummaryLoading={historicalSummaryLoading}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -116,12 +157,35 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
             <EuiContextMenuPanel
               size="s"
               items={[
-                <EuiContextMenuItem key="edit" icon="pencil" onClick={handleEdit}>
+                <EuiContextMenuItem
+                  key="edit"
+                  icon="pencil"
+                  disabled={!hasWriteCapabilities}
+                  onClick={handleEdit}
+                  data-test-subj="sloActionsEdit"
+                >
                   {i18n.translate('xpack.observability.slos.slo.item.actions.edit', {
                     defaultMessage: 'Edit',
                   })}
                 </EuiContextMenuItem>,
-                <EuiContextMenuItem key="delete" icon="trash" onClick={handleDelete}>
+                <EuiContextMenuItem
+                  key="clone"
+                  disabled={!hasWriteCapabilities}
+                  icon="copy"
+                  onClick={handleClone}
+                  data-test-subj="sloActionsClone"
+                >
+                  {i18n.translate('xpack.observability.slos.slo.item.actions.clone', {
+                    defaultMessage: 'Clone',
+                  })}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key="delete"
+                  icon="trash"
+                  disabled={!hasWriteCapabilities}
+                  onClick={handleDelete}
+                  data-test-subj="sloActionsDelete"
+                >
                   {i18n.translate('xpack.observability.slos.slo.item.actions.delete', {
                     defaultMessage: 'Delete',
                   })}

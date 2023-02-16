@@ -75,6 +75,7 @@ describe('Discover grid columns', function () {
           "cellActions": Array [
             [Function],
             [Function],
+            [Function],
           ],
           "displayAsText": "extension",
           "id": "extension",
@@ -120,7 +121,9 @@ describe('Discover grid columns', function () {
             "showMoveLeft": true,
             "showMoveRight": true,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+          ],
           "displayAsText": "message",
           "id": "message",
           "isSortable": false,
@@ -188,6 +191,7 @@ describe('Discover grid columns', function () {
           "cellActions": Array [
             [Function],
             [Function],
+            [Function],
           ],
           "displayAsText": "extension",
           "id": "extension",
@@ -230,7 +234,9 @@ describe('Discover grid columns', function () {
             "showMoveLeft": false,
             "showMoveRight": false,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+          ],
           "displayAsText": "message",
           "id": "message",
           "isSortable": false,
@@ -296,6 +302,7 @@ describe('Discover grid columns', function () {
             "showMoveRight": true,
           },
           "cellActions": Array [
+            [Function],
             [Function],
             [Function],
           ],
@@ -365,6 +372,7 @@ describe('Discover grid columns', function () {
           "cellActions": Array [
             [Function],
             [Function],
+            [Function],
           ],
           "displayAsText": "extension",
           "id": "extension",
@@ -410,7 +418,9 @@ describe('Discover grid columns', function () {
             "showMoveLeft": true,
             "showMoveRight": true,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+          ],
           "displayAsText": "message",
           "id": "message",
           "isSortable": false,

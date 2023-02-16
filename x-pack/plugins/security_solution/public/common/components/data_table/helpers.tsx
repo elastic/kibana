@@ -9,8 +9,8 @@ import { isEmpty } from 'lodash/fp';
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SortColumnTable } from '../../../../common/types';
-import type { Ecs } from '../../../../common/ecs';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { ColumnHeaderOptions, SortDirection } from '../../../../common/types/timeline';
 

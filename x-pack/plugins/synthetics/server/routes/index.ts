@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createJourneyRoute } from './pings/journeys';
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
 import { syncParamsSyntheticsParamsRoute } from './settings/sync_global_params';
 import { editSyntheticsParamsRoute } from './settings/edit_param';
@@ -34,12 +35,12 @@ import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
 import { addSyntheticsProjectMonitorRouteLegacy } from './monitor_cruds/add_monitor_project_legacy';
 import { syntheticsGetPingsRoute, syntheticsGetPingStatusesRoute } from './pings';
-import { createGetCurrentStatusRoute } from './status/current_status';
+import { createGetCurrentStatusRoute } from './overview_status/overview_status';
 import {
   SyntheticsRestApiRouteFactory,
   SyntheticsStreamingRouteFactory,
 } from '../legacy_uptime/routes';
-import { getHasZipUrlMonitorRoute } from './fleet/get_has_zip_url_monitors';
+import { getHasIntegrationMonitorsRoute } from './fleet/get_has_integration_monitors';
 import { addSyntheticsParamsRoute } from './settings/add_param';
 import { enableDefaultAlertingRoute } from './default_alerts/enable_default_alert';
 import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
@@ -65,7 +66,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getAPIKeySyntheticsRoute,
   syntheticsGetPingsRoute,
   syntheticsGetPingStatusesRoute,
-  getHasZipUrlMonitorRoute,
+  getHasIntegrationMonitorsRoute,
   createGetCurrentStatusRoute,
   getIndexSizesRoute,
   getSyntheticsParamsRoute,
@@ -75,6 +76,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   enableDefaultAlertingRoute,
   getDefaultAlertingRoute,
   updateDefaultAlertingRoute,
+  createJourneyRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [

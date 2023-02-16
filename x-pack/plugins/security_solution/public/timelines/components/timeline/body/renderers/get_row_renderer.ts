@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { alertRenderer } from './alert_renderer';
 import { combineRenderers } from './combine_renderers';
 import type { RowRenderer } from '../../../../../../common/types';
-import type { Ecs } from '../../../../../../common/ecs';
 
 /**
  * This function may be used by both Timeline and the `Event Rendered view` in

@@ -139,6 +139,7 @@ Note:
 
 - The default `--to` is `15m`.
 - You can combine `--from` and `--to` with `--live` to back-fill some data.
+- To specify `--scenarioOpts` you need to use [yargs Objects syntax](https://github.com/yargs/yargs/blob/HEAD/docs/tricks.md#objects). (e.g. --scenarioOpts.myOption=myValue)
 
 ### Setup options
 

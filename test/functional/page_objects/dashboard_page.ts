@@ -281,6 +281,13 @@ export class DashboardPageObject extends FtrService {
     return await this.testSubjects.exists('dashboardEditMode');
   }
 
+  public async ensureDashboardIsInEditMode() {
+    if (await this.getIsInViewMode()) {
+      await this.switchToEditMode();
+    }
+    await this.waitForRenderComplete();
+  }
+
   public async clickCancelOutOfEditMode(accept = true) {
     this.log.debug('clickCancelOutOfEditMode');
     if (await this.getIsInViewMode()) return;
@@ -318,6 +325,7 @@ export class DashboardPageObject extends FtrService {
       await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
       await this.clickQuickSave();
       await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      await this.testSubjects.click('toastCloseButton');
     });
     if (switchMode) {
       await this.clickCancelOutOfEditMode();

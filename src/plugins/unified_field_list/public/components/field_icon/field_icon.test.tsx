@@ -35,9 +35,4 @@ describe('UnifiedFieldList <FieldIcon />', () => {
     const component = shallow(<FieldIcon type="document" />);
     expect(component).toMatchSnapshot();
   });
-
-  test('renders Histogram type properly', () => {
-    const component = shallow(<FieldIcon type="histogram" />);
-    expect(component).toMatchSnapshot();
-  });
 });

@@ -117,6 +117,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'icons',
   'policy_templates',
   'release',
+  'elasticsearch',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);
@@ -172,7 +173,7 @@ export async function _generatePackageInfoFromPaths(
   return parseAndVerifyArchive(paths, manifests, topLevelDir);
 }
 
-function parseAndVerifyArchive(
+export function parseAndVerifyArchive(
   paths: string[],
   manifests: ManifestMap,
   topLevelDirOverride?: string
@@ -214,6 +215,9 @@ function parseAndVerifyArchive(
   // at least have all required properties
   // get optional values and combine into one object for the remaining operations
   const optGiven = pick(manifest, optionalArchivePackageProps);
+  if (optGiven.elasticsearch) {
+    optGiven.elasticsearch = parseTopLevelElasticsearchEntry(optGiven.elasticsearch);
+  }
   const parsed: ArchivePackage = { ...reqGiven, ...optGiven };
 
   // Package name and version from the manifest must match those from the toplevel directory
@@ -260,7 +264,11 @@ function parseAndVerifyArchive(
   return parsed;
 }
 
-function parseAndVerifyReadme(paths: string[], pkgName: string, pkgVersion: string): string | null {
+export function parseAndVerifyReadme(
+  paths: string[],
+  pkgName: string,
+  pkgVersion: string
+): string | null {
   const readmeRelPath = `/docs/README.md`;
   const readmePath = `${pkgName}-${pkgVersion}${readmeRelPath}`;
   return paths.includes(readmePath) ? `/package/${pkgName}/${pkgVersion}${readmeRelPath}` : null;
@@ -417,7 +425,9 @@ export function parseAndVerifyVars(manifestVars: any[], location: string): Regis
       const { name, type, ...restOfProps } = manifestVar;
       if (!(name && type)) {
         throw new PackageInvalidArchiveError(
-          `Invalid var definition for ${location}: one of mandatory fields 'name' and 'type' missing in var: ${manifestVar}`
+          `Invalid var definition for ${location}: one of mandatory fields 'name' and 'type' missing in var: ${JSON.stringify(
+            manifestVar
+          )}`
         );
       }
 
@@ -456,7 +466,9 @@ export function parseAndVerifyPolicyTemplates(
       } = policyTemplate;
       if (!(name && policyTemplateTitle && description)) {
         throw new PackageInvalidArchiveError(
-          `Invalid top-level manifest: one of mandatory fields 'name', 'title', 'description' is missing in policy template: ${policyTemplate}`
+          `Invalid top-level manifest: one of mandatory fields 'name', 'title', 'description' is missing in policy template: ${JSON.stringify(
+            policyTemplate
+          )}`
         );
       }
       let parsedInputs: RegistryInput[] | undefined = [];
@@ -499,7 +511,9 @@ export function parseAndVerifyInputs(manifestInputs: any, location: string): Reg
       const { title: inputTitle, vars, ...restOfProps } = input;
       if (!(input.type && inputTitle)) {
         throw new PackageInvalidArchiveError(
-          `Invalid top-level manifest: one of mandatory fields 'type', 'title' missing in input: ${input}`
+          `Invalid top-level manifest: one of mandatory fields 'type', 'title' missing in input: ${JSON.stringify(
+            input
+          )}`
         );
       }
       const parsedVars = parseAndVerifyVars(vars, location);
@@ -554,10 +568,38 @@ export function parseDataStreamElasticsearchEntry(
     );
   }
 
+  if (expandedElasticsearch?.index_template?.data_stream) {
+    parsedElasticsearchEntry['index_template.data_stream'] = expandDottedEntries(
+      expandedElasticsearch.index_template.data_stream
+    );
+  }
+
   if (expandedElasticsearch?.index_mode) {
     parsedElasticsearchEntry.index_mode = expandedElasticsearch.index_mode;
   }
 
+  return parsedElasticsearchEntry;
+}
+
+export function parseTopLevelElasticsearchEntry(elasticsearch?: Record<string, any>) {
+  const parsedElasticsearchEntry: Record<string, any> = {};
+  const expandedElasticsearch = expandDottedObject(elasticsearch);
+
+  if (expandedElasticsearch?.privileges) {
+    parsedElasticsearchEntry.privileges = expandedElasticsearch.privileges;
+  }
+
+  if (expandedElasticsearch?.index_template?.mappings) {
+    parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
+      expandedElasticsearch.index_template.mappings
+    );
+  }
+
+  if (expandedElasticsearch?.index_template?.settings) {
+    parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
+      expandedElasticsearch.index_template.settings
+    );
+  }
   return parsedElasticsearchEntry;
 }
 

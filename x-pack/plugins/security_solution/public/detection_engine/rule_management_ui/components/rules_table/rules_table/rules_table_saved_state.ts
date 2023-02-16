@@ -19,6 +19,7 @@ export const RulesTableSavedFilter = t.partial({
   searchTerm: t.string,
   source: enumeration('RuleSource', RuleSource),
   tags: t.array(t.string),
+  enabled: t.boolean,
 });
 
 export type RulesTableSavedSorting = t.TypeOf<typeof RulesTableSavedSorting>;

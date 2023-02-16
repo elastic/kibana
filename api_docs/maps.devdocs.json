@@ -471,13 +471,15 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.getDescription",
+            "id": "def-public.MapEmbeddable.getLayerList",
             "type": "Function",
             "tags": [],
-            "label": "getDescription",
+            "label": "getLayerList",
             "description": [],
             "signature": [
-              "() => string | undefined"
+              "() => ",
+              "ILayer",
+              "[]"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiAvatar,
   EuiButton,
+  EuiFlexGroup,
   EuiFormLabel,
   EuiPanel,
   EuiSelect,
@@ -23,17 +24,20 @@ import { Controller, useForm } from 'react-hook-form';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../../utils/kibana_react';
-import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
-import { useCheckFormPartialValidities } from '../helpers/use_check_form_partial_validities';
-import { SloEditFormDefinitionCustomKql } from './slo_edit_form_definition_custom_kql';
+import { useCreateOrUpdateSlo } from '../../../hooks/slo/use_create_slo';
+import { useSectionFormValidation } from '../helpers/use_section_form_validation';
+import { CustomKqlIndicatorTypeForm } from './custom_kql/custom_kql_indicator_type_form';
 import { SloEditFormDescription } from './slo_edit_form_description';
 import { SloEditFormObjectives } from './slo_edit_form_objectives';
 import {
-  processValues,
-  transformGetSloToCreateSloParams,
+  transformValuesToCreateSLOInput,
+  transformSloResponseToCreateSloInput,
+  transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
 import { paths } from '../../../config';
 import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
+import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
@@ -42,52 +46,78 @@ export interface Props {
 const maxWidth = 775;
 
 export function SloEditForm({ slo }: Props) {
+  const isEditMode = slo !== undefined;
   const {
     application: { navigateToUrl },
     http: { basePath },
     notifications: { toasts },
   } = useKibana().services;
 
-  const { control, watch, getFieldState, getValues, formState, trigger } = useForm({
+  const { control, watch, getFieldState, getValues, formState } = useForm({
     defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
-    values: transformGetSloToCreateSloParams(slo),
+    values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',
   });
 
-  const { isDefinitionValid, isDescriptionValid, isObjectiveValid } = useCheckFormPartialValidities(
-    { getFieldState, formState }
-  );
+  const { isIndicatorSectionValid, isDescriptionSectionValid, isObjectiveSectionValid } =
+    useSectionFormValidation({
+      getFieldState,
+      getValues,
+      formState,
+      watch,
+    });
 
-  const {
-    loading: loadingCreatingSlo,
-    success: successCreatingSlo,
-    error: errorCreatingSlo,
-    createSlo,
-  } = useCreateSlo();
+  const { loading, success, error, createSlo, updateSlo } = useCreateOrUpdateSlo();
 
-  const handleCreateSlo = () => {
+  const handleSubmit = () => {
     const values = getValues();
-    const processedValues = processValues(values);
-    createSlo(processedValues);
+    if (isEditMode) {
+      const processedValues = transformValuesToUpdateSLOInput(values);
+      updateSlo(slo.id, processedValues);
+    } else {
+      const processedValues = transformValuesToCreateSLOInput(values);
+      createSlo(processedValues);
+    }
   };
 
-  if (successCreatingSlo) {
-    toasts.addSuccess(
-      i18n.translate('xpack.observability.slos.sloEdit.creation.success', {
-        defaultMessage: 'Successfully created {name}',
-        values: { name: getValues().name },
-      })
-    );
-    navigateToUrl(basePath.prepend(paths.observability.slos));
-  }
+  useEffect(() => {
+    if (success) {
+      toasts.addSuccess(
+        isEditMode
+          ? i18n.translate('xpack.observability.slos.sloEdit.update.success', {
+              defaultMessage: 'Successfully updated {name}',
+              values: { name: getValues().name },
+            })
+          : i18n.translate('xpack.observability.slos.sloEdit.creation.success', {
+              defaultMessage: 'Successfully created {name}',
+              values: { name: getValues().name },
+            })
+      );
 
-  if (errorCreatingSlo) {
-    toasts.addError(new Error(errorCreatingSlo), {
-      title: i18n.translate('xpack.observability.slos.sloEdit.creation.error', {
-        defaultMessage: 'Something went wrong',
-      }),
-    });
-  }
+      navigateToUrl(basePath.prepend(paths.observability.slos));
+    }
+
+    if (error) {
+      toasts.addError(new Error(error), {
+        title: i18n.translate('xpack.observability.slos.sloEdit.creation.error', {
+          defaultMessage: 'Something went wrong',
+        }),
+      });
+    }
+  }, [success, error, toasts, isEditMode, getValues, navigateToUrl, basePath]);
+
+  const getIndicatorTypeForm = () => {
+    switch (watch('indicator.type')) {
+      case 'sli.kql.custom':
+        return <CustomKqlIndicatorTypeForm control={control} watch={watch} />;
+      case 'sli.apm.transactionDuration':
+        return <ApmLatencyIndicatorTypeForm control={control} />;
+      case 'sli.apm.transactionErrorRate':
+        return <ApmAvailabilityIndicatorTypeForm control={control} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <EuiTimeline data-test-subj="sloForm">
@@ -95,9 +125,11 @@ export function SloEditForm({ slo }: Props) {
         verticalAlign="top"
         icon={
           <EuiAvatar
-            name={isDefinitionValid ? 'Check' : '1'}
-            iconType={isDefinitionValid ? 'check' : ''}
-            color={isDefinitionValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary}
+            name={isIndicatorSectionValid ? 'Check' : '1'}
+            iconType={isIndicatorSectionValid ? 'check' : ''}
+            color={
+              isIndicatorSectionValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary
+            }
           />
         }
       >
@@ -122,7 +154,7 @@ export function SloEditForm({ slo }: Props) {
             name="indicator.type"
             control={control}
             rules={{ required: true }}
-            render={({ field }) => (
+            render={({ field: { ref, ...field } }) => (
               <EuiSelect
                 data-test-subj="sloFormIndicatorTypeSelect"
                 {...field}
@@ -133,9 +165,7 @@ export function SloEditForm({ slo }: Props) {
 
           <EuiSpacer size="xxl" />
 
-          {watch('indicator.type') === 'sli.kql.custom' ? (
-            <SloEditFormDefinitionCustomKql control={control} trigger={trigger} />
-          ) : null}
+          {getIndicatorTypeForm()}
 
           <EuiSpacer size="m" />
         </EuiPanel>
@@ -145,9 +175,11 @@ export function SloEditForm({ slo }: Props) {
         verticalAlign="top"
         icon={
           <EuiAvatar
-            name={isObjectiveValid ? 'Check' : '2'}
-            iconType={isObjectiveValid ? 'check' : ''}
-            color={isObjectiveValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary}
+            name={isObjectiveSectionValid ? 'Check' : '2'}
+            iconType={isObjectiveSectionValid ? 'check' : ''}
+            color={
+              isObjectiveSectionValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary
+            }
           />
         }
       >
@@ -172,9 +204,13 @@ export function SloEditForm({ slo }: Props) {
         verticalAlign="top"
         icon={
           <EuiAvatar
-            name={isDescriptionValid ? 'Check' : '3'}
-            iconType={isDescriptionValid ? 'check' : ''}
-            color={isDescriptionValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary}
+            name={isDescriptionSectionValid ? 'Check' : '3'}
+            iconType={isDescriptionSectionValid ? 'check' : ''}
+            color={
+              isDescriptionSectionValid
+                ? euiThemeVars.euiColorSuccess
+                : euiThemeVars.euiColorPrimary
+            }
           />
         }
       >
@@ -193,18 +229,34 @@ export function SloEditForm({ slo }: Props) {
 
           <EuiSpacer size="xl" />
 
-          <EuiButton
-            fill
-            color="primary"
-            data-test-subj="sloFormSubmitButton"
-            onClick={handleCreateSlo}
-            disabled={!formState.isValid}
-            isLoading={loadingCreatingSlo && !errorCreatingSlo}
-          >
-            {i18n.translate('xpack.observability.slos.sloEdit.createSloButton', {
-              defaultMessage: 'Create SLO',
-            })}
-          </EuiButton>
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiButton
+              fill
+              color="primary"
+              data-test-subj="sloFormSubmitButton"
+              onClick={handleSubmit}
+              disabled={!formState.isValid}
+              isLoading={loading && !error}
+            >
+              {isEditMode
+                ? i18n.translate('xpack.observability.slos.sloEdit.editSloButton', {
+                    defaultMessage: 'Update SLO',
+                  })
+                : i18n.translate('xpack.observability.slos.sloEdit.createSloButton', {
+                    defaultMessage: 'Create SLO',
+                  })}
+            </EuiButton>
+            <EuiButton
+              fill
+              color="ghost"
+              data-test-subj="sloFormCancelButton"
+              onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
+            >
+              {i18n.translate('xpack.observability.slos.sloEdit.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButton>
+          </EuiFlexGroup>
 
           <EuiSpacer size="xl" />
         </EuiPanel>

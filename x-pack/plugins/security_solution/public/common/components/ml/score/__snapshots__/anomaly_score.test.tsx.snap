@@ -5,8 +5,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <DraggableScore
-      id="anomaly-scores-job-key-1"
+    <Score
       index={0}
       score={
         Object {

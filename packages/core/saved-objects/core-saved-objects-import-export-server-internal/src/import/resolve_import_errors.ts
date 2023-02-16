@@ -8,7 +8,6 @@
 
 import { Readable } from 'stream';
 import type {
-  SavedObject,
   SavedObjectsImportRetry,
   SavedObjectsImportFailure,
   SavedObjectsImportResponse,
@@ -18,6 +17,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type {
   ISavedObjectTypeRegistry,
   SavedObjectsImportHook,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import {
   collectSavedObjects,

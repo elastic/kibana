@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiFieldNumber, EuiFlexGrid, EuiFlexItem, EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Control, Controller } from 'react-hook-form';
-import type { CreateSLOParams } from '@kbn/slo-schema';
+import type { CreateSLOInput } from '@kbn/slo-schema';
 
 export interface Props {
-  control: Control<CreateSLOParams>;
+  control: Control<CreateSLOInput>;
 }
 
 export function SloEditFormObjectivesTimeslices({ control }: Props) {
@@ -20,11 +20,12 @@ export function SloEditFormObjectivesTimeslices({ control }: Props) {
     <EuiFlexGrid columns={3}>
       <EuiFlexItem>
         <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.objectives.timeSliceTarget', {
+          {i18n.translate('xpack.observability.slos.sloEdit.timeSliceTarget.label', {
             defaultMessage: 'Timeslice target (%)',
           })}
         </EuiFormLabel>
         <Controller
+          shouldUnregister={true}
           name="objective.timesliceTarget"
           control={control}
           defaultValue={95}
@@ -33,9 +34,10 @@ export function SloEditFormObjectivesTimeslices({ control }: Props) {
             min: 0.001,
             max: 99.999,
           }}
-          render={({ field }) => (
+          render={({ field: { ref, ...field } }) => (
             <EuiFieldNumber
               {...field}
+              value={String(field.value)}
               data-test-subj="sloFormObjectiveTimesliceTargetInput"
               min={0.001}
               max={99.999}
@@ -48,16 +50,18 @@ export function SloEditFormObjectivesTimeslices({ control }: Props) {
 
       <EuiFlexItem>
         <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.objectives.timesliceWindow', {
+          {i18n.translate('xpack.observability.slos.sloEdit.timesliceWindow.label', {
             defaultMessage: 'Timeslice window (minutes)',
           })}
         </EuiFormLabel>
 
         <Controller
+          shouldUnregister={true}
           name="objective.timesliceWindow"
+          defaultValue="1"
           control={control}
           rules={{ required: true, min: 1, max: 120 }}
-          render={({ field }) => (
+          render={({ field: { ref, ...field } }) => (
             <EuiFieldNumber
               {...field}
               data-test-subj="sloFormObjectiveTimesliceWindowInput"
@@ -65,7 +69,7 @@ export function SloEditFormObjectivesTimeslices({ control }: Props) {
               min={1}
               max={120}
               step={1}
-              onChange={(event) => field.onChange(String(event.target.value))}
+              onChange={(event) => field.onChange(String(Number(event.target.value)))}
             />
           )}
         />

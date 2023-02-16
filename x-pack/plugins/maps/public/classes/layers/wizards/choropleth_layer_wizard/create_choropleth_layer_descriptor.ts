@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
@@ -48,7 +48,7 @@ function createChoroplethLayerDescriptor({
   layerType: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR;
 }) {
   const metricsDescriptor: CountAggDescriptor = { type: AGG_TYPE.COUNT };
-  const joinId = uuid();
+  const joinId = uuidv4();
   const joinKey = getJoinAggKey({
     aggType: metricsDescriptor.type,
     aggFieldName: '',

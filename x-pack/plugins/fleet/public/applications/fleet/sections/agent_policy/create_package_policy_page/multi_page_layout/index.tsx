@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 
 import { splitPkgKey } from '../../../../../../../common/services';
 
-import { useGetPackageInfoByKey, useLink, useFleetServerHostsForPolicy } from '../../../../hooks';
+import {
+  useGetPackageInfoByKeyQuery,
+  useLink,
+  useFleetServerHostsForPolicy,
+} from '../../../../hooks';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
 
@@ -50,7 +54,6 @@ const fleetManagedSteps = [installAgentStep, addIntegrationStep, confirmDataStep
 const standaloneSteps = [addIntegrationStep, installAgentStep, confirmDataStep];
 
 export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
-  from,
   queryParamsPolicyId,
   prerelease,
 }) => {
@@ -66,19 +69,19 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     setIsManaged(newIsManaged);
     setCurrentStep(0);
   };
-
+  const agentPolicyId = policyId || queryParamsPolicyId;
   const {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion, { prerelease, full: true });
+  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, { prerelease, full: true });
 
   const {
     agentPolicy,
     enrollmentAPIKey,
     error: agentPolicyError,
     isLoading: isAgentPolicyLoading,
-  } = useGetAgentPolicyOrDefault(queryParamsPolicyId);
+  } = useGetAgentPolicyOrDefault(agentPolicyId);
 
   const packageInfo = useMemo(() => packageInfoData?.item, [packageInfoData]);
 
@@ -100,7 +103,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     pkgkey,
     useMultiPageLayout: false,
     ...(integration ? { integration } : {}),
-    ...(policyId ? { agentPolicyId: policyId } : {}),
+    ...(agentPolicyId ? { agentPolicyId } : {}),
   });
 
   if (onSplash || !packageInfo) {

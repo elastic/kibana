@@ -71,25 +71,46 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDataMigration",
+        "id": "def-public.CloudDataMigrationPluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudDataMigrationPluginStart",
+        "description": [],
+        "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudDataMigration",
+            "id": "def-public.CloudDataMigrationPluginStart.cloud",
+            "type": "Object",
+            "tags": [],
+            "label": "cloud",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "cloud",
+                "scope": "public",
+                "docId": "kibCloudPluginApi",
+                "section": "def-public.CloudStart",
+                "text": "CloudStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [],
-    "objects": [],
-    "start": {
-      "parentPluginId": "cloudDataMigration",
-      "id": "def-public.CloudDataMigrationPluginStart",
-      "type": "Interface",
-      "tags": [],
-      "label": "CloudDataMigrationPluginStart",
-      "description": [],
-      "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/types.ts",
-      "deprecated": false,
-      "trackAdoption": false,
-      "children": [],
-      "lifecycle": "start",
-      "initialIsOpen": true
-    }
+    "objects": []
   },
   "server": {
     "classes": [],

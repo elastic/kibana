@@ -11,17 +11,19 @@ import { ReactWrapper } from 'enzyme';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
 import { OptionsListComponentState, OptionsListReduxState } from '../types';
 import { mockOptionsListReduxEmbeddableTools } from '../../../common/mocks';
-import { OptionsListField } from '../../../common/options_list/types';
 import { ControlOutput, OptionsListEmbeddableInput } from '../..';
 
 describe('Options list popover', () => {
   const defaultProps = {
     width: 500,
+    isLoading: false,
     updateSearchString: jest.fn(),
+    loadMoreSuggestions: jest.fn(),
   };
 
   interface MountOptions {
@@ -56,13 +58,13 @@ describe('Options list popover', () => {
 
   test('available options list width responds to container size', async () => {
     let popover = await mountComponent({ popoverProps: { width: 301 } });
-    let availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
-    expect(availableOptionsDiv.getDOMNode().getAttribute('style')).toBe('width: 301px;');
+    let popoverDiv = findTestSubject(popover, 'optionsList-control-popover');
+    expect(popoverDiv.getDOMNode().getAttribute('style')).toBe('width: 301px; min-width: 300px;');
 
     // the div cannot be smaller than 301 pixels wide
     popover = await mountComponent({ popoverProps: { width: 300 } });
-    availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
-    expect(availableOptionsDiv.getDOMNode().getAttribute('style')).toBe(null);
+    popoverDiv = findTestSubject(popover, 'optionsList-control-available-options');
+    expect(popoverDiv.getDOMNode().getAttribute('style')).toBe('width: 100%; height: 100%;');
   });
 
   test('no available options', async () => {
@@ -92,13 +94,12 @@ describe('Options list popover', () => {
       explicitInput: { selectedOptions: selections },
     });
     clickShowOnlySelections(popover);
-    const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
-    availableOptionsDiv
-      .childAt(0)
-      .children()
-      .forEach((child, i) => {
-        expect(child.text()).toBe(selections[i]);
-      });
+    const availableOptions = popover.find(
+      '[data-test-subj="optionsList-control-available-options"] ul'
+    );
+    availableOptions.children().forEach((child, i) => {
+      expect(child.text()).toBe(`${selections[i]} - Checked option.`);
+    });
   });
 
   test('disable search and sort when show only selected toggle is true', async () => {
@@ -132,11 +133,18 @@ describe('Options list popover', () => {
       },
     });
     const validSelection = findTestSubject(popover, 'optionsList-control-selection-bark');
-    expect(validSelection.text()).toEqual('bark75');
+    expect(validSelection.find('.euiSelectableListItem__text').text()).toEqual(
+      'bark - Checked option.'
+    );
+    expect(
+      validSelection.find('div[data-test-subj="optionsList-document-count-badge"]').text().trim()
+    ).toEqual('75');
     const title = findTestSubject(popover, 'optionList__ignoredSelectionLabel').text();
     expect(title).toEqual('Ignored selection');
     const invalidSelection = findTestSubject(popover, 'optionsList-control-ignored-selection-woof');
-    expect(invalidSelection.text()).toEqual('woof');
+    expect(invalidSelection.find('.euiSelectableListItem__text').text()).toEqual(
+      'woof - Checked option.'
+    );
     expect(invalidSelection.hasClass('optionsList__selectionInvalid')).toBe(true);
   });
 
@@ -221,14 +229,16 @@ describe('Options list popover', () => {
       explicitInput: { existsSelected: true },
     });
     clickShowOnlySelections(popover);
-    const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
-    expect(availableOptionsDiv.children().at(0).text()).toBe('Exists');
+    const availableOptions = popover.find(
+      '[data-test-subj="optionsList-control-available-options"] ul'
+    );
+    expect(availableOptions.text()).toBe('Exists - Checked option.');
   });
 
   test('when sorting suggestions, show both sorting types for keyword field', async () => {
     const popover = await mountComponent({
       componentState: {
-        field: { name: 'Test keyword field', type: 'keyword' } as OptionsListField,
+        field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec,
       },
     });
     const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
@@ -243,7 +253,7 @@ describe('Options list popover', () => {
     const popover = await mountComponent({
       explicitInput: { sort: { by: '_key', direction: 'asc' } },
       componentState: {
-        field: { name: 'Test keyword field', type: 'keyword' } as OptionsListField,
+        field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec,
       },
     });
     const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
@@ -261,7 +271,7 @@ describe('Options list popover', () => {
 
   test('when sorting suggestions, only show document count sorting for IP fields', async () => {
     const popover = await mountComponent({
-      componentState: { field: { name: 'Test IP field', type: 'ip' } as OptionsListField },
+      componentState: { field: { name: 'Test IP field', type: 'ip' } as FieldSpec },
     });
     const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
     sortButton.simulate('click');
@@ -269,6 +279,25 @@ describe('Options list popover', () => {
     const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
     const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
     expect(optionsText).toEqual(['By document count - Checked option.']);
+  });
+
+  test('ensure warning icon does not show up when testAllowExpensiveQueries = true/undefined', async () => {
+    const popover = await mountComponent({
+      componentState: { field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec },
+    });
+    const warning = findTestSubject(popover, 'optionsList-allow-expensive-queries-warning');
+    expect(warning).toEqual({});
+  });
+
+  test('ensure warning icon shows up when testAllowExpensiveQueries = false', async () => {
+    const popover = await mountComponent({
+      componentState: {
+        field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec,
+        allowExpensiveQueries: false,
+      },
+    });
+    const warning = findTestSubject(popover, 'optionsList-allow-expensive-queries-warning');
+    expect(warning.getDOMNode()).toBeInstanceOf(HTMLDivElement);
   });
 
   describe('Test advanced settings', () => {

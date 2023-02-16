@@ -11,7 +11,7 @@ import { mockAppDataView, mockDataView } from '../../rtl_helpers';
 import { getDefaultConfigs } from '../default_configs';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 import { buildExistsFilter } from '../utils';
-import { LayerConfig, LensAttributes } from '../lens_attributes';
+import { LensAttributes } from '../lens_attributes';
 import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
@@ -32,13 +32,12 @@ describe('SingleMetricAttributes', () => {
 
   let lnsAttr: LensAttributes;
 
-  const layerConfig: LayerConfig = {
+  const layerConfig: any = {
     seriesConfig: reportViewConfig,
     operationType: 'median',
     dataView: mockDataView,
     reportDefinitions: {},
     time: { from: 'now-15m', to: 'now' },
-    color: 'green',
     name: 'Page load time',
     selectedMetricField: TRANSACTION_DURATION,
   };
@@ -192,13 +191,12 @@ describe('SingleMetricAttributes', () => {
       reportConfigMap: obsvReportConfigMap,
     });
 
-    const layerConfigFormula: LayerConfig = {
+    const layerConfigFormula: any = {
       seriesConfig: reportViewConfigFormula,
       operationType: 'median',
       dataView: mockDataView,
       reportDefinitions: {},
       time: { from: 'now-15m', to: 'now' },
-      color: 'green',
       name: 'Availability',
       selectedMetricField: 'monitor_availability',
     };

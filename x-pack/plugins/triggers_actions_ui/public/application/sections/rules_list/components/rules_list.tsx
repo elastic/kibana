@@ -56,14 +56,15 @@ import { BulkOperationPopover } from '../../common/components/bulk_operation_pop
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { RulesListFiltersBar } from './rules_list_filters_bar';
-import {
-  snoozeRule,
-  unsnoozeRule,
-  bulkUpdateAPIKey,
-  bulkDisableRules,
-  bulkEnableRules,
-  cloneRule,
-} from '../../../lib/rule_api';
+
+import { snoozeRule } from '../../../lib/rule_api/snooze';
+import { unsnoozeRule } from '../../../lib/rule_api/unsnooze';
+import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
+import { bulkDisableRules } from '../../../lib/rule_api/bulk_disable';
+import { bulkEnableRules } from '../../../lib/rule_api/bulk_enable';
+import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';
+import { cloneRule } from '../../../lib/rule_api/clone';
+
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
@@ -81,7 +82,6 @@ import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
 import { runRule } from '../../../lib/run_rule';
-import { bulkDeleteRules } from '../../../lib/rule_api';
 
 import { useLoadActionTypesQuery } from '../../../hooks/use_load_action_types_query';
 import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
@@ -97,6 +97,7 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
 
 // Directly lazy import the flyouts because the suspendedComponentWithProps component
@@ -113,7 +114,6 @@ export interface RulesListProps {
   filteredRuleTypes?: string[];
   showActionFilter?: boolean;
   ruleDetailsRoute?: string;
-  showCreateRuleButton?: boolean;
   showCreateRuleButtonInPrompt?: boolean;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   statusFilter?: RuleStatus[];
@@ -145,7 +145,6 @@ export const RulesList = ({
   filteredRuleTypes = EMPTY_ARRAY,
   showActionFilter = true,
   ruleDetailsRoute,
-  showCreateRuleButton = true,
   showCreateRuleButtonInPrompt = false,
   statusFilter,
   onStatusFilterChange,
@@ -270,14 +269,7 @@ export const RulesList = ({
     refresh,
   });
 
-  const {
-    showSpinner,
-    showRulesList,
-    showNoAuthPrompt,
-    showCreateFirstRulePrompt,
-    showHeaderWithCreateButton,
-    showHeaderWithoutCreateButton,
-  } = useUiState({
+  const { showSpinner, showRulesList, showNoAuthPrompt, showCreateFirstRulePrompt } = useUiState({
     authorizedToCreateAnyRules,
     filters,
     hasDefaultRuleTypesFiltersOn,
@@ -611,18 +603,12 @@ export const RulesList = ({
   }, []);
 
   useEffect(() => {
-    if (!setHeaderActions) return;
-
-    if (showHeaderWithoutCreateButton) {
-      setHeaderActions([<RulesListDocLink />]);
-      return;
-    }
-    if (showHeaderWithCreateButton) {
-      setHeaderActions([<CreateRuleButton openFlyout={openFlyout} />, <RulesListDocLink />]);
-      return;
-    }
-    setHeaderActions();
-  }, [showHeaderWithCreateButton, showHeaderWithoutCreateButton]);
+    setHeaderActions?.([
+      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openFlyout} />] : []),
+      <RulesSettingsLink />,
+      <RulesListDocLink />,
+    ]);
+  }, [authorizedToCreateAnyRules]);
 
   useEffect(() => {
     return () => setHeaderActions?.();
@@ -784,11 +770,8 @@ export const RulesList = ({
               tags={tags}
               filterOptions={filterOptions}
               actionTypes={actionTypes}
-              authorizedToCreateAnyRules={authorizedToCreateAnyRules}
-              showCreateRuleButton={showCreateRuleButton}
               lastUpdate={lastUpdate}
               showErrors={showErrors}
-              openFlyout={openFlyout}
               updateFilters={updateFilters}
               setInputText={setInputText}
               onClearSelection={onClearSelection}

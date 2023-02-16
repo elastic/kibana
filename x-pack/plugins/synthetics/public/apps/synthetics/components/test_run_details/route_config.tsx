@@ -12,11 +12,11 @@ import { useHistory } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { RouteProps } from '../../routes';
 import { MonitorDetailsStatus } from '../monitor_details/monitor_details_status';
-import { MonitorDetailsLocation } from '../monitor_details/monitor_details_location';
 import { TestRunDate } from './components/test_run_date';
 import { TEST_RUN_DETAILS_ROUTE } from '../../../../../common/constants';
 import { TestRunDetails } from './test_run_details';
 import { MonitorDetailsLinkPortalNode } from '../monitor_add_edit/portals';
+import { MonitorDetailsLocation } from '../monitor_details/monitor_details_location';
 
 export const getTestRunDetailsRoute = (
   history: ReturnType<typeof useHistory>,

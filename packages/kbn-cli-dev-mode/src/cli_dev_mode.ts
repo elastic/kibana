@@ -31,7 +31,6 @@ import { DevServer } from './dev_server';
 import { Watcher } from './watcher';
 import { BasePathProxyServer } from './base_path_proxy_server';
 import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_path';
-import { getServerWatchPaths } from './get_server_watch_paths';
 import { CliDevConfig } from './config';
 
 // signal that emits undefined once a termination signal has been sent
@@ -114,18 +113,10 @@ export class CliDevMode {
       this.basePathProxy = new BasePathProxyServer(this.log, config.http, config.dev);
     }
 
-    const { watchPaths, ignorePaths } = getServerWatchPaths({
-      runExamples: cliArgs.runExamples,
-      pluginPaths: config.plugins.additionalPluginPaths,
-      pluginScanDirs: config.plugins.pluginSearchPaths,
-    });
-
     this.watcher = new Watcher({
       enabled: !!cliArgs.watch,
       log: this.log,
-      cwd: REPO_ROOT,
-      paths: watchPaths,
-      ignore: ignorePaths,
+      repoRoot: REPO_ROOT,
     });
 
     this.devServer = new DevServer({
@@ -158,9 +149,6 @@ export class CliDevMode {
     this.optimizer = new Optimizer({
       enabled: !cliArgs.disableOptimizer,
       repoRoot: REPO_ROOT,
-      oss: cliArgs.oss,
-      pluginPaths: config.plugins.additionalPluginPaths,
-      pluginScanDirs: config.plugins.pluginSearchPaths,
       runExamples: cliArgs.runExamples,
       cache: cliArgs.cache,
       dist: cliArgs.dist,
@@ -168,6 +156,8 @@ export class CliDevMode {
       silent: !!cliArgs.silent,
       verbose: !!cliArgs.verbose,
       watch: cliArgs.watch,
+      pluginPaths: config.plugins.additionalPluginPaths,
+      pluginScanDirs: config.plugins.pluginSearchPaths,
     });
   }
 

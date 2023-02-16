@@ -59,7 +59,7 @@ export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
 export const INVESTIGATION_NOTES_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-notes"]';
 
-export const MACHINE_LEARNING_JOB_ID = '[data-test-subj="machineLearningJobId"]';
+export const MACHINE_LEARNING_JOB_ID = '[data-test-subj="machineLearningJob"]';
 
 export const MACHINE_LEARNING_JOB_STATUS = '[data-test-subj="machineLearningJobStatus"]';
 

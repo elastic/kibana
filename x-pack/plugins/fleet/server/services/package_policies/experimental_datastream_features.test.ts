@@ -9,15 +9,68 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import type { NewPackagePolicy, PackagePolicy } from '../../types';
+import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
+import { getInstallation } from '../epm/packages';
 
 import { handleExperimentalDatastreamFeatureOptIn } from './experimental_datastream_features';
+
+const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
+  typeof updateCurrentWriteIndices
+>;
+
+jest.mock('../epm/packages', () => {
+  return {
+    getInstallation: jest.fn(),
+    getPackageInfo: jest.fn().mockResolvedValue({
+      data_streams: [
+        {
+          dataset: 'test',
+          type: 'metrics',
+        },
+      ],
+    }),
+  };
+});
+
+jest.mock('../app_context');
+jest.mock('../epm/elasticsearch/template/template');
+
+const mockGetInstallation = getInstallation as jest.Mock;
+
+jest.mock('../epm/elasticsearch/template/install', () => {
+  return {
+    prepareTemplate: jest.fn().mockReturnValue({
+      componentTemplates: {
+        'metrics-test.test@package': {
+          template: {
+            mappings: {
+              properties: {
+                sequence: {
+                  type: 'long',
+                },
+                name: {
+                  type: 'keyword',
+                  index: false,
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  };
+});
 
 function getNewTestPackagePolicy({
   isSyntheticSourceEnabled,
   isTSDBEnabled,
+  isDocValueOnlyNumeric,
+  isDocValueOnlyOther,
 }: {
   isSyntheticSourceEnabled: boolean;
   isTSDBEnabled: boolean;
+  isDocValueOnlyNumeric: boolean;
+  isDocValueOnlyOther: boolean;
 }): NewPackagePolicy {
   const packagePolicy: NewPackagePolicy = {
     name: 'Test policy',
@@ -36,6 +89,8 @@ function getNewTestPackagePolicy({
           features: {
             synthetic_source: isSyntheticSourceEnabled,
             tsdb: isTSDBEnabled,
+            doc_value_only_numeric: isDocValueOnlyNumeric,
+            doc_value_only_other: isDocValueOnlyOther,
           },
         },
       ],
@@ -48,9 +103,13 @@ function getNewTestPackagePolicy({
 function getExistingTestPackagePolicy({
   isSyntheticSourceEnabled,
   isTSDBEnabled,
+  isDocValueOnlyNumeric,
+  isDocValueOnlyOther,
 }: {
   isSyntheticSourceEnabled: boolean;
   isTSDBEnabled: boolean;
+  isDocValueOnlyNumeric: boolean;
+  isDocValueOnlyOther: boolean;
 }): PackagePolicy {
   const packagePolicy: PackagePolicy = {
     id: 'test-policy',
@@ -70,6 +129,8 @@ function getExistingTestPackagePolicy({
           features: {
             synthetic_source: isSyntheticSourceEnabled,
             tsdb: isTSDBEnabled,
+            doc_value_only_numeric: isDocValueOnlyNumeric,
+            doc_value_only_other: isDocValueOnlyOther,
           },
         },
       ],
@@ -87,6 +148,7 @@ function getExistingTestPackagePolicy({
 describe('experimental_datastream_features', () => {
   beforeEach(() => {
     soClient.get.mockClear();
+    mockedUpdateCurrentWriteIndices.mockReset();
     esClient.cluster.getComponentTemplate.mockClear();
     esClient.cluster.putComponentTemplate.mockClear();
 
@@ -98,13 +160,20 @@ describe('experimental_datastream_features', () => {
             template: {
               settings: {},
               mappings: {
-                _source: {
-                  mode: 'stored',
-                },
+                _source: {},
                 properties: {
                   test_dimension: {
                     type: 'keyword',
                     time_series_dimension: true,
+                  },
+                  sequence: {
+                    type: 'long',
+                  },
+                  name: {
+                    type: 'keyword',
+                  },
+                  '@timestamp': {
+                    type: 'date',
                   },
                 },
               },
@@ -113,6 +182,24 @@ describe('experimental_datastream_features', () => {
         },
       ],
     });
+
+    esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+      index_templates: [
+        {
+          name: 'metrics-test.test',
+          index_template: {
+            template: {
+              settings: {},
+              mappings: {},
+            },
+            composed_of: [],
+            index_patterns: '',
+          },
+        },
+      ],
+    });
+
+    esClient.indices.getIndexTemplate.mockClear();
   });
 
   const soClient = savedObjectsClientMock.create();
@@ -120,24 +207,26 @@ describe('experimental_datastream_features', () => {
 
   describe('when package policy does not exist (create)', () => {
     beforeEach(() => {
-      soClient.get.mockResolvedValueOnce({
-        attributes: {
-          experimental_data_stream_features: [
-            {
-              data_stream: 'metrics-test.test',
-              features: { synthetic_source: false, tsdb: false },
+      mockGetInstallation.mockResolvedValueOnce({
+        experimental_data_stream_features: [
+          {
+            data_stream: 'metrics-test.test',
+            features: {
+              synthetic_source: false,
+              tsdb: false,
+              doc_value_only_numeric: false,
+              doc_value_only_other: false,
             },
-          ],
-        },
-        id: 'mocked',
-        type: 'mocked',
-        references: [],
+          },
+        ],
       });
     });
     it('updates component template', async () => {
       const packagePolicy = getNewTestPackagePolicy({
         isSyntheticSourceEnabled: true,
         isTSDBEnabled: false,
+        isDocValueOnlyNumeric: false,
+        isDocValueOnlyOther: false,
       });
 
       await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
@@ -154,26 +243,98 @@ describe('experimental_datastream_features', () => {
       );
     });
 
+    it('updates component template number fields', async () => {
+      const packagePolicy = getNewTestPackagePolicy({
+        isSyntheticSourceEnabled: false,
+        isTSDBEnabled: false,
+        isDocValueOnlyNumeric: true,
+        isDocValueOnlyOther: false,
+      });
+
+      await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+      expect(esClient.cluster.getComponentTemplate).toHaveBeenCalled();
+      expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            template: expect.objectContaining({
+              mappings: expect.objectContaining({
+                properties: expect.objectContaining({
+                  sequence: {
+                    type: 'long',
+                    index: false,
+                  },
+                }),
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('updates component template other fields', async () => {
+      const packagePolicy = getNewTestPackagePolicy({
+        isSyntheticSourceEnabled: false,
+        isTSDBEnabled: false,
+        isDocValueOnlyNumeric: false,
+        isDocValueOnlyOther: true,
+      });
+
+      await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+      expect(esClient.cluster.getComponentTemplate).toHaveBeenCalled();
+      expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            template: expect.objectContaining({
+              mappings: expect.objectContaining({
+                properties: expect.objectContaining({
+                  name: {
+                    type: 'keyword',
+                    index: false,
+                  },
+                }),
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should not set index:false on @timestamp field', async () => {
+      const packagePolicy = getNewTestPackagePolicy({
+        isSyntheticSourceEnabled: false,
+        isTSDBEnabled: false,
+        isDocValueOnlyNumeric: false,
+        isDocValueOnlyOther: true,
+      });
+
+      await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+      expect(esClient.cluster.getComponentTemplate).toHaveBeenCalled();
+      expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            template: expect.objectContaining({
+              mappings: expect.objectContaining({
+                properties: expect.objectContaining({
+                  '@timestamp': {
+                    type: 'date',
+                  },
+                }),
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
     it('should update index template', async () => {
       const packagePolicy = getNewTestPackagePolicy({
         isSyntheticSourceEnabled: false,
         isTSDBEnabled: true,
-      });
-
-      esClient.indices.getIndexTemplate.mockResolvedValueOnce({
-        index_templates: [
-          {
-            name: 'metrics-test.test',
-            index_template: {
-              template: {
-                settings: {},
-                mappings: {},
-              },
-              composed_of: [],
-              index_patterns: '',
-            },
-          },
-        ],
+        isDocValueOnlyNumeric: false,
+        isDocValueOnlyOther: false,
       });
 
       await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
@@ -199,20 +360,22 @@ describe('experimental_datastream_features', () => {
         const packagePolicy = getExistingTestPackagePolicy({
           isSyntheticSourceEnabled: true,
           isTSDBEnabled: false,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
         });
 
-        soClient.get.mockResolvedValueOnce({
-          attributes: {
-            experimental_data_stream_features: [
-              {
-                data_stream: 'metrics-test.test',
-                features: { synthetic_source: true, tsdb: false },
+        mockGetInstallation.mockResolvedValueOnce({
+          experimental_data_stream_features: [
+            {
+              data_stream: 'metrics-test.test',
+              features: {
+                synthetic_source: true,
+                tsdb: false,
+                doc_value_only_numeric: false,
+                doc_value_only_other: false,
               },
-            ],
-          },
-          id: 'mocked',
-          type: 'mocked',
-          references: [],
+            },
+          ],
         });
 
         await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
@@ -220,28 +383,57 @@ describe('experimental_datastream_features', () => {
         expect(esClient.cluster.getComponentTemplate).not.toHaveBeenCalled();
         expect(esClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
       });
+
+      it('does not update write indices', async () => {
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: true,
+          isTSDBEnabled: false,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
+        });
+
+        mockGetInstallation.mockResolvedValueOnce({
+          experimental_data_stream_features: [
+            {
+              data_stream: 'metrics-test.test',
+              features: {
+                synthetic_source: true,
+                tsdb: false,
+                doc_value_only_numeric: false,
+                doc_value_only_other: false,
+              },
+            },
+          ],
+        });
+
+        await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+        expect(mockedUpdateCurrentWriteIndices).not.toHaveBeenCalled();
+      });
     });
 
     describe('when opt in status is changed', () => {
       beforeEach(() => {
-        soClient.get.mockResolvedValueOnce({
-          attributes: {
-            experimental_data_stream_features: [
-              {
-                data_stream: 'metrics-test.test',
-                features: { synthetic_source: false, tsdb: false },
+        mockGetInstallation.mockResolvedValueOnce({
+          experimental_data_stream_features: [
+            {
+              data_stream: 'metrics-test.test',
+              features: {
+                synthetic_source: false,
+                tsdb: false,
+                doc_value_only_numeric: false,
+                doc_value_only_other: true,
               },
-            ],
-          },
-          id: 'mocked',
-          type: 'mocked',
-          references: [],
+            },
+          ],
         });
       });
       it('updates component template', async () => {
         const packagePolicy = getExistingTestPackagePolicy({
           isSyntheticSourceEnabled: true,
           isTSDBEnabled: false,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: true,
         });
 
         await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
@@ -258,10 +450,70 @@ describe('experimental_datastream_features', () => {
         );
       });
 
+      it('updates component template number fields', async () => {
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: false,
+          isTSDBEnabled: false,
+          isDocValueOnlyNumeric: true,
+          isDocValueOnlyOther: true,
+        });
+
+        await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+        expect(esClient.cluster.getComponentTemplate).toHaveBeenCalled();
+        expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              template: expect.objectContaining({
+                mappings: expect.objectContaining({
+                  properties: expect.objectContaining({
+                    sequence: {
+                      type: 'long',
+                      index: false,
+                    },
+                  }),
+                }),
+              }),
+            }),
+          })
+        );
+      });
+
+      it('should not remove index:false from a field that has it in package spec', async () => {
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: false,
+          isTSDBEnabled: false,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
+        });
+
+        await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+        expect(esClient.cluster.getComponentTemplate).toHaveBeenCalled();
+        expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              template: expect.objectContaining({
+                mappings: expect.objectContaining({
+                  properties: expect.objectContaining({
+                    name: {
+                      type: 'keyword',
+                      index: false,
+                    },
+                  }),
+                }),
+              }),
+            }),
+          })
+        );
+      });
+
       it('should update index template', async () => {
         const packagePolicy = getExistingTestPackagePolicy({
           isSyntheticSourceEnabled: false,
           isTSDBEnabled: true,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
         });
 
         esClient.indices.getIndexTemplate.mockResolvedValueOnce({
@@ -294,6 +546,38 @@ describe('experimental_datastream_features', () => {
             }),
           })
         );
+      });
+
+      it('should update existing write indices', async () => {
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: false,
+          isTSDBEnabled: true,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
+        });
+
+        esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+          index_templates: [
+            {
+              name: 'metrics-test.test',
+              index_template: {
+                template: {
+                  settings: {},
+                  mappings: {},
+                },
+                composed_of: [],
+                index_patterns: '',
+              },
+            },
+          ],
+        });
+
+        await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+        expect(mockedUpdateCurrentWriteIndices).toHaveBeenCalledTimes(1);
+        expect(
+          mockedUpdateCurrentWriteIndices.mock.calls[0][2].map(({ templateName }) => templateName)
+        ).toEqual(['metrics-test.test']);
       });
     });
   });

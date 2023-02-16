@@ -9,6 +9,11 @@ import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
 
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
 import { CountryFlag } from '../source_destination/country_flag';
 import type {
   AutonomousSystemItem,
@@ -17,21 +22,12 @@ import type {
 } from '../../../../../common/search_strategy';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { networkModel } from '../../store';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../../common/components/links';
 import type { Columns } from '../../../components/paginated_table';
-import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 import * as i18n from './translations';
-import {
-  getRowItemDraggable,
-  getRowItemDraggables,
-} from '../../../../common/components/tables/helpers';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
 
 export type NetworkTopNFlowColumns = [
@@ -70,57 +66,39 @@ export const getNetworkTopNFlowColumns = (
       if (ip != null) {
         return (
           <>
-            <DraggableWrapper
+            <SecurityCellActions
               key={id}
-              dataProvider={{
-                and: [],
-                enabled: true,
-                id,
-                name: ip,
-                excluded: false,
-                kqlQuery: '',
-                queryMatch: { field: ipAttr, value: ip, operator: IS_OPERATOR },
+              mode={CellActionsMode.HOVER}
+              visibleCellActions={5}
+              showActionTooltips
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              field={{
+                name: ipAttr,
+                value: ip,
+                type: 'keyword',
+                aggregatable: true,
               }}
-              isAggregatable={true}
-              fieldType={'ip'}
-              render={(dataProvider, _, snapshot) =>
-                snapshot.isDragging ? (
-                  <DragEffects>
-                    <Provider dataProvider={dataProvider} />
-                  </DragEffects>
-                ) : (
-                  <NetworkDetailsLink ip={ip} flowTarget={flowTarget} />
-                )
-              }
-            />
+            >
+              <NetworkDetailsLink ip={ip} flowTarget={flowTarget} />
+            </SecurityCellActions>
 
             {geo && (
-              <DraggableWrapper
+              <SecurityCellActions
                 key={`${id}-${geo}`}
-                dataProvider={{
-                  and: [],
-                  enabled: true,
-                  id: `${id}-${geo}`,
-                  name: geo,
-                  excluded: false,
-                  kqlQuery: '',
-                  queryMatch: { field: geoAttrName, value: geo, operator: IS_OPERATOR },
+                mode={CellActionsMode.HOVER}
+                visibleCellActions={5}
+                showActionTooltips
+                triggerId={SecurityCellActionsTrigger.DEFAULT}
+                field={{
+                  name: geoAttrName,
+                  value: geo,
+                  type: 'keyword',
+                  aggregatable: true,
                 }}
-                isAggregatable={true}
-                fieldType={'geo_point'}
-                render={(dataProvider, _, snapshot) =>
-                  snapshot.isDragging ? (
-                    <DragEffects>
-                      <Provider dataProvider={dataProvider} />
-                    </DragEffects>
-                  ) : (
-                    <>
-                      {' '}
-                      <CountryFlag countryCode={geo} /> {geo}
-                    </>
-                  )
-                }
-              />
+              >
+                {' '}
+                <CountryFlag countryCode={geo} /> {geo}
+              </SecurityCellActions>
             )}
           </>
         );
@@ -140,13 +118,13 @@ export const getNetworkTopNFlowColumns = (
 
       if (Array.isArray(domains) && domains.length > 0) {
         const id = escapeDataProviderId(`${tableId}-table-${ip}`);
-        return getRowItemDraggables({
-          rowItems: domains,
-          attrName: domainAttr,
+        return getRowItemsWithActions({
+          values: domains,
+          fieldName: domainAttr,
+          fieldType: 'keyword',
+          aggregatable: true,
           idPrefix: id,
           displayCount: 1,
-          isAggregatable: true,
-          fieldType: 'keyword',
         });
       } else {
         return getEmptyTagValue();
@@ -164,23 +142,23 @@ export const getNetworkTopNFlowColumns = (
         return (
           <>
             {as.name &&
-              getRowItemDraggable({
-                rowItem: as.name,
-                attrName: `${flowTarget}.as.organization.name`,
-                idPrefix: `${id}-name`,
-                isAggregatable: true,
+              getRowItemsWithActions({
+                values: [as.name],
+                fieldName: `${flowTarget}.as.organization.name`,
                 fieldType: 'keyword',
+                aggregatable: true,
+                idPrefix: `${id}-name`,
               })}
 
             {as.number && (
               <>
                 {' '}
-                {getRowItemDraggable({
-                  rowItem: `${as.number}`,
-                  attrName: `${flowTarget}.as.number`,
+                {getRowItemsWithActions({
+                  values: [`${as.number}`],
+                  fieldName: `${flowTarget}.as.number`,
                   idPrefix: `${id}-number`,
-                  isAggregatable: true,
                   fieldType: 'keyword',
+                  aggregatable: true,
                 })}
               </>
             )}

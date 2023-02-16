@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -14,7 +14,7 @@ import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AuthFilterHelpers, OwnerEntity } from './types';
 import { getOwnersFilter, groupByAuthorization } from './utils';
 import type { OperationDetails } from '.';
-import { AuthorizationAuditLogger, Operations } from '.';
+import { AuthorizationAuditLogger } from '.';
 import { createCaseError } from '../common/error';
 
 /**
@@ -57,19 +57,21 @@ export class Authorization {
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
-    spaces: SpacesPluginStart;
+    spaces?: SpacesPluginStart;
     features: FeaturesPluginStart;
     auditLogger: AuthorizationAuditLogger;
     logger: Logger;
   }): Promise<Authorization> {
-    const getSpace = async (): Promise<Space> => {
-      return spaces.spacesService.getActiveSpace(request);
+    const getSpace = async (): Promise<Space | undefined> => {
+      return spaces?.spacesService.getActiveSpace(request);
     };
 
     // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseOwners: Set<string>;
+
     try {
-      const disabledFeatures = new Set((await getSpace()).disabledFeatures ?? []);
+      const maybeSpace = await getSpace();
+      const disabledFeatures = new Set(maybeSpace?.disabledFeatures ?? []);
 
       caseOwners = new Set(
         features
@@ -109,10 +111,9 @@ export class Authorization {
     operation: OperationDetails;
   }) {
     try {
-      await this._ensureAuthorized(
-        entities.map((entity) => entity.owner),
-        operation
-      );
+      const uniqueOwners = Array.from(new Set(entities.map((entity) => entity.owner)));
+
+      await this._ensureAuthorized(uniqueOwners, operation);
     } catch (error) {
       this.logSavedObjects({ entities, operation, error });
       throw error;
@@ -128,13 +129,15 @@ export class Authorization {
    *
    * @param savedObjects an array of saved objects to be authorized. Each saved objects should contain
    * an ID and an owner
+   * @param operation the operation that should be authorized
    */
   public async getAndEnsureAuthorizedEntities<T extends { owner: string }>({
     savedObjects,
+    operation,
   }: {
     savedObjects: Array<SavedObject<T>>;
+    operation: OperationDetails;
   }): Promise<{ authorized: Array<SavedObject<T>>; unauthorized: Array<SavedObject<T>> }> {
-    const operation = Operations.bulkGetCases;
     const entities = savedObjects.map((so) => ({
       id: so.id,
       owner: so.attributes.owner,

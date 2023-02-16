@@ -85,6 +85,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "csp_rule",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "file-upload-telemetry",
                 },
               },
@@ -115,6 +120,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "maps-telemetry",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "ml-telemetry",
                 },
               },
@@ -126,6 +136,11 @@ describe('createInitialState', () => {
               Object {
                 "term": Object {
                   "type": "server",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "siem-detection-engine-rule-execution-info",
                 },
               },
               Object {

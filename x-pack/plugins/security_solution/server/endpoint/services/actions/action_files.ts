@@ -11,7 +11,8 @@ import type { FileClient } from '@kbn/files-plugin/server';
 import { createEsFileClient } from '@kbn/files-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { UploadedFileInfo } from '../../../../common/endpoint/types';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import type { FileUploadMetadata, UploadedFileInfo } from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
 import {
   FILE_STORAGE_DATA_INDEX,
@@ -84,9 +85,17 @@ export const getFileInfo = async (
   fileId: string
 ): Promise<UploadedFileInfo> => {
   try {
-    const fileClient = getFileClient(esClient, logger);
-    const file = await fileClient.get({ id: fileId });
-    const { name, id, mimeType, size, status, created } = file.data;
+    const { _id: id, _source: fileDoc } = await esClient.get<FileUploadMetadata>({
+      index: FILE_STORAGE_METADATA_INDEX,
+      id: fileId,
+    });
+
+    if (!fileDoc) {
+      throw new NotFoundError(`File with id [${fileId}] not found`);
+    }
+
+    const { upload_start: uploadStart, action_id: actionId, agent_id: agentId } = fileDoc;
+    const { name, Status: status, mime_type: mimeType, size } = fileDoc.file;
     let fileHasChunks: boolean = true;
 
     if (status === 'READY') {
@@ -104,7 +113,9 @@ export const getFileInfo = async (
       id,
       mimeType,
       size,
-      created,
+      actionId,
+      agentId,
+      created: new Date(uploadStart).toISOString(),
       status: fileHasChunks ? status : 'DELETED',
     };
   } catch (error) {
@@ -137,4 +148,24 @@ const doesFileHaveChunks = async (
   });
 
   return Boolean((chunks.hits?.total as SearchTotalHits)?.value);
+};
+
+/**
+ * Validates that a given `fileId` is valid for the provided action
+ * @param esClient
+ * @param logger
+ * @param fileId
+ * @param actionId
+ */
+export const validateActionFileId = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  fileId: string,
+  actionId: string
+): Promise<void> => {
+  const fileInfo = await getFileInfo(esClient, logger, fileId);
+
+  if (fileInfo.actionId !== actionId) {
+    throw new CustomHttpRequestError(`Invalid file id [${fileId}] for action [${actionId}]`, 400);
+  }
 };

@@ -1,6 +1,11 @@
 {
   "journeyName": "GET /internal/security/me",
   "scalabilitySetup": {
+    "responseTimeThreshold": {
+      "threshold1": 1000,
+      "threshold2": 3000,
+      "threshold3": 5000
+    },
     "warmup": [
       {
         "action": "constantUsersPerSec",
@@ -12,8 +17,8 @@
       {
         "action": "rampUsersPerSec",
         "minUsersCount": 10,
-        "maxUsersCount": 1000,
-        "duration": "198s"
+        "maxUsersCount": 750,
+        "duration": "148s"
       }
     ],
     "maxDuration": "5m"

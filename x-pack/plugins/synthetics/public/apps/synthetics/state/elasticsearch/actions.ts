@@ -7,14 +7,18 @@
 
 import * as esTypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '@kbn/es-types';
-import { FetcherResult } from '@kbn/observability-plugin/public/hooks/use_fetcher';
 import { createAsyncAction } from '../utils/actions';
 
-export const executeEsQueryAction = createAsyncAction<
-  {
-    params: esTypes.SearchRequest;
-    name: string;
-    addInspectorRequest: <Data>(result: FetcherResult<Data>) => void;
-  },
-  { name: string; result: ESSearchResponse }
->('executeEsQueryAction');
+export interface EsActionPayload {
+  params: esTypes.SearchRequest;
+  name: string;
+}
+
+export interface EsActionResponse {
+  name: string;
+  result: ESSearchResponse;
+}
+
+export const executeEsQueryAction = createAsyncAction<EsActionPayload, EsActionResponse>(
+  'executeEsQueryAction'
+);

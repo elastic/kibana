@@ -115,7 +115,6 @@ export function getUiSettings(
       description: i18n.translate('data.advancedSettings.query.allowWildcardsText', {
         defaultMessage:
           'When set, * is allowed as the first character in a query clause. ' +
-          'Currently only applies when experimental query features are enabled in the query bar. ' +
           'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}.',
         values: {
           queryStringOptionsPattern: UI_SETTINGS.QUERY_STRING_OPTIONS,

@@ -837,6 +837,63 @@ describe('FeatureTable', () => {
     expect(findTestSubject(wrapper, 'primaryFeaturePrivilegeControl')).toHaveLength(0);
   });
 
+  it('renders subtext for features that define an optional description', () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {
+          my_feature: ['all'],
+        },
+      },
+    ]);
+    const featureWithDescription = createFeature({
+      id: 'my_feature',
+      name: 'Some Feature',
+      description: 'a description of my feature',
+    });
+
+    const { wrapper } = setup({
+      role,
+      features: [featureWithDescription],
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: false,
+      canCustomizeSubFeaturePrivileges: false,
+    });
+
+    expect(findTestSubject(wrapper, 'featurePrivilegeDescriptionText').exists()).toEqual(true);
+
+    expect(
+      findTestSubject(wrapper, 'featurePrivilegeDescriptionText').text()
+    ).toMatchInlineSnapshot(`"a description of my feature"`);
+  });
+
+  it('does not render subtext for features without a description', () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {
+          my_feature: ['all'],
+        },
+      },
+    ]);
+    const featureWithDescription = createFeature({
+      id: 'my_feature',
+      name: 'Some Feature',
+    });
+
+    const { wrapper } = setup({
+      role,
+      features: [featureWithDescription],
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: false,
+      canCustomizeSubFeaturePrivileges: false,
+    });
+
+    expect(findTestSubject(wrapper, 'featurePrivilegeDescriptionText').exists()).toEqual(false);
+  });
+
   it('renders renders the primary feature controls when both primary and reserved privileges are specified', () => {
     const role = createRole([
       {
@@ -1313,6 +1370,102 @@ describe('FeatureTable', () => {
       const { type } = wrapper.find(EuiIconTip).props();
 
       expect(type).toBe('empty');
+    });
+  });
+  describe('Optional description for sub-features', () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {
+          unit_test: ['minimal_read', 'sub-toggle-1', 'sub-toggle-2'],
+        },
+      },
+    ]);
+
+    it('renders description subtext if defined', () => {
+      const feature = createFeature({
+        id: 'unit_test',
+        name: 'Unit Test Feature',
+        subFeatures: [
+          {
+            name: 'Some Sub Feature',
+            description: 'some sub feature description',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub-toggle-1',
+                    name: 'Sub Toggle 1',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-1'],
+                  },
+                ],
+              },
+            ],
+          },
+        ] as SubFeatureConfig[],
+      });
+      const { wrapper } = setup({
+        role,
+        features: [feature],
+        privilegeIndex: 0,
+        calculateDisplayedPrivileges: false,
+        canCustomizeSubFeaturePrivileges: true,
+      });
+
+      const categoryExpander = findTestSubject(wrapper, 'featureCategoryButton_foo');
+      categoryExpander.simulate('click');
+
+      const featureExpander = findTestSubject(wrapper, 'featureTableCell');
+      featureExpander.simulate('click');
+
+      expect(findTestSubject(wrapper, 'subFeatureDescription').exists()).toEqual(true);
+      expect(findTestSubject(wrapper, 'subFeatureDescription').text()).toMatchInlineSnapshot(
+        `"some sub feature description"`
+      );
+    });
+    it('should not render description subtext if undefined', () => {
+      const feature = createFeature({
+        id: 'unit_test',
+        name: 'Unit Test Feature',
+        subFeatures: [
+          {
+            name: 'Some Sub Feature',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub-toggle-1',
+                    name: 'Sub Toggle 1',
+                    includeIn: 'all',
+                    savedObject: { all: [], read: [] },
+                    ui: ['sub-toggle-1'],
+                  },
+                ],
+              },
+            ],
+          },
+        ] as SubFeatureConfig[],
+      });
+      const { wrapper } = setup({
+        role,
+        features: [feature],
+        privilegeIndex: 0,
+        calculateDisplayedPrivileges: false,
+        canCustomizeSubFeaturePrivileges: true,
+      });
+
+      const categoryExpander = findTestSubject(wrapper, 'featureCategoryButton_foo');
+      categoryExpander.simulate('click');
+
+      const featureExpander = findTestSubject(wrapper, 'featureTableCell');
+      featureExpander.simulate('click');
+
+      expect(findTestSubject(wrapper, 'subFeatureDescription').exists()).toEqual(false);
     });
   });
 });

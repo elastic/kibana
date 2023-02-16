@@ -20,8 +20,7 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => {
   return { useIsExperimentalFeatureEnabled: jest.fn() };
 });
 
-jest.mock('./alert_donut_embeddable');
-
+jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 jest.mock('./chart_label', () => {
   return {
     ChartLabel: jest.fn((props) => <span data-test-subj="chart-label" {...props} />),
@@ -173,7 +172,7 @@ describe('AlertsByStatus', () => {
       </TestProviders>
     );
     expect(
-      container.querySelector(`[data-test-subj="alert-donut-embeddable"]`)
+      container.querySelector(`[data-test-subj="visualization-embeddable"]`)
     ).toBeInTheDocument();
     expect((useAlertsByStatus as jest.Mock).mock.calls[0][0].skip).toBeTruthy();
   });

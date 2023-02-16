@@ -45,7 +45,6 @@ export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logg
 
       try {
         const rulesClient = (await context.alerting).getRulesClient();
-        const ruleExecutionLog = (await context.securitySolution).getRuleExecutionLog();
         const savedObjectsClient = (await context.core).savedObjects.client;
 
         const rule = await readRules({
@@ -60,9 +59,7 @@ export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logg
             logger,
           });
 
-          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-
-          const transformed = transform(rule, ruleExecutionSummary, legacyRuleActions);
+          const transformed = transform(rule, legacyRuleActions);
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {

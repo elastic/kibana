@@ -20,7 +20,7 @@ import {
   getCase,
   superUserSpace1Auth,
   getCaseUserActions,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import {
   secOnly,
   secOnlyRead,

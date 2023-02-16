@@ -1,5 +1,5 @@
 post:
-  summary: Disable a rule.
+  summary: Disables a rule.
   operationId: disableRule
   description: >
     You must have `all` privileges for the appropriate Kibana features,
@@ -15,6 +15,18 @@ post:
   responses:
     '204':
       description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:

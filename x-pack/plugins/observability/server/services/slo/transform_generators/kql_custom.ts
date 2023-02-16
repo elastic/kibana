@@ -6,12 +6,11 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { kqlCustomIndicatorSchema } from '@kbn/slo-schema';
+import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { TransformGenerator } from '.';
+import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
@@ -27,6 +26,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
+      this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildCommonGroupBy(slo),
@@ -58,6 +58,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
   private buildAggregations(slo: SLO, indicator: KQLCustomIndicator) {
     const numerator = getElastichsearchQueryOrThrow(indicator.params.good);
     const denominator = getElastichsearchQueryOrThrow(indicator.params.total);
+
     return {
       'slo.numerator': {
         filter: numerator,
@@ -65,14 +66,17 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
       'slo.denominator': {
         filter: denominator,
       },
+      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+        'slo.isGoodSlice': {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'slo.numerator>_count',
+              totalEvents: 'slo.denominator>_count',
+            },
+            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+          },
+        },
+      }),
     };
-  }
-}
-
-function getElastichsearchQueryOrThrow(kuery: string) {
-  try {
-    return toElasticsearchQuery(fromKueryExpression(kuery));
-  } catch (err) {
-    throw new InvalidTransformError(`Invalid KQL: ${kuery}`);
   }
 }

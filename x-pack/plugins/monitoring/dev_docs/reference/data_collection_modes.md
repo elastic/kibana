@@ -145,12 +145,14 @@ Beats also doesn't have filebeat module or recommended configuration, but the lo
 
 ### Package-driven collection
 
+See [working with packages](../howto/work_with_packages.md) for details on how to develop and test Stack Monitoring packages.
+
 When using package-driven collection, each component in your Elastic stack is given a corresponding fleet package (also known as "integration").
 
 - [Elasticsearch](https://github.com/elastic/integrations/tree/main/packages/elasticsearch)
 - [Kibana](https://github.com/elastic/integrations/tree/main/packages/kibana)
 - [Logstash](https://github.com/elastic/integrations/tree/main/packages/logstash)
-- Beats (WIP)
+- [Beats](https://github.com/elastic/integrations/tree/main/packages/beat)
 - Enterprise Search (WIP)
 
 An operator will install the package via the monitoring deployment's kibana instance (or possible a separate deployment used for fleet management).

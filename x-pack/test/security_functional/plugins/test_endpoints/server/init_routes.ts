@@ -7,9 +7,20 @@
 
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
-import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  TaskManagerStartContract,
+  ConcreteTaskInstance,
+  BulkUpdateTaskResult,
+} from '@kbn/task-manager-plugin/server';
+import { PluginStartDependencies } from '.';
 
-export function initRoutes(initializerContext: PluginInitializerContext, core: CoreSetup) {
+export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
+
+export function initRoutes(
+  initializerContext: PluginInitializerContext,
+  core: CoreSetup<PluginStartDependencies>
+) {
   const logger = initializerContext.logger.get();
 
   const authenticationAppOptions = { simulateUnauthorized: false };
@@ -94,6 +105,141 @@ export function initRoutes(initializerContext: PluginInitializerContext, core: C
 
         throw err;
       }
+    }
+  );
+
+  async function waitUntilTaskIsIdle(taskManager: TaskManagerStartContract) {
+    logger.info(`Waiting until session cleanup task is in idle.`);
+
+    const RETRY_SCALE_DURATION = 1000;
+    let retriesElapsed = 0;
+    let taskInstance: ConcreteTaskInstance;
+    while (retriesElapsed < 15 /** max around ~100s **/) {
+      await new Promise((resolve) => setTimeout(resolve, retriesElapsed * RETRY_SCALE_DURATION));
+
+      try {
+        taskInstance = await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME);
+        if (taskInstance.status === 'idle') {
+          logger.info(`Session cleanup task is in idle state: ${JSON.stringify(taskInstance)}.`);
+          return;
+        }
+      } catch (err) {
+        logger.error(`Failed to fetch task: ${err?.message || err}.`);
+        throw err;
+      }
+
+      if (++retriesElapsed < 15) {
+        logger.warn(
+          `Session cleanup task is NOT in idle state (waiting for ${
+            retriesElapsed * RETRY_SCALE_DURATION
+          }ms before retrying): ${JSON.stringify(taskInstance)}.`
+        );
+      } else {
+        logger.error(
+          `Failed to wait until session cleanup tasks enters an idle state: ${JSON.stringify(
+            taskInstance
+          )}.`
+        );
+      }
+    }
+  }
+
+  async function refreshTaskManagerIndex(
+    enabled: boolean,
+    coreStart: CoreStart,
+    taskManager: TaskManagerStartContract
+  ) {
+    // Refresh task manager index before trying to modify a task document.
+    // Might not be needed once https://github.com/elastic/kibana/pull/148985 is merged.
+    try {
+      logger.info(
+        `Refreshing task manager index (enabled: ${enabled}), current task: ${JSON.stringify(
+          await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME)
+        )}...`
+      );
+
+      const refreshResult = await coreStart.elasticsearch.client.asInternalUser.indices.refresh({
+        index: '.kibana_task_manager',
+        expand_wildcards: 'all',
+      });
+
+      logger.info(
+        `Successfully refreshed task manager index (enabled: ${enabled}), refresh result: ${JSON.stringify(
+          refreshResult
+        )}, current task: ${JSON.stringify(
+          await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME)
+        )}.`
+      );
+    } catch (err) {
+      logger.error(
+        `Failed to refresh task manager index (enabled: ${enabled}): ${err?.message || err}.`
+      );
+    }
+  }
+
+  router.post(
+    {
+      path: '/session/_run_cleanup',
+      validate: false,
+    },
+    async (context, request, response) => {
+      const [, { taskManager }] = await core.getStartServices();
+      await taskManager.runSoon(SESSION_INDEX_CLEANUP_TASK_NAME);
+      return response.ok();
+    }
+  );
+
+  router.post(
+    {
+      path: '/session/toggle_cleanup_task',
+      validate: { body: schema.object({ enabled: schema.boolean() }) },
+    },
+    async (context, request, response) => {
+      const [coreStart, { taskManager }] = await core.getStartServices();
+      logger.info(`Toggle session cleanup task (enabled: ${request.body.enabled}).`);
+
+      await refreshTaskManagerIndex(request.body.enabled, coreStart, taskManager);
+
+      let bulkEnableDisableResult: BulkUpdateTaskResult;
+      try {
+        if (request.body.enabled) {
+          logger.info(
+            `Going to enable the following task: ${JSON.stringify(
+              await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME)
+            )}.`
+          );
+          bulkEnableDisableResult = await taskManager.bulkEnable(
+            [SESSION_INDEX_CLEANUP_TASK_NAME],
+            true /** runSoon **/
+          );
+        } else {
+          bulkEnableDisableResult = await taskManager.bulkDisable([
+            SESSION_INDEX_CLEANUP_TASK_NAME,
+          ]);
+        }
+
+        await refreshTaskManagerIndex(request.body.enabled, coreStart, taskManager);
+
+        // Make sure that the task enters idle state before acknowledging that task was disabled.
+        if (!request.body.enabled) {
+          await waitUntilTaskIsIdle(taskManager);
+        }
+      } catch (err) {
+        logger.error(
+          `Failed to toggle session cleanup task (enabled: ${request.body.enabled}): ${
+            err?.message || err
+          }.`
+        );
+        throw err;
+      }
+
+      logger.info(
+        `Successfully toggled session cleanup task (enabled: ${
+          request.body.enabled
+        }, enable/disable response: ${JSON.stringify(bulkEnableDisableResult)}).`
+      );
+
+      return response.ok();
     }
   );
 }

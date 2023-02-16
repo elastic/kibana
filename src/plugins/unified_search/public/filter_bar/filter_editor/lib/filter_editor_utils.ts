@@ -52,6 +52,8 @@ export function validateParams(params: any, field: DataViewField) {
         return isSemverValid(params);
       }
       return true;
+    case 'boolean':
+      return typeof params === 'boolean';
     default:
       return true;
   }

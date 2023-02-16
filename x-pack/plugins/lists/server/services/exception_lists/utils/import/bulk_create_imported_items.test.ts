@@ -22,6 +22,7 @@ describe('bulkCreateImportedItems', () => {
         created_by: 'elastic',
         description: 'description here',
         entries: ENTRIES,
+        expire_time: undefined,
         immutable: undefined,
         item_id: 'item-id',
         list_id: 'list-id',

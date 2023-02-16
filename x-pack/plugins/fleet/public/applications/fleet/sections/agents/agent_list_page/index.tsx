@@ -13,6 +13,8 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { agentStatusesToSummary } from '../../../../../../common/services';
+
 import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
@@ -27,7 +29,11 @@ import {
   sendGetAgentTags,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout } from '../../../components';
-import { AgentStatusKueryHelper, policyHasFleetServer } from '../../../services';
+import {
+  AgentStatusKueryHelper,
+  ExperimentalFeaturesService,
+  policyHasFleetServer,
+} from '../../../services';
 import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
@@ -52,6 +58,8 @@ import { EmptyPrompt } from './components/empty_prompt';
 const REFRESH_INTERVAL_MS = 30000;
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
+  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
+
   const { notifications, cloud } = useStartServices();
   useBreadcrumbs('agent_list');
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
@@ -220,7 +228,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
-
   const getSortFieldForAPI = (field: keyof Agent): string => {
     if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
       return `${field}.keyword`;
@@ -269,24 +276,27 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         isLoadingVar.current = true;
         try {
           setIsLoading(true);
-          const [agentsResponse, agentsStatusResponse, agentTagsResponse] = await Promise.all([
-            sendGetAgents({
-              page: pagination.currentPage,
-              perPage: pagination.pageSize,
-              kuery: kuery && kuery !== '' ? kuery : undefined,
-              sortField: getSortFieldForAPI(sortField),
-              sortOrder,
-              showInactive,
-              showUpgradeable,
-            }),
-            sendGetAgentStatus({
-              kuery: kuery && kuery !== '' ? kuery : undefined,
-            }),
-            sendGetAgentTags({
-              kuery: kuery && kuery !== '' ? kuery : undefined,
-              showInactive,
-            }),
-          ]);
+          const [agentsResponse, totalInactiveAgentsResponse, agentTagsResponse] =
+            await Promise.all([
+              sendGetAgents({
+                page: pagination.currentPage,
+                perPage: pagination.pageSize,
+                kuery: kuery && kuery !== '' ? kuery : undefined,
+                sortField: getSortFieldForAPI(sortField),
+                sortOrder,
+                showInactive,
+                showUpgradeable,
+                getStatusSummary: true,
+                withMetrics: displayAgentMetrics,
+              }),
+              sendGetAgentStatus({
+                kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
+              }),
+              sendGetAgentTags({
+                kuery: kuery && kuery !== '' ? kuery : undefined,
+                showInactive,
+              }),
+            ]);
           isLoadingVar.current = false;
           // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
@@ -298,27 +308,22 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           if (!agentsResponse.data) {
             throw new Error('Invalid GET /agents response');
           }
-          if (agentsStatusResponse.error) {
-            throw agentsStatusResponse.error;
-          }
-          if (!agentsStatusResponse.data) {
+          if (!totalInactiveAgentsResponse.data) {
             throw new Error('Invalid GET /agents_status response');
           }
           if (agentTagsResponse.error) {
-            throw agentsStatusResponse.error;
+            throw agentTagsResponse.error;
           }
           if (!agentTagsResponse.data) {
             throw new Error('Invalid GET /agent/tags response');
           }
 
-          setAgentsStatus({
-            healthy: agentsStatusResponse.data.results.online,
-            unhealthy: agentsStatusResponse.data.results.error,
-            offline: agentsStatusResponse.data.results.offline,
-            updating: agentsStatusResponse.data.results.updating,
-            inactive: agentsStatusResponse.data.results.inactive,
-            unenrolled: agentsStatusResponse.data.results.unenrolled,
-          });
+          const statusSummary = agentsResponse.data.statusSummary;
+
+          if (!statusSummary) {
+            throw new Error('Invalid GET /agents response - no status summary');
+          }
+          setAgentsStatus(agentStatusesToSummary(statusSummary));
 
           const newAllTags = agentTagsResponse.data.items;
 
@@ -332,7 +337,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
           setAgents(agentsResponse.data.items);
           setTotalAgents(agentsResponse.data.total);
-          setTotalInactiveAgents(agentsResponse.data.totalInactive);
+          setTotalInactiveAgents(totalInactiveAgentsResponse.data.results.inactive || 0);
         } catch (error) {
           notifications.toasts.addError(error, {
             title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
@@ -354,6 +359,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       notifications.toasts,
       sortField,
       sortOrder,
+      displayAgentMetrics,
     ]
   );
 
