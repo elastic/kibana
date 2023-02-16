@@ -39,21 +39,6 @@ export function Diagnostics() {
   const [reportData, setReportData] = useState<Record<string, any>>();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setConfigStatus(FETCH_STATUS.SUCCESS);
-      setConfigData('success');
-      setActionsEnabled(true);
-      setReportData((prev) => ({
-        ...prev,
-        apmConfiguration: {
-          pipelines: 'test',
-        },
-      }));
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
     if (configData === 'success') {
       setDataStatus(FETCH_STATUS.LOADING);
       const timer = setTimeout(() => {
@@ -90,6 +75,21 @@ export function Diagnostics() {
       reportData
     );
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setConfigStatus(FETCH_STATUS.SUCCESS);
+      setConfigData('success');
+      setActionsEnabled(true);
+      setReportData((prev) => ({
+        ...prev,
+        apmConfiguration: {
+          pipelines,
+        },
+      }));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [pipelines]);
 
   return (
     <>
