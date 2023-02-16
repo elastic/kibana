@@ -147,7 +147,7 @@ export async function updateTagsBatch(
   if (res.updated ?? 0 > 0) {
     await bulkCreateAgentActionResults(
       esClient,
-      agentIds.map((id) => ({
+      getUuidArray(res.updated!).map((id) => ({
         agentId: id,
         actionId,
       }))
