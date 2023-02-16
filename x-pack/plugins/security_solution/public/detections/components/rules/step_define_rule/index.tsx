@@ -214,7 +214,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const queryBar = formQuery ?? initialState.queryBar;
 
-  const setFieldValueCb = useSetFieldValueWithCallback('ruleType', setFieldValue, ruleType);
+  const setRuleTypeCallback = useSetFieldValueWithCallback('ruleType', setFieldValue, ruleType);
 
   const handleSetRuleFromTimeline = useCallback(
     ({ index: timelineIndex, queryBar: timelineQueryBar }) => {
@@ -223,7 +223,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         setFieldValue('queryBar', timelineQueryBar);
       };
       if (timelineQueryBar.query.language === 'eql') {
-        setFieldValueCb('eql', setQuery);
+        setRuleTypeCallback('eql', setQuery);
       } else {
         setQuery();
       }
