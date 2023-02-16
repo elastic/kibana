@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import stringify from 'json-stable-stringify';
 import * as t from 'io-ts';
 import { KibanaRequest, RouteRegistrar } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
