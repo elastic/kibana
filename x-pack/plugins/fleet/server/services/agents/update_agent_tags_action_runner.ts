@@ -138,6 +138,11 @@ export async function updateTagsBatch(
       type: 'UPDATE_TAGS',
       total: options.total ?? res.total,
     });
+    appContextService
+      .getLogger()
+      .debug(
+        `action doc wrote on ${agentIds.length} agentIds, updated: ${res.updated}, failed: ${res.failures}, version_conflicts: ${res.version_conflicts}`
+      );
   }
 
   // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
@@ -152,11 +157,7 @@ export async function updateTagsBatch(
         actionId,
       }))
     );
-    appContextService
-      .getLogger()
-      .info(
-        `action updated result wrote on ${agentIds.length} agentIds, updated: ${res.updated} 1st agentId: ${agentIds[0]}`
-      );
+    appContextService.getLogger().debug(`action updated result wrote on ${res.updated} agents`);
   }
 
   // writing failures from es update
@@ -171,9 +172,7 @@ export async function updateTagsBatch(
     );
     appContextService
       .getLogger()
-      .info(
-        `action failed result wrote on ${res.failures.length} agents, 1st agentId: ${res.failures[0].id}`
-      );
+      .debug(`action failed result wrote on ${res.failures.length} agents`);
   }
 
   if (res.version_conflicts ?? 0 > 0) {
@@ -189,7 +188,7 @@ export async function updateTagsBatch(
       );
       appContextService
         .getLogger()
-        .info(`action conflict result wrote on ${res.version_conflicts!} agents`);
+        .debug(`action conflict result wrote on ${res.version_conflicts!} agents`);
     }
     throw new Error(`version conflict of ${res.version_conflicts} agents`);
   }
