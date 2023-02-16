@@ -8,6 +8,10 @@
 import {
   EuiAccordion,
   EuiAvatar,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
@@ -19,8 +23,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { DownloadJson } from './download_json';
 import { LoadingTimelineItem } from './loading_timeline_item';
 
 export function Diagnostics() {
@@ -28,11 +34,20 @@ export function Diagnostics() {
   const [configData, setConfigData] = useState<'success' | 'error'>();
   const [dataStatus, setDataStatus] = useState(FETCH_STATUS.NOT_INITIATED);
   const [data, setData] = useState<'success' | 'error' | 'warning'>();
+  const [actionsEnabled, setActionsEnabled] = useState(false);
+  const [reportData, setReportData] = useState<Record<string, any>>();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setConfigStatus(FETCH_STATUS.SUCCESS);
       setConfigData('success');
+      setActionsEnabled(true);
+      setReportData((prev) => ({
+        ...prev,
+        apmConfiguration: {
+          pipelines: 'test',
+        },
+      }));
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
@@ -43,6 +58,12 @@ export function Diagnostics() {
       const timer = setTimeout(() => {
         setDataStatus(FETCH_STATUS.SUCCESS);
         setData('success');
+        setReportData((prev) => ({
+          ...prev,
+          apmData: {
+            service: 'test-2',
+          },
+        }));
       }, 1000);
       return () => clearTimeout(timer);
     }
@@ -52,8 +73,45 @@ export function Diagnostics() {
     prefix: 'buttonElementAccordion',
   });
 
+  const restartDiagnostic = () => {
+    console.log('restarting Diagnostic');
+  };
+
+  const downloadReport = async () => {
+    DownloadJson(
+      `apm-diagnostic-${moment(Date.now()).format('YYYYMMDDHHmmss')}.json`,
+      reportData
+    );
+  };
+
   return (
     <>
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            color="primary"
+            isDisabled={!actionsEnabled}
+            onClick={restartDiagnostic}
+          >
+            {i18n.translate('xpack.apm.diagnostics.restartDiagnostic', {
+              defaultMessage: 'Restart diagnostic',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconType="download"
+            isDisabled={!actionsEnabled}
+            onClick={downloadReport}
+            fill
+          >
+            {i18n.translate('xpack.apm.diagnostics.downloadReport', {
+              defaultMessage: 'Download report',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
       <EuiTimeline aria-label="Life cycle of data">
         <EuiTimelineItem
           verticalAlign="top"
