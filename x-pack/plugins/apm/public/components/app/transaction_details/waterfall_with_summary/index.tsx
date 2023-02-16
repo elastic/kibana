@@ -16,6 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
+import {
+  useFetcherSpan,
+  useFetcherTransaction,
+} from '../../../../hooks/use_apm_api_transaction';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
@@ -63,6 +67,11 @@ export function WaterfallWithSummary<TSample extends {}>({
   const isSucceded =
     waterfallFetchResult.status === FETCH_STATUS.SUCCESS &&
     traceSamplesFetchStatus === FETCH_STATUS.SUCCESS;
+
+  useFetcherTransaction('Waterfall', [
+    useFetcherSpan('waterfall', waterfallFetchResult.status),
+    useFetcherSpan('trace samples', traceSamplesFetchStatus),
+  ]);
 
   useEffect(() => {
     if (!isControlled) {

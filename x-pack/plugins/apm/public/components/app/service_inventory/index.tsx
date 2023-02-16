@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { useFetcherTransaction } from '../../../hooks/use_apm_api_transaction';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
@@ -248,6 +249,11 @@ export function ServiceInventory() {
     shouldDisplayMlCallout(anomalyDetectionSetupState);
 
   const isLoading = isPending(mainStatisticsFetch.status);
+
+  useFetcherTransaction('Service Inventory', [
+    mainStatisticsFetch,
+    comparisonFetch,
+  ]);
 
   const isFailure = mainStatisticsFetch.status === FETCH_STATUS.FAILURE;
   const noItemsMessage = (

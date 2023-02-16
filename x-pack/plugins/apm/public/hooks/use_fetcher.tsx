@@ -34,6 +34,7 @@ export interface FetcherResult<Data> {
   data?: Data;
   status: FETCH_STATUS;
   error?: IHttpFetchError<ResponseErrorBody>;
+  endpoint?: string;
 }
 
 function getDetailsFromErrorResponse(
@@ -55,9 +56,12 @@ function getDetailsFromErrorResponse(
 
 const createAutoAbortedAPMClient = (
   signal: AbortSignal,
-  addInspectorRequest: <Data>(result: FetcherResult<Data>) => void
+  addInspectorRequest: <Data>(result: FetcherResult<Data>) => void,
+  setEndpoint: (endpoint: string) => void
 ): AutoAbortedAPMClient => {
   return ((endpoint, options) => {
+    setEndpoint(endpoint);
+
     return callApmApi(endpoint, {
       ...options,
       signal,
@@ -104,6 +108,7 @@ export function useFetcher<TReturn>(
     status: FETCH_STATUS.NOT_INITIATED,
   });
   const [counter, setCounter] = useState(0);
+  const [endpoint, setEndpoint] = useState<string | undefined>();
   const { timeRangeId } = useTimeRangeId();
   const { addInspectorRequest } = useInspectorContext();
 
@@ -118,7 +123,7 @@ export function useFetcher<TReturn>(
       const signal = controller.signal;
 
       const promise = fn(
-        createAutoAbortedAPMClient(signal, addInspectorRequest)
+        createAutoAbortedAPMClient(signal, addInspectorRequest, setEndpoint)
       );
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).
@@ -199,10 +204,11 @@ export function useFetcher<TReturn>(
   return useMemo(() => {
     return {
       ...result,
+      endpoint,
       refetch: () => {
         // this will invalidate the deps to `useEffect` and will result in a new request
         setCounter((count) => count + 1);
       },
     };
-  }, [result]);
+  }, [result, endpoint]);
 }
