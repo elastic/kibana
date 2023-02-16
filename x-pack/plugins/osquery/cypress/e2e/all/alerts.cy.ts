@@ -20,6 +20,7 @@ import {
   inputQuery,
   loadAlertsEvents,
   submitQuery,
+  takeOsqueryActionWithParams,
   toggleRuleOffAndOn,
   typeInECSFieldInput,
 } from '../../tasks/live_query';
@@ -219,6 +220,8 @@ describe('Alert Event Details', () => {
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_2).within(() => {
       cy.contains("SELECT * FROM os_version where name='{{host.os.name}}';");
+      cy.contains('labels');
+      cy.contains('arch');
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_3).within(() => {
       cy.contains('select * from users');
@@ -262,7 +265,11 @@ describe('Alert Event Details', () => {
     loadAlertsEvents();
     cy.getBySel('expand-event').first().click({ force: true });
     cy.contains('Get processes').click();
-    cy.contains("SELECT * FROM os_version where name='Ubuntu';");
+    cy.getBySel('flyout-body-osquery').within(() => {
+      cy.contains("SELECT * FROM os_version where name='Ubuntu';");
+      cy.contains('labels');
+      cy.contains('arch');
+    });
   });
 
   it('sees osquery results from last action', () => {
@@ -305,20 +312,7 @@ describe('Alert Event Details', () => {
       .then((element) => {
         initialNotificationCount = parseInt(element.text(), 10);
       });
-    cy.getBySel('take-action-dropdown-btn').click();
-    cy.getBySel('osquery-action-item').click();
-    cy.contains('1 agent selected.');
-    inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
-      parseSpecialCharSequences: false,
-    });
-    cy.contains('Advanced').click();
-    typeInECSFieldInput('tags{downArrow}{enter}');
-    cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
-    cy.wait(1000);
-    submitQuery();
-    cy.getBySel('dataGridHeader').within(() => {
-      cy.contains('tags');
-    });
+    takeOsqueryActionWithParams();
     cy.getBySel('osquery-empty-button').click();
     cy.getBySel('osquery-actions-notification')
       .should('not.have.text', '0')
@@ -335,5 +329,14 @@ describe('Alert Event Details', () => {
           .find(`[data-test-subj="osquery-results-comment"]`)
           .should('have.length', updatedNotificationCount);
       });
+  });
+
+  it('should substitute params in osquery ran from timelines alerts', () => {
+    loadAlertsEvents();
+    cy.getBySel('send-alert-to-timeline-button').first().click({ force: true });
+    cy.getBySel('query-events-table').within(() => {
+      cy.getBySel('expand-event').first().click();
+    });
+    takeOsqueryActionWithParams();
   });
 });
