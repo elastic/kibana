@@ -144,7 +144,7 @@ export const Policies = () => {
         pageTitle={
           <CloudDefendPageTitle
             title={i18n.translate('xpack.cloudDefend.policies.policiesPageHeader', {
-              defaultMessage: 'D4C Policies',
+              defaultMessage: 'Defend for containers (D4C)',
             })}
           />
         }
