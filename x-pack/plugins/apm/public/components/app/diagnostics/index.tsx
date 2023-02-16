@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiEmptyPrompt } from '@elastic/eui';
 import {
   EuiAvatar,
   EuiButton,
@@ -175,10 +176,14 @@ export function Diagnostics() {
               <EuiAvatar name="Checked" iconType="dot" color="subdued" />
             ) : apmDataStatus === FETCH_STATUS.LOADING ? (
               <LoadingTimelineItem />
-            ) : apmData && suspiciousServices ? (
-              <EuiAvatar name="Checked" iconType="alert" color="#f1d86f" />
+            ) : apmData?.services && apmData?.services.length > 0 ? (
+              suspiciousServices ? (
+                <EuiAvatar name="Checked" iconType="alert" color="#f1d86f" />
+              ) : (
+                <EuiAvatar name="Checked" iconType="check" color="#6dccb1" />
+              )
             ) : (
-              <EuiAvatar name="Checked" iconType="check" color="#6dccb1" />
+              <EuiAvatar name="Checked" iconType="error" color="#ff7f62" />
             )
           }
         >
@@ -214,13 +219,44 @@ export function Diagnostics() {
                   })}
                 </p>
               </EuiText>
-
-              {FETCH_STATUS.SUCCESS && suspiciousServices && (
-                <>
-                  <EuiSpacer />
-                  <DiagnosticsServicesList items={suspiciousServices} />
-                </>
-              )}
+              {FETCH_STATUS.SUCCESS &&
+                apmData &&
+                apmData?.services &&
+                apmData?.services.length === 0 && (
+                  <EuiEmptyPrompt
+                    iconType="alert"
+                    color="danger"
+                    title={
+                      <h2>
+                        {i18n.translate(
+                          'xpack.apm.diagnostics.apmData.noData',
+                          {
+                            defaultMessage: 'No data',
+                          }
+                        )}
+                      </h2>
+                    }
+                    body={
+                      <p>
+                        {i18n.translate(
+                          'xpack.apm.diagnostics.apmData.noData.message',
+                          {
+                            defaultMessage:
+                              'No APM data have been found. Please check our troubleshooting page',
+                          }
+                        )}
+                      </p>
+                    }
+                  />
+                )}
+              {FETCH_STATUS.SUCCESS &&
+                suspiciousServices &&
+                suspiciousServices?.length > 0 && (
+                  <>
+                    <EuiSpacer />
+                    <DiagnosticsServicesList items={suspiciousServices} />
+                  </>
+                )}
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
         </EuiTimelineItem>
