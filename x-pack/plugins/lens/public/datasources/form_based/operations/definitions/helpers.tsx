@@ -217,7 +217,7 @@ function checkReferencedColumnMetric(
 ) {
   const column = layer.columns[columnId] as ReferenceBasedIndexPatternColumn;
   return column.references
-    .filter((referencedId) => 'sourceField' in layer.columns[referencedId])
+    ?.filter((referencedId) => 'sourceField' in layer.columns[referencedId])
     .map((referencedId) => {
       const fieldName = (layer.columns[referencedId] as FieldBasedIndexPatternColumn).sourceField;
       if (!isMetricCounterField(indexPattern.getFieldByName(fieldName))) {

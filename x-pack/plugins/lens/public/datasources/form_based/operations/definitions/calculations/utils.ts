@@ -90,7 +90,7 @@ export function checkReferences(layer: FormBasedLayer, columnId: string) {
 
   const errors: string[] = [];
 
-  column.references.forEach((referenceId, index) => {
+  column.references?.forEach((referenceId, index) => {
     if (!layer.columns[referenceId]) {
       errors.push(
         i18n.translate('xpack.lens.indexPattern.missingReferenceError', {
