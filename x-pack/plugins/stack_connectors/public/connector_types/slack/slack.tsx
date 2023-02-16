@@ -12,13 +12,17 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
-import type { ActionParams, SlackSecrets } from '../../../common/slack/types';
-import { WebhookParams, ExecutorPostMessageParams } from '../../../common/slack/types';
+import type {
+  SlackActionParams,
+  SlackSecrets,
+  WebhookParams,
+  PostMessageParams,
+} from '../../../common/slack/types';
 
 export function getConnectorType(): ConnectorTypeModel<
   unknown,
   SlackSecrets,
-  WebhookParams | ExecutorPostMessageParams
+  WebhookParams | PostMessageParams
 > {
   return {
     id: SLACK_CONNECTOR_ID,
@@ -30,8 +34,8 @@ export function getConnectorType(): ConnectorTypeModel<
       defaultMessage: 'Send to Slack',
     }),
     validateParams: async (
-      actionParams: ActionParams
-    ): Promise<GenericValidationResult<ActionParams>> => {
+      actionParams: SlackActionParams
+    ): Promise<GenericValidationResult<SlackActionParams>> => {
       const translations = await import('./translations');
       const errors = {
         message: new Array<string>(),

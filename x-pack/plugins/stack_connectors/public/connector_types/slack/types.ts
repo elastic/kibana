@@ -8,3 +8,15 @@ import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/p
 import type { SlackConfig, SlackSecrets } from '../../../common/slack/types';
 
 export type SlackActionConnector = UserConfiguredActionConnector<SlackConfig, SlackSecrets>;
+
+export interface GetChannelsResponse {
+  ok: true;
+  error?: string;
+  channels?: Array<{
+    id: string;
+    name: string;
+    is_channel: boolean;
+    is_archived: boolean;
+    is_private: boolean;
+  }>;
+}

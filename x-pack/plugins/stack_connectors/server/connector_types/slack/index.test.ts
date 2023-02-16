@@ -16,7 +16,7 @@ import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/action
 import { loggerMock } from '@kbn/logging-mocks';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import type {
-  ExecutorPostMessageParams,
+  PostMessageSubActionParams,
   PostMessageParams,
   SlackConnectorType,
 } from '../../../common/slack/types';
@@ -476,7 +476,7 @@ describe('execute', () => {
       const params = connectorType.renderParameterTemplates!(
         paramsWithTemplates,
         variables
-      ) as ExecutorPostMessageParams;
+      ) as PostMessageParams;
       expect(params.subActionParams.text).toBe('some text');
     });
 
@@ -588,7 +588,7 @@ describe('execute', () => {
           secrets: { token: 'some token' },
           params: {
             subAction: 'weirdAcrion' as 'postMessage',
-            subActionParams: {} as PostMessageParams,
+            subActionParams: {} as PostMessageSubActionParams,
           },
           configurationUtilities,
           logger: mockedLogger,

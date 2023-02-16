@@ -15,7 +15,7 @@ import { map, getOrElse } from 'fp-ts/lib/Option';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import type { SlackService, PostMessageResponse } from './types';
 import { SLACK_CONNECTOR_NAME } from './translations';
-import type { PostMessageParams } from '../../../common/slack/types';
+import type { PostMessageSubActionParams } from '../../../common/slack/types';
 import { SLACK_URL } from '../../../common/slack/constants';
 import {
   retryResultSeconds,
@@ -35,7 +35,7 @@ const buildSlackExecutorErrorResponse = ({
     message: string;
     response: {
       status: number;
-      statusText: string; // ?
+      statusText: string;
       headers: Record<string, string>;
     };
   };
@@ -159,7 +159,7 @@ export const createExternalService = (
   const postMessage = async ({
     channels,
     text,
-  }: PostMessageParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
+  }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     return await postMessageInOneChannel({ channel: channels[0], text });
   };
 

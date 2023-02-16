@@ -11,7 +11,6 @@ import type { ActionType as ConnectorType } from '@kbn/actions-plugin/server/typ
 import {
   SlackConfigSchema,
   SlackSecretsSchema,
-  ExecutorGetChannelsParamsSchema,
   ExecutorPostMessageParamsSchema,
   SlackWebhookSecretsSchema,
   SlackWebApiSecretsSchema,
@@ -22,14 +21,9 @@ import {
 export type SlackConfig = TypeOf<typeof SlackConfigSchema>;
 export type SlackSecrets = TypeOf<typeof SlackSecretsSchema>;
 
-export type SubAction = 'postMessage' | 'getChannels';
+export type PostMessageParams = TypeOf<typeof ExecutorPostMessageParamsSchema>;
 
-export type ExecutorGetChannelsParams = TypeOf<typeof ExecutorGetChannelsParamsSchema>;
-export type ExecutorPostMessageParams = TypeOf<typeof ExecutorPostMessageParamsSchema>;
-
-export type SlackExecuteActionParams = ExecutorGetChannelsParams | ExecutorPostMessageParams;
-
-export interface PostMessageParams {
+export interface PostMessageSubActionParams {
   channels: string[];
   text: string;
 }
@@ -63,16 +57,4 @@ export type SlackConnectorType = ConnectorType<
 
 export type WebhookParams = TypeOf<typeof WebhookParamsSchema>;
 export type WebApiParams = TypeOf<typeof WebApiParamsSchema>;
-export type ActionParams = WebhookParams | WebApiParams;
-
-export interface GetChannelsResponse {
-  ok: true;
-  error?: string;
-  channels?: Array<{
-    id: string;
-    name: string;
-    is_channel: boolean;
-    is_archived: boolean;
-    is_private: boolean;
-  }>;
-}
+export type SlackActionParams = WebhookParams | WebApiParams;

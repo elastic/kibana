@@ -45,7 +45,7 @@ export type { ActionParamsType as PagerDutyActionParams } from './pagerduty';
 export { ConnectorTypeId as ServerLogConnectorTypeId } from './server_log';
 export type { ActionParamsType as ServerLogActionParams } from './server_log';
 export { ServiceNowITOMConnectorTypeId } from './servicenow_itom';
-export type { ActionParams as SlackActionParams } from '../../common/slack/types';
+export type { SlackActionParams as SlackActionParams } from '../../common/slack/types';
 export { SLACK_CONNECTOR_ID as SlackConnectorTypeId } from '../../common/slack/constants';
 export { ConnectorTypeId as TeamsConnectorTypeId } from './teams';
 export type { ActionParamsType as TeamsActionParams } from './teams';

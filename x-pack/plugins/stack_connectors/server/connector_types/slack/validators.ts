@@ -9,7 +9,6 @@ import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { i18n } from '@kbn/i18n';
 import { URL } from 'url';
 import type { SlackSecrets } from '../../../common/slack/types';
-import type { SlackServiceValidation } from './types';
 
 export const validateCommonSecrets = (
   secrets: SlackSecrets,
@@ -41,10 +40,8 @@ export const validateCommonSecrets = (
       })
     );
   }
-
-  // Add some token validation?
 };
 
-export const validate: SlackServiceValidation = {
+export const validate = {
   secrets: validateCommonSecrets,
 };

@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ExecutorPostMessageParams } from '../../../common/slack/types';
-import type { GetChannelsResponse } from '../../../common/slack/types';
+import type { PostMessageParams } from '../../../common/slack/types';
+import type { GetChannelsResponse } from './types';
 
 interface ChannelsStatus {
   label: string;
@@ -29,7 +29,7 @@ interface ChannelsStatus {
 }
 
 export const SlackWebApiParamsFields: React.FunctionComponent<
-  ActionParamsProps<ExecutorPostMessageParams>
+  ActionParamsProps<PostMessageParams>
 > = ({
   actionConnector,
   actionParams,

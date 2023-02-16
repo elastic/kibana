@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
-import type {
-  SlackSecrets,
-  GetChannelsResponse,
-  PostMessageParams,
-} from '../../../common/slack/types';
-
-export type SlackExecutorResultData = PostMessageResponseList | GetChannelsResponse;
+import type { SlackSecrets, PostMessageSubActionParams } from '../../../common/slack/types';
 
 export interface PostMessageResponse {
   ok: boolean;
@@ -24,25 +17,8 @@ export interface PostMessageResponse {
   };
 }
 
-export type PostMessageResponseList = PostMessageResponse[];
-
 export interface SlackServiceCredentials {
   secrets: SlackSecrets;
-}
-
-export interface SlackServiceApi {
-  getChannels: ({
-    externalService,
-  }: {
-    externalService: SlackService;
-  }) => Promise<ConnectorTypeExecutorResult<unknown>>;
-  postMessage: ({
-    externalService,
-    params,
-  }: {
-    externalService: SlackService;
-    params: PostMessageParams;
-  }) => Promise<ConnectorTypeExecutorResult<unknown>>;
 }
 
 export interface SlackService {
@@ -50,9 +26,5 @@ export interface SlackService {
   postMessage: ({
     channels,
     text,
-  }: PostMessageParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
-}
-
-export interface SlackServiceValidation {
-  secrets: (secrets: SlackSecrets, validatorServices: ValidatorServices) => void;
+  }: PostMessageSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
 }
