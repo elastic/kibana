@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -187,32 +187,36 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   const analysisType =
     jobConfig && jobConfig.analysis ? getAnalysisType(jobConfig.analysis) : undefined;
 
-  const generateDiscoverUrl = async (rowIndex: number) => {
-    const item = tableItems[rowIndex];
+  const generateDiscoverUrl = useCallback(
+    async (rowIndex: number) => {
+      const item = tableItems[rowIndex];
 
-    if (discoverLocator !== undefined) {
-      const url = await discoverLocator.getRedirectUrl({
-        indexPatternId: dataViewId,
-        timeRange: data.query.timefilter.timefilter.getTime(),
-        filters: data.query.filterManager.getFilters(),
-        query: {
-          language: SEARCH_QUERY_LANGUAGE.KUERY,
-          // Filter for all visible column values of supported types - except the results field values
-          query: indexData.visibleColumns
-            .filter(
-              (column) =>
-                item[column] !== undefined &&
-                (typeof item[column] === 'string' || typeof item[column] === 'number') &&
-                !column.includes(resultsField!)
-            )
-            .map((column) => `${escapeKuery(column)}:${escapeKuery(String(item[column]))}`)
-            .join(' and '),
-        },
-      });
+      if (discoverLocator !== undefined) {
+        const url = await discoverLocator.getRedirectUrl({
+          indexPatternId: dataViewId,
+          timeRange: data.query.timefilter.timefilter.getTime(),
+          filters: data.query.filterManager.getFilters(),
+          query: {
+            language: SEARCH_QUERY_LANGUAGE.KUERY,
+            // Filter for all visible column values of supported types - except the results field values
+            query: indexData.visibleColumns
+              .filter(
+                (column) =>
+                  item[column] !== undefined &&
+                  (typeof item[column] === 'string' || typeof item[column] === 'number') &&
+                  !column.includes(resultsField!)
+              )
+              .map((column) => `${escapeKuery(column)}:${escapeKuery(String(item[column]))}`)
+              .join(' and '),
+          },
+        });
 
-      return url;
-    }
-  };
+        return url;
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [indexData?.visibleColumns, discoverLocator, dataViewId, resultsField, tableItems]
+  );
 
   const trailingControlColumns: EuiDataGridProps['trailingControlColumns'] = [
     {
@@ -301,7 +305,9 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
               (tableItems.length > 0 || status === INDEX_STATUS.LOADED) && (
                 <DataGrid
                   {...indexData}
-                  trailingControlColumns={trailingControlColumns}
+                  trailingControlColumns={
+                    indexData.visibleColumns.length ? trailingControlColumns : undefined
+                  }
                   analysisType={analysisType}
                   dataTestSubj="mlExplorationDataGrid"
                   toastNotifications={getToastNotifications()}
