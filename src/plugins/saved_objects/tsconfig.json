@@ -16,7 +16,6 @@
     "@kbn/utility-types",
     "@kbn/config-schema",
     "@kbn/core-saved-objects-server",
-    "@kbn/core-http-request-handler-context-server",
   ],
   "exclude": [
     "target/**/*",
