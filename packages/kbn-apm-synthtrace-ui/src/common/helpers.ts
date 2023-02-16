@@ -7,6 +7,7 @@ export const createTransactionPayload = (
   payload: TransactionFormState,
   serviceId: string = ''
 ): Transaction => ({
+  docType: 'transaction',
   name: payload.name,
   repeat: payload.repeat,
   serviceId,
@@ -15,6 +16,7 @@ export const createTransactionPayload = (
 });
 
 export const createSpanPayload = (payload: SpanFormState, serviceId: string = ''): Span => ({
+  docType: 'span',
   name: payload.name,
   type: payload.span_type,
   subtype: payload.sub_type,

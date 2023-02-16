@@ -5,7 +5,7 @@ export type SynthtraceScenario = {
   topLevelService?: Service;
   services?: Record<string, Service>;
   entryTransaction?: Transaction;
-  createModal?: Partial<CreateModal>;
+  createModal: Partial<CreateModal>;
 };
 
 // TODO: Rename this type to something more generic

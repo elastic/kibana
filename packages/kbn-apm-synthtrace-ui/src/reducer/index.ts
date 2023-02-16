@@ -37,7 +37,8 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
             id,
           },
         },
-        items: {
+        entryTransaction: {
+          docType: 'transaction',
           id: transactionId,
           serviceId: id,
           name: '1rpm/1100ms',
@@ -57,7 +58,7 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
       };
     }
     case 'insert_node': {
-      let clonedRoot = Object.assign({}, state.items);
+      let clonedRoot = Object.assign({}, state.entryTransaction);
       const updatedTree = insertNodeInATree(action.payload.id, action.payload.node, clonedRoot);
 
       return {
@@ -68,7 +69,8 @@ export function reducer(state: SynthtraceScenario, action: Action): SynthtraceSc
           serviceId: '',
           id: '',
         },
-        items: updatedTree,
+        //@ts-ignore
+        entryTransaction: updatedTree,
       };
     }
   }

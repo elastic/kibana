@@ -22,70 +22,82 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
       const successfulTimestamps = range.interval('1m').rate(180);
       const failedTimestamps = range.interval('1m').rate(180);
 
-      const instances = [...Array(numServices).keys()].map((index) =>
-        apm
-          .service({ name: `synth-go-${index}`, environment: ENVIRONMENT, agentName: 'go' })
-          .instance('instance')
-      );
-      const instanceSpans = (instance: Instance) => {
-        const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
-          instance
-            .transaction({ transactionName })
-            .timestamp(timestamp)
-            .duration(1000)
-            .success()
-            .children(
-              instance
-                .span({
-                  spanName: 'GET apm-*/_search',
-                  spanType: 'db',
-                  spanSubtype: 'elasticsearch',
-                })
-                .duration(1000)
-                .success()
-                .destination('elasticsearch')
-                .timestamp(timestamp),
-              instance
-                .span({ spanName: 'custom_operation', spanType: 'custom' })
-                .duration(100)
-                .success()
-                .timestamp(timestamp)
-            )
-        );
+      // const instances = [...Array(numServices).keys()].map((index) =>
+      //   apm
+      //     .service({ name: `synth-go-${index}`, environment: ENVIRONMENT, agentName: 'go' })
+      //     .instance('instance')
+      //     );
+      const javaInstance = apm
+        .service({ name: `synth-node`, environment: ENVIRONMENT, agentName: 'nodejs' })
+        .instance('instance');
 
-        const failedTraceEvents = failedTimestamps.generator((timestamp) =>
-          instance
-            .transaction({ transactionName })
-            .timestamp(timestamp)
-            .duration(1000)
-            .failure()
-            .errors(
-              instance
-                .error({ message: '[ResponseError] index_not_found_exception' })
-                .timestamp(timestamp + 50)
-            )
-        );
+      const traces = range.ratePerMinute(1).generator((timestamp) => {
+        return javaInstance
+          .transaction({ transactionName: 'foo' })
+          .timestamp(timestamp)
+          .duration(100)
+          .success();
+      });
+      return traces;
+      // const instanceSpans = (instance: Instance) => {
+      //   const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
+      //     instance
+      //       .transaction({ transactionName })
+      //       .timestamp(timestamp)
+      //       .duration(1000)
+      //       .success()
+      //       .children(
+      //         instance
+      //           .span({
+      //             spanName: 'GET apm-*/_search',
+      //             spanType: 'db',
+      //             spanSubtype: 'elasticsearch',
+      //           })
+      //           .duration(1000)
+      //           .success()
+      //           .destination('elasticsearch')
+      //           .timestamp(timestamp),
+      //         instance
+      //           .span({ spanName: 'custom_operation', spanType: 'custom' })
+      //           .duration(100)
+      //           .success()
+      //           .timestamp(timestamp)
+      //       )
+      //   );
 
-        const metricsets = range
-          .interval('30s')
-          .rate(1)
-          .generator((timestamp) =>
-            instance
-              .appMetrics({
-                'system.memory.actual.free': 800,
-                'system.memory.total': 1000,
-                'system.cpu.total.norm.pct': 0.6,
-                'system.process.cpu.total.norm.pct': 0.7,
-              })
-              .timestamp(timestamp)
-          );
+      //   const failedTraceEvents = failedTimestamps.generator((timestamp) =>
+      //     instance
+      //       .transaction({ transactionName })
+      //       .timestamp(timestamp)
+      //       .duration(1000)
+      //       .failure()
+      //       .errors(
+      //         instance
+      //           .error({ message: '[ResponseError] index_not_found_exception' })
+      //           .timestamp(timestamp + 50)
+      //       )
+      //   );
 
-        return [successfulTraceEvents, failedTraceEvents, metricsets];
-      };
+      //   const metricsets = range
+      //     .interval('30s')
+      //     .rate(1)
+      //     .generator((timestamp) =>
+      //       instance
+      //         .appMetrics({
+      //           'system.memory.actual.free': 800,
+      //           'system.memory.total': 1000,
+      //           'system.cpu.total.norm.pct': 0.6,
+      //           'system.process.cpu.total.norm.pct': 0.7,
+      //         })
+      //         .timestamp(timestamp)
+      //     );
 
-      return logger.perf('generating_apm_events', () =>
-        instances.flatMap((instance) => instanceSpans(instance))
-      );
+      //   return [successfulTraceEvents, failedTraceEvents, metricsets];
+      // };
+
+      // return logger.perf('generating_apm_events', () =>
+      //   instances.flatMap((instance) => instanceSpans(instance))
+      // );
     },
   };
 };

@@ -8,7 +8,7 @@ import { apm, Instance, timerange } from '@kbn/apm-synthtrace-client';
 import { createEsClientForTesting } from '@kbn/test';
 import { times } from 'lodash';
 import { Readable } from 'stream';
-import { Span, SynthtraceScenario, Transaction } from '../typings';
+import { Span, SynthtraceScenario, Transaction } from '../../typings';
 
 const client = createEsClientForTesting({
   esUrl: 'http://elastic:changeme@localhost:9200',
