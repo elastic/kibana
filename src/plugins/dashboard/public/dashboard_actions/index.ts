@@ -39,7 +39,7 @@ export const buildAllDashboardActions = async ({
   uiActions.registerAction(clonePanelAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
-  const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, uiSettings);
+  const SavedObjectFinder = getSavedObjectFinder(uiSettings, core.http);
   const changeViewAction = new ReplacePanelAction(SavedObjectFinder);
   uiActions.registerAction(changeViewAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);

@@ -221,10 +221,6 @@ export function transformOutputToFullPolicyOutput(
     if (!isShipperDisabled) {
       shipperDiskQueueData = buildShipperQueueData(shipper);
     }
-    /*
-      TODO: Once the Elastic-Shipper is ready,
-      Verify that these parameters have the correct names and structure
-    */
     /* eslint-disable @typescript-eslint/naming-convention */
     const {
       loadbalance,
