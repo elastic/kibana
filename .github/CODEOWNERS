@@ -461,6 +461,7 @@ src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
 x-pack/plugins/notifications @elastic/appex-sharedux
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
+x-pack/plugins/observability @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/infra-monitoring-ui
 packages/kbn-optimizer @elastic/kibana-operations
