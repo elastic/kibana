@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { getEndpointSecurityPolicyManager } from '../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
-import { getArtifactsListTestsData } from '../fixtures/artifacts_page';
+import { getEndpointSecurityPolicyManager } from '../../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
+import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import {
   createPerPolicyArtifact,
   createArtifactList,
   removeAllArtifacts,
   removeExceptionsList,
   yieldFirstPolicyID,
-} from '../tasks/artifacts';
-import { loadEndpointDataForEventFiltersIfNeeded } from '../tasks/load_endpoint_data';
-import { login, loginWithCustomRole, loginWithRole, ROLE } from '../tasks/login';
-import { performUserActions } from '../tasks/perform_user_actions';
+} from '../../tasks/artifacts';
+import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
+import {
+  getRoleWithArtifactReadPrivilege,
+  login,
+  loginWithCustomRole,
+  loginWithRole,
+  ROLE,
+} from '../../tasks/login';
+import { performUserActions } from '../../tasks/perform_user_actions';
 
 const loginWithPrivilegeAll = () => {
   loginWithRole(ROLE.endpoint_security_policy_manager);
@@ -30,28 +36,6 @@ const loginWithPrivilegeRead = (privilegePrefix: string) => {
 const loginWithPrivilegeNone = (privilegePrefix: string) => {
   const roleWithoutArtifactPrivilege = getRoleWithoutArtifactPrivilege(privilegePrefix);
   loginWithCustomRole('roleWithoutArtifactPrivilege', roleWithoutArtifactPrivilege);
-};
-
-const getRoleWithArtifactReadPrivilege = (privilegePrefix: string) => {
-  const endpointSecurityPolicyManagerRole = getEndpointSecurityPolicyManager();
-
-  return {
-    ...endpointSecurityPolicyManagerRole,
-    kibana: [
-      {
-        ...endpointSecurityPolicyManagerRole.kibana[0],
-        feature: {
-          ...endpointSecurityPolicyManagerRole.kibana[0].feature,
-          siem: [
-            ...endpointSecurityPolicyManagerRole.kibana[0].feature.siem.filter(
-              (privilege) => privilege !== `${privilegePrefix}all`
-            ),
-            `${privilegePrefix}read`,
-          ],
-        },
-      },
-    ],
-  };
 };
 
 const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {

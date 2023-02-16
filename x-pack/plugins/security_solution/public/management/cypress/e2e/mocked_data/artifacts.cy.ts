@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import { login, loginWithRole, ROLE } from '../tasks/login';
+import {
+  getRoleWithArtifactReadPrivilege,
+  login,
+  loginWithCustomRole,
+  loginWithRole,
+  ROLE,
+} from '../../tasks/login';
 
-import { getArtifactsListTestsData } from '../fixtures/artifacts_page';
-import { removeAllArtifacts } from '../tasks/artifacts';
-import { performUserActions } from '../tasks/perform_user_actions';
-import { loadEndpointDataForEventFiltersIfNeeded } from '../tasks/load_endpoint_data';
+import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
+import { removeAllArtifacts } from '../../tasks/artifacts';
+import { performUserActions } from '../../tasks/perform_user_actions';
+import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
 
 const loginWithWriteAccess = (url: string) => {
   loginWithRole(ROLE.analyst_hunter);
   cy.visit(url);
 };
 
-const loginWithReadAccess = (url: string) => {
-  loginWithRole(ROLE.t2_analyst);
+const loginWithReadAccess = (privilegePrefix: string, url: string) => {
+  const roleWithArtifactReadPrivilege = getRoleWithArtifactReadPrivilege(privilegePrefix);
+  loginWithCustomRole('roleWithArtifactReadPrivilege', roleWithArtifactReadPrivilege);
   cy.visit(url);
 };
 
@@ -51,7 +58,10 @@ describe('Artifacts pages', () => {
       });
 
       it(`read - should show empty state page if there is no ${testData.title} entry and the add button does not exist`, () => {
-        loginWithReadAccess(`/app/security/administration/${testData.urlPath}`);
+        loginWithReadAccess(
+          testData.privilegePrefix,
+          `/app/security/administration/${testData.urlPath}`
+        );
         cy.getBySel(testData.emptyState).should('exist');
         cy.getBySel(`${testData.pagePrefix}-emptyState-addButton`).should('not.exist');
       });
@@ -82,7 +92,10 @@ describe('Artifacts pages', () => {
       });
 
       it(`read - should not be able to update/delete an existing ${testData.title} entry`, () => {
-        loginWithReadAccess(`/app/security/administration/${testData.urlPath}`);
+        loginWithReadAccess(
+          testData.privilegePrefix,
+          `/app/security/administration/${testData.urlPath}`
+        );
         cy.getBySel('header-page-title').contains(testData.title);
         cy.getBySel(`${testData.pagePrefix}-card-header-actions-button`).should('not.exist');
         cy.getBySel(`${testData.pagePrefix}-card-cardEditAction`).should('not.exist');
@@ -90,7 +103,10 @@ describe('Artifacts pages', () => {
       });
 
       it(`read - should not be able to create a new ${testData.title} entry`, () => {
-        loginWithReadAccess(`/app/security/administration/${testData.urlPath}`);
+        loginWithReadAccess(
+          testData.privilegePrefix,
+          `/app/security/administration/${testData.urlPath}`
+        );
         cy.getBySel('header-page-title').contains(testData.title);
         cy.getBySel(`${testData.pagePrefix}-pageAddButton`).should('not.exist');
       });
