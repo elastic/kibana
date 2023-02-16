@@ -56,6 +56,10 @@ export interface Props<Kind extends string = string> {
    */
   onUpload?: (done: DoneNotification[]) => void;
   /**
+   * `meta` value to be used for file uploads
+   */
+  meta?: FileJSON['meta'];
+  /**
    * The number of results to show per page.
    */
   pageSize?: number;
