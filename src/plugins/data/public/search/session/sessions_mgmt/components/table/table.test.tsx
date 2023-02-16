@@ -178,6 +178,7 @@ describe('Background Search Session Management Table', () => {
 
         await waitFor(
           () => {
+            // 1 for initial load + 2 refresh calls
             expect(find).toHaveBeenCalledTimes(3);
           },
           { timeout: 10000, interval: 100 }
