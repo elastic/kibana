@@ -7,7 +7,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
-    "@kbn/utility-types",
+    "@kbn/core-http-request-handler-context-server",
   ],
   "exclude": [
     "target/**/*",

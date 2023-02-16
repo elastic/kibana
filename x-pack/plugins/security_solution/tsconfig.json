@@ -131,7 +131,6 @@
     "@kbn/core-status-common-internal",
     "@kbn/repo-info",
     "@kbn/storybook",
-    "@kbn/ecs",
     "@kbn/cypress-config",
     "@kbn/controls-plugin",
     "@kbn/shared-ux-utility",
@@ -141,5 +140,6 @@
     "@kbn/guided-onboarding",
     "@kbn/securitysolution-ecs",
     "@kbn/cell-actions",
+    "@kbn/shared-ux-router",
   ]
 }

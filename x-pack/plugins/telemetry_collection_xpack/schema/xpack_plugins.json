@@ -13201,6 +13201,133 @@
               }
             }
           }
+        },
+        "dashboardMetrics": {
+          "properties": {
+            "dashboard_tag": {
+              "properties": {
+                "created_at": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "The time the tab was created"
+                  }
+                },
+                "linked_dashboards_count": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of associated dashboards"
+                  }
+                }
+              }
+            },
+            "dashboards": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "created_at": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The time the dashboard was created"
+                    }
+                  },
+                  "dashboard_id": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The dashboard saved object id"
+                    }
+                  },
+                  "error_message": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The relevant error message"
+                    }
+                  },
+                  "error_status_code": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The relevant error status code"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "slo": {
+      "properties": {
+        "slo": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of slos in the cluster"
+              }
+            },
+            "by_status": {
+              "properties": {
+                "enabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of enabled slos in the cluster"
+                  }
+                },
+                "disabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of disabled slos in the cluster"
+                  }
+                }
+              }
+            },
+            "by_sli_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by sli type in the cluster"
+                  }
+                }
+              }
+            },
+            "by_rolling_duration": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by rolling duration in the cluster"
+                  }
+                }
+              }
+            },
+            "by_calendar_aligned_duration": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by calendar aligned duration in the cluster"
+                  }
+                }
+              }
+            },
+            "by_budgeting_method": {
+              "properties": {
+                "occurrences": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by timeslices budgeting method in the cluster"
+                  }
+                },
+                "timeslices": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by occurrences budgeting method in the cluster"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },

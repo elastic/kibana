@@ -62,6 +62,7 @@ export interface CreateDataProviderParams {
   fieldType?: string;
   values: string | string[] | null | undefined;
   sourceParamType?: Serializable;
+  negate?: boolean;
 }
 
 export const createDataProviders = ({
@@ -72,6 +73,7 @@ export const createDataProviders = ({
   fieldType,
   values,
   sourceParamType,
+  negate,
 }: CreateDataProviderParams) => {
   if (field == null) return null;
 
@@ -83,7 +85,7 @@ export const createDataProviders = ({
       value ? `-${value}` : ''
     }`;
 
-    if (fieldType === GEO_FIELD_TYPE || field === MESSAGE_FIELD_NAME) {
+    if (!isValidDataProviderField(field, fieldType)) {
       return dataProviders;
     }
 
@@ -124,10 +126,13 @@ export const createDataProviders = ({
     }
 
     id = getIdForField({ field, fieldFormat, appendedUniqueId, value });
-    dataProviders.push(getDataProvider({ field, id, value }));
+    dataProviders.push(getDataProvider({ field, id, value, excluded: negate }));
     return dataProviders;
   }, []);
 };
+
+export const isValidDataProviderField = (fieldName: string, fieldType: string | undefined) =>
+  fieldType !== GEO_FIELD_TYPE && fieldName !== MESSAGE_FIELD_NAME;
 
 const getIdForField = ({
   field,

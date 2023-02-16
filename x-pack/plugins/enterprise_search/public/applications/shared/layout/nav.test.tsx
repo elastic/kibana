@@ -258,6 +258,11 @@ describe('useEnterpriseSearchContentNav Engines feature flag', () => {
             name: 'Engines',
             href: '/app/enterprise_search/content/engines',
           },
+          {
+            id: 'searchExperiences',
+            name: 'Search Experiences',
+            href: '/app/enterprise_search/search_experiences',
+          },
         ],
       },
       {
@@ -399,6 +404,11 @@ describe('useEnterpriseSearchEngineNav', () => {
             name: 'Engines',
             href: '/app/enterprise_search/content/engines',
           },
+          {
+            id: 'searchExperiences',
+            name: 'Search Experiences',
+            href: '/app/enterprise_search/search_experiences',
+          },
         ],
       },
       {
@@ -473,11 +483,11 @@ describe('useEnterpriseSearchEngineNav', () => {
           id: 'enterpriseSearchEngineSchema',
           name: 'Schema',
         },
-        // {
-        //   href: `/app/enterprise_search/content/engines/${engineName}/preview`,
-        //   id: 'enterpriseSearchEnginePreview',
-        //   name: 'Preview',
-        // },
+        {
+          href: `/app/enterprise_search/content/engines/${engineName}/preview`,
+          id: 'enterpriseSearchEnginePreview',
+          name: 'Preview',
+        },
         {
           href: `/app/enterprise_search/content/engines/${engineName}/api`,
           id: 'enterpriseSearchEngineAPI',
