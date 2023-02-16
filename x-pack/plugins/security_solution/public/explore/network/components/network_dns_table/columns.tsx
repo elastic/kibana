@@ -50,6 +50,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
               name: 'dns.question.registered_domain',
               value: dnsName,
               type: 'keyword',
+              aggregatable: true,
             }}
           >
             {defaultToEmptyTag(dnsName)}

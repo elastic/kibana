@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { login } from '../tasks/login';
-import { runEndpointLoaderScript } from '../tasks/run_endpoint_loader';
+import { login } from '../../tasks/login';
+import { runEndpointLoaderScript } from '../../tasks/run_endpoint_loader';
 
 describe('Endpoints page', () => {
   before(() => {

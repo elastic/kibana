@@ -4248,6 +4248,20 @@
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.ActionVariable.usesPublicBaseUrl",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "usesPublicBaseUrl",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
