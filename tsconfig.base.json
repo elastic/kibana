@@ -94,6 +94,8 @@
       "@kbn/bfetch-explorer-plugin/*": ["examples/bfetch_explorer/*"],
       "@kbn/bfetch-plugin": ["src/plugins/bfetch"],
       "@kbn/bfetch-plugin/*": ["src/plugins/bfetch/*"],
+      "@kbn/big-data-loader": ["packages/kbn-big-data-loader"],
+      "@kbn/big-data-loader/*": ["packages/kbn-big-data-loader/*"],
       "@kbn/canvas-plugin": ["x-pack/plugins/canvas"],
       "@kbn/canvas-plugin/*": ["x-pack/plugins/canvas/*"],
       "@kbn/cases-api-integration-test-plugin": ["x-pack/test/cases_api_integration/common/plugins/cases"],
