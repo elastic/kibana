@@ -50,7 +50,7 @@ import {
   manageLinks as cloudSecurityPostureLinks,
 } from '../cloud_security_posture/links';
 import {
-  manageCategories as cloudDefendCategories,
+  //  manageCategories as cloudDefendCategories,
   manageLinks as cloudDefendLinks,
 } from '../cloud_defend/links';
 import { IconActionHistory } from './icons/action_history';
@@ -87,7 +87,6 @@ const categories = [
     ],
   },
   ...cloudSecurityPostureCategories,
-  ...cloudDefendCategories,
 ];
 
 export const links: LinkItem = {

@@ -58,7 +58,7 @@ const EmptyState = ({ name }: { name: string }) => (
         <strong>
           <FormattedMessage
             id="xpack.cloudDefend.policies.policyEmptyState.integrationsNotFoundTitle"
-            defaultMessage="No integrations found"
+            defaultMessage="No policies found"
           />
           {name && (
             <FormattedMessage
@@ -75,7 +75,7 @@ const EmptyState = ({ name }: { name: string }) => (
       <EuiTextColor color="subdued">
         <FormattedMessage
           id="xpack.cloudDefend.policies.policyEmptyState.integrationsNotFoundWithFiltersTitle"
-          defaultMessage="We weren't able to find any integrations with the above filters."
+          defaultMessage="We weren't able to find any policies with the above filters."
         />
       </EuiTextColor>
     </EuiText>
@@ -144,7 +144,7 @@ export const Policies = () => {
         pageTitle={
           <CloudDefendPageTitle
             title={i18n.translate('xpack.cloudDefend.policies.policiesPageHeader', {
-              defaultMessage: 'D4C Integrations',
+              defaultMessage: 'D4C Policies',
             })}
           />
         }

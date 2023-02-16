@@ -6,9 +6,10 @@
  */
 import { getSecuritySolutionLink } from '@kbn/cloud-defend-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName, SERVER_APP_ID } from '../../common/constants';
-import type { LinkCategories, LinkItem } from '../common/links/types';
-import { IconExceptionLists } from '../management/icons/exception_lists';
+import type { SecurityPageName } from '../../common/constants';
+import { SERVER_APP_ID } from '../../common/constants';
+import type { LinkItem } from '../common/links/types';
+import { IconCloudDefend } from '../management/icons/cloud_defend';
 
 const commonLinkProperties: Partial<LinkItem> = {
   hideTimeline: true,
@@ -24,17 +25,19 @@ export const rootLinks: LinkItem = {
 export const manageLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('policies'),
   description: i18n.translate('xpack.securitySolution.appLinks.cloudDefendPoliciesDescription', {
-    defaultMessage: 'View control policies.',
+    defaultMessage: 'View drift prevention policies.',
   }),
-  landingIcon: IconExceptionLists,
+  landingIcon: IconCloudDefend,
   ...commonLinkProperties,
 };
 
-export const manageCategories: LinkCategories = [
+// currently using the CSP category, as it's weird to have two categories each with one item..
+// saving this for when we add other pages
+/* export const manageCategories: LinkCategories = [
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.cloudDefend', {
       defaultMessage: 'DEFEND FOR CONTAINERS (D4C)',
     }),
     linkIds: [SecurityPageName.cloudDefendPolicies],
   },
-];
+]; */
