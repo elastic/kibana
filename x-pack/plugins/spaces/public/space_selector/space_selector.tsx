@@ -12,11 +12,11 @@ import {
   EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
-  EuiPortal,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
