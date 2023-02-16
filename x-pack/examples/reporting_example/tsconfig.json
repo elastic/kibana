@@ -25,12 +25,5 @@
     "@kbn/i18n-react",
     "@kbn/utility-types",
     "@kbn/shared-ux-router",
-    "@kbn/discover-plugin",
-    "@kbn/es-query",
-    "@kbn/rison",
-    "@kbn/saved-objects-finder-plugin",
-    "@kbn/saved-objects-management-plugin",
-    "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/data-plugin",
   ]
 }
