@@ -129,10 +129,6 @@ export class SavedObjectsService
       savedObjectsMigrationConfig,
       this.allowHttpApiAccess
     );
-    this.logger.debug(
-      `allowHTTPApisAccess in SavedObjectConfig: this.config.allowHttpApiAccess: ${this.config.allowHttpApiAccess}`
-    );
-    this.logger.debug(`maxImportPayloadBytes: ${this.config.maxImportPayloadBytes}`);
 
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({

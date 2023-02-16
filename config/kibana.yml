@@ -151,7 +151,6 @@
 # configuration option. Default: 100mb
 #migrations.maxBatchSizeBytes: 100mb
 
-
 # The number of times to retry temporary migration failures. Increase the setting
 # if migrations fail frequently with a message such as `Unable to complete the [...] step after
 # 15 attempts, terminating`. Defaults to 15
