@@ -7,7 +7,7 @@
 
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { createEsoMigration, pipeMigrations } from '../utils';
+import { createEsoMigration, isDetectionEngineAADRuleType, pipeMigrations } from '../utils';
 import { RawRule } from '../../../types';
 
 function addRevision(doc: SavedObjectUnsanitizedDoc<RawRule>): SavedObjectUnsanitizedDoc<RawRule> {
@@ -15,7 +15,7 @@ function addRevision(doc: SavedObjectUnsanitizedDoc<RawRule>): SavedObjectUnsani
     ...doc,
     attributes: {
       ...doc.attributes,
-      revision: 0,
+      revision: isDetectionEngineAADRuleType(doc) ? (doc.attributes.params.version as number) : 0,
     },
   };
 }
