@@ -162,7 +162,7 @@ export function Diagnostics() {
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner>
-              <EuiText grow={false} size="s">
+              <EuiText size="s">
                 <p>
                   {i18n.translate(
                     'xpack.apm.diagnostics.apmConfiguration.description',
@@ -172,7 +172,6 @@ export function Diagnostics() {
                     }
                   )}
                 </p>
-
                 {setupConfigData?.pipelines && (
                   <EuiCodeBlock language="json" overflowHeight={300}>
                     {JSON.stringify(setupConfigData?.pipelines)}
