@@ -4,29 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { getApmPipelines } from './get_apm_pipelines';
+import { getApmTemplates, getApmPipelines } from './get_apm_setup_config';
 
-const apmPipelinesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/diagnostics/pipelines',
+export const esClientRequestOptions: TransportRequestOptions = {
+  ignore: [404],
+};
+
+const apmConfigurationsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/diagnostics/setup_config',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const { context } = resources;
 
     const esClient = (await context.core).elasticsearch.client;
 
-    try {
-      const apmPipelines = await getApmPipelines({
-        esClient: esClient.asInternalUser,
-      });
-      return apmPipelines;
-    } catch (error) {
-      console.log(error);
-    }
+    const commonParams = {
+      esClient: esClient.asInternalUser,
+      options: esClientRequestOptions,
+    };
+
+    const [pipelines, templates] = await Promise.all([
+      getApmPipelines(commonParams),
+      getApmTemplates(commonParams),
+    ]);
+
+    return { pipelines, templates };
   },
 });
 
 export const apmDiagnosticsRepository = {
-  ...apmPipelinesRoute,
+  ...apmConfigurationsRoute,
 };

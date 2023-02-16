@@ -39,7 +39,7 @@ export function Diagnostics() {
   const [reportData, setReportData] = useState<Record<string, any>>();
 
   useEffect(() => {
-    if (configData === 'success') {
+    if (configStatus !== FETCH_STATUS.LOADING) {
       setDataStatus(FETCH_STATUS.LOADING);
       const timer = setTimeout(() => {
         setDataStatus(FETCH_STATUS.SUCCESS);
@@ -59,9 +59,9 @@ export function Diagnostics() {
     prefix: 'buttonElementAccordion',
   });
 
-  const { data: pipelines, status: pipelinesStatus } = useFetcher(
+  const { data: setupConfigData, status: setupConfigStatus } = useFetcher(
     (callApmApi) => {
-      return callApmApi('GET /internal/apm/diagnostics/pipelines');
+      return callApmApi('GET /internal/apm/diagnostics/setup_config');
     },
     []
   );
@@ -84,13 +84,13 @@ export function Diagnostics() {
       setReportData((prev) => ({
         ...prev,
         apmConfiguration: {
-          pipelines,
+          pipelines: setupConfigData?.pipelines,
+          templates: setupConfigData?.templates,
         },
       }));
     }, 1000);
     return () => clearTimeout(timer);
-  }, [pipelines]);
-
+  }, [setupConfigData]);
   return (
     <>
       <EuiFlexGroup justifyContent="flexEnd">
@@ -123,7 +123,7 @@ export function Diagnostics() {
         <EuiTimelineItem
           verticalAlign="top"
           icon={
-            pipelinesStatus === FETCH_STATUS.LOADING ? (
+            setupConfigStatus === FETCH_STATUS.LOADING ? (
               <LoadingTimelineItem />
             ) : configData === 'success' ? (
               <EuiAvatar name="Checked" iconType="check" color="#6dccb1" />
@@ -158,9 +158,9 @@ export function Diagnostics() {
                   )}
                 </p>
 
-                {pipelines && (
+                {setupConfigData?.pipelines && (
                   <EuiCodeBlock language="json" overflowHeight={300}>
-                    {JSON.stringify(pipelines)}
+                    {JSON.stringify(setupConfigData?.pipelines)}
                   </EuiCodeBlock>
                 )}
               </EuiText>
