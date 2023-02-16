@@ -16,6 +16,7 @@ import {
   submitQuery,
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
+  viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import {
   LIVE_QUERY_EDITOR,
@@ -152,7 +153,11 @@ describe('ALL - Live Query', () => {
     cy.getBySel('toggleIcon-failingQuery').click();
     cy.contains('Status').click();
     cy.contains('query failed, code: 1, message: no such table: opera_extensions');
-    navigateTo('/app/osquery');
-    cy.contains('Example');
+    cy.getBySel('toggleIcon-failingQuery').click();
+    cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
+    cy.contains('Add to Case').click();
+    cy.contains('Select case');
+    cy.contains(/Select$/).click();
+    viewRecentCaseAndCheckResults();
   });
 });

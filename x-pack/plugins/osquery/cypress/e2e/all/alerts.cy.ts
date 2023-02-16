@@ -22,6 +22,7 @@ import {
   submitQuery,
   toggleRuleOffAndOn,
   typeInECSFieldInput,
+  viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible } from '../../tasks/integrations';
@@ -76,7 +77,7 @@ describe('Alert Event Details', () => {
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.get(LIVE_QUERY_EDITOR);
     });
-    cy.contains('Save changes').click();
+    cy.contains('Save changes').wait(500).click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('Query is a required field');
       inputQuery('select * from uptime1');
@@ -286,7 +287,7 @@ describe('Alert Event Details', () => {
     });
   });
 
-  it('sees osquery results from last action', () => {
+  it('sees osquery results from last action and add to a case', () => {
     toggleRuleOffAndOn(RULE_NAME);
     cy.wait(2000);
     cy.visit('/app/security/alerts');
@@ -314,5 +315,9 @@ describe('Alert Event Details', () => {
         // }
       });
     });
+    cy.contains('Add to Case').click();
+    cy.contains('Select case');
+    cy.contains(/Select$/).click();
+    viewRecentCaseAndCheckResults();
   });
 });

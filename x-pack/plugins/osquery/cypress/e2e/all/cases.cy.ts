@@ -8,7 +8,7 @@
 import {
   addLastLiveQueryToCase,
   checkActionItemsInResults,
-  checkResults,
+  viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
@@ -29,10 +29,8 @@ describe('Add to Cases', () => {
     it('should add result a case and not have add to timeline in result', () => {
       addLastLiveQueryToCase();
       cy.contains('Test Obs case has been updated');
-      cy.visit('/app/observability/cases');
-      cy.contains('Test Obs case').click();
-      checkResults();
-      cy.contains('attached Osquery results');
+      viewRecentCaseAndCheckResults();
+
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");
       checkActionItemsInResults({
         lens: true,
@@ -56,10 +54,8 @@ describe('Add to Cases', () => {
     it('should add result a case and have add to timeline in result', () => {
       addLastLiveQueryToCase();
       cy.contains('Test Security Case has been updated');
-      cy.visit('/app/security/cases');
-      cy.contains('Test Security Case').click();
-      checkResults();
-      cy.contains('attached Osquery results');
+      viewRecentCaseAndCheckResults();
+
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");
       checkActionItemsInResults({
         lens: true,

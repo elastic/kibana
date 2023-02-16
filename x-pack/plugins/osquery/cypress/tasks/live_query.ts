@@ -105,6 +105,13 @@ export const addLastLiveQueryToCase = () => {
   cy.contains(/Select$/).click();
 };
 
+const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?seconds ago/;
+export const viewRecentCaseAndCheckResults = () => {
+  cy.contains('View case').click();
+  cy.contains(casesOsqueryResultRegex);
+  checkResults();
+};
+
 export const checkActionItemsInResults = ({
   lens,
   discover,
