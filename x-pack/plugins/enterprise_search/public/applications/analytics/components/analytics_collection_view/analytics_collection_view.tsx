@@ -121,7 +121,6 @@ export const AnalyticsCollectionView: React.FC = () => {
           ? [
               <RedirectAppLinks application={application}>
                 <EuiLink
-                  data-test-subj="enterpriseSearchAnalyticsCollectionViewLink"
                   href={application.getUrlForApp('discover', {
                     path: `#/?_a=(index:'${dataViewId}')`,
                   })}
