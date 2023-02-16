@@ -7,17 +7,25 @@
 
 import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {
+  checkActionItemsInResults,
+  checkResults,
   deleteAndConfirm,
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
+  selectAllAgents,
+  submitQuery,
 } from '../../tasks/live_query';
 import { login } from '../../tasks/login';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { preparePack } from '../../tasks/packs';
+import { activatePack, deactivatePack, preparePack } from '../../tasks/packs';
 import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
 import { DEFAULT_POLICY } from '../../screens/fleet';
-import { getIdFormField, getSavedQueriesDropdown } from '../../screens/live_query';
+import {
+  getIdFormField,
+  getSavedQueriesDropdown,
+  LIVE_QUERY_EDITOR,
+} from '../../screens/live_query';
 import { ROLES } from '../../test';
 import { getRandomInt } from '../../tasks/helpers';
 
@@ -251,19 +259,10 @@ describe('ALL - Packs', () => {
     //     });
     // });
 
-    it('activate and deactive pack', () => {
+    it('deactivate and active pack', () => {
       cy.contains('Packs').click();
-      cy.react('ActiveStateSwitchComponent', {
-        props: { item: { attributes: { name: PACK_NAME } } },
-      }).click();
-      cy.contains(`Successfully deactivated "${PACK_NAME}" pack`).should('not.exist');
-      cy.contains(`Successfully deactivated "${PACK_NAME}" pack`).should('exist');
-      cy.react('ActiveStateSwitchComponent', {
-        props: { item: { attributes: { name: PACK_NAME } } },
-      }).click();
-      cy.getBySel('confirmModalConfirmButton').click();
-      cy.contains(`Successfully activated "${PACK_NAME}" pack`).should('not.exist');
-      cy.contains(`Successfully activated "${PACK_NAME}" pack`).should('exist');
+      deactivatePack(PACK_NAME);
+      activatePack(PACK_NAME, true);
     });
 
     it.skip('should verify that packs are triggered', () => {
@@ -403,12 +402,61 @@ describe('ALL - Packs', () => {
       login(ROLES.soc_manager);
       navigateTo('/app/osquery/packs');
     });
+    const PREBUILD_PACK_NAME = 'it-compliance';
+    // const PREBUILD_PACK_NAME = 'hardware-monitoring';
 
     it('should load prebuilt packs', () => {
       cy.contains('Load Elastic prebuilt packs').click();
       cy.contains('Load Elastic prebuilt packs').should('not.exist');
       cy.wait(1000);
       cy.react('EuiTableRow').should('have.length.above', 5);
+    });
+
+    it('should be able to activate pack', () => {
+      activatePack(PREBUILD_PACK_NAME);
+      deactivatePack(PREBUILD_PACK_NAME);
+    });
+    it('should be able to add policy to it', () => {
+      cy.contains(PREBUILD_PACK_NAME).click();
+      cy.contains('Edit').click();
+      findFormFieldByRowsLabelAndType(
+        'Scheduled agent policies (optional)',
+        'fleet server {downArrow}{enter}'
+      );
+      cy.contains('Update pack').click();
+      cy.getBySel('confirmModalConfirmButton').click();
+      cy.contains(`Successfully updated "${PREBUILD_PACK_NAME}" pack`);
+    });
+
+    it('should be able to activate pack with agent inside', () => {
+      activatePack(PREBUILD_PACK_NAME, true);
+      deactivatePack(PREBUILD_PACK_NAME, true);
+    });
+    it('should be able to delete prebuilt pack', () => {
+      cy.contains(PREBUILD_PACK_NAME).click();
+      cy.contains('Edit').click();
+      deleteAndConfirm('pack');
+    });
+    it('should be able to run live prebuilt pack', () => {
+      navigateTo('/app/osquery/live_queries');
+      cy.contains('New live query').click();
+      cy.contains('Run a set of queries in a pack.').click();
+      cy.get(LIVE_QUERY_EDITOR).should('not.exist');
+      cy.getBySel('select-live-pack').click().type('osquery-monitoring{downArrow}{enter}');
+      selectAllAgents();
+      submitQuery();
+      cy.getBySel('live-query-loading').should('exist');
+      cy.getBySel('live-query-loading', { timeout: 10000 }).should('not.exist');
+      cy.getBySel('toggleIcon-events').click();
+      checkResults();
+      checkActionItemsInResults({
+        lens: true,
+        discover: true,
+        cases: true,
+        timeline: false,
+      });
+      navigateTo('/app/osquery');
+      cy.contains('osquery-monitoring');
     });
   });
 

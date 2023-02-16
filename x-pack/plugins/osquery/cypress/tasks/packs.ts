@@ -10,3 +10,27 @@ export const preparePack = (packName: string) => {
   const createdPack = cy.contains(packName);
   createdPack.click();
 };
+
+export const deactivatePack = (packName: string, confirmButton?: boolean) => {
+  cy.react('ActiveStateSwitchComponent', {
+    props: { item: { attributes: { name: packName } } },
+  }).click();
+  if (confirmButton) {
+    cy.getBySel('confirmModalConfirmButton').click();
+  }
+
+  cy.contains(`Successfully deactivated "${packName}" pack`).should('not.exist');
+  cy.contains(`Successfully deactivated "${packName}" pack`).should('exist');
+};
+
+export const activatePack = (packName: string, confirmButton?: boolean) => {
+  cy.react('ActiveStateSwitchComponent', {
+    props: { item: { attributes: { name: packName } } },
+  }).click();
+  if (confirmButton) {
+    cy.getBySel('confirmModalConfirmButton').click();
+  }
+
+  cy.contains(`Successfully activated "${packName}" pack`).should('not.exist');
+  cy.contains(`Successfully activated "${packName}" pack`).should('exist');
+};
