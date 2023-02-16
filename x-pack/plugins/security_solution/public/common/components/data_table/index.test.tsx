@@ -18,7 +18,7 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { getMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import type { CellValueElementProps } from '../../../../common/types';
 import { TableId } from '../../../../common/types';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../common/constants';
+import { SecurityCellActionsTrigger } from '../cell_actions';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => ({
@@ -184,7 +184,7 @@ describe('DataTable', () => {
       wrapper.update();
 
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
-        triggerId: CELL_ACTIONS_DEFAULT_TRIGGER,
+        triggerId: SecurityCellActionsTrigger.DEFAULT,
         fields: [
           {
             name: '@timestamp',
