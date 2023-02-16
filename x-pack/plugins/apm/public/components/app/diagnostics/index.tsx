@@ -22,8 +22,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { ApmDatePicker } from '../../shared/date_picker/apm_date_picker';
 import { DownloadJson } from './download_json';
 import { LoadingTimelineItem } from './loading_timeline_item';
 import { ApmDataServiceItem, DiagnosticsServicesList } from './services_list';
@@ -34,9 +36,13 @@ export function Diagnostics() {
   const [suspiciousServices, setSuspiciousServices] =
     useState<ApmDataServiceItem[]>();
 
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/diagnostics');
+
   const { start, end } = useTimeRange({
-    rangeFrom: 'now-1d',
-    rangeTo: 'now',
+    rangeFrom,
+    rangeTo,
   });
 
   const { data: setupConfigData, status: setupConfigStatus } = useFetcher(
@@ -184,13 +190,20 @@ export function Diagnostics() {
                   : 'subdued'
               }
             >
-              <EuiTitle size="s">
-                <h2>
-                  {i18n.translate('xpack.apm.diagnostics.apmData.title', {
-                    defaultMessage: 'APM Data',
-                  })}
-                </h2>
-              </EuiTitle>
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <h2>
+                      {i18n.translate('xpack.apm.diagnostics.apmData.title', {
+                        defaultMessage: 'APM Data',
+                      })}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ApmDatePicker />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner>

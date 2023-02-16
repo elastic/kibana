@@ -26,6 +26,7 @@ export function isRouteWithTimeRange({
       route.path === '/mobile-services/{serviceName}' ||
       route.path === '/service-groups' ||
       route.path === '/storage-explorer' ||
+      route.path === '/diagnostics' ||
       location.pathname === '/' ||
       location.pathname === ''
     );

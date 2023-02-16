@@ -6,6 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import * as t from 'io-ts';
 import React from 'react';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { Diagnostics } from '../../app/diagnostics';
@@ -41,10 +42,17 @@ export const diagnostics = {
               </EuiFlexGroup>
             ),
           }}
+          environmentFilter={false}
         >
           <Diagnostics />
         </ApmMainTemplate>
       </Breadcrumb>
     ),
+    params: t.type({
+      query: t.type({
+        rangeFrom: t.string,
+        rangeTo: t.string,
+      }),
+    }),
   },
 };
