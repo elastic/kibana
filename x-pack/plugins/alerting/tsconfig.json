@@ -40,6 +40,7 @@
     "@kbn/share-plugin",
     "@kbn/safer-lodash-set",
     "@kbn/alerts-as-data-utils",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ],
   "exclude": [
     "target/**/*",
