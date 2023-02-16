@@ -55,7 +55,7 @@ export const transformFilters: SearchFilterConfig[] = [
     options: Object.values(TRANSFORM_HEALTH).map((val) => ({
       value: val,
       name: val,
-      view: <TransformHealthColoredDot compact={true} healthStatus={val} />,
+      view: <TransformHealthColoredDot compact={true} showToolTip={false} healthStatus={val} />,
     })),
   },
 ];
