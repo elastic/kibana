@@ -92,7 +92,7 @@ export type LogStreamQueryTypestate =
         LogStreamQueryContextWithValidationError;
     }
   | {
-      value: 'time';
+      value: 'time' | { time: 'initialized' } | { time: 'streaming' } | { time: 'static' };
       context: LogStreamQueryContextWithDataViews & LogStreamQueryContextWithTime;
     };
 
