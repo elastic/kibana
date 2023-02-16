@@ -6,42 +6,37 @@
  */
 
 import {
-  EuiAccordion,
   EuiAvatar,
   EuiButton,
-  EuiButtonEmpty,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPanel,
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
   EuiTimeline,
   EuiTimelineItem,
   EuiTitle,
-  useGeneratedHtmlId,
-  EuiCodeBlock,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { useTimeRange } from '../../../hooks/use_time_range';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { DownloadJson } from './download_json';
 import { LoadingTimelineItem } from './loading_timeline_item';
+import { ApmDataServiceItem, DiagnosticsServicesList } from './services_list';
 
 export function Diagnostics() {
   const [actionsEnabled, setActionsEnabled] = useState(false);
   const [reportData, setReportData] = useState<Record<string, any>>();
+  const [suspiciousServices, setSuspiciousServices] =
+    useState<ApmDataServiceItem[]>();
 
   const { start, end } = useTimeRange({
     rangeFrom: 'now-1d',
     rangeTo: 'now',
-  });
-
-  const buttonElementAccordionId = useGeneratedHtmlId({
-    prefix: 'buttonElementAccordion',
   });
 
   const { data: setupConfigData, status: setupConfigStatus } = useFetcher(
@@ -66,10 +61,6 @@ export function Diagnostics() {
     [start, end]
   );
 
-  const restartDiagnostic = () => {
-    console.log('restarting Diagnostic');
-  };
-
   const downloadReport = async () => {
     DownloadJson(
       `apm-diagnostic-${moment(Date.now()).format('YYYYMMDDHHmmss')}.json`,
@@ -84,6 +75,12 @@ export function Diagnostics() {
   }, [setupConfigData, apmData]);
 
   useEffect(() => {
+    setSuspiciousServices(
+      apmData?.services.filter(
+        (service) => !(service.transactions && service.metrics && service.spans)
+      )
+    );
+
     setReportData((prev) => ({
       ...prev,
       apmData,
@@ -102,17 +99,6 @@ export function Diagnostics() {
   return (
     <>
       <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            color="primary"
-            isDisabled={!actionsEnabled}
-            onClick={restartDiagnostic}
-          >
-            {i18n.translate('xpack.apm.diagnostics.restartDiagnostic', {
-              defaultMessage: 'Restart diagnostic',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             iconType="download"
@@ -183,10 +169,10 @@ export function Diagnostics() {
               <EuiAvatar name="Checked" iconType="dot" color="subdued" />
             ) : apmDataStatus === FETCH_STATUS.LOADING ? (
               <LoadingTimelineItem />
-            ) : apmData ? (
-              <EuiAvatar name="Checked" iconType="check" color="#6dccb1" />
+            ) : apmData && suspiciousServices ? (
+              <EuiAvatar name="Checked" iconType="alert" color="#f1d86f" />
             ) : (
-              <EuiAvatar name="Checked" iconType="alert" color="#ff7f62" />
+              <EuiAvatar name="Checked" iconType="check" color="#6dccb1" />
             )
           }
         >
@@ -216,19 +202,10 @@ export function Diagnostics() {
                 </p>
               </EuiText>
 
-              {FETCH_STATUS.SUCCESS && (
+              {FETCH_STATUS.SUCCESS && suspiciousServices && (
                 <>
                   <EuiSpacer />
-                  <EuiAccordion
-                    id={buttonElementAccordionId}
-                    buttonElement="div"
-                    buttonContent="Advanced settings"
-                  >
-                    <EuiPanel color="transparent">
-                      Any content inside of <strong>EuiAccordion</strong> will
-                      appear here.
-                    </EuiPanel>
-                  </EuiAccordion>
+                  <DiagnosticsServicesList items={suspiciousServices} />
                 </>
               )}
             </EuiSplitPanel.Inner>
