@@ -11,8 +11,12 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, Fragment, useMemo, useState, useContext } from 'react';
 import styled from 'styled-components';
 
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../common/components/cell_actions';
 import type {
   AutonomousSystem,
   FlowTarget,
@@ -26,10 +30,6 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../explore/network/components/details/translations';
-import {
-  CELL_ACTIONS_DEFAULT_TRIGGER,
-  CELL_ACTIONS_TIMELINE_TRIGGER,
-} from '../../../../common/constants';
 import { TimelineContext } from '../timeline';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
@@ -315,23 +315,24 @@ export const MoreContainer = React.memo<MoreContainerProps>(
           if (typeof value === 'string' && fieldName != null) {
             acc.push(
               <EuiFlexItem key={id}>
-                <CellActions
+                <SecurityCellActions
                   key={id}
                   mode={CellActionsMode.HOVER}
                   visibleCellActions={5}
                   showActionTooltips
-                  triggerId={
-                    timelineId ? CELL_ACTIONS_TIMELINE_TRIGGER : CELL_ACTIONS_DEFAULT_TRIGGER
-                  }
+                  triggerId={SecurityCellActionsTrigger.DEFAULT}
                   field={{
                     name: fieldName,
                     value,
                     type: fieldType,
                     aggregatable: isAggregatable,
                   }}
+                  metadata={{
+                    scopeId: timelineId ?? undefined,
+                  }}
                 >
                   <>{render ? render(value) : defaultToEmptyTag(value)}</>
-                </CellActions>
+                </SecurityCellActions>
               </EuiFlexItem>
             );
           }
