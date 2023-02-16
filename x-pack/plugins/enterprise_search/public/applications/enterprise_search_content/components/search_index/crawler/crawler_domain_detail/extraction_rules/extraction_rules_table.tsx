@@ -63,7 +63,6 @@ export const ExtractionRulesTable: React.FC = () => {
             editExistingField={(id) => {
               editExtractionRule(item);
               const rule = rules.find(({ id: ruleId }) => id === ruleId);
-              console.log(rule, 'logging rules')
               if (rule) {
                 openEditRuleFlyout({
                   fieldRule: rule,
