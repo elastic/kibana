@@ -37,11 +37,11 @@ describe('SyntheticsDatePicker component', () => {
       core: startPlugins,
     });
 
-    expect(await findByText('Last 24 hours')).toBeInTheDocument();
+    expect(await findByText('~ 30 minutes ago')).toBeInTheDocument();
 
     expect(customHistory.push).toHaveBeenCalledWith({
       pathname: '/',
-      search: 'dateRangeEnd=now&dateRangeStart=now-24h',
+      search: 'dateRangeEnd=now-15m&dateRangeStart=now-30m',
     });
   });
 
