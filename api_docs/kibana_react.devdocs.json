@@ -1365,6 +1365,18 @@
             "path": "x-pack/plugins/apm/public/components/routing/app_root.tsx"
           },
           {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_view.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_view.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_view.tsx"
+          },
+          {
             "plugin": "indexLifecycleManagement",
             "path": "x-pack/plugins/index_lifecycle_management/public/shared_imports.ts"
           },
