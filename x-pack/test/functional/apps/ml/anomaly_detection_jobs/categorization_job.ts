@@ -6,8 +6,8 @@
  */
 
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-plugin/common/constants/categorization_job';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { FieldStatsType } from '../data_frame_analytics/types';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FieldStatsType } from '../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
