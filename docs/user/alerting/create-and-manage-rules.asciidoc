@@ -49,63 +49,56 @@ Each rule type provides its own way of defining the conditions to detect, but an
 [role="screenshot"]
 image::images/rule-flyout-rule-conditions.png[UI for defining rule conditions on an index threshold rule]
 
-For details on what types of rules are available and how to configure them,
-refer to <<rule-types>>.
+For details on what types of rules are available and how to configure them, refer to <<rule-types>>.
 
-All rules must a check interval, which defines how often to evaluate the rule condition. Checks are queued; they run as close to the defined value as capacity allows.
+All rules must have a check interval, which defines how often to evaluate the rule conditions. Checks are queued; they run as close to the defined value as capacity allows.
 
 [float]
 [[defining-rules-actions-details]]
 ==== Action type and frequency
 
-Actions are optional when you create a rule. However, to receive notifications when a rule meets the defined conditions, you must add one or more actions.
+Actions are optional when you create a rule. However, to receive notifications when a rule meets its conditions, you must add one or more actions.
 
 Each action must specify a connector, which provides connection information for {kib} services or integrates with third party systems. If no connectors exist, click **Add connector** to create one. For more information about each type of connector, refer to <<action-types>>.
 
-After you select a connector, you must set the action frequency. If the rule type supports alert summaries, you can choose from the following options:
+After you select a connector, set the action frequency. If the rule type supports alert summaries, you can choose from the following options:
 
+* Summary of alerts:
+** *On check intervals*: An alert summary is generated on the check interval if the rule conditions are met.
+** *On custom action intervals*: An alert summary is generated on the specified intervals if the rule conditions are met.
 * For each alert:
 ** *On check intervals*: Actions run on the check interval if the rule conditions are met. 
 ** *On custom action intervals*: Actions run on the specified intervals if the rule conditions are met.  
 ** *On status changes*: Actions run only when the alert status changes.
-* Summary of alerts:
-** *On check intervals*: An alert summary is generated on the check interval if the rule conditions are met.
-** *On custom action intervals*: An alert summary is generated on the specified intervals if the rule conditions are met.
 
-If you choose one of the *For each alert* options, you must also choose an action group from the *Run when* dropdown to associate with this action. When a rule meets the defined condition, it is marked as _active_ and alerts are created and assigned to an action group. In addition to the action groups defined by the selected rule type, each rule also has a _recovered_ action group that is assigned when a rule's conditions are no longer detected.
+If you choose one of the *For each alert* options, you must also choose an action group from the *Run when* dropdown to associate with this action. When the rule conditions are met, it is marked as _active_ and alerts are created and assigned to the action group. When the rule conditions are no longer met, it is marked as _recovered_ and any actions associated with the recovered action group are run.
 
 If the rule type does not support alert summaries, only the *For each alert* options are available. 
 
 [[alerting-concepts-suppressing-duplicate-notifications]]
 [TIP]
 ==============================================
-If you are not using alert summaries, actions are triggered per alert and a rule can end up generating a large
-number of actions. Take the following example where a rule is monitoring three servers every minute for CPU usage > 0.9, and the rule is set to notify
-`On check intervals`:
+If you are not using alert summaries, actions are triggered per alert and a rule can end up generating a large number of actions. Take the following example where a rule is monitoring three servers every minute for CPU usage > 0.9, and the rule is set to notify `On check intervals`:
 
 * Minute 1: server X123 > 0.9. _One email_ is sent for server X123.
 * Minute 2: X123 and Y456 > 0.9. _Two emails_ are sent, one for X123 and one for Y456.
 * Minute 3: X123, Y456, Z789 > 0.9. _Three emails_ are sent, one for each of X123, Y456, Z789.
 
 In this example, three emails are sent for server X123 in the span of 3 minutes for the same rule. Often, it's desirable to suppress these re-notifications. If
-you set the rule notify setting to `On custom action intervals` with an interval
-of 5 minutes, you reduce noise by getting emails only every 5 minutes for
+you set the rule notify setting to `On custom action intervals` with an interval of 5 minutes, you reduce noise by getting emails only every 5 minutes for
 servers that continue to exceed the threshold:
 
 * Minute 1: server X123 > 0.9. _One email_ is sent for server X123.
 * Minute 2: X123 and Y456 > 0.9. _One email_ is sent for Y456.
 * Minute 3: X123, Y456, Z789 > 0.9. _One email_ is sent for Z789.
 
-To get notified only once when a server exceeds the threshold, you can set the
-rule notify setting to `On status changes`.
+To get notified only once when a server exceeds the threshold, you can set the rule notify setting to `On status changes`.
 ==============================================
 
 Each action type exposes different properties. For example, an email action allows you to set the recipients, the subject, and a message body in markdown format. See <<action-types>> for details on the types of actions provided by {kib} and their properties.
 
 [role="screenshot"]
 image::images/rule-flyout-action-details.png[UI for defining an email action]
-
-You can attach more than one action. Clicking the *Add action* button will prompt you to select another rule type and repeat the above steps again.
 
 [float]
 [[defining-rules-actions-variables]]
