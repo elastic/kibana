@@ -31,6 +31,8 @@ export function getAppName(fileName: string, cwd: string) {
 
   const appName = camelCase(
     packageDirs.reduce((acc, repoPath) => {
+      if (!relativePathArray[1]) return '';
+
       if (relativePathArray[1] === 'x-pack') {
         return relativePathArray[3];
       }
