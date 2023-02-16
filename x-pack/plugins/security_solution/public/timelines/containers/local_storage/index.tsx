@@ -103,7 +103,9 @@ export const migrateAlertTableStateToTriggerActionsState = (
     });
 
   triggersActionsState.forEach((stateObj) =>
-    Object.keys(stateObj).forEach((key) => storage.set(key, stateObj[key]))
+    Object.keys(stateObj).forEach((key) => {
+      storage.set(key, stateObj[key]);
+    })
   );
 };
 
@@ -144,11 +146,12 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
   if (!allDataTables) {
     if (legacyTimelineTables) {
       allDataTables = migrateLegacyTimelinesToSecurityDataTable(legacyTimelineTables);
-      migrateAlertTableStateToTriggerActionsState(storage, legacyTimelineTables);
     } else {
       return EMPTY_TABLE;
     }
   }
+
+  migrateAlertTableStateToTriggerActionsState(storage, allDataTables);
 
   return tableIds.reduce((acc, tableId) => {
     const tableModel = allDataTables[tableId];
