@@ -9,6 +9,7 @@ import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
+  addToCase,
   checkActionItemsInResults,
   checkResults,
   inputQuery,
@@ -155,9 +156,7 @@ describe('ALL - Live Query', () => {
     cy.contains('query failed, code: 1, message: no such table: opera_extensions');
     cy.getBySel('toggleIcon-failingQuery').click();
     cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
-    cy.contains('Add to Case').click();
-    cy.contains('Select case');
-    cy.contains(/Select$/).click();
+    addToCase();
     viewRecentCaseAndCheckResults();
   });
 });

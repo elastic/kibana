@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { findFormFieldByRowsLabelAndType, inputQuery } from '../../tasks/live_query';
+import {
+  addToCase,
+  checkResults,
+  deleteAndConfirm,
+  findFormFieldByRowsLabelAndType,
+  inputQuery,
+  selectAllAgents,
+  submitQuery,
+  viewRecentCaseAndCheckResults,
+} from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 
 import { login } from '../../tasks/login';
@@ -44,13 +53,48 @@ describe('ALL - Saved queries', () => {
       cy.contains('Snapshot');
     });
   });
-  it('checks result type on prebuilt saved query', () => {
-    cy.contains('Saved queries').click();
-    cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: 'users_elastic' } } },
-    }).click();
-    cy.getBySel('resultsTypeField').within(() => {
-      cy.contains('Snapshot');
+  describe.only('prebuilt ', () => {
+    beforeEach(() => {
+      navigateTo('/app/osquery/saved_queries');
+    });
+
+    it('checks result type on prebuilt saved query', () => {
+      cy.contains('Saved queries').click();
+      cy.react('CustomItemAction', {
+        props: { index: 1, item: { attributes: { id: 'users_elastic' } } },
+      }).click();
+      cy.getBySel('resultsTypeField').within(() => {
+        cy.contains('Snapshot');
+      });
+    });
+    it('user can run prebuilt saved query and add to case', () => {
+      cy.react('PlayButtonComponent', {
+        props: { savedQuery: { attributes: { id: 'users_elastic' } } },
+      }).click();
+
+      selectAllAgents();
+      submitQuery();
+      checkResults();
+      addToCase();
+      viewRecentCaseAndCheckResults();
+    });
+
+    it('user cant delete prebuilt saved query', () => {
+      cy.contains('Saved queries').click();
+      cy.react('CustomItemAction', {
+        props: { index: 1, item: { attributes: { id: 'users_elastic' } } },
+      }).click();
+      cy.contains('Delete query').should('not.exist');
+      navigateTo('/app/osquery/saved_queries');
+
+      cy.contains('Add saved query').click();
+      inputQuery('test');
+      findFormFieldByRowsLabelAndType('ID', 'query-to-delete');
+      cy.contains('Save query').click();
+      cy.react('CustomItemAction', {
+        props: { index: 1, item: { attributes: { id: 'query-to-delete' } } },
+      }).click();
+      deleteAndConfirm('query');
     });
   });
 });

@@ -15,6 +15,7 @@ import {
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import {
+  addToCase,
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
@@ -315,9 +316,7 @@ describe('Alert Event Details', () => {
         // }
       });
     });
-    cy.contains('Add to Case').click();
-    cy.contains('Select case');
-    cy.contains(/Select$/).click();
+    addToCase();
     viewRecentCaseAndCheckResults();
   });
 });

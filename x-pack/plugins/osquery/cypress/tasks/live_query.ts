@@ -92,6 +92,12 @@ export const loadAlertsEvents = () => {
     });
 };
 
+export const addToCase = () => {
+  cy.contains('Add to Case').click();
+  cy.contains('Select case');
+  cy.contains(/Select$/).click();
+};
+
 export const addLastLiveQueryToCase = () => {
   cy.waitForReact();
   cy.react('CustomItemAction', {
@@ -100,9 +106,7 @@ export const addLastLiveQueryToCase = () => {
     .first()
     .click();
   cy.contains('Live query details');
-  cy.contains('Add to Case').click();
-  cy.contains('Select case');
-  cy.contains(/Select$/).click();
+  addToCase();
 };
 
 const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?seconds ago/;
