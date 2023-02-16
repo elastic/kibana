@@ -197,14 +197,15 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
         filters: data.query.filterManager.getFilters(),
         query: {
           language: SEARCH_QUERY_LANGUAGE.KUERY,
-          // Filter for all visible column values except the results field values
+          // Filter for all visible column values of supported types - except the results field values
           query: indexData.visibleColumns
-            .filter((column) => !column.includes(resultsField!))
-            .map((column) => {
-              if (item[column] !== undefined) {
-                return `${escapeKuery(column)}:${escapeKuery(String(item[column]))}`;
-              }
-            })
+            .filter(
+              (column) =>
+                item[column] !== undefined &&
+                (typeof item[column] === 'string' || typeof item[column] === 'number') &&
+                !column.includes(resultsField!)
+            )
+            .map((column) => `${escapeKuery(column)}:${escapeKuery(String(item[column]))}`)
             .join(' and '),
         },
       });
