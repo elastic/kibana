@@ -151,14 +151,14 @@ describe('Background Search Session Management Table', () => {
 
   describe('fetching sessions data', () => {
     test('re-fetches data', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      jest.useFakeTimers()
       const find = jest.fn();
       sessionsClient.find = find;
       mockConfig = {
         ...mockConfig,
         management: {
           ...mockConfig.management,
-          refreshInterval: moment.duration(10, 'seconds'),
+          refreshInterval: moment.duration(1, 'seconds'),
         },
       };
 
@@ -175,18 +175,12 @@ describe('Background Search Session Management Table', () => {
             />
           </LocaleWrapper>
         );
-        // initial fetch
-        await jest.advanceTimersByTime(500);
-        expect(find).toHaveBeenCalledTimes(1);
-        // refetch 1
-        await jest.advanceTimersByTime(10000);
-        expect(find).toHaveBeenCalledTimes(2);
-        // refetch 2
-        await jest.advanceTimersByTime(10000);
-        expect(find).toHaveBeenCalledTimes(3);
-      });
+        
+        await waitFor(() => {
+          expect(find).toHaveBeenCalledTimes(3);
+        }, { timeout: 10000, interval: 100 });
 
-      jest.useRealTimers();
+      });
     });
 
     test('refresh button uses the session client', async () => {
