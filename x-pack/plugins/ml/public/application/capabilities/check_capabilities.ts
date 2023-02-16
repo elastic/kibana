@@ -39,6 +39,11 @@ export class MlCapabilitiesService {
  */
 export const mlCapabilities = new MlCapabilitiesService();
 
+/**
+ * Check the privilege type and the license to see whether a user has permission to access a feature.
+ *
+ * @param capability
+ */
 export function usePermissionCheck(capability: keyof MlCapabilities) {
   const {
     services: {
@@ -153,8 +158,10 @@ export function checkFindFileStructurePrivilegeResolver(
   });
 }
 
-// check the privilege type and the license to see whether a user has permission to access a feature.
-// takes the name of the privilege variable as specified in get_privileges.js
+/**
+ * @deprecated use {@link usePermissionCheck} instead.
+ * @param capability
+ */
 export function checkPermission(capability: keyof MlCapabilities) {
   const licenseHasExpired = hasLicenseExpired();
   return _capabilities[capability] === true && licenseHasExpired !== true;
