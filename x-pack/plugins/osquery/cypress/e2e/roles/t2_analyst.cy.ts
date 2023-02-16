@@ -77,7 +77,7 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     checkActionItemsInResults({
       lens: false,
       discover: false,
-      cases: false,
+      cases: true,
       timeline: false,
     });
     cy.react('EuiDataGridHeaderCellWrapper', {

@@ -49,7 +49,7 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     checkActionItemsInResults({
       lens: false,
       discover: false,
-      cases: false,
+      cases: true,
       timeline: false,
     });
   });

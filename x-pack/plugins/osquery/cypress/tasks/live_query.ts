@@ -116,16 +116,8 @@ export const checkActionItemsInResults = ({
   cases: boolean;
   timeline: boolean;
 }) => {
-  discover
-    ? cy.contains('View in Discover').should('exist')
-    : cy.contains('View in Discover').should('not.exist');
-  lens
-    ? cy.contains('View in Lens').should('exist')
-    : cy.contains('View in Lens').should('not.exist');
-  cases
-    ? cy.contains('Add to Case').should('exist')
-    : cy.contains('Add to Case').should('not.exist');
-  timeline
-    ? cy.contains('Add to timeline investigation').should('exist')
-    : cy.contains('Add to timeline investigation').should('not.exist');
+  cy.contains('View in Discover').should(discover ? 'exist' : 'not.exist');
+  cy.contains('View in Lens').should(lens ? 'exist' : 'not.exist');
+  cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');
+  cy.contains('Add to timeline investigation').should(timeline ? 'exist' : 'not.exist');
 };
