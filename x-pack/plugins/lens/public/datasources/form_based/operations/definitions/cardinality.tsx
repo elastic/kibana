@@ -91,7 +91,7 @@ export const cardinalityOperation: OperationDefinition<
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
-      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      getInvalidFieldMessage(layer, columnId, indexPattern),
       getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   isTransferable: (column, newIndexPattern) => {

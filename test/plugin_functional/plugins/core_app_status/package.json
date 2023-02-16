@@ -1,5 +1,5 @@
 {
-  "name": "core_app_status",
+  "name": "@kbn/core-app-status-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/core_app_status",
   "kibana": {

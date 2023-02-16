@@ -14,6 +14,7 @@ import {
   isStatusEnabled,
   toggleStatusAlert,
 } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
+import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import { TagsBadges } from '../../../common/components/tag_badges';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
 import * as labels from './labels';
@@ -27,6 +28,7 @@ import {
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
 
+import { canUpdatePrivateMonitor, useFleetPermissions } from '../../../../hooks';
 import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
@@ -34,20 +36,19 @@ import { MonitorLocations } from './monitor_locations';
 
 export function useMonitorListColumns({
   canEditSynthetics,
-  reloadPage,
   loading,
-  status,
+  overviewStatus,
   setMonitorPendingDeletion,
 }: {
   canEditSynthetics: boolean;
   loading: boolean;
-  status: OverviewStatusState | null;
-  reloadPage: () => void;
+  overviewStatus: OverviewStatusState | null;
   setMonitorPendingDeletion: (config: EncryptedSyntheticsSavedMonitor) => void;
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
 
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
+  const { canSaveIntegrations } = useFleetPermissions();
 
   const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
     return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;
@@ -66,7 +67,7 @@ export function useMonitorListColumns({
       ),
     },
     // Only show Project ID column if project monitors are present
-    ...(status?.projectMonitorsCount ?? 0 > 0
+    ...(overviewStatus?.projectMonitorsCount ?? 0 > 0
       ? [
           {
             align: 'left' as const,
@@ -91,7 +92,7 @@ export function useMonitorListColumns({
           ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
           onClick={() => {
             history.push({
-              search: `monitorType=${encodeURIComponent(
+              search: `monitorTypes=${encodeURIComponent(
                 JSON.stringify([monitor[ConfigKey.MONITOR_TYPE]])
               )}`,
             });
@@ -119,7 +120,7 @@ export function useMonitorListColumns({
           <MonitorLocations
             monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
             locations={locations}
-            status={status}
+            status={overviewStatus}
           />
         ) : null,
     },
@@ -149,7 +150,7 @@ export function useMonitorListColumns({
         <MonitorEnabled
           configId={monitor[ConfigKey.CONFIG_ID]}
           monitor={monitor}
-          reloadPage={reloadPage}
+          reloadPage={() => {}}
           isSwitchable={!loading}
         />
       ),
@@ -163,11 +164,21 @@ export function useMonitorListColumns({
         {
           'data-test-subj': 'syntheticsMonitorEditAction',
           isPrimary: true,
-          name: labels.EDIT_LABEL,
+          name: (fields) => (
+            <NoPermissionsTooltip
+              canEditSynthetics={canEditSynthetics}
+              canUpdatePrivateMonitor={canUpdatePrivateMonitor(fields, canSaveIntegrations)}
+            >
+              {labels.EDIT_LABEL}
+            </NoPermissionsTooltip>
+          ),
           description: labels.EDIT_LABEL,
           icon: 'pencil',
           type: 'icon',
-          enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
+          enabled: (fields) =>
+            canEditSynthetics &&
+            !isActionLoading(fields) &&
+            canUpdatePrivateMonitor(fields, canSaveIntegrations),
           onClick: (fields) => {
             history.push({
               pathname: `/edit-monitor/${fields[ConfigKey.CONFIG_ID]}`,
@@ -177,12 +188,22 @@ export function useMonitorListColumns({
         {
           'data-test-subj': 'syntheticsMonitorDeleteAction',
           isPrimary: true,
-          name: labels.DELETE_LABEL,
+          name: (fields) => (
+            <NoPermissionsTooltip
+              canEditSynthetics={canEditSynthetics}
+              canUpdatePrivateMonitor={canUpdatePrivateMonitor(fields, canSaveIntegrations)}
+            >
+              {labels.DELETE_LABEL}
+            </NoPermissionsTooltip>
+          ),
           description: labels.DELETE_LABEL,
           icon: 'trash',
           type: 'icon',
           color: 'danger',
-          enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
+          enabled: (fields) =>
+            canEditSynthetics &&
+            !isActionLoading(fields) &&
+            canUpdatePrivateMonitor(fields, canSaveIntegrations),
           onClick: (fields) => {
             setMonitorPendingDeletion(fields);
           },

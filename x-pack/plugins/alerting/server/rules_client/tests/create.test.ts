@@ -3047,4 +3047,120 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
+  test('should create a rule even if action is missing secret when allowMissingConnectorSecrets is true', async () => {
+    const data = getMockData({
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: '.slack',
+        config: {},
+        isMissingSecrets: true,
+        name: 'Slack connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+      },
+    ]);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        notifyWhen: null,
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: '.slack',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_1',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_2',
+          type: 'action',
+          id: '2',
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [],
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+    });
+    const result = await rulesClient.create({ data, allowMissingConnectorSecrets: true });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": ".slack",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "id": "1",
+        "notifyWhen": null,
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+  });
 });

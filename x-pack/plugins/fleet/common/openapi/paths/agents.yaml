@@ -18,5 +18,10 @@ get:
     - $ref: ../components/parameters/sort_field.yaml
     - $ref: ../components/parameters/sort_order.yaml
     - $ref: ../components/parameters/with_metrics.yaml
+    - name: getStatusSummary
+      in: query
+      required: false
+      schema:
+        type: boolean
   security:
     - basicAuth: []

@@ -8,6 +8,8 @@ import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { formatFilterString } from './status_check';
 import { UptimeAlertTypeFactory } from './types';
 import {
   updateState,
@@ -108,7 +110,11 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   producer: 'uptime',
   name: tlsTranslations.alertFactoryName,
   validate: {
-    params: schema.object({}),
+    params: schema.object({
+      search: schema.maybe(schema.string()),
+      certExpirationThreshold: schema.maybe(schema.number()),
+      certAgeThreshold: schema.maybe(schema.number()),
+    }),
   },
   defaultActionGroupId: TLS.id,
   actionGroups: [
@@ -131,6 +137,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   minimumLicenseRequired: 'basic',
   doesSetRecoveryContext: true,
   async executor({
+    params,
     services: {
       alertFactory,
       alertWithLifecycle,
@@ -149,38 +156,39 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       scopedClusterClient.asCurrentUser
     );
 
+    const certExpirationThreshold =
+      params.certExpirationThreshold ??
+      dynamicSettings?.certExpirationThreshold ??
+      DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold;
+
+    const certAgeThreshold =
+      params.certAgeThreshold ??
+      dynamicSettings?.certAgeThreshold ??
+      DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold;
+
+    let filters: QueryDslQueryContainer | undefined;
+
+    if (params.search) {
+      filters = await formatFilterString(uptimeEsClient, undefined, params.search, libs);
+    }
+
     const { certs, total }: CertResult = await libs.requests.getCerts({
       uptimeEsClient,
       pageIndex: 0,
       size: 1000,
-      notValidAfter: `now+${
-        dynamicSettings?.certExpirationThreshold ??
-        DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
-      }d`,
-      notValidBefore: `now-${
-        dynamicSettings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
-      }d`,
+      notValidAfter: `now+${certExpirationThreshold}d`,
+      notValidBefore: `now-${certAgeThreshold}d`,
       sortBy: 'common_name',
       direction: 'desc',
+      filters,
     });
 
     const foundCerts = total > 0;
 
     if (foundCerts) {
       certs.forEach((cert) => {
-        const absoluteExpirationThreshold = moment()
-          .add(
-            dynamicSettings.certExpirationThreshold ??
-              DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
-            'd'
-          )
-          .valueOf();
-        const absoluteAgeThreshold = moment()
-          .subtract(
-            dynamicSettings.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
-            'd'
-          )
-          .valueOf();
+        const absoluteExpirationThreshold = moment().add(certExpirationThreshold, 'd').valueOf();
+        const absoluteAgeThreshold = moment().subtract(certAgeThreshold, 'd').valueOf();
         const summary = getCertSummary(cert, absoluteExpirationThreshold, absoluteAgeThreshold);
 
         if (!summary.summary || !summary.status) {

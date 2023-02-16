@@ -17,3 +17,7 @@ export type AnalyticsCollectionDocument = Omit<AnalyticsCollection, 'id'>;
 export interface AnalyticsEventsIndexExists {
   exists: boolean;
 }
+
+export interface AnalyticsCollectionDataViewId {
+  data_view_id: string | null;
+}

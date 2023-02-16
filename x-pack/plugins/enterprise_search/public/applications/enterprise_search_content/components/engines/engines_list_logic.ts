@@ -11,6 +11,7 @@ import { Status } from '../../../../../common/types/api';
 
 import {
   EnterpriseSearchEngine,
+  EnterpriseSearchEngineDetails,
   EnterpriseSearchEnginesResponse,
 } from '../../../../../common/types/engines';
 import { Page } from '../../../../../common/types/pagination';
@@ -33,7 +34,7 @@ interface EuiBasicTableOnChange {
   page: { index: number };
 }
 
-type EnginesListActions = Pick<
+export type EnginesListActions = Pick<
   Actions<EnginesListAPIArguments, EnterpriseSearchEnginesResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
@@ -46,18 +47,24 @@ type EnginesListActions = Pick<
   fetchEngines(): void;
 
   onPaginate(args: EuiBasicTableOnChange): { pageNumber: number };
-  openDeleteEngineModal: (engine: EnterpriseSearchEngine) => { engine: EnterpriseSearchEngine };
+  openDeleteEngineModal: (engine: EnterpriseSearchEngine | EnterpriseSearchEngineDetails) => {
+    engine: EnterpriseSearchEngine;
+  };
+  setIsFirstRequest(): void;
   openEngineCreate(): void;
   setSearchQuery(searchQuery: string): { searchQuery: string };
 };
+
 interface EngineListValues {
   createEngineFlyoutOpen: boolean;
   data: typeof FetchEnginesAPILogic.values.data;
   deleteModalEngine: EnterpriseSearchEngine | null;
   deleteModalEngineName: string;
   deleteStatus: typeof DeleteEngineAPILogic.values.status;
+  hasNoEngines: boolean;
   isDeleteLoading: boolean;
   isDeleteModalVisible: boolean;
+  isFirstRequest: boolean;
   isLoading: boolean;
   meta: Page;
   parameters: { meta: Page; searchQuery?: string }; // Added this variable to store to the search Query value as well
@@ -89,6 +96,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     openDeleteEngineModal: (engine) => ({ engine }),
     openEngineCreate: true,
     setSearchQuery: (searchQuery: string) => ({ searchQuery }),
+    setIsFirstRequest: true,
   },
   path: ['enterprise_search', 'content', 'engine_list_logic'],
   reducers: ({}) => ({
@@ -112,6 +120,14 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
       {
         closeDeleteEngineModal: () => false,
         openDeleteEngineModal: () => true,
+      },
+    ],
+    isFirstRequest: [
+      true,
+      {
+        apiError: () => false,
+        apiSuccess: () => false,
+        setIsFirstRequest: () => true,
       },
     ],
 
@@ -146,10 +162,17 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
       (status: EngineListValues['deleteStatus']) => [Status.LOADING].includes(status),
     ],
     isLoading: [
-      () => [selectors.status],
-      (status: EngineListValues['status']) => [Status.LOADING, Status.IDLE].includes(status),
+      () => [selectors.status, selectors.isFirstRequest],
+      (status: EngineListValues['status'], isFirstRequest: EngineListValues['isFirstRequest']) =>
+        [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
     ],
     results: [() => [selectors.data], (data) => data?.results ?? []],
+
+    hasNoEngines: [
+      () => [selectors.data, selectors.results],
+      (data: EngineListValues['data'], results: EngineListValues['results']) =>
+        (data?.meta?.from === 0 && results.length === 0 && !data?.params?.q) ?? false,
+    ],
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
   }),
   listeners: ({ actions, values }) => ({

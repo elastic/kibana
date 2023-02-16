@@ -24,6 +24,7 @@ import type {
 } from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
+import { applyIntersectionObserverMock } from '../intersection_observer_mock';
 import { ConsoleManager } from '../../../management/components/console';
 import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
@@ -244,6 +245,8 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   );
 
   const render: UiRender = (ui, options) => {
+    applyIntersectionObserverMock();
+
     return reactRender(ui, {
       wrapper: AppWrapper,
       ...options,

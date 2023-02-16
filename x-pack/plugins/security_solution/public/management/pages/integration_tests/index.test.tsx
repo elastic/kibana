@@ -13,7 +13,6 @@ import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { endpointPageHttpMock } from '../endpoint_hosts/mocks';
-import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -30,7 +29,7 @@ describe('when in the Administration tab', () => {
   });
 
   afterEach(() => {
-    useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
+    useUserPrivilegesMock.mockReset();
   });
 
   describe('when the user has no permissions', () => {

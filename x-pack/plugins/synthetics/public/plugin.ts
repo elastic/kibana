@@ -30,7 +30,6 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/p
 
 import { FleetStart } from '@kbn/fleet-plugin/public';
 import {
-  enableNewSyntheticsView,
   FetchDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -144,9 +143,8 @@ export class UptimePlugin
         return await dataHelper.overviewData(params);
       },
     });
-    const isSyntheticsViewEnabled = core.uiSettings.get<boolean>(enableNewSyntheticsView);
 
-    registerUptimeRoutesWithNavigation(core, plugins, isSyntheticsViewEnabled);
+    registerUptimeRoutesWithNavigation(core, plugins);
 
     core.getStartServices().then(([coreStart, clientPluginsStart]) => {});
 
@@ -187,28 +185,26 @@ export class UptimePlugin
       },
     });
 
-    if (isSyntheticsViewEnabled) {
-      // Register the Synthetics UI plugin
-      core.application.register({
-        id: 'synthetics',
-        euiIconType: 'logoObservability',
-        order: 8400,
-        title:
-          PLUGIN.SYNTHETICS +
-          i18n.translate('xpack.synthetics.overview.headingBeta', {
-            defaultMessage: ' (beta)',
-          }),
-        category: DEFAULT_APP_CATEGORIES.observability,
-        keywords: appKeywords,
-        deepLinks: [],
-        mount: async (params: AppMountParameters) => {
-          const [coreStart, corePlugins] = await core.getStartServices();
+    // Register the Synthetics UI plugin
+    core.application.register({
+      id: 'synthetics',
+      euiIconType: 'logoObservability',
+      order: 8400,
+      title:
+        PLUGIN.SYNTHETICS +
+        i18n.translate('xpack.synthetics.overview.headingBeta', {
+          defaultMessage: ' (beta)',
+        }),
+      category: DEFAULT_APP_CATEGORIES.observability,
+      keywords: appKeywords,
+      deepLinks: [],
+      mount: async (params: AppMountParameters) => {
+        const [coreStart, corePlugins] = await core.getStartServices();
 
-          const { renderApp } = await import('./apps/synthetics/render_app');
-          return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
-        },
-      });
-    }
+        const { renderApp } = await import('./apps/synthetics/render_app');
+        return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
+      },
+    });
   }
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
@@ -258,8 +254,7 @@ export class UptimePlugin
 
 function registerUptimeRoutesWithNavigation(
   core: CoreSetup<ClientPluginsStart, unknown>,
-  plugins: ClientPluginsSetup,
-  isSyntheticsViewEnabled: boolean
+  plugins: ClientPluginsSetup
 ) {
   plugins.observability.navigation.registerSections(
     from(core.getStartServices()).pipe(
@@ -287,20 +282,16 @@ function registerUptimeRoutesWithNavigation(
                   path: '/certificates',
                   matchFullPath: true,
                 },
-                ...(isSyntheticsViewEnabled
-                  ? [
-                      {
-                        label: i18n.translate('xpack.synthetics.overview.headingBetaSection', {
-                          defaultMessage: 'Synthetics',
-                        }),
-                        app: 'synthetics',
-                        path: OVERVIEW_ROUTE,
-                        matchFullPath: false,
-                        ignoreTrailingSlash: true,
-                        isBetaFeature: true,
-                      },
-                    ]
-                  : []),
+                {
+                  label: i18n.translate('xpack.synthetics.overview.headingBetaSection', {
+                    defaultMessage: 'Synthetics',
+                  }),
+                  app: 'synthetics',
+                  path: OVERVIEW_ROUTE,
+                  matchFullPath: false,
+                  ignoreTrailingSlash: true,
+                  isBetaFeature: true,
+                },
               ],
             },
           ];

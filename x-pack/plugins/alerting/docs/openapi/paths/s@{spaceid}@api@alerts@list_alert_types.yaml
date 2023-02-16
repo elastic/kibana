@@ -1,0 +1,111 @@
+get:
+  summary: Retrieves a list of alert types.
+  operationId: legacyGetAlertTypes
+  deprecated: true
+  description: Deprecated in 7.13.0. Use the get rule types API instead.
+  tags:
+    - alerting
+  parameters:
+    - $ref: '../components/parameters/space_id.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                actionGroups:
+                  description: >
+                    An explicit list of groups for which the alert type can
+                    schedule actions, each with the action group's unique ID and
+                    human readable name. Alert actions validation uses this
+                    configuration to ensure that groups are valid.
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                actionVariables:
+                  description: >
+                    A list of action variables that the alert type makes available
+                    via context and state in action parameter templates, and a
+                    short human readable description. The Alert UI will use this
+                    information to prompt users for these variables in action
+                    parameter editors.
+                  type: object
+                  properties:
+                    context:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          description:
+                            type: string
+                    params:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          description:
+                            type: string
+                          name:
+                            type: string
+                    state:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          description:
+                            type: string
+                          name:
+                            type: string 
+                authorizedConsumers:
+                  description: The list of the plugins IDs that have access to the alert type.
+                  type: object
+                defaultActionGroupId:
+                  description: The default identifier for the alert type group.
+                  type: string
+                enabledInLicense:
+                  description: Indicates whether the rule type is enabled based on the subscription.
+                  type: boolean
+                id: 
+                  description: The unique identifier for the alert type.
+                  type: string
+                isExportable:
+                  description: Indicates whether the alert type is exportable in Saved Objects Management UI.
+                  type: boolean
+                minimumLicenseRequired:
+                  description: The subscriptions required to use the alert type.
+                  type: string
+                name:
+                  description: The descriptive name of the alert type.
+                  type: string
+                producer:
+                  description: An identifier for the application that produces this alert type.
+                  type: string
+                recoveryActionGroup:
+                  description: >
+                    An action group to use when an alert instance goes from an active state to an inactive one.
+                    If it is not specified, the default recovered action group is used.
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+servers:
+  - url: https://localhost:5601

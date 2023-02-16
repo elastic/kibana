@@ -36,7 +36,7 @@ import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/ind
 import { isNotNullish } from '../../../../../common/utils/is_not_nullish';
 
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
-
+import { docLinks } from '../../../shared/doc_links';
 import { getErrorsFromHttpResponse } from '../../../shared/flash_messages/handle_api_errors';
 
 import { indexToOption, IndicesSelectComboBox } from './components/indices_select_combobox';
@@ -85,7 +85,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
               values={{
                 enginesDocsLink: (
                   <EuiLink
-                    href="#" // TODO: replace with docs link
+                    href={docLinks.enterpriseSearchEngines}
                     target="_blank"
                     data-telemetry-id="entSearchContent-engines-createEngine-docsLink"
                     external

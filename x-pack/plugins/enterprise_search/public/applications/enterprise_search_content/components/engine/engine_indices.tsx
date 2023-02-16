@@ -12,10 +12,14 @@ import { useActions, useValues } from 'kea';
 import {
   EuiBasicTableColumn,
   EuiButton,
+  EuiCallOut,
   EuiConfirmModal,
   EuiIcon,
   EuiInMemoryTable,
+  EuiSpacer,
+  EuiTableActionsColumnType,
   EuiText,
+  useEuiBackgroundColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -26,15 +30,20 @@ import { indexHealthToHealthColor } from '../../../shared/constants/health_color
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
+
 import { SEARCH_INDEX_PATH, EngineViewTabs } from '../../routes';
 import { IngestionMethod } from '../../types';
 import { ingestionMethodToText } from '../../utils/indices';
+
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndicesLogic } from './engine_indices_logic';
 
 export const EngineIndices: React.FC = () => {
+  const subduedBackground = useEuiBackgroundColor('subdued');
+  const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { engineData, engineName, isLoadingEngine, addIndicesFlyoutOpen } =
     useValues(EngineIndicesLogic);
   const { removeIndexFromEngine, openAddIndicesFlyout, closeAddIndicesFlyout } =
@@ -45,21 +54,53 @@ export const EngineIndices: React.FC = () => {
   if (!engineData) return null;
   const { indices } = engineData;
 
+  const hasUnknownIndices = indices.some(({ health }) => health === 'unknown');
+
+  const removeIndexAction: EuiTableActionsColumnType<EnterpriseSearchEngineIndex>['actions'][0] = {
+    color: 'danger',
+    'data-test-subj': 'engine-remove-index-btn',
+    description: i18n.translate(
+      'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.title',
+      {
+        defaultMessage: 'Remove this index from engine',
+      }
+    ),
+    icon: 'minusInCircle',
+    isPrimary: false,
+    name: (index: EnterpriseSearchEngineIndex) =>
+      i18n.translate('xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.caption', {
+        defaultMessage: 'Remove index {indexName}',
+        values: {
+          indexName: index.name,
+        },
+      }),
+    onClick: (index: EnterpriseSearchEngineIndex) => {
+      setConfirmRemoveIndex(index.name);
+      sendEnterpriseSearchTelemetry({
+        action: 'clicked',
+        metric: 'entSearchContent-engines-indices-removeIndex',
+      });
+    },
+    type: 'icon',
+  };
+
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngineIndex>> = [
     {
-      field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.content.engine.indices.name.columnTitle', {
         defaultMessage: 'Index name',
       }),
-      render: (name: string) => (
-        <EuiLinkTo
-          data-test-subj="engine-index-link"
-          to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName: name })}
-        >
-          {name}
-        </EuiLinkTo>
-      ),
-      sortable: true,
+      render: ({ health, name }: EnterpriseSearchEngineIndex) =>
+        health === 'unknown' ? (
+          name
+        ) : (
+          <EuiLinkTo
+            data-test-subj="engine-index-link"
+            to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName: name })}
+          >
+            {name}
+          </EuiLinkTo>
+        ),
+      sortable: ({ name }: EnterpriseSearchEngineIndex) => name,
       truncateText: true,
       width: '40%',
     },
@@ -83,6 +124,13 @@ export const EngineIndices: React.FC = () => {
       name: i18n.translate('xpack.enterpriseSearch.content.engine.indices.docsCount.columnTitle', {
         defaultMessage: 'Docs count',
       }),
+      render: (count: number | null) =>
+        count === null
+          ? i18n.translate(
+              'xpack.enterpriseSearch.content.engine.indices.docsCount.notAvailableLabel',
+              { defaultMessage: 'N/A' }
+            )
+          : count,
       sortable: true,
       truncateText: true,
       width: '15%',
@@ -104,6 +152,7 @@ export const EngineIndices: React.FC = () => {
     {
       actions: [
         {
+          available: (index) => index.health !== 'unknown',
           'data-test-subj': 'engine-view-index-btn',
           description: i18n.translate(
             'xpack.enterpriseSearch.content.engine.indices.actions.viewIndex.title',
@@ -131,30 +180,7 @@ export const EngineIndices: React.FC = () => {
             ),
           type: 'icon',
         },
-        {
-          color: 'danger',
-          'data-test-subj': 'engine-remove-index-btn',
-          description: i18n.translate(
-            'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.title',
-            {
-              defaultMessage: 'Remove this index from engine',
-            }
-          ),
-          icon: 'minusInCircle',
-          isPrimary: false,
-          name: (index) =>
-            i18n.translate(
-              'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.caption',
-              {
-                defaultMessage: 'Remove index {indexName}',
-                values: {
-                  indexName: index.name,
-                },
-              }
-            ),
-          onClick: (index) => setConfirmRemoveIndex(index.name),
-          type: 'icon',
-        },
+        ...(indices.length > 1 ? [removeIndexAction] : []),
       ],
       name: i18n.translate('xpack.enterpriseSearch.content.engine.indices.actions.columnTitle', {
         defaultMessage: 'Actions',
@@ -173,6 +199,7 @@ export const EngineIndices: React.FC = () => {
         }),
         rightSideItems: [
           <EuiButton
+            data-telemetry-id="entSearchContent-engines-indices-addNewIndices"
             data-test-subj="engine-add-new-indices-btn"
             iconType="plusInCircle"
             fill
@@ -187,9 +214,39 @@ export const EngineIndices: React.FC = () => {
       engineName={engineName}
     >
       <>
+        {hasUnknownIndices && (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.title',
+                { defaultMessage: 'Some of your indices are unavailable.' }
+              )}
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.description',
+                  {
+                    defaultMessage:
+                      'Some data might be unreachable from this engine. Check for any pending operations or errors on affected indices, or remove those that should no longer be used by this engine.',
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
         <EuiInMemoryTable
           items={indices}
           columns={columns}
+          rowProps={(index: EnterpriseSearchEngineIndex) => {
+            if (index.health === 'unknown') {
+              return { style: { backgroundColor: subduedBackground } };
+            }
+
+            return {};
+          }}
           search={{
             box: {
               incremental: true,
@@ -209,6 +266,10 @@ export const EngineIndices: React.FC = () => {
             onConfirm={() => {
               removeIndexFromEngine(removeIndexConfirm);
               setConfirmRemoveIndex(null);
+              sendEnterpriseSearchTelemetry({
+                action: 'clicked',
+                metric: 'entSearchContent-engines-indices-removeIndexConfirm',
+              });
             }}
             title={i18n.translate(
               'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title',

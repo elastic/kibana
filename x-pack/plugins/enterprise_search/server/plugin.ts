@@ -38,7 +38,14 @@ import {
   ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
 } from '../common/constants';
 
-import { searchGuideId, searchGuideConfig } from '../common/guided_onboarding/search_guide_config';
+import {
+  appSearchGuideId,
+  websiteSearchGuideId,
+  databaseSearchGuideId,
+  appSearchGuideConfig,
+  websiteSearchGuideConfig,
+  databaseSearchGuideConfig,
+} from '../common/guided_onboarding/search_guide_config';
 
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
@@ -264,7 +271,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register a config for the search guide
      */
-    guidedOnboarding.registerGuideConfig(searchGuideId, searchGuideConfig);
+    guidedOnboarding.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
+    guidedOnboarding.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
+    guidedOnboarding.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
   }
 
   public start() {}

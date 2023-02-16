@@ -88,7 +88,7 @@ module.exports = {
           from: 'styled-components',
           to: false,
           exclude: USES_STYLED_COMPONENTS,
-          disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in @kbn/dev-utils/src/babel.ts.`
+          disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in packages/kbn-babel-preset/styled_components_files.js.`
         },
         ...[
           '@elastic/eui/dist/eui_theme_light.json',

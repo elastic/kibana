@@ -14,13 +14,13 @@ import { EuiBadge, EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from 
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import {
-  getPivotQuery,
-  getPivotPreviewDevConsoleStatement,
+  getTransformConfigQuery,
+  getTransformPreviewDevConsoleStatement,
   getPreviewTransformRequestBody,
   isDefaultQuery,
   isMatchAllQuery,
 } from '../../../../common';
-import { usePivotData } from '../../../../hooks/use_pivot_data';
+import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { AggListSummary } from '../aggregation_list';
@@ -37,6 +37,8 @@ interface Props {
 
 export const StepDefineSummary: FC<Props> = ({
   formState: {
+    isDatePickerApplyEnabled,
+    timeRangeMs,
     runtimeMappings,
     searchString,
     searchQuery,
@@ -49,31 +51,33 @@ export const StepDefineSummary: FC<Props> = ({
   searchItems,
 }) => {
   const {
-    ml: { DataGrid },
+    ml: { formatHumanReadableDateTimeSeconds, DataGrid },
   } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
-  const pivotQuery = getPivotQuery(searchQuery);
+  const transformConfigQuery = getTransformConfigQuery(searchQuery);
 
   const previewRequest = getPreviewTransformRequestBody(
-    searchItems.dataView.getIndexPattern(),
-    pivotQuery,
+    searchItems.dataView,
+    transformConfigQuery,
     partialPreviewRequest,
-    runtimeMappings
+    runtimeMappings,
+    isDatePickerApplyEnabled ? timeRangeMs : undefined
   );
 
-  const pivotPreviewProps = usePivotData(
-    searchItems.dataView.getIndexPattern(),
-    pivotQuery,
+  const pivotPreviewProps = useTransformConfigData(
+    searchItems.dataView,
+    transformConfigQuery,
     validationStatus,
     partialPreviewRequest,
-    runtimeMappings
+    runtimeMappings,
+    isDatePickerApplyEnabled ? timeRangeMs : undefined
   );
 
   const isModifiedQuery =
     typeof searchString === 'undefined' &&
-    !isDefaultQuery(pivotQuery) &&
-    !isMatchAllQuery(pivotQuery);
+    !isDefaultQuery(transformConfigQuery) &&
+    !isMatchAllQuery(transformConfigQuery);
 
   let uniqueKeys: string[] = [];
   let sortField = '';
@@ -94,6 +98,18 @@ export const StepDefineSummary: FC<Props> = ({
             >
               <span>{searchItems.dataView.getIndexPattern()}</span>
             </EuiFormRow>
+            {isDatePickerApplyEnabled && timeRangeMs && (
+              <EuiFormRow
+                label={i18n.translate('xpack.transform.stepDefineSummary.timeRangeLabel', {
+                  defaultMessage: 'Time range',
+                })}
+              >
+                <span>
+                  {formatHumanReadableDateTimeSeconds(timeRangeMs.from)} -{' '}
+                  {formatHumanReadableDateTimeSeconds(timeRangeMs.to)}
+                </span>
+              </EuiFormRow>
+            )}
             {typeof searchString === 'string' && (
               <EuiFormRow
                 label={i18n.translate('xpack.transform.stepDefineSummary.queryLabel', {
@@ -117,7 +133,7 @@ export const StepDefineSummary: FC<Props> = ({
                   overflowHeight={300}
                   isCopyable
                 >
-                  {JSON.stringify(pivotQuery, null, 2)}
+                  {JSON.stringify(transformConfigQuery, null, 2)}
                 </EuiCodeBlock>
               </EuiFormRow>
             )}
@@ -187,7 +203,7 @@ export const StepDefineSummary: FC<Props> = ({
         <EuiSpacer size="m" />
         <DataGrid
           {...pivotPreviewProps}
-          copyToClipboard={getPivotPreviewDevConsoleStatement(previewRequest)}
+          copyToClipboard={getTransformPreviewDevConsoleStatement(previewRequest)}
           copyToClipboardDescription={i18n.translate(
             'xpack.transform.pivotPreview.copyClipboardTooltip',
             {

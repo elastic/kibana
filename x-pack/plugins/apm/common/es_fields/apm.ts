@@ -21,6 +21,8 @@ export const CLOUD_INSTANCE_ID = 'cloud.instance.id';
 export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
 export const CLOUD_SERVICE_NAME = 'cloud.service.name';
 
+export const EVENT_SUCCESS_COUNT = 'event.success_count';
+
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
 export const SERVICE_ENVIRONMENT = 'service.environment';
@@ -148,8 +150,6 @@ export const KUBERNETES = 'kubernetes';
 export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 
-export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
-
 export const FAAS_ID = 'faas.id';
 export const FAAS_NAME = 'faas.name';
 export const FAAS_COLDSTART = 'faas.coldstart';
@@ -168,5 +168,12 @@ export const DEVICE_MODEL_IDENTIFIER = 'device.model.identifier';
 export const SESSION_ID = 'session.id';
 export const APP_LAUNCH_TIME = 'application.launch.time';
 export const EVENT_NAME = 'event.name';
+
+// Location
+export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
+export const CLIENT_GEO_REGION_ISO_CODE = 'client.geo.region_iso_code';
+export const CLIENT_GEO_COUNTRY_NAME = 'client.geo.country_name';
+export const CLIENT_GEO_CITY_NAME = 'client.geo.city_name';
+export const CLIENT_GEO_REGION_NAME = 'client.geo.region_name';
 
 export const CHILD_ID = 'child.id';

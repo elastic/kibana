@@ -29,6 +29,10 @@ const Template: ComponentStory<typeof Component> = (props: SloListItemProps) => 
 const defaultProps = {
   slo: buildSlo(),
   historicalSummary: historicalSummaryData[HEALTHY_ROLLING_SLO],
+  onCloned: () => {},
+  onCloning: () => {},
+  onDeleted: () => {},
+  onDeleting: () => {},
 };
 
 export const SloListItem = Template.bind({});

@@ -205,36 +205,82 @@ paths:
               schema:
                 $ref: '#/components/schemas/get_packages_response'
       operationId: list-all-packages
-    parameters:
-      - in: query
-        name: excludeInstallStatus
-        schema:
-          type: boolean
-          default: false
-        description: >-
-          Whether to exclude the install status of each package. Enabling this
-          option will opt in to caching for the response via `cache-control`
-          headers. If you don't need up-to-date installation info for a package,
-          and are querying for a list of available packages, providing this flag
-          can improve performance substantially.
-      - in: query
-        name: prerelease
-        schema:
-          type: boolean
-          default: false
-        description: >-
-          Whether to return prerelease versions of packages (e.g. beta, rc,
-          preview) 
-      - in: query
-        name: experimental
-        deprecated: true
-        schema:
-          type: boolean
-          default: false
-      - in: query
-        name: category
-        schema:
-          type: string
+      parameters:
+        - in: query
+          name: excludeInstallStatus
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to exclude the install status of each package. Enabling this
+            option will opt in to caching for the response via `cache-control`
+            headers. If you don't need up-to-date installation info for a
+            package, and are querying for a list of available packages,
+            providing this flag can improve performance substantially.
+        - in: query
+          name: prerelease
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to return prerelease versions of packages (e.g. beta, rc,
+            preview) 
+        - in: query
+          name: experimental
+          deprecated: true
+          schema:
+            type: boolean
+            default: false
+        - in: query
+          name: category
+          schema:
+            type: string
+    post:
+      summary: Packages - Install by upload
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          oneOf:
+                            - $ref: '#/components/schemas/kibana_saved_object_type'
+                            - $ref: '#/components/schemas/elasticsearch_asset_type'
+                      required:
+                        - id
+                        - type
+                  _meta:
+                    type: object
+                    properties:
+                      install_source:
+                        type: string
+                        enum:
+                          - upload
+                          - registry
+                          - bundled
+                required:
+                  - items
+      operationId: install-package-by-upload
+      description: ''
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        content:
+          application/zip:
+            schema:
+              type: string
+              format: binary
   /epm/packages/_bulk:
     post:
       summary: Packages - Bulk install
@@ -556,17 +602,6 @@ paths:
                   - items
       operationId: update-package
       description: ''
-      parameters:
-        - schema:
-            type: string
-          name: pkgName
-          in: path
-          required: true
-        - schema:
-            type: string
-          name: pkgVersion
-          in: path
-          required: true
       requestBody:
         content:
           application/json:
@@ -833,6 +868,8 @@ paths:
       parameters:
         - schema:
             type: array
+            items:
+              type: string
           name: agentsIds
           in: query
           required: true
@@ -857,6 +894,11 @@ paths:
         - $ref: '#/components/parameters/sort_field'
         - $ref: '#/components/parameters/sort_order'
         - $ref: '#/components/parameters/with_metrics'
+        - name: getStatusSummary
+          in: query
+          required: false
+          schema:
+            type: boolean
       security:
         - basicAuth: []
   /agents/bulk_upgrade:
@@ -1077,6 +1119,11 @@ paths:
                   $ref: '#/components/schemas/agent_action'
   /agents/{agentId}/actions/{actionId}/cancel:
     parameters:
+      - schema:
+          type: string
+        name: agentId
+        in: path
+        required: true
       - schema:
           type: string
         name: actionId
@@ -1511,6 +1558,15 @@ paths:
           description: >-
             When set to true, retrieve the related package policies for each
             agent policy.
+        - schema:
+            type: boolean
+          in: query
+          name: noAgentCount
+          description: >-
+            When set to true, do not count how many agents are in the agent
+            policy, this can improve performance if you are searching over a
+            large number of agent policies. The "agents" property will always be
+            0 if set to true.
       description: ''
     post:
       summary: Agent policy - Create
@@ -2243,11 +2299,6 @@ paths:
                   - id
       parameters:
         - schema:
-            type: string
-          name: packagePolicyId
-          in: path
-          required: true
-        - schema:
             type: boolean
           name: force
           in: query
@@ -2647,11 +2698,6 @@ paths:
                 required:
                   - id
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Fleet Server Hosts - Update
@@ -2683,11 +2729,6 @@ paths:
                 required:
                   - item
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
   /proxies:
     get:
@@ -2790,11 +2831,6 @@ paths:
                 required:
                   - id
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Fleet Proxies - Update
@@ -2830,11 +2866,6 @@ paths:
                 required:
                   - item
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
   /kubernetes:
     get:
@@ -2889,6 +2920,7 @@ components:
       in: header
       name: kbn-xsrf
       required: true
+      description: Kibana's anti Cross-Site Request Forgery token. Can be any string value.
     page_size:
       name: perPage
       in: query
@@ -3078,6 +3110,29 @@ components:
             $ref: '#/components/schemas/search_result'
       required:
         - items
+    kibana_saved_object_type:
+      title: Kibana saved object asset type
+      type: string
+      enum:
+        - dashboard
+        - visualization
+        - search
+        - index-pattern
+        - map
+        - lens
+        - ml-module
+        - security-rule
+        - csp_rule_template
+    elasticsearch_asset_type:
+      title: Elasticsearch asset type
+      type: string
+      enum:
+        - component_template
+        - ingest_pipeline
+        - index_template
+        - ilm_policy
+        - transform
+        - data_stream_ilm_policy
     bulk_install_packages_response:
       title: Bulk install packages response
       type: object
@@ -3251,29 +3306,6 @@ components:
         - format_version
         - download
         - path
-    kibana_saved_object_type:
-      title: Kibana saved object asset type
-      type: string
-      enum:
-        - dashboard
-        - visualization
-        - search
-        - index-pattern
-        - map
-        - lens
-        - ml-module
-        - security-rule
-        - csp_rule_template
-    elasticsearch_asset_type:
-      title: Elasticsearch asset type
-      type: string
-      enum:
-        - component_template
-        - ingest_pipeline
-        - index_template
-        - ilm_policy
-        - transform
-        - data_stream_ilm_policy
     package_usage_stats:
       title: Package usage stats
       type: object
@@ -3421,11 +3453,11 @@ components:
             cpu_avg:
               type: number
               description: >-
-                Average agent CPU usage during the last 5 minute, number between
-                0-1
+                Average agent CPU usage during the last 5 minutes, number
+                between 0-1
             memory_size_byte_avg:
               type: number
-              description: Average agent memory consumption during the last 5 minute
+              description: Average agent memory consumption during the last 5 minutes
       required:
         - type
         - active
@@ -3451,6 +3483,27 @@ components:
           type: number
         perPage:
           type: number
+        statusSummary:
+          type: object
+          properties:
+            offline:
+              type: number
+            error:
+              type: number
+            online:
+              type: number
+            inactive:
+              type: number
+            enrolling:
+              type: number
+            unenrolling:
+              type: number
+            unenrolled:
+              type: number
+            updating:
+              type: number
+            degraded':
+              type: number
       required:
         - items
         - total
@@ -3714,6 +3767,18 @@ components:
               type: number
             agents:
               type: number
+            agent_features:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  enabled:
+                    type: boolean
+                required:
+                  - name
+                  - enabled
           required:
             - id
             - status

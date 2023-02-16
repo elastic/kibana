@@ -50,21 +50,41 @@ jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
   loadAllActions: jest.fn(),
 }));
-jest.mock('../../../lib/rule_api', () => ({
+
+jest.mock('../../../lib/rule_api/rules_kuery_filter', () => ({
   loadRulesWithKueryFilter: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/rule_types', () => ({
   loadRuleTypes: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
   loadRuleAggregationsWithKueryFilter: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/update_api_key', () => ({
   updateAPIKey: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/aggregate', () => ({
   loadRuleTags: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/snooze', () => ({
   bulkSnoozeRules: jest.fn(),
-  bulkDeleteRules: jest.fn().mockResolvedValue({ errors: [], total: 10 }),
+}));
+jest.mock('../../../lib/rule_api/unsnooze', () => ({
   bulkUnsnoozeRules: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/bulk_delete', () => ({
+  bulkDeleteRules: jest.fn().mockResolvedValue({ errors: [], total: 10 }),
+}));
+jest.mock('../../../lib/rule_api/update_api_key', () => ({
   bulkUpdateAPIKey: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/health', () => ({
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
   })),
 }));
+
 jest.mock('../../../lib/rule_api/aggregate_kuery_filter');
 jest.mock('../../../lib/rule_api/rules_kuery_filter');
 
@@ -96,7 +116,10 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const { loadRuleTypes, bulkUpdateAPIKey, loadRuleTags } = jest.requireMock('../../../lib/rule_api');
+const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
+const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
+const { loadRuleTags } = jest.requireMock('../../../lib/rule_api/aggregate');
+
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
 );
@@ -332,15 +355,14 @@ describe('rules_list ', () => {
     renderWithProviders(
       <RulesList statusFilter={['disabled']} onStatusFilterChange={onStatusFilterChangeMock} />
     );
-    await waitFor(() => screen.getByText('Rule state'));
+    await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleStatusesFilter: ['disabled'],
       })
     );
-
-    fireEvent.click(screen.getAllByTestId('ruleStatusFilterButton')[0]);
-    fireEvent.click(screen.getAllByTestId('ruleStatusFilterOption-enabled')[0]);
+    fireEvent.click((await screen.findAllByTestId('ruleStatusFilterButton'))[0]);
+    fireEvent.click((await screen.findAllByTestId('ruleStatusFilterOption-enabled'))[0]);
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleStatusesFilter: ['disabled', 'enabled'],

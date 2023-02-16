@@ -13,8 +13,7 @@ import {
   CommentType,
 } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { deleteAllCaseItems } from '../../../../common/lib/utils';
-import { getCaseUserActions } from '../../../../common/lib/user_actions';
+import { deleteAllCaseItems, getCaseUserActions } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -28,11 +27,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       const CASE_ID = 'e1900ac0-017f-11eb-93f8-d161651bf509';
 
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+        );
+        await deleteAllCaseItems(es);
       });
 
       it('7.10.0 migrates user actions connector', async () => {

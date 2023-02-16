@@ -10,17 +10,17 @@ import { useRouteMatch } from 'react-router-dom';
 
 // TODO: Needs to be moved
 import { EditPackagePolicyForm } from '../../../../../fleet/sections/agent_policy/edit_package_policy_page';
-import { useGetOnePackagePolicy, useUIExtension } from '../../../../hooks';
+import { useGetOnePackagePolicyQuery, useUIExtension } from '../../../../hooks';
 
 export const Policy = memo(() => {
   const {
     params: { packagePolicyId },
   } = useRouteMatch<{ packagePolicyId: string }>();
 
-  const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
+  const { data: packagePolicyData } = useGetOnePackagePolicyQuery(packagePolicyId);
 
   const extensionView = useUIExtension(
-    packagePolicy.data?.item?.package?.name ?? '',
+    packagePolicyData?.item?.package?.name ?? '',
     'package-policy-edit'
   );
 

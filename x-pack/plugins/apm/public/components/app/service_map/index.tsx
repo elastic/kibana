@@ -137,11 +137,12 @@ export function ServiceMap({
             environment,
             serviceName,
             serviceGroup: serviceGroupId,
+            kuery,
           },
         },
       });
     },
-    [license, serviceName, environment, start, end, serviceGroupId]
+    [license, serviceName, environment, start, end, serviceGroupId, kuery]
   );
 
   const { ref, height } = useRefDimensions();
@@ -186,7 +187,7 @@ export function ServiceMap({
 
   return (
     <>
-      <SearchBar showKueryBar={false} showTimeComparison />
+      <SearchBar showTimeComparison />
       <EuiPanel hasBorder={true} paddingSize="none">
         <div
           data-test-subj="ServiceMap"

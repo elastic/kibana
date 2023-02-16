@@ -8,6 +8,7 @@ import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getDocumentSources } from '../../lib/helpers/get_document_sources';
 import { getIsUsingServiceDestinationMetrics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
@@ -16,7 +17,11 @@ export const timeRangeMetadataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/time_range_metadata',
   params: t.type({
     query: t.intersection([
-      t.type({ useSpanName: toBooleanRt }),
+      t.type({
+        useSpanName: toBooleanRt,
+        enableServiceTransactionMetrics: toBooleanRt,
+        enableContinuousRollups: toBooleanRt,
+      }),
       kueryRt,
       rangeRt,
     ]),
@@ -28,10 +33,17 @@ export const timeRangeMetadataRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
 
     const {
-      query: { useSpanName, start, end, kuery },
+      query: {
+        useSpanName,
+        start,
+        end,
+        kuery,
+        enableServiceTransactionMetrics,
+        enableContinuousRollups,
+      },
     } = resources.params;
 
-    const [isUsingServiceDestinationMetrics] = await Promise.all([
+    const [isUsingServiceDestinationMetrics, sources] = await Promise.all([
       getIsUsingServiceDestinationMetrics({
         apmEventClient,
         useSpanName,
@@ -39,10 +51,19 @@ export const timeRangeMetadataRoute = createApmServerRoute({
         end,
         kuery,
       }),
+      getDocumentSources({
+        apmEventClient,
+        start,
+        end,
+        kuery,
+        enableServiceTransactionMetrics,
+        enableContinuousRollups,
+      }),
     ]);
 
     return {
       isUsingServiceDestinationMetrics,
+      sources,
     };
   },
 });

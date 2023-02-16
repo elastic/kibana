@@ -10,6 +10,7 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -20,6 +21,9 @@ import { TransactionsTable } from '../../../shared/transactions_table';
 import { replace } from '../../../shared/links/url_helpers';
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 import { MobileTransactionCharts } from './transaction_charts';
+import { MobileLocationStats } from '../service_overview/stats/location_stats';
+import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
+import { GeoMap } from '../service_overview/geo_map';
 
 export function MobileTransactionOverview() {
   const {
@@ -38,6 +42,11 @@ export function MobileTransactionOverview() {
       comparisonEnabled,
     },
   } = useApmParams('/mobile-services/{serviceName}/transactions');
+
+  const embeddableFilters = useFiltersForEmbeddableCharts({
+    serviceName,
+    environment,
+  });
 
   const kueryWithMobileFilters = getKueryWithMobileFilters({
     device,
@@ -63,6 +72,32 @@ export function MobileTransactionOverview() {
       <EuiFlexItem>
         <EuiHorizontalRule />
       </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={8}>
+            <EuiPanel hasBorder={true}>
+              <GeoMap
+                start={start}
+                end={end}
+                kuery={kueryWithMobileFilters}
+                filters={embeddableFilters}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={4}>
+            <MobileLocationStats
+              start={start}
+              end={end}
+              kuery={kueryWithMobileFilters}
+              environment={environment}
+              serviceName={serviceName}
+              offset={offset}
+              comparisonEnabled={comparisonEnabled}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiSpacer size="s" />
       <MobileTransactionCharts
         transactionType={transactionType}
         serviceName={serviceName}

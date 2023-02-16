@@ -7,11 +7,10 @@
 
 import path from 'path';
 import getPort from 'get-port';
-import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from './plugins/actions_simulators/server/plugin';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
 interface CreateTestConfigOptions {
@@ -26,6 +25,7 @@ interface CreateTestConfigOptions {
   rejectUnauthorized?: boolean; // legacy
   emailDomainsAllowed?: string[];
   testFiles?: string[];
+  reportName?: string;
   useDedicatedTaskRunner: boolean;
 }
 
@@ -73,6 +73,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     rejectUnauthorized = true, // legacy
     emailDomainsAllowed = undefined,
     testFiles = undefined,
+    reportName = undefined,
     useDedicatedTaskRunner,
   } = options;
 
@@ -87,12 +88,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         protocol: ssl ? 'https' : 'http',
       },
     };
-    // Find all folders in ./plugins since we treat all them as plugin folder
-    const pluginDir = path.resolve(__dirname, 'plugins');
-    const pluginPaths = fs
-      .readdirSync(pluginDir)
-      .map((n) => path.resolve(pluginDir, n))
-      .filter((p) => fs.statSync(p));
 
     const proxyPort =
       process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: getPort.makeRange(6200, 6299) }));
@@ -154,7 +149,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       servers,
       services,
       junit: {
-        reportName: 'X-Pack Alerting API Integration Tests',
+        reportName: reportName ? reportName : 'X-Pack Alerting API Integration Tests',
       },
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
@@ -307,7 +302,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          ...pluginPaths.map((p) => `--plugin-path=${p}`),
+          ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [

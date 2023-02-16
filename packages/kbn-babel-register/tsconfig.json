@@ -16,7 +16,6 @@
     "@kbn/repo-info",
     "@kbn/babel-transform",
     "@kbn/peggy",
-    "@kbn/repo-packages",
   ],
   "exclude": [
     "target/**/*",

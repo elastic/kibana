@@ -29,10 +29,7 @@ import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { RuleNotifyWhenType, RuleAction } from '../../../types';
-import {
-  DEFAULT_FREQUENCY_WITH_SUMMARY,
-  DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
-} from '../../../common/constants';
+import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
   {
@@ -135,7 +132,7 @@ interface ActionNotifyWhenProps {
 
 export const ActionNotifyWhen = ({
   hasSummary,
-  frequency = hasSummary ? DEFAULT_FREQUENCY_WITH_SUMMARY : DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
+  frequency = DEFAULT_FREQUENCY,
   throttle,
   throttleUnit,
   onNotifyWhenChange,
@@ -146,32 +143,7 @@ export const ActionNotifyWhen = ({
 }: ActionNotifyWhenProps) => {
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
   const [notifyWhenValue, setNotifyWhenValue] = useState<RuleNotifyWhenType>(
-    hasSummary
-      ? DEFAULT_FREQUENCY_WITH_SUMMARY.notifyWhen
-      : DEFAULT_FREQUENCY_WITHOUT_SUMMARY.notifyWhen
-  );
-
-  // Track whether the user has changed the notify when value from default. This is necessary because the
-  // "default" notifyWhen value for summary: true is the second menu item for summary: false. We want the UX to be:
-  // Case A
-  // - User opens the form with summary: false, notifyWhen: CHANGE
-  // - User switches to summary: true, necessitating a switch to notifyWhen: ACTIVE
-  // - User doesn't touch notifyWhen: ACTIVE, switches back to summary: false. notifyWhen should switch to CHANGE, the 1st menu option
-  // Case B
-  // - User opens the form with summary: false, notifyWhen: ACTIVE (not the "default")
-  // - User switches to summary: true
-  // - User switches back to summary: false. notifyWhen stays ACTIVE
-  // Case C
-  // - User opens the form with summary: true, notifyWhen: ACTIVE (the "default")
-  // - User doesn't change notifyWhen, just sets summary: false. notifyWhen should switch to CHANGE
-  // Case D
-  // - User opens the form with summary: true, notifyWhen: THROTTLE, or summary: false, notifyWhen: !CHANGE
-  // - When user changes summary, leave notifyWhen unchanged
-  const [notifyWhenValueChangedFromDefault, setNotifyWhenValueChangedFromDefault] = useState(
-    // Check if the initial notifyWhen value is different from the default value for its summary type
-    frequency.summary
-      ? frequency.notifyWhen !== DEFAULT_FREQUENCY_WITH_SUMMARY.notifyWhen
-      : frequency.notifyWhen !== DEFAULT_FREQUENCY_WITHOUT_SUMMARY.notifyWhen
+    DEFAULT_FREQUENCY.notifyWhen
   );
 
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
@@ -193,7 +165,6 @@ export const ActionNotifyWhen = ({
     (newValue: RuleNotifyWhenType) => {
       onNotifyWhenChange(newValue);
       setNotifyWhenValue(newValue);
-      setNotifyWhenValueChangedFromDefault(true);
       // Calling onNotifyWhenChange and onThrottleChange at the same time interferes with the React state lifecycle
       // so wait for onNotifyWhenChange to process before calling onThrottleChange
       setTimeout(
@@ -213,24 +184,10 @@ export const ActionNotifyWhen = ({
       onSummaryChange(summary);
       setSummaryMenuOpen(false);
       if (summary && frequency.notifyWhen === RuleNotifyWhen.CHANGE) {
-        // Call onNotifyWhenChange DIRECTLY to bypass setNotifyWhenValueChangedFromDefault
         onNotifyWhenChange(RuleNotifyWhen.ACTIVE);
-        // In cases like this:
-        // 1. User opens form with notifyWhen: THROTTLE
-        // 2. User sets notifyWhen: CHANGE, notifyWhenValueChangedFromDefault is now true
-        // 3. User sets summary: true, notifyWhen gets set to CHANGE
-        // 4. User sets summary: false, notifyWhen should probably get set back to CHANGE
-        // To make step 4 possible, we have to reset notifyWhenValueChangedFromDefault:
-        setNotifyWhenValueChangedFromDefault(false);
-      } else if (
-        !summary &&
-        frequency.notifyWhen === RuleNotifyWhen.ACTIVE &&
-        !notifyWhenValueChangedFromDefault
-      ) {
-        onNotifyWhenChange(RuleNotifyWhen.CHANGE);
       }
     },
-    [onSummaryChange, frequency.notifyWhen, onNotifyWhenChange, notifyWhenValueChangedFromDefault]
+    [onSummaryChange, frequency.notifyWhen, onNotifyWhenChange]
   );
 
   const summaryOptions = useMemo(

@@ -279,6 +279,11 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('has correct transform function selected');
           await transform.wizard.assertSelectedTransformFunction('pivot');
 
+          await transform.testExecution.logTestStep(
+            `sets the date picker to the default '15 minutes ago'`
+          );
+          await transform.datePicker.quickSelect(15, 'm');
+
           await transform.testExecution.logTestStep('has correct runtime mappings settings');
           await transform.wizard.assertRuntimeMappingsEditorSwitchExists();
           await transform.wizard.assertRuntimeMappingsEditorSwitchCheckState(false);
@@ -290,6 +295,12 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('sets runtime mappings settings');
           await transform.wizard.setRuntimeMappingsEditorContent(JSON.stringify(runtimeMappings));
           await transform.wizard.applyRuntimeMappings();
+
+          await transform.testExecution.logTestStep('displays an empty index preview');
+          await transform.wizard.assertIndexPreviewEmpty();
+
+          await transform.testExecution.logTestStep(`sets the date picker to '15 Years ago'`);
+          await transform.datePicker.quickSelect(10, 'y');
 
           await transform.testExecution.logTestStep('loads the index preview');
           await transform.wizard.assertIndexPreviewLoaded();
@@ -439,7 +450,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (isLatestTransformTestData(testData)) {
             const fromTime = 'Feb 7, 2016 @ 00:00:00.000';
             const toTime = 'Feb 11, 2016 @ 23:59:54.000';
-            await transform.wizard.setDiscoverTimeRange(fromTime, toTime);
+            await transform.datePicker.setTimeRange(fromTime, toTime);
           }
 
           await transform.testExecution.logTestStep(

@@ -12,9 +12,10 @@ import {
   EuiPageHeaderProps,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { omit } from 'lodash';
@@ -357,13 +358,20 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      prepend:
+      append:
         serviceAlertsCount.alertsCount > 0 ? (
-          <EuiBadge iconType="alert" color="danger">
-            {serviceAlertsCount.alertsCount}
-          </EuiBadge>
+          <EuiToolTip
+            position="bottom"
+            content={i18n.translate(
+              'xpack.apm.home.serviceAlertsTable.tooltip.activeAlertsExplanation',
+              {
+                defaultMessage: 'Active alerts',
+              }
+            )}
+          >
+            <EuiBadge color="danger">{serviceAlertsCount.alertsCount}</EuiBadge>
+          </EuiToolTip>
         ) : null,
-      append: <TechnicalPreviewBadge icon="beaker" />,
       label: i18n.translate('xpack.apm.home.alertsTabLabel', {
         defaultMessage: 'Alerts',
       }),

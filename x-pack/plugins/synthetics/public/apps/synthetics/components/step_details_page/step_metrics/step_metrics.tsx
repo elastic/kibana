@@ -57,7 +57,7 @@ export const StepMetrics = () => {
                   previous={prevVal?.value ?? 0}
                   helpText={helpText}
                   currentFormatted={formatted}
-                  previousFormatted={prevVal?.formatted!}
+                  previousFormatted={prevVal?.formatted}
                 />
               </EuiFlexItem>
             );

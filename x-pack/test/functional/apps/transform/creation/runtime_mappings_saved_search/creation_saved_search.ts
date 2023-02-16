@@ -68,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
             status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
             progress: '100',
+            health: 'Healthy',
           },
           sourceIndex: 'ft_farequote',
           indexPreview: {
@@ -105,6 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
             status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
             progress: '100',
+            health: 'Healthy',
           },
           sourceIndex: 'ft_farequote',
           indexPreview: {
@@ -143,6 +145,17 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('has correct transform function selected');
           await transform.wizard.assertSelectedTransformFunction('pivot');
+
+          await transform.testExecution.logTestStep(
+            `sets the date picker to the default '15 minutes ago'`
+          );
+          await transform.datePicker.quickSelect(15, 'm');
+
+          await transform.testExecution.logTestStep('displays an empty index preview');
+          await transform.wizard.assertIndexPreviewEmpty();
+
+          await transform.testExecution.logTestStep(`sets the date picker to '15 Years ago'`);
+          await transform.datePicker.quickSelect(10, 'y');
 
           await transform.testExecution.logTestStep('loads the index preview');
           await transform.wizard.assertIndexPreviewLoaded();
@@ -286,6 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,
+            health: testData.expected.row.health,
           });
 
           await transform.testExecution.logTestStep(

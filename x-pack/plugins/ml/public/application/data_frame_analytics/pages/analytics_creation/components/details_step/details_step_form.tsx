@@ -297,7 +297,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           disabled={isJobCreated}
           name="mlDataFrameAnalyticsUseResultsFieldDefault"
           label={i18n.translate('xpack.ml.dataframe.analytics.create.UseResultsFieldDefaultLabel', {
-            defaultMessage: 'Use results field default value "{defaultValue}"',
+            defaultMessage: 'Use results field default value: "{defaultValue}"',
             values: { defaultValue: DEFAULT_RESULTS_FIELD },
           })}
           checked={useResultsFieldDefault === true}
@@ -318,12 +318,12 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.resultsFieldHelpText', {
             defaultMessage:
-              'Defines the name of the field in which to store the results of the analysis. Defaults to ml.',
+              'Define the name of the field in which to store the results of the analysis. Defaults to ml.',
           })}
         >
           <EuiFieldText
             disabled={isJobCreated}
-            placeholder="results field"
+            placeholder="Results field"
             value={resultsField}
             onChange={(e) => setFormState({ resultsField: e.target.value })}
             aria-label={i18n.translate(

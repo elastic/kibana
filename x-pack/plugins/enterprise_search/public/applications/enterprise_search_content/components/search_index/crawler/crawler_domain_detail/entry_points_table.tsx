@@ -130,9 +130,7 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, inde
       onAdd={onAdd}
       onDelete={onDelete}
       onUpdate={onUpdate}
-      title={i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.title', {
-        defaultMessage: 'Entry points',
-      })}
+      title=""
       disableReordering
     />
   );

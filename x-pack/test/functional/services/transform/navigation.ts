@@ -8,11 +8,11 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformNavigationProvider({ getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['common']);
 
   return {
     async navigateTo() {
-      return await PageObjects.common.navigateToApp('transform');
+      return await pageObjects.common.navigateToApp('transform');
     },
   };
 }

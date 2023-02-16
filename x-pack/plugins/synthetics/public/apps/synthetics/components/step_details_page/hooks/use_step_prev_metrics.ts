@@ -9,7 +9,6 @@ import { useParams } from 'react-router-dom';
 import { useEsSearch } from '@kbn/observability-plugin/public';
 import { formatBytes } from './use_object_metrics';
 import { formatMillisecond } from '../step_metrics/step_metrics';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import {
   CLS_LABEL,
   DCL_LABEL,
@@ -19,6 +18,8 @@ import {
   TRANSFER_SIZE,
 } from './use_step_metrics';
 import { JourneyStep } from '../../../../../../common/runtime_types';
+import { median } from './use_network_timings_prev';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
 export const SYNTHETICS_CLS = 'browser.experience.cls';
@@ -75,29 +76,37 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
           },
         },
         aggs: {
-          fcp: {
-            avg: {
-              field: SYNTHETICS_FCP,
+          testRuns: {
+            terms: {
+              field: 'monitor.check_group',
+              size: 10000,
             },
-          },
-          lcp: {
-            avg: {
-              field: SYNTHETICS_LCP,
-            },
-          },
-          cls: {
-            avg: {
-              field: SYNTHETICS_CLS,
-            },
-          },
-          dcl: {
-            avg: {
-              field: SYNTHETICS_DCL,
-            },
-          },
-          totalDuration: {
-            avg: {
-              field: SYNTHETICS_STEP_DURATION,
+            aggs: {
+              fcp: {
+                sum: {
+                  field: SYNTHETICS_FCP,
+                },
+              },
+              lcp: {
+                sum: {
+                  field: SYNTHETICS_LCP,
+                },
+              },
+              cls: {
+                sum: {
+                  field: SYNTHETICS_CLS,
+                },
+              },
+              dcl: {
+                sum: {
+                  field: SYNTHETICS_DCL,
+                },
+              },
+              stepDuration: {
+                sum: {
+                  field: SYNTHETICS_STEP_DURATION,
+                },
+              },
             },
           },
         },
@@ -106,7 +115,6 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
     [monitorId, checkGroupId, stepIndex],
     { name: 'previousStepMetrics' }
   );
-
   const { data: transferData } = useEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
@@ -150,14 +158,17 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
           },
         },
         aggs: {
-          transferSize: {
-            avg: {
-              field: 'synthetics.payload.transfer_size',
+          testRuns: {
+            terms: {
+              field: 'monitor.check_group',
+              size: 10000,
             },
-          },
-          resourceSize: {
-            avg: {
-              field: 'synthetics.payload.resource_size',
+            aggs: {
+              transferSize: {
+                sum: {
+                  field: 'synthetics.payload.transfer_size',
+                },
+              },
             },
           },
         },
@@ -170,40 +181,66 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
   );
 
   const metrics = data?.aggregations;
-  const transferDataVal = transferData?.aggregations?.transferSize?.value ?? 0;
+
+  const transferSize: number[] = [];
+  transferData?.aggregations?.testRuns.buckets.forEach((bucket) => {
+    transferSize.push(bucket.transferSize.value ?? 0);
+  });
+
+  const medianTransferSize = median(transferSize);
+
+  const lcp: number[] = [];
+  const fcp: number[] = [];
+  const cls: number[] = [];
+  const dcl: number[] = [];
+  const stepDuration: number[] = [];
+
+  metrics?.testRuns.buckets.forEach((bucket) => {
+    lcp.push(bucket.lcp.value ?? 0);
+    fcp.push(bucket.fcp.value ?? 0);
+    cls.push(bucket.cls.value ?? 0);
+    dcl.push(bucket.dcl.value ?? 0);
+    stepDuration.push(bucket.stepDuration.value ?? 0);
+  });
+
+  const medianLcp = median(lcp);
+  const medianFcp = median(fcp);
+  const medianCls = median(cls);
+  const medianDcl = median(dcl);
+  const medianStepDuration = median(stepDuration);
 
   return {
     loading,
     metrics: [
       {
         label: STEP_DURATION_LABEL,
-        value: metrics?.totalDuration.value,
-        formatted: formatMillisecond((metrics?.totalDuration.value ?? 0) / 1000),
+        value: medianStepDuration,
+        formatted: formatMillisecond(medianStepDuration / 1000),
       },
       {
-        value: metrics?.lcp.value,
+        value: medianLcp,
         label: LCP_LABEL,
-        formatted: formatMillisecond((metrics?.lcp.value ?? 0) / 1000),
+        formatted: formatMillisecond(medianLcp / 1000),
       },
       {
-        value: metrics?.fcp.value,
+        value: medianFcp,
         label: FCP_LABEL,
-        formatted: formatMillisecond((metrics?.fcp.value ?? 0) / 1000),
+        formatted: formatMillisecond(medianFcp / 1000),
       },
       {
-        value: metrics?.cls.value,
+        value: medianCls,
         label: CLS_LABEL,
-        formatted: formatMillisecond((metrics?.cls.value ?? 0) / 1000),
+        formatted: medianCls,
       },
       {
-        value: metrics?.dcl.value,
+        value: medianDcl,
         label: DCL_LABEL,
-        formatted: formatMillisecond((metrics?.dcl.value ?? 0) / 1000),
+        formatted: formatMillisecond(medianDcl / 1000),
       },
       {
-        value: transferDataVal,
+        value: medianTransferSize,
         label: TRANSFER_SIZE,
-        formatted: formatBytes(transferDataVal ?? 0),
+        formatted: formatBytes(medianTransferSize),
       },
     ],
   };

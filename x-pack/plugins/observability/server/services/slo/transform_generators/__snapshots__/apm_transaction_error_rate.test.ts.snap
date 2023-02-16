@@ -1,5 +1,99 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`APM Transaction Error Rate Transform Generator adds the custom kql filter to the query 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "match": Object {
+          "transaction.root": true,
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "service.name": "irrelevant",
+        },
+      },
+      Object {
+        "match": Object {
+          "service.environment": "irrelevant",
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.name": "irrelevant",
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.type": "irrelevant",
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "my.field": "value",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "range": Object {
+                            "foo": Object {
+                              "gte": "12",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "range": Object {
+                            "bar": Object {
+                              "lte": "100",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
 exports[`APM Transaction Error Rate Transform Generator does not include the query filter when params are '*' 1`] = `
 Object {
   "bool": Object {
@@ -26,6 +120,7 @@ Object {
   "_meta": Object {
     "version": 1,
   },
+  "description": "Rolled-up SLI data for SLO: irrelevant",
   "dest": Object {
     "index": "slo-observability.sli-v1",
     "pipeline": "slo-observability.sli.monthly",
@@ -78,31 +173,6 @@ Object {
           "fixed_interval": "2m",
         },
       },
-      "slo._internal.budgeting_method": Object {
-        "terms": Object {
-          "field": "slo._internal.budgeting_method",
-        },
-      },
-      "slo._internal.name": Object {
-        "terms": Object {
-          "field": "slo._internal.name",
-        },
-      },
-      "slo._internal.objective.target": Object {
-        "terms": Object {
-          "field": "slo._internal.objective.target",
-        },
-      },
-      "slo._internal.time_window.duration": Object {
-        "terms": Object {
-          "field": "slo._internal.time_window.duration",
-        },
-      },
-      "slo._internal.time_window.is_rolling": Object {
-        "terms": Object {
-          "field": "slo._internal.time_window.is_rolling",
-        },
-      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
@@ -159,36 +229,6 @@ Object {
       },
     },
     "runtime_mappings": Object {
-      "slo._internal.budgeting_method": Object {
-        "script": Object {
-          "source": "emit('timeslices')",
-        },
-        "type": "keyword",
-      },
-      "slo._internal.name": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "slo._internal.objective.target": Object {
-        "script": Object {
-          "source": "emit(0.98)",
-        },
-        "type": "double",
-      },
-      "slo._internal.time_window.duration": Object {
-        "script": Object {
-          "source": "emit('7d')",
-        },
-        "type": "keyword",
-      },
-      "slo._internal.time_window.is_rolling": Object {
-        "script": Object {
-          "source": "emit(true)",
-        },
-        "type": "boolean",
-      },
       "slo.id": Object {
         "script": Object {
           "source": Any<String>,
@@ -218,6 +258,7 @@ Object {
   "_meta": Object {
     "version": 1,
   },
+  "description": "Rolled-up SLI data for SLO: irrelevant",
   "dest": Object {
     "index": "slo-observability.sli-v1",
     "pipeline": "slo-observability.sli.monthly",
@@ -261,31 +302,6 @@ Object {
           "fixed_interval": "1m",
         },
       },
-      "slo._internal.budgeting_method": Object {
-        "terms": Object {
-          "field": "slo._internal.budgeting_method",
-        },
-      },
-      "slo._internal.name": Object {
-        "terms": Object {
-          "field": "slo._internal.name",
-        },
-      },
-      "slo._internal.objective.target": Object {
-        "terms": Object {
-          "field": "slo._internal.objective.target",
-        },
-      },
-      "slo._internal.time_window.duration": Object {
-        "terms": Object {
-          "field": "slo._internal.time_window.duration",
-        },
-      },
-      "slo._internal.time_window.is_rolling": Object {
-        "terms": Object {
-          "field": "slo._internal.time_window.is_rolling",
-        },
-      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
@@ -342,36 +358,6 @@ Object {
       },
     },
     "runtime_mappings": Object {
-      "slo._internal.budgeting_method": Object {
-        "script": Object {
-          "source": "emit('occurrences')",
-        },
-        "type": "keyword",
-      },
-      "slo._internal.name": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "slo._internal.objective.target": Object {
-        "script": Object {
-          "source": "emit(0.999)",
-        },
-        "type": "double",
-      },
-      "slo._internal.time_window.duration": Object {
-        "script": Object {
-          "source": "emit('7d')",
-        },
-        "type": "keyword",
-      },
-      "slo._internal.time_window.is_rolling": Object {
-        "script": Object {
-          "source": "emit(true)",
-        },
-        "type": "boolean",
-      },
       "slo.id": Object {
         "script": Object {
           "source": Any<String>,

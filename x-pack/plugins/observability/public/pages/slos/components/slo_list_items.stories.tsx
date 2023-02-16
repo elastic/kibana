@@ -24,6 +24,8 @@ const defaultProps: Props = {
   sloList: sloList.results,
   loading: false,
   error: false,
+  onCloned: () => {},
+  onCloning: () => {},
   onDeleted: () => {},
   onDeleting: () => {},
 };
