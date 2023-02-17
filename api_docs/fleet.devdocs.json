@@ -5483,13 +5483,24 @@
         "children": [
           {
             "parentPluginId": "fleet",
+            "id": "def-server.MessageSigningServiceInterface.isEncryptionAvailable",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEncryptionAvailable",
+            "description": [],
+            "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-server.MessageSigningServiceInterface.generateKeyPair",
             "type": "Function",
             "tags": [],
             "label": "generateKeyPair",
             "description": [],
             "signature": [
-              "(providedPassphrase?: string | undefined) => Promise<void>"
+              "(providedPassphrase?: string | undefined) => Promise<{ privateKey: string; publicKey: string; passphrase: string; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
             "deprecated": false,
@@ -5521,7 +5532,7 @@
             "label": "sign",
             "description": [],
             "signature": [
-              "(serializedMessage: object | Buffer) => Promise<{ data: Buffer; signature: string; }>"
+              "(message: Record<string, unknown> | Buffer) => Promise<{ data: Buffer; signature: string; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
             "deprecated": false,
@@ -5532,10 +5543,10 @@
                 "id": "def-server.MessageSigningServiceInterface.sign.$1",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "serializedMessage",
+                "label": "message",
                 "description": [],
                 "signature": [
-                  "object | Buffer"
+                  "Record<string, unknown> | Buffer"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
                 "deprecated": false,
@@ -17698,7 +17709,21 @@
             "label": "agent",
             "description": [],
             "signature": [
-              "{ monitoring: { namespace?: string | undefined; use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; download: { sourceURI: string; }; features: Record<string, { enabled: boolean; }>; } | undefined"
+              "{ monitoring: { namespace?: string | undefined; use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; download: { sourceURI: string; }; features: Record<string, { enabled: boolean; }>; protection?: { enabled: boolean; uninstall_token_hash: string; signing_key: string; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FullAgentPolicy.signed",
+            "type": "Object",
+            "tags": [],
+            "label": "signed",
+            "description": [],
+            "signature": [
+              "{ data: string; signature: string; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -18018,7 +18043,7 @@
                 "section": "def-common.ListWithKuery",
                 "text": "ListWithKuery"
               },
-              " & { full?: boolean | undefined; }"
+              " & { noAgentCount?: boolean | undefined; full?: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/agent_policy.ts",
             "deprecated": false,
