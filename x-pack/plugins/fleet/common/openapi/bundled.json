@@ -1302,9 +1302,16 @@
                       "type": "integer"
                     },
                     "total": {
-                      "type": "integer"
+                      "type": "integer",
+                      "deprecated": true
                     },
                     "updating": {
+                      "type": "integer"
+                    },
+                    "all": {
+                      "type": "integer"
+                    },
+                    "active": {
                       "type": "integer"
                     }
                   },
@@ -1316,7 +1323,9 @@
                     "online",
                     "other",
                     "total",
-                    "updating"
+                    "updating",
+                    "all",
+                    "active"
                   ]
                 }
               }

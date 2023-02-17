@@ -820,7 +820,12 @@ paths:
                     type: integer
                   total:
                     type: integer
+                    deprecated: true
                   updating:
+                    type: integer
+                  all:
+                    type: integer
+                  active:
                     type: integer
                 required:
                   - error
@@ -831,6 +836,8 @@ paths:
                   - other
                   - total
                   - updating
+                  - all
+                  - active
       operationId: get-agent-status
       parameters:
         - schema:
