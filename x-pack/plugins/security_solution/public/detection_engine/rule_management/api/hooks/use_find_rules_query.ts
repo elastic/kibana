@@ -54,6 +54,7 @@ export const useFindRulesQuery = (
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
+      staleTime: 0,
       ...queryOptions,
     }
   );
