@@ -148,6 +148,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   lastRun?: RuleLastRun | null;
   nextRun?: Date | null;
   running?: boolean | null;
+  viewInAppRelativeUrl?: string;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
