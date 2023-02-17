@@ -134,7 +134,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
     await execa(`multipass`, agentEnrollArgs);
 
-    const runAgentCommand = `multipass exec ${vmName} --working-directory /home/ubuntu/${vmDirName} -- sudo ./elastic-agent \&>/dev/null`;
+    const runAgentCommand = `multipass exec ${vmName} --working-directory /home/ubuntu/${vmDirName} -- sudo ./elastic-agent \&>/dev/null \&`;
 
     log.info(`Running elastic agent`);
     log.verbose(`Command: ${runAgentCommand}`);
@@ -148,6 +148,8 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
       if (error.originalMessage !== 'Timed out') {
         throw error;
       }
+
+      log.verbose(`command timed out, but that might be ok - Fleet server should be running`);
     });
 
     log.info(`Waiting for Agent to check-in with Fleet`);
