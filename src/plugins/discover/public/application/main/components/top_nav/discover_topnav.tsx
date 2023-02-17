@@ -180,7 +180,7 @@ export const DiscoverTopNav = ({
       dataViews.clearInstanceCache(editedDataView.id);
       stateContainer.actions.setDataView(await dataViews.create(editedDataView.toSpec(), true));
     } else {
-      await updateAdHocDataViewId(editedDataView);
+      await stateContainer.actions.updateAdHocDataViewId();
     }
     stateContainer.actions.loadDataViewList();
     stateContainer.dataState.fetch();
