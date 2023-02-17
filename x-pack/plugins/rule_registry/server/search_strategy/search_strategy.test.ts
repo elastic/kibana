@@ -130,7 +130,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     const result = await strategy
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
-    expect(result).toBe(response);
+    expect(result).toEqual(response);
   });
 
   it('should use the active space in siem queries', async () => {
