@@ -276,6 +276,7 @@ export const startFleetServerWithDocker = async ({
 
   View running output:  ${chalk.bold(`docker attach ---sig-proxy=false ${containerName}`)}
   Shell access:         ${chalk.bold(`docker exec -it ${containerName} /bin/bash`)}
+  Kill container:       ${chalk.bold(`docker kill ${containerId}`)}
 `);
   } catch (error) {
     log.error(error);
