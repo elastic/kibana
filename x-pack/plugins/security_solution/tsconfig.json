@@ -139,5 +139,6 @@
     "@kbn/guided-onboarding",
     "@kbn/securitysolution-ecs",
     "@kbn/cell-actions",
+    "@kbn/shared-ux-router",
   ]
 }
