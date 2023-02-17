@@ -28,8 +28,8 @@ export const AgentPolicyBaseSchema = {
   has_fleet_server: schema.maybe(schema.boolean()),
   is_default: schema.maybe(schema.boolean()),
   is_default_fleet_server: schema.maybe(schema.boolean()),
-  unenroll_timeout: schema.nullable(schema.number({ min: 0 })),
-  inactivity_timeout: schema.nullable(schema.number({ min: 0, defaultValue: TWO_WEEKS_SECONDS })),
+  unenroll_timeout: schema.maybe(schema.number({ min: 0 })),
+  inactivity_timeout: schema.number({ min: 0, defaultValue: TWO_WEEKS_SECONDS }),
   monitoring_enabled: schema.maybe(
     schema.arrayOf(
       schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
