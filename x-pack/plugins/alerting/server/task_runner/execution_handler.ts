@@ -270,8 +270,8 @@ export class ExecutionHandler<
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
                 alertParams: this.rule.params,
                 actionParams: action.params,
-                ruleUrl: this.buildRuleUrl(spaceId),
                 flapping: executableAlert.getFlapping(),
+                ruleUrl: this.buildRuleUrl(spaceId),
               }),
             }),
           };
@@ -409,11 +409,13 @@ export class ExecutionHandler<
       return;
     }
 
+    const relativePath = this.ruleType.getViewInAppRelativeUrl
+      ? this.ruleType.getViewInAppRelativeUrl({ rule: this.rule })
+      : `${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`;
+
     try {
       const ruleUrl = new URL(
-        `${
-          spaceId !== 'default' ? `/s/${spaceId}` : ''
-        }${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`,
+        `${spaceId !== 'default' ? `/s/${spaceId}` : ''}${relativePath}`,
         this.taskRunnerContext.kibanaBaseUrl
       );
 
