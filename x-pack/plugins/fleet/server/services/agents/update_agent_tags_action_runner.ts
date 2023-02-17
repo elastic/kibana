@@ -136,6 +136,7 @@ export async function updateTagsBatch(
   const updatedIds = getUuidArray(updatedCount);
 
   const failures = res.failures ?? [];
+  const failureCount = failures.length;
 
   const isLastRetry = options.retryCount === MAX_RETRY_COUNT;
 
@@ -143,6 +144,8 @@ export async function updateTagsBatch(
   const versionConflictIds = isLastRetry ? getUuidArray(versionConflictCount) : [];
 
   // creating an action doc so that update tags  shows up in activity
+  // the logic only saves agent count in the action that updated, failed or in case of last retry, conflicted
+  // this ensures that the action status count will be accurate
   await createAgentAction(esClient, {
     id: actionId,
     agents: updatedIds
@@ -156,10 +159,8 @@ export async function updateTagsBatch(
     .getLogger()
     .debug(
       `action doc wrote on ${
-        updatedCount + failures.length + (isLastRetry ? versionConflictCount : 0)
-      } agentIds, updated: ${res.updated}, failed: ${res.failures}, version_conflicts: ${
-        res.version_conflicts
-      }`
+        updatedCount + failureCount + (isLastRetry ? versionConflictCount : 0)
+      } agentIds, updated: ${updatedCount}, failed: ${failureCount}, version_conflicts: ${versionConflictCount}`
     );
 
   // writing successful action results
@@ -184,7 +185,7 @@ export async function updateTagsBatch(
         error: failure.cause.reason,
       }))
     );
-    appContextService.getLogger().debug(`action failed result wrote on ${failures.length} agents`);
+    appContextService.getLogger().debug(`action failed result wrote on ${failureCount} agents`);
   }
 
   if (versionConflictCount > 0) {
