@@ -54,7 +54,13 @@ export const useBulkActionMutation = (
         case BulkActionType.enable:
         case BulkActionType.disable: {
           invalidateFetchRuleByIdQuery();
-          invalidateFindRulesQuery();
+          if (updatedRules) {
+            // We have a list of updated rules, no need to invalidate all
+            updateRulesCache(updatedRules);
+          } else {
+            // We failed to receive the list of update rules, invalidate all
+            invalidateFindRulesQuery();
+          }
           break;
         }
         case BulkActionType.delete:
