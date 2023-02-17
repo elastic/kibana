@@ -20,6 +20,8 @@ import {
   EuiCodeBlock,
   EuiMarkdownFormat,
   EuiIcon,
+  EuiPagination,
+  EuiFlyoutFooter,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
@@ -61,11 +63,18 @@ const tabs = [
   },
 ] as const;
 
+const PAGINATION_LABEL = i18n.translate('xpack.csp.findings.findingsFlyout.paginationLabel', {
+  defaultMessage: 'Finding navigation',
+});
+
 type FindingsTab = typeof tabs[number];
 
 interface FindingFlyoutProps {
   onClose(): void;
   findings: CspFinding;
+  flyoutIndex: number;
+  findingsCount: number;
+  onPaginate: (pageIndex: number) => void;
 }
 
 export const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
@@ -108,7 +117,13 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
   }
 };
 
-export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) => {
+export const FindingsRuleFlyout = ({
+  onClose,
+  findings,
+  flyoutIndex,
+  findingsCount,
+  onPaginate,
+}: FindingFlyoutProps) => {
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   return (
@@ -143,6 +158,19 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
       <EuiFlyoutBody key={tab.id}>
         <FindingsTab tab={tab} findings={findings} />
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiPagination
+              aria-label={PAGINATION_LABEL}
+              pageCount={findingsCount}
+              activePage={flyoutIndex}
+              onPageClick={onPaginate}
+              compressed
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };
