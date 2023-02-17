@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import { cloneDeep, cloneDeepWith, get } from 'lodash';
 import type { ChangeEventHandler, FocusEventHandler, ReactEventHandler } from 'react';
 import { useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-
-import { set } from '@elastic/safer-lodash-set';
 
 export type FormReturnTuple<Values, Result> = [FormState<Values, Result>, FormProps];
 
