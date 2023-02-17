@@ -10,6 +10,7 @@ import fetch from 'node-fetch';
 import { format, parse, Url } from 'url';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
+import { exec } from './exec';
 
 async function discoverAuth(parsedTarget: Url) {
   const possibleCredentials = [`admin:changeme`, `elastic:changeme`];
@@ -74,7 +75,45 @@ async function getKibanaUrl({ target, logger }: { target: string; logger: Logger
   }
 }
 
-export async function getServiceUrls({ logger, target, kibana }: RunOptions & { logger: Logger }) {
+export async function getServiceUrls({
+  logger,
+  target,
+  kibana,
+  pr,
+}: RunOptions & { logger: Logger }) {
+  if (pr !== undefined) {
+    // Target CI deployment in PR
+    let prNumber: string | undefined;
+    if (pr.length) {
+      // If pr is specified, extract the number
+      const regexResult = /\d+$/.exec(pr);
+      prNumber = regexResult?.[0];
+    } else {
+      // If pr is not specified, use github cli to find pr number for current branch
+      const stdout = await exec(`gh pr view`);
+      const regexResult = /^number:\s*(\d+)$/m.exec(stdout);
+      prNumber = regexResult?.[1];
+    }
+    if (!prNumber) {
+      throw new Error('Could not determine pr number');
+    }
+    // get credentials via vault
+    const stdout = await exec(
+      `vault read secret/kibana-issues/dev/cloud-deploy/kibana-pr-${prNumber}`,
+      { VAULT_ADDR: 'https://secrets.elastic.co:8200' }
+    );
+    const password = /^password\s*"(\w+)"$/m.exec(stdout)?.[1];
+    const username = /^username\s*"(\w+)"$/m.exec(stdout)?.[1];
+
+    // build target kibana and es URLs with auth
+    const auth = username && password ? `${username}:${password}@` : '';
+    const kbUrl = `https://${auth}kibana-pr-${prNumber}.kb.us-west2.gcp.elastic-cloud.com:9243`;
+    const esUrl = `https://${auth}kibana-pr-${prNumber}.es.us-west2.gcp.elastic-cloud.com`;
+
+    kibana = kibana || kbUrl;
+    target = target || esUrl;
+  }
+
   if (!target) {
     // assume things are running locally
     kibana = kibana || 'http://localhost:5601';
@@ -82,7 +121,7 @@ export async function getServiceUrls({ logger, target, kibana }: RunOptions & { 
   }
 
   if (!target) {
-    throw new Error('Could not determine an Elasticsearch target');
+    throw new Error('Could not determine an Elasticsearch target'); // is this unreachable?
   }
 
   const parsedTarget = parse(target);

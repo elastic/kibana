@@ -28,6 +28,11 @@ function options(y: Argv) {
       describe: 'Kibana target, used to bootstrap datastreams/mappings/templates/settings',
       string: true,
     })
+    .option('pr', {
+      describe:
+        'Determine the kibana and es target from the active Kibana PR with label "ci:cloud-deploy".',
+      string: true,
+    })
     .option('from', {
       description: 'The start of the time window',
     })
