@@ -367,7 +367,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     {
       id: 'ml-analytics-job-details',
       name: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettingsLabel', {
-        defaultMessage: 'Job details',
+        defaultMessage: 'Details',
       }),
       content: (
         <ExpandedRowDetailsPane
@@ -382,7 +382,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       name: i18n.translate(
         'xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsStatsLabel',
         {
-          defaultMessage: 'Job stats',
+          defaultMessage: 'Stats',
         }
       ),
       content: (
@@ -409,7 +409,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       name: i18n.translate(
         'xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsMessagesLabel',
         {
-          defaultMessage: 'Job messages',
+          defaultMessage: 'Messages',
         }
       ),
       content: (
