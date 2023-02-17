@@ -78,6 +78,11 @@ const mockedResponse: StatusResponse = {
       },
       event_loop_delay: 1,
       event_loop_delay_histogram: mocked.createHistogram(),
+      event_loop_utilization: {
+        active: 1,
+        idle: 1,
+        utilization: 1,
+      },
       uptime_in_millis: 1,
     },
     processes: [
@@ -93,6 +98,11 @@ const mockedResponse: StatusResponse = {
         },
         event_loop_delay: 1,
         event_loop_delay_histogram: mocked.createHistogram(),
+        event_loop_utilization: {
+          active: 1,
+          idle: 1,
+          utilization: 1,
+        },
         uptime_in_millis: 1,
       },
     ],
