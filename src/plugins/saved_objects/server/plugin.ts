@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import type { CoreSetup, Plugin, RequestHandlerContext } from '@kbn/core/server';
+import { registerRoutes } from './routes';
 import { uiSettings } from './ui_settings';
 
 export class SavedObjectsServerPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup) {
     core.uiSettings.register(uiSettings);
+    const router = core.http.createRouter<RequestHandlerContext>();
+    registerRoutes(router);
     return {};
   }
 

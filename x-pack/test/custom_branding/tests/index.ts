@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
-export interface RuleUrlNavigation {
-  path: string;
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('custom branding - functional tests', function () {
+    loadTestFile(require.resolve('./settings'));
+  });
 }
-export interface RuleStateNavigation {
-  state: JsonObject;
-}
-export type RuleNavigation = RuleUrlNavigation | RuleStateNavigation;

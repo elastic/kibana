@@ -82,7 +82,7 @@ const FindingsTableComponent = ({
       createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
       baseFindingsColumns['rule.benchmark.rule_number'],
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
-      baseFindingsColumns['rule.section'],
+      createColumnWithFilters(baseFindingsColumns['rule.section'], { onAddFilter }),
       baseFindingsColumns['@timestamp'],
     ],
     [onOpenFlyout, onAddFilter]
