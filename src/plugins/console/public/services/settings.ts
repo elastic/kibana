@@ -14,7 +14,12 @@ export const DEFAULT_SETTINGS = Object.freeze({
   pollInterval: 60000,
   tripleQuotes: true,
   wrapMode: true,
-  autocomplete: Object.freeze({ fields: true, indices: true, templates: true, dataStreams: true }),
+  autocomplete: Object.freeze({
+    fields: true,
+    indices: true,
+    templates: true,
+    dataStreams: true,
+  }),
   isHistoryEnabled: true,
   isKeyboardShortcutsEnabled: true,
 });

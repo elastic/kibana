@@ -406,7 +406,9 @@ export class DiscoverPageObject extends FtrService {
   public async removeField(field: string) {
     await this.clickFieldListItem(field);
     await this.testSubjects.click(`discoverFieldListPanelDelete-${field}`);
-    await this.testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
+    await this.retry.waitFor('modal to open', async () => {
+      return await this.testSubjects.exists('runtimeFieldDeleteConfirmModal');
+    });
     await this.fieldEditor.confirmDelete();
   }
 

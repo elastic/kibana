@@ -8,12 +8,16 @@
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { makeAction, makeActionContext } from '../mocks/helpers';
+import { CellActionsProvider } from '../context';
+import { makeAction } from '../mocks/helpers';
+import { CellActionExecutionContext } from '../types';
 import { HoverActionsPopover } from './hover_actions_popover';
-import { CellActionsProvider } from '../context/cell_actions_context';
 
 describe('HoverActionsPopover', () => {
-  const actionContext = makeActionContext();
+  const actionContext = {
+    trigger: { id: 'triggerId' },
+    field: { name: 'fieldName' },
+  } as CellActionExecutionContext;
   const TestComponent = () => <span data-test-subj="test-component" />;
   jest.useFakeTimers();
 
@@ -22,6 +26,7 @@ describe('HoverActionsPopover', () => {
     const { queryByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
+          disabledActionTypes={[]}
           children={null}
           visibleCellActions={4}
           actionContext={actionContext}
@@ -40,6 +45,7 @@ describe('HoverActionsPopover', () => {
     const { queryByLabelText, getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
+          disabledActionTypes={[]}
           visibleCellActions={4}
           actionContext={actionContext}
           showActionTooltips={false}
@@ -65,6 +71,7 @@ describe('HoverActionsPopover', () => {
     const { queryByLabelText, getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
+          disabledActionTypes={[]}
           visibleCellActions={4}
           actionContext={actionContext}
           showActionTooltips={false}
@@ -95,6 +102,7 @@ describe('HoverActionsPopover', () => {
     const { getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
+          disabledActionTypes={[]}
           visibleCellActions={1}
           actionContext={actionContext}
           showActionTooltips={false}
@@ -120,6 +128,7 @@ describe('HoverActionsPopover', () => {
     const { getByTestId, getByLabelText } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
+          disabledActionTypes={[]}
           visibleCellActions={1}
           actionContext={actionContext}
           showActionTooltips={false}
@@ -154,6 +163,7 @@ describe('HoverActionsPopover', () => {
     const { getByTestId, queryByLabelText } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
+          disabledActionTypes={[]}
           visibleCellActions={2}
           actionContext={actionContext}
           showActionTooltips={false}

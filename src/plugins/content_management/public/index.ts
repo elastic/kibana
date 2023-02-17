@@ -12,4 +12,4 @@ export function plugin() {
   return new ContentManagementPlugin();
 }
 
-export type { ContentManagementPublicStart } from './types';
+export type { ContentManagementPublicStart, ContentManagementPublicSetup } from './types';

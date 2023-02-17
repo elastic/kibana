@@ -23,14 +23,16 @@ import {
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
+import { getUrlTracker } from '../../../kibana_services';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
 import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../../common';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
 import {
   AppState,
   DiscoverAppStateContainer,
   getDiscoverAppStateContainer,
+  GLOBAL_STATE_URL_KEY,
 } from './discover_app_state_container';
 import {
   getInternalStateContainer,
@@ -39,15 +41,6 @@ import {
 import { DiscoverServices } from '../../../build_services';
 import { getSavedSearchContainer, SavedSearchContainer } from './discover_saved_search_container';
 import { updateFiltersReferences } from '../utils/update_filter_references';
-import { getUrlTracker } from '../../../kibana_services';
-
-export interface AppStateUrl extends Omit<AppState, 'sort'> {
-  /**
-   * Necessary to take care of legacy links [fieldName,direction]
-   */
-  sort?: string[][] | [string, string];
-}
-
 interface DiscoverStateContainerParams {
   /**
    * Browser history
@@ -97,17 +90,9 @@ export interface DiscoverStateContainer {
     data: DataPublicPluginStart
   ) => () => void;
   /**
-   * Start sync between state and URL -- only used for testing
-   */
-  startSync: () => () => void;
-  /**
    * Set app state to with a partial new app state
    */
   setAppState: (newState: Partial<AppState>) => void;
-  /**
-   * Sync state to URL, used for testing
-   */
-  flushToUrl: () => void;
   /**
    * Pause the auto refresh interval without pushing an entry to history
    */
@@ -158,9 +143,6 @@ export interface DiscoverStateContainer {
     updateAdHocDataViewId: () => void;
   };
 }
-
-export const APP_STATE_URL_KEY = '_a';
-const GLOBAL_STATE_URL_KEY = '_g';
 
 /**
  * Builds and returns appState and globalState containers and helper functions
@@ -276,13 +258,7 @@ export function getDiscoverStateContainer({
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,
     searchSessionManager,
-    startSync: () => {
-      const { start, stop } = appStateContainer.syncState();
-      start();
-      return stop;
-    },
     setAppState: (newPartial: AppState) => appStateContainer.update(newPartial),
-    flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     pauseAutoRefreshInterval,
     initializeAndSync: () => appStateContainer.initAndSync(savedSearch),
     actions: {

@@ -20,7 +20,7 @@ jest.mock('react-router-dom', () => {
     useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
   };
 });
-jest.mock('../../common/components/visualization_actions');
+jest.mock('../../common/components/visualization_actions/actions');
 
 const casesService = {
   ui: { getCasesContext: () => mockCasesContext },
@@ -35,9 +35,7 @@ const context = {
   nodeRef: {
     current: element,
   },
-  extraContentNodeRef: {
-    current: null,
-  },
+  metadata: undefined,
 } as CellActionExecutionContext;
 
 describe('TopNAction', () => {

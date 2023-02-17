@@ -37,7 +37,14 @@ export async function changeDataView(
   const { dataViews, uiSettings } = services;
   const dataView = discoverState.internalState.getState().dataView;
   const state = discoverState.appState.getState();
-  const nextDataView = await dataViews.get(id);
+  let nextDataView: DataView | null = null;
+
+  try {
+    nextDataView = await dataViews.get(id, false);
+  } catch (e) {
+    //
+  }
+
   if (nextDataView && dataView) {
     const nextAppState = getDataViewAppState(
       dataView,

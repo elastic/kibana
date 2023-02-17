@@ -123,10 +123,13 @@ export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj=
 
 export const TOASTER_ERROR_BTN = '[data-test-subj="errorToastBtn"]';
 
-export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="import-data-modal-checkbox-label"]';
+export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="importDataModalCheckboxLabel"]';
 
 export const RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX =
-  '[id="import-data-modal-exceptions-checkbox-label"]';
+  '[id="importDataModalExceptionsCheckboxLabel"]';
+
+export const RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX =
+  '[id="importDataModalActionConnectorsCheckbox"]';
 
 export const RULES_TAGS_POPOVER_BTN = '[data-test-subj="tagsDisplayPopoverButton"]';
 

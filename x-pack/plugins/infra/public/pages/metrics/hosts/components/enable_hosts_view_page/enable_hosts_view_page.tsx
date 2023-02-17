@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { MetricsPageTemplate } from '../../../page_template';
 import hostsLandingBeta from './hosts_landing_beta.svg';
-import { ExperimentalBadge } from '../experimental_badge';
+import { ExperimentalBadge } from '../../../../../components/experimental_badge';
 
 interface Props {
   actions?: ReactNode;

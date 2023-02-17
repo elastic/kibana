@@ -35,11 +35,9 @@ import {
   superUserSpace1Auth,
   delay,
   calculateDuration,
-} from '../../../../common/lib/utils';
-import {
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
-} from '../../../../common/lib/user_actions';
+} from '../../../../common/lib/api';
 import {
   createSignalsIndex,
   deleteSignalsIndex,

@@ -114,6 +114,7 @@ describe('onSaveSearch', () => {
         savedObjectsTagging: undefined,
       },
       state: getStateContainer(),
+      updateAdHocDataViewId: jest.fn(),
     });
     expect(savedSearch.tags).toEqual(['tag1', 'tag2']);
     jest

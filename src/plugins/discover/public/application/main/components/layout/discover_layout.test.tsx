@@ -40,10 +40,11 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
+import { act } from 'react-dom/test-utils';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function mountComponent(
+async function mountComponent(
   dataView: DataView,
   prevSidebarClosed?: boolean,
   mountOptions: { attachTo?: HTMLElement } = {},
@@ -57,12 +58,16 @@ function mountComponent(
       [SIDEBAR_CLOSED_KEY]: prevSidebarClosed,
     }) as unknown as Storage,
   } as unknown as DiscoverServices;
-  services.data.query.timefilter.timefilter.getTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
+  const time = { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
+  services.data.query.timefilter.timefilter.getTime = () => time;
   (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
     language: 'kuery',
     query: '',
+  });
+  (services.data.query.getState as jest.Mock).mockReturnValue({
+    filters: [],
+    query,
+    time,
   });
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
@@ -131,13 +136,19 @@ function mountComponent(
     mountOptions
   );
 
+  // wait for lazy modules
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+  component.update();
+
   return component;
 }
 
 describe('Discover component', () => {
   test('selected data view without time field displays no chart toggle', async () => {
     const container = document.createElement('div');
-    mountComponent(dataViewMock, undefined, { attachTo: container });
+    await mountComponent(dataViewMock, undefined, { attachTo: container });
     expect(
       container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
     ).toBeNull();
@@ -145,7 +156,7 @@ describe('Discover component', () => {
 
   test('selected data view with time field displays chart toggle', async () => {
     const container = document.createElement('div');
-    mountComponent(dataViewWithTimefieldMock, undefined, { attachTo: container });
+    await mountComponent(dataViewWithTimefieldMock, undefined, { attachTo: container });
     expect(
       container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
     ).not.toBeNull();
@@ -153,7 +164,7 @@ describe('Discover component', () => {
 
   test('sql query displays no chart toggle', async () => {
     const container = document.createElement('div');
-    mountComponent(
+    await mountComponent(
       dataViewWithTimefieldMock,
       false,
       { attachTo: container },
@@ -168,7 +179,7 @@ describe('Discover component', () => {
   test('the saved search title h1 gains focus on navigate', async () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
-    const component = mountComponent(dataViewWithTimefieldMock, undefined, {
+    const component = await mountComponent(dataViewWithTimefieldMock, undefined, {
       attachTo: container,
     });
     expect(
@@ -178,17 +189,17 @@ describe('Discover component', () => {
 
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', async () => {
-      const component = mountComponent(dataViewWithTimefieldMock, undefined);
+      const component = await mountComponent(dataViewWithTimefieldMock, undefined);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     }, 10000);
 
     test('should be opened if discover:sidebarClosed is false', async () => {
-      const component = mountComponent(dataViewWithTimefieldMock, false);
+      const component = await mountComponent(dataViewWithTimefieldMock, false);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     }, 10000);
 
     test('should be closed if discover:sidebarClosed is true', async () => {
-      const component = mountComponent(dataViewWithTimefieldMock, true);
+      const component = await mountComponent(dataViewWithTimefieldMock, true);
       expect(component.find(DiscoverSidebar).length).toBe(0);
     }, 10000);
   });

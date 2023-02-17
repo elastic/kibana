@@ -24,7 +24,7 @@ import { PackageNotFoundError } from '../../../errors';
 
 import { getSettings } from '../../settings';
 
-import { getPackageInfo, getPackageUsageStats } from './get';
+import { getPackageInfo, getPackages, getPackageUsageStats } from './get';
 
 const MockRegistry = Registry as jest.Mocked<typeof Registry>;
 
@@ -183,6 +183,94 @@ describe('When using EPM `get` services', () => {
       ).toEqual({
         agent_policy_count: 3,
       });
+    });
+  });
+
+  describe('getPackages', () => {
+    beforeEach(() => {
+      const mockContract = createAppContextStartContractMock();
+      appContextService.start(mockContract);
+      jest.clearAllMocks();
+      MockRegistry.fetchList.mockResolvedValue([
+        {
+          name: 'nginx',
+          version: '1.0.0',
+          title: 'Nginx',
+        } as any,
+      ]);
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+      MockRegistry.fetchInfo.mockResolvedValue({} as any);
+    });
+
+    it('should return installed package that is not in registry with package info', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      soClient.get.mockImplementation((type) => {
+        if (type === 'epm-packages-assets') {
+          return Promise.resolve({
+            attributes: {
+              data_utf8: `
+name: elasticsearch
+version: 0.0.1
+title: Elastic
+description: Elasticsearch description`,
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              package_assets: [],
+              data_utf8: `
+            name: elasticsearch
+            version: 0.0.1
+            title: Elastic
+            description: Elasticsearch description`,
+            },
+          });
+        }
+      });
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [],
+      });
+
+      await expect(
+        getPackages({
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toMatchObject([
+        {
+          id: 'elasticsearch',
+          name: 'elasticsearch',
+          version: '0.0.1',
+          title: 'Elastic',
+          description: 'Elasticsearch description',
+          savedObject: {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+            },
+          },
+        },
+        { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
+      ]);
     });
   });
 

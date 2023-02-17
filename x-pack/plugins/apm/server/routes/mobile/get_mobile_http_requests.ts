@@ -13,17 +13,22 @@ import {
 } from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
-  SERVICE_TARGET_TYPE,
   TRANSACTION_NAME,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
 } from '../../../common/es_fields/apm';
+import {
+  MobileSpanSubtype,
+  MobileSpanType,
+} from '../../../common/mobile/constants';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { Maybe } from '../../../typings/common';
+
 import { Coordinate } from '../../../typings/timeseries';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 
 export interface HttpRequestsTimeseries {
   currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
@@ -64,21 +69,21 @@ async function getHttpRequestsTimeseries({
 
   const aggs = {
     requests: {
-      filter: { term: { [SERVICE_TARGET_TYPE]: 'http' } },
+      filter: { term: { [SPAN_SUBTYPE]: MobileSpanSubtype.Http } },
     },
   };
 
   const response = await apmEventClient.search('get_http_requests_chart', {
-    apm: { events: [ProcessorEvent.metric] },
+    apm: { events: [ProcessorEvent.span] },
     body: {
       track_total_hits: false,
       size: 0,
       query: {
         bool: {
           filter: [
-            { exists: { field: SERVICE_TARGET_TYPE } },
-            ...getDocumentTypeFilterForServiceDestinationStatistics(true),
+            ...termQuery(SPAN_TYPE, MobileSpanType.External),
             ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(SPAN_TYPE, 'external'),
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),

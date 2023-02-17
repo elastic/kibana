@@ -74,7 +74,10 @@ describe('useUpdateCases', () => {
 
     await waitForNextUpdate();
 
-    expect(addSuccess).toHaveBeenCalledWith('Success title');
+    expect(addSuccess).toHaveBeenCalledWith({
+      title: 'Success title',
+      className: 'eui-textBreakWord',
+    });
   });
 
   it('shows a toast error when the api return an error', async () => {

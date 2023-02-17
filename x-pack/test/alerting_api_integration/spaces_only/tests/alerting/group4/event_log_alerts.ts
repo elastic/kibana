@@ -16,8 +16,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/150071
-  describe.skip('eventLog alerts', () => {
+  describe('eventLog alerts', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -57,9 +56,9 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
           provider: 'alerting',
           actions: new Map([
             // make sure the counts of the # of events per type are as expected
-            ['execute', { gte: 9 }],
+            ['execute', { gte: 12 }],
             ['new-instance', { equal: 2 }],
-            ['active-instance', { gte: 4 }],
+            ['active-instance', { gte: 8 }],
             ['recovered-instance', { equal: 2 }],
           ]),
         });
@@ -73,11 +72,12 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
       // Verify unique executionId generated per `action:execute` grouping
       const eventExecutionIdSet = new Set();
       const totalUniqueExecutionIds = new Set();
-      let totalExecutionEventCount = 0;
+      const totalExecutionEventCount = events.filter(
+        (event) => event?.event?.action === 'execute'
+      ).length;
       events.forEach((event) => {
         totalUniqueExecutionIds.add(event?.kibana?.alert?.rule?.execution?.uuid);
         if (event?.event?.action === 'execute') {
-          totalExecutionEventCount += 1;
           eventExecutionIdSet.add(event?.kibana?.alert?.rule?.execution?.uuid);
           expect(eventExecutionIdSet.size).to.equal(1);
           eventExecutionIdSet.clear();
@@ -85,7 +85,6 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
           eventExecutionIdSet.add(event?.kibana?.alert?.rule?.execution?.uuid);
         }
       });
-
       // Ensure every execution actually had a unique id from the others
       expect(totalUniqueExecutionIds.size).to.equal(totalExecutionEventCount);
 

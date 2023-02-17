@@ -45,7 +45,13 @@ const DescriptionPropertyActionsComponent: React.FC<Props> = ({ isLoading, onEdi
     ];
   }, [permissions.update, permissions.create, onEdit, onQuote]);
 
-  return <UserActionPropertyActions isLoading={isLoading} propertyActions={propertyActions} />;
+  return (
+    <UserActionPropertyActions
+      isLoading={isLoading}
+      propertyActions={propertyActions}
+      customDataTestSubj={'description'}
+    />
+  );
 };
 
 DescriptionPropertyActionsComponent.displayName = 'DescriptionPropertyActions';

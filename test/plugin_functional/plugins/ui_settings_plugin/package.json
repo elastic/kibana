@@ -1,5 +1,5 @@
 {
-  "name": "ui_settings_plugin",
+  "name": "@kbn/ui-settings-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/ui_settings_plugin",
   "kibana": {

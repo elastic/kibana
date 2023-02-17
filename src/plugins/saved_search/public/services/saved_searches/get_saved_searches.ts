@@ -12,8 +12,8 @@ import { injectSearchSourceReferences, parseSearchSourceJSON } from '@kbn/data-p
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SavedSearchAttributes, SavedSearch } from './types';
-
+import type { SavedSearchAttributes } from '../../../common';
+import type { SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
 

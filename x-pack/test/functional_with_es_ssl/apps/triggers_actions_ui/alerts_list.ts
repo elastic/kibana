@@ -27,11 +27,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const objectRemover = new ObjectRemover(supertest);
 
   async function refreshAlertsList() {
+    await testSubjects.click('logsTab');
     await testSubjects.click('rulesTab');
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/131535
-  describe.skip('rules list', function () {
+  describe('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
         const rules = await pageObjects.triggersActionsUI.getAlertsList();
@@ -495,7 +495,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               params: { level: 'info', message: 'gfghfhg' },
               frequency: {
                 summary: false,
-                notifyWhen: 'onActionGroupChange',
+                notify_when: 'onActionGroupChange',
                 throttle: null,
               },
             },
@@ -676,7 +676,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               params: { level: 'info', message: 'gfghfhg' },
               frequency: {
                 summary: false,
-                notifyWhen: 'onActionGroupChange',
+                notify_when: 'onActionGroupChange',
                 throttle: null,
               },
             },

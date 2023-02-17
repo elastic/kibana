@@ -7,18 +7,24 @@
 
 import { EuiExpression, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { ValueExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import { TlsTranslations } from './translations';
-import { SettingsMessageExpressionPopover } from './settings_message_expression_popover';
 
 interface Props {
-  ageThreshold?: number;
-  expirationThreshold?: number;
-  setAlertFlyoutVisible: (value: boolean) => void;
+  ageThreshold: number;
+  expirationThreshold: number;
+  setAgeThreshold: (value: number) => void;
+  setExpirationThreshold: (value: number) => void;
 }
 
-export const AlertTlsComponent: React.FC<Props> = (props) => (
+export const AlertTlsComponent: React.FC<Props> = ({
+  ageThreshold,
+  expirationThreshold,
+  setAgeThreshold,
+  setExpirationThreshold,
+}) => (
   <>
-    <EuiSpacer size="l" />
+    <EuiSpacer size="m" />
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
         <EuiExpression
@@ -28,22 +34,24 @@ export const AlertTlsComponent: React.FC<Props> = (props) => (
           value={TlsTranslations.criteriaValue}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <SettingsMessageExpressionPopover
-          aria-label={TlsTranslations.expirationAriaLabel}
-          id="expiration"
+      <EuiFlexItem data-test-subj="tlsExpirationThreshold">
+        <ValueExpression
+          value={expirationThreshold}
+          onChangeSelectedValue={(val) => {
+            setExpirationThreshold(val);
+          }}
           description={TlsTranslations.expirationDescription}
-          value={TlsTranslations.expirationValue(props.expirationThreshold)}
-          {...props}
+          errors={[]}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <SettingsMessageExpressionPopover
-          aria-label={TlsTranslations.ageAriaLabel}
-          id="age"
+      <EuiFlexItem data-test-subj="tlsAgeExpirationThreshold">
+        <ValueExpression
+          value={ageThreshold}
+          onChangeSelectedValue={(val) => {
+            setAgeThreshold(val);
+          }}
           description={TlsTranslations.ageDescription}
-          value={TlsTranslations.ageValue(props.ageThreshold)}
-          {...props}
+          errors={[]}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

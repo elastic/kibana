@@ -115,5 +115,4 @@ const WaffleMapInnerContainer = euiStyled.div`
   flex-wrap: wrap;
   justify-content: center;
   align-content: flex-start;
-  padding: 10px;
 `;

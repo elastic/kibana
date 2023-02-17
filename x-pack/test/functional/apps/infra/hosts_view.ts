@@ -108,6 +108,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
+        await pageObjects.infraHome.clickDismissKubernetesTourButton();
         await pageObjects.infraHostsView.clickTryHostViewBadge();
       });
       after(async () => {
@@ -126,6 +127,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await loginWithReadOnlyUserAndNavigateToInfra();
+        await pageObjects.infraHome.clickDismissKubernetesTourButton();
         await pageObjects.infraHostsView.clickTryHostViewBadge();
       });
       after(async () => {
