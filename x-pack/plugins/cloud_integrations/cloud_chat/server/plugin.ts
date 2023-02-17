@@ -27,7 +27,11 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps> {
   }
 
   public setup(core: CoreSetup, { cloud, security }: CloudChatSetupDeps) {
-    if (cloud.isCloudEnabled && this.config.chatIdentitySecret) {
+    if (
+      cloud.isCloudEnabled &&
+      this.config.chatIdentitySecret &&
+      isTrialWindow(this.config.trialBuffer, cloud.trialEndDate)
+    ) {
       registerChatRoute({
         router: core.http.createRouter(),
         chatIdentitySecret: this.config.chatIdentitySecret,
@@ -41,3 +45,12 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps> {
 
   public stop() {}
 }
+
+const isTrialWindow = (buffer: number, trialEndDate?: Date) => {
+  if (trialEndDate) {
+    const trialEndDateWithBuffer = new Date(trialEndDate);
+    trialEndDateWithBuffer.setDate(trialEndDateWithBuffer.getDate() + buffer);
+    return trialEndDateWithBuffer > new Date();
+  }
+  return false;
+};

@@ -13,6 +13,7 @@ const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   chatURL: schema.maybe(schema.string()),
   chatIdentitySecret: schema.maybe(schema.string()),
+  trialBuffer: schema.number({ defaultValue: 30 }),
 });
 
 export type CloudChatConfigType = TypeOf<typeof configSchema>;
@@ -20,6 +21,7 @@ export type CloudChatConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<CloudChatConfigType> = {
   exposeToBrowser: {
     chatURL: true,
+    trialBuffer: true,
   },
   schema: configSchema,
   deprecations: () => [

@@ -27,6 +27,7 @@ interface SetupChatDeps extends CloudChatSetupDeps {
 
 interface CloudChatConfig {
   chatURL?: string;
+  trialBuffer: number;
 }
 
 export class CloudChatPlugin implements Plugin {
@@ -57,7 +58,12 @@ export class CloudChatPlugin implements Plugin {
   public stop() {}
 
   private async setupChat({ cloud, http, security }: SetupChatDeps) {
-    if (!cloud.isCloudEnabled || !security || !this.config.chatURL) {
+    if (
+      !cloud.isCloudEnabled ||
+      !security ||
+      !this.config.chatURL ||
+      !isTrialWindow(this.config.trialBuffer, cloud.trialEndDate)
+    ) {
       return;
     }
 
@@ -89,3 +95,12 @@ export class CloudChatPlugin implements Plugin {
     }
   }
 }
+
+const isTrialWindow = (buffer: number, trialEndDate?: Date) => {
+  if (trialEndDate) {
+    const trialEndDateWithBuffer = new Date(trialEndDate);
+    trialEndDateWithBuffer.setDate(trialEndDateWithBuffer.getDate() + buffer);
+    return trialEndDateWithBuffer > new Date();
+  }
+  return false;
+};
