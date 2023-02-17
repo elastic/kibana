@@ -22,7 +22,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
-import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
+import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
 import { pluginServices } from '../../services/plugin_services';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
