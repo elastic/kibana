@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
@@ -28,7 +27,6 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
     isUpdate?: boolean
   ) => void;
   stateContainer: DiscoverStateContainer;
-  resetSavedSearch: () => void;
   onChangeDataView: (dataView: string) => void;
   onDataViewCreated: (dataView: DataView) => void;
   isPlainRecord: boolean;
@@ -45,7 +43,6 @@ export const DiscoverTopNav = ({
   stateContainer,
   updateQuery,
   navigateTo,
-  resetSavedSearch,
   onChangeDataView,
   onDataViewCreated,
   isPlainRecord,
@@ -54,7 +51,6 @@ export const DiscoverTopNav = ({
   persistDataView,
   updateDataViewList,
 }: DiscoverTopNavProps) => {
-  const history = useHistory();
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
@@ -72,18 +68,6 @@ export const DiscoverTopNav = ({
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   const { AggregateQueryTopNavMenu } = navigation.ui;
-
-  const onOpenSavedSearch = useCallback(
-    (newSavedSearchId: string) => {
-      const prevSavedSearchId = stateContainer.savedSearchState.get();
-      if (prevSavedSearchId.id && prevSavedSearchId.id === newSavedSearchId) {
-        resetSavedSearch();
-      } else {
-        history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
-      }
-    },
-    [history, resetSavedSearch, stateContainer.savedSearchState]
-  );
 
   useEffect(() => {
     return () => {
@@ -153,7 +137,6 @@ export const DiscoverTopNav = ({
         services,
         state: stateContainer,
         onOpenInspector,
-        onOpenSavedSearch,
         isPlainRecord,
         adHocDataViews,
         updateDataViewList,
@@ -165,7 +148,6 @@ export const DiscoverTopNav = ({
       services,
       stateContainer,
       onOpenInspector,
-      onOpenSavedSearch,
       isPlainRecord,
       adHocDataViews,
       persistDataView,

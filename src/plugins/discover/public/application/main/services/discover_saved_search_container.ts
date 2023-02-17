@@ -62,7 +62,7 @@ export interface SavedSearchContainer {
   load: LoadFunction;
   get: () => SavedSearch;
   update: UpdateFunction;
-  reset: (id: string | undefined) => Promise<SavedSearch | undefined>;
+  reset: (id?: string) => Promise<SavedSearch | undefined>;
   resetUrl: (id: SavedSearch) => Promise<SavedSearch | undefined>;
   undo: () => void;
   isPersisted: () => boolean;

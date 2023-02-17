@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { RefObject } from 'react';
+import React, { RefObject, useCallback } from 'react';
 import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
@@ -17,7 +17,6 @@ import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_m
 import { ResetSearchButton } from './reset_search_button';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
-  resetSavedSearch: () => void;
   resizeRef: RefObject<HTMLDivElement>;
   inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
@@ -30,7 +29,6 @@ const histogramLayoutCss = css`
 export const DiscoverHistogramLayout = ({
   isPlainRecord,
   dataView,
-  resetSavedSearch,
   savedSearch,
   stateContainer,
   resizeRef,
@@ -52,7 +50,9 @@ export const DiscoverHistogramLayout = ({
     searchSessionId,
     ...commonProps,
   });
-
+  const resetSavedSearch = useCallback(() => {
+    stateContainer.savedSearchState.reset(savedSearch?.id);
+  }, [savedSearch?.id, stateContainer.savedSearchState]);
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported
   if (!searchSessionId && !isPlainRecord) {

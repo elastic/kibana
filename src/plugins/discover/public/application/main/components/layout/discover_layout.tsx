@@ -60,7 +60,6 @@ export function DiscoverLayout({
   onChangeDataView,
   onUpdateQuery,
   setExpandedDoc,
-  resetSavedSearch,
   savedSearch,
   stateContainer,
   persistDataView,
@@ -232,7 +231,6 @@ export function DiscoverLayout({
           isPlainRecord={isPlainRecord}
           dataView={dataView}
           navigateTo={navigateTo}
-          resetSavedSearch={resetSavedSearch}
           expandedDoc={expandedDoc}
           setExpandedDoc={setExpandedDoc}
           savedSearch={savedSearch}
@@ -261,7 +259,6 @@ export function DiscoverLayout({
     onAddFilter,
     onDisableFilters,
     onFieldEdited,
-    resetSavedSearch,
     resultState,
     savedSearch,
     searchSessionManager,
@@ -297,7 +294,6 @@ export function DiscoverLayout({
         savedQuery={savedQuery}
         stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
-        resetSavedSearch={resetSavedSearch}
         onChangeDataView={onChangeDataView}
         onDataViewCreated={onDataViewCreated}
         isPlainRecord={isPlainRecord}

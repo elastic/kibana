@@ -53,7 +53,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     onChangeDataView,
     onUpdateQuery,
     persistDataView,
-    resetSavedSearch,
     stateContainer,
     searchSessionManager,
     updateDataViewList,
@@ -67,7 +66,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   /**
    * Url / Routing logic
    */
-  useUrl({ history: usedHistory, resetSavedSearch });
+  useUrl({ history: usedHistory, stateContainer });
 
   /**
    * SavedSearch depended initializing
@@ -96,10 +95,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     stateContainer.internalState.transitions.setSavedDataViews(dataViewList);
   }, [stateContainer, dataViewList]);
 
-  const resetCurrentSavedSearch = useCallback(() => {
-    resetSavedSearch(savedSearch.id);
-  }, [resetSavedSearch, savedSearch]);
-
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
@@ -109,7 +104,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
         expandedDoc={expandedDoc}
         onChangeDataView={onChangeDataView}
         onUpdateQuery={onUpdateQuery}
-        resetSavedSearch={resetCurrentSavedSearch}
         setExpandedDoc={setExpandedDoc}
         navigateTo={navigateTo}
         savedSearch={savedSearch}

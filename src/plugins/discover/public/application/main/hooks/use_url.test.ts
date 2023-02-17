@@ -8,20 +8,23 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { useUrl } from './use_url';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 
 describe('test useUrl', () => {
   test('resetSavedSearch is triggered once path it changed to /', () => {
     const { history } = createSearchSessionMock();
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     history.push('/view');
+    const reset = jest.fn();
+    stateContainer.savedSearchState.reset = reset;
     const props = {
       history,
-      resetSavedSearch: jest.fn(),
+      stateContainer,
     };
     renderHook(() => useUrl(props));
     history.push('/new');
-    expect(props.resetSavedSearch).toHaveBeenCalledTimes(0);
-
+    expect(reset).toHaveBeenCalledTimes(0);
     history.push('/');
-    expect(props.resetSavedSearch).toHaveBeenCalledTimes(1);
+    expect(reset).toHaveBeenCalledTimes(1);
   });
 });

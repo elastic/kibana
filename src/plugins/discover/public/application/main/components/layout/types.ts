@@ -22,7 +22,6 @@ export interface DiscoverLayoutProps {
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => void;
-  resetSavedSearch: () => void;
   expandedDoc?: DataTableRecord;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   savedSearch: SavedSearch;

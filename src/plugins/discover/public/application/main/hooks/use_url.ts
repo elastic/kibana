@@ -7,12 +7,13 @@
  */
 import { useEffect } from 'react';
 import { History } from 'history';
+import { DiscoverStateContainer } from '../services/discover_state';
 export function useUrl({
   history,
-  resetSavedSearch,
+  stateContainer,
 }: {
   history: History;
-  resetSavedSearch: (val?: string) => void;
+  stateContainer: DiscoverStateContainer;
 }) {
   /**
    * Url / Routing logic
@@ -23,9 +24,9 @@ export function useUrl({
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
       if (!search && !hash && pathname === '/') {
-        resetSavedSearch();
+        stateContainer.savedSearchState.reset();
       }
     });
     return () => unlistenHistoryBasePath();
-  }, [history, resetSavedSearch]);
+  }, [history, stateContainer]);
 }

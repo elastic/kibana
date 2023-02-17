@@ -27,7 +27,6 @@ export const getTopNavLinks = ({
   services,
   state,
   onOpenInspector,
-  onOpenSavedSearch,
   isPlainRecord,
   persistDataView,
   adHocDataViews,
@@ -38,7 +37,6 @@ export const getTopNavLinks = ({
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
-  onOpenSavedSearch: (id: string) => void;
   isPlainRecord: boolean;
   adHocDataViews: DataView[];
   updateDataViewList: (dataView: DataView[]) => void;
@@ -132,7 +130,7 @@ export const getTopNavLinks = ({
     testId: 'discoverOpenButton',
     run: () =>
       showOpenSearchPanel({
-        onOpenSavedSearch,
+        onOpenSavedSearch: state.actions.onOpenSavedSearch,
         I18nContext: services.core.i18n.Context,
         theme$: services.core.theme.theme$,
         services,

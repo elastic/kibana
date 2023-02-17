@@ -23,6 +23,7 @@ import {
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
+import { addLog } from '../../../utils/add_log';
 import { getUrlTracker } from '../../../kibana_services';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
 import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
@@ -101,6 +102,7 @@ export interface DiscoverStateContainer {
    * functions executed by UI
    */
   actions: {
+    onOpenSavedSearch: (savedSearchId: string) => void;
     /**
      * Set the currently selected data view
      */
@@ -251,6 +253,21 @@ export function getDiscoverStateContainer({
     return newDataView;
   };
 
+  const onOpenSavedSearch = async (newSavedSearchId: string) => {
+    addLog('🧭 [discoverState] onOpenSavedSearch', newSavedSearchId);
+    const currentSavedSearch = savedSearchContainer.savedSearch$.getValue();
+    if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
+      addLog("🧭 [discoverState] onOpenSavedSearch just reset since id didn't change");
+      const nextSavedSearch = await savedSearchContainer.reset(currentSavedSearch.id);
+      if (nextSavedSearch) {
+        await appStateContainer.resetWithSavedSearch(nextSavedSearch);
+      }
+    } else {
+      addLog('🧭 [discoverState] onOpenSavedSearch open view URL');
+      history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
+    }
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
     appState: appStateContainer,
@@ -262,6 +279,7 @@ export function getDiscoverStateContainer({
     pauseAutoRefreshInterval,
     initializeAndSync: () => appStateContainer.initAndSync(savedSearch),
     actions: {
+      onOpenSavedSearch,
       setDataView,
       loadAndResolveDataView,
       loadDataViewList,

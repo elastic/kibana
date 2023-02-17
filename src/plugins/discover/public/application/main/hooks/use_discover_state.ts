@@ -9,7 +9,7 @@ import { useMemo, useEffect, useState, useCallback } from 'react';
 import { History } from 'history';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
-import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { buildStateSubscribe } from './utils/build_state_subscribe';
 import { changeDataView } from './utils/change_data_view';
 import { useSearchSession } from './use_search_session';
@@ -17,10 +17,8 @@ import { FetchStatus } from '../../types';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { useUrlTracking } from './use_url_tracking';
 import { getDiscoverStateContainer } from '../services/discover_state';
-import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { DataTableRecord } from '../../../types';
-import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { useAdHocDataViews } from './use_adhoc_data_views';
 
 export function useDiscoverState({
@@ -149,36 +147,6 @@ export function useDiscoverState({
   );
 
   /**
-   * function to revert any changes to a given saved search
-   */
-  const resetSavedSearch = useCallback(
-    async (id?: string) => {
-      const newSavedSearch = await getSavedSearch(id, {
-        search: services.data.search,
-        savedObjectsClient: services.core.savedObjects.client,
-        spaces: services.spaces,
-        savedObjectsTagging: services.savedObjectsTagging,
-      });
-
-      const newDataView = newSavedSearch.searchSource.getField('index') || dataView;
-      newSavedSearch.searchSource.setField('index', newDataView);
-      const newAppState = getStateDefaults({
-        savedSearch: newSavedSearch,
-        services,
-      });
-
-      restoreStateFromSavedSearch({
-        savedSearch: newSavedSearch,
-        timefilter: services.timefilter,
-      });
-
-      await stateContainer.appState.update(newAppState, true);
-      setState(newAppState);
-    },
-    [services, dataView, stateContainer]
-  );
-
-  /**
    * Function triggered when the user changes the query in the search bar
    */
   const onUpdateQuery = useCallback(
@@ -212,7 +180,6 @@ export function useDiscoverState({
 
   return {
     inspectorAdapters,
-    resetSavedSearch,
     onChangeDataView,
     onUpdateQuery,
     stateContainer,
