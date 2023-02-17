@@ -7,10 +7,19 @@
 Include a short description of the connector type.
 
 [float]
-[[<ACTION-TYPE>-connector-configuration]]
-=== Connector configuration
+[[define-<ACTION-TYPE>-ui]]
+=== Create connectors in {kib}
 
-<ACTION-TYPE> connectors have the following configuration properties.
+You can create connectors in *{stack-manage-app} > {connectors-ui}*
+or as needed when you're creating a rule.
+
+// Optionally add a screenshot
+
+[float]
+[[<ACTION-TYPE>-connector-configuration]]
+==== Connector configuration
+
+<ACTION-TYPE> connectors have the following configuration properties:
 
 ////
 List of user-facing connector configurations. This should align with the fields available in the Create connector flyout form for this connector type.
@@ -18,13 +27,6 @@ List of user-facing connector configurations. This should align with the fields 
 
 Property1:: A short description of this property.
 Property2:: A short description of this property with format hints. This can be specified in `this specific format`.
-
-[float]
-[[define-<ACTION-TYPE>-ui]]
-=== Create connectors in {kib}
-
-You can create connectors in *{stack-manage-app} > {connectors-ui}*
-or as needed when you're creating a rule.
 
 [float]
 [[preconfigured-<ACTION-TYPE>-configuration]]

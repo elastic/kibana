@@ -7,24 +7,6 @@
 The IBM Resilient connector uses the https://developer.ibm.com/security/resilient/rest/[RESILIENT REST v2] to create IBM Resilient incidents.
 
 [float]
-[[resilient-connector-configuration]]
-=== Connector configuration
-
-IBM Resilient connectors have the following configuration properties.
-
-Name::      The name of the connector.
-URL::       IBM Resilient instance URL.
-Organization ID:: IBM Resilient organization ID.
-API key ID::  The authentication key ID for HTTP Basic authentication.
-API key secret::  The authentication key secret for HTTP Basic authentication.
-
-[float]
-[[resilient-connector-networking-configuration]]
-=== Connector networking configuration
-
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
 [[define-resilient-ui]]
 === Create connectors in {kib}
 
@@ -33,6 +15,18 @@ or as needed when you're creating a rule. For example:
 
 [role="screenshot"]
 image::management/connectors/images/resilient-connector.png[IBM Resilient connector]
+
+[float]
+[[resilient-connector-configuration]]
+==== Connector configuration
+
+IBM Resilient connectors have the following configuration properties:
+
+Name::      The name of the connector.
+URL::       IBM Resilient instance URL.
+Organization ID:: IBM Resilient organization ID.
+API key ID::  The authentication key ID for HTTP Basic authentication.
+API key secret::  The authentication key secret for HTTP Basic authentication.
 
 [float]
 [[preconfigured-resilient-configuration]]
@@ -84,6 +78,12 @@ Severity code:: The severity of the incident.
 Name:: A name for the issue, used for searching the contents of the knowledge base.
 Description:: The details about the incident.
 Additional comments:: Additional information for the client, such as how to troubleshoot the issue.
+
+[float]
+[[resilient-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[configuring-resilient]]

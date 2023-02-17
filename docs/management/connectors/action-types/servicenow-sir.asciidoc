@@ -92,30 +92,6 @@ To update a deprecated connector:
 . Click *Update*.
 
 [float]
-[[servicenow-sir-connector-configuration]]
-=== Connector configuration
-
-{sn-sir} connectors have the following configuration properties.
-
-Name::      The name of the connector.
-Is OAuth::  The type of authentication to use.
-URL::       {sn} instance URL.
-Username::  Username for HTTP Basic authentication.
-Password::  Password for HTTP Basic authentication.
-User Identifier:: Identifier to use for OAuth type authentication. This identifier should be the *User field* you selected during setup. For example, if the selected *User field* is *Email*, the user identifier should be the user's email address.
-Client ID:: The client ID assigned to your OAuth application.
-Client Secret:: The client secret assigned to your OAuth application.
-JWT Key ID:: The key ID assigned to the JWT verifier map of your OAuth application.
-Private Key:: The RSA private key generated during setup.
-Private Key Password:: The password for the RSA private key generated during setup, if set.
-
-[float]
-[[servicenow-sir-connector-networking-configuration]]
-=== Connector networking configuration
-
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
 [[define-servicenow-sir-ui]]
 === Create connectors in {kib}
 
@@ -128,6 +104,23 @@ image::management/connectors/images/servicenow-sir-connector-basic.png[{sn-sir} 
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-connector-oauth.png[{sn-sir} connector using OAuth]
 
+[float]
+[[servicenow-sir-connector-configuration]]
+==== Connector configuration
+
+{sn-sir} connectors have the following configuration properties:
+
+Name::      The name of the connector.
+Is OAuth::  The type of authentication to use.
+URL::       {sn} instance URL.
+Username::  Username for HTTP Basic authentication.
+Password::  Password for HTTP Basic authentication.
+User Identifier:: Identifier to use for OAuth type authentication. This identifier should be the *User field* you selected during setup. For example, if the selected *User field* is *Email*, the user identifier should be the user's email address.
+Client ID:: The client ID assigned to your OAuth application.
+Client Secret:: The client secret assigned to your OAuth application.
+JWT Key ID:: The key ID assigned to the JWT verifier map of your OAuth application.
+Private Key:: The RSA private key generated during setup.
+Private Key Password:: The password for the RSA private key generated during setup, if set.
 
 [float]
 [[preconfigured-servicenow-sir-configuration]]
@@ -214,6 +207,12 @@ NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that 
 Correlation Display::  A descriptive label of the alert for correlation purposes in {sn}.
 Description::          The details about the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
+
+[float]
+[[servicenow-sir-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[configuring-servicenow-sir]]

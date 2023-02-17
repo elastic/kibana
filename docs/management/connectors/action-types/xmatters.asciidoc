@@ -7,24 +7,6 @@
 The xMatters connector uses the https://help.xmatters.com/integrations/#cshid=Elastic[xMatters Workflow for Elastic] to send actionable alerts to on-call xMatters resources.
 
 [float]
-[[xmatters-connector-configuration]]
-=== Connector configuration
-
-xMatters connectors have the following configuration properties:
-
-Name:: The name of the connector.
-Authentication Type:: The type of authentication used in the request made to xMatters.
-URL:: The request URL for the Elastic Alerts trigger in xMatters. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
-Username:: Username for HTTP Basic Authentication.
-Password:: Password for HTTP Basic Authentication.
-
-[float]
-[[xmatters-connector-networking-configuration]]
-=== Connector networking configuration
-
-Use the <<action-settings,Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
 [[define-xmatters-ui]]
 === Create connectors in {kib}
 
@@ -36,6 +18,18 @@ image::management/connectors/images/xmatters-connector-basic.png[xMatters connec
 
 [role="screenshot"]
 image::management/connectors/images/xmatters-connector-url.png[xMatters connector with url authentication]
+
+[float]
+[[xmatters-connector-configuration]]
+==== Connector configuration
+
+xMatters connectors have the following configuration properties:
+
+Name:: The name of the connector.
+Authentication Type:: The type of authentication used in the request made to xMatters.
+URL:: The request URL for the Elastic Alerts trigger in xMatters. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+Username:: Username for HTTP Basic Authentication.
+Password:: Password for HTTP Basic Authentication.
 
 [float]
 [[preconfigured-xmatters-configuration]]
@@ -101,6 +95,12 @@ xMatters rules have the following properties:
 
 Severity::                                                     Severity of the rule.
 Tags:: Comma-separated list of tags for the rule as provided by the user in Elastic.
+
+[float]
+[[xmatters-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings,Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[xmatters-benefits]]

@@ -7,24 +7,6 @@
 The Jira connector uses the https://developer.atlassian.com/cloud/jira/platform/rest/v2/[REST API v2] to create Jira issues.
 
 [float]
-[[jira-connector-configuration]]
-=== Connector configuration
-
-Jira connectors have the following configuration properties.
-
-Name::      The name of the connector.
-URL::       Jira instance URL.
-Project key:: Jira project key.
-Email::  The account email for HTTP Basic authentication.
-API token::  Jira API authentication token for HTTP Basic authentication.
-
-[float]
-[[jira-connector-networking-configuration]]
-=== Connector networking configuration
-
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
 [[define-jira-ui]]
 === Create connectors in {kib}
 
@@ -33,6 +15,18 @@ or as needed when you're creating a rule. For example:
 
 [role="screenshot"]
 image::management/connectors/images/jira-connector.png[Jira connector]
+
+[float]
+[[jira-connector-configuration]]
+==== Connector configuration
+
+Jira connectors have the following configuration properties:
+
+Name::      The name of the connector.
+URL::       Jira instance URL.
+Project key:: Jira project key.
+Email::  The account email for HTTP Basic authentication.
+API token::  Jira API authentication token for HTTP Basic authentication.
 
 [float]
 [[preconfigured-jira-configuration]]
@@ -86,6 +80,12 @@ Title:: A title for the issue, used for searching the contents of the knowledge 
 Description:: The details about the incident.
 Parent:: The ID or key of the parent issue. Only for `Subtask` issue types.
 Additional comments:: Additional information for the client, such as how to troubleshoot the issue.
+
+[float]
+[[jira-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[configuring-jira]]

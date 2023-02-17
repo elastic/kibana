@@ -7,21 +7,6 @@
 The Slack connector uses https://api.slack.com/incoming-webhooks[Slack Incoming Webhooks].
 
 [float]
-[[slack-connector-configuration]]
-=== Connector configuration
-
-Slack connectors have the following configuration properties.
-
-Name::      The name of the connector.
-Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messaging/webhooks#getting_started[Slack Incoming Webhooks] for instructions on generating this URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
-
-[float]
-[[slack-connector-networking-configuration]]
-=== Connector networking configuration
-
-Use the <<action-settings,Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
 [[define-slack-ui]]
 === Create connectors in {kib}
 
@@ -31,6 +16,14 @@ or as needed when you're creating a rule. For example:
 [role="screenshot"]
 image::management/connectors/images/slack-connector.png[Slack connector]
 
+[float]
+[[slack-connector-configuration]]
+==== Connector configuration
+
+Slack connectors have the following configuration properties:
+
+Name::      The name of the connector.
+Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messaging/webhooks#getting_started[Slack Incoming Webhooks] for instructions on generating this URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
 
 [float]
 [[preconfigured-slack-configuration]]
@@ -64,10 +57,15 @@ as you're creating or editing the connector in {kib}. For example:
 [role="screenshot"]
 image::management/connectors/images/slack-params-test.png[Slack params test]
 
-
-Slack actions have the following properties.
+Slack actions have the following properties:
 
 Message::   The message	text, converted to the `text` field in the Webhook JSON payload. Currently only the text field is supported. Markdown, images, and other advanced formatting are not yet supported.
+
+[float]
+[[slack-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings,Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[configuring-slack]]

@@ -22,10 +22,20 @@ configuration setting.
 ====
 
 [float]
-[[email-connector-configuration]]
-=== Connector configuration
+[[define-email-ui]]
+=== Create connectors in {kib}
 
-Email connectors have the following configuration properties.
+You can create connectors in *{stack-manage-app} > {connectors-ui}*
+or as needed when you're creating a rule. For example:
+
+[role="screenshot"]
+image::management/connectors/images/email-connector.png[Email connector]
+
+[float]
+[[email-connector-configuration]]
+==== Connector configuration
+
+Email connectors have the following configuration properties:
 
 Name::
 The name of the connector. The name is used to identify a  connector in the 
@@ -85,25 +95,6 @@ Username for login type authentication.
 
 Password::
 Password for login type authentication.
-
-[float]
-[[email-connector-networking-configuration]]
-=== Connector networking configuration
-
-Use the <<action-settings, Action configuration settings>> to customize 
-connector networking configurations, such as proxies, certificates, or TLS 
-settings. You can set configurations that apply to all your connectors or use 
-`xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
-[[define-email-ui]]
-=== Create connectors in {kib}
-
-You can create connectors in *{stack-manage-app} > {connectors-ui}*
-or as needed when you're creating a rule. For example:
-
-[role="screenshot"]
-image::management/connectors/images/email-connector.png[Email connector]
 
 [float]
 [[preconfigured-email-configuration]]
@@ -204,6 +195,16 @@ The subject line of the email.
 
 Message::
 The message text of the email. Markdown format is supported.
+
+
+[float]
+[[email-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize 
+connector networking configurations, such as proxies, certificates, or TLS 
+settings. You can set configurations that apply to all your connectors or use 
+`xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[configuring-email]]

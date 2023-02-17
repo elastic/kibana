@@ -49,10 +49,23 @@ include::servicenow.asciidoc[tag=servicenow-certificate]
 include::servicenow.asciidoc[tag=servicenow-endpoint]
 
 [float]
-[[servicenow-itom-connector-configuration]]
-=== Connector configuration
+[[define-servicenow-itom-ui]]
+=== Create connectors in {kib}
 
-{sn-itom} connectors have the following configuration properties.
+You can create connectors in *{stack-manage-app} > {connectors-ui}*
+or as needed when you're creating a rule. You must choose whether to use OAuth for authentication.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-itom-connector-basic.png[{sn-itom} connector using basic auth]
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-itom-connector-oauth.png[{sn-itom} connector using OAuth]
+
+[float]
+[[servicenow-itom-connector-configuration]]
+==== Connector configuration
+
+{sn-itom} connectors have the following configuration properties:
 
 Name::      The name of the connector.
 Is OAuth::  The type of authentication to use.
@@ -65,25 +78,6 @@ Client Secret:: The client secret assigned to your OAuth application.
 JWT Key ID:: The key ID assigned to the JWT verifier map of your OAuth application.
 Private Key:: The RSA private key generated during setup.
 Private Key Password:: The password for the RSA private key generated during setup, if set.
-
-[float]
-[[servicenow-itom-connector-networking-configuration]]
-=== Connector networking configuration
-
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
-[[define-servicenow-itom-ui]]
-=== Create connectors in {kib}
-
-You can create connectors in *{stack-manage-app} > {connectors-ui}*
-or as needed when you're creating a rule. You must choose whether to use OAuth for authentication.
-
-[role="screenshot"]
-image::management/connectors/images/servicenow-itom-connector-basic.png[{sn-itom} connector using basic auth]
-
-[role="screenshot"]
-image::management/connectors/images/servicenow-itom-connector-oauth.png[{sn-itom} connector using OAuth]
 
 [float]
 [[preconfigured-servicenow-itom-configuration]]
@@ -164,6 +158,12 @@ Severity::     The severity of the event.
 Description::  The details about the event.
 
 Refer to https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html[{sn} documentation] for more information about the properties.
+
+[float]
+[[servicenow-itom-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[configuring-servicenow-itom]]

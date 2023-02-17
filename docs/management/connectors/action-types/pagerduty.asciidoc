@@ -7,22 +7,6 @@
 The PagerDuty connector uses the https://v2.developer.pagerduty.com/docs/events-api-v2[v2 Events API] to trigger, acknowledge, and resolve PagerDuty alerts.
 
 [float]
-[[pagerduty-connector-configuration]]
-=== Connector configuration
-
-PagerDuty connectors have the following configuration properties.
-
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
-Integration Key::   A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
-
-[float]
-[[pagerduty-connector-networking-configuration]]
-=== Connector networking configuration
-
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
 [[define-pagerduty-ui]]
 === Create connectors in {kib}
 
@@ -31,6 +15,16 @@ or as needed when you're creating a rule. For example:
 
 [role="screenshot"]
 image::management/connectors/images/pagerduty-connector.png[PagerDuty connector]
+
+[float]
+[[pagerduty-connector-configuration]]
+==== Connector configuration
+
+PagerDuty connectors have the following configuration properties:
+
+Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
+API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+Integration Key::   A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
 
 [float]
 [[preconfigured-pagerduty-configuration]]
@@ -83,6 +77,13 @@ Summary::       An *optional* text summary of the event, defaults to `No summary
 Class::         An *optional* value indicating the class/type of the event, for example `ping failure` or `cpu load`.
 
 For more details on these properties, see https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2[PagerDuty v2 event parameters].
+
+[float]
+[[pagerduty-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
 
 [float]
 [[pagerduty-benefits]]
