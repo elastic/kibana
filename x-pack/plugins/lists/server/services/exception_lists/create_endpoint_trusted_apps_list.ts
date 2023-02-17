@@ -52,6 +52,7 @@ export const createEndpointTrustedAppsList = async ({
         created_by: user,
         description: ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
         entries: undefined,
+        expire_time: undefined,
         immutable: false,
         item_id: undefined,
         list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,

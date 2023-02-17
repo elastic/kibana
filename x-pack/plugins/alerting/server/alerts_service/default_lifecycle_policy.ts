@@ -14,8 +14,8 @@
  * This should be used by all alerts-as-data indices
  */
 
-export const ILM_POLICY_NAME = 'alerts-default-ilm-policy';
-export const DEFAULT_ILM_POLICY = {
+export const DEFAULT_ALERTS_ILM_POLICY_NAME = '.alerts-ilm-policy';
+export const DEFAULT_ALERTS_ILM_POLICY = {
   policy: {
     _meta: {
       managed: true,

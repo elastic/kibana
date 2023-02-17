@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import {
@@ -50,8 +51,15 @@ export const getNormalizeCommonFields = ({
   monitor,
   projectId,
   namespace,
-}: NormalizedProjectProps): Partial<CommonFields> => {
+}: NormalizedProjectProps): { errors: Error[]; normalizedFields: Partial<CommonFields> } => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
+  const errors = [];
+  if (monitor.namespace) {
+    const namespaceError = isValidNamespace(monitor.namespace).error;
+    if (namespaceError) {
+      errors.push(getInvalidNamespaceError(monitor, namespaceError));
+    }
+  }
   const normalizedFields = {
     [ConfigKey.JOURNEY_ID]: monitor.id || defaultFields[ConfigKey.JOURNEY_ID],
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
@@ -67,7 +75,8 @@ export const getNormalizeCommonFields = ({
       publicLocations: locations,
     }),
     [ConfigKey.TAGS]: getOptionalListField(monitor.tags) || defaultFields[ConfigKey.TAGS],
-    [ConfigKey.NAMESPACE]: formatKibanaNamespace(namespace) || defaultFields[ConfigKey.NAMESPACE],
+    [ConfigKey.NAMESPACE]:
+      monitor.namespace || formatKibanaNamespace(namespace) || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: getCustomHeartbeatId(monitor, projectId, namespace),
     [ConfigKey.ENABLED]: monitor.enabled ?? defaultFields[ConfigKey.ENABLED],
@@ -75,8 +84,21 @@ export const getNormalizeCommonFields = ({
       ? getValueInSeconds(monitor.timeout)
       : defaultFields[ConfigKey.TIMEOUT],
     [ConfigKey.CONFIG_HASH]: monitor.hash || defaultFields[ConfigKey.CONFIG_HASH],
+    // picking out keys specifically, so users can't add arbitrary fields
+    [ConfigKey.ALERT_CONFIG]: monitor.alert
+      ? {
+          ...defaultFields[ConfigKey.ALERT_CONFIG],
+          status: {
+            ...defaultFields[ConfigKey.ALERT_CONFIG]?.status,
+            enabled:
+              monitor.alert?.status?.enabled ??
+              defaultFields[ConfigKey.ALERT_CONFIG]?.status?.enabled ??
+              true,
+          },
+        }
+      : defaultFields[ConfigKey.ALERT_CONFIG],
   };
-  return normalizedFields;
+  return { normalizedFields, errors };
 };
 
 export const getCustomHeartbeatId = (
@@ -128,6 +150,13 @@ const INVALID_CONFIGURATION_TITLE = i18n.translate(
   }
 );
 
+const INVALID_NAMESPACE_TITLE = i18n.translate(
+  'xpack.synthetics.projectMonitorApi.validation.invalidNamespace.title',
+  {
+    defaultMessage: 'Invalid namespace',
+  }
+);
+
 export const getUnsupportedKeysError = (
   monitor: ProjectMonitor,
   unsupportedKeys: string[],
@@ -161,6 +190,12 @@ export const getInvalidUrlsOrHostsError = (
       },
     }
   ),
+});
+
+export const getInvalidNamespaceError = (monitor: ProjectMonitor, error: string) => ({
+  id: monitor.id,
+  reason: INVALID_NAMESPACE_TITLE,
+  details: error,
 });
 
 export const getValueInSeconds = (value: string) => {

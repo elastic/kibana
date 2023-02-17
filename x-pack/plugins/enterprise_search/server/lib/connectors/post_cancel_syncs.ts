@@ -32,7 +32,6 @@ export const cancelSyncs = async (
         ],
       },
     },
-    refresh: true,
     script: {
       lang: 'painless',
       source: `ctx._source['status'] = '${SyncStatus.CANCELED}';
@@ -59,7 +58,6 @@ ctx._source['completed_at'] = '${new Date(Date.now()).toISOString()}';`,
         ],
       },
     },
-    refresh: true,
     script: {
       lang: 'painless',
       source: `ctx._source['status'] = '${SyncStatus.CANCELING}';
@@ -70,6 +68,6 @@ ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}
     doc: { last_sync_status: SyncStatus.CANCELED, sync_now: false },
     id: connectorId,
     index: CONNECTORS_INDEX,
-    refresh: true,
+    refresh: 'wait_for',
   });
 };

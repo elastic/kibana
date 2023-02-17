@@ -9,15 +9,17 @@ import type {
   EqlSearchRequest,
   FieldCapsRequest,
   FieldCapsResponse,
+  MsearchMultisearchBody,
+  MsearchMultisearchHeader,
   TermsEnumRequest,
   TermsEnumResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ValuesType } from 'utility-types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';
+import { ValuesType } from 'utility-types';
 import { ApmDataSource } from '../../../../../common/data_source';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
@@ -31,8 +33,8 @@ import {
   getDebugTitle,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
-import { processorEventsToIndex, getRequestBase } from './get_request_base';
 import { ProcessorEventOfDocumentType } from '../document_type';
+import { getRequestBase, processorEventsToIndex } from './get_request_base';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
@@ -80,6 +82,10 @@ type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
     >,
     TParams
   >;
+
+interface TypedMSearchResponse<TParams extends APMEventESSearchRequest> {
+  responses: Array<TypedSearchResponse<TParams>>;
+}
 
 export interface APMEventClientConfig {
   esClient: ElasticsearchClient;
@@ -163,7 +169,7 @@ export class APMEventClient {
       this.forceSyntheticSource && events.includes(ProcessorEvent.metric);
 
     const searchParams = {
-      ...omit(params, 'apm'),
+      ...omit(params, 'apm', 'body'),
       index,
       body: {
         ...params.body,
@@ -193,12 +199,63 @@ export class APMEventClient {
     });
   }
 
+  async msearch<TParams extends APMEventESSearchRequest>(
+    operationName: string,
+    ...allParams: TParams[]
+  ): Promise<TypedMSearchResponse<TParams>> {
+    const searches = allParams
+      .map((params) => {
+        const { index, filters } = getRequestBase({
+          apm: params.apm,
+          indices: this.indices,
+        });
+
+        const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] =
+          [
+            {
+              index,
+              preference: 'any',
+              ...(this.includeFrozen ? { ignore_throttled: false } : {}),
+              ignore_unavailable: true,
+              expand_wildcards: ['open' as const, 'hidden' as const],
+            },
+            {
+              ...omit(params, 'apm', 'body'),
+              ...params.body,
+              query: {
+                bool: {
+                  filter: compact([params.body.query, ...filters]),
+                },
+              },
+            },
+          ];
+
+        return searchParams;
+      })
+      .flat();
+
+    return this.callAsyncWithDebug({
+      cb: (opts) =>
+        this.esClient.msearch(
+          {
+            searches,
+          },
+          opts
+        ) as unknown as Promise<{
+          body: TypedMSearchResponse<TParams>;
+        }>,
+      operationName,
+      params: searches,
+      requestType: 'msearch',
+    });
+  }
+
   async eqlSearch(operationName: string, params: APMEventEqlSearchRequest) {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
     const requestParams = {
-      index,
       ...omit(params, 'apm'),
+      index,
     };
 
     return this.callAsyncWithDebug({
@@ -216,8 +273,8 @@ export class APMEventClient {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
     const requestParams = {
-      index,
       ...omit(params, 'apm'),
+      index,
     };
 
     return this.callAsyncWithDebug({
@@ -235,8 +292,8 @@ export class APMEventClient {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
     const requestParams = {
-      index: Array.isArray(index) ? index.join(',') : index,
       ...omit(params, 'apm'),
+      index: index.join(','),
     };
 
     return this.callAsyncWithDebug({

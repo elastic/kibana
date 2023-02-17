@@ -57,8 +57,8 @@ export const buildStateSubscribe =
         return;
       }
       savedSearch.searchSource.setField('index', nextDataView);
-      stateContainer.actions.setDataView(nextDataView);
       stateContainer.dataState.reset();
+      stateContainer.actions.setDataView(nextDataView);
     }
 
     if (

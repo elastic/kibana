@@ -3,7 +3,7 @@
 exports[`guide cards snapshots should render all cards 1`] = `
 <EuiFlexGroup
   justifyContent="center"
-  responsive={true}
+  responsive={false}
   wrap={true}
 >
   <EuiFlexItem
@@ -19,7 +19,15 @@ exports[`guide cards snapshots should render all cards 1`] = `
           "order": 1,
           "solution": "search",
           "telemetryId": "onboarding--search--application",
-          "title": "Build an application on top of Elasticsearch",
+          "title": <FormattedMessage
+            defaultMessage="Build an application on {lineBreak} top of Elasticsearch"
+            id="guidedOnboardingPackage.gettingStarted.cards.appSearch.title"
+            values={
+              Object {
+                "lineBreak": <br />,
+              }
+            }
+          />,
         }
       }
       guidesState={Array []}
@@ -68,7 +76,15 @@ exports[`guide cards snapshots should render all cards 1`] = `
           "order": 3,
           "solution": "security",
           "telemetryId": "onboarding--security--siem",
-          "title": "Detect threats in my data with SIEM",
+          "title": <FormattedMessage
+            defaultMessage="Detect threats in my {lineBreak} data with SIEM"
+            id="guidedOnboardingPackage.gettingStarted.cards.siemSecurity.title"
+            values={
+              Object {
+                "lineBreak": <br />,
+              }
+            }
+          />,
         }
       }
       guidesState={Array []}
@@ -117,7 +133,15 @@ exports[`guide cards snapshots should render all cards 1`] = `
           "order": 5,
           "solution": "observability",
           "telemetryId": "onboarding--observability--apm",
-          "title": "Monitor my application performance (APM / tracing)",
+          "title": <FormattedMessage
+            defaultMessage="Monitor my application {lineBreak} performance (APM / tracing)"
+            id="guidedOnboardingPackage.gettingStarted.cards.apmObservability.title"
+            values={
+              Object {
+                "lineBreak": <br />,
+              }
+            }
+          />,
         }
       }
       guidesState={Array []}
@@ -143,7 +167,15 @@ exports[`guide cards snapshots should render all cards 1`] = `
           "order": 6,
           "solution": "security",
           "telemetryId": "onboarding--security--hosts",
-          "title": "Secure my hosts with endpoint security",
+          "title": <FormattedMessage
+            defaultMessage="Secure my hosts with {lineBreak} endpoint security"
+            id="guidedOnboardingPackage.gettingStarted.cards.hostsSecurity.title"
+            values={
+              Object {
+                "lineBreak": <br />,
+              }
+            }
+          />,
         }
       }
       guidesState={Array []}
@@ -166,7 +198,15 @@ exports[`guide cards snapshots should render all cards 1`] = `
           "order": 7,
           "solution": "search",
           "telemetryId": "onboarding--search--database",
-          "title": "Search across databases and business systems",
+          "title": <FormattedMessage
+            defaultMessage="Search across databases and {lineBreak} business systems"
+            id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
+            values={
+              Object {
+                "lineBreak": <br />,
+              }
+            }
+          />,
         }
       }
       guidesState={Array []}
@@ -218,7 +258,15 @@ exports[`guide cards snapshots should render all cards 1`] = `
           "order": 9,
           "solution": "security",
           "telemetryId": "onboarding--security--cloud",
-          "title": "Secure my cloud assets with posture management",
+          "title": <FormattedMessage
+            defaultMessage="Secure my cloud assets with {lineBreak} posture management"
+            id="guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title"
+            values={
+              Object {
+                "lineBreak": <br />,
+              }
+            }
+          />,
         }
       }
       guidesState={Array []}

@@ -7,3 +7,14 @@
  */
 
 export { PLUGIN_ID, API_ENDPOINT } from './constants';
+export type {
+  ProcedureSchemas,
+  ProcedureName,
+  GetIn,
+  CreateIn,
+  SearchIn,
+  SearchOut,
+  DeleteIn,
+  UpdateIn,
+} from './rpc';
+export { procedureNames, schemas as rpcSchemas } from './rpc';

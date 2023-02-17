@@ -9,7 +9,8 @@ import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { HashRouter, RouteComponentProps, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
@@ -309,6 +310,12 @@ export async function mountApp(
         // If the user navigates to Lens from Discover, or comes from a Lens share link we keep the filters
         if (!initialContext) {
           data.query.filterManager.setAppFilters([]);
+        }
+        // if user comes from a dashboard to convert a legacy viz to a Lens chart
+        // we clear up the dashboard filters and query
+        if (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable) {
+          data.query.filterManager.setAppFilters([]);
+          data.query.queryString.clearQuery();
         }
         lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
         lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
