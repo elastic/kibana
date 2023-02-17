@@ -58,7 +58,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           errors: [
             {
               line: 1,
-              message: `<${element}> should have a \`data-test-subj\` for telemetry purposes. Consider adding it.`,
+              message: `<${element}> should have a \`data-test-subj\` for telemetry purposes. Use the autofix suggestion or add your own.`,
             },
           ],
           output: `<${element} data-test-subj="Value${element.replace(

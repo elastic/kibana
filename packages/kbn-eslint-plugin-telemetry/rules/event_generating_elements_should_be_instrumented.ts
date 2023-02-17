@@ -82,7 +82,7 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         // 6. Report feedback to engineer
         report({
           node: node as any,
-          message: `<${name}> should have a \`data-test-subj\` for telemetry purposes. Consider adding it.`,
+          message: `<${name}> should have a \`data-test-subj\` for telemetry purposes. Use the autofix suggestion or add your own.`,
           fix(fixer) {
             return fixer.insertTextAfterRange(range, ` data-test-subj="${suggestion}"`);
           },
