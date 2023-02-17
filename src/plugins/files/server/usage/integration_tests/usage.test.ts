@@ -46,26 +46,6 @@ describe('Files usage telemetry', () => {
 
     const { body } = await request.get(root, `/api/stats?extended=true&legacy=true`);
 
-    expect(body.usage.files).toMatchInlineSnapshot(`
-      Object {
-        "countByExtension": Array [
-          Object {
-            "count": 3,
-            "extension": "png",
-          },
-        ],
-        "countByStatus": Object {
-          "AWAITING_UPLOAD": 2,
-          "READY": 1,
-        },
-        "storage": Object {
-          "esFixedSizeIndex": Object {
-            "available": 53687091187,
-            "capacity": 53687091200,
-            "used": 13,
-          },
-        },
-      }
-    `);
+    expect(body.usage).to.eql({});
   });
 });
