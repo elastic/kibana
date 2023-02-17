@@ -173,8 +173,9 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
 const getAgentDownloadUrl = async (version: string): Promise<string> => {
   const { log } = getRuntimeServices();
-  // TODO:PT use arch and platform of VM to build download file name below (will be needed if tools ever supports different types of VMs)
-  const agentFile = `elastic-agent-${version}-linux-arm64.tar.gz`;
+  const downloadArch =
+    { arm64: 'arm64', x64: 'x86_64' }[process.arch] ?? `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
+  const agentFile = `elastic-agent-${version}-linux-${downloadArch}.tar.gz`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${version}/${agentFile}`;
 
   log.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
