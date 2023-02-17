@@ -403,7 +403,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       case OperatorTypeEnum.WILDCARD:
         const wildcardValue = typeof entry.value === 'string' ? entry.value : undefined;
         let actualWarning: React.ReactNode | string | undefined;
-        if (listType !== 'detection' && listType !== 'rule_default') {
+        if (listType !== 'detection') {
           let os: OperatingSystem = OperatingSystem.WINDOWS;
           if (osTypes) {
             [os] = osTypes as OperatingSystem[];

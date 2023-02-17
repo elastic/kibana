@@ -523,44 +523,6 @@ describe('BuilderEntryItem', () => {
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldWildcard"]').text()).toEqual(
       '1234*'
     );
-    // doesnt show warning label for non endpoint exception items
-    expect(
-      wrapper.find('[data-test-subj="valuesAutocompleteWildcardLabel"] .euiFormHelpText')
-    ).toHaveLength(0);
-  });
-
-  test('it does not render matches filepath warning message for rule default list item', () => {
-    wrapper = mount(
-      <BuilderEntryItem
-        autocompleteService={autocompleteStartMock}
-        entry={{
-          correspondingKeywordField: undefined,
-          entryIndex: 0,
-          field: getField('@tags'),
-          id: '123',
-          nested: undefined,
-          operator: matchesOperator,
-          parent: undefined,
-          value: '1234*',
-        }}
-        httpService={mockKibanaHttpService}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
-        listType="rule_default"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
-        showLabel={false}
-      />
-    );
-
-    // doesnt show warning label for non endpoint exception items
-    expect(
-      wrapper.find('[data-test-subj="valuesAutocompleteWildcardLabel"] .euiFormHelpText')
-    ).toHaveLength(0);
   });
 
   test('it renders field values correctly when operator is "doesNotMatchOperator"', () => {
