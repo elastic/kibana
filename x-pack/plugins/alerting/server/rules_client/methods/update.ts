@@ -214,6 +214,7 @@ async function updateAlert<Params extends RuleTypeParams>(
     updatedBy: username,
     updatedAt: new Date().toISOString(),
   });
+
   const mappedParams = getMappedParams(updatedParams);
 
   if (Object.keys(mappedParams).length) {

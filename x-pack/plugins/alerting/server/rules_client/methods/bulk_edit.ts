@@ -15,7 +15,6 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-
 import { BulkActionSkipResult } from '../../../common/bulk_edit';
 import {
   RawRule,
@@ -648,7 +647,6 @@ async function getUpdatedAttributesFromOperations(
       }
     }
   }
-
   return {
     attributes,
     ruleActions,
@@ -794,11 +792,7 @@ async function saveBulkUpdatedRules(
 
 async function attemptToMigrateLegacyFrequency(
   context: RulesClientContext,
-  operation: {
-    operation: 'add' | 'set';
-    field: Extract<BulkEditFields, 'actions'>;
-    value: NormalizedAlertAction[];
-  },
+  operation: BulkEditOperation,
   attributes: SavedObjectsFindResult<RawRule>['attributes'],
   ruleType: RuleType
 ) {

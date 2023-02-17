@@ -273,9 +273,6 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200)
             .parse(binaryToString);
 
-          const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
-          const firstRule = removeServerGeneratedProperties(firstRuleParsed);
-
           const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
             ...getSimpleRuleOutput('rule-1'),
             actions: [
@@ -291,6 +288,8 @@ export default ({ getService }: FtrProviderContext): void => {
             ],
             throttle: '1h',
           };
+          const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
+          const firstRule = removeServerGeneratedProperties(firstRuleParsed);
 
           expect(firstRule).to.eql(outputRule1);
         });
@@ -351,9 +350,6 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200)
             .parse(binaryToString);
 
-          const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
-          const firstRule = removeServerGeneratedProperties(firstRuleParsed);
-
           const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
             ...getSimpleRuleOutput('rule-1'),
             actions: [
@@ -378,6 +374,8 @@ export default ({ getService }: FtrProviderContext): void => {
             ],
             throttle: '1h',
           };
+          const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
+          const firstRule = removeServerGeneratedProperties(firstRuleParsed);
 
           expect(firstRule).to.eql(outputRule1);
         });
@@ -469,11 +467,6 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200)
             .parse(binaryToString);
 
-          const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
-          const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
-          const firstRule = removeServerGeneratedProperties(firstRuleParsed);
-          const secondRule = removeServerGeneratedProperties(secondRuleParsed);
-
           const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
             ...getSimpleRuleOutput('rule-1'),
             actions: [
@@ -523,6 +516,10 @@ export default ({ getService }: FtrProviderContext): void => {
             ],
             throttle: '1h',
           };
+          const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
+          const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
+          const firstRule = removeServerGeneratedProperties(firstRuleParsed);
+          const secondRule = removeServerGeneratedProperties(secondRuleParsed);
 
           expect(firstRule).to.eql(outputRule2);
           expect(secondRule).to.eql(outputRule1);

@@ -24,12 +24,7 @@ const mockRule: RuleTableItem = {
   consumer: 'rules',
   schedule: { interval: '5d' },
   actions: [
-    {
-      id: 'test',
-      actionTypeId: 'the_connector',
-      group: 'rule',
-      params: { message: 'test' },
-    },
+    { id: 'test', actionTypeId: 'the_connector', group: 'rule', params: { message: 'test' } },
   ],
   params: { name: 'test rule type name' },
   createdBy: null,
