@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Evaluation } from '../../../../common/types';
@@ -32,15 +32,18 @@ import { usePageSize } from '../../../common/hooks/use_page_size';
 import { ErrorCallout } from '../layout/error_callout';
 import { useLimitProperties } from '../utils/get_limit_properties';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 
 export const getDefaultQuery = ({
   query,
   filters,
-}: FindingsBaseURLQuery): FindingsBaseURLQuery & FindingsGroupByNoneQuery => ({
+}: FindingsBaseURLQuery): FindingsBaseURLQuery &
+  FindingsGroupByNoneQuery & { findingIndex: number } => ({
   query,
   filters,
   sort: { field: '@timestamp', direction: 'desc' },
   pageIndex: 0,
+  findingIndex: -1,
 });
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
@@ -89,6 +92,49 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     });
   };
 
+  const flyoutFindingIndex = urlQuery?.findingIndex;
+
+  const pagination = getPaginationTableParams({
+    pageSize,
+    pageIndex: urlQuery.pageIndex,
+    totalItemCount: limitedTotalItemCount,
+  });
+
+  const onOpenFlyout = useCallback(
+    (flyoutFinding: CspFinding) => {
+      setUrlQuery({
+        findingIndex: slicedPage.findIndex(
+          (finding) =>
+            finding.resource.id === flyoutFinding?.resource.id &&
+            finding.rule.id === flyoutFinding?.rule.id
+        ),
+      });
+    },
+    [slicedPage, setUrlQuery]
+  );
+
+  const onCloseFlyout = () =>
+    setUrlQuery({
+      findingIndex: -1,
+    });
+
+  const onPaginateFlyout = useCallback(
+    (nextPageIndex: number) => {
+      const newPageIndex = Math.floor(nextPageIndex / pagination.pageSize);
+
+      const newFindingIndex =
+        nextPageIndex >= pagination.pageSize * newPageIndex
+          ? nextPageIndex - pagination.pageSize * newPageIndex
+          : nextPageIndex;
+
+      setUrlQuery({
+        pageIndex: newPageIndex,
+        findingIndex: newFindingIndex,
+      });
+    },
+    [pagination.pageSize, setUrlQuery]
+  );
+
   return (
     <div data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
       <FindingsSearchBar
@@ -129,13 +175,13 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
           )}
           <EuiSpacer />
           <FindingsTable
+            onCloseFlyout={onCloseFlyout}
+            onPaginateFlyout={onPaginateFlyout}
+            onOpenFlyout={onOpenFlyout}
+            flyoutFindingIndex={flyoutFindingIndex}
             loading={findingsGroupByNone.isFetching}
             items={slicedPage}
-            pagination={getPaginationTableParams({
-              pageSize,
-              pageIndex: urlQuery.pageIndex,
-              totalItemCount: limitedTotalItemCount,
-            })}
+            pagination={pagination}
             sorting={{
               sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
             }}
