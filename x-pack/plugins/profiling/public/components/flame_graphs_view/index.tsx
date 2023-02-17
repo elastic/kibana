@@ -27,6 +27,7 @@ import { AsyncComponent } from '../async_component';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../flamegraph';
 import { PrimaryAndComparisonSearchBar } from '../primary_and_comparison_search_bar';
+import { PrimaryProfilingSearchBar } from '../profiling_app_page_template/primary_profiling_search_bar';
 import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
 import { RedirectTo } from '../redirect_to';
 import { FlameGraphNormalizationOptions, NormalizationMenu } from './normalization_menu';
@@ -133,7 +134,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   }
 
   return (
-    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
+    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={true}>
       <EuiFlexGroup direction="column">
         {isDifferentialView ? (
           <EuiFlexItem grow={false}>
@@ -261,7 +262,27 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
-        ) : null}
+        ) : (
+          <EuiFlexItem grow={false}>
+            <EuiPanel hasShadow={false} color="subdued">
+              <PrimaryProfilingSearchBar />
+              <EuiHorizontalRule />
+              <EuiFlexGroup direction="row">
+                <EuiFlexItem grow style={{ alignItems: 'flex-end' }}>
+                  <EuiSwitch
+                    checked={showInformationWindow}
+                    onChange={() => {
+                      setShowInformationWindow((prev) => !prev);
+                    }}
+                    label={i18n.translate('xpack.profiling.flameGraph.showInformationWindow', {
+                      defaultMessage: 'Show information window',
+                    })}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
             <FlameGraph
