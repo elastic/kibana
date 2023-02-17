@@ -29,11 +29,11 @@ more information, go to <<alerting-security>>.
 [[create-edit-rules]]
 === Create and edit rules
 
-Many rules must be created within the context of a {kib} app like
+Some rules must be created within the context of a {kib} app like
 <<metrics-app,Metrics>>, <<xpack-apm,APM>>, or <<uptime-app,Uptime>>, but others
 are generic. Generic rule types can be created in *{rules-ui}* by clicking the
 *Create rule* button. This will launch a flyout that guides you through selecting
-a rule type and configuring its conditions and action type.
+a rule type and configuring its conditions and actions.
 
 After a rule is created, you can open the action menu (…) and select *Edit rule*
 to re-open the flyout and change the rule properties.
@@ -42,9 +42,9 @@ to re-open the flyout and change the rule properties.
 [[defining-rules-type-conditions]]
 ==== Rule type and conditions
 
-Depending upon the {kib} app and context, you might be prompted to choose the type of rule to create. Some apps will preselect the type of rule for you.
+Depending on the {kib} app and context, you might be prompted to choose the type of rule to create. Some apps will preselect the type of rule for you.
 
-Each rule type provides its own way of defining the conditions to detect, but an expression formed by a series of clauses is a common pattern. Each clause has a UI control that allows you to define the clause. For example, in an index threshold rule, the `WHEN` clause allows you to select an aggregation operation to apply to a numeric field.
+Each rule type provides its own way of defining the conditions to detect, but an expression formed by a series of clauses is a common pattern. For example, in an index threshold rule, the `WHEN` clause enables you to select an aggregation operation to apply to a numeric field.
 
 [role="screenshot"]
 image::images/rule-flyout-rule-conditions.png[UI for defining rule conditions on an index threshold rule,500]
@@ -55,14 +55,17 @@ For details on what types of rules are available and how to configure them, refe
 
 [float]
 [[defining-rules-actions-details]]
-==== Action type and frequency
+==== Actions
 
 You can add one or more actions to your rule to generate notifications when its
 conditions are met and when they are no longer met.
 
 Each action uses a connector, which provides connection information for a {kib} service or third party integration, depending on where you want to send the notifications. If no connectors exist, click **Add connector** to create one.
 
-After you select a connector, set the action frequency. If the rule type supports alert summaries, you can choose to create a summary of alerts on each check interval or on a custom interval. For example, if you {observability-guide}/metrics-threshold-alert.html[create a metrics threshold rule], you can send email notifications that summarize the new, ongoing, and recovered alerts each day.
+After you select a connector, set the action frequency. If the rule type supports alert summaries, you can choose to create a summary of alerts on each check interval or on a custom interval. For example, if you create a metrics threshold rule, you can send email notifications that summarize the new, ongoing, and recovered alerts each day:
+
+[role="screenshot"]
+image::images/rule-flyout-action-summary.png[UI for defining rule conditions on an index threshold rule,500]
 
 TIP: If you choose a custom action interval, it cannot be shorter than the rule's check interval.
 
