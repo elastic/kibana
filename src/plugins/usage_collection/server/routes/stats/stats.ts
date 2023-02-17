@@ -83,22 +83,18 @@ export function registerStatsRoute({
 
         const usage = {} as UsageObject;
         const clusterUuid = await getClusterUuid(asCurrentUser);
-        if (isLegacy) {
-          // In an effort to make telemetry more easily augmented, we need to ensure
-          // we can passthrough the data without every part of the process needing
-          // to know about the change; however, to support legacy use cases where this
-          // wasn't true, we need to be backwards compatible with how the legacy data
-          // looked and support those use cases here.
-          extended = {
-            usage,
-            clusterUuid,
-          };
-        } else {
-          extended = collectorSet.toApiFieldNames({
-            usage,
-            clusterUuid,
-          });
-        }
+
+        // In an effort to make telemetry more easily augmented, we need to ensure
+        // we can passthrough the data without every part of the process needing
+        // to know about the change; however, to support legacy use cases where this
+        // wasn't true, we need to be backwards compatible with how the legacy data
+        // looked and support those use cases here.
+        extended = isLegacy
+          ? { usage, clusterUuid }
+          : collectorSet.toApiFieldNames({
+              usage,
+              clusterUuid,
+            });
       }
 
       // Guaranteed to resolve immediately due to replay effect on getOpsMetrics$
