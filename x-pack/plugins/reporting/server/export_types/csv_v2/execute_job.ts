@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { TaskPayloadCsvFromSavedObject } from '../../../common/types';
 import { getFieldFormats } from '../../services';
 import type { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders } from '../common';
 import { CsvGenerator } from '../csv_searchsource/generate_csv';
-import type { TaskPayloadCsvFromSavedObject } from './types';
 
 type RunTaskFnType = RunTaskFn<TaskPayloadCsvFromSavedObject>;
 

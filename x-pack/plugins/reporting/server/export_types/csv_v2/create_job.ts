@@ -6,8 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
+import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from '../../../common/types';
 import { CreateJobFn, CreateJobFnFactory } from '../../types';
-import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from './types';
 
 type CreateJobFnType = CreateJobFn<JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject>;
 
