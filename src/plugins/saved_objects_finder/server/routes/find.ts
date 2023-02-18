@@ -27,12 +27,7 @@ export const registerFindRoute = (router: SavedObjectsRouter) => {
             defaultValue: [],
           }),
           searchFields: schema.maybe(schema.arrayOf(schema.string())),
-          hasReference: schema.maybe(
-            schema.object({
-              id: schema.string(),
-              type: schema.string(),
-            })
-          ),
+          hasReference: schema.maybe(schema.string()),
         }),
       },
       options: {
@@ -50,6 +45,7 @@ export const registerFindRoute = (router: SavedObjectsRouter) => {
         ...query,
         type: searchTypes,
         fields: includedFields,
+        hasReference: query.hasReference ? JSON.parse(query.hasReference) : undefined,
       });
 
       const savedObjects = findResponse.saved_objects;

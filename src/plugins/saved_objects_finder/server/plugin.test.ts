@@ -12,7 +12,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { SavedObjectsServerPlugin } from './plugin';
 import { uiSettings } from './ui_settings';
 
-describe('SavedObjectsFinderPlugin', () => {
+describe('SavedObjectsPlugin', () => {
   let plugin: SavedObjectsServerPlugin;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
 

@@ -132,6 +132,10 @@ export class SavedObjectFinderUi extends React.Component<
     }, []);
 
     const perPage = this.props.services.uiSettings.get(LISTING_LIMIT_SETTING);
+    const hasReference = this.props.services.savedObjectsManagement.getTagFindReferences({
+      selectedTags,
+      taggingApi: this.props.services.savedObjectsTagging,
+    });
     const params: FindQueryHTTP = {
       type: visibleTypes ?? Object.keys(metaDataMap),
       fields: [...new Set(fields)],
@@ -140,10 +144,7 @@ export class SavedObjectFinderUi extends React.Component<
       perPage,
       searchFields: ['title^3', 'description', ...additionalSearchFields],
       defaultSearchOperator: 'AND',
-      hasReference: this.props.services.savedObjectsManagement.getTagFindReferences({
-        selectedTags,
-        taggingApi: this.props.services.savedObjectsTagging,
-      }),
+      hasReference: hasReference ? JSON.stringify(hasReference) : undefined,
     };
     const response = (await this.props.services.http.get('/internal/saved-objects-finder/find', {
       query: params as Record<string, any>,
