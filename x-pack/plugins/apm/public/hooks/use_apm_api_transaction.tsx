@@ -8,6 +8,8 @@
 import { apm, Span } from '@elastic/apm-rum';
 import { useEffect, useMemo } from 'react';
 import { FETCH_STATUS } from './use_fetcher';
+import { useApmParams } from './use_apm_params';
+import { getParsedDate } from '../context/url_params_context/helpers';
 
 export function useFetcherSpan(endpoint: string, status: FETCH_STATUS) {
   return useMemo(() => ({ endpoint, status }), [endpoint, status]);
@@ -20,6 +22,10 @@ export function useFetcherTransaction(
     status: FETCH_STATUS;
   }>
 ) {
+  const { query } = useApmParams('/*');
+  const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
+  const rangeTo = 'rangeTo' in query ? query.rangeTo : undefined;
+
   const { transaction, spans } = useMemo(() => {
     return {
       transaction: apm.startTransaction(name, 'apm:fetcher'),
@@ -36,7 +42,6 @@ export function useFetcherTransaction(
     fetchResults.map(({ status, endpoint }, i) => {
       // start span
       if (status === FETCH_STATUS.LOADING && spans[i] === undefined) {
-        console.log('start span', endpoint);
         spans[i] = transaction?.startSpan(endpoint, 'http');
       }
 
@@ -66,6 +71,25 @@ export function useFetcherTransaction(
       );
       // @ts-expect-error
       transaction.outcome = isFailure ? 'failure' : 'success';
+
+      if (rangeFrom && rangeTo) {
+        const fromDate = getParsedDate(rangeFrom);
+        const toDate = getParsedDate(rangeTo);
+
+        if (fromDate && toDate) {
+          transaction.addLabels({
+            time_range_duration_minutes:
+              toDate.getTime() - fromDate.getTime() / 1000 / 60,
+          });
+        }
+      }
     }
-  }, [transaction, didCompleteRequests, fetchResults, spans]);
+  }, [
+    transaction,
+    didCompleteRequests,
+    fetchResults,
+    spans,
+    rangeFrom,
+    rangeTo,
+  ]);
 }

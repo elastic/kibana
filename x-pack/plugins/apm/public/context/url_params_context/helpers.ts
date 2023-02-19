@@ -9,7 +9,7 @@ import datemath from '@kbn/datemath';
 import { pickBy } from 'lodash';
 import { UrlParams } from './types';
 
-function getParsedDate(rawDate?: string, options = {}) {
+export function getParsedDate(rawDate?: string, options = {}) {
   if (rawDate) {
     const parsed = datemath.parse(rawDate, options);
     if (parsed && parsed.isValid()) {
