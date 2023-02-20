@@ -114,6 +114,15 @@ export interface FullAgentPolicy {
     };
     download: { sourceURI: string };
     features: Record<string, { enabled: boolean }>;
+    protection?: {
+      enabled: boolean;
+      uninstall_token_hash: string;
+      signing_key: string;
+    };
+  };
+  signed?: {
+    data: string;
+    signature: string;
   };
 }
 
