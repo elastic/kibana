@@ -2130,6 +2130,14 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             oldStream?.vars['data_stream.dataset']?.value !==
               stream?.vars?.['data_stream.dataset']?.value
           ) {
+            // seeing this error in dev? Package policy must be called with prepareInputPackagePolicyDataset function first in UI code
+            appContextService
+              .getLogger()
+              .debug(
+                `Rejecting package policy update due to dataset change, old val '${
+                  oldStream?.vars['data_stream.dataset']?.value
+                }, new val '${JSON.stringify(stream?.vars?.['data_stream.dataset']?.value)}'`
+              );
             throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
                 defaultMessage:
