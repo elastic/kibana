@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { Core } from './core';
+import { Type, ValidationError } from '@kbn/config-schema';
 
-export type { CoreApi } from './core';
-
-export type { ContentType } from './content_type';
-
-export type { ContentStorage, ContentTypeDefinition, StorageContext, RpcSchemas } from './types';
-
-export type { ContentRegistry } from './registry';
-
-export type { ContentCrud } from './crud';
+export const validate = (input: unknown, schema: Type<any>): ValidationError | null => {
+  try {
+    schema.validate(input);
+    return null;
+  } catch (e: any) {
+    return e as ValidationError;
+  }
+};

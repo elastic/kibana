@@ -6,14 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { Core } from './core';
+export const procedureNames = ['get', 'create', 'update', 'delete', 'search'] as const;
 
-export type { CoreApi } from './core';
-
-export type { ContentType } from './content_type';
-
-export type { ContentStorage, ContentTypeDefinition, StorageContext, RpcSchemas } from './types';
-
-export type { ContentRegistry } from './registry';
-
-export type { ContentCrud } from './crud';
+export type ProcedureName = typeof procedureNames[number];

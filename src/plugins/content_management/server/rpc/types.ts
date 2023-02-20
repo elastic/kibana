@@ -5,15 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { ContentRegistry } from '../core';
 
-export { Core } from './core';
-
-export type { CoreApi } from './core';
-
-export type { ContentType } from './content_type';
-
-export type { ContentStorage, ContentTypeDefinition, StorageContext, RpcSchemas } from './types';
-
-export type { ContentRegistry } from './registry';
-
-export type { ContentCrud } from './crud';
+export interface Context {
+  contentRegistry: ContentRegistry;
+  requestHandlerContext: RequestHandlerContext;
+}

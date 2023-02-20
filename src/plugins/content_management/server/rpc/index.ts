@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { Core } from './core';
+export { RpcService } from './rpc_service';
 
-export type { CoreApi } from './core';
+export { initRpcRoutes } from './routes';
 
-export type { ContentType } from './content_type';
+export { registerProcedures } from './procedures';
 
-export type { ContentStorage, ContentTypeDefinition, StorageContext, RpcSchemas } from './types';
+export type { Context } from './types';
 
-export type { ContentRegistry } from './registry';
-
-export type { ContentCrud } from './crud';
+export type { ProcedureDefinition } from './rpc_service';
