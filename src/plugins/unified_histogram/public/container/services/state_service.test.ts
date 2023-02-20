@@ -87,6 +87,9 @@ describe('UnifiedHistogramStateService', () => {
       topPanelHeight: undefined,
       totalHitsResult: undefined,
       totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
+      columns: [],
+      currentSuggestion: undefined,
+      allSuggestions: undefined,
     });
   });
 
