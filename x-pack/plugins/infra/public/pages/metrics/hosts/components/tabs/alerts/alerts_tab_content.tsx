@@ -4,11 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getAlertSummaryTimeRange, useTimeBuckets } from '@kbn/observability-plugin/public';
+import {
+  calculateTimeRangeBucketSize,
+  getAlertSummaryTimeRange,
+  useTimeBuckets,
+} from '@kbn/observability-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { TimeRange } from '@kbn/es-query';
 import { HeightRetainer } from '../../../../../../components/height_retainer';
 import type { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../../types';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -18,6 +23,8 @@ import {
   ALERTS_TABLE_ID,
   casesFeatures,
   casesOwner,
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_INTERVAL,
   infraAlertFeatureIds,
 } from '../config';
 import { useAlertsQuery } from '../../../hooks/use_alerts_query';
@@ -30,7 +37,7 @@ export const AlertsTabContent = React.memo(() => {
 
   const { unifiedSearchDateRange } = useUnifiedSearchContext();
 
-  const timeBuckets = useTimeBuckets();
+  const summaryTimeRange = useSummaryTimeRange(unifiedSearchDateRange);
 
   const { application, cases, charts, triggersActionsUi } = services;
 
@@ -43,8 +50,6 @@ export const AlertsTabContent = React.memo(() => {
   const CasesContext = cases.ui.getCasesContext();
   const uiCapabilities = application?.capabilities;
   const casesCapabilities = cases.helpers.getUICapabilities(uiCapabilities.observabilityCases);
-
-  const summaryTimeRange = getAlertSummaryTimeRange(unifiedSearchDateRange, timeBuckets);
 
   const chartThemes = {
     theme: charts.theme.useChartsTheme(),
@@ -93,3 +98,18 @@ export const AlertsTabContent = React.memo(() => {
     </HeightRetainer>
   );
 });
+
+const useSummaryTimeRange = (unifiedSearchDateRange: TimeRange) => {
+  const timeBuckets = useTimeBuckets();
+
+  const bucketSize = useMemo(
+    () => calculateTimeRangeBucketSize(unifiedSearchDateRange, timeBuckets),
+    [unifiedSearchDateRange, timeBuckets]
+  );
+
+  return getAlertSummaryTimeRange(
+    unifiedSearchDateRange,
+    bucketSize?.intervalString || DEFAULT_INTERVAL,
+    bucketSize?.dateFormat || DEFAULT_DATE_FORMAT
+  );
+};

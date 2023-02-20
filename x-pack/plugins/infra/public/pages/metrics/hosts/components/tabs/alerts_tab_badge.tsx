@@ -16,7 +16,7 @@ export const AlertsTabBadge = () => {
 
   const { alertsCount, loading, error } = useAlertsCount({
     featureIds: infraAlertFeatureIds,
-    filter: alertsEsQuery,
+    query: alertsEsQuery,
   });
 
   if (loading) {

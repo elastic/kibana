@@ -62,7 +62,7 @@ describe('useAlertsCount', () => {
 
   it('should call API with correct input', async () => {
     const ruleId = 'c95bc120-1d56-11ed-9cc7-e7214ada1128';
-    const filter = {
+    const query = {
       term: {
         'kibana.alert.rule.uuid': ruleId,
       },
@@ -72,13 +72,13 @@ describe('useAlertsCount', () => {
     const { waitForNextUpdate } = renderHook(() =>
       useAlertsCount({
         featureIds,
-        filter,
+        query,
       })
     );
 
     await waitForNextUpdate();
 
-    const body = JSON.stringify({ featureIds, filter: [filter] });
+    const body = JSON.stringify({ featureIds, query });
 
     expect(mockedPostAPI).toHaveBeenCalledWith(
       '/internal/rac/alerts/_alerts_count',

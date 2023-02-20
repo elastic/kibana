@@ -120,6 +120,7 @@ export {
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
 export { fromQuery, toQuery } from './utils/url';
 export { getAlertSummaryTimeRange } from './utils/alert_summary_widget';
+export { calculateTimeRangeBucketSize } from './pages/overview/containers/overview_page/helpers';
 
 export type { NavigationSection } from './services/navigation_registry';
 export { convertTo } from '../common/utils/formatters/duration';
