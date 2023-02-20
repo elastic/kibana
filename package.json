@@ -82,7 +82,7 @@
     "**/pdfkit/crypto-js": "4.0.0",
     "**/react-syntax-highlighter": "^15.3.1",
     "**/recursive-readdir/minimatch": "^3.1.2",
-    "**/trim": "1.0.1",
+    "**/remark-parse/trim": "1.0.1",
     "**/typescript": "4.1.3",
     "**/underscore": "^1.13.1",
     "globby/fast-glob": "3.2.5"
@@ -363,7 +363,7 @@
     "redux-thunk": "^2.3.0",
     "redux-thunks": "^1.0.0",
     "regenerator-runtime": "^0.13.3",
-    "remark-parse": "^8.0.3",
+    "remark-parse-no-trim": "^8.0.4",
     "remark-stringify": "^8.0.3",
     "require-in-the-middle": "^6.0.0",
     "reselect": "^4.0.0",
