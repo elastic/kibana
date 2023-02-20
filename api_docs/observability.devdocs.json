@@ -14159,6 +14159,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.sloFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "sloFeatureId",
+        "description": [],
+        "signature": [
+          "\"slo\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.SYNTHETICS_BLOCKED_TIMINGS",
         "type": "string",
         "tags": [],

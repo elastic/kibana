@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IUiSettingsClient, SavedObjectsStart } from '@kbn/core/public';
+import { IUiSettingsClient, HttpStart } from '@kbn/core/public';
 
 import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
 import type { BaseVisType } from '../../vis_types';
@@ -21,7 +21,7 @@ interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
   visType: BaseVisType;
   uiSettings: IUiSettingsClient;
-  savedObjects: SavedObjectsStart;
+  http: HttpStart;
   goBack: () => void;
 }
 
@@ -85,7 +85,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
             ]}
             fixedPageSize={this.fixedPageSize}
             uiSettings={this.props.uiSettings}
-            savedObjects={this.props.savedObjects}
+            http={this.props.http}
           />
         </EuiModalBody>
       </React.Fragment>
