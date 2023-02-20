@@ -6,7 +6,8 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { get, set } from 'lodash/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
+import { get } from 'lodash/fp';
 import {
   Direction,
   FlowTarget,

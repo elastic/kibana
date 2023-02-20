@@ -14,11 +14,11 @@ import { IndexPatternSavedObject } from '../types';
 export function openSourceModal(
   {
     overlays,
-    savedObjects,
+    http,
     uiSettings,
   }: {
     overlays: KibanaReactOverlays;
-    savedObjects: CoreStart['savedObjects'];
+    http: CoreStart['http'];
     uiSettings: CoreStart['uiSettings'];
   },
   onSelected: (indexPattern: IndexPatternSavedObject) => void
@@ -26,7 +26,7 @@ export function openSourceModal(
   const modalRef = overlays.openModal(
     <SourceModal
       uiSettings={uiSettings}
-      savedObjects={savedObjects}
+      http={http}
       onIndexPatternSelected={(indexPattern) => {
         onSelected(indexPattern);
         modalRef.close();

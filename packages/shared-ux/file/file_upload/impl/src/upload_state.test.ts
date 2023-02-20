@@ -67,7 +67,7 @@ describe('UploadState', () => {
     });
   });
 
-  it('uploads all provided files and reports errors', async () => {
+  it('uploads all provided files', async () => {
     testScheduler.run(({ expectObservable, cold, flush }) => {
       const file1 = { name: 'test', size: 1 } as File;
       const file2 = { name: 'test 2', size: 1 } as File;
