@@ -10,9 +10,9 @@ import { EuiLink, EuiSkeletonText } from '@elastic/eui';
 import { Tooltip as CaseTooltip } from '@kbn/cases-components';
 import type { CaseTooltipContentProps } from '@kbn/cases-components';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
-import { Case } from '../hooks/use_bulk_get_cases';
 import { CellComponentProps } from '../types';
 import { useCaseViewNavigation } from './use_case_view_navigation';
+import { Case } from '../hooks/api';
 
 const formatCase = (theCase: Case): CaseTooltipContentProps => ({
   title: theCase.title,

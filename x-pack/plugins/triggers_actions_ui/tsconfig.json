@@ -47,7 +47,7 @@
     "@kbn/shared-ux-router",
     "@kbn/alerts-ui-shared",
     "@kbn/safer-lodash-set",
-    "@kbn/cases-plugin"
+    "@kbn/cases-components"
   ],
   "exclude": [
     "target/**/*",

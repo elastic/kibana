@@ -5,26 +5,48 @@
  * 2.0.
  */
 
+import { CaseStatuses } from '@kbn/cases-components';
 import { HttpStart } from '@kbn/core-http-browser';
-import type {
-  CaseResponse,
-  CasesBulkGetRequestCertainFields,
-  CasesBulkGetResponseCertainFields,
-} from '@kbn/cases-plugin/common';
-import { INTERNAL_BULK_GET_CASES_URL } from '@kbn/cases-plugin/common';
 
-export const bulkGetCases = async <Field extends keyof CaseResponse = keyof CaseResponse>(
+const INTERNAL_BULK_GET_CASES_URL = '/internal/cases/_bulk_get';
+
+export interface Case {
+  title: string;
+  description: string;
+  status: CaseStatuses;
+  totalComment: number;
+  created_at: string;
+  created_by: {
+    email: string | null | undefined;
+    full_name: string | null | undefined;
+    username: string | null | undefined;
+  };
+  id: string;
+  owner: string;
+  version: string;
+}
+
+export type Cases = Case[];
+
+export interface CasesBulkGetResponse {
+  cases: Cases;
+  errors: Array<{
+    caseId: string;
+    error: string;
+    message: string;
+    status?: number;
+  }>;
+}
+
+export const bulkGetCases = async (
   http: HttpStart,
-  params: CasesBulkGetRequestCertainFields<Field>,
+  params: { ids: string[]; fields: string[] },
   signal?: AbortSignal
-): Promise<CasesBulkGetResponseCertainFields<Field>> => {
-  const res = await http.post<CasesBulkGetResponseCertainFields<Field>>(
-    INTERNAL_BULK_GET_CASES_URL,
-    {
-      body: JSON.stringify({ ...params }),
-      signal,
-    }
-  );
+): Promise<CasesBulkGetResponse> => {
+  const res = await http.post<CasesBulkGetResponse>(INTERNAL_BULK_GET_CASES_URL, {
+    body: JSON.stringify({ ...params }),
+    signal,
+  });
 
   return res;
 };

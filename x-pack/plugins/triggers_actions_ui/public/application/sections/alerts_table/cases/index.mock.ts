@@ -6,7 +6,7 @@
  */
 
 import { CaseStatuses } from '@kbn/cases-components';
-import { Case } from '../hooks/use_bulk_get_cases';
+import { Case } from '../hooks/api';
 
 export const theCase: Case = {
   id: 'test-id',

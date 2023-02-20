@@ -5,32 +5,20 @@
  * 2.0.
  */
 
-import type { CasesBulkGetResponseCertainFields } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../../../common';
 import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
 import { ServerError } from '../types';
-import { bulkGetCases } from './api';
+import { bulkGetCases, Case, CasesBulkGetResponse } from './api';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.cases.api.bulkGet', {
   defaultMessage: 'Error fetching cases data',
 });
 
-const caseFields = [
-  'title',
-  'description',
-  'status',
-  'totalComment',
-  'created_at',
-  'created_by',
-] as const;
+const caseFields = ['title', 'description', 'status', 'totalComment', 'created_at', 'created_by'];
 
-type Response = CasesBulkGetResponseCertainFields<typeof caseFields[number]>;
-export type Cases = Response['cases'];
-export type Case = Response['cases'][number];
-
-const transformCases = (data: Response): Map<string, Case> => {
+const transformCases = (data: CasesBulkGetResponse): Map<string, Case> => {
   const casesMap = new Map();
 
   for (const theCase of data?.cases ?? []) {
@@ -50,7 +38,6 @@ export const useBulkGetCases = (caseIds: string[]) => {
     triggersActionsUiQueriesKeys.casesBulkGet(),
     () => {
       const abortCtrlRef = new AbortController();
-      // @ts-expect-error: fix it
       return bulkGetCases(http, { ids: caseIds, fields: caseFields }, abortCtrlRef.signal);
     },
     {

@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { generatePath } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common';
-import { generateCaseViewPath } from '@kbn/cases-plugin/public';
 import { useCallback } from 'react';
 
 import { useKibana } from '../../../../common/lib/kibana';
 
 type NavigateToCaseView = (pathParams: { caseId: string }) => void;
+
+const CASE_APP_ID = 'cases';
+
+const generateCaseViewPath = (caseId: string): string => {
+  return generatePath('/:caseId', { caseId });
+};
 
 export const useCaseViewNavigation = () => {
   const {
@@ -25,7 +30,7 @@ export const useCaseViewNavigation = () => {
     (pathParams) =>
       navigateToApp(appId ?? '', {
         deepLinkId: CASE_APP_ID,
-        path: generateCaseViewPath({ detailName: pathParams.caseId }),
+        path: generateCaseViewPath(pathParams.caseId),
       }),
     [navigateToApp, appId]
   );
