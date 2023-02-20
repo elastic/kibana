@@ -64,7 +64,8 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
     perPage: SO_SEARCH_LIMIT,
     sortField: 'name',
     sortOrder: 'asc',
-    full: true,
+    full: false, // package_policies will always be empty
+    noAgentCount: true, // agentPolicy.agents will always be 0
   });
   if (err) {
     // eslint-disable-next-line no-console
