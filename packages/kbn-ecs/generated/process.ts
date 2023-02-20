@@ -91,7 +91,7 @@ export interface EcsProcess {
     /**
      * List of exported element names and types.
      */
-    exports?: Array<Record<string, unknown>>;
+    exports?: Record<string, unknown>[];
     header?: {
       /**
        * Version of the ELF Application Binary Interface (ABI).
@@ -130,17 +130,17 @@ export interface EcsProcess {
     /**
      * List of imported element names and types.
      */
-    imports?: Array<Record<string, unknown>>;
+    imports?: Record<string, unknown>[];
     /**
      * An array containing an object for each section of the ELF file.
      * The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.
      */
-    sections?: Array<Record<string, unknown>>;
+    sections?: Record<string, unknown>[];
     /**
      * An array containing an object for each segment of the ELF file.
      * The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.
      */
-    segments?: Array<Record<string, unknown>>;
+    segments?: Record<string, unknown>[];
     /**
      * List of shared libraries used by this ELF object.
      */
@@ -650,7 +650,7 @@ export interface EcsProcess {
       /**
        * List of exported element names and types.
        */
-      exports?: Array<Record<string, unknown>>;
+      exports?: Record<string, unknown>[];
       header?: {
         /**
          * Version of the ELF Application Binary Interface (ABI).
@@ -689,17 +689,17 @@ export interface EcsProcess {
       /**
        * List of imported element names and types.
        */
-      imports?: Array<Record<string, unknown>>;
+      imports?: Record<string, unknown>[];
       /**
        * An array containing an object for each section of the ELF file.
        * The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.
        */
-      sections?: Array<Record<string, unknown>>;
+      sections?: Record<string, unknown>[];
       /**
        * An array containing an object for each segment of the ELF file.
        * The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.
        */
-      segments?: Array<Record<string, unknown>>;
+      segments?: Record<string, unknown>[];
       /**
        * List of shared libraries used by this ELF object.
        */

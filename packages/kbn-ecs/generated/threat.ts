@@ -14,7 +14,7 @@ export interface EcsThreat {
   /**
    * A list of associated indicators objects enriching the event, and the context of that association/enrichment.
    */
-  enrichments?: Array<Record<string, unknown>>;
+  enrichments?: Record<string, unknown>[];
   feed?: {
     /**
      * The saved object ID of the dashboard belonging to the threat feed for displaying dashboard links to threat feeds in Kibana.
@@ -189,7 +189,7 @@ export interface EcsThreat {
         /**
          * List of exported element names and types.
          */
-        exports?: Array<Record<string, unknown>>;
+        exports?: Record<string, unknown>[];
         header?: {
           /**
            * Version of the ELF Application Binary Interface (ABI).
@@ -228,17 +228,17 @@ export interface EcsThreat {
         /**
          * List of imported element names and types.
          */
-        imports?: Array<Record<string, unknown>>;
+        imports?: Record<string, unknown>[];
         /**
          * An array containing an object for each section of the ELF file.
          * The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.
          */
-        sections?: Array<Record<string, unknown>>;
+        sections?: Record<string, unknown>[];
         /**
          * An array containing an object for each segment of the ELF file.
          * The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.
          */
-        segments?: Array<Record<string, unknown>>;
+        segments?: Record<string, unknown>[];
         /**
          * List of shared libraries used by this ELF object.
          */
@@ -554,6 +554,10 @@ export interface EcsThreat {
        * Traffic Light Protocol sharing markings.
        */
       tlp?: string;
+      /**
+       * Traffic Light Protocol version.
+       */
+      tlp_version?: string;
     };
 
     /**
@@ -873,19 +877,6 @@ export interface EcsThreat {
        * The reference url of subtechnique used by this threat. You can use a MITRE ATT&CK® subtechnique, for example. (ex. https://attack.mitre.org/techniques/T1059/001/)
        */
       reference?: string[];
-    };
-  };
-
-  threat?: {
-    indicator?: {
-      marking?: {
-        tlp?: {
-          /**
-           * Traffic Light Protocol version.
-           */
-          version?: string;
-        };
-      };
     };
   };
 }

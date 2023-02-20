@@ -14,7 +14,7 @@ export interface EcsEmail {
   /**
    * A list of objects describing the attachment files sent along with an email message.
    */
-  attachments?: Array<Record<string, unknown>>;
+  attachments?: Record<string, unknown>[];
   bcc?: {
     /**
      * The email address of BCC recipient
