@@ -29,7 +29,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Plugin as NavigationPublicPlugin } from '@kbn/navigation-plugin/public';
 import { SearchBar, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/public';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 const NavigationPlugin = new NavigationPublicPlugin({} as PluginInitializerContext);
 
@@ -111,7 +111,7 @@ export const services = {
     search: {
       session: {
         getSession$: () => {
-          return new Observable();
+          return new BehaviorSubject('test').asObservable();
         },
         state$: new Observable(),
       },
