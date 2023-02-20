@@ -881,13 +881,13 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
 
 # Quality Assurance
-/src/dev/code_coverage @elastic/kibana-qa
-/vars/*Coverage.groovy @elastic/kibana-qa
-/test/functional/services/common @elastic/kibana-qa
-/test/functional/services/lib @elastic/kibana-qa
-/test/functional/services/remote @elastic/kibana-qa
-/test/visual_regression @elastic/kibana-qa
-/x-pack/test/visual_regression @elastic/kibana-qa
+/src/dev/code_coverage @elastic/appex-qa
+/vars/*Coverage.groovy @elastic/appex-qa
+/test/functional/services/common @elastic/appex-qa
+/test/functional/services/lib @elastic/appex-qa
+/test/functional/services/remote @elastic/appex-qa
+/test/visual_regression @elastic/appex-qa
+/x-pack/test/visual_regression @elastic/appex-qa
 
 # Core
 /config/kibana.yml @elastic/kibana-core
