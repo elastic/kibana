@@ -39,7 +39,7 @@ import { AndOrBadge } from '../and_or_badge';
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 import { BuilderLogicButtons } from './logic_buttons';
 import { getTotalErrorExist } from './selectors';
-import { State, EntryFieldError, exceptionsBuilderReducer } from './reducer';
+import { EntryFieldError, State, exceptionsBuilderReducer } from './reducer';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -61,10 +61,10 @@ const initialState: State = {
   disableAnd: false,
   disableNested: false,
   disableOr: false,
+  errors: {},
   exceptions: [],
   exceptionsToDelete: [],
   warningExists: 0,
-  errors:{},
 };
 
 export interface OnChangeProps {
@@ -122,17 +122,14 @@ export const ExceptionBuilderComponent = ({
   operatorsList,
   allowCustomFieldOptions = false,
 }: ExceptionBuilderProps): JSX.Element => {
-  const [
-    state,
-    dispatch,
-  ] = useReducer(exceptionsBuilderReducer(), {
+  const [state, dispatch] = useReducer(exceptionsBuilderReducer(), {
     ...initialState,
     disableAnd: isAndDisabled,
     disableNested: isNestedDisabled,
     disableOr: isOrDisabled,
   });
 
-  const  {
+  const {
     addNested,
     andLogicIncluded,
     disableAnd,

@@ -111,9 +111,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
   const handleError = useCallback(
     (err: boolean): void => {
-      setErrorsExist({[entry.id]: err});
+      setErrorsExist({ [entry.id]: err });
     },
-    [setErrorsExist]
+    [setErrorsExist, entry.id]
   );
   const handleWarning = useCallback(
     (warn: boolean): void => {
