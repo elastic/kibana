@@ -25,8 +25,8 @@ export const updateSchemas: ProcedureSchemas = {
 
 export interface UpdateIn<
   T extends string = string,
-  Data extends object = Record<string, unknown>,
-  Options extends object = any
+  Data extends object = object,
+  Options extends object = object
 > {
   contentTypeId: T;
   id: string;

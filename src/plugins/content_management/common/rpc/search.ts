@@ -25,7 +25,7 @@ export const searchSchemas: ProcedureSchemas = {
 export interface SearchIn<
   T extends string = string,
   Query extends object = object,
-  Options extends object = any
+  Options extends object = object
 > {
   contentTypeId: T;
   query: Query;

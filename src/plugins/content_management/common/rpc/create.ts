@@ -24,8 +24,8 @@ export const createSchemas: ProcedureSchemas = {
 
 export interface CreateIn<
   T extends string = string,
-  Data extends object = Record<string, unknown>,
-  Options extends object = any
+  Data extends object = object,
+  Options extends object = object
 > {
   contentTypeId: T;
   data: Data;
