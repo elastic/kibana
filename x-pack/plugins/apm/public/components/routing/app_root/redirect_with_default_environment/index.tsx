@@ -8,7 +8,7 @@
 import { useLocation, Redirect } from 'react-router-dom';
 import qs from 'query-string';
 import React from 'react';
-import { useDefaultEnvironment } from '../../../hooks/use_default_environment';
+import { useDefaultEnvironment } from '../../../../hooks/use_default_environment';
 
 export function RedirectWithDefaultEnvironment({
   children,
