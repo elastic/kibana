@@ -30,6 +30,7 @@ export type {
   TableSuggestion,
   Visualization,
   VisualizationSuggestion,
+  Suggestion,
 } from './types';
 export type {
   LegacyMetricState as MetricState,
