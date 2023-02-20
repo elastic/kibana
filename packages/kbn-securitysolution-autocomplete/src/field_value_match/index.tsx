@@ -216,7 +216,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     handleSpacesWarning(selectedValue);
     // Looks like selectedField return new object every time when we for example add "and" entry
     // that's why we need to check for name and type here
-    // Probably we should use some kind of memoization on parent components for entries 
+    // Probably we should use some kind of memoization on parent components for entries
   }, [selectedField?.name, selectedField?.type, selectedValue, handleSpacesWarning, onError]);
 
   const defaultInput = useMemo((): JSX.Element => {

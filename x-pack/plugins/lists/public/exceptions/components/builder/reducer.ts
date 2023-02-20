@@ -127,12 +127,10 @@ export const exceptionsBuilderReducer =
         };
       }
       case 'setErrorsExist': {
-
         const newErrorsState = {
           ...state.errors,
           ...action.error,
         };
-        
 
         return {
           ...state,
