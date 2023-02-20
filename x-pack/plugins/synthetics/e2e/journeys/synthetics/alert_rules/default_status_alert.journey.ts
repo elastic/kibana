@@ -50,7 +50,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('Go to monitors page', async () => {
-    await syntheticsApp.navigateToOverview(true);
+    await syntheticsApp.navigateToOverview(true, 15);
   });
 
   step('should create default status alert', async () => {
