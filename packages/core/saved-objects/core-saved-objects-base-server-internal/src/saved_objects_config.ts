@@ -42,7 +42,7 @@ export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMi
 const soSchema = schema.object({
   maxImportPayloadBytes: schema.byteSize({ defaultValue: 26_214_400 }),
   maxImportExportSize: schema.number({ defaultValue: 10_000 }),
-  // Conditionally set within config, dependening on the env. In prod: allow all access(default), in dev: false
+  /* @internal Conditionally set within config, dependening on the env. In prod: allow all access(default), in dev: false */
   allowHttpApiAccess: schema.boolean({ defaultValue: true }),
 });
 
@@ -55,7 +55,8 @@ export const savedObjectsConfig: ServiceConfigDescriptor<SavedObjectsConfigType>
 export class SavedObjectConfig {
   public maxImportPayloadBytes: number;
   public maxImportExportSize: number;
-  public allowHttpApiAccess: boolean; // depend on env: see https://github.com/elastic/dev/issues/2200
+  /* @internal depend on env: see https://github.com/elastic/dev/issues/2200 */
+  public allowHttpApiAccess: boolean;
   public migration: SavedObjectsMigrationConfigType;
 
   constructor(
