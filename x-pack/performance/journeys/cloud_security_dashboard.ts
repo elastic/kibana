@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-// import { EsArchiver } from '@kbn/es-archiver';
 import { Journey } from '@kbn/journeys';
-// import { subj } from '@kbn/test-subj-selector';
-// import { waitForVisualizations } from '../utils';
+import expect from '@kbn/expect';
 
 export const journey = new Journey({
   ftrConfigPath: 'x-pack/performance/configs/cloud_security_posture_config.ts',
@@ -37,12 +35,20 @@ export const journey = new Journey({
     maxDuration: '10m',
   },
 })
-  .step('wait for installation', async () => {
-    await sleep(10000);
+  .step('wait for installation', async ({ supertest, log, retry }) => {
+    // retry.try(async () => {
+    const response = await supertest
+      .get('/internal/cloud_security_posture/status?check=init')
+      .expect(200);
+    expect(response.body).to.eql({ isPluginInitialized: true });
+    log.debug('CSP plugin is initialized');
+    console.log({ response });
   })
+
   .step('Go to cloud security dashboards Page', async ({ page, kbnUrl }) => {
+    // sleep(100000);
     await page.goto(kbnUrl.get(`/app/security/cloud_security_posture/dashboard`));
     await page.waitForSelector(`[data-test-subj="csp:dashboard-sections-table-header-score"]`);
   });
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+// const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

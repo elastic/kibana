@@ -16,8 +16,10 @@ import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request 
 import { asyncMap, asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '@kbn/test';
-import { EsArchiver, KibanaServer } from '@kbn/ftr-common-functional-services';
+import { EsArchiver, KibanaServer, RetryService } from '@kbn/ftr-common-functional-services';
 
+// import supertest from 'supertest';
+import { services as kibanaApiIntegrationServices } from '../../../test/api_integration/services';
 import { Auth } from '../services/auth';
 import { getInputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
@@ -25,6 +27,7 @@ import { KibanaUrl } from '../services/kibana_url';
 import type { Step, AnyStep } from './journey';
 import type { JourneyConfig } from './journey_config';
 import { JourneyScreenshots } from './journey_screenshots';
+// import supertest from 'supertest';
 
 export class JourneyFtrHarness {
   private readonly screenshots: JourneyScreenshots;
@@ -34,6 +37,8 @@ export class JourneyFtrHarness {
     private readonly config: Config,
     private readonly esArchiver: EsArchiver,
     private readonly kibanaServer: KibanaServer,
+    private readonly retry: RetryService,
+    // private readonly supertest: kibanaApiIntegrationServices.supertest,
     private readonly auth: Auth,
     private readonly journeyConfig: JourneyConfig<any>
   ) {
@@ -365,6 +370,8 @@ export class JourneyFtrHarness {
         )
       ),
       kibanaServer: this.kibanaServer,
+      retry: this.retry,
+      supertest: kibanaApiIntegrationServices.supertest,
     });
 
     return this.#_ctx;

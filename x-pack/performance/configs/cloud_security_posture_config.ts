@@ -7,17 +7,13 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+export const config async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
     require.resolve('../../test/functional/config.base.js')
   );
 
   return {
     ...xpackFunctionalConfig.getAll(),
-    // testFiles: [require.resolve('./telemetry/telemetry.ts')],
-    // junit: {
-    //   reportName: 'X-Pack Cloud Security Posture API Tests',
-    // },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
