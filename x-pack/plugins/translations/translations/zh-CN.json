@@ -14243,7 +14243,6 @@
     "xpack.fleet.packagePolicyEdotpr.datastreamIngestPipelines.learnMoreLink": "了解详情",
     "xpack.fleet.packagePolicyField.yamlCodeEditor": "YAML 代码编辑器",
     "xpack.fleet.packagePolicyValidation.boolValueError": "布尔值必须为 true 或 false",
-    "xpack.fleet.packagePolicyValidation.invalidArrayErrorMessage": "格式无效",
     "xpack.fleet.packagePolicyValidation.invalidIntegerErrorMessage": "整数无效",
     "xpack.fleet.packagePolicyValidation.invalidIntegerMultiErrorMessage": "整数无效",
     "xpack.fleet.packagePolicyValidation.invalidYamlFormatErrorMessage": "YAML 格式无效",

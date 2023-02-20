@@ -258,10 +258,9 @@ export const validatePackagePolicyConfig = (
     if (parsedValue && !Array.isArray(parsedValue)) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidArrayErrorMessage', {
-          defaultMessage: 'Invalid format for {fieldName}: expected array, found {fieldType}',
+          defaultMessage: 'Invalid format for {fieldName}: expected array',
           values: {
             fieldName: varDef.title || varDef.name,
-            fieldType: typeof parsedValue
           },
         })
       );
