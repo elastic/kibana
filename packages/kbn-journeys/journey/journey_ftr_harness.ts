@@ -18,8 +18,6 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '@kbn/test';
 import { EsArchiver, KibanaServer, RetryService } from '@kbn/ftr-common-functional-services';
 
-// import supertest from 'supertest';
-import { services as kibanaApiIntegrationServices } from '../../../test/api_integration/services';
 import { Auth } from '../services/auth';
 import { getInputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
@@ -38,7 +36,6 @@ export class JourneyFtrHarness {
     private readonly esArchiver: EsArchiver,
     private readonly kibanaServer: KibanaServer,
     private readonly retry: RetryService,
-    // private readonly supertest: kibanaApiIntegrationServices.supertest,
     private readonly auth: Auth,
     private readonly journeyConfig: JourneyConfig<any>
   ) {
@@ -371,7 +368,7 @@ export class JourneyFtrHarness {
       ),
       kibanaServer: this.kibanaServer,
       retry: this.retry,
-      supertest: kibanaApiIntegrationServices.supertest,
+      esArchiver: this.esArchiver,
     });
 
     return this.#_ctx;

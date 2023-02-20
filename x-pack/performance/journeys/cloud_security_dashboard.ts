@@ -10,45 +10,48 @@ import expect from '@kbn/expect';
 
 export const journey = new Journey({
   ftrConfigPath: 'x-pack/performance/configs/cloud_security_posture_config.ts',
-  esArchives: ['x-pack/performance/es_archives/kspm_findings'],
-  scalabilitySetup: {
-    warmup: [
-      {
-        action: 'constantConcurrentUsers',
-        userCount: 10,
-        duration: '30s',
-      },
-      {
-        action: 'rampConcurrentUsers',
-        minUsersCount: 10,
-        maxUsersCount: 50,
-        duration: '2m',
-      },
-    ],
-    test: [
-      {
-        action: 'constantConcurrentUsers',
-        userCount: 50,
-        duration: '1m',
-      },
-    ],
-    maxDuration: '10m',
-  },
+  // esArchives: ['x-pack/performance/es_archives/kspm_findings'],
+  // scalabilitySetup: {
+  //   warmup: [
+  //     {
+  //       action: 'constantConcurrentUsers',
+  //       userCount: 10,
+  //       duration: '30s',
+  //     },
+  //     {
+  //       action: 'rampConcurrentUsers',
+  //       minUsersCount: 10,
+  //       maxUsersCount: 50,
+  //       duration: '2m',
+  //     },
+  //   ],
+  //   test: [
+  //     {
+  //       action: 'constantConcurrentUsers',
+  //       userCount: 50,
+  //       duration: '1m',
+  //     },
+  //   ],
+  //   maxDuration: '10m',
+  // },
 })
-  .step('wait for installation', async ({ supertest, log, retry }) => {
-    // retry.try(async () => {
-    const response = await supertest
-      .get('/internal/cloud_security_posture/status?check=init')
-      .expect(200);
-    expect(response.body).to.eql({ isPluginInitialized: true });
-    log.debug('CSP plugin is initialized');
-    console.log({ response });
+  .step('wait for installation', async ({ kibanaServer, log, retry }) => {
+    retry.try(async () => {
+      const response = await kibanaServer.request({
+        path: '/internal/cloud_security_posture/status?check=init',
+        method: 'GET',
+      });
+
+      expect(response.status).to.eql(200);
+      expect(response.data).to.eql({ isPluginInitialized: true });
+      log.debug('CSP plugin is initialized');
+    });
+  })
+  .step('Load data', async ({ esArchiver }) => {
+    await esArchiver.load('x-pack/performance/es_archives/kspm_findings');
   })
 
   .step('Go to cloud security dashboards Page', async ({ page, kbnUrl }) => {
-    // sleep(100000);
     await page.goto(kbnUrl.get(`/app/security/cloud_security_posture/dashboard`));
     await page.waitForSelector(`[data-test-subj="csp:dashboard-sections-table-header-score"]`);
   });
-
-// const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

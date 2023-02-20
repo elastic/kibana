@@ -13,15 +13,13 @@ import callsites from 'callsites';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrConfigProvider } from '@kbn/test';
 import {
-  // FtrProviderContext,
+  FtrProviderContext,
   KibanaServer,
   RetryService,
+  EsArchiver,
 } from '@kbn/ftr-common-functional-services';
 
-import { GenericFtrProviderContext } from '@kbn/test';
-import supertest, { SuperTest, Test } from 'supertest';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { services } from '../../../x-pack/test/api_integration/services';
+// import { GenericFtrProviderContext } from '@kbn/test';
 import { Auth } from '../services/auth';
 import { InputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
@@ -30,10 +28,6 @@ import { JourneyFtrHarness } from './journey_ftr_harness';
 import { makeFtrConfigProvider } from './journey_ftr_config';
 import { JourneyConfig, JourneyConfigOptions } from './journey_config';
 
-// import { services } from '@kbn/ftr-common-functional-services/services/all';
-
-type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
-
 export interface BaseStepCtx {
   page: Page;
   log: ToolingLog;
@@ -41,8 +35,7 @@ export interface BaseStepCtx {
   kbnUrl: KibanaUrl;
   kibanaServer: KibanaServer;
   retry: RetryService;
-  // supertest: SuperTest<Test>;
-  supertest: supertest.SuperTest<supertest.Test>;
+  esArchiver: EsArchiver;
 }
 
 export type AnyStep = Step<{}>;
@@ -128,7 +121,6 @@ export class Journey<CtxExt extends object> {
   }
 
   /** called by FTR to setup tests */
-  // protected testProvider({ getService }: FtrProviderContext) {
   protected testProvider({ getService }: FtrProviderContext) {
     new JourneyFtrHarness(
       getService('log'),
@@ -136,7 +128,6 @@ export class Journey<CtxExt extends object> {
       getService('esArchiver'),
       getService('kibanaServer'),
       getService('retry'),
-      // getService('supertest'),
       new Auth(getService('config'), getService('log'), getService('kibanaServer')),
       this.config
     ).initMochaSuite(this.#steps);
