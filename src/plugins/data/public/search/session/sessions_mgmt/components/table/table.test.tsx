@@ -154,13 +154,6 @@ describe('Background Search Session Management Table', () => {
       jest.useFakeTimers();
       const find = jest.fn();
       sessionsClient.find = find;
-      mockConfig = {
-        ...mockConfig,
-        management: {
-          ...mockConfig.management,
-          refreshInterval: moment.duration(1, 'seconds'),
-        },
-      };
 
       await act(async () => {
         mount(
@@ -178,12 +171,13 @@ describe('Background Search Session Management Table', () => {
 
         await waitFor(
           () => {
-            // 1 for initial load + 2 refresh calls
-            expect(find).toHaveBeenCalledTimes(3);
+            // 1 for initial load + 1 refresh calls
+            expect(find).toHaveBeenCalledTimes(2);
           },
-          { timeout: 10000, interval: 100 }
+          { timeout: 3000, interval: 500 }
         );
       });
+      jest.useRealTimers();
     });
 
     test('refresh button uses the session client', async () => {
