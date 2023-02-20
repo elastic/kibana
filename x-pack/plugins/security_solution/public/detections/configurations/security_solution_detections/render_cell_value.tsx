@@ -91,7 +91,6 @@ export const useRenderCellValue = ({
     data,
     ecsData,
     eventId,
-    globalFilters,
     header,
     isDetails = false,
     isDraggable = false,
@@ -120,7 +119,6 @@ export const useRenderCellValue = ({
         data={data}
         ecsData={ecsData}
         eventId={eventId}
-        globalFilters={globalFilters}
         header={myHeader}
         isDetails={isDetails}
         isDraggable={isDraggable}
