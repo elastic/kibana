@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { set, uniq, cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { uniq, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
