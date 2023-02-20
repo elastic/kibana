@@ -597,7 +597,7 @@ describe('CaseViewPage', () => {
 
     it('it should persist the draft of new comment while description is updated', async () => {
       const newComment = 'another cool comment';
-      
+
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
       userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), newComment);
