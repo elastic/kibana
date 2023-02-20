@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { BulkIndexByScrollFailure } from '@elastic/elasticsearch/lib/api/types';
 import type { TransformErrorObjects } from '../core';
 import type { DocumentIdAndType } from '../actions';
 
@@ -57,23 +56,6 @@ export function extractUnknownDocFailureReason(
     unknownDocs.map((doc) => `- "${doc.id}" (type: "${doc.type}")\n`).join('') +
     `\nTo proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.\n` +
     `Please refer to ${resolveMigrationFailuresUrl} for more information.`
-  );
-}
-
-export function extractDeleteQueryFailureReason(
-  kibanaIndex: string,
-  conflictingDocuments: BulkIndexByScrollFailure[]
-): string {
-  return (
-    `Migration failed because it was unable to delete unwanted documents from the ${kibanaIndex} system index:\n` +
-    conflictingDocuments
-      .map(
-        (doc) =>
-          `- "${doc.id}" (type: "${doc.type}"): ${doc.cause.type}${
-            doc.cause.reason ? ' - ' + doc.cause.reason : ''
-          }\n`
-      )
-      .join('')
   );
 }
 

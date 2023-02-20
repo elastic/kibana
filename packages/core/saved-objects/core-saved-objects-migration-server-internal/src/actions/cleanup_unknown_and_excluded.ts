@@ -9,10 +9,7 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/function';
-import type {
-  BulkIndexByScrollFailure,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '@kbn/core-saved-objects-server';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
@@ -38,25 +35,14 @@ export interface CleanupUnknownAndExcludedParams {
 }
 
 /** @internal */
-export interface DeleteByQueryParams {
-  client: ElasticsearchClient;
-  indexName: string;
-  query: QueryDslQueryContainer;
-}
-
-/** @internal */
-export interface DeleteByQueryErrorResponse {
-  type: 'delete_failed';
-  conflictingDocuments: BulkIndexByScrollFailure[];
-}
-
-/** @internal */
-export interface CleanupSuccessful {
-  type: 'cleanup_successful';
-  /** Sample (1000 types * 100 docs per type) of the unknown documents that have been found and discarded */
+export interface CleanupStarted {
+  type: 'cleanup_started';
+  /** Sample (1000 types * 100 docs per type) of the unknown documents that have been found */
   unknownDocs: DocumentIdAndType[];
   /** Any errors that were encountered during filter calculation, keyed by the type name */
   errorsByType: Record<string, Error>;
+  /** the id of the asynchronous delete task */
+  taskId: string;
 }
 
 /**
@@ -72,8 +58,8 @@ export const cleanupUnknownAndExcluded = ({
   knownTypes,
   removedTypes,
 }: CleanupUnknownAndExcludedParams): TaskEither.TaskEither<
-  RetryableEsClientError | UnknownDocsFound | DeleteByQueryErrorResponse,
-  CleanupSuccessful
+  RetryableEsClientError | UnknownDocsFound,
+  CleanupStarted
 > => {
   let unknownDocs: DocumentIdAndType[] = [];
   let unknownDocTypes: string[] = [];
@@ -121,13 +107,26 @@ export const cleanupUnknownAndExcluded = ({
         },
       };
 
-      return deleteByQuery({ client, indexName, query: deleteQuery });
+      return deleteByQuery({
+        client,
+        indexName,
+        query: deleteQuery,
+        // we want to delete as many docs as we can in the current attempt
+        conflicts: 'proceed',
+        // we must refresh to ensure that the subsequent steps of the flow
+        // don't see the unwanted documents anymore:
+        // - another delete attempt (if the current one fails)
+        // - outdated documents read + transform
+        // - ^tests that perform assertions on the contents of the index
+        refresh: true,
+      });
     }),
 
     // map response output
-    TaskEither.chainEitherKW(() => {
+    TaskEither.chainEitherKW((res) => {
       return Either.right({
-        type: 'cleanup_successful' as const,
+        type: 'cleanup_started' as const,
+        taskId: res.taskId,
         unknownDocs,
         errorsByType,
       });

@@ -46,6 +46,8 @@ describe('deleteByQuery', () => {
       client,
       indexName: '.kibana_8.0.0',
       query: deleteQuery,
+      conflicts: 'proceed',
+      refresh: true,
     });
     try {
       await task();
@@ -64,6 +66,8 @@ describe('deleteByQuery', () => {
       client,
       indexName: '.kibana_8.0.0',
       query: deleteQuery,
+      conflicts: 'proceed',
+      refresh: true,
     });
 
     await task();
@@ -73,26 +77,32 @@ describe('deleteByQuery', () => {
       index: '.kibana_8.0.0',
       query: deleteQuery,
       refresh: true,
-      wait_for_completion: true,
+      wait_for_completion: false,
       conflicts: 'proceed',
     });
   });
 
-  it('resolves with `Either.right` if the delete is successful', async () => {
+  it('resolves with `Either.right` if the delete task is successfully created', async () => {
     const client = elasticsearchClientMock.createInternalClient(
-      Promise.resolve(createDeleteByQueryResponse())
+      Promise.resolve({
+        took: 147,
+        timed_out: false,
+        task: 1234,
+      })
     );
 
     const task = deleteByQuery({
       client,
       indexName: '.kibana_8.0.0',
       query: deleteQuery,
+      conflicts: 'proceed',
+      refresh: true,
     });
 
     const result = await task();
 
     expect(Either.isRight(result)).toBe(true);
-    expect((result as Either.Right<any>).right).toEqual('delete_successful' as const);
+    expect((result as Either.Right<any>).right).toEqual({ taskId: '1234' });
   });
 
   it('resolves with `Either.left`, if the delete query fails', async () => {

@@ -12,7 +12,6 @@ import {
   fatalReasonDocumentExceedsMaxBatchSizeBytes,
   extractDiscardedCorruptDocs,
   extractTransformFailuresReason,
-  extractDeleteQueryFailureReason,
 } from './extract_errors';
 
 describe('extractUnknownDocFailureReason', () => {
@@ -57,39 +56,6 @@ describe('extractDiscardedUnknownDocs', () => {
       Therefore, the following documents with unknown types will not be taken into account and they will not be available after the migration:
       - \\"unknownType:12\\" (type: \\"unknownType\\")
       - \\"anotherUnknownType:42\\" (type: \\"anotherUnknownType\\")
-      "
-    `);
-  });
-});
-
-describe('extractDeleteQueryFailureReason', () => {
-  it('generates the correct error message', () => {
-    expect(
-      extractDeleteQueryFailureReason('.kibana_7.11.0_001', [
-        {
-          index: 'kibana_7.11.0_001',
-          id: 'dashboard:12',
-          type: 'dashboard',
-          cause: {
-            type: 'DocumentVersionChanged',
-            reason: 'The document was updated after it was selected for removal',
-          },
-          status: 5,
-        },
-        {
-          index: 'kibana_7.11.0_001',
-          id: 'foo:17',
-          type: 'foo',
-          cause: {
-            type: 'DocumentVersionChanged',
-          },
-          status: 5,
-        },
-      ])
-    ).toMatchInlineSnapshot(`
-      "Migration failed because it was unable to delete unwanted documents from the .kibana_7.11.0_001 system index:
-      - \\"dashboard:12\\" (type: \\"dashboard\\"): DocumentVersionChanged - The document was updated after it was selected for removal
-      - \\"foo:17\\" (type: \\"foo\\"): DocumentVersionChanged
       "
     `);
   });

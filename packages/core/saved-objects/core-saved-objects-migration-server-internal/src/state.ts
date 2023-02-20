@@ -216,6 +216,13 @@ export interface CleanupUnknownAndExcluded extends PostInitWithSource {
   readonly aliases: Record<string, string | undefined>;
 }
 
+export interface CleanupUnknownAndExcludedWaitForTaskState extends PostInitWithSource {
+  readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK';
+  readonly deleteByQueryTaskId: string;
+  readonly sourceIndexMappings: IndexMapping;
+  readonly aliases: Record<string, string | undefined>;
+}
+
 export interface FatalState extends BaseState {
   /** Migration terminated with a failure */
   readonly controlState: 'FATAL';
@@ -476,6 +483,7 @@ export type State = Readonly<
   | InitState
   | PrepareCompatibleMigration
   | CleanupUnknownAndExcluded
+  | CleanupUnknownAndExcludedWaitForTaskState
   | WaitForMigrationCompletionState
   | DoneState
   | WaitForYellowSourceState

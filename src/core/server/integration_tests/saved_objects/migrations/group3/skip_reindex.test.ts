@@ -65,7 +65,12 @@ describe('skip reindexing', () => {
 
     expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE');
     expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED');
-    expect(logs).toMatch('CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION');
+    expect(logs).toMatch(
+      'CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'
+    );
+    expect(logs).toMatch(
+      'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION'
+    );
     expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
     expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS');
     expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE');

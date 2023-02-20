@@ -8,11 +8,7 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type {
-  BulkIndexByScrollFailure,
-  DeleteByQueryResponse,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { Conflicts, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
@@ -24,45 +20,37 @@ export interface DeleteByQueryParams {
   client: ElasticsearchClient;
   indexName: string;
   query: QueryDslQueryContainer;
+  conflicts: Conflicts;
+  refresh?: boolean;
 }
 
 /** @internal */
-export interface DeleteByQueryErrorResponse {
-  type: 'delete_failed';
-  conflictingDocuments: BulkIndexByScrollFailure[];
+export interface DeleteByQueryResponse {
+  taskId: string;
 }
 
 /**
  * Deletes documents matching the provided query
  */
-export const deleteByQuery = ({
-  client,
-  indexName,
-  query,
-}: DeleteByQueryParams): TaskEither.TaskEither<
-  RetryableEsClientError | DeleteByQueryErrorResponse,
-  'delete_successful'
-> => {
-  return () => {
+export const deleteByQuery =
+  ({
+    client,
+    indexName,
+    query,
+    conflicts,
+    refresh = false,
+  }: DeleteByQueryParams): TaskEither.TaskEither<RetryableEsClientError, DeleteByQueryResponse> =>
+  () => {
     return client
       .deleteByQuery({
         index: indexName,
         query,
-        wait_for_completion: true,
-        refresh: true,
-        // we want to delete as many docs as we can in the current attempt
-        conflicts: 'proceed',
+        refresh,
+        conflicts,
+        wait_for_completion: false,
       })
-      .then((response: DeleteByQueryResponse) => {
-        if (!response.failures || !response.failures.length) {
-          return Either.right('delete_successful' as const);
-        } else {
-          return Either.left({
-            type: 'delete_failed' as const,
-            conflictingDocuments: response.failures,
-          });
-        }
+      .then(({ task: taskId }) => {
+        return Either.right({ taskId: String(taskId!) });
       })
       .catch(catchRetryableEsClientErrors);
   };
-};

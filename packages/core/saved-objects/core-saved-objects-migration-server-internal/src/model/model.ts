@@ -26,7 +26,6 @@ import {
   fatalReasonDocumentExceedsMaxBatchSizeBytes,
   extractDiscardedUnknownDocs,
   extractDiscardedCorruptDocs,
-  extractDeleteQueryFailureReason,
 } from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
@@ -469,7 +468,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      // we didn't need to cleanup, or the cleanup went well
       if (res.right.unknownDocs.length) {
         logs = [
           ...stateP.logs,
@@ -485,6 +483,25 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         })),
       ];
 
+      return {
+        ...stateP,
+        logs,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
+        deleteByQueryTaskId: res.right.taskId,
+      };
+    } else {
+      return {
+        ...stateP,
+        controlState: 'FATAL',
+        reason: extractUnknownDocFailureReason(
+          stateP.migrationDocLinks.resolveMigrationFailures,
+          res.left.unknownDocs
+        ),
+      };
+    }
+  } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
       const source = stateP.sourceIndex.value;
       return {
         ...stateP,
@@ -506,45 +523,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ]),
         ],
       };
-    } else if (Either.isLeft(res)) {
-      if (isTypeof(res.left, 'unknown_docs_found')) {
+    } else {
+      if (isTypeof(res.left, 'wait_for_task_completion_timeout')) {
+        // After waiting for the specified timeout, the task has not yet
+        // completed. Retry this step to see if the task has completed after an
+        // exponential delay.  We will basically keep polling forever until the
+        // Elasticsearch task succeeds or fails.
+        return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
+      } else {
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: extractUnknownDocFailureReason(
-            stateP.migrationDocLinks.resolveMigrationFailures,
-            res.left.unknownDocs
-          ),
+          reason:
+            `Migration failed because it was unable to delete unwanted documents from the ${stateP.sourceIndex.value} system index:\n` +
+            res.left.failures.map((failure: string) => `- ${failure}\n`).join(''),
         };
-      } else {
-        if (stateP.retryCount >= stateP.retryAttempts) {
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason: extractDeleteQueryFailureReason(
-              stateP.sourceIndex.value,
-              res.left.conflictingDocuments
-            ),
-          };
-        } else {
-          const retryCount = stateP.retryCount + 1;
-          const retryDelay = 1000 * Math.random();
-          return {
-            ...stateP,
-            retryCount,
-            retryDelay,
-            logs: [
-              ...stateP.logs,
-              {
-                level: 'warning',
-                message: `Errors occurred whilst deleting unwanted documents. Another instance is probably updating or deleting documents in the same index. Retrying attempt ${retryCount}.`,
-              },
-            ],
-          };
-        }
       }
-    } else {
-      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'PREPARE_COMPATIBLE_MIGRATION') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

@@ -7,10 +7,7 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import type {
-  BulkIndexByScrollFailure,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { checkForUnknownDocs, type DocumentIdAndType } from './check_for_unknown_docs';
 import { cleanupUnknownAndExcluded } from './cleanup_unknown_and_excluded';
 import { calculateExcludeFilters } from './calculate_exclude_filters';
@@ -65,7 +62,11 @@ describe('cleanupUnknownAndExcluded', () => {
         errorsByType: {},
       })
     );
-    mockDeleteByQuery.mockReturnValueOnce(async () => Either.right('delete_successful' as const));
+    mockDeleteByQuery.mockReturnValueOnce(async () =>
+      Either.right({
+        taskId: '1234',
+      })
+    );
 
     const task = cleanupUnknownAndExcluded({
       client: emptyResponseClientMock, // the client will not be called anyway
@@ -128,8 +129,11 @@ describe('cleanupUnknownAndExcluded', () => {
           errorsByType: {},
         })
       );
-      mockDeleteByQuery.mockReturnValueOnce(async () => Either.right('delete_successful' as const));
-
+      mockDeleteByQuery.mockReturnValueOnce(async () =>
+        Either.right({
+          taskId: '1234',
+        })
+      );
       const task = cleanupUnknownAndExcluded({
         client: emptyResponseClientMock,
         indexName: '.kibana_8.0.0',
@@ -166,8 +170,11 @@ describe('cleanupUnknownAndExcluded', () => {
           errorsByType: {},
         })
       );
-      mockDeleteByQuery.mockReturnValueOnce(async () => Either.right('delete_successful' as const));
-
+      mockDeleteByQuery.mockReturnValueOnce(async () =>
+        Either.right({
+          taskId: '1234',
+        })
+      );
       const task = cleanupUnknownAndExcluded({
         client: emptyResponseClientMock,
         indexName: '.kibana_8.0.0',
@@ -214,8 +221,11 @@ describe('cleanupUnknownAndExcluded', () => {
     mockCalculateExcludeFilters.mockReturnValueOnce(async () =>
       Either.right({ filterClauses, errorsByType })
     );
-    mockDeleteByQuery.mockReturnValueOnce(async () => Either.right('delete_successful' as const));
-
+    mockDeleteByQuery.mockReturnValueOnce(async () =>
+      Either.right({
+        taskId: '1234',
+      })
+    );
     const task = cleanupUnknownAndExcluded({
       client: emptyResponseClientMock,
       indexName: '.kibana_8.0.0',
@@ -251,54 +261,16 @@ describe('cleanupUnknownAndExcluded', () => {
           ],
         },
       },
+      conflicts: 'proceed',
+      refresh: true,
     });
 
     expect(Either.isRight(result)).toBe(true);
     expect((result as Either.Right<any>).right).toEqual({
-      type: 'cleanup_successful' as const,
+      type: 'cleanup_started' as const,
+      taskId: '1234',
       unknownDocs,
       errorsByType,
-    });
-  });
-
-  it('fails if `deleteByQuery` fails', async () => {
-    mockCheckForUnknownDocs.mockReturnValueOnce(async () => Either.right({}));
-    mockCalculateExcludeFilters.mockReturnValueOnce(async () =>
-      Either.right({
-        filterClauses: [],
-        errorsByType: {},
-      })
-    );
-
-    const conflictingDocuments = [
-      { id: 'failure' } as BulkIndexByScrollFailure,
-      { id: 'another-failure' } as BulkIndexByScrollFailure,
-    ];
-
-    mockDeleteByQuery.mockReturnValueOnce(async () =>
-      Either.left({
-        type: 'delete_failed' as const,
-        conflictingDocuments,
-      })
-    );
-
-    const task = cleanupUnknownAndExcluded({
-      client: emptyResponseClientMock,
-      indexName: '.kibana_8.0.0',
-      discardUnknownDocs: true,
-      excludeOnUpgradeQuery: initialExcludeOnUpgradeQueryMock,
-      excludeFromUpgradeFilterHooks,
-      hookTimeoutMs: 28,
-      knownTypes: ['foo', 'bar'],
-      removedTypes: ['server', 'deprecated'],
-    });
-
-    const result = await task();
-
-    expect(Either.isLeft(result)).toBe(true);
-    expect((result as Either.Left<any>).left).toEqual({
-      type: 'delete_failed',
-      conflictingDocuments,
     });
   });
 });

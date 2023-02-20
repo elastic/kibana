@@ -111,7 +111,10 @@ describe('when upgrading to a new stack version', () => {
           'Therefore, the following documents with unknown types will not be taken into account and they will not be available after the migration:'
         );
         expect(logs).toMatch(
-          '[.kibana_migrator_tests] CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION'
+          '[.kibana_migrator_tests] CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'
+        );
+        expect(logs).toMatch(
+          '[.kibana_migrator_tests] CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION'
         );
         expect(logs).toMatch(
           '[.kibana_migrator_tests] PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT'
@@ -233,7 +236,10 @@ describe('when upgrading to a new stack version', () => {
           '[.kibana_migrator_tests] WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED'
         );
         expect(logs).toMatch(
-          '[.kibana_migrator_tests] CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION'
+          '[.kibana_migrator_tests] CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'
+        );
+        expect(logs).toMatch(
+          '[.kibana_migrator_tests] CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION'
         );
         expect(logs).toMatch(
           '[.kibana_migrator_tests] PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT'
