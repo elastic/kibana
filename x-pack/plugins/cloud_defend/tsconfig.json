@@ -18,8 +18,11 @@
     "@kbn/i18n",
     "@kbn/usage-collection-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/unified-search-plugin",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/es-types"
   ],
   "exclude": ["target/**/*"]
 }
