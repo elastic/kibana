@@ -21,7 +21,6 @@ const createAlertsClientMock = () => {
     find: jest.fn(),
     getFeatureIdsByRegistrationContexts: jest.fn(),
     getBrowserFields: jest.fn(),
-    getAlertsCount: jest.fn(),
     getAlertSummary: jest.fn(),
     ensureAllAlertsAuthorizedRead: jest.fn(),
   };
