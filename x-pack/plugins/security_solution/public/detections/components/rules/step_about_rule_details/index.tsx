@@ -20,6 +20,7 @@ import { isEmpty } from 'lodash';
 import type { PropsWithChildren } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
+import { css } from '@emotion/react';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import type {
@@ -79,9 +80,9 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
   return (
     <EuiPanel
       hasBorder
-      css={{
-        position: 'relative',
-      }}
+      css={css`
+        position: 'relative';
+      `}
     >
       {loading && (
         <>
@@ -93,9 +94,9 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
         <EuiFlexGroup
           gutterSize="xs"
           direction="column"
-          css={{
-            height: '100%',
-          }}
+          css={css`
+            height: 100%;
+          `}
         >
           <EuiFlexItem grow={false} key="header">
             <HeaderSection title={i18n.ABOUT_TEXT}>
@@ -116,7 +117,12 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
             {selectedToggleOption === 'details' && (
               <EuiResizeObserver data-test-subj="stepAboutDetailsContent" onResize={onResize}>
                 {(resizeRef) => (
-                  <div ref={resizeRef} css={{ height: '100%' }}>
+                  <div
+                    ref={resizeRef}
+                    css={css`
+                      height: 100%;
+                    `}
+                  >
                     <VerticalOverflowContainer maxHeight={120}>
                       <VerticalOverflowContent maxHeight={120}>
                         <EuiText
@@ -178,11 +184,11 @@ function VerticalOverflowContainer({
   return (
     <div
       className="eui-yScroll"
-      css={{
-        maxHeight,
-        'overflow-y': 'hidden',
-        'word-break': 'break-word',
-      }}
+      css={css`
+        max-height: ${maxHeight};
+        overflow-y: 'hidden';
+        word-break: 'break-word';
+      `}
     >
       {children}
     </div>
@@ -200,9 +206,9 @@ function VerticalOverflowContent({
   return (
     <div
       className="eui-yScroll"
-      css={{
-        maxHeight,
-      }}
+      css={css`
+        max-height: ${maxHeight};
+      `}
     >
       {children}
     </div>
