@@ -17,7 +17,7 @@ import type {
 
 type RqCtx = RequestHandlerContextBase;
 
-/** A set of type literals to determine accepted versions */
+/** Assuming that version will be a monotonically increasing number where: version > 0. */
 export type Version = `${number}`;
 
 /** Arguments to create a {@link VersionedRouter | versioned router}. */
