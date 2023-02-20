@@ -35,7 +35,6 @@
       "kibanaReact",
       "kibanaUtils",
       "actions",
-      "cases"
     ],
     "extraPublicDirs": [
       "public/common",
