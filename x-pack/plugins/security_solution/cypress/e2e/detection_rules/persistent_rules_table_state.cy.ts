@@ -273,12 +273,12 @@ describe('Persistent rules table state', () => {
     describe('and on the rules monitoring tab', () => {
       beforeEach(() => {
         visit(SECURITY_DETECTIONS_RULES_MONITORING_URL);
-
-        changeRulesTableState();
-        goToTablePage(2);
       });
 
       it('persists the selected tab', () => {
+        changeRulesTableState();
+        goToTablePage(2);
+
         cy.reload();
 
         expectRulesMonitoringTab();
@@ -331,12 +331,12 @@ describe('Persistent rules table state', () => {
     describe('and on the rules management tab', () => {
       beforeEach(() => {
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
-
-        changeRulesTableState();
-        goToTablePage(2);
       });
 
       it('persists after clearing the session storage', () => {
+        changeRulesTableState();
+        goToTablePage(2);
+
         cy.window().then((win) => {
           win.sessionStorage.clear();
         });
@@ -348,6 +348,9 @@ describe('Persistent rules table state', () => {
       });
 
       it('persists after clearing the url state', () => {
+        changeRulesTableState();
+        goToTablePage(2);
+
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
 
         expectRulesManagementTab();
@@ -361,12 +364,12 @@ describe('Persistent rules table state', () => {
     describe('and on the rules management tab', () => {
       beforeEach(() => {
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
-
-        changeRulesTableState();
-        goToTablePage(2);
       });
 
       it('persists after corrupting the session storage data', () => {
+        changeRulesTableState();
+        goToTablePage(2);
+
         cy.window().then((win) => {
           win.sessionStorage.setItem('securitySolution.rulesTable', '!invalid');
           cy.reload();
@@ -378,6 +381,9 @@ describe('Persistent rules table state', () => {
       });
 
       it('persists after corrupting the url param data', () => {
+        changeRulesTableState();
+        goToTablePage(2);
+
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL, { qs: { rulesTable: '(!invalid)' } });
 
         expectRulesManagementTab();
@@ -386,6 +392,9 @@ describe('Persistent rules table state', () => {
       });
 
       it('DOES NOT persist after corrupting the session storage and url param data', () => {
+        changeRulesTableState();
+        goToTablePage(2);
+
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL, {
           qs: { rulesTable: '(!invalid)' },
           onBeforeLoad: (win) => {
