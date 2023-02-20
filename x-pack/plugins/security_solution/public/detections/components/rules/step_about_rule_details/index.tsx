@@ -129,7 +129,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 {(resizeRef) => (
                   <AboutContent ref={resizeRef}>
                     <VerticalOverflowContainer maxHeight={120}>
-                      <VerticalOverflowContent maxHeight={120} className="eui-yScroll">
+                      <VerticalOverflowContent maxHeight={120}>
                         <EuiText
                           size="s"
                           data-test-subj="stepAboutRuleDetailsToggleDescriptionText"
@@ -154,7 +154,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 data-test-subj="stepAboutDetailsNoteContent"
                 maxHeight={aboutPanelHeight}
               >
-                <VerticalOverflowContent maxHeight={aboutPanelHeight} className="eui-yScroll">
+                <VerticalOverflowContent maxHeight={aboutPanelHeight}>
                   <MarkdownRenderer>{stepDataDetails.note}</MarkdownRenderer>
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
@@ -164,7 +164,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 data-test-subj="stepAboutDetailsSetupContent"
                 maxHeight={aboutPanelHeight}
               >
-                <VerticalOverflowContent maxHeight={aboutPanelHeight} className="eui-yScroll">
+                <VerticalOverflowContent maxHeight={aboutPanelHeight}>
                   <MarkdownRenderer>{stepDataDetails.setup}</MarkdownRenderer>
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
@@ -177,3 +177,23 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
 };
 
 export const StepAboutRuleToggleDetails = memo(StepAboutRuleToggleDetailsComponent);
+
+interface VerticalOverflowContentProps {
+  maxHeight: number;
+}
+
+function VerticalOverflowContent({
+  maxHeight,
+  children,
+}: PropsWithChildren<VerticalOverflowContentProps>): JSX.Element {
+  return (
+    <div
+      className="eui-yScroll"
+      css={{
+        maxHeight,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
