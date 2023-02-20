@@ -14,6 +14,7 @@ import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
+  CLOUDBEAT_VULN_MGMT_AWS,
 } from '../../common/constants';
 
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
@@ -126,6 +127,19 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS EKS',
         }),
         icon: eksLogo,
+      },
+    ],
+  },
+  vuln_mgmt: {
+    policyTemplate: 'vuln_mgmt',
+    name: 'Vulnerability Management', // TODO: we should use i18n and fix this
+    shortName: 'VULN_MGMT', // TODO: we should use i18n and fix this
+    options: [
+      {
+        type: CLOUDBEAT_VULN_MGMT_AWS,
+        name: 'Amazon Web Services', // TODO: we should use i18n and fix this
+        icon: 'logoAWS',
+        benchmark: 'N/A', // TODO: change benchmark to be optional
       },
     ],
   },

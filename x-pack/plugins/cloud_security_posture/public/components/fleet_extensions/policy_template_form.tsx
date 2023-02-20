@@ -11,7 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import { useParams } from 'react-router-dom';
 import type { PostureInput, PosturePolicyTemplate } from '../../../common/types';
-import { CLOUDBEAT_AWS, CLOUDBEAT_VANILLA } from '../../../common/constants';
+import {
+  CLOUDBEAT_AWS,
+  CLOUDBEAT_VANILLA,
+  CLOUDBEAT_VULN_MGMT_AWS,
+} from '../../../common/constants';
 import { getPosturePolicy, getEnabledPostureInput, getPostureInputHiddenVars } from './utils';
 import {
   PolicyTemplateInfo,
@@ -23,6 +27,7 @@ import {
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
   cspm: CLOUDBEAT_AWS,
+  vuln_mgmt: CLOUDBEAT_VULN_MGMT_AWS,
 } as const;
 
 const EditScreenStepTitle = () => (
