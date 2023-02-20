@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import { SavedObject } from '@kbn/core-saved-objects-server';
-import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
 
 export type SavedObjectCommon<T = unknown> = SavedObject<T>;
 
@@ -20,7 +19,7 @@ export interface FindQueryHTTP {
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   fields?: string | string[];
-  hasReference?: SavedObjectsFindOptionsReference[];
+  hasReference?: string;
 }
 
 export interface FinderAttributes {
