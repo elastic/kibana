@@ -74,12 +74,24 @@ interface CreateWeatherDashboardHTTPResponse {
 // Imagine this pattern for the update and list endpoints too.
 ```
 
+These interfaces might be in use by HTTP an unversioned route such as:
+
+```ts
+import type { GetWeatherDashboardHTTPResponse } from '../common';
+
+const handler = (ctx, req, res) => {
+  const body: GetWeatherDashboardHTTPResponse = { ... };
+  return res.ok({ body });
+}
+```
+
 ### An example: Weather insights versioned
 
 The following product requirements are added to the Weather insights plugin:
 
-1. Data sources need a more user-friendly name, currently we just show a URL
-2. New feature: **Predictions** that will generate forecasts based on past and current weather data
+1. Data sources need a more user-friendly `name`, currently we just show a URL
+2. Some users have said they'd like to give data sources a short `description` too
+3. New feature: **Predictions** that will generate forecasts based on past and current weather data
 
 Before we make these changes, we need to make sure that our current interfaces are not lost.
 
@@ -124,7 +136,7 @@ export * as weatherDashboardV1 from './weather_dashboard/v1';
 export * as dataSourceV1 from './data_source/v1';
 ```
 
-How we use these types depends on whether the code is aware of versions or not. Generally, code that is aware of multiple versions will create greater complexity.
+How we use these types depends on whether the code is aware of versions or not. Generally, code that is aware of multiple versions will lead to greater complexity. We might have a logger function that expects the latest dashboards:
 
 ```ts
 // This type is being pulled from "latest", so whenever a new latest is linked,
@@ -136,12 +148,10 @@ function logIt(dashboard: WeatherDashboard) {
 }
 ```
 
-<DocCallOut title="Minimize the impact of refactors">
-  By referencing types linked from `latest.ts` we will not have to refactor all our app code to point to the latest version of `WeatherDashboard`. This happens by simply re-exporting the newest types from `latest.ts`.
-</DocCallOut>
+Or we might have a route handler that expects a specific version our domain objects:
 
 ```ts
-// Consider this route handler that expects V1 weather dashboard requests
+// Now we bring it all together by using our versioned types in our handler from before:
 import type { weatherDashboardV1 } from '../common';
 
 const handler = (ctx, req, res) => {
@@ -149,6 +159,10 @@ const handler = (ctx, req, res) => {
   return res.ok({ body });
 }
 ```
+
+<DocCallOut title="Minimize the impact of refactors">
+  By referencing types linked from `latest.ts` we will not have to refactor all our app code to point to the latest version of `WeatherDashboard`. This happens by simply re-exporting the newest types from `latest.ts`. Otherwise, code that needs to know about a specific version or versions will have access to it by using the appropriate namespace.
+</DocCallOut>
 
 ### Introducing a new field to `DataSource`
 
@@ -170,7 +184,9 @@ interface DataSource {
   /** Some URL that provides weather data in an expected format for scraping */
   url: string;
   /** A user-friendly name */
-  name?: string;
+  name: string;
+  /** A longer description of this data source */
+  description?: string;
   /** The data view data is stored in */
   dataViewId: string;
   /** Username to use with source URL */
@@ -179,6 +195,10 @@ interface DataSource {
   password?: string;
 }
 ```
+
+<DocCallOut title="What is a breaking change?">
+  If we had only added the optional `description` field to `DataSource` this would be a backwards-compatible change that does not require a new version. We could have remained on `v1` of the `DataSource` interface.
+</DocCallOut>
 
 We also need to update the `WeatherDashboard` interface to use our new `DataSource` interface:
 
@@ -308,7 +328,9 @@ interface CreatePredictionHTTPResponse {
 // And so forth...
 ```
 
-Both `WeatherDashboard` and `Prediction` reference `DataSource`. Therefore, both will increment their version whenever `DataSource` changes.
+<DocCallOut color="warning" title="Referenced interfaces affect one another">
+  Both `WeatherDashboard` and `Prediction` reference `DataSource`. Therefore, both will increment their version whenever `DataSource` changes.
+</DocCallOut>
 
 ## Challenge
 
@@ -347,7 +369,9 @@ Normalize our domain objects by only holding a reference to `DataSource` in `Wea
     /** Some URL that provides weather data in an expected format for scraping */
     url: string;
     /** A user-friendly name */
-    name?: string;
+    name: string;
+    /** A longer description of this data source */
+    description?: string;
     /** The data view data is stored in */
     dataViewId: string;
     /** Username to use with source URL */
