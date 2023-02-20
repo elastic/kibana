@@ -661,6 +661,43 @@
       },
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.FloatingActions",
+        "type": "Function",
+        "tags": [],
+        "label": "FloatingActions",
+        "description": [],
+        "signature": [
+          "({ className, actions, isEnabled, usingTwoLineLayout, children, }: React.PropsWithChildren<",
+          "FloatingActionsProps",
+          ">) => JSX.Element"
+        ],
+        "path": "src/plugins/presentation_util/public/components/floating_actions/floating_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.FloatingActions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  className = '',\n  actions,\n  isEnabled,\n  usingTwoLineLayout,\n  children,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "FloatingActionsProps",
+              ">"
+            ],
+            "path": "src/plugins/presentation_util/public/components/floating_actions/floating_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.getContextProvider",
         "type": "Function",
         "tags": [],

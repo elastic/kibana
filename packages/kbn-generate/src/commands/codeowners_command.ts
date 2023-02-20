@@ -16,34 +16,30 @@ import type { GenerateCommand } from '../generate_command';
 
 const REL = '.github/CODEOWNERS';
 
-const GENERATED_START = `
-
-####
-## Everything below this comment is automatically generated based on kibana.jsonc
-## "owner" fields. This file is automatically updated by CI or can be updated locally
-## by running \`node scripts/generate codeowners\`.
+const GENERATED_START = `####
+## Everything at the top of the codeowners file is auto generated based on the
+## "owner" fields in the kibana.jsonc files at the root of each package. This
+## file is automatically updated by CI or can be updated locally by running
+## \`node scripts/generate codeowners\`.
 ####
 
 `;
 
-const GENERATED_TRAILER = `
+const GENERATED_END = `
+####
+## Everything below this line overrides the default assignments for each package.
+## Items lower in the file have higher precedence:
+##  https://help.github.com/articles/about-codeowners/
+####
+`;
 
-# Design (at the bottom for specificity of SASS files)
+const ULTIMATE_PRIORITY_RULES = `
+####
+## These rules are always last so they take ultimate priority over everything else
+####
+
 **/*.scss  @elastic/kibana-design
 `;
-
-function normalizeDir(dirish: string): string {
-  const trim = dirish.trim();
-  if (trim.startsWith('/')) {
-    return normalizeDir(trim.slice(1));
-  }
-
-  if (trim.endsWith('/')) {
-    return normalizeDir(trim.slice(0, -1));
-  }
-
-  return trim;
-}
 
 export const CodeownersCommand: GenerateCommand = {
   name: 'codeowners',
@@ -51,39 +47,32 @@ export const CodeownersCommand: GenerateCommand = {
   usage: 'node scripts/generate codeowners',
   async run({ log }) {
     const pkgs = getPackages(REPO_ROOT);
-    const coPath = Path.resolve(REPO_ROOT, REL);
-    const codeowners = await Fsp.readFile(coPath, 'utf8');
-    let genStart: number | undefined = codeowners.indexOf(GENERATED_START);
-    if (genStart === -1) {
-      genStart = undefined;
-      log.warning(`${REL} doesn't include the expected start-marker for injecting generated text`);
+    const path = Path.resolve(REPO_ROOT, REL);
+    const oldCodeowners = await Fsp.readFile(path, 'utf8');
+    let content = oldCodeowners;
+
+    // strip the old generated output
+    const genEnd = content.indexOf(GENERATED_END);
+    if (genEnd !== -1) {
+      content = content.slice(genEnd + GENERATED_END.length);
     }
 
-    const pkgDirs = new Set(pkgs.map((pkg) => pkg.normalizedRepoRelativeDir));
-    const lines = [];
-
-    for (const line of codeowners.slice(0, genStart).split('\n')) {
-      if (line.startsWith('#') || !line.trim()) {
-        lines.push(line);
-        continue;
-      }
-
-      const dir = normalizeDir(line.split('@')[0]);
-      if (!pkgDirs.has(dir)) {
-        lines.push(line);
-      }
+    // strip the old ultimate rules
+    const ultStart = content.indexOf(ULTIMATE_PRIORITY_RULES);
+    if (ultStart !== -1) {
+      content = content.slice(0, ultStart);
     }
 
-    const newCodeowners = `${lines.join('\n')}${GENERATED_START}${pkgs
+    const newCodeowners = `${GENERATED_START}${pkgs
       .map((pkg) => `${pkg.normalizedRepoRelativeDir} ${pkg.manifest.owner.join(' ')}`)
-      .join('\n')}${GENERATED_TRAILER}`;
+      .join('\n')}${GENERATED_END}${content}${ULTIMATE_PRIORITY_RULES}`;
 
-    if (codeowners === newCodeowners) {
+    if (newCodeowners === oldCodeowners) {
       log.success(`${REL} is already up-to-date`);
       return;
     }
 
-    await Fsp.writeFile(coPath, newCodeowners);
+    await Fsp.writeFile(path, newCodeowners);
     log.info(`${REL} updated`);
   },
 };

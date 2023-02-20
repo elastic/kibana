@@ -143,6 +143,41 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.assertValidModelVersion",
+        "type": "Function",
+        "tags": [],
+        "label": "assertValidModelVersion",
+        "description": [
+          "\nAsserts the provided number or string is a valid model version, and returns it.\n\nA valid model version is a positive integer.\n"
+        ],
+        "signature": [
+          "(modelVersion: string | number) => number"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.assertValidModelVersion.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "modelVersion",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-common.decodeRequestVersion",
         "type": "Function",
         "tags": [],
@@ -551,11 +586,133 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.isVirtualModelVersion",
+        "type": "Function",
+        "tags": [],
+        "label": "isVirtualModelVersion",
+        "description": [
+          "\nReturn true if the given semver version is a virtual model version.\nVirtual model versions are version which major is the {@link modelVersionVirtualMajor}\n"
+        ],
+        "signature": [
+          "(version: string) => boolean"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.isVirtualModelVersion.$1",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.modelVersionToVirtualVersion",
+        "type": "Function",
+        "tags": [],
+        "label": "modelVersionToVirtualVersion",
+        "description": [
+          "\nReturns the virtual version associated with the given model version\n"
+        ],
+        "signature": [
+          "(modelVersion: string | number) => string"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.modelVersionToVirtualVersion.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "modelVersion",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.virtualVersionToModelVersion",
+        "type": "Function",
+        "tags": [],
+        "label": "virtualVersionToModelVersion",
+        "description": [
+          "\nConverts a virtual model version to its model version.\n"
+        ],
+        "signature": [
+          "(virtualVersion: string) => number"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.virtualVersionToModelVersion.$1",
+            "type": "string",
+            "tags": [],
+            "label": "virtualVersion",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.modelVersionVirtualMajor",
+        "type": "number",
+        "tags": [],
+        "label": "modelVersionVirtualMajor",
+        "description": [
+          "\nThe major version that is used to represent model versions."
+        ],
+        "signature": [
+          "10"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-common.SavedObjectsConfigType",

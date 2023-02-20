@@ -8,8 +8,14 @@
 import { userInfo } from 'os';
 import execa from 'execa';
 import nodeFetch from 'node-fetch';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  packagePolicyRouteService,
+  type UpdatePackagePolicyResponse,
+  type UpdatePackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import chalk from 'chalk';
+import { inspect } from 'util';
 import { getEndpointPackageInfo } from '../../../common/endpoint/index_data';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
@@ -19,6 +25,7 @@ import {
   waitForHostToEnroll,
 } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
+import { type PolicyData, ProtectionModes } from '../../../common/endpoint/types';
 
 interface ElasticArtifactSearchResponse {
   manifest: {
@@ -37,7 +44,8 @@ interface ElasticArtifactSearchResponse {
   };
 }
 
-export const enrollEndpointHost = async () => {
+export const enrollEndpointHost = async (): Promise<string | undefined> => {
+  let vmName;
   const {
     log,
     kbnClient,
@@ -73,7 +81,7 @@ export const enrollEndpointHost = async () => {
       throw new Error(`No API enrollment key found for policy id [${policyId}]`);
     }
 
-    const vmName = `${username}-dev-${uniqueId}`;
+    vmName = `${username}-dev-${uniqueId}`;
 
     log.info(`Creating VM named: ${vmName}`);
 
@@ -153,12 +161,14 @@ export const enrollEndpointHost = async () => {
     Delete VM:    ${chalk.bold(`multipass delete -p ${vmName}${await getVmCountNotice()}`)}
 `);
   } catch (error) {
-    log.error(error);
+    log.error(inspect(error, { depth: 4 }));
     log.indent(-4);
     throw error;
   }
 
   log.indent(-4);
+
+  return vmName;
 };
 
 const getAgentDownloadUrl = async (version: string): Promise<string> => {
@@ -215,8 +225,39 @@ const getOrCreateAgentPolicyId = async (): Promise<string> => {
     endpointPackageVersion,
     agentPolicyName
   );
-
   const agentPolicy = response.agentPolicies[0];
+
+  // Update the Endpoint integration policy to enable all protections
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { created_by, created_at, updated_at, updated_by, id, version, revision, ...restOfPolicy } =
+    response.integrationPolicies[0];
+  const updatedEndpointPolicy: UpdatePackagePolicy = restOfPolicy;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const policy = updatedEndpointPolicy!.inputs[0]!.config!.policy.value;
+
+  policy.mac.malware.mode = ProtectionModes.prevent;
+  policy.windows.malware.mode = ProtectionModes.prevent;
+  policy.linux.malware.mode = ProtectionModes.prevent;
+
+  policy.mac.memory_protection.mode = ProtectionModes.prevent;
+  policy.windows.memory_protection.mode = ProtectionModes.prevent;
+  policy.linux.memory_protection.mode = ProtectionModes.prevent;
+
+  policy.mac.behavior_protection.mode = ProtectionModes.prevent;
+  policy.windows.behavior_protection.mode = ProtectionModes.prevent;
+  policy.linux.behavior_protection.mode = ProtectionModes.prevent;
+
+  policy.windows.ransomware.mode = ProtectionModes.prevent;
+
+  response.integrationPolicies[0] = (
+    await kbnClient
+      .request<UpdatePackagePolicyResponse>({
+        method: 'PUT',
+        path: packagePolicyRouteService.getUpdatePath(response.integrationPolicies[0].id),
+        body: updatedEndpointPolicy,
+      })
+      .then((res) => res.data)
+  ).item as PolicyData;
 
   log.info(`New agent policy with Endpoint integration created:
   Name: ${agentPolicy.name}

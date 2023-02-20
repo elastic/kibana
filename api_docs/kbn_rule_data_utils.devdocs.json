@@ -1266,7 +1266,7 @@
         "label": "AlertConsumers",
         "description": [],
         "signature": [
-          "\"uptime\" | \"siem\" | \"apm\" | \"logs\" | \"infrastructure\" | \"observability\""
+          "\"uptime\" | \"siem\" | \"apm\" | \"logs\" | \"infrastructure\" | \"observability\" | \"slo\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -1395,6 +1395,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.MAX_CASES_PER_ALERT",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_CASES_PER_ALERT",
+        "description": [],
+        "signature": [
+          "10"
+        ],
+        "path": "packages/kbn-rule-data-utils/src/alerts_as_data_cases.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ruleDetailsRoute",
         "type": "string",
         "tags": [],
@@ -1506,7 +1521,7 @@
         "label": "ValidFeatureId",
         "description": [],
         "signature": [
-          "\"uptime\" | \"siem\" | \"apm\" | \"logs\" | \"infrastructure\" | \"observability\""
+          "\"uptime\" | \"siem\" | \"apm\" | \"logs\" | \"infrastructure\" | \"observability\" | \"slo\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -1555,7 +1570,7 @@
           "\nregistering a new instance of the rule data client\nin a new plugin will require updating the below data structure\nto include the index name where the alerts as data will be written to."
         ],
         "signature": [
-          "{ readonly APM: \"apm\"; readonly LOGS: \"logs\"; readonly INFRASTRUCTURE: \"infrastructure\"; readonly OBSERVABILITY: \"observability\"; readonly SIEM: \"siem\"; readonly UPTIME: \"uptime\"; }"
+          "{ readonly APM: \"apm\"; readonly LOGS: \"logs\"; readonly INFRASTRUCTURE: \"infrastructure\"; readonly OBSERVABILITY: \"observability\"; readonly SLO: \"slo\"; readonly SIEM: \"siem\"; readonly UPTIME: \"uptime\"; }"
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
