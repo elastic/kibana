@@ -179,6 +179,15 @@ export async function pickTestGroupRunOrder() {
     throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
   }
 
+  /**
+   * This env variable corresponds to the env stanza within
+   * https://github.com/elastic/kibana/blob/bc2cb5dc613c3d455a5fed9c54450fd7e46ffd92/.buildkite/pipelines/code_coverage/daily.yml#L17
+   * 
+   * It is a flag that signals the job for which test runners will be executed.
+   *
+   * For example in code coverage pipeline definition, it is "limited"
+   * to 'unit,integration'.  This means FTR tests will not be executed.
+   */
   const LIMIT_CONFIG_TYPE = process.env.LIMIT_CONFIG_TYPE
     ? process.env.LIMIT_CONFIG_TYPE.split(',')
         .map((t) => t.trim())
