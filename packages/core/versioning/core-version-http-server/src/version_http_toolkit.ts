@@ -11,6 +11,7 @@ import type {
   RouteConfig,
   RouteMethod,
   RequestHandler,
+  RouteConfigOptions,
   RouteValidatorFullConfig,
   RequestHandlerContextBase,
 } from '@kbn/core-http-server';
@@ -34,26 +35,30 @@ export interface CreateVersionedRouterArgs<Ctx extends RqCtx = RqCtx> {
  *
  * ```ts
  * const versionedRoute = versionedRouter
- *  .post({
- *    path: '/api/my-app/foo',
- *    options: { timeout: { payload: 60000 } },
- *  })
- *  // First version of the API, accepts { foo: string } in the body
- *  .addVersion(
- *    { version: '1', validate: { body: schema.object({ foo: schema.string() }) } },
- *    async (ctx, req, res) => {
- *      await ctx.fooService.create(req.body.foo);
- *      return res.ok({ body: { foo: req.body.foo } });
- *    }
- *  )
- *  // Second version of the API, accepts { fooName: string } in the body
- *  .addVersion(
- *    { version: '2', validate: { body: schema.object({ fooName: schema.string() }) } },
- *    async (ctx, req, res) => {
- *      await ctx.fooService.create(req.body.fooName);
- *      return res.ok({ body: { fooName: req.body.fooName } });
- *    }
- *  );
+ *   .post({
+ *     path: '/api/my-app/foo/{name?}',
+ *     options: { timeout: { payload: 60000 } },
+ *   })
+ *   // First version of the API, accepts { foo: string } in the body
+ *   .addVersion(
+ *     { version: '1', validate: { body: schema.object({ foo: schema.string() }) } },
+ *     async (ctx, req, res) => {
+ *       await ctx.fooService.create(req.body.foo);
+ *       return res.ok({ body: { foo: req.body.foo } });
+ *     }
+ *   )
+ *   // Second version of the API, accepts { fooName: string } in the body
+ *   .addVersion(
+ *     {
+ *       version: '2',
+ *       path: '/api/my-app/foo/{id?}', // Update the path to something new
+ *       validate: { body: schema.object({ fooName: schema.string() }) },
+ *     },
+ *     async (ctx, req, res) => {
+ *       await ctx.fooService.create(req.body.fooName);
+ *       return res.ok({ body: { fooName: req.body.fooName } });
+ *     }
+ *   );
  * ```
  */
 export interface VersionHTTPToolkit {
@@ -68,7 +73,7 @@ export interface VersionHTTPToolkit {
 }
 
 /**
- * Configuraiton for a versioned route
+ * Configuration for a versioned route
  */
 export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
@@ -83,7 +88,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
  */
 export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCtx = RqCtx> = (
   config: VersionedRouteConfig<Method>
-) => VersionedRoute<Ctx>;
+) => VersionedRoute<Method, Ctx>;
 
 /**
  * A router, very similar to {@link IRouter} that will return an {@link VersionedRoute}
@@ -102,15 +107,25 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
  * Options for a versioned route. Probably needs a lot more options like sunsetting
  * of an endpoint etc.
  */
-export interface AddVersionOpts<P, Q, B> {
+export interface AddVersionOpts<P, Q, B, Method extends RouteMethod = RouteMethod>
+  extends RouteConfigOptions<Method> {
   /** Version to assign to this route */
   version: Version;
   /** Validation for this version of a route */
   validate: false | RouteValidatorFullConfig<P, Q, B>;
+  /**
+   * Override the path of of this "route". Useful to update, add or change existing path parameters.
+   * @note This option should preferably not introduce dramatic changes to the path as we may be
+   *       better of creating a new route entirely.
+   */
+  path?: string;
 }
 
 /** A versioned route */
-export interface VersionedRoute<Ctx extends RqCtx = RqCtx> {
+export interface VersionedRoute<
+  Method extends RouteMethod = RouteMethod,
+  Ctx extends RqCtx = RqCtx
+> {
   /**
    * Add a new version of this route
    * @param opts {@link AddVersionOpts | Options} for this version of a route
@@ -120,5 +135,5 @@ export interface VersionedRoute<Ctx extends RqCtx = RqCtx> {
   addVersion<P, Q, B>(
     opts: AddVersionOpts<P, Q, B>,
     handler: RequestHandler<P, Q, B, Ctx>
-  ): VersionedRoute<Ctx>;
+  ): VersionedRoute<Method, Ctx>;
 }

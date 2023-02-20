@@ -21,7 +21,7 @@ const versionedRouter = vtk.createVersionedRouter({ router });
 // @ts-ignore unused variable
 const versionedRoute = versionedRouter
   .post({
-    path: '/api/my-app/foo',
+    path: '/api/my-app/foo/{name?}',
     options: { timeout: { payload: 60000 } },
   })
   // First version of the API, accepts { foo: string } in the body
@@ -34,7 +34,11 @@ const versionedRoute = versionedRouter
   )
   // Second version of the API, accepts { fooName: string } in the body
   .addVersion(
-    { version: '2', validate: { body: schema.object({ fooName: schema.string() }) } },
+    {
+      version: '2',
+      path: '/api/my-app/foo/{id?}', // Update the path to something new
+      validate: { body: schema.object({ fooName: schema.string() }) },
+    },
     async (ctx, req, res) => {
       await ctx.fooService.create(req.body.fooName);
       return res.ok({ body: { fooName: req.body.fooName } });
