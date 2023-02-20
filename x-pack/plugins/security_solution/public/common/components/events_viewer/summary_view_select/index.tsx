@@ -82,6 +82,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
     () => [
       {
         label: gridView,
+        'data-test-subj': 'gridView',
         key: 'gridView',
         checked: (viewSelected === 'gridView' ? 'on' : undefined) as EuiSelectableOption['checked'],
         meta: [
@@ -99,6 +100,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
       {
         label: eventRenderedView,
         key: 'eventRenderedView',
+        'data-test-subj': 'eventRenderedView',
         checked: (viewSelected === 'eventRenderedView'
           ? 'on'
           : undefined) as EuiSelectableOption['checked'],

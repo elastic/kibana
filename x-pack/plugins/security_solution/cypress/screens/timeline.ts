@@ -315,5 +315,5 @@ export const HOVER_ACTIONS = {
   FILTER_FOR: '[data-test-subj="filter-for-value"]',
   FILTER_OUT: '[data-test-subj="filter-out-value"]',
   COPY: '[data-test-subj="clipboard"]',
-  SHOW_TOP: 'show-top-field',
+  SHOW_TOP: '[data-test-subj=show-top-field]',
 };

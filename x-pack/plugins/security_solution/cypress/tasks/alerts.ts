@@ -36,6 +36,8 @@ import {
   CELL_FILTER_IN_BUTTON,
   CELL_SHOW_TOP_FIELD_BUTTON,
   ACTIONS_EXPAND_BUTTON,
+  ALERT_TABLE_SUMMARY_VIEW_SELECTABLE,
+  ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -385,4 +387,14 @@ export const resetFilters = () => {
    * waitforpagefilters();
    *
    * */
+};
+
+export const waitForTopNHistogramToLoad = () => {
+  cy.get(ALERTS_HISTOGRAM_PANEL_LOADER).should('exist');
+  cy.get(ALERTS_HISTOGRAM_PANEL_LOADER).should('not.exist');
+};
+
+export const switchAlertTableToEventRenderedView = () => {
+  cy.get(ALERT_TABLE_SUMMARY_VIEW_SELECTABLE).should('be.visible').trigger('click');
+  cy.get(ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION).should('be.visible').trigger('click');
 };
