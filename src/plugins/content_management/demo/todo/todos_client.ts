@@ -32,7 +32,7 @@ export class TodosClient implements CrudClient {
   async create(input: TodoCreateIn): Promise<Todo> {
     const todo = {
       id: uuidv4(),
-      title: input.data.title as string,
+      title: input.data.title,
       completed: false,
     };
     this.todos.push(todo);
@@ -48,7 +48,7 @@ export class TodosClient implements CrudClient {
   }
 
   async search(input: TodoSearchIn): Promise<TodoSearchOut> {
-    const filter = input.params.filter as string;
+    const filter = input.params.filter;
     if (filter === 'todo') return { hits: this.todos.filter((t) => !t.completed) };
     if (filter === 'completed') return { hits: this.todos.filter((t) => t.completed) };
     return { hits: [...this.todos] };
