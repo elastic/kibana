@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { ALERT_STATUS, ValidFeatureId } from '@kbn/rule-data-utils';
 
 import { useAlertsCount } from './use_alerts_count';
 import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -15,6 +15,25 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
 
 const mockedAlertsCountResponse = {
+  aggregations: {
+    count: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: 'active',
+          doc_count: 2,
+        },
+        {
+          key: 'recovered',
+          doc_count: 20,
+        },
+      ],
+    },
+  },
+};
+
+const expectedResult = {
   activeAlertCount: 2,
   recoveredAlertCount: 20,
 };
@@ -55,7 +74,7 @@ describe('useAlertsCount', () => {
     await waitForNextUpdate();
 
     const { alertsCount, loading, error } = result.current;
-    expect(alertsCount).toEqual(mockedAlertsCountResponse);
+    expect(alertsCount).toEqual(expectedResult);
     expect(loading).toBeFalsy();
     expect(error).toBeFalsy();
   });
@@ -78,10 +97,19 @@ describe('useAlertsCount', () => {
 
     await waitForNextUpdate();
 
-    const body = JSON.stringify({ featureIds, query });
+    const body = JSON.stringify({
+      aggs: {
+        count: {
+          terms: { field: ALERT_STATUS },
+        },
+      },
+      featureIds,
+      query,
+      size: 0,
+    });
 
     expect(mockedPostAPI).toHaveBeenCalledWith(
-      '/internal/rac/alerts/_alerts_count',
+      '/internal/rac/alerts/find',
       expect.objectContaining({ body })
     );
   });
