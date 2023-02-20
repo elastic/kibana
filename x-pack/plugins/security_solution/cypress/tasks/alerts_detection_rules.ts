@@ -397,6 +397,11 @@ export const expectNoFilterByTags = () => {
   cy.get(RULES_TAGS_FILTER_POPOVER).find(RULES_SELECTED_TAG).should('not.exist');
 };
 
+export const expectFilterByPrebuiltRules = () => {
+  cy.log(`Expecting rules table filtering by prebuilt rules`);
+  cy.get(`${ELASTIC_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+};
+
 export const expectFilterByCustomRules = () => {
   cy.log(`Expecting rules table filtering by custom rules`);
   cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');

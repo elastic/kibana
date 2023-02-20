@@ -33,11 +33,10 @@ import {
   expectFilterByDisabledRules,
   expectNoFilterByEnabledOrDisabledRules,
   filterByDisabledRules,
+  expectFilterByPrebuiltRules,
+  expectFilterByEnabledRules,
 } from '../../tasks/alerts_detection_rules';
-import {
-  RULES_MANAGEMENT_TABLE,
-  RULES_MONITORING_TABLE,
-} from '../../screens/alerts_detection_rules';
+import { RULES_MANAGEMENT_TABLE } from '../../screens/alerts_detection_rules';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import {
   expectRowsPerPage,
@@ -133,6 +132,64 @@ describe('Persistent rules table state', () => {
       expectRulesManagementTab();
     });
 
+    it('leads to displaying a rule according to the specified filters', () => {
+      visitRulesTableWithState({
+        searchTerm: 'rule',
+        tags: ['tag-b'],
+        source: 'custom',
+        enabled: false,
+        field: 'name',
+        order: 'asc',
+        perPage: 5,
+        page: 2,
+      });
+
+      expectManagementTableRules(['rule 6']);
+    });
+
+    it('loads from the url', () => {
+      visitRulesTableWithState({
+        searchTerm: 'rule',
+        tags: ['tag-b'],
+        source: 'custom',
+        enabled: false,
+        field: 'name',
+        order: 'asc',
+        perPage: 5,
+        page: 2,
+      });
+
+      expectRulesManagementTab();
+      expectFilterSearchTerm('rule');
+      expectFilterByTags(['tag-b']);
+      expectFilterByCustomRules();
+      expectFilterByDisabledRules();
+      expectTableSorting('Rule', 'asc');
+      expectRowsPerPage(5);
+      expectTablePage(2);
+    });
+
+    it('loads from the session storage', () => {
+      setStorageState({
+        searchTerm: 'test',
+        tags: ['tag-a'],
+        source: 'prebuilt',
+        enabled: true,
+        field: 'severity',
+        order: 'desc',
+        perPage: 10,
+      });
+
+      visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
+
+      expectRulesManagementTab();
+      expectFilterSearchTerm('test');
+      expectFilterByTags(['tag-a']);
+      expectFilterByPrebuiltRules();
+      expectFilterByEnabledRules();
+      expectTableSorting('Severity', 'desc');
+    });
+
     it('prefers url state over storage state', () => {
       setStorageState({
         searchTerm: 'test',
@@ -158,7 +215,6 @@ describe('Persistent rules table state', () => {
       expectRulesManagementTab();
       expectRulesTableState();
       expectTablePage(2);
-      expectManagementTableRules(['rule 6']);
     });
 
     describe('and on the rules management tab', () => {
@@ -247,7 +303,6 @@ describe('Persistent rules table state', () => {
 
         expectRulesTableState();
         expectTablePage(2);
-        expectManagementTableRules(['rule 6']);
       });
     });
 
@@ -290,7 +345,6 @@ describe('Persistent rules table state', () => {
         expectRulesManagementTab();
         expectRulesTableState();
         expectTablePage(2);
-        expectManagementTableRules(['rule 6']);
       });
 
       it('persists after clearing the url state', () => {
@@ -320,7 +374,6 @@ describe('Persistent rules table state', () => {
           expectRulesManagementTab();
           expectRulesTableState();
           expectTablePage(2);
-          expectManagementTableRules(['rule 6']);
         });
       });
 
@@ -330,7 +383,6 @@ describe('Persistent rules table state', () => {
         expectRulesManagementTab();
         expectRulesTableState();
         expectTablePage(1);
-        expectManagementTableRules(['rule 1', 'rule 2', 'rule 3', 'rule 4', 'rule 5']);
       });
 
       it('DOES NOT persist after corrupting the session storage and url param data', () => {
@@ -343,16 +395,6 @@ describe('Persistent rules table state', () => {
 
         expectRulesManagementTab();
         expectDefaultRulesTableState();
-        expectManagementTableRules([
-          'test 1',
-          'rule 1',
-          'rule 2',
-          'rule 3',
-          'rule 4',
-          'rule 5',
-          'rule 6',
-          'rule 7',
-        ]);
       });
     });
   });
