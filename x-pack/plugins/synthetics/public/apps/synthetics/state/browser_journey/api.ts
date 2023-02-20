@@ -74,7 +74,7 @@ export async function fetchLastSuccessfulCheck({
 export async function getJourneyScreenshot(
   imgSrc: string,
   shouldBackoff = true,
-  maxRetry = 7,
+  maxRetry = 15,
   initialBackoff = 100
 ): Promise<ScreenshotImageBlob | ScreenshotRefImageData | null> {
   try {
