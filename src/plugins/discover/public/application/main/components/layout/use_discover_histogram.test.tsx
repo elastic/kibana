@@ -184,6 +184,7 @@ describe('useDiscoverHistogram', () => {
         'timeRange',
         'chartHidden',
         'timeInterval',
+        'columns',
         'breakdownField',
         'searchSessionId',
         'totalHitsStatus',
