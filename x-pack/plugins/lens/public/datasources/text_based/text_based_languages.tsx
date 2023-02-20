@@ -127,6 +127,7 @@ export function getTextBasedDatasource({
             query,
             columns: newColumns ?? [],
             allColumns: newColumns ?? [],
+            timeField: context.dataViewSpec.timeFieldName,
           },
         },
       };

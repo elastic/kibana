@@ -21,12 +21,14 @@ export const useLensProps = ({
   refetch$,
   attributes,
   onLoad,
+  isPlainRecord,
 }: {
   request?: UnifiedHistogramRequestContext;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
   attributes: TypedLensByValueInput['attributes'];
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
+  isPlainRecord?: boolean;
 }) => {
   const buildLensProps = useCallback(
     () =>
@@ -47,6 +49,14 @@ export const useLensProps = ({
     return () => subscription.unsubscribe();
   }, [refetch$, updateLensProps]);
 
+  if (Boolean(isPlainRecord)) {
+    return getLensProps({
+      searchSessionId: request?.searchSessionId,
+      getTimeRange,
+      attributes,
+      onLoad,
+    });
+  }
   return lensProps;
 };
 

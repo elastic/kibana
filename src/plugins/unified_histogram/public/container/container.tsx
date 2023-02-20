@@ -81,6 +81,7 @@ export type UnifiedHistogramInitializedApi = {
   | 'setChartHidden'
   | 'setTopPanelHeight'
   | 'setBreakdownField'
+  | 'setColumns'
   | 'setTimeInterval'
   | 'setRequestParams'
   | 'setTotalHits'
@@ -130,6 +131,7 @@ export const UnifiedHistogramContainer = forwardRef<
         'setChartHidden',
         'setTopPanelHeight',
         'setBreakdownField',
+        'setColumns',
         'setTimeInterval',
         'setRequestParams',
         'setTotalHits'
@@ -141,7 +143,7 @@ export const UnifiedHistogramContainer = forwardRef<
   // Expose the API to the parent component
   useImperativeHandle(ref, () => api, [api]);
 
-  const stateProps = useStateProps(stateService);
+  const stateProps = useStateProps(stateService, layoutProps?.services);
   const dataView = useStateSelector(stateService?.state$, dataViewSelector);
   const query = useStateSelector(stateService?.state$, querySelector);
   const filters = useStateSelector(stateService?.state$, filtersSelector);

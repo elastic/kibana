@@ -91,6 +91,7 @@ import type {
   EditorFrameSetup,
   LensTopNavMenuEntryGenerator,
   VisualizeEditorContext,
+  Suggestion,
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
@@ -234,6 +235,10 @@ export interface LensPublicStart {
   stateHelperApi: () => Promise<{
     formula: FormulaPublicApi;
     chartInfo: ChartInfoApi;
+    suggestionsApi: (
+      context: VisualizeFieldContext | VisualizeEditorContext,
+      dataViews: DataView
+    ) => Suggestion[] | undefined;
   }>;
 }
 

@@ -9,6 +9,7 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { Suggestion } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices } from '../../types';
@@ -29,6 +30,12 @@ export interface UnifiedHistogramState {
    * The current field used for the breakdown
    */
   breakdownField: string | undefined;
+  /**
+   * The current selected columns
+   */
+  columns: string[] | undefined;
+  currentSuggestion: Suggestion | undefined;
+  allSuggestions: Suggestion[] | undefined;
   /**
    * Whether or not the chart is hidden
    */
@@ -110,6 +117,20 @@ export interface UnifiedHistogramStateService {
    */
   setChartHidden: (chartHidden: boolean) => void;
   /**
+   * Sets current Lens suggestion
+   */
+  setCurrentSuggestion: (suggestion: Suggestion | undefined) => void;
+
+  /**
+   * Sets all Lens suggestions
+   */
+  setAllSuggestions: (suggestions: Suggestion[] | undefined) => void;
+
+  /**
+   * Sets columns
+   */
+  setColumns: (columns: string[] | undefined) => void;
+  /**
    * Sets the current top panel height
    */
   setTopPanelHeight: (topPanelHeight: number | undefined) => void;
@@ -163,7 +184,10 @@ export const createStateService = (
   const state$ = new BehaviorSubject({
     breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
+    columns: [],
     filters: [],
+    currentSuggestion: undefined,
+    allSuggestions: undefined,
     lensRequestAdapter: undefined,
     query: services.data.query.queryString.getDefaultQuery(),
     requestAdapter: undefined,
@@ -208,6 +232,17 @@ export const createStateService = (
       }
 
       updateState({ breakdownField });
+    },
+
+    setCurrentSuggestion: (suggestion: Suggestion | undefined) => {
+      updateState({ currentSuggestion: suggestion });
+    },
+    setColumns: (columns: string[] | undefined) => {
+      updateState({ columns });
+    },
+
+    setAllSuggestions: (suggestions: Suggestion[] | undefined) => {
+      updateState({ allSuggestions: suggestions });
     },
 
     setTimeInterval: (timeInterval: string) => {

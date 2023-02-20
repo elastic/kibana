@@ -12,7 +12,7 @@ import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput, Suggestion } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
@@ -48,6 +48,12 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * The current filters
    */
   filters?: Filter[];
+  /**
+   * The selected columns
+   */
+  columns?: string[];
+  currentSuggestion?: Suggestion;
+  isPlainRecord?: boolean;
   /**
    * The current time range
    */
@@ -141,6 +147,9 @@ export const UnifiedHistogramLayout = ({
   dataView,
   query,
   filters,
+  columns,
+  currentSuggestion,
+  isPlainRecord,
   timeRange,
   request,
   hits,
@@ -214,6 +223,9 @@ export const UnifiedHistogramLayout = ({
           timeRange={timeRange}
           request={request}
           hits={hits}
+          columns={columns}
+          currentSuggestion={currentSuggestion}
+          isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
           appendHitsCounter={appendHitsCounter}

@@ -15,6 +15,7 @@ import {
   UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
+import { AggregateQuery, Query, isOfAggregateQueryType } from '@kbn/es-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { distinctUntilChanged, map, Observable } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -26,6 +27,7 @@ import type { DataFetch$, SavedSearchData } from '../../services/discover_data_s
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../services/discover_state';
+import { getResolvedDateRange } from './utils';
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
@@ -52,6 +54,12 @@ export const useDiscoverHistogram = ({
    */
 
   const [unifiedHistogram, setUnifiedHistogram] = useState<UnifiedHistogramInitializedApi>();
+  const prev = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] | undefined }>(
+    {
+      columns: [],
+      query: undefined,
+    }
+  );
 
   const setUnifiedHistogramApi = useCallback(
     (api: UnifiedHistogramApi | null) => {
@@ -66,12 +74,15 @@ export const useDiscoverHistogram = ({
           hideChart: chartHidden,
           interval: timeInterval,
           breakdownField,
+          columns,
         } = stateContainer.appState.getState();
 
         const { fetchStatus: totalHitsStatus, result: totalHitsResult } =
           savedSearchData$.totalHits$.getValue();
 
         const { query, filters, time: timeRange } = services.data.query.getState();
+        prev.current.query = query;
+        prev.current.columns = columns;
 
         api.initialize({
           services: { ...services, uiActions: getUiActions() },
@@ -85,6 +96,7 @@ export const useDiscoverHistogram = ({
             timeRange,
             chartHidden,
             timeInterval,
+            columns,
             breakdownField,
             searchSessionId,
             totalHitsStatus: totalHitsStatus.toString() as UnifiedHistogramFetchStatus,
@@ -142,10 +154,18 @@ export const useDiscoverHistogram = ({
     toDate: to,
   } = useQuerySubscriber({ data: services.data });
 
-  const timeRange = useMemo(
+  let timeRange = useMemo(
     () => (from && to ? { from, to } : timefilter.getTimeDefaults()),
     [timefilter, from, to]
   );
+
+  if (query && isOfAggregateQueryType(query)) {
+    const dateRange = getResolvedDateRange(services.data.query.timefilter.timefilter);
+    timeRange = {
+      from: dateRange.fromDate,
+      to: dateRange.toDate,
+    };
+  }
 
   useEffect(() => {
     unifiedHistogram?.setRequestParams({
@@ -213,6 +233,17 @@ export const useDiscoverHistogram = ({
   useEffect(() => {
     unifiedHistogram?.setBreakdownField(breakdownField);
   }, [breakdownField, unifiedHistogram]);
+
+  const columns = useAppStateSelector((state) => state.columns);
+
+  useEffect(() => {
+    // Update the columns only when the query changes
+    if (!isEqual(columns, prev.current.columns) && !isEqual(query, prev.current.query)) {
+      unifiedHistogram?.setColumns(columns);
+      prev.current.query = query;
+      prev.current.columns = columns;
+    }
+  }, [columns, query, unifiedHistogram]);
 
   /**
    * Total hits

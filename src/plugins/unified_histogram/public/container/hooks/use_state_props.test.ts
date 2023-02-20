@@ -36,6 +36,9 @@ describe('useStateProps', () => {
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
+    columns: [],
+    currentSuggestion: undefined,
+    allSuggestions: undefined,
   };
 
   const getStateService = (options: Omit<UnifiedHistogramStateOptions, 'services'>) => {
@@ -72,6 +75,8 @@ describe('useStateProps', () => {
           "hidden": false,
           "timeInterval": "auto",
         },
+        "columns": Array [],
+        "currentSuggestion": undefined,
         "hits": Object {
           "status": "uninitialized",
           "total": undefined,
@@ -79,6 +84,7 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
+        "onSuggestionChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -105,10 +111,13 @@ describe('useStateProps', () => {
       Object {
         "breakdown": undefined,
         "chart": undefined,
+        "columns": Array [],
+        "currentSuggestion": undefined,
         "hits": undefined,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
+        "onSuggestionChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -141,6 +150,8 @@ describe('useStateProps', () => {
       Object {
         "breakdown": undefined,
         "chart": undefined,
+        "columns": Array [],
+        "currentSuggestion": undefined,
         "hits": Object {
           "status": "uninitialized",
           "total": undefined,
@@ -148,6 +159,7 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
+        "onSuggestionChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -174,6 +186,8 @@ describe('useStateProps', () => {
       Object {
         "breakdown": undefined,
         "chart": undefined,
+        "columns": Array [],
+        "currentSuggestion": undefined,
         "hits": Object {
           "status": "uninitialized",
           "total": undefined,
@@ -181,6 +195,7 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
+        "onSuggestionChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],

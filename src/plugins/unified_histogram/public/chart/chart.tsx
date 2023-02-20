@@ -17,6 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Suggestion } from '@kbn/lens-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -50,6 +51,9 @@ export interface ChartProps {
   dataView: DataView;
   query?: Query | AggregateQuery;
   filters?: Filter[];
+  columns?: string[];
+  isPlainRecord?: boolean;
+  currentSuggestion?: Suggestion;
   timeRange?: TimeRange;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
@@ -85,6 +89,8 @@ export function Chart({
   hits,
   chart,
   breakdown,
+  currentSuggestion,
+  isPlainRecord,
   appendHitsCounter,
   appendHistogram,
   disableAutoFetching,
@@ -188,8 +194,17 @@ export function Chart({
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
+        suggestion: currentSuggestion,
       }),
-    [breakdown?.field, chart?.timeInterval, chart?.title, dataView, filters, query]
+    [
+      breakdown?.field,
+      chart?.timeInterval,
+      chart?.title,
+      currentSuggestion,
+      dataView,
+      filters,
+      query,
+    ]
   );
 
   const getRelativeTimeRange = useMemo(
@@ -315,6 +330,7 @@ export function Chart({
               getTimeRange={getTimeRange}
               refetch$={refetch$}
               lensAttributes={lensAttributes}
+              isPlainRecord={isPlainRecord}
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}

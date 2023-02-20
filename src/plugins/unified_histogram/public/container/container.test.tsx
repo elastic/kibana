@@ -31,6 +31,9 @@ describe('UnifiedHistogramContainer', () => {
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
+    columns: [],
+    allSuggestions: undefined,
+    currentSuggestion: undefined,
   };
 
   it('should set ref', () => {

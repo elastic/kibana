@@ -28,7 +28,15 @@ export const unifiedHistogramServicesMock = {
     useChartsTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
     useChartsBaseTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
   },
-  lens: { EmbeddableComponent: jest.fn(() => null), navigateToPrefilledEditor: jest.fn() },
+  lens: {
+    EmbeddableComponent: jest.fn(() => null),
+    navigateToPrefilledEditor: jest.fn(),
+    stateHelperApi: jest.fn(() => {
+      return {
+        suggestionsApi: jest.fn(),
+      };
+    }),
+  },
   storage: {
     get: jest.fn(),
     set: jest.fn(),

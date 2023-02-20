@@ -38,6 +38,7 @@ export interface HistogramProps {
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
+  isPlainRecord?: boolean;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
   lensAttributes: TypedLensByValueInput['attributes'];
@@ -55,6 +56,7 @@ export function Histogram({
   request,
   hits,
   chart: { timeInterval },
+  isPlainRecord,
   getTimeRange,
   refetch$,
   lensAttributes: attributes,
@@ -120,6 +122,7 @@ export function Histogram({
     refetch$,
     attributes,
     onLoad,
+    isPlainRecord,
   });
 
   const { euiTheme } = useEuiTheme();
