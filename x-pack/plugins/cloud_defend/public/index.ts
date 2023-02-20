@@ -7,7 +7,10 @@
 import { CloudDefendPlugin } from './plugin';
 
 export type { CloudDefendSecuritySolutionContext } from './types';
-export { getSecuritySolutionLink } from './common/navigation/security_solution_links';
+export {
+  getSecuritySolutionLink,
+  getSecuritySolutionNavTab,
+} from './common/navigation/security_solution_links';
 export { CLOUD_DEFEND_BASE_PATH } from './common/navigation/constants';
 export type { CloudDefendPageId } from './common/navigation/types';
 
