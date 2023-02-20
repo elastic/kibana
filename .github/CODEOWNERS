@@ -770,10 +770,10 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/plugins/observability/public/pages/cases  @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/rules  @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/rule_details  @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/slos  @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/slo_edit  @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/slo_details  @elastic/actionable-observability
 /x-pack/test/observability_functional @elastic/actionable-observability
-
-# keep it below actionable observability
-x-pack/plugins/observability @elastic/observability-ui
 
 # Infra Monitoring
 /x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui
