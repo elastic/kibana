@@ -26,3 +26,7 @@ export const OLDEST = i18n.translate('xpack.cases.userActionsActivity.sort.oldes
 export const NEWEST = i18n.translate('xpack.cases.userActionsActivity.sort.newest', {
   defaultMessage: 'Newest first',
 });
+
+export const SORT_BY = i18n.translate('xpack.cases.userActionsActivity.sort.sortBy', {
+  defaultMessage: 'Sort by',
+});

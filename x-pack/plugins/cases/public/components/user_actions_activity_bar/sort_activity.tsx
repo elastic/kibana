@@ -40,7 +40,7 @@ export const SortActivity = React.memo<FilterActivityProps>(
 
     return (
       <EuiSelect
-        prepend="SortBy"
+        prepend={i18n.SORT_BY}
         data-test-subj="user-actions-sort-select"
         isLoading={isLoading}
         onChange={onChange}
