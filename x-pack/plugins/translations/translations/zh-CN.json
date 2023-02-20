@@ -2339,7 +2339,6 @@
     "discover.sourceViewer.errorMessage": "当前无法获取数据。请刷新选项卡以重试。",
     "discover.sourceViewer.errorMessageTitle": "发生错误",
     "discover.sourceViewer.refresh": "刷新",
-    "discover.textBasedLanguages.visualize.label": "在 Lens 中可视化",
     "discover.toggleSidebarAriaLabel": "切换侧边栏",
     "discover.topNav.openOptionsPopover.documentExplorerDisabledHint": "您知道吗？Discover 有一种新的 Document Explorer，可提供更好的数据排序、可调整大小的列及全屏视图。您可以在高级设置中更改视图模式。",
     "discover.topNav.openOptionsPopover.documentExplorerEnabledHint": "您可以在高级设置中切换回经典 Discover 视图。",
