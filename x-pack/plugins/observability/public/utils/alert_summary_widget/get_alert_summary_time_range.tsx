@@ -10,12 +10,10 @@ import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AlertSummaryTimeRange } from '@kbn/triggers-actions-ui-plugin/public';
+import { defaultTimeRage } from './constants';
 
 export const getDefaultAlertSummaryTimeRange = (): AlertSummaryTimeRange => {
-  const { to, from } = getAbsoluteTimeRange({
-    from: 'now-30d',
-    to: 'now',
-  });
+  const { to, from } = getAbsoluteTimeRange(defaultTimeRage);
 
   return {
     utcFrom: from,

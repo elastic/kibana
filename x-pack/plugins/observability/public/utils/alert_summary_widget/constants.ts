@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export { defaultTimeRage } from './constants';
-export {
-  getDefaultAlertSummaryTimeRange,
-  getAlertSummaryTimeRange,
-} from './get_alert_summary_time_range';
+export const defaultTimeRage = {
+  from: 'now-30d',
+  to: 'now',
+};
