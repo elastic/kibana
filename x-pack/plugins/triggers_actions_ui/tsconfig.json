@@ -46,7 +46,8 @@
     "@kbn/core-capabilities-common",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
-    "@kbn/alerts-ui-shared"
+    "@kbn/alerts-ui-shared",
+    "@kbn/safer-lodash-set"
   ],
   "exclude": [
     "target/**/*"
