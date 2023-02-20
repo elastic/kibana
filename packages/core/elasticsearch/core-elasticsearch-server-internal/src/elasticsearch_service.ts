@@ -181,7 +181,7 @@ export class ElasticsearchService
       logger: this.coreContext.logger.get('elasticsearch'),
       type,
       authHeaders: this.authHeaders,
-      getExecutionContext: () => this.executionContextClient?.getAsHeader(),
+      executionContext: this.executionContextClient,
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
       agentFactoryProvider: this.agentManager,
       kibanaVersion: this.kibanaVersion,

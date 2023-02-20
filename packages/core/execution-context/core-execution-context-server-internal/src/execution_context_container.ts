@@ -51,11 +51,33 @@ function stringify(ctx: KibanaExecutionContext): string {
   return ctx.child ? `${stringifiedCtx};${stringify(ctx.child)}` : stringifiedCtx;
 }
 
+/** get the sum of this context's circuit breaker and all child circuit breakers of type `breaker` */
+function getCircuitBreaker(
+  ctx: KibanaExecutionContext,
+  breaker: keyof Required<KibanaExecutionContext>['circuitBreakers']
+): number {
+  return (
+    (ctx.circuitBreakers ? ctx.circuitBreakers[breaker] : 0) +
+    (ctx.child ? getCircuitBreaker(ctx.child, breaker) : 0)
+  );
+}
+
 export class ExecutionContextContainer implements IExecutionContextContainer {
-  readonly #context: Readonly<KibanaExecutionContext>;
+  readonly #context: KibanaExecutionContext;
 
   constructor(context: KibanaExecutionContext, parent?: IExecutionContextContainer) {
     this.#context = parent ? { ...parent.toJSON(), child: context } : context;
+  }
+
+  getCircuitBreaker(breaker: keyof Required<KibanaExecutionContext>['circuitBreakers']) {
+    return getCircuitBreaker(this.#context, breaker);
+  }
+
+  incrementCircuitBreaker(breaker: keyof Required<KibanaExecutionContext>['circuitBreakers']) {
+    if (this.#context.circuitBreakers === undefined) {
+      this.#context.circuitBreakers = { requests: 0 };
+    }
+    return ++this.#context.circuitBreakers[breaker];
   }
 
   toString(): string {

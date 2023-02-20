@@ -31,4 +31,7 @@ export type KibanaExecutionContext = {
   readonly meta?: { [key: string]: string | number | boolean | undefined };
   /** an inner context spawned from the current context. */
   child?: KibanaExecutionContext;
+  circuitBreakers?: {
+    requests: number;
+  };
 };
