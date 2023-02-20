@@ -40,7 +40,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { BetaBadge } from '../../../shared/beta_badge';
 import { replace } from '../../../shared/links/url_helpers';
-import { SearchBar } from '../../../shared/search_bar';
+import { SearchBar } from '../../../shared/search_bar/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';

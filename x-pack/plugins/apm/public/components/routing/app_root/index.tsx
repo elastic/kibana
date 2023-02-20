@@ -21,26 +21,26 @@ import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import { Route } from '@kbn/shared-ux-router';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
-import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
+import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,
   ApmPluginContextValue,
-} from '../../context/apm_plugin/apm_plugin_context';
-import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
-import { BreadcrumbsContextProvider } from '../../context/breadcrumbs/context';
-import { LicenseProvider } from '../../context/license/license_context';
-import { TimeRangeIdContextProvider } from '../../context/time_range_id/time_range_id_context';
-import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
-import { ApmPluginStartDeps } from '../../plugin';
-import { ScrollToTopOnPathChange } from '../app/main/scroll_to_top_on_path_change';
-import { ApmHeaderActionMenu } from '../shared/apm_header_action_menu';
-import { RedirectWithDefaultDateRange } from '../shared/redirect_with_default_date_range';
-import { RedirectWithDefaultEnvironment } from '../shared/redirect_with_default_environment';
-import { RedirectWithOffset } from '../shared/redirect_with_offset';
-import { ApmErrorBoundary } from './apm_error_boundary';
-import { apmRouter } from './apm_route_config';
-import { RedirectDependenciesToDependenciesInventory } from './home/redirect_dependencies_to_dependencies_inventory';
-import { TrackPageview } from './track_pageview';
+} from '../../../context/apm_plugin/apm_plugin_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { BreadcrumbsContextProvider } from '../../../context/breadcrumbs/context';
+import { LicenseProvider } from '../../../context/license/license_context';
+import { TimeRangeIdContextProvider } from '../../../context/time_range_id/time_range_id_context';
+import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
+import { ApmPluginStartDeps } from '../../../plugin';
+import { ScrollToTopOnPathChange } from './scroll_to_top_on_path_change';
+import { ApmHeaderActionMenu } from './apm_header_action_menu';
+import { RedirectWithDefaultDateRange } from './redirect_with_default_date_range';
+import { RedirectWithDefaultEnvironment } from './redirect_with_default_environment';
+import { RedirectWithOffset } from './redirect_with_offset';
+import { ApmErrorBoundary } from '../apm_error_boundary';
+import { apmRouter } from '../apm_route_config';
+import { RedirectDependenciesToDependenciesInventory } from './redirect_dependencies_to_dependencies_inventory';
+import { TrackPageview } from '../track_pageview';
 
 const storage = new Storage(localStorage);
 
