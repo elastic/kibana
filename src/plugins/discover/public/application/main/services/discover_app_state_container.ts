@@ -292,10 +292,12 @@ function getInitialState(
     services,
   });
   return handleSourceColumnState(
-    {
-      ...defaultAppState,
-      ...appStateFromUrl,
-    },
+    savedSearch.id
+      ? defaultAppState
+      : {
+          ...defaultAppState,
+          ...appStateFromUrl,
+        },
     services.uiSettings
   );
 }

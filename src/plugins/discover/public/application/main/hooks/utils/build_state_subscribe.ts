@@ -32,7 +32,7 @@ export const buildStateSubscribe =
   async (nextState: AppState) => {
     const prevState = stateContainer.appState.getPrevious();
     if (isEqualState(prevState, nextState)) {
-      addLog('[appstate] subscribe update ignored due to no changes');
+      addLog('[appstate] subscribe update ignored due to no changes', { prevState, nextState });
       return;
     }
     addLog('[appstate] subscribe triggered', nextState);
