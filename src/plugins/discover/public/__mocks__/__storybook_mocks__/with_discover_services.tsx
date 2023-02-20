@@ -65,7 +65,11 @@ const filterManager = {
 };
 
 export const services = {
-  core: { http: { basePath: { prepend: () => void 0 } }, notifications: { toasts: {} } },
+  core: {
+    http: { basePath: { prepend: () => void 0 } },
+    notifications: { toasts: {} },
+    docLinks: { links: { discover: {} } },
+  },
   storage: new LocalStorageMock({
     [SIDEBAR_CLOSED_KEY]: false,
   }) as unknown as Storage,
@@ -85,6 +89,7 @@ export const services = {
           getFetch$: () => ({}),
           getAutoRefreshFetch$: () => new Observable(),
           calculateBounds: () => ({ min: undefined, max: undefined }),
+          getTimeDefaults: () => ({}),
         },
       },
       savedQueries: { findSavedQueries: () => Promise.resolve({ queries: [] as SavedQuery[] }) },
@@ -113,6 +118,8 @@ export const services = {
     },
     dataViews: {
       getIdsWithTitle: () => Promise.resolve([]),
+      get: () => Promise.resolve({}),
+      find: () => Promise.resolve([]),
     },
   },
   uiSettings: uiSettingsMock,
@@ -163,6 +170,9 @@ export const services = {
   },
   toastNotifications: {
     addInfo: action('add toast'),
+  },
+  lens: {
+    EmbeddableComponent: <>Histogram</>,
   },
 } as unknown as DiscoverServices;
 

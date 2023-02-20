@@ -30,6 +30,28 @@ import {
 } from '../../../services/discover_state';
 import { services } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
 
+const documentObservables = {
+  main$: new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    foundDocuments: true,
+  }) as DataMain$,
+
+  documents$: new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    result: buildDataTableRecordList(esHits),
+  }) as DataDocuments$,
+
+  availableFields$: new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    fields: [] as string[],
+  }) as AvailableFields$,
+
+  totalHits$: new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    result: Number(esHits.length),
+  }) as DataTotalHits$,
+};
+
 const plainRecordObservables = {
   main$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -121,8 +143,10 @@ export function getDocumentsLayoutProps(dataView: DataView) {
       query: '',
     },
     filters: [],
+    hideChart: true,
   });
   stateContainer.actions.setDataView(dataView);
+  stateContainer.dataState.data$ = documentObservables;
   return {
     ...getCommonProps(dataView),
     stateContainer,
@@ -130,9 +154,24 @@ export function getDocumentsLayoutProps(dataView: DataView) {
 }
 
 export const getPlainRecordLayoutProps = (dataView: DataView) => {
+  const stateContainer = getDiscoverStateContainer({
+    history: createHashHistory(),
+    savedSearch: getSavedSearch(dataView),
+    services,
+  });
+  stateContainer.appState.set({
+    columns: ['name', 'message', 'bytes'],
+    sort: [['date', 'desc']],
+    query: {
+      sql: 'SELECT * FROM "kibana_sample_data_ecommerce"',
+    },
+    filters: [],
+  });
+  stateContainer.actions.setDataView(dataView);
+  stateContainer.dataState.data$ = plainRecordObservables;
   return {
     ...getCommonProps(dataView),
-    savedSearchData$: plainRecordObservables,
+    stateContainer,
     state: {
       columns: ['name', 'message', 'bytes'],
       sort: [['date', 'desc']],
