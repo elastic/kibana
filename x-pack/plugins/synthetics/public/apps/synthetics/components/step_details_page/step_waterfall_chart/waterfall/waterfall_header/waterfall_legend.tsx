@@ -8,7 +8,14 @@
 import React, { Dispatch, SetStateAction, useState, useCallback, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { EuiIcon, EuiText, EuiFlexGroup, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiText,
+  EuiFlexGroup,
+  EuiButtonEmpty,
+  EuiFlexItem,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import {
   FriendlyTimingLabels,
@@ -17,6 +24,8 @@ import {
   Timings,
 } from '../../../common/network_data/types';
 import { colourPalette } from '../../../common/network_data/data_formatting';
+
+import { ViewApmLink } from './view_apm_link';
 
 interface Props {
   activeFilters: string[];
@@ -62,6 +71,10 @@ export const WaterfallLegend = ({ activeFilters, setActiveFilters }: Props) => {
               {CLEAR_FILTER_LABEL}
             </EuiButtonEmpty>
           ) : null}
+
+          <EuiFlexItem grow={true} />
+
+          <ViewApmLink />
         </EuiFlexGroup>
         <EuiFlexGroup>
           <EuiFlexGroup wrap={true} css={{ gap: `min(3%, ${euiTheme.size.l})` }}>

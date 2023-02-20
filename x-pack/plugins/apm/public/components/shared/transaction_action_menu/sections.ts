@@ -69,6 +69,14 @@ export const getSections = ({
     )}`,
   });
 
+  const tracedSyntheticsMonitor = transaction.transaction.synthetics?.monitor;
+  const syntheticsLink = url.format({
+    pathname: `${basePath.get()}/app/synthetics/monitor/${
+      tracedSyntheticsMonitor?.id
+    }/test-run/${tracedSyntheticsMonitor?.check_group}/step/1`,
+    search: ``,
+  });
+
   const podActions: Action[] = [
     {
       key: 'podLogs',
@@ -178,6 +186,15 @@ export const getSections = ({
           filter: `trace.id:"${transaction.trace.id}" OR (not trace.id:* AND "${transaction.trace.id}")`,
         },
       }),
+      condition: true,
+    },
+    {
+      key: 'syntheticsTest',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.viewSyntheticsTest',
+        { defaultMessage: 'View test run in Synthetics' }
+      ),
+      href: syntheticsLink,
       condition: true,
     },
   ];
