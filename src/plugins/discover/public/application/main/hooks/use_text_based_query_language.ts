@@ -123,7 +123,7 @@ export function useTextBasedQueryLanguage({
           ...(addDataViewToState && { index: dataViewObj.id }),
           ...(addColumnsToState && { columns: nextColumns }),
         };
-        stateContainer.replaceUrlAppState(nextState);
+        stateContainer.appState.replaceUrlState(nextState);
       } else {
         // cleanup for a "regular" query
         cleanup();

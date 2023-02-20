@@ -125,6 +125,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Unavailable',
       description: 'Displayed button text when a card option is unavailable.',
     }),
+    'euiCodeBlockAnnotations.ariaLabel': ({ lineNumber }: EuiValues) =>
+      i18n.translate('core.euiCodeBlockAnnotations.ariaLabel', {
+        defaultMessage: 'Click to view a code annotation for line {lineNumber}',
+        values: { lineNumber },
+        description:
+          'ARIA label for a button icon that toggles a popover annotation for a specific code line',
+      }),
     'euiCodeBlockCopy.copy': i18n.translate('core.euiCodeBlockCopy.copy', {
       defaultMessage: 'Copy',
       description: 'ARIA label for a button that copies source code text to the clipboard',
@@ -743,6 +750,23 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFlyout.closeAriaLabel': i18n.translate('core.euiFlyout.closeAriaLabel', {
       defaultMessage: 'Close this dialog',
     }),
+    'euiFlyout.screenReaderModalDialog': i18n.translate('core.euiFlyout.screenReaderModalDialog', {
+      defaultMessage:
+        'You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.',
+    }),
+    'euiFlyout.screenReaderNonModalDialog': i18n.translate(
+      'core.euiFlyout.screenReaderNonModalDialog',
+      {
+        defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
+      }
+    ),
+    'euiFlyout.screenReaderFixedHeaders': i18n.translate(
+      'core.euiFlyout.screenReaderFixedHeaders',
+      {
+        defaultMessage:
+          'You can still continue tabbing through the page headers in addition to the dialog.',
+      }
+    ),
     'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
       defaultMessage: 'Please address the highlighted errors.',
     }),
