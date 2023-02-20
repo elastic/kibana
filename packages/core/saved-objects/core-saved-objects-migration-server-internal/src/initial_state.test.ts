@@ -370,6 +370,22 @@ describe('createInitialState', () => {
                       "should": Array [
                         Object {
                           "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "typeMigrationVersion",
+                                },
+                              },
+                              Object {
+                                "exists": Object {
+                                  "field": "migrationVersion.my_dashboard",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        Object {
+                          "bool": Object {
                             "must": Object {
                               "exists": Object {
                                 "field": "migrationVersion",
@@ -383,19 +399,10 @@ describe('createInitialState', () => {
                           },
                         },
                         Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "migrationVersion",
-                                },
-                              },
-                              Object {
-                                "term": Object {
-                                  "typeMigrationVersion": "7.10.1",
-                                },
-                              },
-                            ],
+                          "range": Object {
+                            "typeMigrationVersion": Object {
+                              "lt": "7.10.1",
+                            },
                           },
                         },
                       ],
@@ -417,6 +424,22 @@ describe('createInitialState', () => {
                       "should": Array [
                         Object {
                           "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "typeMigrationVersion",
+                                },
+                              },
+                              Object {
+                                "exists": Object {
+                                  "field": "migrationVersion.my_viz",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        Object {
+                          "bool": Object {
                             "must": Object {
                               "exists": Object {
                                 "field": "migrationVersion",
@@ -430,19 +453,10 @@ describe('createInitialState', () => {
                           },
                         },
                         Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "migrationVersion",
-                                },
-                              },
-                              Object {
-                                "term": Object {
-                                  "typeMigrationVersion": "8.0.0",
-                                },
-                              },
-                            ],
+                          "range": Object {
+                            "typeMigrationVersion": Object {
+                              "lt": "8.0.0",
+                            },
                           },
                         },
                       ],

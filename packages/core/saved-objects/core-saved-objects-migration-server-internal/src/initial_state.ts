@@ -64,17 +64,20 @@ export const createInitialState = ({
                 should: [
                   {
                     bool: {
+                      must_not: [
+                        { exists: { field: 'typeMigrationVersion' } },
+                        { exists: { field: `migrationVersion.${type}` } },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
                       must: { exists: { field: 'migrationVersion' } },
                       must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
                     },
                   },
                   {
-                    bool: {
-                      must_not: [
-                        { exists: { field: 'migrationVersion' } },
-                        { term: { typeMigrationVersion: latestVersion } },
-                      ],
-                    },
+                    range: { typeMigrationVersion: { lt: latestVersion } },
                   },
                 ],
               },
