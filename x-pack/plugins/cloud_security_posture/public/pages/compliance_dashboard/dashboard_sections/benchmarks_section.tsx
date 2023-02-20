@@ -40,11 +40,7 @@ export const getClusterIdQuery = (cluster: Cluster) => {
   if (cluster.meta.benchmark.posture_type === CSPM_POLICY_TEMPLATE) {
     return { 'cloud.account.name': cluster.meta.cloud?.account.name };
   }
-  if (cluster.meta.benchmark.posture_type === 'kspm') {
-    return { cluster_id: cluster.meta.assetIdentifierId };
-  }
-
-  return {};
+  return { cluster_id: cluster.meta.assetIdentifierId };
 };
 
 export const BenchmarksSection = ({

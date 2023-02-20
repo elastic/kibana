@@ -71,6 +71,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
 
         const query: QueryDslQueryContainer = {
           bool: {
+            // TODO: FIX POSTURE_TYPE
             filter: [{ term: { 'rule.benchmark.posture_type': policyTemplate } }],
           },
         };

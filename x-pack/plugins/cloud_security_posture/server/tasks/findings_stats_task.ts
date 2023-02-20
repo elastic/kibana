@@ -115,6 +115,7 @@ const getScoreQuery = (): SearchRequest => ({
   aggs: {
     score_by_policy_template: {
       terms: {
+        // TODO: FIX POSTURE_TYPE
         field: 'rule.benchmark.posture_type',
       },
       aggs: {

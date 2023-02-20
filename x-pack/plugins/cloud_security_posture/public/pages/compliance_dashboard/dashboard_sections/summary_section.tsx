@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlexItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { statusColors } from '../../../common/constants';
 import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
 import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
@@ -39,8 +40,10 @@ export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
 export const getPolicyTemplateQuery = (policyTemplate: PosturePolicyTemplate) => {
   if (policyTemplate === CSPM_POLICY_TEMPLATE)
     return { 'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE };
+  // TODO: FIX POSTURE_TYPE
   if (policyTemplate === KSPM_POLICY_TEMPLATE)
     return { 'rule.benchmark.posture_type': KSPM_POLICY_TEMPLATE };
+
   return {};
 };
 
@@ -124,7 +127,13 @@ export const SummarySection = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="l">
+    <EuiFlexGroup
+      gutterSize="l"
+      css={css`
+        // height for compliance by cis section with max rows
+        height: 310px;
+      `}
+    >
       <EuiFlexItem grow={dashboardColumnsGrow.first}>
         <EuiFlexGroup direction="column">
           {counters.map((counter) => (
