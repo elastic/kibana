@@ -8,3 +8,4 @@
 
 export const PER_PAGE_SETTING = 'savedObjects:perPage';
 export const LISTING_LIMIT_SETTING = 'savedObjects:listingLimit';
+export type { SavedObjectCommon, FindQueryHTTP, FindResponseHTTP, FinderAttributes } from './types';

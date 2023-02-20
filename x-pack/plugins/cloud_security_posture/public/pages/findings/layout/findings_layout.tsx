@@ -247,24 +247,44 @@ const FilterableCell: React.FC<{
         display: flex;
       `}
     >
-      <EuiButtonIcon
-        iconType="plusInCircleFilled"
-        onClick={onAddFilter}
-        data-test-subj={FINDINGS_TABLE_CELL_ADD_FILTER}
-        aria-label={i18n.translate('xpack.csp.findings.findingsTableCell.addFilterButton', {
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.csp.findings.findingsTableCell.addFilterButtonTooltip', {
           defaultMessage: 'Add {field} filter',
           values: { field },
         })}
-      />
-      <EuiButtonIcon
-        iconType="minusInCircleFilled"
-        onClick={onAddNegateFilter}
-        data-test-subj={FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER}
-        aria-label={i18n.translate('xpack.csp.findings.findingsTableCell.addNegateFilterButton', {
-          defaultMessage: 'Add {field} negated filter',
-          values: { field },
-        })}
-      />
+      >
+        <EuiButtonIcon
+          iconType="plusInCircleFilled"
+          onClick={onAddFilter}
+          data-test-subj={FINDINGS_TABLE_CELL_ADD_FILTER}
+          aria-label={i18n.translate('xpack.csp.findings.findingsTableCell.addFilterButton', {
+            defaultMessage: 'Add {field} filter',
+            values: { field },
+          })}
+        />
+      </EuiToolTip>
+
+      <EuiToolTip
+        position="top"
+        content={i18n.translate(
+          'xpack.csp.findings.findingsTableCell.addNegatedFilterButtonTooltip',
+          {
+            defaultMessage: 'Add {field} negated filter',
+            values: { field },
+          }
+        )}
+      >
+        <EuiButtonIcon
+          iconType="minusInCircleFilled"
+          onClick={onAddNegateFilter}
+          data-test-subj={FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER}
+          aria-label={i18n.translate('xpack.csp.findings.findingsTableCell.addNegateFilterButton', {
+            defaultMessage: 'Add {field} negated filter',
+            values: { field },
+          })}
+        />
+      </EuiToolTip>
     </div>
   </div>
 );
