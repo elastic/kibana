@@ -45,6 +45,20 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
           (field) => !getFieldState(field, formState).invalid
         );
       break;
+    case 'sli.apm.transactionErrorRate':
+      isIndicatorSectionValid =
+        (
+          [
+            'indicator.params.service',
+            'indicator.params.environment',
+            'indicator.params.transactionType',
+            'indicator.params.transactionName',
+          ] as const
+        ).every((field) => !getFieldState(field, formState).invalid && getValues(field) !== '') &&
+        (['indicator.params.index', 'indicator.params.goodStatusCodes'] as const).every(
+          (field) => !getFieldState(field, formState).invalid
+        );
+      break;
     default:
       isIndicatorSectionValid = false;
       break;
