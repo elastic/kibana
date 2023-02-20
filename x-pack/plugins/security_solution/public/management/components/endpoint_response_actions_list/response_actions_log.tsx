@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiEmptyPrompt, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 
 import type { CriteriaWithPagination } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
@@ -27,7 +27,7 @@ import { useActionHistoryUrlParams } from './components/use_action_history_url_p
 import { useUrlPagination } from '../../hooks/use_url_pagination';
 import { ManagementPageLoader } from '../management_page_loader';
 import { ActionsLogEmptyState } from './components/actions_log_empty_state';
-import { useResponseActionsLogTable } from './use_response_actions_log_table';
+import { ActionsLogTable } from './components/actions_log_table';
 
 export const ResponseActionsLog = memo<
   Pick<EndpointActionListRequestQuery, 'agentIds'> & {
@@ -99,16 +99,8 @@ export const ResponseActionsLog = memo<
 
   // total actions
   const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
-
-  // table columns and expanded row state
-  const { itemIdToExpandedRowMap, recordRangeLabel, responseActionListColumns, tablePagination } =
-    useResponseActionsLogTable({
-      showHostNames,
-      pageIndex: isFlyout ? (queryParams.page || 1) - 1 : paginationFromUrlParams.page - 1,
-      pageSize: isFlyout ? queryParams.pageSize || 10 : paginationFromUrlParams.pageSize,
-      queryParams,
-      totalItemCount,
-    });
+  // table items
+  const tableItems = useMemo(() => actionList?.data ?? [], [actionList?.data]);
 
   // Hide page header when there is no actions index calling the setIsDataInResponse with false value.
   // Otherwise, it shows the page header calling the setIsDataInResponse with true value and it also keeps track
@@ -249,22 +241,17 @@ export const ResponseActionsLog = memo<
           </EuiFlexItem>
         </ManagementEmptyStateWrapper>
       ) : (
-        <>
-          {recordRangeLabel}
-          <EuiHorizontalRule margin="xs" />
-          <EuiBasicTable
-            data-test-subj={getTestId('table-view')}
-            items={actionList?.data || []}
-            columns={responseActionListColumns}
-            itemId="id"
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            isExpandable
-            pagination={tablePagination}
-            onChange={handleTableOnChange}
-            loading={isFetching}
-            error={error !== null ? UX_MESSAGES.fetchError : undefined}
-          />
-        </>
+        <ActionsLogTable
+          data-test-subj={getTestId('table-view')}
+          error={error !== null ? UX_MESSAGES.fetchError : undefined}
+          items={tableItems}
+          isFlyout={isFlyout}
+          loading={isFetching}
+          onChange={handleTableOnChange}
+          queryParams={queryParams}
+          showHostNames={showHostNames}
+          totalItemCount={totalItemCount}
+        />
       )}
     </>
   );

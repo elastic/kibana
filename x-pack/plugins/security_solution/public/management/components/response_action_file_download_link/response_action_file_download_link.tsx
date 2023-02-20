@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo, type CSSProperties } from 'react';
-import { EuiButtonEmpty, EuiLoadingContent, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSkeletonText, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -91,7 +91,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     }
 
     if (isFetching) {
-      return <EuiLoadingContent lines={1} data-test-subj={getTestId('loading')} />;
+      return <EuiSkeletonText lines={1} data-test-subj={getTestId('loading')} />;
     }
 
     // Check if file is no longer available
