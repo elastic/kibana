@@ -2646,7 +2646,7 @@ describe('successful migrations', () => {
           actionRef: '1',
           actionTypeId: '1',
           params: { foo: true },
-          uuid: expect.any(String),
+          uuid: expect.stringMatching(/.*\S.*/), // non-empty string
         },
       ]);
     });
