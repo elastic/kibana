@@ -17,6 +17,7 @@ import {
 import { fetchFleetUsage } from '../collectors/register';
 
 import { waitForFleetSetup } from './helpers';
+import { ToolingLog } from '@kbn/tooling-log';
 
 const logFilePath = path.join(__dirname, 'logs.log');
 
@@ -103,8 +104,17 @@ describe('fleet usage telemetry', () => {
       await kbnServer.stop();
     }
 
-    if (esServer) {
+    // if (esServer) {
+    //   await esServer.stop();
+    // }
+    try {
       await esServer.stop();
+    } catch (e) {
+      const logger = new ToolingLog({
+        level: 'info',
+        writeTo: process.stdout,
+      });
+      logger.info(`### Error attempting to force the esServer to stop`, e);
     }
 
     await new Promise((res) => setTimeout(res, 10000));
