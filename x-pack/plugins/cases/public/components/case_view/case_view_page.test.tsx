@@ -223,6 +223,34 @@ describe('CaseViewPage', () => {
     });
   });
 
+  it('renders the descriptions user correctly', async () => {
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+    const description = within(screen.getByTestId('description-action'));
+
+    await waitFor(() => {
+      expect(description.getByText('Leslie Knope')).toBeInTheDocument();
+    });
+  });
+
+  it('it should persist the draft of new comment while description is updated', async () => {
+    const newComment = 'another cool comment';
+
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), newComment);
+
+    userEvent.click(screen.getByTestId('editable-description-edit-icon'));
+
+    userEvent.type(screen.getAllByTestId('euiMarkdownEditorTextArea')[0], 'Edited!');
+
+    userEvent.click(screen.getByTestId('user-action-save-markdown'));
+
+    await waitForComponentToUpdate();
+
+    expect(screen.queryByTestId('euiMarkdownEditorTextArea')).toHaveTextContent(newComment);
+  });
+
   it('should display tags isLoading', async () => {
     useUpdateCaseMock.mockImplementation(() => ({
       ...defaultUpdateCaseState,
@@ -581,41 +609,6 @@ describe('CaseViewPage', () => {
       await act(async () => {
         expect(result.queryByTestId('case-view-alerts-table-experimental-badge')).toBeTruthy();
       });
-    });
-  });
-
-  describe('description', () => {
-    it('renders the descriptions user correctly', async () => {
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-      const description = within(screen.getByTestId('description-action'));
-
-      await waitFor(() => {
-        expect(description.getByText('Leslie Knope')).toBeInTheDocument();
-      });
-    });
-
-    it('it should persist the draft of new comment while description is updated', async () => {
-      const newComment = 'another cool comment';
-
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), newComment);
-
-      userEvent.click(screen.getByTestId('editable-description-edit-icon'));
-
-      await waitForComponentToUpdate();
-
-      userEvent.clear(screen.getAllByTestId('euiMarkdownEditorTextArea')[0]);
-
-      userEvent.type(screen.getAllByTestId('euiMarkdownEditorTextArea')[0], newComment);
-
-      userEvent.click(screen.getByTestId('user-action-save-markdown'));
-
-      await waitForComponentToUpdate();
-
-      expect(screen.queryByTestId('user-action-markdown-form')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('euiMarkdownEditorTextArea')).toHaveTextContent(newComment);
     });
   });
 });
