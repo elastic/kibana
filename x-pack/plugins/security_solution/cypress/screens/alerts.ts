@@ -9,8 +9,10 @@ export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
 
 export const ADD_ENDPOINT_EXCEPTION_BTN = '[data-test-subj="add-endpoint-exception-menu-item"]';
 
-export const ALERT_COUNT_TABLE_FIRST_ROW_COUNT =
-  '[data-test-subj="alertsCountTable"] tr:nth-child(1) td:nth-child(2) .euiTableCellContent__text';
+export const ALERT_COUNT_TABLE_COLUMN = (column: number) =>
+  `[data-test-subj="embeddablePanel"] [data-test-subj="dataGridRowCell"]:nth-child(${column}) [data-test-subj="lnsTableCellContent"]`;
+
+export const ALERT_EMBEDDABLE_PROGRESS_BAR = '[data-test-subj="embeddablePanel"] .euiProgress';
 
 export const ALERT_CHECKBOX = '[data-test-subj~="select-event"].euiCheckbox__input';
 
@@ -28,9 +30,6 @@ export const ALERTS = '[data-test-subj="events-viewer-panel"][data-test-subj="ev
 
 export const ALERTS_COUNT =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
-
-export const ALERTS_TREND_SIGNAL_RULE_NAME_PANEL =
-  '[data-test-subj="render-content-kibana.alert.rule.name"]';
 
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 

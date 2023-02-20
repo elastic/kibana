@@ -36,6 +36,8 @@ import {
   CELL_FILTER_IN_BUTTON,
   CELL_SHOW_TOP_FIELD_BUTTON,
   ACTIONS_EXPAND_BUTTON,
+  ALERT_EMBEDDABLE_PROGRESS_BAR,
+  ALERT_COUNT_TABLE_COLUMN,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -385,4 +387,24 @@ export const resetFilters = () => {
    * waitforpagefilters();
    *
    * */
+};
+
+export const checkAlertCountFromAlertCountTable = (expectedNumberOfAlerts: number | string) => {
+  let sumOfEachRow = 0;
+
+  cy.get(ALERT_EMBEDDABLE_PROGRESS_BAR)
+    .should('not.exist')
+    .then(() => {
+      cy.get(ALERT_COUNT_TABLE_COLUMN(3))
+        .each((row) => {
+          sumOfEachRow += parseInt(row.text(), 10);
+        })
+        .then(() => {
+          const expectedNumber =
+            typeof expectedNumberOfAlerts === 'number'
+              ? expectedNumberOfAlerts
+              : parseInt(expectedNumberOfAlerts, 10);
+          expect(sumOfEachRow).to.eq(expectedNumber);
+        });
+    });
 };

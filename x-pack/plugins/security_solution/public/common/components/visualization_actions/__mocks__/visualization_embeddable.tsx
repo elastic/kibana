@@ -7,4 +7,6 @@
 
 import React from 'react';
 
-export const VisualizationEmbeddable = () => <div data-test-subj="visualization-embeddable" />;
+export const VisualizationEmbeddable = jest
+  .fn()
+  .mockReturnValue(<div data-test-subj="visualization-embeddable" />);
