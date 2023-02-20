@@ -17,7 +17,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 
-import type { ClosureType } from '../../containers/configure/types';
+import type { CaseConnector, ClosureType } from '../../containers/configure/types';
 
 import { SectionWrapper, ContentWrapper, WhitePageWrapper } from '../wrappers';
 import { Connectors } from './connectors';
@@ -60,6 +60,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
     null
   );
+  const [newlyCreatedConnectorItem, setNewlyCreatedConnectorItem] = useState<CaseConnector | null>(
+    null
+  );
 
   const {
     connector,
@@ -92,6 +95,15 @@ export const ConfigureCases: React.FC = React.memo(() => {
       refetchCaseConfigure();
     },
     [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
+  );
+
+  const onConnectorCreated = useCallback(
+    async (createdConnector) => {
+      setNewlyCreatedConnectorItem(createdConnector);
+      onConnectorUpdated(createdConnector);
+      
+    },
+    [setNewlyCreatedConnectorItem, onConnectorUpdated]
   );
 
   const isLoadingAny =
@@ -140,6 +152,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   );
 
   useEffect(() => {
+    console.log('configure cases', connectors, connector);
     if (
       !isLoadingConnectors &&
       connector.id !== 'none' &&
@@ -168,7 +181,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         ? triggersActionsUi.getAddConnectorFlyout({
             onClose: onCloseAddFlyout,
             featureId: CasesConnectorFeatureId,
-            onConnectorCreated: onConnectorUpdated,
+            onConnectorCreated: onConnectorCreated,
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -236,7 +249,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 isLoading={isLoadingAny}
                 mappings={mappings}
                 onChangeConnector={onChangeConnector}
-                selectedConnector={connector}
+                selectedConnector={newlyCreatedConnectorItem || connector}
                 updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
               />
             </SectionWrapper>
