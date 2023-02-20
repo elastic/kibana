@@ -102,7 +102,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     'xpack.apm.settings.agentConfiguration.service.otel.error',
     {
       defaultMessage:
-        'Select service uses an OpenTelemetry agent, which is not supported',
+        'Selected service uses an OpenTelemetry agent, which is not supported',
     }
   );
 
@@ -137,19 +137,10 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         error={INCORRECT_SERVICE_NAME_TRANSLATED}
       />
       {isAllOptionSelected && (
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.apm.settings.agentConfiguration.all.option.calloutTitle',
-            {
-              defaultMessage: 'Proceed with caution!',
-            }
-          )}
-          color="warning"
-          iconType="help"
-        >
+        <EuiCallOut color="warning" iconType="help">
           <EuiText size="s">
             <FormattedMessage
-              defaultMessage="All services, except the ones using OpenTelemtry agents, will be affected by this configuration."
+              defaultMessage="The configuration you are about to create will apply to all types of APM services, except those using an OpenTelemetry agent"
               id="xpack.apm.settings.agentConfiguration.all.option.calloutDescription"
             />
           </EuiText>
