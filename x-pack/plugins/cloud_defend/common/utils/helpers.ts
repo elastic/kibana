@@ -6,6 +6,7 @@
  */
 
 import { Truthy } from 'lodash';
+import { INTEGRATION_PACKAGE_NAME } from '../constants';
 
 /**
  * @example
@@ -29,3 +30,6 @@ export function assert(condition: any, msg?: string): asserts condition {
     throw new Error(msg);
   }
 }
+
+export const isCloudDefendPackage = (packageName?: string) =>
+  packageName === INTEGRATION_PACKAGE_NAME;

@@ -13,6 +13,7 @@ import type {
   SavedObjectsClientContract,
   IScopedClusterClient,
 } from '@kbn/core/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   FleetStartContract,
   FleetRequestHandlerContext,
@@ -40,6 +41,7 @@ export interface CloudDefendPluginStartDeps {
   data: DataPluginStart;
   fleet: FleetStartContract;
   security: SecurityPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 export interface CloudDefendApiRequestHandlerContext {

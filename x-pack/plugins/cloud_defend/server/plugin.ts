@@ -5,14 +5,16 @@
  * 2.0.
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   CloudDefendPluginSetup,
   CloudDefendPluginStart,
   CloudDefendPluginStartDeps,
   CloudDefendPluginSetupDeps,
 } from './types';
-import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
 import { setupRoutes } from './routes/setup_routes';
+import { isCloudDefendPackage } from '../common/utils/helpers';
+import { isSubscriptionAllowed } from '../common/utils/subscription';
 
 export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDefendPluginStart> {
   private readonly logger: Logger;
@@ -42,8 +44,20 @@ export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDe
     this.logger.debug('cloudDefend: Started');
 
     plugins.fleet.fleetSetupCompleted().then(async () => {
-      const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
-        INTEGRATION_PACKAGE_NAME
+      plugins.fleet.registerExternalCallback(
+        'packagePolicyCreate',
+        async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
+          const license = await plugins.licensing.refresh();
+          if (isCloudDefendPackage(packagePolicy.package?.name)) {
+            if (!isSubscriptionAllowed(this.isCloudEnabled, license)) {
+              throw new Error(
+                'To use this feature you must upgrade your subscription or start a trial'
+              );
+            }
+          }
+
+          return packagePolicy;
+        }
       );
     });
 

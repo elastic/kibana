@@ -170,6 +170,7 @@ export const Policies = () => {
         pageIndex={query.page}
         pageSize={pageSize || query.perPage}
         sorting={{
+          // @ts-expect-error - EUI types currently do not support sorting by nested fields
           sort: { field: query.sortField, direction: query.sortOrder },
           allowNeutralSort: false,
         }}
