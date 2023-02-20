@@ -30,31 +30,32 @@ const useUpdateTodoMutation = () => useUpdateContentMutation<TodoUpdateIn, Todo>
 const useSearchTodosQuery = ({ filter }: { filter: TodoSearchIn['params']['filter'] }) =>
   useSearchContentQuery<TodoSearchIn, TodoSearchOut>({ contentType: 'todos', params: { filter } });
 
+type TodoFilter = 'all' | 'completed' | 'todo';
+const filters = [
+  {
+    id: `all`,
+    label: 'All',
+  },
+  {
+    id: `completed`,
+    label: 'Completed',
+  },
+  {
+    id: `todo`,
+    label: 'Todo',
+  },
+];
+
 export const Todos = () => {
-  const [filterIdSelected, setFilterIdSelected] = React.useState('all');
+  const [filterIdSelected, setFilterIdSelected] = React.useState<TodoFilter>('all');
 
   const { data, isLoading, isError, error } = useSearchTodosQuery({
-    filter: filterIdSelected === 'all' ? undefined : (filterIdSelected as 'completed' | 'todo'),
+    filter: filterIdSelected === 'all' ? undefined : filterIdSelected,
   });
 
   const createTodoMutation = useCreateTodoMutation();
   const deleteTodoMutation = useDeleteTodoMutation();
   const updateTodoMutation = useUpdateTodoMutation();
-
-  const filters = [
-    {
-      id: `all`,
-      label: 'All',
-    },
-    {
-      id: `completed`,
-      label: 'Completed',
-    },
-    {
-      id: `todo`,
-      label: 'Todo',
-    },
-  ];
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error: {error}</p>;
@@ -65,7 +66,7 @@ export const Todos = () => {
         legend="Todo filters"
         options={filters}
         idSelected={filterIdSelected}
-        onChange={(id) => setFilterIdSelected(id)}
+        onChange={(id) => setFilterIdSelected(id as TodoFilter)}
       />
       <EuiSpacer />
       <ul>
