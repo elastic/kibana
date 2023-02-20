@@ -20,7 +20,7 @@ interface Props {
 }
 
 export const EmptyPrompt: FunctionComponent<Props> = ({ kind, multiple }) => {
-  const { state } = useFilePickerContext();
+  const { state, uploadMeta } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   return (
     <EuiEmptyPrompt
@@ -32,6 +32,7 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ kind, multiple }) => {
           css={css`
             min-width: calc(${euiTheme.size.xxxl} * 6);
           `}
+          meta={uploadMeta as Record<string, unknown>}
           kind={kind}
           immediate
           multiple={multiple}
