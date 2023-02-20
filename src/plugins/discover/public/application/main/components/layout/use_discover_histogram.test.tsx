@@ -92,7 +92,9 @@ describe('useDiscoverHistogram', () => {
       breakdownField: 'extension',
     });
     const wrappedStateContainer = Object.create(stateContainer);
-    wrappedStateContainer.setAppState = jest.fn((newState) => stateContainer.appState.update(newState));
+    wrappedStateContainer.setAppState = jest.fn((newState) =>
+      stateContainer.appState.update(newState)
+    );
     return wrappedStateContainer;
   };
 
