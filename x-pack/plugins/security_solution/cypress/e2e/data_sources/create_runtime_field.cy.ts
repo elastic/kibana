@@ -16,36 +16,43 @@ import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { getNewRule } from '../../objects/rule';
 import { refreshPage } from '../../tasks/security_header';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { assertFieldDisplayed, createField } from '../../tasks/create_runtime_field';
+import { createField } from '../../tasks/create_runtime_field';
 import { openAlertsFieldBrowser } from '../../tasks/alerts';
-import { deleteAlertsIndex } from '../../tasks/sourcerer';
+import { deleteRuntimeField } from '../../tasks/sourcerer';
+
+const alertRunTimeField = 'field.name.alert.page';
+const timelineRuntimeField = 'field.name.timeline';
 
 describe('Create DataView runtime field', () => {
   before(() => {
-    deleteAlertsIndex();
     login();
   });
 
+  before(() => {
+    deleteRuntimeField('security-solution-default', alertRunTimeField);
+    deleteRuntimeField('security-solution-default', timelineRuntimeField);
+  });
+
   it('adds field to alert table', () => {
-    const fieldName = 'field.name.alert.page';
     visit(ALERTS_URL);
     createCustomRuleEnabled(getNewRule());
     refreshPage();
     waitForAlertsToPopulate();
     openAlertsFieldBrowser();
 
-    createField(fieldName);
-    assertFieldDisplayed(fieldName, 'alerts');
+    createField(alertRunTimeField);
+    cy.get(`[data-test-subj="dataGridHeaderCell-${alertRunTimeField}"]`).should('exist');
   });
 
   it('adds field to timeline', () => {
-    const fieldName = 'field.name.timeline';
     visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
     openTimelineFieldsBrowser();
 
-    createField(fieldName);
-    assertFieldDisplayed(fieldName);
+    createField(timelineRuntimeField);
+    cy.get(
+      `[data-test-subj="timeline"] [data-test-subj="header-text-${timelineRuntimeField}"]`
+    ).should('exist');
   });
 });

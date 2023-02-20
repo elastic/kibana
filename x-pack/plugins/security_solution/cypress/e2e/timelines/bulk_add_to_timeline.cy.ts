@@ -23,30 +23,6 @@ import { openEvents, openSessions } from '../../tasks/hosts/main';
 import { login, visit } from '../../tasks/login';
 import { ALERTS_URL, HOSTS_URL } from '../../urls/navigation';
 
-const assertFirstPageEventsAddToTimeline = (type: 'alerts' | 'events') => {
-  if (type === 'alerts') selectFirstPageAlerts();
-  else selectFirstPageEvents();
-  cy.get(SELECTED_ALERTS).then((sub) => {
-    const alertCountText = sub.text();
-    const alertCount = alertCountText.split(' ')[1];
-    bulkInvestigateSelectedEventsInTimeline();
-    cy.get('body').should('contain.text', `${alertCount} event IDs`);
-    cy.get(SERVER_SIDE_EVENT_COUNT).should('contain.text', alertCount);
-  });
-};
-
-const assertAllEventsAddToTimeline = (type: 'alerts' | 'events') => {
-  if (type === 'alerts') selectAllAlerts();
-  else selectAllEvents();
-  cy.get(SELECTED_ALERTS).then((sub) => {
-    const alertCountText = sub.text(); // Selected 3,654 alerts
-    const alertCount = alertCountText.split(' ')[1];
-    bulkInvestigateSelectedEventsInTimeline();
-    cy.get('body').should('contain.text', `${alertCount} event IDs`);
-    cy.get(SERVER_SIDE_EVENT_COUNT).should('contain.text', alertCount);
-  });
-};
-
 describe('Bulk Investigate in Timeline', () => {
   before(() => {
     cleanKibana();
@@ -69,11 +45,25 @@ describe('Bulk Investigate in Timeline', () => {
     });
 
     it('Adding multiple alerts to the timeline should be successful', () => {
-      assertFirstPageEventsAddToTimeline('alerts');
+      selectFirstPageAlerts();
+      cy.get(SELECTED_ALERTS).then((sub) => {
+        const alertCountText = sub.text();
+        const alertCount = alertCountText.split(' ')[1];
+        bulkInvestigateSelectedEventsInTimeline();
+        cy.get('body').should('contain.text', `${alertCount} event IDs`);
+        cy.get(SERVER_SIDE_EVENT_COUNT).should('contain.text', alertCount);
+      });
     });
 
     it('When selected all alerts are selected should be successfull', () => {
-      assertAllEventsAddToTimeline('alerts');
+      selectAllAlerts();
+      cy.get(SELECTED_ALERTS).then((sub) => {
+        const alertCountText = sub.text(); // Selected 3,654 alerts
+        const alertCount = alertCountText.split(' ')[1];
+        bulkInvestigateSelectedEventsInTimeline();
+        cy.get('body').should('contain.text', `${alertCount} event IDs`);
+        cy.get(SERVER_SIDE_EVENT_COUNT).should('contain.text', alertCount);
+      });
     });
   });
 
@@ -85,11 +75,25 @@ describe('Bulk Investigate in Timeline', () => {
     });
 
     it('Adding multiple events to the timeline should be successful', () => {
-      assertFirstPageEventsAddToTimeline('events');
+      selectFirstPageEvents();
+      cy.get(SELECTED_ALERTS).then((sub) => {
+        const alertCountText = sub.text();
+        const alertCount = alertCountText.split(' ')[1];
+        bulkInvestigateSelectedEventsInTimeline();
+        cy.get('body').should('contain.text', `${alertCount} event IDs`);
+        cy.get(SERVER_SIDE_EVENT_COUNT).should('contain.text', alertCount);
+      });
     });
 
     it('When selected all alerts are selected should be successfull', () => {
-      assertAllEventsAddToTimeline('events');
+      selectAllEvents();
+      cy.get(SELECTED_ALERTS).then((sub) => {
+        const alertCountText = sub.text(); // Selected 3,654 alerts
+        const alertCount = alertCountText.split(' ')[1];
+        bulkInvestigateSelectedEventsInTimeline();
+        cy.get('body').should('contain.text', `${alertCount} event IDs`);
+        cy.get(SERVER_SIDE_EVENT_COUNT).should('contain.text', alertCount);
+      });
     });
   });
 
@@ -101,11 +105,25 @@ describe('Bulk Investigate in Timeline', () => {
     });
 
     it('Adding multiple events to the timeline should be successful', () => {
-      assertFirstPageEventsAddToTimeline('events');
+      selectFirstPageEvents();
+      cy.get(SELECTED_ALERTS).then((sub) => {
+        const alertCountText = sub.text();
+        const alertCount = alertCountText.split(' ')[1];
+        bulkInvestigateSelectedEventsInTimeline();
+        cy.get('body').should('contain.text', `${alertCount} event IDs`);
+        cy.get(SERVER_SIDE_EVENT_COUNT).should('contain.text', alertCount);
+      });
     });
 
     it('When selected all events are selected should be successfull', () => {
-      assertAllEventsAddToTimeline('events');
+      selectAllEvents();
+      cy.get(SELECTED_ALERTS).then((sub) => {
+        const alertCountText = sub.text(); // Selected 3,654 alerts
+        const alertCount = alertCountText.split(' ')[1];
+        bulkInvestigateSelectedEventsInTimeline();
+        cy.get('body').should('contain.text', `${alertCount} event IDs`);
+        cy.get(SERVER_SIDE_EVENT_COUNT).should('contain.text', alertCount);
+      });
     });
   });
 });
