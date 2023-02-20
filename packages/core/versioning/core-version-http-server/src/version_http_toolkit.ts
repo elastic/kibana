@@ -18,7 +18,7 @@ import type {
 type RqCtx = RequestHandlerContextBase;
 
 /** A set of type literals to determine accepted versions */
-export type Version = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
+export type Version = `${number}`;
 
 /** Arguments to create a {@link VersionedRouter | versioned router}. */
 export interface CreateVersionedRouterArgs<Ctx extends RqCtx = RqCtx> {
