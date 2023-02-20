@@ -7,7 +7,7 @@
 
 import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
-import { MockApmPluginStorybook } from '../../context/apm_plugin/mock_apm_plugin_storybook';
+import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { DependencyLink } from './dependency_link';
 
 type Args = ComponentProps<typeof DependencyLink>;

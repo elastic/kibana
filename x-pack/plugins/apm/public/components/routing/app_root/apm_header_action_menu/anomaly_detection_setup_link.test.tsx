@@ -9,12 +9,12 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
-import { getAnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import * as hooks from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { ApmMlJob } from '../../../../../common/anomaly_detection/apm_ml_job';
+import { getAnomalyDetectionSetupState } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import * as hooks from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 
 async function renderTooltipAnchor({
