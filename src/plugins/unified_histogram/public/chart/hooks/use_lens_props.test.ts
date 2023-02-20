@@ -29,6 +29,7 @@ describe('useLensProps', () => {
       dataView: dataViewWithTimefieldMock,
       timeInterval: 'auto',
       breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+      suggestion: undefined,
     });
     const lensProps = renderHook(() => {
       return useLensProps({
@@ -73,6 +74,7 @@ describe('useLensProps', () => {
         dataView: dataViewWithTimefieldMock,
         timeInterval: 'auto',
         breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+        suggestion: undefined,
       }),
       onLoad,
     };
