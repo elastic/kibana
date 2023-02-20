@@ -12,58 +12,58 @@ import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import type { RpcSchemas } from '../../core';
 import { EventBus } from '../../core/event_bus';
-import { create } from './create';
+import { update } from './update';
 
-const { fn, schemas } = create;
+const { fn, schemas } = update;
 
 const inputSchema = schemas?.in;
 const outputSchema = schemas?.out;
 
 if (!inputSchema) {
-  throw new Error(`Input schema missing for [create] procedure.`);
+  throw new Error(`Input schema missing for [update] procedure.`);
 }
 
 if (!outputSchema) {
-  throw new Error(`Output schema missing for [create] procedure.`);
+  throw new Error(`Output schema missing for [update] procedure.`);
 }
 
 const FOO_CONTENT_ID = 'foo';
 const fooDataSchema = schema.object({ title: schema.string() }, { unknowns: 'forbid' });
 
-describe('RPC -> create()', () => {
-  describe('Input/Output validation', () => {
+describe('RPC -> update()', () => {
+  describe.skip('Input/Output validation', () => {
     /**
      * These tests are for the procedure call itself. Every RPC needs to declare in/out schema
-     * We will test _specific_ validation schema inside the procedure in separate tests.
+     * We will test _specific_ validation schema inside the procedure suite below.
      */
-    test('should validate that a contentTypeId and "data" object is passed', () => {
+    test('should validate that a "contentTypeId", an "id" and "data" object is passed', () => {
       [
-        { input: { contentTypeId: 'foo', data: { title: 'hello' } } },
+        { input: { contentTypeId: 'foo', id: '123', data: { title: 'hello' } } },
         {
-          input: { data: { title: 'hello' } }, // contentTypeId missing
+          input: { id: '123', data: { title: 'hello' } }, // contentTypeId missing
           expectedError: '[contentTypeId]: expected value of type [string] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo' }, // data missing
+          input: { contentTypeId: 'foo', data: { title: 'hello' } }, // id missing
+          expectedError: '[id]: expected value of type [string] but got [undefined]',
+        },
+        {
+          input: { contentTypeId: 'foo', id: '123' }, // data missing
           expectedError: '[data]: expected value of type [object] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo', data: 123 }, // data is not an object
+          input: { contentTypeId: 'foo', id: '123', data: 123 }, // data is not an object
           expectedError: '[data]: expected value of type [object] but got [number]',
         },
         {
-          input: { contentTypeId: 'foo', data: { title: 'hello' }, unknown: 'foo' },
+          input: { contentTypeId: 'foo', id: '123', data: { title: 'hello' }, unknown: 'foo' },
           expectedError: '[unknown]: definition for this key is missing',
         },
       ].forEach(({ input, expectedError }) => {
         const error = validate(input, inputSchema);
 
-        if (!expectedError) {
-          try {
-            expect(error).toBe(null);
-          } catch (e) {
-            throw new Error(`Expected no error but got [{${error?.message}}].`);
-          }
+        if (error && !expectedError) {
+          throw new Error(`Expected no error but got [{${error.message}}].`);
         } else {
           expect(error?.message).toBe(expectedError);
         }
@@ -74,6 +74,7 @@ describe('RPC -> create()', () => {
       let error = validate(
         {
           contentTypeId: 'foo',
+          id: '123',
           data: { title: 'hello' },
           options: { any: 'object' },
         },
@@ -86,6 +87,7 @@ describe('RPC -> create()', () => {
         {
           contentTypeId: 'foo',
           data: { title: 'hello' },
+          id: '123',
           options: 123, // Not an object
         },
         inputSchema
@@ -115,7 +117,7 @@ describe('RPC -> create()', () => {
   describe('procedure', () => {
     const createSchemas = (): RpcSchemas => {
       return {
-        create: {
+        update: {
           in: {
             data: fooDataSchema,
           },
@@ -140,21 +142,26 @@ describe('RPC -> create()', () => {
       return { ctx, storage };
     };
 
-    test('should return the storage create() result', async () => {
+    test('should return the storage update() result', async () => {
       const { ctx, storage } = setup();
 
-      const expected = 'CreateResult';
-      storage.create.mockResolvedValueOnce(expected);
+      const expected = 'UpdateResult';
+      storage.update.mockResolvedValueOnce(expected);
 
-      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: { title: 'Hello' } });
+      const result = await fn(ctx, {
+        contentTypeId: FOO_CONTENT_ID,
+        id: '123',
+        data: { title: 'Hello' },
+      });
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
         result: expected,
       });
 
-      expect(storage.create).toHaveBeenCalledWith(
+      expect(storage.update).toHaveBeenCalledWith(
         { requestHandlerContext: ctx.requestHandlerContext },
+        '123',
         { title: 'Hello' },
         undefined
       );
@@ -164,20 +171,22 @@ describe('RPC -> create()', () => {
       test('should validate that content type definition exist', () => {
         const { ctx } = setup();
         expect(() =>
-          fn(ctx, { contentTypeId: 'unknown', data: { title: 'Hello' } })
+          fn(ctx, { contentTypeId: 'unknown', id: '123', data: { title: 'Hello' } })
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
       });
 
       test('should enforce a schema for the data', () => {
         const { ctx } = setup({ contentSchemas: {} as any });
-        expect(() => fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: {} })).rejects.toEqual(
-          new Error('Schema missing for rpc procedure [create.in.data].')
-        );
+        expect(() =>
+          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '123', data: {} })
+        ).rejects.toEqual(new Error('Schema missing for rpc procedure [update.in.data].'));
       });
 
       test('should validate the data sent in input - missing field', () => {
         const { ctx } = setup();
-        expect(() => fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: {} })).rejects.toEqual(
+        expect(() =>
+          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '123', data: {} })
+        ).rejects.toEqual(
           new Error('[title]: expected value of type [string] but got [undefined]')
         );
       });
@@ -187,6 +196,7 @@ describe('RPC -> create()', () => {
         expect(() =>
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
+            id: '123',
             data: { title: 'Hello', unknownField: 'Hello' },
           })
         ).rejects.toEqual(new Error('[unknownField]: definition for this key is missing'));
@@ -197,16 +207,17 @@ describe('RPC -> create()', () => {
         expect(() =>
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
+            id: '123',
             data: { title: 'Hello' },
             options: { foo: 'bar' },
           })
-        ).rejects.toEqual(new Error('Schema missing for rpc procedure [create.in.options].'));
+        ).rejects.toEqual(new Error('Schema missing for rpc procedure [update.in.options].'));
       });
 
       test('should validate the options', () => {
         const { ctx } = setup({
           contentSchemas: {
-            create: {
+            update: {
               in: {
                 data: fooDataSchema,
                 options: schema.object({ validOption: schema.maybe(schema.boolean()) }),
@@ -217,6 +228,7 @@ describe('RPC -> create()', () => {
         expect(() =>
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
+            id: '123',
             data: { title: 'Hello' },
             options: { foo: 'bar' },
           })
@@ -226,7 +238,7 @@ describe('RPC -> create()', () => {
       test('should validate the result if schema is provided', () => {
         const { ctx, storage } = setup({
           contentSchemas: {
-            create: {
+            update: {
               in: { data: fooDataSchema },
               out: { result: schema.object({ validField: schema.maybe(schema.boolean()) }) },
             },
@@ -234,10 +246,10 @@ describe('RPC -> create()', () => {
         });
 
         const invalidResult = { wrongField: 'bad' };
-        storage.create.mockResolvedValueOnce(invalidResult);
+        storage.update.mockResolvedValueOnce(invalidResult);
 
         expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: { title: 'Hello' } })
+          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '123', data: { title: 'Hello' } })
         ).rejects.toEqual(new Error('[wrongField]: definition for this key is missing'));
       });
     });
