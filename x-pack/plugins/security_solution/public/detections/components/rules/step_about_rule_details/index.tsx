@@ -79,9 +79,9 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
   return (
     <EuiPanel
       hasBorder
-      css={`
-        position: relative;
-      `}
+      css={{
+        position: 'relative',
+      }}
     >
       {loading && (
         <>
@@ -93,9 +93,9 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
         <EuiFlexGroup
           gutterSize="xs"
           direction="column"
-          css={`
-            height: 100%;
-          `}
+          css={{
+            height: '100%',
+          }}
         >
           <EuiFlexItem grow={false} key="header">
             <HeaderSection title={i18n.ABOUT_TEXT}>
