@@ -13,7 +13,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useLicense } from '../../hooks/use_license';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list_rq';
+import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
 import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
 import PageNotFound from '../404';
@@ -53,11 +53,7 @@ export function SlosPage() {
     return <PageNotFound />;
   }
 
-  if (isLoading) {
-    return null;
-  }
-
-  if (total === 0 || !hasAtLeast('platinum')) {
+  if ((!isLoading && total === 0) || !hasAtLeast('platinum')) {
     return <SloListWelcomePrompt />;
   }
 

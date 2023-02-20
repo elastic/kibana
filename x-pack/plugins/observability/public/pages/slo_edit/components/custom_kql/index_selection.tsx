@@ -11,7 +11,7 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateSLOInput } from '@kbn/slo-schema';
 
-import { useFetchIndices, Index } from '../../../../hooks/use_fetch_indices_rq';
+import { useFetchIndices, Index } from '../../../../hooks/use_fetch_indices';
 
 export interface Props {
   control: Control<CreateSLOInput>;

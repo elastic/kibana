@@ -67,44 +67,60 @@ export function SloEditForm({ slo }: Props) {
       watch,
     });
 
-  const { loading, success, error, createSlo, updateSlo } = useCreateOrUpdateSlo();
+  const { createSlo, updateSlo } = useCreateOrUpdateSlo();
 
   const handleSubmit = () => {
     const values = getValues();
     if (isEditMode) {
       const processedValues = transformValuesToUpdateSLOInput(values);
-      updateSlo(slo.id, processedValues);
+      updateSlo.mutate({ sloId: slo.id, slo: processedValues });
     } else {
       const processedValues = transformValuesToCreateSLOInput(values);
-      createSlo(processedValues);
+      createSlo.mutate({ slo: processedValues });
     }
   };
 
   useEffect(() => {
-    if (success) {
+    if (createSlo.isSuccess) {
       toasts.addSuccess(
-        isEditMode
-          ? i18n.translate('xpack.observability.slos.sloEdit.update.success', {
-              defaultMessage: 'Successfully updated {name}',
-              values: { name: getValues().name },
-            })
-          : i18n.translate('xpack.observability.slos.sloEdit.creation.success', {
-              defaultMessage: 'Successfully created {name}',
-              values: { name: getValues().name },
-            })
+        i18n.translate('xpack.observability.slos.sloEdit.creation.success', {
+          defaultMessage: 'Successfully created {name}',
+          values: { name: getValues().name },
+        })
+      );
+    }
+
+    if (updateSlo.isSuccess) {
+      toasts.addSuccess(
+        i18n.translate('xpack.observability.slos.sloEdit.update.success', {
+          defaultMessage: 'Successfully updated {name}',
+          values: { name: getValues().name },
+        })
       );
 
       navigateToUrl(basePath.prepend(paths.observability.slos));
     }
 
-    if (error) {
-      toasts.addError(new Error(error), {
+    if (createSlo.isError || updateSlo.isError) {
+      toasts.addError(new Error(String(createSlo.error) || String(updateSlo.error)), {
         title: i18n.translate('xpack.observability.slos.sloEdit.creation.error', {
           defaultMessage: 'Something went wrong',
         }),
       });
     }
-  }, [success, error, toasts, isEditMode, getValues, navigateToUrl, basePath]);
+  }, [
+    toasts,
+    isEditMode,
+    getValues,
+    navigateToUrl,
+    basePath,
+    createSlo.isSuccess,
+    createSlo.isError,
+    updateSlo.isSuccess,
+    updateSlo.isError,
+    createSlo.error,
+    updateSlo.error,
+  ]);
 
   const getIndicatorTypeForm = () => {
     switch (watch('indicator.type')) {
@@ -236,7 +252,7 @@ export function SloEditForm({ slo }: Props) {
               data-test-subj="sloFormSubmitButton"
               onClick={handleSubmit}
               disabled={!formState.isValid}
-              isLoading={loading && !error}
+              isLoading={createSlo.isLoading || updateSlo.isLoading}
             >
               {isEditMode
                 ? i18n.translate('xpack.observability.slos.sloEdit.editSloButton', {

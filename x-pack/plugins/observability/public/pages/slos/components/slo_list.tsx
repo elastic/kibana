@@ -7,10 +7,10 @@
 
 import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
-import { debounce, noop } from 'lodash';
+import { debounce } from 'lodash';
 import { useIsMutating } from '@tanstack/react-query';
 
-import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list_rq';
+import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import {
   FilterType,
   SloListSearchFilterSortBar,
@@ -73,15 +73,7 @@ export function SloList() {
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <SloListItems
-          sloList={sloList}
-          loading={isLoadingSloList}
-          error={error}
-          onCloned={noop}
-          onCloning={noop}
-          onDeleting={noop}
-          onDeleted={noop}
-        />
+        <SloListItems sloList={sloList} loading={isLoadingSloList} error={error} />
       </EuiFlexItem>
 
       {sloList.length ? (

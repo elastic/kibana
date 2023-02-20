@@ -5,42 +5,48 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { FindSLOResponse } from '@kbn/slo-schema';
+
 import { useKibana } from '../../utils/kibana_react';
 
-interface UseDeleteSlo {
-  loading: boolean;
-  success: boolean;
-  error: string | undefined;
-  deleteSlo: (id: string) => void;
-}
-
-export function useDeleteSlo(): UseDeleteSlo {
+export function useDeleteSlo(sloId: string) {
   const { http } = useKibana().services;
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
+  const queryClient = useQueryClient();
 
-  const deleteSlo = useCallback(
-    async (id: string) => {
-      setLoading(true);
-      setError('');
-      setSuccess(false);
-
-      try {
-        await http.delete<string>(`/api/observability/slos/${id}`);
-        setSuccess(true);
-      } catch (e) {
-        setError(e);
-      }
+  const deleteSlo = useMutation(
+    ['deleteSlo', sloId],
+    ({ id }: { id: string }) => {
+      return http.delete<string>(`/api/observability/slos/${id}`);
     },
-    [http]
+    {
+      onMutate: async (slo) => {
+        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+        await queryClient.cancelQueries(['fetchSloList']);
+
+        // Snapshot the previous value
+        const previousSloList = queryClient.getQueryData<FindSLOResponse>(['fetchSloList']);
+
+        // Optimistically update to the new value
+        queryClient.setQueryData(['fetchSloList'], () => ({
+          ...previousSloList,
+          results: previousSloList?.results.filter((result) => result.id !== slo.id),
+        }));
+
+        // Return a context object with the snapshotted value
+        return { previousSloList };
+      },
+      // If the mutation fails, use the context returned from onMutate to roll back
+      onError: (_err, _slo, context: { previousSloList: FindSLOResponse | undefined }) => {
+        if (context.previousSloList) {
+          queryClient.setQueryData(['fetchSloList'], context.previousSloList);
+        }
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries(['fetchSloList']);
+      },
+    }
   );
 
-  return {
-    loading,
-    error,
-    success,
-    deleteSlo,
-  };
+  return deleteSlo;
 }

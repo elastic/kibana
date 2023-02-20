@@ -5,75 +5,86 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type {
   CreateSLOInput,
   CreateSLOResponse,
+  FindSLOResponse,
   UpdateSLOInput,
   UpdateSLOResponse,
 } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 
-interface UseCreateOrUpdateSlo {
-  loading: boolean;
-  success: boolean;
-  error: string | undefined;
-  createSlo: (slo: CreateSLOInput) => void;
-  updateSlo: (sloId: string, slo: UpdateSLOInput) => void;
-}
-
-export function useCreateOrUpdateSlo(): UseCreateOrUpdateSlo {
+export function useCreateOrUpdateSlo() {
   const { http } = useKibana().services;
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
+  const queryClient = useQueryClient();
 
-  const createSlo = useCallback(
-    async (slo: CreateSLOInput) => {
-      setLoading(true);
-      setError('');
-      setSuccess(false);
+  const createSlo = useMutation(
+    ({ slo }: { slo: CreateSLOInput }) => {
       const body = JSON.stringify(slo);
-
-      try {
-        await http.post<CreateSLOResponse>(`/api/observability/slos`, { body });
-        setSuccess(true);
-      } catch (e) {
-        setError(e);
-      } finally {
-        setSuccess(false);
-        setLoading(false);
-      }
+      return http.post<CreateSLOResponse>(`/api/observability/slos`, { body });
     },
-    [http]
+    {
+      mutationKey: ['createSlo'],
+      onSuccess: () => {
+        queryClient.invalidateQueries(['fetchSloList']);
+        queryClient.invalidateQueries(['fetchHistoricalSummary']);
+      },
+    }
   );
 
-  const updateSlo = useCallback(
-    async (sloId: string, slo: UpdateSLOInput) => {
-      setLoading(true);
-      setError('');
-      setSuccess(false);
+  const cloneSlo = useMutation(
+    ['cloneSlo'],
+    ({ slo }: { slo: CreateSLOInput; idToCopyFrom?: string }) => {
       const body = JSON.stringify(slo);
-
-      try {
-        await http.put<UpdateSLOResponse>(`/api/observability/slos/${sloId}`, { body });
-        setSuccess(true);
-      } catch (e) {
-        setError(e);
-      } finally {
-        setSuccess(false);
-        setLoading(false);
-      }
+      return http.post<CreateSLOResponse>(`/api/observability/slos`, { body });
     },
-    [http]
+    {
+      onMutate: async ({ slo, idToCopyFrom }) => {
+        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+        await queryClient.cancelQueries(['fetchSloList']);
+
+        // Snapshot the previous value
+        const previousSloList = queryClient.getQueryData<FindSLOResponse>(['fetchSloList']);
+
+        const sloUsedToClone = previousSloList?.results.find((el) => el.id === idToCopyFrom);
+
+        // Optimistically update to the new value
+        queryClient.setQueryData(['fetchSloList'], () => ({
+          ...previousSloList,
+          results: [...(previousSloList?.results || []), { ...sloUsedToClone, name: slo.name }],
+        }));
+
+        // Return a context object with the snapshotted value
+        return { previousSloList };
+      },
+      // If the mutation fails, use the context returned from onMutate to roll back
+      onError: (_err, _slo, context: { previousSloList: FindSLOResponse | undefined }) => {
+        if (context.previousSloList) {
+          queryClient.setQueryData(['fetchSloList'], context.previousSloList);
+        }
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries(['fetchSloList']);
+        queryClient.invalidateQueries(['fetchHistoricalSummary']);
+      },
+    }
   );
 
-  return {
-    loading,
-    error,
-    success,
-    createSlo,
-    updateSlo,
-  };
+  const updateSlo = useMutation(
+    ({ sloId, slo }: { sloId: string; slo: UpdateSLOInput }) => {
+      const body = JSON.stringify(slo);
+      return http.put<UpdateSLOResponse>(`/api/observability/slos/${sloId}`, { body });
+    },
+    {
+      mutationKey: ['updateSlo'],
+      onSuccess: () => {
+        queryClient.invalidateQueries(['fetchSloList']);
+        queryClient.invalidateQueries(['fetchHistoricalSummary']);
+      },
+    }
+  );
+
+  return { createSlo, cloneSlo, updateSlo };
 }

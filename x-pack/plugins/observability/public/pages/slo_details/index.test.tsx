@@ -11,7 +11,7 @@ import { screen } from '@testing-library/react';
 import { useKibana } from '../../utils/kibana_react';
 import { useParams } from 'react-router-dom';
 import { useLicense } from '../../hooks/use_license';
-import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details_rq';
+import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from '.';
 import { buildSlo } from '../../data/slo/slo';
@@ -27,7 +27,7 @@ jest.mock('react-router-dom', () => ({
 jest.mock('../../utils/kibana_react');
 jest.mock('../../hooks/use_breadcrumbs');
 jest.mock('../../hooks/use_license');
-jest.mock('../../hooks/slo/use_fetch_slo_details_rq');
+jest.mock('../../hooks/slo/use_fetch_slo_details');
 
 const useKibanaMock = useKibana as jest.Mock;
 const useParamsMock = useParams as jest.Mock;

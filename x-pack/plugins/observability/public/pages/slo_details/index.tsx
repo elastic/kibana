@@ -15,7 +15,7 @@ import type { SLOResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details_rq';
+import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';
 import { isSloFeatureEnabled } from '../slos/helpers/is_slo_feature_enabled';

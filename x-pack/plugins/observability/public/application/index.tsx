@@ -9,6 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
@@ -113,6 +114,7 @@ export const renderApp = ({
                       <HasDataContextProvider>
                         <App />
                       </HasDataContextProvider>
+                      <ReactQueryDevtools />
                     </QueryClientProvider>
                   </RedirectAppLinks>
                 </i18nCore.Context>

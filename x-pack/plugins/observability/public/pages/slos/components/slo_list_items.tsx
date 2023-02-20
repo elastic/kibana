@@ -8,7 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary_rq';
+import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { SloListItem } from './slo_list_item';
 import { SloListEmpty } from './slo_list_empty';
 import { SloListError } from './slo_list_error';
@@ -17,22 +17,11 @@ export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
-  onCloned: () => void;
-  onCloning: () => void;
-  onDeleted: () => void;
-  onDeleting: () => void;
 }
 
-export function SloListItems({
-  sloList,
-  loading,
-  error,
-  onCloned,
-  onCloning,
-  onDeleted,
-  onDeleting,
-}: Props) {
+export function SloListItems({ sloList, loading, error }: Props) {
   const [sloIds, setSloIds] = useState<string[]>([]);
+
   useEffect(() => {
     setSloIds(sloList.map((slo) => slo.id));
   }, [sloList]);
@@ -55,10 +44,6 @@ export function SloListItems({
             slo={slo}
             historicalSummary={sloHistoricalSummaryResponse[slo.id]}
             historicalSummaryLoading={historicalSummaryLoading}
-            onCloned={onCloned}
-            onCloning={onCloning}
-            onDeleted={onDeleted}
-            onDeleting={onDeleting}
           />
         </EuiFlexItem>
       ))}

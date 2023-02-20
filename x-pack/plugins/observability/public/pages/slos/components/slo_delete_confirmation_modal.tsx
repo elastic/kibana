@@ -10,20 +10,16 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../utils/kibana_react';
-import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo_rq';
+import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 
 export interface SloDeleteConfirmationModalProps {
   slo: SLOWithSummaryResponse;
   onCancel: () => void;
-  onDeleting: () => void;
-  onDeleted: () => void;
 }
 
 export function SloDeleteConfirmationModal({
   slo: { id, name },
   onCancel,
-  onDeleting,
-  onDeleted,
 }: SloDeleteConfirmationModalProps) {
   const {
     notifications: { toasts },
@@ -31,15 +27,10 @@ export function SloDeleteConfirmationModal({
 
   const [isVisible, setIsVisible] = useState(true);
 
-  const { mutate: deleteSlo, isSuccess, isLoading, isError } = useDeleteSlo(id);
-
-  if (isLoading) {
-    onDeleting();
-  }
+  const { mutate: deleteSlo, isSuccess, isError } = useDeleteSlo(id);
 
   if (isSuccess) {
     toasts.addSuccess(getDeleteSuccesfulMessage(name));
-    onDeleted();
   }
 
   if (isError) {

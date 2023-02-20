@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../utils/kibana_react';
-import { useCreateOrUpdateSlo } from '../../../hooks/slo/use_create_slo_rq';
+import { useCreateOrUpdateSlo } from '../../../hooks/slo/use_create_slo';
 import { SloSummary } from './slo_summary';
 import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
 import { SloBadges } from './badges/slo_badges';
@@ -36,18 +36,12 @@ export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
-  onCloned: () => void;
-  onCloning: () => void;
-  onDeleted: () => void;
-  onDeleting: () => void;
 }
 
 export function SloListItem({
   slo,
   historicalSummary = [],
   historicalSummaryLoading,
-  onDeleted,
-  onDeleting,
 }: SloListItemProps) {
   const {
     application: { navigateToUrl },
@@ -55,7 +49,7 @@ export function SloListItem({
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
 
-  const { createSlo } = useCreateOrUpdateSlo();
+  const { cloneSlo } = useCreateOrUpdateSlo();
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo', slo.id]));
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
@@ -74,7 +68,7 @@ export function SloListItem({
       transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
     );
 
-    createSlo.mutate({ slo: newSlo });
+    cloneSlo.mutate({ slo: newSlo, idToCopyFrom: slo.id });
     setIsActionsPopoverOpen(false);
   };
 
@@ -87,19 +81,14 @@ export function SloListItem({
     setDeleteConfirmationModalOpen(false);
   };
 
-  const handleDeleteSuccess = () => {
-    setDeleteConfirmationModalOpen(false);
-    onDeleted();
-  };
-
   return (
     <EuiPanel
       data-test-subj="sloItem"
       hasBorder
       hasShadow={false}
-      color={createSlo.isLoading || isDeletingSlo ? 'subdued' : undefined}
+      color={isDeletingSlo ? 'subdued' : undefined}
       style={{
-        opacity: createSlo.isLoading || isDeletingSlo ? 0.3 : 1,
+        opacity: isDeletingSlo ? 0.3 : 1,
         transition: 'opacity 0.15s ease-in',
       }}
     >
@@ -187,12 +176,7 @@ export function SloListItem({
       </EuiFlexGroup>
 
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteConfirmationModal
-          slo={slo}
-          onCancel={handleDeleteCancel}
-          onDeleting={onDeleting}
-          onDeleted={handleDeleteSuccess}
-        />
+        <SloDeleteConfirmationModal slo={slo} onCancel={handleDeleteCancel} />
       ) : null}
     </EuiPanel>
   );

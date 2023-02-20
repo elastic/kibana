@@ -40,7 +40,7 @@ export function SloEditPage() {
     },
   ]);
 
-  const { slo, loading } = useFetchSloDetails(sloId);
+  const { slo, isLoading } = useFetchSloDetails(sloId);
 
   if (!isSloFeatureEnabled(config)) {
     return <PageNotFound />;
@@ -50,7 +50,7 @@ export function SloEditPage() {
     navigateToUrl(basePath.prepend(paths.observability.slos));
   }
 
-  if (loading) {
+  if (isLoading) {
     return null;
   }
 
