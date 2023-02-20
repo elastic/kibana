@@ -8,7 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
+import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary_rq';
 import { SloListItem } from './slo_list_item';
 import { SloListEmpty } from './slo_list_empty';
 import { SloListError } from './slo_list_error';
@@ -37,7 +37,7 @@ export function SloListItems({
     setSloIds(sloList.map((slo) => slo.id));
   }, [sloList]);
 
-  const { loading: historicalSummaryLoading, data: historicalSummaryBySlo } =
+  const { isLoading: historicalSummaryLoading, sloHistoricalSummaryResponse } =
     useFetchHistoricalSummary({ sloIds });
 
   if (!loading && !error && sloList.length === 0) {
@@ -53,7 +53,7 @@ export function SloListItems({
         <EuiFlexItem key={slo.id}>
           <SloListItem
             slo={slo}
-            historicalSummary={historicalSummaryBySlo[slo.id]}
+            historicalSummary={sloHistoricalSummaryResponse[slo.id]}
             historicalSummaryLoading={historicalSummaryLoading}
             onCloned={onCloned}
             onCloning={onCloning}

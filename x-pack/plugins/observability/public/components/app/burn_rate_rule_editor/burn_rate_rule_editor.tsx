@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOResponse } from '@kbn/slo-schema';
 
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
-import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
+import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details_rq';
 import { BurnRateRuleParams, Duration, DurationUnit } from '../../../typings';
 import { SloSelector } from './slo_selector';
 import { BurnRate } from './burn_rate';
@@ -28,7 +28,7 @@ type Props = Pick<
 
 export function BurnRateRuleEditor(props: Props) {
   const { setRuleParams, ruleParams, errors } = props;
-  const { loading: loadingInitialSlo, slo: initialSlo } = useFetchSloDetails(ruleParams?.sloId);
+  const { isLoading: loadingInitialSlo, slo: initialSlo } = useFetchSloDetails(ruleParams?.sloId);
 
   const [selectedSlo, setSelectedSlo] = useState<SLOResponse | undefined>(undefined);
   const [longWindowDuration, setLongWindowDuration] = useState<Duration>({

@@ -8,9 +8,9 @@
 import { EuiConfirmModal } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../utils/kibana_react';
-import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
+import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo_rq';
 
 export interface SloDeleteConfirmationModalProps {
   slo: SLOWithSummaryResponse;
@@ -31,24 +31,24 @@ export function SloDeleteConfirmationModal({
 
   const [isVisible, setIsVisible] = useState(true);
 
-  const { deleteSlo, success, loading, error } = useDeleteSlo();
+  const { mutate: deleteSlo, isSuccess, isLoading, isError } = useDeleteSlo(id);
 
-  if (loading) {
+  if (isLoading) {
     onDeleting();
   }
 
-  if (success) {
+  if (isSuccess) {
     toasts.addSuccess(getDeleteSuccesfulMessage(name));
     onDeleted();
   }
 
-  if (error) {
+  if (isError) {
     toasts.addDanger(getDeleteFailMessage(name));
   }
 
   const handleConfirm = () => {
     setIsVisible(false);
-    deleteSlo(id);
+    deleteSlo({ id });
   };
 
   return isVisible ? (

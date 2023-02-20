@@ -15,7 +15,7 @@ import type { SLOResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
+import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details_rq';
 import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';
 import { isSloFeatureEnabled } from '../slos/helpers/is_slo_feature_enabled';
@@ -37,11 +37,11 @@ export function SloDetailsPage() {
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
 
-  const { loading, slo } = useFetchSloDetails(sloId);
+  const { isLoading, slo } = useFetchSloDetails(sloId);
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
-  const isSloNotFound = !loading && slo === undefined;
+  const isSloNotFound = !isLoading && slo === undefined;
 
   if (!isSloFeatureEnabled(config) || isSloNotFound) {
     return <PageNotFound />;
@@ -54,14 +54,14 @@ export function SloDetailsPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <PageTitle isLoading={loading} slo={slo} />,
+        pageTitle: <PageTitle isLoading={isLoading} slo={slo} />,
         rightSideItems: [],
         bottomBorder: true,
       }}
       data-test-subj="sloDetailsPage"
     >
-      {loading && <EuiLoadingSpinner data-test-subj="loadingDetails" />}
-      {!loading && <SloDetails slo={slo!} />}
+      {isLoading && <EuiLoadingSpinner data-test-subj="loadingDetails" />}
+      {!isLoading && <SloDetails slo={slo!} />}
     </ObservabilityPageTemplate>
   );
 }

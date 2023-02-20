@@ -11,7 +11,7 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateSLOInput } from '@kbn/slo-schema';
 
-import { useFetchIndices, Index } from '../../../../hooks/use_fetch_indices';
+import { useFetchIndices, Index } from '../../../../hooks/use_fetch_indices_rq';
 
 export interface Props {
   control: Control<CreateSLOInput>;
@@ -23,7 +23,7 @@ interface Option {
 }
 
 export function IndexSelection({ control }: Props) {
-  const { loading, indices = [] } = useFetchIndices();
+  const { isLoading, indices = [] } = useFetchIndices();
   const [indexOptions, setIndexOptions] = useState<Option[]>([]);
 
   useEffect(() => {
@@ -89,7 +89,7 @@ export function IndexSelection({ control }: Props) {
             data-test-subj="indexSelection"
             isClearable={true}
             isInvalid={!!fieldState.error}
-            isLoading={loading}
+            isLoading={isLoading}
             onChange={(selected: EuiComboBoxOptionOption[]) => {
               if (selected.length) {
                 return field.onChange(selected[0].value);
