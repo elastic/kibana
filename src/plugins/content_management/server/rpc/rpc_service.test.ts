@@ -47,7 +47,7 @@ describe('RpcService', () => {
       const fn = jest.fn().mockResolvedValue(output);
       const procedure: ProcedureDefinition<{}> = {
         fn,
-        schemas: { in: schema.object({ foo: schema.string() }) },
+        schemas: { in: schema.object({ foo: schema.string() }), out: schema.any() },
       };
       rpc.register('foo', procedure);
 
@@ -74,7 +74,7 @@ describe('RpcService', () => {
       const fn = jest.fn();
       const procedure: ProcedureDefinition<{}> = {
         fn,
-        schemas: { in: schema.object({ foo: schema.string() }) },
+        schemas: { in: schema.object({ foo: schema.string() }), out: schema.any() },
       };
       rpc.register('foo', procedure);
 
@@ -92,7 +92,7 @@ describe('RpcService', () => {
       const fn = jest.fn().mockResolvedValue({ bad: 'unknown prop' });
       const procedure: ProcedureDefinition<{}> = {
         fn,
-        schemas: { out: schema.object({ foo: schema.string() }) },
+        schemas: { in: schema.any(), out: schema.object({ foo: schema.string() }) },
       };
       rpc.register('foo', procedure);
 
