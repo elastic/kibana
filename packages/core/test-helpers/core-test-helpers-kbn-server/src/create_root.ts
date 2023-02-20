@@ -255,6 +255,9 @@ export function createTestServers({
     defaultsDeep({}, settings.es ?? {}, {
       log,
       license,
+      onEarlyExit: (x: string) => {
+        log.debug(`\n### Arg passed to onEarlyExit(): \n\t${x}`);
+      },
     })
   );
 
