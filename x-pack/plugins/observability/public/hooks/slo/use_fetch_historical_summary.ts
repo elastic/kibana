@@ -51,7 +51,7 @@ export function useFetchHistoricalSummary({
 
           return response;
         } catch (error) {
-          // ignore error for retrieving slos
+          // ignore error
         }
       },
       refetchOnWindowFocus: false,

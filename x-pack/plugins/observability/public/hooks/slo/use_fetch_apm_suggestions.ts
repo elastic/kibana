@@ -15,6 +15,7 @@ import moment from 'moment';
 import { useKibana } from '../../utils/kibana_react';
 
 export type Suggestion = string;
+
 export interface UseFetchApmSuggestions {
   suggestions: Suggestion[];
   isLoading: boolean;
@@ -27,14 +28,14 @@ export interface UseFetchApmSuggestions {
 
 export interface Params {
   fieldName: string;
-  search: string;
+  search?: string;
 }
 
 interface ApiResponse {
   terms: string[];
 }
 
-const EMPTY_RESPONSE: ApiResponse = { terms: [] };
+const NO_SUGGESTIONS: Suggestion[] = [];
 
 export function useFetchApmSuggestions({ fieldName, search = '' }: Params): UseFetchApmSuggestions {
   const { http } = useKibana().services;
@@ -56,14 +57,14 @@ export function useFetchApmSuggestions({ fieldName, search = '' }: Params): UseF
 
           return terms;
         } catch (error) {
-          // ignore error for retrieving slos
+          // ignore error
         }
       },
     }
   );
 
   return {
-    suggestions: isInitialLoading ? EMPTY_RESPONSE.terms : data ?? EMPTY_RESPONSE.terms,
+    suggestions: isInitialLoading ? NO_SUGGESTIONS : data ?? NO_SUGGESTIONS,
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,
