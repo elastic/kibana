@@ -8,15 +8,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { API_ENDPOINT } from '../../common';
-import type {
-  GetIn,
-  CreateIn,
-  UpdateIn,
-  DeleteIn,
-  SearchIn,
-  SearchOut,
-  ProcedureName,
-} from '../../common';
+import type { GetIn, CreateIn, UpdateIn, DeleteIn, SearchIn, ProcedureName } from '../../common';
 import type { CrudClient } from '../crud_client/crud_client';
 
 export class RpcClient implements CrudClient {
@@ -38,9 +30,7 @@ export class RpcClient implements CrudClient {
     return this.sendMessage('delete', input);
   }
 
-  public search<I extends SearchIn = SearchIn, O extends SearchOut = SearchOut>(
-    input: I
-  ): Promise<O> {
+  public search<I extends SearchIn = SearchIn, O = unknown>(input: I): Promise<O> {
     return this.sendMessage('search', input);
   }
 
