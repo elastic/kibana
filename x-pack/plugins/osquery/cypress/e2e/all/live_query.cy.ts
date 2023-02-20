@@ -32,6 +32,7 @@ describe('ALL - Live Query', () => {
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_1');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'example_pack');
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'case_security');
   });
 
   beforeEach(() => {
@@ -42,6 +43,7 @@ describe('ALL - Live Query', () => {
   after(() => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_1');
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'example_pack');
+    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_security');
   });
 
   it('should validate the form', () => {

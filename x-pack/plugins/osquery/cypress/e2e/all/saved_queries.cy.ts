@@ -30,9 +30,17 @@ describe('ALL - Saved queries', () => {
   const SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
   const SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
 
+  before(() => {
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'case_security');
+  });
+
   beforeEach(() => {
     login(ROLES.soc_manager);
     navigateTo('/app/osquery');
+  });
+
+  after(() => {
+    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_security');
   });
 
   getSavedQueriesComplexTest(SAVED_QUERY_ID, SAVED_QUERY_DESCRIPTION);

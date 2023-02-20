@@ -95,7 +95,8 @@ export const loadAlertsEvents = () => {
 export const addToCase = () => {
   cy.contains('Add to Case').click();
   cy.contains('Select case');
-  cy.contains(/Select$/).click();
+  cy.getBySelContains('cases-table-row-');
+  cy.getBySelContains('cases-table-row-select-').click();
 };
 
 export const addLastLiveQueryToCase = () => {

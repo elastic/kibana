@@ -36,7 +36,6 @@ describe('Alert_Test', () => {
       const RULE_NAME = 'Test-rule';
       navigateTo('/app/osquery');
       cy.contains('Packs').click();
-      cy.getBySel('pagination-button-next').click();
       cy.contains(PACK_NAME).click();
       findAndClickButton('Edit');
       cy.contains(`Edit ${PACK_NAME}`);

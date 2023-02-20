@@ -38,6 +38,7 @@ describe('Alert Event Details', () => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'example_pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'case_security');
   });
 
   beforeEach(() => {
@@ -48,6 +49,7 @@ describe('Alert Event Details', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'pack');
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'example_pack');
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'rule');
+    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_security');
   });
 
   it('should prepare packs and alert rules', () => {

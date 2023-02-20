@@ -262,7 +262,7 @@ describe('ALL - Packs', () => {
     it('deactivate and active pack', () => {
       cy.contains('Packs').click();
       deactivatePack(PACK_NAME);
-      activatePack(PACK_NAME, true);
+      activatePack(PACK_NAME);
     });
 
     it.skip('should verify that packs are triggered', () => {
@@ -429,8 +429,8 @@ describe('ALL - Packs', () => {
     });
 
     it('should be able to activate pack with agent inside', () => {
-      activatePack(PREBUILD_PACK_NAME, true);
-      deactivatePack(PREBUILD_PACK_NAME, true);
+      activatePack(PREBUILD_PACK_NAME);
+      deactivatePack(PREBUILD_PACK_NAME);
     });
     it('should be able to delete prebuilt pack', () => {
       cy.contains(PREBUILD_PACK_NAME).click();
