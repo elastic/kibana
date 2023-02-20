@@ -76,6 +76,7 @@ export const createAppContextStartContractMock = (
     telemetryEventsSender: createMockTelemetryEventsSender(),
     bulkActionsResolver: {} as any,
     messageSigningService: {
+      isEncryptionAvailable: true,
       generateKeyPair: jest.fn(),
       sign: jest.fn(),
       getPublicKey: jest.fn(),
