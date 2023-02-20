@@ -7,15 +7,18 @@
 
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
-
 import { FormProvider, useForm } from 'react-hook-form';
+
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
-import { FieldSelector as Component, Props } from './field_selector';
+import {
+  ApmAvailabilityIndicatorTypeForm as Component,
+  Props,
+} from './apm_availability_indicator_type_form';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../constants';
 
 export default {
   component: Component,
-  title: 'app/SLO/EditPage/ApmLatency/FieldSelector',
+  title: 'app/SLO/EditPage/ApmAvailability/Form',
   decorators: [KibanaReactStorybookDecorator],
 };
 
@@ -28,13 +31,7 @@ const Template: ComponentStory<typeof Component> = (props: Props) => {
   );
 };
 
-const defaultProps: Omit<Props, 'control'> = {
-  dataTestSubj: 'dataTestSubj',
-  name: 'name' as const,
-  placeholder: 'Select the APM service',
-  fieldName: 'service.name',
-  label: 'Service name',
-};
+const defaultProps = {};
 
-export const FieldSelector = Template.bind({});
-FieldSelector.args = defaultProps;
+export const Form = Template.bind({});
+Form.args = defaultProps;
