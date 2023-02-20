@@ -134,6 +134,26 @@ class InMemoryStorage implements ContentStorage {
       status: 'success',
     };
   }
+
+  async search(
+    ctx: StorageContext,
+    query: { title: string },
+    { errorToThrow }: { errorToThrow?: string } = {}
+  ): Promise<FooContent[]> {
+    // This allows us to test that proper error events are thrown when the storage layer op fails
+    if (errorToThrow) {
+      throw new Error(errorToThrow);
+    }
+
+    if (query.title.length < 2) {
+      return [];
+    }
+
+    const rgx = new RegExp(query.title);
+    return [...this.db.values()].filter(({ title }) => {
+      return title.match(rgx);
+    });
+  }
 }
 
 export const createMemoryStorage = () => {
@@ -146,4 +166,5 @@ export const createMockedStorage = (): jest.Mocked<ContentStorage> => ({
   create: jest.fn(),
   update: jest.fn(),
   delete: jest.fn(),
+  search: jest.fn(),
 });

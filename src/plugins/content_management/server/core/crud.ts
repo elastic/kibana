@@ -72,6 +72,7 @@ export class ContentCrud implements ContentStorage {
         contentId,
         contentTypeId: this.contentTypeId,
         data: item,
+        options,
       });
 
       return { contentTypeId: this.contentTypeId, item };
@@ -231,6 +232,43 @@ export class ContentCrud implements ContentStorage {
         type: 'deleteItemError',
         contentId: id,
         contentTypeId: this.contentTypeId,
+        options,
+        error: e.message,
+      });
+
+      throw e;
+    }
+  }
+
+  public async search<Query extends object, Options extends object = object, O = any>(
+    ctx: StorageContext,
+    query: Query,
+    options?: Options
+  ): Promise<CreateItemResponse<O>> {
+    this.eventBus.emit({
+      type: 'searchItemStart',
+      contentTypeId: this.contentTypeId,
+      query,
+      options,
+    });
+
+    try {
+      const result = await this.storage.search(ctx, query, options);
+
+      this.eventBus.emit({
+        type: 'searchItemSuccess',
+        contentTypeId: this.contentTypeId,
+        query,
+        data: result,
+        options,
+      });
+
+      return { contentTypeId: this.contentTypeId, result };
+    } catch (e) {
+      this.eventBus.emit({
+        type: 'searchItemError',
+        contentTypeId: this.contentTypeId,
+        query,
         options,
         error: e.message,
       });

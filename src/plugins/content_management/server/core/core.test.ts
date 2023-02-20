@@ -25,6 +25,9 @@ import type {
   DeleteItemStart,
   DeleteItemSuccess,
   DeleteItemError,
+  SearchItemStart,
+  SearchItemSuccess,
+  SearchItemError,
 } from './event_types';
 import { ContentTypeDefinition, StorageContext } from './types';
 
@@ -392,6 +395,7 @@ describe('Content Core', () => {
                 ...data,
               },
               contentTypeId: FOO_CONTENT_ID,
+              options: { someOption: 'baz' },
             };
 
             expect(listener).toHaveBeenCalledWith(getItemSuccess);
@@ -616,6 +620,71 @@ describe('Content Core', () => {
             };
 
             expect(listener).toHaveBeenLastCalledWith(deleteItemError);
+
+            expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
+
+            sub.unsubscribe();
+            cleanUp();
+          });
+
+          test('search()', async () => {
+            const { fooContentCrud, ctx, eventBus, cleanUp } = setup({
+              registerFooType: true,
+            });
+
+            const myContent = { title: 'Hello' };
+
+            await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(ctx, myContent, {
+              id: '1234',
+            });
+
+            const listener = jest.fn();
+            const sub = eventBus.events$.subscribe(listener);
+
+            const query = { title: 'Hell' };
+
+            const promise = await fooContentCrud!.search(ctx, query, { someOptions: 'baz' });
+
+            const searchItemStart: SearchItemStart = {
+              type: 'searchItemStart',
+              query,
+              contentTypeId: FOO_CONTENT_ID,
+              options: { someOptions: 'baz' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(searchItemStart);
+
+            await promise;
+
+            const searchItemSuccess: SearchItemSuccess = {
+              type: 'searchItemSuccess',
+              query,
+              data: [{ id: '1234', ...myContent }],
+              contentTypeId: FOO_CONTENT_ID,
+              options: { someOptions: 'baz' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(searchItemSuccess);
+
+            listener.mockReset();
+
+            const errorMessage = 'Ohhh no!';
+            const reject = jest.fn();
+            await fooContentCrud!
+              .search(ctx, query, {
+                errorToThrow: errorMessage,
+              })
+              .catch(reject);
+
+            const searchItemError: SearchItemError = {
+              type: 'searchItemError',
+              contentTypeId: FOO_CONTENT_ID,
+              query,
+              error: errorMessage,
+              options: { errorToThrow: errorMessage },
+            };
+
+            expect(listener).toHaveBeenLastCalledWith(searchItemError);
 
             expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
 
