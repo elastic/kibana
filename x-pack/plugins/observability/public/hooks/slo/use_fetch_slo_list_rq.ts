@@ -24,7 +24,8 @@ interface SLOListParams {
   indicatorTypes?: string[];
 }
 
-export function useFetchSloList({ name, page, sortBy, indicatorTypes }: SLOListParams) {
+export function useFetchSloList(params?: SLOListParams) {
+  const { name, page, sortBy, indicatorTypes } = params || {};
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(

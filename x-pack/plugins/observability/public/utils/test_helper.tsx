@@ -21,6 +21,7 @@ import { PluginContext } from '../context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { ConfigSchema } from '../plugin';
 import { Subset } from '../typings';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
 
@@ -43,6 +44,19 @@ const defaultConfig: ConfigSchema = {
   },
 };
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+  logger: {
+    log: console.log,
+    warn: console.warn,
+    error: () => {},
+  },
+});
+
 export const render = (component: React.ReactNode, config: Subset<ConfigSchema> = {}) => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
@@ -55,7 +69,9 @@ export const render = (component: React.ReactNode, config: Subset<ConfigSchema> 
             ObservabilityPageTemplate: KibanaPageTemplate,
           }}
         >
-          <EuiThemeProvider>{component}</EuiThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <EuiThemeProvider>{component}</EuiThemeProvider>
+          </QueryClientProvider>
         </PluginContext.Provider>
       </KibanaContextProvider>
     </IntlProvider>

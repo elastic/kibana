@@ -13,7 +13,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useLicense } from '../../hooks/use_license';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list_rq';
 import { SloList } from './components/slo_list';
 import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
 import PageNotFound from '../404';
@@ -32,9 +32,9 @@ export function SlosPage() {
   const { hasAtLeast } = useLicense();
 
   const {
-    loading,
+    isLoading,
     sloList: { total },
-  } = useFetchSloList({ refetch: false });
+  } = useFetchSloList();
 
   useBreadcrumbs([
     {
@@ -53,7 +53,7 @@ export function SlosPage() {
     return <PageNotFound />;
   }
 
-  if (loading) {
+  if (isLoading) {
     return null;
   }
 
