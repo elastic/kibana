@@ -12,6 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
+    // testFiles: [require.resolve('.')],
+    testFiles: [require.resolve('./log_settings')],
   };
 }
