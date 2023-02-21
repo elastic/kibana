@@ -5350,7 +5350,7 @@
               "\nSpecify which HTTP routes to create for the file kind.\n\nYou can always create your own HTTP routes for working with files but\nthis interface allows you to expose basic CRUD operations, upload, download\nand sharing of files over a RESTful-like interface.\n"
             ],
             "signature": [
-              "{ create?: any; update?: any; delete?: any; getById?: any; list?: any; download?: any; share?: any; }"
+              "{ create?: HttpEndpointDefinition | undefined; update?: HttpEndpointDefinition | undefined; delete?: HttpEndpointDefinition | undefined; getById?: HttpEndpointDefinition | undefined; list?: HttpEndpointDefinition | undefined; download?: HttpEndpointDefinition | undefined; share?: HttpEndpointDefinition | undefined; }"
             ],
             "path": "packages/shared-ux/file/types/index.d.ts",
             "deprecated": false,
