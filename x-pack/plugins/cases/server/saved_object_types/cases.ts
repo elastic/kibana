@@ -46,15 +46,6 @@ export const createCaseSavedObjectType = (
           username: {
             type: 'keyword',
           },
-          full_name: {
-            type: 'keyword',
-          },
-          email: {
-            type: 'keyword',
-          },
-          profile_uid: {
-            type: 'keyword',
-          },
         },
       },
       duration: {
