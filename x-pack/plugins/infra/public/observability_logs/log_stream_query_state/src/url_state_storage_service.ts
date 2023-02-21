@@ -301,10 +301,7 @@ export const replaceLogFilterInQueryString = (query: Query, time?: number) =>
           },
         }
       : {}),
-    refreshInterval: {
-      pause: true,
-      value: 5000,
-    },
+    refreshInterval: DEFAULT_REFRESH_INTERVAL,
   });
 
 const defaultTimeRangeFromPositionOffset: DurationInputObject = { hours: 1 };
