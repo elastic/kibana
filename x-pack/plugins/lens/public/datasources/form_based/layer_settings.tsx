@@ -21,6 +21,8 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DatasourceLayerSettingsProps } from '../../types';
 import type { FormBasedPrivateState } from './types';
+import { isSamplingValueEnabled } from './utils';
+import { TooltipWrapper } from '../../shared_components';
 
 const samplingValue = [0.0001, 0.001, 0.01, 0.1, 1];
 
@@ -31,6 +33,7 @@ export function LayerSettingsPanel({
 }: DatasourceLayerSettingsProps<FormBasedPrivateState>) {
   const samplingIndex = samplingValue.findIndex((v) => v === state.layers[layerId].sampling);
   const currentSamplingIndex = samplingIndex > -1 ? samplingIndex : samplingValue.length - 1;
+  const isSamplingValueDisabled = !isSamplingValueEnabled(state.layers[layerId]);
   return (
     <EuiFormRow
       display="rowCompressed"
@@ -89,29 +92,41 @@ export function LayerSettingsPanel({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiRange
-            data-test-subj="lns-indexPattern-random-sampling"
-            value={currentSamplingIndex}
-            onChange={(e) => {
-              setState({
-                ...state,
-                layers: {
-                  ...state.layers,
-                  [layerId]: {
-                    ...state.layers[layerId],
-                    sampling: samplingValue[Number(e.currentTarget.value)],
+          <TooltipWrapper
+            tooltipContent={i18n.translate(
+              'xpack.lens.indexPattern.randomSampling.disabledMessage',
+              {
+                defaultMessage:
+                  'In order to select a reduced sampling percentage, you must remove any maximum or minimum functions applied on this layer.',
+              }
+            )}
+            condition={isSamplingValueDisabled}
+          >
+            <EuiRange
+              data-test-subj="lns-indexPattern-random-sampling"
+              value={currentSamplingIndex}
+              disabled={isSamplingValueDisabled}
+              onChange={(e) => {
+                setState({
+                  ...state,
+                  layers: {
+                    ...state.layers,
+                    [layerId]: {
+                      ...state.layers[layerId],
+                      sampling: samplingValue[Number(e.currentTarget.value)],
+                    },
                   },
-                },
-              });
-            }}
-            showInput={false}
-            showRange={false}
-            showTicks
-            step={1}
-            min={0}
-            max={samplingValue.length - 1}
-            ticks={samplingValue.map((v, i) => ({ label: `${v * 100}%`, value: i }))}
-          />
+                });
+              }}
+              showInput={false}
+              showRange={false}
+              showTicks
+              step={1}
+              min={0}
+              max={samplingValue.length - 1}
+              ticks={samplingValue.map((v, i) => ({ label: `${v * 100}%`, value: i }))}
+            />
+          </TooltipWrapper>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="xs">

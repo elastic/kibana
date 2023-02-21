@@ -21,6 +21,8 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { EuiIcon } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -876,6 +878,32 @@ export const getXyVisualization = ({
     }
 
     return [...errors, ...warnings];
+  },
+
+  getNotifiableFeatures(state) {
+    const layers = getAnnotationsLayers(state.layers).filter((layer) => layer.ignoreGlobalFilters);
+    if (!layers.length) {
+      return [];
+    }
+    return [
+      {
+        icon: (
+          <EuiIcon
+            type="filterIgnore"
+            css={css`
+              margin-left: 4px;
+            `}
+          />
+        ),
+        tooltipMessage: i18n.translate('xpack.lens.xyChart.annotationLayer.ignoringFilters', {
+          defaultMessage:
+            'Ignoring global filters - {layerCount} annotation {layerCount, plural, one {layer} other {layers}}',
+          values: {
+            layerCount: layers.length,
+          },
+        }),
+      },
+    ];
   },
 
   getUniqueLabels(state) {

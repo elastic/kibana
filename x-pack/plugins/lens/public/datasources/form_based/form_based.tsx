@@ -25,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { css } from '@emotion/react';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -68,6 +69,7 @@ import {
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
+  getSamplingValue,
 } from './utils';
 import { isDraggedDataViewField } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -101,6 +103,7 @@ import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer } from '../..';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import { RandomSamplingIcon } from '../../shared_components/dataview_picker/sampling_icon';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -585,6 +588,7 @@ export function getFormBasedDatasource({
                 unifiedSearch={unifiedSearch}
                 dataViews={dataViews}
                 uniqueLabel={columnLabelMap[props.columnId]}
+                notifications={core.notifications}
                 {...props}
               />
             </KibanaContextProvider>
@@ -873,6 +877,48 @@ export function getFormBasedDatasource({
       ];
 
       return [...layerErrorMessages, ...dimensionErrorMessages, ...warningMessages];
+    },
+
+    getNotifiableFeatures: (state) => {
+      if (!state) {
+        return [];
+      }
+      const samplingValues = Object.values(state.layers)
+        .map((layer) => getSamplingValue(layer))
+        .filter((v) => v !== 1);
+      if (!samplingValues.length) {
+        return [];
+      }
+      const samplingValuePerLayer: Record<number, number> = {};
+      for (const value of samplingValues) {
+        if (samplingValuePerLayer[value] == null) {
+          samplingValuePerLayer[value] = 0;
+        }
+        samplingValuePerLayer[value]++;
+      }
+      return [
+        {
+          icon: (
+            <RandomSamplingIcon
+              css={css`
+                margin-left: 4px;
+              `}
+            />
+          ),
+          tooltipMessage: Object.entries(samplingValuePerLayer)
+            .map(([samplingValue, layerCount]) =>
+              i18n.translate('xpack.lens.indexPattern.samplingPerLayer', {
+                defaultMessage:
+                  '{samplingValue}% sampling - {layerCount} {layerCount, plural, one {layer} other {layers}}',
+                values: {
+                  samplingValue: Number(samplingValue) * 100,
+                  layerCount,
+                },
+              })
+            )
+            .join('\n'),
+        },
+      ];
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {

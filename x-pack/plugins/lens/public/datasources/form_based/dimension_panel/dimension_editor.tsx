@@ -44,7 +44,7 @@ import {
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { getReferencedField, hasField } from '../pure_utils';
-import { fieldIsInvalid } from '../utils';
+import { fieldIsInvalid, isSamplingValueEnabled } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { FormBasedLayer } from '../types';
 import { FormatSelector } from './format_selector';
@@ -126,6 +126,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const [temporaryState, setTemporaryState] = useState<TemporaryState>('none');
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  // If a layer has sampling disabled, assume the toast has already fired in the past
+  const [hasRandomSamplingToastFired, setSamplingToastAsFired] = useState(
+    isSamplingValueEnabled(state.layers[layerId])
+  );
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
@@ -137,6 +141,31 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const updateLayer = useCallback(
     (newLayer) => setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
     [layerId, setState]
+  );
+
+  const fireOrResetRandomSamplingToast = useCallback(
+    (newLayer: FormBasedLayer) => {
+      if (!isSamplingValueEnabled(newLayer) && !hasRandomSamplingToastFired) {
+        if (newLayer.sampling != null && newLayer.sampling < 1) {
+          const message = i18n.translate('xpack.lens.uiInfo.samplingDisabledMessage', {
+            defaultMessage:
+              'The use of a maximum or minimum function on a layer requires all documents to be sampled in order to function properly.',
+          });
+          props.notifications.toasts.addInfo({
+            title: i18n.translate('xpack.lens.uiInfo.samplingDisabledTitle', {
+              defaultMessage: 'Layer sampling changed to 100%',
+            }),
+            text: message,
+          });
+          setSamplingToastAsFired(true);
+        }
+      }
+      // reset the flag if the user switches to another supported operation
+      if (isSamplingValueEnabled(newLayer) && hasRandomSamplingToastFired) {
+        setSamplingToastAsFired(false);
+      }
+    },
+    [hasRandomSamplingToastFired, props.notifications.toasts]
   );
 
   const setStateWrapper = useCallback(
@@ -177,10 +206,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
           } else {
             outputLayer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
           }
+          const newLayer = adjustColumnReferencesForChangedColumn(outputLayer, columnId);
+          // Fire an info toast (eventually) on layer update
+          fireOrResetRandomSamplingToast(newLayer);
+
           return mergeLayer({
             state: prevState,
             layerId,
-            newLayer: adjustColumnReferencesForChangedColumn(outputLayer, columnId),
+            newLayer,
           });
         },
         {
@@ -189,7 +222,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         }
       );
     },
-    [columnId, layerId, setState, state.layers]
+    [columnId, fireOrResetRandomSamplingToast, layerId, setState, state.layers]
   );
 
   const setIsCloseable = (isCloseable: boolean) => {

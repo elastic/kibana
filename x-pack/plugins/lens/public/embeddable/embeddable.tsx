@@ -74,8 +74,7 @@ import {
 } from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt, EuiToolTip } from '@elastic/eui';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -99,6 +98,7 @@ import {
   isMessageRemovable,
   UserMessagesGetter,
   UserMessagesDisplayLocationId,
+  FeatureBadge,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -119,6 +119,7 @@ import {
   getApplicationUserMessages,
 } from '../app_plugin/get_application_user_messages';
 import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
+import { getApplicationFeatureBadges } from '../app_plugin/get_app_feature_badges';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -324,9 +325,26 @@ function getViewUnderlyingDataArgs({
   };
 }
 
+const EmbeddableFeatureBadge = ({ badges }: { badges: FeatureBadge[] }) => {
+  if (!badges.length) {
+    return null;
+  }
+  return (
+    <div>
+      {badges.map(({ icon, tooltipMessage }) => {
+        return <EuiToolTip content={tooltipMessage}>{icon}</EuiToolTip>;
+      })}
+    </div>
+  );
+};
+
 const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
+
+  if (!messages.length) {
+    return null;
+  }
 
   return (
     <MessageList
@@ -427,6 +445,7 @@ export class Embeddable
     this.initializeSavedVis(initialInput)
       .then(() => {
         this.loadUserMessages();
+        this.loadFeatureBadges();
         if (!containerStateChangedCalledAlready) {
           this.onContainerStateChanged(initialInput);
         } else {
@@ -572,7 +591,23 @@ export class Embeddable
     );
   };
 
+  public getFeatureBadges = (): FeatureBadge[] => this._featureBadges;
+
   private _userMessages: UserMessage[] = [];
+  private _featureBadges: FeatureBadge[] = [];
+
+  private loadFeatureBadges() {
+    this._featureBadges = getApplicationFeatureBadges({
+      visualizationType: this.savedVis?.visualizationType,
+      visualization: {
+        state: this.activeVisualizationState,
+        activeId: this.activeVisualizationId,
+      },
+      visualizationMap: this.deps.visualizationMap,
+      activeDatasource: this.activeDatasource,
+      activeDatasourceState: { state: this.activeDatasourceState },
+    });
+  }
 
   // loads all available user messages
   private loadUserMessages() {
@@ -1015,10 +1050,11 @@ export class Embeddable
   private renderBadgeMessages = () => {
     const messages = this.getUserMessages('embeddableBadge');
 
-    if (messages.length && this.badgeDomNode) {
+    if (this.badgeDomNode) {
       render(
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
           <EmbeddableMessagesPopover messages={messages} />
+          <EmbeddableFeatureBadge badges={this.getFeatureBadges()} />
         </KibanaThemeProvider>,
         this.badgeDomNode
       );

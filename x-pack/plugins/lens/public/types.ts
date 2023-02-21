@@ -293,6 +293,11 @@ type UserMessageDisplayLocation =
 
 export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 
+export interface FeatureBadge {
+  icon: React.ReactElement;
+  tooltipMessage: string;
+}
+
 export interface UserMessage {
   uniqueId?: string;
   severity: 'error' | 'warning';
@@ -490,6 +495,11 @@ export interface Datasource<T = unknown, P = unknown> {
       setState: StateSetter<T>;
     }
   ) => UserMessage[];
+
+  /**
+   * Features to be displayed at dashboard level
+   */
+  getNotifiableFeatures?: (state: T) => FeatureBadge[];
 
   /**
    * The embeddable calls this function to display warnings about visualization on the dashboard
@@ -1269,6 +1279,11 @@ export interface Visualization<T = unknown, P = unknown> {
    * to provide more context to the error and show it to the user
    */
   getUserMessages?: (state: T, deps: { frame: FramePublicAPI }) => UserMessage[];
+
+  /**
+   * Features to be displayed at dashboard level
+   */
+  getNotifiableFeatures?: (state: T) => FeatureBadge[];
 
   /**
    * On Edit events the frame will call this to know what's going to be the next visualization state
