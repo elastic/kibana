@@ -5,9 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { schema } from '@kbn/config-schema';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Core } from './core';
-import { createMemoryStorage, MockContent } from './mocks';
+import { createMemoryStorage, FooContent } from './mocks';
 import { ContentRegistry } from './registry';
 import { ContentCrud } from './crud';
 import type {
@@ -24,19 +26,30 @@ import type {
   DeleteItemSuccess,
   DeleteItemError,
 } from './event_types';
+import { ContentTypeDefinition, StorageContext } from './types';
 
 const logger = loggingSystemMock.createLogger();
 
 const FOO_CONTENT_ID = 'foo';
+const fooSchema = schema.object({ title: schema.string() });
 
 const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) => {
-  const ctx = {};
+  const ctx: StorageContext = {
+    requestHandlerContext: {} as any,
+  };
 
   const core = new Core({ logger });
   const coreSetup = core.setup();
-  const contentDefinition = {
+  const contentDefinition: ContentTypeDefinition = {
     id: FOO_CONTENT_ID,
     storage: createMemoryStorage(),
+    schemas: {
+      content: {
+        create: { in: { data: fooSchema } },
+        update: { in: { data: fooSchema } },
+        search: { in: { query: schema.any() } },
+      },
+    },
   };
   const cleanUp = () => {
     coreSetup.api.eventBus.stop();
@@ -124,7 +137,7 @@ describe('Content Core', () => {
 
           const res = await fooContentCrud!.get(ctx, '1234');
           expect(res.item).toBeUndefined();
-          await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
+          await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(
             ctx,
             { title: 'Hello' },
             { id: '1234' } // We send this "id" option to specify the id of the content created
@@ -143,12 +156,12 @@ describe('Content Core', () => {
         test('update()', async () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
-          await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
+          await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(
             ctx,
             { title: 'Hello' },
             { id: '1234' }
           );
-          await fooContentCrud!.update<Omit<MockContent, 'id'>>(ctx, '1234', { title: 'changed' });
+          await fooContentCrud!.update<Omit<FooContent, 'id'>>(ctx, '1234', { title: 'changed' });
           expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
             item: {
@@ -163,12 +176,12 @@ describe('Content Core', () => {
         test('update() - options are forwared to storage layer', async () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
-          await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
+          await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(
             ctx,
             { title: 'Hello' },
             { id: '1234' }
           );
-          const res = await fooContentCrud!.update<Omit<MockContent, 'id'>>(
+          const res = await fooContentCrud!.update<Omit<FooContent, 'id'>>(
             ctx,
             '1234',
             { title: 'changed' },
@@ -199,7 +212,7 @@ describe('Content Core', () => {
         test('delete()', async () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
-          await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
+          await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(
             ctx,
             { title: 'Hello' },
             { id: '1234' }
@@ -220,7 +233,7 @@ describe('Content Core', () => {
         test('delete() - options are forwared to storage layer', async () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
-          await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
+          await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(
             ctx,
             { title: 'Hello' },
             { id: '1234' }
@@ -311,7 +324,7 @@ describe('Content Core', () => {
 
           register(contentDefinition);
 
-          await crud(FOO_CONTENT_ID).create<Omit<MockContent, 'id'>, { id: string }>(
+          await crud(FOO_CONTENT_ID).create<Omit<FooContent, 'id'>, { id: string }>(
             ctx,
             { title: 'Hello' },
             { id: '1234' }
@@ -351,7 +364,7 @@ describe('Content Core', () => {
 
             const data = { title: 'Hello' };
 
-            await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(ctx, data, {
+            await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(ctx, data, {
               id: '1234',
             });
 
@@ -416,7 +429,7 @@ describe('Content Core', () => {
             const listener = jest.fn();
             const sub = eventBus.events$.subscribe(listener);
 
-            const promise = fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
+            const promise = fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(
               ctx,
               data,
               {
@@ -452,7 +465,7 @@ describe('Content Core', () => {
             const errorMessage = 'Ohhh no!';
             const reject = jest.fn();
             await fooContentCrud!
-              .create<Omit<MockContent, 'id'>, { id: string; errorToThrow: string }>(ctx, data, {
+              .create<Omit<FooContent, 'id'>, { id: string; errorToThrow: string }>(ctx, data, {
                 id: '1234',
                 errorToThrow: errorMessage,
               })
@@ -479,7 +492,7 @@ describe('Content Core', () => {
               registerFooType: true,
             });
 
-            await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
+            await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(
               ctx,
               { title: 'Hello' },
               {
@@ -551,7 +564,7 @@ describe('Content Core', () => {
               registerFooType: true,
             });
 
-            await fooContentCrud!.create<Omit<MockContent, 'id'>, { id: string }>(
+            await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(
               ctx,
               { title: 'Hello' },
               {
