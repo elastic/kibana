@@ -15,20 +15,16 @@ import {
   useUpdateContentMutation,
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '../../public/content_client';
-import type {
-  Todo,
-  TodoCreateIn,
-  TodoDeleteIn,
-  TodoSearchIn,
-  TodoSearchOut,
-  TodoUpdateIn,
-} from './todos_client';
+import type { Todo, TodoCreateIn, TodoDeleteIn, TodoSearchIn, TodoUpdateIn } from './todos_client';
 
 const useCreateTodoMutation = () => useCreateContentMutation<TodoCreateIn, Todo>();
 const useDeleteTodoMutation = () => useDeleteContentMutation<TodoDeleteIn, void>();
 const useUpdateTodoMutation = () => useUpdateContentMutation<TodoUpdateIn, Todo>();
-const useSearchTodosQuery = ({ filter }: { filter: TodoSearchIn['params']['filter'] }) =>
-  useSearchContentQuery<TodoSearchIn, TodoSearchOut>({ contentType: 'todos', params: { filter } });
+const useSearchTodosQuery = ({ filter }: { filter: TodoSearchIn['query']['filter'] }) =>
+  useSearchContentQuery<TodoSearchIn, { hits: Todo[] }>({
+    contentTypeId: 'todos',
+    query: { filter },
+  });
 
 type TodoFilter = 'all' | 'completed' | 'todo';
 const filters = [
@@ -81,9 +77,9 @@ export const Todos = () => {
                 checked={todo.completed}
                 onChange={(e) => {
                   updateTodoMutation.mutate({
-                    contentType: 'todos',
+                    contentTypeId: 'todos',
+                    id: todo.id,
                     data: {
-                      ...todo,
                       completed: e.target.checked,
                     },
                   });
@@ -99,7 +95,7 @@ export const Todos = () => {
                 aria-label="Delete"
                 color="danger"
                 onClick={() => {
-                  deleteTodoMutation.mutate({ contentType: 'todos', data: { id: todo.id } });
+                  deleteTodoMutation.mutate({ contentTypeId: 'todos', id: todo.id });
                 }}
               />
             </li>
@@ -116,7 +112,7 @@ export const Todos = () => {
           if (!inputRef || !inputRef.value) return;
 
           createTodoMutation.mutate({
-            contentType: 'todos',
+            contentTypeId: 'todos',
             data: {
               title: inputRef.value,
             },

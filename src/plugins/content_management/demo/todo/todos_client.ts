@@ -8,7 +8,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { CrudClient } from '../../public/crud_client';
-import type { CreateIn, DeleteIn, GetIn, SearchIn, SearchOut, UpdateIn } from '../../common';
+import type { CreateIn, DeleteIn, GetIn, SearchIn, UpdateIn } from '../../common';
 
 export interface Todo {
   id: string;
@@ -17,11 +17,10 @@ export interface Todo {
 }
 
 export type TodoCreateIn = CreateIn<'todos', { title: string }>;
-export type TodoUpdateIn = UpdateIn<'todos', { id: string } & Partial<Todo>>;
+export type TodoUpdateIn = UpdateIn<'todos', Partial<Omit<Todo, 'id'>>>;
 export type TodoDeleteIn = DeleteIn<'todos', { id: string }>;
 export type TodoGetIn = GetIn<'todos'>;
 export type TodoSearchIn = SearchIn<'todos', { filter?: 'todo' | 'completed' }>;
-export type TodoSearchOut = SearchOut<Todo>;
 
 export class TodosClient implements CrudClient {
   private todos: Todo[] = [
@@ -40,22 +39,22 @@ export class TodosClient implements CrudClient {
   }
 
   async delete(input: TodoDeleteIn): Promise<void> {
-    this.todos = this.todos.filter((todo) => todo.id !== input.data.id);
+    this.todos = this.todos.filter((todo) => todo.id !== input.id);
   }
 
-  async get<I extends GetIn = GetIn, O = unknown>(input: TodoGetIn): Promise<Todo> {
+  async get(input: TodoGetIn): Promise<Todo> {
     return this.todos.find((todo) => todo.id === input.id)!;
   }
 
-  async search(input: TodoSearchIn): Promise<TodoSearchOut> {
-    const filter = input.params.filter;
+  async search(input: TodoSearchIn): Promise<{ hits: Todo[] }> {
+    const filter = input.query.filter;
     if (filter === 'todo') return { hits: this.todos.filter((t) => !t.completed) };
     if (filter === 'completed') return { hits: this.todos.filter((t) => t.completed) };
     return { hits: [...this.todos] };
   }
 
   async update(input: TodoUpdateIn): Promise<Todo> {
-    const idToUpdate = input.data.id;
+    const idToUpdate = input.id;
     const todoToUpdate = this.todos.find((todo) => todo.id === idToUpdate)!;
     if (todoToUpdate) {
       Object.assign(todoToUpdate, input.data);

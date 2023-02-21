@@ -19,7 +19,7 @@ export const useCreateContentMutation = <I extends CreateIn = CreateIn, O = unkn
     },
     onSuccess: (data, variables) => {
       contentClient.queryClient.invalidateQueries({
-        queryKey: queryKeyBuilder.all(variables.contentType),
+        queryKey: queryKeyBuilder.all(variables.contentTypeId),
       });
     },
   });
@@ -33,7 +33,7 @@ export const useUpdateContentMutation = <I extends UpdateIn = UpdateIn, O = unkn
     },
     onSuccess: (data, variables) => {
       contentClient.queryClient.invalidateQueries({
-        queryKey: queryKeyBuilder.all(variables.contentType),
+        queryKey: queryKeyBuilder.all(variables.contentTypeId),
       });
     },
   });
@@ -47,7 +47,7 @@ export const useDeleteContentMutation = <I extends DeleteIn = DeleteIn, O = unkn
     },
     onSuccess: (data, variables) => {
       contentClient.queryClient.invalidateQueries({
-        queryKey: queryKeyBuilder.all(variables.contentType),
+        queryKey: queryKeyBuilder.all(variables.contentTypeId),
       });
     },
   });
