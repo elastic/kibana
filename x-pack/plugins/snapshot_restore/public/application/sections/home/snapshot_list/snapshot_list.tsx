@@ -8,8 +8,9 @@
 import React, { useState, useEffect } from 'react';
 import { parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { capitalize } from 'lodash';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import {
   PageLoading,
@@ -36,6 +37,10 @@ interface MatchParams {
   repositoryName?: string;
   snapshotId?: string;
 }
+
+const sanitizeErrorType = (error: string) => {
+  return capitalize(error.replace('_exception', '').replace('_', ' '));
+};
 
 export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   location: { search },
@@ -149,36 +154,29 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     content = <RepositoryError />;
   } else if (repositories.length === 0) {
     content = <RepositoryEmptyPrompt />;
-  } else if (totalSnapshotsCount === 0 && !listParams.searchField && !isLoading) {
+  } else if (totalSnapshotsCount === 0 && !listParams.searchField && !isLoading && Object.keys(errors).length === 0) {
     content = <SnapshotEmptyPrompt policiesCount={policies.length} />;
   } else {
-    const repositoryErrorsWarning = Object.keys(errors).length ? (
+    const snapshotsErrorWarning = Object.keys(errors).length ? (
       <>
         <EuiCallOut
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryWarningTitle"
-              defaultMessage="Some repositories contain errors"
+              defaultMessage="There were a few errors retrieving snapshots"
             />
           }
           color="warning"
           iconType="alert"
-          data-test-subj="repositoryErrorsWarning"
+          data-test-subj="snapshotsErrorWarning"
         >
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryWarningDescription"
-            defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
-            values={{
-              repositoryLink: (
-                <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.repositoryWarningLinkText"
-                    defaultMessage="Repositories"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
+          <ul>
+            {Object.keys(errors).map((errorKey) => (
+              <li key={errorKey}>
+                {sanitizeErrorType(errors[errorKey].type)}: {errors[errorKey].reason}
+              </li>
+            ))}
+          </ul>
         </EuiCallOut>
         <EuiSpacer />
       </>
@@ -186,7 +184,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
     content = (
       <section data-test-subj="snapshotList">
-        {repositoryErrorsWarning}
+        {snapshotsErrorWarning}
 
         <SnapshotTable
           snapshots={snapshots}

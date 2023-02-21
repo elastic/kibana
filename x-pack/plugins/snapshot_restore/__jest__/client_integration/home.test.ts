@@ -566,9 +566,9 @@ describe('<SnapshotRestoreHome />', () => {
         testBed.component.update();
 
         const { find, exists } = testBed;
-        expect(exists('repositoryErrorsWarning')).toBe(true);
-        expect(find('repositoryErrorsWarning').text()).toContain(
-          'Some repositories contain errors'
+        expect(exists('snapshotsErrorWarning')).toBe(true);
+        expect(find('snapshotsErrorWarning').text()).toContain(
+          'There were a few errors retrieving snapshots'
         );
       });
 
