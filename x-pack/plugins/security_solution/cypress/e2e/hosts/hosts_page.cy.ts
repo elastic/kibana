@@ -17,6 +17,8 @@ import {
   ALL_HOSTS_TAB,
   ANOMALIES_TAB,
   EVENTS_TAB,
+  HOST_RISK_TAB,
+  SESSIONS_TAB,
   UNCOMMON_PROCESSES_TAB,
   UNIQUE_HOSTS,
   UNIQUE_IPS,
@@ -24,6 +26,8 @@ import {
 import { ALERTS_OR_EVENTS_HISTOGRAM, EVENTS_VIEWER_PANEL } from '../../screens/hosts/events';
 import { UNCOMMON_PROCESSES_TABLE } from '../../screens/hosts/uncommon_processes';
 import { ANOMOLIES_PANEL } from '../../screens/hosts/anomalies';
+import { SESSIONS_PANEL } from '../../screens/hosts/sessions';
+import { HOST_RISK_PANEL } from '../../screens/hosts/host_risk';
 
 describe('Hosts page renders as expected', () => {
   before(() => {
@@ -50,30 +54,37 @@ describe('Hosts page renders as expected', () => {
   });
 
   describe('Clicking the Host page tabs works as expected', () => {
-    it('should navigate to Events table when Events tab is clicked', () => {
+    it('should navigate to the correct tabs when clicked', () => {
+      // EVENTS
       cy.get(EVENTS_TAB).click();
       cy.get(ALERTS_OR_EVENTS_HISTOGRAM).should('be.visible');
       cy.url().should('contain', HOSTS_PAGE_TAB_URLS.events);
       cy.get(EVENTS_VIEWER_PANEL).should('be.visible');
-    });
 
-    it('should navigate to Anomalies when anomalies tab is clicked', () => {
+      // ANOMALIES
       cy.get(ANOMALIES_TAB).click();
       cy.get(ANOMOLIES_PANEL).should('be.visible');
       cy.url().should('contain', HOSTS_PAGE_TAB_URLS.anomalies);
-    });
 
-    it('should navigate to All Hosts table when All Host tab is clicked', () => {
-      cy.get(ANOMALIES_TAB).click();
+      // ALL HOSTS
       cy.get(ALL_HOSTS_TAB).click();
       cy.get(ALL_HOSTS_TABLE).should('be.visible');
       cy.url().should('contain', HOSTS_PAGE_TAB_URLS.allHosts);
-    });
 
-    it('should navigate to Uncommon Processes when uncommon processes tab is clicked', () => {
+      // UNCOMMON PROCESSES
       cy.get(UNCOMMON_PROCESSES_TAB).click();
       cy.get(UNCOMMON_PROCESSES_TABLE).should('be.visible');
       cy.url().should('contain', HOSTS_PAGE_TAB_URLS.uncommonProcesses);
+
+      // SESSIONS
+      cy.get(SESSIONS_TAB).click();
+      cy.get(SESSIONS_PANEL).should('be.visible');
+      cy.url().should('contain', HOSTS_PAGE_TAB_URLS.sessions);
+
+      // HOST RISK
+      cy.get(HOST_RISK_TAB).click();
+      cy.get(HOST_RISK_PANEL).should('be.visible');
+      cy.url().should('contain', HOSTS_PAGE_TAB_URLS.hostRisk);
     });
   });
 

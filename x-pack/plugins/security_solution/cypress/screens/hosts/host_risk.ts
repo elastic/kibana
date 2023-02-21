@@ -29,3 +29,7 @@ export const HOST_BY_RISK_TABLE_NEXT_PAGE_BUTTON =
 
 export const HOST_BY_RISK_TABLE_HOSTNAME_CELL =
   '[data-test-subj="cellActions-renderContent-host.name"]';
+
+export const HOST_RISK_TABLE = '[data-test-subj="table-users-authentications-loading-false"]';
+
+export const HOST_RISK_PANEL = '[data-test-subj="host-risk-score-panel"]';

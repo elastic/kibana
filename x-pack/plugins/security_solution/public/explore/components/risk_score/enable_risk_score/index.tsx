@@ -48,7 +48,7 @@ const EnableRiskScoreComponent = ({
       };
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel hasBorder data-test-subj={`${entityType}-risk-score-panel`}>
       <HeaderSection title={<RiskScoreHeaderTitle riskScoreEntity={entityType} />} titleSize="s" />
       <EuiEmptyPrompt
         title={<h2>{text.cta}</h2>}

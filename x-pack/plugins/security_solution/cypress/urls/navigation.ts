@@ -44,8 +44,11 @@ export const HOSTS_PAGE_TAB_URLS = {
   allHosts: '/app/security/hosts/allHosts',
   anomalies: '/app/security/hosts/anomalies',
   events: '/app/security/hosts/events',
+  hostRisk: '/app/security/hosts/hostRisk',
+  sessions: '/app/security/hosts/sessions',
   uncommonProcesses: '/app/security/hosts/uncommonProcesses',
 };
+
 export const LOGOUT_URL = '/logout';
 
 export const DISCOVER_WITH_FILTER_URL =

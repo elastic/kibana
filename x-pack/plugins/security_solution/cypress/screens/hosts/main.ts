@@ -11,11 +11,15 @@ export const ANOMALIES_TAB = '[data-test-subj="navigation-anomalies"]';
 
 export const EVENTS_TAB = '[data-test-subj="navigation-events"]';
 
-export const UNCOMMON_PROCESSES_TAB = '[data-test-subj="navigation-uncommonProcesses"]';
-
 export const HOST_OVERVIEW = `[data-test-subj="host-overview"]`;
 
+export const HOST_RISK = `[data-test-subj="host-overview"]`;
+
+export const HOST_RISK_TAB = `[data-test-subj="navigation-hostRisk"]`;
+
 export const SESSIONS_TAB = `[data-test-subj="navigation-sessions"]`;
+
+export const UNCOMMON_PROCESSES_TAB = '[data-test-subj="navigation-uncommonProcesses"]';
 
 export const UNIQUE_HOSTS = `[data-test-subj="stat-hosts"]`;
 
