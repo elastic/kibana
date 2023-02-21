@@ -25,7 +25,6 @@ import { KibanaUrl } from '../services/kibana_url';
 import type { Step, AnyStep } from './journey';
 import type { JourneyConfig } from './journey_config';
 import { JourneyScreenshots } from './journey_screenshots';
-// import supertest from 'supertest';
 
 export class JourneyFtrHarness {
   private readonly screenshots: JourneyScreenshots;
