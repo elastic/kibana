@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             body: {
               version: '2.0.0',
             },
-            refresh: 'wait_for',
+            refresh: true,
           });
 
           await indexPatterns.create({ title: indexTitle }, { override: true });
