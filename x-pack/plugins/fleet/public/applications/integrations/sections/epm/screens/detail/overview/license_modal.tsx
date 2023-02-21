@@ -40,10 +40,9 @@ export const LicenseModal: React.FunctionComponent<Props> = ({
     isLoading,
   } = useGetFileByPathQuery(licensePath);
   const licenseText = licenseResponse?.data;
-  const error = licenseError || licenseResponse?.error;
 
-  if (error) {
-    notifications.toasts.addError(error, {
+  if (licenseError) {
+    notifications.toasts.addError(licenseError, {
       title: i18n.translate('xpack.fleet.epm.errorLoadingLicense', {
         defaultMessage: 'Error loading license information',
       }),
