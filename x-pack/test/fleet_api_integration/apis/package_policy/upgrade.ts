@@ -1314,9 +1314,9 @@ export default function (providerContext: FtrProviderContext) {
           );
         };
 
-        await Promise.all(
-          new Array(POLICY_COUNT).fill(0).map((_, i) => createPackagePolicy(i.toString()))
-        );
+        for (let i = 0; i < POLICY_COUNT; i++) {
+          await createPackagePolicy(i.toString());
+        }
       });
 
       afterEach(async function () {
