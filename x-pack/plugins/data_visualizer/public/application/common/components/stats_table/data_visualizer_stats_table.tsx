@@ -476,7 +476,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
                 : undefined
             }
             css={dvTableCss}
-            // className={'dvTable'}
             items={items}
             itemId={FIELD_NAME}
             columns={columns}
