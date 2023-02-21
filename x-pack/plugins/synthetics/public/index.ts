@@ -8,5 +8,6 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { UptimePlugin } from './plugin';
 
+// force cypress test run
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new UptimePlugin(initializerContext);
