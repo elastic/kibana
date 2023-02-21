@@ -11,13 +11,11 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiCallOut,
-  EuiText,
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   omitAllOption,
@@ -107,6 +105,11 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   );
 
   const isAllOptionSelected = newConfig.service.name === ALL_OPTION_VALUE;
+  const isSaveButtonDisabled =
+    !newConfig.service.name ||
+    !newConfig.service.environment ||
+    agentNameStatus === FETCH_STATUS.LOADING ||
+    !isAgentConfigurationSupported;
 
   return (
     <>
@@ -137,14 +140,17 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         error={INCORRECT_SERVICE_NAME_TRANSLATED}
       />
       {isAllOptionSelected && (
-        <EuiCallOut color="warning" iconType="help">
-          <EuiText size="s">
-            <FormattedMessage
-              defaultMessage="The configuration you are about to create will apply to all types of APM services, except those using an OpenTelemetry agent"
-              id="xpack.apm.settings.agentConfiguration.all.option.calloutDescription"
-            />
-          </EuiText>
-        </EuiCallOut>
+        <EuiCallOut
+          color="warning"
+          iconType="alert"
+          title={i18n.translate(
+            'xpack.apm.settings.agentConfiguration.all.option.calloutTitle',
+            {
+              defaultMessage:
+                'This configuration change will impact all services, except those that use an OpenTelemetry agent. ',
+            }
+          )}
+        />
       )}
       {/* Environment options */}
       <FormRowSelect
@@ -198,12 +204,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
             fill
             onClick={onClickNext}
             isLoading={agentNameStatus === FETCH_STATUS.LOADING}
-            isDisabled={
-              !newConfig.service.name ||
-              !newConfig.service.environment ||
-              agentNameStatus === FETCH_STATUS.LOADING ||
-              !isAgentConfigurationSupported
-            }
+            isDisabled={isSaveButtonDisabled}
           >
             {i18n.translate(
               'xpack.apm.agentConfig.saveConfigurationButtonLabel',
