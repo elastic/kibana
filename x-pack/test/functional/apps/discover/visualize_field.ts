@@ -139,7 +139,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await testSubjects.click('textBased-visualize');
+      await testSubjects.click('unifiedHistogramEditVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -158,7 +158,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await testSubjects.click('textBased-visualize');
+      await testSubjects.click('unifiedHistogramEditVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
