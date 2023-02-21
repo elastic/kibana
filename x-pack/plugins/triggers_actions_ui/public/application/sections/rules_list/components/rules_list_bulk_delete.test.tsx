@@ -5,13 +5,17 @@
  * 2.0.
  */
 import * as React from 'react';
-import { ReactWrapper } from 'enzyme';
-import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { IToasts } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, screen, waitForElementToBeRemoved, fireEvent } from '@testing-library/react';
+import {
+  render,
+  screen,
+  waitForElementToBeRemoved,
+  fireEvent,
+  act,
+  cleanup,
+} from '@testing-library/react';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList } from './rules_list';
@@ -123,26 +127,17 @@ const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: AllTheProviders });
 };
 
-beforeEach(() => {
-  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
-});
-
-// Test are too slow. It's breaking the build. So we skipp it now and waiting for improvment according this ticket:
+// Test are too slow. It's breaking the build. So we skip it now and waiting for improvment according this ticket:
 // https://github.com/elastic/kibana/issues/145122
 describe('Rules list bulk delete', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-    queryClient.clear();
-  });
-
-  beforeAll(async () => {
+  beforeEach(async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
     loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
       total: 6,
       data: mockedRulesData,
     });
-
     loadActionTypes.mockResolvedValue([
       {
         id: 'test',
@@ -166,14 +161,11 @@ describe('Rules list bulk delete', () => {
     } as unknown as IToasts;
   });
 
-  // beforeEach(() => {
-  //   renderWithProviders(<RulesList />);
-  //   wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
-  //   wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
-  //   // Unselect something to test filtering
-  //   wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
-  //   wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
-  // });
+  afterEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    cleanup();
+  });
 
   it('should Bulk Delete', async () => {
     renderWithProviders(<RulesList />);
