@@ -23,7 +23,7 @@ export const StepDetails = ({
 }: {
   loading: boolean;
   step?: JourneyStep;
-  stepsData: SyntheticsJourneyApiResponse;
+  stepsData?: SyntheticsJourneyApiResponse;
   stepIndex: number;
   totalSteps: number;
   setStepIndex: (stepIndex: number) => void;
@@ -61,7 +61,7 @@ export const StepDetails = ({
       <EuiSpacer size="m" />
       <StepScreenshotDetails stepIndex={stepIndex} step={step} />
       <EuiSpacer size="m" />
-      <StepTabs stepsList={stepsData.steps} step={step} loading={loading} />
+      <StepTabs stepsList={stepsData?.steps} step={step} loading={loading} />
     </EuiPanel>
   );
 };
