@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { EuiButtonIcon, EuiCheckbox, EuiFieldText, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
+import { EuiButtonGroup, EuiButtonIcon, EuiCheckbox, EuiFieldText, EuiSpacer } from '@elastic/eui';
 
 import {
-  useSearchContentQuery,
   useCreateContentMutation,
   useDeleteContentMutation,
+  useSearchContentQuery,
   useUpdateContentMutation,
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '../../public/content_client';
@@ -20,8 +20,8 @@ import type {
   TodoCreateIn,
   TodoDeleteIn,
   TodoSearchIn,
-  TodoUpdateIn,
   TodoSearchOut,
+  TodoUpdateIn,
 } from './todos_client';
 
 const useCreateTodoMutation = () => useCreateContentMutation<TodoCreateIn, Todo>();
@@ -66,7 +66,9 @@ export const Todos = () => {
         legend="Todo filters"
         options={filters}
         idSelected={filterIdSelected}
-        onChange={(id) => setFilterIdSelected(id as TodoFilter)}
+        onChange={(id) => {
+          setFilterIdSelected(id as TodoFilter);
+        }}
       />
       <EuiSpacer />
       <ul>
@@ -124,7 +126,11 @@ export const Todos = () => {
           e.preventDefault();
         }}
       >
-        <EuiFieldText placeholder="Type your todo and press enter to submit" name="newTodo" />
+        <EuiFieldText
+          placeholder="Type your todo and press enter to submit"
+          name={'newTodo'}
+          data-test-subj={'newTodo'}
+        />
       </form>
     </>
   );
