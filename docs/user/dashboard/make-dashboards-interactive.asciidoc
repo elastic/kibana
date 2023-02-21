@@ -173,7 +173,17 @@ Change the settings for the Options list and Range slider controls.
 
 . Hover over the control you want to edit, then click image:images/dashboard_controlsEditControl_8.3.0.png[The Edit control icon that opens the Edit control flyout].
 
-. On the *Edit control* flyout, change the options, then click *Save and close*.
+. On the *Edit control* flyout, change the options.
+
+. If you are editing an *Options list*, specify the additional settings:
+
+* To allow options to be inlcluded or excluded on the dashboard, select *Allow selections to be excluded*.
+
+* To allow an exists query to be created, select *Allow exists query*.
+
+* To allow the options to be sorted, select *Allow dynamic sorting of suggestions*, then select the default sort options. 
+
+. Click *Save and close*.
 
 [float]
 [[remove-controls]]
