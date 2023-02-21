@@ -281,7 +281,7 @@ describe('LogViewsClient class', () => {
           },
         ],
         "dataViewReference": DataView {
-          "allowNoIndex": false,
+          "allowNoIndex": true,
           "deleteFieldFormat": [Function],
           "fieldAttrs": Object {},
           "fieldFormatMap": Object {},
