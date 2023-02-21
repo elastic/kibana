@@ -90,33 +90,30 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
   } = useDatePickerContext();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
-  const setRange = useCallback(
-    async (i: DataView, q?: QueryDslQueryContainer, excludeFrozenData?: boolean) => {
-      try {
-        const fullTimeRange = await setFullTimeRange(
-          timefilter,
-          i,
-          toasts,
-          http,
-          q,
-          excludeFrozenData
-        );
-        if (typeof callback === 'function') {
-          callback(fullTimeRange);
-        }
-      } catch (e) {
-        toasts.addDanger(
-          i18n.translate(
-            'xpack.ml.datePicker.fullTimeRangeSelector.errorSettingTimeRangeNotification',
-            {
-              defaultMessage: 'An error occurred setting the time range.',
-            }
-          )
-        );
+  const setRange = useCallback(async () => {
+    try {
+      const fullTimeRange = await setFullTimeRange(
+        timefilter,
+        dataView,
+        toasts,
+        http,
+        query,
+        frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE
+      );
+      if (typeof callback === 'function') {
+        callback(fullTimeRange);
       }
-    },
-    [callback, http, timefilter, toasts]
-  );
+    } catch (e) {
+      toasts.addDanger(
+        i18n.translate(
+          'xpack.ml.datePicker.fullTimeRangeSelector.errorSettingTimeRangeNotification',
+          {
+            defaultMessage: 'An error occurred setting the time range.',
+          }
+        )
+      );
+    }
+  }, [callback, dataView, frozenDataPreference, http, query, timefilter, toasts]);
 
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -194,7 +191,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
       <EuiToolTip content={buttonTooltip}>
         <EuiButton
           isDisabled={disabled}
-          onClick={() => setRange(dataView, query, true)}
+          onClick={() => setRange()}
           data-test-subj="mlDatePickerButtonUseFullData"
         >
           <FormattedMessage
