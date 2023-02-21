@@ -68,7 +68,7 @@ const CONNECTOR_VALUES = {
 describe('IndexViewLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(StartSyncApiLogic);
   const { mount: fetchIndexMount } = new LogicMounter(CachedFetchIndexApiLogic);
-  const indexNameLogic = new LogicMounter(IndexNameLogic);
+  const { mount: indexNameMount } = new LogicMounter(IndexNameLogic);
   const { mount } = new LogicMounter(IndexViewLogic);
   const { flashSuccessToast } = mockFlashMessageHelpers;
   const { http } = mockHttpValues;
@@ -76,15 +76,15 @@ describe('IndexViewLogic', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
-    indexNameLogic.mount({ indexName: 'index-name' }, { indexName: 'index-name' });
+    const indexNameLogic = indexNameMount();
     apiLogicMount();
-    fetchIndexMount({ indexName: 'index-name' }, { indexName: 'index-name' });
-    mount({ indexName: 'index-name' }, { indexName: 'index-name' });
+    fetchIndexMount();
+    mount();
+    indexNameLogic.setIndexName('index-name');
   });
 
   it('has expected default values', () => {
     http.get.mockReturnValueOnce(Promise.resolve(() => ({})));
-    mount({ indexName: 'index-name' }, { indexName: 'index-name' });
 
     expect(IndexViewLogic.values).toEqual(DEFAULT_VALUES);
   });
