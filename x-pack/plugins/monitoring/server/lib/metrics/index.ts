@@ -16,4 +16,10 @@ export { LogstashClusterMetric, LogstashMetric } from './logstash/classes';
 export type { BeatsMetricFields } from './beats/classes';
 export { BeatsClusterMetric, BeatsMetric } from './beats/classes';
 // @ts-ignore
+export {
+  EnterpriseSearchClusterMetric,
+  EnterpriseSearchMetric,
+  EnterpriseSearchMetricFields,
+} from './enterprisesearch/classes';
+// @ts-ignore
 export { metrics } from './metrics';
