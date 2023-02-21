@@ -22,11 +22,14 @@ import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
 import { BulkActionsContext } from './bulk_actions/context';
 import { EmptyState } from './empty_state';
 import {
+  Alert,
+  Alerts,
   AlertsTableConfigurationRegistry,
   AlertsTableProps,
   BulkActionsReducerAction,
@@ -39,6 +42,8 @@ import { bulkActionsReducer } from './bulk_actions/reducer';
 import { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
 import { useColumns } from './hooks/use_columns';
 import { InspectButtonContainer } from './toolbar/components/inspect';
+import { alertsTableQueryClient } from './query_client';
+import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -89,7 +94,28 @@ const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
 const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
 const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
 
-const AlertsTableState = ({
+type AlertWithCaseIds = Alert & Required<Pick<Alert, 'kibana.alert.case_ids'>>;
+
+const getCaseIdsFromAlerts = (alerts: Alerts): Set<string> =>
+  new Set(
+    alerts
+      .filter(
+        (alert): alert is AlertWithCaseIds =>
+          alert['kibana.alert.case_ids'] != null && alert['kibana.alert.case_ids'].length > 0
+      )
+      .map((alert) => alert['kibana.alert.case_ids'])
+      .flat()
+  );
+
+const AlertsTableState = (props: AlertsTableStateProps) => {
+  return (
+    <QueryClientProvider client={alertsTableQueryClient}>
+      <AlertsTableStateWithQueryProvider {...props} />
+    </QueryClientProvider>
+  );
+};
+
+const AlertsTableStateWithQueryProvider = ({
   alertsTableConfigurationRegistry,
   configurationId,
   id,
@@ -100,10 +126,11 @@ const AlertsTableState = ({
   showExpandToDetails,
   showAlertStatusWithFlapping,
 }: AlertsTableStateProps) => {
-  const { cases } = useKibana<{ cases: CaseUi }>().services;
+  const { cases: casesService } = useKibana<{ cases: CaseUi }>().services;
 
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
+
   const alertsTableConfiguration = hasAlertsTableConfiguration
     ? alertsTableConfigurationRegistry.get(configurationId)
     : EmptyConfiguration;
@@ -178,6 +205,9 @@ const AlertsTableState = ({
     skip: false,
   });
 
+  const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
+  const { data: cases, isLoading: isLoadingCases } = useBulkGetCases(Array.from(caseIds.values()));
+
   const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
     setPagination(_pagination);
   }, []);
@@ -240,6 +270,7 @@ const AlertsTableState = ({
   const tableProps = useMemo(
     () => ({
       alertsTableConfiguration,
+      casesData: { cases: cases ?? new Map(), isLoading: isLoadingCases },
       columns,
       bulkActions: [],
       deletedEventIds: [],
@@ -266,6 +297,8 @@ const AlertsTableState = ({
     }),
     [
       alertsTableConfiguration,
+      cases,
+      isLoadingCases,
       columns,
       flyoutSize,
       pagination.pageSize,
@@ -285,7 +318,7 @@ const AlertsTableState = ({
     ]
   );
 
-  const CasesContext = cases?.ui.getCasesContext();
+  const CasesContext = casesService?.ui.getCasesContext();
   const userCasesPermissions = useGetUserCasesPermissions(alertsTableConfiguration.casesFeatureId);
 
   return hasAlertsTableConfiguration ? (
@@ -302,7 +335,7 @@ const AlertsTableState = ({
       {(isLoading || isBrowserFieldDataLoading) && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
-      {alertsCount !== 0 && CasesContext && cases && (
+      {alertsCount !== 0 && CasesContext && casesService && (
         <CasesContext
           owner={[configurationId]}
           permissions={userCasesPermissions}
@@ -314,7 +347,7 @@ const AlertsTableState = ({
           />
         </CasesContext>
       )}
-      {alertsCount !== 0 && (!CasesContext || !cases) && (
+      {alertsCount !== 0 && (!CasesContext || !casesService) && (
         <AlertsTableWithBulkActionsContext
           tableProps={tableProps}
           initialBulkActionsState={initialBulkActionsState}
