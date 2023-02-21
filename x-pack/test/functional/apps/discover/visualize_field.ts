@@ -138,7 +138,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-
+      await testSubjects.click('unifiedTextLangEditor-expand');
       await testSubjects.click('unifiedHistogramEditVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -157,7 +157,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-
+      await testSubjects.click('unifiedTextLangEditor-expand');
       await testSubjects.click('unifiedHistogramEditVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
