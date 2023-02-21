@@ -9,16 +9,15 @@ import { EuiPopover, EuiButtonEmpty, EuiContextMenuPanel, EuiContextMenuItem } f
 import numeral from '@elastic/numeral';
 import React, { useState, useCallback, useMemo, useContext, useEffect } from 'react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { BulkActionsConfig, BulkActionsVerbs, RowSelection } from '../../../../../types';
+import { Alerts, BulkActionsConfig, BulkActionsVerbs, RowSelection } from '../../../../../types';
 import * as i18n from '../translations';
 import { BulkActionsContext } from '../context';
 
 interface BulkActionsProps {
   totalItems: number;
   items: BulkActionsConfig[];
-  alerts: EcsFieldsResponse[];
+  alerts: Alerts;
   setIsBulkActionsLoading: (loading: boolean) => void;
   clearSelection: () => void;
   refresh: () => void;
@@ -42,7 +41,7 @@ const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
 const containerStyles = { display: 'inline-block', position: 'relative' } as const;
 
 const selectedIdsToTimelineItemMapper = (
-  alerts: EcsFieldsResponse[],
+  alerts: Alerts,
   rowSelection: RowSelection
 ): TimelineItem[] => {
   return Array.from(rowSelection.keys()).map((rowIndex: number) => {
@@ -64,14 +63,14 @@ const selectedIdsToTimelineItemMapper = (
 
 const useBulkActionsToMenuItemMapper = (
   items: BulkActionsConfig[],
-  alerts: EcsFieldsResponse[],
   // in case the action takes time, client can set the alerts to a loading
   // state and back when done
   setIsBulkActionsLoading: BulkActionsProps['setIsBulkActionsLoading'],
   // Once the bulk action has been completed, it can set the selection to false.
   clearSelection: BulkActionsProps['clearSelection'],
   // In case bulk item action changes the alert data and need to refresh table page.
-  refresh: BulkActionsProps['refresh']
+  refresh: BulkActionsProps['refresh'],
+  alerts: Alerts
 ) => {
   const [{ isAllSelected, rowSelection }] = useContext(BulkActionsContext);
 
@@ -119,10 +118,10 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   const [showClearSelection, setShowClearSelectiong] = useState(false);
   const bulkActionItems = useBulkActionsToMenuItemMapper(
     items,
-    alerts,
     setIsBulkActionsLoading,
     clearSelection,
-    refresh
+    refresh,
+    alerts
   );
 
   useEffect(() => {

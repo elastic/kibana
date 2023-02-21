@@ -14,7 +14,6 @@ import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import type {
-  EcsFieldsResponse,
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '@kbn/rule-registry-plugin/common/search_strategy';
@@ -23,7 +22,7 @@ import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { GetInspectQuery, InspectQuery } from '../../../../types';
+import type { Alert, Alerts, GetInspectQuery, InspectQuery } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DefaultSort } from './constants';
 import * as i18n from './translations';
@@ -45,7 +44,6 @@ type AlertRequest = Omit<FetchAlertsArgs, 'featureIds' | 'skip'>;
 type Refetch = () => void;
 
 export interface FetchAlertResp {
-  alerts: EcsFieldsResponse[];
   /**
    * We need to have it because of lot code is expecting this format
    * @deprecated
@@ -56,6 +54,7 @@ export interface FetchAlertResp {
    * @deprecated
    */
   ecsAlertsData: unknown[];
+  alerts: Alerts;
   isInitializing: boolean;
   getInspectQuery: GetInspectQuery;
   refetch: Refetch;
@@ -74,7 +73,7 @@ type AlertActions =
   | { type: 'loading'; loading: boolean }
   | {
       type: 'response';
-      alerts: EcsFieldsResponse[];
+      alerts: Alerts;
       totalAlerts: number;
       oldAlertsData: Array<Array<{ field: string; value: string[] }>>;
       ecsAlertsData: unknown[];
@@ -212,13 +211,13 @@ const useFetchAlerts = ({
                   } else if (rawResponse.hits.total && typeof rawResponse.hits.total === 'object') {
                     totalAlerts = rawResponse.hits.total?.value ?? 0;
                   }
-                  const alerts = rawResponse.hits.hits.reduce<EcsFieldsResponse[]>((acc, hit) => {
+                  const alerts = rawResponse.hits.hits.reduce<Alerts>((acc, hit) => {
                     if (hit.fields) {
                       acc.push({
                         ...hit.fields,
                         _id: hit._id,
                         _index: hit._index,
-                      } as EcsFieldsResponse);
+                      } as Alert);
                     }
                     return acc;
                   }, []);

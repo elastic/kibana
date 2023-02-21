@@ -89,6 +89,7 @@ import type {
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
 import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
+import { Case } from './application/sections/alerts_table/hooks/api';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -466,9 +467,12 @@ export interface InspectQuery {
 }
 export type GetInspectQuery = () => InspectQuery;
 
+export type Alert = EcsFieldsResponse;
+export type Alerts = Alert[];
+
 export interface FetchAlertData {
   activePage: number;
-  alerts: EcsFieldsResponse[];
+  alerts: Alerts;
   alertsCount: number;
   isInitializing: boolean;
   isLoading: boolean;
@@ -491,6 +495,7 @@ export interface FetchAlertData {
 
 export type AlertsTableProps = {
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
+  casesData: { cases: Map<string, Case>; isLoading: boolean };
   columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
@@ -531,7 +536,7 @@ export type AlertTableFlyoutComponent =
   | null;
 
 export interface AlertsTableFlyoutBaseProps {
-  alert: EcsFieldsResponse;
+  alert: Alert;
   isLoading: boolean;
   id?: string;
 }
@@ -569,11 +574,11 @@ export type UseCellActions = (props: {
 };
 
 export interface RenderCustomActionsRowArgs {
-  alert: FetchAlertData['alerts'][number];
   ecsAlert: FetchAlertData['ecsAlertsData'][number];
   nonEcsData: FetchAlertData['oldAlertsData'][number];
   rowIndex: number;
   cveProps: EuiDataGridCellValueElementProps;
+  alert: Alert;
   setFlyoutAlert: (data: unknown) => void;
   id?: string;
   setIsActionLoading?: (isLoading: boolean) => void;

@@ -9,11 +9,10 @@ import {
   EuiDataGridToolBarAdditionalControlsOptions,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import React, { lazy, Suspense } from 'react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsCount } from './components/alerts_count/alerts_count';
-import { BulkActionsConfig, GetInspectQuery, RowSelection } from '../../../../types';
+import type { Alerts, BulkActionsConfig, GetInspectQuery, RowSelection } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser } from '../../field_browser';
 import { FieldBrowserOptions } from '../../field_browser/types';
@@ -117,7 +116,7 @@ export const getToolbarVisibility = ({
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
   rowSelection: RowSelection;
-  alerts: EcsFieldsResponse[];
+  alerts: Alerts;
   isLoading: boolean;
   updatedAt: number;
   columnIds: string[];

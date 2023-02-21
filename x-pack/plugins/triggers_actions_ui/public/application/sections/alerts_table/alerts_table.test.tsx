@@ -4,13 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useReducer } from 'react';
+import React, { useMemo, useReducer } from 'react';
 
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { ALERT_RULE_NAME, ALERT_REASON, ALERT_FLAPPING, ALERT_STATUS } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_NAME,
+  ALERT_REASON,
+  ALERT_FLAPPING,
+  ALERT_STATUS,
+  ALERT_CASE_IDS,
+} from '@kbn/rule-data-utils';
 import { AlertsTable } from './alerts_table';
 import {
   AlertsField,
@@ -20,12 +25,14 @@ import {
   FetchAlertData,
   RowSelectionState,
   UseCellActions,
+  Alerts,
 } from '../../../types';
 import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BulkActionsContext } from './bulk_actions/context';
 import { bulkActionsReducer } from './bulk_actions/reducer';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { getCasesMockMap } from './cases/index.mock';
+import { createAppMockRenderer } from '../test_utils';
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -45,6 +52,10 @@ const columns = [
     id: ALERT_STATUS,
     displayAsText: 'Alert status',
   },
+  {
+    id: ALERT_CASE_IDS,
+    displayAsText: 'Cases',
+  },
 ];
 
 const alerts = [
@@ -53,12 +64,14 @@ const alerts = [
     [ALERT_REASON]: ['two'],
     [ALERT_STATUS]: ['active'],
     [ALERT_FLAPPING]: [true],
+    [ALERT_CASE_IDS]: ['test-id'],
   },
   {
     [ALERT_RULE_NAME]: ['three'],
     [ALERT_REASON]: ['four'],
     [ALERT_STATUS]: ['active'],
     [ALERT_FLAPPING]: [false],
+    [ALERT_CASE_IDS]: ['test-id-2'],
   },
   {
     [ALERT_RULE_NAME]: ['five'],
@@ -72,7 +85,7 @@ const alerts = [
     [ALERT_STATUS]: ['recovered'],
     [ALERT_FLAPPING]: [false],
   },
-] as unknown as EcsFieldsResponse[];
+] as unknown as Alerts;
 
 const oldAlertsData = [
   [
@@ -233,8 +246,11 @@ describe('AlertsTable', () => {
     },
   };
 
+  const casesMap = getCasesMockMap();
+
   const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
+    casesData: { cases: casesMap, isLoading: false },
     columns,
     deletedEventIds: [],
     disabledCellActions: [],
@@ -262,26 +278,29 @@ describe('AlertsTable', () => {
     rowCount: 4,
   };
 
-  const AlertsTableWithLocale: React.FunctionComponent<
+  const AlertsTableWithProviders: React.FunctionComponent<
     AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
   > = (props) => {
+    const renderer = useMemo(() => createAppMockRenderer(), []);
+    const AppWrapper = renderer.AppWrapper;
+
     const initialBulkActionsState = useReducer(
       bulkActionsReducer,
       props.initialBulkActionsState || defaultBulkActionsState
     );
 
     return (
-      <IntlProvider locale="en">
+      <AppWrapper>
         <BulkActionsContext.Provider value={initialBulkActionsState}>
           <AlertsTable {...props} />
         </BulkActionsContext.Provider>
-      </IntlProvider>
+      </AppWrapper>
     );
   };
 
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
-      const renderResult = render(<AlertsTableWithLocale {...tableProps} />);
+      const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
       userEvent.click(renderResult.container.querySelector('.euiDataGridHeaderCell__button')!);
       await waitForEuiPopoverOpen();
       userEvent.click(renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`));
@@ -292,18 +311,18 @@ describe('AlertsTable', () => {
     });
 
     it('should support pagination', async () => {
-      const renderResult = render(<AlertsTableWithLocale {...tableProps} />);
+      const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
       userEvent.click(renderResult.getByTestId('pagination-button-1'));
       expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
     });
 
     it('should show when it was updated', () => {
-      const { getByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
+      const { getByTestId } = render(<AlertsTableWithProviders {...tableProps} />);
       expect(getByTestId('toolbar-updated-at')).not.toBe(null);
     });
 
     it('should show alerts count', () => {
-      const { getByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
+      const { getByTestId } = render(<AlertsTableWithProviders {...tableProps} />);
       expect(getByTestId('toolbar-alerts-count')).not.toBe(null);
     });
 
@@ -318,7 +337,7 @@ describe('AlertsTable', () => {
         },
       };
 
-      const { queryAllByTestId } = render(<AlertsTableWithLocale {...props} />);
+      const { queryAllByTestId } = render(<AlertsTableWithProviders {...props} />);
       expect(queryAllByTestId('alertLifecycleStatusBadge')[0].textContent).toEqual('Flapping');
       expect(queryAllByTestId('alertLifecycleStatusBadge')[1].textContent).toEqual('Active');
       expect(queryAllByTestId('alertLifecycleStatusBadge')[2].textContent).toEqual('Recovered');
@@ -327,7 +346,7 @@ describe('AlertsTable', () => {
 
     describe('leading control columns', () => {
       it('should return at least the flyout action control', async () => {
-        const wrapper = render(<AlertsTableWithLocale {...tableProps} />);
+        const wrapper = render(<AlertsTableWithProviders {...tableProps} />);
         expect(wrapper.getByTestId('expandColumnHeaderLabel').textContent).toBe('Actions');
       });
 
@@ -343,7 +362,7 @@ describe('AlertsTable', () => {
             },
           ],
         };
-        const wrapper = render(<AlertsTableWithLocale {...customTableProps} />);
+        const wrapper = render(<AlertsTableWithProviders {...customTableProps} />);
         expect(wrapper.queryByTestId('testHeader')).not.toBe(null);
         expect(wrapper.queryByTestId('testCell')).not.toBe(null);
       });
@@ -388,7 +407,7 @@ describe('AlertsTable', () => {
           },
         };
 
-        const { queryByTestId } = render(<AlertsTableWithLocale {...customTableProps} />);
+        const { queryByTestId } = render(<AlertsTableWithProviders {...customTableProps} />);
         expect(queryByTestId('testActionColumn')).not.toBe(null);
         expect(queryByTestId('testActionColumn2')).not.toBe(null);
         expect(queryByTestId('expandColumnCellOpenFlyoutButton-0')).not.toBe(null);
@@ -433,7 +452,7 @@ describe('AlertsTable', () => {
           },
         };
 
-        const { queryByTestId } = render(<AlertsTableWithLocale {...customTableProps} />);
+        const { queryByTestId } = render(<AlertsTableWithProviders {...customTableProps} />);
         expect(queryByTestId('testActionColumn')).not.toBe(null);
         expect(queryByTestId('testActionColumn2')).not.toBe(null);
         expect(queryByTestId('expandColumnCellOpenFlyoutButton-0')).toBe(null);
@@ -445,7 +464,7 @@ describe('AlertsTable', () => {
           showExpandToDetails: false,
         };
 
-        const { queryByTestId } = render(<AlertsTableWithLocale {...customTableProps} />);
+        const { queryByTestId } = render(<AlertsTableWithProviders {...customTableProps} />);
         expect(queryByTestId('expandColumnHeaderLabel')).toBe(null);
         expect(queryByTestId('expandColumnCellOpenFlyoutButton')).toBe(null);
       });
@@ -485,7 +504,7 @@ describe('AlertsTable', () => {
         });
 
         it('should show the row loader when callback triggered', async () => {
-          render(<AlertsTableWithLocale {...customTableProps} />);
+          render(<AlertsTableWithProviders {...customTableProps} />);
           fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
 
           // the callback given to our clients to run when they want to update the loading state
@@ -499,8 +518,8 @@ describe('AlertsTable', () => {
           expect(within(selectedOptions[0]).queryByRole('checkbox')).not.toBeInTheDocument();
 
           // second row, first column
-          expect(within(selectedOptions[5]).queryByLabelText('Loading')).not.toBeInTheDocument();
-          expect(within(selectedOptions[5]).getByRole('checkbox')).toBeDefined();
+          expect(within(selectedOptions[6]).queryByLabelText('Loading')).not.toBeInTheDocument();
+          expect(within(selectedOptions[6]).getByRole('checkbox')).toBeDefined();
         });
 
         it('should show the row loader when callback triggered with false', async () => {
@@ -510,7 +529,7 @@ describe('AlertsTable', () => {
           };
 
           render(
-            <AlertsTableWithLocale
+            <AlertsTableWithProviders
               {...customTableProps}
               initialBulkActionsState={initialBulkActionsState}
             />
@@ -540,7 +559,7 @@ describe('AlertsTable', () => {
       });
 
       it('Should render cell actions on hover', async () => {
-        render(<AlertsTableWithLocale {...customTableProps} />);
+        render(<AlertsTableWithProviders {...customTableProps} />);
 
         const reasonFirstRow = (await screen.findAllByTestId('dataGridRowCell'))[3];
 
@@ -551,7 +570,7 @@ describe('AlertsTable', () => {
         });
       });
       it('cell Actions can be expanded', async () => {
-        render(<AlertsTableWithLocale {...customTableProps} />);
+        render(<AlertsTableWithProviders {...customTableProps} />);
         const reasonFirstRow = (await screen.findAllByTestId('dataGridRowCell'))[3];
 
         fireEvent.mouseOver(reasonFirstRow);
@@ -566,12 +585,9 @@ describe('AlertsTable', () => {
     });
 
     describe('Alert Registry use field Browser Hook', () => {
-      beforeAll(() => {
-        jest.resetAllMocks();
-      });
       it('field Browser Options hook is working correctly', async () => {
         render(
-          <AlertsTableWithLocale
+          <AlertsTableWithProviders
             {...tableProps}
             initialBulkActionsState={{
               ...defaultBulkActionsState,
@@ -588,6 +604,44 @@ describe('AlertsTable', () => {
         expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER)).toBeVisible();
 
         expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER_CUSTOM_CREATE_BTN)).toBeVisible();
+      });
+    });
+
+    describe('cases column', () => {
+      const props = {
+        ...tableProps,
+        pageSize: alerts.length,
+      };
+
+      it('should show the cases column', async () => {
+        render(<AlertsTableWithProviders {...props} />);
+        expect(await screen.findByText('Cases')).toBeInTheDocument();
+      });
+
+      it('should show the cases titles correctly', async () => {
+        render(<AlertsTableWithProviders {...props} />);
+        expect(await screen.findByText('Test case')).toBeInTheDocument();
+        expect(await screen.findByText('Test case 2')).toBeInTheDocument();
+      });
+
+      it('show loading skeleton if it loads cases', async () => {
+        render(
+          <AlertsTableWithProviders
+            {...props}
+            casesData={{ ...props.casesData, isLoading: true }}
+          />
+        );
+
+        expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(2);
+      });
+
+      it('shows the cases tooltip', async () => {
+        render(<AlertsTableWithProviders {...props} />);
+        expect(await screen.findByText('Test case')).toBeInTheDocument();
+
+        userEvent.hover(screen.getByText('Test case'));
+
+        expect(await screen.findByTestId('cases-components-tooltip')).toBeInTheDocument();
       });
     });
   });
