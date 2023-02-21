@@ -12,25 +12,45 @@ import { findingsNavigation } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
 import { useKibana } from './use_kibana';
 
-const createFilter = (key: string, value: string, negate = false): Filter => ({
-  meta: {
-    alias: null,
-    negate,
-    disabled: false,
-    type: 'phrase',
-    key,
-    params: { query: value },
-  },
-  query: { match_phrase: { [key]: value } },
-});
+interface NegatedValue {
+  value: string | number;
+  negate: boolean;
+}
+
+type FilterValue = string | number | NegatedValue;
+
+export type NavFilter = Record<string, FilterValue>;
+
+const createFilter = (key: string, filterValue: FilterValue): Filter => {
+  let negate = false;
+  let value = filterValue;
+  if (typeof filterValue === 'object') {
+    negate = filterValue.negate;
+    value = filterValue.value;
+  }
+
+  return {
+    meta: {
+      alias: null,
+      negate,
+      disabled: false,
+      type: 'phrase',
+      key,
+    },
+    query: { match_phrase: { [key]: value } },
+  };
+};
 
 const useNavigate = (pathname: string) => {
   const history = useHistory();
   const { services } = useKibana();
 
   return useCallback(
-    (filterParams: Record<string, any> = {}) => {
-      const filters = Object.entries(filterParams).map(([key, value]) => createFilter(key, value));
+    (filterParams: NavFilter = {}) => {
+      const filters = Object.entries(filterParams).map(([key, filterValue]) =>
+        createFilter(key, filterValue)
+      );
+
       history.push({
         pathname,
         search: encodeQuery({

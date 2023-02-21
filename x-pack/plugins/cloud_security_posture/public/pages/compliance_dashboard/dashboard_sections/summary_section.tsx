@@ -22,6 +22,7 @@ import type {
 } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
 import {
+  NavFilter,
   useNavigateFindings,
   useNavigateFindingsByResource,
 } from '../../../common/hooks/use_navigate_findings';
@@ -37,14 +38,12 @@ export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   third: 8,
 };
 
-export const getPolicyTemplateQuery = (policyTemplate: PosturePolicyTemplate) => {
-  if (policyTemplate === CSPM_POLICY_TEMPLATE)
+export const getPolicyTemplateQuery = (policyTemplate: PosturePolicyTemplate): NavFilter => {
+  if (policyTemplate === CSPM_POLICY_TEMPLATE) {
     return { 'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE };
-  // TODO: FIX POSTURE_TYPE
-  if (policyTemplate === KSPM_POLICY_TEMPLATE)
-    return { 'rule.benchmark.posture_type': KSPM_POLICY_TEMPLATE };
+  }
 
-  return {};
+  return { 'rule.benchmark.posture_type': { value: CSPM_POLICY_TEMPLATE, negate: true } };
 };
 
 export const SummarySection = ({
