@@ -29,6 +29,7 @@ import type {
 } from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
 import { StepAboutRule } from '../step_about_rule';
+import { fullHeight } from './styles';
 
 const detailsOption: EuiButtonGroupOptionProps = {
   id: 'details',
@@ -91,13 +92,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
         </>
       )}
       {stepData != null && stepDataDetails != null && (
-        <EuiFlexGroup
-          gutterSize="xs"
-          direction="column"
-          css={css`
-            height: 100%;
-          `}
-        >
+        <EuiFlexGroup gutterSize="xs" direction="column" css={fullHeight}>
           <EuiFlexItem grow={false} key="header">
             <HeaderSection title={i18n.ABOUT_TEXT}>
               {toggleOptions.length > 0 && (
@@ -117,12 +112,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
             {selectedToggleOption === 'details' && (
               <EuiResizeObserver data-test-subj="stepAboutDetailsContent" onResize={onResize}>
                 {(resizeRef) => (
-                  <div
-                    ref={resizeRef}
-                    css={css`
-                      height: 100%;
-                    `}
-                  >
+                  <div ref={resizeRef} css={fullHeight}>
                     <VerticalOverflowContainer maxHeight={120}>
                       <VerticalOverflowContent maxHeight={120}>
                         <EuiText
@@ -175,20 +165,22 @@ export const StepAboutRuleToggleDetails = memo(StepAboutRuleToggleDetailsCompone
 
 interface VerticalOverflowContainerProps {
   maxHeight: number;
+  'data-test-subj'?: string;
 }
 
 function VerticalOverflowContainer({
   maxHeight,
+  'data-test-subj': dataTestSubject,
   children,
 }: PropsWithChildren<VerticalOverflowContainerProps>): JSX.Element {
   return (
     <div
-      className="eui-yScroll"
       css={css`
         max-height: ${maxHeight};
         overflow-y: 'hidden';
         word-break: 'break-word';
       `}
+      data-test-subj={dataTestSubject}
     >
       {children}
     </div>
@@ -201,6 +193,7 @@ interface VerticalOverflowContentProps {
 
 function VerticalOverflowContent({
   maxHeight,
+
   children,
 }: PropsWithChildren<VerticalOverflowContentProps>): JSX.Element {
   return (
