@@ -9,12 +9,11 @@ import { schema } from '@kbn/config-schema';
 
 import type { ProcedureSchemas } from './types';
 
-export const searchSchemas: ProcedureSchemas = {
+export const bulkGetSchemas: ProcedureSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
-      // --> "query" that can be executed will be defined by each content type
-      query: schema.recordOf(schema.string(), schema.any()),
+      ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }
@@ -25,12 +24,8 @@ export const searchSchemas: ProcedureSchemas = {
   ]),
 };
 
-export interface SearchIn<
-  T extends string = string,
-  Query extends object = object,
-  Options extends object = object
-> {
+export interface BulkGetIn<T extends string = string, Options extends object = object> {
   contentTypeId: T;
-  query: Query;
+  ids: string[];
   options?: Options;
 }
