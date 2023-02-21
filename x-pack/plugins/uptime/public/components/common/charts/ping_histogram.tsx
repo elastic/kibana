@@ -15,6 +15,7 @@ import {
   BrushEndListener,
   XYChartElementEvent,
   ElementClickListener,
+  ScaleType,
 } from '@elastic/charts';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -182,9 +183,9 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             splitSeriesAccessors={['type']}
             timeZone="local"
             xAccessor="x"
-            xScaleType="time"
+            xScaleType={ScaleType.Time}
             yAccessors={['y']}
-            yScaleType="linear"
+            yScaleType={ScaleType.Linear}
           />
         </Chart>
       </ChartWrapper>
