@@ -171,8 +171,8 @@ describe('Alert Event Details', () => {
       cy.contains('testpack');
       cy.getBySel('comboBoxInput').type('Example{downArrow}{enter}');
       checkActionItemsInResults({
-        cases: true,
-        lens: true,
+        cases: false,
+        lens: false,
         discover: false,
         timeline: false,
       });
