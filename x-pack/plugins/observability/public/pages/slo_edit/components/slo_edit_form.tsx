@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import {
   EuiAvatar,
   EuiButton,
+  EuiFlexGroup,
   EuiFormLabel,
   EuiPanel,
   EuiSelect,
@@ -36,6 +37,7 @@ import {
 import { paths } from '../../../config';
 import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
+import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
@@ -110,6 +112,8 @@ export function SloEditForm({ slo }: Props) {
         return <CustomKqlIndicatorTypeForm control={control} watch={watch} />;
       case 'sli.apm.transactionDuration':
         return <ApmLatencyIndicatorTypeForm control={control} />;
+      case 'sli.apm.transactionErrorRate':
+        return <ApmAvailabilityIndicatorTypeForm control={control} />;
       default:
         return null;
     }
@@ -225,22 +229,34 @@ export function SloEditForm({ slo }: Props) {
 
           <EuiSpacer size="xl" />
 
-          <EuiButton
-            fill
-            color="primary"
-            data-test-subj="sloFormSubmitButton"
-            onClick={handleSubmit}
-            disabled={!formState.isValid}
-            isLoading={loading && !error}
-          >
-            {isEditMode
-              ? i18n.translate('xpack.observability.slos.sloEdit.editSloButton', {
-                  defaultMessage: 'Update SLO',
-                })
-              : i18n.translate('xpack.observability.slos.sloEdit.createSloButton', {
-                  defaultMessage: 'Create SLO',
-                })}
-          </EuiButton>
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiButton
+              fill
+              color="primary"
+              data-test-subj="sloFormSubmitButton"
+              onClick={handleSubmit}
+              disabled={!formState.isValid}
+              isLoading={loading && !error}
+            >
+              {isEditMode
+                ? i18n.translate('xpack.observability.slos.sloEdit.editSloButton', {
+                    defaultMessage: 'Update SLO',
+                  })
+                : i18n.translate('xpack.observability.slos.sloEdit.createSloButton', {
+                    defaultMessage: 'Create SLO',
+                  })}
+            </EuiButton>
+            <EuiButton
+              fill
+              color="ghost"
+              data-test-subj="sloFormCancelButton"
+              onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
+            >
+              {i18n.translate('xpack.observability.slos.sloEdit.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButton>
+          </EuiFlexGroup>
 
           <EuiSpacer size="xl" />
         </EuiPanel>

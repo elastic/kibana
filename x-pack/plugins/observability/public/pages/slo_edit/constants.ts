@@ -24,6 +24,12 @@ export const SLI_OPTIONS: Array<{
       defaultMessage: 'APM latency',
     }),
   },
+  {
+    value: 'sli.apm.transactionErrorRate',
+    text: i18n.translate('xpack.observability.slos.sliTypes.apmAvailabilityIndicator', {
+      defaultMessage: 'APM availability',
+    }),
+  },
 ];
 
 export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: string }> = [
