@@ -16,22 +16,22 @@ import { errors } from '@elastic/elasticsearch';
 import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
 import { ObservabilityRequestHandlerContext } from '../types';
-import { ObservabilityServerRouteRepository } from './types';
+import { AbstractObservabilityServerRouteRepository } from './types';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
 
 interface RegisterRoutes {
-  core: {
-    setup: CoreSetup;
-  };
-  repository: ObservabilityServerRouteRepository;
+  core: CoreSetup;
+  repository: AbstractObservabilityServerRouteRepository;
   logger: Logger;
-  ruleDataService: RuleDataPluginService;
+  dependencies: {
+    ruleDataService: RuleDataPluginService;
+  };
 }
 
-export function registerRoutes({ repository, core, logger, ruleDataService }: RegisterRoutes) {
+export function registerRoutes({ repository, core, logger, dependencies }: RegisterRoutes) {
   const routes = Object.values(repository);
 
-  const router = core.setup.http.createRouter();
+  const router = core.http.createRouter();
 
   routes.forEach((route) => {
     const { endpoint, options, handler, params } = route;
@@ -59,7 +59,7 @@ export function registerRoutes({ repository, core, logger, ruleDataService }: Re
             request,
             logger,
             params: decodedParams,
-            ruleDataService,
+            ruleDataService: dependencies.ruleDataService,
           })) as any;
 
           if (data === undefined) {

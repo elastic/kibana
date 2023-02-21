@@ -233,12 +233,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     }
 
     registerRoutes({
-      core: {
-        setup: core,
+      core,
+      dependencies: {
+        ruleDataService,
       },
       logger: this.logger,
       repository: getObservabilityServerRouteRepository(config),
-      ruleDataService,
     });
 
     /**
