@@ -36,7 +36,7 @@ import {
 } from './lib/annotations/bootstrap_annotations';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
-import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
+import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { slo, SO_SLO_TYPE } from './saved_objects';
 import { SLO_RULE_REGISTRATION_CONTEXT } from './common/constants';
@@ -232,15 +232,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       registerSloUsageCollector(plugins.usageCollection);
     }
 
-    const start = () => core.getStartServices().then(([coreStart]) => coreStart);
-
     registerRoutes({
       core: {
         setup: core,
-        start,
       },
       logger: this.logger,
-      repository: getGlobalObservabilityServerRouteRepository(config),
+      repository: getObservabilityServerRouteRepository(config),
       ruleDataService,
     });
 

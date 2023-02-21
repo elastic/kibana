@@ -10,28 +10,25 @@ import {
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
-import { CoreSetup, CoreStart, Logger, RouteRegistrar } from '@kbn/core/server';
+import { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+
 import { ObservabilityRequestHandlerContext } from '../types';
-import { AbstractObservabilityServerRouteRepository } from './types';
+import { ObservabilityServerRouteRepository } from './types';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
 
-export function registerRoutes({
-  repository,
-  core,
-  logger,
-  ruleDataService,
-}: {
+interface RegisterRoutes {
   core: {
     setup: CoreSetup;
-    start: () => Promise<CoreStart>;
   };
-  repository: AbstractObservabilityServerRouteRepository;
+  repository: ObservabilityServerRouteRepository;
   logger: Logger;
   ruleDataService: RuleDataPluginService;
-}) {
+}
+
+export function registerRoutes({ repository, core, logger, ruleDataService }: RegisterRoutes) {
   const routes = Object.values(repository);
 
   const router = core.setup.http.createRouter();
@@ -60,7 +57,6 @@ export function registerRoutes({
           const data = (await handler({
             context,
             request,
-            core,
             logger,
             params: decodedParams,
             ruleDataService,
