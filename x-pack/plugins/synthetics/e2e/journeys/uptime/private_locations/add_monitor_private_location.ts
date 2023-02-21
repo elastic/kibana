@@ -7,15 +7,34 @@
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { assertText, byTestId, TIMEOUT_60_SEC } from '@kbn/observability-plugin/e2e/utils';
 import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { cleanTestMonitors } from '../../synthetics/services/add_monitor';
 import { monitorManagementPageProvider } from '../../../page_objects/uptime/monitor_management';
 
-journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => {
+journey('AddPrivateLocationMonitor', async ({ page, params }) => {
   recordVideo(page);
+
+  page.setDefaultTimeout(TIMEOUT_60_SEC.timeout);
+  const kibanaUrl = params.kibanaUrl;
 
   const uptime = monitorManagementPageProvider({ page, kibanaUrl });
 
+  let monitorId: string;
+
   before(async () => {
-    await uptime.waitForLoadingToFinish();
+    await cleanTestMonitors(params);
+    page.on('request', (evt) => {
+      if (
+        evt.resourceType() === 'fetch' &&
+        evt.url().includes('/internal/uptime/service/monitors?preserve_namespace=true')
+      ) {
+        evt
+          .response()
+          ?.then((res) => res?.json())
+          .then((res) => {
+            monitorId = res.id;
+          });
+      }
+    });
   });
 
   step('Go to monitor-management', async () => {
@@ -39,7 +58,7 @@ journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => 
 
     await page.click('input[name="name"]');
     await page.fill('input[name="name"]', 'Private location monitor');
-    await page.click('label:has-text("Test private location Private")', TIMEOUT_60_SEC);
+    await page.click('label:has-text("Test private location Private")');
     await page.selectOption('select', 'http');
     await page.click(byTestId('syntheticsUrlField'));
     await page.fill(byTestId('syntheticsUrlField'), 'https://www.google.com');
@@ -66,7 +85,9 @@ journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => 
   step('Click text=Edit Elastic Synthetics integration', async () => {
     await assertText({ page, text: 'This table contains 1 rows out of 1 rows; Page 1 of 1.' });
     await page.click('[data-test-subj="integrationNameLink"]');
-    await page.click('text=Edit in uptime');
+    const btn = await page.locator(byTestId('syntheticsEditMonitorButton'));
+    expect(await btn.getAttribute('href')).toBe(`/app/synthetics/edit-monitor/${monitorId}`);
+    await btn.click();
     await page.click('text=Private location monitor');
   });
 });
