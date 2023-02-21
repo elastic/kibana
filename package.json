@@ -71,7 +71,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "16.19.0",
+    "node": "16.19.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
