@@ -18,7 +18,8 @@
       "unifiedSearch",
       "kibanaReact",
       "cloud",
-      "security"
+      "security",
+      "licensing"
     ],
     "optionalPlugins": [
       "usageCollection"
