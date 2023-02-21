@@ -101,7 +101,6 @@ const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
 );
 
 const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
-const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
 
 type AlertWithCaseIds = Alert & Required<Pick<Alert, 'kibana.alert.case_ids'>>;
 
