@@ -46,7 +46,7 @@ import { HeaderActionMenu } from './header_action_menu';
 import { HeaderExtension } from './header_extension';
 import { HeaderTopBanner } from './header_top_banner';
 import { HeaderMenuButton } from './header_menu_button';
-import { ScreenReaderRouteAnnouncements } from './screen_reader_a11y';
+import { ScreenReaderRouteAnnouncements, SkipToContent } from './screen_reader_a11y';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -108,6 +108,9 @@ export function Header({
 
   return (
     <>
+      <ScreenReaderRouteAnnouncements breadcrumbs$={observables.breadcrumbs$} />
+      <SkipToContent />
+
       <HeaderTopBanner headerBanner$={observables.headerBanner$} />
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars" className="header__bars">
@@ -166,7 +169,6 @@ export function Header({
           />
 
           <EuiHeader position="fixed" className="header__secondBar">
-            <ScreenReaderRouteAnnouncements breadcrumbs$={observables.breadcrumbs$} />
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
                 <CollapsibleNav
