@@ -88,6 +88,7 @@ export {
   useEmbeddableFactory,
   isFilterableEmbeddable,
   shouldFetch$,
+  shouldRefreshFilterCompareOptions,
 } from './lib';
 
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';

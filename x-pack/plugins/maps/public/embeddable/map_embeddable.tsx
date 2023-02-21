@@ -196,7 +196,6 @@ export class MapEmbeddable
         searchSessionId: this._getSearchSessionId(),
       }
     }).subscribe(() => {
-      console.log('shouldRefresh, input: ', this.getInput());
       this._dispatchSetQuery({
         forceRefresh: false,
       });

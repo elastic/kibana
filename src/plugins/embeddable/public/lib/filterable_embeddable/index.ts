@@ -8,4 +8,4 @@
 
 export type { FilterableEmbeddable } from './types';
 export { isFilterableEmbeddable } from './types';
-export { shouldFetch$ } from './should_fetch';
+export { shouldFetch$, shouldRefreshFilterCompareOptions } from './should_fetch';
