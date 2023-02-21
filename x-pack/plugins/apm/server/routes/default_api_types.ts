@@ -22,7 +22,7 @@ export const probabilityRt = t.type({
 });
 export const kueryRt = t.type({ kuery: t.string });
 
-export const dataSourceRt = t.type({
+export const serviceTransactionDataSourceRt = t.type({
   documentType: t.union([
     t.literal(ApmDocumentType.ServiceTransactionMetric),
     t.literal(ApmDocumentType.TransactionMetric),

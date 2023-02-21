@@ -560,6 +560,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(alert?.lastRun).to.eql({
         outcome: 'succeeded',
         outcomeMsg: null,
+        outcomeOrder: 0,
         warning: null,
         alertsCount: {},
       });

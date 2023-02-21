@@ -81,6 +81,7 @@ describe('common_transformations', () => {
       },
       last_run: {
         outcome: RuleLastRunOutcomeValues[2],
+        outcome_order: 20,
         outcome_msg: ['this is just a test'],
         warning: RuleExecutionStatusErrorReasons.Unknown,
         alerts_count: {
@@ -137,6 +138,7 @@ describe('common_transformations', () => {
           "outcomeMsg": Array [
             "this is just a test",
           ],
+          "outcomeOrder": 20,
           "warning": "unknown",
         },
         "monitoring": Object {
@@ -255,6 +257,7 @@ describe('common_transformations', () => {
       },
       last_run: {
         outcome: 'failed',
+        outcome_order: 20,
         outcome_msg: ['this is just a test'],
         warning: RuleExecutionStatusErrorReasons.Unknown,
         alerts_count: {
@@ -300,6 +303,7 @@ describe('common_transformations', () => {
           "outcomeMsg": Array [
             "this is just a test",
           ],
+          "outcomeOrder": 20,
           "warning": "unknown",
         },
         "monitoring": Object {

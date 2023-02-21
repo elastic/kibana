@@ -71,6 +71,8 @@ export function IndexSelection({ control }: Props) {
       )}
     >
       <Controller
+        shouldUnregister={true}
+        defaultValue=""
         name="indicator.params.index"
         control={control}
         rules={{ required: true }}

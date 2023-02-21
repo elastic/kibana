@@ -79,6 +79,7 @@
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
     "@kbn/core-chrome-browser",
+    "@kbn/ecs-data-quality-dashboard",
     "@kbn/data-views-plugin",
     "@kbn/datemath",
     "@kbn/ui-theme",
@@ -129,7 +130,6 @@
     "@kbn/core-status-common-internal",
     "@kbn/repo-info",
     "@kbn/storybook",
-    "@kbn/ecs",
     "@kbn/cypress-config",
     "@kbn/controls-plugin",
     "@kbn/shared-ux-utility",
@@ -139,5 +139,6 @@
     "@kbn/guided-onboarding",
     "@kbn/securitysolution-ecs",
     "@kbn/cell-actions",
+    "@kbn/shared-ux-router",
   ]
 }

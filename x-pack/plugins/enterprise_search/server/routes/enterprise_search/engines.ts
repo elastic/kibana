@@ -112,7 +112,7 @@ export function registerEnginesRoutes({
     })
   );
 
-  router.get(
+  router.post(
     {
       path: '/internal/enterprise_search/engines/{engine_name}/search',
       validate: {
@@ -126,6 +126,16 @@ export function registerEnginesRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/api/engines/:engine_name/_search',
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/engines/{engine_name}/field_capabilities',
+      validate: { params: schema.object({ engine_name: schema.string() }) },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/engines/:engine_name/field_capabilities',
     })
   );
 }

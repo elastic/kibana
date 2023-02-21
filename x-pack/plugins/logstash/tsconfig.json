@@ -23,6 +23,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/es-ui-shared-plugin",
     "@kbn/config-schema",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

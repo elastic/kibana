@@ -80,7 +80,7 @@ export const ConnectorSyncRules: React.FC = () => {
                   {i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.description', {
                     defaultMessage: `Include or exclude high level items, file types and (file or folder) paths to
                     synchronize from {indexName}. Everything is included by default. Each document is
-                    tested against the reules below and the first rule that matches will be applied.`,
+                    tested against the rules below and the first rule that matches will be applied.`,
                     values: {
                       indexName,
                     },
@@ -142,7 +142,8 @@ export const ConnectorSyncRules: React.FC = () => {
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.index.connector.syncRules.basicRulesDescription',
                         {
-                          defaultMessage: 'These filters apply to documents in post-processing.',
+                          defaultMessage:
+                            'These rules apply to documents during the integration filtering phase.',
                         }
                       )}
                     </p>
@@ -174,7 +175,8 @@ export const ConnectorSyncRules: React.FC = () => {
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.index.connector.syncRules.advancedFiltersDescription',
                         {
-                          defaultMessage: 'These filters apply to documents at the data source.',
+                          defaultMessage:
+                            'These rules apply before the data is obtained from the data source.',
                         }
                       )}
                     </p>

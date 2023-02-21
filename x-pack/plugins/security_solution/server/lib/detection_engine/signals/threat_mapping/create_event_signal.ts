@@ -10,18 +10,14 @@ import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
 import type { CreateEventSignalOptions } from './types';
-import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
-import { getAllThreatListHits } from './get_threat_list';
-import {
-  enrichSignalThreatMatches,
-  getSignalMatchesFromThreatList,
-} from './enrich_signal_threat_matches';
+import type { SearchAfterAndBulkCreateReturnType } from '../types';
+import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
+
+import { threatEnrichmentFactory } from './threat_enrichment_factory';
 import { getSignalValueMap } from './utils';
 
 export const createEventSignal = async ({
-  alertId,
   bulkCreate,
-  completeRule,
   currentResult,
   currentEventList,
   eventsTelemetry,
@@ -29,7 +25,6 @@ export const createEventSignal = async ({
   inputIndex,
   language,
   listClient,
-  outputIndex,
   query,
   ruleExecutionLogger,
   savedId,
@@ -69,7 +64,7 @@ export const createEventSignal = async ({
     );
     return currentResult;
   } else {
-    const threatListHits = await getAllThreatListHits({
+    const threatSearchParams = {
       esClient: services.scopedClusterClient.asCurrentUser,
       threatFilters: [...threatFilters, threatFiltersFromEvents],
       query: threatQuery,
@@ -77,7 +72,7 @@ export const createEventSignal = async ({
       index: threatIndex,
       ruleExecutionLogger,
       threatListConfig: {
-        _source: [`${threatIndicatorPath}.*`, 'threat.feed.*', ...threatMatchedFields.threat],
+        _source: threatMatchedFields.threat,
         fields: undefined,
       },
       pitId: threatPitId,
@@ -85,15 +80,15 @@ export const createEventSignal = async ({
       runtimeMappings,
       listClient,
       exceptionFilter,
+    };
+
+    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+      threatSearchParams,
+      eventsCount: currentEventList.length,
+      signalValueMap: getSignalValueMap({ eventList: currentEventList, threatMatchedFields }),
     });
 
-    const signalMatches = getSignalMatchesFromThreatList(
-      threatListHits,
-      getSignalValueMap({ eventList: currentEventList, threatMatchedFields })
-    );
-
-    const ids = signalMatches.map((item) => item.signalId);
-
+    const ids = Array.from(signalsQueryMap.keys());
     const indexFilter = {
       query: {
         bool: {
@@ -115,22 +110,19 @@ export const createEventSignal = async ({
       exceptionFilter,
     });
 
-    ruleExecutionLogger.debug(
-      `${ids?.length} matched signals found from ${threatListHits.length} indicators`
-    );
+    ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
 
-    const threatEnrichment = (signals: SignalSourceHit[]): Promise<SignalSourceHit[]> =>
-      enrichSignalThreatMatches(
-        signals,
-        () => Promise.resolve(threatListHits),
-        threatIndicatorPath,
-        signalMatches
-      );
+    const enrichment = threatEnrichmentFactory({
+      signalsQueryMap,
+      threatIndicatorPath,
+      threatFilters,
+      threatSearchParams,
+    });
 
     const result = await searchAfterAndBulkCreate({
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
       bulkCreate,
-      enrichment: threatEnrichment,
+      enrichment,
       eventsTelemetry,
       exceptionsList: unprocessedExceptions,
       filter: esFilter,

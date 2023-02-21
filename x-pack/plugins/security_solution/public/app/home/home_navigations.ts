@@ -32,6 +32,7 @@ import {
   APP_LANDING_PATH,
   APP_RESPONSE_ACTIONS_HISTORY_PATH,
   APP_ENTITY_ANALYTICS_PATH,
+  APP_DATA_QUALITY_PATH,
   APP_PATH,
 } from '../../../common/constants';
 
@@ -191,6 +192,13 @@ export const navTabs: SecurityNav = {
     href: APP_ENTITY_ANALYTICS_PATH,
     disabled: false,
     urlKey: 'entity_analytics',
+  },
+  [SecurityPageName.dataQuality]: {
+    id: SecurityPageName.dataQuality,
+    name: i18n.DATA_QUALITY,
+    href: APP_DATA_QUALITY_PATH,
+    disabled: false,
+    urlKey: 'data_quality',
   },
 };
 

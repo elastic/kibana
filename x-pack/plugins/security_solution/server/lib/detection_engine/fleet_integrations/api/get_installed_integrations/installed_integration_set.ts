@@ -126,7 +126,7 @@ const getIntegrationsInfoFromPolicy = (
   packageInfo: InstalledPackageBasicInfo
 ): InstalledIntegrationBasicInfo[] => {
   return policy.inputs.map((input) => {
-    const integrationName = normalizeString(input.policy_template); // e.g. 'cloudtrail'
+    const integrationName = normalizeString(input.policy_template ?? input.type); // e.g. 'cloudtrail'
     const integrationTitle = `${packageInfo.package_title} ${capitalize(integrationName)}`; // e.g. 'AWS Cloudtrail'
     return {
       integration_name: integrationName,
