@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { FullSizeCenteredPage } from '../full_size_page';
 
 // Keep this component lean as it is part of the main app bundle
 export const LoadingState: React.FunctionComponent<{ ['data-test-subj']?: string }> = ({
@@ -14,10 +15,10 @@ export const LoadingState: React.FunctionComponent<{ ['data-test-subj']?: string
   ...rest
 }) => {
   return (
-    <EuiPageTemplate.EmptyPrompt {...rest}>
+    <FullSizeCenteredPage data-test-subj={rest['data-test-subj']}>
       <EuiLoadingSpinner size="xl" />
       <EuiSpacer />
       {children}
-    </EuiPageTemplate.EmptyPrompt>
+    </FullSizeCenteredPage>
   );
 };
