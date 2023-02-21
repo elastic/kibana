@@ -48,6 +48,7 @@ import {
   RuleSnooze,
   IntervalSchedule,
   RuleLastRun,
+  SanitizedRule,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { FieldMap } from '../common/alert_schema/field_maps/types';
@@ -161,6 +162,12 @@ export interface SummarizedAlerts {
   };
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
+export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
+  rule: Omit<SanitizedRule<Params>, 'viewInAppRelativeUrl'>;
+}
+export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
+  opts: GetViewInAppRelativeUrlFnOpts<Params>
+) => string;
 export interface IRuleTypeAlerts {
   context: string;
   namespace?: string;
@@ -218,6 +225,7 @@ export interface RuleType<
    * automatically make recovery determination. Defaults to true.
    */
   autoRecoverAlerts?: boolean;
+  getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
