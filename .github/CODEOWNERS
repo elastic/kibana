@@ -5,6 +5,7 @@
 ## `node scripts/generate codeowners`.
 ####
 
+x-pack/performance @elastic/appex-qa
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
 packages/kbn-ace @elastic/platform-deployment-management
 x-pack/plugins/actions @elastic/response-ops
