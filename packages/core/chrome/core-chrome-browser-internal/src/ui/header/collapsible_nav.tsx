@@ -17,7 +17,6 @@ import {
   EuiListGroupItem,
   EuiCollapsibleNavProps,
   EuiButton,
-  EuiScreenReaderLive,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
@@ -356,14 +355,6 @@ export function CollapsibleNav({
                 defaultMessage: 'Add integrations',
               })}
             </EuiButton>
-            <EuiScreenReaderLive focusRegionOnTextChange>
-              {i18n.translate('core.ui.primaryNav.screenReaderAnnouncement', {
-                defaultMessage: '{title}',
-                values: {
-                  title: appId,
-                },
-              })}
-            </EuiScreenReaderLive>
           </EuiCollapsibleNavGroup>
         </EuiFlexItem>
       )}

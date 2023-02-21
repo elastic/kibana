@@ -12,6 +12,7 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiHideFor,
+  EuiScreenReaderLive,
   EuiShowFor,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -91,7 +92,6 @@ export function Header({
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
-
   if (!isVisible) {
     return (
       <>
@@ -168,6 +168,14 @@ export function Header({
           <EuiHeader position="fixed" className="header__secondBar">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
+                <EuiScreenReaderLive focusRegionOnTextChange>
+                  {i18n.translate('core.ui.primaryNav.screenReaderAnnouncement', {
+                    defaultMessage: '{title}',
+                    values: {
+                      title: application.currentAppId$ as unknown as string,
+                    },
+                  })}
+                </EuiScreenReaderLive>
                 <CollapsibleNav
                   appId$={application.currentAppId$}
                   id={navId}
