@@ -47,11 +47,11 @@ import { registerSloUsageCollector } from './lib/collectors/register';
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
+  alerting: PluginSetupContract;
   features: FeaturesSetup;
+  guidedOnboarding: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   spaces: SpacesPluginStart;
-  alerting: PluginSetupContract;
-  guidedOnboarding: GuidedOnboardingPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
