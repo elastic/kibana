@@ -175,7 +175,7 @@ const baseRulesListGetResponse = (path: string) => {
   }
 };
 
-const emptyRulesListGetResponse = (path: string) => {
+const emptyRulesListResponse = (path: string) => {
   if (path === '/internal/alerting/rules/_find') {
     return {
       data: [],
@@ -189,7 +189,7 @@ const emptyRulesListGetResponse = (path: string) => {
   }
 };
 
-const rulesListGetResponse = (path: string) => {
+const rulesListResponse = (path: string) => {
   if (path === '/internal/alerting/rules/_find') {
     return {
       data: [getMockRule(), getMockRule(), getMockRule(), getMockRule()],
@@ -203,7 +203,7 @@ const rulesListGetResponse = (path: string) => {
   }
 };
 
-const rulesListGetPaginatedResponse = (path: string) => {
+const rulesListPaginatedResponse = (path: string) => {
   if (path === '/internal/alerting/rules/_find') {
     return {
       data: Array.from(Array(10), () => getMockRule()),
@@ -327,13 +327,13 @@ export const getHttp = (context: Parameters<DecoratorFn>[1]) => {
     post: (async (path: string, options: HttpFetchOptions) => {
       const { id } = context;
       if (id === 'app-ruleslist--empty') {
-        return emptyRulesListGetResponse(path);
+        return emptyRulesListResponse(path);
       }
       if (id === 'app-ruleslist--with-rules') {
-        return rulesListGetResponse(path);
+        return rulesListResponse(path);
       }
       if (id === 'app-ruleslist--with-paginated-rules') {
-        return rulesListGetPaginatedResponse(path);
+        return rulesListPaginatedResponse(path);
       }
       action('POST')(path, options);
       return Promise.resolve();
