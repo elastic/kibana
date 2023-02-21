@@ -444,7 +444,7 @@ describe('AlertsTable', () => {
           />
         );
 
-        expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(2);
+        expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(4);
       });
 
       it('shows the cases tooltip', async () => {
