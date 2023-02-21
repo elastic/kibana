@@ -9,16 +9,15 @@ import { EuiPopover, EuiButtonEmpty, EuiContextMenuPanel, EuiContextMenuItem } f
 import numeral from '@elastic/numeral';
 import React, { useState, useCallback, useMemo, useContext, useEffect } from 'react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { BulkActionsConfig, BulkActionsVerbs, RowSelection } from '../../../../../types';
+import { Alerts, BulkActionsConfig, BulkActionsVerbs, RowSelection } from '../../../../../types';
 import * as i18n from '../translations';
 import { BulkActionsContext } from '../context';
 
 interface BulkActionsProps {
   totalItems: number;
   items: BulkActionsConfig[];
-  alerts: EcsFieldsResponse[];
+  alerts: Alerts;
   setIsBulkActionsLoading: (loading: boolean) => void;
 }
 
@@ -40,7 +39,7 @@ const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
 const containerStyles = { display: 'inline-block', position: 'relative' } as const;
 
 const selectedIdsToTimelineItemMapper = (
-  alerts: EcsFieldsResponse[],
+  alerts: Alerts,
   rowSelection: RowSelection
 ): TimelineItem[] => {
   return Array.from(rowSelection.keys()).map((rowIndex: number) => {
@@ -62,7 +61,7 @@ const selectedIdsToTimelineItemMapper = (
 
 const useBulkActionsToMenuItemMapper = (
   items: BulkActionsConfig[],
-  alerts: EcsFieldsResponse[],
+  alerts: Alerts,
   setIsBulkActionsLoading: (loading: boolean) => void
 ) => {
   const [{ isAllSelected, rowSelection }] = useContext(BulkActionsContext);

@@ -435,6 +435,12 @@
                 "type": "string",
                 "format": "binary"
               }
+            },
+            "application/gzip": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
             }
           }
         }
@@ -2075,7 +2081,7 @@
         }
       }
     },
-    "/agents/{agentId}/upload": {
+    "/agents/{agentId}/uploads": {
       "parameters": [
         {
           "schema": {
@@ -2522,6 +2528,14 @@
             "in": "query",
             "name": "full",
             "description": "When set to true, retrieve the related package policies for each agent policy."
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "noAgentCount",
+            "description": "When set to true, do not count how many agents are in the agent policy, this can improve performance if you are searching over a large number of agent policies. The \"agents\" property will always be 0 if set to true."
           }
         ],
         "description": ""
@@ -5720,12 +5734,10 @@
             "nullable": true
           },
           "unenroll_timeout": {
-            "type": "number",
-            "nullable": true
+            "type": "number"
           },
           "inactivity_timeout": {
-            "type": "number",
-            "nullable": true
+            "type": "number"
           }
         },
         "required": [

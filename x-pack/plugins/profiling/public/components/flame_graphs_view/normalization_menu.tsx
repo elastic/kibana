@@ -148,13 +148,32 @@ export function NormalizationMenu(props: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            content={i18n.translate(
-              'xpack.profiling.flameGraphNormalizationMenu.normalizeByTooltip',
-              {
-                defaultMessage:
-                  'Normalization is the process of organizing a database to reduce redundancy and improve data integrity.',
-              }
-            )}
+            content={
+              <EuiFlexGroup direction="column" gutterSize="s">
+                <EuiFlexItem>
+                  <span>
+                    {i18n.translate(
+                      'xpack.profiling.flameGraphNormalizationMenu.normalizeByTimeTooltip',
+                      {
+                        defaultMessage:
+                          'Select Normalize by Scale factor and set your Baseline and Comparison scale factors to compare a set of machines of different sizes. For example, you can compare a deployment of 10% of machines to a deployment of 90% of machines.',
+                      }
+                    )}
+                  </span>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <span>
+                    {i18n.translate(
+                      'xpack.profiling.flameGraphNormalizationMenu.normalizeByScaleTooltip',
+                      {
+                        defaultMessage:
+                          'Select Normalize by Time to compare a set of machines across different time periods. For example, if you compare the last hour to the last 24 hours, the shorter timeframe (1 hour) is multiplied to match the longer timeframe (24 hours).',
+                      }
+                    )}
+                  </span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             position="right"
           />
         </EuiFlexItem>

@@ -24,6 +24,7 @@ import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
+import { appContextService } from '../app_context';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -124,6 +125,15 @@ export async function getFullAgentPolicy(
         acc[name] = featureConfig;
         return acc;
       }, {} as NonNullable<FullAgentPolicy['agent']>['features']),
+      protection: {
+        enabled: false,
+        uninstall_token_hash: '',
+        signing_key: '',
+      },
+    },
+    signed: {
+      data: '',
+      signature: '',
     },
   };
 
@@ -173,6 +183,32 @@ export async function getFullAgentPolicy(
   if (!standalone && fleetServerHosts) {
     fullAgentPolicy.fleet = generateFleetConfig(fleetServerHosts, proxies);
   }
+
+  // populate protection and signed properties
+  const messageSigningService = appContextService.getMessageSigningService();
+  if (messageSigningService?.isEncryptionAvailable && fullAgentPolicy.agent) {
+    const publicKey = await messageSigningService.getPublicKey();
+
+    fullAgentPolicy.agent.protection = {
+      enabled: true,
+      uninstall_token_hash: '',
+      signing_key: publicKey,
+    };
+
+    const dataToSign = {
+      id: fullAgentPolicy.id,
+      agent: {
+        protection: fullAgentPolicy.agent.protection,
+      },
+    };
+
+    const { data: signedData, signature } = await messageSigningService.sign(dataToSign);
+    fullAgentPolicy.signed = {
+      data: signedData.toString('base64'),
+      signature,
+    };
+  }
+
   return fullAgentPolicy;
 }
 
@@ -221,10 +257,6 @@ export function transformOutputToFullPolicyOutput(
     if (!isShipperDisabled) {
       shipperDiskQueueData = buildShipperQueueData(shipper);
     }
-    /*
-      TODO: Once the Elastic-Shipper is ready,
-      Verify that these parameters have the correct names and structure
-    */
     /* eslint-disable @typescript-eslint/naming-convention */
     const {
       loadbalance,
