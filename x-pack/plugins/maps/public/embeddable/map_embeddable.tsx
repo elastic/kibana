@@ -24,6 +24,7 @@ import {
   VALUE_CLICK_TRIGGER,
   omitGenericEmbeddableInput,
   FilterableEmbeddable,
+  shouldFetch$,
 } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
@@ -117,12 +118,7 @@ export class MapEmbeddable
   private _subscription: Subscription;
   private _prevIsRestore: boolean = false;
   private _prevMapExtent?: MapExtent;
-  private _prevTimeRange?: TimeRange;
-  private _prevTimeslice?: [number, number];
-  private _prevQuery?: Query;
-  private _prevFilters: Filter[] = [];
   private _prevSyncColors?: boolean;
-  private _prevSearchSessionId?: string;
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
@@ -193,10 +189,19 @@ export class MapEmbeddable
     // Passing callback into redux store instead of regular pattern of getting redux state changes for performance reasons
     store.dispatch(setOnMapMove(this._propogateMapMovement));
 
-    this._dispatchSetQuery({
-      forceRefresh: false,
+    shouldFetch$(this.getUpdated$(), () => {
+      return {
+        ...this.getInput(),
+        filters: this._getFilters(),
+        searchSessionId: this._getSearchSessionId(),
+      }
+    }).subscribe(() => {
+      console.log('shouldRefresh, input: ', this.getInput());
+      this._dispatchSetQuery({
+        forceRefresh: false,
+      });
     });
-
+    
     const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
     if (mapStateJSON) {
       try {
@@ -309,18 +314,6 @@ export class MapEmbeddable
   }
 
   onUpdate() {
-    if (
-      !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
-      !_.isEqual(this.input.timeslice, this._prevTimeslice) ||
-      !_.isEqual(this.input.query, this._prevQuery) ||
-      !compareFilters(this._getFilters(), this._prevFilters) ||
-      this._getSearchSessionId() !== this._prevSearchSessionId
-    ) {
-      this._dispatchSetQuery({
-        forceRefresh: false,
-      });
-    }
-
     if (this.input.syncColors !== this._prevSyncColors) {
       this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
     }
@@ -401,15 +394,9 @@ export class MapEmbeddable
   }
 
   _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
-    const filters = this._getFilters();
-    this._prevTimeRange = this.input.timeRange;
-    this._prevTimeslice = this.input.timeslice;
-    this._prevQuery = this.input.query;
-    this._prevFilters = filters;
-    this._prevSearchSessionId = this._getSearchSessionId();
     this._savedMap.getStore().dispatch<any>(
       setQuery({
-        filters,
+        filters: this._getFilters(),
         query: this.input.query,
         timeFilters: this.input.timeRange,
         timeslice: this.input.timeslice
