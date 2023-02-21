@@ -8,18 +8,18 @@ import type { EndpointOf, ReturnOf, ServerRouteRepository } from '@kbn/server-ro
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { ObservabilityServerRouteRepository } from './get_global_observability_server_route_repository';
 import { ObservabilityRequestHandlerContext } from '../types';
 
 export type { ObservabilityServerRouteRepository };
 
 export interface ObservabilityRouteHandlerResources {
-  ruleDataService: RuleDataPluginService;
-  spacesService: SpacesServiceStart;
-  request: KibanaRequest;
   context: ObservabilityRequestHandlerContext;
+  dependencies: {
+    ruleDataService: RuleDataPluginService;
+  };
   logger: Logger;
+  request: KibanaRequest;
 }
 
 export interface ObservabilityRouteCreateOptions {

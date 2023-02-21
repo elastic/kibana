@@ -59,7 +59,7 @@ export function registerRoutes({ repository, core, logger, dependencies }: Regis
             request,
             logger,
             params: decodedParams,
-            ruleDataService: dependencies.ruleDataService,
+            dependencies,
           })) as any;
 
           if (data === undefined) {
