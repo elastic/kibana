@@ -15,7 +15,13 @@ import {
   yieldFirstPolicyID,
 } from '../../tasks/artifacts';
 import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
-import { login, loginWithCustomRole, loginWithRole, ROLE } from '../../tasks/login';
+import {
+  getRoleWithArtifactReadPrivilege,
+  login,
+  loginWithCustomRole,
+  loginWithRole,
+  ROLE,
+} from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
 
 const loginWithPrivilegeAll = () => {
@@ -30,28 +36,6 @@ const loginWithPrivilegeRead = (privilegePrefix: string) => {
 const loginWithPrivilegeNone = (privilegePrefix: string) => {
   const roleWithoutArtifactPrivilege = getRoleWithoutArtifactPrivilege(privilegePrefix);
   loginWithCustomRole('roleWithoutArtifactPrivilege', roleWithoutArtifactPrivilege);
-};
-
-const getRoleWithArtifactReadPrivilege = (privilegePrefix: string) => {
-  const endpointSecurityPolicyManagerRole = getEndpointSecurityPolicyManager();
-
-  return {
-    ...endpointSecurityPolicyManagerRole,
-    kibana: [
-      {
-        ...endpointSecurityPolicyManagerRole.kibana[0],
-        feature: {
-          ...endpointSecurityPolicyManagerRole.kibana[0].feature,
-          siem: [
-            ...endpointSecurityPolicyManagerRole.kibana[0].feature.siem.filter(
-              (privilege) => privilege !== `${privilegePrefix}all`
-            ),
-            `${privilegePrefix}read`,
-          ],
-        },
-      },
-    ],
-  };
 };
 
 const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {
