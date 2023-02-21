@@ -482,87 +482,87 @@ class AnnotationsTableUI extends Component {
     }
 
     const actions = [];
-
-    actions.push({
-      name: editAnnotationsText,
-      description: editAnnotationsText,
-      icon: 'pencil',
-      type: 'icon',
-      onClick: (annotation) => {
-        const annotationId = annotation._id;
-        const originalAnnotation = annotations.find((d) => d._id === annotationId);
-
-        annotationUpdatesService.setValue(originalAnnotation ?? annotation);
-      },
-      'data-test-subj': `mlAnnotationsActionEdit`,
-    });
-
-    if (this.state.jobId && this.props.jobs[0].analysis_config.bucket_span) {
-      // add datafeed modal action
+    if (this.props.jobs === undefined || this.props.jobs[0]?.blocked === undefined) {
       actions.push({
-        name: viewDataFeedText,
-        description: viewDataFeedText,
-        icon: 'visAreaStacked',
+        name: editAnnotationsText,
+        description: editAnnotationsText,
+        icon: 'pencil',
         type: 'icon',
         onClick: (annotation) => {
-          this.setState({
-            datafeedFlyoutVisible: true,
-            datafeedEnd: annotation.end_timestamp,
-          });
+          const annotationId = annotation._id;
+          const originalAnnotation = annotations.find((d) => d._id === annotationId);
+
+          annotationUpdatesService.setValue(originalAnnotation ?? annotation);
         },
-        'data-test-subj': `mlAnnotationsActionViewDatafeed`,
+        'data-test-subj': `mlAnnotationsActionEdit`,
       });
-    }
 
-    if (isSingleMetricViewerLinkVisible) {
-      actions.push({
-        name: (annotation) => {
-          const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
+      if (this.state.jobId && this.props.jobs[0].analysis_config.bucket_span) {
+        // add datafeed modal action
+        actions.push({
+          name: viewDataFeedText,
+          description: viewDataFeedText,
+          icon: 'visAreaStacked',
+          type: 'icon',
+          onClick: (annotation) => {
+            this.setState({
+              datafeedFlyoutVisible: true,
+              datafeedEnd: annotation.end_timestamp,
+            });
+          },
+          'data-test-subj': `mlAnnotationsActionViewDatafeed`,
+        });
+      }
 
-          if (isDrillDownAvailable) {
-            return (
-              <FormattedMessage
-                id="xpack.ml.annotationsTable.openInSingleMetricViewerTooltip"
-                defaultMessage="Open in Single Metric Viewer"
-              />
-            );
-          }
-          return (
-            <EuiToolTip
-              content={
+      if (isSingleMetricViewerLinkVisible) {
+        actions.push({
+          name: (annotation) => {
+            const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
+
+            if (isDrillDownAvailable) {
+              return (
                 <FormattedMessage
-                  id="xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerTooltip"
-                  defaultMessage="Job configuration not supported in Single Metric Viewer"
+                  id="xpack.ml.annotationsTable.openInSingleMetricViewerTooltip"
+                  defaultMessage="Open in Single Metric Viewer"
                 />
-              }
-            >
-              <FormattedMessage
-                id="xpack.ml.annotationsTable.openInSingleMetricViewerTooltip"
-                defaultMessage="Open in Single Metric Viewer"
-              />
-            </EuiToolTip>
-          );
-        },
-        description: (annotation) => {
-          const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
-
-          return isDrillDownAvailable
-            ? i18n.translate('xpack.ml.annotationsTable.openInSingleMetricViewerAriaLabel', {
-                defaultMessage: 'Open in Single Metric Viewer',
-              })
-            : i18n.translate(
-                'xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerAriaLabel',
-                { defaultMessage: 'Job configuration not supported in Single Metric Viewer' }
               );
-        },
-        enabled: (annotation) => isTimeSeriesViewJob(this.getJob(annotation.job_id)),
-        icon: 'visLine',
-        type: 'icon',
-        onClick: (annotation) => this.openSingleMetricView(annotation),
-        'data-test-subj': `mlAnnotationsActionOpenInSingleMetricViewer`,
-      });
-    }
+            }
+            return (
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerTooltip"
+                    defaultMessage="Job configuration not supported in Single Metric Viewer"
+                  />
+                }
+              >
+                <FormattedMessage
+                  id="xpack.ml.annotationsTable.openInSingleMetricViewerTooltip"
+                  defaultMessage="Open in Single Metric Viewer"
+                />
+              </EuiToolTip>
+            );
+          },
+          description: (annotation) => {
+            const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
 
+            return isDrillDownAvailable
+              ? i18n.translate('xpack.ml.annotationsTable.openInSingleMetricViewerAriaLabel', {
+                  defaultMessage: 'Open in Single Metric Viewer',
+                })
+              : i18n.translate(
+                  'xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerAriaLabel',
+                  { defaultMessage: 'Job configuration not supported in Single Metric Viewer' }
+                );
+          },
+          enabled: (annotation) => isTimeSeriesViewJob(this.getJob(annotation.job_id)),
+          icon: 'visLine',
+          type: 'icon',
+          onClick: (annotation) => this.openSingleMetricView(annotation),
+          'data-test-subj': `mlAnnotationsActionOpenInSingleMetricViewer`,
+        });
+      }
+    }
     const getRowProps = (item) => {
       return {
         'data-test-subj': `mlAnnotationsTableRow row-${item._id}`,

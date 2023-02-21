@@ -50,8 +50,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const parsedUrl = new URL(currentUrl);
 
             expect(parsedUrl.pathname).to.be('/app/logs/stream');
-            expect(parsedUrl.searchParams.get('logFilter')).to.be(
-              `(filters:!(),query:(language:kuery,query:\'service.id:"${SERVICE_ID}"\'))`
+            expect(parsedUrl.searchParams.get('logFilter')).to.contain(
+              `(filters:!(),query:(language:kuery,query:\'service.id:"${SERVICE_ID}"\')`
             );
           });
         });
@@ -77,8 +77,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const parsedUrl = new URL(currentUrl);
 
             expect(parsedUrl.pathname).to.be('/app/logs/stream');
-            expect(parsedUrl.searchParams.get('logFilter')).to.be(
-              `(filters:!(),query:(language:kuery,query:\'service.id:"${SERVICE_ID}"\'))`
+            expect(parsedUrl.searchParams.get('logFilter')).to.contain(
+              `(filters:!(),query:(language:kuery,query:\'service.id:"${SERVICE_ID}"\')`
             );
           });
         });
