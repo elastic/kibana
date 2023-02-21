@@ -7,7 +7,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import unified from 'unified';
-import markdown from 'remark-parse';
+import markdown from 'remark-parse-no-trim';
 import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
