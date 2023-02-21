@@ -6,6 +6,7 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
+import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 
 const remove = ({ columns, index }: { columns: EuiDataGridColumn[]; index: number }) => {
   return [...columns.slice(0, index), ...columns.slice(index + 1)];
@@ -37,6 +38,21 @@ const insert = ({
   return [columns[0], column, ...columns.slice(1)];
 };
 
+const formatSystemColumn = (column: EuiDataGridColumn): EuiDataGridColumn => {
+  const newColumn = { ...column };
+
+  /**
+   * If a solution wants to default the case column and set their own
+   * display text we should not modified it. For that reason,
+   * we check if the displayAsText is set.
+   */
+  if (column.id === ALERT_CASE_IDS && !column.displayAsText) {
+    newColumn.displayAsText = 'Cases';
+  }
+
+  return newColumn;
+};
+
 /**
  * @param param.column column to be removed/inserted
  * @param param.columns current array of columns in the grid
@@ -55,11 +71,18 @@ export const toggleColumn = ({
   const currentIndex = columns.findIndex(
     (currentColumn: EuiDataGridColumn) => currentColumn.id === column.id
   );
+
   const isVisible = currentIndex >= 0;
+
+  /**
+   * For the Cases column we want to change the
+   * label of the column from kibana.alert.case_ids to Cases.
+   */
+  const formattedColumn = formatSystemColumn(column);
 
   if (isVisible) {
     return remove({ columns, index: currentIndex });
   }
 
-  return insert({ defaultColumns, column, columns });
+  return insert({ defaultColumns, column: formattedColumn, columns });
 };
