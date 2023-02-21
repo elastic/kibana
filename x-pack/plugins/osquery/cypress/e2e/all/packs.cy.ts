@@ -428,10 +428,23 @@ describe('ALL - Packs', () => {
       activatePack(PREBUILD_PACK_NAME);
       deactivatePack(PREBUILD_PACK_NAME);
     });
-    it('should be able to delete prebuilt pack', () => {
+    it('should not be able to update prebuilt pack', () => {
+      cy.contains(PREBUILD_PACK_NAME).click();
+      cy.contains('Edit').click();
+      cy.react('EuiFieldText', { props: { name: 'name', isDisabled: true } });
+      cy.react('EuiFieldText', { props: { name: 'description', isDisabled: true } });
+      cy.contains('Add Query').should('not.exist');
+      cy.react('ExpandedItemActions', { options: { timeout: 1000 } });
+      cy.get('.euiTableRowCell--hasActions').should('not.exist');
+    });
+    it('should be able to delete prebuilt pack and add it again', () => {
       cy.contains(PREBUILD_PACK_NAME).click();
       cy.contains('Edit').click();
       deleteAndConfirm('pack');
+      cy.contains(PREBUILD_PACK_NAME).should('not.exist');
+      cy.contains('Update Elastic prebuilt packs').click();
+      cy.contains('Successfully updated prebuilt packs');
+      cy.contains(PREBUILD_PACK_NAME).should('exist');
     });
     it('should be able to run live prebuilt pack', () => {
       navigateTo('/app/osquery/live_queries');
