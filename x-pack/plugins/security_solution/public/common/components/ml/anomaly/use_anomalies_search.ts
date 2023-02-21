@@ -161,7 +161,6 @@ export const uninstalledJobIdToInstalledJobId = (
 
 /**
  * From version 8.8, jobs installed using security solution have the spaceId in their name.
- * Jobs installed using security solution on versions older than 8.8 don't have the spaceId in their name.
  */
 const matchJobId = (
   jobId: string,

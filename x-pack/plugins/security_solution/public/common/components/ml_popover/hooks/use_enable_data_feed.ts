@@ -58,11 +58,7 @@ export const useEnableDataFeed = () => {
         const startTime = Math.max(latestTimestampMs, maxStartTime);
         try {
           await startDatafeeds({
-            datafeedIds: [
-              job.isInstalled
-                ? `datafeed-${job.id}` // When the job is installed the job.id already contains the prefix.
-                : `datafeed-${uninstalledJobIdToInstalledJobId(job.id, spaceId)}`,
-            ],
+            datafeedIds: [`datafeed-${enabledJobId}`],
             start: startTime,
           });
         } catch (error) {
