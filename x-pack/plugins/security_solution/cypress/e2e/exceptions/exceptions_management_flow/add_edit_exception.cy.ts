@@ -11,7 +11,7 @@ import {
 } from '../../../tasks/es_archiver';
 import { getNewRule } from '../../../objects/rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { createCustomRule, deleteCustomRule } from '../../../tasks/api_calls/rules';
 import { editException, editExceptionFlyoutItemName } from '../../../tasks/exceptions';
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
 
@@ -22,7 +22,7 @@ import {
   RULE_ACTION_LINK_RULE_SWITCH,
 } from '../../../screens/exceptions';
 
-describe('Add/edit exception from excpetion management page', () => {
+describe('Add/edit exception from exception management page', () => {
   before(() => {
     esArchiverResetKibana();
     esArchiverLoad('exceptions');
@@ -33,6 +33,10 @@ describe('Add/edit exception from excpetion management page', () => {
 
   after(() => {
     esArchiverUnload('exceptions');
+  });
+
+  afterEach(() => {
+    deleteCustomRule();
   });
 
   describe('create exception item', () => {
