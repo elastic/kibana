@@ -9,9 +9,12 @@ import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../cell_actions';
 import type { EnrichedFieldInfo } from '../types';
-import { CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER } from '../../../../../common/constants';
 
 const ActionWrapper = euiStyled.div`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
@@ -88,14 +91,14 @@ export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = (
       <ClampedContent data-test-subj={dataTestSubj}>{children}</ClampedContent>
 
       <ActionWrapper>
-        <CellActions
+        <SecurityCellActions
           field={{
             name: enrichedFieldInfo.data.field,
             value: enrichedFieldInfo?.values ? enrichedFieldInfo?.values[0] : '',
             type: enrichedFieldInfo.data.type,
             aggregatable: enrichedFieldInfo.fieldFromBrowserField?.aggregatable,
           }}
-          triggerId={CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER}
+          triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
           mode={CellActionsMode.INLINE}
           metadata={{ scopeId: contextId }}
           visibleCellActions={3}
