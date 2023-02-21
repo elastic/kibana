@@ -42,13 +42,17 @@ const insert = ({
 const formatSystemColumn = (column: EuiDataGridColumn): EuiDataGridColumn => {
   const newColumn = { ...column };
 
-  /**
-   * If a solution wants to default the case column and set their own
-   * display text we should not modified it. For that reason,
-   * we check if the displayAsText is set.
-   */
-  if (column.id === ALERT_CASE_IDS && !column.displayAsText) {
-    newColumn.displayAsText = i18n.CASES;
+  if (column.id === ALERT_CASE_IDS) {
+    newColumn.isSortable = false;
+
+    /**
+     * If a solution wants to default the case column and set their own
+     * display text we should not modified it. For that reason,
+     * we check if the displayAsText is set.
+     */
+    if (!column.displayAsText) {
+      newColumn.displayAsText = i18n.CASES;
+    }
   }
 
   return newColumn;
