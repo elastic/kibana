@@ -181,7 +181,7 @@ export const Layout = React.memo(
               </EuiFlexGroup>
             </TopActionContainer>
             <EuiFlexItem grow={false}>
-              {!hostsLinkClickedRef?.current && (
+              {!hostsLinkClickedRef.current && (
                 <TryItButton
                   data-test-subj="inventory-hostsView-link"
                   label={i18n.translate('xpack.infra.layout.hostsLandingPageLink', {
@@ -193,9 +193,7 @@ export const Layout = React.memo(
                   }}
                   experimental
                   onClick={() => {
-                    if (!hostsLinkClickedRef.current) {
-                      setHostsLinkClicked(true);
-                    }
+                    setHostsLinkClicked(true);
                   }}
                 />
               )}
