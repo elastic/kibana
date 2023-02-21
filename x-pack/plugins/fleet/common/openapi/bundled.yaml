@@ -281,6 +281,10 @@ paths:
             schema:
               type: string
               format: binary
+          application/gzip:
+            schema:
+              type: string
+              format: binary
   /epm/packages/_bulk:
     post:
       summary: Packages - Bulk install
@@ -3647,10 +3651,8 @@ components:
           nullable: true
         unenroll_timeout:
           type: number
-          nullable: true
         inactivity_timeout:
           type: number
-          nullable: true
       required:
         - name
         - namespace
