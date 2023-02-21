@@ -14,9 +14,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { IBasePath } from '@kbn/core/public';
-import { ApmRuleType } from '../../../../common/rules/apm_rule_types';
-import { AlertingFlyout } from '../../alerting/ui_components/alerting_flyout';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
+import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
   defaultMessage: 'Alerts and rules',
