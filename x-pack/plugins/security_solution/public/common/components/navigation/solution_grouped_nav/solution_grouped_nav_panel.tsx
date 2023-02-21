@@ -23,6 +23,7 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import classNames from 'classnames';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiPanelStyled,
   EuiTitleStyled,
@@ -32,6 +33,8 @@ import {
 import type { DefaultSideNavItem } from './types';
 import type { LinkCategories } from '../../../links/types';
 import { NavItemBetaBadge } from '../nav_item_beta_badge';
+import { TELEMETRY_EVENT } from './telemetry/const';
+import { useTelemetryContext } from './telemetry/telemetry_context';
 
 export interface SolutionNavPanelProps {
   onClose: () => void;
@@ -163,6 +166,7 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
 const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => {
   const panelLinkClassNames = classNames('solutionGroupedNavPanelLink');
   const panelLinkItemClassNames = classNames('solutionGroupedNavPanelLinkItem');
+  const { tracker } = useTelemetryContext();
   return (
     <>
       {items.map(({ id, href, onClick, label, description, isBeta, betaOptions }) => (
@@ -172,6 +176,7 @@ const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, on
           data-test-subj={`groupedNavPanelLink-${id}`}
           href={href}
           onClick={(ev) => {
+            tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.GROUPED_NAVIGATION}${id}`);
             onClose();
             onClick?.(ev);
           }}
