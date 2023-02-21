@@ -913,7 +913,7 @@ describe('BuilderEntryItem', () => {
       ).onBlur();
     });
 
-    expect(mockSetErrorExists).toHaveBeenCalledWith(true);
+    expect(mockSetErrorExists).toHaveBeenCalledWith({ '123': true });
   });
 
   test('it invokes "setErrorsExist" when invalid value inputted for field value input', async () => {
@@ -960,7 +960,7 @@ describe('BuilderEntryItem', () => {
       ).onSearchChange('hellooo');
     });
 
-    expect(mockSetErrorExists).toHaveBeenCalledWith(true);
+    expect(mockSetErrorExists).toHaveBeenCalledWith({ '123': true });
   });
 
   test('it invokes "setWarningsExist" when invalid value in field value input', async () => {

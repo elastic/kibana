@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { QueryClient } from '@tanstack/react-query';
 
-export const cpuCores: MetricsUIAggregation = {
-  cpuCores: {
-    max: {
-      field: 'system.cpu.cores',
-    },
-  },
-};
+export const alertsTableQueryClient = new QueryClient();
