@@ -46,17 +46,10 @@ interface FindApiResponse {
 const EMPTY_ACTIVE_ALERTS_MAP = {};
 
 export function useFetchActiveAlerts({ sloIds = [] }: { sloIds: SloId[] }): UseFetchActiveAlerts {
-  const { data: sloAlertIndex } = useDataFetcher<null, string | undefined>({
-    paramsForApiCall: null,
-    initialDataState: undefined,
-    executeApiCall: fetchAlertIndex,
-    shouldExecuteApiCall: useCallback(() => true, []),
-  });
-
-  const params: Params = useMemo(() => ({ sloIds, sloAlertIndex }), [sloIds, sloAlertIndex]);
+  const params: Params = useMemo(() => ({ sloIds }), [sloIds]);
   const shouldExecuteApiCall = useCallback(
-    (apiCallParams: Params) => apiCallParams.sloIds.length > 0 && !!sloAlertIndex,
-    [sloAlertIndex]
+    (apiCallParams: Params) => apiCallParams.sloIds.length > 0,
+    []
   );
 
   const { data, loading, error } = useDataFetcher<Params, ActiveAlertsMap>({
@@ -77,7 +70,7 @@ const fetchActiveAlerts = async (
   try {
     const response = await http.post<FindApiResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
       body: JSON.stringify({
-        index: params.sloAlertIndex,
+        feature_ids: ['slo'],
         size: 0,
         query: {
           bool: {
@@ -129,23 +122,4 @@ const fetchActiveAlerts = async (
   }
 
   return EMPTY_ACTIVE_ALERTS_MAP;
-};
-
-const fetchAlertIndex = async (
-  _: null,
-  abortController: AbortController,
-  http: HttpSetup
-): Promise<string | undefined> => {
-  try {
-    const response = await http.get<{ index_name: string[] }>(`${BASE_RAC_ALERTS_API_PATH}/index`, {
-      query: { features: 'slo' },
-      signal: abortController.signal,
-    });
-
-    return response.index_name[0] ?? undefined;
-  } catch (error) {
-    // ignore error for retrieving slos
-  }
-
-  return undefined;
 };
