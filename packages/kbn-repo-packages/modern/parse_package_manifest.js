@@ -9,6 +9,7 @@
 const Path = require('path');
 const Fs = require('fs');
 const { inspect } = require('util');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 const {
   isSomeString,
@@ -117,7 +118,8 @@ function validatePackageManifestPlugin(plugin, path) {
     throw err(`plugin.type`, type, `must be undefined or "preboot"`);
   }
 
-  const segs = path.split(Path.sep);
+  const repoRelPath = Path.relative(REPO_ROOT, path);
+  const segs = repoRelPath.split(Path.sep);
   const isBuild = segs.includes('node_modules') || segs.includes('build');
   if (__category__ !== undefined) {
     if (!isBuild) {
