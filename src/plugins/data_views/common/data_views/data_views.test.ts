@@ -19,6 +19,7 @@ import {
   IDataViewsApiClient,
 } from '../types';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
+import { DataViewMissingIndices } from '../lib';
 
 const createFieldsFetcher = () =>
   ({
@@ -69,8 +70,10 @@ describe('IndexPatterns', () => {
     remove: jest.fn(),
   } as any as UiSettingsCommon;
   const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
+  const onMissingIndices = jest.fn();
 
   beforeEach(() => {
+    jest.clearAllMocks();
     savedObjectsClient = {} as SavedObjectsClientCommon;
     savedObjectsClient.find = jest.fn(
       () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
@@ -111,6 +114,7 @@ describe('IndexPatterns', () => {
       apiClient,
       fieldFormats,
       onNotification: () => {},
+      onMissingIndices,
       onError: () => {},
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(true),
@@ -123,6 +127,7 @@ describe('IndexPatterns', () => {
       apiClient,
       fieldFormats,
       onNotification: () => {},
+      onMissingIndices,
       onError: () => {},
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(false),
@@ -207,6 +212,9 @@ describe('IndexPatterns', () => {
 
   test('allowNoIndex flag preserves existing fields when index is missing', async () => {
     const id = '2';
+    apiClient.getFieldsForWildcard = jest.fn().mockImplementation(async () => {
+      throw new DataViewMissingIndices('Catch me if you can!');
+    });
     setDocsourcePayload(id, {
       id: 'foo',
       version: 'foo',
@@ -218,6 +226,22 @@ describe('IndexPatterns', () => {
     });
 
     expect((await indexPatterns.get(id)).fields.length).toBe(1);
+  });
+
+  test('missing indices triggering onMissingIndices fn', async () => {
+    const id = '1';
+    setDocsourcePayload(id, {
+      id: 'foo',
+      version: 'foo',
+      attributes: {
+        title: 'something',
+      },
+    });
+    apiClient.getFieldsForWildcard = jest.fn().mockImplementation(async () => {
+      throw new DataViewMissingIndices('Catch me if you can!');
+    });
+    await indexPatterns.get(id);
+    expect(onMissingIndices).toHaveBeenCalled();
   });
 
   test('savedObjectCache pre-fetches title, type, typeMeta', async () => {

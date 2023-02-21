@@ -104,6 +104,10 @@ export interface DataViewsServiceDeps {
    */
   onNotification: OnNotification;
   /**
+   * Handler when there are missing indices
+   */
+  onMissingIndices?: (error: Error) => void;
+  /**
    * Handler for service errors
    */
   onError: OnError;
@@ -303,6 +307,11 @@ export class DataViewsService {
    * @param key used to indicate uniqueness of the notification
    */
   private onNotification: OnNotification;
+  /**
+   * Handler triggered when there are no indices
+   * @param error Error object
+   */
+  private onMissingIndices?: (error: Error) => void;
   /*
    * Handler for service errors
    * @param error notification content in toast format
@@ -332,6 +341,7 @@ export class DataViewsService {
       onError,
       getCanSave = () => Promise.resolve(false),
       getCanSaveAdvancedSettings,
+      onMissingIndices,
     } = deps;
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -339,6 +349,7 @@ export class DataViewsService {
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
+    this.onMissingIndices = onMissingIndices;
     this.getCanSave = getCanSave;
     this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
@@ -582,7 +593,7 @@ export class DataViewsService {
       await this.refreshFieldsFn(dataView);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        // If the index pattern is missing indices, we still want to show the user the fields
+        this.onMissingIndices?.(err);
       } else {
         this.onError(
           err,
@@ -632,6 +643,7 @@ export class DataViewsService {
       return { fields: this.fieldArrayToMap(updatedFieldList, fieldAttrs), indices };
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
+        this.onMissingIndices?.(err);
         return {};
       }
 
@@ -794,7 +806,7 @@ export class DataViewsService {
         indices = fieldsAndIndices.indices;
       } catch (err) {
         if (err instanceof DataViewMissingIndices) {
-          //
+          this.onMissingIndices?.(err);
         } else {
           this.onError(
             err,
