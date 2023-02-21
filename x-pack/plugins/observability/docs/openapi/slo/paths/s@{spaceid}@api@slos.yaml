@@ -1,0 +1,25 @@
+post:
+  summary: Creates an SLO.
+  operationId: createSlo
+  description: >
+    You must have `all` privileges for the **SLOs** feature in the
+    **Observability** section of the Kibana feature privileges.
+  tags:
+    - slos
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: ../components/parameters/space_id.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/create_slo_request.yaml'
+  responses:
+    '200':
+      description: SLOs created with success.
+  servers:
+    - url: https://localhost:5601
+
+servers:
+  - url: https://localhost:5601
