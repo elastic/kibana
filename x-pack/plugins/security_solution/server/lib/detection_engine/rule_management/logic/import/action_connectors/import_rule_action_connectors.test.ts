@@ -380,4 +380,64 @@ describe('checkRuleExceptionReferences', () => {
       successResults: [],
     });
   });
+
+  it('should generate new destinationIds if the connectors are exported from a different namespace', async () => {
+    const successResults = [
+      {
+        destinationId: '72cab9bb-535f-45dd-b9c2-5bc1bc0db96b',
+        id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+        meta: { title: 'Connector: [anotherSpaceSlack]', icon: undefined },
+        type: 'action',
+      },
+    ];
+    core.savedObjects.getImporter = jest.fn().mockReturnValueOnce({
+      import: jest.fn().mockResolvedValue({
+        success: true,
+        successCount: 1,
+        successResults,
+        errors: [],
+        warnings: [],
+      }),
+    });
+    const actionsImporter = core.savedObjects.getImporter;
+
+    actionsClient.getAll.mockResolvedValue([]);
+
+    const res = await importRuleActionConnectors({
+      actionConnectors,
+      actionsClient,
+      actionsImporter: actionsImporter() as never,
+      rules,
+      overwrite: false,
+    });
+    const rulesWithMigratedActions = [
+      {
+        actions: [
+          {
+            action_type_id: '.webhook',
+            group: 'default',
+            id: '72cab9bb-535f-45dd-b9c2-5bc1bc0db96b',
+            params: {},
+          },
+        ],
+        description: 'some description',
+        language: 'kuery',
+        name: 'Query with a rule id',
+        query: 'user.name: root or user.name: admin',
+        risk_score: 55,
+        rule_id: 'rule-1',
+        severity: 'high',
+        type: 'query',
+      },
+    ];
+
+    expect(res).toEqual({
+      success: true,
+      successCount: 1,
+      errors: [],
+      warnings: [],
+      successResults,
+      rulesWithMigratedActions,
+    });
+  });
 });

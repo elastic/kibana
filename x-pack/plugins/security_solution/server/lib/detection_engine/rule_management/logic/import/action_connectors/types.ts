@@ -20,6 +20,7 @@ export interface ImportRuleActionConnectorsResult {
   successResults?: SavedObjectsImportSuccess[];
   errors: BulkError[] | [];
   warnings: WarningSchema[] | [];
+  rulesWithMigratedActions?: Array<RuleToImport | Error>;
 }
 
 export interface ImportRuleActionConnectorsParams {

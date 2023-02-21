@@ -5,7 +5,10 @@
  * 2.0.
  */
 import { pick } from 'lodash';
-import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectsImportFailure,
+  SavedObjectsImportSuccess,
+} from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { BulkError } from '../../../../../routes/utils';
@@ -126,4 +129,28 @@ export const checkIfActionsHaveMissingConnectors = (
     return handleActionsHaveNoConnectors(missingActionConnector, missingActionRules);
   }
   return null;
+};
+export const getDestinationId = (
+  actionId: string,
+  importResult: SavedObjectsImportSuccess[]
+): string | undefined => importResult.find((res) => res.id === actionId)?.destinationId;
+
+export const swapNonDefaultSpaceDestinationIdWithId = (
+  rule: RuleToImport,
+  importResult: SavedObjectsImportSuccess[]
+) => {
+  return rule.actions?.map((action) => {
+    const destinationId = getDestinationId(action.id, importResult);
+    return { ...action, id: destinationId || action.id };
+  });
+};
+
+export const generateNewRulesActionsAfterMigration = (
+  rules: Array<RuleToImport | Error>,
+  importResult: SavedObjectsImportSuccess[]
+): Array<RuleToImport | Error> => {
+  return rules.map((rule) => {
+    if (rule instanceof Error) return rule;
+    return { ...rule, actions: swapNonDefaultSpaceDestinationIdWithId(rule, importResult) };
+  });
 };
