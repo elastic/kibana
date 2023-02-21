@@ -34,7 +34,12 @@ export function useCreateOrUpdateSlo() {
     }
   );
 
-  const cloneSlo = useMutation(
+  const cloneSlo = useMutation<
+    CreateSLOResponse,
+    string,
+    { slo: CreateSLOInput; idToCopyFrom?: string },
+    { previousSloList: FindSLOResponse | undefined }
+  >(
     ['cloneSlo'],
     ({ slo }: { slo: CreateSLOInput; idToCopyFrom?: string }) => {
       const body = JSON.stringify(slo);
@@ -60,8 +65,8 @@ export function useCreateOrUpdateSlo() {
         return { previousSloList };
       },
       // If the mutation fails, use the context returned from onMutate to roll back
-      onError: (_err, _slo, context: { previousSloList: FindSLOResponse | undefined }) => {
-        if (context.previousSloList) {
+      onError: (_err, _slo, context) => {
+        if (context?.previousSloList) {
           queryClient.setQueryData(['fetchSloList'], context.previousSloList);
         }
       },

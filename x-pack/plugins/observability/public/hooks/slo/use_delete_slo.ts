@@ -14,10 +14,19 @@ export function useDeleteSlo(sloId: string) {
   const { http } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const deleteSlo = useMutation(
+  const deleteSlo = useMutation<
+    string,
+    string,
+    { id: string },
+    { previousSloList: FindSLOResponse | undefined }
+  >(
     ['deleteSlo', sloId],
-    ({ id }: { id: string }) => {
-      return http.delete<string>(`/api/observability/slos/${id}`);
+    ({ id }) => {
+      try {
+        return http.delete<string>(`/api/observability/slos/${id}`);
+      } catch (error) {
+        return Promise.reject(`Something went wrong: ${String(error)}`);
+      }
     },
     {
       onMutate: async (slo) => {
@@ -37,8 +46,8 @@ export function useDeleteSlo(sloId: string) {
         return { previousSloList };
       },
       // If the mutation fails, use the context returned from onMutate to roll back
-      onError: (_err, _slo, context: { previousSloList: FindSLOResponse | undefined }) => {
-        if (context.previousSloList) {
+      onError: (_err, _slo, context) => {
+        if (context?.previousSloList) {
           queryClient.setQueryData(['fetchSloList'], context.previousSloList);
         }
       },
