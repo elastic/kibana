@@ -16,7 +16,7 @@ import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request 
 import { asyncMap, asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '@kbn/test';
-import { EsArchiver, KibanaServer, RetryService } from '@kbn/ftr-common-functional-services';
+import { Es, EsArchiver, KibanaServer, RetryService } from '@kbn/ftr-common-functional-services';
 
 import { Auth } from '../services/auth';
 import { getInputDelays } from '../services/input_delays';
@@ -36,6 +36,7 @@ export class JourneyFtrHarness {
     private readonly esArchiver: EsArchiver,
     private readonly kibanaServer: KibanaServer,
     private readonly retry: RetryService,
+    private readonly es: Es,
     private readonly auth: Auth,
     private readonly journeyConfig: JourneyConfig<any>
   ) {
@@ -369,6 +370,7 @@ export class JourneyFtrHarness {
       kibanaServer: this.kibanaServer,
       retry: this.retry,
       esArchiver: this.esArchiver,
+      es: this.es,
     });
 
     return this.#_ctx;

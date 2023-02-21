@@ -2,7 +2,7 @@
   "type": "index",
   "value": {
     "aliases": {},
-    "index": "cloud_security_posture.findings_latest-default",
+    "index": "logs-cloud_security_posture.findings_latest-default",
     "mappings": {
       "_meta": {
         "managed": true,

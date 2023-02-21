@@ -19,7 +19,7 @@ import {
   EsArchiver,
 } from '@kbn/ftr-common-functional-services';
 
-// import { GenericFtrProviderContext } from '@kbn/test';
+import { Client } from '@elastic/elasticsearch';
 import { Auth } from '../services/auth';
 import { InputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
@@ -35,6 +35,7 @@ export interface BaseStepCtx {
   kbnUrl: KibanaUrl;
   kibanaServer: KibanaServer;
   retry: RetryService;
+  es: Client;
   esArchiver: EsArchiver;
 }
 
@@ -128,6 +129,7 @@ export class Journey<CtxExt extends object> {
       getService('esArchiver'),
       getService('kibanaServer'),
       getService('retry'),
+      getService('es'),
       new Auth(getService('config'), getService('log'), getService('kibanaServer')),
       this.config
     ).initMochaSuite(this.#steps);
