@@ -66,7 +66,7 @@ describe('POST /api/saved_objects/_bulk_resolve with allowApiAccess true', () =>
     await server.stop();
   });
 
-  it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {
+  it('returns with status 200 when a type is hidden from the HTTP APIs', async () => {
     await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/_bulk_resolve')
       .send([

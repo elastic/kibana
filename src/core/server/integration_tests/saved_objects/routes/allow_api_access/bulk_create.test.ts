@@ -63,7 +63,7 @@ describe('POST /api/saved_objects/_bulk_create with allowApiAccess true', () => 
     await server.stop();
   });
 
-  it('uses config option allowHttpApiAccess to grant hiddenFromHttpApis types access', async () => {
+  it('returns with status 200 when a type is hidden from the HTTP APIs', async () => {
     await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/_bulk_create?overwrite=true')
       .send([
