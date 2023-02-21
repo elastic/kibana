@@ -1289,7 +1289,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/upgrade_agent'
-  /agents/{agentId}/upload:
+  /agents/{agentId}/uploads:
     parameters:
       - schema:
           type: string
