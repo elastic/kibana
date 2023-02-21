@@ -119,9 +119,11 @@ export class JourneyFtrHarness {
   }
 
   private async onSetup() {
-    // We start browser and init page in first place
+    // We start browser and init page in the first place
     await this.setupBrowserAndPage();
+    // We allow opt-in beforeSteps hook to manage Kibana/ES state
     await this.journeyConfig.getBeforeStepsFn(this.getCtx());
+    // Loading test data
     await Promise.all([
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         await this.esArchiver.load(esArchive);
