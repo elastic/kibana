@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
-  "id": "@kbn/shared-ux-reporting-generate-csv",
+  "id": "@kbn/reporting-generate-csv-types",
   "owner": "@elastic/appex-sharedux"
 }

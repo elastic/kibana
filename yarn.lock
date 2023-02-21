@@ -4677,6 +4677,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-generate-csv-types@link:packages/kbn-reporting/generate_csv/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-generate-csv@link:packages/kbn-reporting/generate_csv/impl":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-plugin@link:x-pack/plugins/reporting":
   version "0.0.0"
   uid ""
@@ -5078,14 +5086,6 @@
   uid ""
 
 "@kbn/shared-ux-prompt-not-found@link:packages/shared-ux/prompt/not_found":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-reporting-generate-csv-types@link:packages/shared-ux/reporting/generate_csv/types":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-reporting-generate-csv@link:packages/shared-ux/reporting/generate_csv/impl":
   version "0.0.0"
   uid ""
 
