@@ -66,7 +66,7 @@ export class RequestHandler {
       throw new Error(`Export type ${exportTypeId} is not an async job type!`);
     }
 
-    // 1. ensure the incoming params have a version field
+    // 1. ensure the incoming params have a version field (should be set by the UI)
     jobParams.version = checkParamsVersion(jobParams, logger);
 
     // 2. encrypt request headers for the running report job to authenticate itself with Kibana
