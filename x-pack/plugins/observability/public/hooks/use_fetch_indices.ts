@@ -5,14 +5,28 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+  useQuery,
+} from '@tanstack/react-query';
 import { useKibana } from '../utils/kibana_react';
 
+export interface UseFetchIndicesResponse {
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  indices: Index[] | undefined;
+  refetch: <TPageData>(
+    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
+  ) => Promise<QueryObserverResult<Index[], unknown>>;
+}
 export interface Index {
   name: string;
 }
 
-export function useFetchIndices() {
+export function useFetchIndices(): UseFetchIndicesResponse {
   const { http } = useKibana().services;
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
