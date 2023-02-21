@@ -7,6 +7,7 @@
 
 import { EuiDataGridColumn } from '@elastic/eui';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import * as i18n from '../../translations';
 
 const remove = ({ columns, index }: { columns: EuiDataGridColumn[]; index: number }) => {
   return [...columns.slice(0, index), ...columns.slice(index + 1)];
@@ -47,7 +48,7 @@ const formatSystemColumn = (column: EuiDataGridColumn): EuiDataGridColumn => {
    * we check if the displayAsText is set.
    */
   if (column.id === ALERT_CASE_IDS && !column.displayAsText) {
-    newColumn.displayAsText = 'Cases';
+    newColumn.displayAsText = i18n.CASES;
   }
 
   return newColumn;
