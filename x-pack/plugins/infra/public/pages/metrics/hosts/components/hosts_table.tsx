@@ -22,7 +22,7 @@ const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
   { type: 'rx' },
   { type: 'tx' },
   { type: 'memory' },
-  { type: 'cpuCores' },
+  { type: 'cpu' },
   { type: 'diskLatency' },
   { type: 'memoryTotal' },
 ];
