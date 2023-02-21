@@ -41,14 +41,14 @@ describe('<FindingsTable />', () => {
   it('opens/closes the flyout when clicked on expand/close buttons ', () => {
     renderWrapper({ items: [getFindingsFixture()] });
 
-    expect(screen.queryByTestId('findings_flyout')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('findings_table_expand_column')).toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJECTS.FINDINGS_FLYOUT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJECTS.FINDINGS_TABLE_EXPAND_COLUMN)).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('findings_table_expand_column'));
-    expect(screen.getByTestId('findings_flyout')).toBeInTheDocument();
+    userEvent.click(screen.getByTestId(TEST_SUBJECTS.FINDINGS_TABLE_EXPAND_COLUMN));
+    expect(screen.getByTestId(TEST_SUBJECTS.FINDINGS_FLYOUT)).toBeInTheDocument();
 
     userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
-    expect(screen.queryByTestId('findings_flyout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJECTS.FINDINGS_FLYOUT)).not.toBeInTheDocument();
   });
 
   it('renders the zero state when status success and data has a length of zero ', async () => {
