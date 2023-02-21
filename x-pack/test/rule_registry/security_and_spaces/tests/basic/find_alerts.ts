@@ -274,7 +274,7 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(superUser.username, superUser.password)
         .set('kbn-xsrf', 'true')
         .send({
-          featureIds: ['siem'],
+          feature_ids: ['siem'],
         });
 
       expect(found.body.hits.hits.every((hit: any) => hit[ALERT_RULE_CONSUMER] === 'siem')).equal(
@@ -288,7 +288,7 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(superUser.username, superUser.password)
         .set('kbn-xsrf', 'true')
         .send({
-          featureIds: ['apm'],
+          feature_ids: ['apm'],
         });
 
       expect(found.body.hits.hits.every((hit: any) => hit[ALERT_RULE_CONSUMER] === 'apm')).equal(
