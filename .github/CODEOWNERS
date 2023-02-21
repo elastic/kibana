@@ -462,7 +462,7 @@ src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
 x-pack/plugins/notifications @elastic/appex-sharedux
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
-x-pack/plugins/observability @elastic/observability-ui
+x-pack/plugins/observability @elastic/actionable-observability
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/infra-monitoring-ui
 packages/kbn-optimizer @elastic/kibana-operations
@@ -760,20 +760,11 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 # /x-pack/test/observability_functional @elastic/unified-observability
 
 # Home/Overview/Landing Pages
-/x-pack/plugins/observability/public/pages/home @elastic/observability-design
-/x-pack/plugins/observability/public/pages/landing @elastic/observability-design
-/x-pack/plugins/observability/public/pages/overview @elastic/observability-design @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/home @elastic/observability-design @elastic/observability-ui
+/x-pack/plugins/observability/public/pages/landing @elastic/observability-design @elastic/observability-ui
+/x-pack/plugins/observability/public/pages/overview @elastic/observability-design @elastic/observability-ui
 
 # Actionable Observability
-/x-pack/plugins/observability/common/rules @elastic/actionable-observability
-/x-pack/plugins/observability/public/rules @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/alerts @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/cases  @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/rules  @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/rule_details  @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/slos  @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/slo_edit  @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/slo_details  @elastic/actionable-observability
 /x-pack/test/observability_functional @elastic/actionable-observability
 
 # Infra Monitoring

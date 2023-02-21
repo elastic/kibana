@@ -13779,7 +13779,7 @@ export const EcsFlat = {
     type: 'keyword',
   },
   'threat.enrichments.indicator.marking.tlp_version': {
-    dashed_name: 'threat-enrichments-indicator-marking-tlp_version',
+    dashed_name: 'threat-enrichments-indicator-marking-tlp-version',
     description: 'Traffic Light Protocol version.',
     example: 2,
     flat_name: 'threat.enrichments.indicator.marking.tlp_version',
@@ -16215,6 +16215,18 @@ export const EcsFlat = {
     short: 'Indicator TLP marking',
     type: 'keyword',
   },
+  'threat.indicator.marking.tlp_version': {
+    dashed_name: 'threat-indicator-marking-tlp-version',
+    description: 'Traffic Light Protocol version.',
+    example: 2,
+    flat_name: 'threat.indicator.marking.tlp_version',
+    ignore_above: 1024,
+    level: 'extended',
+    name: 'indicator.marking.tlp_version',
+    normalize: [],
+    short: 'Indicator TLP version',
+    type: 'keyword',
+  },
   'threat.indicator.modified_at': {
     dashed_name: 'threat-indicator-modified-at',
     description:
@@ -17140,18 +17152,6 @@ export const EcsFlat = {
     name: 'technique.subtechnique.reference',
     normalize: ['array'],
     short: 'Threat subtechnique URL reference.',
-    type: 'keyword',
-  },
-  'threat.threat.indicator.marking.tlp.version': {
-    dashed_name: 'threat-threat-indicator-marking-tlp-version',
-    description: 'Traffic Light Protocol version.',
-    example: 2,
-    flat_name: 'threat.threat.indicator.marking.tlp.version',
-    ignore_above: 1024,
-    level: 'extended',
-    name: 'threat.indicator.marking.tlp.version',
-    normalize: [],
-    short: 'Indicator TLP version',
     type: 'keyword',
   },
   'tls.cipher': {
