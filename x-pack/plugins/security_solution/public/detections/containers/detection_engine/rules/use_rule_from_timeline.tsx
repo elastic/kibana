@@ -103,40 +103,46 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const handleSetRuleFromTimeline = useCallback(() => {
     if (selectedTimeline == null || selectedDataViewBrowserFields == null) return;
 
-    const isEql = timelineIdFromUrlEql != null;
-    const newQuery = isEql
-      ? {
-          query: selectedTimeline.eqlOptions.query ?? '',
-          language: 'eql',
-        }
-      : {
+    try {
+      const queryRuleFromTimeline = () => ({
+        dataProviders:
+          selectedTimeline.dataProviders != null && selectedTimeline.dataProviders.length > 0
+            ? convertKueryToElasticSearchQuery(
+                buildGlobalQuery(selectedTimeline.dataProviders, selectedDataViewBrowserFields),
+                { fields: [], title: selectedPatterns.join(',') }
+              )
+            : '',
+        query: {
           query: selectedTimeline.kqlQuery.filterQuery?.kuery?.expression ?? '',
           language: selectedTimeline.kqlQuery.filterQuery?.kuery?.kind ?? 'kuery',
-        };
-    const newFilters = isEql ? [] : selectedTimeline.filters ?? [];
-    try {
-      const dataProvidersDsl =
-        !isEql &&
-        selectedTimeline.dataProviders != null &&
-        selectedTimeline.dataProviders.length > 0
-          ? convertKueryToElasticSearchQuery(
-              buildGlobalQuery(selectedTimeline.dataProviders, selectedDataViewBrowserFields),
-              { fields: [], title: selectedPatterns.join(',') }
-            )
-          : '';
+        },
+        filters: selectedTimeline.filters ?? [],
+        eqlOptions: {},
+      });
+      const eqlRuleFromTimeline = () => ({
+        dataProviders: '',
+        query: {
+          query: selectedTimeline.eqlOptions.query ?? '',
+          language: 'eql',
+        },
+        filters: [],
+        eqlOptions: selectedTimeline.eqlOptions,
+      });
+
+      const data = timelineIdFromUrlEql != null ? eqlRuleFromTimeline() : queryRuleFromTimeline();
 
       setLoading(false);
       setRuleQuery({
         index: selectedPatterns,
         queryBar: {
           filters:
-            dataProvidersDsl !== ''
-              ? [...newFilters, getDataProviderFilter(dataProvidersDsl)]
-              : newFilters,
-          query: newQuery,
+            data.dataProviders !== ''
+              ? [...data.filters, getDataProviderFilter(data.dataProviders)]
+              : data.filters,
+          query: data.query,
           saved_id: null,
         },
-        ...(isEql ? { eqlOptions: selectedTimeline.eqlOptions } : {}),
+        ...data.eqlOptions,
       });
     } catch (error) {
       setLoading(false);
@@ -207,12 +213,12 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);
 
   useEffect(() => {
-    const id =
-      timelineIdFromUrl != null
-        ? timelineIdFromUrl
-        : timelineIdFromUrlEql != null
-        ? timelineIdFromUrlEql
-        : null;
+    let id: string | null = null;
+    if (timelineIdFromUrl != null) {
+      id = timelineIdFromUrl;
+    } else if (timelineIdFromUrlEql != null) {
+      id = timelineIdFromUrlEql;
+    }
 
     if (id != null && !urlStateInitialized) {
       setUrlStateInitialized(true);
