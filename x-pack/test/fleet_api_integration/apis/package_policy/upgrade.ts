@@ -1299,7 +1299,7 @@ export default function (providerContext: FtrProviderContext) {
                 },
               },
             });
-          if (!packagePolicyResponse.item.id) {
+          if (!packagePolicyResponse.item || !packagePolicyResponse.item.id) {
             throw new Error(
               'Package policy id is missing, response: ' +
                 JSON.stringify(packagePolicyResponse, null, 2)
