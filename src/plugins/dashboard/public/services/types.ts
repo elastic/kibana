@@ -9,6 +9,7 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { KibanaPluginServiceParams } from '@kbn/presentation-util-plugin/public';
 
+import { DashboardSavedObjectsManagementService } from './saved_objects_management/types';
 import { DashboardStartDependencies } from '../plugin';
 import { DashboardAnalyticsService } from './analytics/types';
 import { DashboardApplicationService } from './application/types';
@@ -66,4 +67,5 @@ export interface DashboardServices {
   usageCollection: DashboardUsageCollectionService; // TODO: make this optional in follow up
   visualizations: DashboardVisualizationsService;
   customBranding: DashboardCustomBrandingService;
+  savedObjectsManagement: DashboardSavedObjectsManagementService;
 }

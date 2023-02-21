@@ -8,7 +8,12 @@
 
 import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
 import React from 'react';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { HttpStart } from '@kbn/core-http-browser';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectFinderProps } from './saved_object_finder';
+import SavedObjectFinderUi from './saved_object_finder';
 
 const LazySavedObjectFinder = React.lazy(() => import('./saved_object_finder'));
 const SavedObjectFinder = (props: SavedObjectFinderProps) => (
@@ -22,6 +27,20 @@ const SavedObjectFinder = (props: SavedObjectFinderProps) => (
     <LazySavedObjectFinder {...props} />
   </React.Suspense>
 );
+
+export const getSavedObjectFinder = (
+  uiSettings: IUiSettingsClient,
+  http: HttpStart,
+  savedObjectsManagement?: SavedObjectsManagementPluginStart,
+  savedObjectsTagging?: SavedObjectsTaggingApi
+) => {
+  return (props: SavedObjectFinderProps) => (
+    <SavedObjectFinderUi
+      {...props}
+      services={{ uiSettings, http, savedObjectsManagement, savedObjectsTagging }}
+    />
+  );
+};
 
 export type { SavedObjectMetaData, SavedObjectFinderProps } from './saved_object_finder';
 export { SavedObjectFinder };

@@ -64,7 +64,7 @@ interface SavedObjectFinderServices {
   http: HttpStart;
   uiSettings: IUiSettingsClient;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
-  savedObjectsTagging: SavedObjectsTaggingApi | undefined;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
 interface BaseSavedObjectFinder {
@@ -109,16 +109,7 @@ export class SavedObjectFinderUi extends React.Component<
 
   private debouncedFetch = debounce(async (query: Query) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
-    const { queryText, visibleTypes, selectedTags } =
-      this.props.services.savedObjectsManagement.parseQuery(
-        query,
-        Object.values(metaDataMap).map((metadata) => ({
-          name: metadata.type,
-          namespaceType: 'single',
-          hidden: false,
-          displayName: metadata.name,
-        }))
-      );
+    const { savedObjectsManagement, uiSettings } = this.props.services;
 
     const fields = Object.values(metaDataMap)
       .map((metaData) => metaData.includeFields || [])
@@ -131,21 +122,33 @@ export class SavedObjectFinderUi extends React.Component<
       return col;
     }, []);
 
-    const perPage = this.props.services.uiSettings.get(LISTING_LIMIT_SETTING);
-    const hasReference = this.props.services.savedObjectsManagement.getTagFindReferences({
-      selectedTags,
-      taggingApi: this.props.services.savedObjectsTagging,
-    });
+    const perPage = uiSettings.get(LISTING_LIMIT_SETTING);
     const params: FindQueryHTTP = {
-      type: visibleTypes ?? Object.keys(metaDataMap),
+      type: Object.keys(metaDataMap),
       fields: [...new Set(fields)],
-      search: queryText ? `${queryText}*` : undefined,
       page: 1,
       perPage,
       searchFields: ['title^3', 'description', ...additionalSearchFields],
       defaultSearchOperator: 'AND',
-      hasReference: hasReference ? JSON.stringify(hasReference) : undefined,
     };
+
+    const { queryText, visibleTypes, selectedTags } = savedObjectsManagement.parseQuery(
+      query,
+      Object.values(metaDataMap).map((metadata) => ({
+        name: metadata.type,
+        namespaceType: 'single',
+        hidden: false,
+        displayName: metadata.name,
+      }))
+    );
+    const hasReference = savedObjectsManagement.getTagFindReferences({
+      selectedTags,
+      taggingApi: this.props.services.savedObjectsTagging,
+    });
+    params.type = visibleTypes ?? Object.keys(metaDataMap);
+    params.search = queryText ? `${queryText}*` : undefined;
+    params.hasReference = hasReference ? JSON.stringify(hasReference) : undefined;
+
     const response = (await this.props.services.http.get('/internal/saved-objects-finder/find', {
       query: params as Record<string, any>,
     })) as FindResponseHTTP<FinderAttributes>;
@@ -169,9 +172,8 @@ export class SavedObjectFinderUi extends React.Component<
         const metaData = metaDataMap[savedObject.type];
         if (metaData.showSavedObject) {
           return metaData.showSavedObject(savedObject.simple);
-        } else {
-          return true;
         }
+        return true;
       });
 
     if (!this.isComponentMounted) {
@@ -289,7 +291,7 @@ export class SavedObjectFinderUi extends React.Component<
         name: i18n.translate('savedObjectsFinder.titleName', {
           defaultMessage: 'Title',
         }),
-        width: '55%',
+        width: tagColumn ? '55%' : '100%',
         description: i18n.translate('savedObjectsFinder.titleDescription', {
           defaultMessage: 'Title of the saved object',
         }),

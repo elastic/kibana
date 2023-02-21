@@ -8,7 +8,7 @@
 
 import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { getSavedObjectFinder } from '@kbn/saved-objects-plugin/public';
+import { getSavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 
 import { ExportCSVAction } from './export_csv_action';
 import { ClonePanelAction } from './clone_panel_action';
