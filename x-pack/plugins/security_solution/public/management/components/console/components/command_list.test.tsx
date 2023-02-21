@@ -11,17 +11,21 @@ import {
   getConsoleTestSetup,
   getHelpSidePanelSelectorsAndActionsMock,
 } from '../mocks';
+import React from 'react';
+import { waitFor } from '@testing-library/react';
 
-describe('When rendering the command list', () => {
+describe('When rendering the command list (help output)', () => {
   let render: ConsoleTestSetup['renderConsole'];
   let renderResult: ReturnType<typeof render>;
   let consoleSelectors: ConsoleTestSetup['selectors'];
+  let enterCommand: ConsoleTestSetup['enterCommand'];
 
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
 
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
     consoleSelectors = testSetup.selectors;
+    enterCommand = testSetup.enterCommand;
   });
 
   describe('and its displayed on the side panel', () => {
@@ -120,6 +124,32 @@ describe('When rendering the command list', () => {
       renderAndOpenHelpPanel();
       renderResult.getByTestId('test-commandList-group1-cmd6-addToInput').click();
       expect(consoleSelectors.getInputText()).toEqual('cmd6 --foo ');
+    });
+
+    it('should display custom help output when Command service has `getHelp()` defined', async () => {
+      const HelpComponent: React.FunctionComponent = () => {
+        return <div data-test-subj="custom-help">{'help output'}</div>;
+      };
+      render({ HelpComponent });
+      enterCommand('help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('custom-help')).toBeTruthy();
+      });
+    });
+  });
+
+  describe('And displayed when `help` command is entered', () => {
+    it('should display custom help output when Command service has `getHelp()` defined', async () => {
+      const HelpComponent: React.FunctionComponent = () => {
+        return <div data-test-subj="custom-help">{'help output'}</div>;
+      };
+      render({ HelpComponent });
+      enterCommand('help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('custom-help')).toBeTruthy();
+      });
     });
   });
 });
