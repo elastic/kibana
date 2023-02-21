@@ -181,7 +181,7 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"threshold.us": 500000
+			"threshold": 500000
 		}
 	},
 	"timeWindow": {
@@ -216,7 +216,7 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"threshold.us": 500000
+			"threshold": 500000
 		}
 	},
 	"timeWindow": {
@@ -253,7 +253,7 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"threshold.us": 500000
+			"threshold": 500000
 		}
 	},
 	"timeWindow": {

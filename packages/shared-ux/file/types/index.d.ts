@@ -23,6 +23,19 @@ export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'UPLOAD_ERR
  */
 export type FileCompression = 'br' | 'gzip' | 'deflate' | 'none';
 
+/** Definition for an endpoint that the File's service will generate */
+interface HttpEndpointDefinition {
+  /**
+   * Specify the tags for this endpoint.
+   *
+   * @example
+   * // This will enable access control to this endpoint for users that can access "myApp" only.
+   * { tags: ['access:myApp'] }
+   *
+   */
+  tags: string[];
+}
+
 /**
  * File metadata fields are defined per the ECS specification:
  *
