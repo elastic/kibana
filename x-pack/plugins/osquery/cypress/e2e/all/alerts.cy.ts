@@ -228,7 +228,7 @@ describe('Alert Event Details', () => {
     });
     cy.contains('Save changes').click();
     cy.contains(`${RULE_NAME} was saved`).should('exist');
-    cy.getBySel('toastCloseButton').click();
+    cy.getBySel('toastCloseButton').click({ multiple: true });
   });
 
   it('should be able to run live query and add to timeline (-depending on the previous test)', () => {
