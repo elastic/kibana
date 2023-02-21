@@ -18,16 +18,23 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { CSPM_POLICY_TEMPLATE } from '../../../common/constants';
 import { PosturePolicyTemplate } from '../../../common/types';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
 
 interface AWSSetupInfoContentProps {
-  policyTemplate: PosturePolicyTemplate;
+  policyTemplate: PosturePolicyTemplate | undefined;
 }
 
 const AWSSetupInfoContent = ({ policyTemplate }: AWSSetupInfoContentProps) => {
+  const { cspm, kspm } = cspIntegrationDocsNavigation;
+  const integrationLink =
+    !policyTemplate || policyTemplate === CSPM_POLICY_TEMPLATE
+      ? cspm.getStartedPath
+      : kspm.getStartedPath;
+
   return (
     <>
       <EuiSpacer size="l" />
@@ -46,10 +53,7 @@ const AWSSetupInfoContent = ({ policyTemplate }: AWSSetupInfoContentProps) => {
           defaultMessage="The integration will require certain read-only AWS permissions to detect security misconfigurations. Select your preferred method of providing the AWS credentials this integration will use. You can follow these {stepByStepInstructionsLink} to generate the necessary credentials."
           values={{
             stepByStepInstructionsLink: (
-              <EuiLink
-                href={cspIntegrationDocsNavigation[policyTemplate]?.getStartedPath}
-                target="_blank"
-              >
+              <EuiLink href={integrationLink} target="_blank">
                 <FormattedMessage
                   id="xpack.csp.awsIntegration.setupInfoContentLink"
                   defaultMessage="step-by-step instructions"

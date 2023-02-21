@@ -123,14 +123,12 @@ export const SummarySection = ({
     ]
   );
 
-  const chartTitle =
-    dashboardType === KSPM_POLICY_TEMPLATE
-      ? i18n.translate('xpack.csp.dashboard.summarySection.kubernetesPostureScorePanelTitle', {
-          defaultMessage: 'Overall Kubernetes Posture Score',
-        })
-      : i18n.translate('xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle', {
-          defaultMessage: 'Overall Cloud Posture Score',
-        });
+  const chartTitle = i18n.translate('xpack.csp.dashboard.summarySection.postureScorePanelTitle', {
+    defaultMessage: 'Overall {type} Posture Score',
+    values: {
+      type: dashboardType === KSPM_POLICY_TEMPLATE ? 'Kubernetes' : 'Cloud',
+    },
+  });
 
   return (
     <EuiFlexGroup gutterSize="l">
