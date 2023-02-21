@@ -32,6 +32,24 @@ import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
 import { RedirectTo } from '../redirect_to';
 import { FlameGraphNormalizationOptions, NormalizationMenu } from './normalization_menu';
 
+export function FlameGraphInformationWindowSwitch({
+  showInformationWindow,
+  onChange,
+}: {
+  showInformationWindow: boolean;
+  onChange: () => void;
+}) {
+  return (
+    <EuiSwitch
+      checked={showInformationWindow}
+      onChange={onChange}
+      label={i18n.translate('xpack.profiling.flameGraph.showInformationWindow', {
+        defaultMessage: 'Show information window',
+      })}
+    />
+  );
+}
+
 export function FlameGraphsView({ children }: { children: React.ReactElement }) {
   const {
     path,
@@ -132,6 +150,10 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   if (routePath === '/flamegraphs') {
     return <RedirectTo pathname="/flamegraphs/flamegraph" />;
   }
+
+  const onInformationWindowChange = () => {
+    setShowInformationWindow((prev) => !prev);
+  };
 
   return (
     <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={true}>
@@ -249,14 +271,9 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
                   </EuiFlexItem>
                 ) : undefined}
                 <EuiFlexItem grow style={{ alignItems: 'flex-end' }}>
-                  <EuiSwitch
-                    checked={showInformationWindow}
-                    onChange={() => {
-                      setShowInformationWindow((prev) => !prev);
-                    }}
-                    label={i18n.translate('xpack.profiling.flameGraph.showInformationWindow', {
-                      defaultMessage: 'Show information window',
-                    })}
+                  <FlameGraphInformationWindowSwitch
+                    showInformationWindow={showInformationWindow}
+                    onChange={onInformationWindowChange}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -269,14 +286,9 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
               <EuiHorizontalRule />
               <EuiFlexGroup direction="row">
                 <EuiFlexItem grow style={{ alignItems: 'flex-end' }}>
-                  <EuiSwitch
-                    checked={showInformationWindow}
-                    onChange={() => {
-                      setShowInformationWindow((prev) => !prev);
-                    }}
-                    label={i18n.translate('xpack.profiling.flameGraph.showInformationWindow', {
-                      defaultMessage: 'Show information window',
-                    })}
+                  <FlameGraphInformationWindowSwitch
+                    showInformationWindow={showInformationWindow}
+                    onChange={onInformationWindowChange}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
