@@ -276,7 +276,7 @@ export default function ({ getService }: FtrProviderContext) {
         for (const trustedAppApiCall of [...trustedAppApiCalls, ...needsWritePrivilege]) {
           it(`should error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.t2_analyst, 'changeme')
+              .auth(ROLE.artifact_read_role, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody())
               .expect(403, {
@@ -289,7 +289,7 @@ export default function ({ getService }: FtrProviderContext) {
         for (const trustedAppApiCall of needsReadPrivilege) {
           it(`should not error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.t2_analyst, 'changeme')
+              .auth(ROLE.artifact_read_role, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody())
               .expect(200);
