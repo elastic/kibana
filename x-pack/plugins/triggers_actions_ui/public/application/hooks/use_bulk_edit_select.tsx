@@ -6,7 +6,6 @@
  */
 import { useReducer, useMemo, useCallback } from 'react';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
-import { cloneDeep } from 'lodash';
 import { mapFiltersToKueryNode } from '../lib/rule_api/map_filters_to_kuery_node';
 import { RuleTableItem, RuleStatus } from '../../types';
 
@@ -97,7 +96,7 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
     searchText,
   } = props;
 
-  const [state, dispatch] = useReducer(reducer, cloneDeep(initialState));
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const itemIds = useMemo(() => {
     return items.map((item) => item.id);

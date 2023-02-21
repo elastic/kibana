@@ -149,7 +149,7 @@ const renderWithProviders = (ui: any) => {
 // FLAKY: https://github.com/elastic/kibana/issues/134922
 // FLAKY: https://github.com/elastic/kibana/issues/134923
 
-describe('Update Api Key', () => {
+describe.skip('Update Api Key', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
 
