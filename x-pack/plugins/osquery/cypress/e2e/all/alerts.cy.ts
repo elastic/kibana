@@ -168,6 +168,12 @@ describe('Alert Event Details', () => {
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('testpack');
       cy.getBySel('comboBoxInput').type('Example{downArrow}{enter}');
+      checkActionItemsInResults({
+        cases: true,
+        lens: true,
+        discover: false,
+        timeline: false,
+      });
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
@@ -327,5 +333,20 @@ describe('Alert Event Details', () => {
     });
     addToCase();
     viewRecentCaseAndCheckResults();
+  });
+  it('sees osquery results from last action and add to a case', () => {
+    toggleRuleOffAndOn(RULE_NAME);
+    cy.wait(2000);
+    cy.visit('/app/security/alerts');
+    cy.getBySel('header-page-title').contains('Alerts').should('exist');
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.contains('Osquery Results').click();
+    cy.getBySel('osquery-results').should('exist');
+    checkActionItemsInResults({
+      lens: true,
+      discover: true,
+      cases: true,
+      timeline: true,
+    });
   });
 });
