@@ -18,7 +18,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const esSupertest = getService('esSupertest');
   const es = getService('es');
   const security = getService('security');
   const config = getService('config');
@@ -157,14 +156,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       // The oldest session should be displaced.
       const basicSessionCookieThree = await loginWithBasic(testUser);
-      await setTimeoutAsync(1000);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
       await checkSessionCookieInvalid(basicSessionCookieOne);
       await checkSessionCookie(basicSessionCookieTwo, testUser.username, basicProvider);
       await checkSessionCookie(basicSessionCookieThree, testUser.username, basicProvider);
 
       // The next oldest session should be displaced as well.
       const basicSessionCookieFour = await loginWithBasic(testUser);
-      await setTimeoutAsync(1000);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
       await checkSessionCookieInvalid(basicSessionCookieTwo);
       await checkSessionCookie(basicSessionCookieThree, testUser.username, basicProvider);
       await checkSessionCookie(basicSessionCookieFour, testUser.username, basicProvider);
@@ -184,7 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // The oldest session of the admin user should be displaced.
       const basicSessionCookieFive = await loginWithBasic(adminTestUser);
-      await setTimeoutAsync(1000);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
       await checkSessionCookie(basicSessionCookieOne, testUser.username, basicProvider);
       await checkSessionCookie(basicSessionCookieTwo, testUser.username, basicProvider);
       await checkSessionCookieInvalid(basicSessionCookieThree);
@@ -193,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // The next oldest session of the admin user should be displaced as well.
       const basicSessionCookieSix = await loginWithBasic(adminTestUser);
-      await setTimeoutAsync(1000);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
       await checkSessionCookie(basicSessionCookieOne, testUser.username, basicProvider);
       await checkSessionCookie(basicSessionCookieTwo, testUser.username, basicProvider);
       await checkSessionCookieInvalid(basicSessionCookieFour);
@@ -202,7 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Only the oldest session of the ordinary user should be displaced.
       const basicSessionCookieSeven = await loginWithBasic(testUser);
-      await setTimeoutAsync(1000);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
       await checkSessionCookieInvalid(basicSessionCookieOne);
       await checkSessionCookie(basicSessionCookieTwo, testUser.username, basicProvider);
       await checkSessionCookie(basicSessionCookieFive, adminTestUser.username, basicProvider);
@@ -225,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', basicSessionCookie.cookieString());
         statusCodes.push(statusCode);
         await setTimeoutAsync(1000);
-        await esSupertest.post('/_refresh');
+        await es.indices.refresh({ index: '.kibana_security_session*' });
         await setTimeoutAsync(2000);
       }
 
@@ -250,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Exceed limit with SAML credentials, other sessions shouldn't be affected.
       const samlSessionCookieThree = await loginWithSAML();
-      await setTimeoutAsync(1000);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
       await checkSessionCookie(basicSessionCookieOne, testUser.username, basicProvider);
       await checkSessionCookie(basicSessionCookieTwo, testUser.username, basicProvider);
       await checkSessionCookieInvalid(samlSessionCookieOne);
@@ -259,7 +258,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Exceed limit with Basic credentials, other sessions shouldn't be affected.
       const basicSessionCookieThree = await loginWithBasic(testUser);
-      await setTimeoutAsync(1000);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
       await checkSessionCookieInvalid(basicSessionCookieOne);
       await checkSessionCookie(basicSessionCookieTwo, testUser.username, basicProvider);
       await checkSessionCookie(basicSessionCookieThree, testUser.username, basicProvider);
