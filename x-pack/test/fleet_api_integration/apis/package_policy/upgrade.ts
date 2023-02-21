@@ -1299,7 +1299,12 @@ export default function (providerContext: FtrProviderContext) {
                 },
               },
             });
-
+          if (!packagePolicyResponse.item.id) {
+            throw new Error(
+              'Package policy id is missing, response: ' +
+                JSON.stringify(packagePolicyResponse, null, 2)
+            );
+          }
           packagePolicyIds.push(packagePolicyResponse.item.id);
           expectedAssets.push(
             { id: `logs-somedataset${id}-3.0.0`, type: 'ingest_pipeline' },
