@@ -37,6 +37,7 @@ export const configSchema = schema.object({
     defaultValue: 'http://localhost:9200',
   }),
   maxSockets: schema.number({ defaultValue: Infinity, min: 1 }),
+  internalClientMaxSockets: schema.number({ defaultValue: 500, min: 1 }),
   maxIdleSockets: schema.number({ defaultValue: 256, min: 1 }),
   idleSocketTimeout: schema.duration({ defaultValue: '60s' }),
   compression: schema.boolean({ defaultValue: false }),

@@ -89,10 +89,19 @@ export class ElasticsearchService
     this.log.debug('Setting up elasticsearch service');
 
     const config = await firstValueFrom(this.config$);
+    const internalClientMaxSockets = await firstValueFrom(
+      this.coreContext.configService
+        .atPath<ElasticsearchConfigType>('elasticsearch')
+        .pipe(map((rawConfig) => rawConfig.internalClientMaxSockets))
+    );
 
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
-    this.client = this.createClusterClient('data', config);
+    this.client = this.createClusterClient('data', {
+      ...config,
+      maxSockets:
+        config.maxSockets > internalClientMaxSockets ? internalClientMaxSockets : config.maxSockets,
+    });
 
     const esNodesCompatibility$ = pollEsNodesVersion({
       internalClient: this.client.asInternalUser,

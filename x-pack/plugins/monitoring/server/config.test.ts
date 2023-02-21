@@ -62,6 +62,7 @@ describe('config schema', () => {
             },
             "idleSocketTimeout": "PT1M",
             "ignoreVersionMismatch": false,
+            "internalClientMaxSockets": 500,
             "logFetchCount": 10,
             "logQueries": false,
             "maxIdleSockets": 256,
