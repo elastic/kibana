@@ -79,7 +79,7 @@ journey('AddPrivateLocationMonitor', async ({ page, params }) => {
     await page.waitForSelector('h1:has-text("Edit Elastic Synthetics integration")');
     await page.waitForSelector('text="This package policy is managed by the Synthetics app."');
   });
-  
+
   step('Integration edit button leads to correct Synthetics edit page', async () => {
     await page.click('text="Edit in Synthetics"');
 
