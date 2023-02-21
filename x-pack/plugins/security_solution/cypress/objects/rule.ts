@@ -582,3 +582,15 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
 
   return `${JSON.stringify(rule)}\n${JSON.stringify(details)}\n`;
 };
+export const getEndpointRule = (): CustomRule => ({
+  customQuery: 'event.kind:alert and event.module:(endpoint and not endgame)',
+  dataSource: { index: ['endpoint.alerts-*'], type: 'indexPatterns' },
+  name: 'Endpoint Rule',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+});
