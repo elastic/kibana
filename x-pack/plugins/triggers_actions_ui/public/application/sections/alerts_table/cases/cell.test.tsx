@@ -83,12 +83,28 @@ describe('CasesCell', () => {
     expect(screen.queryByText('Test case 2')).not.toBeInTheDocument();
   });
 
+  it('does show the default value when the alert does not have any case ids', async () => {
+    appMockRender.render(
+      <CasesCell {...props} alert={{ ...alert, 'kibana.alert.case_ids': [] } as unknown as Alert} />
+    );
+
+    expect(screen.getByText('--')).toBeInTheDocument();
+  });
+
   it('does not show any cases when the alert has invalid case ids', async () => {
     appMockRender.render(
       <CasesCell {...props} alert={{ ...alert, 'kibana.alert.case_ids': ['not-exist'] } as Alert} />
     );
 
     expect(screen.queryByTestId('cases-cell-link')).not.toBeInTheDocument();
+  });
+
+  it('does show the default value when the alert has invalid case ids', async () => {
+    appMockRender.render(
+      <CasesCell {...props} alert={{ ...alert, 'kibana.alert.case_ids': ['not-exist'] } as Alert} />
+    );
+
+    expect(screen.getByText('--')).toBeInTheDocument();
   });
 
   it('shows the cases tooltip', async () => {

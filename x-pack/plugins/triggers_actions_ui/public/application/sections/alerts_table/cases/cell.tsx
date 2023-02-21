@@ -26,7 +26,8 @@ const formatCase = (theCase: Case): CaseTooltipContentProps => ({
   totalComments: theCase.totalComment,
 });
 
-const CasesCellComponent: React.FC<CellComponentProps> = ({ isLoading, alert, cases }) => {
+const CasesCellComponent: React.FC<CellComponentProps> = (props) => {
+  const { isLoading, alert, cases } = props;
   const { navigateToCaseView } = useCaseViewNavigation();
 
   const caseIds = alert[ALERT_CASE_IDS] ?? [];
@@ -36,7 +37,7 @@ const CasesCellComponent: React.FC<CellComponentProps> = ({ isLoading, alert, ca
     .filter((theCase): theCase is Case => theCase != null);
 
   if (validCases.length === 0) {
-    return null;
+    return <>{'--'}</>;
   }
 
   return (
