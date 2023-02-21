@@ -13,9 +13,9 @@ export type IndexStatus =
   | 'unprivileged'; // User doesn't have access to query the index
 
 export type CloudDefendStatusCode =
-  | 'indexed' // latest findings index exists and has results
+  | 'indexed' // alerts index exists and has results
   | 'indexing' // index timeout was not surpassed since installation, assumes data is being indexed
-  | 'unprivileged' // user lacks privileges for the latest findings index
+  | 'unprivileged' // user lacks privileges for the alerts index
   | 'index-timeout' // index timeout was surpassed since installation
   | 'not-deployed' // no healthy agents were deployed
   | 'not-installed'; // number of installed integrations is 0;
@@ -38,7 +38,6 @@ interface CloudDefendSetupNotInstalledStatus extends BaseCloudDefendSetupStatus 
 
 interface CloudDefendSetupInstalledStatus extends BaseCloudDefendSetupStatus {
   status: Exclude<CloudDefendStatusCode, 'not-installed'>;
-  // if installedPackageVersion == undefined but status != 'not-installed' it means the integration was installed in the past and findings were found
   // status can be `indexed` but return with undefined package information in this case
   installedPackageVersion: string | undefined;
 }

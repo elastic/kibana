@@ -29,8 +29,8 @@ export const createCloudDefendIntegrationFixture = ({
     created_by: chance.word(),
     inputs: [
       {
-        type: 'cloudbeat/cis_k8s',
-        policy_template: 'kspm',
+        type: 'cloud_defend/control',
+        policy_template: 'cloud_defend',
         enabled: true,
         streams: [
           {
@@ -38,7 +38,7 @@ export const createCloudDefendIntegrationFixture = ({
             enabled: true,
             data_stream: {
               type: 'logs',
-              dataset: 'cloud_security_posture.findings',
+              dataset: 'cloud_defend.alerts',
             },
           },
         ],

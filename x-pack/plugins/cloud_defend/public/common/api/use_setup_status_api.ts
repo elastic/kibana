@@ -12,13 +12,10 @@ import { STATUS_ROUTE_PATH } from '../../../common/constants';
 
 const getCloudDefendSetupStatusQueryKey = 'cloud_defend_status_key';
 
-export const useCloudDefendSetupStatusApi = ({
-  options,
-}: { options?: UseQueryOptions<CloudDefendSetupStatus, unknown, CloudDefendSetupStatus> } = {}) => {
+export const useCloudDefendSetupStatusApi = () => {
   const { http } = useKibana().services;
   return useQuery<CloudDefendSetupStatus, unknown, CloudDefendSetupStatus>(
     [getCloudDefendSetupStatusQueryKey],
     () => http.get<CloudDefendSetupStatus>(STATUS_ROUTE_PATH),
-    options
   );
 };

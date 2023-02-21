@@ -227,7 +227,7 @@ const subscriptionNotAllowedRenderer = () => (
   </FullSizeCenteredPage>
 );
 
-interface CloudPosturePageProps<TData, TError> {
+interface CloudDefendPageProps<TData, TError> {
   children: React.ReactNode;
   query?: UseQueryResult<TData, TError>;
   loadingRender?: () => React.ReactNode;
@@ -241,7 +241,7 @@ export const CloudDefendPage = <TData, TError>({
   loadingRender = defaultLoadingRenderer,
   errorRender = defaultErrorRenderer,
   noDataRenderer = defaultNoDataRenderer,
-}: CloudPosturePageProps<TData, TError>) => {
+}: CloudDefendPageProps<TData, TError>) => {
   const subscriptionStatus = useSubscriptionStatus();
   const getSetupStatus = useCloudDefendSetupStatusApi();
   const { addIntegrationLink, docsLink } = useCloudDefendIntegrationLinks();

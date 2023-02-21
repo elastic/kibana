@@ -22,8 +22,8 @@ interface CloudDefendNavTab<TId extends string = CloudDefendPageId> {
 }
 
 /**
- * Gets the cloud security posture link properties of a CSP page for navigation in the security solution.
- * @param cloudDefendPage the name of the cloud posture page.
+ * Gets the cloud_defend link properties of a Cloud Defend page for navigation in the security solution.
+ * @param cloudDefendPage the name of the cloud defend page.
  */
 export const getSecuritySolutionLink = <TId extends string = CloudDefendPageId>(
   cloudDefendPage: CloudDefendPage

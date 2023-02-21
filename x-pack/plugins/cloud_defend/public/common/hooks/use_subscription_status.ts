@@ -10,7 +10,7 @@ import { SetupContext } from '../../application/setup_context';
 import { isSubscriptionAllowed } from '../../../common/utils/subscription';
 import { useKibana } from './use_kibana';
 
-const SUBSCRIPTION_QUERY_KEY = 'csp_subscription_query_key';
+const SUBSCRIPTION_QUERY_KEY = 'cloud_defend_subscription_query_key';
 
 export const useSubscriptionStatus = () => {
   const { licensing } = useKibana().services;

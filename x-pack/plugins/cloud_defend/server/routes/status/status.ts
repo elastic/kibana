@@ -78,7 +78,7 @@ const calculateCloudDefendStatusCode = (
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
   if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
 
-  throw new Error('Could not determine csp status');
+  throw new Error('Could not determine cloud defend status');
 };
 
 const assertResponse = (
@@ -169,19 +169,11 @@ const getCloudDefendStatus = async ({
   return response;
 };
 
-export const statusQueryParamsSchema = schema.object({
-  /**
-   * CSP Plugin initialization includes creating indices/transforms/tasks.
-   * Prior to this initialization, the plugin is not ready to index findings.
-   */
-  check: schema.oneOf([schema.literal('all'), schema.literal('init')], { defaultValue: 'all' }),
-});
-
 export const defineGetCloudDefendStatusRoute = (router: CloudDefendRouter): void =>
   router.get(
     {
       path: STATUS_ROUTE_PATH,
-      validate: { query: statusQueryParamsSchema },
+      validate: {},
       options: {
         tags: ['access:cloud-defend-read'],
       },
@@ -189,13 +181,6 @@ export const defineGetCloudDefendStatusRoute = (router: CloudDefendRouter): void
     async (context, request, response) => {
       const cloudDefendContext = await context.cloudDefend;
       try {
-        /* if (request.query.check === 'init') {
-          return response.ok({
-            body: {
-              isPluginInitialized: cloudDefendContext.isPluginInitialized(),
-            },
-          });
-        }*/
         const status = await getCloudDefendStatus(cloudDefendContext);
         return response.ok({
           body: status,

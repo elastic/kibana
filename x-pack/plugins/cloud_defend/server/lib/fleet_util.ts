@@ -104,7 +104,7 @@ export const getInstalledPolicyTemplates = async (
       perPage: 1000,
     });
 
-    // getting installed policy templates by findings enabled inputs
+    // getting installed policy templates
     const enabledPolicyTemplates = queryResult.items
       .map((policy) => {
         return policy.inputs.find((input) => input.enabled)?.policy_template;

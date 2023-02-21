@@ -19,7 +19,7 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false } },
 });
 
-/** Props for the cloud security posture router component */
+/** Props for the cloud_defend router component */
 export interface CloudDefendRouterProps {
   securitySolutionContext?: CloudDefendSecuritySolutionContext;
 }
