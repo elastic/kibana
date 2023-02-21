@@ -174,8 +174,8 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
     sortable: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.findingsByResourceTable.complianceScoreColumnLabel"
-        defaultMessage="Compliance Score"
+        id="xpack.csp.findings.findingsByResourceTable.postureScoreColumnLabel"
+        defaultMessage="Posture Score"
       />
     ),
     render: (complianceScore: FindingsByResourcePage['compliance_score'], data) => (
