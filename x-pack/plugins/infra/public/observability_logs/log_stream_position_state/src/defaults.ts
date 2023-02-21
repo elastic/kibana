@@ -5,15 +5,5 @@
  * 2.0.
  */
 
-import moment from 'moment';
-
-export function dateToString(input?: string): string {
-  if (!input) {
-    return '';
-  }
-  try {
-    return moment(input).toLocaleString();
-  } catch {
-    return '';
-  }
-}
+export const DESIRED_BUFFER_PAGES = 2;
+export const RELATIVE_END_UPDATE_DELAY = 1000;
