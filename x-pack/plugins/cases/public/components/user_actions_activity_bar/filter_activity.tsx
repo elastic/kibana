@@ -39,6 +39,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           hasActiveFilters={type === 'all'}
           numFilters={userActionsStats && userActionsStats.total ? userActionsStats.total - 1 : 0} // subtracting user action of description from total
           isLoading={isLoading}
+          isDisabled={isLoading}
           data-test-subj="user-actions-filter-activity-button-all"
         >
           {i18n.ALL}
@@ -47,8 +48,9 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           withNext
           grow={false}
           hasActiveFilters={type === 'user'}
-          numActiveFilters={userActionsStats?.totalComments ?? 0}
+          numFilters={userActionsStats?.totalComments ?? 0}
           isLoading={isLoading}
+          isDisabled={isLoading}
           onClick={() => handleFilterChange('user')}
           data-test-subj="user-actions-filter-activity-button-comments"
         >
@@ -56,13 +58,14 @@ export const FilterActivity = React.memo<FilterActivityProps>(
         </EuiFilterButton>
         <EuiFilterButton
           hasActiveFilters={type === 'action'} // subtracting user action of description other actions
-          numActiveFilters={
+          numFilters={
             userActionsStats && userActionsStats.totalOtherActions > 0
               ? userActionsStats.totalOtherActions - 1
               : 0
           }
           onClick={() => handleFilterChange('action')}
           isLoading={isLoading}
+          isDisabled={isLoading}
           data-test-subj="user-actions-filter-activity-button-history"
         >
           {i18n.HISTORY}

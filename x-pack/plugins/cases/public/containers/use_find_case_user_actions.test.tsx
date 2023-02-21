@@ -6,14 +6,12 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { UseFindCaseUserActions } from './use_find_case_user_actions';
 import { useFindCaseUserActions } from './use_find_case_user_actions';
 import { basicCase, findCaseUserActionsResponse } from './mock';
-import React from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { testQueryClient } from '../common/mock';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -24,23 +22,21 @@ const initialData = {
   isLoading: true,
 };
 
-const wrapper: React.FC<string> = ({ children }) => (
-  <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
-);
-
 describe('UseFindCaseUserActions', () => {
   const filterActionType = 'all';
   const sortOrder = 'asc';
+  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 
   it('returns proper state on findCaseUserActions', async () => {
-    const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
+    const { result, waitForNextUpdate } = renderHook(
       () => useFindCaseUserActions(basicCase.id, filterActionType, sortOrder),
-      { wrapper }
+      { wrapper: appMockRender.AppWrapper }
     );
 
     await waitForNextUpdate();
@@ -64,9 +60,9 @@ describe('UseFindCaseUserActions', () => {
   it('calls the API with correct parameters', async () => {
     const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
-    const { waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
+    const { waitForNextUpdate } = renderHook(
       () => useFindCaseUserActions(basicCase.id, 'user', 'desc'),
-      { wrapper }
+      { wrapper: appMockRender.AppWrapper }
     );
 
     await waitForNextUpdate();
@@ -80,9 +76,9 @@ describe('UseFindCaseUserActions', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const { waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
+    const { waitForNextUpdate } = renderHook(
       () => useFindCaseUserActions(basicCase.id, filterActionType, sortOrder),
-      { wrapper }
+      { wrapper: appMockRender.AppWrapper }
     );
 
     await waitForNextUpdate();

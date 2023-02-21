@@ -124,7 +124,10 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
 
           <EuiSpacer size="l" />
 
-          <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`}>
+          <EuiFlexGroup
+            data-test-subj={`case-view-tab-content-${activeTabId}`}
+            alignItems="baseline"
+          >
             {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
               <CaseViewActivity
                 ruleDetailsNavigation={ruleDetailsNavigation}

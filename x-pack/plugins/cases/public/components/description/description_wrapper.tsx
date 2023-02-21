@@ -6,6 +6,7 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { EuiCommentList, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import React, { useMemo } from 'react';
@@ -13,47 +14,51 @@ import styled from 'styled-components';
 
 import type { Case } from '../../containers/types';
 import type { OnUpdateFields } from '../case_view/types';
-import { getDescriptionUserAction } from './description';
-import { useUserActionsHandler } from './use_user_actions_handler';
+import { getDescriptionUserAction } from '.';
+import { useUserActionsHandler } from '../user_actions/use_user_actions_handler';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
-interface DescriptionHandler {
+interface DescriptionWrapperProps {
   data: Case;
   isLoadingDescription: boolean;
+  userProfiles: Map<string, UserProfileWithAvatar>;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
 }
 
 const MyEuiCommentList = styled(EuiCommentList)`
-  ${({ theme }) => `
-    & .euiComment > [class*="euiTimelineItemIcon-top"] {
+  & .euiComment > [class*='euiTimelineItemIcon-top'] {
+    display: none;
+  }
+
+  & .draftFooter {
+    & .euiCommentEvent__body {
+      padding: 0;
+    }
+  }
+
+  & .euiComment.isEdit {
+    & .euiCommentEvent {
+      border: none;
+      box-shadow: none;
+    }
+
+    & .euiCommentEvent__body {
+      padding: 0;
+    }
+
+    & .euiCommentEvent__header {
       display: none;
     }
-
-    & .draftFooter {
-      & .euiCommentEvent__body {
-        padding: 0;
-      }
-    }
-
-    & .euiComment.isEdit {
-      & .euiCommentEvent {
-        border: none;
-        box-shadow: none;
-      }
-
-      & .euiCommentEvent__body {
-        padding: 0;
-      }
-
-      & .euiCommentEvent__header {
-        display: none;
-      }
-    }
-  `}
+  }
 `;
 
-export const UseDescriptionHandler = React.memo(
-  ({ data: caseData, isLoadingDescription, onUpdateField }: DescriptionHandler) => {
+export const DescriptionWrapper = React.memo(
+  ({
+    data: caseData,
+    isLoadingDescription,
+    userProfiles,
+    onUpdateField,
+  }: DescriptionWrapperProps) => {
     const { appId } = useCasesContext();
 
     const { commentRefs, manageMarkdownEditIds, handleManageMarkdownEditId } =
@@ -65,6 +70,7 @@ export const UseDescriptionHandler = React.memo(
           appId,
           caseData,
           commentRefs,
+          userProfiles,
           manageMarkdownEditIds,
           isLoadingDescription,
           onUpdateField,
@@ -76,6 +82,7 @@ export const UseDescriptionHandler = React.memo(
         commentRefs,
         manageMarkdownEditIds,
         isLoadingDescription,
+        userProfiles,
         onUpdateField,
         handleManageMarkdownEditId,
       ]
@@ -96,4 +103,4 @@ export const UseDescriptionHandler = React.memo(
   }
 );
 
-UseDescriptionHandler.displayName = 'UseDescriptionHandler';
+DescriptionWrapper.displayName = 'DescriptionWrapper';

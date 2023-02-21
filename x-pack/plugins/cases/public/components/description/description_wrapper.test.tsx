@@ -15,7 +15,7 @@ import { useUpdateComment } from '../../containers/use_update_comment';
 import { basicCase } from '../../containers/mock';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { UseDescriptionHandler } from './use_description_handler';
+import { DescriptionWrapper } from './description_wrapper';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 
 const onUpdateField = jest.fn();
@@ -24,18 +24,16 @@ const defaultProps = {
   data: basicCase,
   onUpdateField,
   isLoadingDescription: false,
+  userProfiles: new Map(),
 };
 
 jest.mock('../../containers/use_update_comment');
-jest.mock('./timestamp', () => ({
-  UserActionTimestamp: () => <></>,
-}));
 jest.mock('../../common/lib/kibana');
 
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 const patchComment = jest.fn();
 
-describe(`UseDescriptionHandler`, () => {
+describe(`DescriptionWrapper`, () => {
   const sampleData = {
     content: 'what a great comment update',
   };
@@ -53,13 +51,13 @@ describe(`UseDescriptionHandler`, () => {
   });
 
   it('renders correctly', () => {
-    appMockRender.render(<UseDescriptionHandler {...defaultProps} />);
+    appMockRender.render(<DescriptionWrapper {...defaultProps} />);
 
     expect(screen.getByTestId('description-action')).toBeInTheDocument();
   });
 
   it('renders loading state', () => {
-    appMockRender.render(<UseDescriptionHandler {...defaultProps} isLoadingDescription={true} />);
+    appMockRender.render(<DescriptionWrapper {...defaultProps} isLoadingDescription={true} />);
 
     expect(screen.getByTestId('description-loading')).toBeInTheDocument();
   });
@@ -69,7 +67,7 @@ describe(`UseDescriptionHandler`, () => {
       content: 'what a great comment update',
     };
 
-    appMockRender.render(<UseDescriptionHandler {...defaultProps} />);
+    appMockRender.render(<DescriptionWrapper {...defaultProps} />);
 
     userEvent.click(screen.getByTestId('editable-description-edit-icon'));
 

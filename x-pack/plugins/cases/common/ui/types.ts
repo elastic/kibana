@@ -22,7 +22,7 @@ import type {
   CommentResponse,
   CaseResponse,
   UserActionFindResponse,
-  FindTypeField,
+  FindTypeField as UserActionFindTypeField,
   CommentResponseAlertsType,
   CasesFindResponse,
   CasesStatusResponse,
@@ -63,7 +63,7 @@ export const SeverityAll = 'all' as const;
 export type CaseSeverityWithAll = CaseSeverity | typeof SeverityAll;
 
 export const UserActionTypeAll = 'all' as const;
-export type CaseUserActionTypeWithAll = FindTypeField | typeof UserActionTypeAll;
+export type CaseUserActionTypeWithAll = UserActionFindTypeField | typeof UserActionTypeAll;
 
 /**
  * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.

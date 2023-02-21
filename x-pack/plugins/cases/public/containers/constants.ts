@@ -15,7 +15,7 @@ export const casesQueriesKeys = {
   users: ['users'] as const,
   connectors: ['connectors'] as const,
   alerts: ['alerts'] as const,
-  actions: ['user-actions'] as const,
+  userActions: ['user-actions'] as const,
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
   casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
@@ -27,20 +27,20 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
   caseUsers: (id: string) => [...casesQueriesKeys.case(id), 'users'],
-  userActions: (
+  caseUserActions: (
     id: string,
     filterActionType: CaseUserActionTypeWithAll,
     sortOrder: 'asc' | 'desc'
   ) =>
     [
       ...casesQueriesKeys.case(id),
-      ...casesQueriesKeys.actions,
+      ...casesQueriesKeys.userActions,
       filterActionType,
       sortOrder,
     ] as const,
-  userActionsStats: (id: string) => [
+  caseUserActionsStats: (id: string) => [
     ...casesQueriesKeys.case(id),
-    ...casesQueriesKeys.actions,
+    ...casesQueriesKeys.userActions,
     'stats',
   ],
   userProfiles: () => [...casesQueriesKeys.users, 'user-profiles'] as const,

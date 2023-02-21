@@ -13,10 +13,8 @@ import { useCaseViewNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { EXPERIMENTAL_DESC, EXPERIMENTAL_LABEL } from '../header_page/translations';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
-import { UseDescriptionHandler } from '../user_actions/use_description_handler';
 import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
 import type { Case } from '../../../common';
-import { useOnUpdateField } from './use_on_update_field';
 
 const ExperimentalBadge = styled(EuiBetaBadge)`
   margin-left: 5px;
@@ -30,10 +28,6 @@ export interface CaseViewTabsProps {
 export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab }) => {
   const { features } = useCasesContext();
   const { navigateToCaseView } = useCaseViewNavigation();
-  const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
-    caseData,
-  });
-
   useCasesTitleBreadcrumbs(caseData.title);
 
   const tabs = useMemo(
@@ -81,15 +75,8 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     ));
   }, [activeTab, caseData.id, navigateToCaseView, tabs]);
 
-  const isLoadingDescription = isLoading && loadingKey === 'description';
-
   return (
     <>
-      <UseDescriptionHandler
-        isLoadingDescription={isLoadingDescription}
-        data={caseData}
-        onUpdateField={onUpdateField}
-      />
       <EuiTabs>{renderTabs()}</EuiTabs>
       <EuiSpacer size="l" />
     </>

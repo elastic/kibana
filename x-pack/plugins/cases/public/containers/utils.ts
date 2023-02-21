@@ -22,6 +22,7 @@ import type {
   CaseResolveResponse,
   SingleCaseMetricsResponse,
   User,
+  CaseUserActionStatsResponse,
 } from '../../common/api';
 import {
   CaseResponseRt,
@@ -35,7 +36,7 @@ import {
   SingleCaseMetricsResponseRt,
   CaseUserActionStatsResponseRt,
 } from '../../common/api';
-import type { Case, CaseUserActionsStats, FilterOptions, UpdateByKey } from './types';
+import type { Case, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
@@ -85,7 +86,9 @@ export const decodeCaseUserActionsResponse = (respUserActions?: CaseUserActionsR
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-export const decodeCaseUserActionStatsResponse = (caseUserActionsStats: CaseUserActionsStats) =>
+export const decodeCaseUserActionStatsResponse = (
+  caseUserActionsStats: CaseUserActionStatsResponse
+) =>
   pipe(
     CaseUserActionStatsResponseRt.decode(caseUserActionsStats),
     fold(throwErrors(createToasterPlainError), identity)

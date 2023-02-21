@@ -599,6 +599,8 @@ describe('CaseViewPage', () => {
 
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
+        userEvent.click(screen.getByTestId('user-actions-filter-activity-button-all'));
+
         userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), newComment);
 
         userEvent.click(screen.getByTestId('editable-description-edit-icon'));

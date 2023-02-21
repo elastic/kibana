@@ -32,6 +32,7 @@ import type {
   SingleCaseMetricsResponse,
   CasesFindResponse,
   GetCaseConnectorsResponse,
+  CaseUserActionStatsResponse,
 } from '../../common/api';
 import {
   CommentType,
@@ -188,7 +189,7 @@ export const getCaseUserActionsStats = async (
   caseId: string,
   signal: AbortSignal
 ): Promise<CaseUserActionsStats> => {
-  const response = await KibanaServices.get().http.fetch<CaseUserActionsStats>(
+  const response = await KibanaServices.get().http.fetch<CaseUserActionStatsResponse>(
     getCaseUserActionStatsUrl(caseId),
     {
       method: 'GET',

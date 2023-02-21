@@ -217,22 +217,23 @@ export const UserActions = React.memo(
 
     const { permissions } = useCasesContext();
 
-    const bottomActions =
-      permissions.create && filterOptions !== 'action' // add-comment markdown is not visible in History filter
-        ? [
-            {
-              username: (
-                <UserToolTip userInfo={currentUserProfile}>
-                  <Username userInfo={currentUserProfile} />
-                </UserToolTip>
-              ),
-              'data-test-subj': 'add-comment',
-              timelineAvatar: <HoverableAvatar userInfo={currentUserProfile} />,
-              className: 'isEdit',
-              children: MarkdownNewComment,
-            },
-          ]
-        : [];
+    const showCommentEditor = permissions.create && filterOptions !== 'action'; // add-comment markdown is not visible in History filter
+
+    const bottomActions = showCommentEditor
+      ? [
+          {
+            username: (
+              <UserToolTip userInfo={currentUserProfile}>
+                <Username userInfo={currentUserProfile} />
+              </UserToolTip>
+            ),
+            'data-test-subj': 'add-comment',
+            timelineAvatar: <HoverableAvatar userInfo={currentUserProfile} />,
+            className: 'isEdit',
+            children: MarkdownNewComment,
+          },
+        ]
+      : [];
 
     const comments = [...userActions, ...bottomActions];
 

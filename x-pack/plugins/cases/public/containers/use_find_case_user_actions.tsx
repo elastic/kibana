@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { FindCaseUserActions, CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { findCaseUserActions } from './api';
 import type { ServerError } from '../types';
-import { useToasts } from '../common/lib/kibana';
+import { useCasesToast } from '../common/use_cases_toast';
 import { ERROR_TITLE } from './translations';
 import { casesQueriesKeys } from './constants';
 
@@ -18,22 +18,17 @@ export const useFindCaseUserActions = (
   filterActionType: CaseUserActionTypeWithAll,
   sortOrder: 'asc' | 'desc'
 ) => {
-  const toasts = useToasts();
+  const { showErrorToast } = useCasesToast();
   const abortCtrlRef = new AbortController();
 
   return useQuery<FindCaseUserActions, ServerError>(
-    casesQueriesKeys.userActions(caseId, filterActionType, sortOrder),
+    casesQueriesKeys.caseUserActions(caseId, filterActionType, sortOrder),
     async () => {
       return findCaseUserActions(caseId, filterActionType, sortOrder, abortCtrlRef.signal);
     },
     {
       onError: (error: ServerError) => {
-        if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            { title: ERROR_TITLE }
-          );
-        }
+        showErrorToast(error, { title: ERROR_TITLE });
       },
     }
   );

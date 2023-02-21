@@ -467,6 +467,17 @@ describe('Case View Page activity tab', () => {
     });
 
     describe('User actions', () => {
+      it('renders the descriptions user correctly', async () => {
+        appMockRender = createAppMockRenderer();
+        const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+
+        const description = within(result.getByTestId('description-action'));
+
+        await waitFor(() => {
+          expect(description.getByText('Leslie Knope')).toBeInTheDocument();
+        });
+      });
+
       it('renders the unassigned users correctly', async () => {
         useFindCaseUserActionsMock.mockReturnValue({
           ...defaultUseFindCaseUserActions,

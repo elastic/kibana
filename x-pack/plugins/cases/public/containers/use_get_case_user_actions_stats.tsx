@@ -9,27 +9,22 @@ import { useQuery } from '@tanstack/react-query';
 import { getCaseUserActionsStats } from './api';
 
 import type { ServerError } from '../types';
-import { useToasts } from '../common/lib/kibana';
+import { useCasesToast } from '../common/use_cases_toast';
 import { ERROR_TITLE } from './translations';
 import { casesQueriesKeys } from './constants';
 
 export const useGetCaseUserActionsStats = (caseId: string) => {
-  const toasts = useToasts();
+  const { showErrorToast } = useCasesToast();
   const abortCtrlRef = new AbortController();
 
   return useQuery(
-    casesQueriesKeys.userActionsStats(caseId),
+    casesQueriesKeys.caseUserActionsStats(caseId),
     () => {
       return getCaseUserActionsStats(caseId, abortCtrlRef.signal);
     },
     {
       onError: (error: ServerError) => {
-        if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            { title: ERROR_TITLE }
-          );
-        }
+        showErrorToast(error, { title: ERROR_TITLE });
       },
     }
   );

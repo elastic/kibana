@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, waitFor, within, screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -14,15 +14,13 @@ import '../../common/mock/match_media';
 import { useCaseViewNavigation } from '../../common/navigation/hooks';
 import type { UseGetCase } from '../../containers/use_get_case';
 import { useGetCase } from '../../containers/use_get_case';
-import { useUpdateCase } from '../../containers/use_update_case';
 import { CaseViewTabs } from './case_view_tabs';
-import { caseData, defaultGetCase, defaultUpdateCaseState } from './mocks';
+import { caseData, defaultGetCase } from './mocks';
 import type { CaseViewTabsProps } from './case_view_tabs';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
-jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
@@ -30,7 +28,6 @@ jest.mock('../connectors/resilient/api');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
-const useUpdateCaseMock = useUpdateCase as jest.Mock;
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -55,7 +52,6 @@ describe('CaseViewTabs', () => {
   beforeEach(() => {
     mockGetCase();
     jest.clearAllMocks();
-    useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
 
     const license = licensingMock.createLicense({
       license: { type: 'platinum' },
@@ -86,32 +82,6 @@ describe('CaseViewTabs', () => {
 
     expect(screen.getByTestId('case-view-tab-title-activity')).toBeInTheDocument();
     expect(screen.getByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
-    expect(screen.getByTestId('description-wrapper')).toBeInTheDocument();
-  });
-
-  it('should display description isLoading', async () => {
-    useUpdateCaseMock.mockImplementation(() => ({
-      ...defaultUpdateCaseState,
-      isLoading: true,
-      updateKey: 'description',
-    }));
-
-    appMockRenderer.render(<CaseViewTabs {...caseProps} />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('description-loading')).toBeInTheDocument();
-      expect(screen.queryByTestId('description-action')).not.toBeInTheDocument();
-    });
-  });
-
-  it('renders the descriptions user correctly', async () => {
-    appMockRenderer.render(<CaseViewTabs {...caseProps} />);
-
-    const description = within(screen.getByTestId('description-action'));
-
-    await waitFor(() => {
-      expect(description.getByText('Leslie Knope')).toBeInTheDocument();
-    });
   });
 
   it('renders tabs correctly', async () => {

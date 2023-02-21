@@ -39,6 +39,7 @@ import type { Params } from '../../user_actions_activity_bar';
 import type { FilterType, SortOrderType } from '../../user_actions_activity_bar/types';
 import type { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { CaseViewTabs } from '../case_view_tabs';
+import { DescriptionWrapper } from '../../description/description_wrapper';
 
 const buildUserProfilesMap = (users?: CaseUsers): Map<string, UserProfileWithAvatar> => {
   const userProfiles = new Map();
@@ -204,10 +205,19 @@ export const CaseViewActivity = ({
     [setFilterOptions, setSortOrder]
   );
 
+  const isLoadingDescription = isLoading && loadingKey === 'description';
+
   return (
     <>
       <EuiFlexItem grow={6}>
         <CaseViewTabs caseData={caseData} activeTab={activeTab} />
+        <DescriptionWrapper
+          isLoadingDescription={isLoadingDescription}
+          data={caseData}
+          userProfiles={userProfiles}
+          onUpdateField={onUpdateField}
+        />
+        <EuiSpacer size="l" />
         <EuiFlexItem grow={false}>
           <UserActionsActivityBar
             onUserActionsActivityChanged={handleUserActionsActivityChanged}
