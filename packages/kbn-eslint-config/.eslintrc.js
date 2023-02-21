@@ -1,5 +1,4 @@
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
-const RUNNING_IN_FIX_MODE = process.argv.includes('--fix');
 
 module.exports = {
   extends: ['./javascript.js', './typescript.js', './jest.js', './react.js'],
@@ -277,8 +276,6 @@ module.exports = {
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
     '@kbn/imports/no_boundary_crossing': 'error',
-    ...(!RUNNING_IN_FIX_MODE && {
-      '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
-    }),
+    '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
   },
 };
