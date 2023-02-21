@@ -23,9 +23,11 @@ interface RegisterRoutes {
   core: CoreSetup;
   repository: AbstractObservabilityServerRouteRepository;
   logger: Logger;
-  dependencies: {
-    ruleDataService: RuleDataPluginService;
-  };
+  dependencies: RegisterRoutesDependencies;
+}
+
+export interface RegisterRoutesDependencies {
+  ruleDataService: RuleDataPluginService;
 }
 
 export function registerRoutes({ repository, core, logger, dependencies }: RegisterRoutes) {

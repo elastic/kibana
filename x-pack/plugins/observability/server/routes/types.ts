@@ -6,18 +6,16 @@
  */
 import type { EndpointOf, ReturnOf, ServerRouteRepository } from '@kbn/server-route-repository';
 import { KibanaRequest, Logger } from '@kbn/core/server';
-import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
 import { ObservabilityServerRouteRepository } from './get_global_observability_server_route_repository';
 import { ObservabilityRequestHandlerContext } from '../types';
+import { RegisterRoutesDependencies } from './register_routes';
 
 export type { ObservabilityServerRouteRepository };
 
 export interface ObservabilityRouteHandlerResources {
   context: ObservabilityRequestHandlerContext;
-  dependencies: {
-    ruleDataService: RuleDataPluginService;
-  };
+  dependencies: RegisterRoutesDependencies;
   logger: Logger;
   request: KibanaRequest;
 }
