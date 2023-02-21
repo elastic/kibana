@@ -10,7 +10,6 @@ import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
 import moment from 'moment';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { schema } from '@kbn/config-schema';
 import {
   ALERTS_INDEX_PATTERN,
   INTEGRATION_PACKAGE_NAME,
