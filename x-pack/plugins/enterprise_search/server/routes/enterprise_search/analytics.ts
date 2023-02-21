@@ -124,7 +124,7 @@ export function registerAnalyticsRoutes({
             message: i18n.translate(
               'xpack.enterpriseSearch.server.routes.addAnalyticsCollection.analyticsCollectionExistsError',
               {
-                defaultMessage: 'Analytics collection already exists',
+                defaultMessage: 'Collection name already exists. Choose another name.',
               }
             ),
             response,
