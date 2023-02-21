@@ -67,10 +67,12 @@ export async function runSynthraceScenario({ scenario }: { scenario: SynthtraceS
     throw new Error('Entry transaction not found');
   }
 
+  const isCloudUrl = scenario.credentials.esEndpoint.startsWith('https://');
+
   const client = createEsClientForTesting({
     esUrl: scenario.credentials.esEndpoint,
     requestTimeout: 10000,
-    isCloud: false,
+    isCloud: isCloudUrl,
   });
 
   const synthtraceEsClient = new ApmSynthtraceEsClient({
