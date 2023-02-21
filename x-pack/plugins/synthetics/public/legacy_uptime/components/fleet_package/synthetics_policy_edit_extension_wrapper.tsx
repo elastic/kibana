@@ -107,6 +107,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
           <p>{EDIT_IN_SYNTHETICS_DESC}</p>
           {/* TODO Add a link to exact monitor*/}
           <EuiButton
+            data-test-subj="syntheticsEditMonitorButton"
             href={`${http?.basePath.get()}/app/synthetics/edit-monitor/${
               defaultConfig[ConfigKey.CONFIG_ID]
             }`}
