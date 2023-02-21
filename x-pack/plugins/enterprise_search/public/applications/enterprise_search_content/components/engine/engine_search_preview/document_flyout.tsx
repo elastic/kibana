@@ -54,7 +54,7 @@ export const DocumentFlyout: React.FC = () => {
           </EuiTextColor>
         </EuiText>
       ),
-      truncateText: true,
+      truncateText: false,
     },
     {
       field: 'value',
@@ -67,7 +67,7 @@ export const DocumentFlyout: React.FC = () => {
           <code>{key}</code>
         </EuiText>
       ),
-      truncateText: true,
+      truncateText: false,
     },
   ];
 
