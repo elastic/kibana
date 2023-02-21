@@ -70,6 +70,7 @@ import {
   getSelectedGroupCustomMetrics,
   useGroupTakeActionsItems,
 } from './grouping_settings';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemetry';
 
 /** This local storage key stores the `Grid / Event rendered view` selection */
 export const ALERTS_TABLE_GROUPS_SELECTION_KEY = 'securitySolution.alerts.table.group-selection';
@@ -370,6 +371,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             return;
           }
           storage.set(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`, groupSelection);
+          track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.GROUP_ALERTS}${tableId}-${groupSelection}`);
+
           setGroupsActivePage(0);
           setSelectedGroup(groupSelection);
 

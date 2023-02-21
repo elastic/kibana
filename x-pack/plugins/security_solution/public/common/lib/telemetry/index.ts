@@ -40,6 +40,7 @@ export enum TELEMETRY_EVENT {
   SIEM_RULE_DISABLED = 'siem_rule_disabled',
   CUSTOM_RULE_ENABLED = 'custom_rule_enabled',
   CUSTOM_RULE_DISABLED = 'custom_rule_disabled',
+  GROUP_ALERTS = 'group_alerts_',
 
   // ML
   SIEM_JOB_ENABLED = 'siem_job_enabled',

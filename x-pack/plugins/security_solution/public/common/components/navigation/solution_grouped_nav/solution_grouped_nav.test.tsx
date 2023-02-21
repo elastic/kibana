@@ -131,7 +131,7 @@ describe('SolutionGroupedNav', () => {
       expect(result.getByText('Overview')).toBeInTheDocument();
     });
 
-    it('should telemetry when button is clicked', () => {
+    it('should send telemetry when button is clicked', () => {
       const result = renderNav();
       expect(result.queryByTestId('groupedNavPanel')).not.toBeInTheDocument();
 
