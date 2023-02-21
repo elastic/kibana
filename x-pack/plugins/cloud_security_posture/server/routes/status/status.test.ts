@@ -175,7 +175,7 @@ describe('CspSetupStatus route', () => {
               type: 'cloudbeat/cis_k8s',
               policy_template: 'kspm',
               enabled: true,
-              streams:[]
+              streams: [],
             },
           ],
           name: 'cloud_security_posture-1',
@@ -215,8 +215,8 @@ describe('CspSetupStatus route', () => {
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
     await expect(body).toMatchObject({
-      kspm: {status: 'not-installed', healthyAgents: 0, installedPackagePolicies: 1},
-      cspm: {status: 'not-installed', healthyAgents: 0, installedPackagePolicies: 0},
+      kspm: { status: 'not-installed', healthyAgents: 0, installedPackagePolicies: 1 },
+      cspm: { status: 'not-installed', healthyAgents: 0, installedPackagePolicies: 0 },
       latestPackageVersion: '0.0.14',
       installedPackagePolicies: 0,
       healthyAgents: 0,

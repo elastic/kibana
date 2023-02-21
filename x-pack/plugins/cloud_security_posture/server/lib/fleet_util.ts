@@ -34,7 +34,8 @@ const isFleetMissingAgentHttpError = (error: unknown) =>
 const isPolicyTemplate = (input: any): input is PosturePolicyTemplate =>
   SUPPORTED_POLICY_TEMPLATES.includes(input);
 
-const getPackageNameQuery = ( // ADD 3rd case both cspm and kspm, for findings posture type empty =>  kspm
+const getPackageNameQuery = (
+  // ADD 3rd case both cspm and kspm, for findings posture type empty =>  kspm
   postureType: string,
   packageName: string,
   benchmarkFilter?: string
