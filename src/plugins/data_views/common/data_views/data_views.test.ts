@@ -162,6 +162,41 @@ describe('IndexPatterns', () => {
     expect(apiClient.getFieldsForWildcard).toBeCalledTimes(2);
   });
 
+  test('getFieldsForWildcard called with allowNoIndex set to true as default ', async () => {
+    const id = '1';
+    await indexPatterns.get(id);
+    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+      allowNoIndex: true,
+      indexFilter: undefined,
+      metaFields: false,
+      pattern: 'something',
+      rollupIndex: undefined,
+      type: undefined,
+    });
+  });
+
+  test('getFieldsForWildcard called with allowNoIndex set to false if configured', async () => {
+    const id = '2';
+    setDocsourcePayload(id, {
+      id: 'foo',
+      version: 'foo',
+      attributes: {
+        title: 'something',
+        allowNoIndex: false,
+      },
+    });
+
+    await indexPatterns.get(id);
+    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+      allowNoIndex: false,
+      indexFilter: undefined,
+      metaFields: false,
+      pattern: 'something',
+      rollupIndex: undefined,
+      type: undefined,
+    });
+  });
+
   test('does cache ad-hoc data views', async () => {
     const id = '1';
 
@@ -577,9 +612,8 @@ describe('IndexPatterns', () => {
       expect(indexPattern.fields.length).toBe(1);
     });
 
-    test('refreshFields properly includes allowNoIndex', async () => {
+    test('refreshFields defaults allowNoIndex to true', async () => {
       const indexPatternSpec: DataViewSpec = {
-        allowNoIndex: true,
         title: 'test',
       };
 
@@ -588,6 +622,19 @@ describe('IndexPatterns', () => {
       indexPatterns.refreshFields(indexPattern);
       // @ts-expect-error
       expect(apiClient.getFieldsForWildcard.mock.calls[0][0].allowNoIndex).toBe(true);
+    });
+
+    test('refreshFields properly includes allowNoIndex=false', async () => {
+      const indexPatternSpec: DataViewSpec = {
+        allowNoIndex: false,
+        title: 'test',
+      };
+
+      const indexPattern = await indexPatterns.create(indexPatternSpec);
+
+      indexPatterns.refreshFields(indexPattern);
+      // @ts-expect-error
+      expect(apiClient.getFieldsForWildcard.mock.calls[0][0].allowNoIndex).toBe(false);
     });
   });
 });

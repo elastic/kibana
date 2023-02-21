@@ -530,7 +530,7 @@ export class DataViewsService {
     return this.apiClient.getFieldsForWildcard({
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
-      allowNoIndex: dataView.allowNoIndex !== false,
+      allowNoIndex: dataView.allowNoIndex ?? true,
       pattern: dataView.getIndexPattern(),
       metaFields,
     });
@@ -543,7 +543,7 @@ export class DataViewsService {
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
-      allowNoIndex: options.allowNoIndex !== false,
+      allowNoIndex: options.allowNoIndex ?? true,
       indexFilter: options.indexFilter,
     });
   };

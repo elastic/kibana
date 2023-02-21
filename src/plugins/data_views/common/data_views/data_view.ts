@@ -141,7 +141,7 @@ export class DataView implements DataViewBase {
   /**
    * Prevents errors when index pattern exists before indices
    */
-  public readonly allowNoIndex: boolean = false;
+  public readonly allowNoIndex: boolean = true;
   /**
    * Name of the data view. Human readable name used to differentiate data view.
    */
@@ -183,7 +183,7 @@ export class DataView implements DataViewBase {
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
     this.fieldAttrs = cloneDeep(spec.fieldAttrs) || {};
-    this.allowNoIndex = spec.allowNoIndex || false;
+    this.allowNoIndex = spec.allowNoIndex ?? true;
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
