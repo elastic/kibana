@@ -6,8 +6,8 @@
  */
 
 import { getNewRule } from '../../objects/rule';
-import { ALERTS_HISTOGRAM_LEGEND } from '../../screens/alerts';
-import { waitForAlerts, selectAlertsHistogram } from '../../tasks/alerts';
+import { ALERTS_HISTOGRAM_LEGEND, ALERTS_COUNT } from '../../screens/alerts';
+import { selectAlertsHistogram } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
@@ -26,52 +26,37 @@ describe('Histogram legend hover actions', { testIsolation: false }, () => {
     login();
     createCustomRuleEnabled(getNewRule(), 'new custom rule');
     visit(ALERTS_URL);
-    waitForAlerts();
     selectAlertsHistogram();
   });
 
   it('Filter in/out should add a filter to KQL bar', function () {
-    cy.get(ALERTS_HISTOGRAM_LEGEND)
-      .eq(0)
-      .trigger('mouseover')
-      .then(($el) => {
-        const textValue = $el.text();
-        cy.get(HOVER_ACTIONS.FILTER_FOR).should('exist');
-        cy.get(HOVER_ACTIONS.FILTER_FOR).trigger('click', { force: true });
-        cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
-          'contain.text',
-          `kibana.alert.rule.name: ${textValue}`
-        );
-      });
+    const expectedNumberOfAlerts = 2;
+    cy.get(ALERTS_HISTOGRAM_LEGEND).trigger('mouseover');
+    cy.get(HOVER_ACTIONS.FILTER_FOR).click();
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
+      'have.text',
+      `kibana.alert.rule.name: ${getNewRule().name}`
+    );
+    cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
 
-    cy.get(ALERTS_HISTOGRAM_LEGEND)
-      .eq(0)
-      .trigger('mouseover')
-      .then(($el) => {
-        const textValue = $el.text();
-        cy.get(HOVER_ACTIONS.FILTER_OUT).should('exist');
-        cy.get(HOVER_ACTIONS.FILTER_OUT).trigger('click', { force: true });
-        cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
-          'contain.text',
-          `NOT kibana.alert.rule.name: ${textValue}`
-        );
-      });
+    cy.get(ALERTS_HISTOGRAM_LEGEND).trigger('mouseover');
+    cy.get(HOVER_ACTIONS.FILTER_OUT).click();
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
+      'have.text',
+      `NOT kibana.alert.rule.name: ${getNewRule().name}`
+    );
+    cy.get(ALERTS_COUNT).should('not.exist');
+
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE).trigger('click');
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('not.exist');
   });
 
   it('Add To Timeline', function () {
-    cy.get(ALERTS_HISTOGRAM_LEGEND)
-      .eq(0)
-      .trigger('mouseover')
-      .then(($el) => {
-        const textValue = $el.text();
-        cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('exist');
-        cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).trigger('click', { force: true });
-        openActiveTimeline();
-        cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('be.visible');
-        cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('contain.text', textValue);
-        closeTimelineUsingCloseButton();
-      });
+    cy.get(ALERTS_HISTOGRAM_LEGEND).trigger('mouseover');
+    cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).click();
+    openActiveTimeline();
+    cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('be.visible');
+    cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('contain.text', getNewRule().name);
+    closeTimelineUsingCloseButton();
   });
 });
