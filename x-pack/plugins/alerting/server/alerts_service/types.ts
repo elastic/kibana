@@ -10,7 +10,7 @@ import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { getComponentTemplateFromFieldMap } from '../../common';
 
 export const getComponentTemplateName = (context?: string) =>
-  `.alerts-${context ? `${context}` : 'framework'}-mappings`;
+  `.alerts-${context || 'framework'}-mappings`;
 
 export interface IIndexPatternString {
   template: string;
