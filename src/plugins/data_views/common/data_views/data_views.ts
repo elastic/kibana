@@ -569,8 +569,8 @@ export class DataViewsService {
   };
 
   /**
-   * Refresh field list for a given index pattern.
-   * @param indexPattern
+   * Refresh field list for a given data view.
+   * @param dataView
    * @param displayErrors  - If set false, API consumer is responsible for displaying and handling errors.
    */
   refreshFields = async (dataView: DataView, displayErrors: boolean = true) => {
@@ -582,22 +582,19 @@ export class DataViewsService {
       await this.refreshFieldsFn(dataView);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification(
-          { title: err.message, color: 'danger', iconType: 'alert' },
-          `refreshFields:${dataView.getIndexPattern()}`
+        // If the index pattern is missing indices, we still want to show the user the fields
+      } else {
+        this.onError(
+          err,
+          {
+            title: i18n.translate('dataViews.fetchFieldErrorTitle', {
+              defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+              values: { id: dataView.id, title: dataView.getIndexPattern() },
+            }),
+          },
+          dataView.getIndexPattern()
         );
       }
-
-      this.onError(
-        err,
-        {
-          title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id: dataView.id, title: dataView.getIndexPattern() },
-          }),
-        },
-        dataView.getIndexPattern()
-      );
     }
   };
 
@@ -635,12 +632,6 @@ export class DataViewsService {
       return { fields: this.fieldArrayToMap(updatedFieldList, fieldAttrs), indices };
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        if (displayErrors) {
-          this.onNotification(
-            { title: err.message, color: 'danger', iconType: 'alert' },
-            `refreshFieldSpecMap:${title}`
-          );
-        }
         return {};
       }
 
@@ -803,14 +794,7 @@ export class DataViewsService {
         indices = fieldsAndIndices.indices;
       } catch (err) {
         if (err instanceof DataViewMissingIndices) {
-          this.onNotification(
-            {
-              title: err.message,
-              color: 'danger',
-              iconType: 'alert',
-            },
-            `initFromSavedObject:${spec.title}`
-          );
+          //
         } else {
           this.onError(
             err,
