@@ -188,13 +188,13 @@ describe('SLO Edit Page', () => {
 
           useCreateOrUpdateSloMock.mockReturnValue({
             createSlo: {
-              mutate: jest.fn(),
+              mutateAsync: jest.fn(),
               isLoading: false,
               isSuccess: false,
               isError: false,
             },
             updateSlo: {
-              mutate: jest.fn(),
+              mutateAsync: jest.fn(),
               isLoading: false,
               isSuccess: false,
               isError: false,
@@ -260,13 +260,13 @@ describe('SLO Edit Page', () => {
 
           useCreateOrUpdateSloMock.mockReturnValue({
             createSlo: {
-              mutate: mockCreate,
+              mutateAsync: mockCreate,
               isLoading: false,
               isSuccess: false,
               isError: false,
             },
             updateSlo: {
-              mutate: mockUpdate,
+              mutateAsync: mockUpdate,
               isLoading: false,
               isSuccess: false,
               isError: false,
@@ -350,13 +350,13 @@ describe('SLO Edit Page', () => {
 
           useCreateOrUpdateSloMock.mockReturnValue({
             createSlo: {
-              mutate: jest.fn(),
+              mutateAsync: jest.fn(),
               isLoading: false,
               isSuccess: false,
               isError: false,
             },
             updateSlo: {
-              mutate: jest.fn(),
+              mutateAsync: jest.fn(),
               isLoading: false,
               isSuccess: false,
               isError: false,
@@ -420,13 +420,13 @@ describe('SLO Edit Page', () => {
               isloading: false,
               isSuccess: false,
               isError: false,
-              mutate: mockCreate,
+              mutateAsync: mockCreate,
             },
             updateSlo: {
               isloading: false,
               isSuccess: false,
               isError: false,
-              mutate: mockUpdate,
+              mutateAsync: mockUpdate,
             },
           });
 
@@ -516,20 +516,25 @@ describe('SLO Edit Page', () => {
 
           useCreateOrUpdateSloMock.mockReturnValue({
             createSlo: {
-              mutate: jest.fn(),
+              mutateAsync: jest.fn().mockResolvedValue('success'),
               isLoading: false,
-              isSuccess: true,
+              isSuccess: false,
               isError: false,
             },
             updateSlo: {
-              mutate: jest.fn(),
+              mutateAsync: jest.fn().mockResolvedValue('success'),
               isLoading: false,
-              isSuccess: true,
+              isSuccess: false,
               isError: false,
             },
           });
 
           render(<SloEditPage />, config);
+
+          await waitFor(() => {
+            expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled();
+            fireEvent.click(screen.getByTestId('sloFormSubmitButton'));
+          });
 
           expect(mockAddSuccess).toBeCalled();
         });
@@ -548,13 +553,13 @@ describe('SLO Edit Page', () => {
 
           useCreateOrUpdateSloMock.mockReturnValue({
             createSlo: {
-              mutate: jest.fn(),
+              mutateAsync: jest.fn(),
               isLoading: false,
               isSuccess: true,
               isError: false,
             },
             updateSlo: {
-              mutate: jest.fn(),
+              mutateAsync: jest.fn(),
               isLoading: false,
               isSuccess: true,
               isError: false,
@@ -562,6 +567,11 @@ describe('SLO Edit Page', () => {
           });
 
           render(<SloEditPage />, config);
+
+          await waitFor(() => {
+            expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled();
+            fireEvent.click(screen.getByTestId('sloFormSubmitButton'));
+          });
 
           expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
         });
@@ -582,13 +592,13 @@ describe('SLO Edit Page', () => {
 
           useCreateOrUpdateSloMock.mockReturnValue({
             createSlo: {
-              mutate: jest.fn(),
+              mutateAsync: jest.fn().mockRejectedValue('argh, I died'),
               isLoading: false,
               isSuccess: false,
               isError: true,
             },
             updateSlo: {
-              mutate: jest.fn(),
+              mutateAsync: jest.fn().mockRejectedValue('argh, I died'),
               isLoading: false,
               isSuccess: false,
               isError: true,
@@ -596,6 +606,11 @@ describe('SLO Edit Page', () => {
           });
 
           render(<SloEditPage />, config);
+
+          await waitFor(() => {
+            expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled();
+            fireEvent.click(screen.getByTestId('sloFormSubmitButton'));
+          });
 
           expect(mockAddError).toBeCalled();
         });
