@@ -98,10 +98,10 @@ export const TRANSFORM_STATE = {
 export type TransformState = typeof TRANSFORM_STATE[keyof typeof TRANSFORM_STATE];
 
 export const TRANSFORM_HEALTH = {
-  GREEN: 'green',
-  UNKNOWN: 'unknown',
-  YELLOW: 'yellow',
-  RED: 'red',
+  green: 'green',
+  unknown: 'unknown',
+  yellow: 'yellow',
+  red: 'red',
 } as const;
 
 export type TransformHealth = typeof TRANSFORM_HEALTH[keyof typeof TRANSFORM_HEALTH];
