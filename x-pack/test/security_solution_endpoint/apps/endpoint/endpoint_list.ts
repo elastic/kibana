@@ -19,7 +19,6 @@ import { WebElementWrapper } from '../../../../../test/functional/services/lib/w
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
 
   const expectedData = [
@@ -127,8 +126,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         let querySubmitButton: WebElementWrapper;
         before(async () => {
           await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 60000);
-          adminSearchBar = await testSubjects.find('adminSearchBar');
-          querySubmitButton = await testSubjects.find('querySubmitButton');
         });
         after(async () => {
           adminSearchBar = await testSubjects.find('adminSearchBar');
@@ -137,8 +134,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await querySubmitButton.click();
         });
         it('when the kql query is `na`, table shows an empty list', async () => {
+          adminSearchBar = await testSubjects.find('adminSearchBar');
           await adminSearchBar.clearValueWithKeyboard();
           await adminSearchBar.type('na');
+          querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
           const expectedDataFromQuery = [
             [

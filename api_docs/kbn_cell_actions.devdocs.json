@@ -27,7 +27,7 @@
         "label": "CellActions",
         "description": [],
         "signature": [
-          "({ field, triggerId, children, mode, showActionTooltips, visibleCellActions, metadata, }: React.PropsWithChildren<",
+          "({ field, triggerId, children, mode, showActionTooltips, visibleCellActions, disabledActions, metadata, className, }: React.PropsWithChildren<",
           "CellActionsProps",
           ">) => JSX.Element"
         ],
@@ -40,7 +40,7 @@
             "id": "def-common.CellActions.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  field,\n  triggerId,\n  children,\n  mode,\n  showActionTooltips = true,\n  visibleCellActions = 3,\n  metadata,\n}",
+            "label": "{\n  field,\n  triggerId,\n  children,\n  mode,\n  showActionTooltips = true,\n  visibleCellActions = 3,\n  disabledActions = [],\n  metadata,\n  className,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -101,7 +101,7 @@
         "label": "useDataGridColumnsCellActions",
         "description": [],
         "signature": [
-          "({ fields, triggerId, metadata, }: ",
+          "({ fields, triggerId, metadata, disabledActions, }: ",
           {
             "pluginId": "@kbn/cell-actions",
             "scope": "common",
@@ -122,7 +122,7 @@
             "id": "def-common.useDataGridColumnsCellActions.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  fields,\n  triggerId,\n  metadata,\n}",
+            "label": "{\n  fields,\n  triggerId,\n  metadata,\n  disabledActions = [],\n}",
             "description": [],
             "signature": [
               {
@@ -191,7 +191,7 @@
                 "section": "def-common.CellActionCompatibilityContext",
                 "text": "CellActionCompatibilityContext"
               },
-              ") => Promise<boolean>"
+              "<C[\"metadata\"]>) => Promise<boolean>"
             ],
             "path": "packages/kbn-cell-actions/src/types.ts",
             "deprecated": false,
@@ -211,7 +211,8 @@
                     "docId": "kibKbnCellActionsPluginApi",
                     "section": "def-common.CellActionCompatibilityContext",
                     "text": "CellActionCompatibilityContext"
-                  }
+                  },
+                  "<C[\"metadata\"]>"
                 ],
                 "path": "packages/kbn-cell-actions/src/types.ts",
                 "deprecated": false,
@@ -239,7 +240,7 @@
             "section": "def-common.CellActionCompatibilityContext",
             "text": "CellActionCompatibilityContext"
           },
-          " extends ",
+          "<M> extends ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -263,7 +264,7 @@
               "\nThe object containing the field name and type, needed for the compatibility check"
             ],
             "signature": [
-              "{ type: string; name: string; }"
+              "{ type: string; name: string; aggregatable?: boolean | undefined; }"
             ],
             "path": "packages/kbn-cell-actions/src/types.ts",
             "deprecated": false,
@@ -272,14 +273,14 @@
           {
             "parentPluginId": "@kbn/cell-actions",
             "id": "def-common.CellActionCompatibilityContext.metadata",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "metadata",
             "description": [
               "\nExtra configurations for actions."
             ],
             "signature": [
-              "Record<string, unknown> | undefined"
+              "M | undefined"
             ],
             "path": "packages/kbn-cell-actions/src/types.ts",
             "deprecated": false,
@@ -399,7 +400,7 @@
           },
           " extends Pick<",
           "CellActionsProps",
-          ", \"metadata\" | \"triggerId\">"
+          ", \"metadata\" | \"disabledActions\" | \"triggerId\">"
         ],
         "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
         "deprecated": false,

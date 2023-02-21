@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { KibanaServices, useKibana } from '../lib/kibana';
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook as _renderHook } from '@testing-library/react-hooks';
-import { useUpgradeSecurityPackages } from './use_upgrade_security_packages';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
+import { renderHook } from '@testing-library/react-hooks';
+import { useKibana, KibanaServices } from '../../../common/lib/kibana';
+import { TestProviders } from '../../../common/mock';
+import { useUpgradeSecurityPackages } from './use_upgrade_security_packages';
 
-jest.mock('../components/user_privileges', () => {
+jest.mock('../../../common/components/user_privileges', () => {
   return {
     useUserPrivileges: jest.fn().mockReturnValue({
       endpointPrivileges: {
@@ -21,48 +20,30 @@ jest.mock('../components/user_privileges', () => {
     }),
   };
 });
-jest.mock('../lib/kibana');
+jest.mock('../../../common/lib/kibana');
+
+const mockGetPrebuiltRulesPackageVersion =
+  KibanaServices.getPrebuiltRulesPackageVersion as jest.Mock;
+const mockGetKibanaVersion = KibanaServices.getKibanaVersion as jest.Mock;
+const mockGetKibanaBranch = KibanaServices.getKibanaBranch as jest.Mock;
+const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
 describe('When using the `useUpgradeSecurityPackages()` hook', () => {
-  const mockGetPrebuiltRulesPackageVersion =
-    KibanaServices.getPrebuiltRulesPackageVersion as jest.Mock;
-  const mockGetKibanaVersion = KibanaServices.getKibanaVersion as jest.Mock;
-  const mockGetKibanaBranch = KibanaServices.getKibanaBranch as jest.Mock;
-  let renderResult: RenderHookResult<object, void>;
-  let renderHook: () => RenderHookResult<object, void>;
-  let kibana: ReturnType<typeof useKibana>;
-
-  // eslint-disable-next-line react/display-name
-  const Wrapper = memo(({ children }) => {
-    kibana = useKibana();
-    return <>{children}</>;
-  });
-
   beforeEach(() => {
-    renderHook = () => {
-      renderResult = _renderHook(() => useUpgradeSecurityPackages(), { wrapper: Wrapper });
-      return renderResult;
-    };
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
-    if (renderResult) {
-      renderResult.unmount();
-    }
   });
 
   it('should call fleet setup first via `isInitialized()` and then send upgrade request', async () => {
-    renderHook();
+    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+      wrapper: TestProviders,
+    });
 
-    expect(kibana.services.fleet?.isInitialized).toHaveBeenCalled();
-    expect(kibana.services.http.post).not.toHaveBeenCalled();
+    expect(useKibanaMock().services.fleet?.isInitialized).toHaveBeenCalled();
+    expect(useKibanaMock().services.http.post).not.toHaveBeenCalled();
 
-    await renderResult.waitFor(
-      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
-    );
+    await waitFor(() => (useKibanaMock().services.http.post as jest.Mock).mock.calls.length > 0);
 
-    expect(kibana.services.http.post).toHaveBeenCalledWith(
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
       `${epmRouteService.getBulkInstallPath()}`,
       expect.objectContaining({
         body: '{"packages":["endpoint","security_detection_engine"]}',
@@ -74,13 +55,13 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     mockGetKibanaVersion.mockReturnValue('8.0.0');
     mockGetKibanaBranch.mockReturnValue('release');
 
-    renderHook();
+    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+      wrapper: TestProviders,
+    });
 
-    await renderResult.waitFor(
-      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
-    );
+    await waitFor(() => (useKibanaMock().services.http.post as jest.Mock).mock.calls.length > 0);
 
-    expect(kibana.services.http.post).toHaveBeenCalledWith(
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
       `${epmRouteService.getBulkInstallPath()}`,
       expect.objectContaining({
         body: '{"packages":["endpoint","security_detection_engine"]}',
@@ -93,13 +74,13 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     mockGetKibanaVersion.mockReturnValue('8.0.0-SNAPSHOT');
     mockGetKibanaBranch.mockReturnValue('main');
 
-    renderHook();
+    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+      wrapper: TestProviders,
+    });
 
-    await renderResult.waitFor(
-      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
-    );
+    await waitFor(() => (useKibanaMock().services.http.post as jest.Mock).mock.calls.length > 0);
 
-    expect(kibana.services.http.post).toHaveBeenCalledWith(
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
       `${epmRouteService.getBulkInstallPath()}`,
       expect.objectContaining({
         body: '{"packages":["endpoint","security_detection_engine"]}',
@@ -112,13 +93,13 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     mockGetKibanaVersion.mockReturnValue('8.0.0-SNAPSHOT');
     mockGetKibanaBranch.mockReturnValue('release');
 
-    renderHook();
+    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+      wrapper: TestProviders,
+    });
 
-    await renderResult.waitFor(
-      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
-    );
+    await waitFor(() => (useKibanaMock().services.http.post as jest.Mock).mock.calls.length > 0);
 
-    expect(kibana.services.http.post).toHaveBeenCalledWith(
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
       `${epmRouteService.getBulkInstallPath()}`,
       expect.objectContaining({
         body: '{"packages":["endpoint","security_detection_engine"]}',
@@ -131,13 +112,13 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     mockGetKibanaVersion.mockReturnValue('8.0.0');
     mockGetKibanaBranch.mockReturnValue('main');
 
-    renderHook();
+    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+      wrapper: TestProviders,
+    });
 
-    await renderResult.waitFor(
-      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
-    );
+    await waitFor(() => (useKibanaMock().services.http.post as jest.Mock).mock.calls.length > 0);
 
-    expect(kibana.services.http.post).toHaveBeenCalledWith(
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
       `${epmRouteService.getBulkInstallPath()}`,
       expect.objectContaining({
         body: '{"packages":["endpoint","security_detection_engine"]}',
@@ -149,18 +130,18 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
   it('should send separate upgrade requests if prebuiltRulesPackageVersion is provided', async () => {
     mockGetPrebuiltRulesPackageVersion.mockReturnValue('8.2.1');
 
-    renderHook();
+    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+      wrapper: TestProviders,
+    });
 
-    await renderResult.waitFor(
-      () => (kibana.services.http.post as jest.Mock).mock.calls.length > 0
-    );
+    await waitFor(() => (useKibanaMock().services.http.post as jest.Mock).mock.calls.length > 0);
 
-    expect(kibana.services.http.post).toHaveBeenNthCalledWith(
+    expect(useKibanaMock().services.http.post).toHaveBeenNthCalledWith(
       1,
       `${epmRouteService.getInstallPath('security_detection_engine', '8.2.1')}`,
       expect.objectContaining({ query: { prerelease: true } })
     );
-    expect(kibana.services.http.post).toHaveBeenNthCalledWith(
+    expect(useKibanaMock().services.http.post).toHaveBeenNthCalledWith(
       2,
       `${epmRouteService.getBulkInstallPath()}`,
       expect.objectContaining({
