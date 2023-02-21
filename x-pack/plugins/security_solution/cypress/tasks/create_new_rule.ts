@@ -122,6 +122,7 @@ import { ruleFields } from '../data/detection_engine';
 import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
+import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
@@ -675,7 +676,7 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
       return cy.root().then(($el) => {
-        const emptyTableState = $el.find('[data-test-subj="alertsStateTableEmptyState"]');
+        const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
         if (emptyTableState.length > 0) {
           cy.log('Table is empty', emptyTableState.length);
           return false;

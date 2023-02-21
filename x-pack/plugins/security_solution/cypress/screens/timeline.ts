@@ -319,3 +319,7 @@ export const HOVER_ACTIONS = {
   COPY: '[data-test-subj="clipboard"]',
   SHOW_TOP: 'show-top-field',
 };
+
+export const GET_TIMELINE_HEADER = (fieldName: string) => {
+  return `[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`;
+};

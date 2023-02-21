@@ -19,18 +19,17 @@ import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { createField } from '../../tasks/create_runtime_field';
 import { openAlertsFieldBrowser } from '../../tasks/alerts';
 import { deleteRuntimeField } from '../../tasks/sourcerer';
+import { GET_DATA_GRID_HEADER } from '../../screens/common/data_grid';
+import { GET_TIMELINE_HEADER } from '../../screens/timeline';
 
 const alertRunTimeField = 'field.name.alert.page';
 const timelineRuntimeField = 'field.name.timeline';
 
 describe('Create DataView runtime field', () => {
   before(() => {
-    login();
-  });
-
-  before(() => {
     deleteRuntimeField('security-solution-default', alertRunTimeField);
     deleteRuntimeField('security-solution-default', timelineRuntimeField);
+    login();
   });
 
   it('adds field to alert table', () => {
@@ -39,9 +38,8 @@ describe('Create DataView runtime field', () => {
     refreshPage();
     waitForAlertsToPopulate();
     openAlertsFieldBrowser();
-
     createField(alertRunTimeField);
-    cy.get(`[data-test-subj="dataGridHeaderCell-${alertRunTimeField}"]`).should('exist');
+    cy.get(GET_DATA_GRID_HEADER(alertRunTimeField)).should('exist');
   });
 
   it('adds field to timeline', () => {
@@ -51,8 +49,6 @@ describe('Create DataView runtime field', () => {
     openTimelineFieldsBrowser();
 
     createField(timelineRuntimeField);
-    cy.get(
-      `[data-test-subj="timeline"] [data-test-subj="header-text-${timelineRuntimeField}"]`
-    ).should('exist');
+    cy.get(GET_TIMELINE_HEADER(timelineRuntimeField)).should('exist');
   });
 });
