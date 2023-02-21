@@ -24,15 +24,13 @@ import { appContextService } from '../../app_context';
 
 import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from '.';
 import type { ArchiveEntry } from '.';
-import { parseAndVerifyArchive } from './parse';
+import { MANIFEST_NAME, parseAndVerifyArchive } from './parse';
 
 const ONE_BYTE = 1024 * 1024;
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
 const MAX_ES_ASSET_BYTES = 4 * ONE_BYTE;
 // Updated to accomodate larger package size in some ML model packages
 const ML_MAX_ES_ASSET_BYTES = 50 * ONE_BYTE;
-
-const MANIFEST_NAME = 'manifest.yml';
 
 export interface PackageAsset {
   package_name: string;
