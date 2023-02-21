@@ -35,6 +35,7 @@ export const RULE_FAILED = `failed`;
 
 export const POSTURE_TYPE_KSPM = 'kspm';
 export const POSTURE_TYPE_CSPM = 'cspm';
+export const POSTURE_TYPE_ALL = 'all';
 
 // A mapping of in-development features to their status. These features should be hidden from users but can be easily
 // activated via a simple code change in a single location.

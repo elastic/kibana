@@ -12,7 +12,7 @@ import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
-export type PostureTypes = 'cspm' | 'kspm';
+export type PostureTypes = 'cspm' | 'kspm' | 'all';
 /** number between 1-100 */
 export type Score = number;
 

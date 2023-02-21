@@ -168,7 +168,8 @@ const getCspStatus = async ({
     agentService,
     logger
   );
-
+console.log(installedPackagePoliciesKspm.items[0])
+console.log(installedPackagePoliciesCspm.items[0])
   const installedPackagePoliciesTotalKspm = installedPackagePoliciesKspm.total;
   const installedPackagePoliciesTotalCspm = installedPackagePoliciesCspm.total;
   const latestCspPackageVersion = latestCspPackage.version;
@@ -287,6 +288,7 @@ export const defineGetCspStatusRoute = (router: CspRouter): void =>
       } catch (err) {
         cspContext.logger.error(`Error getting csp status`);
         cspContext.logger.error(err);
+       console.log(err);
 
         const error = transformError(err);
         return response.customError({

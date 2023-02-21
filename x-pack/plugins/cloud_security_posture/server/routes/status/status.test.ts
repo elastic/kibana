@@ -165,9 +165,38 @@ describe('CspSetupStatus route', () => {
     } as unknown as ESSearchResponse);
     mockPackageClient.fetchFindLatestPackage.mockResolvedValueOnce(mockLatestCspPackageInfo);
 
-    mockPackagePolicyService.list.mockResolvedValueOnce({
-      items: [],
-      total: 0,
+    mockPackagePolicyService.list.mockResolvedValue({
+      items: [
+        {
+          id: '2864f163-449e-45d7-acd1-d27f57132828',
+          version: 'WzgxODIsMV0=',
+          inputs: [
+            {
+              type: 'cloudbeat/cis_k8s',
+              policy_template: 'kspm',
+              enabled: true,
+              streams:[]
+            },
+          ],
+          name: 'cloud_security_posture-1',
+          namespace: 'default',
+          description: '',
+          enabled: true,
+          policy_id: 'd62be690-a7f9-11ed-b8f4-5fb952c756ea',
+          vars: [
+            {
+              posture: { value: 'kspm', type: 'text' },
+              deployment: { value: 'cloudbeat/cis_k8s', type: 'text' },
+            },
+          ],
+          revision: 1,
+          created_at: '2023-02-08T21:45:05.762Z',
+          created_by: '212470622',
+          updated_at: '2023-02-08T21:45:05.762Z',
+          updated_by: '212470622',
+        },
+      ],
+      total: 1,
       page: 1,
       perPage: 100,
     });
@@ -186,7 +215,8 @@ describe('CspSetupStatus route', () => {
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
 
     await expect(body).toMatchObject({
-      status: 'indexed',
+      kspm: {status: 'not-installed', healthyAgents: 0, installedPackagePolicies: 1},
+      cspm: {status: 'not-installed', healthyAgents: 0, installedPackagePolicies: 0},
       latestPackageVersion: '0.0.14',
       installedPackagePolicies: 0,
       healthyAgents: 0,

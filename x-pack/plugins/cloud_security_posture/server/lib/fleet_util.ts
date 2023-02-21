@@ -34,19 +34,24 @@ const isFleetMissingAgentHttpError = (error: unknown) =>
 const isPolicyTemplate = (input: any): input is PosturePolicyTemplate =>
   SUPPORTED_POLICY_TEMPLATES.includes(input);
 
-const getPackageNameQuery = (
+const getPackageNameQuery = ( // ADD 3rd case both cspm and kspm, for findings posture type empty =>  kspm
   postureType: string,
   packageName: string,
   benchmarkFilter?: string
 ): string => {
   const integrationNameQuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`;
   const integrationPostureType = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.vars.posture.value:${postureType}`;
-
-  const kquery = benchmarkFilter
-    ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}* AND ${integrationPostureType}`
-    : `${integrationNameQuery} AND ${integrationPostureType}`;
-
-  return kquery;
+  if (postureType === 'all') {
+    const kquery = benchmarkFilter
+      ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}*`
+      : `${integrationNameQuery}`;
+    return kquery;
+  } else {
+    const kquery = benchmarkFilter
+      ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}* AND ${integrationPostureType}`
+      : `${integrationNameQuery} AND ${integrationPostureType}`;
+    return kquery;
+  }
 };
 
 export type AgentStatusByAgentPolicyMap = Record<string, GetAgentStatusResponse['results']>;
