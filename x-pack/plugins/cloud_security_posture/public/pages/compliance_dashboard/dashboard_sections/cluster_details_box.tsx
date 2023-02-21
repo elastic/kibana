@@ -32,14 +32,20 @@ const defaultClusterTitle = i18n.translate(
 
 const getClusterTitle = (cluster: Cluster) => {
   if (cluster.meta.benchmark.posture_type === 'cspm') return cluster.meta.cloud?.account.name;
-  if (cluster.meta.benchmark.posture_type === 'kspm') return cluster.meta.cluster?.name;
+  return cluster.meta.cluster?.name;
+};
+
+const getClusterId = (cluster: Cluster) => {
+  const assetIdentifierId = cluster.meta.assetIdentifierId;
+  if (cluster.meta.benchmark.posture_type === 'cspm') return assetIdentifierId;
+  return assetIdentifierId.slice(0, 6);
 };
 
 export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
 
-  const shortId = cluster.meta.assetIdentifierId.slice(0, 6);
+  const assetId = getClusterId(cluster);
   const title = getClusterTitle(cluster) || defaultClusterTitle;
 
   const handleClusterTitleClick = () => {
@@ -60,10 +66,10 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
               <strong>
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.clusterTitleTooltip.clusterTitle"
-                  defaultMessage="{title} - {shortId}"
+                  defaultMessage="{title} - {assetId}"
                   values={{
                     title,
-                    shortId,
+                    assetId,
                   }}
                 />
               </strong>
@@ -75,10 +81,10 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
               <h5>
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.clusterTitle"
-                  defaultMessage="{title} - {shortId}"
+                  defaultMessage="{title} - {assetId}"
                   values={{
                     title,
-                    shortId,
+                    assetId,
                   }}
                 />
               </h5>
