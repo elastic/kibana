@@ -14,6 +14,7 @@ import {
 import { SearchRequest } from '@kbn/data-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
+import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { FindingsStatsTaskResult, TaskHealthStatus, ScoreByPolicyTemplateBucket } from './types';
 import {
@@ -108,15 +109,15 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
 const getScoreQuery = (): SearchRequest => ({
   index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   size: 0,
-  runtime_mappings: getIdentifierRuntimeMapping(),
+  // creates the safe_posture_type and asset_identifier runtime fields
+  runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },
   query: {
     match_all: {},
   },
   aggs: {
     score_by_policy_template: {
       terms: {
-        // TODO: FIX POSTURE_TYPE
-        field: 'rule.benchmark.posture_type',
+        field: 'safe_posture_type',
       },
       aggs: {
         total_findings: {
