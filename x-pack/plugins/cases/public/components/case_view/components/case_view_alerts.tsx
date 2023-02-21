@@ -15,11 +15,13 @@ import { useKibana } from '../../../common/lib/kibana';
 import { getManualAlertIds, getRegistrationContextFromAlerts } from './helpers';
 import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';
 import { CaseViewAlertsEmpty } from './case_view_alerts_empty';
-
+import { CaseViewTabs } from '../case_view_tabs';
+import type { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 interface CaseViewAlertsProps {
   caseData: Case;
+  activeTab: CASE_VIEW_PAGE_TABS;
 }
-export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
+export const CaseViewAlerts = ({ caseData, activeTab }: CaseViewAlertsProps) => {
   const { triggersActionsUi } = useKibana().services;
 
   const alertIdsQuery = useMemo(
@@ -61,7 +63,14 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    triggersActionsUi.getAlertsStateTable(alertStateProps)
+    <EuiFlexItem data-test-subj="case-view-alerts">
+      <CaseViewTabs caseData={caseData} activeTab={activeTab} />
+      <EuiFlexGroup>
+        <EuiFlexItem style={{ minHeight: 300 }}>
+          {triggersActionsUi.getAlertsStateTable(alertStateProps)}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
   );
 };
 CaseViewAlerts.displayName = 'CaseViewAlerts';

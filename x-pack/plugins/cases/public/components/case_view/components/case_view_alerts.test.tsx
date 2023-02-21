@@ -11,6 +11,7 @@ import { OBSERVABILITY_OWNER } from '../../../../common/constants';
 import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
+import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { Case } from '../../../../common';
 import { CaseViewAlerts } from './case_view_alerts';
 import * as api from '../../../containers/api';
@@ -21,6 +22,8 @@ const caseData: Case = {
   ...basicCase,
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
+
+const alertTab = CASE_VIEW_PAGE_TABS.ALERTS;
 
 describe('Case View Page activity tab', () => {
   const getAlertsStateTableMock = jest.fn();
@@ -34,14 +37,16 @@ describe('Case View Page activity tab', () => {
   });
 
   it('should render the alerts table', async () => {
-    const result = appMockRender.render(<CaseViewAlerts caseData={caseData} />);
+    const result = appMockRender.render(
+      <CaseViewAlerts caseData={caseData} activeTab={alertTab} />
+    );
     await waitFor(async () => {
       expect(result.getByTestId('alerts-table')).toBeTruthy();
     });
   });
 
   it('should call the alerts table with correct props for security solution', async () => {
-    appMockRender.render(<CaseViewAlerts caseData={caseData} />);
+    appMockRender.render(<CaseViewAlerts caseData={caseData} activeTab={alertTab} />);
     await waitFor(async () => {
       expect(getAlertsStateTableMock).toHaveBeenCalledWith({
         alertsTableConfigurationRegistry: expect.anything(),
@@ -69,6 +74,7 @@ describe('Case View Page activity tab', () => {
           ...caseData,
           owner: OBSERVABILITY_OWNER,
         }}
+        activeTab={alertTab}
       />
     );
 
@@ -92,7 +98,7 @@ describe('Case View Page activity tab', () => {
 
   it('should call the getFeatureIds with the correct registration context', async () => {
     const getFeatureIdsMock = jest.spyOn(api, 'getFeatureIds');
-    appMockRender.render(<CaseViewAlerts caseData={caseData} />);
+    appMockRender.render(<CaseViewAlerts caseData={caseData} activeTab={alertTab} />);
     await waitFor(async () => {
       expect(getFeatureIdsMock).toHaveBeenCalledWith(
         { registrationContext: ['matchme'] },
@@ -108,6 +114,7 @@ describe('Case View Page activity tab', () => {
           ...caseData,
           comments: [],
         }}
+        activeTab={alertTab}
       />
     );
     await waitFor(async () => {

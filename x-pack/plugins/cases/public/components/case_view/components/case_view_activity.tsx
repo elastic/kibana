@@ -35,6 +35,10 @@ import { AssignUsers } from './assign_users';
 import { UserActionsActivityBar } from '../../user_actions_activity_bar';
 import type { Assignee } from '../../user_profiles/types';
 import { convertToCaseUserWithProfileInfo } from '../../user_profiles/user_converter';
+import type { Params } from '../../user_actions_activity_bar';
+import type { FilterType, SortOrderType } from '../../user_actions_activity_bar/types';
+import type { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import { CaseViewTabs } from '../case_view_tabs';
 
 const buildUserProfilesMap = (users?: CaseUsers): Map<string, UserProfileWithAvatar> => {
   const userProfiles = new Map();
@@ -69,8 +73,6 @@ const buildUserProfilesMap = (users?: CaseUsers): Map<string, UserProfileWithAva
 
   return userProfiles;
 };
-import type { Params } from '../../user_actions_activity_bar';
-import type { FilterType, SortOrderType } from '../../user_actions_activity_bar/types';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -78,17 +80,20 @@ export const CaseViewActivity = ({
   actionsNavigation,
   showAlertDetails,
   useFetchAlertData,
+  activeTab,
 }: {
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   caseData: Case;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
+  activeTab: CASE_VIEW_PAGE_TABS;
 }) => {
   const [filterOptions, setFilterOptions] = useState<FilterType>('all');
   const [sortOrder, setSortOrder] = useState<SortOrderType>('asc');
 
   const { permissions } = useCasesContext();
+
   const { caseAssignmentAuthorized, pushToServiceAuthorized } = useCasesFeatures();
 
   const { data: caseConnectors, isLoading: isLoadingCaseConnectors } = useGetCaseConnectors(
@@ -202,6 +207,7 @@ export const CaseViewActivity = ({
   return (
     <>
       <EuiFlexItem grow={6}>
+        <CaseViewTabs caseData={caseData} activeTab={activeTab} />
         <EuiFlexItem grow={false}>
           <UserActionsActivityBar
             onUserActionsActivityChanged={handleUserActionsActivityChanged}

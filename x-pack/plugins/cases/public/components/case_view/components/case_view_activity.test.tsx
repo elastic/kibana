@@ -22,6 +22,7 @@ import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common
 import { CaseViewActivity } from './case_view_activity';
 import { ConnectorTypes } from '../../../../common/api/connectors';
 import type { Case } from '../../../../common';
+import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseViewProps } from '../types';
 import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
@@ -86,6 +87,8 @@ const sortOrder = 'asc';
 
 const pushCaseToExternalService = jest.fn();
 
+const activityTab = CASE_VIEW_PAGE_TABS.ACTIVITY;
+
 const userActionsStats = {
   total: 21,
   totalComments: 9,
@@ -96,6 +99,7 @@ export const caseProps = {
   ...caseViewProps,
   caseData,
   fetchCaseMetrics: jest.fn(),
+  activeTab: activityTab,
 };
 
 const caseUsers = getCaseUsersMockResponse();
