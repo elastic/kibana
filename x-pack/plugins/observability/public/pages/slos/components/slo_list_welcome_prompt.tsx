@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useLicense } from '../../../hooks/use_license';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { paths } from '../../../config';
 import illustration from './assets/illustration.svg';
 
@@ -28,6 +29,7 @@ export function SloListWelcomePrompt() {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
+  const { ObservabilityPageTemplate } = usePluginContext();
 
   const { hasAtLeast } = useLicense();
 
@@ -38,11 +40,7 @@ export function SloListWelcomePrompt() {
   };
 
   return (
-    <EuiPageTemplate
-      minHeight="0"
-      data-test-subj="slosPageWelcomePrompt"
-      style={{ paddingBlockStart: 0 }}
-    >
+    <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">
       <EuiPageTemplate.EmptyPrompt
         title={
           <EuiTitle size="l">
@@ -177,6 +175,6 @@ export function SloListWelcomePrompt() {
           </>
         }
       />
-    </EuiPageTemplate>
+    </ObservabilityPageTemplate>
   );
 }
