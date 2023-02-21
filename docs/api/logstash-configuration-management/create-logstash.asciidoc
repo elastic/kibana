@@ -21,7 +21,7 @@ experimental[] Create a centrally-managed Logstash pipeline, or update an existi
 ==== Request body
 
 `description`::
-  (Optional, string) The pipeline description.
+  (Required, string) The pipeline description.
 
 `pipeline`::
   (Required, string) The pipeline definition.
@@ -43,6 +43,8 @@ experimental[] Create a centrally-managed Logstash pipeline, or update an existi
 --------------------------------------------------
 $ curl -X PUT api/logstash/pipeline/hello-world
 {
+  "id": "hello-world",
+  "description": "My Hello World pipeline",
   "pipeline": "input { stdin {} } output { stdout {} }",
   "settings": {
     "queue.type": "persisted"
