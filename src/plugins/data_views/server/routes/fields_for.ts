@@ -84,7 +84,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
       type,
       rollupIndex,
       fieldCapsOptions: {
-        allow_no_indices: allowNoIndex || false,
+        allow_no_indices: allowNoIndex ?? true,
         includeUnmapped,
       },
       indexFilter,
