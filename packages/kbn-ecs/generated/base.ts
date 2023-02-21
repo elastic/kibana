@@ -16,7 +16,7 @@ export interface EcsBase {
    * If the event source has no original timestamp, this value is typically populated by the first time the event was received by the pipeline.
    * Required field for all events.
    */
-  "@timestamp": string;
+  '@timestamp': string;
   /**
    * Custom key/value pairs.
    * Can be used to add meta information to events. Should not contain nested objects. All values are stored as keyword.

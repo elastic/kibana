@@ -16,7 +16,7 @@ export interface EcsDns {
    * The main keys that should be present in these objects are defined by ECS. Records that have more information may contain more keys than what ECS defines.
    * Not all DNS data sources give all details about DNS answers. At minimum, answer objects must contain the `data` key. If more information is available, map as much of it to ECS as possible, and add any additional fields to the answer objects as custom fields.
    */
-  answers?: Record<string, unknown>[];
+  answers?: Array<Record<string, unknown>>;
   /**
    * Array of 2 letter DNS header flags.
    */
