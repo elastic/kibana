@@ -16,7 +16,7 @@ import {
   logEntryRateJobTypes,
   Pagination,
 } from '../../../common/log_analysis';
-import { ResolvedLogView } from '../../../common/log_views';
+import { PersistedLogViewReference, ResolvedLogView } from '../../../common/log_views';
 import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
@@ -331,7 +331,7 @@ export async function getLogEntryExamples(
   context: InfraPluginRequestHandlerContext & {
     infra: Promise<Required<InfraRequestHandlerContext>>;
   },
-  sourceId: string,
+  logView: PersistedLogViewReference,
   startTime: number,
   endTime: number,
   dataset: string,
@@ -345,7 +345,7 @@ export async function getLogEntryExamples(
 
   const jobId = getJobId(
     infraContext.spaceId,
-    sourceId,
+    logView.logViewId,
     categoryId != null ? logEntryCategoriesJobTypes[0] : logEntryRateJobTypes[0]
   );
 
@@ -370,7 +370,7 @@ export async function getLogEntryExamples(
     timing: { spans: fetchLogEntryExamplesSpans },
   } = await fetchLogEntryExamples(
     context,
-    sourceId,
+    logView,
     indices,
     runtimeMappings,
     timestampField,
@@ -397,7 +397,7 @@ export async function fetchLogEntryExamples(
   context: InfraPluginRequestHandlerContext & {
     infra: Promise<Required<InfraRequestHandlerContext>>;
   },
-  sourceId: string,
+  logView: PersistedLogViewReference,
   indices: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   timestampField: string,
@@ -420,7 +420,7 @@ export async function fetchLogEntryExamples(
 
     const logEntryCategoriesCountJobId = getJobId(
       infraContext.spaceId,
-      sourceId,
+      logView.logViewId,
       logEntryCategoriesJobTypes[0]
     );
 

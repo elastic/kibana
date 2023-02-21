@@ -43,7 +43,10 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       const [, , { logViews }] = await libs.getStartServices();
       const logQueryFields: LogQueryFields | undefined = await logViews
         .getScopedClient(request)
-        .getResolvedLogView(snapshotRequest.sourceId)
+        .getResolvedLogView({
+          type: 'log-view-reference',
+          logViewId: snapshotRequest.sourceId,
+        })
         .then(
           ({ indices }) => ({ indexPattern: indices }),
           () => undefined
