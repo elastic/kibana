@@ -12,7 +12,6 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiHideFor,
-  EuiScreenReaderLive,
   EuiShowFor,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -47,6 +46,7 @@ import { HeaderActionMenu } from './header_action_menu';
 import { HeaderExtension } from './header_extension';
 import { HeaderTopBanner } from './header_top_banner';
 import { HeaderMenuButton } from './header_menu_button';
+import { ScreenReaderRouteAnnouncements } from './screen_reader_a11y';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -166,16 +166,9 @@ export function Header({
           />
 
           <EuiHeader position="fixed" className="header__secondBar">
+            <ScreenReaderRouteAnnouncements breadcrumbs$={observables.breadcrumbs$} />
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
-                <EuiScreenReaderLive focusRegionOnTextChange>
-                  {i18n.translate('core.ui.primaryNav.screenReaderAnnouncement', {
-                    defaultMessage: '{title}',
-                    values: {
-                      title: application.currentAppId$ as unknown as string,
-                    },
-                  })}
-                </EuiScreenReaderLive>
                 <CollapsibleNav
                   appId$={application.currentAppId$}
                   id={navId}
