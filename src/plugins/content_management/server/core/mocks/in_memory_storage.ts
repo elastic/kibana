@@ -41,9 +41,16 @@ class InMemoryStorage implements ContentStorage {
   async bulkGet(
     ctx: StorageContext,
     ids: string[],
-    { forwardInResponse }: { forwardInResponse?: object } = {}
+    { forwardInResponse, errorToThrow }: { forwardInResponse?: object; errorToThrow?: string } = {}
   ) {
-    return ids.map((id) => this.db.get(id));
+    // This allows us to test that proper error events are thrown when the storage layer op fails
+    if (errorToThrow) {
+      throw new Error(errorToThrow);
+    }
+
+    return ids.map((id) =>
+      forwardInResponse ? { ...this.db.get(id), options: forwardInResponse } : this.db.get(id)
+    );
   }
 
   async create(

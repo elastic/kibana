@@ -16,6 +16,9 @@ import type {
   GetItemStart,
   GetItemSuccess,
   GetItemError,
+  BulkGetItemStart,
+  BulkGetItemSuccess,
+  BulkGetItemError,
   CreateItemStart,
   CreateItemSuccess,
   CreateItemError,
@@ -130,6 +133,37 @@ describe('Content Core', () => {
               // Options forwared in response
               options: { foo: 'bar' },
             },
+          });
+
+          cleanUp();
+        });
+
+        test('bulkGet()', async () => {
+          const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
+
+          const res = await fooContentCrud!.bulkGet(ctx, ['1', '2']);
+          expect(res.items).toEqual([]);
+
+          cleanUp();
+        });
+
+        test('bulkGet() - options are forwared to storage layer', async () => {
+          const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
+
+          const res = await fooContentCrud!.bulkGet(ctx, ['1', '2'], {
+            forwardInResponse: { foo: 'bar' },
+          });
+
+          expect(res).toEqual({
+            contentTypeId: FOO_CONTENT_ID,
+            items: [
+              {
+                options: { foo: 'bar' }, // Options forwared in response
+              },
+              {
+                options: { foo: 'bar' }, // Options forwared in response
+              },
+            ],
           });
 
           cleanUp();
@@ -415,6 +449,80 @@ describe('Content Core', () => {
             };
 
             expect(listener).toHaveBeenLastCalledWith(getItemError);
+
+            expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
+
+            sub.unsubscribe();
+
+            cleanUp();
+          });
+
+          test('bulkGet()', async () => {
+            const { fooContentCrud, eventBus, ctx, cleanUp } = setup({
+              registerFooType: true,
+            });
+
+            const data = { title: 'Hello' };
+
+            await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(ctx, data, {
+              id: '1234',
+            });
+            await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(ctx, data, {
+              id: '5678',
+            });
+
+            const listener = jest.fn();
+            const sub = eventBus.events$.subscribe(listener);
+
+            const promise = fooContentCrud!.bulkGet(ctx, ['1234', '5678'], { someOption: 'baz' });
+
+            const bulkGetItemStart: BulkGetItemStart = {
+              type: 'bulkGetItemStart',
+              ids: ['1234', '5678'],
+              contentTypeId: FOO_CONTENT_ID,
+              options: { someOption: 'baz' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(bulkGetItemStart);
+
+            await promise;
+
+            const bulkGetItemSuccess: BulkGetItemSuccess = {
+              type: 'bulkGetItemSuccess',
+              ids: ['1234', '5678'],
+              data: [
+                {
+                  id: '1234',
+                  ...data,
+                },
+                {
+                  id: '5678',
+                  ...data,
+                },
+              ],
+              contentTypeId: FOO_CONTENT_ID,
+              options: { someOption: 'baz' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(bulkGetItemSuccess);
+
+            listener.mockReset();
+
+            const errorMessage = 'Ohhh no!';
+            const reject = jest.fn();
+            await fooContentCrud!
+              .bulkGet(ctx, ['1234', '5678'], { errorToThrow: errorMessage })
+              .catch(reject);
+
+            const bulkGetItemError: BulkGetItemError = {
+              type: 'bulkGetItemError',
+              ids: ['1234', '5678'],
+              contentTypeId: FOO_CONTENT_ID,
+              error: errorMessage,
+              options: { errorToThrow: errorMessage },
+            };
+
+            expect(listener).toHaveBeenLastCalledWith(bulkGetItemError);
 
             expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
 

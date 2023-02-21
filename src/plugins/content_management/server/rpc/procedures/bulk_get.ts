@@ -7,35 +7,24 @@
  */
 
 import { rpcSchemas } from '../../../common';
-import type { SearchIn } from '../../../common';
+import type { BulkGetIn } from '../../../common';
 import type { StorageContext, ContentCrud } from '../../core';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
 import { validate } from '../../utils';
+import { BulkGetResponse } from '../../core/crud';
 
-export const search: ProcedureDefinition<Context, SearchIn<string>> = {
-  schemas: rpcSchemas.search,
-  fn: async (ctx, { contentTypeId, query, options }) => {
+export const bulkGet: ProcedureDefinition<Context, BulkGetIn<string>, BulkGetResponse> = {
+  schemas: rpcSchemas.bulkGet,
+  fn: async (ctx, { contentTypeId, ids, options }) => {
     const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
-    const { search: schemas } = contentDefinition.schemas.content;
-
-    // Validate query to execute
-    if (schemas?.in?.query) {
-      const error = validate(query, schemas.in.query);
-      if (error) {
-        // TODO: Improve error handling
-        throw error;
-      }
-    } else {
-      // TODO: Improve error handling
-      throw new Error('Schema missing for rpc procedure [search.in.query].');
-    }
+    const { bulkGet: schemas } = contentDefinition.schemas.content;
 
     // Validate the possible options
     if (options) {
-      if (!schemas.in?.options) {
+      if (!schemas?.in?.options) {
         // TODO: Improve error handling
-        throw new Error('Schema missing for rpc procedure [search.in.options].');
+        throw new Error('Schema missing for rpc procedure [bulkGet.in.options].');
       }
       const error = validate(options, schemas.in.options);
       if (error) {
@@ -49,12 +38,12 @@ export const search: ProcedureDefinition<Context, SearchIn<string>> = {
     const storageContext: StorageContext = {
       requestHandlerContext: ctx.requestHandlerContext,
     };
-    const result = await crudInstance.search(storageContext, query, options);
+    const result = await crudInstance.bulkGet(storageContext, ids, options);
 
     // Validate result
-    const resultSchema = schemas.out?.result;
+    const resultSchema = schemas?.out?.result;
     if (resultSchema) {
-      const error = validate(result.result, resultSchema);
+      const error = validate(result.items, resultSchema);
       if (error) {
         // TODO: Improve error handling
         throw error;

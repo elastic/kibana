@@ -109,6 +109,7 @@ export class ContentCrud implements ContentStorage {
         ids,
         contentTypeId: this.contentTypeId,
         data: items,
+        options,
       });
 
       return {
@@ -121,7 +122,7 @@ export class ContentCrud implements ContentStorage {
         ids,
         contentTypeId: this.contentTypeId,
         options,
-        error: e,
+        error: e.message,
       });
 
       throw e;

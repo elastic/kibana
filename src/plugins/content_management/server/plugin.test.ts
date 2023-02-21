@@ -31,55 +31,35 @@ jest.mock('./core', () => ({
 }));
 
 const mockGet = jest.fn().mockResolvedValue('getMocked');
+const mockBulkGet = jest.fn().mockResolvedValue('bulkGetMocked');
 const mockCreate = jest.fn().mockResolvedValue('createMocked');
 const mockUpdate = jest.fn().mockResolvedValue('updateMocked');
 const mockDelete = jest.fn().mockResolvedValue('deleteMocked');
 const mockSearch = jest.fn().mockResolvedValue('searchMocked');
 
-jest.mock('./rpc/procedures/all_procedures', () => ({
-  procedures: {
-    get: {
-      fn: (...args: unknown[]) => mockGet(...args),
-      schemas: {
-        in: {
-          validate: () => undefined,
-        } as any,
-      },
+jest.mock('./rpc/procedures/all_procedures', () => {
+  const mockedProcedure = (spyGetter: () => jest.Mock) => ({
+    fn: (...args: unknown[]) => spyGetter()(...args),
+    schemas: {
+      in: {
+        validate: () => undefined,
+      } as any,
     },
-    create: {
-      fn: (...args: unknown[]) => mockCreate(...args),
-      schemas: {
-        in: {
-          validate: () => undefined,
-        } as any,
-      },
-    },
-    update: {
-      fn: (...args: unknown[]) => mockUpdate(...args),
-      schemas: {
-        in: {
-          validate: () => undefined,
-        } as any,
-      },
-    },
-    delete: {
-      fn: (...args: unknown[]) => mockDelete(...args),
-      schemas: {
-        in: {
-          validate: () => undefined,
-        } as any,
-      },
-    },
-    search: {
-      fn: (...args: unknown[]) => mockSearch(...args),
-      schemas: {
-        in: {
-          validate: () => undefined,
-        } as any,
-      },
-    },
-  } as { [key in ProcedureName]: ProcedureDefinition<Context, any, any> },
-}));
+  });
+
+  const mockedProcedures: { [key in ProcedureName]: any } = {
+    get: mockedProcedure(() => mockGet),
+    bulkGet: mockedProcedure(() => mockBulkGet),
+    create: mockedProcedure(() => mockCreate),
+    update: mockedProcedure(() => mockUpdate),
+    delete: mockedProcedure(() => mockDelete),
+    search: mockedProcedure(() => mockSearch),
+  };
+
+  return {
+    procedures: mockedProcedures,
+  };
+});
 
 const setup = () => {
   const logger = loggingSystemMock.create();

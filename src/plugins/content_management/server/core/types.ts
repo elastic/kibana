@@ -43,6 +43,14 @@ export interface RpcSchemas {
       result: Type<any>;
     };
   };
+  bulkGet?: {
+    in?: {
+      options?: Type<any>;
+    };
+    out?: {
+      result: Type<any>;
+    };
+  };
   create: {
     in: {
       data: Type<any>;
