@@ -6,6 +6,7 @@
  */
 import { useReducer, useMemo, useCallback } from 'react';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
+import { cloneDeep } from 'lodash';
 import { mapFiltersToKueryNode } from '../lib/rule_api/map_filters_to_kuery_node';
 import { RuleTableItem, RuleStatus } from '../../types';
 
@@ -42,14 +43,15 @@ const reducer = (state: BulkEditSelectionState, action: Action) => {
       };
     case ActionTypes.TOGGLE_ROW: {
       const id = payload as string;
+      const selectedIds = new Set(Array.from(state.selectedIds));
       if (state.selectedIds.has(id)) {
-        state.selectedIds.delete(id);
+        selectedIds.delete(id);
       } else {
-        state.selectedIds.add(id);
+        selectedIds.add(id);
       }
       return {
         ...state,
-        selectedIds: new Set<string>(state.selectedIds),
+        selectedIds,
       };
     }
     case ActionTypes.SET_SELECTION: {
@@ -95,7 +97,7 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
     searchText,
   } = props;
 
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, cloneDeep(initialState));
 
   const itemIds = useMemo(() => {
     return items.map((item) => item.id);

@@ -171,15 +171,15 @@ describe('Rules list bulk delete', () => {
     renderWithProviders(<RulesList />);
     await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-    fireEvent.click(await screen.getByTestId('checkboxSelectRow-1'));
-    fireEvent.click(await screen.getByTestId('selectAllRulesButton'));
-    fireEvent.click(await screen.getByTestId('checkboxSelectRow-2'));
-    fireEvent.click(await screen.getByTestId('showBulkActionButton'));
+    fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
+    fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+    fireEvent.click(screen.getByTestId('checkboxSelectRow-2'));
+    fireEvent.click(screen.getByTestId('showBulkActionButton'));
 
-    fireEvent.click(await screen.getByTestId('bulkDelete'));
-    expect(await screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('bulkDelete'));
+    expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
     await act(async () => {
-      fireEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
     });
 
     const filter = bulkDeleteRules.mock.calls[0][0].filter;
@@ -201,15 +201,15 @@ describe('Rules list bulk delete', () => {
     renderWithProviders(<RulesList />);
     await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-    fireEvent.click(await screen.getByTestId('checkboxSelectRow-1'));
-    fireEvent.click(await screen.getByTestId('selectAllRulesButton'));
-    fireEvent.click(await screen.getByTestId('checkboxSelectRow-2'));
-    fireEvent.click(await screen.getByTestId('showBulkActionButton'));
+    fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
+    fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+    fireEvent.click(screen.getByTestId('checkboxSelectRow-2'));
+    fireEvent.click(screen.getByTestId('showBulkActionButton'));
 
-    fireEvent.click(await screen.getByTestId('bulkDelete'));
-    expect(await screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('bulkDelete'));
+    expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
     await act(async () => {
-      fireEvent.click(await screen.getByTestId('confirmModalCancelButton'));
+      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
     });
     expect(bulkDeleteRules).not.toBeCalled();
   });
@@ -231,15 +231,15 @@ describe('Rules list bulk delete', () => {
     renderWithProviders(<RulesList />);
     await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-    fireEvent.click(await screen.getByTestId('checkboxSelectRow-1'));
-    fireEvent.click(await screen.getByTestId('selectAllRulesButton'));
-    fireEvent.click(await screen.getByTestId('checkboxSelectRow-2'));
-    fireEvent.click(await screen.getByTestId('showBulkActionButton'));
+    fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
+    fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+    fireEvent.click(screen.getByTestId('checkboxSelectRow-2'));
+    fireEvent.click(screen.getByTestId('showBulkActionButton'));
 
-    fireEvent.click(await screen.getByTestId('bulkDelete'));
-    expect(await screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('bulkDelete'));
+    expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
     await act(async () => {
-      fireEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
     });
 
     expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
@@ -267,15 +267,15 @@ describe('Rules list bulk delete', () => {
     renderWithProviders(<RulesList />);
     await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-    fireEvent.click(await screen.getByTestId('checkboxSelectRow-1'));
-    fireEvent.click(await screen.getByTestId('selectAllRulesButton'));
-    fireEvent.click(await screen.getByTestId('checkboxSelectRow-2'));
-    fireEvent.click(await screen.getByTestId('showBulkActionButton'));
+    fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
+    fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+    fireEvent.click(screen.getByTestId('checkboxSelectRow-2'));
+    fireEvent.click(screen.getByTestId('showBulkActionButton'));
 
-    fireEvent.click(await screen.getByTestId('bulkDelete'));
-    expect(await screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('bulkDelete'));
+    expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
     await act(async () => {
-      fireEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
     });
 
     expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
