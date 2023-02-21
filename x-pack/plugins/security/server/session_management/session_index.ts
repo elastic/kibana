@@ -720,7 +720,7 @@ export class SessionIndex {
         // We write to the alias for `create` operations so that we can prevent index auto-creation in the event it is missing.
         index: this.aliasName,
         body: sessionValueToStore,
-        refresh: 'wait_for',
+        refresh: 'false',
         require_alias: true,
       } as CreateRequest,
       { meta: true, ignore: ignore404 ? [404] : [] }
@@ -742,7 +742,7 @@ export class SessionIndex {
         body: sessionValueToStore,
         if_seq_no: metadata.sequenceNumber,
         if_primary_term: metadata.primaryTerm,
-        refresh: 'wait_for',
+        refresh: 'false',
         require_alias: true,
       },
       { ignore: ignore404 ? [404, 409] : [409], meta: true }

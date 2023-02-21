@@ -25,6 +25,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
+  const esSupertest = getService('esSupertest');
   const es = getService('es');
   const security = getService('security');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
@@ -371,16 +372,20 @@ export default function ({ getService }: FtrProviderContext) {
         unauthenticatedSessionOne.cookie,
         unauthenticatedSessionOne.location
       );
-      await setTimeoutAsync(500);
+      // await setTimeoutAsync(500);
       const samlSessionCookieTwo = await finishSAMLHandshake(
         unauthenticatedSessionTwo.cookie,
         unauthenticatedSessionTwo.location
       );
-      await setTimeoutAsync(500);
+      // await setTimeoutAsync(500);
       const samlSessionCookieThree = await finishSAMLHandshake(
         unauthenticatedSessionThree.cookie,
         unauthenticatedSessionThree.location
       );
+
+      await setTimeoutAsync(500);
+      // await esSupertest.post('/_refresh');
+      await setTimeoutAsync(1000);
 
       // For authenticated sessions limit should be enforced
       await checkSessionCookieInvalid(samlSessionCookieOne);
