@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './use_log_position';
+export * from './src/types';
+export * from './src/defaults';
