@@ -57,7 +57,7 @@ import { EcsVlan } from './vlan';
 import { EcsVulnerability } from './vulnerability';
 import { EcsX509 } from './x509';
 
-export const EcsVersion = '8.6.0' as const;
+export const EcsVersion = '8.6.1' as const;
 
 /**
  * Exporting raw schema files for easy programmatic use

@@ -8927,10 +8927,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.10":
-  version "4.1.10"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.10.tgz#a33299c40afa8dfbd948c8dd338608b163f7c062"
-  integrity sha512-o6ARpkBI8J0b+jhLjXF46rYc8Vsb5CLrRetyA3V3qUPVDwNjPDyHZsZOCFSXH0KPZ6lIn2BfP1xVEPnO+AQy5w==
+"@types/selenium-webdriver@^4.1.11":
+  version "4.1.11"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.11.tgz#29ad053d04bf07c148dae36ba09baa3af5323cb0"
+  integrity sha512-KQ+TIvSTdpkUoW+fCLO3XyxlpnoD1PSZc0TBbuSbD/6gltB6gZ9q/VxhDGR7svhwA23G35uCAb5guAlVUaQKeA==
   dependencies:
     "@types/ws" "*"
 
@@ -24840,7 +24840,7 @@ remark-parse-no-trim@^8.0.4:
     vfile-location "^3.0.0"
     xtend "^4.0.1"
 
-remark-parse@8.0.3, remark-parse@^8.0.3:
+remark-parse@8.0.3:
   version "8.0.3"
   resolved "https://registry.yarnpkg.com/remark-parse/-/remark-parse-8.0.3.tgz#9c62aa3b35b79a486454c690472906075f40c7e1"
   integrity sha512-E1K9+QLGgggHxCQtLt++uXltxEprmWzNfg+MxpfHsZlrddKzZ/hZyWHDbK3/Ap8HJQqYJRXP+jHczdL6q6i85Q==

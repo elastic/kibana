@@ -42,7 +42,7 @@ export const useRetrieveStepImage = ({
   /**
    * Whether to retry screenshot image fetch on revisit (when intersection change triggers).
    * Will only re-fetch if an image fetch wasn't successful in previous attempts.
-   * Set this to `true` fro "Run Once" / "Test Now" modes
+   * Set this to `true` from "Run Once" / "Test Now" modes
    *
    */
   retryFetchOnRevisit: boolean;
