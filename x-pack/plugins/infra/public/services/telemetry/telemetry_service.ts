@@ -18,9 +18,7 @@ export class TelemetryService {
 
   public setup({ analytics }: TelemetryServiceSetupParams) {
     this.analytics = analytics;
-    infraTelemetryEvents.forEach((eventConfig) =>
-      analytics.registerEventType<InfraTelemetryEventParams>(eventConfig)
-    );
+    infraTelemetryEvents.forEach((eventConfig) => analytics.registerEventType(eventConfig));
   }
 
   public start(): ITelemetryClient {

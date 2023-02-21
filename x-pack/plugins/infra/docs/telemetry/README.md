@@ -6,5 +6,6 @@ Custom events provide a flexible way to track specific user behaviors and applic
 
 In this documentation, we will see how to implement custom events and how to trigger them while working with React.
 
-- [Define custom events with TelemetryService](./define-custom-events.md)
-- [Examples for using custom events in the plugin](./trigger-custom-events-examples.md)
+- [TelemetryService Overview](./telemetry_service_overview.md)
+- [Define custom events with TelemetryService](./define_custom_events.md)
+- [Examples of using custom events in the plugin](./trigger_custom_events_examples.md)
