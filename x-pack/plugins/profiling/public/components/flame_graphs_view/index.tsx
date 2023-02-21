@@ -50,6 +50,22 @@ export function FlameGraphInformationWindowSwitch({
   );
 }
 
+export function FlameGraphSearchPanel({
+  children,
+  searchBar,
+}: {
+  children: React.ReactNode;
+  searchBar: JSX.Element;
+}) {
+  return (
+    <EuiPanel hasShadow={false} color="subdued">
+      {searchBar}
+      <EuiHorizontalRule />
+      <EuiFlexGroup direction="row">{children}</EuiFlexGroup>
+    </EuiPanel>
+  );
+}
+
 export function FlameGraphsView({ children }: { children: React.ReactElement }) {
   const {
     path,
@@ -158,143 +174,133 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   return (
     <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={true}>
       <EuiFlexGroup direction="column">
-        {isDifferentialView ? (
-          <EuiFlexItem grow={false}>
-            <EuiPanel hasShadow={false} color="subdued">
-              <PrimaryAndComparisonSearchBar />
-              <EuiHorizontalRule />
-              <EuiFlexGroup direction="row">
+        <EuiFlexItem grow={false}>
+          {isDifferentialView ? (
+            <FlameGraphSearchPanel searchBar={<PrimaryAndComparisonSearchBar />}>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xxs">
+                      <h3>
+                        {i18n.translate(
+                          'xpack.profiling.flameGraphsView.differentialFlameGraphComparisonModeTitle',
+                          { defaultMessage: 'Format' }
+                        )}
+                      </h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonGroup
+                      legend={i18n.translate(
+                        'xpack.profiling.flameGraphsView.differentialFlameGraphComparisonModeLegend',
+                        {
+                          defaultMessage:
+                            'This switch allows you to switch between an absolute and relative comparison between both graphs',
+                        }
+                      )}
+                      type="single"
+                      buttonSize="s"
+                      idSelected={comparisonMode}
+                      onChange={(nextComparisonMode) => {
+                        if (!('comparisonRangeFrom' in query)) {
+                          return;
+                        }
+
+                        profilingRouter.push(routePath, {
+                          path,
+                          query: {
+                            ...query,
+                            ...(nextComparisonMode === FlameGraphComparisonMode.Absolute
+                              ? {
+                                  comparisonMode: FlameGraphComparisonMode.Absolute,
+                                  normalizationMode: FlameGraphNormalizationMode.Time,
+                                }
+                              : { comparisonMode: FlameGraphComparisonMode.Relative }),
+                          },
+                        });
+                      }}
+                      options={[
+                        {
+                          id: FlameGraphComparisonMode.Absolute,
+                          label: i18n.translate(
+                            'xpack.profiling.flameGraphsView.differentialFlameGraphComparisonModeAbsoluteButtonLabel',
+                            {
+                              defaultMessage: 'Abs',
+                            }
+                          ),
+                        },
+                        {
+                          id: FlameGraphComparisonMode.Relative,
+                          label: i18n.translate(
+                            'xpack.profiling.flameGraphsView.differentialFlameGraphComparisonModeRelativeButtonLabel',
+                            {
+                              defaultMessage: 'Rel',
+                            }
+                          ),
+                        },
+                      ]}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              {comparisonMode === FlameGraphComparisonMode.Absolute ? (
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiTitle size="xxs">
-                        <h3>
-                          {i18n.translate(
-                            'xpack.profiling.flameGraphsView.differentialFlameGraphComparisonModeTitle',
-                            { defaultMessage: 'Format' }
-                          )}
-                        </h3>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonGroup
-                        legend={i18n.translate(
-                          'xpack.profiling.flameGraphsView.differentialFlameGraphComparisonModeLegend',
-                          {
-                            defaultMessage:
-                              'This switch allows you to switch between an absolute and relative comparison between both graphs',
-                          }
-                        )}
-                        type="single"
-                        buttonSize="s"
-                        idSelected={comparisonMode}
-                        onChange={(nextComparisonMode) => {
-                          if (!('comparisonRangeFrom' in query)) {
-                            return;
-                          }
-
+                      <NormalizationMenu
+                        onChange={(options) => {
                           profilingRouter.push(routePath, {
-                            path,
+                            path: routePath,
+                            // @ts-expect-error Code gets too complicated to satisfy TS constraints
                             query: {
                               ...query,
-                              ...(nextComparisonMode === FlameGraphComparisonMode.Absolute
-                                ? {
-                                    comparisonMode: FlameGraphComparisonMode.Absolute,
-                                    normalizationMode: FlameGraphNormalizationMode.Time,
-                                  }
-                                : { comparisonMode: FlameGraphComparisonMode.Relative }),
+                              ...pick(options, 'baseline', 'comparison'),
+                              normalizationMode: options.mode,
                             },
                           });
                         }}
-                        options={[
-                          {
-                            id: FlameGraphComparisonMode.Absolute,
-                            label: i18n.translate(
-                              'xpack.profiling.flameGraphsView.differentialFlameGraphComparisonModeAbsoluteButtonLabel',
-                              {
-                                defaultMessage: 'Abs',
-                              }
-                            ),
-                          },
-                          {
-                            id: FlameGraphComparisonMode.Relative,
-                            label: i18n.translate(
-                              'xpack.profiling.flameGraphsView.differentialFlameGraphComparisonModeRelativeButtonLabel',
-                              {
-                                defaultMessage: 'Rel',
-                              }
-                            ),
-                          },
-                        ]}
+                        totalSeconds={
+                          (new Date(timeRange.end).getTime() -
+                            new Date(timeRange.start).getTime()) /
+                          1000
+                        }
+                        comparisonTotalSeconds={
+                          (new Date(comparisonTimeRange.end!).getTime() -
+                            new Date(comparisonTimeRange.start!).getTime()) /
+                          1000
+                        }
+                        options={
+                          (normalizationMode === FlameGraphNormalizationMode.Time
+                            ? { mode: FlameGraphNormalizationMode.Time }
+                            : {
+                                mode: FlameGraphNormalizationMode.Scale,
+                                baseline,
+                                comparison,
+                              }) as FlameGraphNormalizationOptions
+                        }
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                {comparisonMode === FlameGraphComparisonMode.Absolute ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <NormalizationMenu
-                          onChange={(options) => {
-                            profilingRouter.push(routePath, {
-                              path: routePath,
-                              // @ts-expect-error Code gets too complicated to satisfy TS constraints
-                              query: {
-                                ...query,
-                                ...pick(options, 'baseline', 'comparison'),
-                                normalizationMode: options.mode,
-                              },
-                            });
-                          }}
-                          totalSeconds={
-                            (new Date(timeRange.end).getTime() -
-                              new Date(timeRange.start).getTime()) /
-                            1000
-                          }
-                          comparisonTotalSeconds={
-                            (new Date(comparisonTimeRange.end!).getTime() -
-                              new Date(comparisonTimeRange.start!).getTime()) /
-                            1000
-                          }
-                          options={
-                            (normalizationMode === FlameGraphNormalizationMode.Time
-                              ? { mode: FlameGraphNormalizationMode.Time }
-                              : {
-                                  mode: FlameGraphNormalizationMode.Scale,
-                                  baseline,
-                                  comparison,
-                                }) as FlameGraphNormalizationOptions
-                          }
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                ) : undefined}
-                <EuiFlexItem grow style={{ alignItems: 'flex-end' }}>
-                  <FlameGraphInformationWindowSwitch
-                    showInformationWindow={showInformationWindow}
-                    onChange={onInformationWindowChange}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-        ) : (
-          <EuiFlexItem grow={false}>
-            <EuiPanel hasShadow={false} color="subdued">
-              <PrimaryProfilingSearchBar />
-              <EuiHorizontalRule />
-              <EuiFlexGroup direction="row">
-                <EuiFlexItem grow style={{ alignItems: 'flex-end' }}>
-                  <FlameGraphInformationWindowSwitch
-                    showInformationWindow={showInformationWindow}
-                    onChange={onInformationWindowChange}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-        )}
+              ) : undefined}
+              <EuiFlexItem grow style={{ alignItems: 'flex-end' }}>
+                <FlameGraphInformationWindowSwitch
+                  showInformationWindow={showInformationWindow}
+                  onChange={onInformationWindowChange}
+                />
+              </EuiFlexItem>
+            </FlameGraphSearchPanel>
+          ) : (
+            <FlameGraphSearchPanel searchBar={<PrimaryProfilingSearchBar />}>
+              <EuiFlexItem grow style={{ alignItems: 'flex-end' }}>
+                <FlameGraphInformationWindowSwitch
+                  showInformationWindow={showInformationWindow}
+                  onChange={onInformationWindowChange}
+                />
+              </EuiFlexItem>
+            </FlameGraphSearchPanel>
+          )}
+        </EuiFlexItem>
         <EuiFlexItem>
           <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
             <FlameGraph
