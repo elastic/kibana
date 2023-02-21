@@ -152,3 +152,11 @@ export const ACTIONS_EXPAND_BUTTON = '[data-test-subj="euiDataGridCellExpandButt
 
 export const SHOW_TOP_N_HEADER =
   '[data-test-subj="topN-container"] [data-test-subj="header-section-title"]';
+
+export const ALERT_TABLE_ADDITIONAL_CONTROLS = '[data-test-subj="additionalFilters-popover"]';
+
+export const ALERT_TABLE_SHOW_BUILDING_BLOCK_TOGGLE =
+  '[data-test-subj="showBuildingBlockAlertsCheckbox"]';
+
+export const ALERT_TABLE_SHOW_THREAT_INDICATOR =
+  '[data-test-subj="showOnlyThreatIndicatorAlertsCheckbox"]';
