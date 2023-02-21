@@ -170,7 +170,7 @@ export class ResourceInstaller {
     const aliases = indexInfo.basePattern;
     const backingIndices = indexInfo.getPatternForBackingIndices(namespace);
 
-    logger.info(`Updating mappings of existing concrete indices for ${indexInfo.baseName}`);
+    logger.debug(`Updating mappings of existing concrete indices for ${indexInfo.baseName}`);
 
     // Find all concrete indices for all namespaces of the index.
     const concreteIndices = await this.fetchConcreteIndices(aliases, backingIndices);
