@@ -119,8 +119,8 @@ export const BrowserStepsList = ({
           checkGroup={step.monitor.check_group}
           initialStepNumber={step.synthetics?.step?.index}
           stepStatus={step.synthetics.payload?.status}
-          allStepsLoaded={true}
-          retryFetchOnRevisit={false}
+          allStepsLoaded={!loading}
+          retryFetchOnRevisit={true}
           size={screenshotImageSize}
         />
       ),

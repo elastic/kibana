@@ -435,6 +435,12 @@
                 "type": "string",
                 "format": "binary"
               }
+            },
+            "application/gzip": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
             }
           }
         }
@@ -5728,12 +5734,10 @@
             "nullable": true
           },
           "unenroll_timeout": {
-            "type": "number",
-            "nullable": true
+            "type": "number"
           },
           "inactivity_timeout": {
-            "type": "number",
-            "nullable": true
+            "type": "number"
           }
         },
         "required": [
