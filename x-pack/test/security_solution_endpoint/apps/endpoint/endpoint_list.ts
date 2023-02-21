@@ -14,7 +14,6 @@ import {
   deleteAllDocsFromMetadataCurrentIndex,
   deleteAllDocsFromMetadataUnitedIndex,
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
@@ -122,22 +121,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('for the search bar', () => {
-        let adminSearchBar: WebElementWrapper;
-        let querySubmitButton: WebElementWrapper;
         before(async () => {
           await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 60000);
         });
         after(async () => {
-          adminSearchBar = await testSubjects.find('adminSearchBar');
-          querySubmitButton = await testSubjects.find('querySubmitButton');
+          const adminSearchBar = await testSubjects.find('adminSearchBar');
+          const querySubmitButton = await testSubjects.find('querySubmitButton');
           await adminSearchBar.clearValueWithKeyboard();
           await querySubmitButton.click();
         });
         it('when the kql query is `na`, table shows an empty list', async () => {
-          adminSearchBar = await testSubjects.find('adminSearchBar');
+          const adminSearchBar = await testSubjects.find('adminSearchBar');
           await adminSearchBar.clearValueWithKeyboard();
           await adminSearchBar.type('na');
-          querySubmitButton = await testSubjects.find('querySubmitButton');
+          const querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
           const expectedDataFromQuery = [
             [
@@ -162,12 +159,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('when the kql filters for united.endpoint.host.hostname, table shows 1 item', async () => {
           const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
           const hostName = expectedDataFromQuery[1][0];
-          adminSearchBar = await testSubjects.find('adminSearchBar');
+          const adminSearchBar = await testSubjects.find('adminSearchBar');
           await adminSearchBar.clearValueWithKeyboard();
           await adminSearchBar.type(
             `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
           );
-          querySubmitButton = await testSubjects.find('querySubmitButton');
+          const querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
           await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
             'endpointListTable',
