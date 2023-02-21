@@ -36,6 +36,7 @@ import type {
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
+import { inspect } from 'util';
 import { isLocalhost } from '../common/localhost_services';
 import {
   fetchFleetAgents,
@@ -346,7 +347,7 @@ const configureFleetIfNeeded = async () => {
       }
     }
   } catch (error) {
-    log.error(error);
+    log.error(inspect(error, { depth: 4 }));
     log.indent(-4);
     throw error;
   }
