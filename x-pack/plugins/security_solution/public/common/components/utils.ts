@@ -25,6 +25,8 @@ export const getDaysDiff = (minDate: moment.Moment, maxDate: moment.Moment) => {
   return diff;
 };
 
+// hello
+
 export const histogramDateTimeFormatter = (domain: [string, string] | null, fixedDiff?: number) => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const diff = fixedDiff ?? getDaysDiff(moment(domain![0]), moment(domain![1]));
