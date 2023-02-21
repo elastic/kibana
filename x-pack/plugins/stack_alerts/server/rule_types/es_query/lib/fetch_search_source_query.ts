@@ -195,7 +195,7 @@ async function generateLink(
 }
 
 function updateFilterReferences(filters: Filter[], fromDataView: string, toDataView: string) {
-  return filters.map((filter) => {
+  return (filters || []).map((filter) => {
     if (filter.meta.index === fromDataView) {
       return {
         ...filter,
