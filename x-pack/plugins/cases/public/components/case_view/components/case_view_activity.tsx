@@ -35,8 +35,7 @@ import { AssignUsers } from './assign_users';
 import { UserActionsActivityBar } from '../../user_actions_activity_bar';
 import type { Assignee } from '../../user_profiles/types';
 import { convertToCaseUserWithProfileInfo } from '../../user_profiles/user_converter';
-import type { Params } from '../../user_actions_activity_bar';
-import type { FilterType, SortOrderType } from '../../user_actions_activity_bar/types';
+import type { UserActivityParams } from '../../user_actions_activity_bar/types';
 import type { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { CaseViewTabs } from '../case_view_tabs';
 import { DescriptionWrapper } from '../../description/description_wrapper';
@@ -90,8 +89,10 @@ export const CaseViewActivity = ({
   useFetchAlertData: UseFetchAlertData;
   activeTab: CASE_VIEW_PAGE_TABS;
 }) => {
-  const [filterOptions, setFilterOptions] = useState<FilterType>('all');
-  const [sortOrder, setSortOrder] = useState<SortOrderType>('asc');
+  const [userActivityQueryParams, setUserActivityQueryParams] = useState<UserActivityParams>({
+    type: 'all',
+    sortOrder: 'asc',
+  });
 
   const { permissions } = useCasesContext();
 
@@ -103,8 +104,9 @@ export const CaseViewActivity = ({
 
   const { data: userActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
     caseData.id,
-    filterOptions,
-    sortOrder
+    {
+      ...userActivityQueryParams,
+    }
   );
 
   const { data: userActionsStats, isLoading: isLoadingUserActionsStats } =
@@ -198,11 +200,10 @@ export const CaseViewActivity = ({
       : [convertToCaseUserWithProfileInfo(caseData.createdBy)];
 
   const handleUserActionsActivityChanged = useCallback(
-    (params: Params) => {
-      setFilterOptions(params.type);
-      setSortOrder(params.sortOrder);
+    (params: UserActivityParams) => {
+      setUserActivityQueryParams({ type: params.type, sortOrder: params.sortOrder });
     },
-    [setFilterOptions, setSortOrder]
+    [setUserActivityQueryParams]
   );
 
   const isLoadingDescription = isLoading && loadingKey === 'description';
@@ -221,7 +222,7 @@ export const CaseViewActivity = ({
         <EuiFlexItem grow={false}>
           <UserActionsActivityBar
             onUserActionsActivityChanged={handleUserActionsActivityChanged}
-            params={{ type: filterOptions, sortOrder }}
+            params={userActivityQueryParams}
             userActionsStats={userActionsStats}
             isLoading={isLoadingUserActionsStats}
           />
@@ -255,7 +256,7 @@ export const CaseViewActivity = ({
                     />
                   ) : null
                 }
-                filterOptions={filterOptions}
+                filterOptions={userActivityQueryParams.type}
                 useFetchAlertData={useFetchAlertData}
               />
             )}

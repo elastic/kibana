@@ -10,28 +10,23 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FilterActivity } from './filter_activity';
 import { SortActivity } from './sort_activity';
-import type { FilterType, SortOrderType } from './types';
+import type { UserActivityFilter, UserActivitySortOrder, UserActivityParams } from './types';
 import type { CaseUserActionsStats } from '../../containers/types';
-
-export interface Params {
-  type: FilterType;
-  sortOrder: SortOrderType;
-}
 
 interface UserActionsActivityProps {
   isLoading?: boolean;
-  params: Params;
+  params: UserActivityParams;
   userActionsStats?: CaseUserActionsStats;
-  onUserActionsActivityChanged: (params: Params) => void;
+  onUserActionsActivityChanged: (params: UserActivityParams) => void;
 }
 
 export const UserActionsActivityBar = React.memo<UserActionsActivityProps>(
   ({ params, onUserActionsActivityChanged, userActionsStats, isLoading }) => {
-    const handleFilterChange = (type: FilterType) => {
+    const handleFilterChange = (type: UserActivityFilter) => {
       onUserActionsActivityChanged({ ...params, type });
     };
 
-    const handleOrderChange = (sortOrder: SortOrderType) => {
+    const handleOrderChange = (sortOrder: UserActivitySortOrder) => {
       onUserActionsActivityChanged({ ...params, sortOrder });
     };
 

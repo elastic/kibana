@@ -39,7 +39,6 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
-import { waitForComponentToUpdate } from '../../common/test_utils';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -574,9 +573,7 @@ describe('CaseViewPage', () => {
 
         const description = within(screen.getByTestId('description-action'));
 
-        await waitFor(() => {
-          expect(description.getByText('Leslie Knope')).toBeInTheDocument();
-        });
+        expect(await description.findByText('Leslie Knope')).toBeInTheDocument();
       });
 
       it('should display description isLoading', async () => {
@@ -599,19 +596,19 @@ describe('CaseViewPage', () => {
 
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        userEvent.click(screen.getByTestId('user-actions-filter-activity-button-all'));
+        userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
 
-        userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), newComment);
+        userEvent.type(await screen.findByTestId('euiMarkdownEditorTextArea'), newComment);
 
-        userEvent.click(screen.getByTestId('editable-description-edit-icon'));
+        userEvent.click(await screen.findByTestId('editable-description-edit-icon'));
 
         userEvent.type(screen.getAllByTestId('euiMarkdownEditorTextArea')[0], 'Edited!');
 
         userEvent.click(screen.getByTestId('user-action-save-markdown'));
 
-        await waitForComponentToUpdate();
-
-        expect(screen.getByTestId('euiMarkdownEditorTextArea')).toHaveTextContent(newComment);
+        expect(await screen.findByTestId('euiMarkdownEditorTextArea')).toHaveTextContent(
+          newComment
+        );
       });
     });
   });

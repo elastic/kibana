@@ -7,6 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useFindCaseUserActions } from './use_find_case_user_actions';
+import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { basicCase, findCaseUserActionsResponse } from './mock';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
@@ -23,8 +24,13 @@ const initialData = {
 };
 
 describe('UseFindCaseUserActions', () => {
-  const filterActionType = 'all';
-  const sortOrder = 'asc';
+  const filterActionType: CaseUserActionTypeWithAll = 'all';
+  const sortOrder: 'asc' | 'desc' = 'asc';
+  const params = {
+    type: filterActionType,
+    sortOrder,
+  };
+
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
@@ -35,7 +41,7 @@ describe('UseFindCaseUserActions', () => {
 
   it('returns proper state on findCaseUserActions', async () => {
     const { result, waitForNextUpdate } = renderHook(
-      () => useFindCaseUserActions(basicCase.id, filterActionType, sortOrder),
+      () => useFindCaseUserActions(basicCase.id, params),
       { wrapper: appMockRender.AppWrapper }
     );
 
@@ -61,13 +67,17 @@ describe('UseFindCaseUserActions', () => {
     const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
     const { waitForNextUpdate } = renderHook(
-      () => useFindCaseUserActions(basicCase.id, 'user', 'desc'),
+      () => useFindCaseUserActions(basicCase.id, { type: 'user', sortOrder: 'desc' }),
       { wrapper: appMockRender.AppWrapper }
     );
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith(basicCase.id, 'user', 'desc', expect.any(AbortSignal));
+    expect(spy).toHaveBeenCalledWith(
+      basicCase.id,
+      { type: 'user', sortOrder: 'desc' },
+      expect.any(AbortSignal)
+    );
   });
 
   it('shows a toast error when the API returns an error', async () => {
@@ -76,17 +86,15 @@ describe('UseFindCaseUserActions', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const { waitForNextUpdate } = renderHook(
-      () => useFindCaseUserActions(basicCase.id, filterActionType, sortOrder),
-      { wrapper: appMockRender.AppWrapper }
-    );
+    const { waitForNextUpdate } = renderHook(() => useFindCaseUserActions(basicCase.id, params), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
     await waitForNextUpdate();
 
     expect(spy).toHaveBeenCalledWith(
       basicCase.id,
-      filterActionType,
-      sortOrder,
+      { type: filterActionType, sortOrder },
       expect.any(AbortSignal)
     );
     expect(addError).toHaveBeenCalled();

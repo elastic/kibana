@@ -67,6 +67,7 @@ import { getCasesStatus } from '../api';
 import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep } from 'lodash';
+import type { CaseUserActionTypeWithAll } from './types';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -472,8 +473,12 @@ describe('Cases API', () => {
       total: 20,
       userActions: [...caseUserActionsWithRegisteredAttachmentsSnake],
     };
-    const filterActionType = 'all';
-    const sortOrder = 'asc';
+    const filterActionType: CaseUserActionTypeWithAll = 'all';
+    const sortOrder: 'asc' | 'desc' = 'asc';
+    const params = {
+      type: filterActionType,
+      sortOrder,
+    };
 
     beforeEach(() => {
       fetchMock.mockClear();
@@ -481,7 +486,7 @@ describe('Cases API', () => {
     });
 
     it('should be called with correct check url, method, signal', async () => {
-      await findCaseUserActions(basicCase.id, filterActionType, sortOrder, abortCtrl.signal);
+      await findCaseUserActions(basicCase.id, params, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
         method: 'GET',
         signal: abortCtrl.signal,
@@ -494,7 +499,11 @@ describe('Cases API', () => {
     });
 
     it('should be called with action type user action and desc sort order', async () => {
-      await findCaseUserActions(basicCase.id, 'action', 'desc', abortCtrl.signal);
+      await findCaseUserActions(
+        basicCase.id,
+        { type: 'action', sortOrder: 'desc' },
+        abortCtrl.signal
+      );
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
         method: 'GET',
         signal: abortCtrl.signal,
@@ -507,7 +516,7 @@ describe('Cases API', () => {
     });
 
     it('should be called with user type user action and desc sort order', async () => {
-      await findCaseUserActions(basicCase.id, 'user', 'asc', abortCtrl.signal);
+      await findCaseUserActions(basicCase.id, { ...params, type: 'user' }, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
         method: 'GET',
         signal: abortCtrl.signal,
@@ -520,23 +529,13 @@ describe('Cases API', () => {
     });
 
     it('should return correct response', async () => {
-      const resp = await findCaseUserActions(
-        basicCase.id,
-        filterActionType,
-        sortOrder,
-        abortCtrl.signal
-      );
+      const resp = await findCaseUserActions(basicCase.id, params, abortCtrl.signal);
       expect(resp).toEqual(findCaseUserActionsResponse);
     });
 
     it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(findCaseUserActionsSnake);
-      const resp = await findCaseUserActions(
-        basicCase.id,
-        filterActionType,
-        sortOrder,
-        abortCtrl.signal
-      );
+      const resp = await findCaseUserActions(basicCase.id, params, abortCtrl.signal);
       expect(resp).toEqual(findCaseUserActionsResponse);
     });
   });

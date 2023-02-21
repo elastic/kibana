@@ -15,16 +15,18 @@ import { casesQueriesKeys } from './constants';
 
 export const useFindCaseUserActions = (
   caseId: string,
-  filterActionType: CaseUserActionTypeWithAll,
-  sortOrder: 'asc' | 'desc'
+  params: {
+    type: CaseUserActionTypeWithAll;
+    sortOrder: 'asc' | 'desc';
+  }
 ) => {
   const { showErrorToast } = useCasesToast();
   const abortCtrlRef = new AbortController();
 
   return useQuery<FindCaseUserActions, ServerError>(
-    casesQueriesKeys.caseUserActions(caseId, filterActionType, sortOrder),
+    casesQueriesKeys.caseUserActions(caseId, params.type, params.sortOrder),
     async () => {
-      return findCaseUserActions(caseId, filterActionType, sortOrder, abortCtrlRef.signal);
+      return findCaseUserActions(caseId, params, abortCtrlRef.signal);
     },
     {
       onError: (error: ServerError) => {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -51,13 +51,16 @@ describe('CaseViewTabs', () => {
 
   beforeEach(() => {
     mockGetCase();
-    jest.clearAllMocks();
 
     const license = licensingMock.createLicense({
       license: { type: 'platinum' },
     });
 
     appMockRenderer = createAppMockRenderer({ license });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should render CaseViewTabs', async () => {
@@ -80,45 +83,42 @@ describe('CaseViewTabs', () => {
     appMockRenderer = createAppMockRenderer({ features: { metrics: ['alerts.count'] }, license });
     appMockRenderer.render(<CaseViewTabs {...props} />);
 
-    expect(screen.getByTestId('case-view-tab-title-activity')).toBeInTheDocument();
-    expect(screen.getByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
   });
 
   it('renders tabs correctly', async () => {
-    const result = appMockRenderer.render(<CaseViewTabs {...caseProps} />);
-    await act(async () => {
-      expect(result.getByTestId('case-view-tab-title-activity')).toBeInTheDocument();
-      expect(result.getByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
-    });
+    appMockRenderer.render(<CaseViewTabs {...caseProps} />);
+
+    expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
   });
 
   it('renders the activity tab by default', async () => {
-    const result = appMockRenderer.render(<CaseViewTabs {...caseProps} />);
-    await act(async () => {
-      expect(result.getByTestId('case-view-tab-title-activity')).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-    });
+    appMockRenderer.render(<CaseViewTabs {...caseProps} />);
+
+    expect(await screen.findByTestId('case-view-tab-title-activity')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 
   it('shows the alerts tab as active', async () => {
-    const result = appMockRenderer.render(
-      <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+    appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />);
+
+    expect(await screen.findByTestId('case-view-tab-title-alerts')).toHaveAttribute(
+      'aria-selected',
+      'true'
     );
-    await act(async () => {
-      expect(result.getByTestId('case-view-tab-title-alerts')).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-    });
   });
 
   it('navigates to the activity tab when the activity tab is clicked', async () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-    const result = appMockRenderer.render(<CaseViewTabs {...caseProps} />);
-    userEvent.click(result.getByTestId('case-view-tab-title-activity'));
-    await act(async () => {
+    appMockRenderer.render(<CaseViewTabs {...caseProps} />);
+
+    userEvent.click(await screen.findByTestId('case-view-tab-title-activity'));
+
+    await waitFor(() => {
       expect(navigateToCaseViewMock).toHaveBeenCalledWith({
         detailName: caseData.id,
         tabId: CASE_VIEW_PAGE_TABS.ACTIVITY,
@@ -128,9 +128,11 @@ describe('CaseViewTabs', () => {
 
   it('navigates to the alerts tab when the alerts tab is clicked', async () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-    const result = appMockRenderer.render(<CaseViewTabs {...caseProps} />);
-    userEvent.click(result.getByTestId('case-view-tab-title-alerts'));
-    await act(async () => {
+    appMockRenderer.render(<CaseViewTabs {...caseProps} />);
+
+    userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
+
+    await waitFor(() => {
       expect(navigateToCaseViewMock).toHaveBeenCalledWith({
         detailName: caseData.id,
         tabId: CASE_VIEW_PAGE_TABS.ALERTS,

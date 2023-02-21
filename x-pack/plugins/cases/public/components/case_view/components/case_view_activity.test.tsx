@@ -149,11 +149,10 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeInTheDocument();
     expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(result.getByTestId('case-view-status-action-button')).toBeInTheDocument();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-      caseData.id,
-      filterActionType,
-      sortOrder
-    );
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+      type: filterActionType,
+      sortOrder,
+    });
 
     await waitForComponentToUpdate();
   });
@@ -170,11 +169,10 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeInTheDocument();
     expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(result.queryByTestId('case-view-status-action-button')).not.toBeInTheDocument();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-      caseData.id,
-      filterActionType,
-      sortOrder
-    );
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+      type: filterActionType,
+      sortOrder,
+    });
 
     await waitForComponentToUpdate();
   });
@@ -191,11 +189,10 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeInTheDocument();
     expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(result.getByTestId('case-severity-selection')).toBeDisabled();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-      caseData.id,
-      filterActionType,
-      sortOrder
-    );
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+      type: filterActionType,
+      sortOrder,
+    });
 
     await waitForComponentToUpdate();
   });
@@ -210,11 +207,10 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-view-activity')).toBeInTheDocument();
     expect(result.getByTestId('case-view-loading-content')).toBeInTheDocument();
     expect(result.queryByTestId('user-actions')).not.toBeInTheDocument();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-      caseData.id,
-      filterActionType,
-      sortOrder
-    );
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+      type: filterActionType,
+      sortOrder,
+    });
   });
 
   it('should not render the assignees on basic license', () => {
@@ -260,16 +256,18 @@ describe('Case View Page activity tab', () => {
     it('should show all filter as active', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-        caseData.id,
-        filterActionType,
-        sortOrder
-      );
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+        type: filterActionType,
+        sortOrder,
+      });
 
       userEvent.click(screen.getByTestId('user-actions-filter-activity-button-all'));
 
       await waitFor(() => {
-        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'all', sortOrder);
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+          type: 'all',
+          sortOrder,
+        });
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(screen.getByLabelText(`${userActionsStats.total - 1} active filters`));
         expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
@@ -282,16 +280,18 @@ describe('Case View Page activity tab', () => {
     it('should show comment filter as active', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-        caseData.id,
-        filterActionType,
-        sortOrder
-      );
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+        type: filterActionType,
+        sortOrder,
+      });
 
       userEvent.click(screen.getByTestId('user-actions-filter-activity-button-comments'));
 
       await waitFor(() => {
-        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'user', sortOrder);
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+          type: 'user',
+          sortOrder,
+        });
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(screen.getByLabelText(`${userActionsStats.totalComments} active filters`));
         expect(screen.getByLabelText(`${userActionsStats.total - 1} available filters`));
@@ -304,16 +304,18 @@ describe('Case View Page activity tab', () => {
     it('should show history filter as active', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-        caseData.id,
-        filterActionType,
-        sortOrder
-      );
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+        type: filterActionType,
+        sortOrder,
+      });
 
       userEvent.click(screen.getByTestId('user-actions-filter-activity-button-history'));
 
       await waitFor(() => {
-        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'action', sortOrder);
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+          type: 'action',
+          sortOrder,
+        });
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(screen.getByLabelText(`${userActionsStats.totalOtherActions - 1} active filters`));
         expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
@@ -324,18 +326,20 @@ describe('Case View Page activity tab', () => {
     it('should render by desc sort order', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-        caseData.id,
-        filterActionType,
-        sortOrder
-      );
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+        type: filterActionType,
+        sortOrder,
+      });
 
       const sortSelect = screen.getByTestId('user-actions-sort-select');
 
       fireEvent.change(sortSelect, { target: { value: 'desc' } });
 
       await waitFor(() => {
-        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'all', 'desc');
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+          type: 'all',
+          sortOrder: 'desc',
+        });
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(screen.getByLabelText(`${userActionsStats.total - 1} active filters`));
         expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));

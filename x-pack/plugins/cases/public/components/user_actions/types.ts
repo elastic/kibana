@@ -24,7 +24,7 @@ import type { OnUpdateFields } from '../case_view/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import type { CurrentUserProfile } from '../types';
-import type { FilterType } from '../user_actions_activity_bar/types';
+import type { UserActivityFilter } from '../user_actions_activity_bar/types';
 
 export interface UserActionTreeProps {
   caseConnectors: CaseConnectors;
@@ -40,7 +40,7 @@ export interface UserActionTreeProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
   useFetchAlertData: UseFetchAlertData;
-  filterOptions: FilterType;
+  filterOptions: UserActivityFilter;
 }
 
 type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];

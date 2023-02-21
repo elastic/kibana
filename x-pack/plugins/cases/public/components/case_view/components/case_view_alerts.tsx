@@ -53,7 +53,14 @@ export const CaseViewAlerts = ({ caseData, activeTab }: CaseViewAlertsProps) => 
   };
 
   if (alertIdsQuery.ids.values.length === 0) {
-    return <CaseViewAlertsEmpty />;
+    return (
+      <EuiFlexGroup>
+      <EuiFlexItem>
+        <CaseViewTabs caseData={caseData} activeTab={activeTab} />
+        <CaseViewAlertsEmpty />
+        </EuiFlexItem>
+    </EuiFlexGroup>
+    );
   }
 
   return isLoadingAlertFeatureIds ? (

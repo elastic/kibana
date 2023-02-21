@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export type FilterType = 'all' | 'user' | 'action';
+export type UserActivityFilter = 'all' | 'user' | 'action';
 
-export type SortOrderType = 'asc' | 'desc';
+export type UserActivitySortOrder = 'asc' | 'desc';
+
+export interface UserActivityParams {
+  type: UserActivityFilter;
+  sortOrder: UserActivitySortOrder;
+}

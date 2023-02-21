@@ -158,13 +158,15 @@ export const getSingleCaseMetrics = async (
 
 export const findCaseUserActions = async (
   caseId: string,
-  filterActionType: CaseUserActionTypeWithAll,
-  sortOrder: 'asc' | 'desc',
+  params: {
+    type: CaseUserActionTypeWithAll;
+    sortOrder: 'asc' | 'desc';
+  },
   signal: AbortSignal
 ): Promise<FindCaseUserActions> => {
   const query = {
-    types: filterActionType !== 'all' ? [filterActionType] : [],
-    sortOrder: sortOrder ?? 'asc',
+    types: params.type !== 'all' ? [params.type] : [],
+    sortOrder: params.sortOrder ?? 'asc',
     perPage: MAX_DOCS_PER_PAGE,
   };
 

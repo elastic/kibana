@@ -12,14 +12,14 @@ import { waitFor, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { UserActionsActivityBar } from '.';
-import type { Params } from '.';
+import type { UserActivityParams } from './types';
 
 describe('UserActionsActivityBar ', () => {
   const onUserActionsActivityChanged = jest.fn();
 
   let appMockRender: AppMockRenderer;
 
-  const params: Params = {
+  const params: UserActivityParams = {
     type: 'all',
     sortOrder: 'asc',
   };

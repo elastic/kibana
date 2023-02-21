@@ -24,14 +24,14 @@ import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { Actions } from '../../../common/api';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { connectorsMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
-import type { FilterType } from '../user_actions_activity_bar/types';
+import type { UserActivityFilter } from '../user_actions_activity_bar/types';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
 const updateCase = jest.fn();
 const onShowAlertDetails = jest.fn();
 
-const filterOptions: FilterType = 'all';
+const filterOptions: UserActivityFilter = 'all';
 
 const defaultProps = {
   caseConnectors: getCaseConnectorsMockResponse(),

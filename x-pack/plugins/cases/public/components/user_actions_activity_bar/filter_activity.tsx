@@ -10,19 +10,19 @@ import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
 
 import type { CaseUserActionsStats } from '../../containers/types';
 import * as i18n from './translations';
-import type { FilterType } from './types';
+import type { UserActivityFilter } from './types';
 
 interface FilterActivityProps {
   isLoading?: boolean;
-  type: FilterType;
+  type: UserActivityFilter;
   userActionsStats?: CaseUserActionsStats;
-  onFilterChange: (type: FilterType) => void;
+  onFilterChange: (type: UserActivityFilter) => void;
 }
 
 export const FilterActivity = React.memo<FilterActivityProps>(
   ({ type, onFilterChange, userActionsStats, isLoading = false }) => {
     const handleFilterChange = useCallback(
-      (value: FilterType) => {
+      (value: UserActivityFilter) => {
         if (value !== type) {
           onFilterChange(value);
         }
@@ -37,7 +37,9 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           grow={false}
           onClick={() => handleFilterChange('all')}
           hasActiveFilters={type === 'all'}
-          numFilters={userActionsStats && userActionsStats.total ? userActionsStats.total - 1 : 0} // subtracting user action of description from total
+          numFilters={
+            userActionsStats && userActionsStats.total > 0 ? userActionsStats.total - 1 : 0
+          } // subtracting user action of description from total
           isLoading={isLoading}
           isDisabled={isLoading}
           data-test-subj="user-actions-filter-activity-button-all"

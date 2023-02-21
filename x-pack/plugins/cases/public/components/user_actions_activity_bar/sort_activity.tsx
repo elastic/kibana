@@ -10,12 +10,12 @@ import { EuiSelect } from '@elastic/eui';
 import type { EuiSelectOption } from '@elastic/eui';
 
 import * as i18n from './translations';
-import type { SortOrderType } from './types';
+import type { UserActivitySortOrder } from './types';
 
 interface FilterActivityProps {
   isLoading?: boolean;
-  sortOrder: SortOrderType;
-  onOrderChange: (sortOrder: SortOrderType) => void;
+  sortOrder: UserActivitySortOrder;
+  onOrderChange: (sortOrder: UserActivitySortOrder) => void;
 }
 
 export const SortOptions: EuiSelectOption[] = [
@@ -33,7 +33,7 @@ export const SortActivity = React.memo<FilterActivityProps>(
   ({ sortOrder, onOrderChange, isLoading = false }) => {
     const onChange = useCallback(
       (e) => {
-        onOrderChange(e.target.value as SortOrderType);
+        onOrderChange(e.target.value as UserActivitySortOrder);
       },
       [onOrderChange]
     );
