@@ -137,7 +137,7 @@ export function getDocumentsLayoutProps(dataView: DataView) {
   });
   stateContainer.appState.set({
     columns: ['name', 'message', 'bytes'],
-    sort: [['date', 'desc']],
+    sort: dataView.timeFieldName ? [['date', 'desc']] : [['name', 'desc']],
     query: {
       language: 'kuery',
       query: '',

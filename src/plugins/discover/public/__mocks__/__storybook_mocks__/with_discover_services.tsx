@@ -90,6 +90,7 @@ export const services = {
           getAutoRefreshFetch$: () => new Observable(),
           calculateBounds: () => ({ min: undefined, max: undefined }),
           getTimeDefaults: () => ({}),
+          createFilter: () => ({}),
         },
       },
       savedQueries: { findSavedQueries: () => Promise.resolve({ queries: [] as SavedQuery[] }) },
@@ -114,6 +115,17 @@ export const services = {
           return new BehaviorSubject('test').asObservable();
         },
         state$: new Observable(),
+      },
+      searchSource: {
+        createEmpty: () => {
+          const empty = {
+            setField: () => {
+              return empty;
+            },
+            fetch$: () => new Observable(),
+          };
+          return empty;
+        },
       },
     },
     dataViews: {
