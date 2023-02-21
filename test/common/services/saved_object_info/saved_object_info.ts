@@ -37,7 +37,10 @@ export const types =
     await pipe(
       TE.tryCatch(
         async () => {
-          const { body } = await new Client({ node }).search({
+          const { body } = await new Client({
+            node,
+            headers: { 'X-Opaque-Id': 'kbn-test-so-service' },
+          }).search({
             index,
             size: 0,
             body: query,

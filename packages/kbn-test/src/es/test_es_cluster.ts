@@ -8,12 +8,13 @@
 
 import Path from 'path';
 import { format } from 'url';
+import Fs from 'fs';
 import del from 'del';
 // @ts-expect-error in js
 import { Cluster } from '@kbn/es';
 import { Client } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import type { ToolingLog } from '@kbn/dev-utils';
+import { CA_CERT_PATH, ToolingLog } from '@kbn/dev-utils';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
@@ -260,6 +261,29 @@ export function createTestEsCluster<
     }
 
     async stop() {
+      await this.getClient()
+        .search<{
+          'log.level': string;
+          message: string;
+          'elasticsearch.http.request.x_opaque_id': string;
+        }>(
+          { index: '.logs-deprecation.elasticsearch-default', ignore_unavailable: true, size: 100 },
+          { ignore: [404] } // The index doesn't exist if there's no deprecation logs
+        )
+        .then((res) => {
+          const deps = res.body.hits.hits
+            .filter((d) => /^kbn-test.*/.test(d._source!['elasticsearch.http.request.x_opaque_id']))
+            .map((d) => {
+              return `ES DEPRECATION ${d._source!['log.level']} ${d._source!.message}`;
+            });
+
+          if (deps.length > 0) {
+            log.error(`Found ${deps.length} deprecation logs:`);
+          }
+          deps.forEach((m) => {
+            log.error(m);
+          });
+        });
       const nodeStopPromises = [];
       for (let i = 0; i < this.nodes.length; i++) {
         nodeStopPromises.push(async () => {
@@ -283,7 +307,9 @@ export function createTestEsCluster<
      */
     getClient(): KibanaClient {
       return new Client({
-        node: this.getHostUrls()[0],
+        node: this.getHostUrls(),
+        headers: { 'X-Opaque-Id': 'kbn-test' },
+        ...(ssl && { ssl: { ca: Fs.readFileSync(CA_CERT_PATH), rejectUnauthorized: true } }),
       });
     }
 
@@ -308,7 +334,9 @@ export function createTestEsCluster<
      * in this list.
      */
     getHostUrls(): string[] {
-      return this.ports.map((p) => format({ ...esTestConfig.getUrlParts(), port: p }));
+      return this.ports.map((p) =>
+        format({ ...esTestConfig.getUrlParts(ssl), port: p, protocol: ssl ? 'https' : 'http' })
+      );
     }
   })() as EsTestCluster<Options>;
 }

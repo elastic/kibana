@@ -31,7 +31,7 @@ class EsTestConfig {
     return process.env.TEST_ES_TRANSPORT_PORT || '9300-9400';
   }
 
-  getUrlParts() {
+  getUrlParts(ssl?: boolean) {
     // Allow setting one complete TEST_ES_URL for Es like https://elastic:changeme@myCloudInstance:9200
     if (process.env.TEST_ES_URL) {
       const testEsUrl = Url.parse(process.env.TEST_ES_URL);
@@ -65,7 +65,7 @@ class EsTestConfig {
     return {
       // Allow setting any individual component(s) of the URL,
       // or use default values (username and password from ../kbn/users.js)
-      protocol: process.env.TEST_ES_PROTOCOL || 'http',
+      protocol: process.env.TEST_ES_PROTOCOL || ssl ? 'https' : 'http',
       hostname: process.env.TEST_ES_HOSTNAME || 'localhost',
       port,
       auth: `${username}:${password}`,
