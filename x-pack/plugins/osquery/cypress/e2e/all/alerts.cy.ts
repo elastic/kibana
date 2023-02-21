@@ -16,6 +16,7 @@ import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import {
   addToCase,
+  checkActionItemsInResults,
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
@@ -317,6 +318,12 @@ describe('Alert Event Details', () => {
         }
         // }
       });
+    });
+    checkActionItemsInResults({
+      lens: true,
+      discover: true,
+      cases: true,
+      timeline: true,
     });
     addToCase();
     viewRecentCaseAndCheckResults();
