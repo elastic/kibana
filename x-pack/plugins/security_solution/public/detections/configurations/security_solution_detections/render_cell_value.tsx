@@ -154,35 +154,27 @@ export const getRenderCellValueHook = ({
 
         const localLinkValues = getOr([], colHeader?.linkField ?? '', ecsData);
 
-        const isTourAnchor = columnId === SIGNAL_RULE_NAME_FIELD_NAME && rowIndex === 0;
-
         return (
-          <GuidedOnboardingTourStep
-            isTourAnchor={isTourAnchor}
-            step={AlertsCasesTourSteps.pointToAlertName}
-            tourId={SecurityStepId.alertsCases}
-          >
-            <DefaultCellRenderer
-              browserFields={browserFields}
-              columnId={columnId}
-              data={finalData}
-              ecsData={ecsData}
-              eventId={eventId}
-              header={myHeader}
-              isDetails={isDetails}
-              isDraggable={isDraggable}
-              isExpandable={isExpandable}
-              isExpanded={isExpanded}
-              linkValues={linkValues ?? localLinkValues}
-              rowIndex={rowIndex}
-              colIndex={colIndex}
-              rowRenderers={rowRenderers ?? defaultRowRenderers}
-              setCellProps={setCellProps}
-              scopeId={scopeId}
-              truncate={truncate}
-              asPlainText={false}
-            />
-          </GuidedOnboardingTourStep>
+          <RenderCellValue
+            browserFields={browserFields}
+            columnId={columnId}
+            data={finalData}
+            ecsData={ecsData}
+            eventId={eventId}
+            header={myHeader}
+            isDetails={isDetails}
+            isDraggable={isDraggable}
+            isExpandable={isExpandable}
+            isExpanded={isExpanded}
+            linkValues={linkValues ?? localLinkValues}
+            rowIndex={rowIndex}
+            colIndex={colIndex}
+            rowRenderers={rowRenderers ?? defaultRowRenderers}
+            setCellProps={setCellProps}
+            scopeId={tableId}
+            truncate={truncate}
+            asPlainText={false}
+          />
         );
       },
       [browserFieldsByName, browserFields, columnHeaders]
