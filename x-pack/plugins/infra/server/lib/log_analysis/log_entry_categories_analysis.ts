@@ -47,7 +47,7 @@ export async function getTopLogEntryCategories(
       spaceId: string;
     };
   },
-  sourceId: string,
+  logView: PersistedLogViewReference,
   startTime: number,
   endTime: number,
   categoryCount: number,
@@ -59,7 +59,7 @@ export async function getTopLogEntryCategories(
 
   const logEntryCategoriesCountJobId = getJobId(
     context.infra.spaceId,
-    sourceId,
+    logView.logViewId,
     logEntryCategoriesJobTypes[0]
   );
 
@@ -119,13 +119,13 @@ export async function getLogEntryCategoryDatasets(
       spaceId: string;
     };
   },
-  sourceId: string,
+  logView: PersistedLogViewReference,
   startTime: number,
   endTime: number
 ) {
   const logEntryCategoriesCountJobId = getJobId(
     context.infra.spaceId,
-    sourceId,
+    logView.logViewId,
     logEntryCategoriesJobTypes[0]
   );
 

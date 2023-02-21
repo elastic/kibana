@@ -13,7 +13,7 @@ import {
   ForLastExpression,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { LogViewReference, ResolvedLogViewField } from '../../../../../common/log_views';
+import { PersistedLogViewReference, ResolvedLogViewField } from '../../../../../common/log_views';
 import {
   Comparator,
   isOptimizableGroupedThreshold,
@@ -54,7 +54,7 @@ const DEFAULT_BASE_EXPRESSION = {
 
 const DEFAULT_FIELD = 'log.level';
 
-const createLogViewReference = (logViewId: string): LogViewReference => ({
+const createLogViewReference = (logViewId: string): PersistedLogViewReference => ({
   logViewId,
   type: 'log-view-reference',
 });
@@ -69,7 +69,7 @@ const createDefaultCriterion = (
 
 const createDefaultCountRuleParams = (
   availableFields: ResolvedLogViewField[],
-  logView: LogViewReference
+  logView: PersistedLogViewReference
 ): PartialCountRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   logView,
@@ -82,7 +82,7 @@ const createDefaultCountRuleParams = (
 
 const createDefaultRatioRuleParams = (
   availableFields: ResolvedLogViewField[],
-  logView: LogViewReference
+  logView: PersistedLogViewReference
 ): PartialRatioRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   logView,
