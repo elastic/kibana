@@ -18,7 +18,7 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { OverviewErrorsSparklines } from './overview_errors_sparklines';
-import { useAbsoluteDate } from '../../../../../hooks';
+import { useRefreshedRange } from '../../../../../hooks';
 import { OverviewErrorsCount } from './overview_errors_count';
 
 export function OverviewErrors() {
@@ -26,7 +26,7 @@ export function OverviewErrors() {
 
   const loading = !status?.allIds || status?.allIds.length === 0;
 
-  const { from, to } = useAbsoluteDate({ from: 'now-6h', to: 'now' });
+  const { from, to } = useRefreshedRange(6, 'hours');
 
   return (
     <EuiPanel hasShadow={false} hasBorder>

@@ -104,10 +104,15 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
     if (currentPolicy.is_managed) {
       return (
         <EuiCallOut>
-          <p>{EDIT_IN_UPTIME_DESC}</p>
+          <p>{EDIT_IN_SYNTHETICS_DESC}</p>
           {/* TODO Add a link to exact monitor*/}
-          <EuiButton href={`${http?.basePath.get()}/app/uptime/manage-monitors/all`}>
-            {EDIT_IN_UPTIME_LABEL}
+          <EuiButton
+            data-test-subj="syntheticsEditMonitorButton"
+            href={`${http?.basePath.get()}/app/synthetics/edit-monitor/${
+              defaultConfig[ConfigKey.CONFIG_ID]
+            }`}
+          >
+            {EDIT_IN_SYNTHETICS_LABEL}
           </EuiButton>
         </EuiCallOut>
       );
@@ -143,10 +148,13 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
 );
 SyntheticsPolicyEditExtensionWrapper.displayName = 'SyntheticsPolicyEditExtensionWrapper';
 
-const EDIT_IN_UPTIME_LABEL = i18n.translate('xpack.synthetics.editPackagePolicy.inUptime', {
-  defaultMessage: 'Edit in uptime',
+const EDIT_IN_SYNTHETICS_LABEL = i18n.translate('xpack.synthetics.editPackagePolicy.inSynthetics', {
+  defaultMessage: 'Edit in synthetics',
 });
 
-const EDIT_IN_UPTIME_DESC = i18n.translate('xpack.synthetics.editPackagePolicy.inUptimeDesc', {
-  defaultMessage: 'This package policy is managed by uptime app.',
-});
+const EDIT_IN_SYNTHETICS_DESC = i18n.translate(
+  'xpack.synthetics.editPackagePolicy.inSyntheticsDesc',
+  {
+    defaultMessage: 'This package policy is managed by synthetics app.',
+  }
+);
