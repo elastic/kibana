@@ -1,4 +1,4 @@
-Telemetry Implementation Guide | `infra` plugin
+# Telemetry Implementation Guide | `infra` plugin
 
 Welcome to the documentation on implementing custom Telemetry events using the TelemetryService. Tracking Telemetry events is part of our workflow for better understanding what users like the most and constantly improving the Observability Metrics and Logs.
 
