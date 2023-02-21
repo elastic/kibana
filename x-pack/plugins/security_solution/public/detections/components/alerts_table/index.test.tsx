@@ -28,6 +28,7 @@ import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
+import * as telemetry from '../../../common/lib/telemetry';
 
 jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../../common/containers/use_global_time', () => ({
@@ -148,6 +149,8 @@ jest.mock('./timeline_actions/use_bulk_add_to_case_actions', () => ({
   useBulkAddToCaseActions: jest.fn(() => []),
 }));
 
+const mockTrack = jest.spyOn(telemetry, 'track');
+
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
@@ -224,6 +227,44 @@ describe('AlertsTableComponent', () => {
       expect(wrapper.find('[data-test-subj="group-selector-dropdown"]').exists()).toBe(true);
       wrapper.find('[data-test-subj="group-selector-dropdown"]').first().simulate('click');
       expect(wrapper.find('[data-test-subj="panel-kibana.alert.rule.name"]').exists()).toBe(true);
+    });
+  });
+
+  it('it sends telemetry when the grouping field is changed', async () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <AlertsTableComponent
+          tableId={TableId.test}
+          hasIndexWrite
+          hasIndexMaintenance
+          from={'2020-07-07T08:20:18.966Z'}
+          loading={false}
+          to={'2020-07-08T08:20:18.966Z'}
+          globalQuery={{
+            query: 'query',
+            language: 'language',
+          }}
+          globalFilters={[]}
+          loadingEventIds={[]}
+          isSelectAllChecked={false}
+          showBuildingBlockAlerts={false}
+          onShowBuildingBlockAlertsChanged={jest.fn()}
+          showOnlyThreatIndicatorAlerts={false}
+          onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
+          dispatch={jest.fn()}
+          runtimeMappings={{}}
+          signalIndexName={'test'}
+        />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      wrapper.find('[data-test-subj="group-selector-dropdown"]').first().simulate('click');
+      wrapper.find('[data-test-subj="panel-kibana.alert.rule.name"]').first().simulate('click');
+
+      expect(mockTrack).toHaveBeenCalledWith(
+        telemetry.METRIC_TYPE.CLICK,
+        `${telemetry.TELEMETRY_EVENT.GROUP_ALERTS}${TableId.test}-kibana.alert.rule.name`
+      );
     });
   });
 });
