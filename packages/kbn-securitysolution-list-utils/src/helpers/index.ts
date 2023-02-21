@@ -60,6 +60,7 @@ import {
   ExceptionsBuilderReturnExceptionItem,
   FormattedBuilderEntry,
   OperatorOption,
+  SavedObjectType,
 } from '../types';
 
 export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
@@ -913,6 +914,21 @@ export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry => ({
 
 export const containsValueListEntry = (items: ExceptionsBuilderExceptionItem[]): boolean =>
   items.some((item) => item.entries.some(({ type }) => type === OperatorTypeEnum.LIST));
+
+export const buildShowActiveExceptionsFilter = (savedObjectPrefix: SavedObjectType[]): string => {
+  const now = new Date().toISOString();
+  const filters = savedObjectPrefix.map(
+    (prefix) =>
+      `${prefix}.attributes.expire_time > "${now}" OR NOT ${prefix}.attributes.expire_time: *`
+  );
+  return filters.join(',');
+};
+
+export const buildShowExpiredExceptionsFilter = (savedObjectPrefix: SavedObjectType[]): string => {
+  const now = new Date().toISOString();
+  const filters = savedObjectPrefix.map((prefix) => `${prefix}.attributes.expire_time <= "${now}"`);
+  return filters.join(',');
+};
 
 const getIndexGroupName = (indexName: string): string => {
   // Check whether it is a Data Stream index

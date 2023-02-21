@@ -19,7 +19,7 @@ import {
 } from '../../../assets/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO, APMTransactionDurationIndicator } from '../../../domain/models';
-import { TransformGenerator } from '.';
+import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
 import { DEFAULT_APM_INDEX } from './constants';
 import { Query } from './types';
 
@@ -31,6 +31,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
+      this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildCommonGroupBy(slo),
@@ -85,6 +86,10 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       });
     }
 
+    if (!!indicator.params.filter) {
+      queryFilter.push(getElastichsearchQueryOrThrow(indicator.params.filter));
+    }
+
     return {
       index: indicator.params.index ?? DEFAULT_APM_INDEX,
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
@@ -111,7 +116,8 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
   }
 
   private buildAggregations(slo: SLO, indicator: APMTransactionDurationIndicator) {
-    const truncatedThreshold = Math.trunc(indicator.params['threshold.us']);
+    // threshold is in ms (milliseconds), but apm data is stored in us (microseconds)
+    const truncatedThreshold = Math.trunc(indicator.params.threshold * 1000);
 
     return {
       _numerator: {

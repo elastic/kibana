@@ -511,6 +511,7 @@ describe('get_filter', () => {
 
       test('it should work with a list', async () => {
         const { filter } = await buildExceptionFilter({
+          startedAt: new Date(),
           listClient: getListClientMock(),
           lists: [getExceptionListItemSchemaMock()],
           alias: null,
@@ -595,6 +596,7 @@ describe('get_filter', () => {
 
     test('it should work with a list with multiple items', async () => {
       const { filter } = await buildExceptionFilter({
+        startedAt: new Date(),
         listClient: getListClientMock(),
         lists: [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
         alias: null,
@@ -714,6 +716,7 @@ describe('get_filter', () => {
 
     test('it should work with an exception list that includes a nested type', async () => {
       const { filter } = await buildExceptionFilter({
+        startedAt: new Date(),
         listClient: getListClientMock(),
         lists: [getExceptionListItemSchemaMock()],
         alias: null,
@@ -819,6 +822,7 @@ describe('get_filter', () => {
     describe('when "excludeExceptions" is false', () => {
       test('it should work with a list', async () => {
         const { filter } = await buildExceptionFilter({
+          startedAt: new Date(),
           listClient: getListClientMock(),
           lists: [getExceptionListItemSchemaMock()],
           alias: null,
@@ -901,6 +905,7 @@ describe('get_filter', () => {
 
       test('it should work with a list with multiple items', async () => {
         const { filter } = await buildExceptionFilter({
+          startedAt: new Date(),
           listClient: getListClientMock(),
           lists: [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
           alias: null,

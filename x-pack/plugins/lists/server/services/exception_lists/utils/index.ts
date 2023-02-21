@@ -150,6 +150,7 @@ export const transformSavedObjectToExceptionListItem = ({
       created_by,
       description,
       entries,
+      expire_time,
       item_id: itemId,
       list_id,
       meta,
@@ -174,6 +175,7 @@ export const transformSavedObjectToExceptionListItem = ({
     created_by,
     description,
     entries: entries ?? [],
+    expire_time,
     id,
     item_id: itemId ?? '(unknown)',
     list_id,
@@ -203,6 +205,7 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
       comments,
       description,
       entries,
+      expire_time: expireTime,
       meta,
       name,
       os_types: osTypes,
@@ -225,6 +228,7 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
     created_by: exceptionListItem.created_by,
     description: description ?? exceptionListItem.description,
     entries: entries ?? exceptionListItem.entries,
+    expire_time: expireTime ?? exceptionListItem.expire_time,
     id,
     item_id: exceptionListItem.item_id,
     list_id: exceptionListItem.list_id,
@@ -308,6 +312,7 @@ export const transformCreateCommentsToComments = ({
 };
 
 export const transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema = ({
+  expireTime,
   listId,
   itemId,
   namespaceType,
@@ -316,6 +321,7 @@ export const transformCreateExceptionListItemOptionsToCreateExceptionListItemSch
 }: CreateExceptionListItemOptions): CreateExceptionListItemSchema => {
   return {
     ...rest,
+    expire_time: expireTime,
     item_id: itemId,
     list_id: listId,
     namespace_type: namespaceType,
@@ -327,6 +333,7 @@ export const transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSch
   itemId,
   namespaceType,
   osTypes,
+  expireTime,
   // The `UpdateExceptionListItemOptions` type differs from the schema in that some properties are
   // marked as having `undefined` as a valid value, where the schema, however, requires it.
   // So we assign defaults here
@@ -338,6 +345,7 @@ export const transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSch
   return {
     ...rest,
     description,
+    expire_time: expireTime,
     item_id: itemId,
     name,
     namespace_type: namespaceType,

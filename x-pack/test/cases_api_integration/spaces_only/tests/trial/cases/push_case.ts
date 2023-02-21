@@ -12,12 +12,13 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
 import { nullUser } from '../../../../common/lib/mock';
-import { pushCase, deleteAllCaseItems, getAuthWithSuperUser } from '../../../../common/lib/utils';
-
 import {
+  pushCase,
+  deleteAllCaseItems,
+  getAuthWithSuperUser,
   createCaseWithConnector,
   getServiceNowSimulationServer,
-} from '../../../../common/lib/connectors';
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

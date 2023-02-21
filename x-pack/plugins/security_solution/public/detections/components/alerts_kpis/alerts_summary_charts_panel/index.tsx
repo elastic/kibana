@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
 import styled from 'styled-components';
@@ -16,6 +16,8 @@ import { SeverityLevelPanel } from '../severity_level_panel';
 import { AlertsByTypePanel } from '../alerts_by_type_panel';
 import { AlertsProgressBarPanel } from '../alerts_progress_bar_panel';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
   @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l});
@@ -36,6 +38,10 @@ interface Props {
   signalIndexName: string | null;
   title?: React.ReactNode;
   runtimeMappings?: MappingRuntimeFields;
+  isExpanded?: boolean;
+  setIsExpanded?: (status: boolean) => void;
+  groupBySelection: GroupBySelection;
+  setGroupBySelection: (groupBySelection: GroupBySelection) => void;
 }
 
 export const AlertsSummaryChartsPanel: React.FC<Props> = ({
@@ -47,25 +53,53 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
   runtimeMappings,
   signalIndexName,
   title = i18n.CHARTS_TITLE,
+  isExpanded,
+  setIsExpanded,
+  groupBySelection,
+  setGroupBySelection,
 }: Props) => {
-  const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_ALERTS_CHARTS_ID);
-  const [querySkip, setQuerySkip] = useState(!toggleStatus);
+  const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
 
+  const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_ALERTS_CHARTS_ID);
+  const [querySkip, setQuerySkip] = useState(
+    isAlertsPageChartsEnabled ? !isExpanded : !toggleStatus
+  );
   useEffect(() => {
-    setQuerySkip(!toggleStatus);
-  }, [toggleStatus]);
+    if (isAlertsPageChartsEnabled) {
+      setQuerySkip(!isExpanded);
+    } else {
+      setQuerySkip(!toggleStatus);
+    }
+  }, [toggleStatus, isAlertsPageChartsEnabled, isExpanded]);
+
   const toggleQuery = useCallback(
     (status: boolean) => {
-      setToggleStatus(status);
+      if (isAlertsPageChartsEnabled && setIsExpanded) {
+        setIsExpanded(status);
+      } else {
+        setToggleStatus(status);
+      }
       // toggle on = skipQuery false
       setQuerySkip(!status);
     },
-    [setQuerySkip, setToggleStatus]
+    [setQuerySkip, setToggleStatus, setIsExpanded, isAlertsPageChartsEnabled]
   );
+
+  const status: boolean = useMemo(() => {
+    if (isAlertsPageChartsEnabled && isExpanded) {
+      return true;
+    }
+    if (!isAlertsPageChartsEnabled && toggleStatus) {
+      return true;
+    }
+    return false;
+  }, [isAlertsPageChartsEnabled, isExpanded, toggleStatus]);
 
   return (
     <KpiPanel
-      $toggleStatus={toggleStatus}
+      $toggleStatus={
+        isAlertsPageChartsEnabled && isExpanded !== undefined ? isExpanded : toggleStatus
+      }
       data-test-subj="alerts-charts-panel"
       hasBorder
       height={panelHeight}
@@ -77,10 +111,10 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
         titleSize="s"
         hideSubtitle
         showInspectButton={false}
-        toggleStatus={toggleStatus}
+        toggleStatus={isAlertsPageChartsEnabled ? isExpanded : toggleStatus}
         toggleQuery={toggleQuery}
       />
-      {toggleStatus && (
+      {status && (
         <StyledFlexGroup
           data-test-subj="alerts-charts-container"
           className="eui-yScroll"
@@ -108,12 +142,13 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
           </StyledFlexItem>
           <StyledFlexItem>
             <AlertsProgressBarPanel
-              addFilter={addFilter}
               filters={filters}
               query={query}
               signalIndexName={signalIndexName}
               runtimeMappings={runtimeMappings}
               skip={querySkip}
+              groupBySelection={groupBySelection}
+              setGroupBySelection={setGroupBySelection}
             />
           </StyledFlexItem>
         </StyledFlexGroup>

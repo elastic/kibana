@@ -27,6 +27,8 @@ export {
   enableAgentExplorerView,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
   enableCriticalPath,
   profilingElasticsearchPlugin,
 } from './ui_settings_keys';
@@ -35,6 +37,8 @@ export {
   ProgressiveLoadingQuality,
   getProbabilityFromProgressiveLoadingQuality,
 } from './progressive_loading';
+
+export const sloFeatureId = 'slo';
 
 export const casesFeatureId = 'observabilityCases';
 

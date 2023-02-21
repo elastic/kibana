@@ -270,39 +270,15 @@ export const TlsTranslations = {
         'The context of this `when` is in the conditional sense, like "when there are three cookies, eat them all".',
     }
   ),
-  criteriaValue: i18n.translate('xpack.synthetics.alerts.tls.criteriaExpression.value', {
-    defaultMessage: 'any monitor',
+  criteriaValue: i18n.translate('xpack.synthetics.tls.criteriaExpression.value', {
+    defaultMessage: 'matching monitor',
   }),
-  expirationAriaLabel: i18n.translate(
-    'xpack.synthetics.alerts.tls.expirationExpression.ariaLabel',
-    {
-      defaultMessage:
-        'An expression displaying the threshold that will trigger the TLS alert for certificate expiration',
-    }
-  ),
-  expirationDescription: i18n.translate(
-    'xpack.synthetics.alerts.tls.expirationExpression.description',
-    {
-      defaultMessage: 'has a certificate expiring within',
-    }
-  ),
-  expirationValue: (value?: number) =>
-    i18n.translate('xpack.synthetics.alerts.tls.expirationExpression.value', {
-      defaultMessage: '{value} days',
-      values: { value },
-    }),
-  ageAriaLabel: i18n.translate('xpack.synthetics.alerts.tls.ageExpression.ariaLabel', {
-    defaultMessage:
-      'An expressing displaying the threshold that will trigger the TLS alert for old certificates',
+  expirationDescription: i18n.translate('xpack.synthetics.tls.expirationExpression.description', {
+    defaultMessage: 'has a certificate expiring within days: ',
   }),
-  ageDescription: i18n.translate('xpack.synthetics.alerts.tls.ageExpression.description', {
-    defaultMessage: 'or older than',
+  ageDescription: i18n.translate('xpack.synthetics.tls.ageExpression.description', {
+    defaultMessage: 'or older than days: ',
   }),
-  ageValue: (value?: number) =>
-    i18n.translate('xpack.synthetics.alerts.tls.ageExpression.value', {
-      defaultMessage: '{value} days',
-      values: { value },
-    }),
 };
 
 export const ToggleFlyoutTranslations = {

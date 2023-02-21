@@ -140,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         info: 'list export',
         get path() {
-          return `${EXCEPTION_LIST_URL}/_export?list_id=${eventFilterData.artifact.list_id}&namespace_type=${eventFilterData.artifact.namespace_type}&id=${eventFilterData.artifact.id}`;
+          return `${EXCEPTION_LIST_URL}/_export?list_id=${eventFilterData.artifact.list_id}&namespace_type=${eventFilterData.artifact.namespace_type}&id=${eventFilterData.artifact.id}&include_expired_exceptions=true`;
         },
         getBody: () => undefined,
       },
@@ -248,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
       for (const eventFilterApiCall of [...eventFilterCalls, ...needsWritePrivilege]) {
         it(`should error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.t2_analyst, 'changeme')
+            .auth(ROLE.artifact_read_role, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(eventFilterApiCall.getBody())
             .expect(403, {
@@ -261,7 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
       for (const eventFilterApiCall of needsReadPrivilege) {
         it(`should not error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.t2_analyst, 'changeme')
+            .auth(ROLE.artifact_read_role, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(eventFilterApiCall.getBody())
             .expect(200);

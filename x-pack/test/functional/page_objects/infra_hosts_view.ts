@@ -16,7 +16,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async clickTryHostViewBadge() {
-      return await testSubjects.click('inventory-hostsView-badge');
+      return await testSubjects.click('inventory-hostsView-link-badge');
     },
 
     async getHostsLandingPageDisabled() {

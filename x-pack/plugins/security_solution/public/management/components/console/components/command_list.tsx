@@ -290,8 +290,9 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
 
     return (
       <>
-        {commandsByGroups.map((commandsByGroup) => (
+        {commandsByGroups.map((commandsByGroup, i) => (
           <StyledEuiBasicTable
+            key={`styledEuiBasicTable-${i}`}
             items={getTableItems(commandsByGroup)}
             columns={getTableColumns(commandsByGroup)}
           />

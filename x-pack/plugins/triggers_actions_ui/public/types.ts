@@ -71,7 +71,6 @@ import type {
 import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
-import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
 import type {
   FieldBrowserOptions,
   CreateFieldComponent,
@@ -81,6 +80,9 @@ import type {
 } from './application/sections/field_browser/types';
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
+import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
+import { Case } from './application/sections/alerts_table/hooks/api';
+
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
@@ -122,7 +124,7 @@ export type {
   RulesListProps,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
-  RulesListNotifyBadgeProps,
+  RulesListNotifyBadgePropsWithApi,
   FieldBrowserProps,
   FieldBrowserOptions,
   CreateFieldComponent,
@@ -206,6 +208,7 @@ export interface ActionParamsProps<TParams> {
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
+  useDefaultMessage?: boolean;
   actionConnector?: ActionConnector;
   isLoading?: boolean;
   isDisabled?: boolean;
@@ -456,9 +459,12 @@ export interface InspectQuery {
 }
 export type GetInspectQuery = () => InspectQuery;
 
+export type Alert = EcsFieldsResponse;
+export type Alerts = Alert[];
+
 export interface FetchAlertData {
   activePage: number;
-  alerts: EcsFieldsResponse[];
+  alerts: Alerts;
   alertsCount: number;
   isInitializing: boolean;
   isLoading: boolean;
@@ -471,6 +477,7 @@ export interface FetchAlertData {
 
 export interface AlertsTableProps {
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
+  casesData: { cases: Map<string, Case>; isLoading: boolean };
   columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
@@ -509,7 +516,7 @@ export type AlertTableFlyoutComponent =
   | null;
 
 export interface AlertsTableFlyoutBaseProps {
-  alert: EcsFieldsResponse;
+  alert: Alert;
   isLoading: boolean;
   id?: string;
 }
@@ -528,7 +535,7 @@ export interface BulkActionsConfig {
 }
 
 export interface RenderCustomActionsRowArgs {
-  alert: EcsFieldsResponse;
+  alert: Alert;
   setFlyoutAlert: (data: unknown) => void;
   id?: string;
   setIsActionLoading?: (isLoading: boolean) => void;
@@ -664,4 +671,8 @@ export interface UpdateRulesToBulkEditProps {
   action: BulkEditActions;
   rules?: RuleTableItem[];
   filter?: KueryNode | null;
+}
+
+export interface LazyLoadProps {
+  hideLazyLoader?: boolean;
 }

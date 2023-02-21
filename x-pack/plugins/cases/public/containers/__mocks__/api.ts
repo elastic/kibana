@@ -26,8 +26,14 @@ import {
   pushedCase,
   tags,
   findCaseUserActionsResponse,
+  getCaseUsersMockResponse,
 } from '../mock';
-import type { CaseConnectors, CaseUpdateRequest, ResolvedCase } from '../../../common/ui/types';
+import type {
+  CaseConnectors,
+  CaseUpdateRequest,
+  CaseUsers,
+  ResolvedCase,
+} from '../../../common/ui/types';
 import { SeverityAll } from '../../../common/ui/types';
 import type {
   CasePatchRequest,
@@ -146,3 +152,6 @@ export const getCaseConnectors = async (
   caseId: string,
   signal: AbortSignal
 ): Promise<CaseConnectors> => Promise.resolve(getCaseConnectorsMockResponse());
+
+export const getCaseUsers = async (caseId: string, signal: AbortSignal): Promise<CaseUsers> =>
+  Promise.resolve(getCaseUsersMockResponse());

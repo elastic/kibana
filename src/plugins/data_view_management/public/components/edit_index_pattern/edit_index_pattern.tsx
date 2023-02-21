@@ -128,7 +128,10 @@ export const EditIndexPattern = withRouter(
     const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor
-        onSave={() => setShowEditDialog(false)}
+        onSave={() => {
+          setFields(indexPattern.getNonScriptedFields());
+          setShowEditDialog(false);
+        }}
         onCancel={() => setShowEditDialog(false)}
         defaultTypeIsRollup={isRollup}
         editData={indexPattern}

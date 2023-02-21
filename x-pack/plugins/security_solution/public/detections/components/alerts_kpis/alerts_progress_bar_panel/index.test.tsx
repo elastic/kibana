@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { AlertsProgressBarPanel } from '.';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 import { STACK_BY_ARIA_LABEL } from '../common/translations';
+import type { GroupBySelection } from './types';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -27,6 +28,8 @@ describe('Alert by grouping', () => {
   const defaultProps = {
     signalIndexName: 'signalIndexName',
     skip: false,
+    groupBySelection: 'host.name' as GroupBySelection,
+    setGroupBySelection: jest.fn(),
   };
 
   beforeEach(() => {
@@ -74,6 +77,8 @@ describe('Alert by grouping', () => {
   });
 
   describe('combo box', () => {
+    const setGroupBySelection = jest.fn();
+
     test('renders combo box', async () => {
       await act(async () => {
         const { container } = render(
@@ -89,7 +94,7 @@ describe('Alert by grouping', () => {
       await act(async () => {
         render(
           <TestProviders>
-            <AlertsProgressBarPanel {...defaultProps} />
+            <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
           </TestProviders>
         );
         const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
@@ -101,6 +106,25 @@ describe('Alert by grouping', () => {
       options.forEach((option, i) => {
         expect(optionsFound[i]).toEqual(option);
       });
+    });
+
+    test('it invokes setGroupBySelection when an option is selected', async () => {
+      const toBeSelected = 'user.name';
+      await act(async () => {
+        render(
+          <TestProviders>
+            <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
+          </TestProviders>
+        );
+        const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
+        if (comboBox) {
+          comboBox.focus(); // display the combo box options
+        }
+      });
+      const button = await screen.findByText(toBeSelected);
+      fireEvent.click(button);
+
+      expect(setGroupBySelection).toBeCalledWith(toBeSelected);
     });
   });
 });

@@ -601,5 +601,57 @@ describe('CollectorSet', () => {
         expect.any(Function)
       );
     });
+
+    it('reuses ongoing collectors for subsequent calls', async () => {
+      const fetchMock = jest.fn(
+        () => new Promise((resolve) => setTimeout(() => resolve({ test: 1000 }), 100))
+      );
+
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'slow_collector',
+          isReady: () => true,
+          schema: { test: { type: 'long' } },
+          fetch: fetchMock,
+        })
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+
+      // Call bulkFetch twice concurrently
+      await Promise.all([
+        collectorSet.bulkFetch(mockEsClient, mockSoClient),
+        collectorSet.bulkFetch(mockEsClient, mockSoClient),
+      ]);
+
+      // It should be called once
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls completed collectors on subsequent calls', async () => {
+      const fetchMock = jest.fn(
+        () => new Promise((resolve) => setTimeout(() => resolve({ test: 1000 }), 100))
+      );
+
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'slow_collector',
+          isReady: () => true,
+          schema: { test: { type: 'long' } },
+          fetch: fetchMock,
+        })
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+
+      // Call bulkFetch twice sequentially
+      await collectorSet.bulkFetch(mockEsClient, mockSoClient);
+      await collectorSet.bulkFetch(mockEsClient, mockSoClient);
+
+      // It should be called once
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
   });
 });
