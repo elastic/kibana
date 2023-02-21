@@ -71,7 +71,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "16.19.0",
+    "node": "16.19.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -727,7 +727,7 @@
     "compare-versions": "3.5.1",
     "constate": "^3.3.2",
     "copy-to-clipboard": "^3.0.8",
-    "core-js": "^3.27.2",
+    "core-js": "^3.28.0",
     "cronstrue": "^1.51.0",
     "cuid": "^2.1.8",
     "cytoscape": "^3.10.0",

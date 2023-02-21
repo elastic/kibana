@@ -168,6 +168,13 @@ describe('RPC -> create()', () => {
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
       });
 
+      test('should enforce a schema for the data', () => {
+        const { ctx } = setup({ contentSchemas: {} as any });
+        expect(() => fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: {} })).rejects.toEqual(
+          new Error('Schema missing for rpc procedure [create.in.data].')
+        );
+      });
+
       test('should validate the data sent in input - missing field', () => {
         const { ctx } = setup();
         expect(() => fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: {} })).rejects.toEqual(
