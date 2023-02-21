@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { merge } from 'lodash';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as testLibRender } from '@testing-library/react';
 import { AppMountParameters } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -21,14 +22,12 @@ import { PluginContext } from '../context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { ConfigSchema } from '../plugin';
 import { Subset } from '../typings';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
+const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
 export const core = coreMock.createStart();
 export const data = dataPluginMock.createStartContract();
-
-const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
 const defaultConfig: ConfigSchema = {
   unsafe: {

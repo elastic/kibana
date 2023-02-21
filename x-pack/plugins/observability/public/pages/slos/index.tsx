@@ -13,6 +13,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useLicense } from '../../hooks/use_license';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
 import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
@@ -20,7 +21,6 @@ import PageNotFound from '../404';
 import { paths } from '../../config';
 import { isSloFeatureEnabled } from './helpers/is_slo_feature_enabled';
 import type { ObservabilityAppServices } from '../../application/types';
-import { useCapabilities } from '../../hooks/slo/use_capabilities';
 
 export function SlosPage() {
   const {
@@ -65,11 +65,11 @@ export function SlosPage() {
         }),
         rightSideItems: [
           <EuiButton
-            disabled={!hasWriteCapabilities}
             color="primary"
+            data-test-subj="slosPage-createNewSloButton"
+            disabled={!hasWriteCapabilities}
             fill
             onClick={handleClickCreateSlo}
-            data-test-subj="slosPage-createNewSloButton"
           >
             {i18n.translate('xpack.observability.slos.sloList.pageHeader.createNewButtonLabel', {
               defaultMessage: 'Create new SLO',
