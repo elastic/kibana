@@ -19,7 +19,6 @@ import type {
   InstallSource,
   PackageAssetReference,
 } from '../../../../common/types';
-import { pkgToPkgKey } from '../registry';
 
 import { appContextService } from '../../app_context';
 
