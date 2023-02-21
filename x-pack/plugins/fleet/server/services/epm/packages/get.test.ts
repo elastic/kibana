@@ -198,9 +198,11 @@ describe('When using EPM `get` services', () => {
           title: 'Nginx',
         } as any,
       ]);
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+      MockRegistry.fetchInfo.mockResolvedValue({} as any);
     });
 
-    it('should return installed package that is not in registry', async () => {
+    it('should return installed package that is not in registry with package info', async () => {
       const soClient = savedObjectsClientMock.create();
       soClient.find.mockResolvedValue({
         saved_objects: [
@@ -210,10 +212,42 @@ describe('When using EPM `get` services', () => {
               name: 'elasticsearch',
               version: '0.0.1',
               install_source: 'upload',
+              install_version: '0.0.1',
             },
           },
         ],
       } as any);
+      soClient.get.mockImplementation((type) => {
+        if (type === 'epm-packages-assets') {
+          return Promise.resolve({
+            attributes: {
+              data_utf8: `
+name: elasticsearch
+version: 0.0.1
+title: Elastic
+description: Elasticsearch description`,
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              package_assets: [],
+              data_utf8: `
+            name: elasticsearch
+            version: 0.0.1
+            title: Elastic
+            description: Elasticsearch description`,
+            },
+          });
+        }
+      });
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [],
+      });
 
       await expect(
         getPackages({
@@ -224,7 +258,8 @@ describe('When using EPM `get` services', () => {
           id: 'elasticsearch',
           name: 'elasticsearch',
           version: '0.0.1',
-          title: 'Elasticsearch',
+          title: 'Elastic',
+          description: 'Elasticsearch description',
           savedObject: {
             id: 'elasticsearch',
             attributes: {
@@ -234,13 +269,7 @@ describe('When using EPM `get` services', () => {
             },
           },
         },
-        {
-          name: 'nginx',
-          version: '1.0.0',
-          title: 'Nginx',
-          id: 'nginx',
-          status: 'not_installed',
-        },
+        { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
       ]);
     });
   });
