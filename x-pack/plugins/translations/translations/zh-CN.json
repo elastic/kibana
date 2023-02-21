@@ -33246,8 +33246,6 @@
     "xpack.synthetics.durationTrend.percentile75": "第 75 个",
     "xpack.synthetics.editMonitor.errorDetailsRoute.title": "错误详细信息",
     "xpack.synthetics.editMonitor.pageHeader.title": "编辑监测",
-    "xpack.synthetics.editPackagePolicy.inUptime": "在 Uptime 中编辑",
-    "xpack.synthetics.editPackagePolicy.inUptimeDesc": "此软件包策略由 Uptime 应用托管。",
     "xpack.synthetics.emptyState.loadingMessage": "正在加载……",
     "xpack.synthetics.emptyStateError.notAuthorized": "您无权查看 Uptime 数据，请联系系统管理员。",
     "xpack.synthetics.emptyStateError.notFoundPage": "未找到页面",
