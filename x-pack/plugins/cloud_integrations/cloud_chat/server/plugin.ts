@@ -11,6 +11,7 @@ import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { registerChatRoute } from './routes';
 import { CloudChatConfigType } from './config';
+import { isTodayInDateWindow } from '../common/util';
 
 interface CloudChatSetupDeps {
   cloud: CloudSetup;
@@ -30,7 +31,8 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps> {
     if (
       cloud.isCloudEnabled &&
       this.config.chatIdentitySecret &&
-      isTrialWindow(this.config.trialBuffer, cloud.trialEndDate)
+      cloud.trialEndDate &&
+      isTodayInDateWindow(cloud.trialEndDate, this.config.trialBuffer)
     ) {
       registerChatRoute({
         router: core.http.createRouter(),
@@ -45,12 +47,3 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps> {
 
   public stop() {}
 }
-
-const isTrialWindow = (buffer: number, trialEndDate?: Date) => {
-  if (trialEndDate) {
-    const trialEndDateWithBuffer = new Date(trialEndDate);
-    trialEndDateWithBuffer.setDate(trialEndDateWithBuffer.getDate() + buffer);
-    return trialEndDateWithBuffer > new Date();
-  }
-  return false;
-};

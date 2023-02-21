@@ -15,6 +15,7 @@ import { ReplaySubject } from 'rxjs';
 import type { GetChatUserDataResponseBody } from '../common/types';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../common/constants';
 import { ChatConfig, ServicesProvider } from './services';
+import { isTodayInDateWindow } from '../common/util';
 
 interface CloudChatSetupDeps {
   cloud: CloudSetup;
@@ -62,7 +63,8 @@ export class CloudChatPlugin implements Plugin {
       !cloud.isCloudEnabled ||
       !security ||
       !this.config.chatURL ||
-      !isTrialWindow(this.config.trialBuffer, cloud.trialEndDate)
+      !cloud.trialEndDate ||
+      !isTodayInDateWindow(cloud.trialEndDate, this.config.trialBuffer)
     ) {
       return;
     }
@@ -95,12 +97,3 @@ export class CloudChatPlugin implements Plugin {
     }
   }
 }
-
-const isTrialWindow = (buffer: number, trialEndDate?: Date) => {
-  if (trialEndDate) {
-    const trialEndDateWithBuffer = new Date(trialEndDate);
-    trialEndDateWithBuffer.setDate(trialEndDateWithBuffer.getDate() + buffer);
-    return trialEndDateWithBuffer > new Date();
-  }
-  return false;
-};
