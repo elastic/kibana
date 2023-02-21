@@ -15,6 +15,9 @@ import { SolutionNavPanel } from './solution_grouped_nav_panel';
 import type { DefaultSideNavItem } from './types';
 import { bottomNavOffset } from '../../../lib/helpers';
 import { BETA } from '@kbn/kubernetes-security-plugin/common/translations';
+import { TELEMETRY_EVENT } from './telemetry/const';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { TelemetryContextProvider } from './telemetry/telemetry_context';
 
 const mockUseIsWithinMinBreakpoint = jest.fn(() => true);
 jest.mock('@elastic/eui', () => {
@@ -24,6 +27,8 @@ jest.mock('@elastic/eui', () => {
     useIsWithinMinBreakpoint: () => mockUseIsWithinMinBreakpoint(),
   };
 });
+
+const mockTrack = jest.fn();
 
 const mockItems: DefaultSideNavItem[] = [
   {
@@ -67,13 +72,15 @@ const renderNavPanel = (props: Partial<SolutionNavPanelProps> = {}) =>
   render(
     <>
       <div data-test-subj="outsideClickDummy" />
-      <SolutionNavPanel
-        items={mockItems}
-        title={PANEL_TITLE}
-        onClose={mockOnClose}
-        onOutsideClick={mockOnOutsideClick}
-        {...props}
-      />
+      <TelemetryContextProvider tracker={mockTrack}>
+        <SolutionNavPanel
+          items={mockItems}
+          title={PANEL_TITLE}
+          onClose={mockOnClose}
+          onOutsideClick={mockOnOutsideClick}
+          {...props}
+        />
+      </TelemetryContextProvider>
     </>,
     {
       wrapper: TestProviders,
@@ -138,6 +145,27 @@ describe('SolutionGroupedNav', () => {
       const result = renderNavPanel({ items });
       result.getByTestId(`groupedNavPanelLink-${SecurityPageName.users}`).click();
       expect(mockOnClick).toHaveBeenCalled();
+    });
+
+    it('should send telemetry if link clicked', () => {
+      const mockOnClick = jest.fn((ev) => {
+        ev.preventDefault();
+      });
+      const items = [
+        ...mockItems,
+        {
+          id: SecurityPageName.users,
+          label: 'Users',
+          href: '/users',
+          onClick: mockOnClick,
+        },
+      ];
+      const result = renderNavPanel({ items });
+      result.getByTestId(`groupedNavPanelLink-${SecurityPageName.users}`).click();
+      expect(mockTrack).toHaveBeenCalledWith(
+        METRIC_TYPE.CLICK,
+        `${TELEMETRY_EVENT.GROUPED_NAVIGATION}${SecurityPageName.users}`
+      );
     });
   });
 

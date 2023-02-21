@@ -16,6 +16,7 @@
 // See: https://docs.elastic.dev/kibana-dev-docs/key-concepts/platform-intro#public-plugin-api
 
 export {
+  APP_ID,
   CASES_URL,
   SECURITY_SOLUTION_OWNER,
   OBSERVABILITY_OWNER,
@@ -25,6 +26,7 @@ export {
   PUSH_CASES_CAPABILITY,
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
+  INTERNAL_BULK_GET_CASES_URL,
 } from './constants';
 
 export {
@@ -33,6 +35,12 @@ export {
   getCasesFromAlertsUrl,
   throwErrors,
   ExternalReferenceStorageType,
+} from './api';
+
+export type {
+  CaseResponse,
+  CasesBulkGetRequestCertainFields,
+  CasesBulkGetResponseCertainFields,
 } from './api';
 
 export type {

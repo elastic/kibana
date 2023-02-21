@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { EuiLoadingContent } from '@elastic/eui';
 
 import { INTEGRATIONS_ROUTING_PATHS } from '../../constants';
