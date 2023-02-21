@@ -144,7 +144,11 @@ export const swapNonDefaultSpaceDestinationIdWithId = (
     return { ...action, id: destinationId || action.id };
   });
 };
-
+/*
+// When a connector is exported from one namespace and imported to another, it does not result in an error, but instead a new object is created with
+// new destination id and id will have the old  origin id, so in order to be able to use the newly generated Connectors id, this util is used to swap the old id with the
+// new destination Id
+*/
 export const generateNewRulesActionsAfterMigration = (
   rules: Array<RuleToImport | Error>,
   importResult: SavedObjectsImportSuccess[]
