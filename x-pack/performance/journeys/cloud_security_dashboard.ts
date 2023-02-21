@@ -34,11 +34,28 @@ export const journey = new Journey({
     maxDuration: '10m',
   },
 })
-  // this step will be replace by the before hook once it will be merged.
   .step('wait for installation and then post data', async ({ esArchiver }) => {
     await sleep(3000);
     await esArchiver.load('x-pack/performance/es_archives/kspm_findings');
+    // Since the status API call calculates in APM output, I use here sleep
+
+    // retry.try(async () => {
+    //   const response = await kibanaServer.request({
+    //     path: '/internal/cloud_security_posture/status?check=init',
+    //     method: 'GET',
+    //   });
+
+    //   expect(response.status).to.eql(200);
+    //   expect(response.data).to.eql({ isPluginInitialized: true });
+    //   log.debug('CSP plugin is initialized');
+    // });
   })
+  // .step('Load data', async ({ es, esArchiver }) => {
+
+  //   await esArchiver.load('x-pack/performance/es_archives/kspm_findings');
+
+  //   // await sleep(3000);
+  // })
 
   .step('Go to cloud security dashboards Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/security/cloud_security_posture/dashboard`));
