@@ -56,8 +56,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     ),
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/140867
-  describe.skip('alerts', () => {
+  describe('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
@@ -113,6 +112,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await ensureAlertIsRunning();
 
               await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
+
+              await ensureAlertIsRunning();
 
               // update alert as user with privileges - so it is no longer a legacy alert
               const updatedKeyResponse = await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
