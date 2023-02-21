@@ -5716,12 +5716,10 @@
             "nullable": true
           },
           "unenroll_timeout": {
-            "type": "number",
-            "nullable": true
+            "type": "number"
           },
           "inactivity_timeout": {
-            "type": "number",
-            "nullable": true
+            "type": "number"
           }
         },
         "required": [
