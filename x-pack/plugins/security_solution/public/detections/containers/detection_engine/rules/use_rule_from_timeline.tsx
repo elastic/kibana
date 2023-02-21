@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import type { EqlOptionsSelected } from '@kbn/timelines-plugin/common';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import { updateIsLoading } from '../../../../timelines/store/timeline/actions';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -36,9 +37,11 @@ export interface RuleFromTimeline {
 type SetRuleQuery = ({
   index,
   queryBar,
+  eqlOptions,
 }: {
   index: string[];
   queryBar: FieldValueQueryBar;
+  eqlOptions?: EqlOptionsSelected;
 }) => void;
 
 export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimeline => {
@@ -123,7 +126,6 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
           : '';
 
       setLoading(false);
-
       setRuleQuery({
         index: selectedPatterns,
         queryBar: {
@@ -134,6 +136,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
           query: newQuery,
           saved_id: null,
         },
+        ...(isEql ? { eqlOptions: selectedTimeline.eqlOptions } : {}),
       });
     } catch (error) {
       setLoading(false);

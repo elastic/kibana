@@ -226,6 +226,13 @@ describe('useRuleFromTimeline', () => {
     });
 
     it('when timeline has eql, set rule data to match from eql query', async () => {
+      const eqlOptions = {
+        eventCategoryField: 'category',
+        tiebreakerField: '',
+        timestampField: '@timestamp',
+        query: 'find it EQL',
+        size: 100,
+      };
       const eqlTimeline = {
         data: {
           timeline: {
@@ -234,13 +241,7 @@ describe('useRuleFromTimeline', () => {
             savedObjectId: timelineId,
             indexNames: ['awesome-*'],
             dataViewId: 'custom-data-view-id',
-            eqlOptions: {
-              eventCategoryField: 'category',
-              tiebreakerField: '',
-              timestampField: '@timestamp',
-              query: 'find it EQL',
-              size: 100,
-            },
+            eqlOptions,
           },
         },
       };
@@ -259,6 +260,7 @@ describe('useRuleFromTimeline', () => {
           query: { query: 'find it EQL', language: 'eql' },
           saved_id: null,
         },
+        eqlOptions,
       });
     });
 

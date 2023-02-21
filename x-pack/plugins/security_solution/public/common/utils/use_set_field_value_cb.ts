@@ -22,7 +22,7 @@ export const useSetFieldValueWithCallback = ({
   const [callback, setCallback] = useState<() => void>(() => null);
 
   useEffect(() => {
-    if (isWaitingRef.current && value === valueRef.current && typeof callback === 'function') {
+    if (isWaitingRef.current && value === valueRef.current) {
       isWaitingRef.current = false;
       valueRef.current = undefined;
       callback();

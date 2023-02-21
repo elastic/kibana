@@ -220,14 +220,22 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setFieldValue,
   });
 
+  const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
+    initialState.eqlOptions || {}
+  );
+
   const handleSetRuleFromTimeline = useCallback(
-    ({ index: timelineIndex, queryBar: timelineQueryBar }) => {
+    ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
       const setQuery = () => {
         setFieldValue('index', timelineIndex);
         setFieldValue('queryBar', timelineQueryBar);
       };
       if (timelineQueryBar.query.language === 'eql') {
         setRuleTypeCallback('eql', setQuery);
+        setOptionsSelected((prevOptions) => ({
+          ...prevOptions,
+          ...(eqlOptions != null ? eqlOptions : {}),
+        }));
       } else {
         setQuery();
       }
@@ -278,9 +286,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
   const previousRuleType = usePrevious(ruleType);
-  const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
-    initialState.eqlOptions || {}
-  );
   const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] = useFetchIndex(
     index,
     false
