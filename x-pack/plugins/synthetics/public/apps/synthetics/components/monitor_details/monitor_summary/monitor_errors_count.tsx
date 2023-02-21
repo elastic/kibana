@@ -16,9 +16,10 @@ interface MonitorErrorsCountProps {
   from: string;
   to: string;
   monitorId: string[];
+  id: string;
 }
 
-export const MonitorErrorsCount = ({ monitorId, from, to }: MonitorErrorsCountProps) => {
+export const MonitorErrorsCount = ({ monitorId, from, to, id }: MonitorErrorsCountProps) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
@@ -33,6 +34,7 @@ export const MonitorErrorsCount = ({ monitorId, from, to }: MonitorErrorsCountPr
 
   return (
     <ExploratoryViewEmbeddable
+      id={id}
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}

@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
-
-export const cpuCores: MetricsUIAggregation = {
-  cpuCores: {
-    max: {
-      field: 'system.cpu.cores',
-    },
-  },
-};
+export const DESIRED_BUFFER_PAGES = 2;
+export const RELATIVE_END_UPDATE_DELAY = 1000;
