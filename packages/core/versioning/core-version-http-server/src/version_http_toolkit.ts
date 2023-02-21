@@ -18,12 +18,21 @@ import type {
 
 type RqCtx = RequestHandlerContextBase;
 
-/** Assuming that version will be a monotonically increasing number where: version > 0. */
+/**
+ * Assuming that version will be a monotonically increasing number where: version > 0.
+ * @experimental
+ */
 export type Version = `${number}`;
 
-/** Arguments to create a {@link VersionedRouter | versioned router}. */
+/**
+ * Arguments to create a {@link VersionedRouter | versioned router}.
+ * @experimental
+ */
 export interface CreateVersionedRouterArgs<Ctx extends RqCtx = RqCtx> {
-  /** A router instance */
+  /**
+   * A router instance
+   * @experimental
+   */
   router: IRouter<Ctx>;
 }
 
@@ -36,36 +45,52 @@ export interface CreateVersionedRouterArgs<Ctx extends RqCtx = RqCtx> {
  * ```ts
  * const versionedRoute = versionedRouter
  *   .post({
- *     path: '/api/my-app/foo/{name?}',
+ *     path: '/api/my-app/foo/{fooId?}/{name?}', // <= design mistake, {name?} should be a query parameter, but it has been released...
  *     options: { timeout: { payload: 60000 } },
  *   })
- *   // First version of the API, accepts { foo: string } in the body
  *   .addVersion(
- *     { version: '1', validate: { body: schema.object({ foo: schema.string() }) } },
+ *     {
+ *       version: '1',
+ *       validate: {
+ *         params: schema.object({
+ *           fooId: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+ *           name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+ *         }),
+ *         body: schema.object({ foo: schema.string() }),
+ *       },
+ *     },
  *     async (ctx, req, res) => {
- *       await ctx.fooService.create(req.body.foo);
+ *       await ctx.fooService.create(req.body.foo, req.params.fooId, req.params.name);
  *       return res.ok({ body: { foo: req.body.foo } });
  *     }
  *   )
- *   // Second version of the API, accepts { fooName: string } in the body
+ *   // BREAKING CHANGE: { foo: string } => { fooString: string } in body
  *   .addVersion(
  *     {
  *       version: '2',
- *       path: '/api/my-app/foo/{id?}', // Update the path to something new
- *       validate: { body: schema.object({ fooName: schema.string() }) },
+ *       path: '/api/my-app/foo/{id?}/{name?}', // Update "fooId" => "id", this is not a breaking change!
+ *       validate: {
+ *         params: schema.object({
+ *           id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+ *           name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+ *         }),
+ *         body: schema.object({ fooString: schema.string() }),
+ *       },
  *     },
  *     async (ctx, req, res) => {
- *       await ctx.fooService.create(req.body.fooName);
- *       return res.ok({ body: { fooName: req.body.fooName } });
+ *       await ctx.fooService.create(req.body.fooString, req.params.id, req.params.name);
+ *       return res.ok({ body: { fooName: req.body.fooString } });
  *     }
- *   );
+ *   )
  * ```
+ * @experimental
  */
 export interface VersionHTTPToolkit {
   /**
    * Create a versioned router
    * @param args - The arguments to create a versioned router
    * @returns A versioned router
+   * @experimental
    */
   createVersionedRouter<Ctx extends RqCtx = RqCtx>(
     args: CreateVersionedRouterArgs<Ctx>
@@ -74,6 +99,7 @@ export interface VersionHTTPToolkit {
 
 /**
  * Configuration for a versioned route
+ * @experimental
  */
 export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
@@ -85,6 +111,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
  *
  * @param config - The route configuration
  * @returns A versioned route
+ * @experimental
  */
 export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCtx = RqCtx> = (
   config: VersionedRouteConfig<Method>
@@ -93,35 +120,53 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
 /**
  * A router, very similar to {@link IRouter} that will return an {@link VersionedRoute}
  * instead.
+ * @experimental
  */
 export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
+  /** @experimental */
   get: VersionedRouteRegistrar<'get', Ctx>;
+  /** @experimental */
   put: VersionedRouteRegistrar<'put', Ctx>;
+  /** @experimental */
   post: VersionedRouteRegistrar<'post', Ctx>;
+  /** @experimental */
   patch: VersionedRouteRegistrar<'patch', Ctx>;
+  /** @experimental */
   delete: VersionedRouteRegistrar<'delete', Ctx>;
+  /** @experimental */
   options: VersionedRouteRegistrar<'options', Ctx>;
 }
 
 /**
  * Options for a versioned route. Probably needs a lot more options like sunsetting
  * of an endpoint etc.
+ * @experimental
  */
 export interface AddVersionOpts<P, Q, B, Method extends RouteMethod = RouteMethod>
   extends RouteConfigOptions<Method> {
-  /** Version to assign to this route */
+  /**
+   * Version to assign to this route
+   * @experimental
+   */
   version: Version;
-  /** Validation for this version of a route */
+  /**
+   * Validation for this version of a route
+   * @experimental
+   */
   validate: false | RouteValidatorFullConfig<P, Q, B>;
   /**
    * Override the path of of this "route". Useful to update, add or change existing path parameters.
    * @note This option should preferably not introduce dramatic changes to the path as we may be
    *       better of creating a new route entirely.
+   * @experimental
    */
   path?: string;
 }
 
-/** A versioned route */
+/**
+ * A versioned route
+ * @experimental
+ */
 export interface VersionedRoute<
   Method extends RouteMethod = RouteMethod,
   Ctx extends RqCtx = RqCtx
@@ -131,6 +176,7 @@ export interface VersionedRoute<
    * @param opts {@link AddVersionOpts | Options} for this version of a route
    * @param handler The request handler for this version of a route
    * @returns A versioned route, allows for fluent chaining of version declarations
+   * @experimental
    */
   addVersion<P, Q, B>(
     opts: AddVersionOpts<P, Q, B>,
