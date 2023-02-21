@@ -119,7 +119,8 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
   }
 
   const segs = path.split(Path.sep);
-  const isBuild = segs.includes('node_modules') || Path.basename(Path.dirname(repoRoot)).includes('build');
+  const isBuild =
+    segs.includes('node_modules') || Path.basename(Path.dirname(repoRoot)).includes('build');
   // TODO: evaluate if __category__ should be removed
   if (__category__ !== undefined) {
     if (!isBuild) {
