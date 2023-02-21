@@ -281,6 +281,10 @@ paths:
             schema:
               type: string
               format: binary
+          application/gzip:
+            schema:
+              type: string
+              format: binary
   /epm/packages/_bulk:
     post:
       summary: Packages - Bulk install

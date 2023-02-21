@@ -435,6 +435,12 @@
                 "type": "string",
                 "format": "binary"
               }
+            },
+            "application/gzip": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
             }
           }
         }
