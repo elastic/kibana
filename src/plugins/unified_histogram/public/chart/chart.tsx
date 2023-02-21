@@ -129,6 +129,7 @@ export function Chart({
     onTimeIntervalChange,
     closePopover: closeChartOptions,
     onResetChartHeight,
+    isPlainRecord,
   });
 
   const chartVisible = !!(

@@ -83,10 +83,10 @@ export const SuggestionSelector = ({
       <EuiComboBox
         data-test-subj="unifiedHistogramSuggestionSelector"
         prepend={i18n.translate('unifiedHistogram.suggestionSelectorLabel', {
-          defaultMessage: 'Chart',
+          defaultMessage: 'Visualization',
         })}
         placeholder={i18n.translate('unifiedHistogram.suggestionSelectorPlaceholder', {
-          defaultMessage: 'Select chart',
+          defaultMessage: 'Select visualization',
         })}
         singleSelection={{ asPlainText: true }}
         options={suggestionOptions}
