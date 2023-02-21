@@ -8,8 +8,46 @@
 import { resolve } from 'path';
 import Url from 'url';
 import { withProcRunner } from '@kbn/dev-proc-runner';
-
+import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/runtime';
 import { FtrProviderContext } from './ftr_provider_context';
+import { AgentManager } from './agent';
+import { FleetManager } from './fleet_server';
+import { getLatestAvailableAgentVersion } from './utils';
+
+async function withFleetAgent(
+  { getService }: FtrProviderContext,
+  runner: (runnerEnv: Record<string, string>) => Promise<void>
+) {
+  const log = getService('log');
+  const config = getService('config');
+  const kbnClient = getService('kibanaServer');
+
+  const elasticUrl = Url.format(config.get('servers.elasticsearch'));
+  const kibanaUrl = Url.format(config.get('servers.kibana'));
+  const username = config.get('servers.elasticsearch.username');
+  const password = config.get('servers.elasticsearch.password');
+
+  await startRuntimeServices({
+    log,
+    elasticUrl,
+    kibanaUrl,
+    username,
+    password,
+    version: await getLatestAvailableAgentVersion(kbnClient),
+  });
+
+  const fleetManager = new FleetManager(log);
+  const agentManager = new AgentManager(log);
+
+  await fleetManager.setup();
+  await agentManager.setup();
+  try {
+    await runner({});
+  } finally {
+    agentManager.cleanup();
+    fleetManager.cleanup();
+  }
+}
 
 export async function DefendWorkflowsCypressCliTestRunner(context: FtrProviderContext) {
   await startDefendWorkflowsCypress(context, 'dw:run');
@@ -17,6 +55,10 @@ export async function DefendWorkflowsCypressCliTestRunner(context: FtrProviderCo
 
 export async function DefendWorkflowsCypressVisualTestRunner(context: FtrProviderContext) {
   await startDefendWorkflowsCypress(context, 'dw:open');
+}
+
+export async function DefendWorkflowsCypressEndpointTestRunner(context: FtrProviderContext) {
+  await withFleetAgent(context, () => startDefendWorkflowsCypress(context, 'dw:endpoint:open'));
 }
 
 function startDefendWorkflowsCypress(context: FtrProviderContext, cypressCommand: string) {

@@ -7,8 +7,8 @@
  */
 import type { SavedObjectsClientContract, SavedObjectsStart } from '@kbn/core/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SavedSearch, SavedSearchAttributes } from './types';
-
+import type { SavedSearchAttributes } from '../../../common';
+import type { SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
 import { toSavedSearchAttributes } from './saved_searches_utils';
 

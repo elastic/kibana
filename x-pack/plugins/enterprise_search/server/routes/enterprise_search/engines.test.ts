@@ -238,7 +238,7 @@ describe('engines routes', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
-        method: 'get',
+        method: 'post',
         path: '/internal/enterprise_search/engines/{engine_name}/search',
       });
 
