@@ -16,6 +16,7 @@ import {
 } from '../../../common/mock/endpoint';
 import { ResponseActionsLog } from './response_actions_log';
 import type {
+  ActionDetailsApiResponse,
   ActionFileInfoApiResponse,
   ActionListApiResponse,
 } from '../../../../common/endpoint/types';
@@ -135,6 +136,19 @@ jest.mock('../../hooks/response_actions/use_get_file_info', () => {
   return {
     ...original,
     useGetFileInfo: () => mockUseGetFileInfo,
+  };
+});
+
+let mockUseGetActionDetails: {
+  isFetching?: boolean;
+  error?: Partial<IHttpFetchError> | null;
+  data?: ActionDetailsApiResponse;
+};
+jest.mock('../../hooks/response_actions/use_get_action_details', () => {
+  const original = jest.requireActual('../../hooks/response_actions/use_get_action_details');
+  return {
+    ...original,
+    useGetActionDetails: () => mockUseGetActionDetails,
   };
 });
 
@@ -438,89 +452,265 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should contain download link in expanded row for `get-file` action WITH file operation permission', async () => {
-      mockUseGetEndpointActionList = {
-        ...getBaseMockedActionList(),
-        data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
-      };
+    describe('`get-file` action', () => {
+      it('should contain download link in expanded row for `get-file` action WITH file operation permission', async () => {
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
+        };
 
-      mockUseGetFileInfo = {
-        isFetching: false,
-        error: null,
-        data: apiMocks.responseProvider.fileInfo(),
-      };
+        mockUseGetFileInfo = {
+          isFetching: false,
+          error: null,
+          data: apiMocks.responseProvider.fileInfo(),
+        };
 
-      render();
+        render();
 
-      const { getByTestId } = renderResult;
-      const expandButton = getByTestId(`${testPrefix}-expand-button`);
-      userEvent.click(expandButton);
+        const { getByTestId } = renderResult;
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
 
-      await waitFor(() => {
-        expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+        });
+
+        const downloadLink = getByTestId(`${testPrefix}-getFileDownloadLink`);
+        expect(downloadLink).toBeTruthy();
+        expect(downloadLink.textContent).toEqual(
+          'Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+        );
       });
 
-      const downloadLink = getByTestId(`${testPrefix}-getFileDownloadLink`);
-      expect(downloadLink).toBeTruthy();
-      expect(downloadLink.textContent).toEqual(
-        'Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
-      );
+      it('should show file unavailable for download for `get-file` action WITH file operation permission when file is deleted', async () => {
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
+        };
+
+        const fileInfo = apiMocks.responseProvider.fileInfo();
+        fileInfo.data.status = 'DELETED';
+
+        apiMocks.responseProvider.fileInfo.mockReturnValue(fileInfo);
+
+        mockUseGetFileInfo = {
+          isFetching: false,
+          error: null,
+          data: apiMocks.responseProvider.fileInfo(),
+        };
+
+        render();
+
+        const { getByTestId } = renderResult;
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+        });
+
+        const unavailableText = getByTestId(
+          `${testPrefix}-getFileDownloadLink-fileNoLongerAvailable`
+        );
+        expect(unavailableText).toBeTruthy();
+      });
+
+      it('should not contain download link in expanded row for `get-file` action when NO file operation permission', async () => {
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({
+            canWriteFileOperations: false,
+          }),
+        });
+
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
+        };
+
+        render();
+        const { getByTestId, queryByTestId } = renderResult;
+
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
+        const output = getByTestId(`${testPrefix}-details-tray-output`);
+        expect(output).toBeTruthy();
+        expect(output.textContent).toEqual('get-file completed successfully');
+        expect(queryByTestId(`${testPrefix}-getFileDownloadLink`)).toBeNull();
+      });
     });
 
-    it('should show file unavailable for download for `get-file` action WITH file operation permission when file is deleted', async () => {
-      mockUseGetEndpointActionList = {
-        ...getBaseMockedActionList(),
-        data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
-      };
+    describe('`execute` action', () => {
+      it('should contain download execute link in expanded row for `execute` action WITH file operation permission', async () => {
+        const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: actionDetails,
+        };
 
-      const fileInfo = apiMocks.responseProvider.fileInfo();
-      fileInfo.data.status = 'DELETED';
+        mockUseGetFileInfo = {
+          isFetching: false,
+          error: null,
+          data: apiMocks.responseProvider.fileInfo(),
+        };
 
-      apiMocks.responseProvider.fileInfo.mockReturnValue(fileInfo);
+        mockUseGetActionDetails = {
+          isFetching: false,
+          error: null,
+          data: {
+            ...apiMocks.responseProvider.actionDetails({
+              path: `/api/endpoint/action/${actionDetails.data[0].id}`,
+            }),
+            data: {
+              ...apiMocks.responseProvider.actionDetails({
+                path: `/api/endpoint/action/${actionDetails.data[0].id}`,
+              }).data,
+              outputs: {
+                [actionDetails.data[0].agents[0]]: {
+                  content: {},
+                  type: 'json',
+                },
+              },
+            },
+          },
+        };
 
-      mockUseGetFileInfo = {
-        isFetching: false,
-        error: null,
-        data: apiMocks.responseProvider.fileInfo(),
-      };
+        render();
 
-      render();
+        const { getByTestId } = renderResult;
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
 
-      const { getByTestId } = renderResult;
-      const expandButton = getByTestId(`${testPrefix}-expand-button`);
-      userEvent.click(expandButton);
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+        });
 
-      await waitFor(() => {
-        expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+        const downloadExecuteLink = getByTestId(`${testPrefix}-getExecuteLink`);
+        expect(downloadExecuteLink).toBeTruthy();
+        expect(downloadExecuteLink.textContent).toEqual(
+          'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+        );
       });
 
-      const unavailableText = getByTestId(
-        `${testPrefix}-getFileDownloadLink-fileNoLongerAvailable`
-      );
-      expect(unavailableText).toBeTruthy();
-    });
+      it('should contain execute output and error for `execute` action', async () => {
+        const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: actionDetails,
+        };
 
-    it('should not contain download link in expanded row for `get-file` action when NO file operation permission', async () => {
-      useUserPrivilegesMock.mockReturnValue({
-        endpointPrivileges: getEndpointAuthzInitialStateMock({
-          canWriteFileOperations: false,
-        }),
+        mockUseGetFileInfo = {
+          isFetching: false,
+          error: null,
+          data: apiMocks.responseProvider.fileInfo(),
+        };
+
+        mockUseGetActionDetails = {
+          isFetching: false,
+          error: null,
+          data: {
+            data: {
+              ...apiMocks.responseProvider.actionDetails({
+                path: `/api/endpoint/action/${actionDetails.data[0].id}`,
+              }).data,
+              outputs: {
+                [actionDetails.data[0].agents[0]]: {
+                  content: {},
+                  type: 'json',
+                },
+              },
+            },
+          },
+        };
+
+        render();
+
+        const { getByTestId } = renderResult;
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+        });
+
+        const executeAccordions = getByTestId(`${testPrefix}-executeResponseOutput`);
+        expect(executeAccordions).toBeTruthy();
+        expect(executeAccordions).toHaveTextContent('Execution outputExecution error');
       });
 
-      mockUseGetEndpointActionList = {
-        ...getBaseMockedActionList(),
-        data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
-      };
+      it('should not contain execute output for `execute` action without required privilege', async () => {
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({
+            canWriteExecuteOperations: false,
+          }),
+        });
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
+        };
 
-      render();
-      const { getByTestId, queryByTestId } = renderResult;
+        render();
 
-      const expandButton = getByTestId(`${testPrefix}-expand-button`);
-      userEvent.click(expandButton);
-      const output = getByTestId(`${testPrefix}-details-tray-output`);
-      expect(output).toBeTruthy();
-      expect(output.textContent).toEqual('get-file completed successfully');
-      expect(queryByTestId(`${testPrefix}-getFileDownloadLink`)).toBeNull();
+        const { getByTestId, queryByTestId } = renderResult;
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
+
+        const executeAccordions = queryByTestId(`${testPrefix}-executeResponseOutput`);
+        expect(executeAccordions).toBeNull();
+      });
+
+      it('should show file unavailable for download for `execute` action WITH file operation permission when file is deleted', async () => {
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
+        };
+
+        const fileInfo = apiMocks.responseProvider.fileInfo();
+        fileInfo.data.status = 'DELETED';
+
+        apiMocks.responseProvider.fileInfo.mockReturnValue(fileInfo);
+
+        mockUseGetFileInfo = {
+          isFetching: false,
+          error: null,
+          data: apiMocks.responseProvider.fileInfo(),
+        };
+
+        render();
+
+        const { getByTestId } = renderResult;
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+        });
+
+        const unavailableText = getByTestId(`${testPrefix}-getExecuteLink-fileNoLongerAvailable`);
+        expect(unavailableText).toBeTruthy();
+      });
+
+      it('should not contain full output file download link in expanded row for `execute` action when NO file operation permission', async () => {
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({
+            canWriteFileOperations: false,
+          }),
+        });
+
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
+        };
+
+        render();
+        const { getByTestId, queryByTestId } = renderResult;
+
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
+        const output = getByTestId(`${testPrefix}-details-tray-output`);
+        expect(output).toBeTruthy();
+        expect(output.textContent).toEqual('execute completed successfully');
+        expect(queryByTestId(`${testPrefix}-getExecuteLink`)).toBeNull();
+      });
     });
 
     it('should refresh data when autoRefresh is toggled on', async () => {
