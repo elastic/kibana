@@ -42,8 +42,13 @@ export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMi
 const soSchema = schema.object({
   maxImportPayloadBytes: schema.byteSize({ defaultValue: 26_214_400 }),
   maxImportExportSize: schema.number({ defaultValue: 10_000 }),
-  /* @internal Conditionally set within config, dependening on the env. In prod: allow all access(default), in dev: false */
-  allowHttpApiAccess: schema.boolean({ defaultValue: true }),
+  /* @internal Conditionally set default, dependening on if kibana's running from a dist build or not */
+  allowHttpApiAccess: schema.conditional(
+    schema.contextRef('dist'),
+    true,
+    schema.boolean({ defaultValue: true }),
+    schema.boolean({ defaultValue: false })
+  ),
 });
 
 export type SavedObjectsConfigType = TypeOf<typeof soSchema>;
@@ -61,12 +66,11 @@ export class SavedObjectConfig {
 
   constructor(
     rawConfig: SavedObjectsConfigType,
-    rawMigrationConfig: SavedObjectsMigrationConfigType,
-    allowHttpApiAccess: boolean
+    rawMigrationConfig: SavedObjectsMigrationConfigType
   ) {
     this.maxImportPayloadBytes = rawConfig.maxImportPayloadBytes.getValueInBytes();
     this.maxImportExportSize = rawConfig.maxImportExportSize;
     this.migration = rawMigrationConfig;
-    this.allowHttpApiAccess = rawConfig.allowHttpApiAccess || allowHttpApiAccess;
+    this.allowHttpApiAccess = rawConfig.allowHttpApiAccess;
   }
 }
