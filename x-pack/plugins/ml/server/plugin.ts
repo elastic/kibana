@@ -48,6 +48,7 @@ import { jobServiceRoutes } from './routes/job_service';
 import { savedObjectsRoutes } from './routes/saved_objects';
 import { jobValidationRoutes } from './routes/job_validation';
 import { resultsServiceRoutes } from './routes/results_service';
+import { modelManagementRoutes } from './routes/model_management';
 import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
 import { createSharedServices, SharedServices } from './shared_services';
@@ -218,6 +219,7 @@ export class MlServerPlugin
     jobRoutes(routeInit);
     jobServiceRoutes(routeInit);
     managementRoutes(routeInit);
+    modelManagementRoutes(routeInit);
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit);
     savedObjectsRoutes(routeInit, {

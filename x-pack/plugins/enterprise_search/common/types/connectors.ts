@@ -7,6 +7,7 @@
 
 export interface KeyValuePair {
   label: string;
+  order?: number | null;
   value: string | null;
 }
 
@@ -169,7 +170,7 @@ export interface ConnectorSyncJob {
   completed_at: string | null;
   connector: {
     configuration: ConnectorConfiguration;
-    filtering: FilteringRules[] | null;
+    filtering: FilteringRules | FilteringRules[] | null;
     id: string;
     index_name: string;
     language: string;

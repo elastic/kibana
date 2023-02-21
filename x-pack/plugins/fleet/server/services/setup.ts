@@ -165,6 +165,13 @@ async function createSetupSideEffects(
   logger.debug('Upgrade Fleet package install versions');
   await upgradePackageInstallVersion({ soClient, esClient, logger });
 
+  if (appContextService.getMessageSigningService()?.isEncryptionAvailable) {
+    logger.debug('Generating key pair for message signing');
+    await appContextService.getMessageSigningService()?.generateKeyPair();
+  } else {
+    logger.info('No encryption key set, skipping key pair generation for message signing');
+  }
+
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);
 

@@ -176,6 +176,9 @@
       "label": "Contributors Newsletters",
       "items": [
         {
+          "id": "kibJanuary2023ContributorNewsletter"
+        },
+        {
           "id": "kibNovember2022ContributorNewsletter"
         },
         {
@@ -257,9 +260,6 @@
         },
         {
           "id": "kibDevDocsDeprecationsByApi"
-        },
-        {
-          "id": "kibCorePluginApi"
         },
         {
           "id": "kibFieldFormatsPluginApi"

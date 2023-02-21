@@ -115,7 +115,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
       <>
         <EuiFlexGroup direction="column">
           {isDifferentialView ? (
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <PrimaryAndComparisonSearchBar />
             </EuiFlexItem>
           ) : null}

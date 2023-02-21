@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApmDocumentType } from '../../../../common/document_type';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
@@ -28,7 +28,7 @@ export async function getServicesDetailedStatistics({
   environment: string;
   kuery: string;
   apmEventClient: APMEventClient;
-  documentType: ApmDocumentType;
+  documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
   bucketSizeInSeconds: number;
   offset?: string;

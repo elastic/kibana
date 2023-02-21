@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
 import { useErrorDetailsLink } from '../../../common/links/error_details_link';
-import { MonitorOverviewItem, Ping } from '../../../../../../../common/runtime_types';
+import { MonitorOverviewItem, OverviewPing } from '../../../../../../../common/runtime_types';
 import { manualTestRunSelector } from '../../../../state/manual_test_runs';
 import { useFormatTestRunAt } from '../../../../utils/monitor_test_result/test_time_formats';
 
@@ -46,7 +46,7 @@ export const MetricItemIcon = ({
   status: string;
   configIdByLocation: string;
   timestamp?: string;
-  ping?: Ping;
+  ping?: OverviewPing;
 }) => {
   const testNowRun = useSelector(manualTestRunSelector(monitor.configId));
   const isPopoverOpen = useSelector(selectErrorPopoverState);

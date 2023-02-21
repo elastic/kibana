@@ -236,6 +236,33 @@
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
+        "id": "def-common.useRefresh",
+        "type": "Function",
+        "tags": [],
+        "label": "useRefresh",
+        "description": [
+          "\nProvides the latest refresh, both manual or auto."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/ml-date-picker",
+            "scope": "common",
+            "docId": "kibKbnMlDatePickerPluginApi",
+            "section": "def-common.Refresh",
+            "text": "Refresh"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-date-picker",
         "id": "def-common.useRefreshIntervalUpdates",
         "type": "Function",
         "tags": [],
@@ -723,7 +750,15 @@
               "\ntimefilter service."
             ],
             "signature": [
-              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
+              "{ setRefreshInterval: (refreshInterval: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.RefreshInterval",
+                "text": "RefreshInterval"
+              },
+              ">) => void; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",
@@ -767,15 +802,7 @@
                 "section": "def-common.RefreshInterval",
                 "text": "RefreshInterval"
               },
-              "; setRefreshInterval: (refreshInterval: Partial<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              ">) => void; createFilter: (indexPattern: ",
+              "; createFilter: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",

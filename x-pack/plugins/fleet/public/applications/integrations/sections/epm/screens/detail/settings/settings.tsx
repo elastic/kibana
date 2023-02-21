@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
@@ -25,15 +25,15 @@ import { i18n } from '@kbn/i18n';
 import type { Observable } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
 
-import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
+import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
-  useGetPackagePolicies,
+  useGetPackagePoliciesQuery,
   useGetPackageInstallStatus,
   useLink,
-  sendUpgradePackagePolicyDryRun,
-  sendUpdatePackage,
   useStartServices,
+  useUpgradePackagePolicyDryRunQuery,
+  useUpdatePackageMutation,
 } from '../../../../../hooks';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -100,14 +100,29 @@ interface Props {
 
 export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Props) => {
   const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
-  const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse | null>();
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
   const getPackageInstallStatus = useGetPackageInstallStatus();
-  const { data: packagePoliciesData } = useGetPackagePolicies({
+
+  const { data: packagePoliciesData } = useGetPackagePoliciesQuery({
     perPage: SO_SEARCH_LIMIT,
     page: 1,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${name}`,
   });
+
+  const packagePolicyIds = useMemo(
+    () => packagePoliciesData?.items.map(({ id }) => id),
+    [packagePoliciesData]
+  );
+
+  const { data: dryRunData } = useUpgradePackagePolicyDryRunQuery(
+    packagePolicyIds ?? [],
+    latestVersion,
+    {
+      enabled: packagePolicyIds && packagePolicyIds.length > 0,
+    }
+  );
+
+  const updatePackageMutation = useUpdatePackageMutation();
 
   const { notifications } = useStartServices();
 
@@ -124,71 +139,59 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
   );
 
   const handleKeepPoliciesUpToDateSwitchChange = useCallback(() => {
-    const saveKeepPoliciesUpToDate = async () => {
-      try {
-        setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
+    setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
 
-        await sendUpdatePackage(packageInfo.name, packageInfo.version, {
+    updatePackageMutation.mutate(
+      {
+        pkgName: packageInfo.name,
+        pkgVersion: packageInfo.version,
+        body: {
           keepPoliciesUpToDate: !keepPoliciesUpToDateSwitchValue,
-        });
-
-        notifications.toasts.addSuccess({
-          title: i18n.translate('xpack.fleet.integrations.integrationSaved', {
-            defaultMessage: 'Integration settings saved',
-          }),
-          text: !keepPoliciesUpToDateSwitchValue
-            ? i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateEnabledSuccess', {
-                defaultMessage:
-                  'Fleet will automatically keep integration policies up to date for {title}',
-                values: { title },
-              })
-            : i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateDisabledSuccess', {
-                defaultMessage:
-                  'Fleet will not automatically keep integration policies up to date for {title}',
-                values: { title },
-              }),
-        });
-      } catch (error) {
-        notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.fleet.integrations.integrationSavedError', {
-            defaultMessage: 'Error saving integration settings',
-          }),
-          toastMessage: i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateError', {
-            defaultMessage: 'Error saving integration settings for {title}',
-            values: { title },
-          }),
-        });
+        },
+      },
+      {
+        onSuccess: () => {
+          notifications.toasts.addSuccess({
+            title: i18n.translate('xpack.fleet.integrations.integrationSaved', {
+              defaultMessage: 'Integration settings saved',
+            }),
+            text: !keepPoliciesUpToDateSwitchValue
+              ? i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateEnabledSuccess', {
+                  defaultMessage:
+                    'Fleet will automatically keep integration policies up to date for {title}',
+                  values: { title },
+                })
+              : i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateDisabledSuccess', {
+                  defaultMessage:
+                    'Fleet will not automatically keep integration policies up to date for {title}',
+                  values: { title },
+                }),
+          });
+        },
+        onError: (error) => {
+          notifications.toasts.addError(error, {
+            title: i18n.translate('xpack.fleet.integrations.integrationSavedError', {
+              defaultMessage: 'Error saving integration settings',
+            }),
+            toastMessage: i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateError', {
+              defaultMessage: 'Error saving integration settings for {title}',
+              values: { title },
+            }),
+          });
+        },
       }
-    };
-
-    saveKeepPoliciesUpToDate();
+    );
   }, [
     keepPoliciesUpToDateSwitchValue,
     notifications.toasts,
     packageInfo.name,
     packageInfo.version,
     title,
+    updatePackageMutation,
   ]);
 
   const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
   const packageHasUsages = !!packagePoliciesData?.total;
-
-  const packagePolicyIds = useMemo(
-    () => packagePoliciesData?.items.map(({ id }) => id),
-    [packagePoliciesData]
-  );
-
-  useEffect(() => {
-    const fetchDryRunData = async () => {
-      if (packagePolicyIds && packagePolicyIds.length) {
-        const { data } = await sendUpgradePackagePolicyDryRun(packagePolicyIds, latestVersion);
-
-        setDryRunData(data);
-      }
-    };
-
-    fetchDryRunData();
-  }, [latestVersion, packagePolicyIds]);
 
   const updateAvailable =
     installedVersion && semverLt(installedVersion, latestVersion) ? true : false;
@@ -407,7 +410,14 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <div>
-                        <ReinstallButton {...packageInfo} />
+                        <ReinstallButton
+                          {...packageInfo}
+                          installSource={
+                            'savedObject' in packageInfo
+                              ? packageInfo.savedObject.attributes.install_source
+                              : ''
+                          }
+                        />
                       </div>
                     </EuiFlexItem>
                   </EuiFlexGroup>

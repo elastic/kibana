@@ -9,6 +9,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { css } from '@emotion/react';
 import { FilterBar } from './components/filter_bar';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
@@ -64,7 +65,10 @@ export const SnapshotPage = () => {
                 }}
                 pageSectionProps={{
                   contentProps: {
-                    css: fullHeightContentStyles,
+                    css: css`
+                      ${fullHeightContentStyles};
+                      padding-bottom: 0;
+                    `,
                   },
                 }}
               >

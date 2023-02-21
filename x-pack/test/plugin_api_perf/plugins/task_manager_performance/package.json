@@ -1,5 +1,5 @@
 {
-  "name": "task_manager_performance",
+  "name": "@kbn/task-manager-performance-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",

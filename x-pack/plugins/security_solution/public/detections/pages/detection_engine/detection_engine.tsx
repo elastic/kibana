@@ -217,7 +217,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [formatUrl, navigateToUrl]
   );
 
-  const alertsHistogramDefaultFilters = useMemo(
+  const alertsDefaultFilters = useMemo(
     () => [
       ...filters,
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
@@ -437,7 +437,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="l" />
               <ChartPanels
                 addFilter={addFilter}
-                alertsHistogramDefaultFilters={alertsHistogramDefaultFilters}
+                alertsDefaultFilters={alertsDefaultFilters}
                 isLoadingIndexPattern={isChartPanelLoading}
                 query={query}
                 runtimeMappings={runtimeMappings}

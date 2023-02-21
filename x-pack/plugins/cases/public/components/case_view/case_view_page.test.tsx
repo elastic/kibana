@@ -15,7 +15,7 @@ import { createAppMockRenderer } from '../../common/mock';
 import '../../common/mock/match_media';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation/hooks';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import { basicCaseClosed, connectorsMock } from '../../containers/mock';
+import { basicCaseClosed, connectorsMock, getCaseUsersMockResponse } from '../../containers/mock';
 import type { UseGetCase } from '../../containers/use_get_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
@@ -24,7 +24,7 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useUpdateCase } from '../../containers/use_update_case';
-import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
+import { useGetCaseUsers } from '../../containers/use_get_case_users';
 import { CaseViewPage } from './case_view_page';
 import {
   caseData,
@@ -49,6 +49,7 @@ jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_case_connectors');
+jest.mock('../../containers/use_get_case_users');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../user_actions/timestamp', () => ({
   UserActionTimestamp: () => <></>,
@@ -67,7 +68,7 @@ const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
-const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
+const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -99,6 +100,7 @@ describe('CaseViewPage', () => {
   const data = caseProps.caseData;
   let appMockRenderer: AppMockRenderer;
   const caseConnectors = getCaseConnectorsMockResponse();
+  const caseUsers = getCaseUsersMockResponse();
 
   beforeEach(() => {
     mockGetCase();
@@ -113,10 +115,11 @@ describe('CaseViewPage', () => {
     });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
-    useBulkGetUserProfilesMock.mockReturnValue({ data: new Map(), isLoading: false });
     const license = licensingMock.createLicense({
       license: { type: 'platinum' },
     });
+    useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
+
     appMockRenderer = createAppMockRenderer({ license });
   });
 

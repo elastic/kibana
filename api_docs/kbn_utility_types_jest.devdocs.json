@@ -30,7 +30,7 @@
         "label": "DeeplyMockedKeys",
         "description": [],
         "signature": [
-          "{ [P in keyof T]: T[P] extends (...args: any[]) => any ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>> : ",
+          "{ [P in keyof T]: T[P] extends readonly any[] ? readonly ",
           {
             "pluginId": "@kbn/utility-types-jest",
             "scope": "common",
@@ -38,7 +38,15 @@
             "section": "def-common.DeeplyMockedKeys",
             "text": "DeeplyMockedKeys"
           },
-          "<T[P]>; } & T"
+          "<T[P][0]>[] : T[P] extends (...args: any[]) => any ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>> : T[P] extends object ? ",
+          {
+            "pluginId": "@kbn/utility-types-jest",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesJestPluginApi",
+            "section": "def-common.DeeplyMockedKeys",
+            "text": "DeeplyMockedKeys"
+          },
+          "<T[P]> : T[P]; } & T"
         ],
         "path": "packages/kbn-utility-types-jest/index.ts",
         "deprecated": false,

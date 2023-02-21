@@ -20,7 +20,6 @@ import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { OverviewErrorsSparklines } from './overview_errors_sparklines';
 import { useAbsoluteDate } from '../../../../../hooks';
 import { OverviewErrorsCount } from './overview_errors_count';
-import { ErrorsLink } from '../../../../common/links/view_errors';
 
 export function OverviewErrors() {
   const { status } = useSelector(selectOverviewStatus);
@@ -40,13 +39,18 @@ export function OverviewErrors() {
       ) : (
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>
-            <OverviewErrorsCount from={from} to={to} monitorIds={status?.enabledIds ?? []} />
+            <OverviewErrorsCount
+              from={from}
+              to={to}
+              monitorIds={status?.enabledMonitorQueryIds ?? []}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <OverviewErrorsSparklines from={from} to={to} monitorIds={status?.enabledIds ?? []} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={{ alignSelf: 'center' }}>
-            <ErrorsLink disabled={true} />
+            <OverviewErrorsSparklines
+              from={from}
+              to={to}
+              monitorIds={status?.enabledMonitorQueryIds ?? []}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

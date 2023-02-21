@@ -199,11 +199,14 @@ export class ObservabilityDataViews {
 
   async getDataView(app: AppDataType, indices?: string): Promise<DataView | undefined> {
     let appIndices = indices;
+    let hasData = false;
     if (!appIndices) {
-      appIndices = (await getDataTypeIndices(app)).indices;
+      const { indices: indicesT, hasData: hData } = await getDataTypeIndices(app);
+      hasData = hData;
+      appIndices = indicesT;
     }
 
-    if (appIndices) {
+    if (appIndices && (hasData || indices)) {
       try {
         const dataViewId = getAppDataViewId(app, appIndices);
         const dataViewTitle = getAppIndicesWithPattern(app, appIndices);
