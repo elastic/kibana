@@ -13,6 +13,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectableProps,
+  EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
@@ -47,23 +48,30 @@ function TriggerButton({
     : {};
   const content =
     samplingValue != null && samplingValue !== 1 ? (
-      <EuiFlexGroup justifyContent={'spaceBetween'}>
-        <EuiFlexItem grow={3}>{label}</EuiFlexItem>
-        <EuiToolTip
-          content={i18n.translate('xpack.lens.indexPattern.randomSamplingInfo', {
-            defaultMessage: '{value}% sampling',
-            values: {
-              value: samplingValue * 100,
-            },
-          })}
-          display="block"
-          position="top"
-        >
-          <EuiFlexItem grow={1}>
-            <RandomSamplingIcon />
-            {samplingValue * 100}%
-          </EuiFlexItem>
-        </EuiToolTip>
+      <EuiFlexGroup justifyContent={'spaceBetween'} style={{ lineHeight: '16px' }}>
+        <EuiFlexItem grow>{label}</EuiFlexItem>
+
+        <EuiFlexItem grow={1}>
+          <EuiToolTip
+            content={i18n.translate('xpack.lens.indexPattern.randomSamplingInfo', {
+              defaultMessage: '{value}% sampling',
+              values: {
+                value: samplingValue * 100,
+              },
+            })}
+            display="block"
+            position="top"
+          >
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <RandomSamplingIcon />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiTextColor color="subdued">{samplingValue * 100}%</EuiTextColor>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiToolTip>
+        </EuiFlexItem>
       </EuiFlexGroup>
     ) : (
       label
