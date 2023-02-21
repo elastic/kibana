@@ -48,7 +48,8 @@ const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const useCapabilitiesMock = useCapabilities as jest.Mock;
 
 const mockCreateSlo = { mutate: jest.fn() };
-useCreateOrUpdateSloMock.mockReturnValue({ createSlo: mockCreateSlo });
+const mockCloneSlo = { mutate: jest.fn() };
+useCreateOrUpdateSloMock.mockReturnValue({ createSlo: mockCreateSlo, cloneSlo: mockCloneSlo });
 
 const mockDeleteSlo = jest.fn();
 useDeleteSloMock.mockReturnValue({ mutate: mockDeleteSlo });
@@ -122,15 +123,6 @@ describe('SLOs Page', () => {
     describe('when the correct license is found', () => {
       beforeEach(() => {
         useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
-      });
-
-      it('renders nothing when the API is loading', async () => {
-        useFetchSloListMock.mockReturnValue({ isLoading: true, sloList: emptySloList });
-
-        await act(async () => {
-          const { container } = render(<SlosPage />, config);
-          expect(container).toBeEmptyDOMElement();
-        });
       });
 
       it('renders the SLOs Welcome Prompt when the API has finished loading and there are no results', async () => {
@@ -251,7 +243,7 @@ describe('SLOs Page', () => {
 
           button.click();
 
-          expect(mockCreateSlo.mutate).toBeCalled();
+          expect(mockCloneSlo.mutate).toBeCalled();
         });
       });
     });

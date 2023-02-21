@@ -121,7 +121,7 @@ describe('SLO Edit Page', () => {
       jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
 
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
-      useFetchSloMock.mockReturnValue({ loading: false, slo: undefined });
+      useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
 
       render(<SloEditPage />, { unsafe: { slo: { enabled: false } } });
 
@@ -132,7 +132,7 @@ describe('SLO Edit Page', () => {
       jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
 
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
-      useFetchSloMock.mockReturnValue({ loading: false, slo: undefined });
+      useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
 
       render(<SloEditPage />, { unsafe: { slo: { enabled: false } } });
 
@@ -142,17 +142,22 @@ describe('SLO Edit Page', () => {
 
   describe('when the feature flag is enabled', () => {
     describe('when the incorrect license is found', () => {
+      beforeEach(() => {
+        useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
+      });
+
       it('navigates to the SLO List page', async () => {
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
 
-        useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
-        useFetchSloMock.mockReturnValue({ loading: false, slo: undefined });
+        useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
+
         useFetchIndicesMock.mockReturnValue({
-          loading: false,
+          isLoading: false,
           indices: [{ name: 'some-index' }],
         });
+
         useCreateOrUpdateSloMock.mockReturnValue({
-          loading: false,
+          isLoading: false,
           success: false,
           error: '',
           createSlo: jest.fn(),
@@ -166,22 +171,34 @@ describe('SLO Edit Page', () => {
     });
 
     describe('when the correct license is found', () => {
+      beforeEach(() => {
+        useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+      });
+
       describe('when no sloId route param is provided', () => {
         it('renders the SLO Edit page in pristine state', async () => {
           jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
 
-          useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
-          useFetchSloMock.mockReturnValue({ loading: false, slo: undefined });
+          useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
+
           useFetchIndicesMock.mockReturnValue({
-            loading: false,
+            isLoading: false,
             indices: [{ name: 'some-index' }],
           });
+
           useCreateOrUpdateSloMock.mockReturnValue({
-            loading: false,
-            success: false,
-            error: '',
-            createSlo: jest.fn(),
-            updateSlo: jest.fn(),
+            createSlo: {
+              mutate: jest.fn(),
+              isLoading: false,
+              isSuccess: false,
+              isError: false,
+            },
+            updateSlo: {
+              mutate: jest.fn(),
+              isLoading: false,
+              isSuccess: false,
+              isError: false,
+            },
           });
 
           render(<SloEditPage />, config);
@@ -232,18 +249,28 @@ describe('SLO Edit Page', () => {
         it.skip('calls the createSlo hook if all required values are filled in', async () => {
           jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
           useFetchIndicesMock.mockReturnValue({
-            loading: false,
+            isLoading: false,
             indices: [{ name: 'some-index' }],
           });
-          useFetchSloMock.mockReturnValue({ loading: false, slo: undefined });
+
+          useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
+
           const mockCreate = jest.fn();
           const mockUpdate = jest.fn();
+
           useCreateOrUpdateSloMock.mockReturnValue({
-            loading: false,
-            success: false,
-            error: '',
-            createSlo: mockCreate,
-            updateSlo: mockUpdate,
+            createSlo: {
+              mutate: mockCreate,
+              isLoading: false,
+              isSuccess: false,
+              isError: false,
+            },
+            updateSlo: {
+              mutate: mockUpdate,
+              isLoading: false,
+              isSuccess: false,
+              isError: false,
+            },
           });
 
           render(<SloEditPage />, config);
@@ -314,19 +341,28 @@ describe('SLO Edit Page', () => {
           const slo = buildSlo({ id: '123' });
           jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
 
-          useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
-          useFetchSloMock.mockReturnValue({ loading: false, slo });
+          useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+
           useFetchIndicesMock.mockReturnValue({
-            loading: false,
+            isLoading: false,
             indices: [{ name: 'some-index' }],
           });
+
           useCreateOrUpdateSloMock.mockReturnValue({
-            loading: false,
-            success: false,
-            error: '',
-            createSlo: jest.fn(),
-            updateSlo: jest.fn(),
+            createSlo: {
+              mutate: jest.fn(),
+              isLoading: false,
+              isSuccess: false,
+              isError: false,
+            },
+            updateSlo: {
+              mutate: jest.fn(),
+              isLoading: false,
+              isSuccess: false,
+              isError: false,
+            },
           });
+
           render(<SloEditPage />, config);
 
           expect(screen.queryByTestId('slosEditPage')).toBeTruthy();
@@ -365,26 +401,33 @@ describe('SLO Edit Page', () => {
         });
 
         it('calls the updateSlo hook if all required values are filled in', async () => {
-          // Note: the `anSLO` object is considered to have (at least)
-          // values for all required fields.
           const slo = buildSlo({ id: '123' });
 
           jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
 
-          useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
           useFetchIndicesMock.mockReturnValue({
-            loading: false,
+            isLoading: false,
             indices: [{ name: 'some-index' }],
           });
-          useFetchSloMock.mockReturnValue({ loading: false, slo });
+
+          useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+
           const mockCreate = jest.fn();
           const mockUpdate = jest.fn();
+
           useCreateOrUpdateSloMock.mockReturnValue({
-            loading: false,
-            success: false,
-            error: '',
-            createSlo: mockCreate,
-            updateSlo: mockUpdate,
+            createSlo: {
+              isloading: false,
+              isSuccess: false,
+              isError: false,
+              mutate: mockCreate,
+            },
+            updateSlo: {
+              isloading: false,
+              isSuccess: false,
+              isError: false,
+              mutate: mockUpdate,
+            },
           });
 
           render(<SloEditPage />, config);
@@ -394,61 +437,61 @@ describe('SLO Edit Page', () => {
           fireEvent.click(screen.queryByTestId('sloFormSubmitButton')!);
 
           expect(mockUpdate).toMatchInlineSnapshot(`
-          [MockFunction] {
-            "calls": Array [
-              Array [
-                "123",
-                Object {
-                  "budgetingMethod": "occurrences",
-                  "description": "some description useful",
-                  "indicator": Object {
-                    "params": Object {
-                      "filter": "baz: foo and bar > 2",
-                      "good": "http_status: 2xx",
-                      "index": "some-index",
-                      "total": "a query",
+            [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "slo": Object {
+                      "budgetingMethod": "occurrences",
+                      "description": "some description useful",
+                      "indicator": Object {
+                        "params": Object {
+                          "filter": "baz: foo and bar > 2",
+                          "good": "http_status: 2xx",
+                          "index": "some-index",
+                          "total": "a query",
+                        },
+                        "type": "sli.kql.custom",
+                      },
+                      "name": "super important level service",
+                      "objective": Object {
+                        "target": 0.98,
+                      },
+                      "settings": Object {
+                        "frequency": "1m",
+                        "syncDelay": "1m",
+                        "timestampField": "@timestamp",
+                      },
+                      "timeWindow": Object {
+                        "duration": "30d",
+                        "isRolling": true,
+                      },
                     },
-                    "type": "sli.kql.custom",
+                    "sloId": "123",
                   },
-                  "name": "super important level service",
-                  "objective": Object {
-                    "target": 0.98,
-                  },
-                  "settings": Object {
-                    "frequency": "1m",
-                    "syncDelay": "1m",
-                    "timestampField": "@timestamp",
-                  },
-                  "timeWindow": Object {
-                    "duration": "30d",
-                    "isRolling": true,
-                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": undefined,
                 },
               ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          }
-        `);
+            }
+          `);
         });
 
         it('blocks submitting if not all required values are filled in', async () => {
-          // Note: the `anSLO` object is considered to have (at least)
-          // values for all required fields.
           const slo = buildSlo();
 
           jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
 
-          useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
           useFetchIndicesMock.mockReturnValue({
-            loading: false,
+            isLoading: false,
             indices: [],
           });
-          useFetchSloMock.mockReturnValue({ loading: false, slo: { ...slo, name: '' } });
+
+          useFetchSloMock.mockReturnValue({ isLoading: false, slo: { ...slo, name: '' } });
 
           render(<SloEditPage />, config);
 
@@ -460,74 +503,100 @@ describe('SLO Edit Page', () => {
 
       describe('when submitting has completed successfully', () => {
         it('renders a success toast', async () => {
-          // Note: the `anSLO` object is considered to have (at least)
-          // values for all required fields.
           const slo = buildSlo();
 
           jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
 
-          useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
-          useFetchSloMock.mockReturnValue({ loading: false, slo });
+          useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+
           useFetchIndicesMock.mockReturnValue({
-            loading: false,
+            isLoading: false,
             indices: [{ name: 'some-index' }],
           });
+
           useCreateOrUpdateSloMock.mockReturnValue({
-            loading: false,
-            success: true,
-            error: '',
-            createSlo: jest.fn(),
-            updateSlo: jest.fn(),
+            createSlo: {
+              mutate: jest.fn(),
+              isLoading: false,
+              isSuccess: true,
+              isError: false,
+            },
+            updateSlo: {
+              mutate: jest.fn(),
+              isLoading: false,
+              isSuccess: true,
+              isError: false,
+            },
           });
+
           render(<SloEditPage />, config);
+
           expect(mockAddSuccess).toBeCalled();
         });
 
         it('navigates to the SLO List page', async () => {
-          // Note: the `anSLO` object is considered to have (at least)
-          // values for all required fields.
           const slo = buildSlo();
+
           jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
 
-          useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
-          useFetchSloMock.mockReturnValue({ loading: false, slo });
+          useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+
           useFetchIndicesMock.mockReturnValue({
-            loading: false,
+            isLoading: false,
             indices: [{ name: 'some-index' }],
           });
+
           useCreateOrUpdateSloMock.mockReturnValue({
-            loading: false,
-            success: true,
-            error: '',
-            createSlo: jest.fn(),
-            updateSlo: jest.fn(),
+            createSlo: {
+              mutate: jest.fn(),
+              isLoading: false,
+              isSuccess: true,
+              isError: false,
+            },
+            updateSlo: {
+              mutate: jest.fn(),
+              isLoading: false,
+              isSuccess: true,
+              isError: false,
+            },
           });
+
           render(<SloEditPage />, config);
+
           expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
         });
       });
 
       describe('when submitting has not completed successfully', () => {
         it('renders an error toast', async () => {
-          // Note: the `anSLO` object is considered to have (at least)
-          // values for all required fields.
           const slo = buildSlo();
+
           jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
 
-          useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
-          useFetchSloMock.mockReturnValue({ loading: false, slo });
+          useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+
           useFetchIndicesMock.mockReturnValue({
-            loading: false,
+            isLoading: false,
             indices: [{ name: 'some-index' }],
           });
+
           useCreateOrUpdateSloMock.mockReturnValue({
-            loading: false,
-            success: false,
-            error: 'Argh, API died',
-            createSlo: jest.fn(),
-            updateSlo: jest.fn(),
+            createSlo: {
+              mutate: jest.fn(),
+              isLoading: false,
+              isSuccess: false,
+              isError: true,
+            },
+            updateSlo: {
+              mutate: jest.fn(),
+              isLoading: false,
+              isSuccess: false,
+              isError: true,
+            },
           });
+
           render(<SloEditPage />, config);
+
           expect(mockAddError).toBeCalled();
         });
       });
