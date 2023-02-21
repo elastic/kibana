@@ -592,6 +592,8 @@ packages/shared-ux/prompt/no_data_views/impl @elastic/appex-sharedux
 packages/shared-ux/prompt/no_data_views/mocks @elastic/appex-sharedux
 packages/shared-ux/prompt/no_data_views/types @elastic/appex-sharedux
 packages/shared-ux/prompt/not_found @elastic/appex-sharedux
+packages/shared-ux/reporting/generate_csv/impl @elastic/appex-sharedux
+packages/shared-ux/reporting/generate_csv/types @elastic/appex-sharedux
 packages/shared-ux/router/impl @elastic/appex-sharedux
 packages/shared-ux/router/mocks @elastic/appex-sharedux
 packages/shared-ux/router/types @elastic/appex-sharedux
