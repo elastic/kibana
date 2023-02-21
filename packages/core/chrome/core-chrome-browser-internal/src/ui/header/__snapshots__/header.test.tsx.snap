@@ -121,6 +121,24 @@ exports[`Header renders 1`] = `
         <div
           class="euiHeaderSectionItem euiHeaderSectionItem--borderRight header__toggleNavButtonSection"
         >
+          <div
+            class="emotion-euiScreenReaderOnly"
+            tabindex="-1"
+          >
+            <div
+              aria-atomic="true"
+              aria-live="off"
+              role="status"
+            >
+              [object Object]
+            </div>
+            <div
+              aria-atomic="true"
+              aria-hidden="true"
+              aria-live="off"
+              role="status"
+            />
+          </div>
           <button
             aria-controls="generated-id"
             aria-expanded="false"
