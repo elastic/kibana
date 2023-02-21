@@ -94,10 +94,13 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   // end browser field management
 
   const getInitialUrlParamValue = useGetInitialUrlParamValue<string>(RULE_FROM_TIMELINE_URL_PARAM);
-  const timelineIdFromUrl = useMemo(getInitialUrlParamValue, [getInitialUrlParamValue]);
-
+  const [timelineIdFromUrl, setTimelineIdFromUrl] = useState<string | null>(
+    getInitialUrlParamValue
+  );
   const getInitialUrlParamValueEql = useGetInitialUrlParamValue<string>(RULE_FROM_EQL_URL_PARAM);
-  const timelineIdFromUrlEql = useMemo(getInitialUrlParamValueEql, [getInitialUrlParamValueEql]);
+  const [timelineIdFromUrlEql, setTimelineIdFromUrlEql] = useState<string | null>(
+    getInitialUrlParamValueEql
+  );
 
   // start set rule
   const handleSetRuleFromTimeline = useCallback(() => {
@@ -159,6 +162,9 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
       });
     }
 
+    // reset url field to null so it does not interfere with add timeline query on click feature
+    setTimelineIdFromUrl(null);
+    setTimelineIdFromUrlEql(null);
     // reset timeline data view once complete
     if (originalDataView.dataViewId !== dataViewId) {
       dispatch(
