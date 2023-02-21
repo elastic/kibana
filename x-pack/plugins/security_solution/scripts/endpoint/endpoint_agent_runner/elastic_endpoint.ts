@@ -56,7 +56,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
   log.indent(4);
 
   try {
-    const uniqueId = Math.random().toString(32).substring(2).substring(0, 4);
+    const uniqueId = Math.random().toString().substring(2, 6);
     const username = userInfo().username.toLowerCase();
     const policyId: string = policy || (await getOrCreateAgentPolicyId());
 
