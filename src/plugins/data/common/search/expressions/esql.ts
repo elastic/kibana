@@ -191,7 +191,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               } else {
                 const { type, reason } = error.err.attributes;
                 if (type === 'parsing_exception') {
-                  error.message = `Couldn't parse Elasticsearch ESQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
+                  error.message = `Couldn't parse Elasticsearch ESQL query. You may need to add backticks to names containing special characters. Check your query and try again. Error: ${reason}`;
                 } else {
                   error.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
                 }
