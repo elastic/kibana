@@ -169,6 +169,7 @@ kibana_vars=(
     xpack.fleet.agents.elasticsearch.host
     xpack.fleet.agents.kibana.host
     xpack.fleet.agents.tlsCheckDisabled
+    xpack.fleet.registryUrl
     xpack.graph.enabled
     xpack.graph.canEditDrillDownUrls
     xpack.graph.savePolicy
