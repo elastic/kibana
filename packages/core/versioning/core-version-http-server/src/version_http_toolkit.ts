@@ -11,7 +11,6 @@ import type {
   RouteConfig,
   RouteMethod,
   RequestHandler,
-  RouteConfigOptions,
   RouteValidatorFullConfig,
   RequestHandlerContextBase,
 } from '@kbn/core-http-server';
@@ -142,8 +141,7 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
  * of an endpoint etc.
  * @experimental
  */
-export interface AddVersionOpts<P, Q, B, Method extends RouteMethod = RouteMethod>
-  extends RouteConfigOptions<Method> {
+export interface AddVersionOpts<P, Q, B, Method extends RouteMethod = RouteMethod> {
   /**
    * Version to assign to this route
    * @experimental
@@ -154,13 +152,6 @@ export interface AddVersionOpts<P, Q, B, Method extends RouteMethod = RouteMetho
    * @experimental
    */
   validate: false | RouteValidatorFullConfig<P, Q, B>;
-  /**
-   * Override the path of of this "route". Useful to update, add or change existing path parameters.
-   * @note This option should preferably not introduce dramatic changes to the path as we may be
-   *       better of creating a new route entirely.
-   * @experimental
-   */
-  path?: string;
 }
 
 /**

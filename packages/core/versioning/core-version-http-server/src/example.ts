@@ -21,22 +21,24 @@ const versionedRouter = vtk.createVersionedRouter({ router });
 // @ts-ignore unused variable
 const versionedRoute = versionedRouter
   .post({
-    path: '/api/my-app/foo/{fooId?}/{name?}', // <= design mistake, {name?} should be a query parameter, but it has been released...
+    path: '/api/my-app/foo/{id?}',
     options: { timeout: { payload: 60000 } },
   })
   .addVersion(
     {
       version: '1',
       validate: {
-        params: schema.object({
-          fooId: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+        query: schema.object({
           name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+        }),
+        params: schema.object({
+          id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
         }),
         body: schema.object({ foo: schema.string() }),
       },
     },
     async (ctx, req, res) => {
-      await ctx.fooService.create(req.body.foo, req.params.fooId, req.params.name);
+      await ctx.fooService.create(req.body.foo, req.params.id, req.query.name);
       return res.ok({ body: { foo: req.body.foo } });
     }
   )
@@ -44,27 +46,25 @@ const versionedRoute = versionedRouter
   .addVersion(
     {
       version: '2',
-      path: '/api/my-app/foo/{id?}/{name?}', // Update "fooId" => "id", this is not a breaking change!
       validate: {
+        query: schema.object({
+          name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+        }),
         params: schema.object({
           id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
-          name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
         }),
         body: schema.object({ fooString: schema.string() }),
       },
     },
     async (ctx, req, res) => {
-      await ctx.fooService.create(req.body.fooString, req.params.id, req.params.name);
+      await ctx.fooService.create(req.body.fooString, req.params.id, req.query.name);
       return res.ok({ body: { fooName: req.body.fooString } });
     }
   )
-  // BREAKING CHANGES:
-  // 1. Move {name?} from params to query (hopefully an uncommon change)
-  // 2. Enforce min/max length on fooString
+  // BREAKING CHANGES: Enforce min/max length on fooString
   .addVersion(
     {
       version: '3',
-      path: '/api/my-app/foo/{id?}', // Breaking change to the path, we move "name" to the query
       validate: {
         query: schema.object({
           name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
