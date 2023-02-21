@@ -75,7 +75,7 @@ export const useStateProps = (
   }, [isPlainRecord, totalHitsResult, totalHitsStatus]);
 
   const chart = useMemo(() => {
-    if (!isTimeBased) {
+    if (!isTimeBased && !isPlainRecord) {
       return undefined;
     }
 
@@ -227,6 +227,7 @@ export const useStateProps = (
     request,
     columns,
     currentSuggestion,
+    allSuggestions,
     isPlainRecord,
     onTopPanelHeightChange,
     onTimeIntervalChange,

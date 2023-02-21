@@ -53,6 +53,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   columns?: string[];
   currentSuggestion?: Suggestion;
+  allSuggestions?: Suggestion[];
   isPlainRecord?: boolean;
   /**
    * The current time range
@@ -123,6 +124,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   /**
+   * Callback to update the breakdown field -- should set {@link UnifiedHistogramBreakdownContext.field} to breakdownField
+   */
+  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
+  /**
    * Callback to update the total hits -- should set {@link UnifiedHistogramHitsContext.status} to status
    * and {@link UnifiedHistogramHitsContext.total} to result
    */
@@ -149,6 +154,7 @@ export const UnifiedHistogramLayout = ({
   filters,
   columns,
   currentSuggestion,
+  allSuggestions,
   isPlainRecord,
   timeRange,
   request,
@@ -167,6 +173,7 @@ export const UnifiedHistogramLayout = ({
   onChartHiddenChange,
   onTimeIntervalChange,
   onBreakdownFieldChange,
+  onSuggestionChange,
   onTotalHitsChange,
   onChartLoad,
   onFilter,
@@ -225,6 +232,7 @@ export const UnifiedHistogramLayout = ({
           hits={hits}
           columns={columns}
           currentSuggestion={currentSuggestion}
+          allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
@@ -239,6 +247,7 @@ export const UnifiedHistogramLayout = ({
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
           onBreakdownFieldChange={onBreakdownFieldChange}
+          onSuggestionChange={onSuggestionChange}
           onTotalHitsChange={onTotalHitsChange}
           onChartLoad={onChartLoad}
           onFilter={onFilter}

@@ -37,6 +37,7 @@ import type {
   UnifiedHistogramInputMessage,
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
+import { SuggestionSelector } from './suggestion_selector';
 import { useTotalHits } from './hooks/use_total_hits';
 import { useRequestParams } from './hooks/use_request_params';
 import { useChartStyles } from './hooks/use_chart_styles';
@@ -54,6 +55,7 @@ export interface ChartProps {
   columns?: string[];
   isPlainRecord?: boolean;
   currentSuggestion?: Suggestion;
+  allSuggestions?: Suggestion[];
   timeRange?: TimeRange;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
@@ -70,6 +72,7 @@ export interface ChartProps {
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
+  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
@@ -90,6 +93,7 @@ export function Chart({
   chart,
   breakdown,
   currentSuggestion,
+  allSuggestions,
   isPlainRecord,
   appendHitsCounter,
   appendHistogram,
@@ -101,6 +105,7 @@ export function Chart({
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
+  onSuggestionChange,
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
@@ -256,6 +261,15 @@ export function Chart({
                       dataView={dataView}
                       breakdown={breakdown}
                       onBreakdownFieldChange={onBreakdownFieldChange}
+                    />
+                  </EuiFlexItem>
+                )}
+                {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
+                  <EuiFlexItem css={breakdownFieldSelectorItemCss}>
+                    <SuggestionSelector
+                      suggestions={allSuggestions}
+                      activeSuggestion={currentSuggestion}
+                      onSuggestionChange={onSuggestionChange}
                     />
                   </EuiFlexItem>
                 )}

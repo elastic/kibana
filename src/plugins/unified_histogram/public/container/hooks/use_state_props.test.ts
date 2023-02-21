@@ -61,6 +61,7 @@ describe('useStateProps', () => {
     const { result } = renderHook(() => useStateProps(stateService));
     expect(result.current).toMatchInlineSnapshot(`
       Object {
+        "allSuggestions": undefined,
         "breakdown": Object {
           "field": Object {
             "aggregatable": true,
@@ -110,6 +111,7 @@ describe('useStateProps', () => {
     const { result } = renderHook(() => useStateProps(stateService));
     expect(result.current).toMatchInlineSnapshot(`
       Object {
+        "allSuggestions": undefined,
         "breakdown": undefined,
         "chart": undefined,
         "columns": Array [],
@@ -150,6 +152,7 @@ describe('useStateProps', () => {
     const { result } = renderHook(() => useStateProps(stateService));
     expect(result.current).toMatchInlineSnapshot(`
       Object {
+        "allSuggestions": undefined,
         "breakdown": undefined,
         "chart": undefined,
         "columns": Array [],
@@ -187,6 +190,7 @@ describe('useStateProps', () => {
     const { result } = renderHook(() => useStateProps(stateService));
     expect(result.current).toMatchInlineSnapshot(`
       Object {
+        "allSuggestions": undefined,
         "breakdown": undefined,
         "chart": undefined,
         "columns": Array [],

@@ -74,6 +74,7 @@ export function Histogram({
     bucketInterval,
     timeRange: getTimeRange(),
     timeInterval,
+    isPlainRecord,
   });
   const chartRef = useRef<HTMLDivElement | null>(null);
   const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
