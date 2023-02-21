@@ -10,8 +10,10 @@ import { join } from 'path';
 import { mkdir, writeFile, readFile, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 
+const DEFAULT_DIRECTORY_PATH = join(homedir(), '.kibanaSecuritySolutionCliTools');
+
 interface SettingStorageOptions<TSettingsDef extends object = object> {
-  /** The default directory where settings will be saved. Defaults to `~/.kibanaSecuritySolutionCliTools` */
+  /** The default directory where settings will be saved. Defaults to `.kibanaSecuritySolutionCliTools` */
   directory?: string;
 
   /** The default settings object (used if file does not exist yet) */
@@ -19,8 +21,8 @@ interface SettingStorageOptions<TSettingsDef extends object = object> {
 }
 
 /**
- * A generic service for persisting settings. By default, all settings are saved to a directory
- * under `~/.kibanaSecuritySolutionCliTools`
+ * A generic service for persisting settings. All settings are stored under a directory (configurable)
+ * under the user's home directory. The default directory name is `.kibanaSecuritySolutionCliTools`
  */
 export class SettingsStorage<TSettingsDef extends object = object> {
   private options: Required<SettingStorageOptions<TSettingsDef>>;
@@ -28,10 +30,7 @@ export class SettingsStorage<TSettingsDef extends object = object> {
   private dirExists: boolean = false;
 
   constructor(fileName: string, options: SettingStorageOptions<TSettingsDef> = {}) {
-    const {
-      directory = join(homedir(), '.kibanaSecuritySolutionCliTools'),
-      defaultSettings = {} as TSettingsDef,
-    } = options;
+    const { directory = DEFAULT_DIRECTORY_PATH, defaultSettings = {} as TSettingsDef } = options;
 
     this.options = {
       directory,
@@ -41,7 +40,12 @@ export class SettingsStorage<TSettingsDef extends object = object> {
     this.settingsFileFullPath = join(this.options.directory, fileName);
   }
 
-  private async ensureExists(): Promise<void> {
+  /** The default directory path where setting files will be saved */
+  static getDefaultDirectoryPath() {
+    return DEFAULT_DIRECTORY_PATH;
+  }
+
+  protected async ensureExists(): Promise<void> {
     if (!this.dirExists) {
       await mkdir(this.options.directory, { recursive: true });
       this.dirExists = true;
@@ -50,6 +54,11 @@ export class SettingsStorage<TSettingsDef extends object = object> {
         await this.save(this.options.defaultSettings);
       }
     }
+  }
+
+  /** Returns the directory path where the settings file is getting saved to */
+  public getDirectoryPath(): string {
+    return this.options.directory;
   }
 
   /** Retrieve the content of the settings file */

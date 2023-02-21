@@ -51,6 +51,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
     log,
     kbnClient,
     options: { version, policy },
+    localSettingsDirPath,
   } = getRuntimeServices();
 
   log.info(`Creating VM and enrolling Elastic Agent`);
@@ -165,20 +166,13 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
     await execa(`multipass`, agentEnrollArgs);
 
-    // const runAgentCommand = `multipass exec ${vmName} --working-directory /home/ubuntu/${vmDirName} -- nohup bash -c 'sudo /home/ubuntu/${vmDiname}/elastic-agent &>/dev/null &'`;
-
     const runAgentCommand = `ssh ubuntu@${vmInfo.info[vmName].ipv4[0]} -o StrictHostKeyChecking=no -i multipass_ssh_key -tt nohup bash -c 'sudo /home/ubuntu/${vmDirName}/elastic-agent &>/dev/null &'`;
 
     log.info(`Running elastic agent`);
     log.verbose(`Command: ${runAgentCommand}`);
 
-    // About `timeout` option below
-    // The `multipass exec` command seems to have some issues when a command pass to it redirects output,
-    // as is with the command that runs endpoint. See https://github.com/canonical/multipass/issues/667
-    // To get around it, `timeout` is set to 5s, which should be enough time for the command to be executed
-    // in the VM.
     await execa
-      .command(runAgentCommand, { timeout: 5000, cwd: localVmConfigDir })
+      .command(runAgentCommand, { timeout: 5000, cwd: localSettingsDirPath })
       .catch((error) => {
         if (error.originalMessage !== 'Timed out') {
           throw error;
