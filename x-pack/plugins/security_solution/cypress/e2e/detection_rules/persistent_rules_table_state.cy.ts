@@ -277,7 +277,6 @@ describe('Persistent rules table state', () => {
 
       it('persists the selected tab', () => {
         changeRulesTableState();
-        goToTablePage(2);
 
         cy.reload();
 
