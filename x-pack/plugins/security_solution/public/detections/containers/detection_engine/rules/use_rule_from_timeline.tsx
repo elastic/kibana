@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptionsSelected } from '@kbn/timelines-plugin/common';
@@ -51,6 +51,8 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     SourcererScopeName.timeline
   );
 
+  const isEql = useRef(false);
+
   // selectedTimeline = timeline to set rule from
   const [selectedTimeline, setRuleFromTimeline] = useState<TimelineModel | null>(null);
 
@@ -94,13 +96,9 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   // end browser field management
 
   const getInitialUrlParamValue = useGetInitialUrlParamValue<string>(RULE_FROM_TIMELINE_URL_PARAM);
-  const [timelineIdFromUrl, setTimelineIdFromUrl] = useState<string | null>(
-    getInitialUrlParamValue
-  );
+  const timelineIdFromUrl = useMemo(getInitialUrlParamValue, [getInitialUrlParamValue]);
   const getInitialUrlParamValueEql = useGetInitialUrlParamValue<string>(RULE_FROM_EQL_URL_PARAM);
-  const [timelineIdFromUrlEql, setTimelineIdFromUrlEql] = useState<string | null>(
-    getInitialUrlParamValueEql
-  );
+  const timelineIdFromUrlEql = useMemo(getInitialUrlParamValueEql, [getInitialUrlParamValueEql]);
 
   // start set rule
   const handleSetRuleFromTimeline = useCallback(() => {
@@ -129,10 +127,9 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
           language: 'eql',
         },
         filters: [],
-        eqlOptions: selectedTimeline.eqlOptions,
+        eqlOptions: { eqlOptions: selectedTimeline.eqlOptions },
       });
-
-      const data = timelineIdFromUrlEql != null ? eqlRuleFromTimeline() : queryRuleFromTimeline();
+      const data = isEql.current ? eqlRuleFromTimeline() : queryRuleFromTimeline();
 
       setLoading(false);
       setRuleQuery({
@@ -162,9 +159,8 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
       });
     }
 
-    // reset url field to null so it does not interfere with add timeline query on click feature
-    setTimelineIdFromUrl(null);
-    setTimelineIdFromUrlEql(null);
+    // reset and default to query since this is the only query type the user can set after url has been initialized
+    isEql.current = false;
     // reset timeline data view once complete
     if (originalDataView.dataViewId !== dataViewId) {
       dispatch(
@@ -185,7 +181,6 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     selectedPatterns,
     selectedTimeline,
     setRuleQuery,
-    timelineIdFromUrlEql,
   ]);
 
   useEffect(() => {
@@ -219,17 +214,20 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);
 
   useEffect(() => {
-    let id: string | null = null;
-    if (timelineIdFromUrl != null) {
-      id = timelineIdFromUrl;
-    } else if (timelineIdFromUrlEql != null) {
-      id = timelineIdFromUrlEql;
-    }
+    if (!urlStateInitialized) {
+      let id: string | null = null;
+      if (timelineIdFromUrl != null) {
+        id = timelineIdFromUrl;
+      } else if (timelineIdFromUrlEql != null) {
+        id = timelineIdFromUrlEql;
+        isEql.current = true;
+      }
 
-    if (id != null && !urlStateInitialized) {
-      setUrlStateInitialized(true);
-      getTimelineById(id);
-      setLoading(true);
+      if (id != null) {
+        setUrlStateInitialized(true);
+        getTimelineById(id);
+        setLoading(true);
+      }
     }
   }, [getTimelineById, timelineIdFromUrl, timelineIdFromUrlEql, urlStateInitialized]);
   // end handle set rule from timeline id
