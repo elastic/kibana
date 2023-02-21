@@ -210,7 +210,7 @@ describe('ALL - Packs', () => {
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
 
-    it.skip('should open lens in new tab', () => {
+    it('should open lens in new tab', () => {
       let lensUrl = '';
       cy.window().then((win) => {
         cy.stub(win, 'open')
@@ -220,18 +220,14 @@ describe('ALL - Packs', () => {
           });
       });
       preparePack(PACK_NAME);
-      cy.react('CustomItemAction', {
-        props: { index: 1, item: { id: SAVED_QUERY_ID } },
-      })
-        .should('exist')
-        .click();
+      cy.get(`[aria-label="View in Lens"]`).click();
       cy.window()
         .its('open')
         .then(() => {
           cy.visit(lensUrl);
         });
       cy.getBySel('lnsWorkspace').should('exist');
-      cy.getBySel('breadcrumbs').contains(`Action pack_${PACK_NAME}_${SAVED_QUERY_ID} results`);
+      cy.getBySel('breadcrumbs').contains(`Action pack_${PACK_NAME}_${SAVED_QUERY_ID}`);
     });
 
     // TODO extremely strange behaviour with Cypress not finding Discover's page elements

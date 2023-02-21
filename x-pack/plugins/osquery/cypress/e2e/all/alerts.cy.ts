@@ -32,6 +32,8 @@ import { navigateTo } from '../../tasks/navigation';
 import { LIVE_QUERY_EDITOR, RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { ROLES } from '../../test';
 
+const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
+
 describe('Alert Event Details', () => {
   const RULE_NAME = 'Test-rule';
 
@@ -334,9 +336,7 @@ describe('Alert Event Details', () => {
     addToCase();
     viewRecentCaseAndCheckResults();
   });
-  it('sees osquery results from last action and add to a case', () => {
-    toggleRuleOffAndOn(RULE_NAME);
-    cy.wait(2000);
+  it('can visit discover from response action results', () => {
     cy.visit('/app/security/alerts');
     cy.getBySel('header-page-title').contains('Alerts').should('exist');
     cy.getBySel('expand-event').first().click({ force: true });
@@ -348,5 +348,79 @@ describe('Alert Event Details', () => {
       cases: true,
       timeline: true,
     });
+    cy.contains('View in Discover')
+      .should('exist')
+      .should('have.attr', 'href')
+      .then(($href) => {
+        // @ts-expect-error-next-line href string - check types
+        cy.visit($href);
+        cy.getBySel('breadcrumbs').contains('Discover').should('exist');
+        cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
+          'action_data.queryselect * from uptime'
+        );
+      });
+  });
+  it('can visit lens from response action results', () => {
+    const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
+
+    cy.visit('/app/security/alerts');
+    cy.getBySel('header-page-title').contains('Alerts').should('exist');
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.contains('Osquery Results').click();
+    cy.getBySel('osquery-results').should('exist');
+    checkActionItemsInResults({
+      lens: true,
+      discover: true,
+      cases: true,
+      timeline: true,
+    });
+    cy.getBySel('osquery-results-comment')
+      .first()
+      .within(() => {
+        let lensUrl = '';
+        cy.window().then((win) => {
+          cy.stub(win, 'open')
+            .as('windowOpen')
+            .callsFake((url) => {
+              lensUrl = url;
+            });
+        });
+        cy.get(`[aria-label="View in Lens"]`).click();
+        cy.window()
+          .its('open')
+          .then(() => {
+            cy.visit(lensUrl);
+          });
+      });
+    cy.getBySel('lnsWorkspace').should('exist');
+    cy.getBySel('breadcrumbs').contains(lensRegex);
+  });
+  it('can add to timeline from response action results', () => {
+    const timelineRegex = new RegExp(`Added ${UUID_REGEX} to timeline`);
+    const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
+
+    cy.visit('/app/security/alerts');
+    cy.getBySel('header-page-title').contains('Alerts').should('exist');
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.contains('Osquery Results').click();
+    cy.getBySel('osquery-results').should('exist');
+    checkActionItemsInResults({
+      lens: true,
+      discover: true,
+      cases: true,
+      timeline: true,
+    });
+    cy.getBySel('osquery-results-comment')
+      .first()
+      .within(() => {
+        cy.get('.euiTableRow')
+          .first()
+          .within(() => {
+            cy.getBySel('add-to-timeline').click();
+          });
+      });
+    cy.contains(timelineRegex);
+    cy.contains('Untitled timeline').click();
+    cy.contains(filterRegex);
   });
 });
