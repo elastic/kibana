@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './use_log_position';
+export const DESIRED_BUFFER_PAGES = 2;
+export const RELATIVE_END_UPDATE_DELAY = 1000;
