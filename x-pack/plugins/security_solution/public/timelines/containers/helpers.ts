@@ -25,7 +25,6 @@ export const getTimelineQueryTypes = (timeline: TimelineResult) => ({
 
 export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
 
-// TODO: Once we are past experimental phase `useRuleRegistry` should be removed
 export const skipQueryForDetectionsPage = (
   id: string,
   defaultIndex: string[],
