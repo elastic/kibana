@@ -1354,15 +1354,15 @@
           },
           {
             "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/routing/app_root.tsx"
+            "path": "x-pack/plugins/apm/public/components/routing/app_root/index.tsx"
           },
           {
             "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/routing/app_root.tsx"
+            "path": "x-pack/plugins/apm/public/components/routing/app_root/index.tsx"
           },
           {
             "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/routing/app_root.tsx"
+            "path": "x-pack/plugins/apm/public/components/routing/app_root/index.tsx"
           },
           {
             "plugin": "enterpriseSearch",
