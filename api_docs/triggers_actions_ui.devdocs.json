@@ -933,66 +933,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadActionErrorLog",
-        "type": "Function",
-        "tags": [],
-        "label": "loadActionErrorLog",
-        "description": [],
-        "signature": [
-          "({ id, http, dateStart, dateEnd, runId, message, perPage, page, sort, namespace, withAuth, }: ",
-          "LoadActionErrorLogProps",
-          " & { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.IExecutionErrorsResult",
-            "text": "IExecutionErrorsResult"
-          },
-          ">"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/load_action_error_log.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadActionErrorLog.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  id,\n  http,\n  dateStart,\n  dateEnd,\n  runId,\n  message,\n  perPage = 10,\n  page = 0,\n  sort,\n  namespace,\n  withAuth = false,\n}",
-            "description": [],
-            "signature": [
-              "LoadActionErrorLogProps",
-              " & { http: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
-                "text": "HttpSetup"
-              },
-              "; }"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/load_action_error_log.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.loadActionTypes",
         "type": "Function",
         "tags": [],
@@ -1067,133 +1007,6 @@
                 "trackAdoption": false
               }
             ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadAllActions",
-        "type": "Function",
-        "tags": [],
-        "label": "loadAllActions",
-        "description": [],
-        "signature": [
-          "({ http }: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<",
-          {
-            "pluginId": "triggersActionsUi",
-            "scope": "public",
-            "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.ActionConnector",
-            "text": "ActionConnector"
-          },
-          "<Record<string, unknown>, Record<string, unknown>>[]>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connectors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadAllActions.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ http }",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connectors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.loadAllActions.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connectors.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadExecutionLogAggregations",
-        "type": "Function",
-        "tags": [],
-        "label": "loadExecutionLogAggregations",
-        "description": [],
-        "signature": [
-          "({ id, http, dateStart, dateEnd, outcomeFilter, message, perPage, page, sort, }: ",
-          "LoadExecutionLogAggregationsProps",
-          " & { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.IExecutionLogResult",
-            "text": "IExecutionLogResult"
-          },
-          ">"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/load_execution_log_aggregations.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadExecutionLogAggregations.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  id,\n  http,\n  dateStart,\n  dateEnd,\n  outcomeFilter,\n  message,\n  perPage = 10,\n  page = 0,\n  sort = [],\n}",
-            "description": [],
-            "signature": [
-              "LoadExecutionLogAggregationsProps",
-              " & { http: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
-                "text": "HttpSetup"
-              },
-              "; }"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/load_execution_log_aggregations.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1324,57 +1137,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadRules",
-        "type": "Function",
-        "tags": [],
-        "label": "loadRules",
-        "description": [],
-        "signature": [
-          "({\n  http,\n  page,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n  sort = { field: 'name', direction: 'asc' },\n}: ",
-          "LoadRulesProps",
-          ") => Promise<{ page: number; perPage: number; total: number; data: ",
-          {
-            "pluginId": "triggersActionsUi",
-            "scope": "public",
-            "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.Rule",
-            "text": "Rule"
-          },
-          "<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          ">[]; }>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rules.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadRules.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  http,\n  page,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n  sort = { field: 'name', direction: 'asc' },\n}",
-            "description": [],
-            "signature": [
-              "LoadRulesProps"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rules.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.loadRuleSummary",
         "type": "Function",
         "tags": [],
@@ -1467,134 +1229,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadRuleTags",
-        "type": "Function",
-        "tags": [],
-        "label": "loadRuleTags",
-        "description": [],
-        "signature": [
-          "({ http }: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<",
-          "RuleTagsAggregations",
-          ">"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadRuleTags.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ http }",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.loadRuleTags.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadRuleTypes",
-        "type": "Function",
-        "tags": [],
-        "label": "loadRuleTypes",
-        "description": [],
-        "signature": [
-          "({ http }: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<",
-          {
-            "pluginId": "triggersActionsUi",
-            "scope": "public",
-            "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.RuleType",
-            "text": "RuleType"
-          },
-          "<string, string>[]>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadRuleTypes.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ http }",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.loadRuleTypes.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.MustacheTextFieldWrapper",
         "type": "Function",
         "tags": [],
@@ -1621,76 +1255,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.muteRule",
-        "type": "Function",
-        "tags": [],
-        "label": "muteRule",
-        "description": [],
-        "signature": [
-          "({ id, http }: { id: string; http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<void>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/mute.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.muteRule.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ id, http }",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/mute.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.muteRule.$1.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/mute.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.muteRule.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/mute.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
           }
         ],
         "returnComment": [],
@@ -1825,92 +1389,6 @@
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.snoozeRule",
-        "type": "Function",
-        "tags": [],
-        "label": "snoozeRule",
-        "description": [],
-        "signature": [
-          "({\n  id,\n  snoozeSchedule,\n  http,\n}: { id: string; snoozeSchedule: ",
-          "SnoozeSchedule",
-          "; http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<void>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.snoozeRule.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  id,\n  snoozeSchedule,\n  http,\n}",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.snoozeRule.$1.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.snoozeRule.$1.snoozeSchedule",
-                "type": "Object",
-                "tags": [],
-                "label": "snoozeSchedule",
-                "description": [],
-                "signature": [
-                  "SnoozeSchedule"
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.snoozeRule.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -2106,160 +1584,6 @@
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.unmuteRule",
-        "type": "Function",
-        "tags": [],
-        "label": "unmuteRule",
-        "description": [],
-        "signature": [
-          "({ id, http }: { id: string; http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<void>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unmute.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.unmuteRule.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ id, http }",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unmute.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.unmuteRule.$1.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unmute.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.unmuteRule.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unmute.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.unsnoozeRule",
-        "type": "Function",
-        "tags": [],
-        "label": "unsnoozeRule",
-        "description": [],
-        "signature": [
-          "({\n  id,\n  http,\n  scheduleIds,\n}: { id: string; http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; scheduleIds?: string[] | undefined; }) => Promise<void>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.unsnoozeRule.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  id,\n  http,\n  scheduleIds,\n}",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.unsnoozeRule.$1.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.unsnoozeRule.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.unsnoozeRule.$1.scheduleIds",
-                "type": "Array",
-                "tags": [],
-                "label": "scheduleIds",
-                "description": [],
-                "signature": [
-                  "string[] | undefined"
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -2806,6 +2130,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionParamsProps.useDefaultMessage",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useDefaultMessage",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -5637,7 +4975,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"id\" | \"params\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"monitoring\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"running\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"id\" | \"params\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"monitoring\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"running\" | \"viewInAppRelativeUrl\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
@@ -8180,6 +7518,8 @@
           "signature": [
             "(props: ",
             "AlertsTableStateProps",
+            " & ",
+            "LazyLoadProps",
             ") => React.ReactElement<",
             "AlertsTableStateProps",
             ", string | React.JSXElementConstructor<any>>"
@@ -8191,12 +7531,14 @@
             {
               "parentPluginId": "triggersActionsUi",
               "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAlertsStateTable.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "AlertsTableStateProps"
+                "AlertsTableStateProps",
+                " & ",
+                "LazyLoadProps"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,

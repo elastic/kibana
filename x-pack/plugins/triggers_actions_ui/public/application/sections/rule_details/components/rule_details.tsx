@@ -27,7 +27,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { bulkUpdateAPIKey } from '../../../lib/rule_api';
+import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
 import { RuleActionsPopover } from './rule_actions_popover';
 import {

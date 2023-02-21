@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, memo } from 'react';
-import { Route } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { act, cleanup } from '@testing-library/react';
 
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';

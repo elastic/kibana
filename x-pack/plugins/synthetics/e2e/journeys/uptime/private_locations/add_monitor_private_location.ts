@@ -8,16 +8,35 @@ import { v4 as uuidv4 } from 'uuid';
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { byTestId, TIMEOUT_60_SEC } from '@kbn/observability-plugin/e2e/utils';
 import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { cleanTestMonitors } from '../../synthetics/services/add_monitor';
 import { monitorManagementPageProvider } from '../../../page_objects/uptime/monitor_management';
 
-journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => {
+journey('AddPrivateLocationMonitor', async ({ page, params }) => {
   recordVideo(page);
+
+  page.setDefaultTimeout(TIMEOUT_60_SEC.timeout);
+  const kibanaUrl = params.kibanaUrl;
 
   const uptime = monitorManagementPageProvider({ page, kibanaUrl });
   const monitorName = `Private location monitor ${uuidv4()}`;
 
+  let monitorId: string;
+
   before(async () => {
-    await uptime.waitForLoadingToFinish();
+    await cleanTestMonitors(params);
+    page.on('request', (evt) => {
+      if (
+        evt.resourceType() === 'fetch' &&
+        evt.url().includes('/internal/uptime/service/monitors?preserve_namespace=true')
+      ) {
+        evt
+          .response()
+          ?.then((res) => res?.json())
+          .then((res) => {
+            monitorId = res.id;
+          });
+      }
+    });
   });
 
   step('Go to monitor-management', async () => {
@@ -60,7 +79,7 @@ journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => 
     await page.waitForSelector('h1:has-text("Edit Elastic Synthetics integration")');
     await page.waitForSelector('text="This package policy is managed by the Synthetics app."');
   });
-
+  
   step('Integration edit button leads to correct Synthetics edit page', async () => {
     await page.click('text="Edit in Synthetics"');
 
