@@ -13,53 +13,57 @@ import { TOASTER } from '../../screens/alerts_detection_rules';
 import { TIMELINE_CHECKBOX } from '../../screens/timelines';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { expectedExportedTimeline, getTimeline } from '../../objects/timeline';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteTimelines } from '../../tasks/common';
 
 describe('Export timelines', () => {
   before(() => {
     cleanKibana();
     login();
-    createTimeline(getTimeline()).then((response) => {
-      cy.wrap(response).as('timelineResponse');
-      cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId');
-    });
-    createTimeline(getTimeline());
   });
 
   beforeEach(() => {
+    deleteTimelines();
     cy.intercept({
       method: 'POST',
       path: '/api/timeline/_export?file_name=timelines_export.ndjson',
     }).as('export');
+    createTimeline(getTimeline()).then((response) => {
+      cy.wrap(response).as('timelineResponse1');
+      cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId1');
+    });
+    createTimeline(getTimeline()).then((response) => {
+      cy.wrap(response).as('timelineResponse2');
+      cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId2');
+    });
+    visitWithoutDateRange(TIMELINES_URL);
   });
 
   it('Exports a custom timeline', function () {
-    visitWithoutDateRange(TIMELINES_URL);
-    exportTimeline(this.timelineId);
+    exportTimeline(this.timelineId1);
 
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
 
-      cy.wrap(response?.body).should('eql', expectedExportedTimeline(this.timelineResponse));
+      cy.wrap(response?.body).should('eql', expectedExportedTimeline(this.timelineResponse1));
     });
   });
 
   it('Bulk export all created timeline', function () {
-    visitWithoutDateRange(TIMELINES_URL);
-    cy.get(TIMELINE_CHECKBOX(this.timelineId)).should('exist'); // wait for all timelines to be loaded
+    cy.get(TIMELINE_CHECKBOX(this.timelineId1)).should('exist'); // wait for all timelines to be loaded
     selectAllTimelines();
     exportSelectedTimelines();
 
     const expectedNumberCustomRulesToBeExported = 2;
-
     cy.get(TOASTER).should(
-      'contain',
+      'have.text',
       `Successfully exported ${expectedNumberCustomRulesToBeExported} timelines`
     );
 
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-      cy.wrap(response?.body).should('not.be.empty');
+      const timelines = response?.body?.split('\n');
+      assert.deepEqual(JSON.parse(timelines[0]), expectedExportedTimeline(this.timelineResponse2));
+      assert.deepEqual(JSON.parse(timelines[1]), expectedExportedTimeline(this.timelineResponse1));
     });
   });
 });
