@@ -773,6 +773,8 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/plugins/observability/public/pages/slos  @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/slo_edit  @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/slo_details  @elastic/actionable-observability
+/x-pack/plugins/observability/public/hooks/slo  @elastic/actionable-observability
+/x-pack/plugins/observability/public/data/slo  @elastic/actionable-observability
 /x-pack/test/observability_functional @elastic/actionable-observability
 
 # Infra Monitoring
