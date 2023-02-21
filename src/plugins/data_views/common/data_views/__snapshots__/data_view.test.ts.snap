@@ -51,7 +51,7 @@ Object {
 
 exports[`IndexPattern toSpec should match snapshot 1`] = `
 Object {
-  "allowNoIndex": false,
+  "allowNoIndex": true,
   "fieldAttrs": Object {},
   "fieldFormats": Object {},
   "fields": Object {
