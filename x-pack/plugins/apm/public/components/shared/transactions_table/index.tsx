@@ -262,6 +262,7 @@ export function TransactionsTable({
 
   const isLoading = status === FETCH_STATUS.LOADING;
   const isNotInitiated = status === FETCH_STATUS.NOT_INITIATED;
+  const hasFailed = status === FETCH_STATUS.FAILURE;
 
   const pagination = useMemo(
     () => ({
@@ -342,8 +343,17 @@ export function TransactionsTable({
           >
             <EuiBasicTable
               loading={isLoading}
+              noItemsMessage={
+                isLoading
+                  ? i18n.translate('xpack.apm.transactionsTable.loading', {
+                      defaultMessage: 'Loading...',
+                    })
+                  : i18n.translate('xpack.apm.transactionsTable.noResults', {
+                      defaultMessage: 'No transactions found',
+                    })
+              }
               error={
-                status === FETCH_STATUS.FAILURE
+                hasFailed
                   ? i18n.translate('xpack.apm.transactionsTable.errorMessage', {
                       defaultMessage: 'Failed to fetch',
                     })

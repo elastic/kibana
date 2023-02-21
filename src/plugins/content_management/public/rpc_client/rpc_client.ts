@@ -8,17 +8,30 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { API_ENDPOINT } from '../../common';
-import type { GetIn, CreateIn, ProcedureName } from '../../common';
+import type { GetIn, CreateIn, UpdateIn, DeleteIn, SearchIn, ProcedureName } from '../../common';
+import type { CrudClient } from '../crud_client/crud_client';
 
-export class RpcClient {
+export class RpcClient implements CrudClient {
   constructor(private http: { post: HttpSetup['post'] }) {}
 
   public get<I extends GetIn = GetIn, O = unknown>(input: I): Promise<O> {
     return this.sendMessage('get', input);
   }
 
-  public create<I extends CreateIn, O = unknown>(input: I): Promise<O> {
+  public create<I extends CreateIn = CreateIn, O = unknown>(input: I): Promise<O> {
     return this.sendMessage('create', input);
+  }
+
+  public update<I extends UpdateIn = UpdateIn, O = unknown>(input: I): Promise<O> {
+    return this.sendMessage('update', input);
+  }
+
+  public delete<I extends DeleteIn = DeleteIn, O = unknown>(input: I): Promise<O> {
+    return this.sendMessage('delete', input);
+  }
+
+  public search<I extends SearchIn = SearchIn, O = unknown>(input: I): Promise<O> {
+    return this.sendMessage('search', input);
   }
 
   private sendMessage = async (name: ProcedureName, input: any): Promise<any> => {

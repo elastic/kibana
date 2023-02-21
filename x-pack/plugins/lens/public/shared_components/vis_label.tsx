@@ -13,11 +13,11 @@ export type LabelMode = 'auto' | 'custom' | 'none';
 
 export interface Label {
   mode: LabelMode;
-  label: string;
+  label: string | undefined;
 }
 
 export interface VisLabelProps {
-  label: string;
+  label: string | undefined;
   mode: LabelMode;
   handleChange: (label: Label) => void;
   placeholder?: string;
@@ -76,11 +76,12 @@ export function VisLabel({
           data-test-subj={`${dataTestSubj}-select`}
           aria-label="Label"
           onChange={({ target }) => {
-            if (target.value === 'custom') {
-              handleChange({ label: '', mode: target.value as LabelMode });
-              return;
-            }
-            handleChange({ label: '', mode: target.value as LabelMode });
+            const title =
+              target.value === 'custom' ? '' : target.value === 'auto' ? undefined : label;
+            handleChange({
+              label: title,
+              mode: target.value as LabelMode,
+            });
           }}
           options={hasAutoOption ? modeEnhancedOptions : modeDefaultOptions}
           value={mode}
