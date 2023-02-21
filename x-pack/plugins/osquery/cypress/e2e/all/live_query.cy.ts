@@ -175,4 +175,44 @@ describe('ALL - Live Query', () => {
     addToCase();
     viewRecentCaseAndCheckResults();
   });
+
+  it('should run multiline query', () => {
+    const multilineQuery =
+      'select u.username, {shift+enter}' +
+      '       p.pid, {shift+enter}' +
+      '       p.name, {shift+enter}' +
+      '       pos.local_address, {shift+enter}' +
+      '       pos.local_port, {shift+enter}' +
+      '       p.path, {shift+enter}' +
+      '       p.cmdline, {shift+enter}' +
+      '       pos.remote_address, {shift+enter}' +
+      '       pos.remote_port {shift+enter}' +
+      'from processes as p{esc}{shift+enter}' +
+      'join users as u{esc}{shift+enter}' +
+      '    on u.uid=p.uid{esc}{shift+enter}' +
+      'join process_open_sockets as pos{esc}{shift+enter}' +
+      '    on pos.pid=p.pid{esc}{shift+enter}' +
+      "where pos.remote_port !='0' {shift+enter}" +
+      'limit 1000;';
+    cy.contains('New live query').click();
+    cy.react('ReactAce').invoke('height').and('be.gt', 99).and('be.lt', 110);
+    cy.get(LIVE_QUERY_EDITOR).click().invoke('val', multilineQuery);
+
+    inputQuery(multilineQuery);
+    cy.react('ReactAce').invoke('height').should('be.gt', 250).and('be.lt', 300);
+    selectAllAgents();
+    submitQuery();
+    checkResults();
+
+    // check if it get's bigger when we add more lines
+    cy.react('ReactAce').invoke('height').should('be.gt', 250).and('be.lt', 300);
+    inputQuery(multilineQuery);
+    cy.wait(1000);
+    cy.react('ReactAce').invoke('height').should('be.gt', 400).and('be.lt', 500);
+
+    inputQuery('{selectall}{backspace}{selectall}{backspace}');
+    cy.wait(1000);
+    // not sure if this is how it used to work when I implemented the functionality, but let's leave it like this for now
+    cy.react('ReactAce').invoke('height').should('be.gt', 400).and('be.lt', 500);
+  });
 });
