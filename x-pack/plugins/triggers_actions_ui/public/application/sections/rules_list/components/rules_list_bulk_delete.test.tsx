@@ -127,9 +127,7 @@ const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: AllTheProviders });
 };
 
-// Test are too slow. It's breaking the build. So we skip it now and waiting for improvment according this ticket:
-// https://github.com/elastic/kibana/issues/145122
-describe('Rules list bulk delete', () => {
+describe('Rules list Bulk Delete', () => {
   beforeEach(async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
     loadRulesWithKueryFilter.mockResolvedValue({
@@ -138,16 +136,7 @@ describe('Rules list bulk delete', () => {
       total: 6,
       data: mockedRulesData,
     });
-    loadActionTypes.mockResolvedValue([
-      {
-        id: 'test',
-        name: 'Test',
-      },
-      {
-        id: 'test2',
-        name: 'Test2',
-      },
-    ]); // do we need fake actions here?
+    loadActionTypes.mockResolvedValue([]);
     loadRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi()]);
     loadAllActions.mockResolvedValue([]);
     loadRuleAggregationsWithKueryFilter.mockResolvedValue({});
@@ -167,7 +156,7 @@ describe('Rules list bulk delete', () => {
     cleanup();
   });
 
-  it('should Bulk Delete', async () => {
+  beforeEach(async () => {
     renderWithProviders(<RulesList />);
     await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
@@ -175,7 +164,9 @@ describe('Rules list bulk delete', () => {
     fireEvent.click(screen.getByTestId('selectAllRulesButton'));
     fireEvent.click(screen.getByTestId('checkboxSelectRow-2'));
     fireEvent.click(screen.getByTestId('showBulkActionButton'));
+  });
 
+  it('should Bulk Delete', async () => {
     fireEvent.click(screen.getByTestId('bulkDelete'));
     expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
     await act(async () => {
@@ -198,14 +189,6 @@ describe('Rules list bulk delete', () => {
   });
 
   it('should cancel Bulk Delete', async () => {
-    renderWithProviders(<RulesList />);
-    await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-
-    fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
-    fireEvent.click(screen.getByTestId('selectAllRulesButton'));
-    fireEvent.click(screen.getByTestId('checkboxSelectRow-2'));
-    fireEvent.click(screen.getByTestId('showBulkActionButton'));
-
     fireEvent.click(screen.getByTestId('bulkDelete'));
     expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
     await act(async () => {
@@ -227,14 +210,6 @@ describe('Rules list bulk delete', () => {
       ],
       total: 10,
     });
-
-    renderWithProviders(<RulesList />);
-    await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-
-    fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
-    fireEvent.click(screen.getByTestId('selectAllRulesButton'));
-    fireEvent.click(screen.getByTestId('checkboxSelectRow-2'));
-    fireEvent.click(screen.getByTestId('showBulkActionButton'));
 
     fireEvent.click(screen.getByTestId('bulkDelete'));
     expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
@@ -263,14 +238,6 @@ describe('Rules list bulk delete', () => {
       ],
       total: 1,
     });
-
-    renderWithProviders(<RulesList />);
-    await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-
-    fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
-    fireEvent.click(screen.getByTestId('selectAllRulesButton'));
-    fireEvent.click(screen.getByTestId('checkboxSelectRow-2'));
-    fireEvent.click(screen.getByTestId('showBulkActionButton'));
 
     fireEvent.click(screen.getByTestId('bulkDelete'));
     expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
