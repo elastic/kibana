@@ -123,10 +123,9 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
   const setPreference = useCallback(
     (id: string) => {
       setFrozenDataPreference(id as FrozenTierPreference);
-      setRange(dataView, query, id === FROZEN_TIER_PREFERENCE.EXCLUDE);
       closePopover();
     },
-    [dataView, query, setFrozenDataPreference, setRange]
+    [setFrozenDataPreference]
   );
 
   const onButtonClick = () => {
