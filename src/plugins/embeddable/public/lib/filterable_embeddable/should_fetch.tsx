@@ -7,11 +7,8 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import { map, distinctUntilChanged, skip } from 'rxjs/operators';
-import {
-  COMPARE_ALL_OPTIONS,
-  onlyDisabledFiltersChanged,
-} from '@kbn/es-query';
+import { map, distinctUntilChanged } from 'rxjs/operators';
+import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
 
 export const shouldRefreshFilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,
@@ -25,21 +22,24 @@ type FilterableEmbeddableInput = EmbeddableInput & {
   timeRange?: TimeRange;
   timeslice?: [number, number];
   [key: string]: unknown;
-}
+};
 
-export function shouldFetch$(updated$: Observable<unknown>, getInput: () => FilterableEmbeddableInput) {
-  return updated$
-    .pipe(map(() => getInput()))
-    .pipe(
-      distinctUntilChanged((a, b) => {
-        if (!fastIsEqual(
-            [a.searchSessionId, a.query, a.timeRange, a.timeslice],
-            [b.searchSessionId, b.query, b.timeRange, b.timeslice]
-          )) {
-          return false;
-        }
+export function shouldFetch$(
+  updated$: Observable<unknown>,
+  getInput: () => FilterableEmbeddableInput
+) {
+  return updated$.pipe(map(() => getInput())).pipe(
+    distinctUntilChanged((a, b) => {
+      if (
+        !fastIsEqual(
+          [a.searchSessionId, a.query, a.timeRange, a.timeslice],
+          [b.searchSessionId, b.query, b.timeRange, b.timeslice]
+        )
+      ) {
+        return false;
+      }
 
-        return onlyDisabledFiltersChanged(a.filters, b.filters, shouldRefreshFilterCompareOptions);
-      }),
-    );
+      return onlyDisabledFiltersChanged(a.filters, b.filters, shouldRefreshFilterCompareOptions);
+    })
+  );
 }

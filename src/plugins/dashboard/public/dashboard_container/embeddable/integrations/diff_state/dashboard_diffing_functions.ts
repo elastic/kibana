@@ -15,7 +15,7 @@ import {
   isFilterPinned,
   onlyDisabledFiltersChanged,
 } from '@kbn/es-query';
-import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public'; 
+import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
 import { DashboardContainerByValueInput } from '../../../../../common';

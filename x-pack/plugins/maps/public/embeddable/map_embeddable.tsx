@@ -14,7 +14,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { type Filter, compareFilters, type TimeRange, type Query } from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
@@ -194,13 +194,13 @@ export class MapEmbeddable
         ...this.getInput(),
         filters: this._getFilters(),
         searchSessionId: this._getSearchSessionId(),
-      }
+      };
     }).subscribe(() => {
       this._dispatchSetQuery({
         forceRefresh: false,
       });
     });
-    
+
     const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
     if (mapStateJSON) {
       try {
