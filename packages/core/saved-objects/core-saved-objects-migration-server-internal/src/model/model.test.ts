@@ -1458,7 +1458,27 @@ describe('migrations v2 model', () => {
         ]);
       });
 
-      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> FAIL if the deleteQuery fails', () => {
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> CLEANUP_UNKNOWN_AND_EXCLUDED if the deleteQuery fails and we have some attempts left', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.left({
+          type: 'cleanup_failed' as const,
+          failures: ['Failed to delete dashboard:12345', 'Failed to delete dashboard:67890'],
+        });
+
+        const newState = model(cleanupUnknownAndExcludedWaitForTask, res);
+
+        expect(newState).toMatchObject({
+          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+          logs: [
+            {
+              level: 'warning',
+              message:
+                'Errors occurred whilst deleting unwanted documents. Another instance is probably updating or deleting documents in the same index. Retrying attempt 1.',
+            },
+          ],
+        });
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> FAIL if the deleteQuery fails after N retries', () => {
         const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.left({
           type: 'cleanup_failed' as const,
           failures: ['Failed to delete dashboard:12345', 'Failed to delete dashboard:67890'],
@@ -1467,6 +1487,7 @@ describe('migrations v2 model', () => {
         const newState = model(
           {
             ...cleanupUnknownAndExcludedWaitForTask,
+            retryCount: cleanupUnknownAndExcludedWaitForTask.retryAttempts,
           },
           res
         );

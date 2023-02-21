@@ -531,13 +531,31 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // Elasticsearch task succeeds or fails.
         return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
       } else {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason:
-            `Migration failed because it was unable to delete unwanted documents from the ${stateP.sourceIndex.value} system index:\n` +
-            res.left.failures.map((failure: string) => `- ${failure}\n`).join(''),
-        };
+        if (stateP.retryCount < stateP.retryAttempts) {
+          const retryCount = stateP.retryCount + 1;
+          const retryDelay = 1000 * Math.random();
+          return {
+            ...stateP,
+            controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+            retryCount,
+            retryDelay,
+            logs: [
+              ...stateP.logs,
+              {
+                level: 'warning',
+                message: `Errors occurred whilst deleting unwanted documents. Another instance is probably updating or deleting documents in the same index. Retrying attempt ${retryCount}.`,
+              },
+            ],
+          };
+        } else {
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason:
+              `Migration failed because it was unable to delete unwanted documents from the ${stateP.sourceIndex.value} system index:\n` +
+              res.left.failures.map((failure: string) => `- ${failure}\n`).join(''),
+          };
+        }
       }
     }
   } else if (stateP.controlState === 'PREPARE_COMPATIBLE_MIGRATION') {
