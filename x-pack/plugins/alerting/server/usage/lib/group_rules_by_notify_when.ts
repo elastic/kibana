@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AlertingUsage } from '../types';
+import { AlertingTelemetry } from '../types';
 
 export function groupRulesByNotifyWhen(
   rulesByNotifyWhen: Record<string, number>
-): AlertingUsage['count_rules_by_notify_when'] {
+): AlertingTelemetry['count_rules_by_notify_when'] {
   return {
     on_action_group_change: rulesByNotifyWhen.onActionGroupChange ?? 0,
     on_active_alert: rulesByNotifyWhen.onActiveAlert ?? 0,

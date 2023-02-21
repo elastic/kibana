@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AlertingUsage } from '../types';
+import { AlertingTelemetry } from '../types';
 
 export function groupRulesByStatus(
   rulesByStatus: Record<string, number>
-): AlertingUsage['count_rules_by_execution_status'] {
+): AlertingTelemetry['count_rules_by_execution_status'] {
   const ok = rulesByStatus.ok || 0;
   const active = rulesByStatus.active || 0;
 

@@ -5,25 +5,32 @@
  * 2.0.
  */
 
-import { flatMap, merge } from 'lodash';
+import { get, flatMap, merge, omit } from 'lodash';
 import type {
   AggregationsKeyedPercentiles,
   AggregationsSingleBucketAggregateBase,
-  AggregationsPercentilesAggregateBase,
-  AggregationsSingleMetricAggregateBase,
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
   AggregationsBuckets,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import {
   NUM_ALERTING_RULE_TYPES,
   NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES,
 } from '../alerting_usage_collector';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
+import {
+  EventLogUsageAggregations,
+  EventLogUsageAggregationType,
+  EventLogUsage,
+  EventLogUsageSchema,
+  EventLogUsageByTypeSchema,
+  getEmptyEventLogUsageByType,
+  getEmptyEventLogUsage,
+} from '../generated/event_log_telemetry_types';
 
-const Millis2Nanos = 1000 * 1000;
 const percentileFieldNameMapping: Record<string, string> = {
   '50.0': 'p50',
   '90.0': 'p90',
@@ -36,7 +43,15 @@ interface Opts {
   logger: Logger;
 }
 
-interface GetExecutionsPerDayCountResults {
+interface RuleTypeBucketResults extends EventLogUsageByTypeSchema {
+  countRuleExecutionsByType: Record<string, number>;
+}
+
+interface ParsedAggResults extends EventLogUsageSchema {
+  countTotalFailedExecutions: number;
+  countFailedExecutionsByReason: Record<string, number>;
+}
+interface GetExecutionsPerDayCountResults extends EventLogUsage {
   hasErrors: boolean;
   errorMessage?: string;
   countTotalRuleExecutions: number;
@@ -44,16 +59,6 @@ interface GetExecutionsPerDayCountResults {
   countTotalFailedExecutions: number;
   countFailedExecutionsByReason: Record<string, number>;
   countFailedExecutionsByReasonByType: Record<string, Record<string, number>>;
-  avgExecutionTime: number;
-  avgExecutionTimeByType: Record<string, number>;
-  avgEsSearchDuration: number;
-  avgEsSearchDurationByType: Record<string, number>;
-  avgTotalSearchDuration: number;
-  avgTotalSearchDurationByType: Record<string, number>;
-  generatedActionsPercentiles: Record<string, number>;
-  generatedActionsPercentilesByType: Record<string, Record<string, number>>;
-  alertsPercentiles: Record<string, number>;
-  alertsPercentilesByType: Record<string, Record<string, number>>;
   countRulesByExecutionStatus: Record<string, number>;
 }
 interface GetExecutionTimeoutsPerDayCountResults {
@@ -65,17 +70,20 @@ interface GetExecutionTimeoutsPerDayCountResults {
 interface GetExecutionCountsExecutionFailures extends AggregationsSingleBucketAggregateBase {
   by_reason: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
 }
-interface GetExecutionCountsAggregationBucket extends AggregationsStringTermsBucketKeys {
-  avg_execution_time: AggregationsSingleMetricAggregateBase;
-  avg_es_search_duration: AggregationsSingleMetricAggregateBase;
-  avg_total_search_duration: AggregationsSingleMetricAggregateBase;
+export interface GetExecutionCountsAggregationBucket
+  extends AggregationsStringTermsBucketKeys,
+    EventLogUsageAggregationType {
   execution_failures: GetExecutionCountsExecutionFailures;
-  percentile_scheduled_actions: AggregationsPercentilesAggregateBase;
-  percentile_alerts: AggregationsPercentilesAggregateBase;
 }
 
 interface IGetExecutionFailures extends AggregationsSingleBucketAggregateBase {
   by_reason: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
+}
+
+interface IAggResult extends EventLogUsageAggregationType, Record<string, AggregationsAggregate> {
+  by_rule_type_id: AggregationsTermsAggregateBase<GetExecutionCountsAggregationBucket>;
+  execution_failures: IGetExecutionFailures;
+  by_execution_status: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
 }
 
 export async function getExecutionsPerDayCount({
@@ -85,34 +93,6 @@ export async function getExecutionsPerDayCount({
 }: Opts): Promise<GetExecutionsPerDayCountResults> {
   try {
     const eventLogAggs = {
-      avg_execution_time: {
-        avg: {
-          field: 'event.duration',
-        },
-      },
-      avg_es_search_duration: {
-        avg: {
-          field: 'kibana.alert.rule.execution.metrics.es_search_duration_ms',
-        },
-      },
-      avg_total_search_duration: {
-        avg: {
-          field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
-        },
-      },
-
-      percentile_scheduled_actions: {
-        percentiles: {
-          field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
-          percents: [50, 90, 99],
-        },
-      },
-      percentile_alerts: {
-        percentiles: {
-          field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
-          percents: [50, 90, 99],
-        },
-      },
       execution_failures: {
         filter: {
           term: {
@@ -128,6 +108,7 @@ export async function getExecutionsPerDayCount({
           },
         },
       },
+      ...EventLogUsageAggregations,
     };
 
     const query = {
@@ -161,17 +142,7 @@ export async function getExecutionsPerDayCount({
     const totalRuleExecutions =
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
 
-    const aggregations = results.aggregations as {
-      by_rule_type_id: AggregationsTermsAggregateBase<GetExecutionCountsAggregationBucket>;
-      execution_failures: IGetExecutionFailures;
-      percentile_scheduled_actions: AggregationsPercentilesAggregateBase;
-      percentile_alerts: AggregationsPercentilesAggregateBase;
-      avg_execution_time: AggregationsSingleMetricAggregateBase;
-      avg_es_search_duration: AggregationsSingleMetricAggregateBase;
-      avg_total_search_duration: AggregationsSingleMetricAggregateBase;
-      by_execution_status: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
-    };
-
+    const aggregations = results.aggregations as IAggResult;
     const aggregationsByRuleTypeId: AggregationsBuckets<GetExecutionCountsAggregationBucket> =
       aggregations.by_rule_type_id.buckets as GetExecutionCountsAggregationBucket[];
 
@@ -202,17 +173,9 @@ export async function getExecutionsPerDayCount({
       countTotalFailedExecutions: 0,
       countFailedExecutionsByReason: {},
       countFailedExecutionsByReasonByType: {},
-      avgExecutionTime: 0,
-      avgExecutionTimeByType: {},
-      avgEsSearchDuration: 0,
-      avgEsSearchDurationByType: {},
-      avgTotalSearchDuration: 0,
-      avgTotalSearchDurationByType: {},
-      generatedActionsPercentiles: {},
-      generatedActionsPercentilesByType: {},
-      alertsPercentiles: {},
-      alertsPercentilesByType: {},
       countRulesByExecutionStatus: {},
+      ...getEmptyEventLogUsage(),
+      ...getEmptyEventLogUsageByType(),
     };
   }
 }
@@ -335,58 +298,55 @@ export async function getExecutionTimeoutsPerDayCount({
 
 export function parseRuleTypeBucket(
   buckets: GetExecutionCountsAggregationBucket[]
-): Pick<
-  GetExecutionsPerDayCountResults,
-  | 'countRuleExecutionsByType'
-  | 'avgExecutionTimeByType'
-  | 'avgEsSearchDurationByType'
-  | 'avgTotalSearchDurationByType'
-  | 'generatedActionsPercentilesByType'
-  | 'alertsPercentilesByType'
-> {
-  let summary = {
+): RuleTypeBucketResults {
+  let summary: RuleTypeBucketResults = {
     countRuleExecutionsByType: {},
-    avgExecutionTimeByType: {},
-    avgEsSearchDurationByType: {},
-    avgTotalSearchDurationByType: {},
-    generatedActionsPercentilesByType: { p50: {}, p90: {}, p99: {} },
-    alertsPercentilesByType: { p50: {}, p90: {}, p99: {} },
+    ...getEmptyEventLogUsageByType(),
   };
   for (const bucket of buckets ?? []) {
     const ruleType: string = replaceDotSymbols(bucket?.key) ?? '';
     const numExecutions: number = bucket?.doc_count ?? 0;
-    const avgExecutionTimeNanos = bucket?.avg_execution_time?.value ?? 0;
-    const avgEsSearchTimeMillis = bucket?.avg_es_search_duration?.value ?? 0;
-    const avgTotalSearchTimeMillis = bucket?.avg_total_search_duration?.value ?? 0;
-    const actionPercentiles = bucket?.percentile_scheduled_actions?.values ?? {};
-    const alertPercentiles = bucket?.percentile_alerts?.values ?? {};
+
+    const metrics = Object.keys(bucket).reduce((acc, key) => {
+      if (key.startsWith('avg_')) {
+        return {
+          ...acc,
+          [`${key}_by_type_per_day`]: get(bucket, `${key}.value`, 0) ?? 0,
+        };
+      } else if (key.startsWith('percentile_')) {
+        return {
+          ...acc,
+          [`${key}_by_type_per_day`]: get(bucket, `${key}.values`, {}) ?? {},
+        };
+      }
+      return acc;
+    }, {});
 
     summary = {
       countRuleExecutionsByType: {
         ...summary.countRuleExecutionsByType,
         [ruleType]: numExecutions,
       },
-      avgExecutionTimeByType: {
-        ...summary.avgExecutionTimeByType,
-        [ruleType]: Math.round(avgExecutionTimeNanos / Millis2Nanos),
-      },
-      avgEsSearchDurationByType: {
-        ...summary.avgEsSearchDurationByType,
-        [ruleType]: Math.round(avgEsSearchTimeMillis),
-      },
-      avgTotalSearchDurationByType: {
-        ...summary.avgTotalSearchDurationByType,
-        [ruleType]: Math.round(avgTotalSearchTimeMillis),
-      },
-      generatedActionsPercentilesByType: merge(
-        summary.generatedActionsPercentilesByType,
-        parsePercentileAggs(actionPercentiles as AggregationsKeyedPercentiles, ruleType)
-      ),
-      alertsPercentilesByType: merge(
-        summary.alertsPercentilesByType,
-        parsePercentileAggs(alertPercentiles as AggregationsKeyedPercentiles, ruleType)
-      ),
-    };
+      ...Object.keys(metrics).reduce((acc, key) => {
+        if (key.startsWith('percentile')) {
+          return {
+            ...acc,
+            [key]: merge(
+              get(summary, `${key}`),
+              parsePercentileAggs(get(metrics, `${key}`), ruleType)
+            ),
+          };
+        } else {
+          return {
+            ...acc,
+            [key]: {
+              ...get(summary, `${key}`),
+              [ruleType]: Math.round(get(metrics, `${key}`)),
+            },
+          };
+        }
+      }, omit(summary, 'countRuleExecutionsByType')),
+    } as RuleTypeBucketResults;
   }
 
   return summary;
@@ -535,30 +495,23 @@ export function parsePercentileAggs(
  *     value: 28.630434782608695,
  *   },
  */
-export function parseExecutionCountAggregationResults(results: {
-  execution_failures: IGetExecutionFailures;
-  percentile_scheduled_actions: AggregationsPercentilesAggregateBase;
-  percentile_alerts: AggregationsPercentilesAggregateBase;
-  avg_execution_time: AggregationsSingleMetricAggregateBase;
-  avg_es_search_duration: AggregationsSingleMetricAggregateBase;
-  avg_total_search_duration: AggregationsSingleMetricAggregateBase;
-}): Pick<
-  GetExecutionsPerDayCountResults,
-  | 'countTotalFailedExecutions'
-  | 'countFailedExecutionsByReason'
-  | 'avgExecutionTime'
-  | 'avgEsSearchDuration'
-  | 'avgTotalSearchDuration'
-  | 'generatedActionsPercentiles'
-  | 'alertsPercentiles'
-> {
-  const avgExecutionTimeNanos = results?.avg_execution_time?.value ?? 0;
-  const avgEsSearchDurationMillis = results?.avg_es_search_duration?.value ?? 0;
-  const avgTotalSearchDurationMillis = results?.avg_total_search_duration?.value ?? 0;
+export function parseExecutionCountAggregationResults(results: IAggResult): ParsedAggResults {
   const executionFailuresByReasonBuckets =
     (results?.execution_failures?.by_reason?.buckets as AggregationsStringTermsBucketKeys[]) ?? [];
-  const actionPercentiles = results?.percentile_scheduled_actions?.values ?? {};
-  const alertPercentiles = results?.percentile_alerts?.values ?? {};
+  const metrics = Object.keys(results ?? []).reduce((acc, key) => {
+    if (key.startsWith('avg_')) {
+      return {
+        ...acc,
+        [`${key}_per_day`]: get(results, `${key}.value`, 0) ?? 0,
+      };
+    } else if (key.startsWith('percentile_')) {
+      return {
+        ...acc,
+        [`${key}_per_day`]: get(results, `${key}.values`, {}) ?? {},
+      };
+    }
+    return acc;
+  }, {});
 
   return {
     countTotalFailedExecutions: results?.execution_failures?.doc_count ?? 0,
@@ -572,14 +525,20 @@ export function parseExecutionCountAggregationResults(results: {
       },
       {}
     ),
-    avgExecutionTime: Math.round(avgExecutionTimeNanos / Millis2Nanos),
-    avgEsSearchDuration: Math.round(avgEsSearchDurationMillis),
-    avgTotalSearchDuration: Math.round(avgTotalSearchDurationMillis),
-    generatedActionsPercentiles: parsePercentileAggs(
-      actionPercentiles as AggregationsKeyedPercentiles
-    ),
-    alertsPercentiles: parsePercentileAggs(alertPercentiles as AggregationsKeyedPercentiles),
-  };
+    ...Object.keys(metrics).reduce((acc, key) => {
+      if (key.startsWith('percentile')) {
+        return {
+          ...acc,
+          [key]: parsePercentileAggs(get(metrics, `${key}`)),
+        };
+      } else {
+        return {
+          ...acc,
+          [key]: Math.round(get(metrics, `${key}`)),
+        };
+      }
+    }, {}),
+  } as ParsedAggResults;
 }
 
 function getProviderAndActionFilterForTimeRange(
