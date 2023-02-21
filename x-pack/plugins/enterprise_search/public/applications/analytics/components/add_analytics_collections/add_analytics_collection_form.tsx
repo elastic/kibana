@@ -11,6 +11,8 @@ import { useActions, useValues } from 'kea';
 
 import { EuiFormRow, EuiFieldText, EuiForm } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { AddAnalyticsCollectionLogic } from './add_analytics_collection_logic';
 
 interface AddAnalyticsCollectionForm {
@@ -36,7 +38,13 @@ export const AddAnalyticsCollectionForm: React.FC<AddAnalyticsCollectionForm> = 
         }
       }}
     >
-      <EuiFormRow label="Collection name" isInvalid={!!inputError} error={inputError}>
+      <EuiFormRow
+        label={i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.form.label', {
+          defaultMessage: 'Collection name',
+        })}
+        isInvalid={!!inputError}
+        error={inputError}
+      >
         <EuiFieldText
           name={collectionNameField}
           fullWidth
