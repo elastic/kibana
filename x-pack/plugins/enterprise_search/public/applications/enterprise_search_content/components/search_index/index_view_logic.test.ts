@@ -31,21 +31,27 @@ import { IndexViewLogic } from './index_view_logic';
 // And the timeoutId is non-deterministic. We use expect.object.containing throughout this test file
 const DEFAULT_VALUES = {
   connector: undefined,
+  connectorError: undefined,
   connectorId: null,
   error: null,
-  fetchIndexApiData: undefined,
-  fetchIndexApiStatus: Status.IDLE,
+  fetchIndexApiData: {},
+  fetchIndexApiStatus: Status.SUCCESS,
   hasAdvancedFilteringFeature: false,
   hasBasicFilteringFeature: false,
   hasFilteringFeature: false,
-  index: undefined,
-  indexData: null,
+  htmlExtraction: undefined,
+  index: {
+    ingestionMethod: IngestionMethod.API,
+    ingestionStatus: IngestionStatus.CONNECTED,
+    lastUpdated: null,
+  },
+  indexData: {},
   indexName: 'index-name',
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
   isCanceling: false,
   isConnectorIndex: false,
-  isInitialLoading: true,
+  isInitialLoading: false,
   isSyncing: false,
   isWaitingForSync: false,
   lastUpdated: null,
@@ -76,16 +82,15 @@ describe('IndexViewLogic', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
+    http.get.mockReturnValueOnce(Promise.resolve({}));
     const indexNameLogic = indexNameMount();
     apiLogicMount();
     fetchIndexMount();
     mount();
-    indexNameLogic.setIndexName('index-name');
+    indexNameLogic.actions.setIndexName('index-name');
   });
 
   it('has expected default values', () => {
-    http.get.mockReturnValueOnce(Promise.resolve(() => ({})));
-
     expect(IndexViewLogic.values).toEqual(DEFAULT_VALUES);
   });
 
