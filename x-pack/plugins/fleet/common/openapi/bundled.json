@@ -1391,6 +1391,8 @@
                     }
                   },
                   "required": [
+                    "active",
+                    "all",
                     "error",
                     "events",
                     "inactive",
@@ -1398,9 +1400,7 @@
                     "online",
                     "other",
                     "total",
-                    "updating",
-                    "all",
-                    "active"
+                    "updating"
                   ]
                 }
               }
