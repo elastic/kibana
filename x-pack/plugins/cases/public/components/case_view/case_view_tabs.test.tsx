@@ -58,7 +58,6 @@ describe('CaseViewTabs', () => {
 
   it('should render CaseViewTabs', async () => {
     const props = { activeTab: CASE_VIEW_PAGE_TABS.ACTIVITY, caseData };
-    appMockRenderer = createAppMockRenderer({ features: { metrics: ['alerts.count'] } });
     appMockRenderer.render(<CaseViewTabs {...props} />);
 
     expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
