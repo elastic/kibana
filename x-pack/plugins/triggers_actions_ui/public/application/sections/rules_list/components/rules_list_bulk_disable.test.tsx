@@ -128,10 +128,6 @@ const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: AllTheProviders });
 };
 
-beforeEach(() => {
-  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
-});
-
 describe('Rules list Bulk Disable', () => {
   beforeAll(async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
