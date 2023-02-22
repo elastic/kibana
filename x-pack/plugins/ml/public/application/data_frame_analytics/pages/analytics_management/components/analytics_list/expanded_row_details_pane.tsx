@@ -7,9 +7,20 @@
 
 import './expanded_row_details_pane.scss';
 
-import React, { Fragment, FC, ReactElement } from 'react';
+import React, { FC, ReactElement } from 'react';
 
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBetaBadge,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 
 export interface SectionItem {
   title: string;
@@ -17,7 +28,7 @@ export interface SectionItem {
 }
 export interface SectionConfig {
   title: string;
-  position: 'left' | 'right';
+  position: 'left' | 'right' | 'top';
   items: SectionItem[];
   dataTestSubj: string;
 }
@@ -25,6 +36,65 @@ export interface SectionConfig {
 interface SectionProps {
   section: SectionConfig;
 }
+
+export const OverallDetails: FC<{ overallDetails: SectionConfig }> = ({ overallDetails }) => (
+  <EuiFlexGroup alignItems="center" wrap>
+    {overallDetails.items.map((item) => {
+      if (item.title === 'badge') {
+        return (
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge label={item.description} color="subdued" title={item.title} />
+          </EuiFlexItem>
+        );
+      }
+
+      return (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiDescriptionListDescription>
+                <EuiText size="xs">{item.title}</EuiText>
+              </EuiDescriptionListDescription>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiDescriptionListTitle>
+                <EuiText size="s">
+                  <h5>{item.description}</h5>
+                </EuiText>
+              </EuiDescriptionListTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      );
+    })}
+  </EuiFlexGroup>
+);
+
+export const Stats = ({ section }: { section: SectionConfig }) => (
+  <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexItem grow={false}>
+      <EuiTitle size="xs">
+        <span>{section.title}</span>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup>
+        {section.items.map((item) => (
+          <EuiFlexItem grow={false}>
+            <EuiDescriptionListDescription>
+              <EuiText size="xs">{item.title}</EuiText>
+            </EuiDescriptionListDescription>
+            <EuiDescriptionListTitle>
+              <EuiText size="xs">
+                <h5>{item.description}</h5>
+              </EuiText>
+            </EuiDescriptionListTitle>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 export const Section: FC<SectionProps> = ({ section }) => {
   if (section.items.length === 0) {
@@ -35,7 +105,6 @@ export const Section: FC<SectionProps> = ({ section }) => {
     {
       field: 'title',
       name: '',
-      render: (v: SectionItem['title']) => <strong>{v}</strong>,
     },
     {
       field: 'description',
@@ -63,36 +132,73 @@ export const Section: FC<SectionProps> = ({ section }) => {
 };
 
 interface ExpandedRowDetailsPaneProps {
-  sections: SectionConfig[];
+  overallDetails: SectionConfig;
+  dataCounts: SectionConfig;
+  memoryUsage: SectionConfig;
+  analysisStats?: SectionConfig;
+  progress: SectionConfig;
   dataTestSubj: string;
 }
 
 export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({
-  sections,
+  analysisStats,
+  dataCounts,
+  memoryUsage,
+  overallDetails,
+  progress,
   dataTestSubj,
 }) => {
   return (
-    <EuiFlexGroup className="mlExpandedRowDetails" data-test-subj={dataTestSubj}>
-      <EuiFlexItem style={{ width: '50%' }}>
-        {sections
-          .filter((s) => s.position === 'left')
-          .map((s) => (
-            <Fragment key={s.title}>
+    <>
+      <EuiSpacer />
+      <EuiFlexGroup
+        direction="column"
+        className="mlExpandedRowDetails"
+        data-test-subj={dataTestSubj}
+        gutterSize="s"
+      >
+        {/* Top area */}
+        <EuiFlexItem>
+          <OverallDetails overallDetails={overallDetails} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <Stats section={dataCounts} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Stats section={memoryUsage} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {/* END Top area */}
+        <EuiFlexItem>
+          <EuiHorizontalRule margin="xs" />
+        </EuiFlexItem>
+        {/* Bottom area */}
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={1}>
               <EuiSpacer size="s" />
-              <Section section={s} />
-            </Fragment>
-          ))}
-      </EuiFlexItem>
-      <EuiFlexItem style={{ width: '50%' }}>
-        {sections
-          .filter((s) => s.position === 'right')
-          .map((s) => (
-            <Fragment key={s.title}>
+              <EuiTitle size="xs">
+                <span>{progress.title}</span>
+              </EuiTitle>
+              <EuiSpacer size="xs" />
+              {progress.items.map((item) => (
+                <>
+                  {item.description}
+                  <EuiSpacer size="s" />
+                </>
+              ))}
+            </EuiFlexItem>
+            <EuiFlexItem grow={3}>
               <EuiSpacer size="s" />
-              <Section section={s} />
-            </Fragment>
-          ))}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+              <Section section={analysisStats!} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {/* END Bottom area */}
+      </EuiFlexGroup>
+    </>
   );
 };

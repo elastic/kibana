@@ -8,16 +8,16 @@
 import React, { FC, Fragment, useState, useEffect } from 'react';
 import moment from 'moment-timezone';
 
-import { EuiIcon, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiProgress, EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../../common/util/date_utils';
 
 import { DataFrameAnalyticsListRow } from './common';
-import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';
+import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
-import { ProgressBar } from './progress_bar';
+
 import {
   getDependentVar,
   getPredictionFieldName,
@@ -25,7 +25,6 @@ import {
   loadEvalData,
   Eval,
 } from '../../../../common';
-import { getTaskStateBadge } from './use_columns';
 import { getDataFrameAnalyticsProgressPhase, isCompletedAnalyticsJob } from './common';
 import {
   isRegressionAnalysis,
@@ -173,48 +172,104 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   }
   delete stateValues.progress;
 
-  const stateItems = Object.entries(stateValues)
-    .map(([stateKey, stateValue]) => {
-      const title = stateKey.toString();
-      if (title === 'state') {
-        return {
-          title,
-          description: getTaskStateBadge(getItemDescription(stateValue)),
-        };
-      } else if (title !== 'analysis_stats') {
-        return { title, description: getItemDescription(stateValue) };
+  const dataCounts: SectionConfig = {
+    title: i18n.translate(
+      'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.dataCounts',
+      {
+        defaultMessage: 'Data counts',
       }
-    })
-    .filter((stateItem) => stateItem !== undefined);
+    ),
+    position: 'top',
+    items: [
+      {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.trainingDocsCount',
+          {
+            defaultMessage: 'Training docs',
+          }
+        ),
+        description: stateValues.data_counts.training_docs_count,
+      },
+      {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.testDocsCount',
+          {
+            defaultMessage: 'Test docs',
+          }
+        ),
+        description: stateValues.data_counts.test_docs_count,
+      },
+      {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.skippedDocsCount',
+          {
+            defaultMessage: 'Skipped docs',
+          }
+        ),
+        description: stateValues.data_counts.skipped_docs_count,
+      },
+    ],
+    dataTestSubj: '',
+  };
 
-  const state: SectionConfig = {
-    title: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.state', {
-      defaultMessage: 'State',
-    }),
-    items: stateItems as SectionItem[],
-    position: 'left',
-    dataTestSubj: 'mlAnalyticsTableRowDetailsSection state',
+  const memoryUsage: SectionConfig = {
+    title: i18n.translate(
+      'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.memoryUsage',
+      {
+        defaultMessage: 'Memory usage',
+      }
+    ),
+    position: 'top',
+    items: [
+      {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.timestamp',
+          {
+            defaultMessage: 'Timestamp',
+          }
+        ),
+        description: formatHumanReadableDateTimeSeconds(
+          moment(stateValues.memory_usage.timestamp).unix() * 1000
+        ),
+      },
+      {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.peakUsageBytes',
+          {
+            defaultMessage: 'Peak usage bytes',
+          }
+        ),
+        description: stateValues.memory_usage.peak_usage_bytes, // TODO: convert to kb
+      },
+      { title: 'Status', description: stateValues.memory_usage.status }, // TODO: convert to number?
+    ],
+    dataTestSubj: '',
   };
 
   const { currentPhase, totalPhases } = getDataFrameAnalyticsProgressPhase(item.stats);
 
   const progress: SectionConfig = {
     title: i18n.translate(
-      'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.progress',
-      { defaultMessage: 'Progress' }
+      'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.progressTitle',
+      {
+        defaultMessage: 'Phase {phase}',
+        values: { phase: `${currentPhase}/${totalPhases}` },
+      }
     ),
     items: [
-      {
-        title: i18n.translate(
-          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.phase',
-          { defaultMessage: 'Phase' }
-        ),
-        description: `${currentPhase}/${totalPhases}`,
-      },
       ...item.stats.progress.map((s) => {
         return {
           title: s.phase,
-          description: <ProgressBar progress={s.progress_percent} />,
+          description: (
+            <EuiProgress
+              label={s.phase}
+              valueText={true}
+              value={s.progress_percent}
+              max={100}
+              color="success"
+              size="s"
+            />
+          ),
         };
       }),
     ],
@@ -222,19 +277,36 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     dataTestSubj: 'mlAnalyticsTableRowDetailsSection progress',
   };
 
-  const stats: SectionConfig = {
+  const overallDetails: SectionConfig = {
     title: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.stats', {
-      defaultMessage: 'Stats',
+      defaultMessage: 'Overall',
     }),
     items: [
+      { title: 'badge', description: stateValues.state },
       {
-        title: 'create_time',
+        title: 'Create time',
         description: formatHumanReadableDateTimeSeconds(
           moment(item.config.create_time).unix() * 1000
         ),
       },
-      { title: 'model_memory_limit', description: item.config.model_memory_limit ?? '' },
-      { title: 'version', description: item.config.version ?? '' },
+      {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.modelMemoryLimit',
+          {
+            defaultMessage: 'Model memory limit',
+          }
+        ),
+        description: item.config.model_memory_limit ?? '',
+      },
+      {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.version',
+          {
+            defaultMessage: 'Version',
+          }
+        ),
+        description: item.config.version ?? '',
+      },
     ],
     position: 'left',
     dataTestSubj: 'mlAnalyticsTableRowDetailsSection stats',
@@ -272,7 +344,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     : undefined;
 
   if (jobIsCompleted && isRegressionJob) {
-    stats.items.push(
+    overallDetails.items.push(
       {
         title: 'generalization mean squared error',
         description: (
@@ -356,13 +428,6 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     );
   }
 
-  const detailsSections: SectionConfig[] = [state, progress];
-  const statsSections: SectionConfig[] = [stats];
-
-  if (analysisStats !== undefined) {
-    statsSections.push(analysisStats);
-  }
-
   const tabs = [
     {
       id: 'ml-analytics-job-details',
@@ -371,27 +436,15 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       }),
       content: (
         <ExpandedRowDetailsPane
-          sections={detailsSections}
+          overallDetails={overallDetails}
+          dataCounts={dataCounts}
+          memoryUsage={memoryUsage}
+          analysisStats={analysisStats}
+          progress={progress}
           dataTestSubj={`mlAnalyticsTableRowDetailsTabContent job-details ${item.config.id}`}
         />
       ),
       'data-test-subj': `mlAnalyticsTableRowDetailsTab job-details ${item.config.id}`,
-    },
-    {
-      id: 'ml-analytics-job-stats',
-      name: i18n.translate(
-        'xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsStatsLabel',
-        {
-          defaultMessage: 'Stats',
-        }
-      ),
-      content: (
-        <ExpandedRowDetailsPane
-          sections={statsSections}
-          dataTestSubj={`mlAnalyticsTableRowDetailsTabContent job-stats ${item.config.id}`}
-        />
-      ),
-      'data-test-subj': `mlAnalyticsTableRowDetailsTab job-stats ${item.config.id}`,
     },
     {
       id: 'ml-analytics-job-json',
