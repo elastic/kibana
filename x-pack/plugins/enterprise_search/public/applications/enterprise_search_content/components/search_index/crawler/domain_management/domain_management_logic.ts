@@ -103,9 +103,4 @@ export const DomainManagementLogic = kea<
         deleteStatus === Status.LOADING,
     ],
   }),
-  events: ({ actions, values }) => ({
-    afterMount: () => {
-      actions.getDomains(values.meta);
-    },
-  }),
 });
