@@ -321,12 +321,10 @@ describe('Alert Event Details', () => {
       })
       .then(() => {
         cy.contains('Osquery Results').click();
-        cy.getBySel('osquery-results')
-          .within(() => {
-            cy.contains('tags');
-          })
-          .find(`[data-test-subj="osquery-results-comment"]`)
-          .should('have.length', updatedNotificationCount);
+        cy.getBySel('osquery-results').within(() => {
+          cy.contains('tags');
+          cy.getBySel('osquery-results-comment').should('have.length', updatedNotificationCount);
+        });
       });
   });
 
