@@ -8,15 +8,10 @@ source .buildkite/scripts/common/util.sh
 echo "--- yarn kbn reset && yarn kbn bootstrap"
 yarn kbn reset && yarn kbn bootstrap
 
-GCS_BUCKET="gs://kibana-performance/scalability-tests"
-GCS_ARTIFACTS_REL="gcs_artifacts"
-GCS_ARTIFACTS_DIR="${WORKSPACE}/${GCS_ARTIFACTS_REL}"
 KIBANA_LOAD_TESTING_DIR="${KIBANA_DIR}/kibana-load-testing"
-
 # These tests are running on static workers so we must delete previous build, load runner and scalability artifacts
 rm -rf "${KIBANA_BUILD_LOCATION}"
 rm -rf "${KIBANA_LOAD_TESTING_DIR}"
-rm -rf "${GCS_ARTIFACTS_DIR}"
 
 echo "--- Download the build artifacts"
 .buildkite/scripts/download_build_artifacts.sh
@@ -47,9 +42,6 @@ upload_test_results() {
   echo "--- Upload Gatling reports as build artifacts"
   tar -czf "scalability_test_report.tar.gz" --exclude=simulation.log -C kibana-load-testing/target gatling
   buildkite-agent artifact upload "scalability_test_report.tar.gz"
-  cd "${LATEST_RUN_ARTIFACTS_DIR}"
-  echo "Upload scalability traces as build artifacts"
-  buildkite-agent artifact upload "scalability_traces.tar.gz"
 }
 
 echo "--- Clone kibana-load-testing repo and compile project"

@@ -75,13 +75,8 @@ cd "$KIBANA_DIR"
 echo "--- Download the latest artifacts from single user performance pipeline"
 download_artifacts
 
-if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-scalability-benchmarking-1" ]; then
-  echo "--- Run journey scalability tests"
-  node scripts/run_scalability --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path "scalability_traces/server"
-else
-  echo "--- Run single apis capacity tests"
-  node scripts/run_scalability --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path "x-pack/test/scalability/apis"
-fi
+echo "--- Run journey scalability tests"
+node scripts/run_scalability --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path "scalability_traces/server"
 
 echo "--- Upload test results"
 upload_test_results
