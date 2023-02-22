@@ -236,9 +236,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Lens charts', () => {
-        it('should load 7 lens metric charts', async () => {
+        it('should load 8 lens metric charts', async () => {
           const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
-          expect(metricCharts.length).to.equal(7);
+          expect(metricCharts.length).to.equal(8);
         });
 
         it('should have an option to open the chart in lens', async () => {
