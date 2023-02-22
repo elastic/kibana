@@ -16,6 +16,9 @@ import type {
 
 export interface FleetConfigType {
   enabled: boolean;
+  auditLogging?: {
+    enabled: boolean;
+  };
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {

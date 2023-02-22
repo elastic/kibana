@@ -103,6 +103,11 @@ export const config: PluginConfigDescriptor = {
     },
   ],
   schema: schema.object({
+    auditLogging: schema.maybe(
+      schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+      })
+    ),
     registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     agents: schema.object({

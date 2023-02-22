@@ -16,13 +16,14 @@ import type {
 } from '@kbn/core/server';
 
 import type { FleetRequestHandlerContext } from '../..';
+import { handleAuditLogging } from '../audit_logging';
 
-import type { FleetAuthzRouteConfig, FleetAuthzRouter } from './types';
 import {
   checkSecurityEnabled,
-  getAuthzFromRequest,
   doesNotHaveRequiredFleetAuthz,
+  getAuthzFromRequest,
 } from './security';
+import type { FleetAuthzRouteConfig, FleetAuthzRouter } from './types';
 
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
   router: IRouter<TContext>,
@@ -57,7 +58,12 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
       logger.info(`User does not have required fleet authz to access path: ${request.route.path}`);
       return response.forbidden();
     }
-    return handler(context, request, response);
+
+    const res = await handler(context, request, response);
+
+    await handleAuditLogging(context, request, res);
+
+    return res;
   };
 
   const fleetAuthzRouter: FleetAuthzRouter<TContext> = {
