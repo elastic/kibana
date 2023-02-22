@@ -29,8 +29,8 @@ import {
   createComment,
   bulkCreateAttachments,
   ensureSavedObjectIsAuthorized,
-} from '../../../../common/lib/utils';
-import { bulkGetAttachments } from '../../../../common/lib/attachments';
+  bulkGetAttachments,
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,

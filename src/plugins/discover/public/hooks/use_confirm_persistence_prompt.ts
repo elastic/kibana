@@ -32,7 +32,7 @@ export const useConfirmPersistencePrompt = (stateContainer: DiscoverStateContain
         updateFiltersReferences(adHocDataView, persistedDataView);
 
         stateContainer.actions.removeAdHocDataViewById(adHocDataView.id!);
-        await stateContainer.replaceUrlAppState({ index: persistedDataView.id });
+        await stateContainer.appState.update({ index: persistedDataView.id }, true);
 
         const message = i18n.translate('discover.dataViewPersist.message', {
           defaultMessage: "Saved '{dataViewName}'",

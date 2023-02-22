@@ -139,8 +139,8 @@ export const BenchmarksSection = ({
             <EuiTitle size="xxs">
               <div>
                 <FormattedMessage
-                  id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceScoreTitle"
-                  defaultMessage="Compliance Score"
+                  id="xpack.csp.dashboard.benchmarkSection.columnsHeader.postureScoreTitle"
+                  defaultMessage="Posture Score"
                 />
                 <EuiIcon className="euiTableSortIcon" type={clusterSortingIcon} />
               </div>
@@ -173,6 +173,9 @@ export const BenchmarksSection = ({
           </EuiFlexItem>
           <EuiFlexItem
             grow={dashboardColumnsGrow.second}
+            css={css`
+              margin-left: -${euiTheme.size.s};
+            `}
             data-test-subj={DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID}
           >
             <CloudPostureScoreChart

@@ -26,7 +26,8 @@ export function EdgeContents({ elementData }: ContentsProps) {
 
   const { query } = useAnyOfApmParams(
     '/service-map',
-    '/services/{serviceName}/service-map'
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
   );
 
   const apmRouter = useApmRouter();

@@ -34,10 +34,6 @@ export const StepDetailPage = () => {
 
   useStepDetailsBreadcrumbs();
 
-  const activeStep = data?.steps?.find(
-    (step) => step.synthetics?.step?.index === Number(stepIndex)
-  );
-
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -51,7 +47,7 @@ export const StepDetailPage = () => {
 
   return (
     <>
-      <ErrorCallOut step={activeStep} />
+      <ErrorCallOut step={currentStep} />
       {data?.details?.journey?.config_id && (
         <MonitorDetailsLinkPortal
           configId={data.details.journey.config_id}
@@ -109,7 +105,7 @@ export const StepDetailPage = () => {
         <WaterfallChartContainer
           checkGroup={checkGroupId}
           stepIndex={Number(stepIndex)}
-          activeStep={activeStep}
+          activeStep={currentStep}
         />
       )}
     </>

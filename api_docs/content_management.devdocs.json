@@ -17,8 +17,74 @@
       "path": "src/plugins/content_management/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "contentManagement",
+          "id": "def-public.ContentManagementPublicStart.client",
+          "type": "Object",
+          "tags": [],
+          "label": "client",
+          "description": [],
+          "signature": [
+            "ContentClient"
+          ],
+          "path": "src/plugins/content_management/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "contentManagement",
+          "id": "def-public.ContentManagementPublicStart.registry",
+          "type": "Object",
+          "tags": [],
+          "label": "registry",
+          "description": [],
+          "signature": [
+            "{ get: (id: string) => ",
+            "ContentType",
+            " | undefined; getAll: () => ",
+            "ContentType",
+            "[]; }"
+          ],
+          "path": "src/plugins/content_management/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "start",
+      "initialIsOpen": true
+    },
+    "setup": {
+      "parentPluginId": "contentManagement",
+      "id": "def-public.ContentManagementPublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ContentManagementPublicSetup",
+      "description": [],
+      "path": "src/plugins/content_management/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "contentManagement",
+          "id": "def-public.ContentManagementPublicSetup.registry",
+          "type": "Object",
+          "tags": [],
+          "label": "registry",
+          "description": [],
+          "signature": [
+            "{ register: (definition: ",
+            "ContentTypeDefinition",
+            ") => ",
+            "ContentType",
+            "; }"
+          ],
+          "path": "src/plugins/content_management/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
       "initialIsOpen": true
     }
   },
@@ -61,7 +127,401 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.CreateIn",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateIn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.CreateIn",
+            "text": "CreateIn"
+          },
+          "<T, Data, Options>"
+        ],
+        "path": "src/plugins/content_management/common/rpc/create.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.CreateIn.contentTypeId",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "contentTypeId",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/content_management/common/rpc/create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.CreateIn.data",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "Data"
+            ],
+            "path": "src/plugins/content_management/common/rpc/create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.CreateIn.options",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Options | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.DeleteIn",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeleteIn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.DeleteIn",
+            "text": "DeleteIn"
+          },
+          "<T, Options>"
+        ],
+        "path": "src/plugins/content_management/common/rpc/delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.DeleteIn.contentTypeId",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "contentTypeId",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/content_management/common/rpc/delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.DeleteIn.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/content_management/common/rpc/delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.DeleteIn.options",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Options | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.GetIn",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetIn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.GetIn",
+            "text": "GetIn"
+          },
+          "<T, Options>"
+        ],
+        "path": "src/plugins/content_management/common/rpc/get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.GetIn.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/content_management/common/rpc/get.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.GetIn.contentTypeId",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "contentTypeId",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/content_management/common/rpc/get.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.GetIn.options",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Options | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/get.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.ProcedureSchemas",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcedureSchemas",
+        "description": [],
+        "path": "src/plugins/content_management/common/rpc/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.ProcedureSchemas.in",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "in",
+            "description": [],
+            "signature": [
+              "false | ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<any>"
+            ],
+            "path": "src/plugins/content_management/common/rpc/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.ProcedureSchemas.out",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "out",
+            "description": [],
+            "signature": [
+              "false | ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<any>"
+            ],
+            "path": "src/plugins/content_management/common/rpc/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.SearchIn",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchIn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.SearchIn",
+            "text": "SearchIn"
+          },
+          "<T, Query, Options>"
+        ],
+        "path": "src/plugins/content_management/common/rpc/search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.SearchIn.contentTypeId",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "contentTypeId",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.SearchIn.query",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "Query"
+            ],
+            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.SearchIn.options",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Options | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.UpdateIn",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdateIn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.UpdateIn",
+            "text": "UpdateIn"
+          },
+          "<T, Data, Options>"
+        ],
+        "path": "src/plugins/content_management/common/rpc/update.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.UpdateIn.contentTypeId",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "contentTypeId",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/content_management/common/rpc/update.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.UpdateIn.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/content_management/common/rpc/update.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.UpdateIn.data",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "Data"
+            ],
+            "path": "src/plugins/content_management/common/rpc/update.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.UpdateIn.options",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Options | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/update.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -93,8 +553,153 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.ProcedureName",
+        "type": "Type",
+        "tags": [],
+        "label": "ProcedureName",
+        "description": [],
+        "signature": [
+          "\"create\" | \"update\" | \"get\" | \"delete\" | \"search\""
+        ],
+        "path": "src/plugins/content_management/common/rpc/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.procedureNames",
+        "type": "Object",
+        "tags": [],
+        "label": "procedureNames",
+        "description": [],
+        "signature": [
+          "readonly [\"get\", \"create\", \"update\", \"delete\", \"search\"]"
+        ],
+        "path": "src/plugins/content_management/common/rpc/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.schemas",
+        "type": "Object",
+        "tags": [],
+        "label": "schemas",
+        "description": [],
+        "path": "src/plugins/content_management/common/rpc/rpc.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.schemas.get",
+            "type": "Object",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.ProcedureSchemas",
+                "text": "ProcedureSchemas"
+              }
+            ],
+            "path": "src/plugins/content_management/common/rpc/rpc.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.schemas.create",
+            "type": "Object",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.ProcedureSchemas",
+                "text": "ProcedureSchemas"
+              }
+            ],
+            "path": "src/plugins/content_management/common/rpc/rpc.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.schemas.update",
+            "type": "Object",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.ProcedureSchemas",
+                "text": "ProcedureSchemas"
+              }
+            ],
+            "path": "src/plugins/content_management/common/rpc/rpc.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.schemas.delete",
+            "type": "Object",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.ProcedureSchemas",
+                "text": "ProcedureSchemas"
+              }
+            ],
+            "path": "src/plugins/content_management/common/rpc/rpc.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.schemas.search",
+            "type": "Object",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.ProcedureSchemas",
+                "text": "ProcedureSchemas"
+              }
+            ],
+            "path": "src/plugins/content_management/common/rpc/rpc.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

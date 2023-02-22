@@ -34,7 +34,10 @@ import {
   ALERT_ORIGINAL_EVENT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
+import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import {
+  createExceptionList,
+  createExceptionListItem,
   createRule,
   deleteAllAlerts,
   deleteSignalsIndex,
@@ -1429,6 +1432,97 @@ export default ({ getService }: FtrProviderContext) => {
             expect(previewAlerts[0]._source?.host?.risk?.calculated_score_norm).to.eql(1);
           });
         });
+      });
+    });
+
+    describe('with exceptions', async () => {
+      afterEach(async () => {
+        await deleteAllExceptions(supertest, log);
+      });
+      it('should correctly evaluate exceptions with expiration time in the past', async () => {
+        // create an exception list container of type "detection"
+        const {
+          id,
+          list_id: listId,
+          namespace_type: namespaceType,
+          type,
+        } = await createExceptionList(supertest, log, {
+          description: 'description',
+          list_id: '123',
+          name: 'test list',
+          type: 'detection',
+        });
+
+        await createExceptionListItem(supertest, log, {
+          description: 'endpoint description',
+          entries: [
+            {
+              field: 'host.name',
+              operator: 'included',
+              type: 'match',
+              value: 'suricata-sensor-london',
+            },
+          ],
+          list_id: listId,
+          name: 'endpoint_list',
+          os_types: [],
+          type: 'simple',
+          expire_time: new Date(Date.now() - 1000000).toISOString(),
+        });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          query: `_id:${ID} or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi`,
+          exceptions_list: [{ id, list_id: listId, type, namespace_type: namespaceType }],
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts.length).equal(2);
+      });
+
+      it('should correctly evaluate exceptions with expiration time in the future', async () => {
+        // create an exception list container of type "detection"
+        const {
+          id,
+          list_id: listId,
+          namespace_type: namespaceType,
+          type,
+        } = await createExceptionList(supertest, log, {
+          description: 'description',
+          list_id: '123',
+          name: 'test list',
+          type: 'detection',
+        });
+
+        await createExceptionListItem(supertest, log, {
+          description: 'endpoint description',
+          entries: [
+            {
+              field: 'host.name',
+              operator: 'included',
+              type: 'match',
+              value: 'suricata-sensor-london',
+            },
+          ],
+          list_id: listId,
+          name: 'endpoint_list',
+          os_types: [],
+          type: 'simple',
+          expire_time: new Date(Date.now() + 1000000).toISOString(),
+        });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          query: `_id:${ID} or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi`,
+          exceptions_list: [{ id, list_id: listId, type, namespace_type: namespaceType }],
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts.length).equal(1);
       });
     });
   });

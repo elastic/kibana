@@ -1889,15 +1889,7 @@
             "label": "apiKeys",
             "description": [],
             "signature": [
-              "{ validate: (apiKeyPrams: ",
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.ValidateAPIKeyParams",
-                "text": "ValidateAPIKeyParams"
-              },
-              ") => Promise<boolean>; create: (request: ",
+              "{ create: (request: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -1921,7 +1913,15 @@
                 "section": "def-server.CreateAPIKeyResult",
                 "text": "CreateAPIKeyResult"
               },
-              " | null>; areAPIKeysEnabled: () => Promise<boolean>; invalidate: (request: ",
+              " | null>; validate: (apiKeyPrams: ",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.ValidateAPIKeyParams",
+                "text": "ValidateAPIKeyParams"
+              },
+              ") => Promise<boolean>; areAPIKeysEnabled: () => Promise<boolean>; invalidate: (request: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",

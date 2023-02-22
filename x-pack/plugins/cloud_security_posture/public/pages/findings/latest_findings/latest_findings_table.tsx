@@ -70,7 +70,7 @@ const FindingsTableComponent = ({
       createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
       baseFindingsColumns['rule.benchmark.rule_number'],
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
-      baseFindingsColumns['rule.section'],
+      createColumnWithFilters(baseFindingsColumns['rule.section'], { onAddFilter }),
       baseFindingsColumns['@timestamp'],
     ],
     [onAddFilter]
@@ -98,7 +98,7 @@ const FindingsTableComponent = ({
     <>
       <EuiBasicTable
         loading={loading}
-        data-test-subj={TEST_SUBJECTS.FINDINGS_TABLE}
+        data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE}
         items={items}
         columns={columns}
         pagination={pagination}

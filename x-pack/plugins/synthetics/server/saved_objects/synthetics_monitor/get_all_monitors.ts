@@ -11,7 +11,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import pMap from 'p-map';
-import { periodToMs } from '../../routes/status/current_status';
+import { periodToMs } from '../../routes/overview_status/overview_status';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
@@ -28,8 +28,8 @@ export const getAllMonitors = async ({
   search,
   fields,
   filter,
-  sortField,
-  sortOrder,
+  sortField = 'name.keyword',
+  sortOrder = 'asc',
   searchFields,
 }: {
   soClient: SavedObjectsClientContract;
