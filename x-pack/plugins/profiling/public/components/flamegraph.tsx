@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { Chart, Datum, Flame, FlameLayerValue, PartialTheme, Settings } from '@elastic/charts';
+import {
+  Chart,
+  Datum,
+  Flame,
+  FlameLayerValue,
+  PartialTheme,
+  Settings,
+  TooltipContainer,
+} from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -112,60 +120,62 @@ function FlameGraphTooltip({
   comparisonTotalSamples?: number;
 }) {
   return (
-    <EuiPanel>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="m"
-        style={{
-          overflowWrap: 'anywhere',
-        }}
-      >
-        <EuiFlexItem>{label}</EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            {isRoot === false && (
-              <>
-                <TooltipRow
-                  label={i18n.translate('xpack.profiling.flameGraphTooltip.inclusiveCpuLabel', {
-                    defaultMessage: `CPU incl. subfunctions`,
-                  })}
-                  value={countInclusive / totalSamples}
-                  comparison={
-                    isNumber(comparisonCountInclusive) && isNumber(comparisonTotalSamples)
-                      ? comparisonCountInclusive / comparisonTotalSamples
-                      : undefined
-                  }
-                  formatAsPercentage
-                  showChange
-                />
-                <TooltipRow
-                  label={i18n.translate('xpack.profiling.flameGraphTooltip.exclusiveCpuLabel', {
-                    defaultMessage: `CPU`,
-                  })}
-                  value={countExclusive / totalSamples}
-                  comparison={
-                    isNumber(comparisonCountExclusive) && isNumber(comparisonTotalSamples)
-                      ? comparisonCountExclusive / comparisonTotalSamples
-                      : undefined
-                  }
-                  formatAsPercentage
-                  showChange
-                />
-              </>
-            )}
-            <TooltipRow
-              label={i18n.translate('xpack.profiling.flameGraphTooltip.samplesLabel', {
-                defaultMessage: `Samples`,
-              })}
-              value={countInclusive}
-              comparison={comparisonCountInclusive}
-              formatAsPercentage={false}
-              showChange
-            />
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <TooltipContainer>
+      <EuiPanel>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="m"
+          style={{
+            overflowWrap: 'anywhere',
+          }}
+        >
+          <EuiFlexItem>{label}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              {isRoot === false && (
+                <>
+                  <TooltipRow
+                    label={i18n.translate('xpack.profiling.flameGraphTooltip.inclusiveCpuLabel', {
+                      defaultMessage: `CPU incl. subfunctions`,
+                    })}
+                    value={countInclusive / totalSamples}
+                    comparison={
+                      isNumber(comparisonCountInclusive) && isNumber(comparisonTotalSamples)
+                        ? comparisonCountInclusive / comparisonTotalSamples
+                        : undefined
+                    }
+                    formatAsPercentage
+                    showChange
+                  />
+                  <TooltipRow
+                    label={i18n.translate('xpack.profiling.flameGraphTooltip.exclusiveCpuLabel', {
+                      defaultMessage: `CPU`,
+                    })}
+                    value={countExclusive / totalSamples}
+                    comparison={
+                      isNumber(comparisonCountExclusive) && isNumber(comparisonTotalSamples)
+                        ? comparisonCountExclusive / comparisonTotalSamples
+                        : undefined
+                    }
+                    formatAsPercentage
+                    showChange
+                  />
+                </>
+              )}
+              <TooltipRow
+                label={i18n.translate('xpack.profiling.flameGraphTooltip.samplesLabel', {
+                  defaultMessage: `Samples`,
+                })}
+                value={countInclusive}
+                comparison={comparisonCountInclusive}
+                formatAsPercentage={false}
+                showChange
+              />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </TooltipContainer>
   );
 }
 
