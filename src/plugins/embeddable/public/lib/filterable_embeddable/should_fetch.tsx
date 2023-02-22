@@ -7,8 +7,11 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
+import { Observable } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import { EmbeddableInput } from '../embeddables';
 
 export const shouldRefreshFilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,
@@ -21,7 +24,6 @@ type FilterableEmbeddableInput = EmbeddableInput & {
   query?: Query;
   timeRange?: TimeRange;
   timeslice?: [number, number];
-  [key: string]: unknown;
 };
 
 export function shouldFetch$(
@@ -29,7 +31,7 @@ export function shouldFetch$(
   getInput: () => FilterableEmbeddableInput
 ) {
   return updated$.pipe(map(() => getInput())).pipe(
-    distinctUntilChanged((a, b) => {
+    distinctUntilChanged((a: FilterableEmbeddableInput, b: FilterableEmbeddableInput) => {
       if (
         !fastIsEqual(
           [a.searchSessionId, a.query, a.timeRange, a.timeslice],
