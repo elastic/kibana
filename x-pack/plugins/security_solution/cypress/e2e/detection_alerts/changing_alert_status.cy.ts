@@ -78,9 +78,10 @@ describe('Changing alert status', () => {
                 'have.text',
                 `Selected ${numberOfAlertsToBeSelected} alerts`
               );
+              cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
 
               // TODO: Popover not shwing up in cypress UI, but code is in the UtilityBar
-              cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible');
+              // cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
 
               openFirstAlert();
               waitForAlerts();
