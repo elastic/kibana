@@ -75,6 +75,12 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
 
   const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
 
+  useEffect(() => {
+    if (!xJson && inputTargetValue != null) {
+      setXJson(inputTargetValue);
+    }
+  }, [inputTargetValue, xJson, setXJson]);
+
   const onSelectMessageVariable = (variable: ActionVariable) => {
     const editor = editorRef.current;
     if (!editor) {
