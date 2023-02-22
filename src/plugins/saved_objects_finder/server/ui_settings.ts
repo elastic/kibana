@@ -14,23 +14,23 @@ import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
   [PER_PAGE_SETTING]: {
-    name: i18n.translate('savedObjects.advancedSettings.perPageTitle', {
+    name: i18n.translate('savedObjectsFinder.advancedSettings.perPageTitle', {
       defaultMessage: 'Objects per page',
     }),
     value: 20,
     type: 'number',
-    description: i18n.translate('savedObjects.advancedSettings.perPageText', {
+    description: i18n.translate('savedObjectsFinder.advancedSettings.perPageText', {
       defaultMessage: 'Number of objects to show per page in the load dialog',
     }),
     schema: schema.number(),
   },
   [LISTING_LIMIT_SETTING]: {
-    name: i18n.translate('savedObjects.advancedSettings.listingLimitTitle', {
+    name: i18n.translate('savedObjectsFinder.advancedSettings.listingLimitTitle', {
       defaultMessage: 'Objects listing limit',
     }),
     type: 'number',
     value: 1000,
-    description: i18n.translate('savedObjects.advancedSettings.listingLimitText', {
+    description: i18n.translate('savedObjectsFinder.advancedSettings.listingLimitText', {
       defaultMessage: 'Number of objects to fetch for the listing pages',
     }),
     schema: schema.number(),
