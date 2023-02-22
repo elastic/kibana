@@ -123,7 +123,6 @@ export class SavedObjectsService
       this.coreContext.configService.atPath<SavedObjectsMigrationConfigType>('migrations')
     );
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
-
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({
         kibanaIndex,

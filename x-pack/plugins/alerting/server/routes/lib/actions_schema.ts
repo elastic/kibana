@@ -24,6 +24,7 @@ export const actionsSchema = schema.arrayOf(
         throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
       })
     ),
+    uuid: schema.maybe(schema.string()),
   }),
   { defaultValue: [] }
 );
