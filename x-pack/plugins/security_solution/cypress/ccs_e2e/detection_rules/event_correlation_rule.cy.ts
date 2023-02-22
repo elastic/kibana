@@ -8,7 +8,7 @@
 import { esArchiverCCSLoad } from '../../tasks/es_archiver';
 import { getCCSEqlRule } from '../../objects/rule';
 
-import { ALERT_DATA_GRID, NUMBER_OF_ALERTS } from '../../screens/alerts';
+import { ALERTS_COUNT, ALERT_DATA_GRID } from '../../screens/alerts';
 
 import {
   filterByCustomRules,
@@ -41,7 +41,7 @@ describe('Detection rules', function () {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
+    cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts);
     cy.get(ALERT_DATA_GRID)
       .invoke('text')
       .then((text) => {
