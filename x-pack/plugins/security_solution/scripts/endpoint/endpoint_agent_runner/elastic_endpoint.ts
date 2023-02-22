@@ -15,7 +15,6 @@ import {
   type UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import chalk from 'chalk';
-import { inspect } from 'util';
 import path from 'path';
 import { getEndpointPackageInfo } from '../../../common/endpoint/index_data';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
@@ -27,6 +26,7 @@ import {
 } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 import { type PolicyData, ProtectionModes } from '../../../common/endpoint/types';
+import { dump } from './utils';
 
 interface ElasticArtifactSearchResponse {
   manifest: {
@@ -119,7 +119,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
       };
     } = JSON.parse((await execa('multipass', ['info', vmName, '--format', 'json'])).stdout);
 
-    log.verbose(inspect(vmInfo, { depth: 4 }));
+    log.verbose(dump(vmInfo));
 
     const agentDownloadUrl = await getAgentDownloadUrl(version);
     const agentDownloadedFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
@@ -181,7 +181,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
         log.verbose(`command timed out, but that might be ok - Fleet server should be running`);
       })
       .then((output) => {
-        log.verbose(inspect(output, { depth: 4 }));
+        log.verbose(dump(output));
       });
 
     log.info(`Waiting for Agent to check-in with Fleet`);
@@ -195,7 +195,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
     Delete VM:    ${chalk.bold(`multipass delete -p ${vmName}${await getVmCountNotice()}`)}
 `);
   } catch (error) {
-    log.error(inspect(error, { depth: 4 }));
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }
