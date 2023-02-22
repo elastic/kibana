@@ -60,7 +60,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params, frequency }) => ({
+  actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid }) => ({
     group,
     id,
     params,
@@ -72,6 +72,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
           throttle: frequency.throttle,
         }
       : undefined,
+    ...(uuid && { uuid }),
   })),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),

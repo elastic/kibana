@@ -13,6 +13,7 @@ import { ALERT_DATA_GRID } from '../../screens/alerts';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
+  RULES_MANAGEMENT_TABLE,
   RULE_NAME,
   RULE_SWITCH,
   SEVERITY,
@@ -98,7 +99,7 @@ describe('New Terms rules', () => {
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-      expectNumberOfRules(expectedNumberOfRules);
+      expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 
       cy.get(RULE_NAME).should('have.text', this.rule.name);
       cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
