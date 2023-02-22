@@ -116,6 +116,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                   group: 'default',
                   params: {},
                   connector_type_id: 'test.noop',
+                  uuid: response.body.rules[0].actions[0].uuid,
                 },
               ]);
               expect(response.statusCode).to.eql(200);
