@@ -6,30 +6,27 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { FindSLOResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 
-export function useDeleteSlo(sloId: string) {
+export function useCloneSlo() {
   const { http } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const deleteSlo = useMutation<
+  const cloneSlo = useMutation<
+    CreateSLOResponse,
     string,
-    string,
-    { id: string },
+    { slo: CreateSLOInput; idToCopyFrom?: string },
     { previousSloList: FindSLOResponse | undefined }
   >(
-    ['deleteSlo', sloId],
-    ({ id }) => {
-      try {
-        return http.delete<string>(`/api/observability/slos/${id}`);
-      } catch (error) {
-        return Promise.reject(`Something went wrong: ${String(error)}`);
-      }
+    ['cloneSlo'],
+    ({ slo }: { slo: CreateSLOInput; idToCopyFrom?: string }) => {
+      const body = JSON.stringify(slo);
+      return http.post<CreateSLOResponse>(`/api/observability/slos`, { body });
     },
     {
-      onMutate: async (slo) => {
+      onMutate: async ({ slo, idToCopyFrom }) => {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
         await queryClient.cancelQueries(['fetchSloList']);
 
@@ -39,10 +36,12 @@ export function useDeleteSlo(sloId: string) {
 
         const [queryKey, data] = latestFetchSloListRequest || [];
 
+        const sloUsedToClone = data?.results.find((el) => el.id === idToCopyFrom);
+
         const optimisticUpdate = {
           ...data,
-          results: data?.results.filter((result) => result.id !== slo.id),
-          total: data?.total && data.total - 1,
+          results: [...(data?.results || []), { ...sloUsedToClone, name: slo.name }],
+          total: data?.total && data.total + 1,
         };
 
         // Optimistically update to the new value
@@ -65,5 +64,5 @@ export function useDeleteSlo(sloId: string) {
     }
   );
 
-  return deleteSlo;
+  return cloneSlo;
 }

@@ -9,8 +9,9 @@ import { Index, UseFetchIndicesResponse } from '../use_fetch_indices';
 
 export const useFetchIndices = (): UseFetchIndicesResponse => {
   return {
-    loading: false,
-    error: false,
+    isLoading: false,
+    isError: false,
+    isSuccess: true,
     indices: [
       ...Array(10)
         .fill(0)
@@ -23,5 +24,6 @@ export const useFetchIndices = (): UseFetchIndicesResponse => {
           name: `.some-other-index-${i}`,
         })),
     ] as Index[],
+    refetch: function () {} as UseFetchIndicesResponse['refetch'],
   };
 };
