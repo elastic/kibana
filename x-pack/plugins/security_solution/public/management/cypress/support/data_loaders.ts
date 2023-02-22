@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+// / <reference types="cypress" />
+
 import { createKbnClient } from '../../../../scripts/endpoint/common/stack_services';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   indexFleetEndpointPolicy,
   deleteIndexedFleetEndpointPolicies,
@@ -19,10 +22,16 @@ export const dataLoaders = (on: Cypress.PluginEvents, config: Cypress.PluginConf
   });
 
   on('task', {
-    indexFleetEndpointPolicy: async ({ policyName, endpointPackageVersion }) => {
+    indexFleetEndpointPolicy: async ({
+      policyName,
+      endpointPackageVersion,
+    }: {
+      policyName: string;
+      endpointPackageVersion: string;
+    }) => {
       return indexFleetEndpointPolicy(kbnClient, policyName, endpointPackageVersion);
     },
-    deleteIndexedFleetEndpointPolicies: async (indexData) => {
+    deleteIndexedFleetEndpointPolicies: async (indexData: IndexedFleetEndpointPolicyResponse) => {
       return deleteIndexedFleetEndpointPolicies(kbnClient, indexData);
     },
   });

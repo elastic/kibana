@@ -16,7 +16,6 @@
   ],
   "exclude": [
     "target/**/*",
-    "**/cypress/**",
   ],
   "kbn_references": [
     "@kbn/core",
