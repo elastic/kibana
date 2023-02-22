@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { TestRunErrorInfo } from '../test_run_details/components/test_run_error_info';
 import { StepDurationPanel } from '../monitor_details/monitor_summary/step_duration_panel';
 import { useFormatTestRunAt } from '../../utils/monitor_test_result/test_time_formats';
@@ -41,13 +42,13 @@ export function ErrorDetailsPage() {
 
   return (
     <div>
-      <PanelWithTitle title="Timeline">
+      <PanelWithTitle title={TIMELINE_LABEL}>
         <ErrorTimeline />
       </PanelWithTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={2} style={{ minWidth: 0 }}>
-          <PanelWithTitle title="Failed tests">
+          <PanelWithTitle title={FAILED_TESTS_LABEL}>
             <FailedTestsList failedTests={failedTests} loading={loading} />
           </PanelWithTitle>
           {isBrowser && (
@@ -85,3 +86,11 @@ export function ErrorDetailsPage() {
     </div>
   );
 }
+
+const TIMELINE_LABEL = i18n.translate('xpack.synthetics.errors.timeline.title', {
+  defaultMessage: 'Timeline',
+});
+
+const FAILED_TESTS_LABEL = i18n.translate('xpack.synthetics.errors.failedTests', {
+  defaultMessage: 'Failed tests',
+});

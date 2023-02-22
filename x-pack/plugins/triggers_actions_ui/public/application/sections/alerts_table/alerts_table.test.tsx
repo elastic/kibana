@@ -6,7 +6,7 @@
  */
 import React, { useMemo, useReducer } from 'react';
 
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import {
@@ -17,10 +17,20 @@ import {
   ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
 import { AlertsTable } from './alerts_table';
-import type { Alerts, AlertsTableProps, BulkActionsState, RowSelectionState } from '../../../types';
-import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import {
+  AlertsField,
+  AlertsTableConfigurationRegistry,
+  AlertsTableProps,
+  BulkActionsState,
+  FetchAlertData,
+  RowSelectionState,
+  UseCellActions,
+  Alerts,
+} from '../../../types';
+import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
 import { BulkActionsContext } from './bulk_actions/context';
 import { bulkActionsReducer } from './bulk_actions/reducer';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getCasesMockMap } from './cases/index.mock';
 import { createAppMockRenderer } from '../test_utils';
 
@@ -77,6 +87,94 @@ const alerts = [
   },
 ] as unknown as Alerts;
 
+const oldAlertsData = [
+  [
+    {
+      field: AlertsField.name,
+      value: ['one'],
+    },
+    {
+      field: AlertsField.reason,
+      value: ['two'],
+    },
+  ],
+  [
+    {
+      field: AlertsField.name,
+      value: ['three'],
+    },
+    {
+      field: AlertsField.reason,
+      value: ['four'],
+    },
+  ],
+] as FetchAlertData['oldAlertsData'];
+
+const ecsAlertsData = [
+  [
+    {
+      '@timestamp': ['2023-01-28T10:48:49.559Z'],
+      _id: 'SomeId',
+      _index: 'SomeIndex',
+      kibana: {
+        alert: {
+          rule: {
+            name: ['one'],
+          },
+          reason: ['two'],
+        },
+      },
+    },
+  ],
+  [
+    {
+      '@timestamp': ['2023-01-27T10:48:49.559Z'],
+      _id: 'SomeId2',
+      _index: 'SomeIndex',
+      kibana: {
+        alert: {
+          rule: {
+            name: ['three'],
+          },
+          reason: ['four'],
+        },
+      },
+    },
+  ],
+] as FetchAlertData['ecsAlertsData'];
+
+const cellActionOnClickMockedFn = jest.fn();
+
+const TEST_ID = {
+  CELL_ACTIONS_POPOVER: 'euiDataGridExpansionPopover',
+  CELL_ACTIONS_EXPAND: 'euiDataGridCellExpandButton',
+  FIELD_BROWSER: 'fields-browser-container',
+  FIELD_BROWSER_BTN: 'show-field-browser',
+  FIELD_BROWSER_CUSTOM_CREATE_BTN: 'field-browser-custom-create-btn',
+};
+
+const mockedUseCellActions: UseCellActions = () => {
+  const mockedGetCellActions = (columnId: string): EuiDataGridColumnCellAction[] => {
+    const fakeCellAction: EuiDataGridColumnCellAction = ({ rowIndex, Component }) => {
+      const label = 'Fake Cell First Action';
+      return (
+        <Component
+          onClick={() => cellActionOnClickMockedFn(columnId, rowIndex)}
+          data-test-subj={'fake-cell-first-action'}
+          iconType="refresh"
+          aria-label={label}
+        />
+      );
+    };
+    return [fakeCellAction];
+  };
+  return {
+    getCellActions: mockedGetCellActions,
+    visibleCellActions: 2,
+    disabledCellActions: [],
+  };
+};
+
 // FAILING: https://github.com/elastic/kibana/issues/151688
 describe.skip('AlertsTable', () => {
   const fetchAlertsData = {
@@ -86,18 +184,19 @@ describe.skip('AlertsTable', () => {
     isInitializing: false,
     isLoading: false,
     getInspectQuery: jest.fn().mockImplementation(() => ({ request: {}, response: {} })),
-    onColumnsChange: jest.fn(),
     onPageChange: jest.fn(),
     onSortChange: jest.fn(),
     refresh: jest.fn(),
     sort: [],
+    ecsAlertsData,
+    oldAlertsData,
   };
 
   const useFetchAlertsData = () => {
     return fetchAlertsData;
   };
 
-  const alertsTableConfiguration = {
+  const alertsTableConfiguration: AlertsTableConfigurationRegistry = {
     id: '',
     casesFeatureId: '',
     columns,
@@ -120,15 +219,40 @@ describe.skip('AlertsTable', () => {
         onClick: () => {},
       },
     ],
+    useFieldBrowserOptions: () => {
+      return {
+        createFieldButton: () => (
+          <EuiButton data-test-subj={TEST_ID.FIELD_BROWSER_CUSTOM_CREATE_BTN} />
+        ),
+      };
+    },
+  };
+
+  const browserFields: BrowserFields = {
+    kibana: {
+      fields: {
+        [AlertsField.uuid]: {
+          category: 'kibana',
+          name: AlertsField.uuid,
+        },
+        [AlertsField.name]: {
+          category: 'kibana',
+          name: AlertsField.name,
+        },
+        [AlertsField.reason]: {
+          category: 'kibana',
+          name: AlertsField.reason,
+        },
+      },
+    },
   };
 
   const casesMap = getCasesMockMap();
 
-  const tableProps = {
+  const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
     casesData: { cases: casesMap, isLoading: false },
     columns,
-    bulkActions: [],
     deletedEventIds: [],
     disabledCellActions: [],
     pageSize: 1,
@@ -136,7 +260,6 @@ describe.skip('AlertsTable', () => {
     leadingControlColumns: [],
     showExpandToDetails: true,
     trailingControlColumns: [],
-    alerts,
     useFetchAlertsData,
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
@@ -145,14 +268,15 @@ describe.skip('AlertsTable', () => {
     onResetColumns: () => {},
     onColumnsChange: () => {},
     onChangeVisibleColumns: () => {},
-    browserFields: {},
+    browserFields,
+    query: {},
   };
 
   const defaultBulkActionsState = {
     rowSelection: new Map<number, RowSelectionState>(),
     isAllSelected: false,
     areAllVisibleRowsSelected: false,
-    rowCount: 2,
+    rowCount: 4,
   };
 
   const AlertsTableWithProviders: React.FunctionComponent<
@@ -373,6 +497,7 @@ describe.skip('AlertsTable', () => {
                       </EuiFlexItem>
                     </>
                   ),
+                  width: 124,
                 };
               },
             },
@@ -417,6 +542,69 @@ describe.skip('AlertsTable', () => {
 
           expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
         });
+      });
+    });
+
+    describe('cell Actions', () => {
+      let customTableProps: AlertsTableProps;
+
+      beforeEach(() => {
+        customTableProps = {
+          ...tableProps,
+          pageSize: 2,
+          alertsTableConfiguration: {
+            ...alertsTableConfiguration,
+            useCellActions: mockedUseCellActions,
+          },
+        };
+      });
+
+      it('Should render cell actions on hover', async () => {
+        render(<AlertsTableWithProviders {...customTableProps} />);
+
+        const reasonFirstRow = (await screen.findAllByTestId('dataGridRowCell'))[3];
+
+        fireEvent.mouseOver(reasonFirstRow);
+
+        await waitFor(() => {
+          expect(screen.getByTestId('fake-cell-first-action')).toBeInTheDocument();
+        });
+      });
+      it('cell Actions can be expanded', async () => {
+        render(<AlertsTableWithProviders {...customTableProps} />);
+        const reasonFirstRow = (await screen.findAllByTestId('dataGridRowCell'))[3];
+
+        fireEvent.mouseOver(reasonFirstRow);
+
+        expect(await screen.findByTestId(TEST_ID.CELL_ACTIONS_EXPAND)).toBeVisible();
+
+        fireEvent.click(await screen.findByTestId(TEST_ID.CELL_ACTIONS_EXPAND));
+
+        expect(await screen.findByTestId(TEST_ID.CELL_ACTIONS_POPOVER)).toBeVisible();
+        expect(await screen.findAllByLabelText(/fake cell first action/i)).toHaveLength(2);
+      });
+    });
+
+    describe('Alert Registry use field Browser Hook', () => {
+      it('field Browser Options hook is working correctly', async () => {
+        render(
+          <AlertsTableWithProviders
+            {...tableProps}
+            initialBulkActionsState={{
+              ...defaultBulkActionsState,
+              rowSelection: new Map(),
+            }}
+          />
+        );
+
+        const fieldBrowserBtn = screen.getByTestId(TEST_ID.FIELD_BROWSER_BTN);
+        expect(fieldBrowserBtn).toBeVisible();
+
+        fireEvent.click(fieldBrowserBtn);
+
+        expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER)).toBeVisible();
+
+        expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER_CUSTOM_CREATE_BTN)).toBeVisible();
       });
     });
 
