@@ -8,16 +8,13 @@ import React from 'react';
 
 import { EuiDescriptionList, EuiLoadingContent } from '@elastic/eui';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
-import { useMonitorLatestPing } from '../../monitor_details/hooks/use_monitor_latest_ping';
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
 import { BadgeStatus, MonitorStatus, STATUS_LABEL } from '../../common/components/monitor_status';
 
 export const TestRunDetailsStatus = () => {
-  const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
-
   const { monitor, isMonitorMissing } = useSelectedMonitor();
 
-  const { data: stepsData } = useJourneySteps();
+  const { data: stepsData, loading } = useJourneySteps();
 
   if (!monitor) {
     return (
@@ -44,9 +41,9 @@ export const TestRunDetailsStatus = () => {
 
   return (
     <MonitorStatus
-      status={latestPing?.monitor.status}
+      status={stepsData?.details?.journey.monitor.status}
       monitor={monitor}
-      loading={pingsLoading}
+      loading={loading}
       compressed={false}
     />
   );
