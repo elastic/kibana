@@ -168,11 +168,7 @@ export const createPureLogStreamQueryStateMachine = (
             },
             time: {
               initial: 'initialized',
-              entry: [
-                'notifyTimeChanged',
-                'updateTimeInTimeFilterService',
-                'setDefaultRefreshInterval',
-              ],
+              entry: ['notifyTimeChanged', 'updateTimeInTimeFilterService'],
               invoke: [
                 {
                   src: 'subscribeToTimeFilterServiceChanges',
@@ -273,15 +269,6 @@ export const createPureLogStreamQueryStateMachine = (
           'parsedQuery' in event
             ? ({ parsedQuery: event.parsedQuery } as LogStreamQueryContextWithParsedQuery)
             : {}
-        ),
-        setDefaultRefreshInterval: actions.assign(
-          (_context, _event) =>
-            ({
-              refreshInterval: {
-                value: 5000,
-                pause: false,
-              },
-            } as LogStreamQueryContextWithRefreshInterval)
         ),
         clearValidationError: actions.assign(
           (_context, _event) =>
