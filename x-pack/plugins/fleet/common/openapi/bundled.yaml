@@ -870,9 +870,16 @@ paths:
                     type: integer
                   total:
                     type: integer
+                    deprecated: true
                   updating:
                     type: integer
+                  all:
+                    type: integer
+                  active:
+                    type: integer
                 required:
+                  - active
+                  - all
                   - error
                   - events
                   - inactive
@@ -1349,7 +1356,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/upgrade_agent'
-  /agents/{agentId}/upload:
+  /agents/{agentId}/uploads:
     parameters:
       - schema:
           type: string

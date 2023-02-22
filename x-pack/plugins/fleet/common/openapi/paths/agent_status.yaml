@@ -25,9 +25,16 @@ get:
                 type: integer
               total:
                 type: integer
+                deprecated: true
               updating:
                 type: integer
+              all:
+                type: integer 
+              active:
+                type: integer
             required:
+              - active
+              - all
               - error
               - events
               - inactive
