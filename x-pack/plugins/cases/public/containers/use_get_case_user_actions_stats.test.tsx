@@ -28,7 +28,6 @@ describe('UseGetCaseUserActionsStats', () => {
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('returns proper state on getCaseUserActionsStats', async () => {
@@ -70,5 +69,17 @@ describe('UseGetCaseUserActionsStats', () => {
 
     expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
     expect(addError).toHaveBeenCalled();
+  });
+
+  it('calls the api when invoked with the correct parameters', async () => {
+    const spy = jest.spyOn(api, 'getCaseUserActionsStats');
+
+    const { waitForNextUpdate } = renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    await waitForNextUpdate();
+
+    expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
   });
 });
