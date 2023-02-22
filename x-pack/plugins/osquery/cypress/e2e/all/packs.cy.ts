@@ -220,9 +220,9 @@ describe('ALL - Packs', () => {
           });
       });
       preparePack(PACK_NAME);
-      cy.getBySel('docsLoading').should('exist');
-      cy.getBySel('docsLoading').should('not.exist');
-      cy.get(`[aria-label="View in Lens"]`).click();
+      cy.react('CustomItemAction', {
+        props: { index: 1, item: { id: SAVED_QUERY_ID } },
+      }).click();
       cy.window()
         .its('open')
         .then(() => {
@@ -547,6 +547,7 @@ describe('ALL - Packs', () => {
           queries: {},
         });
       });
+      cy.getBySel('pagination-button-next').click();
       cy.contains(shardPack).click();
       cy.contains('Edit').click();
       cy.get('#shardsPercentage0').should('have.value', '15');
