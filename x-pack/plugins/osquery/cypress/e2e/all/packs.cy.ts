@@ -401,7 +401,6 @@ describe('ALL - Packs', () => {
       navigateTo('/app/osquery/packs');
     });
     const PREBUILD_PACK_NAME = 'it-compliance';
-    // const PREBUILD_PACK_NAME = 'hardware-monitoring';
 
     it('should load prebuilt packs', () => {
       cy.contains('Load Elastic prebuilt packs').click();
