@@ -74,12 +74,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
           updatedBy: user.fullName,
           actions: actions.map((action: any) => {
             /* eslint-disable @typescript-eslint/naming-convention */
-            const { connector_type_id, group, id, params } = action;
+            const { connector_type_id, group, id, params, uuid } = action;
             return {
               actionTypeId: connector_type_id,
               group,
               id,
               params,
+              uuid,
             };
           }),
           producer: 'alertsFixture',
@@ -421,12 +422,13 @@ instanceStateValue: true
             updatedBy: Superuser.fullName,
             actions: response2.body.actions.map((action: any) => {
               /* eslint-disable @typescript-eslint/naming-convention */
-              const { connector_type_id, group, id, params } = action;
+              const { connector_type_id, group, id, params, uuid } = action;
               return {
                 actionTypeId: connector_type_id,
                 group,
                 id,
                 params,
+                uuid,
               };
             }),
             producer: 'alertsFixture',
