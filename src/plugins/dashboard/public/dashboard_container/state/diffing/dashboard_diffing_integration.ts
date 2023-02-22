@@ -9,8 +9,8 @@ import { omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
 import { debounceTime, Observable, Subject, switchMap } from 'rxjs';
 
+import { DashboardContainerInput } from '../../../../common';
 import type { DashboardDiffFunctions } from './dashboard_diffing_functions';
-import { DashboardContainerInput } from '@kbn/dashboard-plugin/common';
 import {
   isKeyEqual,
   shouldRefreshDiffingFunctions,
