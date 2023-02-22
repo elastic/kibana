@@ -6,9 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 
 import { getServiceLocations, selectServiceLocationsState } from '../../state';
@@ -20,6 +18,7 @@ import { MonitorForm } from './form';
 import { LocationsLoadingError } from './locations_loading_error';
 import { ADD_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
+import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 
 export const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor' });
@@ -44,16 +43,7 @@ export const MonitorAddPage = () => {
       <MonitorSteps stepMap={ADD_MONITOR_STEPS} />
     </MonitorForm>
   ) : (
-    <EuiEmptyPrompt
-      icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
-      title={
-        <h3>
-          {i18n.translate('xpack.synthetics.monitorAddPage.loading.label', {
-            defaultMessage: 'Loading',
-          })}
-        </h3>
-      }
-    />
+    <LoadingState />
   );
 };
 

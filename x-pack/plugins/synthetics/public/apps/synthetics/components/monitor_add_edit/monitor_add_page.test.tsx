@@ -52,7 +52,7 @@ describe('MonitorAddPage', () => {
   });
 
   it('renders when loading', async () => {
-    const { getByText } = render(<MonitorAddPage />, {
+    const { getByLabelText } = render(<MonitorAddPage />, {
       state: {
         serviceLocations: {
           locations: [
@@ -72,7 +72,7 @@ describe('MonitorAddPage', () => {
     });
 
     // page is loading
-    expect(getByText('Loading')).toBeInTheDocument();
+    expect(getByLabelText(/Loading/)).toBeInTheDocument();
   });
 
   it('renders an error', async () => {
