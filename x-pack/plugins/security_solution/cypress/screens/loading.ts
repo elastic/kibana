@@ -5,15 +5,4 @@
  * 2.0.
  */
 
-import moment from 'moment';
-
-export function dateToString(input?: string): string {
-  if (!input) {
-    return '';
-  }
-  try {
-    return moment(input).toLocaleString();
-  } catch {
-    return '';
-  }
-}
+export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';

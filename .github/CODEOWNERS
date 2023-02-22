@@ -281,6 +281,7 @@ packages/core/usage-data/core-usage-data-base-server-internal @elastic/kibana-co
 packages/core/usage-data/core-usage-data-server @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-internal @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-mocks @elastic/kibana-core
+packages/core/versioning/core-version-http-server @elastic/kibana-core
 x-pack/plugins/cross_cluster_replication @elastic/platform-deployment-management
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
