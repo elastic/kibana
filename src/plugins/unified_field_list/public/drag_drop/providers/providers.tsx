@@ -119,12 +119,12 @@ export function RootDragDropProvider({
             {a11yMessageState}
           </p>
           <p id={`lnsDragDrop-keyboardInstructionsWithReorder`}>
-            {i18n.translate('xpack.lens.dragDrop.keyboardInstructionsReorder', {
+            {i18n.translate('unifiedFieldList.dragDrop.keyboardInstructionsReorder', {
               defaultMessage: `Press space or enter to start dragging. When dragging, use the up/down arrow keys to reorder items in the group and left/right arrow keys to choose drop targets outside of the group. Press space or enter again to finish.`,
             })}
           </p>
           <p id={`lnsDragDrop-keyboardInstructions`}>
-            {i18n.translate('xpack.lens.dragDrop.keyboardInstructions', {
+            {i18n.translate('unifiedFieldList.dragDrop.keyboardInstructions', {
               defaultMessage: `Press space or enter to start dragging. When dragging, use the left/right arrow keys to move between drop targets. Press space or enter again to finish.`,
             })}
           </p>

@@ -36,7 +36,7 @@ const replaceAnnouncement = {
     announceModifierKeys?: boolean
   ) => {
     if (announceModifierKeys && (canSwap || canDuplicate)) {
-      return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replaceMain', {
+      return i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.replaceMain', {
         defaultMessage: `You're dragging {label} from {groupLabel} at position {position} in layer {layerNumber} over {dropLabel} from {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Press space or enter to replace {dropLabel} with {label}.{duplicateCopy}{swapCopy}{combineCopy}`,
         values: {
           label,
@@ -53,7 +53,7 @@ const replaceAnnouncement = {
         },
       });
     }
-    return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replace', {
+    return i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.replace', {
       defaultMessage: `Replace {dropLabel} in {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber} with {label}. Press space or enter to replace.`,
       values: {
         label,
@@ -68,7 +68,7 @@ const replaceAnnouncement = {
     { label }: HumanData,
     { label: dropLabel, groupLabel, position, layerNumber: dropLayerNumber }: HumanData
   ) => {
-    return i18n.translate('xpack.lens.dragDrop.announce.duplicated.replace', {
+    return i18n.translate('unifiedFieldList.dragDrop.announce.duplicated.replace', {
       defaultMessage:
         'Replaced {dropLabel} with {label} in {groupLabel} at position {position} in layer {dropLayerNumber}',
       values: {
@@ -88,7 +88,7 @@ const duplicateAnnouncement = {
     { groupLabel: dropGroupLabel, position }: HumanData
   ) => {
     if (groupLabel !== dropGroupLabel) {
-      return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.duplicated', {
+      return i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.duplicated', {
         defaultMessage: `Duplicate {label} to {dropGroupLabel} group at position {position} in layer {layerNumber}. Hold Alt or Option and press space or enter to duplicate`,
         values: {
           label,
@@ -98,7 +98,7 @@ const duplicateAnnouncement = {
         },
       });
     }
-    return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.duplicatedInGroup', {
+    return i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.duplicatedInGroup', {
       defaultMessage: `Duplicate {label} to {dropGroupLabel} group at position {position} in layer {layerNumber}. Press space or enter to duplicate`,
       values: {
         label,
@@ -109,7 +109,7 @@ const duplicateAnnouncement = {
     });
   },
   dropped: ({ label }: HumanData, { groupLabel, position, layerNumber }: HumanData) =>
-    i18n.translate('xpack.lens.dragDrop.announce.dropped.duplicated', {
+    i18n.translate('unifiedFieldList.dragDrop.announce.dropped.duplicated', {
       defaultMessage:
         'Duplicated {label} in {groupLabel} group at position {position} in layer {layerNumber}',
       values: {
@@ -127,14 +127,14 @@ const reorderAnnouncement = {
     { position }: HumanData
   ) => {
     return prevPosition === position
-      ? i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.reorderedBack', {
+      ? i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.reorderedBack', {
           defaultMessage: `{label} returned to its initial position {prevPosition}`,
           values: {
             label,
             prevPosition,
           },
         })
-      : i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.reordered', {
+      : i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.reordered', {
           defaultMessage: `Reorder {label} in {groupLabel} group from position {prevPosition} to position {position}. Press space or enter to reorder`,
           values: {
             label,
@@ -145,7 +145,7 @@ const reorderAnnouncement = {
         });
   },
   dropped: ({ label, groupLabel, position: prevPosition }: HumanData, { position }: HumanData) =>
-    i18n.translate('xpack.lens.dragDrop.announce.dropped.reordered', {
+    i18n.translate('unifiedFieldList.dragDrop.announce.dropped.reordered', {
       defaultMessage:
         'Reordered {label} in {groupLabel} group from position {prevPosition} to position {position}',
       values: {
@@ -172,7 +172,7 @@ const combineAnnouncement = {
     announceModifierKeys?: boolean
   ) => {
     if (announceModifierKeys && (canSwap || canDuplicate || canCombine)) {
-      return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.combineMain', {
+      return i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.combineMain', {
         defaultMessage: `You're dragging {label} from {groupLabel} at position {position} in layer {layerNumber} over {dropLabel} from {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Press space or enter to combine {dropLabel} with {label}.{duplicateCopy}{swapCopy}{combineCopy}`,
         values: {
           label,
@@ -189,7 +189,7 @@ const combineAnnouncement = {
         },
       });
     }
-    return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.combine', {
+    return i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.combine', {
       defaultMessage: `Combine {dropLabel} in {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber} with {label}. Press space or enter to combine.`,
       values: {
         label,
@@ -204,7 +204,7 @@ const combineAnnouncement = {
     { label }: HumanData,
     { label: dropLabel, groupLabel, position, layerNumber: dropLayerNumber }: HumanData
   ) =>
-    i18n.translate('xpack.lens.dragDrop.announce.duplicated.combine', {
+    i18n.translate('unifiedFieldList.dragDrop.announce.duplicated.combine', {
       defaultMessage:
         'Combine {dropLabel} with {label} in {groupLabel} at position {position} in layer {dropLayerNumber}',
       values: {
@@ -217,15 +217,15 @@ const combineAnnouncement = {
     }),
 };
 
-const DUPLICATE_SHORT = i18n.translate('xpack.lens.dragDrop.announce.duplicate.short', {
+const DUPLICATE_SHORT = i18n.translate('unifiedFieldList.dragDrop.announce.duplicate.short', {
   defaultMessage: ' Hold alt or option to duplicate.',
 });
 
-const SWAP_SHORT = i18n.translate('xpack.lens.dragDrop.announce.swap.short', {
+const SWAP_SHORT = i18n.translate('unifiedFieldList.dragDrop.announce.swap.short', {
   defaultMessage: ' Hold shift to swap.',
 });
 
-const COMBINE_SHORT = i18n.translate('xpack.lens.dragDrop.announce.combine.short', {
+const COMBINE_SHORT = i18n.translate('unifiedFieldList.dragDrop.announce.combine.short', {
   defaultMessage: ' Hold control to combine',
 });
 
@@ -252,7 +252,7 @@ export const announcements: CustomAnnouncementsType = {
     ) => {
       if (announceModifierKeys && (canSwap || canDuplicate || canCombine)) {
         return i18n.translate(
-          'xpack.lens.dragDrop.announce.selectedTarget.replaceIncompatibleMain',
+          'unifiedFieldList.dragDrop.announce.selectedTarget.replaceIncompatibleMain',
           {
             defaultMessage: `You're dragging {label} from {groupLabel} at position {position} in layer {layerNumber} over {dropLabel} from {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Press space or enter to convert {label} to {nextLabel} and replace {dropLabel}.{duplicateCopy}{swapCopy}{combineCopy}`,
             values: {
@@ -272,17 +272,20 @@ export const announcements: CustomAnnouncementsType = {
           }
         );
       }
-      return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replaceIncompatible', {
-        defaultMessage: `Convert {label} to {nextLabel} and replace {dropLabel} in {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Press space or enter to replace`,
-        values: {
-          label,
-          dropLabel,
-          dropGroupLabel,
-          dropPosition,
-          nextLabel,
-          dropLayerNumber,
-        },
-      });
+      return i18n.translate(
+        'unifiedFieldList.dragDrop.announce.selectedTarget.replaceIncompatible',
+        {
+          defaultMessage: `Convert {label} to {nextLabel} and replace {dropLabel} in {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Press space or enter to replace`,
+          values: {
+            label,
+            dropLabel,
+            dropGroupLabel,
+            dropPosition,
+            nextLabel,
+            dropLayerNumber,
+          },
+        }
+      );
     },
     move_incompatible: (
       { label, groupLabel, position, layerNumber }: HumanData,
@@ -297,22 +300,25 @@ export const announcements: CustomAnnouncementsType = {
       announceModifierKeys?: boolean
     ) => {
       if (announceModifierKeys && (canSwap || canDuplicate)) {
-        return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.moveIncompatibleMain', {
-          defaultMessage: `You're dragging {label} from {groupLabel} at position {position} in layer {layerNumber} over position {dropPosition} in {dropGroupLabel} group in layer {dropLayerNumber}. Press space or enter to convert {label} to {nextLabel} and move.{duplicateCopy}`,
-          values: {
-            label,
-            groupLabel,
-            position,
-            dropGroupLabel,
-            dropPosition,
-            nextLabel,
-            duplicateCopy: canDuplicate ? DUPLICATE_SHORT : '',
-            layerNumber,
-            dropLayerNumber,
-          },
-        });
+        return i18n.translate(
+          'unifiedFieldList.dragDrop.announce.selectedTarget.moveIncompatibleMain',
+          {
+            defaultMessage: `You're dragging {label} from {groupLabel} at position {position} in layer {layerNumber} over position {dropPosition} in {dropGroupLabel} group in layer {dropLayerNumber}. Press space or enter to convert {label} to {nextLabel} and move.{duplicateCopy}`,
+            values: {
+              label,
+              groupLabel,
+              position,
+              dropGroupLabel,
+              dropPosition,
+              nextLabel,
+              duplicateCopy: canDuplicate ? DUPLICATE_SHORT : '',
+              layerNumber,
+              dropLayerNumber,
+            },
+          }
+        );
       }
-      return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.moveIncompatible', {
+      return i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.moveIncompatible', {
         defaultMessage: `Convert {label} to {nextLabel} and move to {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Press space or enter to move`,
         values: {
           label,
@@ -336,20 +342,23 @@ export const announcements: CustomAnnouncementsType = {
       announceModifierKeys?: boolean
     ) => {
       if (announceModifierKeys && (canSwap || canDuplicate)) {
-        return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.moveCompatibleMain', {
-          defaultMessage: `You're dragging {label} from {groupLabel} at position {position} over position {dropPosition} in {dropGroupLabel} group in layer {dropLayerNumber}. Press space or enter to move.{duplicateCopy}`,
-          values: {
-            label,
-            groupLabel,
-            position,
-            dropGroupLabel,
-            dropPosition,
-            duplicateCopy: canDuplicate ? DUPLICATE_SHORT : '',
-            dropLayerNumber,
-          },
-        });
+        return i18n.translate(
+          'unifiedFieldList.dragDrop.announce.selectedTarget.moveCompatibleMain',
+          {
+            defaultMessage: `You're dragging {label} from {groupLabel} at position {position} over position {dropPosition} in {dropGroupLabel} group in layer {dropLayerNumber}. Press space or enter to move.{duplicateCopy}`,
+            values: {
+              label,
+              groupLabel,
+              position,
+              dropGroupLabel,
+              dropPosition,
+              duplicateCopy: canDuplicate ? DUPLICATE_SHORT : '',
+              dropLayerNumber,
+            },
+          }
+        );
       }
-      return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.moveCompatible', {
+      return i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.moveCompatible', {
         defaultMessage: `Move {label} to {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Press space or enter to move`,
         values: {
           label,
@@ -363,7 +372,7 @@ export const announcements: CustomAnnouncementsType = {
       { label }: HumanData,
       { groupLabel, position, nextLabel, layerNumber: dropLayerNumber }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.duplicateIncompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.duplicateIncompatible', {
         defaultMessage:
           'Convert copy of {label} to {nextLabel} and add to {groupLabel} group at position {position} in layer {dropLayerNumber}. Hold Alt or Option and press space or enter to duplicate',
         values: {
@@ -378,33 +387,39 @@ export const announcements: CustomAnnouncementsType = {
       { label }: HumanData,
       { label: dropLabel, groupLabel, position, nextLabel, layerNumber: dropLayerNumber }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replaceDuplicateIncompatible', {
-        defaultMessage:
-          'Convert copy of {label} to {nextLabel} and replace {dropLabel} in {groupLabel} group at position {position} in layer {dropLayerNumber}. Hold Alt or Option and press space or enter to duplicate and replace',
-        values: {
-          label,
-          groupLabel,
-          position,
-          dropLabel,
-          nextLabel,
-          dropLayerNumber,
-        },
-      }),
+      i18n.translate(
+        'unifiedFieldList.dragDrop.announce.selectedTarget.replaceDuplicateIncompatible',
+        {
+          defaultMessage:
+            'Convert copy of {label} to {nextLabel} and replace {dropLabel} in {groupLabel} group at position {position} in layer {dropLayerNumber}. Hold Alt or Option and press space or enter to duplicate and replace',
+          values: {
+            label,
+            groupLabel,
+            position,
+            dropLabel,
+            nextLabel,
+            dropLayerNumber,
+          },
+        }
+      ),
     replace_duplicate_compatible: (
       { label }: HumanData,
       { label: dropLabel, groupLabel, position, layerNumber: dropLayerNumber }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replaceDuplicateCompatible', {
-        defaultMessage:
-          'Duplicate {label} and replace {dropLabel} in {groupLabel} at position {position} in layer {dropLayerNumber}. Hold Alt or Option and press space or enter to duplicate and replace',
-        values: {
-          label,
-          dropLabel,
-          groupLabel,
-          position,
-          dropLayerNumber,
-        },
-      }),
+      i18n.translate(
+        'unifiedFieldList.dragDrop.announce.selectedTarget.replaceDuplicateCompatible',
+        {
+          defaultMessage:
+            'Duplicate {label} and replace {dropLabel} in {groupLabel} at position {position} in layer {dropLayerNumber}. Hold Alt or Option and press space or enter to duplicate and replace',
+          values: {
+            label,
+            dropLabel,
+            groupLabel,
+            position,
+            dropLayerNumber,
+          },
+        }
+      ),
     swap_compatible: (
       { label, groupLabel, position, layerNumber }: HumanData,
       {
@@ -414,7 +429,7 @@ export const announcements: CustomAnnouncementsType = {
         layerNumber: dropLayerNumber,
       }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.swapCompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.swapCompatible', {
         defaultMessage:
           'Swap {label} in {groupLabel} group at position {position} in layer {layerNumber} with {dropLabel} in {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Hold Shift and press space or enter to swap',
         values: {
@@ -438,7 +453,7 @@ export const announcements: CustomAnnouncementsType = {
         layerNumber: dropLayerNumber,
       }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.swapIncompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.swapIncompatible', {
         defaultMessage:
           'Convert {label} to {nextLabel} in {groupLabel} group at position {position} in layer {layerNumber} and swap with {dropLabel} in {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Hold Shift and press space or enter to swap',
         values: {
@@ -462,7 +477,7 @@ export const announcements: CustomAnnouncementsType = {
         layerNumber: dropLayerNumber,
       }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.combineCompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.combineCompatible', {
         defaultMessage:
           'Combine {label} in {groupLabel} group at position {position} in layer {layerNumber} with {dropLabel} in {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Hold Control and press space or enter to combine',
         values: {
@@ -486,7 +501,7 @@ export const announcements: CustomAnnouncementsType = {
         layerNumber: dropLayerNumber,
       }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.combineIncompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.combineIncompatible', {
         defaultMessage:
           'Convert {label} to {nextLabel} in {groupLabel} group at position {position} in layer {layerNumber} and combine with {dropLabel} in {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Hold Control and press space or enter to combine',
         values: {
@@ -512,7 +527,7 @@ export const announcements: CustomAnnouncementsType = {
       { label }: HumanData,
       { label: dropLabel, groupLabel, position, nextLabel, layerNumber: dropLayerNumber }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.dropped.replaceIncompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.dropped.replaceIncompatible', {
         defaultMessage:
           'Converted {label} to {nextLabel} and replaced {dropLabel} in {groupLabel} group at position {position} in layer {dropLayerNumber}',
         values: {
@@ -528,7 +543,7 @@ export const announcements: CustomAnnouncementsType = {
       { label }: HumanData,
       { groupLabel, position, nextLabel, layerNumber: dropLayerNumber }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.dropped.moveIncompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.dropped.moveIncompatible', {
         defaultMessage:
           'Converted {label} to {nextLabel} and moved to {groupLabel} group at position {position} in layer {dropLayerNumber}',
         values: {
@@ -544,7 +559,7 @@ export const announcements: CustomAnnouncementsType = {
       { label }: HumanData,
       { groupLabel, position, layerNumber: dropLayerNumber }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.dropped.moveCompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.dropped.moveCompatible', {
         defaultMessage:
           'Moved {label} to {groupLabel} group at position {position} in layer {dropLayerNumber}',
         values: {
@@ -559,7 +574,7 @@ export const announcements: CustomAnnouncementsType = {
       { label }: HumanData,
       { groupLabel, position, nextLabel, layerNumber: dropLayerNumber }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.dropped.duplicateIncompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.dropped.duplicateIncompatible', {
         defaultMessage:
           'Converted copy of {label} to {nextLabel} and added to {groupLabel} group at position {position} in layer {dropLayerNumber}',
         values: {
@@ -575,7 +590,7 @@ export const announcements: CustomAnnouncementsType = {
       { label }: HumanData,
       { label: dropLabel, groupLabel, position, nextLabel, layerNumber: dropLayerNumber }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.dropped.replaceDuplicateIncompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.dropped.replaceDuplicateIncompatible', {
         defaultMessage:
           'Converted copy of {label} to {nextLabel} and replaced {dropLabel} in {groupLabel} group at position {position} in layer {dropLayerNumber}',
         values: {
@@ -591,7 +606,7 @@ export const announcements: CustomAnnouncementsType = {
       { label }: HumanData,
       { label: dropLabel, groupLabel, position, layerNumber: dropLayerNumber }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.duplicated.replaceDuplicateCompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.duplicated.replaceDuplicateCompatible', {
         defaultMessage:
           'Replaced {dropLabel} with a copy of {label} in {groupLabel} at position {position} in layer {dropLayerNumber}',
         values: {
@@ -611,7 +626,7 @@ export const announcements: CustomAnnouncementsType = {
         layerNumber: dropLayerNumber,
       }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.dropped.swapCompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.dropped.swapCompatible', {
         defaultMessage:
           'Moved {label} to {dropGroupLabel} at position {dropPosition} in layer {dropLayerNumber} and {dropLabel} to {groupLabel} group at position {position} in layer {layerNumber}',
         values: {
@@ -635,7 +650,7 @@ export const announcements: CustomAnnouncementsType = {
         layerNumber: dropLayerNumber,
       }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.dropped.swapIncompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.dropped.swapIncompatible', {
         defaultMessage:
           'Converted {label} to {nextLabel} in {groupLabel} group at position {position} in layer {layerNumber} and swapped with {dropLabel} in {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}',
         values: {
@@ -659,7 +674,7 @@ export const announcements: CustomAnnouncementsType = {
         layerNumber: dropLayerNumber,
       }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.dropped.combineCompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.dropped.combineCompatible', {
         defaultMessage:
           'Combined {label} in group {groupLabel} to {dropLabel} in group {dropGroupLabel} at position {dropPosition} in layer {dropLayerNumber}',
         values: {
@@ -681,7 +696,7 @@ export const announcements: CustomAnnouncementsType = {
         layerNumber: dropLayerNumber,
       }: HumanData
     ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.dropped.combineIncompatible', {
+      i18n.translate('unifiedFieldList.dragDrop.announce.dropped.combineIncompatible', {
         defaultMessage:
           'Converted {label} to {nextLabel} in {groupLabel} group at position {position} and combined with {dropLabel} in {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}',
         values: {
@@ -700,7 +715,7 @@ export const announcements: CustomAnnouncementsType = {
 
 const defaultAnnouncements = {
   lifted: ({ label }: HumanData) =>
-    i18n.translate('xpack.lens.dragDrop.announce.lifted', {
+    i18n.translate('unifiedFieldList.dragDrop.announce.lifted', {
       defaultMessage: `Lifted {label}`,
       values: {
         label,
@@ -708,14 +723,14 @@ const defaultAnnouncements = {
     }),
   cancelled: ({ label, groupLabel, position }: HumanData) => {
     if (!groupLabel || !position) {
-      return i18n.translate('xpack.lens.dragDrop.announce.cancelled', {
+      return i18n.translate('unifiedFieldList.dragDrop.announce.cancelled', {
         defaultMessage: 'Movement cancelled. {label} returned to its initial position',
         values: {
           label,
         },
       });
     }
-    return i18n.translate('xpack.lens.dragDrop.announce.cancelledItem', {
+    return i18n.translate('unifiedFieldList.dragDrop.announce.cancelledItem', {
       defaultMessage:
         'Movement cancelled. {label} returned to {groupLabel} group at position {position}',
       values: {
@@ -727,7 +742,7 @@ const defaultAnnouncements = {
   },
 
   noTarget: () => {
-    return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.noSelected', {
+    return i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.noSelected', {
       defaultMessage: `No target selected. Use arrow keys to select a target`,
     });
   },
@@ -742,7 +757,7 @@ const defaultAnnouncements = {
     }: HumanData
   ) =>
     dropGroupLabel && position
-      ? i18n.translate('xpack.lens.dragDrop.announce.droppedDefault', {
+      ? i18n.translate('unifiedFieldList.dragDrop.announce.droppedDefault', {
           defaultMessage:
             'Added {label} in {dropGroupLabel} group at position {position} in layer {dropLayerNumber}',
           values: {
@@ -752,7 +767,7 @@ const defaultAnnouncements = {
             dropLayerNumber,
           },
         })
-      : i18n.translate('xpack.lens.dragDrop.announce.droppedNoPosition', {
+      : i18n.translate('unifiedFieldList.dragDrop.announce.droppedNoPosition', {
           defaultMessage: 'Added {label} to {dropLabel}',
           values: {
             label,
@@ -769,7 +784,7 @@ const defaultAnnouncements = {
     }: HumanData
   ) => {
     return dropGroupLabel && position
-      ? i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.default', {
+      ? i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.default', {
           defaultMessage: `Add {label} to {dropGroupLabel} group at position {position} in layer {dropLayerNumber}. Press space or enter to add`,
           values: {
             label,
@@ -778,7 +793,7 @@ const defaultAnnouncements = {
             dropLayerNumber,
           },
         })
-      : i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.defaultNoPosition', {
+      : i18n.translate('unifiedFieldList.dragDrop.announce.selectedTarget.defaultNoPosition', {
           defaultMessage: `Add {label} to {dropLabel}. Press space or enter to add`,
           values: {
             dropLabel,
