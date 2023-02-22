@@ -6,13 +6,17 @@
  */
 
 import React, { useMemo, useCallback, useContext, ReactElement } from 'react';
+import {
+  DragDrop,
+  DragDropIdentifier,
+  DragContext,
+  DropType,
+} from '@kbn/unified-field-list-plugin/public'; // drag & drop
 import { isDraggedField } from '../../../../utils';
-import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
 import {
   Datasource,
   VisualizationDimensionGroupConfig,
   isOperation,
-  DropType,
   DatasourceLayers,
   IndexPatternMap,
   DragDropOperation,

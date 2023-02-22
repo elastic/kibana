@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './drag_drop.scss';
@@ -11,7 +12,6 @@ import type { KeyboardEvent, ReactElement } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
-import { trackUiCounterEvents } from '../lens_ui_telemetry';
 import {
   DragDropIdentifier,
   DropIdentifier,
@@ -24,7 +24,7 @@ import {
   announce,
   Ghost,
 } from './providers';
-import { DropType } from '../types';
+import { DropType } from './types';
 
 export type DroppableEvent = React.DragEvent<HTMLElement>;
 
@@ -126,6 +126,7 @@ interface DragInnerProps extends BaseProps {
     activeDropTarget: DragContextState['activeDropTarget'];
     dropTargetsByOrder: DragContextState['dropTargetsByOrder'];
   };
+  onTrackUICounterEvent: DragContextState['onTrackUICounterEvent'] | undefined;
   extraKeyboardHandler?: (e: KeyboardEvent<HTMLButtonElement>) => void;
   ariaDescribedBy?: string;
 }
@@ -142,6 +143,7 @@ interface DropsInnerProps extends BaseProps {
   setA11yMessage: DragContextState['setA11yMessage'];
   registerDropTarget: DragContextState['registerDropTarget'];
   activeDropTarget: DragContextState['activeDropTarget'];
+  onTrackUICounterEvent: DragContextState['onTrackUICounterEvent'] | undefined;
   isNotDroppable: boolean;
 }
 
@@ -158,6 +160,7 @@ export const DragDrop = (props: BaseProps) => {
     activeDropTarget,
     setActiveDropTarget,
     setA11yMessage,
+    onTrackUICounterEvent,
   } = useContext(DragContext);
 
   const { value, draggable, dropTypes, reorderableGroup } = props;
@@ -179,6 +182,7 @@ export const DragDrop = (props: BaseProps) => {
       setDragging,
       setActiveDropTarget,
       setA11yMessage,
+      onTrackUICounterEvent,
     };
     if (reorderableGroup && reorderableGroup.length > 1) {
       return <ReorderableDrag {...dragProps} reorderableGroup={reorderableGroup} />;
@@ -197,6 +201,7 @@ export const DragDrop = (props: BaseProps) => {
     setActiveDropTarget,
     registerDropTarget,
     setA11yMessage,
+    onTrackUICounterEvent,
     isNotDroppable:
       // If the configuration has provided a droppable flag, but this particular item is not
       // droppable, then it should be less prominent. Ignores items that are both
@@ -237,6 +242,7 @@ const DragInner = memo(function DragInner({
   extraKeyboardHandler,
   ariaDescribedBy,
   setA11yMessage,
+  onTrackUICounterEvent,
 }: DragInnerProps) {
   const keyboardMode = activeDraggingProps?.keyboardMode;
   const activeDropTarget = activeDraggingProps?.activeDropTarget;
@@ -385,7 +391,7 @@ const DragInner = memo(function DragInner({
 
   const dropToActiveDropTarget = () => {
     if (activeDropTarget) {
-      trackUiCounterEvents('drop_total');
+      onTrackUICounterEvent?.('drop_total');
       const { dropType, humanData, onDrop: onTargetDrop } = activeDropTarget;
       setTimeout(() => setA11yMessage(announce.dropped(value.humanData, humanData, dropType)));
       onTargetDrop(value, dropType);
@@ -879,6 +885,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
     setActiveDropTarget,
     reorderableGroup,
     setA11yMessage,
+    onTrackUICounterEvent,
   } = props;
 
   const currentIndex = reorderableGroup.findIndex((i) => i.id === value.id);
@@ -953,7 +960,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
     setKeyboardMode(false);
 
     if (onDrop && dragging) {
-      trackUiCounterEvents('drop_total');
+      onTrackUICounterEvent?.('drop_total');
       onDrop(dragging, 'reorder');
       // setTimeout ensures it will run after dragEnd messaging
       setTimeout(() =>

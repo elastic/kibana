@@ -8,9 +8,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiFormRow } from '@elastic/eui';
+import { ChildDragDropProvider, DragDrop } from '@kbn/unified-field-list-plugin/public'; // drag & drop
 import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
 import { LayerPanel } from './layer_panel';
-import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
 import { coreMock } from '@kbn/core/public/mocks';
 import { generateId } from '../../../id_generator';
 import {

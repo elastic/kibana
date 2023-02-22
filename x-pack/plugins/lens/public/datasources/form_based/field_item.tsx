@@ -28,8 +28,8 @@ import {
   getFieldIconProps,
   wrapFieldNameOnDot,
 } from '@kbn/unified-field-list-plugin/public';
+import { DragDrop } from '@kbn/unified-field-list-plugin/public'; // drag & drop
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
-import { DragDrop } from '../../drag_drop';
 import { DatasourceDataPanelProps } from '../../types';
 import { DOCUMENT_FIELD_NAME } from '../../../common';
 import type { IndexPattern, IndexPatternField } from '../../types';

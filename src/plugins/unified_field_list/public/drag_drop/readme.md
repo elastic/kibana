@@ -9,7 +9,7 @@ We aren't using EUI or another library, due to the fact that Lens visualizations
 First, place a RootDragDropProvider at the root of your application.
 
 ```js
-<RootDragDropProvider>
+<RootDragDropProvider onTrackUICounterEvent={...}>
   ... your app here ...
 </RootDragDropProvider>
 ```

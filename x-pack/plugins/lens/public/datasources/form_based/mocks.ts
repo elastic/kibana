@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DragContextState } from '../../drag_drop';
+import { DragContextState } from '@kbn/unified-field-list-plugin/public'; // drag & drop
 import { getFieldByNameFactory } from './pure_helpers';
 import type { IndexPattern, IndexPatternField } from '../../types';
 

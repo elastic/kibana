@@ -100,3 +100,15 @@ export {
   getFieldType,
   getFieldIconType,
 } from './utils/field_types';
+
+export {
+  type DragDropIdentifier,
+  type DragContextState,
+  type DropType,
+  type DraggingIdentifier,
+  DragDrop,
+  DragContext,
+  RootDragDropProvider,
+  ChildDragDropProvider,
+  ReorderProvider,
+} from './drag_drop';

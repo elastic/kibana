@@ -25,7 +25,7 @@ jest.mock('../../../debounced_component', () => {
 
 import { WorkspacePanel } from './workspace_panel';
 import { ReactWrapper } from 'enzyme';
-import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
+import { DragDrop, ChildDragDropProvider } from '@kbn/unified-field-list-plugin/public'; // drag & drop
 import { buildExistsFilter } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DataView } from '@kbn/data-views-plugin/public';
