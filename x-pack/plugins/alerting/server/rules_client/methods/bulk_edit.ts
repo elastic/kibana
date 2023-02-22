@@ -54,13 +54,14 @@ import {
   API_KEY_GENERATE_CONCURRENCY,
 } from '../common/constants';
 import { getMappedParams } from '../common/mapped_params_utils';
-import { getAlertFromRaw, extractReferences, validateActions, updateMeta } from '../lib';
+import { getAlertFromRaw, extractReferences, validateActions, updateMeta, addUuid } from '../lib';
 import {
   NormalizedAlertAction,
   BulkOperationError,
   RuleBulkOperationAggregation,
   RulesClientContext,
   CreateAPIKeyResult,
+  NormalizedAlertActionWithUuid,
 } from '../types';
 
 export type BulkEditFields = keyof Pick<
@@ -462,7 +463,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     } = await extractReferences(
       context,
       ruleType,
-      ruleActions.actions,
+      ruleActions.actions as NormalizedAlertActionWithUuid[],
       validatedMutatedAlertTypeParams
     );
 
@@ -537,7 +538,11 @@ async function getUpdatedAttributesFromOperations(
 ) {
   let attributes = cloneDeep(rule.attributes);
   let ruleActions = {
-    actions: injectReferencesIntoActions(rule.id, rule.attributes.actions, rule.references || []),
+    actions: injectReferencesIntoActions(
+      rule.id,
+      rule.attributes.actions || [],
+      rule.references || []
+    ),
   };
 
   let hasUpdateApiKeyOperation = false;
@@ -550,23 +555,28 @@ async function getUpdatedAttributesFromOperations(
     // the `isAttributesUpdateSkipped` flag to false.
     switch (operation.field) {
       case 'actions': {
+        const updatedOperation = {
+          ...operation,
+          value: addUuid(operation.value),
+        };
+
         try {
           await validateActions(context, ruleType, {
             ...attributes,
-            actions: operation.value,
+            actions: updatedOperation.value,
           });
         } catch (e) {
           // If validateActions fails on the first attempt, it may be because of legacy rule-level frequency params
           attributes = await attemptToMigrateLegacyFrequency(
             context,
-            operation,
+            updatedOperation,
             attributes,
             ruleType
           );
         }
 
         const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
-          operation,
+          updatedOperation,
           ruleActions
         );
         if (isAttributeModified) {
@@ -576,7 +586,7 @@ async function getUpdatedAttributesFromOperations(
 
         // TODO https://github.com/elastic/kibana/issues/148414
         // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-        const firstFrequency = operation.value[0]?.frequency;
+        const firstFrequency = updatedOperation.value[0]?.frequency;
         if (rule.attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
           ruleActions.actions = ruleActions.actions.map((action) => omit(action, 'frequency'));
           if (!attributes.notifyWhen) {

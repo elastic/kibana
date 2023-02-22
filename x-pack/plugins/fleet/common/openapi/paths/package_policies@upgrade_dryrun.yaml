@@ -33,3 +33,5 @@ post:
                   $ref: ../components/schemas/upgrade_agent_diff.yaml
               required:
                 - hasErrors
+    '400':
+      $ref: ../components/responses/error.yaml

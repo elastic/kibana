@@ -44,6 +44,7 @@ describe('resolveRuleRoute', () => {
         params: {
           foo: true,
         },
+        uuid: '123-456',
       },
     ],
     consumer: 'bar',
@@ -99,6 +100,7 @@ describe('resolveRuleRoute', () => {
         id: mockedRule.actions[0].id,
         params: mockedRule.actions[0].params,
         connector_type_id: mockedRule.actions[0].actionTypeId,
+        uuid: mockedRule.actions[0].uuid,
       },
     ],
     outcome: 'aliasMatch',

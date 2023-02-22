@@ -347,6 +347,7 @@ describe('getRuleWithInvalidatedFields', () => {
               field: {},
             },
           },
+          uuid: '123-456',
         },
       ],
       tags: [],
@@ -393,6 +394,7 @@ describe('getRuleWithInvalidatedFields', () => {
               field: {},
             },
           },
+          uuid: '111-111',
         },
         {
           actionTypeId: 'test',
@@ -405,6 +407,7 @@ describe('getRuleWithInvalidatedFields', () => {
               },
             },
           },
+          uuid: '222-222',
         },
       ],
       tags: [],

@@ -368,6 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ id: rule.id, enabled: false })
           .expect(200);
 
+        const bodyToCompare = removeServerGeneratedProperties(patchResponse.body);
         const outputRule = getSimpleRuleOutput();
         outputRule.actions = [
           {
@@ -378,11 +379,11 @@ export default ({ getService }: FtrProviderContext) => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            uuid: bodyToCompare.actions[0].uuid,
           },
         ];
         outputRule.throttle = '1h';
         outputRule.revision = 2; // Expected revision is 2 as call to `createLegacyRuleAction()` does two separate rules updates for `notifyWhen` & `actions` field
-        const bodyToCompare = removeServerGeneratedProperties(patchResponse.body);
         expect(bodyToCompare).to.eql(outputRule);
       });
 

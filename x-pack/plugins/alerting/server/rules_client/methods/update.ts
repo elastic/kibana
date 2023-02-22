@@ -29,6 +29,7 @@ import {
   extractReferences,
   updateMeta,
   getPartialRuleFromRaw,
+  addUuid,
   incrementRevision,
 } from '../lib';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
@@ -149,10 +150,12 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
 async function updateAlert<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data, allowMissingConnectorSecrets }: UpdateOptions<Params>,
+  { id, data: initialData, allowMissingConnectorSecrets }: UpdateOptions<Params>,
   currentRule: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
   const { attributes, version } = currentRule;
+  const data = { ...initialData, actions: addUuid(initialData.actions) };
+
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
   // TODO https://github.com/elastic/kibana/issues/148414
