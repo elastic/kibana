@@ -8,7 +8,7 @@
 import { formatMitreAttackDescription } from '../../helpers/rules';
 import { getEqlRule, getEqlSequenceRule, getIndexPatterns } from '../../objects/rule';
 
-import { ALERT_DATA_GRID, NUMBER_OF_ALERTS } from '../../screens/alerts';
+import { ALERTS_COUNT, ALERT_DATA_GRID } from '../../screens/alerts';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
@@ -132,7 +132,7 @@ describe('EQL rules', () => {
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
-      cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
+      cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts);
       cy.get(ALERT_DATA_GRID)
         .invoke('text')
         .then((text) => {
@@ -166,7 +166,7 @@ describe('EQL rules', () => {
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
-      cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfSequenceAlerts);
+      cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfSequenceAlerts);
       cy.get(ALERT_DATA_GRID)
         .invoke('text')
         .then((text) => {

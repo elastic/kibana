@@ -8,7 +8,7 @@
 import { formatMitreAttackDescription } from '../../helpers/rules';
 import { getNewOverrideRule, getSeveritiesOverride } from '../../objects/rule';
 
-import { NUMBER_OF_ALERTS, ALERT_GRID_CELL } from '../../screens/alerts';
+import { ALERT_GRID_CELL, ALERTS_COUNT } from '../../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
@@ -147,7 +147,7 @@ describe('Detection rules, override', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS)
+    cy.get(ALERTS_COUNT)
       .invoke('text')
       .should('match', /^[1-9].+$/); // Any number of alerts
     cy.get(ALERT_GRID_CELL).contains('auditbeat');

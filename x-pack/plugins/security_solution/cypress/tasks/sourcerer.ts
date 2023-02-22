@@ -151,3 +151,14 @@ export const waitForAlertsIndexToExist = () => {
   createRule({ ...getNewRule(), rule_id: '1', max_signals: 100 });
   refreshUntilAlertsIndexExists();
 };
+
+export const deleteRuntimeField = (dataView: string, fieldName: string) => {
+  const deleteRuntimeFieldPath = `/api/data_views/data_view/${dataView}/runtime_field/${fieldName}`;
+
+  cy.request({
+    url: deleteRuntimeFieldPath,
+    method: 'DELETE',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
+};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expandFirstAlert, waitForAlertsPanelToBeLoaded } from '../../tasks/alerts';
+import { expandFirstAlert, waitForAlerts } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
@@ -33,7 +33,7 @@ describe('Alert Details Page Navigation', () => {
     describe('context menu', () => {
       beforeEach(() => {
         visit(ALERTS_URL);
-        waitForAlertsPanelToBeLoaded();
+        waitForAlerts();
       });
 
       it('should navigate to the details page from the alert context menu', () => {
@@ -53,7 +53,7 @@ describe('Alert Details Page Navigation', () => {
     describe('flyout', () => {
       beforeEach(() => {
         visit(ALERTS_URL);
-        waitForAlertsPanelToBeLoaded();
+        waitForAlerts();
       });
 
       it('should navigate to the details page from the alert flyout', () => {

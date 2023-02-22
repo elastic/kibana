@@ -8,7 +8,7 @@
 import { getException, getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
@@ -52,10 +52,10 @@ import {
   CONFIRM_BTN,
   ADD_TO_SHARED_LIST_RADIO_INPUT,
   EXCEPTION_ITEM_CONTAINER,
-  FIELD_INPUT,
   VALUES_MATCH_ANY_INPUT,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_CARD_ITEM_CONDITIONS,
+  FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
 import {
   createExceptionList,
@@ -143,7 +143,7 @@ describe('Add/edit exception from rule details', () => {
       // check that the existing item's field is being populated
       cy.get(EXCEPTION_ITEM_CONTAINER)
         .eq(0)
-        .find(FIELD_INPUT)
+        .find(FIELD_INPUT_PARENT)
         .eq(0)
         .should('have.text', ITEM_FIELD);
       cy.get(VALUES_MATCH_ANY_INPUT).should('have.text', 'foo');
@@ -309,7 +309,7 @@ describe('Add/edit exception from rule details', () => {
       // Closed alert should appear in table
       goToClosedAlertsOnRuleDetailsPage();
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
+      cy.get(ALERTS_COUNT).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
 
       // Remove the exception and load an event that would have matched that exception
       // to show that said exception now starts to show up again
@@ -324,12 +324,13 @@ describe('Add/edit exception from rule details', () => {
 
       // now that there are no more exceptions, the docs should match and populate alerts
       goToAlertsTab();
+      waitForAlertsToPopulate();
       goToOpenedAlertsOnRuleDetailsPage();
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS).should('have.text', '2 alerts');
+      cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
     });
   });
 });
