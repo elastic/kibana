@@ -91,11 +91,11 @@ describe('useDiscoverHistogram', () => {
       hideChart: false,
       breakdownField: 'extension',
     });
-    const wrappedStateContainer = Object.create(stateContainer);
-    wrappedStateContainer.setAppState = jest.fn((newState) =>
-      stateContainer.appState.update(newState)
-    );
-    return wrappedStateContainer;
+    const appState = stateContainer.appState;
+    const wrappedStateContainer = Object.create(appState);
+    wrappedStateContainer.update = jest.fn((newState) => appState.update(newState));
+    stateContainer.appState = wrappedStateContainer;
+    return stateContainer;
   };
 
   const renderUseDiscoverHistogram = async ({
@@ -224,7 +224,7 @@ describe('useDiscoverHistogram', () => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
       expect(inspectorAdapters.lensRequests).toBe(lensRequestAdapter);
-      expect(stateContainer.setAppState).toHaveBeenCalledWith({
+      expect(stateContainer.appState.update).toHaveBeenCalledWith({
         interval: state.timeInterval,
         hideChart: state.chartHidden,
         breakdownField: state.breakdownField,
@@ -247,7 +247,7 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
-      expect(stateContainer.setAppState).not.toHaveBeenCalled();
+      expect(stateContainer.appState.update).not.toHaveBeenCalled();
     });
 
     it('should sync the state container state with Unified Histogram', async () => {
@@ -448,10 +448,10 @@ describe('useDiscoverHistogram', () => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
       act(() => {
-        stateContainer.setAppState({ hideChart: true });
+        stateContainer.appState.update({ hideChart: true });
       });
       act(() => {
-        stateContainer.setAppState({ hideChart: false });
+        stateContainer.appState.update({ hideChart: false });
       });
       act(() => {
         savedSearchFetch$.next({ reset: false, searchSessionId: '1234' });
