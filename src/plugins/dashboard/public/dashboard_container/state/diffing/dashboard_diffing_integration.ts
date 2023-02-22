@@ -54,6 +54,7 @@ export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerInpu
   'searchSessionId',
   'timeslice',
   'viewMode',
+  'id',
 ];
 
 export function startDiffingDashboardState(

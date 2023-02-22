@@ -46,6 +46,8 @@ export {
   type ReduxEmbeddablePackage,
 } from './redux_embeddables';
 
+export { createReduxTools } from './redux_tools/create_redux_tools';
+
 export type {
   ExpressionInputEditorRef,
   ExpressionInputProps,

@@ -14,7 +14,7 @@ import { EuiWrappingPopover } from '@elastic/eui';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { DashboardOptions } from './overlays/options';
-import { DashboardContainer } from '../dashboard_container';
+import { DashboardContainer, DashboardContainerContext } from '../dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
 
 let isOpen = false;
@@ -43,7 +43,7 @@ export function showOptions(this: DashboardContainer, anchorElement: HTMLElement
   const element = (
     <I18nProvider>
       <KibanaThemeProvider theme$={theme$}>
-        <this.DashboardReduxWrapper>
+        <DashboardContainerContext.Provider value={this}>
           <EuiWrappingPopover
             id="popover"
             button={anchorElement}
@@ -52,7 +52,7 @@ export function showOptions(this: DashboardContainer, anchorElement: HTMLElement
           >
             <DashboardOptions />
           </EuiWrappingPopover>
-        </this.DashboardReduxWrapper>
+        </DashboardContainerContext.Provider>
       </KibanaThemeProvider>
     </I18nProvider>
   );

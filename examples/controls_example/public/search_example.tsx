@@ -22,11 +22,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { ControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { PLUGIN_ID } from './constants';
-
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 interface Props {
   data: DataPublicPluginStart;
@@ -36,7 +33,7 @@ interface Props {
 
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [controlFilters, setControlFilters] = useState<Filter[]>([]);
-  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
+  const [controlGroup, setControlGroup] = useState<ControlGroupAPI | null>();
   const [hits, setHits] = useState(0);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -153,10 +150,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
               viewMode: ViewMode.VIEW,
             };
           }}
-          onLoadComplete={async (newControlGroup) => {
-            setControlGroup(newControlGroup);
-          }}
           query={query}
+          ref={setControlGroup}
           timeRange={timeRange}
         />
         <EuiCallOut title="Search results">

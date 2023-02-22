@@ -47,7 +47,7 @@ export interface DashboardAppProps {
 
 export const DashboardAPIContext = createContext<DashboardAPI | null>(null);
 
-export const useDashboardAPI = (): DashboardAPI => {
+export const useDashboardAPI = (): NonNullable<DashboardAPI> => {
   const api = useContext<DashboardAPI | null>(DashboardAPIContext);
   if (api == null) {
     throw new Error('useDashboardAPI must be used inside DashboardAPIContext');

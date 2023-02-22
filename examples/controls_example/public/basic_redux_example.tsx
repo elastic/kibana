@@ -15,7 +15,29 @@ import { ControlGroupRenderer, ControlStyle, ControlGroupAPI } from '@kbn/contro
 export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
   const [controlGroupAPI, setControlGroupApi] = useState<ControlGroupAPI | null>();
 
-  const controlStyle = controlGroupAPI?.select((state) => state.explicitInput.controlStyle);
+  const Buttons = ({ api }: { api: NonNullable<ControlGroupAPI> }) => {
+    const controlStyle = api.select((state) => state.explicitInput.controlStyle);
+    return (
+      <EuiButtonGroup
+        legend="Text style"
+        options={[
+          {
+            id: `oneLine`,
+            label: 'One line',
+            value: 'oneLine' as ControlStyle,
+          },
+          {
+            id: `twoLine`,
+            label: 'Two lines',
+            value: 'twoLine' as ControlStyle,
+          },
+        ]}
+        idSelected={controlStyle}
+        onChange={(id, value) => controlGroupAPI?.dispatch.setControlStyle(value)}
+        type="single"
+      />
+    );
+  };
 
   return (
     <>
@@ -27,26 +49,7 @@ export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
-        {controlGroupAPI && (
-          <EuiButtonGroup
-            legend="Text style"
-            options={[
-              {
-                id: `oneLine`,
-                label: 'One line',
-                value: 'oneLine' as ControlStyle,
-              },
-              {
-                id: `twoLine`,
-                label: 'Two lines',
-                value: 'twoLine' as ControlStyle,
-              },
-            ]}
-            idSelected={controlStyle ?? 'oneLine'}
-            onChange={(id, value) => controlGroupAPI?.dispatch.setControlStyle(value)}
-            type="single"
-          />
-        )}
+        {controlGroupAPI && <Buttons api={controlGroupAPI} />}
 
         <ControlGroupRenderer
           ref={setControlGroupApi}
