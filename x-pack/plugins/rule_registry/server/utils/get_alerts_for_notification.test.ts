@@ -12,6 +12,7 @@ import {
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { cloneDeep } from 'lodash';
 import { getAlertsForNotification } from './get_alerts_for_notification';
+
 describe('getAlertsForNotification', () => {
   const alert1 = {
     event: {
