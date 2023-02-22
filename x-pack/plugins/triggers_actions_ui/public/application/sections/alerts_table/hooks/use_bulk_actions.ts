@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { useContext, useEffect, useMemo } from 'react';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Alerts,
   BulkActionsConfig,
@@ -22,6 +23,7 @@ import { ADD_TO_CASE_DISABLED, ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './t
 import { useGetUserCasesPermissions } from './use_get_user_cases_permissions';
 
 interface BulkActionsProps {
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   alerts: Alerts;
   casesService?: CasesService;
   casesFeatureId: string;
@@ -34,6 +36,7 @@ export interface UseBulkActions {
   bulkActionsState: BulkActionsState;
   bulkActions: BulkActionsConfig[];
   setIsBulkActionsLoading: (isLoading: boolean) => void;
+  clearSelection: () => void;
 }
 
 type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesService' | 'casesFeatureId'>;
@@ -91,10 +94,11 @@ export function useBulkActions({
   alerts,
   casesService,
   casesFeatureId,
+  query,
   useBulkActionsConfig = () => [],
 }: BulkActionsProps): UseBulkActions {
   const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
-  const configBulkActions = useBulkActionsConfig();
+  const configBulkActions = useBulkActionsConfig(query);
   const caseBulkActions = useBulkAddToCaseActions({ casesService, casesFeatureId });
 
   const bulkActions = [...configBulkActions, ...caseBulkActions];
@@ -109,11 +113,16 @@ export function useBulkActions({
     updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
   };
 
+  const clearSelection = () => {
+    updateBulkActionsState({ action: BulkActionsVerbs.clear });
+  };
+
   return {
     isBulkActionsColumnActive,
     getBulkActionsLeadingControlColumn,
     bulkActionsState,
     bulkActions,
     setIsBulkActionsLoading,
+    clearSelection,
   };
 }

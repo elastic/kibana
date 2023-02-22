@@ -165,7 +165,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput('rule-1'),
-          actions: [action1, action2],
+          actions: [
+            { ...action1, uuid: firstRule.actions[0].uuid },
+            { ...action2, uuid: firstRule.actions[1].uuid },
+          ],
           throttle: 'rule',
         };
         expect(firstRule).to.eql(outputRule1);
@@ -213,12 +216,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput('rule-2'),
-          actions: [action],
+          actions: [{ ...action, uuid: firstRule.actions[0].uuid }],
           throttle: 'rule',
         };
         const outputRule2: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput('rule-1'),
-          actions: [action],
+          actions: [{ ...action, uuid: secondRule.actions[0].uuid }],
           throttle: 'rule',
         };
         expect(firstRule).to.eql(outputRule1);

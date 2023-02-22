@@ -6,7 +6,7 @@
  */
 
 import type { Moment } from 'moment';
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactNode, RefObject } from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -17,7 +17,12 @@ import type {
   IconType,
   EuiFlyoutSize,
   RecursivePartial,
+  EuiDataGridCellValueElementProps,
   EuiDataGridToolBarAdditionalControlsOptions,
+  EuiDataGridProps,
+  EuiDataGridRefProps,
+  EuiDataGridColumnCellAction,
+  EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
@@ -52,7 +57,10 @@ import {
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { TypeRegistry } from './application/type_registry';
@@ -474,9 +482,19 @@ export interface FetchAlertData {
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;
   sort: SortCombinations[];
+  /**
+   * We need to have it because of lot code is expecting this format
+   * @deprecated
+   */
+  oldAlertsData: Array<Array<{ field: string; value: string[] }>>;
+  /**
+   * We need to have it because of lot code is expecting this format
+   * @deprecated
+   */
+  ecsAlertsData: unknown[];
 }
 
-export interface AlertsTableProps {
+export type AlertsTableProps = {
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
   casesData: { cases: Map<string, Case>; isLoading: boolean };
   casesService?: CasesService;
@@ -501,9 +519,11 @@ export interface AlertsTableProps {
   onResetColumns: () => void;
   onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
   showInspectButton?: boolean;
-}
+  toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
+} & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
 export type GetRenderCellValue = ({
@@ -532,15 +552,40 @@ export interface BulkActionsConfig {
   onClick: (
     selectedIds: TimelineItem[],
     isAllSelected: boolean,
-    setIsBulkActionsLoading: (isLoading: boolean) => void
+    setIsBulkActionsLoading: (isLoading: boolean) => void,
+    clearSelection: () => void,
+    refresh: () => void
   ) => void;
 }
 
+export type UseBulkActionsRegistry = (
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>
+) => BulkActionsConfig[];
+
+export type UseCellActions = (props: {
+  columns: EuiDataGridColumn[];
+  data: unknown[][];
+  dataGridRef: RefObject<EuiDataGridRefProps>;
+  ecsData: unknown[];
+  pageSize: number;
+}) => {
+  // getCellAction function for system to return cell actions per Id
+  getCellActions: (columnId: string, columnIndex: number) => EuiDataGridColumnCellAction[];
+  visibleCellActions?: number;
+  disabledCellActions?: string[];
+};
+
 export interface RenderCustomActionsRowArgs {
+  ecsAlert: FetchAlertData['ecsAlertsData'][number];
+  nonEcsData: FetchAlertData['oldAlertsData'][number];
+  rowIndex: number;
+  cveProps: EuiDataGridCellValueElementProps;
   alert: Alert;
   setFlyoutAlert: (data: unknown) => void;
   id?: string;
   setIsActionLoading?: (isLoading: boolean) => void;
+  refresh: () => void;
+  clearSelection: () => void;
 }
 
 export type UseActionsColumnRegistry = () => {
@@ -548,7 +593,11 @@ export type UseActionsColumnRegistry = () => {
   width?: number;
 };
 
-export type UseBulkActionsRegistry = () => BulkActionsConfig[];
+export interface UseFieldBrowserOptionsArgs {
+  onToggleColumn: (columnId: string) => void;
+}
+
+export type UseFieldBrowserOptions = (args: UseFieldBrowserOptionsArgs) => FieldBrowserOptions;
 
 export interface AlertsTableConfigurationRegistry {
   id: string;
@@ -563,10 +612,13 @@ export interface AlertsTableConfigurationRegistry {
   getRenderCellValue?: GetRenderCellValue;
   useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
+  useCellActions?: UseCellActions;
   usePersistentControls?: () => {
     right?: ReactNode;
   };
+  useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
+  app_id?: string;
 }
 
 export enum BulkActionsVerbs {
@@ -673,6 +725,12 @@ export interface UpdateRulesToBulkEditProps {
   action: BulkEditActions;
   rules?: RuleTableItem[];
   filter?: KueryNode | null;
+}
+
+export interface TableUpdateHandlerArgs {
+  totalCount: number;
+  isLoading: boolean;
+  refresh: () => void;
 }
 
 export interface LazyLoadProps {

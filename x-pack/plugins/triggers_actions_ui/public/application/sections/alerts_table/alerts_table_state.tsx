@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useRef, useMemo, useReducer } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useReducer, useEffect } from 'react';
 import { isEmpty } from 'lodash';
 import {
   EuiDataGridColumn,
@@ -13,9 +13,14 @@ import {
   EuiDataGridSorting,
   EuiEmptyPrompt,
   EuiFlyoutSize,
+  EuiDataGridProps,
+  EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import type {
+  BrowserFields,
+  RuleRegistrySearchRequestPagination,
+} from '@kbn/rule-registry-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
@@ -35,6 +40,7 @@ import {
   BulkActionsReducerAction,
   BulkActionsState,
   RowSelectionState,
+  TableUpdateHandlerArgs,
 } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
@@ -50,7 +56,7 @@ const DefaultPagination = {
   pageIndex: 0,
 };
 
-export interface AlertsTableStateProps {
+export type AlertsTableStateProps = {
   alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
   configurationId: string;
   id: string;
@@ -59,8 +65,11 @@ export interface AlertsTableStateProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
+  browserFields?: BrowserFields;
+  onUpdate?: (args: TableUpdateHandlerArgs) => void;
   showAlertStatusWithFlapping?: boolean;
-}
+  toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
+} & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
   columns: EuiDataGridColumn[];
@@ -85,7 +94,6 @@ const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
 );
 
 const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
-const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
 
 type AlertWithCaseIds = Alert & Required<Pick<Alert, 'kibana.alert.case_ids'>>;
 
@@ -117,12 +125,24 @@ const AlertsTableStateWithQueryProvider = ({
   query,
   pageSize,
   showExpandToDetails,
+  leadingControlColumns,
+  rowHeightsOptions,
+  renderCellValue,
+  columns: propColumns,
+  gridStyle,
+  browserFields: propBrowserFields,
+  onUpdate,
   showAlertStatusWithFlapping,
+  toolbarVisibility,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
 
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
+
+  if (!hasAlertsTableConfiguration)
+    // eslint-disable-next-line no-console
+    console.warn(`Missing Alert Table configuration for configuration ID: ${configurationId}`);
 
   const alertsTableConfiguration = hasAlertsTableConfiguration
     ? alertsTableConfigurationRegistry.get(configurationId)
@@ -133,14 +153,17 @@ const AlertsTableStateWithQueryProvider = ({
   const persistentControls = alertsTableConfiguration?.usePersistentControls?.();
   const showInspectButton = alertsTableConfiguration?.showInspectButton ?? false;
 
+  const columnConfigByClient =
+    propColumns && !isEmpty(propColumns) ? propColumns : alertsTableConfiguration?.columns ?? [];
+
   const columnsLocal =
     localAlertsTableConfig &&
     localAlertsTableConfig.columns &&
     !isEmpty(localAlertsTableConfig?.columns)
       ? localAlertsTableConfig?.columns ?? []
-      : alertsTableConfiguration?.columns ?? [];
+      : columnConfigByClient;
 
-  const storageAlertsTable = useRef<AlertsTableStorage>({
+  const getStorageConfig = () => ({
     columns: columnsLocal,
     sort:
       localAlertsTableConfig &&
@@ -155,6 +178,9 @@ const AlertsTableStateWithQueryProvider = ({
         ? localAlertsTableConfig?.visibleColumns ?? []
         : columnsLocal.map((c) => c.id),
   });
+  const storageAlertsTable = useRef<AlertsTableStorage>(getStorageConfig());
+
+  storageAlertsTable.current = getStorageConfig();
 
   const [sort, setSort] = useState<SortCombinations[]>(storageAlertsTable.current.sort);
   const [pagination, setPagination] = useState({
@@ -171,18 +197,22 @@ const AlertsTableStateWithQueryProvider = ({
     onResetColumns,
     visibleColumns,
     onChangeVisibleColumns,
+    fields,
   } = useColumns({
     featureIds,
     storageAlertsTable,
     storage,
     id,
-    defaultColumns: (alertsTableConfiguration && alertsTableConfiguration.columns) ?? [],
+    defaultColumns: columnConfigByClient,
+    initialBrowserFields: propBrowserFields,
   });
 
   const [
     isLoading,
     {
       alerts,
+      oldAlertsData,
+      ecsAlertsData,
       isInitializing,
       getInspectQuery,
       refetch: refresh,
@@ -190,7 +220,7 @@ const AlertsTableStateWithQueryProvider = ({
       updatedAt,
     },
   ] = useFetchAlerts({
-    fields: EMPTY_FIELDS,
+    fields,
     featureIds,
     query,
     pagination,
@@ -198,7 +228,14 @@ const AlertsTableStateWithQueryProvider = ({
     skip: false,
   });
 
+  useEffect(() => {
+    if (onUpdate) {
+      onUpdate({ isLoading, totalCount: alertsCount, refresh });
+    }
+  }, [isLoading, alertsCount, onUpdate, refresh]);
+
   const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
+
   const { data: cases, isLoading: isLoadingCases } = useBulkGetCases(Array.from(caseIds.values()));
 
   const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
@@ -245,13 +282,17 @@ const AlertsTableStateWithQueryProvider = ({
       refresh,
       sort,
       updatedAt,
+      oldAlertsData,
+      ecsAlertsData,
     };
   }, [
     alerts,
     alertsCount,
+    ecsAlertsData,
     getInspectQuery,
     isInitializing,
     isLoading,
+    oldAlertsData,
     onPageChange,
     onSortChange,
     pagination.pageIndex,
@@ -260,7 +301,7 @@ const AlertsTableStateWithQueryProvider = ({
     updatedAt,
   ]);
 
-  const tableProps = useMemo<AlertsTableProps>(
+  const tableProps: AlertsTableProps = useMemo(
     () => ({
       alertsTableConfiguration,
       casesData: { cases: cases ?? new Map(), isLoading: isLoadingCases },
@@ -273,7 +314,7 @@ const AlertsTableStateWithQueryProvider = ({
       pageSize: pagination.pageSize,
       pageSizeOptions: [10, 20, 50, 100],
       id,
-      leadingControlColumns: [],
+      leadingControlColumns: leadingControlColumns ?? [],
       showExpandToDetails,
       showAlertStatusWithFlapping,
       trailingControlColumns: [],
@@ -286,8 +327,13 @@ const AlertsTableStateWithQueryProvider = ({
       onResetColumns,
       onColumnsChange,
       onChangeVisibleColumns,
+      query,
+      rowHeightsOptions,
+      renderCellValue,
+      gridStyle,
       controls: persistentControls,
       showInspectButton,
+      toolbarVisibility,
     }),
     [
       alertsTableConfiguration,
@@ -308,8 +354,14 @@ const AlertsTableStateWithQueryProvider = ({
       onResetColumns,
       onColumnsChange,
       onChangeVisibleColumns,
+      leadingControlColumns,
+      query,
+      rowHeightsOptions,
+      renderCellValue,
+      gridStyle,
       persistentControls,
       showInspectButton,
+      toolbarVisibility,
     ]
   );
 
@@ -334,6 +386,7 @@ const AlertsTableStateWithQueryProvider = ({
       {alertsCount !== 0 && hasCases && (
         <CasesContext
           owner={[alertsTableConfiguration.cases?.owner]}
+          // owner={[alertsTableConfiguration.app_id ?? configurationId]}
           permissions={casesPermissions}
           features={{ alerts: { sync: false } }}
         >
