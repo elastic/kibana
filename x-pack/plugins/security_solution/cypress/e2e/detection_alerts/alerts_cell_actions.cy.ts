@@ -51,7 +51,7 @@ describe('Alerts cell actions', () => {
           .first()
           .invoke('text')
           .then((severityVal) => {
-            scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+            scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
             filterForAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
             cy.get(FILTER_BADGE)
               .first()
@@ -75,7 +75,7 @@ describe('Alerts cell actions', () => {
           .first()
           .invoke('text')
           .then((severityVal) => {
-            scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+            scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
             addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 0);
             openActiveTimeline();
             cy.get(PROVIDER_BADGE)
@@ -101,7 +101,7 @@ describe('Alerts cell actions', () => {
           .first()
           .invoke('text')
           .then(() => {
-            scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+            scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
             showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
             cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
           });
@@ -114,7 +114,7 @@ describe('Alerts cell actions', () => {
           .first()
           .invoke('text')
           .then(() => {
-            scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+            scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
             cy.window().then((win) => {
               cy.stub(win, 'prompt').returns('DISABLED WINDOW PROMPT');
             });

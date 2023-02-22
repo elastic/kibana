@@ -80,10 +80,10 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
         };
 
         enableTLS =
-          formattedDefaultConfigForMonitorType[ConfigKey.METADATA].is_tls_enabled ||
+          formattedDefaultConfigForMonitorType[ConfigKey.METADATA].is_tls_enabled ??
           Boolean(vars?.[ConfigKey.TLS_VERIFICATION_MODE]?.value);
         enableZipUrlTLS =
-          formattedDefaultConfigForMonitorType[ConfigKey.METADATA].is_zip_url_tls_enabled ||
+          formattedDefaultConfigForMonitorType[ConfigKey.METADATA].is_zip_url_tls_enabled ??
           Boolean(vars?.[ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]?.value);
 
         const formattedDefaultConfig: Partial<PolicyConfig> = {
