@@ -14,7 +14,8 @@ the rules active and then recovered, so that the alert data will show
 up in both the "active" and "recovered but tracking for flapping"
 containers.
 
-It then will send data for the alerts to go active on, then recover.
+It then will send data for the alerts to go active on, then recover,
+forever.
 
 It will then query the task documents for the rules, waiting till it
 gets some in both of the containers.  It prints the task document as
@@ -33,7 +34,7 @@ const KBN_URL = process.env.KBN_URL;
 const ES_URL = process.env.ES_URL;
 
 const dataIndex = 'rule-task-state--dev';
-const dataAlias = `metrics-${dataIndex}`;
+const dataAlias = `metrics-${dataIndex}`; // metrics rules look for metrics-* indices
 const mappings = {
   properties: {
     '@timestamp': { type: 'date' },
@@ -42,10 +43,10 @@ const mappings = {
   },
 };
 
-let active = true;
-let conn;
-let mtRule;
-let itRule;
+let Active = true;
+let Conn;
+let MtRule;
+let ItRule;
 
 main();
 
@@ -58,21 +59,21 @@ async function main() {
 
   // write data @ 1s, alternating active / not active @ 5s
   setInterval(writeData, 1000);
-  setInterval(() => (active = !active), 5000);
+  setInterval(() => (Active = !Active), 5000);
 
   const createConnPayload = {
     name: 'server log for rule-task-state',
     connector_type_id: '.server-log',
   };
 
-  conn = await postKbn(`api/actions/connector`, createConnPayload);
-  console.log(`server log id:            ${conn.id}`);
+  Conn = await postKbn(`api/actions/connector`, createConnPayload);
+  console.log(`server log id:            ${Conn.id}`);
 
-  mtRule = await postKbn(`api/alerting/rule`, getMtRulePayload());
-  console.log(`metric threshold rule id: ${mtRule.id}`);
+  MtRule = await postKbn(`api/alerting/rule`, getMtRulePayload());
+  console.log(`metric threshold rule id: ${MtRule.id}`);
 
-  itRule = await postKbn(`api/alerting/rule`, getItRulePayload());
-  console.log(`index  threshold rule id: ${itRule.id}`);
+  ItRule = await postKbn(`api/alerting/rule`, getItRulePayload());
+  console.log(`index  threshold rule id: ${ItRule.id}`);
 
   setInterval(getTaskDocs, 3000);
 }
@@ -81,21 +82,21 @@ function writeData() {
   const date = new Date().toISOString();
   postEs(`${dataIndex}/_doc`, {
     '@timestamp': date,
-    network: { name: 'host-A', packets: active ? 1 : 0 },
+    network: { name: 'host-A', packets: Active ? 1 : 0 },
   });
   postEs(`${dataIndex}/_doc`, {
     '@timestamp': date,
-    network: { name: 'host-B', packets: active ? 1 : 0 },
+    network: { name: 'host-B', packets: Active ? 1 : 0 },
   });
   postEs(`${dataIndex}/_doc`, {
     '@timestamp': date,
-    network: { name: 'host-C', packets: active ? 0 : 1 },
+    network: { name: 'host-C', packets: Active ? 0 : 1 },
   });
 }
 
 async function getTaskDocs() {
-  const { task: mtTaskState, ruleState: mtRuleState } = await getTask(mtRule.id);
-  const { task: itTaskState, ruleState: itRuleState } = await getTask(itRule.id);
+  const { task: mtTaskState, ruleState: mtRuleState } = await getTask(MtRule.id);
+  const { task: itTaskState, ruleState: itRuleState } = await getTask(ItRule.id);
 
   console.log('--------------------------------------------------------');
   console.log(JSON.stringify(itTaskState._source));
@@ -146,7 +147,7 @@ function getMtRulePayload() {
     actions: [
       {
         group: 'metrics.threshold.fired',
-        id: conn.id,
+        id: Conn.id,
         params: {
           message:
             '{{alertName}} - {{context.group}} is in a state of {{context.alertState}}\n\nReason:\n{{context.reason}}\n',
@@ -166,7 +167,7 @@ function getItRulePayload() {
     actions: [
       {
         group: 'threshold met',
-        id: conn.id,
+        id: Conn.id,
         params: { message: '{{context.message}}' },
       },
     ],

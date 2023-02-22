@@ -165,6 +165,7 @@ export const createLifecycleExecutor =
       services: { alertFactory, shouldWriteAlerts },
       state: previousState,
       flappingSettings,
+      rule,
     } = options;
 
     const ruleDataClientWriter = await ruleDataClient.getWriter();
@@ -196,18 +197,24 @@ export const createLifecycleExecutor =
       },
       getAlertStartedDate: (alertId: string) => state.trackedAlerts[alertId]?.started ?? null,
       getAlertUuid: (alertId: string) => {
-        const trackedAlert = state.trackedAlerts[alertId];
-        if (trackedAlert) {
-          return trackedAlert.alertUuid;
-        }
-
         const uuid = alertUuidMap.get(alertId);
         if (uuid) {
           return uuid;
         }
 
+        const trackedAlert = state.trackedAlerts[alertId];
+        if (trackedAlert) {
+          return trackedAlert.alertUuid;
+        }
+
+        const trackedRecoveredAlert = state.trackedAlertsRecovered[alertId];
+        if (trackedRecoveredAlert) {
+          return trackedRecoveredAlert.alertUuid;
+        }
+
+        const alertInfo = `alert ${alertId} of rule ${rule.ruleTypeId}:${rule.id}`;
         logger.warn(
-          `[Rule Registry] requesting uuid for alert ${alertId} which is not tracked, generating dynamically`
+          `[Rule Registry] requesting uuid for ${alertInfo} which is not tracked, generating dynamically`
         );
         return v4();
       },
