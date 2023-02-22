@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useState, useEffect } from 'react';
+import React, { FC } from 'react';
 import moment from 'moment-timezone';
 
-import { EuiIcon, EuiLoadingSpinner, EuiProgress, EuiTabbedContent } from '@elastic/eui';
+import { EuiProgress, EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,21 +18,8 @@ import { DataFrameAnalyticsListRow } from './common';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 
-import {
-  getDependentVar,
-  getPredictionFieldName,
-  getValuesFromResponse,
-  loadEvalData,
-  Eval,
-} from '../../../../common';
-import { getDataFrameAnalyticsProgressPhase, isCompletedAnalyticsJob } from './common';
-import {
-  isRegressionAnalysis,
-  getAnalysisType,
-  ANALYSIS_CONFIG_TYPE,
-  REGRESSION_STATS,
-  isRegressionEvaluateResponse,
-} from '../../../../common/analytics';
+import { getDataFrameAnalyticsProgressPhase } from './common';
+import { getAnalysisType } from '../../../../common/analytics';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {
@@ -43,124 +30,12 @@ function getItemDescription(value: any) {
   return value.toString();
 }
 
-interface LoadedStatProps {
-  isLoading: boolean;
-  evalData: Eval;
-  resultProperty: REGRESSION_STATS;
-}
-
-const LoadedStat: FC<LoadedStatProps> = ({ isLoading, evalData, resultProperty }) => {
-  return (
-    <Fragment>
-      {isLoading === false && evalData.error !== null && <EuiIcon type="alert" size="s" />}
-      {isLoading === true && <EuiLoadingSpinner size="s" />}
-      {isLoading === false && evalData.error === null && evalData[resultProperty]}
-    </Fragment>
-  );
-};
-
 interface Props {
   item: DataFrameAnalyticsListRow;
 }
 
-const defaultEval: Eval = { mse: '', msle: '', huber: '', rSquared: '', error: null };
-
 export const ExpandedRow: FC<Props> = ({ item }) => {
-  const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
-  const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
-  const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
-  const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
-  const index = item?.config?.dest?.index;
-  const dependentVariable = getDependentVar(item.config.analysis);
-  const predictionFieldName = getPredictionFieldName(item.config.analysis);
-  // default is 'ml'
-  const resultsField = item.config.dest.results_field ?? 'ml';
-  const jobIsCompleted = isCompletedAnalyticsJob(item.stats);
-  const isRegressionJob = isRegressionAnalysis(item.config.analysis);
   const analysisType = getAnalysisType(item.config.analysis);
-
-  const loadData = async () => {
-    setIsLoadingGeneralization(true);
-    setIsLoadingTraining(true);
-
-    const genErrorEval = await loadEvalData({
-      isTraining: false,
-      index,
-      dependentVariable,
-      resultsField,
-      predictionFieldName,
-      jobType: ANALYSIS_CONFIG_TYPE.REGRESSION,
-    });
-
-    if (
-      genErrorEval.success === true &&
-      genErrorEval.eval &&
-      isRegressionEvaluateResponse(genErrorEval.eval)
-    ) {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { mse, msle, huber, r_squared } = getValuesFromResponse(genErrorEval.eval);
-      setGeneralizationEval({
-        mse,
-        msle,
-        huber,
-        rSquared: r_squared,
-        error: null,
-      });
-      setIsLoadingGeneralization(false);
-    } else {
-      setIsLoadingGeneralization(false);
-      setGeneralizationEval({
-        mse: '',
-        msle: '',
-        huber: '',
-        rSquared: '',
-        error: genErrorEval.error,
-      });
-    }
-
-    const trainingErrorEval = await loadEvalData({
-      isTraining: true,
-      index,
-      dependentVariable,
-      resultsField,
-      predictionFieldName,
-      jobType: ANALYSIS_CONFIG_TYPE.REGRESSION,
-    });
-
-    if (
-      trainingErrorEval.success === true &&
-      trainingErrorEval.eval &&
-      isRegressionEvaluateResponse(trainingErrorEval.eval)
-    ) {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { mse, msle, huber, r_squared } = getValuesFromResponse(trainingErrorEval.eval);
-      setTrainingEval({
-        mse,
-        msle,
-        huber,
-        rSquared: r_squared,
-        error: null,
-      });
-      setIsLoadingTraining(false);
-    } else {
-      setIsLoadingTraining(false);
-      setTrainingEval({
-        mse: '',
-        msle: '',
-        huber: '',
-        rSquared: '',
-        error: genErrorEval.error,
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (jobIsCompleted && isRegressionJob) {
-      loadData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobIsCompleted]);
-
   const stateValues: any = { ...item.stats };
 
   const analysisStatsValues = stateValues.analysis_stats
@@ -179,7 +54,6 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
         defaultMessage: 'Data counts',
       }
     ),
-    position: 'top',
     items: [
       {
         title: i18n.translate(
@@ -219,7 +93,6 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
         defaultMessage: 'Memory usage',
       }
     ),
-    position: 'top',
     items: [
       {
         title: i18n.translate(
@@ -273,7 +146,6 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
         };
       }),
     ],
-    position: 'right',
     dataTestSubj: 'mlAnalyticsTableRowDetailsSection progress',
   };
 
@@ -308,7 +180,6 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
         description: item.config.version ?? '',
       },
     ],
-    position: 'left',
     dataTestSubj: 'mlAnalyticsTableRowDetailsSection stats',
   };
 
@@ -338,7 +209,6 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
             return { title, description: getItemDescription(stateValue) };
           }),
         ],
-        position: 'right',
         dataTestSubj: 'mlAnalyticsTableRowDetailsSection analysisStats',
       }
     : undefined;

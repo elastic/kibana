@@ -28,7 +28,6 @@ export interface SectionItem {
 }
 export interface SectionConfig {
   title: string;
-  position: 'left' | 'right' | 'top';
   items: SectionItem[];
   dataTestSubj: string;
 }
