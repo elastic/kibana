@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, ReactElement, useCallback, useRef, useState } from 'react';
+import React, { FC, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import useMount from 'react-use/lib/useMount';
 
 export interface FloatingActionsProps {
   className?: string;
@@ -16,6 +17,25 @@ export interface FloatingActionsProps {
   children: ReactElement;
   isEnabled?: boolean;
   usingTwoLineLayout?: boolean;
+}
+
+const hiddenActionsStyles = `
+visibility: hidden;
+opacity: 0;
+
+// slower transition on hover leave in case the user accidentally stops hover
+transition: visibility 0.3s, opacity 0.3s;
+`;
+
+const visibleActionsStyles = `
+transition: visibility 0.1s, opacity 0.1s;
+visibility: visible;
+opacity: 1;
+`;
+
+interface FloatingActionsPosition {
+  top: number;
+  left: number;
 }
 
 export const FloatingActions: FC<FloatingActionsProps> = ({
@@ -28,45 +48,58 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   const { euiTheme } = useEuiTheme();
   const anchorRef = useRef<HTMLSpanElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
+
+  const [position, setPosition] = useState<FloatingActionsPosition>({
+    top: 0,
+    left: 0,
+  });
   const [areFloatingActionsVisible, setFloatingActionsVisible] = useState<boolean>(false);
 
   const showFloatingActions = useCallback(
-    () => isEnabled && setFloatingActionsVisible(true),
-    [isEnabled, setFloatingActionsVisible]
+    () => isEnabled && !areFloatingActionsVisible && setFloatingActionsVisible(true),
+    [isEnabled, areFloatingActionsVisible, setFloatingActionsVisible]
   );
   const hideFloatingActions = useCallback(
-    () => setFloatingActionsVisible(false),
-    [setFloatingActionsVisible]
+    () => areFloatingActionsVisible && setFloatingActionsVisible(false),
+    [areFloatingActionsVisible, setFloatingActionsVisible]
   );
 
-  const anchorBoundingRect = anchorRef.current?.getBoundingClientRect();
-  const actionsBoundingRect = actionsRef.current?.getBoundingClientRect();
+  const updatePosition = useCallback(() => {
+    if (anchorRef.current && actionsRef.current) {
+      const anchorBoundingRect = anchorRef.current?.getBoundingClientRect();
+      const actionsBoundingRect = actionsRef.current?.getBoundingClientRect();
 
-  const hiddenActionsStyles = `
-  visibility: hidden;
-  opacity: 0;
+      const top =
+        anchorBoundingRect.top -
+        (usingTwoLineLayout ? parseInt(euiTheme.size.xs, 10) : parseInt(euiTheme.size.l, 10)) +
+        window.scrollY;
+      const left =
+        anchorBoundingRect.right -
+        actionsBoundingRect.width -
+        parseInt(euiTheme.size.xs, 10) +
+        window.scrollX;
 
-  // slower transition on hover leave in case the user accidentally stops hover
-  transition: visibility 0.3s, opacity 0.3s;
+      if (position.top !== top || position.left !== left) {
+        setPosition({ top, left });
+      }
+    }
+  }, [anchorRef, actionsRef, euiTheme.size, position, usingTwoLineLayout]);
+
+  console.log('render');
+
+  const floatingActionsStyles = css`
+    top: ${position.top}px;
+    left: ${position.left}px;
+
+    ${areFloatingActionsVisible ? visibleActionsStyles : hiddenActionsStyles}
   `;
-  const visibleActionsStyles = `
-  transition: visibility 0.1s, opacity 0.1s;
-  visibility: visible;
-  opacity: 1;
-  `;
 
-  const floatingActionStyles =
-    anchorBoundingRect && actionsBoundingRect
-      ? css`
-          top: ${anchorBoundingRect.top -
-          (usingTwoLineLayout ? parseInt(euiTheme.size.xs, 10) : parseInt(euiTheme.size.l, 10))}px;
-          left: ${anchorBoundingRect.right -
-          actionsBoundingRect.width -
-          parseInt(euiTheme.size.xs, 10)}px;
+  useEffect(updatePosition);
 
-          ${areFloatingActionsVisible ? visibleActionsStyles : hiddenActionsStyles}
-        `
-      : undefined;
+  useMount(() => {
+    window.addEventListener('scroll', updatePosition, true);
+    return () => window.removeEventListener('scroll', updatePosition, true);
+  });
 
   return (
     <>
@@ -84,7 +117,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         <div
           ref={actionsRef}
           className={className}
-          css={floatingActionStyles}
+          css={floatingActionsStyles}
           onMouseOver={showFloatingActions}
           onFocus={showFloatingActions}
           onMouseLeave={hideFloatingActions}
