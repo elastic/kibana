@@ -212,9 +212,6 @@ describe('IndexPatterns', () => {
 
   test('allowNoIndex flag preserves existing fields when index is missing', async () => {
     const id = '2';
-    apiClient.getFieldsForWildcard = jest.fn().mockImplementation(async () => {
-      throw new DataViewMissingIndices('Catch me if you can!');
-    });
     setDocsourcePayload(id, {
       id: 'foo',
       version: 'foo',

@@ -104,7 +104,8 @@ export interface DataViewsServiceDeps {
    */
   onNotification: OnNotification;
   /**
-   * Handler when there are missing indices
+   * Handler triggered when there are no indices
+   * @param error Error object
    */
   onMissingIndices?: (error: Error) => void;
   /**
@@ -338,10 +339,10 @@ export class DataViewsService {
       apiClient,
       fieldFormats,
       onNotification,
+      onMissingIndices,
       onError,
       getCanSave = () => Promise.resolve(false),
       getCanSaveAdvancedSettings,
-      onMissingIndices,
     } = deps;
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -645,6 +646,9 @@ export class DataViewsService {
       if (err instanceof DataViewMissingIndices) {
         this.onMissingIndices?.(err);
         return {};
+      }
+      if (!displayErrors) {
+        throw err;
       }
 
       this.onError(
