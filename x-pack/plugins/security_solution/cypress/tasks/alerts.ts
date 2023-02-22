@@ -38,6 +38,7 @@ import {
   ACTIONS_EXPAND_BUTTON,
   ALERT_EMBEDDABLE_PROGRESS_BAR,
   ALERT_COUNT_TABLE_COLUMN,
+  SELECT_HISTOGRAM,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -260,6 +261,10 @@ export const openAlerts = () => {
 
 export const selectCountTable = () => {
   cy.get(SELECT_AGGREGATION_CHART).click({ force: true });
+};
+
+export const selectAlertsHistogram = () => {
+  cy.get(SELECT_HISTOGRAM).click({ force: true });
 };
 
 export const clearGroupByTopInput = () => {

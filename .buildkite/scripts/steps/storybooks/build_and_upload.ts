@@ -19,6 +19,7 @@ const STORYBOOKS = [
   'cloud_chat',
   'coloring',
   'chart_icons',
+  'content_management_plugin',
   'controls',
   'custom_integrations',
   'dashboard_enhanced',

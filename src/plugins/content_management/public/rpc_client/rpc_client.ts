@@ -8,7 +8,15 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { API_ENDPOINT } from '../../common';
-import type { GetIn, CreateIn, UpdateIn, DeleteIn, SearchIn, ProcedureName } from '../../common';
+import type {
+  GetIn,
+  BulkGetIn,
+  CreateIn,
+  UpdateIn,
+  DeleteIn,
+  SearchIn,
+  ProcedureName,
+} from '../../common';
 import type { CrudClient } from '../crud_client/crud_client';
 
 export class RpcClient implements CrudClient {
@@ -16,6 +24,10 @@ export class RpcClient implements CrudClient {
 
   public get<I extends GetIn = GetIn, O = unknown>(input: I): Promise<O> {
     return this.sendMessage('get', input);
+  }
+
+  public bulkGet<I extends BulkGetIn = BulkGetIn, O = unknown>(input: I): Promise<O> {
+    return this.sendMessage('bulkGet', input);
   }
 
   public create<I extends CreateIn = CreateIn, O = unknown>(input: I): Promise<O> {

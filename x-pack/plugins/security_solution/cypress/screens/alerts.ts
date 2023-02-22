@@ -151,3 +151,8 @@ export const ACTIONS_EXPAND_BUTTON = '[data-test-subj="euiDataGridCellExpandButt
 
 export const SHOW_TOP_N_HEADER =
   '[data-test-subj="topN-container"] [data-test-subj="header-section-title"]';
+
+export const ALERTS_HISTOGRAM_LEGEND =
+  '[data-test-subj="alerts-histogram-panel"] [data-test-subj="withHoverActionsButton"]';
+
+export const SELECT_HISTOGRAM = '[data-test-subj="chart-select-trend"]';
