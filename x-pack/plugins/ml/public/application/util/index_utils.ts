@@ -18,7 +18,25 @@ let indexPatternsContract: DataViewsContract | null = null;
 export async function loadIndexPatterns(indexPatterns: DataViewsContract) {
   indexPatternsContract = indexPatterns;
   const dataViewsContract = getDataViews();
-  indexPatternCache = await dataViewsContract.find('*', 10000);
+  const idsAndTitles = await dataViewsContract.getIdsWithTitle();
+
+  const dataViewsThatExist = (
+    await Promise.allSettled(
+      // attempt to load the fields for every data view.
+      // if the index doesn't exist an error is thrown which we can catch.
+      // This is preferable to the get function which display an
+      // error toast for every missing index.
+      idsAndTitles.map(({ title }) => dataViewsContract.getFieldsForIndexPattern({ title }))
+    )
+  ).reduce<string[]>((acc, { status }, i) => {
+    if (status === 'fulfilled') {
+      acc.push(idsAndTitles[i].id);
+    }
+    return acc;
+  }, []);
+
+  // load each data view which has a real index behind it.
+  indexPatternCache = await Promise.all(dataViewsThatExist.map(dataViewsContract.get));
   return indexPatternCache;
 }
 

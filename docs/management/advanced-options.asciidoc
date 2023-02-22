@@ -555,4 +555,4 @@ only production-ready visualizations are available to users.
 [horizontal]
 [[telemetry-enabled-advanced-setting]]`telemetry:enabled`::
 When enabled, helps improve the Elastic Stack by providing usage statistics for
-basic features. This data will not be shared outside of Elastic.
+basic features.

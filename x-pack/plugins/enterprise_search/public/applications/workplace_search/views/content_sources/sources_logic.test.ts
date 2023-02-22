@@ -62,7 +62,7 @@ describe('SourcesLogic', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
     jest.clearAllMocks();
     mount();
   });

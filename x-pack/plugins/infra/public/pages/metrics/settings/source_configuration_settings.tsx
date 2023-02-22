@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { Source } from '../../../containers/metrics_source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
@@ -76,18 +76,12 @@ export const SourceConfigurationSettings = ({
     formStateChanges,
   ]);
 
-  const isWriteable = useMemo(
-    () => shouldAllowEdit && source && source.origin !== 'internal',
-    [shouldAllowEdit, source]
-  );
+  const isWriteable = shouldAllowEdit && (!Boolean(source) || source?.origin !== 'internal');
 
   const { hasInfraMLCapabilities } = useInfraMLCapabilitiesContext();
 
   if ((isLoading || isUninitialized) && !source) {
     return <SourceLoadingPage />;
-  }
-  if (!source?.configuration) {
-    return null;
   }
 
   return (

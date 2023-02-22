@@ -52,7 +52,7 @@ describe('<TemplateEdit />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
   });
 
