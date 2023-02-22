@@ -13,10 +13,4 @@ export {
   DEFAULT_SPACE_ID,
 } from './constants';
 export { addSpaceIdToPath, getSpaceIdFromPath } from './lib/spaces_url_parser';
-export type {
-  Space,
-  GetAllSpacesOptions,
-  GetAllSpacesPurpose,
-  GetSpaceResult,
-  LegacyUrlAliasTarget,
-} from './types';
+export type { Space, GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from './types';

@@ -22,7 +22,7 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         },
         data: {},
         dataViews: {
-          create: () => {},
+          create: () => Promise.resolve({}),
         },
         docLinks: {
           links: {

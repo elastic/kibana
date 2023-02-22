@@ -12,6 +12,7 @@ import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
+  AGENT_ACTIVATION_METHOD,
   AGENT_NAME,
   AGENT_VERSION,
   CLIENT_GEO_COUNTRY_ISO_CODE,
@@ -858,6 +859,12 @@ export const tasks: TelemetryTask[] = [
               '@timestamp': 'desc',
             },
             aggs: {
+              [AGENT_ACTIVATION_METHOD]: {
+                terms: {
+                  field: AGENT_ACTIVATION_METHOD,
+                  size,
+                },
+              },
               [AGENT_VERSION]: {
                 terms: {
                   field: AGENT_VERSION,
@@ -943,6 +950,9 @@ export const tasks: TelemetryTask[] = [
           ...data,
           [agentName]: {
             agent: {
+              activation_method: aggregations[AGENT_ACTIVATION_METHOD].buckets
+                .map((bucket) => bucket.key as string)
+                .slice(0, size),
               version: aggregations[AGENT_VERSION].buckets.map(
                 (bucket) => bucket.key as string
               ),
@@ -1279,6 +1289,9 @@ export const tasks: TelemetryTask[] = [
                         sort: '_score',
                         metrics: [
                           {
+                            field: AGENT_ACTIVATION_METHOD,
+                          },
+                          {
                             field: AGENT_NAME,
                           },
                           {
@@ -1382,6 +1395,9 @@ export const tasks: TelemetryTask[] = [
             },
             agent: {
               name: envBucket.top_metrics?.top[0].metrics[AGENT_NAME] as string,
+              activation_method: envBucket.top_metrics?.top[0].metrics[
+                AGENT_ACTIVATION_METHOD
+              ] as string,
               version: envBucket.top_metrics?.top[0].metrics[
                 AGENT_VERSION
               ] as string,

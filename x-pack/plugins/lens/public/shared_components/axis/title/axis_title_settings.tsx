@@ -83,7 +83,7 @@ export const AxisTitleSettings: React.FunctionComponent<AxisTitleSettingsProps> 
             defaultMessage: 'Axis title',
           })}
           dataTestSubj={`lns${axis}AxisTitle`}
-          label={localAxisState.title || ''}
+          label={localAxisState.title}
           mode={localAxisState.visibility}
           placeholder={i18n.translate('xpack.lens.shared.overwriteAxisTitle', {
             defaultMessage: 'Overwrite axis title',
