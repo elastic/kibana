@@ -26,6 +26,7 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
   "//packages/elastic-datemath",
+  "//packages/elastic-safer-lodash-set",
   "@npm//@elastic/elasticsearch",
   "@npm//lodash",
   "@npm//moment",
@@ -38,6 +39,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/elastic-datemath:npm_module_types",
+  "//packages/elastic-safer-lodash-set",
   "@npm//@elastic/elasticsearch",
   "@npm//moment",
   "@npm//p-limit",
