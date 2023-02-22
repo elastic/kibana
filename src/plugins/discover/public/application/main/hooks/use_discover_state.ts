@@ -5,50 +5,33 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect, useState, useCallback } from 'react';
-import { History } from 'history';
+import { useEffect, useState, useCallback } from 'react';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { buildStateSubscribe } from './utils/build_state_subscribe';
 import { changeDataView } from './utils/change_data_view';
 import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { useUrlTracking } from './use_url_tracking';
-import { getDiscoverStateContainer } from '../services/discover_state';
+import { DiscoverStateContainer } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
 import { DataTableRecord } from '../../../types';
 import { useAdHocDataViews } from './use_adhoc_data_views';
 
 export function useDiscoverState({
   services,
-  history,
-  savedSearch,
+  stateContainer,
   setExpandedDoc,
 }: {
   services: DiscoverServices;
-  savedSearch: SavedSearch;
-  history: History;
+  stateContainer: DiscoverStateContainer;
   setExpandedDoc: (doc?: DataTableRecord) => void;
 }) {
   const { data, filterManager, dataViews, toastNotifications, trackUiMetric } = services;
+  const savedSearch = stateContainer.savedSearchState.get();
 
-  const dataView = savedSearch.searchSource.getField('index')!;
-
-  const stateContainer = useMemo(() => {
-    const container = getDiscoverStateContainer({
-      history,
-      savedSearch,
-      services,
-    });
-    const nextDataView = savedSearch.searchSource.getField('index')!;
-    container.actions.setDataView(nextDataView);
-    if (!nextDataView.isPersisted()) {
-      container.actions.appendAdHocDataViews(nextDataView);
-    }
-    return container;
-  }, [history, savedSearch, services]);
+  const dataView = stateContainer.savedSearchState.get().searchSource.getField('index')!;
 
   const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
 
@@ -111,7 +94,7 @@ export function useDiscoverState({
    * or dataView / savedSearch switch
    */
   useEffect(() => {
-    const stopSync = stateContainer.initializeAndSync(dataView, filterManager, data);
+    const stopSync = stateContainer.initializeAndSync();
     setState(stateContainer.appState.getState());
 
     return () => stopSync();

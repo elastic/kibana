@@ -8,7 +8,6 @@
 
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DataTableRecord } from '../../../../types';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
@@ -24,7 +23,6 @@ export interface DiscoverLayoutProps {
   ) => void;
   expandedDoc?: DataTableRecord;
   setExpandedDoc: (doc?: DataTableRecord) => void;
-  savedSearch: SavedSearch;
   stateContainer: DiscoverStateContainer;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   searchSessionManager: DiscoverSearchSessionManager;

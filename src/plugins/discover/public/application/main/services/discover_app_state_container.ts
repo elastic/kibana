@@ -34,6 +34,10 @@ import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<AppState> {
   /**
+   * Returns if the current URL is empty
+   */
+  isEmptyURL: () => boolean;
+  /**
    * Returns the previous state, used for diffing e.g. if fetching new data is necessary
    */
   getPrevious: () => AppState;
@@ -257,10 +261,15 @@ export const getDiscoverAppStateContainer = ({
     }
   };
 
+  const isEmptyURL = () => {
+    return stateStorage.get(APP_STATE_URL_KEY) === null;
+  };
+
   const getPrevious = () => previousState;
 
   return {
     ...enhancedAppContainer,
+    isEmptyURL,
     getPrevious,
     hasChanged,
     initAndSync: initializeAndSync,

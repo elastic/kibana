@@ -21,6 +21,10 @@ export const savedSearchMockWithTimeField = {
   searchSource: createSearchSourceMock({ index: dataViewWithTimefieldMock }),
 } as unknown as SavedSearch;
 
+export const savedSearchMockWithTimeFieldNew = {
+  searchSource: createSearchSourceMock({ index: dataViewWithTimefieldMock }),
+} as unknown as SavedSearch;
+
 export const savedSearchMockWithSQL = {
   id: 'the-saved-search-id-sql',
   searchSource: createSearchSourceMock({

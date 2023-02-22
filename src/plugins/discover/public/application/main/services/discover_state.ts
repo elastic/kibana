@@ -16,13 +16,13 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import {
   DataPublicPluginStart,
-  FilterManager,
   QueryState,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
+import { loadDataViewBySavedSearch } from '../utils/load_data_view_by_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { getUrlTracker } from '../../../kibana_services';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
@@ -50,7 +50,7 @@ interface DiscoverStateContainerParams {
   /**
    * The current savedSearch
    */
-  savedSearch: SavedSearch;
+  savedSearch?: SavedSearch;
   /**
    * core ui settings service
    */
@@ -83,13 +83,9 @@ export interface DiscoverStateContainer {
    **/
   dataState: DataStateContainer;
   /**
-   * Initialize state with filters and query,  start state syncing
+   * Initialize state with filters and query, start state syncing
    */
-  initializeAndSync: (
-    dataView: DataView,
-    filterManager: FilterManager,
-    data: DataPublicPluginStart
-  ) => () => void;
+  initializeAndSync: () => () => void;
   /**
    * Set app state to with a partial new app state
    */
@@ -136,13 +132,25 @@ export interface DiscoverStateContainer {
      */
     removeAdHocDataViewById: (id: string) => void;
     /**
-     * Replace the data view of the given id with the given data view
-     * Used when the spec of a data view changed to prevent duplicates
-     * @param id
-     * @param dataView
+     * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
+     * This is to prevent duplicate ids messing with our system
      */
-    replaceAdHocDataViewWithId: (id: string, dataView: DataView) => void;
     updateAdHocDataViewId: () => void;
+    /**
+     * Load a saved search by id
+     * @param savedSearchId
+     * @param dataViewSpec
+     * @param onError
+     */
+    loadSavedSearch: (
+      savedSearchId: string,
+      onError: (e: Error) => void
+    ) => Promise<SavedSearch | undefined>;
+    /**
+     * Load new saved search
+     * @param onError
+     */
+    loadNewSavedSearch: (onError: (e: Error) => void) => Promise<SavedSearch | undefined>;
   };
 }
 
@@ -174,7 +182,11 @@ export function getDiscoverStateContainer({
   /**
    * App State Container, synced with URL
    */
-  const appStateContainer = getDiscoverAppStateContainer({ stateStorage, savedSearch, services });
+  const appStateContainer = getDiscoverAppStateContainer({
+    stateStorage,
+    savedSearch: initialSavedSearch,
+    services,
+  });
 
   const savedSearchContainer = getSavedSearchContainer({
     savedSearch: initialSavedSearch,
@@ -202,7 +214,8 @@ export function getDiscoverStateContainer({
     getSavedSearch: () => {
       // Simulating the behavior of the removed hook to always create a clean searchSource child that
       // we then use to add query, filters, etc., will be removed soon.
-      return { ...savedSearch, searchSource: savedSearch.searchSource.createChild() };
+      const actualSavedSearch = savedSearchContainer.get();
+      return { ...actualSavedSearch, searchSource: actualSavedSearch.searchSource.createChild() };
     },
     appStateContainer,
   });
@@ -213,8 +226,6 @@ export function getDiscoverStateContainer({
     internalStateContainer.transitions.setAdHocDataViews(dataViews);
   const appendAdHocDataViews = (dataViews: DataView | DataView[]) =>
     internalStateContainer.transitions.appendAdHocDataViews(dataViews);
-  const replaceAdHocDataViewWithId = (id: string, dataView: DataView) =>
-    internalStateContainer.transitions.replaceAdHocDataViewWithId(id, dataView);
   const removeAdHocDataViewById = (id: string) =>
     internalStateContainer.transitions.removeAdHocDataViewById(id);
 
@@ -223,11 +234,11 @@ export function getDiscoverStateContainer({
     internalStateContainer.transitions.setSavedDataViews(dataViewList);
   };
 
-  const loadAndResolveDataView = async (id: string, actualSavedSearch: SavedSearch) => {
+  const loadAndResolveDataView = async (id?: string, actualSavedSearch?: SavedSearch) => {
     const nextDataViewData = await loadDataView(services.dataViews, services.uiSettings, id);
     const nextDataView = resolveDataView(
       nextDataViewData,
-      actualSavedSearch.searchSource,
+      actualSavedSearch?.searchSource,
       services.toastNotifications
     );
     return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
@@ -245,9 +256,9 @@ export function getDiscoverStateContainer({
 
     updateFiltersReferences(prevDataView, newDataView);
 
-    replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
+    internalStateContainer.transitions.replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
     await appStateContainer.replaceUrlState({ index: newDataView.id });
-    const trackingEnabled = Boolean(newDataView.isPersisted() || savedSearch.id);
+    const trackingEnabled = Boolean(newDataView.isPersisted() || initialSavedSearch.id);
     getUrlTracker().setTrackingEnabled(trackingEnabled);
 
     return newDataView;
@@ -268,6 +279,59 @@ export function getDiscoverStateContainer({
     }
   };
 
+  const loadSavedSearch = async (
+    id: string,
+    onError: (e: Error) => void
+  ): Promise<SavedSearch | undefined> => {
+    if (appStateContainer.isEmptyURL()) {
+      appStateContainer.set({});
+    }
+    const currentSavedSearch = await savedSearchContainer.load(id, {
+      setError: onError,
+      dataViewList: internalStateContainer.getState().savedDataViews,
+    });
+    if (currentSavedSearch) {
+      await savedSearchContainer.set(currentSavedSearch);
+      if (!appStateContainer.isEmptyURL()) {
+        await savedSearchContainer.update(
+          currentSavedSearch.searchSource.getField('index'),
+          appStateContainer.getState()
+        );
+      }
+      await appStateContainer.resetWithSavedSearch(currentSavedSearch);
+      setDataView(currentSavedSearch.searchSource.getField('index')!);
+    }
+    return currentSavedSearch;
+  };
+
+  const loadNewSavedSearch = async (onError: (e: Error) => void) => {
+    addLog('🧭 [discoverState] loadNewSavedSearch');
+    const initialDataViewResult = await loadAndResolveDataView();
+    const nextSavedSearch = await savedSearchContainer.new(initialDataViewResult.dataView);
+    if (!appStateContainer.isEmptyURL()) {
+      await savedSearchContainer.update(
+        nextSavedSearch.searchSource.getField('index'),
+        appStateContainer.getState()
+      );
+    }
+
+    const nextDataView = await loadDataViewBySavedSearch(
+      nextSavedSearch,
+      appStateContainer,
+      internalStateContainer.getState().savedDataViews,
+      services,
+      onError
+    );
+
+    if (nextDataView) {
+      nextSavedSearch.searchSource.setField('index', nextDataView);
+      setDataView(nextDataView);
+    }
+    appStateContainer.resetWithSavedSearch(nextSavedSearch);
+    await savedSearchContainer.update(nextDataView, appStateContainer.getState(), true);
+    return nextSavedSearch;
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
     appState: appStateContainer,
@@ -277,15 +341,16 @@ export function getDiscoverStateContainer({
     searchSessionManager,
     setAppState: (newPartial: AppState) => appStateContainer.update(newPartial),
     pauseAutoRefreshInterval,
-    initializeAndSync: () => appStateContainer.initAndSync(savedSearch),
+    initializeAndSync: () => appStateContainer.initAndSync(savedSearchContainer.get()),
     actions: {
       onOpenSavedSearch,
       setDataView,
       loadAndResolveDataView,
       loadDataViewList,
+      loadSavedSearch,
+      loadNewSavedSearch,
       setAdHocDataViews,
       appendAdHocDataViews,
-      replaceAdHocDataViewWithId,
       removeAdHocDataViewById,
       updateAdHocDataViewId,
     },

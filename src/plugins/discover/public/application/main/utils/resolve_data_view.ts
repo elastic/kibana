@@ -107,13 +107,13 @@ export async function loadDataView(
  */
 export function resolveDataView(
   ip: DataViewData,
-  searchSource: ISearchSource,
+  searchSource: ISearchSource | undefined,
   toastNotifications: ToastsStart,
   isTextBasedQuery?: boolean
 ) {
   const { loaded: loadedDataView, stateVal, stateValFound } = ip;
 
-  const ownDataView = searchSource.getOwnField('index');
+  const ownDataView = searchSource?.getOwnField('index');
 
   if (ownDataView && !stateVal) {
     return ownDataView;

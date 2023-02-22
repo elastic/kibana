@@ -60,7 +60,6 @@ export function DiscoverLayout({
   onChangeDataView,
   onUpdateQuery,
   setExpandedDoc,
-  savedSearch,
   stateContainer,
   persistDataView,
   searchSessionManager,
@@ -79,6 +78,7 @@ export function DiscoverLayout({
     inspector,
   } = useDiscoverServices();
   const { main$ } = stateContainer.dataState.data$;
+  const savedSearch = stateContainer.savedSearchState.get();
   const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,

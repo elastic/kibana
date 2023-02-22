@@ -7,8 +7,7 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
+import { DiscoverStateContainer } from './services/discover_state';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
@@ -23,17 +22,14 @@ const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
 export interface DiscoverMainProps {
   /**
-   * List of available data views
+   * Central state container
    */
-  dataViewList: DataViewListItem[];
-  /**
-   * Current instance of SavedSearch
-   */
-  savedSearch: SavedSearch;
+  stateContainer: DiscoverStateContainer;
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { savedSearch, dataViewList } = props;
+  const { stateContainer } = props;
+  const savedSearch = stateContainer.savedSearchState.get();
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
   const usedHistory = useHistory();
@@ -53,13 +49,11 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     onChangeDataView,
     onUpdateQuery,
     persistDataView,
-    stateContainer,
     searchSessionManager,
     updateDataViewList,
   } = useDiscoverState({
     services,
-    history: usedHistory,
-    savedSearch,
+    stateContainer,
     setExpandedDoc,
   });
 
@@ -87,14 +81,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     addHelpMenuToAppChrome(chrome, docLinks);
   }, [stateContainer, chrome, docLinks]);
 
-  /**
-   * Set initial data view list
-   * Can be removed once the state container work was completed
-   */
-  useEffect(() => {
-    stateContainer.internalState.transitions.setSavedDataViews(dataViewList);
-  }, [stateContainer, dataViewList]);
-
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
@@ -106,7 +92,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
         onUpdateQuery={onUpdateQuery}
         setExpandedDoc={setExpandedDoc}
         navigateTo={navigateTo}
-        savedSearch={savedSearch}
         stateContainer={stateContainer}
         persistDataView={persistDataView}
         searchSessionManager={searchSessionManager}

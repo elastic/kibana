@@ -7,9 +7,7 @@
  */
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { useDiscoverState } from './use_discover_state';
 import { setUrlTracker } from '../../../kibana_services';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
@@ -19,15 +17,13 @@ setUrlTracker(urlTrackerMock);
 
 describe('test useDiscoverState', () => {
   test('return is valid', async () => {
-    const { history } = createSearchSessionMock();
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
     const { result } = renderHook(
       () => {
         return useDiscoverState({
           services: discoverServiceMock,
-          history,
-          savedSearch: savedSearchMock,
+          stateContainer,
           setExpandedDoc: jest.fn(),
         });
       },
