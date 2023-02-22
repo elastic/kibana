@@ -4,7 +4,7 @@
   "owner": "@elastic/kibana-data-discovery",
   "plugin": {
     "id": "savedObjectsFinder",
-    "server": false,
+    "server": true,
     "browser": true,
     "requiredBundles": [
       "savedObjects"

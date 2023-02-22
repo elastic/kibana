@@ -3833,6 +3833,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-version-http-server@link:packages/core/versioning/core-version-http-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core@link:src/core":
   version "0.0.0"
   uid ""
