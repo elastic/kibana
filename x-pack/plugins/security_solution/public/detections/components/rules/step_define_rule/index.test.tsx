@@ -11,7 +11,16 @@ import { shallow } from 'enzyme';
 import { StepDefineRule, aggregatableFields } from '.';
 import { stepDefineDefaultValue } from '../../../pages/detection_engine/rules/utils';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-
+import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
+import { fireEvent, render, within } from '@testing-library/react';
+import { TestProviders } from '../../../../common/mock';
+jest.mock('../../../../common/components/query_bar', () => {
+  return {
+    QueryBar: jest.fn(({ filterQuery }) => {
+      return <div data-test-subj="query-bar">{`${filterQuery.query} ${filterQuery.language}`}</div>;
+    }),
+  };
+});
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector', () => {
   const actual = jest.requireActual('../../../../common/hooks/use_selector');
@@ -61,6 +70,8 @@ jest.mock('react-redux', () => {
   };
 });
 
+jest.mock('../../../containers/detection_engine/rules/use_rule_from_timeline');
+
 test('aggregatableFields', function () {
   expect(
     aggregatableFields([
@@ -108,7 +119,13 @@ test('aggregatableFields with aggregatable: true', function () {
   ]);
 });
 
+const mockUseRuleFromTimeline = useRuleFromTimeline as jest.Mock;
+const onOpenTimeline = jest.fn();
 describe('StepDefineRule', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseRuleFromTimeline.mockReturnValue({ onOpenTimeline, loading: false });
+  });
   it('renders correctly', () => {
     const wrapper = shallow(
       <StepDefineRule
@@ -121,5 +138,88 @@ describe('StepDefineRule', () => {
     );
 
     expect(wrapper.find('Form[data-test-subj="stepDefineRule"]')).toHaveLength(1);
+  });
+
+  const kqlQuery = {
+    index: ['.alerts-security.alerts-default', 'logs-*', 'packetbeat-*'],
+    queryBar: {
+      filters: [],
+      query: {
+        query: 'host.name:*',
+        language: 'kuery',
+      },
+      saved_id: null,
+    },
+  };
+
+  const eqlQuery = {
+    index: ['.alerts-security.alerts-default', 'logs-*', 'packetbeat-*'],
+    queryBar: {
+      filters: [],
+      query: {
+        query: 'process where true',
+        language: 'eql',
+      },
+      saved_id: null,
+    },
+    eqlOptions: {
+      eventCategoryField: 'cool.field',
+      tiebreakerField: 'another.field',
+      timestampField: 'cool.@timestamp',
+      query: 'process where true',
+      size: 77,
+    },
+  };
+  it('handleSetRuleFromTimeline correctly updates the query', () => {
+    mockUseRuleFromTimeline.mockImplementation((handleSetRuleFromTimeline) => {
+      handleSetRuleFromTimeline(kqlQuery);
+      return { onOpenTimeline, loading: false };
+    });
+    const { getAllByTestId } = render(
+      <TestProviders>
+        <StepDefineRule
+          isReadOnlyView={false}
+          isLoading={false}
+          indicesConfig={[]}
+          threatIndicesConfig={[]}
+          defaultValues={stepDefineDefaultValue}
+        />
+      </TestProviders>
+    );
+    expect(getAllByTestId('query-bar')[0].textContent).toEqual(
+      `${kqlQuery.queryBar.query.query} ${kqlQuery.queryBar.query.language}`
+    );
+  });
+  it('handleSetRuleFromTimeline correctly updates eql query', async () => {
+    mockUseRuleFromTimeline
+      .mockImplementationOnce(() => ({ onOpenTimeline, loading: false }))
+      .mockImplementationOnce((handleSetRuleFromTimeline) => {
+        handleSetRuleFromTimeline(eqlQuery);
+        return { onOpenTimeline, loading: false };
+      });
+    const { getByTestId } = render(
+      <TestProviders>
+        <StepDefineRule
+          isReadOnlyView={false}
+          isLoading={false}
+          indicesConfig={[]}
+          threatIndicesConfig={[]}
+          defaultValues={stepDefineDefaultValue}
+        />
+      </TestProviders>
+    );
+    expect(getByTestId(`eqlQueryBarTextInput`).textContent).toEqual(eqlQuery.queryBar.query.query);
+    fireEvent.click(getByTestId(`eql-settings-trigger`));
+    expect(
+      within(getByTestId(`eql-event-category-field`)).queryByText(
+        eqlQuery.eqlOptions.eventCategoryField
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(getByTestId(`eql-tiebreaker-field`)).queryByText(eqlQuery.eqlOptions.tiebreakerField)
+    ).toBeInTheDocument();
+    expect(
+      within(getByTestId(`eql-timestamp-field`)).queryByText(eqlQuery.eqlOptions.timestampField)
+    ).toBeInTheDocument();
   });
 });
