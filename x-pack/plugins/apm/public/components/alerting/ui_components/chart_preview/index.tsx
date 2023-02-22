@@ -49,6 +49,7 @@ export function ChartPreview({
   const xFormatter = niceTimeFormatter([xMin, xMax]);
 
   function updateYMax() {
+    // Make the maximum Y value either the actual max or 20% more than the threshold
     const values = series.flatMap(({ data }) => data.map((d) => d.y ?? 0));
     setYMax(Math.max(...values, threshold * 1.2));
   }
