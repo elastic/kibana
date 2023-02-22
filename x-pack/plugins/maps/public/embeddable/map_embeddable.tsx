@@ -189,7 +189,7 @@ export class MapEmbeddable
     // Passing callback into redux store instead of regular pattern of getting redux state changes for performance reasons
     store.dispatch(setOnMapMove(this._propogateMapMovement));
 
-    shouldFetch$(this.getUpdated$(), () => {
+    shouldFetch$<MapEmbeddableInput>(this.getUpdated$(), () => {
       return {
         ...this.getInput(),
         filters: this._getFilters(),

@@ -26,12 +26,12 @@ type FilterableEmbeddableInput = EmbeddableInput & {
   timeslice?: [number, number];
 };
 
-export function shouldFetch$(
+export function shouldFetch$<TFilterableEmbeddableInput extends FilterableEmbeddableInput = FilterableEmbeddableInput>(
   updated$: Observable<unknown>,
-  getInput: () => FilterableEmbeddableInput
-) {
+  getInput: () => TFilterableEmbeddableInput
+): Observable<TFilterableEmbeddableInput> {
   return updated$.pipe(map(() => getInput())).pipe(
-    distinctUntilChanged((a: FilterableEmbeddableInput, b: FilterableEmbeddableInput) => {
+    distinctUntilChanged((a: TFilterableEmbeddableInput, b: TFilterableEmbeddableInput) => {
       if (
         !fastIsEqual(
           [a.searchSessionId, a.query, a.timeRange, a.timeslice],

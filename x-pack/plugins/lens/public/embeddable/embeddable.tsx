@@ -502,10 +502,10 @@ export class Embeddable
 
     // Update search context and reload on changes related to search
     this.inputReloadSubscriptions.push(
-      shouldFetch$(this.getUpdated$(), this.getInput)
+      shouldFetch$<LensEmbeddableInput>(this.getUpdated$(), this.getInput)
         .pipe(skip(1))
-        .subscribe(() => {
-          this.onContainerStateChanged(this.getInput());
+        .subscribe((input) => {
+          this.onContainerStateChanged(input);
         })
     );
   }
