@@ -41,21 +41,17 @@ import {
 interface ConditionProps {
   label: string;
   prop: string;
-  selector: ControlSelector;
   onRemoveCondition(prop: string): void;
 }
 
 interface StringArrayConditionProps extends ConditionProps {
+  selector: ControlSelector;
   errorMap: ControlFormErrorMap;
   onAddValueToCondition(prop: string, value: string): void;
   onChangeStringArrayCondition(prop: string, value: string[]): void;
 }
 
-interface BooleanConditionProps extends ConditionProps {
-  onChangeBooleanCondition(prop: string, value: boolean): void;
-}
-
-const BooleanCondition = ({ label, prop, selector, onRemoveCondition }: BooleanConditionProps) => {
+const BooleanCondition = ({ label, prop, onRemoveCondition }: ConditionProps) => {
   return (
     <EuiFormRow label={label} fullWidth={true} key={prop}>
       <EuiFlexGroup alignItems="center" gutterSize="m">
@@ -395,7 +391,6 @@ export const ControlGeneralViewSelector = ({
                   key={prop}
                   label={label}
                   prop={prop}
-                  selector={selector}
                   onRemoveCondition={onRemoveCondition}
                 />
               );

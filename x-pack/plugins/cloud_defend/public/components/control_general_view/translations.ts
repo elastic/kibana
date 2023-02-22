@@ -109,6 +109,8 @@ export const getConditionHelpLabel = (prop: string) => {
       return i18n.translate('xpack.cloudDefend.ignoreVolumeFilesHelp', {
         defaultMessage: 'The selector will avoid matching on k8s volume files',
       });
+    default:
+      return '';
   }
 };
 
@@ -162,5 +164,7 @@ export const getConditionLabel = (prop: string) => {
       return i18n.translate('xpack.cloudDefend.orchestratorResourceType', {
         defaultMessage: 'Orchestrator resource type',
       });
+    default:
+      return '';
   }
 };
