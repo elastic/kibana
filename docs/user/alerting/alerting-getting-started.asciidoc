@@ -82,7 +82,7 @@ The result is a template: all the parameters needed to invoke a service are supp
 
 In the server monitoring example, the `email` connector type is used, and `server` is mapped to the body of the email, using the template string `CPU on {{server}} is high`.
 
-When the rule detects the condition, it creates an <<alerting-concepts-alerts,alert>> containing the details of the condition, renders the template with these details such as server name, and runs the action on the {kib} server by invoking the `email` connector type. 
+When the rule detects the condition, it creates an <<alerting-concepts-alerts,alert>> containing the details of the condition. In this example, it renders the template with details such as server name (`X123` and `Y456`) and runs the action on the {kib} server by invoking the `email` connector type:
 
 image::images/what-is-an-action.svg[Actions are like templates that are rendered when an alert detects a condition]
 
