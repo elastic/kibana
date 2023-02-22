@@ -26,7 +26,7 @@ export const getUseActionColumnHook =
     const isEnterprisePlus = license.isEnterprise();
     const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
 
-    const { onRuleChange } = useContext(StatefulEventContext);
+    const eventContext = useContext(StatefulEventContext);
 
     const leadingControlColumns = useMemo(
       () => [...getDefaultControlColumn(ACTION_BUTTON_COUNT)],
@@ -81,7 +81,7 @@ export const getUseActionColumnHook =
             selectedEventIds={selectedEventIds}
             setCellProps={cveProps.setCellProps}
             showCheckboxes={showCheckboxes}
-            onRuleChange={onRuleChange}
+            onRuleChange={eventContext?.onRuleChange}
             tabType={'query'}
             tableId={tableId}
             width={0}
@@ -103,7 +103,7 @@ export const getUseActionColumnHook =
         showCheckboxes,
         leadingControlColumns,
         selectedEventIds,
-        onRuleChange,
+        eventContext,
       ]
     );
 
