@@ -16,7 +16,7 @@ import { AlertsResult, MonitorIdParam } from '../actions/types';
 import { API_URLS } from '../../../../common/constants';
 import { AtomicStatusCheckParams } from '../../../../common/runtime_types/alerts';
 
-import { populateAlertActions, RuleAction } from '../../../../common/rules/alert_actions_legacy';
+import { populateAlertActions, RuleAction } from '../../../../common/rules/alert_actions';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { DefaultEmail } from '../../../../common/runtime_types';
 
@@ -87,6 +87,7 @@ export const createAlert = async ({
       defaultRecoveryMessage: MonitorStatusTranslations.defaultRecoveryMessage,
       defaultSubjectMessage: MonitorStatusTranslations.defaultSubjectMessage,
     },
+    isLegacy: true,
   });
 
   const data: NewMonitorStatusAlert = {

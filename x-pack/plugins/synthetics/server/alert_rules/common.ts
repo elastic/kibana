@@ -80,12 +80,14 @@ export const setRecoveredAlertsContext = ({
   getAlertUuid,
   spaceId,
   staleDownConfigs,
+  upConfigs,
 }: {
   alertFactory: RuleExecutorServices['alertFactory'];
   basePath?: IBasePath;
   getAlertUuid?: (alertId: string) => string | null;
   spaceId?: string;
   staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
+  upConfigs: AlertOverviewStatus['upConfigs'];
 }) => {
   const { getRecoveredAlerts } = alertFactory.done();
   for (const alert of getRecoveredAlerts()) {
@@ -108,6 +110,12 @@ export const setRecoveredAlertsContext = ({
           defaultMessage: `Location has been removed from the monitor`,
         });
       }
+    }
+
+    if (state?.idWithLocation && upConfigs[state.idWithLocation]) {
+      recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck', {
+        defaultMessage: `Monitor has recovered with status Up`,
+      });
     }
 
     alert.setContext({
