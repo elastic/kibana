@@ -54,6 +54,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   columns?: string[];
   currentSuggestion?: Suggestion;
   allSuggestions?: Suggestion[];
+  textBasedResults?: number;
   isPlainRecord?: boolean;
   /**
    * The current time range

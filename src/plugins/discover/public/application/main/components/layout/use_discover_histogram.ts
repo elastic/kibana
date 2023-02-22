@@ -159,7 +159,8 @@ export const useDiscoverHistogram = ({
     [timefilter, from, to]
   );
 
-  if (query && isOfAggregateQueryType(query)) {
+  const isPlainRecord = query && isOfAggregateQueryType(query);
+  if (isPlainRecord) {
     const dateRange = getResolvedDateRange(services.data.query.timefilter.timefilter);
     timeRange = {
       from: dateRange.fromDate,
@@ -235,7 +236,7 @@ export const useDiscoverHistogram = ({
   }, [breakdownField, unifiedHistogram]);
 
   const columns = useAppStateSelector((state) => state.columns);
-
+  const documentState = useDataState(savedSearchData$.documents$);
   useEffect(() => {
     // Update the columns only when the query changes
     if (!isEqual(columns, prev.current.columns) && !isEqual(query, prev.current.query)) {
@@ -244,6 +245,12 @@ export const useDiscoverHistogram = ({
       prev.current.columns = columns;
     }
   }, [columns, query, unifiedHistogram]);
+
+  useEffect(() => {
+    if (isPlainRecord && documentState.fetchStatus === 'complete' && documentState.result) {
+      unifiedHistogram?.setTextBasedResults(documentState.result?.length);
+    }
+  }, [columns, documentState.fetchStatus, documentState.result, isPlainRecord, unifiedHistogram]);
 
   /**
    * Total hits

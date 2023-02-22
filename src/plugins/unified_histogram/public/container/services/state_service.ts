@@ -36,6 +36,7 @@ export interface UnifiedHistogramState {
   columns: string[] | undefined;
   currentSuggestion: Suggestion | undefined;
   allSuggestions: Suggestion[] | undefined;
+  textBasedResults?: number;
   /**
    * Whether or not the chart is hidden
    */
@@ -130,6 +131,11 @@ export interface UnifiedHistogramStateService {
    * Sets columns
    */
   setColumns: (columns: string[] | undefined) => void;
+
+  /**
+   * Sets columns
+   */
+  setTextBasedResults: (total: number) => void;
   /**
    * Sets the current top panel height
    */
@@ -239,6 +245,9 @@ export const createStateService = (
     },
     setColumns: (columns: string[] | undefined) => {
       updateState({ columns });
+    },
+    setTextBasedResults: (total: number) => {
+      updateState({ textBasedResults: total });
     },
 
     setAllSuggestions: (suggestions: Suggestion[] | undefined) => {
