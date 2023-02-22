@@ -24,7 +24,7 @@ export interface UseFetchSloDetailsResponse {
   ) => Promise<QueryObserverResult<GetSLOResponse | undefined, unknown>>;
 }
 
-export function useFetchSloDetails(sloId?: string): UseFetchSloDetailsResponse {
+export function useFetchSloDetails(sloId: string): UseFetchSloDetailsResponse {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
@@ -42,6 +42,7 @@ export function useFetchSloDetails(sloId?: string): UseFetchSloDetailsResponse {
           // ignore error for retrieving slos
         }
       },
+      enabled: Boolean(sloId),
     }
   );
 
