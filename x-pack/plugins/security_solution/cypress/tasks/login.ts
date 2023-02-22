@@ -325,26 +325,22 @@ export const waitForPage = (url: string) => {
 };
 
 export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, role?: ROLES) => {
+  const timerangeConfig = {
+    from: 1547914976217,
+    fromStr: '2019-01-19T16:22:56.217Z',
+    kind: 'relative',
+    to: 1579537385745,
+    toStr: 'now',
+  };
+
   const timerange = encode({
     global: {
       linkTo: ['timeline'],
-      timerange: {
-        from: 1547914976217,
-        fromStr: '2019-01-19T16:22:56.217Z',
-        kind: 'relative',
-        to: 1579537385745,
-        toStr: 'now',
-      },
+      timerange: timerangeConfig,
     },
     timeline: {
       linkTo: ['global'],
-      timerange: {
-        from: 1547914976217,
-        fromStr: '2019-01-19T16:22:56.217Z',
-        kind: 'relative',
-        to: 1579537385745,
-        toStr: 'now',
-      },
+      timerange: timerangeConfig,
     },
   });
 
