@@ -19,6 +19,7 @@ const {
   isArrOfStrings,
   PACKAGE_TYPES,
 } = require('./parse_helpers');
+const { getGitRepoRootSync } = require('./get_git_repo_root');
 const { parse } = require('../utils/jsonc');
 const { isValidPluginCategoryInfo, PLUGIN_CATEGORY } = require('./plugin_category_info');
 
@@ -119,7 +120,9 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
   }
 
   const segs = path.split(Path.sep);
-  const isBuild = segs.includes('node_modules') || Path.basename(Path.dirname(repoRoot)).includes('build');
+  const gitRepoRoot = getGitRepoRootSync(repoRoot);
+  const isBuild = segs.includes('node_modules') || gitRepoRoot && path.startsWith(Path.join(gitRepoRoot, 'build', 'kibana'))
+
   // TODO: evaluate if __category__ should be removed
   if (__category__ !== undefined) {
     if (!isBuild) {
