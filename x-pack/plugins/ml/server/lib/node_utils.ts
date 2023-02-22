@@ -30,7 +30,6 @@ export async function getMlNodeCount(client: IScopedClusterClient): Promise<MlNo
 
   const lazyNodeCount = await getLazyMlNodeCount(client);
 
-  // return { count: 0, lazyNodeCount: 0 };
   return { count, lazyNodeCount };
 }
 

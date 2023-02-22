@@ -70,7 +70,7 @@ export const EventRateChart: FC<Props> = ({
       data-test-subj={`mlEventRateChart ${eventRateChartData.length ? 'withData' : 'empty'}`}
     >
       <LoadingWrapper height={height} hasData={eventRateChartData.length > 0} loading={loading}>
-        <Chart css={cssOverride}>
+        <Chart css={overlayRanges !== undefined ? cssOverride : undefined}>
           {showAxis === true && <Axes />}
           <Settings
             tooltip={TooltipType.None}
