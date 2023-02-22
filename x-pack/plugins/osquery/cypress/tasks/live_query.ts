@@ -145,3 +145,20 @@ export const checkActionItemsInResults = ({
   cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');
   cy.contains('Add to timeline investigation').should(timeline ? 'exist' : 'not.exist');
 };
+
+export const takeOsqueryActionWithParams = () => {
+  cy.getBySel('take-action-dropdown-btn').click();
+  cy.getBySel('osquery-action-item').click();
+  cy.contains('1 agent selected.');
+  inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
+    parseSpecialCharSequences: false,
+  });
+  cy.contains('Advanced').click();
+  typeInECSFieldInput('tags{downArrow}{enter}');
+  cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
+  cy.wait(1000);
+  submitQuery();
+  cy.getBySel('dataGridHeader').within(() => {
+    cy.contains('tags');
+  });
+};
