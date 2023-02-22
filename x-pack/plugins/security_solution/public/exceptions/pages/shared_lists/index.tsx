@@ -133,6 +133,12 @@ export const SharedLists = React.memo(() => {
   const [displayImportListFlyout, setDisplayImportListFlyout] = useState(false);
   const { addError, addSuccess } = useAppToasts();
 
+  // Loading states
+  const exceptionsLoaded = !loadingExceptions && !loadingTableInfo && !initLoading;
+  const hasNoExceptions = exceptionsLoaded && !exceptionListsWithRuleRefs.length;
+  const isSearchingExceptions = viewerStatus === ViewerStatus.SEARCHING;
+  const isLoadingExceptions = viewerStatus === ViewerStatus.LOADING;
+
   const handleDeleteSuccess = useCallback(
     (listId?: string) => () => {
       notifications.toasts.addSuccess({
@@ -386,37 +392,16 @@ export const SharedLists = React.memo(() => {
   }, [canUserREAD, canUserCRUD]);
 
   useEffect(() => {
-    // If current status is searching and results come up empty,
-    // show empty search screen
-    if (
-      viewerStatus === ViewerStatus.SEARCHING &&
-      !loadingExceptions &&
-      !exceptionListsWithRuleRefs.length
-    ) {
+    if (isSearchingExceptions && hasNoExceptions) {
       setViewStatus(ViewerStatus.EMPTY_SEARCH);
-      // if loading exceptions or their refs, set to loading
-    } else if (loadingTableInfo || initLoading) {
+    } else if (!exceptionsLoaded) {
       setViewStatus(ViewerStatus.LOADING);
-      // to differentiate between no exception lists and
-      // no exception list search results, check for existing
-      // loading state
-    } else if (
-      viewerStatus === ViewerStatus.LOADING &&
-      !loadingTableInfo &&
-      !initLoading &&
-      !exceptionListsWithRuleRefs.length
-    ) {
+    } else if (isLoadingExceptions && hasNoExceptions) {
       setViewStatus(ViewerStatus.EMPTY);
-    } else if (viewerStatus === ViewerStatus.LOADING && !loadingTableInfo && !initLoading) {
+    } else if (isLoadingExceptions && exceptionsLoaded) {
       setViewStatus(null);
     }
-  }, [
-    loadingTableInfo,
-    initLoading,
-    viewerStatus,
-    loadingExceptions,
-    exceptionListsWithRuleRefs.length,
-  ]);
+  }, [isSearchingExceptions, hasNoExceptions, exceptionsLoaded, isLoadingExceptions]);
 
   return (
     <>
