@@ -21,27 +21,45 @@ export interface Todo {
   title: string;
   completed: boolean;
 }
+const todoSchema = schema.object({
+  id: schema.string(),
+  title: schema.string(),
+  completed: schema.boolean(),
+});
 
 export type TodoCreateIn = CreateIn<'todos', { title: string }>;
+export type TodoCreateOut = Todo; // TODO: Is this correct?
 export const createInSchema = schema.object({ title: schema.string() });
+export const createOutSchema = todoSchema;
 
 export type TodoUpdateIn = UpdateIn<'todos', Partial<Omit<Todo, 'id'>>>;
+export type TodoUpdateOut = Todo;
 export const updateInSchema = schema.object({
   title: schema.maybe(schema.string()),
   completed: schema.maybe(schema.boolean()),
 });
+export const updateOutSchema = todoSchema;
 
 export type TodoDeleteIn = DeleteIn<'todos', { id: string }>;
+export type TodoDeleteOut = void;
 // no schema for delete ?
 
 export type TodoGetIn = GetIn<'todos'>;
-// no schema for get ?
+export type TodoGetOut = Todo;
+// no get in schema for get ?
+export const getOutSchema = todoSchema;
 
 export type TodoSearchIn = SearchIn<'todos', { filter?: 'todo' | 'completed' }>;
+export interface TodoSearchOut {
+  hits: Todo[];
+}
 export const searchInSchema = schema.object({
   filter: schema.maybe(
     schema.oneOf([schema.literal('todo'), schema.literal('completed')], {
       defaultValue: undefined,
     })
   ),
+});
+export const searchOutSchema = schema.object({
+  hits: schema.arrayOf(todoSchema),
 });

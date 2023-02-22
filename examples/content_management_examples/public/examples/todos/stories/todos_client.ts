@@ -14,7 +14,12 @@ import type {
   TodoDeleteIn,
   TodoGetIn,
   TodoSearchIn,
+  TodoUpdateOut,
+  TodoCreateOut,
+  TodoSearchOut,
+  TodoDeleteOut,
   Todo,
+  TodoGetOut,
 } from '../../../../common/examples/todos';
 
 /**
@@ -27,7 +32,7 @@ export class TodosClient implements CrudClient {
     { id: uuidv4(), title: 'Learn Kibana', completed: false },
   ];
 
-  async create(input: TodoCreateIn): Promise<Todo> {
+  async create(input: TodoCreateIn): Promise<TodoCreateOut> {
     const todo = {
       id: uuidv4(),
       title: input.data.title,
@@ -37,22 +42,22 @@ export class TodosClient implements CrudClient {
     return todo;
   }
 
-  async delete(input: TodoDeleteIn): Promise<void> {
+  async delete(input: TodoDeleteIn): Promise<TodoDeleteOut> {
     this.todos = this.todos.filter((todo) => todo.id !== input.id);
   }
 
-  async get(input: TodoGetIn): Promise<Todo> {
+  async get(input: TodoGetIn): Promise<TodoGetOut> {
     return this.todos.find((todo) => todo.id === input.id)!;
   }
 
-  async search(input: TodoSearchIn): Promise<{ hits: Todo[] }> {
+  async search(input: TodoSearchIn): Promise<TodoSearchOut> {
     const filter = input.query.filter;
     if (filter === 'todo') return { hits: this.todos.filter((t) => !t.completed) };
     if (filter === 'completed') return { hits: this.todos.filter((t) => t.completed) };
     return { hits: [...this.todos] };
   }
 
-  async update(input: TodoUpdateIn): Promise<Todo> {
+  async update(input: TodoUpdateIn): Promise<TodoUpdateOut> {
     const idToUpdate = input.id;
     const todoToUpdate = this.todos.find((todo) => todo.id === idToUpdate)!;
     if (todoToUpdate) {

@@ -18,6 +18,15 @@ import {
   Todo,
   TODO_CONTENT_ID,
   updateInSchema,
+  TodoSearchOut,
+  TodoCreateOut,
+  TodoUpdateOut,
+  TodoDeleteOut,
+  TodoGetOut,
+  createOutSchema,
+  getOutSchema,
+  updateOutSchema,
+  searchOutSchema,
 } from '../../../common/examples/todos';
 
 export const registerTodoContentType = ({
@@ -33,17 +42,34 @@ export const registerTodoContentType = ({
           in: {
             data: createInSchema,
           },
+          out: {
+            result: createOutSchema,
+          },
         },
         update: {
           in: {
             data: updateInSchema,
+          },
+          out: {
+            result: updateOutSchema,
           },
         },
         search: {
           in: {
             query: searchInSchema,
           },
+          out: {
+            result: searchOutSchema,
+          },
         },
+        get: {
+          // TODO: why no get in ?
+          out: {
+            result: getOutSchema,
+          },
+        },
+
+        // TODO: why no delete?
       },
     },
     storage: new TodosStorage(),
@@ -68,15 +94,17 @@ class TodosStorage implements ContentStorage {
     });
   }
 
-  async get(ctx: StorageContext, id: string) {
-    return this.db.get(id);
+  // TODO: how to connect this to TodoGetIn?
+  // TODO: hot to connect this to input and output schema?
+  async get(ctx: StorageContext, id: string): Promise<TodoGetOut> {
+    return this.db.get(id)!;
   }
 
-  async bulkGet(ctx: StorageContext, ids: string[]) {
-    return ids.map((id) => this.db.get(id));
+  async bulkGet(ctx: StorageContext, ids: string[]): Promise<TodoGetOut[]> {
+    return ids.map((id) => this.db.get(id)!);
   }
 
-  async create(ctx: StorageContext, data: Omit<Todo, 'id' | 'completed'>): Promise<Todo> {
+  async create(ctx: StorageContext, data: Omit<Todo, 'id' | 'completed'>): Promise<TodoCreateOut> {
     const todo: Todo = {
       ...data,
       completed: false,
@@ -88,7 +116,11 @@ class TodosStorage implements ContentStorage {
     return todo;
   }
 
-  async update(ctx: StorageContext, id: string, data: Partial<Omit<Todo, 'id'>>) {
+  async update(
+    ctx: StorageContext,
+    id: string,
+    data: Partial<Omit<Todo, 'id'>>
+  ): Promise<TodoUpdateOut> {
     const content = this.db.get(id);
     if (!content) {
       throw new Error(`Content to update not found [${id}].`);
@@ -104,14 +136,14 @@ class TodosStorage implements ContentStorage {
     return updatedContent;
   }
 
-  async delete(ctx: StorageContext, id: string) {
+  async delete(ctx: StorageContext, id: string): Promise<TodoDeleteOut> {
     this.db.delete(id);
   }
 
   async search(
     ctx: StorageContext,
     query: { filter?: 'completed' | 'todo' }
-  ): Promise<{ hits: Todo[] }> {
+  ): Promise<TodoSearchOut> {
     const hits = Array.from(this.db.values());
     if (query.filter === 'todo') return { hits: hits.filter((t) => !t.completed) };
     if (query.filter === 'completed') return { hits: hits.filter((t) => t.completed) };
