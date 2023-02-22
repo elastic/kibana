@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { PosturePolicyTemplate, PostureInput } from '../../common/types';
+import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types';
 import {
   CLOUDBEAT_EKS,
   CLOUDBEAT_VANILLA,
@@ -15,6 +15,9 @@ import {
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
   CLOUDBEAT_VULN_MGMT_AWS,
+  KSPM_POLICY_TEMPLATE,
+  CSPM_POLICY_TEMPLATE,
+  VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
 
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
@@ -34,9 +37,12 @@ export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
 export const LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY =
   'cloudPosture:complianceDashboard:clusterSort';
 
-export type CloudPostureIntegrations = Record<PosturePolicyTemplate, CloudPostureIntegrationProps>;
+export type CloudPostureIntegrations = Record<
+  CloudSecurityPolicyTemplate,
+  CloudPostureIntegrationProps
+>;
 export interface CloudPostureIntegrationProps {
-  policyTemplate: PosturePolicyTemplate;
+  policyTemplate: CloudSecurityPolicyTemplate;
   name: string;
   shortName: string;
   options: Array<{
@@ -51,7 +57,7 @@ export interface CloudPostureIntegrationProps {
 
 export const cloudPostureIntegrations: CloudPostureIntegrations = {
   cspm: {
-    policyTemplate: 'cspm',
+    policyTemplate: CSPM_POLICY_TEMPLATE,
     name: i18n.translate('xpack.csp.cspmIntegration.integration.nameTitle', {
       defaultMessage: 'Cloud Security Posture Management',
     }),
@@ -100,7 +106,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
     ],
   },
   kspm: {
-    policyTemplate: 'kspm',
+    policyTemplate: KSPM_POLICY_TEMPLATE,
     name: i18n.translate('xpack.csp.kspmIntegration.integration.nameTitle', {
       defaultMessage: 'Kubernetes Security Posture Management',
     }),
@@ -131,7 +137,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
     ],
   },
   vuln_mgmt: {
-    policyTemplate: 'vuln_mgmt',
+    policyTemplate: VULN_MGMT_POLICY_TEMPLATE,
     name: 'Vulnerability Management', // TODO: we should use i18n and fix this
     shortName: 'VULN_MGMT', // TODO: we should use i18n and fix this
     options: [

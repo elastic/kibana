@@ -34,10 +34,8 @@ import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
 
-type PosturePolicyTemplates = Extract<PosturePolicyTemplate, 'kspm' | 'cspm'>;
-
 const noDataOptions: Record<
-  PosturePolicyTemplates,
+  PosturePolicyTemplate,
   Pick<CspNoDataPageProps, 'docsLink' | 'actionTitle' | 'actionDescription'> & { testId: string }
 > = {
   kspm: {
@@ -92,7 +90,7 @@ const noDataOptions: Record<
 };
 
 const getNotInstalledConfig = (
-  policyTemplate: PosturePolicyTemplates,
+  policyTemplate: PosturePolicyTemplate,
   actionHref: CspNoDataPageProps['actionHref']
 ) => {
   const policyTemplateNoDataConfig = noDataOptions[policyTemplate];
