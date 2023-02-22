@@ -75,6 +75,7 @@ describe('Exceptions flyout', () => {
       createRule({
         ...getNewRule(),
         index: ['auditbeat-*', 'exceptions-*'],
+        enabled: false,
         exceptions_list: [
           {
             id: response.body.id,
