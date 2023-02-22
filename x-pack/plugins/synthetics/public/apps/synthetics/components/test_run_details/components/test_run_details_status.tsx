@@ -7,14 +7,17 @@
 import React from 'react';
 
 import { EuiDescriptionList, EuiLoadingContent } from '@elastic/eui';
-import { MonitorStatus, STATUS_LABEL } from '../common/components/monitor_status';
-import { useSelectedMonitor } from './hooks/use_selected_monitor';
-import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
+import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
+import { useMonitorLatestPing } from '../../monitor_details/hooks/use_monitor_latest_ping';
+import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
+import { BadgeStatus, MonitorStatus, STATUS_LABEL } from '../../common/components/monitor_status';
 
-export const MonitorDetailsStatus = () => {
+export const TestRunDetailsStatus = () => {
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
 
   const { monitor, isMonitorMissing } = useSelectedMonitor();
+
+  const { data: stepsData } = useJourneySteps();
 
   if (!monitor) {
     return (
@@ -24,7 +27,15 @@ export const MonitorDetailsStatus = () => {
         listItems={[
           {
             title: STATUS_LABEL,
-            description: isMonitorMissing ? <></> : <EuiLoadingContent lines={1} />,
+            description:
+              isMonitorMissing && stepsData?.details ? (
+                <BadgeStatus
+                  status={stepsData.details.journey.monitor.status}
+                  isBrowserType={stepsData.details.journey.monitor.type === 'browser'}
+                />
+              ) : (
+                <EuiLoadingContent lines={1} />
+              ),
           },
         ]}
       />

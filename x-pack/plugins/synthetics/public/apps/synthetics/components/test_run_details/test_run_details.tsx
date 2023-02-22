@@ -45,7 +45,7 @@ export const TestRunDetails = () => {
 
   return (
     <>
-      <TestRunErrorInfo journeyDetails={stepsData?.details} />
+      <TestRunErrorInfo journeyDetails={stepsData?.details} hasNoSteps={hasNoSteps} />
       {!hasNoSteps && (
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem grow={2} style={{ minWidth: 0 }}>

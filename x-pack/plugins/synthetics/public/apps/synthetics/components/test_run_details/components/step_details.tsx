@@ -28,6 +28,8 @@ export const StepDetails = ({
   totalSteps: number;
   setStepIndex: (stepIndex: number) => void;
 }) => {
+  if (totalSteps === 0 && !loading) return null;
+
   return (
     <EuiPanel hasShadow={false} hasBorder>
       <EuiFlexGroup alignItems="center">

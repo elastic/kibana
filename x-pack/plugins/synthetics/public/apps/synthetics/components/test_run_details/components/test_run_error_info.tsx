@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import { SyntheticsJourneyApiResponse } from '../../../../../../common/runtime_types';
 import { StdErrorLogs } from '../../common/components/stderr_logs';
@@ -16,18 +16,20 @@ import {
 
 export const TestRunErrorInfo = ({
   journeyDetails,
+  hasNoSteps,
+  showErrorTitle = true,
 }: {
+  hasNoSteps?: boolean;
+  showErrorTitle?: boolean;
   journeyDetails: SyntheticsJourneyApiResponse['details'];
 }) => {
   const isDownMonitor = journeyDetails?.journey?.monitor?.status === 'down';
 
   const errorMessage = journeyDetails?.journey?.error?.message;
 
-  const isStepsLoadingFailed = false;
-
   return (
     <>
-      {(isStepsLoadingFailed || isDownMonitor) && (
+      {(hasNoSteps || isDownMonitor) && showErrorTitle && (
         <EuiCallOut
           data-test-subj="monitorTestRunErrorCallout"
           title={ERROR_RUNNING_TEST}
@@ -37,7 +39,8 @@ export const TestRunErrorInfo = ({
           <EuiText color="danger">{errorMessage ?? FAILED_TO_RUN}</EuiText>
         </EuiCallOut>
       )}
-      {(isStepsLoadingFailed || isDownMonitor) &&
+      <EuiSpacer size="m" />
+      {(hasNoSteps || isDownMonitor) &&
         errorMessage?.includes('journey did not finish executing') && (
           <StdErrorLogs
             checkGroup={journeyDetails?.journey?.monitor.check_group}
