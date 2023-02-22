@@ -72,7 +72,7 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     <EuiFlexItem data-test-subj="case-view-alerts">
       <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
       <EuiFlexGroup>
-        <EuiFlexItem style={{ minHeight: 300 }}>
+        <EuiFlexItem css={{ minHeight: 300 }}>
           {triggersActionsUi.getAlertsStateTable(alertStateProps)}
         </EuiFlexItem>
       </EuiFlexGroup>

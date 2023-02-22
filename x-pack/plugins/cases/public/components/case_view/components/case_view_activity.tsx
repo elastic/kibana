@@ -102,9 +102,7 @@ export const CaseViewActivity = ({
 
   const { data: userActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
     caseData.id,
-    {
-      ...userActivityQueryParams,
-    }
+    userActivityQueryParams
   );
 
   const { data: userActionsStats, isLoading: isLoadingUserActionsStats } =
@@ -199,7 +197,11 @@ export const CaseViewActivity = ({
 
   const handleUserActionsActivityChanged = useCallback(
     (params: UserActivityParams) => {
-      setUserActivityQueryParams({ type: params.type, sortOrder: params.sortOrder });
+      setUserActivityQueryParams((oldParams) => ({
+        ...oldParams,
+        type: params.type,
+        sortOrder: params.sortOrder,
+      }));
     },
     [setUserActivityQueryParams]
   );
@@ -226,40 +228,43 @@ export const CaseViewActivity = ({
           />
         </EuiFlexItem>
         <EuiSpacer size="l" />
-        {(isLoadingUserActions || isLoadingCaseConnectors) && (
-          <EuiSkeletonText lines={8} data-test-subj="case-view-loading-content" />
-        )}
 
-        <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
-          <EuiFlexItem>
-            {showUserActions && (
-              <UserActions
-                userProfiles={userProfiles}
-                currentUserProfile={currentUserProfile}
-                getRuleDetailsHref={ruleDetailsNavigation?.href}
-                onRuleDetailsClick={ruleDetailsNavigation?.onClick}
-                caseConnectors={caseConnectors}
-                caseUserActions={userActionsData.userActions}
-                data={caseData}
-                actionsNavigation={actionsNavigation}
-                isLoadingUserActions={isLoadingUserActions}
-                onShowAlertDetails={onShowAlertDetails}
-                onUpdateField={onUpdateField}
-                statusActionButton={
-                  permissions.update ? (
-                    <StatusActionButton
-                      status={caseData.status}
-                      onStatusChanged={changeStatus}
-                      isLoading={isLoading && loadingKey === 'status'}
-                    />
-                  ) : null
-                }
-                filterOptions={userActivityQueryParams.type}
-                useFetchAlertData={useFetchAlertData}
-              />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiSkeletonText
+          lines={8}
+          data-test-subj="case-view-loading-content"
+          isLoading={isLoadingUserActions || isLoadingCaseConnectors}
+        >
+          <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
+            <EuiFlexItem>
+              {showUserActions && (
+                <UserActions
+                  userProfiles={userProfiles}
+                  currentUserProfile={currentUserProfile}
+                  getRuleDetailsHref={ruleDetailsNavigation?.href}
+                  onRuleDetailsClick={ruleDetailsNavigation?.onClick}
+                  caseConnectors={caseConnectors}
+                  caseUserActions={userActionsData.userActions}
+                  data={caseData}
+                  actionsNavigation={actionsNavigation}
+                  isLoadingUserActions={isLoadingUserActions}
+                  onShowAlertDetails={onShowAlertDetails}
+                  onUpdateField={onUpdateField}
+                  statusActionButton={
+                    permissions.update ? (
+                      <StatusActionButton
+                        status={caseData.status}
+                        onStatusChanged={changeStatus}
+                        isLoading={isLoading && loadingKey === 'status'}
+                      />
+                    ) : null
+                  }
+                  filterOptions={userActivityQueryParams.type}
+                  useFetchAlertData={useFetchAlertData}
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiSkeletonText>
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">

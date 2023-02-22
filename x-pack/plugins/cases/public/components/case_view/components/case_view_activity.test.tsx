@@ -204,8 +204,8 @@ describe('Case View Page activity tab', () => {
       isLoading: true,
     });
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
-    expect(result.getByTestId('case-view-activity')).toBeInTheDocument();
     expect(result.getByTestId('case-view-loading-content')).toBeInTheDocument();
+    expect(result.queryByTestId('case-view-activity')).not.toBeInTheDocument();
     expect(result.queryByTestId('user-actions')).not.toBeInTheDocument();
     expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
       type: filterActionType,

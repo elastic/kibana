@@ -325,6 +325,14 @@ describe(`UserActions`, () => {
     });
   });
 
+  it('does not show add comment markdown when history filter is selected', async () => {
+    appMockRender.render(<UserActions {...defaultProps} filterOptions="action" />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('add-comment')).not.toBeInTheDocument();
+    });
+  });
+
   it('Outlines comment when url param is provided', async () => {
     const commentId = 'basic-comment-id';
     jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId });

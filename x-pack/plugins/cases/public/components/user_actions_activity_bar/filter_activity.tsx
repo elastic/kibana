@@ -64,7 +64,11 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           withNext
           grow={false}
           hasActiveFilters={type === 'user'}
-          numFilters={userActionsStats?.totalComments ?? 0}
+          numFilters={
+            userActionsStats && userActionsStats.totalComments > 0
+              ? userActionsStats.totalComments
+              : 0
+          }
           isLoading={isLoading}
           isDisabled={isLoading}
           onClick={() => handleFilterChange('user')}

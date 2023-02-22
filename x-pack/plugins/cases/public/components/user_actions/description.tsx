@@ -11,16 +11,12 @@ import type { EuiCommentProps } from '@elastic/eui';
 import styled from 'styled-components';
 import { EuiText, EuiButtonIcon } from '@elastic/eui';
 
-import type {
-  UserActionBuilder,
-  UserActionBuilderArgs,
-  UserActionTreeProps,
-} from '../user_actions/types';
-import { createCommonUpdateUserActionBuilder } from '../user_actions/common';
-import { UserActionTimestamp } from '../user_actions/timestamp';
-import { UserActionMarkdown } from '../user_actions/markdown_form';
+import type { UserActionBuilder, UserActionBuilderArgs, UserActionTreeProps } from './types';
+import { createCommonUpdateUserActionBuilder } from './common';
+import { UserActionTimestamp } from './timestamp';
+import { UserActionMarkdown } from './markdown_form';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
-import * as i18n from '../user_actions/translations';
+import * as i18n from './translations';
 import { HoverableUsernameResolver } from '../user_profiles/hoverable_username_resolver';
 
 const DESCRIPTION_ID = 'description';
