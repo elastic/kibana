@@ -5,14 +5,9 @@
  * 2.0.
  */
 
+import { RULES_TO_IMPORT_FILENAME, TOASTER } from '../../screens/alerts_detection_rules';
 import {
-  RULES_TO_IMPORT_FILENAME,
-  RULES_MANAGEMENT_TABLE,
-  TOASTER,
-} from '../../screens/alerts_detection_rules';
-import {
-  expectNumberOfRules,
-  expectToContainRule,
+  expectManagementTableRules,
   importRules,
   importRulesWithOverwriteAll,
 } from '../../tasks/alerts_detection_rules';
@@ -33,9 +28,6 @@ describe('Import rules', () => {
   });
 
   it('Imports a custom rule with exceptions', function () {
-    const expectedNumberOfRules = 1;
-    const expectedImportedRuleName = 'Test Custom Rule';
-
     importRules(RULES_TO_IMPORT_FILENAME);
 
     cy.wait('@import').then(({ response }) => {
@@ -45,8 +37,7 @@ describe('Import rules', () => {
         'Successfully imported 1 ruleSuccessfully imported 1 exception.'
       );
 
-      expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
-      expectToContainRule(RULES_MANAGEMENT_TABLE, expectedImportedRuleName);
+      expectManagementTableRules(['Test Custom Rule']);
     });
   });
 

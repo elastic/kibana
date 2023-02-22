@@ -449,6 +449,14 @@ export const expectToContainRule = (
   cy.get(tableSelector).find(RULES_ROW).should('include.text', ruleName);
 };
 
+export const expectManagementTableRules = (ruleNames: string[]): void => {
+  expectNumberOfRules(RULES_MANAGEMENT_TABLE, ruleNames.length);
+
+  for (const ruleName of ruleNames) {
+    expectToContainRule(RULES_MANAGEMENT_TABLE, ruleName);
+  }
+};
+
 const selectOverwriteRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX)
     .pipe(($el) => $el.trigger('click'))

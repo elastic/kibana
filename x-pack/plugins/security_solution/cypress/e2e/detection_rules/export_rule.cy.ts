@@ -25,7 +25,7 @@ import {
   bulkExportRules,
   selectAllRules,
   importRules,
-  expectNumberOfRules,
+  expectManagementTableRules,
 } from '../../tasks/alerts_detection_rules';
 import { createExceptionList, deleteExceptionList } from '../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../objects/exception';
@@ -53,10 +53,12 @@ describe('Export rules', () => {
     // Rules get exported via _bulk_action endpoint
     cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createCustomRule(getNewRule(), { enabled: true }).as('ruleResponse');
+    createCustomRule({ ...getNewRule(), name: 'Rule to export' }, { enabled: true }).as(
+      'ruleResponse'
+    );
   });
 
-  it('Exports a custom rule', function () {
+  it('exports a custom rule', function () {
     exportFirstRule();
     cy.wait('@bulk_action').then(({ response }) => {
       cy.wrap(response?.body).should('eql', expectedExportedRule(this.ruleResponse));
@@ -64,7 +66,7 @@ describe('Export rules', () => {
     });
   });
 
-  it('Imports an exported custom rule', function () {
+  it('imports an exported custom rule', () => {
     exportFirstRule();
 
     cy.get(TOASTER).should('have.text', 'Rules exported');
@@ -74,10 +76,10 @@ describe('Export rules', () => {
     importRules(path.join(downloadsFolder, EXPORTED_RULES_FILENAME));
 
     cy.get(TOASTER).should('have.text', 'Successfully imported 1 rule');
-    expectNumberOfRules(1);
+    expectManagementTableRules(['Rule to export']);
   });
 
-  it('shows a modal saying that no rules can be exported if all the selected rules are prebuilt', function () {
+  it('shows a modal saying that no rules can be exported if all the selected rules are prebuilt', () => {
     const expectedElasticRulesCount = 7;
 
     loadPrebuiltDetectionRulesFromHeaderBtn();
@@ -91,7 +93,7 @@ describe('Export rules', () => {
     );
   });
 
-  it('exports only custom rules', function () {
+  it('exports only custom rules', () => {
     const expectedNumberCustomRulesToBeExported = 1;
 
     loadPrebuiltDetectionRulesFromHeaderBtn();
