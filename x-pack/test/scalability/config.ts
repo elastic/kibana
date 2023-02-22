@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
@@ -55,10 +55,20 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...baseConfig.kbnTestServer,
+      serverArgs: [
+        ...baseConfig.kbnTestServer.serverArgs,
+        `--logging.loggers=${JSON.stringify([
+          ...getKibanaCliLoggers(baseConfig.kbnTestServer.serverArgs),
+          // Enable logger for the Ops Metrics
+          {
+            name: 'metrics.ops',
+            level: 'all',
+            appenders: ['default'],
+          },
+        ])}`,
+      ],
       sourceArgs: [
         ...baseConfig.kbnTestServer.sourceArgs,
-        '--no-base-path',
-        '--env.name=development',
         ...(!!AGGS_SHARD_DELAY ? ['--data.search.aggs.shardDelay.enabled=true'] : []),
         ...(!!DISABLE_PLUGINS ? ['--plugins.initialize=false'] : []),
       ],
