@@ -71,17 +71,31 @@ export type {
   EncryptedObjectDescriptor,
 } from './src/extensions/encryption';
 export type {
-  CheckAuthorizationParams,
-  PerformAuthorizationParams,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
-  EnforceAuthorizationParams,
-  AddAuditEventParams,
   RedactNamespacesParams,
   ISavedObjectsSecurityExtension,
+  AuthorizeCreateObject,
+  AuthorizeUpdateObject,
+  AuthorizeBulkGetObject,
+  AuthorizeCreateParams,
+  AuthorizeUpdateParams,
+  AuthorizeAndRedactMultiNamespaceReferencesParams,
+  AuthorizeAndRedactInternalBulkResolveParams,
+  AuthorizeGetParams,
+  AuthorizeBulkGetParams,
+  AuthorizeObjectWithExistingSpaces,
+  AuthorizeBulkCreateParams,
+  AuthorizeBulkDeleteParams,
+  AuthorizeBulkUpdateParams,
+  AuthorizeCheckConflictsParams,
+  AuthorizeDeleteParams,
+  GetFindRedactTypeMapParams,
+  AuthorizeOpenPointInTimeParams,
+  AuthorizeUpdateSpacesParams,
+  AuthorizeFindParams,
 } from './src/extensions/security';
-export { AuditAction } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
 export type { SavedObjectsExtensions } from './src/extensions/extensions';
 export {
@@ -89,6 +103,12 @@ export {
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
 } from './src/extensions/extensions';
+export {
+  SavedObjectsErrorHelpers,
+  type DecoratedError,
+  type BulkResolveError,
+} from './src/saved_objects_error_helpers';
+
 export type {
   SavedObjectsModelVersion,
   SavedObjectsModelVersionMap,
@@ -102,10 +122,11 @@ export type {
   SavedObjectModelTransformationResult,
 } from './src/model_version';
 
+// We re-export the SavedObject types here for convenience.
 export type {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectReference,
-} from '@kbn/core-saved-objects-common/src/server_types';
+} from '@kbn/core-saved-objects-api-server';
