@@ -1672,7 +1672,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.delete).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.delete).toHaveBeenCalledWith(
-        { id: 'some-long-sid', index: aliasName, refresh: 'false' },
+        { id: 'some-long-sid', index: aliasName, refresh: 'wait_for' },
         { ignore: [404], meta: true }
       );
     });

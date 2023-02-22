@@ -96,6 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should be able to invalidate all sessions at once', async function () {
       const basicSessionCookie = await loginWithBasic(notSuperuserTestUser);
       const samlSessionCookie = await loginWithSAML();
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       // Invalidate all sessions and make sure neither of the sessions is active now.
       await supertest
@@ -119,6 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should do nothing if specified provider type is not configured', async function () {
       const basicSessionCookie = await loginWithBasic(notSuperuserTestUser);
       const samlSessionCookie = await loginWithSAML();
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       await supertest
         .post('/api/security/session/_invalidate')
@@ -136,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should be able to invalidate session only for a specific provider type', async function () {
       const basicSessionCookie = await loginWithBasic(notSuperuserTestUser);
       const samlSessionCookie = await loginWithSAML();
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       // Invalidate `basic` session and make sure that only `saml` session is still active.
       await supertest
@@ -168,6 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should do nothing if specified provider name is not configured', async function () {
       const basicSessionCookie = await loginWithBasic(notSuperuserTestUser);
       const samlSessionCookie = await loginWithSAML();
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       await supertest
         .post('/api/security/session/_invalidate')
@@ -191,6 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should be able to invalidate session only for a specific provider name', async function () {
       const basicSessionCookie = await loginWithBasic(notSuperuserTestUser);
       const samlSessionCookie = await loginWithSAML();
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       // Invalidate `saml1` session and make sure that only `basic1` session is still active.
       await supertest
@@ -226,6 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should do nothing if specified username does not have session', async function () {
       const basicSessionCookie = await loginWithBasic(notSuperuserTestUser);
       const samlSessionCookie = await loginWithSAML();
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       await supertest
         .post('/api/security/session/_invalidate')
@@ -258,6 +264,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should be able to invalidate session only for a specific user', async function () {
       const basicSessionCookie = await loginWithBasic(notSuperuserTestUser);
       const samlSessionCookie = await loginWithSAML();
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       // Invalidate session for `test_user` and make sure that only session of `a@b.c` is still active.
       await supertest
@@ -299,6 +306,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('only super users should be able to invalidate sessions', async function () {
       const basicSessionCookie = await loginWithBasic(notSuperuserTestUser);
       const samlSessionCookie = await loginWithSAML();
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       // User without a superuser role shouldn't be able to invalidate sessions.
       await supertest
