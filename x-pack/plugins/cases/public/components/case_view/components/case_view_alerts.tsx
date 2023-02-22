@@ -55,11 +55,11 @@ export const CaseViewAlerts = ({ caseData, activeTab }: CaseViewAlertsProps) => 
   if (alertIdsQuery.ids.values.length === 0) {
     return (
       <EuiFlexGroup>
-      <EuiFlexItem>
-        <CaseViewTabs caseData={caseData} activeTab={activeTab} />
-        <CaseViewAlertsEmpty />
+        <EuiFlexItem>
+          <CaseViewTabs caseData={caseData} activeTab={activeTab} />
+          <CaseViewAlertsEmpty />
         </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiFlexGroup>
     );
   }
 
