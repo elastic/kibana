@@ -28,10 +28,10 @@ function getGitRepoRootSync(repoRoot) {
       maxBuffer: Infinity,
     });
 
-    const firstLine = stdout.split('\n')[0]
-    const trimPath = firstLine.trim()
+    const firstLine = stdout.split('\n')[0];
+    const trimPath = firstLine.trim();
     cache.set(repoRoot, Path.basename(trimPath) !== trimPath ? trimPath : null);
-    
+
     return cache.get(repoRoot);
   } catch {
     cache.set(repoRoot, null);
