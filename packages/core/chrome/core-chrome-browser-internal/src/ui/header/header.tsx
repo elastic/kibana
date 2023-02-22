@@ -91,8 +91,8 @@ export function Header({
   const isVisible = useObservable(observables.isVisible$, false);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
-
   const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
+
   if (!isVisible) {
     return (
       <>
