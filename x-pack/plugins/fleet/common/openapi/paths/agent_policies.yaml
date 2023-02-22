@@ -24,6 +24,8 @@ get:
               - total
               - page
               - perPage
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: agent-policy-list
   parameters:
     - $ref: ../components/parameters/page_size.yaml
@@ -54,6 +56,8 @@ post:
             properties:
               item:
                 $ref: ../components/schemas/agent_policy.yaml
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: create-agent-policy
   requestBody:
     content:
