@@ -6,22 +6,18 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import path from 'path';
-import { copyFile, mkdir } from 'fs/promises';
-import execa from 'execa';
-import { existsSync } from 'fs';
-import { SettingsStorage } from '../common/settings_storage';
 import { getAgentVersionMatchingCurrentStack } from '../common/fleet_services';
 import type { StartRuntimeServicesOptions } from './types';
 import type { RuntimeServices } from '../common/stack_services';
 import { createRuntimeServices } from '../common/stack_services';
+import { EndpointAgentRunnerSettings } from './settings';
 
 interface EndpointRunnerRuntimeServices extends RuntimeServices {
   options: Omit<
     StartRuntimeServicesOptions,
     'kibanaUrl' | 'elasticUrl' | 'username' | 'password' | 'log'
   >;
-  localSettingsDirPath: string;
+  settings: EndpointAgentRunnerSettings;
 }
 
 // Internal singleton storing the services for the current run
@@ -52,13 +48,12 @@ export const startRuntimeServices = async ({
         otherOptions.version ||
         (await getAgentVersionMatchingCurrentStack(stackServices.kbnClient)),
     },
-    localSettingsDirPath: path.join(
-      SettingsStorage.getDefaultDirectoryPath(),
-      'endpoint_agent_runner'
-    ),
+    settings: new EndpointAgentRunnerSettings(),
   };
 
-  await setupLocalFiles(runtimeServices.localSettingsDirPath);
+  await runtimeServices.settings.setup();
+
+  log?.verbose(`Settings being saved to: ${runtimeServices.settings.getDirectoryPath()}`);
 };
 
 export const stopRuntimeServices = async () => {
@@ -71,20 +66,4 @@ export const getRuntimeServices = () => {
   }
 
   return runtimeServices;
-};
-
-const setupLocalFiles = async (localSettingsDir: string) => {
-  const vmConfigDir = path.resolve(__dirname, 'vm_config');
-
-  await mkdir(localSettingsDir, { recursive: true });
-
-  const localhostSshKeyFilePath = path.join(localSettingsDir, 'multipass_ssh_key');
-
-  if (!existsSync(localhostSshKeyFilePath)) {
-    await copyFile(path.join(vmConfigDir, 'multipass_ssh_key'), localhostSshKeyFilePath);
-
-    if (process.platform !== 'win32') {
-      execa.command(`chmod 600 multipass_ssh_key`, { cwd: localSettingsDir });
-    }
-  }
 };

@@ -50,7 +50,7 @@ const checkSsh = async () => {
   const { log } = getRuntimeServices();
 
   try {
-    const version = await execa('ssh', ['-V']);
+    const version = await execa.command('ssh -V');
 
     log.verbose(`Using 'ssh': ${version.stdout}`);
   } catch (err) {
