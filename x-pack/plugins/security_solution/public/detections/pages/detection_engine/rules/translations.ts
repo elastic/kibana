@@ -46,28 +46,6 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine
   defaultMessage: 'Rules',
 });
 
-export const EXPERIMENTAL_ON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalOn',
-  {
-    defaultMessage: 'Advanced sorting',
-  }
-);
-
-export const EXPERIMENTAL_OFF = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalOff',
-  {
-    defaultMessage: 'Advanced sorting',
-  }
-);
-
-export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalDescription',
-  {
-    defaultMessage:
-      'Turn this on to enable sorting for all table columns. You can turn it off if you encounter table performance issues.',
-  }
-);
-
 export const ADD_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addPageTitle',
   {
@@ -558,13 +536,6 @@ export const COLUMN_LAST_RESPONSE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.lastResponseTitle',
   {
     defaultMessage: 'Last response',
-  }
-);
-
-export const COLUMN_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.versionTitle',
-  {
-    defaultMessage: 'Version',
   }
 );
 

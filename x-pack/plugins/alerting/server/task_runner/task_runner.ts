@@ -45,6 +45,7 @@ import {
   RuleTypeState,
   parseDuration,
   RawAlertInstance,
+  RuleLastRunOutcomeOrderMap,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -825,10 +826,12 @@ export class TaskRunner<
     this.logger.debug(
       `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
     );
+    const outcome = 'failed';
     await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
       executionStatus: ruleExecutionStatusToRaw(executionStatus),
       lastRun: {
-        outcome: 'failed',
+        outcome,
+        outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
         warning: RuleExecutionStatusErrorReasons.Timeout,
         outcomeMsg,
         alertsCount: {},

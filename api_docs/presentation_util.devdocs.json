@@ -661,6 +661,43 @@
       },
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.FloatingActions",
+        "type": "Function",
+        "tags": [],
+        "label": "FloatingActions",
+        "description": [],
+        "signature": [
+          "({ className, actions, isEnabled, usingTwoLineLayout, children, }: React.PropsWithChildren<",
+          "FloatingActionsProps",
+          ">) => JSX.Element"
+        ],
+        "path": "src/plugins/presentation_util/public/components/floating_actions/floating_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.FloatingActions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  className = '',\n  actions,\n  isEnabled,\n  usingTwoLineLayout,\n  children,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "FloatingActionsProps",
+              ">"
+            ],
+            "path": "src/plugins/presentation_util/public/components/floating_actions/floating_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.getContextProvider",
         "type": "Function",
         "tags": [],
@@ -1451,7 +1488,7 @@
             "section": "def-public.ExpressionInputProps",
             "text": "ExpressionInputProps"
           },
-          " extends Pick<React.HTMLAttributes<HTMLDivElement>, \"className\" | \"style\">"
+          " extends Pick<React.HTMLAttributes<HTMLDivElement>, \"style\" | \"className\">"
         ],
         "path": "src/plugins/presentation_util/public/components/types.ts",
         "deprecated": false,
@@ -2008,7 +2045,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", ",
+              "(solutions?: (\"canvas\" | \"presentation\" | \"dashboard\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -2030,7 +2067,7 @@
                 "label": "solutions",
                 "description": [],
                 "signature": [
-                  "(\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined"
+                  "(\"canvas\" | \"presentation\" | \"dashboard\")[] | undefined"
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs/types.ts",
                 "deprecated": false,
@@ -3509,7 +3546,7 @@
             "label": "solutions",
             "description": [],
             "signature": [
-              "(\"dashboard\" | \"canvas\" | \"presentation\")[]"
+              "(\"canvas\" | \"presentation\" | \"dashboard\")[]"
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false,
@@ -3688,7 +3725,7 @@
         "label": "SolutionName",
         "description": [],
         "signature": [
-          "\"dashboard\" | \"canvas\" | \"presentation\""
+          "\"canvas\" | \"presentation\" | \"dashboard\""
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,

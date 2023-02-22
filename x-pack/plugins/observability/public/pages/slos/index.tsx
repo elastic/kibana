@@ -20,6 +20,7 @@ import PageNotFound from '../404';
 import { paths } from '../../config';
 import { isSloFeatureEnabled } from './helpers/is_slo_feature_enabled';
 import type { ObservabilityAppServices } from '../../application/types';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
 
 export function SlosPage() {
   const {
@@ -27,7 +28,7 @@ export function SlosPage() {
     http: { basePath },
   } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
-
+  const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();
 
   const {
@@ -67,7 +68,13 @@ export function SlosPage() {
           defaultMessage: 'SLOs',
         }),
         rightSideItems: [
-          <EuiButton color="primary" fill onClick={handleClickCreateSlo}>
+          <EuiButton
+            disabled={!hasWriteCapabilities}
+            color="primary"
+            fill
+            onClick={handleClickCreateSlo}
+            data-test-subj="slosPage-createNewSloButton"
+          >
             {i18n.translate('xpack.observability.slos.sloList.pageHeader.createNewButtonLabel', {
               defaultMessage: 'Create new SLO',
             })}

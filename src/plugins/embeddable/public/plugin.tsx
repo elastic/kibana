@@ -207,7 +207,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
             notifications={core.notifications}
             application={core.application}
             inspector={inspector}
-            SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
+            SavedObjectFinder={getSavedObjectFinder(core.uiSettings, core.http)}
             containerContext={containerContext}
             theme={theme}
           />

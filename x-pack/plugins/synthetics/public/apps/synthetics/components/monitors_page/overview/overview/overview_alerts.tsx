@@ -61,7 +61,10 @@ export const OverviewAlerts = () => {
                   selectedMetricField: RECORDS_FIELD,
                   reportDefinitions: {
                     'kibana.alert.rule.category': ['Synthetics monitor status'],
-                    'monitor.id': status?.enabledIds.length > 0 ? status?.enabledIds : ['false-id'],
+                    'monitor.id':
+                      status?.enabledMonitorQueryIds.length > 0
+                        ? status?.enabledMonitorQueryIds
+                        : ['false-id'],
                   },
                   filters: [{ field: 'kibana.alert.status', values: ['active', 'recovered'] }],
                   color: theme.eui.euiColorVis1,
@@ -83,7 +86,10 @@ export const OverviewAlerts = () => {
                   },
                   reportDefinitions: {
                     'kibana.alert.rule.category': ['Synthetics monitor status'],
-                    'monitor.id': status?.enabledIds.length > 0 ? status?.enabledIds : ['false-id'],
+                    'monitor.id':
+                      status?.enabledMonitorQueryIds.length > 0
+                        ? status?.enabledMonitorQueryIds
+                        : ['false-id'],
                   },
                   dataType: 'alerts',
                   selectedMetricField: RECORDS_FIELD,

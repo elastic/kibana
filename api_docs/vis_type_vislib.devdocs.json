@@ -40,7 +40,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"metric\" | \"goal\" | \"gauge\" | \"heatmap\""
+              "\"metric\" | \"goal\" | \"heatmap\" | \"gauge\""
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
             "deprecated": false,
@@ -289,7 +289,7 @@
             "label": "legendPosition",
             "description": [],
             "signature": [
-              "\"top\" | \"bottom\" | \"left\" | \"right\""
+              "\"right\" | \"left\" | \"top\" | \"bottom\""
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
             "deprecated": false,
@@ -359,7 +359,7 @@
         "label": "VislibChartType",
         "description": [],
         "signature": [
-          "\"metric\" | \"goal\" | \"gauge\" | \"heatmap\""
+          "\"metric\" | \"goal\" | \"heatmap\" | \"gauge\""
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,

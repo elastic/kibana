@@ -44,6 +44,7 @@ jest.mock('../link_to');
 jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/timeline/actions');
 jest.mock('../visualization_actions/actions');
+jest.mock('../visualization_actions/lens_embeddable');
 const field = 'process.name';
 const value = 'nice';
 

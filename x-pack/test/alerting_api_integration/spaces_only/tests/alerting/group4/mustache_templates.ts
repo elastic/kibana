@@ -18,13 +18,10 @@ import { URL, format as formatUrl } from 'url';
 import axios from 'axios';
 
 import expect from '@kbn/expect';
+import { getWebhookServer, getSlackServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  getWebhookServer,
-  getSlackServer,
-} from '../../../../common/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function executionStatusAlertTests({ getService }: FtrProviderContext) {

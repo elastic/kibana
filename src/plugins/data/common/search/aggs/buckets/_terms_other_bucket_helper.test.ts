@@ -325,6 +325,38 @@ describe('Terms Agg Other bucket helper', () => {
         expect(typeof agg).toBe('function');
       });
 
+      test('returns a function for undefined agg buckets', () => {
+        const response = {
+          took: 10,
+          timed_out: false,
+          _shards: {
+            total: 1,
+            successful: 1,
+            skipped: 0,
+            failed: 0,
+          },
+          hits: {
+            total: 14005,
+            max_score: 0,
+            hits: [],
+          },
+          aggregations: {
+            2: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 8325,
+            },
+          },
+          status: 200,
+        };
+        const aggConfigs = getAggConfigs(nestedTerm.aggs);
+        const agg = buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[1] as IBucketAggConfig,
+          enrichResponseWithSampling(response)
+        );
+        expect(agg).toBe(false);
+      });
+
       test('correctly builds query with single terms agg', () => {
         const aggConfigs = getAggConfigs(singleTerm.aggs);
         const agg = buildOtherBucketAgg(

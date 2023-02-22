@@ -7,24 +7,29 @@
 import React, { FC, useCallback } from 'react';
 import {
   EuiBadge,
+  EuiCallOut,
   EuiDescriptionList,
   EuiEmptyPrompt,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPagination,
   EuiPanel,
   EuiProgress,
   EuiSpacer,
-  EuiTitle,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
+import { useDataSource } from '../../hooks/use_data_source';
+import { SPLIT_FIELD_CARDINALITY_LIMIT } from './constants';
+import { ChangePointTypeFilter } from './change_point_type_filter';
 import { SearchBarWrapper } from './search_bar';
-import { useChangePointDetectionContext } from './change_point_detection_context';
+import { ChangePointType, useChangePointDetectionContext } from './change_point_detection_context';
 import { MetricFieldSelector } from './metric_field_selector';
 import { SplitFieldSelector } from './split_field_selector';
 import { FunctionPicker } from './function_picker';
@@ -40,7 +45,12 @@ export const ChangePointDetectionPage: FC = () => {
     resultQuery,
     progress,
     pagination,
+    splitFieldCardinality,
+    splitFieldsOptions,
+    metricFieldOptions,
   } = useChangePointDetectionContext();
+
+  const { dataView } = useDataSource();
 
   const setFn = useCallback(
     (fn: string) => {
@@ -50,7 +60,7 @@ export const ChangePointDetectionPage: FC = () => {
   );
 
   const setSplitField = useCallback(
-    (splitField: string) => {
+    (splitField: string | undefined) => {
       updateRequestParams({ splitField });
     },
     [updateRequestParams]
@@ -70,7 +80,37 @@ export const ChangePointDetectionPage: FC = () => {
     [updateRequestParams]
   );
 
-  const selectControlCss = { width: '200px' };
+  const setChangePointType = useCallback(
+    (changePointType: ChangePointType[] | undefined) => {
+      updateRequestParams({ changePointType });
+    },
+    [updateRequestParams]
+  );
+
+  const selectControlCss = { width: '300px' };
+
+  const cardinalityExceeded =
+    splitFieldCardinality && splitFieldCardinality > SPLIT_FIELD_CARDINALITY_LIMIT;
+
+  if (metricFieldOptions.length === 0) {
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationTitle', {
+          defaultMessage: 'The data view "{dataViewTitle}" does not contain any metric fields.',
+          values: { dataViewTitle: dataView.getName() },
+        })}
+        color="danger"
+        iconType="alert"
+      >
+        <p>
+          {i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationDescription', {
+            defaultMessage:
+              'Change point detection can only be run on data views with a metric field.',
+          })}
+        </p>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <div data-test-subj="aiopsChangePointDetectionPage">
@@ -90,9 +130,11 @@ export const ChangePointDetectionPage: FC = () => {
         <EuiFlexItem grow={false} css={selectControlCss}>
           <MetricFieldSelector value={requestParams.metricField} onChange={setMetricField} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false} css={selectControlCss}>
-          <SplitFieldSelector value={requestParams.splitField} onChange={setSplitField} />
-        </EuiFlexItem>
+        {splitFieldsOptions.length > 0 ? (
+          <EuiFlexItem grow={false} css={selectControlCss}>
+            <SplitFieldSelector value={requestParams.splitField} onChange={setSplitField} />
+          </EuiFlexItem>
+        ) : null}
 
         <EuiFlexItem css={{ visibility: progress === 100 ? 'hidden' : 'visible' }} grow={false}>
           <EuiProgress
@@ -113,6 +155,51 @@ export const ChangePointDetectionPage: FC = () => {
 
       <EuiSpacer size="m" />
 
+      {cardinalityExceeded ? (
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.aiops.changePointDetection.cardinalityWarningTitle', {
+              defaultMessage: 'Analysis has been limited',
+            })}
+            color="warning"
+            iconType="alert"
+          >
+            <p>
+              {i18n.translate('xpack.aiops.changePointDetection.cardinalityWarningMessage', {
+                defaultMessage:
+                  'The "{splitField}" field cardinality is {cardinality} which exceeds the limit of {cardinalityLimit}. Only the first {cardinalityLimit} partitions, sorted by document count, are analyzed.',
+                values: {
+                  cardinality: splitFieldCardinality,
+                  cardinalityLimit: SPLIT_FIELD_CARDINALITY_LIMIT,
+                  splitField: requestParams.splitField,
+                },
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+
+      <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'}>
+        <EuiFlexItem grow={false}>
+          <EuiText size={'s'}>
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.aggregationIntervalTitle"
+              defaultMessage="Aggregation interval: "
+            />
+            {requestParams.interval}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={{ minWidth: '400px' }}>
+          <ChangePointTypeFilter
+            value={requestParams.changePointType}
+            onChange={setChangePointType}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
       {annotations.length === 0 && progress === 100 ? (
         <>
           <EuiEmptyPrompt
@@ -129,7 +216,7 @@ export const ChangePointDetectionPage: FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.aiops.changePointDetection.noChangePointsFoundMessage"
-                  defaultMessage="Try to extend the time range or update the query"
+                  defaultMessage="Detect statistically significant change points such as dips, spikes, and distribution changes in a metric. Select a metric and set a time range to start detecting change points in your data."
                 />
               </p>
             }
@@ -140,46 +227,70 @@ export const ChangePointDetectionPage: FC = () => {
       <EuiFlexGrid columns={annotations.length >= 2 ? 2 : 1} responsive gutterSize={'m'}>
         {annotations.map((v) => {
           return (
-            <EuiFlexItem key={v.group_field}>
+            <EuiFlexItem key={v.group?.value ?? 'single_metric'}>
               <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
-                <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
+                <EuiFlexGroup
+                  alignItems={'center'}
+                  justifyContent={'spaceBetween'}
+                  gutterSize={'s'}
+                >
                   <EuiFlexItem grow={false}>
-                    <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
-                      <EuiFlexItem grow={false}>
-                        <EuiTitle size="xxs">
-                          <h3>{v.group_field}</h3>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                      {v.reason ? (
-                        <EuiFlexItem grow={false}>
-                          <EuiToolTip position="top" content={v.reason}>
-                            <EuiIcon
-                              tabIndex={0}
-                              color={'warning'}
-                              type="alert"
-                              title={i18n.translate(
-                                'xpack.aiops.changePointDetection.notResultsWarning',
-                                {
-                                  defaultMessage: 'No change point agg results warning',
-                                }
-                              )}
-                            />
-                          </EuiToolTip>
-                        </EuiFlexItem>
-                      ) : null}
-                    </EuiFlexGroup>
+                    {v.group ? (
+                      <EuiDescriptionList
+                        type="inline"
+                        listItems={[{ title: v.group.name, description: v.group.value }]}
+                      />
+                    ) : null}
+
+                    {v.reason ? (
+                      <EuiToolTip position="top" content={v.reason}>
+                        <EuiIcon
+                          tabIndex={0}
+                          color={'warning'}
+                          type="alert"
+                          title={i18n.translate(
+                            'xpack.aiops.changePointDetection.notResultsWarning',
+                            {
+                              defaultMessage: 'No change point agg results warning',
+                            }
+                          )}
+                        />
+                      </EuiToolTip>
+                    ) : null}
                   </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText color={'subdued'} size={'s'}>
+                      {requestParams.fn}({requestParams.metricField})
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiHorizontalRule margin="xs" />
+
+                <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
+                  {v.p_value !== undefined ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiDescriptionList
+                        type="inline"
+                        listItems={[
+                          {
+                            title: (
+                              <FormattedMessage
+                                id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueLabel"
+                                defaultMessage="p-value"
+                              />
+                            ),
+                            description: v.p_value.toPrecision(3),
+                          },
+                        ]}
+                      />
+                    </EuiFlexItem>
+                  ) : null}
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="hollow">{v.type}</EuiBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
-                {v.p_value !== undefined ? (
-                  <EuiDescriptionList
-                    type="inline"
-                    listItems={[{ title: 'p-value', description: v.p_value.toPrecision(3) }]}
-                  />
-                ) : null}
                 <ChartComponent annotation={v} />
               </EuiPanel>
             </EuiFlexItem>

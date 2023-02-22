@@ -287,7 +287,7 @@ describe('Detections Rules API', () => {
           tags: ['hello', 'world'],
         },
         sortingOptions: {
-          field: 'updated_at',
+          field: 'updatedAt',
           order: 'desc',
         },
         signal: abortCtrl.signal,
