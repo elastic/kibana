@@ -12,6 +12,7 @@ import {
   useQuery,
 } from '@tanstack/react-query';
 import moment from 'moment';
+
 import { useKibana } from '../../utils/kibana_react';
 
 export type Suggestion = string;
@@ -27,7 +28,8 @@ export interface UseFetchApmSuggestions {
 
 export interface Params {
   fieldName: string;
-  search: string;
+  search?: string;
+  serviceName?: string;
 }
 
 interface ApiResponse {
@@ -36,12 +38,16 @@ interface ApiResponse {
 
 const EMPTY_RESPONSE: ApiResponse = { terms: [] };
 
-export function useFetchApmSuggestions({ fieldName, search = '' }: Params): UseFetchApmSuggestions {
+export function useFetchApmSuggestions({
+  fieldName,
+  search = '',
+  serviceName = '',
+}: Params): UseFetchApmSuggestions {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: ['fetchApmSuggestions', fieldName, search],
+      queryKey: ['fetchApmSuggestions', fieldName, search, serviceName],
       queryFn: async ({ signal }) => {
         try {
           const { terms = [] } = await http.get<ApiResponse>('/internal/apm/suggestions', {
@@ -50,6 +56,7 @@ export function useFetchApmSuggestions({ fieldName, search = '' }: Params): UseF
               start: moment().subtract(2, 'days').toISOString(),
               end: moment().toISOString(),
               fieldValue: search,
+              ...(!!serviceName && { serviceName }),
             },
             signal,
           });

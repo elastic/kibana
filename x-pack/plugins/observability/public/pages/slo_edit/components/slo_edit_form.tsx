@@ -124,9 +124,11 @@ export function SloEditForm({ slo }: Props) {
       case 'sli.kql.custom':
         return <CustomKqlIndicatorTypeForm control={control} watch={watch} />;
       case 'sli.apm.transactionDuration':
-        return <ApmLatencyIndicatorTypeForm control={control} setValue={setValue} />;
+        return <ApmLatencyIndicatorTypeForm control={control} setValue={setValue} watch={watch} />;
       case 'sli.apm.transactionErrorRate':
-        return <ApmAvailabilityIndicatorTypeForm control={control} setValue={setValue} />;
+        return (
+          <ApmAvailabilityIndicatorTypeForm control={control} setValue={setValue} watch={watch} />
+        );
       default:
         return null;
     }

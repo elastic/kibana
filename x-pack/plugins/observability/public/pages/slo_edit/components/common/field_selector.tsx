@@ -28,6 +28,7 @@ export interface Props {
   label: string;
   name: FieldPath<CreateSLOInput>;
   placeholder: string;
+  selectedServiceName?: string;
 }
 
 export function FieldSelector({
@@ -38,11 +39,13 @@ export function FieldSelector({
   label,
   name,
   placeholder,
+  selectedServiceName,
 }: Props) {
   const [search, setSearch] = useState<string>('');
   const { suggestions, isLoading } = useFetchApmSuggestions({
     fieldName,
     search,
+    serviceName: selectedServiceName,
   });
   const [options, setOptions] = useState<Option[]>([]);
 
@@ -81,6 +84,7 @@ export function FieldSelector({
             async
             data-test-subj={dataTestSubj}
             isClearable={true}
+            isDisabled={name !== 'indicator.params.service' && !selectedServiceName}
             isInvalid={!!fieldState.error}
             isLoading={isLoading}
             onChange={(selected: EuiComboBoxOptionOption[]) => {

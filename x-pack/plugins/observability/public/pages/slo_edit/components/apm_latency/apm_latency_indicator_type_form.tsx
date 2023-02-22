@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormLabel } from '@elastic/eui';
-import { Control, Controller, UseFormSetValue } from 'react-hook-form';
+import { Control, Controller, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
@@ -17,9 +17,10 @@ import { FieldSelector } from '../common/field_selector';
 export interface Props {
   control: Control<CreateSLOInput>;
   setValue: UseFormSetValue<CreateSLOInput>;
+  watch: UseFormWatch<CreateSLOInput>;
 }
 
-export function ApmLatencyIndicatorTypeForm({ control, setValue }: Props) {
+export function ApmLatencyIndicatorTypeForm({ control, setValue, watch }: Props) {
   const { data: apmIndex } = useFetchApmIndex();
   useEffect(() => {
     setValue('indicator.params.index', apmIndex);
@@ -58,6 +59,7 @@ export function ApmLatencyIndicatorTypeForm({ control, setValue }: Props) {
           name="indicator.params.environment"
           control={control}
           dataTestSubj="apmLatencyEnvironmentSelector"
+          selectedServiceName={watch('indicator.params.service')}
         />
       </EuiFlexGroup>
 
@@ -76,6 +78,7 @@ export function ApmLatencyIndicatorTypeForm({ control, setValue }: Props) {
           name="indicator.params.transactionType"
           control={control}
           dataTestSubj="apmLatencyTransactionTypeSelector"
+          selectedServiceName={watch('indicator.params.service')}
         />
         <FieldSelector
           label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.transactionName', {
@@ -91,6 +94,7 @@ export function ApmLatencyIndicatorTypeForm({ control, setValue }: Props) {
           name="indicator.params.transactionName"
           control={control}
           dataTestSubj="apmLatencyTransactionNameSelector"
+          selectedServiceName={watch('indicator.params.service')}
         />
       </EuiFlexGroup>
 

@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
   EuiFormLabel,
 } from '@elastic/eui';
-import { Control, Controller, UseFormSetValue } from 'react-hook-form';
+import { Control, Controller, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
@@ -23,9 +23,10 @@ import { FieldSelector } from '../common/field_selector';
 export interface Props {
   control: Control<CreateSLOInput>;
   setValue: UseFormSetValue<CreateSLOInput>;
+  watch: UseFormWatch<CreateSLOInput>;
 }
 
-export function ApmAvailabilityIndicatorTypeForm({ control, setValue }: Props) {
+export function ApmAvailabilityIndicatorTypeForm({ control, setValue, watch }: Props) {
   const { data: apmIndex } = useFetchApmIndex();
   useEffect(() => {
     setValue('indicator.params.index', apmIndex);
@@ -67,6 +68,7 @@ export function ApmAvailabilityIndicatorTypeForm({ control, setValue }: Props) {
           name="indicator.params.environment"
           control={control}
           dataTestSubj="apmAvailabilityEnvironmentSelector"
+          selectedServiceName={watch('indicator.params.service')}
         />
       </EuiFlexGroup>
 
@@ -88,6 +90,7 @@ export function ApmAvailabilityIndicatorTypeForm({ control, setValue }: Props) {
           name="indicator.params.transactionType"
           control={control}
           dataTestSubj="apmAvailabilityTransactionTypeSelector"
+          selectedServiceName={watch('indicator.params.service')}
         />
         <FieldSelector
           label={i18n.translate(
@@ -106,6 +109,7 @@ export function ApmAvailabilityIndicatorTypeForm({ control, setValue }: Props) {
           name="indicator.params.transactionName"
           control={control}
           dataTestSubj="apmAvailabilityTransactionNameSelector"
+          selectedServiceName={watch('indicator.params.service')}
         />
       </EuiFlexGroup>
 
@@ -138,10 +142,14 @@ export function ApmAvailabilityIndicatorTypeForm({ control, setValue }: Props) {
                   }
                 )}
                 isInvalid={!!fieldState.error}
-                options={generateStatusCodeOptions()}
+                options={generateStatusCodeOptions(['2xx', '3xx', '4xx', '5xx'])}
                 selectedOptions={generateStatusCodeOptions(field.value)}
                 onChange={(selected: EuiComboBoxOptionOption[]) => {
-                  field.onChange(selected.map((opts) => opts.value));
+                  if (selected.length) {
+                    return field.onChange(selected.map((opts) => opts.value));
+                  }
+
+                  field.onChange([]);
                 }}
                 isClearable={true}
                 data-test-subj="sloEditApmAvailabilityGoodStatusCodesSelector"
@@ -155,7 +163,7 @@ export function ApmAvailabilityIndicatorTypeForm({ control, setValue }: Props) {
   );
 }
 
-function generateStatusCodeOptions(codes: string[] = ['2xx', '3xx', '4xx', '5xx']) {
+function generateStatusCodeOptions(codes: string[] = []) {
   return codes.map((code) => ({
     label: code,
     value: code,
