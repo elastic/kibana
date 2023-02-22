@@ -17,11 +17,12 @@ import {
   ALERT_RULE_NAME,
   ALERT_RISK_SCORE,
   ALERT_SEVERITY,
-  NUMBER_OF_ALERTS,
+  ALERTS_COUNT,
 } from '../../screens/alerts';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
+  RULES_MANAGEMENT_TABLE,
   RULE_NAME,
   RULE_SWITCH,
   SEVERITY,
@@ -432,7 +433,7 @@ describe('indicator match', () => {
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-        expectNumberOfRules(expectedNumberOfRules);
+        expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 
         cy.get(RULE_NAME).should('have.text', rule.name);
         cy.get(RISK_SCORE).should('have.text', rule.riskScore);
@@ -491,7 +492,7 @@ describe('indicator match', () => {
         waitForTheRuleToBeExecuted();
         waitForAlertsToPopulate();
 
-        cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
+        cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts);
         cy.get(ALERT_RULE_NAME).first().should('have.text', rule.name);
         cy.get(ALERT_SEVERITY).first().should('have.text', rule.severity?.toLowerCase());
         cy.get(ALERT_RISK_SCORE).first().should('have.text', rule.riskScore);

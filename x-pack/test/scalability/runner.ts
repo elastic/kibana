@@ -83,6 +83,8 @@ export async function ScalabilityTestRunner(
         `-Dgatling.core.outputDirectoryBaseName=${gatlingReportBaseDir}`,
         '-Dgatling.simulationClass=org.kibanaLoadTest.simulation.generic.GenericJourney',
         `-DjourneyPath=${scalabilityJsonPath}`,
+        // skip unloading kbn/es archives on journey finish since we shutdown instances anyway
+        `-DskipCleanupOnTeardown=true`,
       ],
       cwd: gatlingProjectRootPath,
       env: {

@@ -33,6 +33,8 @@ get:
               active:
                 type: integer
             required:
+              - active
+              - all
               - error
               - events
               - inactive
@@ -41,8 +43,8 @@ get:
               - other
               - total
               - updating
-              - all
-              - active
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-agent-status
   parameters:
     - schema:

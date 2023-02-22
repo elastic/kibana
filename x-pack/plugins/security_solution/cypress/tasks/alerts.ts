@@ -12,7 +12,6 @@ import {
   CLOSE_SELECTED_ALERTS_BTN,
   EXPAND_ALERT_BTN,
   GROUP_BY_TOP_INPUT,
-  LOADING_ALERTS_PANEL,
   MANAGE_ALERT_DETECTION_RULES_BTN,
   MARK_ALERT_ACKNOWLEDGED_BTN,
   OPEN_ALERT_BTN,
@@ -25,12 +24,12 @@ import {
   TAKE_ACTION_BTN,
   TAKE_ACTION_MENU,
   ADD_ENDPOINT_EXCEPTION_BTN,
-  ALERTS_HISTOGRAM_PANEL_LOADER,
-  ALERTS_CONTAINER_LOADING_BAR,
   DATAGRID_CHANGES_IN_PROGRESS,
-  EVENT_CONTAINER_TABLE_NOT_LOADING,
   CLOSED_ALERTS_FILTER_BTN,
   OPENED_ALERTS_FILTER_BTN,
+  EVENT_CONTAINER_TABLE_LOADING,
+  SELECT_ALL_ALERTS,
+  SELECT_ALL_VISIBLE_ALERTS,
   ACKNOWLEDGED_ALERTS_FILTER_BTN,
   CELL_ADD_TO_TIMELINE_BUTTON,
   CELL_FILTER_IN_BUTTON,
@@ -51,6 +50,7 @@ import {
   CELL_EXPAND_VALUE,
   CELL_EXPANSION_POPOVER,
   USER_DETAILS_LINK,
+  ALERT_FLYOUT,
 } from '../screens/alerts_details';
 import { FIELD_INPUT } from '../screens/exceptions';
 import {
@@ -66,6 +66,7 @@ import {
 } from '../screens/common/filter_group';
 import { LOADING_SPINNER } from '../screens/common/page';
 import { ALERTS_URL } from '../urls/navigation';
+import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
@@ -151,12 +152,12 @@ export const expandFirstAlertActions = () => {
 };
 
 export const expandFirstAlert = () => {
-  cy.get(EXPAND_ALERT_BTN).should('exist');
-
-  cy.get(EXPAND_ALERT_BTN)
-    .first()
-    .should('exist')
-    .pipe(($el) => $el.trigger('click'));
+  cy.root()
+    .pipe(($el) => {
+      $el.find(EXPAND_ALERT_BTN).trigger('click');
+      return $el.find(ALERT_FLYOUT);
+    })
+    .should('be.visible');
 };
 
 export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
@@ -292,10 +293,15 @@ export const markAcknowledgedFirstAlert = () => {
   cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
 };
 
+export const openAlertsFieldBrowser = () => {
+  cy.get(FIELDS_BROWSER_BTN).click();
+};
+
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
-  waitForAlerts();
   for (let i = 0; i < numberOfAlerts; i++) {
-    cy.get(ALERT_CHECKBOX).eq(i).click({ force: true });
+    waitForAlerts();
+    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').click({ force: true });
+    cy.get('@checkbox').should('have.attr', 'checked');
   }
 };
 
@@ -336,15 +342,8 @@ export const waitForAlerts = () => {
    * */
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
-  cy.get(EVENT_CONTAINER_TABLE_NOT_LOADING).should('be.visible');
+  cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
-};
-
-export const waitForAlertsPanelToBeLoaded = () => {
-  cy.get(LOADING_ALERTS_PANEL).should('exist');
-  cy.get(LOADING_ALERTS_PANEL).should('not.exist');
-  cy.get(ALERTS_CONTAINER_LOADING_BAR).should('not.exist');
-  cy.get(ALERTS_HISTOGRAM_PANEL_LOADER).should('not.exist');
 };
 
 export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {
@@ -412,4 +411,13 @@ export const checkAlertCountFromAlertCountTable = (expectedNumberOfAlerts: numbe
           expect(sumOfEachRow).to.eq(expectedNumber);
         });
     });
+};
+
+export const selectFirstPageAlerts = () => {
+  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().scrollIntoView().click({ force: true });
+};
+
+export const selectAllAlerts = () => {
+  selectFirstPageAlerts();
+  cy.get(SELECT_ALL_ALERTS).click();
 };

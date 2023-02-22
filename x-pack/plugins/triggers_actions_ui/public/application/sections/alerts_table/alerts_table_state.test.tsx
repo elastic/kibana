@@ -17,6 +17,7 @@ import {
   AlertsField,
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
+  FetchAlertData,
 } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import { TypeRegistry } from '../../type_registry';
@@ -106,6 +107,62 @@ const alerts = [
   },
 ] as unknown as Alerts;
 
+const oldAlertsData = [
+  [
+    {
+      field: AlertsField.name,
+      value: ['one'],
+    },
+    {
+      field: AlertsField.reason,
+      value: ['two'],
+    },
+  ],
+  [
+    {
+      field: AlertsField.name,
+      value: ['three'],
+    },
+    {
+      field: AlertsField.reason,
+      value: ['four'],
+    },
+  ],
+] as FetchAlertData['oldAlertsData'];
+
+const ecsAlertsData = [
+  [
+    {
+      '@timestamp': ['2023-01-28T10:48:49.559Z'],
+      _id: 'SomeId',
+      _index: 'SomeIndex',
+      kibana: {
+        alert: {
+          rule: {
+            name: ['one'],
+          },
+          reason: ['two'],
+        },
+      },
+    },
+  ],
+  [
+    {
+      '@timestamp': ['2023-01-27T10:48:49.559Z'],
+      _id: 'SomeId2',
+      _index: 'SomeIndex',
+      kibana: {
+        alert: {
+          rule: {
+            name: ['three'],
+          },
+          reason: ['four'],
+        },
+      },
+    },
+  ],
+] as FetchAlertData['ecsAlertsData'];
+
 const FlyoutBody = ({ alert }: AlertsTableFlyoutBaseProps) => (
   <ul>
     {columns.map((column) => (
@@ -158,6 +215,8 @@ const fetchAlertsResponse = {
   getInspectQuery: jest.fn(),
   refetch: refetchMock,
   totalAlerts: alerts.length,
+  ecsAlertsData,
+  oldAlertsData,
 };
 
 hookUseFetchAlerts.mockReturnValue([false, fetchAlertsResponse]);
@@ -398,6 +457,7 @@ describe('AlertsTableState', () => {
         },
         set: jest.fn(),
       }));
+
       const { getByTestId, queryByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
 
       expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).toBe(null);
@@ -501,6 +561,29 @@ describe('AlertsTableState', () => {
         const result = render(<AlertsTableWithLocale {...props} />);
         expect(result.getByText('This is a persistent control')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Client provided toolbar visiblity options', () => {
+    it('hide column order control', () => {
+      const customTableProps: AlertsTableStateProps = {
+        ...tableProps,
+        toolbarVisibility: { showColumnSelector: false },
+      };
+
+      render(<AlertsTableWithLocale {...customTableProps} />);
+
+      expect(screen.queryByTestId('dataGridColumnSelectorButton')).not.toBeInTheDocument();
+    });
+    it('hide sort Selection', () => {
+      const customTableProps: AlertsTableStateProps = {
+        ...tableProps,
+        toolbarVisibility: { showSortSelector: false },
+      };
+
+      render(<AlertsTableWithLocale {...customTableProps} />);
+
+      expect(screen.queryByTestId('dataGridColumnSortingButton')).not.toBeInTheDocument();
     });
   });
 });
