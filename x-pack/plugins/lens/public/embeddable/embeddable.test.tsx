@@ -30,23 +30,36 @@ import { OnSaveProps } from '@kbn/saved-objects-plugin/public/save_modal';
 import { act } from 'react-dom/test-utils';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { Visualization } from '../types';
+import { createMockDatasource, createMockVisualization } from '../mocks';
 
 jest.mock('@kbn/inspector-plugin/public', () => ({
   isAvailable: false,
   open: false,
 }));
 
+const defaultVisualizationId = 'lnsSomeVisType';
+const defaultDatasourceId = 'someDatasource';
+
 const savedVis: Document = {
   state: {
-    visualization: {},
-    datasourceStates: {},
+    visualization: { activeId: defaultVisualizationId },
+    datasourceStates: { [defaultDatasourceId]: {} },
     query: { query: '', language: 'lucene' },
     filters: [],
   },
   references: [],
   title: 'My title',
-  visualizationType: '',
+  visualizationType: defaultVisualizationId,
 };
+
+const defaultVisualizationMap = {
+  [defaultVisualizationId]: createMockVisualization(),
+};
+
+const defaultDatasourceMap = {
+  [defaultDatasourceId]: createMockDatasource(defaultDatasourceId),
+};
+
 const defaultSaveMethod = (
   testAttributes: LensSavedObjectAttributes,
   savedObjectId?: string
@@ -155,8 +168,8 @@ describe('embeddable', () => {
         inspector: inspectorPluginMock.createStartContract(),
         getTrigger,
         theme: themeServiceMock.createStartContract(),
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         documentToExpression: () =>
           Promise.resolve({
@@ -208,8 +221,8 @@ describe('embeddable', () => {
         inspector: inspectorPluginMock.createStartContract(),
         getTrigger,
         theme: themeServiceMock.createStartContract(),
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         documentToExpression: () =>
           Promise.resolve({
@@ -268,8 +281,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -322,8 +335,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -398,8 +411,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -452,8 +465,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -505,8 +518,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -554,8 +567,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -609,8 +622,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -668,8 +681,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -725,8 +738,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -789,8 +802,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -854,8 +867,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -922,8 +935,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -975,8 +988,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -1030,8 +1043,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -1082,8 +1095,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -1150,8 +1163,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -1236,8 +1249,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -1297,8 +1310,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -1355,8 +1368,8 @@ describe('embeddable', () => {
           navLinks: {},
         },
         getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
         injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
@@ -1408,7 +1421,7 @@ describe('embeddable', () => {
     const visDocument: Document = {
       state: {
         visualization: {},
-        datasourceStates: {},
+        datasourceStates: { [defaultDatasourceId]: {} },
         query: { query: '', language: 'lucene' },
         filters: [],
       },
@@ -1443,7 +1456,7 @@ describe('embeddable', () => {
             initialize: () => {},
           } as unknown as Visualization,
         },
-        datasourceMap: {},
+        datasourceMap: defaultDatasourceMap,
         documentToExpression: documentToExpressionMock,
       },
       { id: '123' } as unknown as LensEmbeddableInput
@@ -1475,23 +1488,11 @@ describe('embeddable', () => {
   it('should override noPadding in the display options if noPadding is set in the embeddable input', async () => {
     expressionRenderer = jest.fn((_) => null);
 
-    const visDocument: Document = {
-      state: {
-        visualization: {},
-        datasourceStates: {},
-        query: { query: '', language: 'lucene' },
-        filters: [],
-      },
-      references: [],
-      title: 'My title',
-      visualizationType: 'testVis',
-    };
-
     const createEmbeddable = (displayOptions?: { noPadding: boolean }, noPadding?: boolean) => {
       return new Embeddable(
         {
           timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
-          attributeService: attributeServiceMockFromSavedVis(visDocument),
+          attributeService: attributeServiceMockFromSavedVis(savedVis),
           data: dataMock,
           expressionRenderer,
           coreStart: {} as CoreStart,
@@ -1507,12 +1508,12 @@ describe('embeddable', () => {
           getTrigger,
           theme: themeServiceMock.createStartContract(),
           visualizationMap: {
-            [visDocument.visualizationType as string]: {
+            [savedVis.visualizationType as string]: {
               getDisplayOptions: displayOptions ? () => displayOptions : undefined,
               initialize: () => {},
             } as unknown as Visualization,
           },
-          datasourceMap: {},
+          datasourceMap: defaultDatasourceMap,
           injectFilterReferences: jest.fn(mockInjectFilterReferences),
           documentToExpression: () =>
             Promise.resolve({

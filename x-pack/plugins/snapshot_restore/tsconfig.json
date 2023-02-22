@@ -29,6 +29,7 @@
     "@kbn/i18n-react",
     "@kbn/analytics",
     "@kbn/config-schema",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

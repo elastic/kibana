@@ -109,6 +109,7 @@ export interface DocLinks {
   };
   readonly enterpriseSearch: {
     readonly apiKeys: string;
+    readonly behavioralAnalytics: string;
     readonly behavioralAnalyticsEvents: string;
     readonly bulkApi: string;
     readonly configuration: string;
@@ -116,6 +117,7 @@ export interface DocLinks {
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
     readonly connectorsWorkplaceSearch: string;
+    readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
     readonly deployTrainedModels: string;
@@ -218,6 +220,7 @@ export interface DocLinks {
     readonly std_dev: string;
     readonly sum: string;
     readonly top_hits: string;
+    readonly change_point: string;
   };
   readonly runtimeFields: {
     readonly overview: string;
@@ -352,6 +355,7 @@ export interface DocLinks {
     createAlerts: string;
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
+    syntheticsMigrateFromIntegration: string;
   }>;
   readonly alerting: Readonly<{
     guide: string;

@@ -23,6 +23,7 @@ import { emptySloList, sloList } from '../../data/slo/slo';
 import type { ConfigSchema } from '../../plugin';
 import type { Subset } from '../../typings';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -36,6 +37,7 @@ jest.mock('../../hooks/slo/use_fetch_slo_list');
 jest.mock('../../hooks/slo/use_create_slo');
 jest.mock('../../hooks/slo/use_delete_slo');
 jest.mock('../../hooks/slo/use_fetch_historical_summary');
+jest.mock('../../hooks/slo/use_capabilities');
 
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
@@ -43,6 +45,7 @@ const useFetchSloListMock = useFetchSloList as jest.Mock;
 const useCreateOrUpdateSloMock = useCreateOrUpdateSlo as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
+const useCapabilitiesMock = useCapabilities as jest.Mock;
 
 const mockCreateSlo = jest.fn();
 useCreateOrUpdateSloMock.mockReturnValue({ createSlo: mockCreateSlo });
@@ -84,6 +87,7 @@ describe('SLOs Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockKibana();
+    useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
   });
 
   describe('when the feature flag is not enabled', () => {

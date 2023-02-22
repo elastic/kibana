@@ -11,7 +11,7 @@ import { makeAction, makeActionContext } from '../mocks/helpers';
 import { useBulkLoadActions, useLoadActions, useLoadActionsFn } from './use_load_actions';
 
 const action = makeAction('action-1', 'icon', 1);
-const mockGetActions = jest.fn(async () => [action]);
+const mockGetActions = jest.fn();
 jest.mock('../context/cell_actions_context', () => ({
   useCellActionsContext: () => ({ getActions: mockGetActions }),
 }));
@@ -21,6 +21,7 @@ describe('loadActions hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetActions.mockResolvedValue([action]);
   });
   describe('useLoadActions', () => {
     it('should load actions when called', async () => {
@@ -49,6 +50,20 @@ describe('loadActions hooks', () => {
       await waitForNextUpdate();
 
       expect(result.error?.message).toEqual(message);
+    });
+
+    it('filters out disabled actions', async () => {
+      const actionEnabled = makeAction('action-enabled');
+      const actionDisabled = makeAction('action-disabled');
+      mockGetActions.mockResolvedValue([actionEnabled, actionDisabled]);
+
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useLoadActions(actionContext, { disabledActionTypes: [actionDisabled.type] })
+      );
+
+      await waitForNextUpdate();
+
+      expect(result.current.value).toEqual([actionEnabled]);
     });
   });
 
@@ -94,6 +109,25 @@ describe('loadActions hooks', () => {
 
       expect(result.error?.message).toEqual(message);
     });
+
+    it('filters out disabled actions types', async () => {
+      const actionEnabled = makeAction('action-enabled');
+      const actionDisabled = makeAction('action-disabled');
+      mockGetActions.mockResolvedValue([actionEnabled, actionDisabled]);
+
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useLoadActionsFn({ disabledActionTypes: [actionDisabled.type] })
+      );
+      const [_, loadActions] = result.current;
+
+      act(() => {
+        loadActions(actionContext);
+      });
+      await waitForNextUpdate();
+
+      const [{ value: valueAfterUpdate }] = result.current;
+      expect(valueAfterUpdate).toEqual([actionEnabled]);
+    });
   });
 
   describe('useBulkLoadActions', () => {
@@ -127,6 +161,20 @@ describe('loadActions hooks', () => {
       await waitForNextUpdate();
 
       expect(result.error?.message).toEqual(message);
+    });
+
+    it('filters out disabled actions types', async () => {
+      const actionEnabled = makeAction('action-enabled');
+      const actionDisabled = makeAction('action-disabled');
+      mockGetActions.mockResolvedValue([actionEnabled, actionDisabled]);
+
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useBulkLoadActions(actionContexts, { disabledActionTypes: [actionDisabled.type] })
+      );
+
+      await waitForNextUpdate();
+
+      expect(result.current.value).toEqual([[actionEnabled], [actionEnabled]]);
     });
   });
 });

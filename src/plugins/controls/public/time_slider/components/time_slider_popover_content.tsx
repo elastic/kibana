@@ -82,7 +82,7 @@ export function TimeSliderPopoverContent(props: Props) {
       <EuiFlexItem grow={false}>
         <EuiToolTip content={anchorStartToggleButtonLabel}>
           <EuiButtonIcon
-            iconType={isAnchored ? 'pin' : 'pinFilled'}
+            iconType={isAnchored ? 'pinFilled' : 'pin'}
             onClick={() => {
               const nextIsAnchored = !isAnchored;
               if (nextIsAnchored) {
