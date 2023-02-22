@@ -8,9 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { capitalize } from 'lodash';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { PageLoading, PageError, Error, useExecutionContext } from '../../../../shared_imports';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
@@ -24,16 +22,13 @@ import {
   RepositoryEmptyPrompt,
   SnapshotEmptyPrompt,
   RepositoryError,
+  SnapshotError,
 } from './components';
 
 interface MatchParams {
   repositoryName?: string;
   snapshotId?: string;
 }
-
-const sanitizeErrorType = (error: string) => {
-  return capitalize(error.replace('_exception', '').replace('_', ' '));
-};
 
 export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   location: { search },
@@ -147,42 +142,14 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     content = <RepositoryError />;
   } else if (repositories.length === 0) {
     content = <RepositoryEmptyPrompt />;
-  } else if (
-    totalSnapshotsCount === 0 &&
-    !listParams.searchField &&
-    !isLoading &&
-    Object.keys(errors).length === 0
-  ) {
-    content = <SnapshotEmptyPrompt policiesCount={policies.length} />;
+  } else if (totalSnapshotsCount === 0 && !listParams.searchField && !isLoading) {
+    content = <SnapshotEmptyPrompt errors={errors} policiesCount={policies.length} />;
   } else {
-    const snapshotsErrorWarning = Object.keys(errors).length ? (
-      <>
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryWarningTitle"
-              defaultMessage="There were a few errors retrieving snapshots"
-            />
-          }
-          color="warning"
-          iconType="alert"
-          data-test-subj="snapshotsErrorWarning"
-        >
-          <ul>
-            {Object.keys(errors).map((errorKey) => (
-              <li key={errorKey}>
-                {sanitizeErrorType(errors[errorKey].type)}: {errors[errorKey].reason}
-              </li>
-            ))}
-          </ul>
-        </EuiCallOut>
-        <EuiSpacer />
-      </>
-    ) : null;
+    const hasErrors = Object.keys(errors).length;
 
     content = (
       <section data-test-subj="snapshotList">
-        {snapshotsErrorWarning}
+        {hasErrors && <SnapshotError errors={errors} />}
 
         <SnapshotTable
           snapshots={snapshots}
