@@ -6,15 +6,20 @@
  */
 
 import { useEffect, useState } from 'react';
-
+import { LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
 import { syntheticsEditMonitorLocatorID } from '@kbn/observability-plugin/common';
-import { useSyntheticsStartPlugins } from '../../../contexts';
+import { useSyntheticsStartPlugins } from '../contexts';
 
-export function useEditMonitorLocator({ configId }: { configId: string }) {
+export function useEditMonitorLocator({
+  configId,
+  locators,
+}: {
+  configId: string;
+  locators?: LocatorClient;
+}) {
   const [editUrl, setEditUrl] = useState<string | undefined>(undefined);
-  const locator = useSyntheticsStartPlugins()?.share?.url.locators.get(
-    syntheticsEditMonitorLocatorID
-  );
+  const syntheticsLocators = useSyntheticsStartPlugins()?.share?.url.locators;
+  const locator = (locators || syntheticsLocators)?.get(syntheticsEditMonitorLocatorID);
 
   useEffect(() => {
     async function generateUrl() {
