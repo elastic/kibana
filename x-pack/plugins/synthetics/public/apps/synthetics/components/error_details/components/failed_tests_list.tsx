@@ -9,7 +9,10 @@ import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useState } from 'react';
 import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
-import { TestDetailsLink } from '../../common/links/test_details_link';
+import {
+  getTestRunDetailRelativeLink,
+  TestDetailsLink,
+} from '../../common/links/test_details_link';
 import { Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
@@ -68,7 +71,11 @@ export const FailedTestsList = ({
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
           history.push(
-            `/monitor/${monitorId}/test-run/${item.monitor.check_group}?locationId=${selectedLocation?.id}`
+            getTestRunDetailRelativeLink({
+              monitorId,
+              checkGroup: item.monitor.check_group,
+              locationId: selectedLocation?.id,
+            })
           );
         },
       };
