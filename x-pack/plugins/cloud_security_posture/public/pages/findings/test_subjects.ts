@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const FINDINGS_FLYOUT = 'findings_flyout';
+export const FINDINGS_TABLE_EXPAND_COLUMN = 'findings_table_expand_column';
 export const FINDINGS_TABLE = 'findings_table';
 export const FINDINGS_BY_RESOURCE_TABLE_NO_FINDINGS_EMPTY_STATE =
   'findings-by-resource-table-no-findings-empty-state';
