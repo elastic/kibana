@@ -5,23 +5,34 @@
  * 2.0.
  */
 
-import type { AgentPolicy, GetAgentsResponse, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type {
+  AgentPolicy,
+  GetAgentsResponse,
+  GetInfoResponse,
+  UpdatePackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import {
   agentRouteService,
   agentPolicyRouteService,
+  epmRouteService,
   packagePolicyRouteService,
 } from '@kbn/fleet-plugin/common';
 import { request } from './common';
 
-export const getAgentByHostName = (hostname: string) => {
-  return request<GetAgentsResponse>({
+export const getEndpointIntegrationVersion = () =>
+  request<GetInfoResponse>({
+    url: epmRouteService.getInfoPath('endpoint'),
+    method: 'GET',
+  }).then((response) => response.body.item.version);
+
+export const getAgentByHostName = (hostname: string) =>
+  request<GetAgentsResponse>({
     url: agentRouteService.getListPath(),
     method: 'GET',
     qs: {
       kuery: `local_metadata.host.hostname: "${hostname}"`,
     },
   }).then((response) => response.body.items[0]);
-};
 
 export const updatePackagePolicy = (packagePolicyId: string, packagePolicy: UpdatePackagePolicy) =>
   request({
