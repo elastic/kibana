@@ -36,4 +36,5 @@ export const platformServiceFactory: CanvasPlatformServiceFactory = () => ({
   setFullscreen: noop,
   redirectLegacyUrl: noop,
   getLegacyUrlConflict: undefined,
+  getHttp: noop,
 });

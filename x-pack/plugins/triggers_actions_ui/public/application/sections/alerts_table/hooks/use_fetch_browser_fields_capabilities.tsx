@@ -6,9 +6,9 @@
  */
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { BASE_RAC_ALERTS_API_PATH, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
+import type { Alerts } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ERROR_FETCH_BROWSER_FIELDS } from './translations';
 
@@ -17,7 +17,7 @@ export interface FetchAlertsArgs {
 }
 
 export interface FetchAlertResp {
-  alerts: EcsFieldsResponse[];
+  alerts: Alerts;
 }
 
 export type UseFetchAlerts = ({ featureIds }: FetchAlertsArgs) => [boolean, FetchAlertResp];
