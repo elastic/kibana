@@ -7,9 +7,22 @@
 
 import React, { useState } from 'react';
 
-import { EuiCodeBlock, EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiTabs, EuiTab } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+} from '@elastic/eui';
 import { SearchRequest, SearchResponse } from '@elastic/search-ui-engines-connector';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { EuiLinkTo } from '../../../../shared/react_router_helpers';
+
+import { EngineViewTabs, ENGINE_TAB_PATH } from '../../../routes';
 
 export interface APICallData {
   request: SearchRequest;
@@ -17,11 +30,16 @@ export interface APICallData {
 }
 
 export interface APICallFlyoutProps {
+  engineName: string;
   lastAPICall: APICallData;
   onClose: () => void;
 }
 
-export const APICallFlyout: React.FC<APICallFlyoutProps> = ({ onClose, lastAPICall }) => {
+export const APICallFlyout: React.FC<APICallFlyoutProps> = ({
+  engineName,
+  onClose,
+  lastAPICall,
+}) => {
   const [tab, setTab] = useState<'request' | 'response'>('request');
 
   const contents = JSON.stringify(lastAPICall[tab], null, 2);
@@ -37,20 +55,39 @@ export const APICallFlyout: React.FC<APICallFlyoutProps> = ({ onClose, lastAPICa
             />
           </h2>
         </EuiTitle>
-        <EuiTabs bottomBorder={false} style={{ marginBottom: '-24px' }}>
-          <EuiTab isSelected={tab === 'request'} onClick={() => setTab('request')}>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          style={{ marginBottom: '-24px' }}
+        >
+          <EuiTabs bottomBorder={false}>
+            <EuiTab isSelected={tab === 'request'} onClick={() => setTab('request')}>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.engine.searchPreivew.apiCallFlyout.requestTab"
+                defaultMessage="Request"
+              />
+            </EuiTab>
+            <EuiTab isSelected={tab === 'response'} onClick={() => setTab('response')}>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.engine.searchPreivew.apiCallFlyout.responseTab"
+                defaultMessage="Response"
+              />
+            </EuiTab>
+          </EuiTabs>
+          <EuiLinkTo
+            to={generateEncodedPath(ENGINE_TAB_PATH, {
+              engineName,
+              tabId: EngineViewTabs.API,
+            })}
+            color="primary"
+            target="_blank"
+          >
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.engine.searchPreivew.apiCallFlyout.requestTab"
-              defaultMessage="Request"
+              id="xpack.enterpriseSearch.content.engine.searchPreivew.apiCallFlyout.searchEndpointLink"
+              defaultMessage="Search endpoint"
             />
-          </EuiTab>
-          <EuiTab isSelected={tab === 'response'} onClick={() => setTab('response')}>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.content.engine.searchPreivew.apiCallFlyout.responseTab"
-              defaultMessage="Response"
-            />
-          </EuiTab>
-        </EuiTabs>
+          </EuiLinkTo>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <div style={{ blockSize: '100%' }}>
         <EuiCodeBlock overflowHeight="100%" isCopyable isVirtualized>

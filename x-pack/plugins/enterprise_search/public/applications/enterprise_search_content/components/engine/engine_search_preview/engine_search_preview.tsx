@@ -131,7 +131,11 @@ export const EngineSearchPreview: React.FC = () => {
         </SearchProvider>
         <DocumentFlyout />
         {showAPICallFlyout && lastAPICall && (
-          <APICallFlyout onClose={() => setShowAPICallFlyout(false)} lastAPICall={lastAPICall} />
+          <APICallFlyout
+            onClose={() => setShowAPICallFlyout(false)}
+            lastAPICall={lastAPICall}
+            engineName={engineName}
+          />
         )}
       </DocumentProvider>
     </EnterpriseSearchEnginesPageTemplate>
