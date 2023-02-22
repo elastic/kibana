@@ -25,7 +25,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    **/
   version?: string;
   /** A semver value that is used when migrating documents between Kibana versions. */
-  migrationVersion?: string;
+  migrationVersion?: Record<string, string> | string;
   /**
    * A semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current
    * Kibana version when the object is created. If this is set to a non-semver value, or it is set to a semver value greater than the

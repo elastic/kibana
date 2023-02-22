@@ -112,7 +112,8 @@ interface SavedObjectDoc<T = unknown> {
  *
  * @public
  */
-export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & {
+export type SavedObjectUnsanitizedDoc<T = unknown> = Omit<SavedObjectDoc<T>, 'migrationVersion'> & {
+  migrationVersion?: Record<string, string> | string;
   references?: SavedObjectReference[];
 };
 
