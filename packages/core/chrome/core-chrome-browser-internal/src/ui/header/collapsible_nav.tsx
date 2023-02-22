@@ -148,6 +148,7 @@ export function CollapsibleNav({
       ...(needsIcon && { basePath }),
     });
   };
+
   return (
     <EuiCollapsibleNav
       data-test-subj="collapsibleNav"
@@ -256,6 +257,7 @@ export function CollapsibleNav({
                 basePath,
                 navigateToUrl
               );
+
               return {
                 ...hydratedLink,
                 'data-test-subj': 'collapsibleNavAppLink--recent',

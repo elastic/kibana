@@ -19,14 +19,14 @@ export const ScreenReaderRouteAnnouncements: FC<{
   breadcrumbs$: HeaderProps['breadcrumbs$'];
 }> = ({ breadcrumbs$ }) => {
   const [routeTitle, setRouteTitle] = useState('');
-  const fallbackBreadcrumbs = useObservable(breadcrumbs$, []);
+  const breadcrumbs = useObservable(breadcrumbs$, []);
 
   useEffect(() => {
-    if (fallbackBreadcrumbs.length) {
+    if (breadcrumbs.length) {
       const breadcrumbText: string[] = [];
 
       // Reverse the breadcrumb title order and ensure we only pick up valid strings
-      fallbackBreadcrumbs.reverse().map((breadcrumb) => {
+      breadcrumbs.reverse().map((breadcrumb) => {
         if (typeof breadcrumb.text === 'string') breadcrumbText.push(breadcrumb.text);
       });
       breadcrumbText.push(DEFAULT_TITLE);
@@ -36,7 +36,7 @@ export const ScreenReaderRouteAnnouncements: FC<{
       // Don't announce anything during loading states
       setRouteTitle('');
     }
-  }, [fallbackBreadcrumbs]);
+  }, [breadcrumbs]);
 
   return <EuiScreenReaderLive focusRegionOnTextChange>{routeTitle}</EuiScreenReaderLive>;
 };
