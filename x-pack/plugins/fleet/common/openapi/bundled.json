@@ -35,6 +35,9 @@
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/error"
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -73,6 +76,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-settings"
@@ -114,6 +120,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "update-settings"
@@ -144,6 +153,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "fleet-server-health-check",
@@ -191,6 +203,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "generate-service-token-deprecated",
@@ -224,6 +239,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "generate-service-token",
@@ -248,6 +266,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-package-categories"
@@ -303,6 +324,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "list-limited-packages"
@@ -323,6 +347,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "list-all-packages",
@@ -419,6 +446,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "install-package-by-upload",
@@ -460,6 +490,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-install-packages",
@@ -544,6 +577,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-package-deprecated",
@@ -616,6 +652,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "install-package-deprecated",
@@ -692,6 +731,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "delete-package-deprecated",
@@ -780,6 +822,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-package",
@@ -888,6 +933,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "install-package",
@@ -958,6 +1006,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "update-package",
@@ -1020,6 +1071,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "delete-package",
@@ -1069,6 +1123,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "packages-get-file"
@@ -1122,6 +1179,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-package-stats",
@@ -1156,6 +1216,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agents-setup-status",
@@ -1178,6 +1241,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -1258,6 +1324,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agent-status-deprecated",
@@ -1327,6 +1396,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agent-status",
@@ -1380,6 +1452,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agent-data",
@@ -1412,6 +1487,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agents",
@@ -1477,14 +1555,7 @@
             }
           },
           "400": {
-            "description": "BAD REQUEST",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/upgrade_agent"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-upgrade-agents",
@@ -1608,6 +1679,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "agents-action-status"
@@ -1645,6 +1719,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agent",
@@ -1675,6 +1752,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "update-agent",
@@ -1729,6 +1809,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "delete-agent",
@@ -1777,6 +1860,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "new-agent-action",
@@ -1839,6 +1925,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "agent-action-cancel",
@@ -1895,6 +1984,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agent-upload-file"
@@ -1924,6 +2016,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "reassign-agent",
@@ -2053,14 +2148,7 @@
             }
           },
           "400": {
-            "description": "BAD REQUEST",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/upgrade_agent"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "upgrade-agent",
@@ -2118,6 +2206,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "list-agent-uploads"
@@ -2142,6 +2233,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-reassign-agents",
@@ -2209,6 +2303,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-unenroll-agents",
@@ -2283,6 +2380,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-update-agent-tags",
@@ -2363,6 +2463,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agent-tags"
@@ -2397,6 +2500,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "request-diagnostics-agent",
@@ -2426,6 +2532,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-request-diagnostics",
@@ -2508,6 +2617,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "agent-policy-list",
@@ -2558,6 +2670,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "create-agent-policy",
@@ -2610,6 +2725,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "agent-policy-info",
@@ -2637,6 +2755,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "update-agent-policy",
@@ -2693,6 +2814,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -2744,6 +2868,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         }
       },
@@ -2801,6 +2928,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         }
       },
@@ -2892,6 +3022,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-get-agent-policies",
@@ -2925,6 +3058,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -2974,6 +3110,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "data-streams-list"
@@ -3024,6 +3163,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-enrollment-api-keys-deprecated",
@@ -3054,6 +3196,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "create-enrollment-api-keys-deprecated",
@@ -3097,6 +3242,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-enrollment-api-key-deprecated",
@@ -3126,6 +3274,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "delete-enrollment-api-key-deprecated",
@@ -3181,6 +3332,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-enrollment-api-keys",
@@ -3210,6 +3364,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "create-enrollment-api-keys",
@@ -3252,6 +3409,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-enrollment-api-key"
@@ -3280,6 +3440,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "delete-enrollment-api-key",
@@ -3324,6 +3487,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-package-policies",
@@ -3352,6 +3518,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -3420,6 +3589,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-get-package-policies",
@@ -3482,6 +3654,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -3543,6 +3718,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         }
       }
@@ -3601,6 +3779,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         }
       }
@@ -3627,6 +3808,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-package-policy"
@@ -3675,6 +3859,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -3705,6 +3892,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -3749,6 +3939,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-outputs"
@@ -3772,6 +3965,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -3844,6 +4040,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-output"
@@ -3879,6 +4078,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -3953,6 +4155,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -3993,6 +4198,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-download-sources"
@@ -4016,6 +4224,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -4071,6 +4282,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-one-download-source"
@@ -4106,6 +4320,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -4160,6 +4377,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -4188,6 +4408,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "generate-logstash-api-key",
@@ -4230,6 +4453,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-fleet-server-hosts"
@@ -4253,6 +4479,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -4310,6 +4539,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-one-fleet-server-hosts"
@@ -4345,6 +4577,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -4397,6 +4632,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -4438,6 +4676,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-fleet-proxies"
@@ -4461,6 +4702,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -4524,6 +4768,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-one-fleet-proxies"
@@ -4559,6 +4806,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -4617,6 +4867,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -4645,6 +4898,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-full-k8s-manifest",
@@ -5579,25 +5835,6 @@
           "version"
         ]
       },
-      "upgrade_agent": {
-        "title": "Upgrade agent",
-        "type": "object",
-        "properties": {
-          "version": {
-            "type": "string"
-          },
-          "source_uri": {
-            "type": "string"
-          },
-          "force": {
-            "type": "boolean",
-            "description": "Force upgrade, skipping validation (should be used with caution)"
-          }
-        },
-        "required": [
-          "version"
-        ]
-      },
       "agent_action": {
         "title": "Agent action",
         "oneOf": [
@@ -5640,6 +5877,25 @@
               }
             }
           }
+        ]
+      },
+      "upgrade_agent": {
+        "title": "Upgrade agent",
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "source_uri": {
+            "type": "string"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force upgrade, skipping validation (should be used with caution)"
+          }
+        },
+        "required": [
+          "version"
         ]
       },
       "agent_diagnostics": {
@@ -6668,6 +6924,29 @@
           "name",
           "url"
         ]
+      }
+    },
+    "responses": {
+      "error": {
+        "description": "Generic Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "statusCode": {
+                  "type": "number"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
