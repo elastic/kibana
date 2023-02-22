@@ -118,10 +118,17 @@ export const MANAGE_RULES_SAVE = i18n.translate(
     defaultMessage: 'Save',
   }
 );
-export const MANAGE_RULES_HEADER = i18n.translate(
+export const LINK_RULES_HEADER = i18n.translate(
   'xpack.securitySolution.exceptions.list.manage_rules_header',
   {
-    defaultMessage: 'Manage rules',
+    defaultMessage: 'Link rules',
+  }
+);
+
+export const LINK_RULES_OVERFLOW_BUTTON_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.list.link_rules_overflow_button_title',
+  {
+    defaultMessage: 'Link rules',
   }
 );
 

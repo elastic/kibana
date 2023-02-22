@@ -139,10 +139,10 @@ export const useExceptionsListCard = ({
         },
       },
       {
-        key: 'ManageRules',
+        key: 'LinkRules',
         icon: 'gear',
         disabled: listCannotBeEdited,
-        label: 'Manage Rules',
+        label: i18n.LINK_RULES_OVERFLOW_BUTTON_TITLE,
         onClick: (e: React.MouseEvent<Element, MouseEvent>) => {
           handleManageRules();
         },
