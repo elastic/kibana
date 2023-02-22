@@ -15,6 +15,7 @@ import {
   addServiceNowConnector,
   openAddNewConnectorOption,
   selectLastConnectorCreated,
+  verifyNewConnector,
 } from '../../tasks/configure_cases';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
@@ -97,7 +98,9 @@ describe('Cases connectors', () => {
       cy.get(TOASTER).should('have.text', "Created 'New connector'");
       cy.get(TOASTER).should('not.exist');
 
-      selectLastConnectorCreated(response?.body.id);
+      verifyNewConnector(snConnector);
+
+      // selectLastConnectorCreated(response?.body.id);
 
       cy.wait('@saveConnector', { timeout: 10000 }).its('response.statusCode').should('eql', 200);
       cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'short_description');

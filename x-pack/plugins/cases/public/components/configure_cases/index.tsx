@@ -99,11 +99,17 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   const onConnectorCreated = useCallback(
     async (createdConnector) => {
-      setNewlyCreatedConnectorItem(createdConnector);
+      const caseConnector = normalizeActionConnector(createdConnector);
+
       onConnectorUpdated(createdConnector);
-      
+      setConnector(caseConnector);
+      persistCaseConfigure({
+        connector: caseConnector,
+        closureType,
+      });
+
     },
-    [setNewlyCreatedConnectorItem, onConnectorUpdated]
+    [onConnectorUpdated, setConnector, persistCaseConfigure]
   );
 
   const isLoadingAny =
@@ -152,7 +158,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   );
 
   useEffect(() => {
-    console.log('configure cases', connectors, connector);
+
     if (
       !isLoadingConnectors &&
       connector.id !== 'none' &&
@@ -249,7 +255,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 isLoading={isLoadingAny}
                 mappings={mappings}
                 onChangeConnector={onChangeConnector}
-                selectedConnector={newlyCreatedConnectorItem || connector}
+                selectedConnector={connector}
                 updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
               />
             </SectionWrapper>

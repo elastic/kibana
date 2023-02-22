@@ -29,3 +29,5 @@ export const URL = '[data-test-subj="credentialsApiUrlFromInput"]';
 export const USERNAME = '[data-test-subj="connector-servicenow-username-form-input"]';
 
 export const SERVICE_NOW_MAPPING = 'code[data-test-subj="field-mapping-target"]';
+
+export const UPDATE_CONNECTOR_BUTTON = '[data-test-sub="case-configure-update-selected-connector-button"]';
