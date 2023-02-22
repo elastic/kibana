@@ -311,9 +311,8 @@ export const TIMELINE_DATA_PROVIDERS_CONTAINER = '[data-test-subj="dataProviders
 export const EMPTY_DATA_PROVIDER_AREA = `.timeline-drop-area-empty`;
 
 export const HOVER_ACTIONS = {
-  ADD_TO_TIMELINE: '[data-test-subj="add-to-timeline"]',
-  FILTER_FOR: '[data-test-subj="filter-for-value"]',
-  FILTER_OUT: '[data-test-subj="filter-out-value"]',
-  COPY: '[data-test-subj="clipboard"]',
-  SHOW_TOP: 'show-top-field',
+  ADD_TO_TIMELINE: '[data-test-subj="legend-New Rule Test-embeddable_addToTimeline"]',
+  FILTER_FOR: '[data-test-subj="legend-New Rule Test-filterIn"]',
+  FILTER_OUT: '[data-test-subj="legend-New Rule Test-filterOut"]',
+  COPY: '[data-test-subj="legend-New Rule Test-embeddable_copyToClipboard"]',
 };
