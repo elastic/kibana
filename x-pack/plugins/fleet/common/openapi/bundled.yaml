@@ -281,6 +281,10 @@ paths:
             schema:
               type: string
               format: binary
+          application/gzip:
+            schema:
+              type: string
+              format: binary
   /epm/packages/_bulk:
     post:
       summary: Packages - Bulk install
@@ -820,7 +824,12 @@ paths:
                     type: integer
                   total:
                     type: integer
+                    deprecated: true
                   updating:
+                    type: integer
+                  all:
+                    type: integer
+                  active:
                     type: integer
                 required:
                   - error
@@ -831,6 +840,8 @@ paths:
                   - other
                   - total
                   - updating
+                  - all
+                  - active
       operationId: get-agent-status
       parameters:
         - schema:
@@ -1285,7 +1296,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/upgrade_agent'
-  /agents/{agentId}/upload:
+  /agents/{agentId}/uploads:
     parameters:
       - schema:
           type: string
@@ -1558,6 +1569,15 @@ paths:
           description: >-
             When set to true, retrieve the related package policies for each
             agent policy.
+        - schema:
+            type: boolean
+          in: query
+          name: noAgentCount
+          description: >-
+            When set to true, do not count how many agents are in the agent
+            policy, this can improve performance if you are searching over a
+            large number of agent policies. The "agents" property will always be
+            0 if set to true.
       description: ''
     post:
       summary: Agent policy - Create
@@ -3638,10 +3658,8 @@ components:
           nullable: true
         unenroll_timeout:
           type: number
-          nullable: true
         inactivity_timeout:
           type: number
-          nullable: true
       required:
         - name
         - namespace

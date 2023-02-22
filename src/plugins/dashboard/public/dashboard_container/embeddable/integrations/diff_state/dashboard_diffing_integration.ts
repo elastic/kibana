@@ -13,7 +13,12 @@ import { DashboardContainer } from '../../dashboard_container';
 import { pluginServices } from '../../../../services/plugin_services';
 import { DashboardContainerByValueInput } from '../../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../../dashboard_constants';
-import { isKeyEqual } from './dashboard_diffing_functions';
+import type { DashboardDiffFunctions } from './dashboard_diffing_functions';
+import {
+  isKeyEqual,
+  shouldRefreshDiffingFunctions,
+  unsavedChangesDiffingFunctions,
+} from './dashboard_diffing_functions';
 import { dashboardContainerReducers } from '../../../state/dashboard_container_reducers';
 
 /**
@@ -52,6 +57,23 @@ export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerByVa
   'searchSessionId',
   'timeslice',
   'viewMode',
+];
+
+/**
+ * input keys that will cause a new session to be created.
+ */
+const refetchKeys: Array<keyof DashboardContainerByValueInput> = [
+  'query',
+  'filters',
+  'timeRange',
+  'timeslice',
+  'timeRestore',
+  'lastReloadRequestTime',
+
+  // also refetch when chart settings change
+  'syncColors',
+  'syncCursor',
+  'syncTooltips',
 ];
 
 /**
@@ -139,44 +161,67 @@ function backupUnsavedChanges(
 }
 
 /**
- * Does a shallow diff between @param lastExplicitInput and @param currentExplicitInput and
+ * Does a shallow diff between @param lastInput and @param input and
  * @returns an object out of the keys which are different.
  */
 export async function getUnsavedChanges(
   this: DashboardContainer,
   lastInput: DashboardContainerByValueInput,
-  input: DashboardContainerByValueInput,
-  keys?: Array<keyof DashboardContainerByValueInput>
+  input: DashboardContainerByValueInput
 ): Promise<Partial<DashboardContainerByValueInput>> {
-  await this.untilInitialized();
-  const allKeys =
-    keys ??
-    ([...new Set([...Object.keys(lastInput), ...Object.keys(input)])] as Array<
-      keyof DashboardContainerByValueInput
-    >);
-  const keyComparePromises = allKeys.map(
+  const allKeys = [...new Set([...Object.keys(lastInput), ...Object.keys(input)])] as Array<
+    keyof DashboardContainerByValueInput
+  >;
+  return await getInputChanges(this, lastInput, input, allKeys, unsavedChangesDiffingFunctions);
+}
+
+export async function getShouldRefresh(
+  this: DashboardContainer,
+  lastInput: DashboardContainerByValueInput,
+  input: DashboardContainerByValueInput
+): Promise<boolean> {
+  const inputChanges = await getInputChanges(
+    this,
+    lastInput,
+    input,
+    refetchKeys,
+    shouldRefreshDiffingFunctions
+  );
+  return Object.keys(inputChanges).length > 0;
+}
+
+async function getInputChanges(
+  container: DashboardContainer,
+  lastInput: DashboardContainerByValueInput,
+  input: DashboardContainerByValueInput,
+  keys: Array<keyof DashboardContainerByValueInput>,
+  diffingFunctions: DashboardDiffFunctions
+): Promise<Partial<DashboardContainerByValueInput>> {
+  await container.untilInitialized();
+  const keyComparePromises = keys.map(
     (key) =>
       new Promise<{ key: keyof DashboardContainerByValueInput; isEqual: boolean }>((resolve) =>
-        isKeyEqual(key, {
-          container: this,
+        isKeyEqual(
+          key,
+          {
+            container,
 
-          currentValue: input[key],
-          currentInput: input,
+            currentValue: input[key],
+            currentInput: input,
 
-          lastValue: lastInput[key],
-          lastInput,
-        }).then((isEqual) => resolve({ key, isEqual }))
+            lastValue: lastInput[key],
+            lastInput,
+          },
+          diffingFunctions
+        ).then((isEqual) => resolve({ key, isEqual }))
       )
   );
-  const unsavedChanges = (await Promise.allSettled(keyComparePromises)).reduce(
-    (changes, current) => {
-      if (current.status === 'fulfilled') {
-        const { key, isEqual } = current.value;
-        if (!isEqual) (changes as { [key: string]: unknown })[key] = input[key];
-      }
-      return changes;
-    },
-    {} as Partial<DashboardContainerByValueInput>
-  );
-  return unsavedChanges;
+  const inputChanges = (await Promise.allSettled(keyComparePromises)).reduce((changes, current) => {
+    if (current.status === 'fulfilled') {
+      const { key, isEqual } = current.value;
+      if (!isEqual) (changes as { [key: string]: unknown })[key] = input[key];
+    }
+    return changes;
+  }, {} as Partial<DashboardContainerByValueInput>);
+  return inputChanges;
 }
