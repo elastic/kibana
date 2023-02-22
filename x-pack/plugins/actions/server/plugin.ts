@@ -28,6 +28,7 @@ import {
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  RunContext,
 } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
@@ -39,10 +40,6 @@ import {
   IEventLogService,
 } from '@kbn/event-log-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import {
-  ensureCleanupFailedExecutionsTaskScheduled,
-  registerCleanupFailedExecutionsTaskDefinition,
-} from './cleanup_failed_executions';
 
 import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
@@ -343,17 +340,19 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       usageCounter: this.usageCounter,
     });
 
-    // Cleanup failed execution task definition
-    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
-      registerCleanupFailedExecutionsTaskDefinition(plugins.taskManager, {
-        actionTypeRegistry,
-        logger: this.logger,
-        coreStartServices: core.getStartServices(),
-        config: this.actionsConfig.cleanupFailedExecutionsTask,
-        kibanaIndex: this.kibanaIndex,
-        taskManagerIndex: plugins.taskManager.index,
-      });
-    }
+    plugins.taskManager.registerTaskDefinitions({
+      foo: {
+        title: 'Foo',
+        maxAttempts: 1,
+        createTaskRunner: (context: RunContext) => {
+          return {
+            run: async () => {
+              throw new Error('NO!');
+            },
+          };
+        },
+      },
+    });
 
     return {
       registerType: <
@@ -540,14 +539,15 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     }
 
-    // Cleanup failed execution task
-    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
-      ensureCleanupFailedExecutionsTaskScheduled(
-        plugins.taskManager,
-        this.logger,
-        this.actionsConfig.cleanupFailedExecutionsTask
-      );
-    }
+    (async () => {
+      await plugins.taskManager.removeIfExists('foo-run');
+      await plugins.taskManager.ensureScheduled({
+        id: 'foo-run',
+        taskType: 'foo',
+        state: {},
+        params: {},
+      });
+    })();
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {

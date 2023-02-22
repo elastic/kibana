@@ -537,12 +537,6 @@ describe('create()', () => {
       proxyOnlyHosts: undefined,
       maxResponseContentLength: new ByteSizeValue(1000000),
       responseTimeout: moment.duration('60s'),
-      cleanupFailedExecutionsTask: {
-        enabled: true,
-        cleanupInterval: schema.duration().validate('5m'),
-        idleInterval: schema.duration().validate('1h'),
-        pageSize: 100,
-      },
       ssl: {
         verificationMode: 'full',
         proxyVerificationMode: 'full',
