@@ -31051,7 +31051,6 @@
     "xpack.snapshotRestore.repositoryList.table.actionEditAriaLabel": "编辑存储库 `{name}`",
     "xpack.snapshotRestore.repositoryList.table.actionRemoveAriaLabel": "移除存储库 `{name}`",
     "xpack.snapshotRestore.repositoryValidation.nameValidation.invalidCharacter": "名称中不允许使用字符“{char}”。",
-    "xpack.snapshotRestore.repositoryWarningDescription": "快照可能加载缓慢。前往 {repositoryLink} 以修复错误。",
     "xpack.snapshotRestore.restoreForm.dataStreamsWarningCallOut.body": "每个数据流需要匹配的索引模板。请确保任何存储的数据流有匹配的索引模板。可以通过存储全局集群状态来存储索引模板。不过，这可能会覆盖现有模板、集群设置、采集管道和生命周期策略。{learnMoreLink}如何存储包含数据流的快照。",
     "xpack.snapshotRestore.restoreForm.dataStreamsWarningCallOut.title": "此快照包含{count, plural, other {数据流}}",
     "xpack.snapshotRestore.restoreForm.stepLogistics.noDataStreamsOrIndicesHelpText": "将不还原任何内容。{selectAllLink}",
