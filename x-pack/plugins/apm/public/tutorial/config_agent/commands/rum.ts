@@ -36,7 +36,7 @@ export const rumLineNumbers = {
     ),
     9: serviceEnvironmentHint,
   },
-}
+};
 
 export const rum = `import { init as initApm } from '@elastic/apm-rum'
 var apm = initApm({

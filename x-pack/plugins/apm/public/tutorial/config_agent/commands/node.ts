@@ -5,7 +5,12 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { serviceNameHint, secretTokenHint, serverUrlHint, serviceEnvironmentHint } from './shared_hints';
+import {
+  serviceNameHint,
+  secretTokenHint,
+  serverUrlHint,
+  serviceEnvironmentHint,
+} from './shared_hints';
 
 export const nodeVariables = {
   apmServiceName: 'serviceName',
@@ -21,19 +26,19 @@ export const nodeLineNumbers = {
   highlight: '3, 5, 7, 9',
   annotations: {
     3:
-    serviceNameHint +
-    ' ' +
-    i18n.translate(
-      'xpack.apm.tutorial.nodeClient.createConfig.commands.serviceName',
-      {
-        defaultMessage: 'Overrides the service name in package.json.',
-      }
-    ),
+      serviceNameHint +
+      ' ' +
+      i18n.translate(
+        'xpack.apm.tutorial.nodeClient.createConfig.commands.serviceName',
+        {
+          defaultMessage: 'Overrides the service name in package.json.',
+        }
+      ),
     5: secretTokenHint,
     7: serverUrlHint,
     9: serviceEnvironmentHint,
   },
-}
+};
 
 export const node = `// ${i18n.translate(
   'xpack.apm.tutorial.nodeClient.configure.commands.addThisToTheFileTopComment',
