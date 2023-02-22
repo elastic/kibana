@@ -8,10 +8,10 @@
 import React, { useCallback } from 'react';
 import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
 
+import styled from 'styled-components';
 import type { CaseUserActionsStats } from '../../containers/types';
 import * as i18n from './translations';
 import type { UserActivityFilter } from './types';
-import styled from 'styled-components';
 
 interface FilterActivityProps {
   isLoading?: boolean;
@@ -30,9 +30,7 @@ const FilterAllButton = styled(EuiFilterButton)`
   & .euiFilterButton__textShift {
     min-width: 28px;
   }
-`; 
-
-
+`;
 
 export const FilterActivity = React.memo<FilterActivityProps>(
   ({ type, onFilterChange, userActionsStats, isLoading = false }) => {
@@ -58,7 +56,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isLoading={isLoading}
           isDisabled={isLoading}
           data-test-subj="user-actions-filter-activity-button-all"
-          iconSize='s'
+          iconSize="s"
         >
           {i18n.ALL}
         </FilterAllButton>
