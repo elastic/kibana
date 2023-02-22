@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlyout,
   EuiFlyoutHeader,
+  EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiTitle,
@@ -55,6 +56,7 @@ export const APICallFlyout: React.FC<APICallFlyoutProps> = ({
             />
           </h2>
         </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiFlexGroup
           alignItems="center"
           justifyContent="spaceBetween"
