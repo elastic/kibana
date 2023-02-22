@@ -104,11 +104,6 @@ export interface DataViewsServiceDeps {
    */
   onNotification: OnNotification;
   /**
-   * Handler triggered when there are no indices
-   * @param error Error object
-   */
-  onMissingIndices?: (error: Error) => void;
-  /**
    * Handler for service errors
    */
   onError: OnError;
@@ -308,11 +303,6 @@ export class DataViewsService {
    * @param key used to indicate uniqueness of the notification
    */
   private onNotification: OnNotification;
-  /**
-   * Handler triggered when there are no indices
-   * @param error Error object
-   */
-  private onMissingIndices?: (error: Error) => void;
   /*
    * Handler for service errors
    * @param error notification content in toast format
@@ -339,7 +329,6 @@ export class DataViewsService {
       apiClient,
       fieldFormats,
       onNotification,
-      onMissingIndices,
       onError,
       getCanSave = () => Promise.resolve(false),
       getCanSaveAdvancedSettings,
@@ -350,7 +339,6 @@ export class DataViewsService {
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
-    this.onMissingIndices = onMissingIndices;
     this.getCanSave = getCanSave;
     this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
@@ -594,7 +582,7 @@ export class DataViewsService {
       await this.refreshFieldsFn(dataView);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onMissingIndices?.(err);
+        // not considered an error, check dataView.matchedIndices.length to be 0
       } else {
         this.onError(
           err,
@@ -644,7 +632,7 @@ export class DataViewsService {
       return { fields: this.fieldArrayToMap(updatedFieldList, fieldAttrs), indices };
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onMissingIndices?.(err);
+        // not considered an error, check dataView.matchedIndices.length to be 0
         return {};
       }
       if (!displayErrors) {
@@ -805,12 +793,13 @@ export class DataViewsService {
         const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
           savedObjectId: savedObject.id,
           spec,
+          displayErrors,
         });
         fields = fieldsAndIndices.fields;
         indices = fieldsAndIndices.indices;
       } catch (err) {
         if (err instanceof DataViewMissingIndices) {
-          this.onMissingIndices?.(err);
+          // not considered an error, check dataView.matchedIndices.length to be 0
         } else {
           this.onError(
             err,
