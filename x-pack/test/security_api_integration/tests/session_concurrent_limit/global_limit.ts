@@ -136,6 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await security.testUser.setRoles(['kibana_admin']);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
       await supertest
         .post('/api/security/session/_invalidate')
@@ -213,12 +214,13 @@ export default function ({ getService }: FtrProviderContext) {
         Array.from({ length: 10 }).map(() => loginWithBasic(testUser))
       );
 
-      await es.indices.refresh({ index: '.kibana_security_session*' });
-
       // Since logins were concurrent we cannot know upfront their `createdAt` timestamps and
       // hence which specific sessions will be outside the limit.
       const statusCodes = [];
       for (const basicSessionCookie of basicSessionCookies) {
+        // This index refresh is only in the loop because get actually calls invalidate,
+        // which now also uses 'refresh = false', so we must manuall refresh for testing
+        await es.indices.refresh({ index: '.kibana_security_session*' });
         const { statusCode } = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
@@ -238,6 +240,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const samlSessionCookieOne = await loginWithSAML();
       const samlSessionCookieTwo = await loginWithSAML();
+
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       // All sessions should be active.
       await checkSessionCookie(basicSessionCookieOne, testUser.username, basicProvider);
@@ -272,6 +276,7 @@ export default function ({ getService }: FtrProviderContext) {
         await loginWithAnonymous(),
         await loginWithAnonymous(),
       ]) {
+        await es.indices.refresh({ index: '.kibana_security_session*' });
         await checkSessionCookie(anonymousSessionCookie, 'anonymous_user', anonymousProvider);
       }
     });
