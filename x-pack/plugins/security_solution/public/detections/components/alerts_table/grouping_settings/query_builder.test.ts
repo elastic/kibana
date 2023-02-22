@@ -95,6 +95,7 @@ describe('getAlertsGroupingQuery', () => {
             },
           },
           multi_terms: {
+            size: 10000,
             terms: [
               {
                 field: 'kibana.alert.rule.name',
