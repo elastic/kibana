@@ -10,6 +10,7 @@ import { UseFetchSloListResponse } from '../use_fetch_slo_list';
 
 export const useFetchSloList = (): UseFetchSloListResponse => {
   return {
+    isInitialLoading: false,
     isLoading: false,
     isError: false,
     isSuccess: true,

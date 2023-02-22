@@ -41,7 +41,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedOptions(opts);
     const selectedSlo =
-      opts.length === 1 ? sloList.results.find((slo) => slo.id === opts[0].value) : undefined;
+      opts.length === 1 ? sloList?.results.find((slo) => slo.id === opts[0].value) : undefined;
     onSelected(selectedSlo);
   };
 

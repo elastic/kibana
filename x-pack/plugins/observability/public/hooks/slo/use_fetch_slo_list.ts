@@ -15,13 +15,6 @@ import {
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
 
-const EMPTY_LIST: FindSLOResponse = {
-  results: [],
-  total: 0,
-  page: 0,
-  perPage: 0,
-};
-
 interface SLOListParams {
   name?: string;
   page?: number;
