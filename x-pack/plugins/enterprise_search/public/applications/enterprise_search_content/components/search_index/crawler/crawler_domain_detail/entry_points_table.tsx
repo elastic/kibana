@@ -27,9 +27,15 @@ export interface EntryPointsTableProps {
   domain: CrawlerDomain;
   indexName: string;
   items: EntryPoint[];
+  title?: string | React.ReactNode;
 }
 
-export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, indexName, items }) => {
+export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
+  domain,
+  indexName,
+  items,
+  title,
+}) => {
   const { onAdd, onDelete, onUpdate } = useActions(EntryPointsTableLogic);
   const field = 'value';
 
@@ -130,7 +136,7 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, inde
       onAdd={onAdd}
       onDelete={onDelete}
       onUpdate={onUpdate}
-      title=""
+      title={title || ''}
       disableReordering
     />
   );

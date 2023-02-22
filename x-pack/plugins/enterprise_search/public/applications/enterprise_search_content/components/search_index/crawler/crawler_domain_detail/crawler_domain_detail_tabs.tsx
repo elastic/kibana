@@ -43,14 +43,20 @@ export const CrawlerDomainDetailTabs: React.FC<CrawlerDomainDetailTabsProps> = (
       content: (
         <>
           <EuiSpacer />
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.title', {
-                defaultMessage: 'Entry points',
-              })}
-            </h2>
-          </EuiTitle>
-          <EntryPointsTable domain={domain} indexName={indexName} items={domain.entryPoints} />
+          <EntryPointsTable
+            domain={domain}
+            indexName={indexName}
+            items={domain.entryPoints}
+            title={
+              <EuiTitle size="s">
+                <h2>
+                  {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.title', {
+                    defaultMessage: 'Entry points',
+                  })}
+                </h2>
+              </EuiTitle>
+            }
+          />
         </>
       ),
       id: CrawlerDomainTabId.ENTRY_POINTS,

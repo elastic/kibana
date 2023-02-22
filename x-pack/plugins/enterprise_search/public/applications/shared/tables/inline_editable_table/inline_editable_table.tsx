@@ -29,7 +29,7 @@ export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   items: Item[];
   defaultItem?: Partial<Item>;
   emptyPropertyAllowed?: boolean;
-  title: string;
+  title: string | React.ReactNode;
   addButtonText?: string;
   canRemoveLastItem?: boolean;
   className?: string;
@@ -129,7 +129,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
 
   return (
     <>
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem>
           {!!title && (
             <EuiTitle size="xs" data-test-subj="inlineEditableTableTitle">
