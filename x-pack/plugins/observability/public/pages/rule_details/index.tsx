@@ -39,7 +39,10 @@ import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { fromQuery, toQuery } from '../../utils/url';
-import { defaultTimeRage, getDefaultAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
+import {
+  defaultTimeRange,
+  getDefaultAlertSummaryTimeRange,
+} from '../../utils/alert_summary_widget';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
@@ -131,17 +134,15 @@ export function RuleDetailsPage() {
   const tabsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const timeRange = getDefaultAlertSummaryTimeRange();
-    setAlertSummaryWidgetTimeRange(timeRange);
+    setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
   }, [esQuery]);
 
   const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
-    const timeRange = getDefaultAlertSummaryTimeRange();
-    setAlertSummaryWidgetTimeRange(timeRange);
+    setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
     await locators.get(ruleDetailsLocatorID)?.navigate(
       {
-        rangeFrom: defaultTimeRage.from,
-        rangeTo: defaultTimeRage.to,
+        rangeFrom: defaultTimeRange.from,
+        rangeTo: defaultTimeRange.to,
         ruleId,
         status,
         tabId: ALERTS_TAB,

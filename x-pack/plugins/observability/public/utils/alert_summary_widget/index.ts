@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { defaultTimeRage } from './constants';
+export { defaultTimeRange } from './constants';
 export {
   getDefaultAlertSummaryTimeRange,
   getAlertSummaryTimeRange,

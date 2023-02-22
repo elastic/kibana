@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const defaultTimeRage = {
+export const defaultTimeRange = {
   from: 'now-30d',
   to: 'now',
 };
