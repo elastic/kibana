@@ -259,7 +259,7 @@ export class SavedObjectFinderUi extends React.Component<
 
               return currentSavedObjectMetaData?.name ?? '';
             },
-            'data-test-subj': 'savedObjectFinderType',
+            'data-test-subj': 'savedObjectFinderFilterButton',
             render: (_, item) => {
               const currentSavedObjectMetaData = savedObjectMetaData.find(
                 (metaData) => metaData.type === item.type
