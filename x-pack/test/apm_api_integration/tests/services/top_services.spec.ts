@@ -502,4 +502,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     }
   );
+
+  registry.when(
+    'APM Service Overview with overflow bucket',
+    { config: 'basic', archives: [] },
+    () => {}
+  );
 }

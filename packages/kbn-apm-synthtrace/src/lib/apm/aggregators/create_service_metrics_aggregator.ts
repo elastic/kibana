@@ -16,6 +16,7 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
   'service.name',
   'transaction.type',
   'service.language.name',
+  'service_transaction.aggregation.overflow_count',
 ];
 
 export function createServiceMetricsAggregator(flushInterval: string) {

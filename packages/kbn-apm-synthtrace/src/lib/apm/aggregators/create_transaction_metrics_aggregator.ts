@@ -14,6 +14,7 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
   'transaction.name',
   'transaction.result',
   'transaction.type',
+  'transaction.aggregation.overflow_count',
   'event.outcome',
 
   'agent.name',

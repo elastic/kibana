@@ -30,7 +30,14 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
       ];
 
       const instances = serviceRange.flatMap((serviceName) => {
-        const services = ENVIRONMENTS.map((env) => apm.service(serviceName, env, 'go'));
+        const services = ENVIRONMENTS.map((env) =>
+          apm.service({
+            name: serviceName,
+            environment: env,
+            agentName: 'go',
+            'service_transaction.aggregation.overflow_count': 20,
+          })
+        );
 
         return lodashRange(0, 2).flatMap((serviceNodeId) =>
           services.map((service) => service.instance(`${serviceName}-${serviceNodeId}`))
