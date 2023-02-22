@@ -90,6 +90,8 @@ const getResourceFindingSharedValues = (sharedValues: {
 
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
+  const decodedResourceId = decodeURIComponent(params.resourceId);
+
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY);
@@ -109,7 +111,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const resourceFindings = useResourceFindings({
     sort: urlQuery.sort,
     query: baseEsQuery.query,
-    resourceId: params.resourceId,
+    resourceId: decodedResourceId,
     enabled: !baseEsQuery.error,
   });
 
@@ -168,7 +170,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
           resourceFindings.data && (
             <CspInlineDescriptionList
               listItems={getResourceFindingSharedValues({
-                resourceId: params.resourceId,
+                resourceId: decodedResourceId,
                 resourceName: resourceFindings.data?.resourceName || '',
                 resourceSubType: resourceFindings.data?.resourceSubType || '',
                 clusterId: resourceFindings.data?.clusterId || '',
