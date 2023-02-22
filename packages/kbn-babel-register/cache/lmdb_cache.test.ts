@@ -18,7 +18,7 @@ const DIR = Path.resolve(__dirname, '../__tmp__/cache');
 const makeTestLog = () => {
   const log = Object.assign(
     new Writable({
-      write(chunk, enc, cb) {
+      write(chunk, _, cb) {
         log.output += chunk;
         cb();
       },
@@ -39,50 +39,35 @@ const makeCache = (...options: ConstructorParameters<typeof LmdbCache>) => {
 };
 
 beforeEach(async () => await del(DIR));
-afterEach(async () => {
-  await del(DIR);
-  for (const instance of instances) {
-    instance.close();
-  }
-  instances.length = 0;
-});
+afterEach(async () => await del(DIR));
 
 it('returns undefined until values are set', async () => {
   const path = '/foo/bar.js';
-  const mtime = new Date().toJSON();
+  const source = `console.log("hi, hello")`;
   const log = makeTestLog();
   const cache = makeCache({
     dir: DIR,
     prefix: 'prefix',
     log,
-    pathRoot: '/foo/',
   });
 
-  expect(cache.getMtime(path)).toBe(undefined);
-  expect(cache.getCode(path)).toBe(undefined);
-  expect(cache.getSourceMap(path)).toBe(undefined);
+  const key = cache.getKey(path, source);
+  expect(cache.getCode(key)).toBe(undefined);
+  expect(cache.getSourceMap(key)).toBe(undefined);
 
-  await cache.update(path, {
-    mtime,
+  await cache.update(key, {
     code: 'var x = 1',
     map: { foo: 'bar' },
   });
 
-  expect(cache.getMtime(path)).toBe(mtime);
-  expect(cache.getCode(path)).toBe('var x = 1');
-  expect(cache.getSourceMap(path)).toEqual({ foo: 'bar' });
+  expect(cache.getCode(key)).toBe('var x = 1');
+  expect(cache.getSourceMap(key)).toEqual({ foo: 'bar' });
   expect(log.output).toMatchInlineSnapshot(`
-    "MISS   [mtimes]   prefix:bar.js
-    MISS   [codes]   prefix:bar.js
-    MISS   [sourceMaps]   prefix:bar.js
-    PUT   [atimes]   prefix:bar.js
-    PUT   [mtimes]   prefix:bar.js
-    PUT   [codes]   prefix:bar.js
-    PUT   [sourceMaps]   prefix:bar.js
-    HIT   [mtimes]   prefix:bar.js
-    HIT   [codes]   prefix:bar.js
-    PUT   [atimes]   prefix:bar.js
-    HIT   [sourceMaps]   prefix:bar.js
+    "MISS   [db]   prefix:05a4b8198c4ec215d54d94681ef00ca9ecb45931
+    MISS   [db]   prefix:05a4b8198c4ec215d54d94681ef00ca9ecb45931
+    PUT   [db]   prefix:05a4b8198c4ec215d54d94681ef00ca9ecb45931
+    HIT   [db]   prefix:05a4b8198c4ec215d54d94681ef00ca9ecb45931
+    HIT   [db]   prefix:05a4b8198c4ec215d54d94681ef00ca9ecb45931
     "
   `);
 });

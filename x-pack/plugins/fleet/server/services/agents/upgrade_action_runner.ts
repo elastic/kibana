@@ -25,6 +25,7 @@ import { bulkUpdateAgents } from './crud';
 import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
+import { getCancelledActions } from './action_status';
 
 export class UpgradeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -39,6 +40,11 @@ export class UpgradeActionRunner extends ActionRunner {
     return 'UPGRADE';
   }
 }
+
+const isActionIdCancelled = async (esClient: ElasticsearchClient, actionId: string) => {
+  const cancelledActions = await getCancelledActions(esClient);
+  return cancelledActions.filter((action) => action.actionId === actionId).length > 0;
+};
 
 export async function upgradeBatch(
   soClient: SavedObjectsClientContract,
@@ -107,6 +113,24 @@ export async function upgradeBatch(
     options?.startTime,
     options.upgradeDurationSeconds
   );
+
+  if (options.actionId && (await isActionIdCancelled(esClient, options.actionId))) {
+    appContextService
+      .getLogger()
+      .info(
+        `Skipping batch of actionId:${options.actionId} of ${givenAgents.length} agents as the upgrade was cancelled`
+      );
+    return {
+      actionId: options.actionId,
+    };
+  }
+  if (options.actionId) {
+    appContextService
+      .getLogger()
+      .info(
+        `Continuing batch of actionId:${options.actionId} of ${givenAgents.length} agents of upgrade`
+      );
+  }
 
   await bulkUpdateAgents(
     esClient,

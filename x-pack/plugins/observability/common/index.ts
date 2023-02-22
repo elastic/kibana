@@ -13,7 +13,6 @@ export { getInspectResponse } from './utils/get_inspect_response';
 export { ProcessorEvent } from './processor_event';
 
 export {
-  enableNewSyntheticsView,
   enableInspectEsQueries,
   maxSuggestions,
   enableComparisonByDefault,
@@ -28,6 +27,8 @@ export {
   enableAgentExplorerView,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
   enableCriticalPath,
   profilingElasticsearchPlugin,
 } from './ui_settings_keys';
@@ -36,6 +37,8 @@ export {
   ProgressiveLoadingQuality,
   getProbabilityFromProgressiveLoadingQuality,
 } from './progressive_loading';
+
+export const sloFeatureId = 'slo';
 
 export const casesFeatureId = 'observabilityCases';
 

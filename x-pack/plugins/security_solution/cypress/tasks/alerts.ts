@@ -8,7 +8,6 @@
 import {
   ADD_EXCEPTION_BTN,
   ALERT_CHECKBOX,
-  CHART_SELECT,
   CLOSE_ALERT_BTN,
   CLOSE_SELECTED_ALERTS_BTN,
   EXPAND_ALERT_BTN,
@@ -18,7 +17,7 @@ import {
   MARK_ALERT_ACKNOWLEDGED_BTN,
   OPEN_ALERT_BTN,
   SEND_ALERT_TO_TIMELINE_BTN,
-  SELECT_TABLE,
+  SELECT_AGGREGATION_CHART,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
   CLOSE_FLYOUT,
@@ -33,12 +32,14 @@ import {
   CLOSED_ALERTS_FILTER_BTN,
   OPENED_ALERTS_FILTER_BTN,
   ACKNOWLEDGED_ALERTS_FILTER_BTN,
+  CELL_ADD_TO_TIMELINE_BUTTON,
+  CELL_FILTER_IN_BUTTON,
+  CELL_SHOW_TOP_FIELD_BUTTON,
+  ACTIONS_EXPAND_BUTTON,
+  SELECT_HISTOGRAM,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
-import {
-  ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE,
-  TIMELINE_COLUMN_SPINNER,
-} from '../screens/timeline';
+import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 import {
   UPDATE_ENRICHMENT_RANGE_BUTTON,
   ENRICHMENT_QUERY_END_INPUT,
@@ -257,8 +258,11 @@ export const openAlerts = () => {
 };
 
 export const selectCountTable = () => {
-  cy.get(CHART_SELECT).click({ force: true });
-  cy.get(SELECT_TABLE).click();
+  cy.get(SELECT_AGGREGATION_CHART).click({ force: true });
+};
+
+export const selectAlertsHistogram = () => {
+  cy.get(SELECT_HISTOGRAM).click({ force: true });
 };
 
 export const clearGroupByTopInput = () => {
@@ -301,9 +305,22 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
   cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
-export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: number) => {
+const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
   cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
-  cy.get(ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE).first().click({ force: true });
+  cy.get(actionSelector).first().click({ force: true });
+};
+export const clickExpandActions = (propertySelector: string, rowIndex: number) => {
+  clickAction(propertySelector, rowIndex, ACTIONS_EXPAND_BUTTON);
+};
+export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: number) => {
+  clickAction(propertySelector, rowIndex, CELL_ADD_TO_TIMELINE_BUTTON);
+};
+export const filterForAlertProperty = (propertySelector: string, rowIndex: number) => {
+  clickAction(propertySelector, rowIndex, CELL_FILTER_IN_BUTTON);
+};
+export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
+  clickExpandActions(propertySelector, rowIndex);
+  cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click({ force: true });
 };
 
 export const waitForAlerts = () => {

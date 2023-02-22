@@ -124,6 +124,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     enterpriseSearch: {
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
+      behavioralAnalytics: `${ENTERPRISE_SEARCH_DOCS}analytics-overview.html`,
       behavioralAnalyticsEvents: `${ENTERPRISE_SEARCH_DOCS}analytics-events.html`,
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
@@ -131,10 +132,12 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsMongoDB: `${ENTERPRISE_SEARCH_DOCS}connectors-mongodb.html`,
       connectorsMySQL: `${ENTERPRISE_SEARCH_DOCS}connectors-mysql.html`,
       connectorsWorkplaceSearch: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-workplace-search`,
+      crawlerExtractionRules: `${ENTERPRISE_SEARCH_DOCS}crawler-extraction-rules.html`,
       crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
       crawlerOverview: `${ENTERPRISE_SEARCH_DOCS}crawler.html`,
       deployTrainedModels: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-models.html`,
       documentLevelSecurity: `${ELASTICSEARCH_DOCS}document-level-security.html`,
+      engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       ingestPipelines: `${ENTERPRISE_SEARCH_DOCS}ingest-pipelines.html`,
       languageAnalyzers: `${ELASTICSEARCH_DOCS}analysis-lang-analyzer.html`,
       languageClients: `${ENTERPRISE_SEARCH_DOCS}programming-language-clients.html`,
@@ -240,6 +243,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       sum: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-sum-aggregation.html`,
       top_hits: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-hits-aggregation.html`,
       top_metrics: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-metrics.html`,
+      change_point: `${ELASTICSEARCH_DOCS}search-aggregations-change-point-aggregation.html`,
     },
     runtimeFields: {
       overview: `${ELASTICSEARCH_DOCS}runtime.html`,
@@ -469,6 +473,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       createAlerts: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/create-alerts.html`,
       syntheticsCommandReference: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-configuration.html#synthetics-configuration-playwright-options`,
       syntheticsProjectMonitors: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetic-run-tests.html#synthetic-monitor-choose-project`,
+      syntheticsMigrateFromIntegration: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-migrate-from-integration.html`,
     },
     alerting: {
       guide: `${KIBANA_DOCS}create-and-manage-rules.html`,

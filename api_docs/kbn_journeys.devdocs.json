@@ -424,6 +424,22 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getFtrConfigPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getFtrConfigPath",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
             "id": "def-common.JourneyConfig.getEsArchives",
             "type": "Function",
             "tags": [],
@@ -944,7 +960,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "() => { path: string; fullscreenPath: string; type: \"success\" | \"failure\"; title: string; filename: string; fullscreenFilename: string; }[]"
+              "() => { path: string; fullscreenPath: string; type: \"failure\" | \"success\"; title: string; filename: string; fullscreenFilename: string; }[]"
             ],
             "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
