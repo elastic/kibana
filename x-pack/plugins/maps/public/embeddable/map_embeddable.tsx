@@ -115,7 +115,7 @@ export class MapEmbeddable
   private _isActive: boolean;
   private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
-  private _subscription: Subscription;
+  private _subscriptions: Subscription[] = [];
   private _prevIsRestore: boolean = false;
   private _prevMapExtent?: MapExtent;
   private _prevSyncColors?: boolean;
@@ -141,7 +141,7 @@ export class MapEmbeddable
     this._isActive = true;
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
-    this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
+    this._subscriptions.push(this.getUpdated$().subscribe(() => this.onUpdate()));
     this._controlledBy = `mapEmbeddablePanel${this.id}`;
   }
 
@@ -189,17 +189,19 @@ export class MapEmbeddable
     // Passing callback into redux store instead of regular pattern of getting redux state changes for performance reasons
     store.dispatch(setOnMapMove(this._propogateMapMovement));
 
-    shouldFetch$<MapEmbeddableInput>(this.getUpdated$(), () => {
-      return {
-        ...this.getInput(),
-        filters: this._getFilters(),
-        searchSessionId: this._getSearchSessionId(),
-      };
-    }).subscribe(() => {
-      this._dispatchSetQuery({
-        forceRefresh: false,
-      });
-    });
+    this._subscriptions.push(
+      shouldFetch$<MapEmbeddableInput>(this.getUpdated$(), () => {
+        return {
+          ...this.getInput(),
+          filters: this._getFilters(),
+          searchSessionId: this._getSearchSessionId(),
+        };
+      }).subscribe(() => {
+        this._dispatchSetQuery({
+          forceRefresh: false,
+        });
+      })
+    );
 
     const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
     if (mapStateJSON) {
@@ -661,9 +663,9 @@ export class MapEmbeddable
       unmountComponentAtNode(this._domNode);
     }
 
-    if (this._subscription) {
-      this._subscription.unsubscribe();
-    }
+    this._subscriptions.forEach((subscription) => {
+      subscription.unsubscribe();
+    });
   }
 
   reload() {
