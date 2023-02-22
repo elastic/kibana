@@ -14,20 +14,16 @@ import { IndexPatternSavedObject } from '../types';
 
 export interface SourcePickerProps {
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
-  savedObjects: CoreStart['savedObjects'];
+  http: CoreStart['http'];
   uiSettings: CoreStart['uiSettings'];
 }
 
 const fixedPageSize = 8;
 
-export function SourcePicker({
-  savedObjects,
-  uiSettings,
-  onIndexPatternSelected,
-}: SourcePickerProps) {
+export function SourcePicker({ http, uiSettings, onIndexPatternSelected }: SourcePickerProps) {
   return (
     <SavedObjectFinderUi
-      savedObjects={savedObjects}
+      http={http}
       uiSettings={uiSettings}
       onChoose={(_id, _type, _name, indexPattern) => {
         onIndexPatternSelected(indexPattern as IndexPatternSavedObject);

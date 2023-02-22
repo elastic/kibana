@@ -23,6 +23,8 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
+import { loggerMock } from '@kbn/logging-mocks';
+import { setupConfig } from './routes_test_utils';
 
 const coreId = Symbol('core');
 
@@ -38,6 +40,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
   let handlerContext: ReturnType<typeof coreMock.createRequestHandlerContext>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
+  let loggerWarnSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
@@ -73,7 +76,11 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsResolve.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
-    registerResolveRoute(router, { coreUsageData });
+    const logger = loggerMock.create();
+    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    const config = setupConfig();
+
+    registerResolveRoute(router, { config, coreUsageData, logger });
 
     await server.start();
   });
@@ -121,5 +128,12 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
       .get('/api/saved_objects/resolve/hidden-from-http/hiddenId')
       .expect(400);
     expect(result.body.message).toContain("Unsupported saved object type: 'hidden-from-http'");
+  });
+
+  it('logs a warning message when called', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/resolve/index-pattern/logstash-*')
+      .expect(200);
+    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
   });
 });

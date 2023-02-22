@@ -513,6 +513,211 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.FleetStartServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "FleetStartServices",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.FleetStartServices",
+            "text": "FleetStartServices"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreStart",
+            "text": "CoreStart"
+          },
+          ",",
+          "FleetStartDeps"
+        ],
+        "path": "x-pack/plugins/fleet/public/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.storage",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ toggleShareContextMenu: (options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; }"
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.cloud",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cloud",
+            "description": [],
+            "signature": [
+              "(",
+              {
+                "pluginId": "cloud",
+                "scope": "public",
+                "docId": "kibCloudPluginApi",
+                "section": "def-public.CloudSetup",
+                "text": "CloudSetup"
+              },
+              " & ",
+              {
+                "pluginId": "cloud",
+                "scope": "public",
+                "docId": "kibCloudPluginApi",
+                "section": "def-public.CloudStart",
+                "text": "CloudStart"
+              },
+              ") | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.discover",
+            "type": "Object",
+            "tags": [],
+            "label": "discover",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverStart",
+                "text": "DiscoverStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "public",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-public.SpacesApi",
+                "text": "SpacesApi"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.authz",
+            "type": "Object",
+            "tags": [],
+            "label": "authz",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.FleetAuthz",
+                "text": "FleetAuthz"
+              }
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.guidedOnboarding",
+            "type": "Object",
+            "tags": [],
+            "label": "guidedOnboarding",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "public",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-public.GuidedOnboardingPluginStart",
+                "text": "GuidedOnboardingPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.IntegrationsAppBrowseRouteState",
         "type": "Interface",
         "tags": [],
@@ -5466,6 +5671,111 @@
             "path": "x-pack/plugins/fleet/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-server.MessageSigningServiceInterface",
+        "type": "Interface",
+        "tags": [],
+        "label": "MessageSigningServiceInterface",
+        "description": [],
+        "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.MessageSigningServiceInterface.isEncryptionAvailable",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEncryptionAvailable",
+            "description": [],
+            "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.MessageSigningServiceInterface.generateKeyPair",
+            "type": "Function",
+            "tags": [],
+            "label": "generateKeyPair",
+            "description": [],
+            "signature": [
+              "(providedPassphrase?: string | undefined) => Promise<{ privateKey: string; publicKey: string; passphrase: string; }>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.MessageSigningServiceInterface.generateKeyPair.$1",
+                "type": "string",
+                "tags": [],
+                "label": "providedPassphrase",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.MessageSigningServiceInterface.sign",
+            "type": "Function",
+            "tags": [],
+            "label": "sign",
+            "description": [],
+            "signature": [
+              "(message: Record<string, unknown> | Buffer) => Promise<{ data: Buffer; signature: string; }>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.MessageSigningServiceInterface.sign.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown> | Buffer"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.MessageSigningServiceInterface.getPublicKey",
+            "type": "Function",
+            "tags": [],
+            "label": "getPublicKey",
+            "description": [],
+            "signature": [
+              "() => Promise<string>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -15630,6 +15940,26 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "fleet",
+          "id": "def-server.FleetStartContract.messageSigningService",
+          "type": "Object",
+          "tags": [],
+          "label": "messageSigningService",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "fleet",
+              "scope": "server",
+              "docId": "kibFleetPluginApi",
+              "section": "def-server.MessageSigningServiceInterface",
+              "text": "MessageSigningServiceInterface"
+            }
+          ],
+          "path": "x-pack/plugins/fleet/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -17584,7 +17914,21 @@
             "label": "agent",
             "description": [],
             "signature": [
-              "{ monitoring: { namespace?: string | undefined; use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; download: { sourceURI: string; }; features: Record<string, { enabled: boolean; }>; } | undefined"
+              "{ monitoring: { namespace?: string | undefined; use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; download: { sourceURI: string; }; features: Record<string, { enabled: boolean; }>; protection?: { enabled: boolean; uninstall_token_hash: string; signing_key: string; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FullAgentPolicy.signed",
+            "type": "Object",
+            "tags": [],
+            "label": "signed",
+            "description": [],
+            "signature": [
+              "{ data: string; signature: string; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -17904,7 +18248,7 @@
                 "section": "def-common.ListWithKuery",
                 "text": "ListWithKuery"
               },
-              " & { full?: boolean | undefined; }"
+              " & { noAgentCount?: boolean | undefined; full?: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/agent_policy.ts",
             "deprecated": false,
@@ -22357,7 +22701,7 @@
         "label": "FleetServerAgentComponentStatus",
         "description": [],
         "signature": [
-          "\"failed\" | \"degraded\" | \"starting\" | \"configuring\" | \"healthy\" | \"stopping\" | \"stopped\""
+          "\"STARTING\" | \"CONFIGURING\" | \"HEALTHY\" | \"DEGRADED\" | \"FAILED\" | \"STOPPING\" | \"STOPPED\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
         "deprecated": false,
@@ -22827,6 +23171,21 @@
           "[]; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"fleet-message-signing-keys\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/message_signing_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -25206,7 +25565,7 @@
         "label": "FleetServerAgentComponentStatuses",
         "description": [],
         "signature": [
-          "readonly [\"starting\", \"configuring\", \"healthy\", \"degraded\", \"failed\", \"stopping\", \"stopped\"]"
+          "readonly [\"STARTING\", \"CONFIGURING\", \"HEALTHY\", \"DEGRADED\", \"FAILED\", \"STOPPING\", \"STOPPED\"]"
         ],
         "path": "x-pack/plugins/fleet/common/constants/agent.ts",
         "deprecated": false,
