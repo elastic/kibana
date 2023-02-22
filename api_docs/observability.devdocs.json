@@ -2382,6 +2382,20 @@
         "children": [
           {
             "parentPluginId": "observability",
+            "id": "def-public.ExploratoryEmbeddableProps.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ExploratoryEmbeddableProps.appId",
             "type": "CompoundType",
             "tags": [],
@@ -2632,6 +2646,38 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ExploratoryEmbeddableProps.onLoad",
+            "type": "Function",
+            "tags": [],
+            "label": "onLoad",
+            "description": [],
+            "signature": [
+              "((loading: boolean) => void) | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.ExploratoryEmbeddableProps.onLoad.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "loading",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ExploratoryEmbeddableProps.caseOwner",
             "type": "string",
             "tags": [],
@@ -2793,6 +2839,20 @@
             "type": "string",
             "tags": [],
             "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ExploratoryEmbeddableProps.searchSessionId",
+            "type": "string",
+            "tags": [],
+            "label": "searchSessionId",
             "description": [],
             "signature": [
               "string | undefined"
@@ -14151,6 +14211,21 @@
         "description": [],
         "signature": [
           "\"RULE_DETAILS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.sloFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "sloFeatureId",
+        "description": [],
+        "signature": [
+          "\"slo\""
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,

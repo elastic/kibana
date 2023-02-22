@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+
+import { EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
-
-import { AddAnalyticsCollectionForm } from './add_analytics_collection_form';
-
-export const collectionsCreateBreadcrumbs = [
-  i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.breadcrumb', {
-    defaultMessage: 'Create collection',
-  }),
-];
+import { AddAnalyticsCollectionModal } from './add_analytics_collection_modal';
 
 export const AddAnalyticsCollection: React.FC = () => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const closeModal = () => setIsModalVisible(false);
+  const showModal = () => setIsModalVisible(true);
+
   return (
-    <EnterpriseSearchAnalyticsPageTemplate
-      pageChrome={[...collectionsCreateBreadcrumbs]}
-      restrictWidth
-      pageViewTelemetry="Add Analytics Collection"
-    >
-      <AddAnalyticsCollectionForm />
-    </EnterpriseSearchAnalyticsPageTemplate>
+    <>
+      <EuiButton fill iconType="plusInCircle" onClick={showModal}>
+        {i18n.translate('xpack.enterpriseSearch.analytics.collections.create.buttonTitle', {
+          defaultMessage: 'Create collection',
+        })}
+      </EuiButton>
+      {isModalVisible && <AddAnalyticsCollectionModal onClose={closeModal} />}
+    </>
   );
 };
