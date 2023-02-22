@@ -21,6 +21,7 @@ export const deactivatePack = (packName: string) => {
 
   cy.contains(`Successfully deactivated "${packName}" pack`).should('not.exist');
   cy.contains(`Successfully deactivated "${packName}" pack`).should('exist');
+  cy.getBySel('toastCloseButton').click();
 };
 
 export const activatePack = (packName: string) => {
@@ -31,4 +32,5 @@ export const activatePack = (packName: string) => {
 
   cy.contains(`Successfully activated "${packName}" pack`).should('not.exist');
   cy.contains(`Successfully activated "${packName}" pack`).should('exist');
+  cy.getBySel('toastCloseButton').click();
 };

@@ -40,7 +40,7 @@ describe('ALL - Add Integration', () => {
     cy.getBySel('nav-search-input').type('Osquery');
     cy.get('[title="Osquery • Management"]').should('exist');
     cy.get('[title="Osquery Logs • Integration"]').should('exist');
-    cy.get('[title="Osquery Manager • Integration"]').click();
+    cy.get('[title="Osquery Manager • Integration"]').should('exist').click();
   });
 
   it('should add the old integration and be able to upgrade it', () => {
