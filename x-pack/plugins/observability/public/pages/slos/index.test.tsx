@@ -13,7 +13,8 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { render } from '../../utils/test_helper';
 import { useKibana } from '../../utils/kibana_react';
-import { useCreateOrUpdateSlo } from '../../hooks/slo/use_create_slo';
+import { useCreateSlo } from '../../hooks/slo/use_create_slo';
+import { useCloneSlo } from '../../hooks/slo/use_clone_slo';
 import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
@@ -35,6 +36,7 @@ jest.mock('../../hooks/use_breadcrumbs');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/slo/use_fetch_slo_list');
 jest.mock('../../hooks/slo/use_create_slo');
+jest.mock('../../hooks/slo/use_clone_slo');
 jest.mock('../../hooks/slo/use_delete_slo');
 jest.mock('../../hooks/slo/use_fetch_historical_summary');
 jest.mock('../../hooks/slo/use_capabilities');
@@ -42,14 +44,17 @@ jest.mock('../../hooks/slo/use_capabilities');
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useFetchSloListMock = useFetchSloList as jest.Mock;
-const useCreateOrUpdateSloMock = useCreateOrUpdateSlo as jest.Mock;
+const useCreateSloMock = useCreateSlo as jest.Mock;
+const useCloneSloMock = useCloneSlo as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const useCapabilitiesMock = useCapabilities as jest.Mock;
 
-const mockCreateSlo = { mutate: jest.fn() };
-const mockCloneSlo = { mutate: jest.fn() };
-useCreateOrUpdateSloMock.mockReturnValue({ createSlo: mockCreateSlo, cloneSlo: mockCloneSlo });
+const mockCreateSlo = jest.fn();
+const mockCloneSlo = jest.fn();
+
+useCreateSloMock.mockReturnValue({ mutate: mockCreateSlo });
+useCloneSloMock.mockReturnValue({ mutate: mockCloneSlo });
 
 const mockDeleteSlo = jest.fn();
 useDeleteSloMock.mockReturnValue({ mutate: mockDeleteSlo });
@@ -243,7 +248,7 @@ describe('SLOs Page', () => {
 
           button.click();
 
-          expect(mockCloneSlo.mutate).toBeCalled();
+          expect(mockCloneSlo).toBeCalled();
         });
       });
     });

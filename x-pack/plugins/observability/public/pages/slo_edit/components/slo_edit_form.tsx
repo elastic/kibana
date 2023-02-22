@@ -24,7 +24,8 @@ import { Controller, useForm } from 'react-hook-form';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../../utils/kibana_react';
-import { useCreateOrUpdateSlo } from '../../../hooks/slo/use_create_slo';
+import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
+import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
 import { useSectionFormValidation } from '../helpers/use_section_form_validation';
 import { CustomKqlIndicatorTypeForm } from './custom_kql/custom_kql_indicator_type_form';
 import { SloEditFormDescription } from './slo_edit_form_description';
@@ -66,7 +67,8 @@ export function SloEditForm({ slo }: Props) {
       watch,
     });
 
-  const { createSlo, updateSlo } = useCreateOrUpdateSlo();
+  const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
+  const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
 
   const isEditMode = slo !== undefined;
 
@@ -77,7 +79,7 @@ export function SloEditForm({ slo }: Props) {
       try {
         const processedValues = transformValuesToUpdateSLOInput(values);
 
-        await updateSlo.mutateAsync({ sloId: slo.id, slo: processedValues });
+        await updateSlo({ sloId: slo.id, slo: processedValues });
 
         toasts.addSuccess(
           i18n.translate('xpack.observability.slos.sloEdit.update.success', {
@@ -98,7 +100,7 @@ export function SloEditForm({ slo }: Props) {
       try {
         const processedValues = transformValuesToCreateSLOInput(values);
 
-        await createSlo.mutateAsync({ slo: processedValues });
+        await createSlo({ slo: processedValues });
 
         toasts.addSuccess(
           i18n.translate('xpack.observability.slos.sloEdit.creation.success', {
@@ -246,7 +248,7 @@ export function SloEditForm({ slo }: Props) {
               data-test-subj="sloFormSubmitButton"
               fill
               disabled={!formState.isValid}
-              isLoading={createSlo.isLoading || updateSlo.isLoading}
+              isLoading={isCreateSloLoading || isUpdateSloLoading}
               onClick={handleSubmit}
             >
               {isEditMode

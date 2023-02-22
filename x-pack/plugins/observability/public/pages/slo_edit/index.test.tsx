@@ -16,7 +16,8 @@ import { useKibana } from '../../utils/kibana_react';
 import { useLicense } from '../../hooks/use_license';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
-import { useCreateOrUpdateSlo } from '../../hooks/slo/use_create_slo';
+import { useCreateSlo } from '../../hooks/slo/use_create_slo';
+import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { ConfigSchema } from '../../plugin';
 import { Subset } from '../../typings';
@@ -35,6 +36,7 @@ jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_indices');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
 jest.mock('../../hooks/slo/use_create_slo');
+jest.mock('../../hooks/slo/use_update_slo');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -46,7 +48,8 @@ const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useFetchIndicesMock = useFetchIndices as jest.Mock;
 const useFetchSloMock = useFetchSloDetails as jest.Mock;
-const useCreateOrUpdateSloMock = useCreateOrUpdateSlo as jest.Mock;
+const useCreateSloMock = useCreateSlo as jest.Mock;
+const useUpdateSloMock = useUpdateSlo as jest.Mock;
 
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
@@ -156,12 +159,20 @@ describe('SLO Edit Page', () => {
           indices: [{ name: 'some-index' }],
         });
 
-        useCreateOrUpdateSloMock.mockReturnValue({
+        useCreateSloMock.mockReturnValue({
           isLoading: false,
-          success: false,
-          error: '',
-          createSlo: jest.fn(),
-          updateSlo: jest.fn(),
+          isSuccess: false,
+          isError: false,
+          mutate: jest.fn(),
+          mutateAsync: jest.fn(),
+        });
+
+        useUpdateSloMock.mockReturnValue({
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+          mutate: jest.fn(),
+          mutateAsync: jest.fn(),
         });
 
         render(<SloEditPage />, config);
@@ -186,19 +197,18 @@ describe('SLO Edit Page', () => {
             indices: [{ name: 'some-index' }],
           });
 
-          useCreateOrUpdateSloMock.mockReturnValue({
-            createSlo: {
-              mutateAsync: jest.fn(),
-              isLoading: false,
-              isSuccess: false,
-              isError: false,
-            },
-            updateSlo: {
-              mutateAsync: jest.fn(),
-              isLoading: false,
-              isSuccess: false,
-              isError: false,
-            },
+          useCreateSloMock.mockReturnValue({
+            mutateAsync: jest.fn(),
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
+          });
+
+          useUpdateSloMock.mockReturnValue({
+            mutateAsync: jest.fn(),
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
           });
 
           render(<SloEditPage />, config);
@@ -258,19 +268,18 @@ describe('SLO Edit Page', () => {
           const mockCreate = jest.fn();
           const mockUpdate = jest.fn();
 
-          useCreateOrUpdateSloMock.mockReturnValue({
-            createSlo: {
-              mutateAsync: mockCreate,
-              isLoading: false,
-              isSuccess: false,
-              isError: false,
-            },
-            updateSlo: {
-              mutateAsync: mockUpdate,
-              isLoading: false,
-              isSuccess: false,
-              isError: false,
-            },
+          useCreateSloMock.mockReturnValue({
+            mutateAsync: mockCreate,
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
+          });
+
+          useUpdateSloMock.mockReturnValue({
+            mutateAsync: mockUpdate,
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
           });
 
           render(<SloEditPage />, config);
@@ -348,19 +357,18 @@ describe('SLO Edit Page', () => {
             indices: [{ name: 'some-index' }],
           });
 
-          useCreateOrUpdateSloMock.mockReturnValue({
-            createSlo: {
-              mutateAsync: jest.fn(),
-              isLoading: false,
-              isSuccess: false,
-              isError: false,
-            },
-            updateSlo: {
-              mutateAsync: jest.fn(),
-              isLoading: false,
-              isSuccess: false,
-              isError: false,
-            },
+          useCreateSloMock.mockReturnValue({
+            mutateAsync: jest.fn(),
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
+          });
+
+          useUpdateSloMock.mockReturnValue({
+            mutateAsync: jest.fn(),
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
           });
 
           render(<SloEditPage />, config);
@@ -415,19 +423,18 @@ describe('SLO Edit Page', () => {
           const mockCreate = jest.fn();
           const mockUpdate = jest.fn();
 
-          useCreateOrUpdateSloMock.mockReturnValue({
-            createSlo: {
-              isloading: false,
-              isSuccess: false,
-              isError: false,
-              mutateAsync: mockCreate,
-            },
-            updateSlo: {
-              isloading: false,
-              isSuccess: false,
-              isError: false,
-              mutateAsync: mockUpdate,
-            },
+          useCreateSloMock.mockReturnValue({
+            mutateAsync: mockCreate,
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
+          });
+
+          useUpdateSloMock.mockReturnValue({
+            mutateAsync: mockUpdate,
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
           });
 
           render(<SloEditPage />, config);
@@ -514,19 +521,18 @@ describe('SLO Edit Page', () => {
             indices: [{ name: 'some-index' }],
           });
 
-          useCreateOrUpdateSloMock.mockReturnValue({
-            createSlo: {
-              mutateAsync: jest.fn().mockResolvedValue('success'),
-              isLoading: false,
-              isSuccess: false,
-              isError: false,
-            },
-            updateSlo: {
-              mutateAsync: jest.fn().mockResolvedValue('success'),
-              isLoading: false,
-              isSuccess: false,
-              isError: false,
-            },
+          useCreateSloMock.mockReturnValue({
+            mutateAsync: jest.fn().mockResolvedValue('success'),
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
+          });
+
+          useUpdateSloMock.mockReturnValue({
+            mutateAsync: jest.fn().mockResolvedValue('success'),
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
           });
 
           render(<SloEditPage />, config);
@@ -551,19 +557,18 @@ describe('SLO Edit Page', () => {
             indices: [{ name: 'some-index' }],
           });
 
-          useCreateOrUpdateSloMock.mockReturnValue({
-            createSlo: {
-              mutateAsync: jest.fn(),
-              isLoading: false,
-              isSuccess: true,
-              isError: false,
-            },
-            updateSlo: {
-              mutateAsync: jest.fn(),
-              isLoading: false,
-              isSuccess: true,
-              isError: false,
-            },
+          useCreateSloMock.mockReturnValue({
+            mutateAsync: jest.fn(),
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
+          });
+
+          useUpdateSloMock.mockReturnValue({
+            mutateAsync: jest.fn(),
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
           });
 
           render(<SloEditPage />, config);
@@ -590,19 +595,18 @@ describe('SLO Edit Page', () => {
             indices: [{ name: 'some-index' }],
           });
 
-          useCreateOrUpdateSloMock.mockReturnValue({
-            createSlo: {
-              mutateAsync: jest.fn().mockRejectedValue('argh, I died'),
-              isLoading: false,
-              isSuccess: false,
-              isError: true,
-            },
-            updateSlo: {
-              mutateAsync: jest.fn().mockRejectedValue('argh, I died'),
-              isLoading: false,
-              isSuccess: false,
-              isError: true,
-            },
+          useCreateSloMock.mockReturnValue({
+            mutateAsync: jest.fn().mockRejectedValue('argh, I died'),
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
+          });
+
+          useUpdateSloMock.mockReturnValue({
+            mutateAsync: jest.fn().mockRejectedValue('argh, I died'),
+            isLoading: false,
+            isSuccess: false,
+            isError: false,
           });
 
           render(<SloEditPage />, config);

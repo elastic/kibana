@@ -25,20 +25,19 @@ export function SloList() {
   const [sort, setSort] = useState<SortType>('name');
   const [indicatorTypeFilter, setIndicatorTypeFilter] = useState<FilterType[]>([]);
 
-  const {
-    isLoading: isLoadingSloList,
-    isError: error,
-    sloList: { results: sloList = [], total, perPage },
-    refetch,
-  } = useFetchSloList({
+  const { isLoading, isError, sloList, refetch } = useFetchSloList({
     page: activePage + 1,
     name: query,
     sortBy: sort,
     indicatorTypes: indicatorTypeFilter,
   });
 
+  const { results = [], total = 0, perPage = 0 } = sloList || {};
+
+  const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
+  const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
+  const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
-  const isCloningSlo = Boolean(useIsMutating(['createSlo']));
 
   const handlePageClick = (pageNumber: number) => {
     setActivePage(pageNumber);
@@ -65,7 +64,7 @@ export function SloList() {
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
         <SloListSearchFilterSortBar
-          loading={isLoadingSloList || isDeletingSlo || isCloningSlo}
+          loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
           onChangeIndicatorTypeFilter={handleChangeIndicatorTypeFilter}
@@ -73,10 +72,10 @@ export function SloList() {
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <SloListItems sloList={sloList} loading={isLoadingSloList} error={error} />
+        <SloListItems sloList={results} loading={isLoading} error={isError} />
       </EuiFlexItem>
 
-      {sloList.length ? (
+      {results.length ? (
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
             <EuiFlexItem>
