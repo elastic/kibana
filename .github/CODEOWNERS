@@ -46,7 +46,7 @@ packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
-x-pack/plugins/banners @elastic/kibana-core
+x-pack/plugins/banners @elastic/appex-sharedux
 packages/kbn-bazel-runner @elastic/kibana-operations
 examples/bfetch_explorer @elastic/appex-sharedux
 src/plugins/bfetch @elastic/appex-sharedux
@@ -114,9 +114,9 @@ packages/core/capabilities/core-capabilities-common @elastic/kibana-core
 packages/core/capabilities/core-capabilities-server @elastic/kibana-core
 packages/core/capabilities/core-capabilities-server-internal @elastic/kibana-core
 packages/core/capabilities/core-capabilities-server-mocks @elastic/kibana-core
-packages/core/chrome/core-chrome-browser @elastic/kibana-core
-packages/core/chrome/core-chrome-browser-internal @elastic/kibana-core
-packages/core/chrome/core-chrome-browser-mocks @elastic/kibana-core
+packages/core/chrome/core-chrome-browser @elastic/appex-sharedux
+packages/core/chrome/core-chrome-browser-internal @elastic/appex-sharedux
+packages/core/chrome/core-chrome-browser-mocks @elastic/appex-sharedux
 packages/core/config/core-config-server-internal @elastic/kibana-core
 packages/core/custom-branding/core-custom-branding-browser @elastic/appex-sharedux
 packages/core/custom-branding/core-custom-branding-browser-internal @elastic/appex-sharedux
@@ -310,7 +310,7 @@ src/plugins/discover @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/kibana-docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-ebt-tools @elastic/kibana-core
-packages/kbn-ecs @elastic/kibana-core
+packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investigations
 x-pack/packages/kbn-ecs-data-quality-dashboard @elastic/security-threat-hunting-investigations
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
@@ -374,9 +374,9 @@ packages/kbn-ftr-screenshot-filename @elastic/kibana-operations
 x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-get-repo-files @elastic/kibana-operations
-x-pack/plugins/global_search_bar @elastic/kibana-core
-x-pack/plugins/global_search @elastic/kibana-core
-x-pack/plugins/global_search_providers @elastic/kibana-core
+x-pack/plugins/global_search_bar @elastic/appex-sharedux
+x-pack/plugins/global_search @elastic/appex-sharedux
+x-pack/plugins/global_search_providers @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/plugins/graph @elastic/kibana-visualizations
 x-pack/plugins/grokdebugger @elastic/platform-deployment-management
@@ -462,7 +462,7 @@ src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
 x-pack/plugins/notifications @elastic/appex-sharedux
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
-x-pack/plugins/observability @elastic/observability-ui
+x-pack/plugins/observability @elastic/actionable-observability
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/infra-monitoring-ui
 packages/kbn-optimizer @elastic/kibana-operations
@@ -760,17 +760,11 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 # /x-pack/test/observability_functional @elastic/unified-observability
 
 # Home/Overview/Landing Pages
-/x-pack/plugins/observability/public/pages/home @elastic/observability-design
-/x-pack/plugins/observability/public/pages/landing @elastic/observability-design
-/x-pack/plugins/observability/public/pages/overview @elastic/observability-design @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/home @elastic/observability-design @elastic/observability-ui
+/x-pack/plugins/observability/public/pages/landing @elastic/observability-design @elastic/observability-ui
+/x-pack/plugins/observability/public/pages/overview @elastic/observability-design @elastic/observability-ui
 
 # Actionable Observability
-/x-pack/plugins/observability/common/rules @elastic/actionable-observability
-/x-pack/plugins/observability/public/rules @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/alerts @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/cases  @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/rules  @elastic/actionable-observability
-/x-pack/plugins/observability/public/pages/rule_details  @elastic/actionable-observability
 /x-pack/test/observability_functional @elastic/actionable-observability
 
 # Infra Monitoring
@@ -879,13 +873,13 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
 
 # Quality Assurance
-/src/dev/code_coverage @elastic/kibana-qa
-/vars/*Coverage.groovy @elastic/kibana-qa
-/test/functional/services/common @elastic/kibana-qa
-/test/functional/services/lib @elastic/kibana-qa
-/test/functional/services/remote @elastic/kibana-qa
-/test/visual_regression @elastic/kibana-qa
-/x-pack/test/visual_regression @elastic/kibana-qa
+/src/dev/code_coverage @elastic/appex-qa
+/vars/*Coverage.groovy @elastic/appex-qa
+/test/functional/services/common @elastic/appex-qa
+/test/functional/services/lib @elastic/appex-qa
+/test/functional/services/remote @elastic/appex-qa
+/test/visual_regression @elastic/appex-qa
+/x-pack/test/visual_regression @elastic/appex-qa
 
 # Core
 /config/kibana.yml @elastic/kibana-core
@@ -912,6 +906,8 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 #CC# /x-pack/plugins/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # Kibana Platform Security
+/.github/codeql @elastic/kibana-security
+/.github/workflows/codeql.yml @elastic/kibana-security
 /src/plugins/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
 /test/interactive_setup_api_integration/ @elastic/kibana-security
 /test/interactive_setup_functional/ @elastic/kibana-security

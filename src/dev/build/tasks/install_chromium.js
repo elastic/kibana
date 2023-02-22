@@ -39,7 +39,10 @@ export const InstallChromium = {
         log: log.write.bind(log),
       };
 
-      const path = build.resolvePathForPlatform(platform, 'x-pack/plugins/screenshotting/chromium');
+      const path = build.resolvePathForPlatform(
+        platform,
+        'node_modules/@kbn/screenshotting-plugin/chromium'
+      );
       await install(logger, pkg, path);
     }
   },
