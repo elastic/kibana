@@ -693,12 +693,12 @@
         }
       },
       "filters": {
-        "type": "object",
-        "enabled": false
+        "dynamic": false,
+        "properties": {}
       },
       "timefilter": {
-        "type": "object",
-        "enabled": false
+        "dynamic": false,
+        "properties": {}
       }
     }
   },
@@ -733,16 +733,16 @@
         "type": "keyword"
       },
       "initialState": {
-        "type": "object",
-        "enabled": false
+        "dynamic": false,
+        "properties": {}
       },
       "restoreState": {
-        "type": "object",
-        "enabled": false
+        "dynamic": false,
+        "properties": {}
       },
       "idMapping": {
-        "type": "object",
-        "enabled": false
+        "dynamic": false,
+        "properties": {}
       },
       "realmType": {
         "type": "keyword"
@@ -822,8 +822,8 @@
             "type": "keyword"
           },
           "params": {
-            "enabled": false,
-            "type": "object"
+            "dynamic": false,
+            "properties": {}
           },
           "frequency": {
             "properties": {
@@ -1215,8 +1215,8 @@
         "type": "text"
       },
       "grid": {
-        "type": "object",
-        "enabled": false
+        "dynamic": false,
+        "properties": {}
       },
       "version": {
         "type": "integer"
@@ -1586,10 +1586,6 @@
       }
     }
   },
-  "maps-telemetry": {
-    "type": "object",
-    "enabled": false
-  },
   "cases-comments": {
     "properties": {
       "comment": {
@@ -1660,16 +1656,14 @@
       },
       "externalReferenceMetadata": {
         "dynamic": false,
-        "type": "object",
-        "enabled": false
+        "properties": {}
       },
       "persistableStateAttachmentTypeId": {
         "type": "keyword"
       },
       "persistableStateAttachmentState": {
         "dynamic": false,
-        "type": "object",
-        "enabled": false
+        "properties": {}
       },
       "pushed_at": {
         "type": "date"
@@ -2210,80 +2204,15 @@
         }
       },
       "elasticsearch": {
-        "enabled": false,
-        "properties": {
-          "privileges": {
-            "properties": {
-              "cluster": {
-                "type": "keyword"
-              }
-            }
-          }
-        }
+        "dynamic": false,
+        "properties": {}
       },
       "vars": {
         "type": "flattened"
       },
       "inputs": {
-        "type": "nested",
-        "enabled": false,
-        "properties": {
-          "type": {
-            "type": "keyword"
-          },
-          "policy_template": {
-            "type": "keyword"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "vars": {
-            "type": "flattened"
-          },
-          "config": {
-            "type": "flattened"
-          },
-          "compiled_input": {
-            "type": "flattened"
-          },
-          "streams": {
-            "type": "nested",
-            "properties": {
-              "id": {
-                "type": "keyword"
-              },
-              "enabled": {
-                "type": "boolean"
-              },
-              "data_stream": {
-                "properties": {
-                  "dataset": {
-                    "type": "keyword"
-                  },
-                  "type": {
-                    "type": "keyword"
-                  },
-                  "elasticsearch": {
-                    "properties": {
-                      "privileges": {
-                        "type": "flattened"
-                      }
-                    }
-                  }
-                }
-              },
-              "vars": {
-                "type": "flattened"
-              },
-              "config": {
-                "type": "flattened"
-              },
-              "compiled_stream": {
-                "type": "flattened"
-              }
-            }
-          }
-        }
+        "dynamic": false,
+        "properties": {}
       },
       "revision": {
         "type": "integer"
@@ -2318,8 +2247,8 @@
         "index": false
       },
       "es_index_patterns": {
-        "enabled": false,
-        "type": "object"
+        "dynamic": false,
+        "properties": {}
       },
       "verification_status": {
         "type": "keyword"
@@ -2342,15 +2271,15 @@
         }
       },
       "installed_kibana": {
-        "type": "object",
-        "enabled": false
+        "dynamic": false,
+        "properties": {}
       },
       "installed_kibana_space_id": {
         "type": "keyword"
       },
       "package_assets": {
-        "type": "object",
-        "enabled": false
+        "dynamic": false,
+        "properties": {}
       },
       "install_started_at": {
         "type": "date"
@@ -2489,6 +2418,10 @@
       }
     }
   },
+  "fleet-message-signing-keys": {
+    "dynamic": false,
+    "properties": {}
+  },
   "osquery-manager-usage-metric": {
     "properties": {
       "count": {
@@ -2533,8 +2466,8 @@
         "type": "keyword"
       },
       "ecs_mapping": {
-        "type": "object",
-        "enabled": false
+        "dynamic": false,
+        "properties": {}
       }
     }
   },
@@ -2562,8 +2495,8 @@
         "type": "boolean"
       },
       "shards": {
-        "type": "object",
-        "enabled": false
+        "dynamic": false,
+        "properties": {}
       },
       "version": {
         "type": "long"
@@ -2587,8 +2520,8 @@
             "type": "keyword"
           },
           "ecs_mapping": {
-            "type": "object",
-            "enabled": false
+            "dynamic": false,
+            "properties": {}
           }
         }
       }
@@ -2607,8 +2540,8 @@
         "type": "long"
       },
       "shards": {
-        "type": "object",
-        "enabled": false
+        "dynamic": false,
+        "properties": {}
       },
       "queries": {
         "dynamic": false,
@@ -2629,8 +2562,8 @@
             "type": "keyword"
           },
           "ecs_mapping": {
-            "type": "object",
-            "enabled": false
+            "dynamic": false,
+            "properties": {}
           }
         }
       }
@@ -2955,8 +2888,8 @@
             "type": "keyword"
           },
           "params": {
-            "type": "object",
-            "enabled": false
+            "dynamic": false,
+            "properties": {}
           }
         }
       }
@@ -3408,68 +3341,13 @@
     }
   },
   "upgrade-assistant-reindex-operation": {
+    "dynamic": false,
     "properties": {
-      "reindexTaskId": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
-      },
       "indexName": {
         "type": "keyword"
       },
-      "newIndexName": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
-      },
       "status": {
         "type": "integer"
-      },
-      "locked": {
-        "type": "date"
-      },
-      "lastCompletedStep": {
-        "type": "long"
-      },
-      "errorMessage": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
-      },
-      "reindexTaskPercComplete": {
-        "type": "float"
-      },
-      "runningReindexCount": {
-        "type": "integer"
-      },
-      "reindexOptions": {
-        "properties": {
-          "openAndClose": {
-            "type": "boolean"
-          },
-          "queueSettings": {
-            "properties": {
-              "queuedAt": {
-                "type": "long"
-              },
-              "startedAt": {
-                "type": "long"
-              }
-            }
-          }
-        }
       }
     }
   },
@@ -3490,35 +3368,9 @@
     }
   },
   "upgrade-assistant-ml-upgrade-operation": {
+    "dynamic": false,
     "properties": {
-      "nodeId": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
-      },
       "snapshotId": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
-      },
-      "jobId": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-          }
-        }
-      },
-      "status": {
         "type": "text",
         "fields": {
           "keyword": {
