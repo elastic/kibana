@@ -6,9 +6,10 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../../common/hooks/use_license';
@@ -24,6 +25,8 @@ export const getUseActionColumnHook =
     const license = useLicense();
     const isEnterprisePlus = license.isEnterprise();
     const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
+
+    const { onRuleChange } = useContext(StatefulEventContext);
 
     const leadingControlColumns = useMemo(
       () => [...getDefaultControlColumn(ACTION_BUTTON_COUNT)],
@@ -57,6 +60,7 @@ export const getUseActionColumnHook =
           ecs: alert as Ecs,
           data: nonEcsData,
         };
+
         return (
           <RowAction
             columnId={`actions-${rowIndex}`}
@@ -77,6 +81,7 @@ export const getUseActionColumnHook =
             selectedEventIds={selectedEventIds}
             setCellProps={cveProps.setCellProps}
             showCheckboxes={showCheckboxes}
+            onRuleChange={onRuleChange}
             tabType={'query'}
             tableId={tableId}
             width={0}
@@ -92,7 +97,14 @@ export const getUseActionColumnHook =
           />
         );
       },
-      [columnHeaders, loadingEventIds, showCheckboxes, leadingControlColumns, selectedEventIds]
+      [
+        columnHeaders,
+        loadingEventIds,
+        showCheckboxes,
+        leadingControlColumns,
+        selectedEventIds,
+        onRuleChange,
+      ]
     );
 
     return {

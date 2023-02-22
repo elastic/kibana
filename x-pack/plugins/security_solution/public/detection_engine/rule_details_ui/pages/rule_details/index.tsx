@@ -240,6 +240,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     loading: ruleLoading,
     isExistingRule,
   } = useRuleWithFallback(ruleId);
+
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
@@ -617,10 +618,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           flyoutSize="m"
           inputFilters={[...alertMergedFilters, ...groupingFilters]}
           tableId={TableId.alertsOnRuleDetailsPage}
+          onRuleChange={refreshRule}
         />
       );
     },
-    [alertMergedFilters]
+    [alertMergedFilters, refreshRule]
   );
 
   const {

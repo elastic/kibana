@@ -85,6 +85,7 @@ interface DetectionEngineAlertTableProps {
   tableId: TableId;
   sourcererScope?: SourcererScopeName;
   isLoading?: boolean;
+  onRuleChange?: () => void;
 }
 export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   configId,
@@ -93,6 +94,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   tableId = TableId.alertsOnAlertsPage,
   sourcererScope = SourcererScopeName.detections,
   isLoading,
+  onRuleChange,
 }) => {
   const { triggersActionsUi, uiSettings } = useKibana().services;
 
@@ -108,6 +110,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     tabType: 'query',
     enableHostDetailsFlyout: true,
     enableIpDetailsFlyout: true,
+    onRuleChange,
   });
   const { browserFields, indexPattern: indexPatterns } = useSourcererDataView(sourcererScope);
   const license = useLicense();
