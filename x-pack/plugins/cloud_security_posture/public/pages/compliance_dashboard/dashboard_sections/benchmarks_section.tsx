@@ -26,7 +26,7 @@ import {
   KSPM_POLICY_TEMPLATE,
   RULE_FAILED,
 } from '../../../../common/constants';
-import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
+import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { ClusterDetailsBox } from './cluster_details_box';
 import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
 import {
@@ -36,15 +36,12 @@ import {
 
 const CLUSTER_DEFAULT_SORT_ORDER = 'asc';
 
-export const getClusterIdQuery = (cluster: Cluster) => {
+export const getClusterIdQuery = (cluster: Cluster): NavFilter => {
   if (cluster.meta.benchmark.posture_type === CSPM_POLICY_TEMPLATE) {
-    return { 'cloud.account.name': cluster.meta.cloud?.account.name };
+    // TODO: remove assertion after typing CspFinding as discriminating union
+    return { 'cloud.account.name': cluster.meta.cloud!.account.name };
   }
-  if (cluster.meta.benchmark.posture_type === 'kspm') {
-    return { cluster_id: cluster.meta.assetIdentifierId };
-  }
-
-  return {};
+  return { cluster_id: cluster.meta.assetIdentifierId };
 };
 
 export const BenchmarksSection = ({
