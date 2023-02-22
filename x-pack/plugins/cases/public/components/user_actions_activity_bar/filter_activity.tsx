@@ -22,13 +22,13 @@ interface FilterActivityProps {
 
 const MyEuiFilterGroup = styled(EuiFilterGroup)`
   > .euiFilterButton-hasNotification {
-    min-width: 80px;
+    min-width: 68px;
   }
 `;
 
 const FilterAllButton = styled(EuiFilterButton)`
   & .euiFilterButton__textShift {
-    min-width: 32px;
+    min-width: 28px;
   }
 `; 
 
