@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { useContext, useEffect } from 'react';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import {
+  Alerts,
   BulkActionsConfig,
   BulkActionsState,
   BulkActionsVerbs,
@@ -19,7 +19,7 @@ import {
 } from '../bulk_actions/get_leading_control_column';
 
 interface BulkActionsProps {
-  alerts: EcsFieldsResponse[];
+  alerts: Alerts;
   useBulkActionsConfig?: UseBulkActionsRegistry;
 }
 

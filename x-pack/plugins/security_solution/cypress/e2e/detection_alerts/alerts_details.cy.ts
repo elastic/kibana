@@ -24,7 +24,7 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 import { getUnmappedRule } from '../../objects/rule';
 
 import { ALERTS_URL } from '../../urls/navigation';
-import { pageSelector } from '../../screens/alerts_detection_rules';
+import { tablePageSelector } from '../../screens/table_pagination';
 
 describe('Alert details with unmapped fields', () => {
   before(() => {
@@ -65,7 +65,7 @@ describe('Alert details with unmapped fields', () => {
     };
 
     openTable();
-    cy.get(ALERT_FLYOUT).find(pageSelector(6)).click();
+    cy.get(ALERT_FLYOUT).find(tablePageSelector(4)).click({ force: true });
     cy.get(ALERT_FLYOUT)
       .find(TABLE_ROWS)
       .last()

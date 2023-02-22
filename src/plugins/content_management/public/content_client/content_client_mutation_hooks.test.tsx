@@ -36,7 +36,7 @@ const setup = () => {
 describe('useCreateContentMutation', () => {
   test('should call rpcClient.create with input and resolve with output', async () => {
     const { Wrapper, crudClient } = setup();
-    const input: CreateIn = { contentType: 'testType', data: { foo: 'bar' } };
+    const input: CreateIn = { contentTypeId: 'testType', data: { foo: 'bar' } };
     const output = { test: 'test' };
     crudClient.create.mockResolvedValueOnce(output);
     const { result, waitFor } = renderHook(() => useCreateContentMutation(), { wrapper: Wrapper });
@@ -51,7 +51,7 @@ describe('useCreateContentMutation', () => {
 describe('useUpdateContentMutation', () => {
   test('should call rpcClient.update with input and resolve with output', async () => {
     const { Wrapper, crudClient } = setup();
-    const input: UpdateIn = { contentType: 'testType', data: { foo: 'bar' } };
+    const input: UpdateIn = { contentTypeId: 'testType', id: 'test', data: { foo: 'bar' } };
     const output = { test: 'test' };
     crudClient.update.mockResolvedValueOnce(output);
     const { result, waitFor } = renderHook(() => useUpdateContentMutation(), { wrapper: Wrapper });
@@ -66,7 +66,7 @@ describe('useUpdateContentMutation', () => {
 describe('useDeleteContentMutation', () => {
   test('should call rpcClient.delete with input and resolve with output', async () => {
     const { Wrapper, crudClient } = setup();
-    const input: DeleteIn = { contentType: 'testType', data: { foo: 'bar' } };
+    const input: DeleteIn = { contentTypeId: 'testType', id: 'test' };
     const output = { test: 'test' };
     crudClient.delete.mockResolvedValueOnce(output);
     const { result, waitFor } = renderHook(() => useDeleteContentMutation(), { wrapper: Wrapper });

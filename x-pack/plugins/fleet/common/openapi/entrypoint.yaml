@@ -71,7 +71,7 @@ paths:
     $ref: 'paths/agents@{agent_id}@unenroll.yaml'
   '/agents/{agentId}/upgrade':
     $ref: 'paths/agents@{agent_id}@upgrade.yaml'
-  '/agents/{agentId}/upload':
+  '/agents/{agentId}/uploads':
     $ref: 'paths/agents@{agent_id}@uploads.yaml'
   '/agents/bulk_reassign':
     $ref: 'paths/agents@bulk_reassign.yaml'
