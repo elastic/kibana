@@ -93,7 +93,6 @@ describe('Legacy Alert Actions factory', () => {
               latestErrorMessage: '',
               monitorName: '{{context.monitorName}}',
               monitorUrl: '{{{context.monitorUrl}}}',
-              recoveryReason: '{{{context.recoveryReason}}}',
               observerLocation: '{{context.observerLocation}}',
               statusMessage:
                 'Alert for monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} has recovered',
@@ -245,11 +244,12 @@ describe('Alert Actions factory', () => {
         params: {
           documents: [
             {
-              latestErrorMessage: '',
+              latestErrorMessage: '{{{context.latestErrorMessage}}}',
               monitorName: '{{context.monitorName}}',
               monitorUrl: '{{{context.monitorUrl}}}',
               observerLocation: '{{context.locationName}}',
               statusMessage: '{{{context.status}}}',
+              recoveryReason: '{{context.recoveryReason}}',
             },
           ],
           indexOverride: null,
