@@ -8,7 +8,7 @@
 import { getNewRule } from '../../objects/rule';
 import { ALERTS_HISTOGRAM_LEGEND, ALERTS_COUNT } from '../../screens/alerts';
 import { selectAlertsHistogram } from '../../tasks/alerts';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
@@ -24,7 +24,7 @@ describe('Histogram legend hover actions', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     login();
-    createCustomRuleEnabled(getNewRule(), 'new custom rule');
+    createRule({ ...getNewRule(), rule_id: 'new custom rule' });
     visit(ALERTS_URL);
     selectAlertsHistogram();
   });
