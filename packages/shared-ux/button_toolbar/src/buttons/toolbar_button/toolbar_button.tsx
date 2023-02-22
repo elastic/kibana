@@ -32,8 +32,8 @@ export const ToolbarButton: React.FunctionComponent<Props> = ({
   const euiTheme = useEuiTheme();
   const toolbarButtonStyleProps: EuiButtonPropsForButton =
     type === 'primary'
-      ? { fill: true, color: 'primary' }
-      : { css: ToolbarButtonStyles(euiTheme).emptyButton };
+      ? { color: 'primary', fill: true }
+      : { color: 'text', css: ToolbarButtonStyles(euiTheme).emptyButton };
 
   return (
     <EuiButton size="m" {...toolbarButtonStyleProps} {...{ iconSide, ...rest }}>
