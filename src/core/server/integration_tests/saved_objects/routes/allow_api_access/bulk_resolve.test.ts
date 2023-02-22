@@ -19,7 +19,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { setupConfig } from '../routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -28,13 +28,12 @@ const testTypes = [
   { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
 ];
 
-describe('POST /api/saved_objects/_bulk_resolve', () => {
+describe('POST /api/saved_objects/_bulk_resolve with allowApiAccess true', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
-  let loggerWarnSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -56,9 +55,8 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
     coreUsageStatsClient.incrementSavedObjectsBulkResolve.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
-    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
 
-    const config = setupConfig();
+    const config = setupConfig(true);
     registerBulkResolveRoute(router, { config, coreUsageData, logger });
 
     await server.start();
@@ -68,59 +66,8 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
     await server.stop();
   });
 
-  it('formats successful response and records usage stats', async () => {
-    const clientResponse = {
-      resolved_objects: [
-        {
-          saved_object: {
-            id: 'abc123',
-            type: 'index-pattern',
-            title: 'logstash-*',
-            version: 'foo',
-            references: [],
-            attributes: {},
-          },
-          outcome: 'exactMatch' as const,
-        },
-      ],
-    };
-    savedObjectsClient.bulkResolve.mockImplementation(() => Promise.resolve(clientResponse));
-
-    const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_bulk_resolve')
-      .send([
-        {
-          id: 'abc123',
-          type: 'index-pattern',
-        },
-      ])
-      .expect(200);
-
-    expect(result.body).toEqual(clientResponse);
-    expect(coreUsageStatsClient.incrementSavedObjectsBulkResolve).toHaveBeenCalledWith({
-      request: expect.anything(),
-    });
-  });
-
-  it('calls upon savedObjectClient.bulkResolve', async () => {
-    const docs = [
-      {
-        id: 'abc123',
-        type: 'index-pattern',
-      },
-    ];
-
+  it('returns with status 200 when a type is hidden from the HTTP APIs', async () => {
     await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_bulk_resolve')
-      .send(docs)
-      .expect(200);
-
-    expect(savedObjectsClient.bulkResolve).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.bulkResolve).toHaveBeenCalledWith(docs);
-  });
-
-  it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {
-    const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/_bulk_resolve')
       .send([
         {
@@ -128,20 +75,7 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
           type: 'hidden-from-http',
         },
       ])
-      .expect(400);
-    expect(result.body.message).toContain('Unsupported saved object type(s):');
-  });
-
-  it('logs a warning message when called', async () => {
-    await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_bulk_resolve')
-      .send([
-        {
-          id: 'abc123',
-          type: 'index-pattern',
-        },
-      ])
       .expect(200);
-    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkResolve).toHaveBeenCalledTimes(1);
   });
 });
