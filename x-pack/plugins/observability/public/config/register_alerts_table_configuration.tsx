@@ -8,6 +8,7 @@
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { casesFeatureId, observabilityFeatureId } from '../../common';
 import { TopAlert, useToGetInternalFlyout } from '../pages/alerts';
 import { getRenderCellValue } from '../pages/alerts/components/render_cell_value';
@@ -20,9 +21,9 @@ import type { ConfigSchema } from '../plugin';
 const getO11yAlertsTableConfiguration = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   config: ConfigSchema
-) => ({
+): AlertsTableConfigurationRegistry => ({
   id: observabilityFeatureId,
-  casesFeatureId,
+  cases: { featureId: casesFeatureId, owner: observabilityFeatureId, showBulkActions: true },
   columns: alertO11yColumns.map(addDisplayNames),
   getRenderCellValue: (({ setFlyoutAlert }: { setFlyoutAlert: (data: TopAlert) => void }) => {
     return getRenderCellValue({ observabilityRuleTypeRegistry, setFlyoutAlert });

@@ -39,7 +39,6 @@ import {
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
 import { bulkActionsReducer } from './bulk_actions/reducer';
-import { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
 import { useColumns } from './hooks/use_columns';
 import { InspectButtonContainer } from './toolbar/components/inspect';
 import { alertsTableQueryClient } from './query_client';
@@ -71,7 +70,6 @@ export interface AlertsTableStorage {
 
 const EmptyConfiguration: AlertsTableConfigurationRegistry = {
   id: '',
-  casesFeatureId: '',
   columns: [],
   sort: [],
   getRenderCellValue: () => () => null,
@@ -316,7 +314,8 @@ const AlertsTableStateWithQueryProvider = ({
   );
 
   const CasesContext = casesService?.ui.getCasesContext();
-  const userCasesPermissions = useGetUserCasesPermissions(alertsTableConfiguration.casesFeatureId);
+  const casesPermissions = casesService?.helpers.canUseCases();
+  const hasCases = casesService && CasesContext && alertsTableConfiguration.cases;
 
   return hasAlertsTableConfiguration ? (
     <>
@@ -332,10 +331,10 @@ const AlertsTableStateWithQueryProvider = ({
       {(isLoading || isBrowserFieldDataLoading) && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
-      {alertsCount !== 0 && CasesContext && casesService && (
+      {alertsCount !== 0 && hasCases && (
         <CasesContext
-          owner={[configurationId]}
-          permissions={userCasesPermissions}
+          owner={[alertsTableConfiguration.cases?.owner]}
+          permissions={casesPermissions}
           features={{ alerts: { sync: false } }}
         >
           <AlertsTableWithBulkActionsContext
@@ -344,7 +343,7 @@ const AlertsTableStateWithQueryProvider = ({
           />
         </CasesContext>
       )}
-      {alertsCount !== 0 && (!CasesContext || !casesService) && (
+      {alertsCount !== 0 && !hasCases && (
         <AlertsTableWithBulkActionsContext
           tableProps={tableProps}
           initialBulkActionsState={initialBulkActionsState}

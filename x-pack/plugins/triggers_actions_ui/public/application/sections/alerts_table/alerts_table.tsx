@@ -88,7 +88,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   } = useBulkActions({
     alerts,
     casesService: props.casesService,
-    casesFeatureId: props.alertsTableConfiguration.casesFeatureId,
+    casesFeatureId: props.alertsTableConfiguration.cases?.featureId ?? '',
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
   });
 

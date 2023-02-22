@@ -552,7 +552,7 @@ export type UseBulkActionsRegistry = () => BulkActionsConfig[];
 
 export interface AlertsTableConfigurationRegistry {
   id: string;
-  casesFeatureId: string;
+  cases?: { featureId: string; owner: string; showBulkActions: boolean };
   columns: EuiDataGridColumn[];
   useInternalFlyout?: () => {
     header: AlertTableFlyoutComponent;

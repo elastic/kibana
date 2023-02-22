@@ -25,8 +25,6 @@ import {
 } from '../../../../components/shared/alert_search_bar/containers';
 import { ObservabilityAlertSearchBar } from '../../../../components/shared/alert_search_bar';
 import { observabilityAlertFeatureIds } from '../../../../config';
-import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
-import { observabilityFeatureId } from '../../../../../common';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
@@ -48,7 +46,6 @@ import { RuleStatsState } from './types';
 function InternalAlertsPage() {
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const {
-    cases,
     charts,
     data: {
       query: {
@@ -159,9 +156,6 @@ function InternalAlertsPage() {
   // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
-  const CasesContext = cases.ui.getCasesContext();
-  const userCasesPermissions = useGetUserCasesPermissions();
-
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
   }
@@ -203,25 +197,19 @@ function InternalAlertsPage() {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <CasesContext
-            owner={[observabilityFeatureId]}
-            permissions={userCasesPermissions}
-            features={{ alerts: { sync: false } }}
-          >
-            {esQuery && (
-              <AlertsStateTable
-                alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-                configurationId={AlertConsumers.OBSERVABILITY}
-                id={ALERTS_TABLE_ID}
-                flyoutSize="s"
-                featureIds={observabilityAlertFeatureIds}
-                query={esQuery}
-                showExpandToDetails={false}
-                showAlertStatusWithFlapping
-                pageSize={ALERTS_PER_PAGE}
-              />
-            )}
-          </CasesContext>
+          {esQuery && (
+            <AlertsStateTable
+              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+              configurationId={AlertConsumers.OBSERVABILITY}
+              id={ALERTS_TABLE_ID}
+              flyoutSize="s"
+              featureIds={observabilityAlertFeatureIds}
+              query={esQuery}
+              showExpandToDetails={false}
+              showAlertStatusWithFlapping
+              pageSize={ALERTS_PER_PAGE}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
