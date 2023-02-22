@@ -26,13 +26,10 @@ export const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor', delay: 15000 });
   useMonitorAddEditBreadcrumbs();
   const dispatch = useDispatch();
-  const { locationsLoaded, error: locationsError } = useSelector(selectServiceLocationsState);
-
   useEffect(() => {
-    if (!locationsLoaded) {
-      dispatch(getServiceLocations());
-    }
-  }, [dispatch, locationsLoaded]);
+    dispatch(getServiceLocations());
+  }, [dispatch]);
+  const { locationsLoaded, error: locationsError } = useSelector(selectServiceLocationsState);
 
   if (locationsError) {
     return <LocationsLoadingError />;
