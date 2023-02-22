@@ -11,6 +11,12 @@ export interface AllowedValue {
   name?: string;
 }
 
+export interface MultiField {
+  flat_name: string;
+  name: string;
+  type: string;
+}
+
 export interface EcsMetadata {
   allowed_values?: AllowedValue[];
   dashed_name: string;
@@ -21,6 +27,7 @@ export interface EcsMetadata {
   ignore_above?: number;
   index?: boolean;
   level: string;
+  multi_fields?: MultiField[];
   name: string;
   normalize: string[];
   required?: boolean;
@@ -38,6 +45,7 @@ export interface FieldMap {
     enabled?: boolean;
     format?: string;
     ignore_above?: number;
+    multi_fields?: MultiField[];
     index?: boolean;
     path?: string;
     scaling_factor?: number;

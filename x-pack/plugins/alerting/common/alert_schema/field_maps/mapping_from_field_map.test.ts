@@ -25,6 +25,19 @@ describe('mappingFromFieldMap', () => {
       array: false,
       required: false,
     },
+    multifield_field: {
+      type: 'keyword',
+      array: false,
+      required: false,
+      ignore_above: 1024,
+      multi_fields: [
+        {
+          flat_name: 'multifield_field.text',
+          name: 'text',
+          type: 'match_only_text',
+        },
+      ],
+    },
     geopoint_field: {
       type: 'geo_point',
       array: false,
@@ -103,6 +116,15 @@ describe('mappingFromFieldMap', () => {
       },
       date_field: {
         type: 'date',
+      },
+      multifield_field: {
+        fields: {
+          text: {
+            type: 'match_only_text',
+          },
+        },
+        ignore_above: 1024,
+        type: 'keyword',
       },
       geopoint_field: {
         type: 'geo_point',
