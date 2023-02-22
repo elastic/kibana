@@ -5,7 +5,6 @@
 ## `node scripts/generate codeowners`.
 ####
 
-x-pack/performance @elastic/appex-qa
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
 packages/kbn-ace @elastic/platform-deployment-management
 x-pack/plugins/actions @elastic/response-ops
@@ -1192,6 +1191,8 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 # Changes to translation files should not ping code reviewers
 x-pack/plugins/translations/translations
+
+x-pack/performance @elastic/appex-qa
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
