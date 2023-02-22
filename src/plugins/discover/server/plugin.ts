@@ -6,17 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
-import { getUiSettings } from './ui_settings';
-import { capabilitiesProvider } from './capabilities_provider';
-import { registerSampleData } from './sample_data';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DiscoverAppLocatorDefinition } from '../common/locator';
+import { capabilitiesProvider } from './capabilities_provider';
+import { initializeLocatorServices } from './locator';
+import { registerSampleData } from './sample_data';
+import { getUiSettings } from './ui_settings';
 
-export class DiscoverServerPlugin implements Plugin<object, object> {
+export class DiscoverServerPlugin
+  implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
+{
   public setup(
     core: CoreSetup,
     plugins: {
@@ -41,8 +45,8 @@ export class DiscoverServerPlugin implements Plugin<object, object> {
     return {};
   }
 
-  public start(core: CoreStart) {
-    return {};
+  public start(core: CoreStart, deps: DiscoverServerPluginStartDeps) {
+    return { locator: initializeLocatorServices(core, deps) };
   }
 
   public stop() {}
