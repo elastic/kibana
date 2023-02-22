@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
@@ -55,11 +55,8 @@ const FindingsTableComponent = ({
   onCloseFlyout,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
-  useEffect(() => {
-    setSelectedFinding(items[flyoutFindingIndex]);
-  }, [items, flyoutFindingIndex]);
+  const selectedFinding = items[flyoutFindingIndex];
 
   const getRowProps = (row: CspFinding) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsTableRowTestId(row.resource.id),

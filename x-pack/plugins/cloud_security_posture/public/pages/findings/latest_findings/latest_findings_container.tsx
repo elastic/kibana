@@ -119,20 +119,19 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     });
 
   const onPaginateFlyout = useCallback(
-    (nextPageIndex: number) => {
-      const newPageIndex = Math.floor(nextPageIndex / pagination.pageSize);
+    (nextFindingIndex: number) => {
+      // the index of the finding in the current page
+      const newFindingIndex = nextFindingIndex % pageSize;
 
-      const newFindingIndex =
-        nextPageIndex >= pagination.pageSize * newPageIndex
-          ? nextPageIndex - pagination.pageSize * newPageIndex
-          : nextPageIndex;
+      // if the finding is not in the current page, we need to change the page
+      const pageIndex = Math.floor(nextFindingIndex / pageSize);
 
       setUrlQuery({
-        pageIndex: newPageIndex,
+        pageIndex,
         findingIndex: newFindingIndex,
       });
     },
-    [pagination.pageSize, setUrlQuery]
+    [pageSize, setUrlQuery]
   );
 
   return (
