@@ -410,6 +410,6 @@ export function registerEncryptedSavedObjects(
   // Encrypted saved objects
   encryptedSavedObjects.registerType({
     type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['private_key', 'passphrase']),
+    attributesToEncrypt: new Set(['passphrase']),
   });
 }

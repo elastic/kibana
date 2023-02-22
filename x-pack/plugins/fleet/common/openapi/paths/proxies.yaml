@@ -20,6 +20,8 @@ get:
                 type: integer
               perPage:
                 type: integer
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-fleet-proxies
 post:
   summary: Fleet Proxies - Create
@@ -35,6 +37,8 @@ post:
             properties:
               item:
                 $ref: ../components/schemas/proxies.yaml
+    '400':
+      $ref: ../components/responses/error.yaml
   requestBody:
     content:
       application/json:
