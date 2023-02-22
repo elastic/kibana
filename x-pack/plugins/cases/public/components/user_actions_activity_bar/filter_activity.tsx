@@ -11,6 +11,7 @@ import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
 import type { CaseUserActionsStats } from '../../containers/types';
 import * as i18n from './translations';
 import type { UserActivityFilter } from './types';
+import styled from 'styled-components';
 
 interface FilterActivityProps {
   isLoading?: boolean;
@@ -18,6 +19,20 @@ interface FilterActivityProps {
   userActionsStats?: CaseUserActionsStats;
   onFilterChange: (type: UserActivityFilter) => void;
 }
+
+const MyEuiFilterGroup = styled(EuiFilterGroup)`
+  > .euiFilterButton-hasNotification {
+    min-width: 80px;
+  }
+`;
+
+const FilterAllButton = styled(EuiFilterButton)`
+  & .euiFilterButton__textShift {
+    min-width: 32px;
+  }
+`; 
+
+
 
 export const FilterActivity = React.memo<FilterActivityProps>(
   ({ type, onFilterChange, userActionsStats, isLoading = false }) => {
@@ -31,8 +46,8 @@ export const FilterActivity = React.memo<FilterActivityProps>(
     );
 
     return (
-      <EuiFilterGroup data-test-subj="user-actions-filter-activity-group">
-        <EuiFilterButton
+      <MyEuiFilterGroup data-test-subj="user-actions-filter-activity-group">
+        <FilterAllButton
           withNext
           grow={false}
           onClick={() => handleFilterChange('all')}
@@ -43,9 +58,10 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isLoading={isLoading}
           isDisabled={isLoading}
           data-test-subj="user-actions-filter-activity-button-all"
+          iconSize='s'
         >
           {i18n.ALL}
-        </EuiFilterButton>
+        </FilterAllButton>
         <EuiFilterButton
           withNext
           grow={false}
@@ -72,7 +88,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
         >
           {i18n.HISTORY}
         </EuiFilterButton>
-      </EuiFilterGroup>
+      </MyEuiFilterGroup>
     );
   }
 );
