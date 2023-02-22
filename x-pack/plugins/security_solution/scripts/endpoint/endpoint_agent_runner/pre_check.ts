@@ -13,7 +13,7 @@ export const checkDependencies = async () => {
 
   log.info(`Checking dependencies`);
 
-  await Promise.all([checkDocker(), checkVmRunner()]);
+  await Promise.all([checkDocker(), checkVmRunner(), checkSsh()]);
 };
 
 const checkDocker = async () => {
@@ -43,5 +43,18 @@ const checkVmRunner = async () => {
     throw new Error(
       `Mutipass not found on local machine [${err.message}]. Install it from: https://multipass.run\n\n`
     );
+  }
+};
+
+const checkSsh = async () => {
+  const { log } = getRuntimeServices();
+
+  try {
+    const version = await execa('ssh', ['-V']);
+
+    log.verbose(`Using 'ssh': ${version.stdout}`);
+  } catch (err) {
+    log.verbose(err);
+    throw new Error(`ssh not found on local machine [${err.message}].\n\n`);
   }
 };
