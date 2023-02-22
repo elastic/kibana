@@ -214,8 +214,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
         return url;
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [indexData?.visibleColumns, discoverLocator, dataViewId, resultsField, tableItems]
+    [indexData?.visibleColumns, discoverLocator, dataViewId, resultsField, tableItems, data]
   );
 
   const trailingControlColumns: EuiDataGridProps['trailingControlColumns'] = [
@@ -261,24 +260,22 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
         ];
 
         return (
-          <>
-            <EuiPopover
-              isOpen={isPopoverVisible}
-              panelPaddingSize="none"
-              anchorPosition="upCenter"
-              button={
-                <EuiButtonIcon
-                  aria-label="Show actions"
-                  iconType="gear"
-                  color="text"
-                  onClick={() => setIsPopoverVisible(!isPopoverVisible)}
-                />
-              }
-              closePopover={closePopover}
-            >
-              <EuiContextMenuPanel items={actions} size="s" />
-            </EuiPopover>
-          </>
+          <EuiPopover
+            isOpen={isPopoverVisible}
+            panelPaddingSize="none"
+            anchorPosition="upCenter"
+            button={
+              <EuiButtonIcon
+                aria-label="Show actions"
+                iconType="gear"
+                color="text"
+                onClick={() => setIsPopoverVisible(!isPopoverVisible)}
+              />
+            }
+            closePopover={closePopover}
+          >
+            <EuiContextMenuPanel items={actions} size="s" />
+          </EuiPopover>
         );
       },
     },
