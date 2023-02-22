@@ -17,6 +17,8 @@ import {
   Tooltip,
   TooltipInfo,
   XYChartElementEvent,
+  CustomTooltip,
+  TooltipContainer,
 } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import React from 'react';
@@ -87,14 +89,16 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
 
   const { chartsBaseTheme, chartsTheme } = useProfilingChartsTheme();
 
-  const customTooltip = highlightedSubchart
-    ? (props: TooltipInfo) => (
-        <SubchartTooltip
-          {...props}
-          highlightedSubchart={highlightedSubchart!}
-          highlightedSample={highlightedSample}
-          showFrames={showFrames}
-        />
+  const customTooltip: CustomTooltip = highlightedSubchart
+    ? (props) => (
+        <TooltipContainer>
+          <SubchartTooltip
+            {...props}
+            highlightedSubchart={highlightedSubchart!}
+            highlightedSample={highlightedSample}
+            showFrames={showFrames}
+          />
+        </TooltipContainer>
       )
     : () => <></>;
 

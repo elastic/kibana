@@ -2764,6 +2764,22 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.casesData",
+            "type": "Object",
+            "tags": [],
+            "label": "casesData",
+            "description": [],
+            "signature": [
+              "{ cases: Map<string, ",
+              "Case",
+              ">; isLoading: boolean; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.AlertsTableProps.columns",
             "type": "Array",
             "tags": [],

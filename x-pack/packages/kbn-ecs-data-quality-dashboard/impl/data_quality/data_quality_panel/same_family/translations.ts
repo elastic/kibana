@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import { i18n } from '@kbn/i18n';
 
-export const cpuCores: MetricsUIAggregation = {
-  cpuCores: {
-    max: {
-      field: 'system.cpu.cores',
-    },
-  },
-};
+export const SAME_FAMILY = i18n.translate('ecsDataQualityDashboard.sameFamilyBadgeLabel', {
+  defaultMessage: 'same family',
+});
