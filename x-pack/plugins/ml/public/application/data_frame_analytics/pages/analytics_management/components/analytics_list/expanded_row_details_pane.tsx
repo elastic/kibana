@@ -37,7 +37,9 @@ interface SectionProps {
   section: SectionConfig;
 }
 
-export const OverallDetails: FC<{ overallDetails: SectionConfig }> = ({ overallDetails }) => (
+export const OverallDetails: FC<{
+  overallDetails: SectionConfig;
+}> = ({ overallDetails }) => (
   <EuiFlexGroup alignItems="center" wrap>
     {overallDetails.items.map((item) => {
       if (item.title === 'badge') {
