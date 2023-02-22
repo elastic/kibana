@@ -20,7 +20,7 @@ import { GroupingStyledContainer, GroupsUnitCount } from '../styles';
 import { GROUPS_UNIT } from '../translations';
 import type { GroupingTableAggregation, RawBucket } from '../types';
 
-interface GroupingContainerProps {
+export interface GroupingContainerProps {
   badgeMetricStats?: (fieldBucket: RawBucket) => BadgeMetric[];
   customMetricStats?: (fieldBucket: RawBucket) => CustomMetric[];
   data: GroupingTableAggregation &
