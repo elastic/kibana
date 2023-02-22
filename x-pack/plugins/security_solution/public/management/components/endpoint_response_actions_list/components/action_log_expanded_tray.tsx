@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { OUTPUT_MESSAGES } from '../translations';
 import { getUiCommand } from './hooks';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -73,6 +74,8 @@ export const ActionsLogExpandedTray = memo<{
   action: MaybeImmutable<ActionDetails>;
 }>(({ action }) => {
   const getTestId = useTestIdGenerator('response-actions-list');
+  const { canWriteFileOperations, canWriteExecuteOperations } =
+    useUserPrivileges().endpointPrivileges;
 
   const {
     startedAt,
@@ -145,6 +148,7 @@ export const ActionsLogExpandedTray = memo<{
           {OUTPUT_MESSAGES.wasSuccessful(command)}
           <ResponseActionFileDownloadLink
             action={action}
+            canAccessFileDownloadLink={canWriteFileOperations}
             textSize="xs"
             data-test-subj={getTestId('getFileDownloadLink')}
           />
@@ -162,6 +166,7 @@ export const ActionsLogExpandedTray = memo<{
                 <ResponseActionFileDownloadLink
                   action={action}
                   buttonTitle={EXECUTE_FILE_LINK_TITLE}
+                  canAccessFileDownloadLink={canWriteExecuteOperations}
                   data-test-subj={getTestId('getExecuteLink')}
                   textSize="xs"
                 />

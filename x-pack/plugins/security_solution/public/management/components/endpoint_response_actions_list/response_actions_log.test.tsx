@@ -452,8 +452,61 @@ describe('Response actions history', () => {
       );
     });
 
+    it('should refresh data when autoRefresh is toggled on', async () => {
+      mockUseGetEndpointActionList = getBaseMockedActionList();
+      render();
+      const { getByTestId } = renderResult;
+
+      const quickMenuButton = getByTestId('superDatePickerToggleQuickMenuButton');
+      userEvent.click(quickMenuButton);
+      await waitForEuiPopoverOpen();
+
+      const toggle = getByTestId('superDatePickerToggleRefreshButton');
+      const intervalInput = getByTestId('superDatePickerRefreshIntervalInput');
+
+      userEvent.click(toggle);
+      reactTestingLibrary.fireEvent.change(intervalInput, { target: { value: 1 } });
+
+      await reactTestingLibrary.waitFor(() => {
+        expect(mockUseGetEndpointActionList.refetch).toHaveBeenCalledTimes(3);
+      });
+    });
+
+    it('should refresh data when super date picker refresh button is clicked', async () => {
+      mockUseGetEndpointActionList = getBaseMockedActionList();
+      render();
+
+      const superRefreshButton = renderResult.getByTestId(`${testPrefix}-super-refresh-button`);
+      userEvent.click(superRefreshButton);
+      await waitFor(() => {
+        expect(mockUseGetEndpointActionList.refetch).toHaveBeenCalled();
+      });
+    });
+
+    it('should set date picker with relative dates', async () => {
+      render();
+      const { getByTestId } = renderResult;
+
+      const quickMenuButton = getByTestId('superDatePickerToggleQuickMenuButton');
+      const startDatePopoverButton = getByTestId(`superDatePickerShowDatesButton`);
+
+      // shows 24 hours at first
+      expect(startDatePopoverButton).toHaveTextContent('Last 24 hours');
+
+      // pick another relative date
+      userEvent.click(quickMenuButton);
+      await waitForEuiPopoverOpen();
+      userEvent.click(getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
+      expect(startDatePopoverButton).toHaveTextContent('Last 15 minutes');
+    });
+
     describe('`get-file` action', () => {
       it('should contain download link in expanded row for `get-file` action WITH file operation permission', async () => {
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({
+            canWriteExecuteOperations: false,
+          }),
+        });
         mockUseGetEndpointActionList = {
           ...getBaseMockedActionList(),
           data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
@@ -483,6 +536,11 @@ describe('Response actions history', () => {
       });
 
       it('should show file unavailable for download for `get-file` action WITH file operation permission when file is deleted', async () => {
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({
+            canWriteExecuteOperations: false,
+          }),
+        });
         mockUseGetEndpointActionList = {
           ...getBaseMockedActionList(),
           data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
@@ -540,7 +598,13 @@ describe('Response actions history', () => {
     });
 
     describe('`execute` action', () => {
-      it('should contain download execute link in expanded row for `execute` action WITH file operation permission', async () => {
+      it('should contain full output download link in expanded row for `execute` action WITH execute operation privilege', async () => {
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({
+            canWriteExecuteOperations: true,
+            canWriteFileOperations: false,
+          }),
+        });
         const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
         mockUseGetEndpointActionList = {
           ...getBaseMockedActionList(),
@@ -591,7 +655,7 @@ describe('Response actions history', () => {
         );
       });
 
-      it('should contain execute output and error for `execute` action', async () => {
+      it('should contain execute output and error for `execute` action WITH execute operation privilege', async () => {
         const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
         mockUseGetEndpointActionList = {
           ...getBaseMockedActionList(),
@@ -637,28 +701,12 @@ describe('Response actions history', () => {
         expect(executeAccordions).toHaveTextContent('Execution outputExecution error');
       });
 
-      it('should not contain execute output for `execute` action without required privilege', async () => {
+      it('should show file unavailable for download for `execute` action WITH execute operation privilege when file is deleted', async () => {
         useUserPrivilegesMock.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({
-            canWriteExecuteOperations: false,
+            canWriteFileOperations: false,
           }),
         });
-        mockUseGetEndpointActionList = {
-          ...getBaseMockedActionList(),
-          data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
-        };
-
-        render();
-
-        const { getByTestId, queryByTestId } = renderResult;
-        const expandButton = getByTestId(`${testPrefix}-expand-button`);
-        userEvent.click(expandButton);
-
-        const executeAccordions = queryByTestId(`${testPrefix}-executeResponseOutput`);
-        expect(executeAccordions).toBeNull();
-      });
-
-      it('should show file unavailable for download for `execute` action WITH file operation permission when file is deleted', async () => {
         mockUseGetEndpointActionList = {
           ...getBaseMockedActionList(),
           data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
@@ -689,10 +737,31 @@ describe('Response actions history', () => {
         expect(unavailableText).toBeTruthy();
       });
 
-      it('should not contain full output file download link in expanded row for `execute` action when NO file operation permission', async () => {
+      it('should not contain execute output for `execute` action WITHOUT execute operation privilege', async () => {
         useUserPrivilegesMock.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({
-            canWriteFileOperations: false,
+            canWriteExecuteOperations: false,
+          }),
+        });
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
+        };
+
+        render();
+
+        const { getByTestId, queryByTestId } = renderResult;
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
+
+        const executeAccordions = queryByTestId(`${testPrefix}-executeResponseOutput`);
+        expect(executeAccordions).toBeNull();
+      });
+
+      it('should not contain full output download link in expanded row for `execute` action WITHOUT execute operation privilege', async () => {
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({
+            canWriteExecuteOperations: false,
           }),
         });
 
@@ -706,59 +775,12 @@ describe('Response actions history', () => {
 
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
         userEvent.click(expandButton);
+        expect(queryByTestId(`${testPrefix}-getExecuteLink`)).toBeNull();
+
         const output = getByTestId(`${testPrefix}-details-tray-output`);
         expect(output).toBeTruthy();
         expect(output.textContent).toEqual('execute completed successfully');
-        expect(queryByTestId(`${testPrefix}-getExecuteLink`)).toBeNull();
       });
-    });
-
-    it('should refresh data when autoRefresh is toggled on', async () => {
-      mockUseGetEndpointActionList = getBaseMockedActionList();
-      render();
-      const { getByTestId } = renderResult;
-
-      const quickMenuButton = getByTestId('superDatePickerToggleQuickMenuButton');
-      userEvent.click(quickMenuButton);
-      await waitForEuiPopoverOpen();
-
-      const toggle = getByTestId('superDatePickerToggleRefreshButton');
-      const intervalInput = getByTestId('superDatePickerRefreshIntervalInput');
-
-      userEvent.click(toggle);
-      reactTestingLibrary.fireEvent.change(intervalInput, { target: { value: 1 } });
-
-      await reactTestingLibrary.waitFor(() => {
-        expect(mockUseGetEndpointActionList.refetch).toHaveBeenCalledTimes(3);
-      });
-    });
-
-    it('should refresh data when super date picker refresh button is clicked', async () => {
-      mockUseGetEndpointActionList = getBaseMockedActionList();
-      render();
-
-      const superRefreshButton = renderResult.getByTestId(`${testPrefix}-super-refresh-button`);
-      userEvent.click(superRefreshButton);
-      await waitFor(() => {
-        expect(mockUseGetEndpointActionList.refetch).toHaveBeenCalled();
-      });
-    });
-
-    it('should set date picker with relative dates', async () => {
-      render();
-      const { getByTestId } = renderResult;
-
-      const quickMenuButton = getByTestId('superDatePickerToggleQuickMenuButton');
-      const startDatePopoverButton = getByTestId(`superDatePickerShowDatesButton`);
-
-      // shows 24 hours at first
-      expect(startDatePopoverButton).toHaveTextContent('Last 24 hours');
-
-      // pick another relative date
-      userEvent.click(quickMenuButton);
-      await waitForEuiPopoverOpen();
-      userEvent.click(getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
-      expect(startDatePopoverButton).toHaveTextContent('Last 15 minutes');
     });
   });
 
