@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { MapEmbeddable } from './map_embeddable';
+import { MapEmbeddableConfig, MapEmbeddableInput } from './types';
+import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 
 jest.mock('../kibana_services', () => {
   return {
     getHttp() {
       return {
         basePath: {
-          prepend: (url) => url,
+          prepend: (url: string) => url,
         },
       };
     },
@@ -54,37 +57,38 @@ jest.mock('../routes/map_page', () => {
   class MockSavedMap {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     private _store = require('../reducers/store').createMapStore();
-    private _attributes = {
+    private _attributes: MapSavedObjectAttributes = {
       title: 'myMap',
     };
 
     whenReady = async function () {};
 
-    getStore = function () {
+    getStore() {
       return this._store;
-    };
-    getAttributes = function () {
+    }
+    getAttributes() {
       return this._attributes;
-    };
-    getAutoFitToBounds = function () {
+    }
+    getAutoFitToBounds() {
       return true;
-    };
-    getSharingSavedObjectProps = function () {
+    }
+    getSharingSavedObjectProps() {
       return null;
-    };
+    }
   }
   return { SavedMap: MockSavedMap };
 });
 
-function untilInitialized(mapEmbeddable: MapEmbeddable) {
+function untilInitialized(mapEmbeddable: MapEmbeddable): Promise<void> {
   return new Promise((resolve) => {
+    // @ts-expect-error setInitializationFinished is protected but we are overriding it to know when embeddable is initialized
     mapEmbeddable.setInitializationFinished = () => {
       resolve();
     };
   });
 }
 
-function onNextTick() {
+function onNextTick(): Promise<void> {
   // wait one tick to give observables time to fire
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
@@ -92,10 +96,10 @@ function onNextTick() {
 describe('shouldFetch$', () => {
   test('should not fetch when search context does not change', async () => {
     const mapEmbeddable = new MapEmbeddable(
-      {},
+      {} as unknown as MapEmbeddableConfig,
       {
         id: 'map1',
-      }
+      } as unknown as MapEmbeddableInput
     );
     await untilInitialized(mapEmbeddable);
 
@@ -113,11 +117,11 @@ describe('shouldFetch$', () => {
   describe('on searchSessionId change', () => {
     test('should fetch when filterByMapExtent is false', async () => {
       const mapEmbeddable = new MapEmbeddable(
-        {},
+        {} as unknown as MapEmbeddableConfig,
         {
           id: 'map1',
           filterByMapExtent: false,
-        }
+        } as unknown as MapEmbeddableInput
       );
       await untilInitialized(mapEmbeddable);
 
@@ -134,11 +138,11 @@ describe('shouldFetch$', () => {
 
     test('should not fetch when filterByMapExtent is true', async () => {
       const mapEmbeddable = new MapEmbeddable(
-        {},
+        {} as unknown as MapEmbeddableConfig,
         {
           id: 'map1',
           filterByMapExtent: true,
-        }
+        } as unknown as MapEmbeddableInput
       );
       await untilInitialized(mapEmbeddable);
 
