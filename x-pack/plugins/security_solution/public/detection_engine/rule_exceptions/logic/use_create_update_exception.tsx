@@ -41,7 +41,6 @@ export const useCreateOrUpdateException = (): ReturnUseCreateOrUpdateException =
         items.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
           if ('id' in item && item.id != null) {
             const formattedExceptionItem = formatExceptionItemForUpdate(item);
-            console.log(formattedExceptionItem);
             return updateExceptionListItem({
               listItem: formattedExceptionItem,
             });
