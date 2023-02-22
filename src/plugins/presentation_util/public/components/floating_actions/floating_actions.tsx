@@ -85,8 +85,6 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     }
   }, [anchorRef, actionsRef, euiTheme.size, position, usingTwoLineLayout]);
 
-  console.log('render');
-
   const floatingActionsStyles = css`
     top: ${position.top}px;
     left: ${position.left}px;
