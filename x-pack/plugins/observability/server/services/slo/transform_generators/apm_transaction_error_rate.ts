@@ -101,8 +101,10 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       query: {
         bool: {
           filter: [
-            { exists: { field: 'transaction.result' } },
+            { terms: { 'processor.event': ['metric'] } },
+            { term: { 'metricset.name': 'transaction' } },
             { exists: { field: 'transaction.duration.histogram' } },
+            { exists: { field: 'transaction.result' } },
             ...queryFilter,
           ],
         },
