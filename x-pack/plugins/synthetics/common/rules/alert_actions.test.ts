@@ -93,6 +93,7 @@ describe('Legacy Alert Actions factory', () => {
               latestErrorMessage: '',
               monitorName: '{{context.monitorName}}',
               monitorUrl: '{{{context.monitorUrl}}}',
+              recoveryReason: '{{{context.recoveryReason}}}',
               observerLocation: '{{context.observerLocation}}',
               statusMessage:
                 'Alert for monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} has recovered',
