@@ -8,7 +8,7 @@
 export { CPU } from './cpu';
 export { Load } from './load';
 export { Memory } from './memory';
-export { MemoryTotal } from './memoryTotal';
+export { MemoryAvailable } from './memory_available';
 export { RX } from './rx';
 export { TX } from './tx';
 export { DiskIORead } from './diskio_read';

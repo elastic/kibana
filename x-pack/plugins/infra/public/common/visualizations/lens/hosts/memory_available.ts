@@ -26,7 +26,7 @@ import { ILensVisualization } from '../types';
 const BREAKDOWN_COLUMN_NAME = 'hosts_aggs_breakdown';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 
-export class MemoryTotal implements ILensVisualization {
+export class MemoryAvailable implements ILensVisualization {
   constructor(
     private dataView: DataView,
     private options: LensOptions,
@@ -34,7 +34,7 @@ export class MemoryTotal implements ILensVisualization {
   ) {}
 
   getTitle(): string {
-    return 'Memory Total';
+    return 'Memory Available';
   }
 
   getVisualizationType(): string {
@@ -51,9 +51,9 @@ export class MemoryTotal implements ILensVisualization {
     };
 
     const dataLayer = this.formula.insertOrReplaceFormulaColumn(
-      'y_memory_total',
+      'y_memory_available',
       {
-        formula: 'average(system.memory.total)',
+        formula: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
         format: {
           id: 'bytes',
           params: {
@@ -77,7 +77,7 @@ export class MemoryTotal implements ILensVisualization {
         {
           layerId: DEFAULT_LAYER_ID,
           seriesType: 'line',
-          accessors: ['y_memory_total'],
+          accessors: ['y_memory_available'],
           yConfig: [],
           layerType: 'data',
           xAccessor: HISTOGRAM_COLUMN_NAME,
@@ -88,6 +88,25 @@ export class MemoryTotal implements ILensVisualization {
   };
   getFilters = (): Filter[] => {
     return [
+      {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          index: '3be1e71b-4bc5-4462-a314-04539f877a19',
+          key: 'system.memory.actual.used.bytes',
+          value: 'exists',
+          type: 'exists',
+        },
+        query: {
+          exists: {
+            field: 'system.memory.actual.used.bytes',
+          },
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+      },
       {
         meta: {
           disabled: false,
