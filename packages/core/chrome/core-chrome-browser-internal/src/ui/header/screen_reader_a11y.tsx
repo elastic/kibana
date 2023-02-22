@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState, useEffect, useRef } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiScreenReaderLive, EuiSkipLink, useMutationObserver } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiScreenReaderLive } from '@elastic/eui';
 
 import type { HeaderProps } from './header';
 
@@ -27,7 +26,7 @@ export const ScreenReaderRouteAnnouncements: FC<{
       const breadcrumbText: string[] = [];
 
       // Reverse the breadcrumb title order and ensure we only pick up valid strings
-      fallbackBreadcrumbs.reverse().forEach((breadcrumb) => {
+      fallbackBreadcrumbs.reverse().map((breadcrumb) => {
         if (typeof breadcrumb.text === 'string') breadcrumbText.push(breadcrumb.text);
       });
       breadcrumbText.push(DEFAULT_TITLE);
@@ -40,49 +39,4 @@ export const ScreenReaderRouteAnnouncements: FC<{
   }, [fallbackBreadcrumbs]);
 
   return <EuiScreenReaderLive focusRegionOnTextChange>{routeTitle}</EuiScreenReaderLive>;
-};
-
-export const SkipToContent = () => {
-  const [applicationRef, setApplicationRef] = useState<HTMLElement | null>(null);
-  useEffect(() => {
-    setApplicationRef(document.querySelector<HTMLElement>('.kbnAppWrapper'));
-  }, []);
-
-  // Ensure pages are done loading and `main` is available
-  const [shouldRender, setShouldRender] = useState(false);
-  const [forceRerender, setForceRerender] = useState(1);
-  const prevMainId = useRef<string | undefined>();
-  useMutationObserver(
-    applicationRef,
-    () => {
-      const main = document.querySelector('main'); // TODO: This should use `destinationId` once configurable
-      if (main) {
-        setShouldRender(true);
-        // Ensure that rerendered `main`s are targetable between in-app navigation
-        if (main.id !== prevMainId.current) {
-          setForceRerender(forceRerender + 1);
-          prevMainId.current = main.id;
-        }
-      } else {
-        // Don't display a skip link if there's no content found
-        setShouldRender(false);
-        prevMainId.current = undefined;
-      }
-    },
-    { subtree: true, childList: true }
-  );
-
-  return shouldRender ? (
-    <EuiSkipLink
-      position="fixed"
-      overrideLinkBehavior
-      destinationId="" // TODO: Allow plugins to configure this - Maps will likely need this
-      href={undefined}
-      key={forceRerender}
-    >
-      {i18n.translate('core.ui.primaryNav.skipToContent', {
-        defaultMessage: 'Skip to content',
-      })}
-    </EuiSkipLink>
-  ) : null;
 };
