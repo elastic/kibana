@@ -220,9 +220,9 @@ describe('ALL - Packs', () => {
           });
       });
       preparePack(PACK_NAME);
-      cy.react('CustomItemAction', {
-        props: { index: 1, item: { id: SAVED_QUERY_ID } },
-      }).click();
+      cy.getBySel('docsLoading').should('exist');
+      cy.getBySel('docsLoading').should('not.exist');
+      cy.get(`[aria-label="View in Lens"]`).eq(0).click();
       cy.window()
         .its('open')
         .then(() => {
