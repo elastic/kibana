@@ -536,7 +536,17 @@ export class TaskManagerRunner implements TaskRunner {
       unwrap
     )(result);
 
-    if (!this.isExpired) {
+    if (this.isExpired) {
+      this.usageCounter?.incrementCounter({
+        counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
+        counterType: 'taskManagerTaskRunner',
+        incrementBy: 1,
+      });
+    } else if (fieldUpdates.status === TaskStatus.Failed) {
+      // Delete the SO instead so it doesn't remain in the index forever
+      await this.bufferedTaskStore.remove(this.id);
+      asRan(this.instance.task);
+    } else {
       this.instance = asRan(
         await this.bufferedTaskStore.update(
           defaults(
@@ -551,12 +561,6 @@ export class TaskManagerRunner implements TaskRunner {
           )
         )
       );
-    } else {
-      this.usageCounter?.incrementCounter({
-        counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
-        counterType: 'taskManagerTaskRunner',
-        incrementBy: 1,
-      });
     }
 
     return fieldUpdates.status === TaskStatus.Failed

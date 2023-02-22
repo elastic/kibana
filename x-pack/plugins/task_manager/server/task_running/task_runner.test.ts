@@ -957,7 +957,7 @@ describe('TaskManagerRunner', () => {
       expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
     });
 
-    test(`doesn't reschedule recurring tasks that throw an unrecoverable error`, async () => {
+    test(`Removes recurring tasks that throw an unrecoverable error`, async () => {
       const id = _.random(1, 20).toString();
       const error = new Error('Dangit!');
       const onTaskEvent = jest.fn();
@@ -988,9 +988,8 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      const instance = store.update.mock.calls[0][0];
-      expect(instance.status).toBe('failed');
-      expect(instance.enabled).not.toBeDefined();
+      expect(store.remove).toHaveBeenCalledWith(id);
+      expect(store.update).not.toHaveBeenCalled();
 
       expect(onTaskEvent).toHaveBeenCalledWith(
         withAnyTiming(
@@ -1201,12 +1200,9 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
+      expect(store.remove).toHaveBeenCalledWith(id);
+      expect(store.update).not.toHaveBeenCalled();
       sinon.assert.calledWith(getRetryStub, initialAttempts, error);
-      const instance = store.update.mock.calls[0][0];
-
-      expect(instance.status).toBe('failed');
-      expect(instance.enabled).not.toBeDefined();
     });
 
     test('bypasses getRetry function (returning false) on error of a recurring task', async () => {
@@ -1247,7 +1243,7 @@ describe('TaskManagerRunner', () => {
       expect(instance.enabled).not.toBeDefined();
     });
 
-    test('Fails non-recurring task when maxAttempts reached', async () => {
+    test('Removes non-recurring task when maxAttempts reached', async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = 3;
       const { runner, store } = await readyToRunStageSetup({
@@ -1272,13 +1268,8 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
-      expect(instance.attempts).toEqual(3);
-      expect(instance.status).toEqual('failed');
-      expect(instance.retryAt!).toBeNull();
-      expect(instance.runAt.getTime()).toBeLessThanOrEqual(Date.now());
-      expect(instance.enabled).not.toBeDefined();
+      expect(store.remove).toHaveBeenCalledWith(id);
+      expect(store.update).not.toHaveBeenCalled();
     });
 
     test(`Doesn't fail recurring tasks when maxAttempts reached`, async () => {
@@ -1502,9 +1493,8 @@ describe('TaskManagerRunner', () => {
 
         await runner.run();
 
-        const instance = store.update.mock.calls[0][0];
-        expect(instance.status).toBe('failed');
-        expect(instance.enabled).not.toBeDefined();
+        expect(store.remove).toHaveBeenCalledWith(id);
+        expect(store.update).not.toHaveBeenCalled();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
           withAnyTiming(
