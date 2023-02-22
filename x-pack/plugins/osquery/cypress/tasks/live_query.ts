@@ -44,9 +44,21 @@ export const checkResults = () => {
   });
 };
 
-export const typeInECSFieldInput = (text: string) => cy.getBySel('ECS-field-input').type(text);
-export const typeInOsqueryFieldInput = (text: string) =>
-  cy.react('OsqueryColumnFieldComponent').first().react('ResultComboBox').type(text);
+export const typeInECSFieldInput = (text: string, index = 0) =>
+  cy.getBySel('ECS-field-input').eq(index).type(text);
+export const typeInOsqueryFieldInput = (text: string, index = 0) =>
+  cy.react('OsqueryColumnFieldComponent').eq(index).react('ResultComboBox').type(text);
+
+export const getOsqueryFieldTypes = (value: 'Osquery value' | 'Static value', index = 0) => {
+  cy.getBySel(`osquery-result-type-select-${index}`).click();
+  cy.contains(value).click();
+
+  if (value === 'Static value') {
+    cy.contains('Osquery value').should('not.exist');
+  } else {
+    cy.contains('Static value').should('not.exist');
+  }
+};
 
 export const findFormFieldByRowsLabelAndType = (label: string, text: string) => {
   cy.react('EuiFormRow', { props: { label } }).type(text);
