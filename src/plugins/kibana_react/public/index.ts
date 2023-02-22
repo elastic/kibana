@@ -47,7 +47,9 @@ export {
 export { useExecutionContext } from './use_execution_context';
 
 export type { ToolbarButtonProps } from './toolbar_button';
-export { POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES, ToolbarButton } from './toolbar_button';
+export { POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES } from './toolbar_button';
+/** @deprecated use `ToolbarButton` from `@kbn/shared-ux-button-toolbar` */
+export { ToolbarButton } from './toolbar_button';
 
 export { Route } from './router';
 
