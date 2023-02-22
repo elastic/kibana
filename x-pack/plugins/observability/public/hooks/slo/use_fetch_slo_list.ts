@@ -30,22 +30,27 @@ interface SLOListParams {
 }
 
 export interface UseFetchSloListResponse {
+  isInitialLoading: boolean;
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
-  sloList: FindSLOResponse;
+  sloList: FindSLOResponse | undefined;
   refetch: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
   ) => Promise<QueryObserverResult<FindSLOResponse | undefined, unknown>>;
 }
 
-export function useFetchSloList(params?: SLOListParams): UseFetchSloListResponse {
-  const { name, page, sortBy, indicatorTypes } = params || {};
+export function useFetchSloList({
+  name = '',
+  page = 1,
+  sortBy = 'name',
+  indicatorTypes = [],
+}: SLOListParams | undefined = {}): UseFetchSloListResponse {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: ['fetchSloList'],
+      queryKey: ['fetchSloList', { name, page, sortBy, indicatorTypes }],
       queryFn: async ({ signal }) => {
         try {
           const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
@@ -66,12 +71,15 @@ export function useFetchSloList(params?: SLOListParams): UseFetchSloListResponse
           // ignore error for retrieving slos
         }
       },
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
     }
   );
 
   return {
-    sloList: isInitialLoading ? EMPTY_LIST : data ?? EMPTY_LIST,
-    isLoading: isInitialLoading || isLoading || isRefetching,
+    sloList: data,
+    isLoading: isLoading || isRefetching,
+    isInitialLoading,
     isSuccess,
     isError,
     refetch,

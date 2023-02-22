@@ -31,10 +31,9 @@ export function SlosPage() {
   const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();
 
-  const {
-    isLoading,
-    sloList: { total },
-  } = useFetchSloList();
+  const { isInitialLoading, isLoading, sloList } = useFetchSloList();
+
+  const { total } = sloList || {};
 
   useBreadcrumbs([
     {
@@ -51,6 +50,10 @@ export function SlosPage() {
 
   if (!isSloFeatureEnabled(config)) {
     return <PageNotFound />;
+  }
+
+  if (isInitialLoading) {
+    return null;
   }
 
   if ((!isLoading && total === 0) || !hasAtLeast('platinum')) {
