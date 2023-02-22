@@ -83,7 +83,7 @@ export interface DragContextState {
   /**
    * Customizable data-test-subj prefix
    */
-  dataTestSubj: string;
+  dataTestSubjPrefix: string;
 
   /**
    * A custom callback for telemetry

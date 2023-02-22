@@ -29,7 +29,7 @@ const dataTransfer = {
 
 describe('DragDrop', () => {
   const defaultContext = {
-    dataTestSubj: 'lnsDragDrop',
+    dataTestSubjPrefix: 'lnsDragDrop',
     dragging: undefined,
     setDragging: jest.fn(),
     setActiveDropTarget: jest.fn(),
@@ -282,7 +282,7 @@ describe('DragDrop', () => {
 
     const component = mount(
       <ChildDragDropProvider
-        dataTestSubj={defaultContext.dataTestSubj}
+        dataTestSubjPrefix={defaultContext.dataTestSubjPrefix}
         setA11yMessage={jest.fn()}
         dragging={dragging}
         setDragging={() => {
@@ -543,7 +543,7 @@ describe('DragDrop', () => {
       });
       component = mount(
         <ChildDragDropProvider
-          dataTestSubj={defaultContext.dataTestSubj}
+          dataTestSubjPrefix={defaultContext.dataTestSubjPrefix}
           setA11yMessage={jest.fn()}
           dragging={{ id: '1', humanData: { label: 'Label1', layerNumber: 0 } }}
           setDragging={jest.fn()}
@@ -989,7 +989,7 @@ describe('DragDrop', () => {
       const setA11yMessage = jest.fn();
       const registerDropTarget = jest.fn();
       const baseContext = {
-        dataTestSubj: defaultContext.dataTestSubj,
+        dataTestSubjPrefix: defaultContext.dataTestSubjPrefix,
         dragging,
         setDragging: (val?: DraggingIdentifier) => {
           dragging = val;

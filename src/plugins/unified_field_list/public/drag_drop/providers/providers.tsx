@@ -34,7 +34,7 @@ export const DragContext = React.createContext<DragContextState>({
   setA11yMessage: () => {},
   dropTargetsByOrder: undefined,
   registerDropTarget: () => {},
-  dataTestSubj: DEFAULT_DATA_TEST_SUBJ,
+  dataTestSubjPrefix: DEFAULT_DATA_TEST_SUBJ,
   onTrackUICounterEvent: undefined,
 });
 
@@ -114,7 +114,7 @@ export function RootDragDropProvider({
         setActiveDropTarget={setActiveDropTarget}
         registerDropTarget={registerDropTarget}
         dropTargetsByOrder={dropTargetsByOrderState}
-        dataTestSubj={dataTestSubj}
+        dataTestSubjPrefix={dataTestSubj}
         onTrackUICounterEvent={onTrackUICounterEvent}
       >
         {children}
@@ -217,7 +217,7 @@ export function ChildDragDropProvider({
   setA11yMessage,
   registerDropTarget,
   dropTargetsByOrder,
-  dataTestSubj,
+  dataTestSubjPrefix,
   onTrackUICounterEvent,
   children,
 }: ProviderProps) {
@@ -232,7 +232,7 @@ export function ChildDragDropProvider({
       setA11yMessage,
       dropTargetsByOrder,
       registerDropTarget,
-      dataTestSubj,
+      dataTestSubjPrefix,
       onTrackUICounterEvent,
     }),
     [
@@ -245,7 +245,7 @@ export function ChildDragDropProvider({
       setA11yMessage,
       dropTargetsByOrder,
       registerDropTarget,
-      dataTestSubj,
+      dataTestSubjPrefix,
       onTrackUICounterEvent,
     ]
   );

@@ -51,6 +51,7 @@ afterEach(() => {
 });
 
 const defaultContext = {
+  dataTestSubjPrefix: 'lnsDragDrop',
   dragging: undefined,
   setDragging: jest.fn(),
   setActiveDropTarget: () => {},
