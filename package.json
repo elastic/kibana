@@ -843,7 +843,7 @@
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.1.1",
-    "re2": "^1.18.0",
+    "re2": "1.17.4",
     "react": "^17.0.2",
     "react-ace": "^7.0.5",
     "react-beautiful-dnd": "^13.1.0",
