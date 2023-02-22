@@ -56,6 +56,7 @@ echo "--- Download the latest artifacts from single user performance pipeline"
 .buildkite/scripts/download_build_artifacts.sh
 
 echo "--- Run single apis capacity tests"
+cd "$KIBANA_DIR"
 node scripts/run_scalability --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path "x-pack/test/scalability/apis"
 
 echo "--- Upload test results"
