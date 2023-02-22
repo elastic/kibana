@@ -8,13 +8,10 @@
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import {
-  RulesListColumns,
-  RulesListVisibleColumns,
-  useRulesListColumnSelector,
-} from './rules_list_column_selector';
+import { RulesListVisibleColumn, RulesListColumn } from '../../../../types';
+import { useRulesListColumnSelector } from './rules_list_column_selector';
 
-const allRuleColumns: RulesListColumns[] = [
+const allRuleColumns: RulesListColumn[] = [
   {
     id: 'ruleName',
     field: 'name',
@@ -50,7 +47,7 @@ const allRuleColumns: RulesListColumns[] = [
   },
 ];
 
-const visibleColumns: RulesListVisibleColumns[] = [
+const visibleColumns: RulesListVisibleColumn[] = [
   'ruleName',
   'ruleTags',
   'ruleExecutionStatusLastDate',

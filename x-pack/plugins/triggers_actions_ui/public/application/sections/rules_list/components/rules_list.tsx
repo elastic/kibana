@@ -51,6 +51,7 @@ import {
   UpdateFiltersProps,
   BulkEditActions,
   UpdateRulesToBulkEditProps,
+  CustomRulesListColumn,
 } from '../../../../types';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
@@ -125,6 +126,7 @@ export interface RulesListProps {
   refresh?: Date;
   rulesListKey?: string;
   visibleColumns?: string[];
+  columns?: CustomRulesListColumn[];
 }
 
 export const percentileFields = {
@@ -156,6 +158,7 @@ export const RulesList = ({
   refresh,
   rulesListKey,
   visibleColumns,
+  columns,
 }: RulesListProps) => {
   const history = useHistory();
   const {
@@ -896,6 +899,7 @@ export const RulesList = ({
               rulesListKey={rulesListKey}
               config={config}
               visibleColumns={visibleColumns}
+              columns={columns}
             />
             {manageLicenseModalOpts && (
               <ManageLicenseModal

@@ -15,17 +15,17 @@ import {
   EuiToolTip,
   EuiStat,
 } from '@elastic/eui';
-import { RuleTableItem } from '../../../../types';
+import { RuleTableItem } from '../../../../../types';
 import {
   getRuleHealthColor,
   getIsLicenseError,
   getRuleStatusMessage,
-} from '../../../../common/lib/rule_status_helpers';
+} from '../../../../../common/lib/rule_status_helpers';
 import {
   ALERT_STATUS_LICENSE_ERROR,
   rulesLastRunOutcomeTranslationMapping,
   rulesStatusesTranslationsMapping,
-} from '../translations';
+} from '../../translations';
 
 export interface RulesListTableStatusCellProps {
   rule: RuleTableItem;

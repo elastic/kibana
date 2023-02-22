@@ -19,7 +19,14 @@ import type {
   RecursivePartial,
   EuiDataGridToolBarAdditionalControlsOptions,
 } from '@elastic/eui';
-import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
+import {
+  EuiDataGridColumn,
+  EuiDataGridControlColumn,
+  EuiDataGridSorting,
+  EuiTableActionsColumnType,
+  EuiTableComputedColumnType,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
 import {
@@ -60,6 +67,7 @@ import type { ComponentOpts as RuleStatusDropdownProps } from './application/sec
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
 import type { RulesListProps } from './application/sections/rules_list/components/rules_list';
+import type { RulesListTableProps } from './application/sections/rules_list/components/rules_list_table';
 import type {
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
@@ -78,7 +86,6 @@ import type {
   FieldBrowserProps,
   BrowserFieldItem,
 } from './application/sections/field_browser/types';
-import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
 import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
 import { Case } from './application/sections/alerts_table/hooks/api';
@@ -130,8 +137,8 @@ export type {
   CreateFieldComponent,
   GetFieldTableColumns,
   BrowserFieldItem,
-  RulesListVisibleColumns,
   AlertSummaryTimeRange,
+  RulesListTableProps,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -676,3 +683,47 @@ export interface UpdateRulesToBulkEditProps {
 export interface LazyLoadProps {
   hideLazyLoader?: boolean;
 }
+
+export type RulesListVisibleColumn =
+  | 'ruleName'
+  | 'ruleTags'
+  | 'ruleExecutionStatusLastDate'
+  | 'ruleSnoozeNotify'
+  | 'ruleScheduleInterval'
+  | 'ruleExecutionStatusLastDuration'
+  | 'ruleExecutionPercentile'
+  | 'ruleExecutionSuccessRatio'
+  | 'ruleExecutionStatus'
+  | 'ruleExecutionState';
+
+export interface RuleTypeState {
+  isLoading: boolean;
+  initialLoad: boolean;
+  data: RuleTypeIndex;
+}
+
+export type RulesListTableColumn =
+  | EuiTableFieldDataColumnType<RuleTableItem>
+  | EuiTableComputedColumnType<RuleTableItem>
+  | EuiTableActionsColumnType<RuleTableItem>;
+
+export type RulesListColumnContext = RulesListTableProps & {
+  tagPopoverOpenIndex: number;
+  currentlyOpenNotify: string | undefined;
+  isLoadingMap: Record<string, boolean>;
+  setTagPopoverOpenIndex: (index: number) => void;
+  setCurrentlyOpenNotify: (id: string) => void;
+  setIsLoadingMap: (loadingMap: Record<string, boolean>) => void;
+};
+
+export type RulesListColumn = {
+  id?: RulesListVisibleColumn | string;
+  selectorName?: string;
+} & RulesListTableColumn;
+
+// Only extend the Field Data column type to make the typing more concise
+export type CustomRulesListColumn = Omit<EuiTableFieldDataColumnType<RuleTableItem>, 'render'> & {
+  id: RulesListVisibleColumn;
+  selectorName?: string;
+  render: (value: unknown, rule: RuleTableItem, context: RulesListColumnContext) => ReactNode;
+};
