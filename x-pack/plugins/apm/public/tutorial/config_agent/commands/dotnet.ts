@@ -5,17 +5,47 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import {
+  serviceNameHint,
+  secretTokenHint,
+  serverUrlHint,
+  serviceEnvironmentHint,
+} from './shared_hints';
+
 export const dotnetVariables = {
   apmServiceName: 'ServiceName',
   secretToken: 'SecretToken',
   apmServerUrl: 'ServerUrl',
   apmEnvironment: 'Environment',
 };
+
+export const dotnetHighlightLang = 'dotnet';
+
+export const dotnetLineNumbers = {
+  start: 1,
+  highlight: '3, 4, 5, 6',
+  annotations: {
+    3:
+      serviceNameHint +
+      ' ' +
+      i18n.translate(
+        'xpack.apm.tutorial.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
+        {
+          defaultMessage: 'Default is the entry assembly of the application.',
+        }
+      ),
+    4: secretTokenHint,
+    5: serverUrlHint,
+    6: serviceEnvironmentHint,
+  },
+};
+
 export const dotnet = `{
   "ElasticApm": {
-    "${dotnetVariables.apmServiceName}": "{{{apmServiceName}}}", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
+    "${dotnetVariables.apmServiceName}": "{{{apmServiceName}}}",
     "${dotnetVariables.secretToken}": "{{{secretToken}}}",
-    "${dotnetVariables.apmServerUrl}": "{{{apmServerUrl}}}", //Set custom APM Server URL (default: http://localhost:8200)
-    "${dotnetVariables.apmEnvironment}": "{{{apmEnvironment}}}", // Set the service environment
+    "${dotnetVariables.apmServerUrl}": "{{{apmServerUrl}}}",
+    "${dotnetVariables.apmEnvironment}": "{{{apmEnvironment}}}",
   }
 }`;
