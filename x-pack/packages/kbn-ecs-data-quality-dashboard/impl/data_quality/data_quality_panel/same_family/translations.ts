@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 
-export function dateToString(input?: string): string {
-  if (!input) {
-    return '';
-  }
-  try {
-    return moment(input).toLocaleString();
-  } catch {
-    return '';
-  }
-}
+export const SAME_FAMILY = i18n.translate('ecsDataQualityDashboard.sameFamilyBadgeLabel', {
+  defaultMessage: 'same family',
+});
