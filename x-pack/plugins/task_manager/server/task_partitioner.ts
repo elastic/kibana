@@ -42,6 +42,7 @@ export class TaskPartitioner {
 
   private async getAllPodNames(): Promise<string[]> {
     const kc = new k8s.KubeConfig();
+
     kc.loadFromCluster();
 
     const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
@@ -64,7 +65,13 @@ export class TaskPartitioner {
         `Service's selector is undefined, unable to determine pods that match an empty selector`
       );
     }
-    const podLabelSelector = Object.entries(serviceSelector)
+
+    // TODO: Don't just shove the role label in here...
+    const podSelector = {
+      ...serviceSelector,
+      'kibana.k8s.elastic.co/role-background-tasks': 'true',
+    };
+    const podLabelSelector = Object.entries(podSelector)
       .map(([key, value]) => `${key}=${value}`)
       .join(',');
     const pods = await k8sApi.listNamespacedPod(
