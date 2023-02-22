@@ -2081,7 +2081,7 @@
         }
       }
     },
-    "/agents/{agentId}/upload": {
+    "/agents/{agentId}/uploads": {
       "parameters": [
         {
           "schema": {

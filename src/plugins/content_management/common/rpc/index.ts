@@ -10,6 +10,7 @@ export { schemas } from './rpc';
 export { procedureNames } from './constants';
 
 export type { GetIn } from './get';
+export type { BulkGetIn } from './bulk_get';
 export type { CreateIn } from './create';
 export type { UpdateIn } from './update';
 export type { DeleteIn } from './delete';
