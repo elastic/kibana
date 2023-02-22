@@ -26,7 +26,9 @@ type FilterableEmbeddableInput = EmbeddableInput & {
   timeslice?: [number, number];
 };
 
-export function shouldFetch$<TFilterableEmbeddableInput extends FilterableEmbeddableInput = FilterableEmbeddableInput>(
+export function shouldFetch$<
+  TFilterableEmbeddableInput extends FilterableEmbeddableInput = FilterableEmbeddableInput
+>(
   updated$: Observable<unknown>,
   getInput: () => TFilterableEmbeddableInput
 ): Observable<TFilterableEmbeddableInput> {
