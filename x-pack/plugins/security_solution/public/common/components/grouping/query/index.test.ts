@@ -8,29 +8,6 @@
 import type { GroupingQueryArgs } from '..';
 import { getGroupingQuery } from '..';
 
-const additionalFilters = [
-  {
-    bool: {
-      must: [],
-      filter: [
-        {
-          term: {
-            'kibana.alert.workflow_status': 'open',
-          },
-        },
-      ],
-      should: [],
-      must_not: [
-        {
-          exists: {
-            field: 'kibana.alert.building_block_type',
-          },
-        },
-      ],
-    },
-  },
-];
-
 const testProps: GroupingQueryArgs = {
   additionalFilters: [],
   additionalAggregationsRoot: [],
@@ -139,7 +116,31 @@ describe('group selector', () => {
     });
   });
   it('Additional filters get added to the query', () => {
-    const result = getGroupingQuery({ ...testProps, additionalFilters });
+    const result = getGroupingQuery({
+      ...testProps,
+      additionalFilters: [
+        {
+          bool: {
+            must: [],
+            filter: [
+              {
+                term: {
+                  'kibana.alert.workflow_status': 'open',
+                },
+              },
+            ],
+            should: [],
+            must_not: [
+              {
+                exists: {
+                  field: 'kibana.alert.building_block_type',
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
     expect(result.query.bool.filter.length).toEqual(2);
   });
 });
