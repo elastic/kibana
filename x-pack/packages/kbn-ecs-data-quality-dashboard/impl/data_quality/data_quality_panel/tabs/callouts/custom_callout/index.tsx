@@ -8,35 +8,34 @@
 import { EcsVersion } from '@kbn/ecs';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { EnrichedFieldMetadata } from '../../../../types';
 
 import * as i18n from '../../../index_properties/translations';
-import { CalloutItem } from '../../styles';
 
 interface Props {
   children?: React.ReactNode;
   enrichedFieldMetadata: EnrichedFieldMetadata[];
 }
 
-const CustomCalloutComponent: React.FC<Props> = ({ children, enrichedFieldMetadata }) => (
-  <EuiCallOut
-    color="primary"
-    size="s"
-    title={i18n.CUSTOM_CALLOUT_TITLE(enrichedFieldMetadata.length)}
-  >
-    <div>
-      {i18n.CUSTOM_CALLOUT({ fieldCount: enrichedFieldMetadata.length, version: EcsVersion })}
-    </div>
-    <EuiSpacer size="s" />
-    <CalloutItem>{i18n.PRE_BUILT_DETECTION_ENGINE_RULES_WONT_WORK}</CalloutItem>
-    <CalloutItem>{i18n.PAGES_MAY_NOT_DISPLAY_FIELDS}</CalloutItem>
-    <CalloutItem>{i18n.CUSTOM_DETECTION_ENGINE_RULES_WORK}</CalloutItem>
-    <EuiSpacer size="s" />
-    {children}
-  </EuiCallOut>
-);
+const CustomCalloutComponent: React.FC<Props> = ({ children, enrichedFieldMetadata }) => {
+  const title = useMemo(
+    () => (
+      <span data-test-subj="title">{i18n.CUSTOM_CALLOUT_TITLE(enrichedFieldMetadata.length)}</span>
+    ),
+    [enrichedFieldMetadata.length]
+  );
 
-CustomCalloutComponent.displayName = 'CustomCalloutComponent';
+  return (
+    <EuiCallOut color="primary" size="s" title={title}>
+      <div data-test-subj="fieldsNotDefinedByEcs">
+        {i18n.CUSTOM_CALLOUT({ fieldCount: enrichedFieldMetadata.length, version: EcsVersion })}
+      </div>
+      <EuiSpacer size="s" />
+      <div data-test-subj="ecsIsPermissive">{i18n.ECS_IS_A_PERMISSIVE_SCHEMA}</div>
+      {children}
+    </EuiCallOut>
+  );
+};
 
 export const CustomCallout = React.memo(CustomCalloutComponent);
