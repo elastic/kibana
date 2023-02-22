@@ -29,6 +29,7 @@ export const getPackagePoliciesRoute = (router: IRouter, osqueryContext: Osquery
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
       const policies = await packagePolicyService?.list(internalSavedObjectsClient, {
         kuery,
+        perPage: 1000,
       });
 
       return response.ok({
