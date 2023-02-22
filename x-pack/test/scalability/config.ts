@@ -70,6 +70,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...(!!AGGS_SHARD_DELAY ? ['--data.search.aggs.shardDelay.enabled=true'] : []),
         ...(!!DISABLE_PLUGINS ? ['--plugins.initialize=false'] : []),
       ],
+      serverArgs: [...baseConfig.kbnTestServer.serverArgs, '--elasticsearch.maxSockets=800'],
       env: {
         ELASTIC_APM_ACTIVE: true,
         ELASTIC_APM_CENTRAL_CONFIG: false,
