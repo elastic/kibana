@@ -36,7 +36,7 @@ interface Props {
   sorting: TableProps['sorting'];
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
   onAddFilter: OnAddFilter;
-  onPaginateFlyout: any;
+  onPaginateFlyout: (pageIndex: number) => void;
   onCloseFlyout: () => void;
   onOpenFlyout: (finding: CspFinding) => void;
   flyoutFindingIndex: number;
