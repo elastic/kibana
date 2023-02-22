@@ -55,7 +55,7 @@ journey(`TestRunDetailsPage`, async ({ page, params }) => {
     await page.click('[aria-label="Open actions menu"]');
     await page.click('text=Go to monitor');
     await page.waitForSelector(byTestId('monitorLatestStatusUp'));
-    await page.getByTestId('syntheticsMonitorHistoryTab').click();
+    await page.click(byTestId('syntheticsMonitorHistoryTab'));
   });
 
   step('Go to test run page', async () => {
