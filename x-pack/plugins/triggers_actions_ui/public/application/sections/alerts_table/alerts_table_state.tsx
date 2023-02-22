@@ -44,17 +44,12 @@ import { useColumns } from './hooks/use_columns';
 import { InspectButtonContainer } from './toolbar/components/inspect';
 import { alertsTableQueryClient } from './query_client';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
+import { CasesService } from './types';
 
 const DefaultPagination = {
   pageSize: 10,
   pageIndex: 0,
 };
-
-interface CaseUi {
-  ui: {
-    getCasesContext: () => React.FC<any>;
-  };
-}
 
 export interface AlertsTableStateProps {
   alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
@@ -126,7 +121,7 @@ const AlertsTableStateWithQueryProvider = ({
   showExpandToDetails,
   showAlertStatusWithFlapping,
 }: AlertsTableStateProps) => {
-  const { cases: casesService } = useKibana<{ cases: CaseUi }>().services;
+  const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
 
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
@@ -267,10 +262,11 @@ const AlertsTableStateWithQueryProvider = ({
     updatedAt,
   ]);
 
-  const tableProps = useMemo(
+  const tableProps = useMemo<AlertsTableProps>(
     () => ({
       alertsTableConfiguration,
       casesData: { cases: cases ?? new Map(), isLoading: isLoadingCases },
+      casesService,
       columns,
       bulkActions: [],
       deletedEventIds: [],
@@ -299,6 +295,7 @@ const AlertsTableStateWithQueryProvider = ({
       alertsTableConfiguration,
       cases,
       isLoadingCases,
+      casesService,
       columns,
       flyoutSize,
       pagination.pageSize,

@@ -82,6 +82,7 @@ import { RulesListVisibleColumns } from './application/sections/rules_list/compo
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
 import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
 import { Case } from './application/sections/alerts_table/hooks/api';
+import { CasesService } from './application/sections/alerts_table/types';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -478,6 +479,7 @@ export interface FetchAlertData {
 export interface AlertsTableProps {
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
   casesData: { cases: Map<string, Case>; isLoading: boolean };
+  casesService?: CasesService;
   columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];

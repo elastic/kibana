@@ -31,3 +31,21 @@ export interface SystemCellComponentMap {
 }
 
 export type SystemCellId = keyof SystemCellComponentMap;
+
+type CaseHooks = (props?: Record<string, unknown>) => {
+  open: ({ attachments }?: { attachments: any[] }) => void;
+  close: () => void;
+};
+
+export interface CasesService {
+  ui: {
+    getCasesContext: () => React.FC<any>;
+  };
+  hooks: {
+    getUseCasesAddToNewCaseFlyout: CaseHooks;
+    getUseCasesAddToExistingCaseModal: CaseHooks;
+  };
+  helpers: {
+    groupAlertsByRule: (items?: any[]) => any[];
+  };
+}
