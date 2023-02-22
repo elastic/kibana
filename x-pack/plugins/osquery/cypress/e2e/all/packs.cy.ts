@@ -482,7 +482,10 @@ describe('ALL - Packs', () => {
       cy.contains('Packs').click();
       findAndClickButton('Add pack');
       findFormFieldByRowsLabelAndType('Name', globalPack);
+      cy.getBySel('policyIdsComboBox').should('exist');
       cy.getBySel('osqueryPackTypeGlobal').click();
+      cy.getBySel('policyIdsComboBox').should('not.exist');
+
       findAndClickButton('Save pack');
 
       cy.contains(globalPack);
@@ -558,6 +561,15 @@ describe('ALL - Packs', () => {
       cy.getBySel('policyIdsComboBox').within(() => {
         cy.contains('testGlobal').should('not.exist');
       });
+
+      cy.getBySel('comboBoxInput').contains('testGlobal').should('exist');
+      cy.getBySel('policyIdsComboBox').click();
+      cy.get('[data-test-subj="packShardsForm-1"]').within(() => {
+        cy.get(`[aria-label="Delete shards row"]`).click();
+      });
+      cy.getBySel('comboBoxInput').contains('testGlobal').should('not.exist');
+      cy.getBySel('policyIdsComboBox').click();
+      cy.contains('testGlobal').should('exist');
     });
   });
 });
