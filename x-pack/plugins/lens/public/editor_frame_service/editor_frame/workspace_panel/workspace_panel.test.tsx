@@ -933,6 +933,7 @@ describe('workspace_panel', () => {
     async function initComponent(draggingContext = draggedField) {
       const mounted = await mountWithProvider(
         <ChildDragDropProvider
+          dataTestSubjPrefix="lnsDragDrop"
           dragging={draggingContext}
           setDragging={() => {}}
           setActiveDropTarget={() => {}}

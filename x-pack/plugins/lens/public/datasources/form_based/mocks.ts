@@ -216,6 +216,7 @@ export const createMockedIndexPatternWithoutType = (
 
 export function createMockedDragDropContext(): jest.Mocked<DragContextState> {
   return {
+    dataTestSubjPrefix: 'lnsDragDrop',
     dragging: undefined,
     setDragging: jest.fn(),
     activeDropTarget: undefined,
