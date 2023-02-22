@@ -6,10 +6,21 @@
  */
 
 import { Journey } from '@kbn/journeys';
+import expect from '@kbn/expect';
 
 export const journey = new Journey({
+  beforeSteps: async ({ kibanaServer, retry }) => {
+    retry.try(async () => {
+      const response = await kibanaServer.request({
+        path: '/internal/cloud_security_posture/status?check=init',
+        method: 'GET',
+      });
+      expect(response.status).to.eql(200);
+      expect(response.data).to.eql({ isPluginInitialized: true });
+    });
+  },
   ftrConfigPath: 'x-pack/performance/configs/cloud_security_posture_config.ts',
-  // esArchives: ['x-pack/performance/es_archives/kspm_findings'],
+  esArchives: ['x-pack/performance/es_archives/kspm_findings'],
   scalabilitySetup: {
     warmup: [
       {
@@ -28,38 +39,12 @@ export const journey = new Journey({
       {
         action: 'constantConcurrentUsers',
         userCount: 50,
-        duration: '1m',
+        duration: '3m',
       },
     ],
     maxDuration: '10m',
   },
-})
-  .step('wait for installation and then post data', async ({ esArchiver }) => {
-    await sleep(3000);
-    await esArchiver.load('x-pack/performance/es_archives/kspm_findings');
-    // Since the status API call calculates in APM output, I use here sleep
-
-    // retry.try(async () => {
-    //   const response = await kibanaServer.request({
-    //     path: '/internal/cloud_security_posture/status?check=init',
-    //     method: 'GET',
-    //   });
-
-    //   expect(response.status).to.eql(200);
-    //   expect(response.data).to.eql({ isPluginInitialized: true });
-    //   log.debug('CSP plugin is initialized');
-    // });
-  })
-  // .step('Load data', async ({ es, esArchiver }) => {
-
-  //   await esArchiver.load('x-pack/performance/es_archives/kspm_findings');
-
-  //   // await sleep(3000);
-  // })
-
-  .step('Go to cloud security dashboards Page', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get(`/app/security/cloud_security_posture/dashboard`));
-    await page.waitForSelector(`[data-test-subj="csp:dashboard-sections-table-header-score"]`);
-  });
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+}).step('Go to cloud security dashboards Page', async ({ page, kbnUrl }) => {
+  await page.goto(kbnUrl.get(`/app/security/cloud_security_posture/dashboard`));
+  await page.waitForSelector(`[data-test-subj="csp:dashboard-sections-table-header-score"]`);
+});
