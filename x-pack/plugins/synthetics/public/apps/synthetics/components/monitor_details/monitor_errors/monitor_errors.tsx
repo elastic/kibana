@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { useMonitorDetailsPage } from '../use_monitor_details_page';
 import { useMonitorErrors } from '../hooks/use_monitor_errors';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { ErrorsTabContent } from './errors_tab_content';
@@ -25,6 +26,11 @@ export const MonitorErrors = () => {
   const initialLoading = loading && !data;
 
   const emptyState = !loading && errorStates.length === 0;
+
+  const redirect = useMonitorDetailsPage();
+  if (redirect) {
+    return redirect;
+  }
 
   return (
     <>

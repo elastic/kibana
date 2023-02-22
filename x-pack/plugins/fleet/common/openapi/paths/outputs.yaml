@@ -19,6 +19,8 @@ get:
                 type: integer
               perPage:
                 type: integer
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-outputs
 post:
   summary: Outputs
@@ -34,6 +36,8 @@ post:
             properties:
               item:
                 $ref: ../components/schemas/output.yaml
+    '400':
+      $ref: ../components/responses/error.yaml
   requestBody:
     content:
       application/json:
