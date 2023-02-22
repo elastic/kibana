@@ -5,116 +5,107 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export interface GetItemStart {
-  type: 'getItemStart';
-  contentId: string;
+interface BaseEvent<T extends string> {
+  type: T;
   contentTypeId: string;
   options?: object;
 }
 
-export interface GetItemSuccess {
-  type: 'getItemSuccess';
+export interface GetItemStart extends BaseEvent<'getItemStart'> {
   contentId: string;
-  contentTypeId: string;
+  options?: object;
+}
+
+export interface GetItemSuccess extends BaseEvent<'getItemSuccess'> {
+  contentId: string;
   data: unknown;
 }
 
-export interface GetItemError {
-  type: 'getItemError';
+export interface GetItemError extends BaseEvent<'getItemError'> {
   contentId: string;
-  contentTypeId: string;
   error: unknown;
+}
+
+export interface BulkGetItemStart extends BaseEvent<'bulkGetItemStart'> {
+  ids: string[];
   options?: object;
 }
 
-export interface BulkGetItemStart {
-  type: 'bulkGetItemStart';
+export interface BulkGetItemSuccess extends BaseEvent<'bulkGetItemSuccess'> {
   ids: string[];
-  contentTypeId: string;
-  options?: object;
-}
-
-export interface BulkGetItemSuccess {
-  type: 'bulkGetItemSuccess';
-  ids: string[];
-  contentTypeId: string;
   data: unknown;
 }
 
-export interface BulkGetItemError {
-  type: 'bulkGetItemError';
+export interface BulkGetItemError extends BaseEvent<'bulkGetItemError'> {
   ids: string[];
-  contentTypeId: string;
   error: unknown;
   options?: object;
 }
 
-export interface CreateItemStart {
-  type: 'createItemStart';
-  contentTypeId: string;
+export interface CreateItemStart extends BaseEvent<'createItemStart'> {
   data: object;
   options?: object;
 }
 
-export interface CreateItemSuccess {
-  type: 'createItemSuccess';
-  contentTypeId: string;
+export interface CreateItemSuccess extends BaseEvent<'createItemSuccess'> {
   data: object;
   options?: object;
 }
 
-export interface CreateItemError {
-  type: 'createItemError';
-  contentTypeId: string;
+export interface CreateItemError extends BaseEvent<'createItemError'> {
   data: object;
   error: unknown;
   options?: object;
 }
 
-export interface UpdateItemStart {
-  type: 'updateItemStart';
+export interface UpdateItemStart extends BaseEvent<'updateItemStart'> {
   contentId: string;
-  contentTypeId: string;
   data: object;
   options?: object;
 }
 
-export interface UpdateItemSuccess {
-  type: 'updateItemSuccess';
+export interface UpdateItemSuccess extends BaseEvent<'updateItemSuccess'> {
   contentId: string;
-  contentTypeId: string;
   data: object;
   options?: object;
 }
 
-export interface UpdateItemError {
-  type: 'updateItemError';
+export interface UpdateItemError extends BaseEvent<'updateItemError'> {
   contentId: string;
-  contentTypeId: string;
   data: object;
   error: unknown;
   options?: object;
 }
 
-export interface DeleteItemStart {
-  type: 'deleteItemStart';
+export interface DeleteItemStart extends BaseEvent<'deleteItemStart'> {
   contentId: string;
-  contentTypeId: string;
   options?: object;
 }
 
-export interface DeleteItemSuccess {
-  type: 'deleteItemSuccess';
+export interface DeleteItemSuccess extends BaseEvent<'deleteItemSuccess'> {
   contentId: string;
-  contentTypeId: string;
   options?: object;
 }
 
-export interface DeleteItemError {
-  type: 'deleteItemError';
+export interface DeleteItemError extends BaseEvent<'deleteItemError'> {
   contentId: string;
-  contentTypeId: string;
+  error: unknown;
+  options?: object;
+}
+
+export interface SearchItemStart extends BaseEvent<'searchItemStart'> {
+  query: object;
+  options?: object;
+}
+
+export interface SearchItemSuccess extends BaseEvent<'searchItemSuccess'> {
+  query: object;
+  data: unknown;
+  options?: object;
+}
+
+export interface SearchItemError extends BaseEvent<'searchItemError'> {
+  query: object;
   error: unknown;
   options?: object;
 }
@@ -134,6 +125,9 @@ export type ContentEvent =
   | UpdateItemError
   | DeleteItemStart
   | DeleteItemSuccess
-  | DeleteItemError;
+  | DeleteItemError
+  | SearchItemStart
+  | SearchItemSuccess
+  | SearchItemError;
 
 export type ContentEventType = ContentEvent['type'];
