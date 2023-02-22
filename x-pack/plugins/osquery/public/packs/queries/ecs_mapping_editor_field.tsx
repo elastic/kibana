@@ -524,7 +524,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         onChange={onTypeChange}
       />
     ),
-    [euiFieldProps.isDisabled, onTypeChange, resultTypeField.value]
+    [euiFieldProps.isDisabled, index, onTypeChange, resultTypeField.value]
   );
 
   useEffect(() => {

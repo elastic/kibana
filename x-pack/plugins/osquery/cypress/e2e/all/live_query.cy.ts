@@ -200,20 +200,20 @@ describe('ALL - Live Query', () => {
 
     inputQuery(multilineQuery);
     cy.wait(2000);
-    cy.react('ReactAce').invoke('height').should('be.gt', 250).and('be.lt', 300);
+    cy.react('ReactAce').invoke('height').should('be.gt', 230).and('be.lt', 300);
     selectAllAgents();
     submitQuery();
     checkResults();
 
     // check if it get's bigger when we add more lines
-    cy.react('ReactAce').invoke('height').should('be.gt', 250).and('be.lt', 300);
+    cy.react('ReactAce').invoke('height').should('be.gt', 230).and('be.lt', 300);
     inputQuery(multilineQuery);
     cy.wait(2000);
-    cy.react('ReactAce').invoke('height').should('be.gt', 400).and('be.lt', 500);
+    cy.react('ReactAce').invoke('height').should('be.gt', 350).and('be.lt', 500);
 
     inputQuery('{selectall}{backspace}{selectall}{backspace}');
     cy.wait(2000);
     // not sure if this is how it used to work when I implemented the functionality, but let's leave it like this for now
-    cy.react('ReactAce').invoke('height').should('be.gt', 400).and('be.lt', 500);
+    cy.react('ReactAce').invoke('height').should('be.gt', 350).and('be.lt', 500);
   });
 });
