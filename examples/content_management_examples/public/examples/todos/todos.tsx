@@ -7,15 +7,20 @@
  */
 import React from 'react';
 import { EuiButtonGroup, EuiButtonIcon, EuiCheckbox, EuiFieldText, EuiSpacer } from '@elastic/eui';
-
 import {
   useCreateContentMutation,
   useDeleteContentMutation,
   useSearchContentQuery,
   useUpdateContentMutation,
-  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-} from '../../public/content_client';
-import type { Todo, TodoCreateIn, TodoDeleteIn, TodoSearchIn, TodoUpdateIn } from './todos_client';
+} from '@kbn/content-management-plugin/public';
+
+import type {
+  Todo,
+  TodoCreateIn,
+  TodoDeleteIn,
+  TodoSearchIn,
+  TodoUpdateIn,
+} from '../../../common/examples/todos';
 
 const useCreateTodoMutation = () => useCreateContentMutation<TodoCreateIn, Todo>();
 const useDeleteTodoMutation = () => useDeleteContentMutation<TodoDeleteIn, void>();

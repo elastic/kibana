@@ -5,13 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { ContentManagementPlugin } from './plugin';
+import { PluginInitializerContext } from '@kbn/core/server';
+import { ContentManagementExamplesPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new ContentManagementPlugin(initializerContext);
+  return new ContentManagementExamplesPlugin(initializerContext);
 }
-
-export type { ContentManagementServerSetup, ContentManagementServerStart } from './types';
-export type { ContentStorage, StorageContext } from './core';

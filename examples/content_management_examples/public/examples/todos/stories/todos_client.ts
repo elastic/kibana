@@ -7,21 +7,20 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { CrudClient } from '../../public/crud_client';
-import type { CreateIn, DeleteIn, GetIn, SearchIn, UpdateIn } from '../../common';
+import type { CrudClient } from '@kbn/content-management-plugin/public';
+import type {
+  TodoCreateIn,
+  TodoUpdateIn,
+  TodoDeleteIn,
+  TodoGetIn,
+  TodoSearchIn,
+  Todo,
+} from '../../../../common/examples/todos';
 
-export interface Todo {
-  id: string;
-  title: string;
-  completed: boolean;
-}
-
-export type TodoCreateIn = CreateIn<'todos', { title: string }>;
-export type TodoUpdateIn = UpdateIn<'todos', Partial<Omit<Todo, 'id'>>>;
-export type TodoDeleteIn = DeleteIn<'todos', { id: string }>;
-export type TodoGetIn = GetIn<'todos'>;
-export type TodoSearchIn = SearchIn<'todos', { filter?: 'todo' | 'completed' }>;
-
+/**
+ * This client is used in the storybook examples to simulate a server-side registry client
+ * and to show how a content type can have a custom client-side CRUD client without using the server-side registry
+ */
 export class TodosClient implements CrudClient {
   private todos: Todo[] = [
     { id: uuidv4(), title: 'Learn Elasticsearch', completed: true },
