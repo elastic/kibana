@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SanitizedRule, RuleTypeParams, Rule } from '../types';
+import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions, MuteOptions } from './types';
 
@@ -66,7 +66,7 @@ const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
   'activeSnoozes',
 ];
 
-export const fieldsToExcludeFromRevisionUpdates: Array<keyof Rule> = [
+export const fieldsToExcludeFromRevisionUpdates: Set<keyof RuleTypeParams> = new Set([
   'activeSnoozes',
   'alertTypeId',
   'apiKey',
@@ -88,7 +88,7 @@ export const fieldsToExcludeFromRevisionUpdates: Array<keyof Rule> = [
   'snoozeSchedule',
   'updatedBy',
   'updatedAt',
-];
+]);
 
 export class RulesClient {
   private readonly context: RulesClientContext;

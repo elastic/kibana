@@ -68,6 +68,11 @@ export type BulkEditFields = keyof Pick<
   'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen' | 'snoozeSchedule' | 'apiKey'
 >;
 
+export const bulkEditFieldsToExcludeFromRevisionUpdates: Set<BulkEditOperation['field']> = new Set([
+  'snoozeSchedule',
+  'apiKey',
+]);
+
 export type BulkEditOperation =
   | {
       operation: 'add' | 'delete' | 'set';
@@ -426,6 +431,11 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
           isParamsUpdateSkipped: true,
         };
 
+    // Increment revision if params ended up being modified AND it wasn't already incremented as part of attribute update
+    if (!isParamsUpdateSkipped && rule.attributes.revision === attributes.revision) {
+      attributes.revision += 1;
+    }
+
     // If neither attributes nor parameters were updated, mark
     // the rule as skipped and continue to the next rule.
     if (isAttributesUpdateSkipped && isParamsUpdateSkipped) {
@@ -562,7 +572,6 @@ async function getUpdatedAttributesFromOperations(
         if (isAttributeModified) {
           ruleActions = modifiedAttributes;
           isAttributesUpdateSkipped = false;
-          attributes.revision = attributes.revision + 1;
         }
 
         // TODO https://github.com/elastic/kibana/issues/148414
@@ -632,11 +641,17 @@ async function getUpdatedAttributesFromOperations(
           attributes = {
             ...attributes,
             ...modifiedAttributes,
-            revision: attributes.revision + 1,
           };
           isAttributesUpdateSkipped = false;
         }
       }
+    }
+    // Only increment revision if update wasn't skipped and `operation.field` should result in a revision increment
+    if (
+      !isAttributesUpdateSkipped &&
+      !bulkEditFieldsToExcludeFromRevisionUpdates.has(operation.field)
+    ) {
+      attributes.revision += 1;
     }
   }
   return {
