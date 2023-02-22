@@ -112,7 +112,7 @@ import {
 } from '../screens/common/rule_actions';
 import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
-import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
+import { ALERTS_TABLE_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
@@ -686,7 +686,7 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
           cy.log('Table is empty', emptyTableState.length);
           return false;
         }
-        const countEl = $el.find(SERVER_SIDE_EVENT_COUNT);
+        const countEl = $el.find(ALERTS_TABLE_COUNT);
         const alertCount = parseInt(countEl.text(), 10) || 0;
         return alertCount >= alertCountThreshold;
       });
