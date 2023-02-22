@@ -12,6 +12,7 @@ export type {
   ProcedureSchemas,
   ProcedureName,
   GetIn,
+  BulkGetIn,
   CreateIn,
   UpdateIn,
   DeleteIn,
