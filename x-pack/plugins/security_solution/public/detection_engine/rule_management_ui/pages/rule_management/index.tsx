@@ -40,7 +40,6 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 
 const RulesPageComponent: React.FC = () => {
@@ -142,19 +141,17 @@ const RulesPageComponent: React.FC = () => {
                   {i18n.IMPORT_RULE}
                 </EuiButton>
               </EuiFlexItem>
-              <RulesPageTourComponent>
-                <EuiFlexItem grow={false}>
-                  <SecuritySolutionLinkButton
-                    data-test-subj="create-new-rule"
-                    fill
-                    iconType="plusInCircle"
-                    isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-                    deepLinkId={SecurityPageName.rulesCreate}
-                  >
-                    {i18n.ADD_NEW_RULE}
-                  </SecuritySolutionLinkButton>
-                </EuiFlexItem>
-              </RulesPageTourComponent>
+              <EuiFlexItem grow={false}>
+                <SecuritySolutionLinkButton
+                  data-test-subj="create-new-rule"
+                  fill
+                  iconType="plusInCircle"
+                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                  deepLinkId={SecurityPageName.rulesCreate}
+                >
+                  {i18n.ADD_NEW_RULE}
+                </SecuritySolutionLinkButton>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
           {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
