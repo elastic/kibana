@@ -32,6 +32,7 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useControlGroupContainerContext } from '../control_group_renderer';
+import { ControlGroupStrings } from '../control_group_strings';
 
 export const ControlGroup = () => {
   // Redux embeddable container Context
@@ -162,6 +163,7 @@ export const ControlGroup = () => {
                   iconSize="m"
                   display="base"
                   iconType={'plusInCircle'}
+                  aria-label={ControlGroupStrings.management.getAddControlTitle()}
                   onClick={() => controlGroup.openAddDataControlFlyout()}
                 />
               </EuiFlexItem>
