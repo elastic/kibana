@@ -25,12 +25,10 @@ import { SearchIndex } from './search_index';
 
 export const SearchIndexRouter: React.FC = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
-
-  const indexNameLogic = IndexNameLogic({ indexName });
-  const { setIndexName } = useActions(indexNameLogic);
+  const { setIndexName } = useActions(IndexNameLogic);
   const { stopFetchIndexPoll } = useActions(IndexViewLogic);
   useEffect(() => {
-    const unmountName = indexNameLogic.mount();
+    const unmountName = IndexNameLogic.mount();
     const unmountView = IndexViewLogic.mount();
     return () => {
       stopFetchIndexPoll();
