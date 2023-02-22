@@ -689,7 +689,7 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-import-resolver-node": "^0.3.6",
-    "eslint-import-resolver-webpack": "^0.13.1",
+    "eslint-import-resolver-webpack": "^0.13.2",
     "eslint-module-utils": "^2.6.2",
     "eslint-plugin-ban": "^1.5.2",
     "eslint-plugin-cypress": "^2.12.1",
