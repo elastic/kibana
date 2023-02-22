@@ -46,8 +46,8 @@ export const AGENT_NAMES: AgentName[] = [
   ...OPEN_TELEMETRY_AGENT_NAMES,
 ];
 
-export const isOpenTelemetryAgentName = (agentName: AgentName) =>
-  OPEN_TELEMETRY_AGENT_NAMES.includes(agentName);
+export const isOpenTelemetryAgentName = (agentName: string) =>
+  OPEN_TELEMETRY_AGENT_NAMES.some((otelAgent) => otelAgent === agentName);
 
 export const JAVA_AGENT_NAMES: AgentName[] = ['java', 'opentelemetry/java'];
 

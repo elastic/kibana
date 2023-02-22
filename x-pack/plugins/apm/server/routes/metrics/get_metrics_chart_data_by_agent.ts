@@ -7,7 +7,10 @@
 
 import { getJavaMetricsCharts } from './by_agent/java';
 import { getDefaultMetricsCharts } from './by_agent/default';
-import { isJavaAgentName } from '../../../common/agent_name';
+import {
+  isJavaAgentName,
+  isOpenTelemetryAgentName,
+} from '../../../common/agent_name';
 import { GenericMetricsChart } from './fetch_and_transform_metrics';
 import { APMConfig } from '../..';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -42,13 +45,15 @@ export async function getMetricsChartDataByAgent({
     start,
     end,
   };
+  const isOpenTelemetry = isOpenTelemetryAgentName(agentName);
 
   if (isJavaAgentName(agentName)) {
     return getJavaMetricsCharts({
       ...options,
       serviceNodeName,
+      isOpenTelemetry,
     });
   }
 
-  return getDefaultMetricsCharts(options);
+  return getDefaultMetricsCharts({ ...options, isOpenTelemetry });
 }
