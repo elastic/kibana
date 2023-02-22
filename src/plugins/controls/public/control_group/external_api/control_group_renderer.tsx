@@ -24,7 +24,11 @@ import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import { getDefaultControlGroupInput } from '../../../common';
 import { ControlGroupContainer } from '../embeddable/control_group_container';
 import { ControlGroupInput, ControlGroupOutput, CONTROL_GROUP_TYPE } from '../types';
-import { buildApiFromControlGroupContainer, ControlGroupAPI } from './control_group_api';
+import {
+  AwaitingControlGroupAPI,
+  buildApiFromControlGroupContainer,
+  ControlGroupAPI,
+} from './control_group_api';
 import { ControlGroupInputBuilder, controlGroupInputBuilder } from './control_group_input_builder';
 
 export interface ControlGroupRendererProps {
@@ -37,10 +41,15 @@ export interface ControlGroupRendererProps {
   query?: Query;
 }
 
-export const ControlGroupRenderer = forwardRef<ControlGroupAPI, ControlGroupRendererProps>(
+export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlGroupRendererProps>(
   ({ getInitialInput, filters, timeRange, query }, ref) => {
     const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
-    useImperativeHandle(ref, () => buildApiFromControlGroupContainer(controlGroup), [controlGroup]);
+
+    useImperativeHandle(
+      ref,
+      () => buildApiFromControlGroupContainer(controlGroup) as ControlGroupAPI,
+      [controlGroup]
+    );
 
     const controlGroupDomRef = useRef(null);
     const id = useMemo(() => uuidv4(), []);

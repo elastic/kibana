@@ -11,11 +11,12 @@ import React, { useState } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EuiButtonGroup, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { ControlGroupRenderer, ControlStyle, ControlGroupAPI } from '@kbn/controls-plugin/public';
+import { AwaitingControlGroupAPI } from '@kbn/controls-plugin/public/control_group';
 
 export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
-  const [controlGroupAPI, setControlGroupApi] = useState<ControlGroupAPI | null>();
+  const [controlGroupAPI, setControlGroupApi] = useState<AwaitingControlGroupAPI>();
 
-  const Buttons = ({ api }: { api: NonNullable<ControlGroupAPI> }) => {
+  const Buttons = ({ api }: { api: ControlGroupAPI }) => {
     const controlStyle = api.select((state) => state.explicitInput.controlStyle);
     return (
       <EuiButtonGroup

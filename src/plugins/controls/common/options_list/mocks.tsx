@@ -25,6 +25,8 @@ const mockOptionsListComponentState = {
     moo: { doc_count: 5 },
   },
   invalidSelections: [],
+  allowExpensiveQueries: true,
+  popoverOpen: false,
   validSelections: [],
 } as OptionsListComponentState;
 

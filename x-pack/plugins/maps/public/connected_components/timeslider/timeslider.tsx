@@ -11,9 +11,9 @@ import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  type ControlGroupAPI,
   type ControlGroupInput,
   type ControlGroupInputBuilder,
+  type AwaitingControlGroupAPI,
   ControlGroupRenderer,
 } from '@kbn/controls-plugin/public';
 import { first } from 'rxjs/operators';
@@ -51,7 +51,7 @@ export class Timeslider extends Component<Props, {}> {
     };
   };
 
-  _onLoadComplete = (controlGroup: ControlGroupAPI | null) => {
+  _onLoadComplete = (controlGroup: AwaitingControlGroupAPI) => {
     if (!this._isMounted || !controlGroup) {
       return;
     }

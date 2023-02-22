@@ -22,7 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { PLUGIN_ID } from './constants';
 
 interface Props {
@@ -33,7 +33,7 @@ interface Props {
 
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [controlFilters, setControlFilters] = useState<Filter[]>([]);
-  const [controlGroup, setControlGroup] = useState<ControlGroupAPI | null>();
+  const [controlGroup, setControlGroup] = useState<AwaitingControlGroupAPI>();
   const [hits, setHits] = useState(0);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [isSearching, setIsSearching] = useState(false);

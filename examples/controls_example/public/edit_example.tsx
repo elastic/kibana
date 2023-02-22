@@ -19,19 +19,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { ControlGroupRenderer, ControlGroupAPI } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer, AwaitingControlGroupAPI } from '@kbn/controls-plugin/public';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 
 export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [controlGroup, setControlGroup] = useState<ControlGroupAPI | null>();
+  const [controlGroup, setControlGroup] = useState<AwaitingControlGroupAPI>();
 
   async function onSave() {
     setIsSaving(true);
 
-    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroup!.getInput()));
+    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroup?.getInput()));
 
     // simulated async save await
     await new Promise((resolve) => setTimeout(resolve, 1000));

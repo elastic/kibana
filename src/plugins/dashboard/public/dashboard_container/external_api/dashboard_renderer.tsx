@@ -9,12 +9,12 @@
 import '../_dashboard_container.scss';
 
 import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
   useRef,
+  useMemo,
   useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
 } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
@@ -23,13 +23,17 @@ import { css } from '@emotion/react';
 import { EuiLoadingElastic, useEuiOverflowScroll, EuiLoadingSpinner } from '@elastic/eui';
 
 import {
+  DashboardAPI,
+  AwaitingDashboardAPI,
+  buildApiFromDashboardContainer,
+} from './dashboard_api';
+import {
   DashboardCreationOptions,
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
 } from '../embeddable/dashboard_container_factory';
+import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
-import { DashboardAPI, DASHBOARD_CONTAINER_TYPE } from '..';
-import { buildApiFromDashboardContainer } from './dashboard_api';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
 
 export interface DashboardRendererProps {
@@ -38,7 +42,7 @@ export interface DashboardRendererProps {
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
 }
 
-export const DashboardRenderer = forwardRef<DashboardAPI | undefined, DashboardRendererProps>(
+export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRendererProps>(
   ({ savedObjectId, getCreationOptions, showPlainSpinner }, ref) => {
     const dashboardRoot = useRef(null);
     const [loading, setLoading] = useState(true);
@@ -46,9 +50,11 @@ export const DashboardRenderer = forwardRef<DashboardAPI | undefined, DashboardR
     const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
     const [dashboardIdToBuild, setDashboardIdToBuild] = useState<string | undefined>(savedObjectId);
 
-    useImperativeHandle(ref, () => buildApiFromDashboardContainer(dashboardContainer), [
-      dashboardContainer,
-    ]);
+    useImperativeHandle(
+      ref,
+      () => buildApiFromDashboardContainer(dashboardContainer) as DashboardAPI,
+      [dashboardContainer]
+    );
 
     useEffect(() => {
       (async () => {

@@ -40,6 +40,7 @@ export {
   type ControlGroupInput,
   type ControlGroupInputBuilder,
   type ControlGroupAPI,
+  type AwaitingControlGroupAPI,
   type ControlGroupOutput,
 } from './control_group';
 

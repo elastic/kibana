@@ -9,6 +9,7 @@
 import { DashboardContainer } from '../embeddable/dashboard_container';
 
 // TODO lock down DashboardAPI
-export type DashboardAPI = ReturnType<typeof buildApiFromDashboardContainer>;
+export type DashboardAPI = DashboardContainer;
+export type AwaitingDashboardAPI = DashboardAPI | null;
 
-export const buildApiFromDashboardContainer = (container?: DashboardContainer) => container;
+export const buildApiFromDashboardContainer = (container?: DashboardContainer) => container ?? null;

@@ -18,6 +18,7 @@ import { ControlOutput, OptionsListEmbeddableInput } from '../..';
 import { OptionsListComponentState, OptionsListReduxState } from '../types';
 import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
 import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
+import { pluginServices } from '../../services';
 
 describe('Options list popover', () => {
   const defaultProps = {
@@ -291,6 +292,9 @@ describe('Options list popover', () => {
   });
 
   test('ensure warning icon shows up when testAllowExpensiveQueries = false', async () => {
+    pluginServices.getServices().optionsList.getAllowExpensiveQueries = jest.fn(() =>
+      Promise.resolve(false)
+    );
     const popover = await mountComponent({
       componentState: {
         field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec,

@@ -38,6 +38,7 @@ import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_val
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
 import useObservable from 'react-use/lib/useObservable';
+import { AwaitingDashboardAPI } from '../dashboard_container';
 
 export interface DashboardAppProps {
   history: History;
@@ -46,10 +47,10 @@ export interface DashboardAppProps {
   embedSettings?: DashboardEmbedSettings;
 }
 
-export const DashboardAPIContext = createContext<DashboardAPI | null>(null);
+export const DashboardAPIContext = createContext<AwaitingDashboardAPI>(null);
 
-export const useDashboardAPI = (): NonNullable<DashboardAPI> => {
-  const api = useContext<DashboardAPI | null>(DashboardAPIContext);
+export const useDashboardAPI = (): DashboardAPI => {
+  const api = useContext<AwaitingDashboardAPI>(DashboardAPIContext);
   if (api == null) {
     throw new Error('useDashboardAPI must be used inside DashboardAPIContext');
   }
@@ -66,7 +67,7 @@ export function DashboardApp({
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
-  const [dashboardAPI, setDashboardAPI] = useState<DashboardAPI | null>(null);
+  const [dashboardAPI, setDashboardAPI] = useState<AwaitingDashboardAPI>(null);
 
   /**
    * Unpack & set up dashboard services

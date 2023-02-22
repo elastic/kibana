@@ -18,7 +18,7 @@ export {
   type ControlGroupInputBuilder,
 } from './external_api/control_group_input_builder';
 
-export { type ControlGroupAPI } from './external_api/control_group_api';
+export type { ControlGroupAPI, AwaitingControlGroupAPI } from './external_api/control_group_api';
 
 export {
   type ControlGroupRendererProps,

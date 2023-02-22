@@ -16,6 +16,7 @@ export {
 } from './dashboard_constants';
 export {
   type DashboardAPI,
+  type AwaitingDashboardAPI,
   DashboardRenderer,
   DASHBOARD_CONTAINER_TYPE,
   type DashboardCreationOptions,

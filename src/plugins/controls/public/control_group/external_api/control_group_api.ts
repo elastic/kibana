@@ -9,6 +9,8 @@
 import { ControlGroupContainer } from '..';
 
 // TODO lock down ControlGroupAPI
-export type ControlGroupAPI = ReturnType<typeof buildApiFromControlGroupContainer>;
+export type ControlGroupAPI = ControlGroupContainer;
+export type AwaitingControlGroupAPI = ControlGroupAPI | null;
 
-export const buildApiFromControlGroupContainer = (container?: ControlGroupContainer) => container;
+export const buildApiFromControlGroupContainer = (container?: ControlGroupContainer) =>
+  container ?? null;
