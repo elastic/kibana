@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiPageHeader,
   EuiHorizontalRule,
+  EuiText,
 } from '@elastic/eui';
 
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
@@ -151,7 +152,7 @@ export const SharedLists = React.memo(() => {
   );
 
   const handleDelete = useCallback(
-    ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
+    ({ id, namespaceType }: { id: string; namespaceType: NamespaceType }) =>
       async () => {
         try {
           if (exceptionsListsRef[id] != null) {
@@ -329,8 +330,7 @@ export const SharedLists = React.memo(() => {
       iconSide="right"
       onClick={onRowSizeButtonClick}
     >
-      {/* TODO move to translations */}
-      {`Rows per page: ${rowSize}`}
+      {i18n.allExceptionsRowPerPage(rowSize)}
     </EuiButtonEmpty>
   );
 
@@ -338,35 +338,20 @@ export const SharedLists = React.memo(() => {
     return size === rowSize ? 'check' : 'empty';
   };
 
+  const onPerPageClick = useCallback((size: number) => {
+    closeRowSizePopover();
+    setRowSize(size);
+    setActivePage(0);
+  }, []);
+
   const rowSizeItems = [
-    <EuiContextMenuItem
-      key="5 rows"
-      icon={getIconType(5)}
-      onClick={() => {
-        closeRowSizePopover();
-        setRowSize(5);
-      }}
-    >
+    <EuiContextMenuItem key="5 rows" icon={getIconType(5)} onClick={() => onPerPageClick(5)}>
       {'5 rows'}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="10 rows"
-      icon={getIconType(10)}
-      onClick={() => {
-        closeRowSizePopover();
-        setRowSize(10);
-      }}
-    >
+    <EuiContextMenuItem key="10 rows" icon={getIconType(10)} onClick={() => onPerPageClick(10)}>
       {'10 rows'}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="25 rows"
-      icon={getIconType(25)}
-      onClick={() => {
-        closeRowSizePopover();
-        setRowSize(25);
-      }}
-    >
+    <EuiContextMenuItem key="25 rows" icon={getIconType(25)} onClick={() => onPerPageClick(25)}>
       {'25 rows'}
     </EuiContextMenuItem>,
   ];
@@ -397,14 +382,16 @@ export const SharedLists = React.memo(() => {
   return (
     <>
       <MissingPrivilegesCallOut />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiPageHeader
-            pageTitle={i18n.ALL_EXCEPTIONS}
-            description={
-              <>
-                <div>
-                  {"To view rule specific exceptions navigate to that rule's details page."}
+      <EuiPageHeader
+        pageTitle={i18n.ALL_EXCEPTIONS}
+        description={
+          <EuiFlexGroup gutterSize="xs" direction="column">
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="none" direction="row">
+                <EuiFlexItem grow={false}>
+                  <EuiText>{i18n.ALL_EXCEPTIONS_SUBTITLE}</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
                   <EuiButtonIcon
                     iconType="popout"
                     aria-label="go-to-rules"
@@ -413,24 +400,18 @@ export const SharedLists = React.memo(() => {
                       navigateToApp('security', { openInNewTab: true, path: '/rules' })
                     }
                   />
-                </div>
-                {/* TODO: update the above text to incorporate a navigateToApp link to the rule management page */}
-                <div>
-                  {timelines.getLastUpdated({
-                    showUpdating: loading,
-                    updatedAt: lastUpdated,
-                  })}
-                </div>
-              </>
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton iconType={'importAction'} onClick={() => setDisplayImportListFlyout(true)}>
-            {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {timelines.getLastUpdated({
+                showUpdating: loading,
+                updatedAt: lastUpdated,
+              })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        rightSideItems={[
           <EuiPopover
             data-test-subj="manageExceptionListCreateButton"
             button={
@@ -454,6 +435,7 @@ export const SharedLists = React.memo(() => {
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   key={'createItem'}
+                  data-test-subj="manageExceptionListCreateExceptionButton"
                   onClick={() => {
                     onCloseCreatePopover();
                     setDisplayAddExceptionItemFlyout(true);
@@ -463,9 +445,12 @@ export const SharedLists = React.memo(() => {
                 </EuiContextMenuItem>,
               ]}
             />
-          </EuiPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiPopover>,
+          <EuiButton iconType={'importAction'} onClick={() => setDisplayImportListFlyout(true)}>
+            {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
+          </EuiButton>,
+        ]}
+      />
 
       {displayCreateSharedListFlyout && (
         <CreateSharedListFlyout

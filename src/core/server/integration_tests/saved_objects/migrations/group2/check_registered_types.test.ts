@@ -57,7 +57,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
       Object {
         "action": "6cfc277ed3211639e37546ac625f4a68f2494215",
         "action_task_params": "db2afea7d78e00e725486b791554d0d4e81956ef",
-        "alert": "f81ad957a7936522482e4539c7a96a963ebdbc3e",
+        "alert": "2568bf6d8ba0876441c61c9e58e08016c1dc1617",
         "api_key_pending_invalidation": "16e7bcf8e78764102d7f525542d5b616809a21ee",
         "apm-indices": "d19dd7fb51f2d2cbc1f8769481721e0953f9a6d2",
         "apm-server-schema": "1d42f17eff9ec6c16d3a9324d9539e2d123d0a9a",
@@ -143,7 +143,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "task": "ebcc113df12f14bf627dbd335ba78507187b48a3",
         "telemetry": "561b329aaed3c15b91aaf2075645be3097247612",
         "ui-metric": "410a8ad28e0f44b161c960ff0ce950c712b17c52",
-        "upgrade-assistant-ml-upgrade-operation": "e20ff1efa3c4757f5e7ff5fb897c557b08524c3a",
+        "upgrade-assistant-ml-upgrade-operation": "d8816e5ce32649e7a3a43e2c406c632319ff84bb",
         "upgrade-assistant-reindex-operation": "09ac8ed9c9acf7e8ece8eafe47d7019ea1472144",
         "upgrade-assistant-telemetry": "12bcbfc4e4ce64d2ca7c24f9acccd331a2bd2ab6",
         "uptime-dynamic-settings": "9a63ce80904a04be114749e426882dc3ff011137",

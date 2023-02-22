@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 import * as t from 'io-ts';
 import { saved_object_attributes } from '../saved_object_attributes';
@@ -18,6 +19,9 @@ export const RuleActionId = t.string;
 export type RuleActionTypeId = t.TypeOf<typeof RuleActionTypeId>;
 export const RuleActionTypeId = t.string;
 
+export type RuleActionUuid = t.TypeOf<typeof RuleActionUuid>;
+export const RuleActionUuid = NonEmptyString;
+
 /**
  * Params is an "object", since it is a type of RuleActionParams which is action templates.
  * @see x-pack/plugins/alerting/common/rule.ts
@@ -27,12 +31,15 @@ export const RuleActionParams = saved_object_attributes;
 
 export type RuleAction = t.TypeOf<typeof RuleAction>;
 export const RuleAction = t.exact(
-  t.type({
-    group: RuleActionGroup,
-    id: RuleActionId,
-    action_type_id: RuleActionTypeId,
-    params: RuleActionParams,
-  })
+  t.intersection([
+    t.type({
+      group: RuleActionGroup,
+      id: RuleActionId,
+      action_type_id: RuleActionTypeId,
+      params: RuleActionParams,
+    }),
+    t.partial({ uuid: RuleActionUuid }),
+  ])
 );
 
 export type RuleActionArray = t.TypeOf<typeof RuleActionArray>;
@@ -40,12 +47,15 @@ export const RuleActionArray = t.array(RuleAction);
 
 export type RuleActionCamel = t.TypeOf<typeof RuleActionCamel>;
 export const RuleActionCamel = t.exact(
-  t.type({
-    group: RuleActionGroup,
-    id: RuleActionId,
-    actionTypeId: RuleActionTypeId,
-    params: RuleActionParams,
-  })
+  t.intersection([
+    t.type({
+      group: RuleActionGroup,
+      id: RuleActionId,
+      actionTypeId: RuleActionTypeId,
+      params: RuleActionParams,
+    }),
+    t.partial({ uuid: RuleActionUuid }),
+  ])
 );
 
 export type RuleActionArrayCamel = t.TypeOf<typeof RuleActionArrayCamel>;
