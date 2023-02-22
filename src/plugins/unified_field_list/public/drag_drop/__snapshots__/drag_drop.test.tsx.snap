@@ -3,11 +3,11 @@
 exports[`DragDrop defined dropTypes is reflected in the className 1`] = `
 <div
   class="lnsDragDrop__container"
-  data-test-subj="lnsDragDropContainer"
+  data-test-subj="dragAndDropContainer"
 >
   <button
     class="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isDropTarget"
-    data-test-subj="lnsDragDrop"
+    data-test-subj="dragAndDrop"
   >
     Hello!
   </button>
@@ -39,17 +39,17 @@ exports[`DragDrop items that has dropTypes=undefined get special styling when an
 exports[`DragDrop renders if nothing is being dragged 1`] = `
 <div
   class=""
-  data-test-subj="lnsDragDrop_draggable-hello"
+  data-test-subj="dragAndDrop_draggable-hello"
 >
   <button
-    aria-describedby="lnsDragDrop-keyboardInstructions"
+    aria-describedby="dragAndDrop-keyboardInstructions"
     aria-label="hello"
     class="lnsDragDrop__keyboardHandler emotion-euiScreenReaderOnly"
-    data-test-subj="lnsDragDrop-keyboardHandler"
+    data-test-subj="dragAndDrop-keyboardHandler"
   />
   <button
     class="lnsDragDrop lnsDragDrop-isDraggable"
-    data-test-subj="lnsDragDrop"
+    data-test-subj="dragAndDrop"
     draggable="true"
   >
     Hello!

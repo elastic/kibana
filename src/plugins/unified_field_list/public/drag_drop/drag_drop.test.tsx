@@ -29,6 +29,7 @@ const dataTransfer = {
 
 describe('DragDrop', () => {
   const defaultContext = {
+    dataTestSubj: 'lnsDragDrop',
     dragging: undefined,
     setDragging: jest.fn(),
     setActiveDropTarget: jest.fn(),
@@ -70,7 +71,7 @@ describe('DragDrop', () => {
       </DragDrop>
     );
 
-    component.find('[data-test-subj="lnsDragDrop"]').at(0).simulate('dragover', { preventDefault });
+    component.find('[data-test-subj="dragAndDrop"]').at(0).simulate('dragover', { preventDefault });
 
     expect(preventDefault).toBeCalled();
   });
@@ -83,7 +84,7 @@ describe('DragDrop', () => {
       </DragDrop>
     );
 
-    component.find('[data-test-subj="lnsDragDrop"]').at(0).simulate('dragover', { preventDefault });
+    component.find('[data-test-subj="dragAndDrop"]').at(0).simulate('dragover', { preventDefault });
 
     expect(preventDefault).not.toBeCalled();
   });
@@ -97,7 +98,7 @@ describe('DragDrop', () => {
       </DragDrop>
     );
 
-    component.find('[data-test-subj="lnsDragDrop"]').at(0).simulate('mousedown');
+    component.find('[data-test-subj="dragAndDrop"]').at(0).simulate('mousedown');
     expect(global.getSelection).toBeCalled();
     expect(removeAllRanges).toBeCalled();
   });
@@ -281,6 +282,7 @@ describe('DragDrop', () => {
 
     const component = mount(
       <ChildDragDropProvider
+        dataTestSubj={defaultContext.dataTestSubj}
         setA11yMessage={jest.fn()}
         dragging={dragging}
         setDragging={() => {
@@ -541,6 +543,7 @@ describe('DragDrop', () => {
       });
       component = mount(
         <ChildDragDropProvider
+          dataTestSubj={defaultContext.dataTestSubj}
           setA11yMessage={jest.fn()}
           dragging={{ id: '1', humanData: { label: 'Label1', layerNumber: 0 } }}
           setDragging={jest.fn()}
@@ -986,6 +989,7 @@ describe('DragDrop', () => {
       const setA11yMessage = jest.fn();
       const registerDropTarget = jest.fn();
       const baseContext = {
+        dataTestSubj: defaultContext.dataTestSubj,
         dragging,
         setDragging: (val?: DraggingIdentifier) => {
           dragging = val;

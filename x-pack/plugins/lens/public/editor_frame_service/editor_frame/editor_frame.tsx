@@ -108,7 +108,7 @@ export function EditorFrame(props: EditorFrameProps) {
   const bannerMessages = props.getUserMessages('banner', { severity: 'warning' });
 
   return (
-    <RootDragDropProvider onTrackUICounterEvent={trackUiCounterEvents}>
+    <RootDragDropProvider dataTestSubj="lnsDragDrop" onTrackUICounterEvent={trackUiCounterEvents}>
       <FrameLayout
         bannerMessages={
           bannerMessages.length ? (

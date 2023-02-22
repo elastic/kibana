@@ -17,6 +17,8 @@ import {
   DragContextState,
 } from './types';
 
+const DEFAULT_DATA_TEST_SUBJ = 'dragAndDrop';
+
 /**
  * The drag / drop context singleton, used like so:
  *
@@ -32,6 +34,7 @@ export const DragContext = React.createContext<DragContextState>({
   setA11yMessage: () => {},
   dropTargetsByOrder: undefined,
   registerDropTarget: () => {},
+  dataTestSubj: DEFAULT_DATA_TEST_SUBJ,
   onTrackUICounterEvent: undefined,
 });
 
@@ -54,9 +57,11 @@ export interface ProviderProps extends DragContextState {
  */
 export function RootDragDropProvider({
   children,
+  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
   onTrackUICounterEvent,
 }: {
   children: React.ReactNode;
+  dataTestSubj?: string;
   onTrackUICounterEvent?: DragContextState['onTrackUICounterEvent'];
 }) {
   const [draggingState, setDraggingState] = useState<{ dragging?: DraggingIdentifier }>({
@@ -109,6 +114,7 @@ export function RootDragDropProvider({
         setActiveDropTarget={setActiveDropTarget}
         registerDropTarget={registerDropTarget}
         dropTargetsByOrder={dropTargetsByOrderState}
+        dataTestSubj={dataTestSubj}
         onTrackUICounterEvent={onTrackUICounterEvent}
       >
         {children}
@@ -118,12 +124,12 @@ export function RootDragDropProvider({
           <p aria-live="assertive" aria-atomic={true}>
             {a11yMessageState}
           </p>
-          <p id={`lnsDragDrop-keyboardInstructionsWithReorder`}>
+          <p id={`${dataTestSubj}-keyboardInstructionsWithReorder`}>
             {i18n.translate('unifiedFieldList.dragDrop.keyboardInstructionsReorder', {
               defaultMessage: `Press space or enter to start dragging. When dragging, use the up/down arrow keys to reorder items in the group and left/right arrow keys to choose drop targets outside of the group. Press space or enter again to finish.`,
             })}
           </p>
-          <p id={`lnsDragDrop-keyboardInstructions`}>
+          <p id={`${dataTestSubj}-keyboardInstructions`}>
             {i18n.translate('unifiedFieldList.dragDrop.keyboardInstructions', {
               defaultMessage: `Press space or enter to start dragging. When dragging, use the left/right arrow keys to move between drop targets. Press space or enter again to finish.`,
             })}
@@ -211,6 +217,7 @@ export function ChildDragDropProvider({
   setA11yMessage,
   registerDropTarget,
   dropTargetsByOrder,
+  dataTestSubj,
   onTrackUICounterEvent,
   children,
 }: ProviderProps) {
@@ -225,6 +232,7 @@ export function ChildDragDropProvider({
       setA11yMessage,
       dropTargetsByOrder,
       registerDropTarget,
+      dataTestSubj,
       onTrackUICounterEvent,
     }),
     [
@@ -237,6 +245,7 @@ export function ChildDragDropProvider({
       setA11yMessage,
       dropTargetsByOrder,
       registerDropTarget,
+      dataTestSubj,
       onTrackUICounterEvent,
     ]
   );

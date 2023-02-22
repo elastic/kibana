@@ -81,6 +81,11 @@ export interface DragContextState {
   registerDropTarget: (order: number[], dropTarget?: DropIdentifier) => void;
 
   /**
+   * Customizable data-test-subj prefix
+   */
+  dataTestSubj: string;
+
+  /**
    * A custom callback for telemetry
    * @param event
    */

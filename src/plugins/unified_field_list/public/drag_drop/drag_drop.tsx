@@ -83,11 +83,6 @@ interface BaseProps {
   getAdditionalClassesOnDroppable?: (dropType?: DropType) => string | undefined;
 
   /**
-   * The optional test subject associated with this DOM element.
-   */
-  dataTestSubj?: string;
-
-  /**
    * items belonging to the same group that can be reordered
    */
   reorderableGroup?: Array<{ id: string }>;
@@ -126,6 +121,7 @@ interface DragInnerProps extends BaseProps {
     activeDropTarget: DragContextState['activeDropTarget'];
     dropTargetsByOrder: DragContextState['dropTargetsByOrder'];
   };
+  dataTestSubj: DragContextState['dataTestSubj'];
   onTrackUICounterEvent: DragContextState['onTrackUICounterEvent'] | undefined;
   extraKeyboardHandler?: (e: KeyboardEvent<HTMLButtonElement>) => void;
   ariaDescribedBy?: string;
@@ -143,6 +139,7 @@ interface DropsInnerProps extends BaseProps {
   setA11yMessage: DragContextState['setA11yMessage'];
   registerDropTarget: DragContextState['registerDropTarget'];
   activeDropTarget: DragContextState['activeDropTarget'];
+  dataTestSubj: DragContextState['dataTestSubj'];
   onTrackUICounterEvent: DragContextState['onTrackUICounterEvent'] | undefined;
   isNotDroppable: boolean;
 }
@@ -160,6 +157,7 @@ export const DragDrop = (props: BaseProps) => {
     activeDropTarget,
     setActiveDropTarget,
     setA11yMessage,
+    dataTestSubj,
     onTrackUICounterEvent,
   } = useContext(DragContext);
 
@@ -182,6 +180,7 @@ export const DragDrop = (props: BaseProps) => {
       setDragging,
       setActiveDropTarget,
       setA11yMessage,
+      dataTestSubj,
       onTrackUICounterEvent,
     };
     if (reorderableGroup && reorderableGroup.length > 1) {
@@ -201,6 +200,7 @@ export const DragDrop = (props: BaseProps) => {
     setActiveDropTarget,
     registerDropTarget,
     setA11yMessage,
+    dataTestSubj,
     onTrackUICounterEvent,
     isNotDroppable:
       // If the configuration has provided a droppable flag, but this particular item is not
@@ -410,14 +410,14 @@ const DragInner = memo(function DragInner({
           (activeDraggingProps && dragType === 'move' && !keyboardMode) ||
           shouldShowGhostImageInstead,
       })}
-      data-test-subj={`lnsDragDrop_draggable-${value.humanData.label}`}
+      data-test-subj={`${dataTestSubj}_draggable-${value.humanData.label}`}
     >
       <EuiScreenReaderOnly showOnFocus>
         <button
           aria-label={value.humanData.label}
-          aria-describedby={ariaDescribedBy || `lnsDragDrop-keyboardInstructions`}
+          aria-describedby={ariaDescribedBy || `${dataTestSubj}-keyboardInstructions`}
           className="lnsDragDrop__keyboardHandler"
-          data-test-subj="lnsDragDrop-keyboardHandler"
+          data-test-subj={`${dataTestSubj}-keyboardHandler`}
           onBlur={(e) => {
             if (activeDraggingProps) {
               dragEnd();
@@ -457,7 +457,7 @@ const DragInner = memo(function DragInner({
       </EuiScreenReaderOnly>
 
       {React.cloneElement(children, {
-        'data-test-subj': dataTestSubj || 'lnsDragDrop',
+        'data-test-subj': dataTestSubj,
         className: classNames(children.props.className, 'lnsDragDrop', 'lnsDragDrop-isDraggable'),
         draggable: true,
         onDragEnd: dragEnd,
@@ -593,7 +593,7 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
       activeDropTarget?.id === value.id && dropType === activeDropTarget?.dropType
     );
     return {
-      'data-test-subj': dataTestSubj || 'lnsDragDrop',
+      'data-test-subj': dataTestSubj,
       className: getClasses(dropType, dropChildren),
       onDragEnter: dragEnter,
       onDragLeave: dragLeave,
@@ -650,7 +650,7 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
 
   return (
     <div
-      data-test-subj="lnsDragDropContainer"
+      data-test-subj={`${dataTestSubj}Container`}
       className={classNames('lnsDragDrop__container', {
         'lnsDragDrop__container-active': isInZone || activeDropTarget?.id === value.id,
       })}
@@ -672,7 +672,7 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
           <EuiFlexGroup
             gutterSize="none"
             direction="column"
-            data-test-subj="lnsDragDropExtraDrops"
+            data-test-subj={`${dataTestSubj}ExtraDrops`}
             className={classNames('lnsDragDrop__extraDrops', {
               'lnsDragDrop__extraDrops-visible': isInZone || activeDropTarget?.id === value.id,
             })}
@@ -725,8 +725,14 @@ const ReorderableDrag = memo(function ReorderableDrag(
     setReorderState,
   } = useContext(ReorderContext);
 
-  const { value, setActiveDropTarget, activeDraggingProps, reorderableGroup, setA11yMessage } =
-    props;
+  const {
+    value,
+    setActiveDropTarget,
+    activeDraggingProps,
+    reorderableGroup,
+    setA11yMessage,
+    dataTestSubj,
+  } = props;
 
   const keyboardMode = activeDraggingProps?.keyboardMode;
   const activeDropTarget = activeDraggingProps?.activeDropTarget;
@@ -844,7 +850,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
 
   return (
     <div
-      data-test-subj="lnsDragDrop-reorderableDrag"
+      data-test-subj={`${dataTestSubj}-reorderableDrag`}
       className={
         isDragging
           ? 'lnsDragDrop-reorderable lnsDragDrop-translatableDrag'
@@ -863,7 +869,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
     >
       <DragInner
         {...props}
-        ariaDescribedBy="lnsDragDrop-keyboardInstructionsWithReorder"
+        ariaDescribedBy={`${dataTestSubj}-keyboardInstructionsWithReorder`}
         extraKeyboardHandler={extraKeyboardHandler}
         onDragStart={onReorderableDragStart}
         onDragEnd={onReorderableDragEnd}
@@ -885,6 +891,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
     setActiveDropTarget,
     reorderableGroup,
     setA11yMessage,
+    dataTestSubj,
     onTrackUICounterEvent,
   } = props;
 
@@ -980,14 +987,14 @@ const ReorderableDrop = memo(function ReorderableDrop(
             : undefined
         }
         ref={heightRef}
-        data-test-subj="lnsDragDrop-translatableDrop"
+        data-test-subj={`${dataTestSubj}-translatableDrop`}
         className="lnsDragDrop-translatableDrop lnsDragDrop-reorderable"
       >
         <DropsInner {...props} />
       </div>
 
       <div
-        data-test-subj="lnsDragDrop-reorderableDropLayer"
+        data-test-subj={`${dataTestSubj}-reorderableDropLayer`}
         className={classNames('lnsDragDrop', {
           ['lnsDragDrop__reorderableDrop']: dragging,
         })}
