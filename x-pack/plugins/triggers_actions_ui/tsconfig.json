@@ -45,6 +45,7 @@
     "@kbn/datemath",
     "@kbn/core-capabilities-common",
     "@kbn/alerts-ui-shared",
+    "@kbn/safer-lodash-set",
   ],
   "exclude": [
     "target/**/*",

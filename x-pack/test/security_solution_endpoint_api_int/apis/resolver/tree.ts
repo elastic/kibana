@@ -45,7 +45,8 @@ export default function ({ getService }: FtrProviderContext) {
     ancestryArraySize: 2,
   };
 
-  describe('Resolver tree', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/150815
+  describe.skip('Resolver tree', () => {
     before(async () => {
       resolverTrees = await resolver.createTrees(treeOptions);
       // we only requested a single alert so there's only 1 tree
