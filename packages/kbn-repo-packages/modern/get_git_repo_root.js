@@ -21,17 +21,22 @@ function getGitRepoRootSync(repoRoot) {
     return cache.get(repoRoot);
   }
 
-  const stdout = ChildProcess.execFileSync('git', ['rev-parse', '--show-toplevel'], {
-    cwd: repoRoot,
-    encoding: 'utf8',
-    maxBuffer: Infinity,
-  });
+  try {
+    const stdout = ChildProcess.execFileSync('git', ['rev-parse', '--show-toplevel'], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      maxBuffer: Infinity,
+    });
 
-  const firstLine = stdout.split('\n')[0]
-  const trimPath = firstLine.trim()
-  cache.set(repoRoot, Path.basename(trimPath) !== trimPath ? trimPath : null);
+    const firstLine = stdout.split('\n')[0]
+    const trimPath = firstLine.trim()
+    cache.set(repoRoot, Path.basename(trimPath) !== trimPath ? trimPath : null);
 
-  return cache.get(repoRoot);
+    return cache.get(repoRoot);
+  } catch {
+    cache.set(repoRoot, null);
+    return null;
+  }
 }
 
 module.exports = { getGitRepoRootSync };
