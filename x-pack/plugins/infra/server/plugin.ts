@@ -198,10 +198,16 @@ export class InfraServerPlugin
         const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(request, soClient);
         const spaceId = plugins.spaces?.spacesService.getSpaceId(request) || 'default';
 
+        async function getScopedDataClient() {
+          const [, { data }] = await core.getStartServices();
+          return data.search.asScoped(request);
+        }
+
         return {
           mlAnomalyDetectors,
           mlSystem,
           spaceId,
+          getScopedDataClient,
         };
       }
     );

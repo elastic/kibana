@@ -7,10 +7,7 @@
     "id": "infra",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "infra"
-    ],
+    "configPath": ["xpack", "infra"],
     "requiredPlugins": [
       "share",
       "features",
@@ -25,14 +22,10 @@
       "triggersActionsUi",
       "observability",
       "ruleRegistry",
-      "unifiedSearch"
+      "unifiedSearch",
+      "bfetch"
     ],
-    "optionalPlugins": [
-      "ml",
-      "home",
-      "embeddable",
-      "osquery"
-    ],
+    "optionalPlugins": ["ml", "home", "embeddable", "osquery"],
     "requiredBundles": [
       "unifiedSearch",
       "observability",

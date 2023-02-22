@@ -30,6 +30,7 @@ import type {
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { type TypedLensByValueInput, LensPublicStart } from '@kbn/lens-plugin/public';
+import { BfetchPublicStart } from '@kbn/bfetch-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -81,6 +82,7 @@ export interface InfraClientStartDeps {
   storage: IStorageWrapper;
   lens: LensPublicStart;
   telemetry: ITelemetryClient;
+  bfetch: BfetchPublicStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

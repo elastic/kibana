@@ -16,29 +16,23 @@ import {
   AggregationResponse,
   CompositeResponse,
   HistogramBucketRT,
+  TermsAggregationResponse,
+  TermsAggregationResponseRT,
 } from './types';
 import { EMPTY_RESPONSE } from './constants';
-import { createAggregations, createCompositeAggregations } from './lib/create_aggregations';
+import {
+  createAggregations,
+  createCompositeAggregations,
+  createTermsAggregations,
+} from './lib/create_aggregations';
 import { convertBucketsToMetricsApiSeries } from './lib/convert_buckets_to_metrics_series';
 import { calculateBucketSize } from './lib/calculate_bucket_size';
 import { calculatedInterval } from './lib/calculate_interval';
+import { InfraDatabaseSearchResponse } from '../adapters/framework';
 
 const DEFAULT_LIMIT = 9;
 
-export const query = async (
-  search: ESSearchClient,
-  rawOptions: MetricsAPIRequest
-): Promise<MetricsAPIResponse> => {
-  const interval = await calculatedInterval(search, rawOptions);
-
-  const options = {
-    ...rawOptions,
-    timerange: {
-      ...rawOptions.timerange,
-      interval,
-    },
-  };
-  const hasGroupBy = Array.isArray(options.groupBy) && options.groupBy.length > 0;
+export const getQuery = (options: MetricsAPIRequest, hasGroupBy: boolean, isTerms = false) => {
   const filter: Array<Record<string, any>> = [
     {
       range: {
@@ -59,57 +53,94 @@ export const query = async (
     body: {
       size: 0,
       query: { bool: { filter: [...filter, ...(options.filters ?? [])] } },
-      aggs: hasGroupBy ? createCompositeAggregations(options) : createAggregations(options),
+      aggs: hasGroupBy
+        ? isTerms
+          ? createTermsAggregations(options)
+          : createCompositeAggregations(options)
+        : createAggregations(options),
     },
   };
+
+  return params;
+};
+
+export const convertResponse = (
+  response: InfraDatabaseSearchResponse<{}, MetricsESResponse>,
+  options: MetricsAPIRequest,
+  hasGroupBy: boolean,
+  interval: string,
+  isTerms = false
+) => {
+  if (response.hits.total.value === 0) {
+    return EMPTY_RESPONSE;
+  }
+
+  if (!response.aggregations) {
+    throw new Error('Aggregations should be present.');
+  }
+
+  const { bucketSize } = calculateBucketSize({ ...options.timerange, interval });
+
+  if (isTerms) {
+    const aggregations = decodeOrThrow(TermsAggregationResponseRT)(response.aggregations);
+    const { groupings } = aggregations;
+    return {
+      series: getSeriesFromTermsAggregationAggregations(groupings, options, bucketSize * 1000),
+      info: {
+        afterKey: null,
+        interval: options.includeTimeseries ? bucketSize : undefined,
+      },
+    };
+  }
+
+  if (hasGroupBy) {
+    const aggregations = decodeOrThrow(CompositeResponseRT)(response.aggregations);
+    const { groupings } = aggregations;
+    const limit = options.limit ?? DEFAULT_LIMIT;
+    const returnAfterKey = !!groupings.after_key && groupings.buckets.length === limit;
+    const afterKey = returnAfterKey ? groupings.after_key : null;
+
+    return {
+      series: getSeriesFromCompositeAggregations(groupings, options, bucketSize * 1000),
+      info: {
+        afterKey,
+        interval: options.includeTimeseries ? bucketSize : undefined,
+      },
+    };
+  }
+
+  const aggregations = decodeOrThrow(AggregationResponseRT)(response.aggregations);
+  return {
+    series: getSeriesFromHistogram(aggregations, options, bucketSize * 1000),
+    info: {
+      afterKey: null,
+      interval: bucketSize,
+    },
+  };
+};
+
+export const query = async (
+  search: ESSearchClient,
+  rawOptions: MetricsAPIRequest
+): Promise<MetricsAPIResponse> => {
+  const interval = await calculatedInterval(search, rawOptions);
+
+  const options = {
+    ...rawOptions,
+    timerange: {
+      ...rawOptions.timerange,
+      interval,
+    },
+  };
+
+  const hasGroupBy = Array.isArray(options.groupBy) && options.groupBy.length > 0;
+
+  const params = getQuery(options, hasGroupBy);
 
   try {
     const response = await search<{}, MetricsESResponse>(params);
 
-    if (response.hits.total.value === 0) {
-      return EMPTY_RESPONSE;
-    }
-
-    if (!response.aggregations) {
-      throw new Error('Aggregations should be present.');
-    }
-
-    const { bucketSize } = calculateBucketSize({ ...options.timerange, interval });
-
-    // const aggregations = decodeOrThrow(TermsAggregationResponseRT)(response.aggregations);
-    // const { groupings } = aggregations;
-    // return {
-    //   series: getSeriesFromTermsAggregationAggregations(groupings, options, bucketSize * 1000),
-    //   info: {
-    //     afterKey: null,
-    //     interval: rawOptions.includeTimeseries ? bucketSize : undefined,
-    //   },
-    // };
-
-    if (hasGroupBy) {
-      const aggregations = decodeOrThrow(CompositeResponseRT)(response.aggregations);
-      const { groupings } = aggregations;
-      const limit = options.limit ?? DEFAULT_LIMIT;
-      const returnAfterKey = !!groupings.after_key && groupings.buckets.length === limit;
-      const afterKey = returnAfterKey ? groupings.after_key : null;
-
-      return {
-        series: getSeriesFromCompositeAggregations(groupings, options, bucketSize * 1000),
-        info: {
-          afterKey,
-          interval: rawOptions.includeTimeseries ? bucketSize : undefined,
-        },
-      };
-    }
-
-    const aggregations = decodeOrThrow(AggregationResponseRT)(response.aggregations);
-    return {
-      series: getSeriesFromHistogram(aggregations, options, bucketSize * 1000),
-      info: {
-        afterKey: null,
-        interval: bucketSize,
-      },
-    };
+    return convertResponse(response, options, hasGroupBy, interval);
   } catch (e) {
     throw e;
   }
@@ -125,21 +156,21 @@ const getSeriesFromHistogram = (
   ];
 };
 
-// const getSeriesFromTermsAggregationAggregations = (
-//   groupings: TermsAggregationResponse['groupings'],
-//   options: MetricsAPIRequest,
-//   bucketSize: number
-// ): MetricsAPIResponse['series'] => {
-//   return groupings.buckets.map((bucket) => {
-//     const metrics = convertBucketsToMetricsApiSeries(
-//       ['*'],
-//       options,
-//       HistogramBucketRT.is(bucket) ? bucket.histogram.buckets : [bucket],
-//       bucketSize
-//     );
-//     return metrics;
-//   });
-// };
+const getSeriesFromTermsAggregationAggregations = (
+  groupings: TermsAggregationResponse['groupings'],
+  options: MetricsAPIRequest,
+  bucketSize: number
+): MetricsAPIResponse['series'] => {
+  return groupings.buckets.map((bucket) => {
+    const metrics = convertBucketsToMetricsApiSeries(
+      [bucket.key as string],
+      options,
+      HistogramBucketRT.is(bucket) ? bucket.histogram.buckets : [bucket],
+      bucketSize
+    );
+    return metrics;
+  });
+};
 
 const getSeriesFromCompositeAggregations = (
   groupings: CompositeResponse['groupings'],

@@ -17,6 +17,33 @@ import {
   SnapshotRequest,
 } from '../../../../../common/http_api/snapshot_api';
 
+export const convertToSnapshotApiRequest = ({
+  timerange,
+  currentTime,
+  accountId = '',
+  region = '',
+  groupBy = null,
+  sendRequestImmediately = true,
+  includeTimeseries = true,
+  requestTs,
+  ...args
+}: UseSnapshotRequest): SnapshotRequest => {
+  const payload: Omit<SnapshotRequest, 'filterQuery'> = {
+    ...args,
+    accountId,
+    region,
+    groupBy,
+    timerange: timerange ?? {
+      interval: '1m',
+      to: currentTime,
+      from: currentTime - 1200 * 1000,
+      lookbackSize: 5,
+    },
+    includeTimeseries,
+  };
+
+  return payload;
+};
 export interface UseSnapshotRequest
   extends Omit<SnapshotRequest, 'filterQuery' | 'timerange' | 'includeTimeseries'> {
   filterQuery: string | null | symbol | undefined;

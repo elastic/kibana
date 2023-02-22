@@ -6,6 +6,7 @@
  */
 
 import { InfraBackendLibs } from './lib/infra_types';
+import { initHostsRoute } from './routes/hosts';
 import { initGetHostsAnomaliesRoute, initGetK8sAnomaliesRoute } from './routes/infra_ml';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
 import { initIpToHostName } from './routes/ip_to_hostname';
@@ -47,6 +48,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initGetK8sAnomaliesRoute(libs);
   initGetHostsAnomaliesRoute(libs);
   initSnapshotRoute(libs);
+  initHostsRoute(libs);
   initNodeDetailsRoute(libs);
   initMetricsSourceConfigurationRoutes(libs);
   initValidateLogAnalysisDatasetsRoute(libs);

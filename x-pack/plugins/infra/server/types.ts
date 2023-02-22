@@ -10,7 +10,7 @@ import type {
   CustomRequestHandlerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { SearchRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { IScopedSearchClient, SearchRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { InfraServerPluginStartDeps } from './lib/adapters/framework';
@@ -49,8 +49,13 @@ export interface InfraSpacesRequestHandlerContext {
   spaceId: string;
 }
 
+export interface InfraDataRequestHandlerContext {
+  getScopedDataClient(): Promise<IScopedSearchClient>;
+}
+
 export type InfraRequestHandlerContext = InfraMlRequestHandlerContext &
-  InfraSpacesRequestHandlerContext;
+  InfraSpacesRequestHandlerContext &
+  InfraDataRequestHandlerContext;
 
 /**
  * @internal
