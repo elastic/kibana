@@ -8,7 +8,7 @@
 
 import fastIsEqual from 'fast-deep-equal';
 import { Observable } from 'rxjs';
-import { map, distinctUntilChanged } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, startWith } from 'rxjs/operators';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import { EmbeddableInput } from '../embeddables';
@@ -33,6 +33,8 @@ export function shouldFetch$<
   getInput: () => TFilterableEmbeddableInput
 ): Observable<TFilterableEmbeddableInput> {
   return updated$.pipe(map(() => getInput())).pipe(
+    // wrapping distinctUntilChanged with startWith and skip to prime distinctUntilChanged with an initial input value.
+    startWith(getInput()),
     distinctUntilChanged((a: TFilterableEmbeddableInput, b: TFilterableEmbeddableInput) => {
       if (
         !fastIsEqual(
@@ -44,6 +46,7 @@ export function shouldFetch$<
       }
 
       return onlyDisabledFiltersChanged(a.filters, b.filters, shouldRefreshFilterCompareOptions);
-    })
+    }),
+    skip(1)
   );
 }
