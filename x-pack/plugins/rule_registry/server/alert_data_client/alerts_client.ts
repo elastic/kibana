@@ -847,25 +847,35 @@ export class AlertsClient {
   }
 
   public async find<Params extends RuleTypeParams = never>({
-    query,
     aggs,
-    _source,
-    track_total_hits: trackTotalHits,
-    size,
+    featureIds,
     index,
-    sort,
+    query,
     search_after: searchAfter,
+    size,
+    sort,
+    track_total_hits: trackTotalHits,
+    _source,
   }: {
-    query?: object | undefined;
-    aggs?: object | undefined;
-    index: string | undefined;
-    track_total_hits?: boolean | undefined;
-    _source?: string[] | undefined;
-    size?: number | undefined;
-    sort?: estypes.SortOptions[] | undefined;
-    search_after?: Array<string | number> | undefined;
+    aggs?: object;
+    featureIds?: string[];
+    index?: string;
+    query?: object;
+    search_after?: Array<string | number>;
+    size?: number;
+    sort?: estypes.SortOptions[];
+    track_total_hits?: boolean;
+    _source?: string[];
   }) {
     try {
+      let indexToUse = index;
+      if (featureIds && !isEmpty(featureIds)) {
+        const tempIndexToUse = await this.getAuthorizedAlertsIndices(featureIds);
+        if (!isEmpty(tempIndexToUse)) {
+          indexToUse = (tempIndexToUse ?? []).join();
+        }
+      }
+
       // first search for the alert by id, then use the alert info to check if user has access to it
       const alertsSearchResponse = await this.singleSearchAfterAndAudit({
         query,
@@ -873,7 +883,7 @@ export class AlertsClient {
         _source,
         track_total_hits: trackTotalHits,
         size,
-        index,
+        index: indexToUse,
         operation: ReadOperations.Find,
         sort,
         lastSortIds: searchAfter,

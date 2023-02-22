@@ -136,8 +136,8 @@ export const BenchmarksSection = ({
             <EuiTitle size="xxs">
               <div>
                 <FormattedMessage
-                  id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceScoreTitle"
-                  defaultMessage="Compliance Score"
+                  id="xpack.csp.dashboard.benchmarkSection.columnsHeader.postureScoreTitle"
+                  defaultMessage="Posture Score"
                 />
                 <EuiIcon className="euiTableSortIcon" type={clusterSortingIcon} />
               </div>
