@@ -72,19 +72,20 @@ const getTimefilterState = (timeFilterService: TimefilterContract): TimefilterSt
 
 export const updateTimeContextFromTimeFilterService = actions.assign(
   (context: LogStreamQueryContext, event: LogStreamQueryEvent) => {
-    if (event.type === 'INITIALIZED_FROM_TIME_FILTER_SERVICE') {
+    if (
+      event.type === 'TIME_FROM_TIME_FILTER_SERVICE_CHANGED' ||
+      event.type === 'INITIALIZED_FROM_TIME_FILTER_SERVICE'
+    ) {
       return {
         ...getTimeFromEvent(context, event),
-        refreshInterval: { ...event.refreshInterval, value: 5000 },
+        refreshInterval:
+          event.type === 'TIME_FROM_TIME_FILTER_SERVICE_CHANGED'
+            ? event.refreshInterval
+            : { ...context.refreshInterval, pause: event.refreshInterval.pause },
       };
+    } else {
+      return {};
     }
-    if (event.type === 'TIME_FROM_TIME_FILTER_SERVICE_CHANGED') {
-      return {
-        ...getTimeFromEvent(context, event),
-        refreshInterval: event.refreshInterval,
-      };
-    }
-    return {};
   }
 );
 
