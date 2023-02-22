@@ -61,6 +61,8 @@ export const useConfigModel = (configuration: string) => {
                   { required: ['containerImageName'] },
                   { required: ['containerImageTag'] },
                   { required: ['targetFilePath'] },
+                  { required: ['ignoreVolumeFiles'] },
+                  { required: ['ignoreVolumeMounts'] },
                   { required: ['orchestratorClusterId'] },
                   { required: ['orchestratorClusterName'] },
                   { required: ['orchestratorNamespace'] },
@@ -92,6 +94,12 @@ export const useConfigModel = (configuration: string) => {
                     type: 'array',
                     minItems: 1,
                     items: { type: 'string', maxLength: MAX_CONDITION_VALUE_LENGTH },
+                  },
+                  ignoreVolumeFiles: {
+                    const: true,
+                  },
+                  ignoreVolumeMounts: {
+                    const: true,
                   },
                   orchestratorClusterId: {
                     type: 'array',

@@ -99,6 +99,19 @@ export const errorValueLengthExceeded = i18n.translate(
   }
 );
 
+export const getConditionHelpLabel = (prop: string) => {
+  switch (prop) {
+    case ControlSelectorCondition.ignoreVolumeMounts:
+      return i18n.translate('xpack.cloudDefend.ignoreVolumeMountsHelp', {
+        defaultMessage: 'The selector will avoid matching on k8s volume mounts',
+      });
+    case ControlSelectorCondition.ignoreVolumeFiles:
+      return i18n.translate('xpack.cloudDefend.ignoreVolumeFilesHelp', {
+        defaultMessage: 'The selector will avoid matching on k8s volume files',
+      });
+  }
+};
+
 export const getConditionLabel = (prop: string) => {
   switch (prop) {
     case ControlSelectorCondition.operation:
@@ -116,6 +129,14 @@ export const getConditionLabel = (prop: string) => {
     case ControlSelectorCondition.targetFilePath:
       return i18n.translate('xpack.cloudDefend.targetFilePath', {
         defaultMessage: 'Target file path',
+      });
+    case ControlSelectorCondition.ignoreVolumeFiles:
+      return i18n.translate('xpack.cloudDefend.ignoreVolumeFiles', {
+        defaultMessage: 'Ignore volume files',
+      });
+    case ControlSelectorCondition.ignoreVolumeMounts:
+      return i18n.translate('xpack.cloudDefend.ignoreVolumeMounts', {
+        defaultMessage: 'Ignore volume mounts',
       });
     case ControlSelectorCondition.orchestratorClusterId:
       return i18n.translate('xpack.cloudDefend.orchestratorClusterId', {
