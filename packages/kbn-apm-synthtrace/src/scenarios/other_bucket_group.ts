@@ -17,6 +17,8 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
       const TRANSACTION_TYPES = ['request'];
       const ENVIRONMENTS = ['production', 'development'];
 
+      const OVERFLOW_BUCKET_NAME = '_other';
+
       const MIN_DURATION = 10;
       const MAX_DURATION = 1000;
 
@@ -26,8 +28,12 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
 
       const serviceRange = [
         ...lodashRange(0, numServices).map((groupId) => `service-${groupId}`),
-        '_other',
+        OVERFLOW_BUCKET_NAME,
       ];
+
+      const overflowCountConfig: Record<string, number> = {
+        [OVERFLOW_BUCKET_NAME]: 20,
+      };
 
       const instances = serviceRange.flatMap((serviceName) => {
         const services = ENVIRONMENTS.map((env) =>
@@ -35,7 +41,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
             name: serviceName,
             environment: env,
             agentName: 'go',
-            'service_transaction.aggregation.overflow_count': 20,
+            'service_transaction.aggregation.overflow_count': overflowCountConfig[serviceName] ?? 0,
           })
         );
 
@@ -46,7 +52,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
 
       const transactionGroupRange = [
         ...lodashRange(0, numTxGroups).map((groupId) => `transaction-${groupId}`),
-        '_other',
+        OVERFLOW_BUCKET_NAME,
       ];
 
       return range
@@ -62,7 +68,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
                     (timestampIndex % MAX_BUCKETS) * BUCKET_SIZE + MIN_DURATION
                   );
 
-                  if (groupId === '_other') {
+                  if (groupId === OVERFLOW_BUCKET_NAME) {
                     return instance
                       .transaction(groupId)
                       .timestamp(timestamp)

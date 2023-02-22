@@ -12,15 +12,23 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
   return {
     generate: ({ range }) => {
       const withTx = apm
-        .service('service-with-transactions', 'production', 'java')
+        .service({
+          name: 'service-with-transactions',
+          environment: 'production',
+          agentName: 'java',
+        })
         .instance('instance');
 
       const withErrorsOnly = apm
-        .service('service-with-errors-only', 'production', 'java')
+        .service({ name: 'service-with-errors-only', environment: 'production', agentName: 'java' })
         .instance('instance');
 
       const withAppMetricsOnly = apm
-        .service('service-with-app-metrics-only', 'production', 'java')
+        .service({
+          name: 'service-with-app-metrics-only',
+          environment: 'production',
+          agentName: 'java',
+        })
         .instance('instance');
 
       return range

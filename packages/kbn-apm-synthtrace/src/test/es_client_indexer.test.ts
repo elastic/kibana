@@ -53,7 +53,9 @@ describe('Synthtrace ES Client indexer', () => {
   });
 
   it('indexes documents', async () => {
-    const instance = apm.service('foo', 'java', 'java').instance('foo');
+    const instance = apm
+      .service({ name: 'foo', environment: 'java', agentName: 'java' })
+      .instance('foo');
 
     const generator = timerange(
       new Date('2022-01-01T00:00:00.000Z'),
@@ -89,7 +91,9 @@ describe('Synthtrace ES Client indexer', () => {
     // be factors in the complexity around this.
     // see also: https://nodejs.org/api/stream.html#choose-one-api-style
 
-    const instance = apm.service('foo', 'production', 'java').instance('foo');
+    const instance = apm
+      .service({ name: 'foo', environment: 'production', agentName: 'java' })
+      .instance('foo');
 
     const generatorCallback = jest.fn((timestamp: number) => {
       return range(0, 50).map(() =>
@@ -127,8 +131,12 @@ describe('Synthtrace ES Client indexer', () => {
   });
 
   it('creates the expected transaction metrics', async () => {
-    const serviceA = apm.service('service-a', 'production', 'java').instance('one');
-    const serviceB = apm.service('service-b', 'production', 'java').instance('one');
+    const serviceA = apm
+      .service({ name: 'service-a', environment: 'production', agentName: 'java' })
+      .instance('one');
+    const serviceB = apm
+      .service({ name: 'service-b', environment: 'production', agentName: 'java' })
+      .instance('one');
 
     const MINUTES = 7;
     const CARDINALITY = 2;

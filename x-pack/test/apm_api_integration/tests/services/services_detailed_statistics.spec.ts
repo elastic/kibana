@@ -96,7 +96,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let servicesDetailedStatistics: ServicesDetailedStatisticsReturn;
 
-      const instance = apm.service('my-service', 'production', 'java').instance('instance');
+      const instance = apm
+        .service({ name: 'my-service', environment: 'production', agentName: 'java' })
+        .instance('instance');
 
       const EXPECTED_TPM = 5;
       const EXPECTED_LATENCY = 1000;

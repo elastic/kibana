@@ -75,7 +75,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       before(() => {
-        const instance = apm.service('my-service', 'production', 'java').instance('instance');
+        const instance = apm
+          .service({ name: 'my-service', environment: 'production', agentName: 'java' })
+          .instance('instance');
 
         return synthtraceEsClient.index(
           timerange(moment(start).subtract(1, 'day'), end)

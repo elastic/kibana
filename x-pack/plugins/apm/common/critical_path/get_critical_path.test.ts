@@ -35,7 +35,9 @@ describe('getCriticalPath', () => {
     };
   }
   it('adds the only active span to the critical path', () => {
-    const service = apm.service('a', 'development', 'java').instance('a');
+    const service = apm
+      .service({ name: 'a', environment: 'development', agentName: 'java' })
+      .instance('a');
 
     const {
       criticalPath: { segments },
@@ -59,7 +61,9 @@ describe('getCriticalPath', () => {
   });
 
   it('adds the span that ended last', () => {
-    const service = apm.service('a', 'development', 'java').instance('a');
+    const service = apm
+      .service({ name: 'a', environment: 'development', agentName: 'java' })
+      .instance('a');
 
     const {
       criticalPath: { segments },
@@ -93,7 +97,9 @@ describe('getCriticalPath', () => {
   });
 
   it('adds segment for uninstrumented gaps in the parent', () => {
-    const service = apm.service('a', 'development', 'java').instance('a');
+    const service = apm
+      .service({ name: 'a', environment: 'development', agentName: 'java' })
+      .instance('a');
 
     const {
       criticalPath: { segments },
@@ -146,7 +152,9 @@ describe('getCriticalPath', () => {
   });
 
   it('only considers a single child to be active at the same time', () => {
-    const service = apm.service('a', 'development', 'java').instance('a');
+    const service = apm
+      .service({ name: 'a', environment: 'development', agentName: 'java' })
+      .instance('a');
 
     const {
       criticalPath: { segments },
@@ -189,7 +197,9 @@ describe('getCriticalPath', () => {
 
   // https://www.uber.com/en-NL/blog/crisp-critical-path-analysis-for-microservice-architectures/
   it('correctly returns the critical path for the CRISP example', () => {
-    const service = apm.service('a', 'development', 'java').instance('a');
+    const service = apm
+      .service({ name: 'a', environment: 'development', agentName: 'java' })
+      .instance('a');
 
     const {
       criticalPath: { segments },
