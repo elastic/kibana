@@ -16,6 +16,7 @@ import {
   formatTestRunAt,
 } from '../../../utils/monitor_test_result/test_time_formats';
 import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 
 export const FailedTestsList = ({
   failedTests,
@@ -37,6 +38,8 @@ export const FailedTestsList = ({
 
   const history = useHistory();
 
+  const selectedLocation = useSelectedLocation();
+
   const format = useKibanaDateFormat();
 
   const columns = [
@@ -47,7 +50,7 @@ export const FailedTestsList = ({
       render: (value: string, item: Ping) => {
         return (
           <EuiLink
-            href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${item.monitor.check_group}`}
+            href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${item.monitor.check_group}?locationId=${selectedLocation?.id}`}
           >
             {formatTestRunAt(value, format)}
           </EuiLink>
@@ -75,7 +78,9 @@ export const FailedTestsList = ({
       return {
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
-          history.push(`/monitor/${monitorId}/test-run/${item.monitor.check_group}`);
+          history.push(
+            `/monitor/${monitorId}/test-run/${item.monitor.check_group}?locationId=${selectedLocation?.id}`
+          );
         },
       };
     }
