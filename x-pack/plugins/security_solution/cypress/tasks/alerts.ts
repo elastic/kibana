@@ -37,6 +37,7 @@ import {
   CELL_SHOW_TOP_FIELD_BUTTON,
   ACTIONS_EXPAND_BUTTON,
   SELECT_HISTOGRAM,
+  CELL_FILTER_OUT_BUTTON,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -317,6 +318,9 @@ export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: n
 };
 export const filterForAlertProperty = (propertySelector: string, rowIndex: number) => {
   clickAction(propertySelector, rowIndex, CELL_FILTER_IN_BUTTON);
+};
+export const filterOutAlertProperty = (propertySelector: string, rowIndex: number) => {
+  clickAction(propertySelector, rowIndex, CELL_FILTER_OUT_BUTTON);
 };
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
   clickExpandActions(propertySelector, rowIndex);
