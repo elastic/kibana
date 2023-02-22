@@ -16,6 +16,7 @@ import { groupBy, isPlainObject } from 'lodash';
 
 import { Logger } from '@kbn/core/server';
 
+import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { asOk, asErr, Result, isOk, isErr } from '../lib/result_type';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer, TaskTiming } from '../task_events';
@@ -284,6 +285,9 @@ export class TaskClaiming {
   }: OwnershipClaimingOpts): Promise<ClaimAvailableTasksResult> {
     const partitions = await this.taskPartitioner.getPartitions();
 
+    this.logger.debug(
+      `Claiming tasks for ${partitions.length} partitions: ${partitions.join(',')}`
+    );
     const { taskTypesToClaim = [] } = groupBy(this.definitions.getAllTypes(), (type) =>
       taskTypes.has(type) && !this.isTaskTypeExcluded(type) ? 'taskTypesToClaim' : 'taskTypesToSkip'
     );
@@ -307,65 +311,81 @@ export class TaskClaiming {
     // ugly constant... this accommodates for 2 Kibana nodes trying to claim the same tasks
     // and Elasticsearch's refresh rate being twice the poll interval
     const searchSize = claimSize * 4;
+    let searchesCount = 0;
 
     try {
-      // we're going to search for more docs than we need
-      // so if we hit a version conflict claiming one, we can proceed with
-      // claiming more docs without having to do another search
-      const searchResult = await this.taskStore.search({
-        query,
-        sort,
-        size: searchSize,
-        seq_no_primary_term: true,
-      });
-
-      const claimableDocs = searchResult.docs;
+      let hasMore = true;
+      let searchAfter: SortResults | undefined;
       const claimedDocs: ConcreteTaskInstance[] = [];
       let tasksConflicted = 0;
+
       do {
-        const docsToUpdate: ConcreteTaskInstance[] = [];
-        for (let i = 0; i < claimSize - claimedDocs.length && claimableDocs.length > 0; ++i) {
-          const doc = claimableDocs.shift()!;
-          if (taskTypesToClaim.includes(doc.taskType)) {
-            docsToUpdate.push(doc);
-            if (doc.schedule != null || doc.attempts < this.taskMaxAttempts[doc.taskType]) {
-              if (doc.retryAt != null && doc.retryAt < new Date()) {
-                doc.scheduledAt = doc.retryAt;
-              } else {
-                doc.scheduledAt = doc.runAt;
-              }
+        // we're going to search for more docs than we need
+        // so if we hit a version conflict claiming one, we can proceed with
+        // claiming more docs without having to do another search
+        const searchResult = await this.taskStore.search({
+          query,
+          sort,
+          size: searchSize,
+          seq_no_primary_term: true,
+          search_after: searchAfter,
+        });
+        ++searchesCount;
 
-              doc.status = TaskStatus.Claiming;
-              doc.ownerId = this.taskStore.taskManagerId;
-              doc.retryAt = claimOwnershipUntil;
-            } else {
+        const claimableDocs = searchResult.docs;
+        if (claimableDocs.length < searchSize) {
+          hasMore = false;
+        } else {
+          searchAfter = searchResult.searchAfter;
+        }
+
+        do {
+          const docsToUpdate: ConcreteTaskInstance[] = [];
+          for (let i = 0; i < claimSize - claimedDocs.length && claimableDocs.length > 0; ++i) {
+            const doc = claimableDocs.shift()!;
+            if (taskTypesToClaim.includes(doc.taskType)) {
               docsToUpdate.push(doc);
-              doc.status = TaskStatus.Failed;
+              if (doc.schedule != null || doc.attempts < this.taskMaxAttempts[doc.taskType]) {
+                if (doc.retryAt != null && doc.retryAt < new Date()) {
+                  doc.scheduledAt = doc.retryAt;
+                } else {
+                  doc.scheduledAt = doc.runAt;
+                }
+
+                doc.status = TaskStatus.Claiming;
+                doc.ownerId = this.taskStore.taskManagerId;
+                doc.retryAt = claimOwnershipUntil;
+              } else {
+                docsToUpdate.push(doc);
+                doc.status = TaskStatus.Failed;
+              }
+            } else if (this.unusedTypes.includes(doc.taskType)) {
+              docsToUpdate.push(doc);
+              doc.status = TaskStatus.Unrecognized;
             }
-          } else if (this.unusedTypes.includes(doc.taskType)) {
-            docsToUpdate.push(doc);
-            doc.status = TaskStatus.Unrecognized;
           }
-        }
 
-        let bulkUpdateResults: BulkUpdateResult[] = [];
-        if (docsToUpdate.length > 0) {
-          bulkUpdateResults = await this.taskStore.bulkUpdate(docsToUpdate);
-        }
-
-        for (const bulkUpdateResult of bulkUpdateResults) {
-          if (isOk(bulkUpdateResult)) {
-            claimedDocs.push(bulkUpdateResult.value);
-          } else {
-            tasksConflicted++;
+          let bulkUpdateResults: BulkUpdateResult[] = [];
+          if (docsToUpdate.length > 0) {
+            bulkUpdateResults = await this.taskStore.bulkUpdate(docsToUpdate);
           }
-        }
-      } while (claimedDocs.length < claimSize && claimableDocs.length > 0);
+
+          for (const bulkUpdateResult of bulkUpdateResults) {
+            if (isOk(bulkUpdateResult)) {
+              claimedDocs.push(bulkUpdateResult.value);
+            } else {
+              tasksConflicted++;
+            }
+          }
+        } while (claimedDocs.length < claimSize && claimableDocs.length > 0);
+      } while (claimedDocs.length < claimSize && hasMore && searchAfter);
 
       apmTrans?.end('success');
 
       if (tasksConflicted > 0) {
-        this.logger.warn(`Version conflict claiming ${tasksConflicted} tasks`);
+        this.logger.warn(
+          `Version conflict claiming ${tasksConflicted} tasks, took ${searchesCount} searches.`
+        );
       }
 
       return {

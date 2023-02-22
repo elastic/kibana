@@ -32,11 +32,6 @@ export class TaskPartitioner {
   async getPartitions(): Promise<number[]> {
     const allPodNames = await this.getAllPodNames();
     const podPartitions = rendezvousHash(this.podName, allPodNames, this.allPartitions, 2);
-    console.log({
-      podName: this.podName,
-      partitionsLength: podPartitions.length,
-      partitions: podPartitions,
-    });
     return podPartitions;
   }
 

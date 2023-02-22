@@ -74,6 +74,7 @@ export interface UpdateByQueryOpts extends SearchOpts {
 
 export interface FetchResult {
   docs: ConcreteTaskInstance[];
+  searchAfter?: estypes.SortResults;
 }
 
 export type BulkUpdateResult = Result<
@@ -151,14 +152,15 @@ export class TaskStore {
     let savedObject;
     try {
       const id = taskInstance.id || uuid.v4();
-      savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstanceWithPartition>(
-        'task',
-        {
-          ...taskInstanceToAttributes(taskInstance),
-          partition: murmurhash.v3(id) % 360
-        },
-        { id, refresh: false }
-      );
+      savedObject =
+        await this.savedObjectsRepository.create<SerializedConcreteTaskInstanceWithPartition>(
+          'task',
+          {
+            ...taskInstanceToAttributes(taskInstance),
+            partition: murmurhash.v3(id) % 360,
+          },
+          { id, refresh: false }
+        );
       if (get(taskInstance, 'schedule.interval', null) == null) {
         this.adHocTaskCounter.increment();
       }
@@ -183,18 +185,19 @@ export class TaskStore {
         type: 'task',
         attributes: {
           ...taskInstanceToAttributes(taskInstance),
-          partition: murmurhash.v3(id) % 360
+          partition: murmurhash.v3(id) % 360,
         },
-        id: id,
+        id,
       };
     });
 
     let savedObjects;
     try {
-      savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstanceWithPartition>(
-        objects,
-        { refresh: false }
-      );
+      savedObjects =
+        await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstanceWithPartition>(
+          objects,
+          { refresh: false }
+        );
       this.adHocTaskCounter.increment(
         taskInstances.filter((task) => {
           return get(task, 'schedule.interval', null) == null;
@@ -415,6 +418,7 @@ export class TaskStore {
       });
 
       return {
+        searchAfter: tasks.length === 0 ? undefined : tasks[tasks.length - 1].sort,
         docs: tasks
           // @ts-expect-error @elastic/elasticsearch _source is optional
           .filter((doc) => this.serializer.isRawSavedObject(doc))
