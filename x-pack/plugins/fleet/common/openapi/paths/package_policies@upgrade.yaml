@@ -32,3 +32,5 @@ post:
               required:
                 - id
                 - success
+    '400':
+      $ref: ../components/responses/error.yaml
