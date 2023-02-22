@@ -20,7 +20,6 @@ import type {
   MaybeImmutable,
   ResponseActionExecuteOutputContent,
 } from '../../../../common/endpoint/types';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 const ACCORDION_BUTTON_TEXT = Object.freeze({
   output: {
@@ -88,7 +87,7 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
 );
 ExecutionActionOutputAccordion.displayName = 'ExecutionActionOutputAccordion';
 
-interface ExecuteActionHostResponseOutputProps {
+export interface ExecuteActionHostResponseOutputProps {
   action: MaybeImmutable<ActionDetails>;
   agentId?: string;
   'data-test-subj'?: string;
@@ -97,12 +96,6 @@ interface ExecuteActionHostResponseOutputProps {
 
 export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
   ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize = 'xs' }) => {
-    const { canWriteExecuteOperations } = useUserPrivileges().endpointPrivileges;
-
-    const [executeOutputContent, setExecuteOutputContent] = useState<
-      undefined | ResponseActionExecuteOutputContent
-    >(undefined);
-
     const outputContent = useMemo(
       () =>
         action.outputs &&
@@ -112,8 +105,12 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
     );
 
     const { data: actionDetails, isFetching } = useGetActionDetails(action.id, {
-      enabled: canWriteExecuteOperations && !outputContent,
+      enabled: !outputContent,
     });
+
+    const [executeOutputContent, setExecuteOutputContent] = useState<
+      undefined | ResponseActionExecuteOutputContent
+    >(outputContent);
 
     useEffect(() => {
       if (
@@ -133,14 +130,14 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
       };
     }, [actionDetails, agentId, isFetching]);
 
-    if (!canWriteExecuteOperations || !executeOutputContent) {
-      return null;
-    }
-
     if (isFetching) {
       return (
         <EuiSkeletonText size="relative" lines={2} data-test-subj={`${dataTestSubj}-loading`} />
       );
+    }
+
+    if (!executeOutputContent) {
+      return null;
     }
 
     return (

@@ -737,7 +737,7 @@ describe('Response actions history', () => {
         expect(unavailableText).toBeTruthy();
       });
 
-      it('should not contain execute output for `execute` action WITHOUT execute operation privilege', async () => {
+      it('should contain execute output for `execute` action WITHOUT execute operation privilege', async () => {
         useUserPrivilegesMock.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({
             canWriteExecuteOperations: false,
@@ -750,12 +750,12 @@ describe('Response actions history', () => {
 
         render();
 
-        const { getByTestId, queryByTestId } = renderResult;
+        const { getByTestId } = renderResult;
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
         userEvent.click(expandButton);
 
-        const executeAccordions = queryByTestId(`${testPrefix}-executeResponseOutput`);
-        expect(executeAccordions).toBeNull();
+        const executeAccordions = getByTestId(`${testPrefix}-executeResponseOutput`);
+        expect(executeAccordions).toBeTruthy();
       });
 
       it('should not contain full output download link in expanded row for `execute` action WITHOUT execute operation privilege', async () => {
@@ -779,7 +779,7 @@ describe('Response actions history', () => {
 
         const output = getByTestId(`${testPrefix}-details-tray-output`);
         expect(output).toBeTruthy();
-        expect(output.textContent).toEqual('execute completed successfully');
+        expect(output.textContent).toContain('execute completed successfully');
       });
     });
   });
