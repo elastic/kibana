@@ -16,7 +16,7 @@ import { AlertsResult, MonitorIdParam } from '../actions/types';
 import { API_URLS } from '../../../../common/constants';
 import { AtomicStatusCheckParams } from '../../../../common/runtime_types/alerts';
 
-import { populateAlertActions, RuleAction } from '../../../../common/rules/alert_actions';
+import { populateAlertActions, RuleAction } from '../../../../common/rules/alert_actions_legacy';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { DefaultEmail } from '../../../../common/runtime_types';
 

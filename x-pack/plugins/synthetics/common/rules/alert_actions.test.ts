@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { populateAlertActions } from './alert_actions';
+import { populateAlertActions } from './alert_actions_legacy';
 import { ActionConnector } from './types';
 import { MONITOR_STATUS } from '../constants/uptime_alerts';
 import { MonitorStatusTranslations } from '../translations';
