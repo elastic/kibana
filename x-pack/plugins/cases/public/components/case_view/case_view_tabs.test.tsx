@@ -17,14 +17,11 @@ import { useGetCase } from '../../containers/use_get_case';
 import { CaseViewTabs } from './case_view_tabs';
 import { caseData, defaultGetCase } from './mocks';
 import type { CaseViewTabsProps } from './case_view_tabs';
-import { userProfiles } from '../../containers/user_profiles/api.mock';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
 jest.mock('../../containers/use_get_case');
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
-jest.mock('../connectors/resilient/api');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
@@ -52,11 +49,7 @@ describe('CaseViewTabs', () => {
   beforeEach(() => {
     mockGetCase();
 
-    const license = licensingMock.createLicense({
-      license: { type: 'platinum' },
-    });
-
-    appMockRenderer = createAppMockRenderer({ license });
+    appMockRenderer = createAppMockRenderer();
   });
 
   afterEach(() => {
@@ -64,31 +57,9 @@ describe('CaseViewTabs', () => {
   });
 
   it('should render CaseViewTabs', async () => {
-    const damagedRaccoonUser = userProfiles[0].user;
-    const caseDataWithDamagedRaccoon = {
-      ...caseData,
-      createdBy: {
-        profileUid: userProfiles[0].uid,
-        username: damagedRaccoonUser.username,
-        fullName: damagedRaccoonUser.full_name,
-        email: damagedRaccoonUser.email,
-      },
-    };
-
-    const license = licensingMock.createLicense({
-      license: { type: 'platinum' },
-    });
-
-    const props = { activeTab: CASE_VIEW_PAGE_TABS.ACTIVITY, caseData: caseDataWithDamagedRaccoon };
-    appMockRenderer = createAppMockRenderer({ features: { metrics: ['alerts.count'] }, license });
+    const props = { activeTab: CASE_VIEW_PAGE_TABS.ACTIVITY, caseData };
+    appMockRenderer = createAppMockRenderer({ features: { metrics: ['alerts.count'] } });
     appMockRenderer.render(<CaseViewTabs {...props} />);
-
-    expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
-  });
-
-  it('renders tabs correctly', async () => {
-    appMockRenderer.render(<CaseViewTabs {...caseProps} />);
 
     expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
     expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();

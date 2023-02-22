@@ -36,7 +36,7 @@ import { UserActionsActivityBar } from '../../user_actions_activity_bar';
 import type { Assignee } from '../../user_profiles/types';
 import { convertToCaseUserWithProfileInfo } from '../../user_profiles/user_converter';
 import type { UserActivityParams } from '../../user_actions_activity_bar/types';
-import type { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { CaseViewTabs } from '../case_view_tabs';
 import { DescriptionWrapper } from '../../description/description_wrapper';
 
@@ -80,14 +80,12 @@ export const CaseViewActivity = ({
   actionsNavigation,
   showAlertDetails,
   useFetchAlertData,
-  activeTab,
 }: {
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   caseData: Case;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
-  activeTab: CASE_VIEW_PAGE_TABS;
 }) => {
   const [userActivityQueryParams, setUserActivityQueryParams] = useState<UserActivityParams>({
     type: 'all',
@@ -211,7 +209,7 @@ export const CaseViewActivity = ({
   return (
     <>
       <EuiFlexItem grow={6}>
-        <CaseViewTabs caseData={caseData} activeTab={activeTab} />
+        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
         <DescriptionWrapper
           isLoadingDescription={isLoadingDescription}
           data={caseData}

@@ -135,11 +135,10 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                 actionsNavigation={actionsNavigation}
                 showAlertDetails={showAlertDetails}
                 useFetchAlertData={useFetchAlertData}
-                activeTab={activeTabId}
               />
             )}
             {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
-              <CaseViewAlerts caseData={caseData} activeTab={activeTabId} />
+              <CaseViewAlerts caseData={caseData} />
             )}
           </EuiFlexGroup>
         </WhitePageWrapperNoBorder>

@@ -40,6 +40,8 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 
+const mockSetTitle = jest.fn();
+
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_metrics');
@@ -57,6 +59,21 @@ jest.mock('../user_actions/timestamp', () => ({
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
 jest.mock('../connectors/resilient/api');
+jest.mock('../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: () => {
+      const { services } = originalModule.useKibana();
+      return {
+        services: {
+          ...services,
+          chrome: { setBreadcrumbs: jest.fn(), docTitle: { change: mockSetTitle } },
+        },
+      };
+    },
+  };
+});
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useUrlParamsMock = useUrlParams as jest.Mock;
@@ -609,6 +626,14 @@ describe('CaseViewPage', () => {
         expect(await screen.findByTestId('euiMarkdownEditorTextArea')).toHaveTextContent(
           newComment
         );
+      });
+    });
+
+    describe('breadcrumbs', () => {
+      it('should set the cases title', () => {
+        appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+        expect(mockSetTitle).toHaveBeenCalledWith([caseProps.caseData.title, 'Cases', 'Test']);
       });
     });
   });
