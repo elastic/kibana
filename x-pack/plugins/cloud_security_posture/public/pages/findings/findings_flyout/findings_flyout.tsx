@@ -35,6 +35,7 @@ import { RuleTab } from './rule_tab';
 import type { BenchmarkId } from '../../../../common/types';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { BenchmarkName } from '../../../../common/types';
+import { FINDINGS_FLYOUT } from '../test_subjects';
 
 const tabs = [
   {
@@ -127,7 +128,7 @@ export const FindingsRuleFlyout = ({
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} data-test-subj={FINDINGS_FLYOUT}>
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
