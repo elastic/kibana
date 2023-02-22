@@ -2764,6 +2764,22 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.casesData",
+            "type": "Object",
+            "tags": [],
+            "label": "casesData",
+            "description": [],
+            "signature": [
+              "{ cases: Map<string, ",
+              "Case",
+              ">; isLoading: boolean; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.AlertsTableProps.columns",
             "type": "Array",
             "tags": [],
@@ -4975,7 +4991,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"id\" | \"params\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"monitoring\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"running\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"id\" | \"params\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"monitoring\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"running\" | \"viewInAppRelativeUrl\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
