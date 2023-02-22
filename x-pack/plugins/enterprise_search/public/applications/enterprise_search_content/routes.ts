@@ -32,7 +32,6 @@ export const ENGINE_TAB_PATH = `${ENGINE_PATH}/:tabId`;
 export enum EngineViewTabs {
   OVERVIEW = 'overview',
   INDICES = 'indices',
-  DOCUMENTS = 'documents',
   SCHEMA = 'schema',
   PREVIEW = 'preview',
   API = 'api',

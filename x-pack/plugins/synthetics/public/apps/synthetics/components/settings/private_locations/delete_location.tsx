@@ -9,6 +9,8 @@ import React, { useState } from 'react';
 import { EuiButtonIcon, EuiConfirmModal, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useFleetPermissions } from '../../../hooks';
+import { CANNOT_SAVE_INTEGRATION_LABEL } from '../../common/components/permissions';
 
 export const DeleteLocation = ({
   loading,
@@ -27,8 +29,17 @@ export const DeleteLocation = ({
   const canDelete = monCount === 0;
 
   const { canSave } = useSyntheticsSettingsContext();
+  const { canSaveIntegrations } = useFleetPermissions();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const deleteDisabledReason = !canSaveIntegrations
+    ? CANNOT_SAVE_INTEGRATION_LABEL
+    : i18n.translate('xpack.synthetics.monitorManagement.cannotDelete.description', {
+        defaultMessage: `This location cannot be deleted, because it has {monCount, number} {monCount, plural,one {monitor} other {monitors}} running.
+                Please remove this location from your monitors before deleting this location.`,
+        values: { monCount },
+      });
 
   const deleteModal = (
     <EuiConfirmModal
@@ -51,17 +62,7 @@ export const DeleteLocation = ({
   return (
     <>
       {isModalOpen && deleteModal}
-      <EuiToolTip
-        content={
-          canDelete
-            ? DELETE_LABEL
-            : i18n.translate('xpack.synthetics.monitorManagement.cannotDelete.description', {
-                defaultMessage: `This location cannot be deleted, because it has {monCount, number} {monCount, plural,one {monitor} other {monitors}} running.
-                Please remove this location from your monitors before deleting this location.`,
-                values: { monCount },
-              })
-        }
-      >
+      <EuiToolTip content={canDelete && canSaveIntegrations ? DELETE_LABEL : deleteDisabledReason}>
         <EuiButtonIcon
           data-test-subj={`deleteLocation-${id}`}
           isLoading={loading}

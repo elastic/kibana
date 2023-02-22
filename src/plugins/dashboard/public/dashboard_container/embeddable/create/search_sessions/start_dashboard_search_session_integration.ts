@@ -12,28 +12,10 @@ import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public
 
 import { DashboardContainer } from '../../dashboard_container';
 import { DashboardContainerInput } from '../../../../../common';
-import { DashboardContainerInputWithoutId } from '../../../types';
 import { pluginServices } from '../../../../services/plugin_services';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../../dashboard_constants';
 import { DashboardCreationOptions } from '../../dashboard_container_factory';
-import { getUnsavedChanges } from '../../../state/diffing/dashboard_diffing_integration';
-
-/**
- * input keys that will cause a new session to be created.
- */
-const refetchKeys: Array<keyof DashboardContainerInputWithoutId> = [
-  'query',
-  'filters',
-  'timeRange',
-  'timeslice',
-  'timeRestore',
-  'lastReloadRequestTime',
-
-  // also refetch when chart settings change
-  'syncColors',
-  'syncCursor',
-  'syncTooltips',
-];
+import { getShouldRefresh } from '../../../state/diffing/dashboard_diffing_integration';
 
 /**
  * Enables dashboard search sessions.
@@ -78,8 +60,7 @@ export function startDashboardSearchSessionIntegration(
     .pipe(pairwise(), debounceTime(CHANGE_CHECK_DEBOUNCE))
     .subscribe(async (states) => {
       const [previous, current] = states as DashboardContainerInput[];
-      const changes = await getUnsavedChanges.bind(this)(previous, current, refetchKeys);
-      const shouldRefetch = Object.keys(changes).length > 0;
+      const shouldRefetch = await getShouldRefresh.bind(this)(previous, current);
       if (!shouldRefetch) return;
 
       const currentSearchSessionId = this.getState().explicitInput.searchSessionId;

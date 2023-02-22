@@ -7,8 +7,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { DashboardPlugin } from './plugin';
 
+import { DashboardPlugin } from './plugin';
 export {
   createDashboardEditUrl,
   DASHBOARD_APP_ID,
@@ -18,6 +18,7 @@ export {
   type DashboardAPI,
   DashboardRenderer,
   DASHBOARD_CONTAINER_TYPE,
+  type DashboardCreationOptions,
 } from './dashboard_container';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 

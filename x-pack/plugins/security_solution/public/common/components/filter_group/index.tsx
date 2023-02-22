@@ -12,6 +12,7 @@ import type {
   ControlGroupAPI,
   OptionsListEmbeddableInput,
 } from '@kbn/controls-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useEffect, useState, useRef, useMemo } from 'react';
@@ -336,6 +337,9 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             id="filter-group__context-menu"
             button={
               <EuiButtonIcon
+                aria-label={i18n.translate('xpack.securitySolution.filterGroup.groupMenuTitle', {
+                  defaultMessage: 'Filter group menu',
+                })}
                 display="empty"
                 size="s"
                 iconType="boxesHorizontal"

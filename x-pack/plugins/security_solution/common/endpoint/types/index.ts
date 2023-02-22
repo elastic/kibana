@@ -933,6 +933,7 @@ export interface PolicyConfig {
       };
     };
     events: {
+      credential_access: boolean;
       dll_and_driver_load: boolean;
       dns: boolean;
       file: boolean;

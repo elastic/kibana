@@ -19,3 +19,4 @@ export * from './test_assertions';
 export { checkAAD } from './check_aad';
 export { getEventLog } from './get_event_log';
 export { createWaitForExecutionCount } from './wait_for_execution_count';
+export { resetRulesSettings } from './reset_rules_settings';

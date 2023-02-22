@@ -19,6 +19,8 @@ get:
                 $ref: ../components/schemas/agent.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-agent
   parameters:
     - $ref: ../components/parameters/with_metrics.yaml
@@ -37,6 +39,8 @@ put:
                 $ref: ../components/schemas/agent.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: update-agent
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
@@ -70,6 +74,8 @@ delete:
                   - deleted
             required:
               - action
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: delete-agent
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

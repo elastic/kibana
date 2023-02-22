@@ -6,35 +6,53 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiLoadingSpinner, EuiSelectable, EuiSpacer } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
+import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
-import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 interface OptionsListPopoverSuggestionsProps {
-  isLoading: boolean;
   showOnlySelected: boolean;
+  loadMoreSuggestions: (cardinality: number) => void;
 }
 
 export const OptionsListPopoverSuggestions = ({
-  isLoading,
   showOnlySelected,
+  loadMoreSuggestions,
 }: OptionsListPopoverSuggestionsProps) => {
   const optionsList = useOptionsList();
 
-  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const searchString = optionsList.select((state) => state.componentState.searchString);
   const availableOptions = optionsList.select((state) => state.componentState.availableOptions);
+  const totalCardinality = optionsList.select((state) => state.componentState.totalCardinality);
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
 
-  const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
-  const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
-  const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
-  const hideExists = optionsList.select((state) => state.explicitInput.hideExists);
+  const sort = optionsList.select((state) => state.explicitInput.sort);
   const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
+  const hideExists = optionsList.select((state) => state.explicitInput.hideExists);
+  const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
+  const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
+  const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
+
+  const isLoading = optionsList.select((state) => state.output.loading) ?? false;
+
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const canLoadMoreSuggestions = useMemo(
+    () =>
+      totalCardinality
+        ? Object.keys(availableOptions ?? {}).length <
+          Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE)
+        : false,
+    [availableOptions, totalCardinality]
+  );
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
@@ -42,7 +60,6 @@ export const OptionsListPopoverSuggestions = ({
     () => new Set<string>(invalidSelections),
     [invalidSelections]
   );
-
   const suggestions = useMemo(() => {
     return showOnlySelected ? selectedOptions : Object.keys(availableOptions ?? {});
   }, [availableOptions, selectedOptions, showOnlySelected]);
@@ -78,10 +95,23 @@ export const OptionsListPopoverSuggestions = ({
           ) : undefined,
       };
     });
-    const suggestionsSelectableOptions = existsSelectableOption
-      ? [existsSelectableOption, ...options]
-      : options;
-    setSelectableOptions(suggestionsSelectableOptions);
+
+    if (canLoadMoreSuggestions) {
+      options.push({
+        key: 'loading-option',
+        className: 'optionslist--loadingMoreGroupLabel',
+        label: OptionsListStrings.popover.getLoadingMoreMessage(),
+        isGroupLabel: true,
+      });
+    } else if (options.length === MAX_OPTIONS_LIST_REQUEST_SIZE) {
+      options.push({
+        key: 'no-more-option',
+        className: 'optionslist--endOfOptionsGroupLabel',
+        label: OptionsListStrings.popover.getAtEndOfOptionsMessage(),
+        isGroupLabel: true,
+      });
+    }
+    setSelectableOptions(existsSelectableOption ? [existsSelectableOption, ...options] : options);
   }, [
     suggestions,
     availableOptions,
@@ -89,42 +119,66 @@ export const OptionsListPopoverSuggestions = ({
     selectedOptionsSet,
     invalidSelectionsSet,
     existsSelectableOption,
+    canLoadMoreSuggestions,
   ]);
 
-  return (
-    <EuiSelectable
-      isLoading={isLoading}
-      loadingMessage={
-        <span data-test-subj="optionsList-control-popover-loading">
-          <EuiLoadingSpinner size="m" />
-          <EuiSpacer size="xs" />
-          {OptionsListStrings.popover.getLoadingMessage()}
-        </span>
-      }
-      options={selectableOptions}
-      listProps={{ onFocusBadge: false }}
-      aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
-        fieldName,
-        selectableOptions.length
-      )}
-      emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
-      onChange={(newSuggestions, _, changedOption) => {
-        setSelectableOptions(newSuggestions);
+  const loadMoreOptions = useCallback(() => {
+    const listbox = listRef.current?.querySelector('.euiSelectableList__list');
+    if (!listbox) return;
 
-        const key = changedOption.key ?? changedOption.label;
-        // the order of these checks matters, so be careful if rearranging them
-        if (key === 'exists-option') {
-          optionsList.dispatch.selectExists(!Boolean(existsSelected));
-        } else if (showOnlySelected || selectedOptionsSet.has(key)) {
-          optionsList.dispatch.deselectOption(key);
-        } else if (singleSelect) {
-          optionsList.dispatch.replaceSelection(key);
-        } else {
-          optionsList.dispatch.selectOption(key);
-        }
-      }}
-    >
-      {(list) => list}
-    </EuiSelectable>
+    const { scrollTop, scrollHeight, clientHeight } = listbox;
+    if (scrollTop + clientHeight >= scrollHeight - parseInt(euiThemeVars.euiSizeXXL, 10)) {
+      // reached the "bottom" of the list, where euiSizeXXL acts as a "margin of error" so that the user doesn't
+      // have to scroll **all the way** to the bottom in order to load more options
+      loadMoreSuggestions(totalCardinality ?? MAX_OPTIONS_LIST_REQUEST_SIZE);
+    }
+  }, [loadMoreSuggestions, totalCardinality]);
+
+  useEffect(() => {
+    const container = listRef.current;
+    if (!isLoading && canLoadMoreSuggestions) {
+      container?.addEventListener('scroll', loadMoreOptions, true);
+      return () => {
+        container?.removeEventListener('scroll', loadMoreOptions, true);
+      };
+    }
+  }, [loadMoreOptions, isLoading, canLoadMoreSuggestions]);
+
+  useEffect(() => {
+    // scroll back to the top when changing the sorting or the search string
+    const listbox = listRef.current?.querySelector('.euiSelectableList__list');
+    listbox?.scrollTo({ top: 0 });
+  }, [sort, searchString]);
+
+  return (
+    <>
+      <div ref={listRef}>
+        <EuiSelectable
+          options={selectableOptions}
+          listProps={{ onFocusBadge: false }}
+          aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
+            fieldName,
+            selectableOptions.length
+          )}
+          emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
+          onChange={(newSuggestions, _, changedOption) => {
+            const key = changedOption.key ?? changedOption.label;
+            setSelectableOptions(newSuggestions);
+            // the order of these checks matters, so be careful if rearranging them
+            if (key === 'exists-option') {
+              optionsList.dispatch.selectExists(!Boolean(existsSelected));
+            } else if (showOnlySelected || selectedOptionsSet.has(key)) {
+              optionsList.dispatch.deselectOption(key);
+            } else if (singleSelect) {
+              optionsList.dispatch.replaceSelection(key);
+            } else {
+              optionsList.dispatch.selectOption(key);
+            }
+          }}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </div>
+    </>
   );
 };

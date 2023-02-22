@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
@@ -14,10 +14,7 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-    "**/cypress/**",
-  ],
+  "exclude": ["target/**/*", "**/cypress/**"],
   "kbn_references": [
     "@kbn/core",
     { "path": "../../../src/setup_node_env/tsconfig.json" },
@@ -79,6 +76,7 @@
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
     "@kbn/core-chrome-browser",
+    "@kbn/ecs-data-quality-dashboard",
     "@kbn/data-views-plugin",
     "@kbn/datemath",
     "@kbn/ui-theme",
@@ -129,12 +127,15 @@
     "@kbn/core-status-common-internal",
     "@kbn/repo-info",
     "@kbn/storybook",
-    "@kbn/ecs",
     "@kbn/cypress-config",
     "@kbn/controls-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-import-export-server-mocks",
     "@kbn/user-profile-components",
     "@kbn/guided-onboarding",
     "@kbn/securitysolution-ecs",
     "@kbn/cell-actions",
+    "@kbn/shared-ux-router"
   ]
 }

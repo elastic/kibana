@@ -27,12 +27,13 @@ export const BuildKibanaPlatformPlugins: Task = {
       repoRoot: REPO_ROOT,
       outputRoot: build.resolvePath(),
       cache: false,
-      examples: false,
       watch: false,
       dist: true,
       includeCoreBundle: true,
       inspectWorkers: false,
       limitsPath: Path.resolve(REPO_ROOT, 'packages/kbn-optimizer/limits.yml'),
+      examples: buildConfig.pluginSelector.examples,
+      testPlugins: buildConfig.pluginSelector.testPlugins,
     });
 
     await lastValueFrom(
@@ -42,6 +43,10 @@ export const BuildKibanaPlatformPlugins: Task = {
     const combinedMetrics: CiStatsMetric[] = [];
     const metricFilePaths: string[] = [];
     for (const bundle of config.bundles) {
+      if (bundle.ignoreMetrics) {
+        continue;
+      }
+
       const path = Path.resolve(bundle.outputDir, 'metrics.json');
       const metrics: CiStatsMetric[] = JSON.parse(await read(path));
       combinedMetrics.push(...metrics);

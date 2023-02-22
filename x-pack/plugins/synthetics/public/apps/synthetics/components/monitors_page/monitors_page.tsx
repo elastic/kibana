@@ -38,17 +38,12 @@ const MonitorPage: React.FC = () => {
   } = useEnablement();
 
   const monitorListProps = useMonitorList();
-  const {
-    syntheticsMonitors,
-    loading: monitorsLoading,
-    isDataQueried,
-    absoluteTotal,
-  } = monitorListProps;
+  const { syntheticsMonitors, loading: monitorsLoading, absoluteTotal, loaded } = monitorListProps;
 
   const { loading: locationsLoading } = useLocations();
   const showEmptyState = isEnabled !== undefined && syntheticsMonitors.length === 0;
 
-  if (isEnabled && !monitorsLoading && absoluteTotal === 0 && isDataQueried) {
+  if (isEnabled && !monitorsLoading && absoluteTotal === 0 && loaded) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 

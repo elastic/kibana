@@ -10,19 +10,18 @@ import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
-  EuiIcon,
-  EuiLink,
   EuiLoadingChart,
   EuiPopover,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 
 import {
   controlGroupSelector,
@@ -41,25 +40,26 @@ interface ControlFrameErrorProps {
 const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const popoverButton = (
-    <EuiText className="errorEmbeddableCompact__button" size="xs">
-      <EuiLink
-        className="eui-textTruncate"
-        color="subdued"
-        onClick={() => setPopoverOpen((open) => !open)}
-      >
-        <EuiIcon type="alert" color="danger" />
-        <FormattedMessage
-          id="controls.frame.error.message"
-          defaultMessage="An error has occurred. Read more"
-        />
-      </EuiLink>
-    </EuiText>
+    <EuiButtonEmpty
+      color="danger"
+      iconSize="m"
+      iconType={'alert'}
+      onClick={() => setPopoverOpen((open) => !open)}
+      className={'errorEmbeddableCompact__button'}
+      textProps={{ className: 'errorEmbeddableCompact__text' }}
+    >
+      <FormattedMessage
+        id="controls.frame.error.message"
+        defaultMessage="An error occurred. View more"
+      />
+    </EuiButtonEmpty>
   );
 
   return (
     <EuiPopover
       button={popoverButton}
       isOpen={isPopoverOpen}
+      className="errorEmbeddableCompact__popover"
       anchorClassName="errorEmbeddableCompact__popoverAnchor"
       closePopover={() => setPopoverOpen(false)}
     >
@@ -124,12 +124,7 @@ export const ControlFrame = ({
   }, [embeddable, embeddableRoot]);
 
   const floatingActions = (
-    <div
-      className={classNames('controlFrameFloatingActions', {
-        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
-        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
-      })}
-    >
+    <>
       {!fatalError && embeddableType !== TIME_SLIDER_CONTROL && (
         <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
           <EditControlButton embeddableId={embeddableId} />
@@ -155,7 +150,7 @@ export const ControlFrame = ({
           color="danger"
         />
       </EuiToolTip>
-    </div>
+    </>
   );
 
   const embeddableParentClassNames = classNames('controlFrame__control', {
@@ -217,18 +212,27 @@ export const ControlFrame = ({
 
   return (
     <>
-      {embeddable && enableActions && floatingActions}
-      <EuiFormRow
-        data-test-subj="control-frame-title"
-        fullWidth
-        label={
-          usingTwoLineLayout
-            ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
-            : undefined
-        }
+      <FloatingActions
+        className={classNames('controlFrameFloatingActions', {
+          'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
+          'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
+        })}
+        usingTwoLineLayout={usingTwoLineLayout}
+        actions={floatingActions}
+        isEnabled={embeddable && enableActions}
       >
-        {form}
-      </EuiFormRow>
+        <EuiFormRow
+          data-test-subj="control-frame-title"
+          fullWidth
+          label={
+            usingTwoLineLayout
+              ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
+              : undefined
+          }
+        >
+          {form}
+        </EuiFormRow>
+      </FloatingActions>
     </>
   );
 };

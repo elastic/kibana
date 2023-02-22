@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
   ENDPOINT_BLOCKLISTS_LIST_ID,
@@ -50,7 +50,7 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const history = useHistory();
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
-
+  const { state } = useLocation();
   const getPath = useCallback(
     (args: Partial<PolicyDetailsArtifactsPageLocation>) => {
       if (listId === ENDPOINT_TRUSTED_APPS_LIST_ID) {
@@ -79,8 +79,8 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
   );
 
   return useCallback(
-    (args: Partial<PolicyDetailsArtifactsPageLocation>) => history.push(getPath(args)),
-    [getPath, history]
+    (args: Partial<PolicyDetailsArtifactsPageLocation>) => history.push(getPath(args), state),
+    [getPath, history, state]
   );
 }
 

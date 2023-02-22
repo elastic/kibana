@@ -15,8 +15,9 @@ import {
   QuickButtonProps,
   SolutionToolbar,
 } from '@kbn/presentation-util-plugin/public';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EuiHorizontalRule } from '@elastic/eui';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
@@ -37,6 +38,7 @@ export function DashboardEditingToolbar() {
     embeddable: { getStateTransfer, getEmbeddableFactory },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
+  const { euiTheme } = useEuiTheme();
 
   const dashboard = useDashboardAPI();
 
@@ -176,8 +178,11 @@ export function DashboardEditingToolbar() {
   }
 
   return (
-    <>
-      <EuiHorizontalRule margin="none" />
+    <div
+      css={css`
+        padding: 0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};
+      `}
+    >
       <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>
         {{
           primaryActionButton: (
@@ -193,6 +198,6 @@ export function DashboardEditingToolbar() {
           extraButtons,
         }}
       </SolutionToolbar>
-    </>
+    </div>
   );
 }

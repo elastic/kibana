@@ -8,9 +8,6 @@
 
 import '../_dashboard_container.scss';
 
-import { v4 as uuidv4 } from 'uuid';
-import classNames from 'classnames';
-import { EuiLoadingElastic } from '@elastic/eui';
 import React, {
   forwardRef,
   useEffect,
@@ -19,24 +16,30 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import classNames from 'classnames';
+import { css } from '@emotion/react';
+
+import { EuiLoadingElastic, useEuiOverflowScroll, EuiLoadingSpinner } from '@elastic/eui';
 
 import {
   DashboardCreationOptions,
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
 } from '../embeddable/dashboard_container_factory';
-import { DashboardAPI, DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
-import type { DashboardContainer } from '../embeddable/dashboard_container';
+import { DashboardAPI, DASHBOARD_CONTAINER_TYPE } from '..';
 import { buildApiFromDashboardContainer } from './dashboard_api';
+import type { DashboardContainer } from '../embeddable/dashboard_container';
 
 export interface DashboardRendererProps {
   savedObjectId?: string;
-  getCreationOptions?: () => DashboardCreationOptions;
+  showPlainSpinner?: boolean;
+  getCreationOptions?: () => Promise<DashboardCreationOptions>;
 }
 
 export const DashboardRenderer = forwardRef<DashboardAPI | undefined, DashboardRendererProps>(
-  ({ savedObjectId, getCreationOptions }, ref) => {
+  ({ savedObjectId, getCreationOptions, showPlainSpinner }, ref) => {
     const dashboardRoot = useRef(null);
     const [loading, setLoading] = useState(true);
     const [screenshotMode, setScreenshotMode] = useState(false);
@@ -74,7 +77,7 @@ export const DashboardRenderer = forwardRef<DashboardAPI | undefined, DashboardR
       let destroyContainer: () => void;
 
       (async () => {
-        const creationOptions = getCreationOptions?.();
+        const creationOptions = await getCreationOptions?.();
 
         // Lazy loading all services is required in this component because it is exported and contributes to the bundle size.
         const { pluginServices } = await import('../../services/plugin_services');
@@ -116,9 +119,20 @@ export const DashboardRenderer = forwardRef<DashboardAPI | undefined, DashboardR
       { 'dashboardViewport--screenshotMode': screenshotMode },
       { 'dashboardViewport--loading': loading }
     );
+
+    const viewportStyles = css`
+      ${useEuiOverflowScroll('y', false)}
+    `;
+
+    const loadingSpinner = showPlainSpinner ? (
+      <EuiLoadingSpinner size="xxl" />
+    ) : (
+      <EuiLoadingElastic size="xxl" />
+    );
+
     return (
-      <div className={viewportClasses}>
-        {loading ? <EuiLoadingElastic size="xxl" /> : <div ref={dashboardRoot} />}
+      <div className={viewportClasses} css={viewportStyles}>
+        {loading ? loadingSpinner : <div ref={dashboardRoot} />}
       </div>
     );
   }

@@ -7,18 +7,23 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, throwIfAnyTypeNotVisibleByAPI } from './utils';
 
 interface RouteDependencies {
+  config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerBulkCreateRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { config, coreUsageData, logger }: RouteDependencies
 ) => {
+  const { allowHttpApiAccess } = config;
   router.post(
     {
       path: '/_bulk_create',
@@ -49,6 +54,9 @@ export const registerBulkCreateRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      logger.warn(
+        "The bulk create saved object API '/api/saved_objects/_bulk_create' is deprecated."
+      );
       const { overwrite } = req.query;
 
       const usageStatsClient = coreUsageData.getClient();
@@ -57,7 +65,9 @@ export const registerBulkCreateRoute = (
       const { savedObjects } = await context.core;
 
       const typesToCheck = [...new Set(req.body.map(({ type }) => type))];
-      throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
+      if (!allowHttpApiAccess) {
+        throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
+      }
       const result = await savedObjects.client.bulkCreate(req.body, { overwrite });
       return res.ok({ body: result });
     })

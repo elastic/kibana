@@ -31,6 +31,19 @@ export const QuerySchema = schema.object({
 
 export type MonitorsQuery = TypeOf<typeof QuerySchema>;
 
+export const OverviewStatusSchema = schema.object({
+  query: schema.maybe(schema.string()),
+  filter: schema.maybe(schema.string()),
+  tags: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  monitorTypes: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  projects: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  schedules: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+});
+
+export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;
+
 export const SEARCH_FIELDS = [
   'name',
   'tags.text',

@@ -7,11 +7,11 @@
 
 import { URL } from 'url';
 
-import { AuditAction } from '@kbn/core-saved-objects-server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from '../authentication';
+import { AuditAction } from '../saved_objects/saved_objects_security_extension';
 import {
   httpRequestEvent,
   savedObjectEvent,

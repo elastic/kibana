@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -23,6 +23,7 @@ import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
 import { getRequestsAndResponses } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { VisualizationActions } from './actions';
 
 const LensComponentWrapper = styled.div<{ height?: string; width?: string }>`
   height: ${({ height }) => height ?? 'auto'};
@@ -31,7 +32,7 @@ const LensComponentWrapper = styled.div<{ height?: string; width?: string }>`
     background-color: transparent;
   }
   .expExpressionRenderer__expression {
-    padding: 0 !important;
+    padding: 2px 0 0 0 !important;
   }
   .legacyMtrVis__container {
     padding: 0;
@@ -48,8 +49,6 @@ const initVisualizationData: {
   isLoading: true,
 };
 
-const style = { height: '100%', minWidth: '100px' };
-
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   applyGlobalQueriesAndFilters = true,
   extraActions,
@@ -65,7 +64,16 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   stackByField,
   timerange,
   width: wrapperWidth,
+  withActions = true,
 }) => {
+  const style = useMemo(
+    () => ({
+      height: wrapperHeight ?? '100%',
+      minWidth: '100px',
+      width: wrapperWidth ?? '100%',
+    }),
+    [wrapperHeight, wrapperWidth]
+  );
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
   const [isShowingModal, setIsShowingModal] = useState(false);
@@ -81,7 +89,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     stackByField,
     title: '',
   });
-
   const LensComponent = lens.EmbeddableComponent;
   const inspectActionProps = useMemo(
     () => ({
@@ -98,7 +105,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     extraActions,
     inspectActionProps,
     timeRange: timerange,
-    withActions: true,
+    withActions,
   });
 
   const handleCloseModal = useCallback(() => {
@@ -165,19 +172,41 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [attributes?.state?.adHocDataViews]
   );
 
+  if (!searchSessionId) {
+    return null;
+  }
+
   if (
     !attributes ||
     (visualizationData?.responses != null && visualizationData?.responses?.length === 0)
   ) {
     return (
-      <EuiEmptyPrompt
-        body={
-          <FormattedMessage
-            id="xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title"
-            defaultMessage="No data to display"
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <EuiEmptyPrompt
+            body={
+              <FormattedMessage
+                id="xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title"
+                defaultMessage="No data to display"
+              />
+            }
           />
-        }
-      />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <VisualizationActions
+            extraActions={extraActions}
+            getLensAttributes={getLensAttributes}
+            inputId={inputsModelId}
+            isInspectButtonDisabled={true}
+            lensAttributes={attributes}
+            queryId={id}
+            stackByField={stackByField}
+            timerange={timerange}
+            title={inspectTitle}
+            withDefaultActions={false}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

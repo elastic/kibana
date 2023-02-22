@@ -168,9 +168,12 @@ function getOverviewConfigsPerLocation(
   return filteredLocations.map((location) => ({
     id,
     configId,
-    name: attributes[ConfigKey.NAME],
     location,
+    name: attributes[ConfigKey.NAME],
+    tags: attributes[ConfigKey.TAGS],
     isEnabled: attributes[ConfigKey.ENABLED],
+    type: attributes[ConfigKey.MONITOR_TYPE],
+    projectId: attributes[ConfigKey.PROJECT_ID],
     isStatusAlertEnabled: isStatusEnabled(attributes[ConfigKey.ALERT_CONFIG]),
   }));
 }

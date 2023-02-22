@@ -89,11 +89,19 @@ const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    checkFullLicense,
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
-  });
+  const { context } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {
+      checkFullLicense,
+      checkGetJobsCapabilities: () =>
+        checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
+      checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
+    }
+  );
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 

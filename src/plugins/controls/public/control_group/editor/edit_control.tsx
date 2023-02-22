@@ -7,6 +7,7 @@
  */
 
 import { isEqual } from 'lodash';
+import { batch } from 'react-redux';
 import { EuiButtonIcon } from '@elastic/eui';
 import React, { useEffect, useRef } from 'react';
 
@@ -73,7 +74,8 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
             ...panel.explicitInput,
             ...inputToReturn,
           }) &&
-            isEqual(latestPanelState.current.width, panel.width))
+            isEqual(latestPanelState.current.width, panel.width) &&
+            isEqual(latestPanelState.current.grow, panel.grow))
         ) {
           reject();
           ref.close();
@@ -86,7 +88,10 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
           buttonColor: 'danger',
         }).then((confirmed) => {
           if (confirmed) {
-            controlGroup.dispatch.setControlWidth({ width: panel.width, embeddableId });
+            batch(() => {
+              controlGroup.dispatch.setControlWidth({ width: panel.width, embeddableId });
+              controlGroup.dispatch.setControlGrow({ grow: panel.grow, embeddableId });
+            });
             reject();
             ref.close();
           }

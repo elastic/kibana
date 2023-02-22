@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { uniqBy } from 'lodash';
 import type { BaseIndexPatternColumn, OperationDefinition } from '..';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { IndexPattern } from '../../../../../types';
@@ -15,7 +16,7 @@ import { insertOrReplaceFormulaColumn } from './parse';
 import { generateFormula } from './generate';
 import { filterByVisibleOperation, nonNullable } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
-import { getFilter, isColumnFormatted } from '../helpers';
+import { generateMissingFieldMessage, getFilter, isColumnFormatted } from '../helpers';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
@@ -85,7 +86,11 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
 
       if (errors.length) {
         // remove duplicates
-        return Array.from(new Set(errors.map(({ message }) => message)));
+        return uniqBy(errors, ({ message }) => message).map(({ type, message, extraInfo }) =>
+          type === 'missingField' && extraInfo?.missingFields
+            ? generateMissingFieldMessage(extraInfo.missingFields, columnId)
+            : message
+        );
       }
 
       const managedColumns = getManagedColumnsFrom(columnId, layer.columns);

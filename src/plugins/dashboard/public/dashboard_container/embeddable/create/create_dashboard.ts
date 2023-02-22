@@ -257,8 +257,8 @@ export const createDashboard = async (
     }
 
     untilDashboardReady().then((dashboardContainer) => {
-      dashboardContainer.controlGroup = controlGroup;
       startSyncingDashboardControlGroup.bind(dashboardContainer)();
+      dashboardContainer.controlGroup = controlGroup;
     });
     await controlGroup.untilInitialized();
   }

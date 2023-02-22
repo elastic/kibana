@@ -29,6 +29,8 @@ export const getFindingsFixture = (): CspFinding & { id: string } => ({
       name: 'CIS Kubernetes',
       version: '1.6.0',
       id: 'cis_k8s',
+      rule_number: '1.1.1',
+      posture_type: 'kspm',
     },
     default_value: chance.sentence(),
     description: chance.paragraph(),

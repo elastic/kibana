@@ -21,6 +21,7 @@ import { BehaviorSubject } from 'rxjs';
 describe('Options list control', () => {
   const defaultProps = {
     typeaheadSubject: new BehaviorSubject(''),
+    loadMoreSubject: new BehaviorSubject(10),
   };
 
   interface MountOptions {

@@ -11,10 +11,10 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/dom';
 import { act } from '@testing-library/react';
-import { AppMockRenderer, createAppMockRenderer } from '../../../components/test_utils';
 import EditConnectorFlyout from '.';
 import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
 import { betaBadgeProps } from '../beta_badge_props';
+import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 
 const updateConnectorResponse = {
   connector_type_id: 'test',
@@ -441,6 +441,40 @@ describe('EditConnectorFlyout', () => {
         isPreconfigured: false,
         name: 'My test',
         secrets: {},
+      });
+    });
+
+    it('updates connector form field with latest value', async () => {
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
+      });
+
+      userEvent.clear(getByTestId('test-connector-text-field'));
+      await userEvent.type(getByTestId('test-connector-text-field'), 'My updated text field', {
+        delay: 100,
+      });
+
+      userEvent.clear(getByTestId('nameInput'));
+      await userEvent.type(getByTestId('nameInput'), 'My test', {
+        delay: 100,
+      });
+      await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password', {
+        delay: 100,
+      });
+
+      userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
+
+      await waitFor(() => {
+        expect(getByTestId('test-connector-text-field')).toHaveValue('My updated text field');
       });
     });
 

@@ -13,30 +13,44 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 
 import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
 
+import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListPopover } from './options_list_popover';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 import './options_list.scss';
 
-export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Subject<string> }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
+export const OptionsListControl = ({
+  typeaheadSubject,
+  loadMoreSubject,
+}: {
+  typeaheadSubject: Subject<string>;
+  loadMoreSubject: Subject<number>;
+}) => {
   const resizeRef = useRef(null);
   const optionsList = useOptionsList();
   const dimensions = useResizeObserver(resizeRef.current);
 
-  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
   const validSelections = optionsList.select((state) => state.componentState.validSelections);
-  const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
-  const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+
+  const id = optionsList.select((state) => state.explicitInput.id);
+  const exclude = optionsList.select((state) => state.explicitInput.exclude);
+  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
+  const placeholder = optionsList.select((state) => state.explicitInput.placeholder);
   const controlStyle = optionsList.select((state) => state.explicitInput.controlStyle);
   const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
-  const placeholder = optionsList.select((state) => state.explicitInput.placeholder);
-  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
-  const exclude = optionsList.select((state) => state.explicitInput.exclude);
+  const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
+  const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
+
   const loading = optionsList.select((state) => state.output.loading);
-  const id = optionsList.select((state) => state.explicitInput.id);
+
+  useEffect(() => {
+    return () => {
+      optionsList.dispatch.setPopoverOpen(false); // on unmount, close the popover
+    };
+  }, [optionsList]);
 
   // debounce loading state so loading doesn't flash when user types
   const [debouncedLoading, setDebouncedLoading] = useState(true);
@@ -62,6 +76,13 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
       optionsList.dispatch.setSearchString(newSearchString);
     },
     [typeaheadSubject, optionsList.dispatch]
+  );
+
+  const loadMoreSuggestions = useCallback(
+    (cardinality: number) => {
+      loadMoreSubject.next(Math.min(cardinality, MAX_OPTIONS_LIST_REQUEST_SIZE));
+    },
+    [loadMoreSubject]
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
@@ -110,7 +131,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
           'optionsList--filterBtnPlaceholder': !hasSelections,
         })}
         data-test-subj={`optionsList-control-${id}`}
-        onClick={() => setIsPopoverOpen((openState) => !openState)}
+        onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
         isSelected={isPopoverOpen}
         numActiveFilters={validSelectionsCount}
         hasActiveFilters={Boolean(validSelectionsCount)}
@@ -136,7 +157,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         panelPaddingSize="none"
         anchorPosition="downCenter"
         className="optionsList__popoverOverride"
-        closePopover={() => setIsPopoverOpen(false)}
+        closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
         anchorClassName="optionsList__anchorOverride"
         aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >
@@ -144,6 +165,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
           width={dimensions.width}
           isLoading={debouncedLoading}
           updateSearchString={updateSearchString}
+          loadMoreSuggestions={loadMoreSuggestions}
         />
       </EuiPopover>
     </EuiFilterGroup>

@@ -81,4 +81,20 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       pods_count: { type: 'short' },
     },
   },
+  rules_stats: {
+    type: 'array',
+    items: {
+      rule_id: { type: 'keyword' },
+      rule_name: { type: 'keyword' },
+      rule_section: { type: 'keyword' },
+      rule_version: { type: 'keyword' },
+      rule_number: { type: 'keyword' },
+      posture_type: { type: 'keyword' },
+      benchmark_id: { type: 'keyword' },
+      benchmark_name: { type: 'keyword' },
+      benchmark_version: { type: 'keyword' },
+      passed_findings_count: { type: 'long' },
+      failed_findings_count: { type: 'long' },
+    },
+  },
 };

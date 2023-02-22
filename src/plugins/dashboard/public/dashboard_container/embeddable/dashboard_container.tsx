@@ -112,6 +112,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private analyticsService: DashboardAnalyticsService;
   private theme$;
   private chrome;
+  private customBranding;
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -141,6 +142,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         theme: { theme$: this.theme$ },
       },
       chrome: this.chrome,
+      customBranding: this.customBranding,
     } = pluginServices.getServices());
 
     this.creationOptions = creationOptions;
@@ -214,10 +216,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
+    this.domNode.className = 'dashboardContainer';
 
     ReactDOM.render(
       <I18nProvider>
-        <ExitFullScreenButtonKibanaProvider coreStart={{ chrome: this.chrome }}>
+        <ExitFullScreenButtonKibanaProvider
+          coreStart={{ chrome: this.chrome, customBranding: this.customBranding }}
+        >
           <KibanaThemeProvider theme$={this.theme$}>
             <DashboardContainerContext.Provider value={this}>
               <DashboardViewport />

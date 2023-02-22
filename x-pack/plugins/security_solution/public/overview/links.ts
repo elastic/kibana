@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
   ENTITY_ANALYTICS_PATH,
   LANDING_PATH,
@@ -15,6 +16,7 @@ import {
   SERVER_APP_ID,
 } from '../../common/constants';
 import {
+  DATA_QUALITY,
   DETECTION_RESPONSE,
   GETTING_STARTED,
   OVERVIEW,
@@ -22,6 +24,7 @@ import {
 } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import overviewPageImg from '../common/images/overview_page.png';
+import dataQualityDashboardPageImg from '../common/images/data_quality_dashboard_page.png';
 import detectionResponsePageImg from '../common/images/detection_response_page.png';
 import entityAnalyticsDashboard from '../common/images/entity_analytics_dashboard.png';
 
@@ -85,4 +88,25 @@ export const entityAnalyticsLinks: LinkItem = {
   capabilities: [`${SERVER_APP_ID}.show`],
   isBeta: false,
   globalSearchKeywords: [ENTITY_ANALYTICS],
+};
+
+export const ecsDataQualityDashboardLinks: LinkItem = {
+  id: SecurityPageName.dataQuality,
+  title: DATA_QUALITY,
+  landingImage: dataQualityDashboardPageImg,
+  description: i18n.translate(
+    'xpack.securitySolution.appLinks.ecsDataQualityDashboardDescription',
+    {
+      defaultMessage:
+        'Check index mappings and values for compatibility with the Elastic Common Schema (ECS)',
+    }
+  ),
+  path: DATA_QUALITY_PATH,
+  capabilities: [`${SERVER_APP_ID}.show`],
+  isBeta: true,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.ecsDataQualityDashboard', {
+      defaultMessage: 'Data Quality',
+    }),
+  ],
 };

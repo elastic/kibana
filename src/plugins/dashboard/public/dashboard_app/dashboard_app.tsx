@@ -37,6 +37,7 @@ import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
+import useObservable from 'react-use/lib/useObservable';
 
 export interface DashboardAppProps {
   history: History;
@@ -77,7 +78,9 @@ export function DashboardApp({
     notifications: { toasts },
     settings: { uiSettings },
     data: { search },
+    customBranding,
   } = pluginServices.getServices();
+  const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
 
   const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
     DASHBOARD_APP_ID,
@@ -121,11 +124,11 @@ export function DashboardApp({
    * Create options to pass into the dashboard renderer
    */
   const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
-  const getCreationOptions = useCallback((): DashboardCreationOptions => {
+  const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
 
-    return {
+    return Promise.resolve({
       incomingEmbeddable,
 
       // integrations
@@ -157,7 +160,7 @@ export function DashboardApp({
       },
 
       validateLoadedSavedObject: validateOutcome,
-    };
+    });
   }, [
     history,
     validateOutcome,
@@ -181,7 +184,7 @@ export function DashboardApp({
   }, [dashboardAPI, kbnUrlStateStorage]);
 
   return (
-    <>
+    <div className={'dshAppWrapper'}>
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
@@ -197,10 +200,11 @@ export function DashboardApp({
           <DashboardRenderer
             ref={setDashboardAPI}
             savedObjectId={savedDashboardId}
+            showPlainSpinner={showPlainSpinner}
             getCreationOptions={getCreationOptions}
           />
         </>
       )}
-    </>
+    </div>
   );
 }

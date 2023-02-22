@@ -6,7 +6,14 @@
  */
 
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { Rule, RuleTypeParams, RecoveredActionGroup, RuleMonitoring } from '../../common';
+import {
+  Rule,
+  RuleTypeParams,
+  RecoveredActionGroup,
+  RuleMonitoring,
+  RuleLastRunOutcomeOrderMap,
+  RuleLastRunOutcomes,
+} from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -43,6 +50,7 @@ export const RULE_ACTIONS = [
     params: {
       foo: true,
     },
+    uuid: '111-111',
   },
   {
     actionTypeId: 'action',
@@ -51,6 +59,7 @@ export const RULE_ACTIONS = [
     params: {
       isResolved: true,
     },
+    uuid: '222-222',
   },
 ];
 
@@ -74,7 +83,7 @@ export const generateSavedObjectParams = ({
   error?: null | { reason: string; message: string };
   warning?: null | { reason: string; message: string };
   status?: string;
-  outcome?: string;
+  outcome?: RuleLastRunOutcomes;
   nextRun?: string | null;
   successRatio?: number;
   history?: RuleMonitoring['run']['history'];
@@ -110,6 +119,7 @@ export const generateSavedObjectParams = ({
     },
     lastRun: {
       outcome,
+      outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
       outcomeMsg:
         (error?.message && [error?.message]) || (warning?.message && [warning?.message]) || null,
       warning: error?.reason || warning?.reason || null,
@@ -182,6 +192,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
       params: {
         foo: true,
       },
+      uuid: '111-111',
     },
     {
       group: RecoveredActionGroup.id,
@@ -190,6 +201,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
       params: {
         isResolved: true,
       },
+      uuid: '222-222',
     },
   ],
   executionStatus: {

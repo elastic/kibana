@@ -37,7 +37,7 @@ const Status = {
     </EuiBadge>
   ),
   Unenrolled: (
-    <EuiBadge color="hollow">
+    <EuiBadge color={euiVars.euiColorDisabled}>
       <FormattedMessage
         id="xpack.fleet.agentHealth.unenrolledStatusText"
         defaultMessage="Unenrolled"

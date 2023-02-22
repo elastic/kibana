@@ -150,7 +150,10 @@ export const useDashboardMenuItems = ({
         iconType: 'pencil',
         testId: 'dashboardEditMode',
         className: 'eui-hideFor--s eui-hideFor--xs', // hide for small screens - editing doesn't work in mobile mode.
-        run: () => dashboard.dispatch.setViewMode(ViewMode.EDIT),
+        run: () => {
+          dashboard.dispatch.setViewMode(ViewMode.EDIT);
+          dashboard.clearOverlays();
+        },
       } as TopNavMenuData,
 
       quickSave: {

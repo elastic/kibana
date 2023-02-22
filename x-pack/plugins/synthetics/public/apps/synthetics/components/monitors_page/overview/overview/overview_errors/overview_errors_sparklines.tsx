@@ -14,9 +14,9 @@ import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monito
 interface Props {
   from: string;
   to: string;
-  monitorId: string[];
+  monitorIds: string[];
 }
-export const OverviewErrorsSparklines = ({ from, to, monitorId }: Props) => {
+export const OverviewErrorsSparklines = ({ from, to, monitorIds }: Props) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
@@ -27,6 +27,7 @@ export const OverviewErrorsSparklines = ({ from, to, monitorId }: Props) => {
 
   return (
     <ExploratoryViewEmbeddable
+      id="overviewErrorsSparklines"
       reportType="kpi-over-time"
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
@@ -36,7 +37,7 @@ export const OverviewErrorsSparklines = ({ from, to, monitorId }: Props) => {
           time,
           seriesType: 'area',
           reportDefinitions: {
-            'monitor.id': monitorId,
+            'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'],
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',

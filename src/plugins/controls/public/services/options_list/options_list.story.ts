@@ -20,13 +20,10 @@ let optionsListRequestMethod = async (request: OptionsListRequest, abortSignal: 
         r({
           suggestions: {},
           totalCardinality: 100,
-          rejected: false,
         }),
       120
     )
   );
-
-const clearOptionsListCacheMock = () => {};
 
 export const replaceOptionsListMethod = (
   newMethod: (request: OptionsListRequest, abortSignal: AbortSignal) => Promise<OptionsListResponse>
@@ -35,6 +32,12 @@ export const replaceOptionsListMethod = (
 export const optionsListServiceFactory: OptionsListServiceFactory = () => {
   return {
     runOptionsListRequest: optionsListRequestMethod,
-    clearOptionsListCache: clearOptionsListCacheMock,
+    clearOptionsListCache: jest.fn(),
+    getAllowExpensiveQueries: jest.fn().mockReturnValue(Promise.resolve(true)),
+    optionsListResponseWasFailure: jest
+      .fn()
+      .mockReturnValue(
+        false
+      ) as unknown as ControlsOptionsListService['optionsListResponseWasFailure'],
   };
 };

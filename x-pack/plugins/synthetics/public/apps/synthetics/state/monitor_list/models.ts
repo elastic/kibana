@@ -19,6 +19,7 @@ import { IHttpSerializedFetchError } from '../utils/http_error';
 export type MonitorListSortField = `${keyof EncryptedSyntheticsSavedMonitor}.keyword` | 'enabled';
 
 export interface MonitorFilterState {
+  query?: string;
   tags?: string[];
   monitorTypes?: string[];
   projects?: string[];
@@ -27,7 +28,6 @@ export interface MonitorFilterState {
 }
 
 export interface MonitorListPageState extends MonitorFilterState {
-  query?: string;
   pageIndex: number;
   pageSize: number;
   sortField: MonitorListSortField;

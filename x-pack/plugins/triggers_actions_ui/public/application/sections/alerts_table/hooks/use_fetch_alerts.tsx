@@ -13,7 +13,6 @@ import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import type {
-  EcsFieldsResponse,
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '@kbn/rule-registry-plugin/common/search_strategy';
@@ -22,6 +21,7 @@ import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Alert, Alerts, GetInspectQuery, InspectQuery } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DefaultSort } from './constants';
 import * as i18n from './translations';
@@ -42,14 +42,8 @@ type AlertRequest = Omit<FetchAlertsArgs, 'featureIds' | 'skip'>;
 
 type Refetch = () => void;
 
-interface InspectQuery {
-  request: string[];
-  response: string[];
-}
-type GetInspectQuery = () => InspectQuery;
-
 export interface FetchAlertResp {
-  alerts: EcsFieldsResponse[];
+  alerts: Alerts;
   isInitializing: boolean;
   getInspectQuery: GetInspectQuery;
   refetch: Refetch;
@@ -66,7 +60,7 @@ interface AlertStateReducer {
 
 type AlertActions =
   | { type: 'loading'; loading: boolean }
-  | { type: 'response'; alerts: EcsFieldsResponse[]; totalAlerts: number }
+  | { type: 'response'; alerts: Alerts; totalAlerts: number }
   | { type: 'resetPagination' }
   | { type: 'request'; request: Omit<FetchAlertsArgs, 'skip'> };
 
@@ -183,12 +177,12 @@ const useFetchAlerts = ({
               }
             )
             .subscribe({
-              next: (response) => {
+              next: (response: RuleRegistrySearchResponse) => {
                 if (isCompleteResponse(response)) {
                   const { rawResponse } = response;
                   inspectQuery.current = {
-                    request: [],
-                    response: [],
+                    request: response?.inspect?.dsl ?? [],
+                    response: [JSON.stringify(rawResponse)] ?? [],
                   };
                   let totalAlerts = 0;
                   if (rawResponse.hits.total && typeof rawResponse.hits.total === 'number') {
@@ -198,13 +192,13 @@ const useFetchAlerts = ({
                   }
                   dispatch({
                     type: 'response',
-                    alerts: rawResponse.hits.hits.reduce<EcsFieldsResponse[]>((acc, hit) => {
+                    alerts: rawResponse.hits.hits.reduce<Alerts>((acc, hit) => {
                       if (hit.fields) {
                         acc.push({
                           ...hit.fields,
                           _id: hit._id,
                           _index: hit._index,
-                        } as EcsFieldsResponse);
+                        } as Alert);
                       }
 
                       return acc;
