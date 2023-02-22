@@ -57,7 +57,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
       <EuiFlyoutBody>
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,

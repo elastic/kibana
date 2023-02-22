@@ -37,6 +37,11 @@ jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
+jest.mock('uuid', () => {
+  let uuid = 100;
+  return { v4: () => `${uuid++}` };
+});
+
 const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as jest.Mock;
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -350,6 +355,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "100",
           },
           Object {
             "actionRef": "action_1",
@@ -358,6 +364,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "101",
           },
           Object {
             "actionRef": "action_2",
@@ -366,6 +373,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "102",
           },
         ],
         "alertTypeId": "myType",
@@ -585,6 +593,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '103',
           },
           {
             group: 'default',
@@ -593,6 +602,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '104',
           },
           {
             group: 'custom',
@@ -601,6 +611,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '105',
           },
         ],
         alertTypeId: 'myType',
@@ -779,7 +790,13 @@ describe('update()', () => {
       'alert',
       {
         actions: [
-          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            group: 'default',
+            params: { foo: true },
+            uuid: '106',
+          },
         ],
         alertTypeId: 'myType',
         apiKey: null,
@@ -953,6 +970,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "107",
           },
         ],
         "alertTypeId": "myType",
@@ -1101,6 +1119,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "108",
           },
         ],
         "alertTypeId": "myType",
@@ -2113,6 +2132,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '144',
           },
         ],
         alertTypeId: 'myType',
@@ -2521,5 +2541,167 @@ describe('update()', () => {
         })
       );
     });
+  });
+
+  test('updates an action with uuid and adds uuid to an action without it', async () => {
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+      },
+    ]);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+            frequency: {
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              summary: false,
+            },
+            uuid: '123-456',
+          },
+          {
+            group: 'default',
+            actionRef: 'action_1',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+            frequency: {
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              summary: false,
+            },
+            uuid: '111-111',
+          },
+        ],
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_1',
+          type: 'action',
+          id: '2',
+        },
+      ],
+    });
+    await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+          risk_score: 40,
+          severity: 'low',
+        },
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+            frequency: {
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              summary: false,
+            },
+            uuid: '123-456',
+          },
+          {
+            group: 'default',
+            id: '2',
+            params: {
+              foo: true,
+            },
+            frequency: {
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              summary: false,
+            },
+          },
+        ],
+      },
+    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+            group: 'default',
+            params: { foo: true },
+            uuid: '123-456',
+          },
+          {
+            actionRef: '',
+            actionTypeId: '',
+            frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+            group: 'default',
+            params: { foo: true },
+            uuid: '151',
+          },
+        ],
+        alertTypeId: 'myType',
+        apiKey: null,
+        apiKeyOwner: null,
+        consumer: 'myApp',
+        enabled: true,
+        mapped_params: { risk_score: 40, severity: '20-low' },
+        meta: { versionApiKeyLastmodified: 'v7.10.0' },
+        name: 'abc',
+        notifyWhen: null,
+        params: { bar: true, risk_score: 40, severity: 'low' },
+        schedule: { interval: '1m' },
+        scheduledTaskId: 'task-123',
+        tags: ['foo'],
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+      },
+      {
+        id: '1',
+        overwrite: true,
+        references: [{ id: '1', name: 'action_0', type: 'action' }],
+        version: '123',
+      }
+    );
   });
 });
