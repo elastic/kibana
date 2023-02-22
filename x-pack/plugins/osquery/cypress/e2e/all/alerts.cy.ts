@@ -343,7 +343,7 @@ describe('Alert Event Details', () => {
         cy.visit($href);
         cy.getBySel('breadcrumbs').contains('Discover').should('exist');
         cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
-          cy.contains('action_data.query');
+          cy.contains(`action_data.querySELECT * FROM os_version where name='Ubuntu'`);
         });
         cy.contains(discoverRegex);
       });
