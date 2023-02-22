@@ -63,6 +63,7 @@ export const ErrorsList = ({
             configId={monitorId}
             stateId={item.state?.id!}
             label={formatTestRunAt(item.state!.started_at, format)}
+            locationId={selectedLocation?.id}
           />
         );
         const isActive = isActiveState(item);
@@ -131,7 +132,9 @@ export const ErrorsList = ({
             activeDuration = diff;
           }
         }
-        return <EuiText>{formatTestDuration(Number(value) + activeDuration, true)}</EuiText>;
+        return (
+          <EuiText size="s">{formatTestDuration(Number(value) + activeDuration, true)}</EuiText>
+        );
       },
     },
   ];
