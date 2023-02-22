@@ -33,17 +33,25 @@ export function useDeleteSlo(sloId: string) {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
         await queryClient.cancelQueries(['fetchSloList']);
 
-        // Snapshot the previous value
-        const previousSloList = queryClient.getQueryData<FindSLOResponse>(['fetchSloList']);
+        const latestFetchSloListRequest = (
+          queryClient.getQueriesData<FindSLOResponse>(['fetchSloList']) || []
+        ).at(0);
+
+        const [queryKey, data] = latestFetchSloListRequest || [];
+
+        const optimisticUpdate = {
+          ...data,
+          results: data?.results.filter((result) => result.id !== slo.id),
+          total: data?.total && data.total - 1,
+        };
 
         // Optimistically update to the new value
-        queryClient.setQueryData(['fetchSloList'], () => ({
-          ...previousSloList,
-          results: previousSloList?.results.filter((result) => result.id !== slo.id),
-        }));
+        if (queryKey) {
+          queryClient.setQueryData(queryKey, optimisticUpdate);
+        }
 
         // Return a context object with the snapshotted value
-        return { previousSloList };
+        return { previousSloList: data };
       },
       // If the mutation fails, use the context returned from onMutate to roll back
       onError: (_err, _slo, context) => {

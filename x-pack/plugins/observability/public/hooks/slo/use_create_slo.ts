@@ -23,7 +23,6 @@ export function useCreateSlo() {
       mutationKey: ['createSlo'],
       onSuccess: () => {
         queryClient.invalidateQueries(['fetchSloList']);
-        queryClient.invalidateQueries(['fetchHistoricalSummary']);
       },
     }
   );
