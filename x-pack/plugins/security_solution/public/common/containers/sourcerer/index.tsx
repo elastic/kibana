@@ -39,6 +39,7 @@ import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_que
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 import { useKibana } from '../../lib/kibana';
+import { useFetchPatternList } from './use_fetch_pattern_list';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -416,6 +417,18 @@ export const useSourcererDataView = (
     [legacyDataView, missingPatterns.length, selectedDataView]
   );
 
+  const [patternList, setPatternList] = useState<string[]>([]);
+
+  const { patternList: pList } = useFetchPatternList(sourcererDataView.id);
+
+  useEffect(() => {
+    if (sourcererDataView.id != null) {
+      setPatternList(pList);
+    } else {
+      setPatternList(sourcererDataView.patternList);
+    }
+  }, [pList, sourcererDataView.id, sourcererDataView.patternList]);
+
   const indicesExist = useMemo(
     () =>
       loading || sourcererDataView.loading
@@ -423,9 +436,9 @@ export const useSourcererDataView = (
         : checkIfIndicesExist({
             scopeId,
             signalIndexName,
-            patternList: sourcererDataView.patternList,
+            patternList,
           }),
-    [loading, scopeId, signalIndexName, sourcererDataView.loading, sourcererDataView.patternList]
+    [loading, patternList, scopeId, signalIndexName, sourcererDataView.loading]
   );
 
   return useMemo(
