@@ -14,6 +14,10 @@ import {
   TaskTypeDictionary,
 } from './task_type_dictionary';
 
+jest.mock('./constants', () => ({
+  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['foo'],
+}));
+
 interface Opts {
   numTasks: number;
 }
