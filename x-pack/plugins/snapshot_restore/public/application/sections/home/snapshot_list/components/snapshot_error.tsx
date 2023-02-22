@@ -10,6 +10,9 @@ import { capitalize } from 'lodash';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+// All error types come directly from ES with the form `zzzz_xxxx_exception`,
+// this function will take such string, and sanitaze it in a way that can be
+// more user friendly to show directly to users.
 const sanitizeErrorType = (error: string) => {
   return capitalize(error.replace('_exception', '').replace('_', ' '));
 };
