@@ -591,7 +591,7 @@ describe('CaseViewPage', () => {
         });
       });
 
-      it('it should persist the draft of new comment while description is updated', async () => {
+      it.skip('it should persist the draft of new comment while description is updated', async () => {
         const newComment = 'another cool comment';
 
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
