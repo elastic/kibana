@@ -69,7 +69,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "canvas-element": "ec334dd45d14291db4d74197e0e42dfe06526868",
         "canvas-workpad": "ab0525bd5aa4dbad2d6fdb30e6a51bb475254751",
         "canvas-workpad-template": "c54f2a188a1d0bf18a6cebd9d6f28a7337d41bbf",
-        "cases": "ef9bd792f8a3c49cd32060059b906534f7eb6af5",
+        "cases": "1e86563e8364c69f86b77cb6f2933408dd5b827a",
         "cases-comments": "69257ec55e8380fdb2ecbddc83e7c26d2ce2a351",
         "cases-configure": "66d4c64d83b464f5166005b8ffa03b721fcaaf8b",
         "cases-connector-mappings": "877bb4d52e9821e330622bd75fba799490ec6952",
