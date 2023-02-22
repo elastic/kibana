@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 
+import { persistedLogViewReferenceRT } from '../../../log_views';
 import { timeRangeRT, routeTimingMetadataRT } from '../../shared';
 import {
   logEntryAnomalyRT,
@@ -51,8 +52,8 @@ export type GetLogEntryAnomaliesSuccessResponsePayload = rt.TypeOf<
 export const getLogEntryAnomaliesRequestPayloadRT = rt.type({
   data: rt.intersection([
     rt.type({
-      // the ID of the source configuration
-      sourceId: rt.string,
+      // log view
+      logView: persistedLogViewReferenceRT,
       // the time range to fetch the log entry anomalies from
       timeRange: timeRangeRT,
     }),

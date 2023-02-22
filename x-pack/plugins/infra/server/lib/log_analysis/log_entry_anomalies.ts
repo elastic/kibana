@@ -54,11 +54,11 @@ interface MappedAnomalyHit {
 
 async function getCompatibleAnomaliesJobIds(
   spaceId: string,
-  sourceId: string,
+  logViewId: string,
   mlAnomalyDetectors: MlAnomalyDetectors
 ) {
-  const logRateJobId = getJobId(spaceId, sourceId, logEntryRateJobTypes[0]);
-  const logCategoriesJobId = getJobId(spaceId, sourceId, logEntryCategoriesJobTypes[0]);
+  const logRateJobId = getJobId(spaceId, logViewId, logEntryRateJobTypes[0]);
+  const logCategoriesJobId = getJobId(spaceId, logViewId, logEntryCategoriesJobTypes[0]);
 
   const jobIds: string[] = [];
   let jobSpans: TracingSpan[] = [];
@@ -99,7 +99,7 @@ export async function getLogEntryAnomalies(
   context: InfraPluginRequestHandlerContext & {
     infra: Promise<Required<InfraRequestHandlerContext>>;
   },
-  sourceId: string,
+  logView: PersistedLogViewReference,
   startTime: number,
   endTime: number,
   sort: AnomaliesSort,
@@ -114,7 +114,7 @@ export async function getLogEntryAnomalies(
     timing: { spans: jobSpans },
   } = await getCompatibleAnomaliesJobIds(
     infraContext.spaceId,
-    sourceId,
+    logView.logViewId,
     infraContext.mlAnomalyDetectors
   );
 
@@ -155,7 +155,7 @@ export async function getLogEntryAnomalies(
 
   const logEntryCategoriesCountJobId = getJobId(
     infraContext.spaceId,
-    sourceId,
+    logView.logViewId,
     logEntryCategoriesJobTypes[0]
   );
 
@@ -483,7 +483,7 @@ export async function getLogEntryAnomaliesDatasets(
       spaceId: string;
     };
   },
-  sourceId: string,
+  logView: PersistedLogViewReference,
   startTime: number,
   endTime: number
 ) {
@@ -492,7 +492,7 @@ export async function getLogEntryAnomaliesDatasets(
     timing: { spans: jobSpans },
   } = await getCompatibleAnomaliesJobIds(
     context.infra.spaceId,
-    sourceId,
+    logView.logViewId,
     context.infra.mlAnomalyDetectors
   );
 
