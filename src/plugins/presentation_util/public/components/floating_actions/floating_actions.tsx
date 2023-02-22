@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, ReactElement, useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import useMount from 'react-use/lib/useMount';
+import { update } from 'lodash';
 
 export interface FloatingActionsProps {
   className?: string;
@@ -55,17 +56,8 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   });
   const [areFloatingActionsVisible, setFloatingActionsVisible] = useState<boolean>(false);
 
-  const showFloatingActions = useCallback(
-    () => isEnabled && !areFloatingActionsVisible && setFloatingActionsVisible(true),
-    [isEnabled, areFloatingActionsVisible, setFloatingActionsVisible]
-  );
-  const hideFloatingActions = useCallback(
-    () => areFloatingActionsVisible && setFloatingActionsVisible(false),
-    [areFloatingActionsVisible, setFloatingActionsVisible]
-  );
-
   const updatePosition = useCallback(() => {
-    if (anchorRef.current && actionsRef.current) {
+    if (areFloatingActionsVisible && anchorRef.current && actionsRef.current) {
       const anchorBoundingRect = anchorRef.current?.getBoundingClientRect();
       const actionsBoundingRect = actionsRef.current?.getBoundingClientRect();
 
@@ -83,7 +75,26 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         setPosition({ top, left });
       }
     }
-  }, [anchorRef, actionsRef, euiTheme.size, position, usingTwoLineLayout]);
+  }, [
+    anchorRef,
+    actionsRef,
+    euiTheme.size,
+    position,
+    usingTwoLineLayout,
+    areFloatingActionsVisible,
+  ]);
+
+  const showFloatingActions = useCallback(() => {
+    if (isEnabled && !areFloatingActionsVisible) {
+      setFloatingActionsVisible(true);
+    }
+  }, [isEnabled, areFloatingActionsVisible, setFloatingActionsVisible]);
+
+  const hideFloatingActions = useCallback(() => {
+    if (isEnabled && areFloatingActionsVisible) {
+      setFloatingActionsVisible(false);
+    }
+  }, [areFloatingActionsVisible, setFloatingActionsVisible, isEnabled]);
 
   const floatingActionsStyles = css`
     top: ${position.top}px;
@@ -92,12 +103,16 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     ${areFloatingActionsVisible ? visibleActionsStyles : hiddenActionsStyles}
   `;
 
-  useEffect(updatePosition);
+  useLayoutEffect(() => {
+    if (areFloatingActionsVisible) {
+      updatePosition();
+      window.addEventListener('scroll', updatePosition, true);
+    } else {
+      window.removeEventListener('scroll', updatePosition, true);
+    }
 
-  useMount(() => {
-    window.addEventListener('scroll', updatePosition, true);
     return () => window.removeEventListener('scroll', updatePosition, true);
-  });
+  }, [areFloatingActionsVisible, updatePosition]);
 
   return (
     <>
