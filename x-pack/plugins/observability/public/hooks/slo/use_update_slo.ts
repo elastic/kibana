@@ -6,21 +6,21 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { CreateSLOInput, CreateSLOResponse } from '@kbn/slo-schema';
+import type { UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 
-export function useCreateSlo() {
+export function useUpdateSlo() {
   const { http } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const createSlo = useMutation(
-    ({ slo }: { slo: CreateSLOInput }) => {
+  const updateSlo = useMutation(
+    ({ sloId, slo }: { sloId: string; slo: UpdateSLOInput }) => {
       const body = JSON.stringify(slo);
-      return http.post<CreateSLOResponse>(`/api/observability/slos`, { body });
+      return http.put<UpdateSLOResponse>(`/api/observability/slos/${sloId}`, { body });
     },
     {
-      mutationKey: ['createSlo'],
+      mutationKey: ['updateSlo'],
       onSuccess: () => {
         queryClient.invalidateQueries(['fetchSloList']);
         queryClient.invalidateQueries(['fetchHistoricalSummary']);
@@ -28,5 +28,5 @@ export function useCreateSlo() {
     }
   );
 
-  return createSlo;
+  return updateSlo;
 }
