@@ -26,7 +26,7 @@ export const ScreenReaderRouteAnnouncements: FC<{
       const breadcrumbText: string[] = [];
 
       // Reverse the breadcrumb title order and ensure we only pick up valid strings
-      breadcrumbs.reverse().map((breadcrumb) => {
+      breadcrumbs.reverse().forEach((breadcrumb) => {
         if (typeof breadcrumb.text === 'string') breadcrumbText.push(breadcrumb.text);
       });
       breadcrumbText.push(DEFAULT_TITLE);
