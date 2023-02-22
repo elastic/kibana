@@ -93,6 +93,7 @@ export const getGroupingQuery = ({
               size: MAX_QUERY_SIZE,
             },
           }),
+      // TODO: Fix this type error!
       aggs: {
         ...getOptionalSubAggregation({
           stackByMultipleFields1,
