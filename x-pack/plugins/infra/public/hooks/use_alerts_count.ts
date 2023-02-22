@@ -84,7 +84,7 @@ async function fetchAlertsCount({
             terms: { field: ALERT_STATUS },
           },
         },
-        featureIds,
+        feature_ids: featureIds,
         query,
         size: 0,
       }),
