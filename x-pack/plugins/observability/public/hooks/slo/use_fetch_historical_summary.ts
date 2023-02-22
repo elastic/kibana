@@ -38,7 +38,7 @@ export function useFetchHistoricalSummary({
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: ['fetchHistoricalSummary'],
+      queryKey: ['fetchHistoricalSummary', sloIds],
       queryFn: async ({ signal }) => {
         try {
           const response = await http.post<FetchHistoricalSummaryResponse>(
@@ -54,6 +54,7 @@ export function useFetchHistoricalSummary({
           // ignore error for retrieving slos
         }
       },
+      refetchOnWindowFocus: false,
     }
   );
 
