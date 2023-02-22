@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -13,17 +13,24 @@ import {
   EuiFlexItem,
   EuiFormLabel,
 } from '@elastic/eui';
-import { Control, Controller } from 'react-hook-form';
+import { Control, Controller, UseFormSetValue } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
+import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
 import { FieldSelector } from '../common/field_selector';
 
 export interface Props {
   control: Control<CreateSLOInput>;
+  setValue: UseFormSetValue<CreateSLOInput>;
 }
 
-export function ApmAvailabilityIndicatorTypeForm({ control }: Props) {
+export function ApmAvailabilityIndicatorTypeForm({ control, setValue }: Props) {
+  const { data: apmIndex } = useFetchApmIndex();
+  useEffect(() => {
+    setValue('indicator.params.index', apmIndex);
+  }, [apmIndex, setValue]);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexGroup direction="row" gutterSize="l">

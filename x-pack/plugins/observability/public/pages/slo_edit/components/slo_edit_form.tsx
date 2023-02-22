@@ -53,7 +53,7 @@ export function SloEditForm({ slo }: Props) {
     notifications: { toasts },
   } = useKibana().services;
 
-  const { control, watch, getFieldState, getValues, formState } = useForm({
+  const { control, watch, getFieldState, getValues, formState, setValue } = useForm({
     defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
     values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',
@@ -124,9 +124,9 @@ export function SloEditForm({ slo }: Props) {
       case 'sli.kql.custom':
         return <CustomKqlIndicatorTypeForm control={control} watch={watch} />;
       case 'sli.apm.transactionDuration':
-        return <ApmLatencyIndicatorTypeForm control={control} />;
+        return <ApmLatencyIndicatorTypeForm control={control} setValue={setValue} />;
       case 'sli.apm.transactionErrorRate':
-        return <ApmAvailabilityIndicatorTypeForm control={control} />;
+        return <ApmAvailabilityIndicatorTypeForm control={control} setValue={setValue} />;
       default:
         return null;
     }
