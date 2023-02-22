@@ -59,12 +59,15 @@ export class CloudChatPlugin implements Plugin {
   public stop() {}
 
   private async setupChat({ cloud, http, security }: SetupChatDeps) {
+    const { isCloudEnabled, trialEndDate } = cloud;
+    const { chatURL, trialBuffer } = this.config;
+
     if (
-      !cloud.isCloudEnabled ||
       !security ||
-      !this.config.chatURL ||
-      !cloud.trialEndDate ||
-      !isTodayInDateWindow(cloud.trialEndDate, this.config.trialBuffer)
+      !isCloudEnabled ||
+      !chatURL ||
+      !trialEndDate ||
+      !isTodayInDateWindow(trialEndDate, trialBuffer)
     ) {
       return;
     }
@@ -81,7 +84,7 @@ export class CloudChatPlugin implements Plugin {
       }
 
       this.chatConfig$.next({
-        chatURL: this.config.chatURL,
+        chatURL,
         user: {
           email,
           id,

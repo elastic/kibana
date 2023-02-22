@@ -66,9 +66,15 @@ export const registerChatRoute = ({
         });
       }
 
+      if (!trialEndDate) {
+        return response.badRequest({
+          body: 'Chat can only be started if a trial end date is specified',
+        });
+      }
+
       if (!trialEndDate || !isTodayInDateWindow(trialEndDate, trialBuffer)) {
         return response.badRequest({
-          body: 'Chat can only be started during trial',
+          body: 'Chat can only be started during trial and trial chat buffer',
         });
       }
 
