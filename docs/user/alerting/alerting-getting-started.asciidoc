@@ -68,12 +68,14 @@ The intervals of rule checks in {kib} are approximate. Their timing is affected 
 [[alerting-concepts-actions]]
 ==== Actions
 
-Actions are invocations of connectors, which allow interaction with {kib} services or integrations with third-party systems. Actions run as background tasks on the {kib} server when rule conditions are met. 
+Actions run as background tasks on the {kib} server when rule conditions are met.
+They send notifications by connecting with services inside {kib} or integrating with third-party systems.
+Rather than repeatedly entering connection information and credentials for each action, {kib} simplifies action setup using <<action-types,connectors>>. For example if four rules send email notifications via the same SMTP service, they can all reference the same SMTP connector. When the SMTP settings change, you can update them once in the connector, instead of having to update four rules.
 
 When defining actions in a rule, you specify:
 
-* The _connector type_: the type of service or integration to use
-* The connection for that type by referencing a <<alerting-concepts-connectors,connector>>
+* A connector
+* An action frequency
 * A mapping of rule values to properties exposed for that type of action
 
 The result is a template: all the parameters needed to invoke a service are supplied except for specific values that are only known at the time the rule condition is detected. 
@@ -84,8 +86,6 @@ When the rule detects the condition, it creates an <<alerting-concepts-alerts,al
 
 image::images/what-is-an-action.svg[Actions are like templates that are rendered when an alert detects a condition]
 
-See <<action-types>> for details on the types of connectors provided by {kib}.
-
 [float]
 [[alerting-concepts-alerts]]
 === Alerts
@@ -95,17 +95,6 @@ When checking for a condition, a rule might identify multiple occurrences of the
 Using the server monitoring example, each server with average CPU > 0.9 is tracked as an alert. This means a separate email is sent for each server that exceeds the threshold.
 
 image::images/alerts.svg[{kib} tracks each detected condition as an alert and takes action on each alert]
-
-[float]
-[[alerting-concepts-connectors]]
-=== Connectors
-
-Actions often involve connecting with services inside {kib} or integrating with third-party systems.
-Rather than repeatedly entering connection information and credentials for each action, {kib} simplifies action setup using connectors.
-
-Connectors provide a central place to store connection information for services and integrations. For example if four rules send email notifications via the same SMTP service, they can all reference the same SMTP connector. When the SMTP settings change, you can update them once in the connector, instead of having to update four rules.
-
-image::images/rule-concepts-connectors.svg[Connectors provide a central place to store service connection settings]
 
 [float]
 == Putting it all together

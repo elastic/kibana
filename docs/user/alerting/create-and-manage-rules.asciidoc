@@ -110,7 +110,7 @@ Actions are optional when you create a rule. However, to receive notifications w
 [role="screenshot"]
 image::images/rule-flyout-connector-type-selection.png[UI for selecting an action type]
 
-Each action must specify a <<alerting-concepts-connectors, connector>> instance. If no connectors exist for the selected type, click **Add connector** to create one.
+Each action must specify a connector. If no connectors exist for the selected type, click **Add connector** to create one.
 
 After you have selected a connector, use the **Run When** dropdown to choose the action group to associate with this action. When a rule meets the defined condition, it is marked as **Active** and alerts are created and assigned to an action group. In addition to the action groups defined by the selected rule type, each rule also has a **Recovered** action group that is assigned when a rule's conditions are no longer detected.
 
