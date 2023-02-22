@@ -1,6 +1,11 @@
 {
   "type": "http",
   "enabled": true,
+  "alert": {
+    "status": {
+      "enabled": true
+    }
+  },
   "tags": [
     "tag1",
     "tag2"
@@ -13,12 +18,7 @@
   "config_id": "",
   "timeout": "3m",
   "__ui": {
-    "is_tls_enabled": false,
-    "is_zip_url_tls_enabled": false,
-    "script_source": {
-      "is_generated_script": false,
-      "file_name": "test-file.name"
-    }
+    "is_tls_enabled": false
   },
   "max_redirects": "3",
   "password": "test",
@@ -56,7 +56,7 @@
   "locations": [
     {
       "id": "eu-west-01",
-      "label": "Europe West",
+      "label": "Europe East",
       "geo": {
         "lat": 33.2343132435,
         "lon": 73.2342343434

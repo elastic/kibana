@@ -29,6 +29,7 @@ interface Props {
   rule: FieldRule;
   onChange: (rule: FieldRule) => void;
   onDelete: () => void;
+  readOnly?: boolean;
 }
 
 const userFields = [
@@ -72,6 +73,10 @@ const comparisonOptions: Record<
 };
 
 export class FieldRuleEditor extends Component<Props, {}> {
+  static defaultProps: Partial<Props> = {
+    readOnly: false,
+  };
+
   public render() {
     const { field, value } = this.props.rule;
 
@@ -118,6 +123,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
                 onCreateOption={this.onAddField}
                 options={fieldOptions}
                 data-test-subj={`fieldRuleEditorField-${valueIndex} fieldRuleEditorField-${valueIndex}-combo`}
+                isDisabled={this.props.readOnly}
               />
             </EuiFormRow>
           ) : (
@@ -139,29 +145,43 @@ export class FieldRuleEditor extends Component<Props, {}> {
         <EuiFlexItem grow={1}>
           {this.renderFieldValueInput(comparisonType.id, rowRuleValue, valueIndex)}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace={true}>
-            {renderAddValueButton ? (
-              <EuiButtonIcon
-                iconSize="s"
-                iconType="plusInCircle"
-                onClick={this.onAddAlternateValue}
-                color="primary"
-                data-test-subj="addAlternateValueButton"
-                aria-label={i18n.translate(
-                  'xpack.security.management.editRoleMapping.fieldRuleEditor.addAlternateValueButton',
-                  {
-                    defaultMessage: 'Add alternate value',
-                  }
-                )}
-              />
-            ) : (
-              <EuiIcon size="l" type="empty" />
-            )}
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiFormRow hasEmptyLabelSpace={true}>
+        {this.conditionallyRenderAddButton(renderAddValueButton)}
+        {this.conditionallyRenderDeleteButton(valueIndex)}
+      </EuiFlexGroup>
+    );
+  };
+
+  private conditionallyRenderAddButton = (renderAddValueButton: boolean) => {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiFormRow hasEmptyLabelSpace={true}>
+          {this.props.readOnly === false && renderAddValueButton ? (
+            <EuiButtonIcon
+              iconSize="s"
+              iconType="plusInCircle"
+              onClick={this.onAddAlternateValue}
+              color="primary"
+              data-test-subj="addAlternateValueButton"
+              aria-label={i18n.translate(
+                'xpack.security.management.editRoleMapping.fieldRuleEditor.addAlternateValueButton',
+                {
+                  defaultMessage: 'Add alternate value',
+                }
+              )}
+            />
+          ) : (
+            <EuiIcon size="s" type="empty" />
+          )}
+        </EuiFormRow>
+      </EuiFlexItem>
+    );
+  };
+
+  private conditionallyRenderDeleteButton = (valueIndex: number) => {
+    return (
+      <EuiFlexItem grow={1}>
+        <EuiFormRow hasEmptyLabelSpace={true}>
+          {this.props.readOnly === false ? (
             <EuiButtonIcon
               iconType="trash"
               color="danger"
@@ -175,9 +195,11 @@ export class FieldRuleEditor extends Component<Props, {}> {
               )}
               onClick={() => this.onRemoveAlternateValue(valueIndex)}
             />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          ) : (
+            <EuiIcon size="s" type="empty" />
+          )}
+        </EuiFormRow>
+      </EuiFlexItem>
     );
   };
 
@@ -204,6 +226,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
           onChange={(e) =>
             this.onComparisonTypeChange(valueIndex, e.target.value as ComparisonOption)
           }
+          disabled={this.props.readOnly}
         />
       </EuiFormRow>
     );
@@ -253,6 +276,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
               { value: 'true', text: 'true' },
               { value: 'false', text: 'false' },
             ]}
+            disabled={this.props.readOnly}
           />
         );
       case 'text':
@@ -262,7 +286,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
             {...commonProps}
             value={isNullValue ? '-- null --' : (rowRuleValue as string)}
             onChange={this.onValueChange(valueIndex)}
-            disabled={isNullValue}
+            disabled={isNullValue || this.props.readOnly}
           />
         );
       case 'number':
@@ -271,6 +295,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
             data-test-subj={`fieldRuleEditorValue-${valueIndex}`}
             value={rowRuleValue as number}
             onChange={this.onNumericValueChange(valueIndex)}
+            disabled={this.props.readOnly}
           />
         );
       default:

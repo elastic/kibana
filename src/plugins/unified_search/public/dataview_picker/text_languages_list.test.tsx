@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { ShallowWrapper } from 'enzyme';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import TextBasedLanguagesList, { TextBasedLanguagesListProps } from './text_languages_list';
-import { TextBasedLanguages } from '.';
+import { TextBasedLanguages } from './data_view_picker';
 
 function getTextLanguagesPickerList(instance: ShallowWrapper) {
   return instance.find(EuiSelectable).first();
@@ -31,7 +31,8 @@ function selectTextLanguagePickerOption(instance: ShallowWrapper, selectedLabel:
       ? { ...option, checked: 'on' }
       : { ...option, checked: undefined }
   );
-  return getTextLanguagesPickerList(instance).prop('onChange')!(options, event);
+  const selectedOption = { label: selectedLabel };
+  return getTextLanguagesPickerList(instance).prop('onChange')!(options, event, selectedOption);
 }
 
 describe('Text based languages list component', () => {

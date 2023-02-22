@@ -29,20 +29,18 @@ import {
   getSimpleRuleOutput,
   ruleToUpdateSchema,
 } from '../../utils';
-
-// Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-// x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json
-const RULE_ID = '9a1a2dae-0b5f-4c3d-8305-a268d404c306';
+import { ELASTIC_SECURITY_RULE_ID } from '../../utils/create_prebuilt_rule_saved_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
+  const es = getService('es');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
 
   const getImmutableRule = async () => {
-    await installPrePackagedRules(supertest, log);
-    return getRule(supertest, log, RULE_ID);
+    await installPrePackagedRules(supertest, es, log);
+    return getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
   };
 
   describe('update_actions', () => {
@@ -73,7 +71,10 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedProperties(updatedRule);
 
         const expected = {
-          ...getSimpleRuleOutputWithWebHookAction(`${bodyToCompare.actions?.[0].id}`),
+          ...getSimpleRuleOutputWithWebHookAction(
+            `${bodyToCompare.actions?.[0].id}`,
+            `${bodyToCompare.actions?.[0].uuid}`
+          ),
           version: 2, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
         };
         expect(bodyToCompare).to.eql(expected);
@@ -149,7 +150,10 @@ export default ({ getService }: FtrProviderContext) => {
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
         const bodyToCompare = removeServerGeneratedProperties(updatedRule);
 
-        const expected = getSimpleRuleOutputWithWebHookAction(`${bodyToCompare.actions?.[0].id}`);
+        const expected = getSimpleRuleOutputWithWebHookAction(
+          `${bodyToCompare.actions?.[0].id}`,
+          `${bodyToCompare.actions?.[0].uuid}`
+        );
 
         expect(bodyToCompare.actions).to.eql(expected.actions);
         expect(bodyToCompare.throttle).to.eql(expected.throttle);
@@ -178,11 +182,14 @@ export default ({ getService }: FtrProviderContext) => {
           ruleToUpdateSchema(immutableRule)
         );
         await updateRule(supertest, log, ruleToUpdate);
-        const body = await findImmutableRuleById(supertest, log, RULE_ID);
+        const body = await findImmutableRuleById(supertest, log, ELASTIC_SECURITY_RULE_ID);
 
         expect(body.data.length).to.eql(1); // should have only one length to the data set, otherwise we have duplicates or the tags were removed and that is incredibly bad.
         const bodyToCompare = removeServerGeneratedProperties(body.data[0]);
-        const expected = getSimpleRuleOutputWithWebHookAction(`${bodyToCompare.actions?.[0].id}`);
+        const expected = getSimpleRuleOutputWithWebHookAction(
+          `${bodyToCompare.actions?.[0].id}`,
+          `${bodyToCompare.actions?.[0].uuid}`
+        );
 
         expect(bodyToCompare.actions).to.eql(expected.actions);
         expect(bodyToCompare.immutable).to.be(true);

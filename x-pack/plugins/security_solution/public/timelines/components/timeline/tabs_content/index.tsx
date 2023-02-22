@@ -11,6 +11,7 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 're
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
 import {
@@ -23,7 +24,6 @@ import {
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
 import type { CellValueElementProps } from '../cell_rendering';
-import type { SessionViewConfig } from '../session_tab_content/use_session_view';
 import {
   getActiveTabSelector,
   getNoteIdsSelector,

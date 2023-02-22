@@ -1,9 +1,14 @@
 {
   "extends": "../../../../../../../tsconfig.base.json",
-  "kbn_references": [{ "path": "../../../../../../../test/tsconfig.json" }],
   "include": ["./**/*"],
   "compilerOptions": {
-    "outDir": "../../../../target/cypress/types/shared",
+    "outDir": "target/types",
     "types": ["cypress", "cypress-axe", "node"]
-  }
+  },
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/axe-config",
+  ],
 }

@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
 import { useCurrentUser, useKibana, useHttp as _useHttp } from '../../../lib/kibana';

@@ -29,6 +29,7 @@ import { getMigrations830 } from './8.3';
 import { getMigrations841 } from './8.4';
 import { getMigrations850 } from './8.5';
 import { getMigrations860 } from './8.6';
+import { getMigrations870 } from './8.7';
 import { AlertLogMeta, AlertMigration } from './types';
 import { MINIMUM_SS_MIGRATION_VERSION } from './constants';
 import { createEsoMigration, isEsQueryRuleType, pipeMigrations } from './utils';
@@ -77,6 +78,7 @@ export function getMigrations(
       '8.4.1': executeMigrationWithErrorHandling(getMigrations841(encryptedSavedObjects), '8.4.1'),
       '8.5.0': executeMigrationWithErrorHandling(getMigrations850(encryptedSavedObjects), '8.5.0'),
       '8.6.0': executeMigrationWithErrorHandling(getMigrations860(encryptedSavedObjects), '8.6.0'),
+      '8.7.0': executeMigrationWithErrorHandling(getMigrations870(encryptedSavedObjects), '8.7.0'),
     },
     getSearchSourceMigrations(encryptedSavedObjects, searchSourceMigrations)
   );

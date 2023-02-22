@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/dev-cli-errors",
-        "id": "def-server.combineErrors",
+        "id": "def-common.combineErrors",
         "type": "Function",
         "tags": [],
         "label": "combineErrors",
@@ -27,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-errors",
-            "id": "def-server.combineErrors.$1",
+            "id": "def-common.combineErrors.$1",
             "type": "Array",
             "tags": [],
             "label": "errors",
@@ -46,7 +54,7 @@
       },
       {
         "parentPluginId": "@kbn/dev-cli-errors",
-        "id": "def-server.createFailError",
+        "id": "def-common.createFailError",
         "type": "Function",
         "tags": [],
         "label": "createFailError",
@@ -60,7 +68,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-errors",
-            "id": "def-server.createFailError.$1",
+            "id": "def-common.createFailError.$1",
             "type": "string",
             "tags": [],
             "label": "reason",
@@ -75,7 +83,7 @@
           },
           {
             "parentPluginId": "@kbn/dev-cli-errors",
-            "id": "def-server.createFailError.$2",
+            "id": "def-common.createFailError.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -94,7 +102,7 @@
       },
       {
         "parentPluginId": "@kbn/dev-cli-errors",
-        "id": "def-server.createFlagError",
+        "id": "def-common.createFlagError",
         "type": "Function",
         "tags": [],
         "label": "createFlagError",
@@ -108,7 +116,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-errors",
-            "id": "def-server.createFlagError.$1",
+            "id": "def-common.createFlagError.$1",
             "type": "string",
             "tags": [],
             "label": "reason",
@@ -127,7 +135,7 @@
       },
       {
         "parentPluginId": "@kbn/dev-cli-errors",
-        "id": "def-server.isFailError",
+        "id": "def-common.isFailError",
         "type": "Function",
         "tags": [],
         "label": "isFailError",
@@ -141,7 +149,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/dev-cli-errors",
-            "id": "def-server.isFailError.$1",
+            "id": "def-common.isFailError.$1",
             "type": "Any",
             "tags": [],
             "label": "error",
@@ -159,14 +167,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

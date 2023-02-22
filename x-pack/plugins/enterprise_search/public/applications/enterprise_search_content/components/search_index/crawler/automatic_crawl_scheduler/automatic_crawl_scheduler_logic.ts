@@ -7,16 +7,27 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { ConnectorScheduling } from '../../../../../../../common/types/connectors';
+
+import { CrawlerIndex } from '../../../../../../../common/types/indices';
+import { Actions } from '../../../../../shared/api_logic/create_api_logic';
+
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
+import {
+  UpdateConnectorSchedulingApiLogic,
+  UpdateConnectorSchedulingArgs,
+} from '../../../../api/connector/update_connector_scheduling_api_logic';
 import { CrawlSchedule, CrawlScheduleFromServer, CrawlUnits } from '../../../../api/crawler/types';
 import { crawlScheduleServerToClient } from '../../../../api/crawler/utils';
 import { IndexNameLogic } from '../../index_name_logic';
+import { IndexViewLogic } from '../../index_view_logic';
 
 export interface AutomaticCrawlSchedulerLogicValues {
   crawlAutomatically: boolean;
   crawlFrequency: CrawlSchedule['frequency'];
   crawlUnit: CrawlSchedule['unit'];
+  index: CrawlerIndex;
   isSubmitting: boolean;
   useConnectorSchedule: CrawlSchedule['useConnectorSchedule'];
 }
@@ -33,7 +44,9 @@ export interface AutomaticCrawlSchedulerLogicActions {
   onDoneSubmitting(): void;
   enableCrawlAutomatically(): void;
   fetchCrawlSchedule(): void;
+  makeUpdateConnectorSchedulingRequest: Actions<{}, UpdateConnectorSchedulingArgs>['makeRequest'];
   saveChanges(): void;
+  setCrawlAutomatically(crawlAutomatically: boolean): { crawlAutomatically: boolean };
   setCrawlFrequency(crawlFrequency: CrawlSchedule['frequency']): {
     crawlFrequency: CrawlSchedule['frequency'];
   };
@@ -42,14 +55,25 @@ export interface AutomaticCrawlSchedulerLogicActions {
   setUseConnectorSchedule(useConnectorSchedule: CrawlSchedule['useConnectorSchedule']): {
     useConnectorSchedule: CrawlSchedule['useConnectorSchedule'];
   };
+  submitConnectorSchedule(scheduling: ConnectorScheduling): { scheduling: ConnectorScheduling };
   submitCrawlSchedule(): void;
-  toggleCrawlAutomatically(): void;
+  updateConnectorSchedulingApiError: Actions<{}, UpdateConnectorSchedulingArgs>['apiError'];
 }
 
 export const AutomaticCrawlSchedulerLogic = kea<
   MakeLogicType<AutomaticCrawlSchedulerLogicValues, AutomaticCrawlSchedulerLogicActions>
 >({
   path: ['enterprise_search', 'crawler', 'automatic_crawl_scheduler_logic'],
+  connect: {
+    actions: [
+      UpdateConnectorSchedulingApiLogic,
+      [
+        'makeRequest as makeUpdateConnectorSchedulingRequest',
+        'apiError as updateConnectorSchedulingApiError',
+      ],
+    ],
+    values: [IndexViewLogic, ['index']],
+  },
   actions: () => ({
     clearCrawlSchedule: true,
     deleteCrawlSchedule: true,
@@ -59,19 +83,20 @@ export const AutomaticCrawlSchedulerLogic = kea<
     fetchCrawlSchedule: true,
     saveChanges: true,
     setCrawlSchedule: (crawlSchedule: CrawlSchedule) => ({ crawlSchedule }),
+    submitConnectorSchedule: (scheduling) => ({ scheduling }),
     submitCrawlSchedule: true,
+    setCrawlAutomatically: (crawlAutomatically) => ({ crawlAutomatically }),
     setCrawlFrequency: (crawlFrequency: string) => ({ crawlFrequency }),
     setCrawlUnit: (crawlUnit: CrawlUnits) => ({ crawlUnit }),
     setUseConnectorSchedule: (useConnectorSchedule) => ({ useConnectorSchedule }),
-    toggleCrawlAutomatically: true,
   }),
   reducers: () => ({
     crawlAutomatically: [
       false,
       {
         clearCrawlSchedule: () => false,
+        setCrawlAutomatically: (_, { crawlAutomatically }) => crawlAutomatically,
         setCrawlSchedule: () => true,
-        toggleCrawlAutomatically: (crawlAutomatically) => !crawlAutomatically,
       },
     ],
     crawlFrequency: [
@@ -80,6 +105,8 @@ export const AutomaticCrawlSchedulerLogic = kea<
         clearCrawlSchedule: () => DEFAULT_VALUES.crawlFrequency,
         setCrawlSchedule: (_, { crawlSchedule: { frequency } }) => frequency,
         setCrawlFrequency: (_, { crawlFrequency }) => crawlFrequency,
+        setUseConnectorSchedule: (crawlFrequency) =>
+          crawlFrequency || DEFAULT_VALUES.crawlFrequency,
       },
     ],
     crawlUnit: [
@@ -88,6 +115,7 @@ export const AutomaticCrawlSchedulerLogic = kea<
         clearCrawlSchedule: () => DEFAULT_VALUES.crawlUnit,
         setCrawlSchedule: (_, { crawlSchedule: { unit } }) => unit,
         setCrawlUnit: (_, { crawlUnit }) => crawlUnit,
+        setUseConnectorSchedule: (crawlUnit) => crawlUnit || DEFAULT_VALUES.crawlUnit,
       },
     ],
     isSubmitting: [
@@ -101,6 +129,8 @@ export const AutomaticCrawlSchedulerLogic = kea<
     useConnectorSchedule: [
       false,
       {
+        setCrawlAutomatically: (useConnectorSchedule, { crawlAutomatically }) =>
+          crawlAutomatically || useConnectorSchedule,
         setCrawlSchedule: (_, { crawlSchedule: { useConnectorSchedule = false } }) =>
           useConnectorSchedule,
         setUseConnectorSchedule: (_, { useConnectorSchedule }) => useConnectorSchedule,
@@ -148,11 +178,21 @@ export const AutomaticCrawlSchedulerLogic = kea<
       } else {
         actions.deleteCrawlSchedule();
       }
+      actions.submitConnectorSchedule({
+        ...values.index.connector.scheduling,
+        enabled: values.crawlAutomatically && values.useConnectorSchedule,
+      });
     },
-    setCrawlUnit: actions.saveChanges,
+    setCrawlAutomatically: actions.saveChanges,
     setCrawlFrequency: actions.saveChanges,
+    setCrawlUnit: actions.saveChanges,
     setUseConnectorSchedule: actions.saveChanges,
-    toggleCrawlAutomatically: actions.saveChanges,
+    submitConnectorSchedule: ({ scheduling }) => {
+      actions.makeUpdateConnectorSchedulingRequest({
+        connectorId: values.index.connector.id,
+        scheduling,
+      });
+    },
     submitCrawlSchedule: async () => {
       const { http } = HttpLogic.values;
       const { indexName } = IndexNameLogic.values;
@@ -179,6 +219,7 @@ export const AutomaticCrawlSchedulerLogic = kea<
         actions.onDoneSubmitting();
       }
     },
+    updateConnectorSchedulingApiError: (e) => flashAPIErrors(e),
   }),
   events: ({ actions }) => ({
     afterMount: () => {

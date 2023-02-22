@@ -41,7 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('are hidden in view mode', async function () {
       await PageObjects.dashboard.saveDashboard(dashboardName);
 
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.expectMissingEditPanelAction();
       await dashboardPanelActions.expectMissingRemovePanelAction();
     });
@@ -79,6 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('visualization object edit menu', () => {
       it('opens a visualization when edit link is clicked', async () => {
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const currentUrl = await browser.getCurrentUrl();
@@ -120,6 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('opens a saved search when edit link is clicked', async () => {
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const queryName = await PageObjects.discover.getCurrentQueryName();
@@ -148,6 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       before('expand panel to "full screen"', async () => {
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickExpandPanelToggle();
       });
 

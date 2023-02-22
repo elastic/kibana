@@ -475,26 +475,19 @@ export class EditJobFlyoutUI extends Component {
     if (this.state.isConfirmationModalVisible) {
       confirmationModal = (
         <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle"
-              defaultMessage="Save changes before leaving?"
-            />
-          }
+          title={i18n.translate('xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle', {
+            defaultMessage: 'Save changes before leaving?',
+          })}
           onCancel={() => this.closeFlyout(true)}
           onConfirm={() => this.save()}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.leaveAnywayButtonLabel"
-              defaultMessage="Leave anyway"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.saveChangesButtonLabel"
-              defaultMessage="Save changes"
-            />
-          }
+          cancelButtonText={i18n.translate(
+            'xpack.ml.jobsList.editJobFlyout.leaveAnywayButtonLabel',
+            { defaultMessage: 'Leave anyway' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.ml.jobsList.editJobFlyout.saveChangesButtonLabel',
+            { defaultMessage: 'Save changes' }
+          )}
           defaultFocusedButton="confirm"
         >
           <p>

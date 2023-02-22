@@ -148,6 +148,17 @@ const refreshUntilAlertsIndexExists = async () => {
 };
 
 export const waitForAlertsIndexToExist = () => {
-  createCustomRuleEnabled(getNewRule(), '1', '100m', 100);
+  createCustomRuleEnabled(getNewRule(), '1', 100);
   refreshUntilAlertsIndexExists();
+};
+
+export const deleteRuntimeField = (dataView: string, fieldName: string) => {
+  const deleteRuntimeFieldPath = `/api/data_views/data_view/${dataView}/runtime_field/${fieldName}`;
+
+  cy.request({
+    url: deleteRuntimeFieldPath,
+    method: 'DELETE',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
 };

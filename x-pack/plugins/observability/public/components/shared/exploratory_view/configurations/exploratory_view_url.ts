@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import rison, { RisonValue } from 'rison-node';
+import rison from '@kbn/rison';
 import { URL_KEYS } from './constants/url_constants';
 import type { ReportViewType, SeriesUrl } from '../types';
 import type { AllSeries } from '../../../..';
@@ -51,7 +51,7 @@ export function createExploratoryViewUrl(
   return (
     baseHref +
     `/app/${appId}/exploratory-view/#?reportType=${reportType}&sr=${encodeUriIfNeeded(
-      rison.encode(allShortSeries as unknown as RisonValue)
+      rison.encode(allShortSeries)
     )}`
   );
 }

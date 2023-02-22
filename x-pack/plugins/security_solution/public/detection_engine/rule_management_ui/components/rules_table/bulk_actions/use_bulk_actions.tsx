@@ -6,6 +6,7 @@
  */
 /* eslint-disable complexity */
 
+import { omit } from 'lodash';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import type { Toast } from '@kbn/core/public';
@@ -74,7 +75,7 @@ export const useBulkActions = ({
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
-    actions: { clearRulesSelection },
+    actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
 
   const getBulkItemsPopoverContent = useCallback(
@@ -195,6 +196,8 @@ export const useBulkActions = ({
 
         closePopover();
 
+        setIsPreflightInProgress(true);
+
         const dryRunResult = await executeBulkActionsDryRun({
           type: BulkActionType.edit,
           ...(isAllSelected
@@ -202,6 +205,8 @@ export const useBulkActions = ({
             : { ids: selectedRuleIds }),
           editPayload: computeDryRunEditPayload(bulkEditActionType),
         });
+
+        setIsPreflightInProgress(false);
 
         // User has cancelled edit action or there are no custom rules to proceed
         const hasActionBeenConfirmed = await showBulkActionConfirmation(
@@ -215,6 +220,16 @@ export const useBulkActions = ({
         const editPayload = await completeBulkEditForm(bulkEditActionType);
         if (editPayload == null) {
           return;
+        }
+
+        // TODO: https://github.com/elastic/kibana/issues/148414
+        // Strip frequency from actions to comply with Security Solution alert API
+        if ('actions' in editPayload.value) {
+          // `actions.frequency` is included in the payload from TriggersActionsUI ActionForm
+          // but is not included in the type definition for the editPayload, because this type
+          // definition comes from the Security Solution alert API
+          // TODO https://github.com/elastic/kibana/issues/148414 fix this discrepancy
+          editPayload.value.actions = editPayload.value.actions.map((a) => omit(a, 'frequency'));
         }
 
         startTransaction({ name: BULK_RULE_ACTIONS.EDIT });
@@ -464,15 +479,16 @@ export const useBulkActions = ({
       executeBulkAction,
       filterQuery,
       toasts,
+      showBulkDuplicateConfirmation,
       clearRulesSelection,
       confirmDeletion,
       bulkExport,
       showBulkActionConfirmation,
+      downloadExportedRules,
+      setIsPreflightInProgress,
       executeBulkActionsDryRun,
       filterOptions,
       completeBulkEditForm,
-      downloadExportedRules,
-      showBulkDuplicateConfirmation,
     ]
   );
 

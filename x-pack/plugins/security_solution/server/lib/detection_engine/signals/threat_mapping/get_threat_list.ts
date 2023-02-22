@@ -11,7 +11,6 @@ import type {
   GetThreatListOptions,
   ThreatListCountOptions,
   ThreatListDoc,
-  ThreatListItem,
   GetSortForThreatList,
 } from './types';
 
@@ -113,23 +112,4 @@ export const getThreatListCount = async ({
     index,
   });
   return response.count;
-};
-
-export const getAllThreatListHits = async (
-  params: Omit<GetThreatListOptions, 'searchAfter'>
-): Promise<ThreatListItem[]> => {
-  let allThreatListHits: ThreatListItem[] = [];
-  let threatList = await getThreatList({ ...params, searchAfter: undefined });
-
-  allThreatListHits = allThreatListHits.concat(threatList.hits.hits);
-
-  while (threatList.hits.hits.length !== 0) {
-    threatList = await getThreatList({
-      ...params,
-      searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
-    });
-
-    allThreatListHits = allThreatListHits.concat(threatList.hits.hits);
-  }
-  return allThreatListHits;
 };

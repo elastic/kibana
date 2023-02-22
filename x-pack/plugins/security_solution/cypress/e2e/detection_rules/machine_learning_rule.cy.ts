@@ -11,10 +11,9 @@ import { getMachineLearningRule } from '../../objects/rule';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
+  RULES_MANAGEMENT_TABLE,
   RULE_NAME,
   RULE_SWITCH,
-  RULES_ROW,
-  RULES_TABLE,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
 import {
@@ -40,7 +39,7 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { expectNumberOfRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../tasks/common';
 import {
   createAndEnableRule,
@@ -75,9 +74,7 @@ describe('Detection rules, machine learning', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-    });
+    expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 
     cy.get(RULE_NAME).should('have.text', getMachineLearningRule().name);
     cy.get(RISK_SCORE).should('have.text', getMachineLearningRule().riskScore);

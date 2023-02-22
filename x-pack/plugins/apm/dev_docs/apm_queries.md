@@ -1,8 +1,8 @@
 ### Table of Contents
 
 - [Transactions](#transactions)
+- [Transactions in service inventory page](#transactions-in-service-inventory-page)
 - [System metrics](#system-metrics)
-- [Transaction breakdown metrics](#transaction-breakdown-metrics)
 - [Span breakdown metrics](#span-breakdown-metrics)
 - [Service destination metrics](#service-destination-metrics)
 - [Common filters](#common-filters)
@@ -224,38 +224,48 @@ GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 
 # Transactions in service inventory page
 
-Service metrics is an aggregated metric document that holds latency and throughput metrics pivoted by `service.name + service.environment + transaction.type`
+Service transaction metrics are aggregated metric documents that hold latency and throughput metrics pivoted by `service.name`, `service.environment` and `transaction.type`. Additionally, `agent.name` and `service.language.name` are included as metadata.
 
-The decision to use service metrics aggregation or not is determined in [getServiceInventorySearchSource](https://github.com/elastic/kibana/blob/5d585ea375be551a169a0bea49b011819b9ac669/x-pack/plugins/apm/server/lib/helpers/get_service_inventory_search_source.ts#L12) and [getSearchServiceMetrics](https://github.com/elastic/kibana/blob/5d585ea375be551a169a0bea49b011819b9ac669/x-pack/plugins/apm/server/lib/helpers/service_metrics/index.ts#L38)
+We use the response from the `GET /internal/apm/time_range_metadata` endpoint to determine what data source is available. A data source is considered available if there is either data before the current time range, or, if there is no data at all before the current time range, if there is data within the current time range. This means that existing deployments will use transaction metrics right after upgrading (instead of using service transaction metrics and seeing a mostly blank screen), but also that new deployments immediately get the benefits of service transaction metrics, instead of falling all the way back to transaction events.
 
 A pre-aggregated document where `_doc_count` is the number of transaction events
 
 ```
 {
-  "_doc_count": 627,
+  "_doc_count": 4,
   "@timestamp": "2021-09-01T10:00:00.000Z",
   "processor.event": "metric",
-  "metricset.name": "service",
+  "metricset.name": "service_transaction",
+  "metricset.interval": "1m",
   "service": {
     "environment": "production",
     "name": "web-go"
   },
   "transaction": {
     "duration.summary": {
-        "sum": 376492831,
-        "value_count": 627
+        "sum": 1000,
+        "value_count": 4
     },
-    "success_count": 476,
-    "failure_count": 151,
+    "duration.histogram": {
+      "counts": [ 4 ],
+      "values": [ 250 ]
+    },
     "type": "request"
+  },
+  "event": {
+    "success_count": {
+      "sum": 1,
+      "value_count": 2
+    }
   }
 }
 ```
 
 - `_doc_count` is the number of bucket counts
-- `transaction.duration.summary` is an [aggregate_metric_double](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/aggregate-metric-double.html) field and holds an aggregated transaction duration summary, for service metrics
-- `failure_count` holds an aggregated count of transactions with the outcome "failure"
-- `success_count` holds an aggregated count of transactions with the outcome "success"
+- `transaction.duration.summary` is an [aggregate_metric_double](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/aggregate-metric-double.html) field and holds an aggregated transaction duration summary, for service transaction metrics
+- `event.success_count` holds an aggregate metric double that describes the _success rate_. E.g., in this example, the success rate is 50% (1/2).
+
+In addition to `service_transaction`, `service_summary` metrics are also generated. Every service outputs these, even when it does not record any transaction (that also means there is no transaction data on this metric). This means that we can use `service_summary` to display services without transactions, i.e. services that only have app/system metrics or errors.
 
 ### Latency
 

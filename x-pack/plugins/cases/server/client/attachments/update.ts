@@ -10,25 +10,12 @@ import Boom from '@hapi/boom';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
-import type { CaseResponse, CommentPatchRequest } from '../../../common/api';
+import type { CaseResponse } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
-
-/**
- * Parameters for updating a single attachment
- */
-export interface UpdateArgs {
-  /**
-   * The ID of the case that is associated with this attachment
-   */
-  caseID: string;
-  /**
-   * The full attachment request with the fields updated with appropriate values
-   */
-  updateRequest: CommentPatchRequest;
-}
+import type { UpdateArgs } from './types';
 
 /**
  * Update an attachment.
@@ -41,7 +28,6 @@ export async function update(
 ): Promise<CaseResponse> {
   const {
     services: { attachmentService },
-    unsecuredSavedObjectsClient,
     logger,
     authorization,
   } = clientArgs;
@@ -55,8 +41,7 @@ export async function update(
 
     decodeCommentRequest(queryRestAttributes);
 
-    const myComment = await attachmentService.get({
-      unsecuredSavedObjectsClient,
+    const myComment = await attachmentService.getter.get({
       attachmentId: queryCommentId,
     });
 

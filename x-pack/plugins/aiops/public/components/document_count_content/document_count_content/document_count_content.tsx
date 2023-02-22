@@ -12,9 +12,10 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { WindowParameters } from '@kbn/aiops-utils';
 
+import { DocumentCountStats } from '../../../get_document_stats';
+
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
-import { DocumentCountStats } from '../../../get_document_stats';
 
 const clearSelectionLabel = i18n.translate(
   'xpack.aiops.documentCountContent.clearSelectionAriaLabel',

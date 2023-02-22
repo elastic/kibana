@@ -11,7 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '..';
 import { SavedObjectsClientCommon } from '../types';
 
@@ -194,7 +194,7 @@ export interface DataViewsServicePublicMethods {
    * @param id - Id of the data view to get.
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  get: (id: string, displayErrors?: boolean) => Promise<DataView>;
+  get: (id: string, displayErrors?: boolean, refreshFields?: boolean) => Promise<DataView>;
   /**
    * Get populated data view saved object cache.
    */
@@ -214,8 +214,14 @@ export interface DataViewsServicePublicMethods {
   getDefaultId: () => Promise<string | null>;
   /**
    * Get default data view, if it doesn't exist, choose and save new default data view and return it.
+   * @param {Object} options
+   * @param {boolean} options.refreshFields - If true, will refresh the fields of the default data view
+   * @param {boolean} [options.displayErrors=true] - If set false, API consumer is responsible for displaying and handling errors.
    */
-  getDefaultDataView: () => Promise<DataView | null>;
+  getDefaultDataView: (options?: {
+    refreshFields?: boolean;
+    displayErrors?: boolean;
+  }) => Promise<DataView | null>;
   /**
    * Get fields for data view
    * @param dataView - Data view instance or spec
@@ -258,7 +264,6 @@ export interface DataViewsServicePublicMethods {
   /**
    * Converts data view saved object to spec
    * @params savedObject - Data view saved object
-   * @params displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
   savedObjectToSpec: (savedObject: SavedObject<DataViewAttributes>) => DataViewSpec;
   /**
@@ -497,12 +502,8 @@ export class DataViewsService {
   getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
     const metaFields = await this.config.get<string[]>(META_FIELDS);
     const { fields } = await this.apiClient.getFieldsForWildcard({
-      pattern: options.pattern,
+      ...options,
       metaFields,
-      type: options.type,
-      rollupIndex: options.rollupIndex,
-      allowNoIndex: options.allowNoIndex,
-      filter: options.filter,
     });
     return fields;
   };
@@ -543,7 +544,7 @@ export class DataViewsService {
       type: options.type,
       rollupIndex: options.rollupIndex,
       allowNoIndex: options.allowNoIndex,
-      filter: options.filter,
+      indexFilter: options.indexFilter,
     });
   };
 
@@ -613,7 +614,8 @@ export class DataViewsService {
     id: string,
     title: string,
     options: GetFieldsOptions,
-    fieldAttrs: FieldAttrs = {}
+    fieldAttrs: FieldAttrs = {},
+    displayErrors: boolean = true
   ) => {
     const fieldsAsArr = Object.values(fields);
     const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
@@ -633,10 +635,12 @@ export class DataViewsService {
       return { fields: this.fieldArrayToMap(updatedFieldList, fieldAttrs), indices };
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification(
-          { title: err.message, color: 'danger', iconType: 'alert' },
-          `refreshFieldSpecMap:${title}`
-        );
+        if (displayErrors) {
+          this.onNotification(
+            { title: err.message, color: 'danger', iconType: 'alert' },
+            `refreshFieldSpecMap:${title}`
+          );
+        }
         return {};
       }
 
@@ -742,9 +746,11 @@ export class DataViewsService {
   private initFromSavedObjectLoadFields = async ({
     savedObjectId,
     spec,
+    displayErrors = true,
   }: {
     savedObjectId: string;
     spec: DataViewSpec;
+    displayErrors?: boolean;
   }) => {
     const { title, type, typeMeta, runtimeFieldMap } = spec;
     const { fields, indices } = await this.refreshFieldSpecMap(
@@ -758,7 +764,8 @@ export class DataViewsService {
         rollupIndex: typeMeta?.params?.rollup_index,
         allowNoIndex: spec.allowNoIndex,
       },
-      spec.fieldAttrs
+      spec.fieldAttrs,
+      displayErrors
     );
 
     const runtimeFieldSpecs = this.getRuntimeFields(runtimeFieldMap, spec.fieldAttrs);
@@ -782,6 +789,7 @@ export class DataViewsService {
       const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
         savedObjectId: savedObject.id,
         spec,
+        displayErrors,
       });
       fields = fieldsAndIndices.fields;
       indices = fieldsAndIndices.indices;
@@ -877,10 +885,22 @@ export class DataViewsService {
    * Get an index pattern by id, cache optimized.
    * @param id
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
+   * @param refreshFields - If set true, will fetch fields from the index pattern
    */
-  get = async (id: string, displayErrors: boolean = true): Promise<DataView> => {
+  get = async (
+    id: string,
+    displayErrors: boolean = true,
+    refreshFields = false
+  ): Promise<DataView> => {
+    const dataViewFromCache = this.dataViewCache.get(id)?.then(async (dataView) => {
+      if (dataView && refreshFields) {
+        await this.refreshFields(dataView, displayErrors);
+      }
+      return dataView;
+    });
+
     const indexPatternPromise =
-      this.dataViewCache.get(id) ||
+      dataViewFromCache ||
       this.dataViewCache.set(id, this.getSavedObjectAndInit(id, displayErrors));
 
     // don't cache failed requests
@@ -907,7 +927,7 @@ export class DataViewsService {
     const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
 
     const spec = {
-      id: id ?? uuid.v4(),
+      id: id ?? uuidv4(),
       title,
       name: name || title,
       ...restOfSpec,
@@ -1048,13 +1068,13 @@ export class DataViewsService {
       .update(DATA_VIEW_SAVED_OBJECT_TYPE, indexPattern.id, body, {
         version: indexPattern.version,
       })
-      .then((resp) => {
-        indexPattern.id = resp.id;
-        indexPattern.version = resp.version;
+      .then((response) => {
+        indexPattern.id = response.id;
+        indexPattern.version = response.version;
         return indexPattern;
       })
       .catch(async (err) => {
-        if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
+        if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
           const samePattern = await this.get(indexPattern.id as string, displayErrors);
           // What keys changed from now and what the server returned
           const updatedBody = samePattern.getAsSavedObjectBody();
@@ -1135,9 +1155,18 @@ export class DataViewsService {
    * another data view is selected as default and returned.
    * If no possible data view found to become a default returns null.
    *
+   * @param {Object} options
+   * @param {boolean} options.refreshFields - If true, will refresh the fields of the default data view
+   * @param {boolean} [options.displayErrors=true] - If set false, API consumer is responsible for displaying and handling errors.
    * @returns default data view
    */
-  async getDefaultDataView(): Promise<DataView | null> {
+  async getDefaultDataView(
+    options: {
+      displayErrors?: boolean;
+      refreshFields?: boolean;
+    } = {}
+  ): Promise<DataView | null> {
+    const { displayErrors = true, refreshFields } = options;
     const patterns = await this.getIdsWithTitle();
     let defaultId: string | undefined = await this.config.get('defaultIndex');
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
@@ -1158,7 +1187,7 @@ export class DataViewsService {
     }
 
     if (defaultId) {
-      return this.get(defaultId);
+      return this.get(defaultId, displayErrors, refreshFields);
     } else {
       return null;
     }

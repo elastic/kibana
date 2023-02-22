@@ -10,13 +10,14 @@ import expect from '@kbn/expect';
 import {
   testGuideStep1ActiveState,
   testGuideNotActiveState,
-  testGuide,
 } from '@kbn/guided-onboarding-plugin/public/services/api.mocks';
 import {
   pluginStateSavedObjectsType,
   pluginStateSavedObjectsId,
   guideStateSavedObjectsType,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
+import { testGuideId } from '@kbn/guided-onboarding';
+import { appSearchGuideId } from '@kbn/enterprise-search-plugin/common/guided_onboarding/search_guide_config';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createGuides, createPluginState } from './helpers';
 
@@ -97,7 +98,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
 
       const createdSO = await kibanaServer.savedObjects.get({
         type: guideStateSavedObjectsType,
-        id: testGuide,
+        id: testGuideId,
       });
 
       expect(createdSO.attributes).to.eql(testGuideStep1ActiveState);
@@ -116,7 +117,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
 
       const createdSO = await kibanaServer.savedObjects.get({
         type: guideStateSavedObjectsType,
-        id: testGuide,
+        id: testGuideId,
       });
 
       expect(createdSO.attributes).to.eql(testGuideNotActiveState);
@@ -126,7 +127,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
       // create an active guide and an inactive guide
       await createGuides(kibanaServer, [
         testGuideStep1ActiveState,
-        { ...testGuideNotActiveState, guideId: 'search' },
+        { ...testGuideNotActiveState, guideId: appSearchGuideId },
       ]);
 
       // Create a new guide with isActive: true
@@ -136,7 +137,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
         .send({
           guide: {
             ...testGuideStep1ActiveState,
-            guideId: 'observability',
+            guideId: 'kubernetes',
           },
         })
         .expect(200);
@@ -144,21 +145,21 @@ export default function testPutState({ getService }: FtrProviderContext) {
       // Check that all guides except observability are inactive
       const testGuideSO = await kibanaServer.savedObjects.get({
         type: guideStateSavedObjectsType,
-        id: testGuide,
+        id: testGuideId,
       });
       expect(testGuideSO.attributes.isActive).to.eql(false);
 
       const searchGuideSO = await kibanaServer.savedObjects.get({
         type: guideStateSavedObjectsType,
-        id: 'search',
+        id: appSearchGuideId,
       });
       expect(searchGuideSO.attributes.isActive).to.eql(false);
 
-      const observabilityGuide = await kibanaServer.savedObjects.get({
+      const kubernetesGuide = await kibanaServer.savedObjects.get({
         type: guideStateSavedObjectsType,
-        id: 'observability',
+        id: 'kubernetes',
       });
-      expect(observabilityGuide.attributes.isActive).to.eql(true);
+      expect(kubernetesGuide.attributes.isActive).to.eql(true);
     });
   });
 }

@@ -17,11 +17,11 @@ import type {
   CaseStatuses,
   User,
   ActionConnector,
-  CaseExternalServiceBasic,
   CaseUserActionResponse,
   SingleCaseMetricsResponse,
   CommentResponse,
   CaseResponse,
+  UserActionFindResponse,
   CommentResponseAlertsType,
   CasesFindResponse,
   CasesStatusResponse,
@@ -29,6 +29,8 @@ import type {
   CaseSeverity,
   CommentResponseExternalReferenceType,
   CommentResponseTypePersistableState,
+  GetCaseConnectorsResponse,
+  GetCaseUsersResponse,
 } from '../api';
 import type { PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
@@ -77,12 +79,16 @@ export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type ExternalReferenceComment = SnakeToCamelCase<CommentResponseExternalReferenceType>;
 export type PersistableComment = SnakeToCamelCase<CommentResponseTypePersistableState>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
-export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
+export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
+  userActions: CaseUserActions[];
+};
 export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
 export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
+export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
+export type CaseUsers = GetCaseUsersResponse;
 
 export interface ResolvedCase {
   case: Case;
@@ -91,21 +97,28 @@ export interface ResolvedCase {
   aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
 
-export interface QueryParams {
-  page: number;
-  perPage: number;
+export interface SortingParams {
   sortField: SortFieldCase;
   sortOrder: 'asc' | 'desc';
 }
-export type UrlQueryParams = Partial<QueryParams>;
 
-export type ParsedUrlQueryParams = Partial<Omit<QueryParams, 'page' | 'perPage'>> & {
-  page?: string;
-  perPage?: string;
+export interface QueryParams extends SortingParams {
+  page: number;
+  perPage: number;
+}
+export type PartialQueryParams = Partial<QueryParams>;
+
+export interface UrlQueryParams extends SortingParams {
+  page: string;
+  perPage: string;
+}
+
+export interface ParsedUrlQueryParams extends Partial<UrlQueryParams> {
   [index: string]: string | string[] | undefined | null;
-};
+}
 
 export type LocalStorageQueryParams = Partial<Omit<QueryParams, 'page'>>;
+
 export interface FilterOptions {
   search: string;
   searchFields: string[];
@@ -116,6 +129,7 @@ export interface FilterOptions {
   reporters: User[];
   owner: string[];
 }
+export type PartialFilterOptions = Partial<FilterOptions>;
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
 export type SingleCaseMetricsFeature =
@@ -127,11 +141,15 @@ export type SingleCaseMetricsFeature =
   | 'lifespan';
 
 export enum SortFieldCase {
-  createdAt = 'createdAt',
   closedAt = 'closedAt',
+  createdAt = 'createdAt',
+  updatedAt = 'updatedAt',
+  severity = 'severity',
+  status = 'status',
+  title = 'title',
 }
 
-export type ElasticUser = SnakeToCamelCase<User>;
+export type CaseUser = SnakeToCamelCase<User>;
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;

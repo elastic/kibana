@@ -41,19 +41,24 @@ import {
   TodoRefEmbeddableFactory,
   TodoRefEmbeddableFactoryDefinition,
 } from './todo/todo_ref_embeddable_factory';
-import { createEditBookAction } from './book/edit_book_action';
+import { createEditBookActionDefinition } from './book/edit_book_action';
 import { BOOK_EMBEDDABLE } from './book/book_embeddable';
 import {
   BookEmbeddableFactory,
   BookEmbeddableFactoryDefinition,
 } from './book/book_embeddable_factory';
-import { createAddBookToLibraryAction } from './book/add_book_to_library_action';
-import { createUnlinkBookFromLibraryAction } from './book/unlink_book_from_library_action';
+import { createAddBookToLibraryActionDefinition } from './book/add_book_to_library_action';
+import { createUnlinkBookFromLibraryActionDefinition } from './book/unlink_book_from_library_action';
 import {
   SIMPLE_EMBEDDABLE,
   SimpleEmbeddableFactory,
   SimpleEmbeddableFactoryDefinition,
 } from './migrations';
+import {
+  FILTER_DEBUGGER_EMBEDDABLE,
+  FilterDebuggerEmbeddableFactory,
+  FilterDebuggerEmbeddableFactoryDefinition,
+} from './filter_debugger';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -74,6 +79,7 @@ interface ExampleEmbeddableFactories {
   getTodoRefEmbeddableFactory: () => TodoRefEmbeddableFactory;
   getBookEmbeddableFactory: () => BookEmbeddableFactory;
   getMigrationsEmbeddableFactory: () => SimpleEmbeddableFactory;
+  getFilterDebuggerEmbeddableFactory: () => FilterDebuggerEmbeddableFactory;
 }
 
 export interface EmbeddableExamplesStart {
@@ -157,7 +163,13 @@ export class EmbeddableExamplesPlugin
         }))
       );
 
-    const editBookAction = createEditBookAction(async () => ({
+    this.exampleEmbeddableFactories.getFilterDebuggerEmbeddableFactory =
+      deps.embeddable.registerEmbeddableFactory(
+        FILTER_DEBUGGER_EMBEDDABLE,
+        new FilterDebuggerEmbeddableFactoryDefinition()
+      );
+
+    const editBookAction = createEditBookActionDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
       openModal: (await core.getStartServices())[0].overlays.openModal,
       savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
@@ -165,11 +177,11 @@ export class EmbeddableExamplesPlugin
     deps.uiActions.registerAction(editBookAction);
     deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, editBookAction.id);
 
-    const addBookToLibraryAction = createAddBookToLibraryAction();
+    const addBookToLibraryAction = createAddBookToLibraryActionDefinition();
     deps.uiActions.registerAction(addBookToLibraryAction);
     deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, addBookToLibraryAction.id);
 
-    const unlinkBookFromLibraryAction = createUnlinkBookFromLibraryAction();
+    const unlinkBookFromLibraryAction = createUnlinkBookFromLibraryActionDefinition();
     deps.uiActions.registerAction(unlinkBookFromLibraryAction);
     deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkBookFromLibraryAction.id);
   }

@@ -10,26 +10,36 @@ import {
   TransformPivot,
   TransformPutTransformRequest,
   TransformSource,
+  TransformTimeSync,
 } from '@elastic/elasticsearch/lib/api/types';
+
+export interface TransformSettings {
+  frequency: TransformPutTransformRequest['frequency'];
+  sync_field: TransformTimeSync['field'];
+  sync_delay: TransformTimeSync['delay'];
+}
 
 export const getSLOTransformTemplate = (
   transformId: string,
+  description: string,
   source: TransformSource,
   destination: TransformDestination,
   groupBy: TransformPivot['group_by'] = {},
-  aggregations: TransformPivot['aggregations'] = {}
+  aggregations: TransformPivot['aggregations'] = {},
+  settings: TransformSettings
 ): TransformPutTransformRequest => ({
   transform_id: transformId,
+  description,
   source,
-  frequency: '1m',
+  frequency: settings.frequency,
   dest: destination,
   settings: {
     deduce_mappings: false,
   },
   sync: {
     time: {
-      field: '@timestamp',
-      delay: '60s',
+      field: settings.sync_field,
+      delay: settings.sync_delay,
     },
   },
   pivot: {

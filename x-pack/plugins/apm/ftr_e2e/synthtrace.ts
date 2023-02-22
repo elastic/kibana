@@ -4,10 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EntityIterable } from '@kbn/apm-synthtrace';
+import type {
+  Serializable,
+  ApmFields,
+  SynthtraceGenerator,
+} from '@kbn/apm-synthtrace-client';
 
 export const synthtrace = {
-  index: (events: EntityIterable) =>
-    cy.task('synthtrace:index', events.toArray()),
+  index: (
+    events: SynthtraceGenerator<ApmFields> | Array<Serializable<ApmFields>>
+  ) =>
+    cy.task(
+      'synthtrace:index',
+      Array.from(events).flatMap((event) => event.serialize())
+    ),
   clean: () => cy.task('synthtrace:clean'),
 };

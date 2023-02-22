@@ -24,14 +24,14 @@ import {
   deleteAllCaseItems,
   createCase,
   createComment,
-  getCaseUserActions,
   removeServerGeneratedPropertiesFromSavedObject,
   getComment,
   getSOFromKibanaIndex,
   getReferenceFromEsResponse,
   bulkCreateAttachments,
   updateComment,
-} from '../../../../common/lib/utils';
+  getCaseUserActions,
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   /**
    * Attachment types are being registered in
-   * x-pack/test/cases_api_integration/common/fixtures/plugins/cases/server/plugin.ts
+   * x-pack/test/cases_api_integration/common/plugins/cases/server/plugin.ts
    */
   describe('Persistable state attachments', () => {
     describe('references', () => {

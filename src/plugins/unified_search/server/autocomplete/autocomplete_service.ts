@@ -7,6 +7,7 @@
  */
 
 import moment from 'moment';
+import { clone } from 'lodash';
 import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 import { ConfigSchema } from '../../config';
@@ -32,6 +33,7 @@ export class AutocompleteService implements Plugin<void> {
         terminateAfter: moment.duration(terminateAfter).asMilliseconds(),
         timeout: moment.duration(timeout).asMilliseconds(),
       }),
+      getInitializerContextConfig: () => clone(this.initializerContext.config),
     };
   }
 

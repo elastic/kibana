@@ -16,3 +16,4 @@ export * from './src/value_with_space_warning';
 export * from './src/types';
 export * from './src/list_header';
 export * from './src/header_menu';
+export * from './src/generate_linked_rules_menu_item';

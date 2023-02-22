@@ -27,7 +27,7 @@ export function useMonitorList() {
 
   const { pageIndex, pageSize, sortField, sortOrder } = pageState as MonitorManagementListPageState;
 
-  const { type: viewType } = useParams<{ type: 'all' | 'invalid' }>();
+  const { type: viewType = 'all' } = useParams<{ type: 'all' | 'invalid' }>();
 
   useEffect(() => {
     if (viewType === 'all') {

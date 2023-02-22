@@ -9,11 +9,12 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
-import { UsersTableType } from '../../../../users/store/model';
+import styled from 'styled-components';
+import { UsersTableType } from '../../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
-import { HostsTableType } from '../../../../hosts/store/model';
-import { RiskScore } from '../../../../common/components/severity/common';
+import { HostsTableType } from '../../../../explore/hosts/store/model';
+import { RiskScore } from '../../../../explore/components/risk_score/severity/common';
 import type {
   HostRiskScore,
   RiskSeverity,
@@ -22,9 +23,18 @@ import type {
 import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { FormattedCount } from '../../../../common/components/formatted_number';
-import { EntityAnalyticsHoverActions } from '../common/entity_hover_actions';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+  SecurityCellActionType,
+} from '../../../../common/components/cell_actions';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
+
+const StyledCellActions = styled(SecurityCellActions)`
+  padding-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
 
 export const getRiskScoreColumns = (
   riskEntity: RiskScoreEntity,
@@ -40,19 +50,36 @@ export const getRiskScoreColumns = (
         return riskEntity === RiskScoreEntity.host ? (
           <>
             <HostDetailsLink hostName={entityName} hostTab={HostsTableType.risk} />
-            <EntityAnalyticsHoverActions
-              idPrefix={`hosts-risk-table-${entityName}`}
-              fieldName={'host.name'}
-              fieldValue={entityName}
+            <StyledCellActions
+              field={{
+                name: 'host.name',
+                value: entityName,
+                type: 'keyword',
+              }}
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              mode={CellActionsMode.INLINE}
+              visibleCellActions={2}
+              disabledActionTypes={[
+                SecurityCellActionType.FILTER,
+                SecurityCellActionType.SHOW_TOP_N,
+              ]}
             />
           </>
         ) : (
           <>
             <UserDetailsLink userName={entityName} userTab={UsersTableType.risk} />
-            <EntityAnalyticsHoverActions
-              idPrefix={`users-risk-table-${entityName}`}
-              fieldName={'user.name'}
-              fieldValue={entityName}
+            <StyledCellActions
+              field={{
+                name: 'user.name',
+                value: entityName,
+                type: 'keyword',
+              }}
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              mode={CellActionsMode.INLINE}
+              disabledActionTypes={[
+                SecurityCellActionType.FILTER,
+                SecurityCellActionType.SHOW_TOP_N,
+              ]}
             />
           </>
         );

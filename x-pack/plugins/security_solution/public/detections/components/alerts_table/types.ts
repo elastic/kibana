@@ -7,8 +7,8 @@
 
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import type { Ecs } from '../../../../common/ecs';
 import type { NoteResult } from '../../../../common/types/timeline/note';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import type { TimelineModel } from '../../../timelines/store/timeline/model';
@@ -67,6 +67,7 @@ export interface CreateTimelineProps {
   to: string;
   notes: NoteResult[] | null;
   ruleNote?: string;
+  ruleAuthor?: string | string[];
 }
 
 export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => void;

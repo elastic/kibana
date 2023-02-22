@@ -29,13 +29,17 @@ import { IndicesLogic } from './indices_logic';
 const DEFAULT_VALUES = {
   data: undefined,
   deleteModalIndex: null,
+  deleteModalIndexHasInProgressSyncs: false,
   deleteModalIndexName: '',
   deleteModalIngestionMethod: IngestionMethod.API,
   deleteStatus: Status.IDLE,
   hasNoIndices: false,
+  indexDetails: undefined,
+  indexDetailsStatus: 0,
   indices: [],
   isDeleteLoading: false,
   isDeleteModalVisible: false,
+  isFetchIndexDetailsLoading: true,
   isFirstRequest: true,
   isLoading: true,
   meta: DEFAULT_META,
@@ -80,21 +84,27 @@ describe('IndicesLogic', () => {
     });
     describe('openDeleteModal', () => {
       it('should set deleteIndexName and set isDeleteModalVisible to true', () => {
+        IndicesLogic.actions.fetchIndexDetails = jest.fn();
         IndicesLogic.actions.openDeleteModal(connectorIndex);
         expect(IndicesLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          deleteModalIndex: connectorIndex,
           deleteModalIndexName: 'connector',
-          deleteModalIngestionMethod: IngestionMethod.CONNECTOR,
           isDeleteModalVisible: true,
+        });
+        expect(IndicesLogic.actions.fetchIndexDetails).toHaveBeenCalledWith({
+          indexName: 'connector',
         });
       });
     });
     describe('closeDeleteModal', () => {
       it('should set deleteIndexName to empty and set isDeleteModalVisible to false', () => {
         IndicesLogic.actions.openDeleteModal(connectorIndex);
+        IndicesLogic.actions.fetchIndexDetails = jest.fn();
         IndicesLogic.actions.closeDeleteModal();
-        expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          indexDetailsStatus: Status.LOADING,
+        });
       });
     });
   });
@@ -266,7 +276,7 @@ describe('IndicesLogic', () => {
           isDeleteLoading: true,
         });
       });
-      it('should update isDeleteLoading to to false on apiError', () => {
+      it('should update isDeleteLoading to false on apiError', () => {
         IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
         IndicesLogic.actions.deleteError({} as HttpError);
 
@@ -276,9 +286,9 @@ describe('IndicesLogic', () => {
           isDeleteLoading: false,
         });
       });
-      it('should update isDeleteLoading to to false on apiSuccess', () => {
+      it('should update isDeleteLoading to false on apiSuccess', () => {
         IndicesLogic.actions.deleteIndex({ indexName: 'to-delete' });
-        IndicesLogic.actions.deleteSuccess();
+        IndicesLogic.actions.deleteSuccess({ indexName: 'to-delete' });
 
         expect(IndicesLogic.values).toEqual({
           ...DEFAULT_VALUES,
@@ -294,20 +304,10 @@ describe('IndicesLogic', () => {
       IndicesLogic.actions.makeRequest({ meta: DEFAULT_META, returnHiddenIndices: false });
       expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
     });
-    it('calls flashAPIErrors on apiError', () => {
-      IndicesLogic.actions.apiError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
-    });
-    it('calls flashAPIErrors on deleteError', () => {
-      IndicesLogic.actions.deleteError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
-    });
     it('calls flashSuccessToast, closeDeleteModal and fetchIndices on deleteSuccess', () => {
       IndicesLogic.actions.fetchIndices = jest.fn();
       IndicesLogic.actions.closeDeleteModal = jest.fn();
-      IndicesLogic.actions.deleteSuccess();
+      IndicesLogic.actions.deleteSuccess({ indexName: 'index-name' });
       expect(mockFlashMessageHelpers.flashSuccessToast).toHaveBeenCalledTimes(1);
       expect(IndicesLogic.actions.fetchIndices).toHaveBeenCalledWith(
         IndicesLogic.values.searchParams

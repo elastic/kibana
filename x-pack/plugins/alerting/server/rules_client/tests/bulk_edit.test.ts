@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -20,6 +20,7 @@ import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server'
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { NormalizedAlertAction } from '../types';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -28,6 +29,11 @@ jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation
 jest.mock('../../lib/snooze/is_snooze_active', () => ({
   isSnoozeActive: jest.fn(),
 }));
+
+jest.mock('uuid', () => {
+  let uuid = 100;
+  return { v4: () => `${uuid++}` };
+});
 
 const { isSnoozeActive } = jest.requireMock('../../lib/snooze/is_snooze_active');
 
@@ -59,6 +65,9 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
 };
+const paramsModifier = jest.fn();
+
+const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
@@ -93,7 +102,7 @@ describe('bulkEdit()', () => {
     ...existingRule,
     attributes: {
       ...existingRule.attributes,
-      apiKey: Buffer.from('123:abc').toString('base64'),
+      apiKey: MOCK_API_KEY,
     },
   };
 
@@ -112,7 +121,29 @@ describe('bulkEdit()', () => {
 
   beforeEach(async () => {
     rulesClient = new RulesClient(rulesClientParams);
+
+    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+      },
+    ]);
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
+
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
     });
@@ -129,7 +160,14 @@ describe('bulkEdit()', () => {
       total: 1,
     });
 
-    mockCreatePointInTimeFinderAsInternalUser();
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [
+        {
+          ...existingDecryptedRule,
+          attributes: { ...existingDecryptedRule.attributes, enabled: true },
+        },
+      ],
+    });
 
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: [existingRule],
@@ -146,11 +184,25 @@ describe('bulkEdit()', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
   });
+
   describe('tags operations', () => {
+    beforeEach(() => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: { ...existingDecryptedRule.attributes, tags: ['foo'] },
+          },
+        ],
+      });
+    });
+
     test('should add new tag', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
@@ -229,7 +281,6 @@ describe('bulkEdit()', () => {
           },
         ],
       });
-
       const result = await rulesClient.bulkEdit({
         filter: '',
         operations: [
@@ -309,6 +360,396 @@ describe('bulkEdit()', () => {
         { overwrite: true }
       );
     });
+
+    test('should skip operation when adding already existing tags', async () => {
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['foo'],
+          },
+        ],
+      });
+
+      expect(result.total).toBe(1);
+      expect(result.errors).toHaveLength(0);
+      expect(result.rules).toHaveLength(0);
+      expect(result.skipped).toHaveLength(1);
+      expect(result.skipped[0]).toHaveProperty('id', existingRule.id);
+      expect(result.skipped[0]).toHaveProperty('skip_reason', 'RULE_NOT_MODIFIED');
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
+    });
+
+    test('should skip operation when adding no tags', async () => {
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: [],
+          },
+        ],
+      });
+
+      expect(result.total).toBe(1);
+      expect(result.errors).toHaveLength(0);
+      expect(result.rules).toHaveLength(0);
+      expect(result.skipped).toHaveLength(1);
+      expect(result.skipped[0]).toHaveProperty('id', existingRule.id);
+      expect(result.skipped[0]).toHaveProperty('skip_reason', 'RULE_NOT_MODIFIED');
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
+    });
+
+    test('should skip operation when deleting non existing tags', async () => {
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'delete',
+            value: ['bar'],
+          },
+        ],
+      });
+
+      expect(result.total).toBe(1);
+      expect(result.errors).toHaveLength(0);
+      expect(result.rules).toHaveLength(0);
+      expect(result.skipped).toHaveLength(1);
+      expect(result.skipped[0]).toHaveProperty('id', existingRule.id);
+      expect(result.skipped[0]).toHaveProperty('skip_reason', 'RULE_NOT_MODIFIED');
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
+    });
+
+    test('should skip operation when deleting no tags', async () => {
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'delete',
+            value: [],
+          },
+        ],
+      });
+
+      expect(result.total).toBe(1);
+      expect(result.errors).toHaveLength(0);
+      expect(result.rules).toHaveLength(0);
+      expect(result.skipped).toHaveLength(1);
+      expect(result.skipped[0]).toHaveProperty('id', existingRule.id);
+      expect(result.skipped[0]).toHaveProperty('skip_reason', 'RULE_NOT_MODIFIED');
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('actions operations', () => {
+    beforeEach(() => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [existingDecryptedRule],
+      });
+    });
+
+    test('should add uuid to new actions', async () => {
+      const existingAction = {
+        frequency: {
+          notifyWhen: 'onActiveAlert',
+          summary: false,
+          throttle: null,
+        },
+        group: 'default',
+        id: '1',
+        params: {},
+        uuid: '111',
+      };
+      const newAction = {
+        frequency: {
+          notifyWhen: 'onActiveAlert',
+          summary: false,
+          throttle: null,
+        },
+        group: 'default',
+        id: '2',
+        params: {},
+      };
+      const newAction2 = {
+        frequency: {
+          notifyWhen: 'onActiveAlert',
+          summary: false,
+          throttle: null,
+        },
+        group: 'default',
+        id: '3',
+        params: {},
+      };
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              actions: [
+                {
+                  ...existingAction,
+                  actionRef: 'action_0',
+                },
+                {
+                  ...newAction,
+                  actionRef: 'action_1',
+                  uuid: '222',
+                },
+              ],
+            },
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+              {
+                name: 'action_1',
+                type: 'action',
+                id: '2',
+              },
+            ],
+          },
+        ],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [existingAction, newAction, newAction2] as NormalizedAlertAction[],
+          },
+        ],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              actions: [
+                {
+                  actionRef: 'action_0',
+                  actionTypeId: 'test',
+                  frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+                  group: 'default',
+                  params: {},
+                  uuid: '111',
+                },
+                {
+                  actionRef: '',
+                  actionTypeId: '',
+                  frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+                  group: 'default',
+                  params: {},
+                  uuid: '100',
+                },
+                {
+                  actionRef: '',
+                  actionTypeId: '',
+                  frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+                  group: 'default',
+                  params: {},
+                  uuid: '101',
+                },
+              ],
+              apiKey: null,
+              apiKeyOwner: null,
+              meta: { versionApiKeyLastmodified: 'v8.2.0' },
+              name: 'my rule name',
+              enabled: false,
+              updatedAt: '2019-02-12T21:01:22.479Z',
+              updatedBy: 'elastic',
+              tags: ['foo'],
+            },
+            references: [{ id: '1', name: 'action_0', type: 'action' }],
+          },
+        ],
+        { overwrite: true }
+      );
+      expect(result.rules[0]).toEqual({
+        ...existingRule.attributes,
+        actions: [existingAction, { ...newAction, uuid: '222' }],
+        id: existingRule.id,
+        snoozeSchedule: [],
+      });
+    });
+  });
+
+  describe('index pattern operations', () => {
+    beforeEach(() => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              params: { index: ['index-1', 'index-2'] },
+            },
+          },
+        ],
+      });
+    });
+
+    test('should add index patterns', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: {
+                index: ['test-1', 'test-2', 'test-4', 'test-5'],
+              },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      paramsModifier.mockResolvedValue({
+        modifiedParams: {
+          index: ['test-1', 'test-2', 'test-4', 'test-5'],
+        },
+        isParamsUpdateSkipped: false,
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [],
+        paramsModifier,
+      });
+
+      expect(result.rules[0].params).toHaveProperty('index', [
+        'test-1',
+        'test-2',
+        'test-4',
+        'test-5',
+      ]);
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              params: expect.objectContaining({
+                index: ['test-1', 'test-2', 'test-4', 'test-5'],
+              }),
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    test('should delete index patterns', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: {
+                index: ['test-1'],
+              },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      paramsModifier.mockResolvedValue({
+        modifiedParams: {
+          index: ['test-1'],
+        },
+        isParamsUpdateSkipped: false,
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [],
+        paramsModifier,
+      });
+
+      expect(result.rules[0].params).toHaveProperty('index', ['test-1']);
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              params: expect.objectContaining({
+                index: ['test-1'],
+              }),
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    test('should skip operation when params modifiers does not modify index pattern array', async () => {
+      paramsModifier.mockResolvedValue({
+        modifiedParams: {
+          index: ['test-1', 'test-2'],
+        },
+        isParamsUpdateSkipped: true,
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [],
+        paramsModifier,
+      });
+
+      expect(result.rules).toHaveLength(0);
+      expect(result.skipped[0].id).toBe(existingRule.id);
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('snoozeSchedule operations', () => {
@@ -318,7 +759,7 @@ describe('bulkEdit()', () => {
 
     const getSnoozeSchedule = (useId: boolean = true) => {
       return {
-        ...(useId && { id: uuid.v4() }),
+        ...(useId && { id: uuidv4() }),
         duration: 28800000,
         rRule: {
           dtstart: '2010-09-19T11:49:59.329Z',
@@ -714,6 +1155,16 @@ describe('bulkEdit()', () => {
   });
 
   describe('apiKey operations', () => {
+    beforeEach(() => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: { ...existingDecryptedRule.attributes, tags: ['foo'] },
+          },
+        ],
+      });
+    });
     test('should bulk update API key', async () => {
       // Does not generate API key for disabled rules
       await rulesClient.bulkEdit({
@@ -741,6 +1192,252 @@ describe('bulkEdit()', () => {
       });
 
       expect(createAPIKeyMock).toHaveBeenCalled();
+    });
+  });
+
+  describe('mixed operations', () => {
+    beforeEach(() => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              tags: ['foo'],
+              params: { index: ['index-1', 'index-2'] },
+            },
+          },
+        ],
+      });
+    });
+
+    it('should succesfully update tags and index patterns and return updated rule', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo', 'test-1'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: {
+                index: ['index-1', 'index-2', 'index-3'],
+              },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      paramsModifier.mockResolvedValue({
+        modifiedParams: {
+          index: ['index-1', 'index-2', 'index-3'],
+        },
+        isParamsUpdateSkipped: false,
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+        paramsModifier,
+      });
+
+      expect(result.rules[0]).toHaveProperty('tags', ['foo', 'test-1']);
+      expect(result.rules[0]).toHaveProperty('params.index', ['index-1', 'index-2', 'index-3']);
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              tags: ['foo', 'test-1'],
+              params: {
+                index: ['index-1', 'index-2', 'index-3'],
+              },
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    it('should succesfully update rule if tags are updated but index patterns are not', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo', 'test-1'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: {
+                index: ['index-1', 'index-2'],
+              },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      paramsModifier.mockResolvedValue({
+        modifiedParams: {
+          index: ['index-1', 'index-2'],
+        },
+        isParamsUpdateSkipped: true,
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+        paramsModifier,
+      });
+
+      expect(result.rules[0]).toHaveProperty('tags', ['foo', 'test-1']);
+      expect(result.rules[0]).toHaveProperty('params.index', ['index-1', 'index-2']);
+      expect(result.skipped).toHaveLength(0);
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              tags: ['foo', 'test-1'],
+              params: {
+                index: ['index-1', 'index-2'],
+              },
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    it('should succesfully update rule if index patterns are updated but tags are not', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: {
+                index: ['index-1', 'index-2', 'index-3'],
+              },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      paramsModifier.mockResolvedValue({
+        modifiedParams: {
+          index: ['index-1', 'index-2', 'index-3'],
+        },
+        isParamsUpdateSkipped: false,
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['foo'],
+          },
+        ],
+        paramsModifier,
+      });
+
+      expect(result.rules[0]).toHaveProperty('tags', ['foo']);
+      expect(result.rules[0]).toHaveProperty('params.index', ['index-1', 'index-2', 'index-3']);
+      expect(result.skipped).toHaveLength(0);
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            id: '1',
+            type: 'alert',
+            attributes: expect.objectContaining({
+              tags: ['foo'],
+              params: {
+                index: ['index-1', 'index-2', 'index-3'],
+              },
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    it('should skip rule update if neither index patterns nor tags are updated', async () => {
+      paramsModifier.mockResolvedValue({
+        modifiedParams: {
+          index: ['index-1', 'index-2'],
+        },
+        isParamsUpdateSkipped: true,
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['foo'],
+          },
+        ],
+        paramsModifier,
+      });
+
+      expect(result.skipped[0]).toHaveProperty('id', existingRule.id);
+      expect(result.skipped[0]).toHaveProperty('skip_reason', 'RULE_NOT_MODIFIED');
+
+      expect(result.rules).toHaveLength(0);
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -964,6 +1661,18 @@ describe('bulkEdit()', () => {
   });
 
   describe('apiKeys', () => {
+    beforeEach(() => {
+      createAPIKeyMock.mockResolvedValueOnce({ apiKeysEnabled: true, result: { api_key: '111' } });
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: { ...existingDecryptedRule.attributes, enabled: true },
+          },
+        ],
+      });
+    });
+
     test('should call createPointInTimeFinderDecryptedAsInternalUser that returns api Keys', async () => {
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
@@ -1021,16 +1730,6 @@ describe('bulkEdit()', () => {
     });
 
     test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if bulkCreate failed', async () => {
-      createAPIKeyMock.mockReturnValue({ apiKeysEnabled: true, result: { api_key: '111' } });
-      mockCreatePointInTimeFinderAsInternalUser({
-        saved_objects: [
-          {
-            ...existingDecryptedRule,
-            attributes: { ...existingDecryptedRule.attributes, enabled: true },
-          },
-        ],
-      });
-
       unsecuredSavedObjectsClient.bulkCreate.mockImplementation(() => {
         throw new Error('Fail');
       });
@@ -1057,16 +1756,6 @@ describe('bulkEdit()', () => {
     });
 
     test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if SO update failed', async () => {
-      createAPIKeyMock.mockReturnValue({ apiKeysEnabled: true, result: { api_key: '111' } });
-      mockCreatePointInTimeFinderAsInternalUser({
-        saved_objects: [
-          {
-            ...existingDecryptedRule,
-            attributes: { ...existingDecryptedRule.attributes, enabled: true },
-          },
-        ],
-      });
-
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
@@ -1128,15 +1817,6 @@ describe('bulkEdit()', () => {
     });
 
     test('should return error in rule errors if key is not generated', async () => {
-      mockCreatePointInTimeFinderAsInternalUser({
-        saved_objects: [
-          {
-            ...existingDecryptedRule,
-            attributes: { ...existingDecryptedRule.attributes, enabled: true },
-          },
-        ],
-      });
-
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
         operations: [
@@ -1152,6 +1832,12 @@ describe('bulkEdit()', () => {
   });
 
   describe('params validation', () => {
+    beforeEach(() => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [existingDecryptedRule],
+      });
+    });
+
     test('should return error for rule that failed params validation', async () => {
       ruleTypeRegistry.get.mockReturnValue({
         id: '123',
@@ -1166,7 +1852,9 @@ describe('bulkEdit()', () => {
             param1: schema.string(),
           }),
         },
-        async executor() {},
+        async executor() {
+          return { state: {} };
+        },
         producer: 'alerts',
       });
 
@@ -1208,7 +1896,9 @@ describe('bulkEdit()', () => {
             },
           },
         },
-        async executor() {},
+        async executor() {
+          return { state: {} };
+        },
         producer: 'alerts',
       });
 
@@ -1218,7 +1908,7 @@ describe('bulkEdit()', () => {
           {
             field: 'tags',
             operation: 'add',
-            value: ['test-1'],
+            value: ['test-1', 'another-tag'],
           },
         ],
       });
@@ -1251,7 +1941,7 @@ describe('bulkEdit()', () => {
         paramsModifier: async (params) => {
           params.index = ['test-index-*'];
 
-          return params;
+          return { modifiedParams: params, isParamsUpdateSkipped: false, skipReasons: [] };
         },
       });
 
@@ -1294,7 +1984,7 @@ describe('bulkEdit()', () => {
         paramsModifier: async (params) => {
           params.index = ['test-index-*'];
 
-          return params;
+          return { modifiedParams: params, isParamsUpdateSkipped: false, skipReasons: [] };
         },
       });
 

@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { rawAlertInstance } from './alert_instance';
+import { throttledActionSchema, rawAlertInstance } from './alert_instance';
 import { DateFromString } from './date_from_string';
 
 export enum ActionsCompletion {
@@ -16,8 +16,12 @@ export enum ActionsCompletion {
 
 export const ruleStateSchema = t.partial({
   alertTypeState: t.record(t.string, t.unknown),
+  // tracks the active alerts
   alertInstances: t.record(t.string, rawAlertInstance),
+  // tracks the recovered alerts for flapping purposes
+  alertRecoveredInstances: t.record(t.string, rawAlertInstance),
   previousStartedAt: t.union([t.null, DateFromString]),
+  summaryActions: throttledActionSchema,
 });
 
 // This is serialized in the rule task document

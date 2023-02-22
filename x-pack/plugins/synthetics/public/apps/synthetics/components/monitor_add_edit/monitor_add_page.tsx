@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 
@@ -21,7 +20,7 @@ import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 
 const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor' });
-  const { space, loading, error } = useKibanaSpace();
+  const { space } = useKibanaSpace();
   useTrackPageview({ app: 'synthetics', path: 'add-monitor', delay: 15000 });
   useMonitorAddEditBreadcrumbs();
   const dispatch = useDispatch();
@@ -30,12 +29,10 @@ const MonitorAddPage = () => {
     dispatch(getServiceLocations());
   }, [dispatch]);
 
-  return !loading && !error ? (
+  return (
     <MonitorForm space={space?.id}>
       <MonitorSteps stepMap={ADD_MONITOR_STEPS} />
     </MonitorForm>
-  ) : (
-    <EuiLoadingSpinner />
   );
 };
 

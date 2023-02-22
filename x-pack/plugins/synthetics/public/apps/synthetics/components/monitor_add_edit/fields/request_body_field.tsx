@@ -13,13 +13,14 @@ import { Mode, MonacoEditorLangId } from '../types';
 import { KeyValuePairsField, Pair } from './key_value_field';
 import { CodeEditor } from './code_editor';
 
-interface Props {
+export interface RequestBodyFieldProps {
   onChange: (requestBody: { type: Mode; value: string }) => void;
   onBlur?: () => void;
   value: {
     type: Mode;
     value: string;
   };
+  readOnly?: boolean;
 }
 
 enum ResponseBodyType {
@@ -28,7 +29,12 @@ enum ResponseBodyType {
 }
 
 // TO DO: Look into whether or not code editor reports errors, in order to prevent form submission on an error
-export const RequestBodyField = ({ onChange, onBlur, value: { type, value } }: Props) => {
+export const RequestBodyField = ({
+  onChange,
+  onBlur,
+  value: { type, value },
+  readOnly,
+}: RequestBodyFieldProps) => {
   const [values, setValues] = useState<Record<ResponseBodyType, string>>({
     [ResponseBodyType.FORM]: type === Mode.FORM ? value : '',
     [ResponseBodyType.CODE]: type !== Mode.FORM ? value : '',
@@ -101,6 +107,7 @@ export const RequestBodyField = ({ onChange, onBlur, value: { type, value } }: P
             onBlur?.();
           }}
           value={values[ResponseBodyType.CODE]}
+          readOnly
         />
       ),
     },
@@ -123,6 +130,7 @@ export const RequestBodyField = ({ onChange, onBlur, value: { type, value } }: P
             onBlur?.();
           }}
           value={values[ResponseBodyType.CODE]}
+          readOnly
         />
       ),
     },
@@ -145,6 +153,7 @@ export const RequestBodyField = ({ onChange, onBlur, value: { type, value } }: P
             onBlur?.();
           }}
           value={values[ResponseBodyType.CODE]}
+          readOnly
         />
       ),
     },
@@ -163,20 +172,24 @@ export const RequestBodyField = ({ onChange, onBlur, value: { type, value } }: P
           defaultPairs={defaultFormPairs}
           onChange={onChangeFormFields}
           onBlur={() => onBlur?.()}
+          readOnly
         />
       ),
     },
   ];
 
   return (
-    <EuiTabbedContent
-      tabs={tabs}
-      initialSelectedTab={tabs.find((tab) => tab.id === type)}
-      autoFocus="selected"
-      onTabClick={(tab) => {
-        handleSetMode(tab.id as Mode);
-      }}
-    />
+    <div css={readOnly ? { cursor: 'not-allowed' } : undefined}>
+      <EuiTabbedContent
+        tabs={tabs}
+        css={readOnly ? { pointerEvents: 'none' } : undefined}
+        initialSelectedTab={tabs.find((tab) => tab.id === type)}
+        autoFocus="selected"
+        onTabClick={(tab) => {
+          handleSetMode(tab.id as Mode);
+        }}
+      />
+    </div>
   );
 };
 

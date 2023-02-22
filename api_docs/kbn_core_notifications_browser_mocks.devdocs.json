@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-notifications-browser-mocks",
-        "id": "def-server.notificationServiceMock",
+        "id": "def-common.notificationServiceMock",
         "type": "Object",
         "tags": [],
         "label": "notificationServiceMock",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-notifications-browser-mocks",
-            "id": "def-server.notificationServiceMock.create",
+            "id": "def-common.notificationServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +60,7 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-mocks",
-            "id": "def-server.notificationServiceMock.createSetupContract",
+            "id": "def-common.notificationServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -61,9 +69,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.MockedKeys",
+                "section": "def-common.MockedKeys",
                 "text": "MockedKeys"
               },
               "<",
@@ -84,7 +92,7 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-mocks",
-            "id": "def-server.notificationServiceMock.createStartContract",
+            "id": "def-common.notificationServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -93,9 +101,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.MockedKeys",
+                "section": "def-common.MockedKeys",
                 "text": "MockedKeys"
               },
               "<",
@@ -118,13 +126,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export type DeleteAnalyticsCollectionApiLogicResponse = void;
 
-export const deleteAnalyticsCollection = async ({ name }: { name: string }) => {
+export const deleteAnalyticsCollection = async ({ id }: { id: string }) => {
   const { http } = HttpLogic.values;
-  const route = `/internal/enterprise_search/analytics/collections/${name}`;
+  const route = `/internal/enterprise_search/analytics/collections/${id}`;
   await http.delete<DeleteAnalyticsCollectionApiLogicResponse>(route);
 
   return;
@@ -20,5 +22,11 @@ export const deleteAnalyticsCollection = async ({ name }: { name: string }) => {
 
 export const DeleteAnalyticsCollectionAPILogic = createApiLogic(
   ['analytics', 'delete_analytics_collection_api_logic'],
-  deleteAnalyticsCollection
+  deleteAnalyticsCollection,
+  {
+    showSuccessFlashFn: () =>
+      i18n.translate('xpack.enterpriseSearch.analytics.collectionsDelete.action.successMessage', {
+        defaultMessage: 'The collection has been successfully deleted',
+      }),
+  }
 );

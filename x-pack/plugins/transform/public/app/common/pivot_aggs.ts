@@ -7,7 +7,7 @@
 
 import { FC } from 'react';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { AggName } from '../../../common/types/aggregations';

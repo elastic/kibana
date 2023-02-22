@@ -156,6 +156,40 @@ describe('BuilderEntryItem', () => {
     expect(wrapper.find('.euiFormHelpText.euiFormRow__text').exists()).toBeFalsy();
   });
 
+  test('it render mapping issues warning text when field has mapping conflicts', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('mapping issues'),
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: '1234',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel
+        allowCustomOptions
+      />
+    );
+
+    expect(wrapper.find('.euiFormHelpText.euiFormRow__text').text()).toMatch(
+      /This field is defined as several types across different indices./
+    );
+  });
+
   test('it renders field values correctly when operator is "isOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
@@ -879,7 +913,7 @@ describe('BuilderEntryItem', () => {
       ).onBlur();
     });
 
-    expect(mockSetErrorExists).toHaveBeenCalledWith(true);
+    expect(mockSetErrorExists).toHaveBeenCalledWith({ '123': true });
   });
 
   test('it invokes "setErrorsExist" when invalid value inputted for field value input', async () => {
@@ -926,7 +960,7 @@ describe('BuilderEntryItem', () => {
       ).onSearchChange('hellooo');
     });
 
-    expect(mockSetErrorExists).toHaveBeenCalledWith(true);
+    expect(mockSetErrorExists).toHaveBeenCalledWith({ '123': true });
   });
 
   test('it invokes "setWarningsExist" when invalid value in field value input', async () => {

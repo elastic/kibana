@@ -32,9 +32,7 @@ export function ExplainLogRateSpikesPageProvider({ getService }: FtrProviderCont
 
     async clickUseFullDataButton(expectedFormattedTotalDocCount: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabledWithoutRetry(
-          'aiopsExplainLogRatesSpikeButtonUseFullData'
-        );
+        await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
         await testSubjects.clickWhenNotDisabledWithoutRetry('superDatePickerApplyTimeButton');
         await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
       });

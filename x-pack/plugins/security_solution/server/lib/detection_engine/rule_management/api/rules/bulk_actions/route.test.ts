@@ -75,6 +75,7 @@ describe('Perform bulk action route', () => {
           results: someBulkActionResults(),
           summary: {
             failed: 0,
+            skipped: 0,
             succeeded: 1,
             total: 1,
           },
@@ -96,6 +97,7 @@ describe('Perform bulk action route', () => {
           results: someBulkActionResults(),
           summary: {
             failed: 0,
+            skipped: 0,
             succeeded: 0,
             total: 0,
           },
@@ -148,6 +150,7 @@ describe('Perform bulk action route', () => {
           results: someBulkActionResults(),
           summary: {
             failed: 1,
+            skipped: 0,
             succeeded: 0,
             total: 1,
           },
@@ -185,6 +188,7 @@ describe('Perform bulk action route', () => {
           results: someBulkActionResults(),
           summary: {
             failed: 1,
+            skipped: 0,
             succeeded: 0,
             total: 1,
           },
@@ -224,6 +228,7 @@ describe('Perform bulk action route', () => {
           results: someBulkActionResults(),
           summary: {
             failed: 1,
+            skipped: 0,
             succeeded: 0,
             total: 1,
           },
@@ -236,6 +241,7 @@ describe('Perform bulk action route', () => {
     it('returns partial failure error if update of few rules fail', async () => {
       clients.rulesClient.bulkEdit.mockResolvedValue({
         rules: [mockRule, mockRule],
+        skipped: [],
         errors: [
           {
             message: 'mocked validation message',
@@ -264,6 +270,7 @@ describe('Perform bulk action route', () => {
           summary: {
             failed: 3,
             succeeded: 2,
+            skipped: 0,
             total: 5,
           },
           errors: [
@@ -333,6 +340,7 @@ describe('Perform bulk action route', () => {
         attributes: {
           summary: {
             failed: 1,
+            skipped: 0,
             succeeded: 1,
             total: 2,
           },
@@ -348,6 +356,133 @@ describe('Perform bulk action route', () => {
             },
           ],
           results: someBulkActionResults(),
+        },
+        message: 'Bulk edit partially failed',
+        status_code: 500,
+      });
+    });
+  });
+
+  describe('rule skipping', () => {
+    it('returns partial failure error with skipped rules if some rule updates fail and others are skipped', async () => {
+      clients.rulesClient.bulkEdit.mockResolvedValue({
+        rules: [mockRule, mockRule],
+        skipped: [
+          { id: 'skipped-rule-id-1', name: 'Skipped Rule 1', skip_reason: 'RULE_NOT_MODIFIED' },
+          { id: 'skipped-rule-id-2', name: 'Skipped Rule 2', skip_reason: 'RULE_NOT_MODIFIED' },
+        ],
+        errors: [
+          {
+            message: 'test failure',
+            rule: { id: 'failed-rule-id-3', name: 'Detect Root/Admin Users' },
+          },
+        ],
+        total: 5,
+      });
+
+      const response = await server.inject(
+        getBulkActionEditRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          summary: {
+            failed: 1,
+            skipped: 2,
+            succeeded: 2,
+            total: 5,
+          },
+          errors: [
+            {
+              message: 'test failure',
+              rules: [
+                {
+                  id: 'failed-rule-id-3',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+              status_code: 500,
+            },
+          ],
+          results: someBulkActionResults(),
+        },
+        message: 'Bulk edit partially failed',
+        status_code: 500,
+      });
+    });
+
+    it('returns success with skipped rules if some rules are skipped, but no errors are reported', async () => {
+      clients.rulesClient.bulkEdit.mockResolvedValue({
+        rules: [mockRule, mockRule],
+        skipped: [
+          { id: 'skipped-rule-id-1', name: 'Skipped Rule 1', skip_reason: 'RULE_NOT_MODIFIED' },
+          { id: 'skipped-rule-id-2', name: 'Skipped Rule 2', skip_reason: 'RULE_NOT_MODIFIED' },
+        ],
+        errors: [],
+        total: 4,
+      });
+
+      const response = await server.inject(
+        getBulkActionEditRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        attributes: {
+          summary: {
+            failed: 0,
+            skipped: 2,
+            succeeded: 2,
+            total: 4,
+          },
+          results: someBulkActionResults(),
+        },
+        rules_count: 4,
+        success: true,
+      });
+    });
+
+    it('returns 500 with skipped rules if some rules are skipped, but some errors are reported', async () => {
+      clients.rulesClient.bulkEdit.mockResolvedValue({
+        rules: [mockRule, mockRule],
+        skipped: [
+          { id: 'skipped-rule-id-1', name: 'Skipped Rule 1', skip_reason: 'RULE_NOT_MODIFIED' },
+          { id: 'skipped-rule-id-2', name: 'Skipped Rule 2', skip_reason: 'RULE_NOT_MODIFIED' },
+        ],
+        errors: [
+          {
+            message: 'test failure',
+            rule: { id: 'failed-rule-id-3', name: 'Detect Root/Admin Users' },
+          },
+        ],
+        total: 5,
+      });
+
+      const response = await server.inject(
+        getBulkActionEditRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          summary: {
+            failed: 1,
+            skipped: 2,
+            succeeded: 2,
+            total: 5,
+          },
+          results: someBulkActionResults(),
+          errors: [
+            {
+              message: 'test failure',
+              rules: [{ id: 'failed-rule-id-3', name: 'Detect Root/Admin Users' }],
+              status_code: 500,
+            },
+          ],
         },
         message: 'Bulk edit partially failed',
         status_code: 500,
@@ -504,7 +639,7 @@ describe('Perform bulk action route', () => {
         success: true,
         rules_count: rulesNumber,
         attributes: {
-          summary: { failed: 0, succeeded: rulesNumber, total: rulesNumber },
+          summary: { failed: 0, skipped: 0, succeeded: rulesNumber, total: rulesNumber },
           results: someBulkActionResults(),
         },
       })
@@ -517,5 +652,6 @@ function someBulkActionResults() {
     created: expect.any(Array),
     deleted: expect.any(Array),
     updated: expect.any(Array),
+    skipped: expect.any(Array),
   };
 }

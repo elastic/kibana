@@ -54,7 +54,7 @@ beforeEach(() => {
 
 setGlobalDate();
 
-jest.mock('../lib/map_sort_field', () => ({
+jest.mock('../common/map_sort_field', () => ({
   mapSortField: jest.fn(),
 }));
 
@@ -288,7 +288,7 @@ describe('find()', () => {
   test('calls mapSortField', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.find({ options: { sortField: 'name' } });
-    expect(jest.requireMock('../lib/map_sort_field').mapSortField).toHaveBeenCalledWith('name');
+    expect(jest.requireMock('../common/map_sort_field').mapSortField).toHaveBeenCalledWith('name');
   });
 
   test('should translate filter/sort/search on params to mapped_params', async () => {
@@ -356,7 +356,9 @@ describe('find()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'myApp',
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
@@ -367,7 +369,9 @@ describe('find()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -552,7 +556,9 @@ describe('find()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'myApp',
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
@@ -563,7 +569,9 @@ describe('find()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),

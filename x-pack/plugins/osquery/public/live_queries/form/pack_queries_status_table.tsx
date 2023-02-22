@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { QueryDetailsFlyout } from './query_details_flyout';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
@@ -43,6 +44,10 @@ const TruncateTooltipText = styled.div`
   }
 `;
 
+const StyledEuiFlexItem = styled(EuiFlexItem)`
+  cursor: pointer;
+`;
+
 const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 
 // @ts-expect-error TS2769
@@ -51,13 +56,16 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
     padding: 0;
     border: 1px solid #d3dae6;
   }
+
   div.euiDataGrid__virtualized::-webkit-scrollbar {
     display: none;
   }
+
   .euiDataGrid > div {
     .euiDataGrid__scrollOverlay {
       box-shadow: none;
     }
+
     border-left: 0px;
     border-right: 0px;
   }
@@ -78,7 +86,7 @@ const DocsColumnResults: React.FC<DocsColumnResultsProps> = ({ count, isLive }) 
     <EuiFlexItem grow={false}>
       {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
     </EuiFlexItem>
-    {isLive ? (
+    {!isLive ? (
       <EuiFlexItem grow={false} data-test-subj={'live-query-loading'}>
         <EuiLoadingSpinner />
       </EuiFlexItem>
@@ -122,6 +130,7 @@ type PackQueryStatusItem = Partial<{
   status?: string;
   pending?: number;
   docs?: number;
+  error?: string;
 }>;
 
 interface PackQueriesStatusTableProps {
@@ -143,6 +152,19 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   expirationDate,
   showResultsHeader,
 }) => {
+  const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
+    id: string;
+    query: string;
+  } | null>(null);
+
+  const handleQueryFlyoutOpen = useCallback(
+    (item) => () => {
+      setQueryDetailsFlyoutOpen(item);
+    },
+    []
+  );
+  const handleQueryFlyoutClose = useCallback(() => setQueryDetailsFlyoutOpen(null), []);
+
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
   const renderIDColumn = useCallback(
     (id: string) => (
@@ -155,28 +177,28 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     []
   );
 
-  const renderQueryColumn = useCallback((query: string, item) => {
-    const singleLine = removeMultilines(query);
-    const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
+  const renderQueryColumn = useCallback(
+    (query: string, item) => {
+      const singleLine = removeMultilines(query);
+      const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
 
-    return (
-      <EuiToolTip title={item.id} content={<EuiFlexItem>{query}</EuiFlexItem>}>
-        <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-          {content}
-        </EuiCodeBlock>
-      </EuiToolTip>
-    );
-  }, []);
-
-  const renderDocsColumn = useCallback(
-    (item: PackQueryStatusItem) => (
-      <DocsColumnResults
-        count={item?.docs ?? 0}
-        isLive={item?.status === 'running' && item?.pending !== 0}
-      />
-    ),
-    []
+      return (
+        <StyledEuiFlexItem onClick={handleQueryFlyoutOpen(item)}>
+          <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+            {content}
+          </EuiCodeBlock>
+        </StyledEuiFlexItem>
+      );
+    },
+    [handleQueryFlyoutOpen]
   );
+
+  const renderDocsColumn = useCallback((item: PackQueryStatusItem) => {
+    const isLive =
+      !item?.status || !!item.error || (item?.status !== 'running' && item?.pending === 0);
+
+    return <DocsColumnResults count={item?.docs ?? 0} isLive={isLive} />;
+  }, []);
 
   const renderAgentsColumn = useCallback((item) => {
     if (!item.action_id) return;
@@ -215,6 +237,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   endDate={expirationDate}
                   agentIds={agentIds}
                   failedAgentsCount={item?.failed ?? 0}
+                  error={item.error}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -269,11 +292,22 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
               />
             ),
         },
+        {
+          render: (item: { action_id: string }) => (
+            <EuiButtonIcon iconType={'expand'} onClick={handleQueryFlyoutOpen(item)} />
+          ),
+        },
       ];
 
       return resultActions.map((action) => action.render(row));
     },
-    [actionId, agentIds, renderDiscoverResultsAction, renderLensResultsAction]
+    [
+      actionId,
+      agentIds,
+      handleQueryFlyoutOpen,
+      renderDiscoverResultsAction,
+      renderLensResultsAction,
+    ]
   );
   const columns = useMemo(
     () => [
@@ -381,6 +415,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         isExpandable
       />
+      {queryDetailsFlyoutOpen ? (
+        <QueryDetailsFlyout onClose={handleQueryFlyoutClose} action={queryDetailsFlyoutOpen} />
+      ) : null}
     </>
   );
 };

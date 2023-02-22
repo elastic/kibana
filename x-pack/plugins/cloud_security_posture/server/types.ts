@@ -72,6 +72,7 @@ export interface CspApiRequestHandlerContext {
   agentService: AgentService;
   packagePolicyService: PackagePolicyClient;
   packageService: PackageService;
+  isPluginInitialized(): boolean;
 }
 
 export type CspRequestHandlerContext = CustomRequestHandlerContext<{

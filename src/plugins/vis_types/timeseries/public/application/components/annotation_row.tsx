@@ -37,7 +37,6 @@ import {
 } from '../../../common/index_patterns_utils';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
-// @ts-expect-error not typed yet
 import { IconSelect } from './icon_select/icon_select';
 
 import type { Annotation, IndexPatternValue } from '../../../common/types';

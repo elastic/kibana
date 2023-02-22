@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FieldStatsType } from '../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -16,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('outlier detection creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -28,6 +29,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     const jobId = `ihp_1_${Date.now()}`;
+
+    const fieldStatsEntries = [
+      {
+        fieldName: '1stFlrSF',
+        type: 'keyword' as FieldStatsType,
+        isIncludeFieldInput: true,
+      },
+    ];
 
     const testDataList = [
       {
@@ -64,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
             // markers
             { color: '#5078AA', percentage: 15 },
             // grey boilerplate
-            { color: '#6A717D', percentage: 12 },
+            { color: '#69707D', percentage: 12 },
           ],
           scatterplotMatrixColorStatsResults: [
             // outlier markers
@@ -72,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
             // regular markers
             { color: '#6496BE', percentage: 15 },
             // tick/grid/axis
-            { color: '#6E6E82', percentage: 11 },
+            { color: '#69707D', percentage: 12 },
             { color: '#D2DCE6', percentage: 10 },
             // anti-aliasing
             { color: '#F5F7FA', percentage: 35 },
@@ -170,6 +179,16 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep('opens field stats flyout from include fields input');
+          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
+            (e) => e.isIncludeFieldInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.assertFieldStatFlyoutContentFromIncludeFieldTrigger(
+              fieldName,
+              fieldType
+            );
+          }
 
           await ml.testExecution.logTestStep(
             'sets the sample size to 10000 for the scatterplot matrix'

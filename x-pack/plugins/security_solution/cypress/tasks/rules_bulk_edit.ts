@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TIMELINE_SEARCHBOX, EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
+import { TIMELINE_SEARCHBOX, EUI_SELECTABLE_LIST_ITEM } from '../screens/common/controls';
 
 import {
   BULK_ACTIONS_BTN,
@@ -125,9 +125,42 @@ export const openTagsSelect = () => {
 
 export const submitBulkEditForm = () => cy.get(RULES_BULK_EDIT_FORM_CONFIRM_BTN).click();
 
-export const waitForBulkEditActionToFinish = ({ rulesCount }: { rulesCount: number }) => {
+export const waitForBulkEditActionToFinish = ({
+  updatedCount,
+  skippedCount,
+  failedCount,
+  showDataViewsWarning = false,
+}: {
+  updatedCount?: number;
+  skippedCount?: number;
+  failedCount?: number;
+  showDataViewsWarning?: boolean;
+}) => {
   cy.get(BULK_ACTIONS_PROGRESS_BTN).should('be.disabled');
-  cy.contains(TOASTER_BODY, `You've successfully updated ${rulesCount} rule`);
+
+  if (updatedCount !== undefined) {
+    cy.contains(TOASTER_BODY, `You've successfully updated ${updatedCount} rule`);
+  }
+  if (failedCount !== undefined) {
+    if (failedCount === 1) {
+      cy.contains(TOASTER_BODY, `${failedCount} rule failed to update`);
+    } else {
+      cy.contains(TOASTER_BODY, `${failedCount} rules failed to update`);
+    }
+  }
+  if (skippedCount !== undefined) {
+    if (skippedCount === 1) {
+      cy.contains(TOASTER_BODY, `${skippedCount} rule was skipped`);
+    } else {
+      cy.contains(TOASTER_BODY, `${skippedCount} rules were skipped`);
+    }
+    if (showDataViewsWarning) {
+      cy.contains(
+        TOASTER_BODY,
+        'If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.'
+      );
+    }
+  }
 };
 
 export const checkPrebuiltRulesCannotBeModified = (rulesCount: number) => {
@@ -193,7 +226,7 @@ export const selectTimelineTemplate = (timelineTitle: string) => {
 export const checkTagsInTagsFilter = (tags: string[]) => {
   cy.get(RULES_TAGS_FILTER_BTN).contains(`Tags${tags.length}`).click();
 
-  cy.get(EUI_FILTER_SELECT_ITEM)
+  cy.get(EUI_SELECTABLE_LIST_ITEM)
     .should('have.length', tags.length)
     .each(($el, index) => {
       cy.wrap($el).should('have.text', tags[index]);

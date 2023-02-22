@@ -1311,6 +1311,56 @@
       },
       {
         "parentPluginId": "charts",
+        "id": "def-public.MultiClickTriggerEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "MultiClickTriggerEvent",
+        "description": [],
+        "path": "src/plugins/charts/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.MultiClickTriggerEvent.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"multiFilter\""
+            ],
+            "path": "src/plugins/charts/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.MultiClickTriggerEvent.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "{ data: { table: Pick<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", \"rows\" | \"columns\">; column: number; value: any[]; }; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
+            ],
+            "path": "src/plugins/charts/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
         "id": "def-public.RawColorSchema",
         "type": "Interface",
         "tags": [],
@@ -3491,9 +3541,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"

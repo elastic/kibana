@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-        "id": "def-server.MockedElasticSearchServiceStart",
+        "id": "def-common.MockedElasticSearchServiceStart",
         "type": "Interface",
         "tags": [],
         "label": "MockedElasticSearchServiceStart",
@@ -25,7 +33,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-            "id": "def-server.MockedElasticSearchServiceStart.client",
+            "id": "def-common.MockedElasticSearchServiceStart.client",
             "type": "Object",
             "tags": [],
             "label": "client",
@@ -33,9 +41,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.ClusterClientMock",
+                "section": "def-common.ClusterClientMock",
                 "text": "ClusterClientMock"
               }
             ],
@@ -45,7 +53,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-            "id": "def-server.MockedElasticSearchServiceStart.createClient",
+            "id": "def-common.MockedElasticSearchServiceStart.createClient",
             "type": "Function",
             "tags": [],
             "label": "createClient",
@@ -54,33 +62,33 @@
               "jest.MockInstance<",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.CustomClusterClientMock",
+                "section": "def-common.CustomClusterClientMock",
                 "text": "CustomClusterClientMock"
               },
               ", [type: string, config?: Partial<",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClientConfig",
+                "section": "def-common.ElasticsearchClientConfig",
                 "text": "ElasticsearchClientConfig"
               },
               "> | undefined]> & ((type: string, config?: Partial<",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClientConfig",
+                "section": "def-common.ElasticsearchClientConfig",
                 "text": "ElasticsearchClientConfig"
               },
               "> | undefined) => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-                "section": "def-server.CustomClusterClientMock",
+                "section": "def-common.CustomClusterClientMock",
                 "text": "CustomClusterClientMock"
               },
               ")"
@@ -92,7 +100,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-                "id": "def-server.MockedElasticSearchServiceStart.createClient.$1",
+                "id": "def-common.MockedElasticSearchServiceStart.createClient.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -103,7 +111,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-                "id": "def-server.MockedElasticSearchServiceStart.createClient.$2",
+                "id": "def-common.MockedElasticSearchServiceStart.createClient.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "config",
@@ -112,9 +120,9 @@
                   "Partial<",
                   {
                     "pluginId": "@kbn/core-elasticsearch-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                    "section": "def-server.ElasticsearchClientConfig",
+                    "section": "def-common.ElasticsearchClientConfig",
                     "text": "ElasticsearchClientConfig"
                   },
                   "> | undefined"
@@ -133,7 +141,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-        "id": "def-server.MockedElasticSearchServiceSetup",
+        "id": "def-common.MockedElasticSearchServiceSetup",
         "type": "Type",
         "tags": [],
         "label": "MockedElasticSearchServiceSetup",
@@ -142,17 +150,17 @@
           "{ setUnauthorizedErrorHandler: jest.MockInstance<void, [handler: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.UnauthorizedErrorHandler",
+            "section": "def-common.UnauthorizedErrorHandler",
             "text": "UnauthorizedErrorHandler"
           },
           "]>; } & Omit<",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchServiceSetup",
+            "section": "def-common.ElasticsearchServiceSetup",
             "text": "ElasticsearchServiceSetup"
           },
           ", \"legacy\"> & { legacy: { config$: ",
@@ -170,7 +178,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-        "id": "def-server.elasticsearchServiceMock",
+        "id": "def-common.elasticsearchServiceMock",
         "type": "Object",
         "tags": [],
         "label": "elasticsearchServiceMock",
@@ -181,7 +189,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-            "id": "def-server.elasticsearchServiceMock.create",
+            "id": "def-common.elasticsearchServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -197,7 +205,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-            "id": "def-server.elasticsearchServiceMock.createInternalPreboot",
+            "id": "def-common.elasticsearchServiceMock.createInternalPreboot",
             "type": "Function",
             "tags": [],
             "label": "createInternalPreboot",
@@ -213,7 +221,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-            "id": "def-server.elasticsearchServiceMock.createPreboot",
+            "id": "def-common.elasticsearchServiceMock.createPreboot",
             "type": "Function",
             "tags": [],
             "label": "createPreboot",
@@ -229,7 +237,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-            "id": "def-server.elasticsearchServiceMock.createInternalSetup",
+            "id": "def-common.elasticsearchServiceMock.createInternalSetup",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetup",
@@ -245,7 +253,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-            "id": "def-server.elasticsearchServiceMock.createSetup",
+            "id": "def-common.elasticsearchServiceMock.createSetup",
             "type": "Function",
             "tags": [],
             "label": "createSetup",
@@ -254,9 +262,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerMocksPluginApi",
-                "section": "def-server.MockedElasticSearchServiceSetup",
+                "section": "def-common.MockedElasticSearchServiceSetup",
                 "text": "MockedElasticSearchServiceSetup"
               }
             ],
@@ -268,7 +276,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-            "id": "def-server.elasticsearchServiceMock.createInternalStart",
+            "id": "def-common.elasticsearchServiceMock.createInternalStart",
             "type": "Function",
             "tags": [],
             "label": "createInternalStart",
@@ -277,9 +285,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerMocksPluginApi",
-                "section": "def-server.MockedElasticSearchServiceStart",
+                "section": "def-common.MockedElasticSearchServiceStart",
                 "text": "MockedElasticSearchServiceStart"
               }
             ],
@@ -291,7 +299,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-            "id": "def-server.elasticsearchServiceMock.createStart",
+            "id": "def-common.elasticsearchServiceMock.createStart",
             "type": "Function",
             "tags": [],
             "label": "createStart",
@@ -300,9 +308,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerMocksPluginApi",
-                "section": "def-server.MockedElasticSearchServiceStart",
+                "section": "def-common.MockedElasticSearchServiceStart",
                 "text": "MockedElasticSearchServiceStart"
               }
             ],
@@ -314,7 +322,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server-mocks",
-            "id": "def-server.elasticsearchServiceMock.Unnamed",
+            "id": "def-common.elasticsearchServiceMock.Unnamed",
             "type": "Any",
             "tags": [],
             "label": "Unnamed",
@@ -330,13 +338,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

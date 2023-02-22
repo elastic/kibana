@@ -5,27 +5,20 @@
  * 2.0.
  */
 
-import { Request } from '@hapi/hapi';
+import type { FakeRawRequest, Headers } from '@kbn/core/server';
 import { CoreKibanaRequest } from '@kbn/core/server';
 
 export function getFakeKibanaRequest(apiKey: { id: string; api_key: string }) {
-  const requestHeaders: Record<string, string> = {};
+  const requestHeaders: Headers = {};
 
   requestHeaders.authorization = `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString(
     'base64'
   )}`;
 
-  return CoreKibanaRequest.from({
+  const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
     path: '/',
-    route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
-      },
-    },
-  } as unknown as Request);
+  };
+
+  return CoreKibanaRequest.from(fakeRawRequest);
 }

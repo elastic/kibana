@@ -6,12 +6,8 @@
  */
 
 import React, { ComponentType } from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  ApmPluginContext,
-  ApmPluginContextValue,
-} from '../../../../context/apm_plugin/apm_plugin_context';
 import { ErrorDistribution } from '.';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 export default {
@@ -19,23 +15,10 @@ export default {
   component: ErrorDistribution,
   decorators: [
     (Story: ComponentType) => {
-      const kibanaContextServices = {
-        uiSettings: { get: () => {} },
-      };
-
-      const apmPluginContextMock = {
-        observabilityRuleTypeRegistry: { getFormatter: () => undefined },
-        core: {
-          uiSettings: kibanaContextServices.uiSettings,
-        },
-      } as unknown as ApmPluginContextValue;
-
       return (
-        <ApmPluginContext.Provider value={apmPluginContextMock}>
-          <KibanaContextProvider services={kibanaContextServices}>
-            <Story />
-          </KibanaContextProvider>
-        </ApmPluginContext.Provider>
+        <MockApmPluginStorybook routePath="/services/{serviceName}/errors/{groupId}?kuery=&rangeFrom=now-15m&rangeTo=now&environment=ENVIRONMENT_ALL&serviceGroup=&comparisonEnabled=true&transactionType=request&offset=1d">
+          <Story />
+        </MockApmPluginStorybook>
       );
     },
   ],

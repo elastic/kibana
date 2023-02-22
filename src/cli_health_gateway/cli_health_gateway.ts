@@ -7,7 +7,7 @@
  */
 
 import { Command } from 'commander';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { bootstrap } from '@kbn/health-gateway-server';
 
 const program = new Command('bin/kibana-health-gateway');

@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isFilterPinned } from '@kbn/es-query';
-
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
@@ -18,6 +18,7 @@ import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
 import type { LensAppState } from '../state_management';
 import { getPersisted } from '../state_management/init_middleware/load_initial';
+import { VisualizeEditorContext } from '../types';
 
 type ExtraProps = Pick<LensAppProps, 'initialInput'> &
   Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;
@@ -33,6 +34,7 @@ export type SaveModalContainerProps = {
   isSaveable?: boolean;
   getAppNameFromId?: () => string | undefined;
   lensServices: LensAppServices;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 } & ExtraProps;
 
 export function SaveModalContainer({
@@ -49,6 +51,7 @@ export function SaveModalContainer({
   isSaveable = true,
   lastKnownDoc: initLastKnownDoc,
   lensServices,
+  initialContext,
 }: SaveModalContainerProps) {
   let title = '';
   let description;
@@ -58,6 +61,20 @@ export function SaveModalContainer({
     title = lastKnownDoc.title;
     description = lastKnownDoc.description;
     savedObjectId = lastKnownDoc.savedObjectId;
+  }
+
+  if (
+    !lastKnownDoc?.title &&
+    initialContext &&
+    'isEmbeddable' in initialContext &&
+    initialContext.isEmbeddable
+  ) {
+    title = i18n.translate('xpack.lens.app.convertedLabel', {
+      defaultMessage: '{title} (converted)',
+      values: {
+        title: initialContext.title || `${initialContext.visTypeTitle} visualization`,
+      },
+    });
   }
 
   const { attributeService, savedObjectsTagging, application, dashboardFeatureFlag } = lensServices;

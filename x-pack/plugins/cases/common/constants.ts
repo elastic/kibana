@@ -44,7 +44,7 @@ export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments' as const;
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
 
 /**
- * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/fixtures/plugins
+ * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
  */
 export const SAVED_OBJECT_TYPES = [
   CASE_SAVED_OBJECT,
@@ -73,6 +73,7 @@ export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
 export const CASE_STATUS_URL = `${CASES_URL}/status` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
 export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions` as const;
+export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as const;
 
 export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}` as const;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts` as const;
@@ -87,8 +88,15 @@ export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}` as cons
 export const CASES_INTERNAL_URL = '/internal/cases' as const;
 export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_create` as const;
+export const INTERNAL_BULK_GET_ATTACHMENTS_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_get` as const;
 export const INTERNAL_SUGGEST_USER_PROFILES_URL =
   `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
+export const INTERNAL_CONNECTORS_URL = `${CASES_INTERNAL_URL}/{case_id}/_connectors` as const;
+export const INTERNAL_BULK_GET_CASES_URL = `${CASES_INTERNAL_URL}/_bulk_get` as const;
+export const INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/user_actions/_stats` as const;
+export const INTERNAL_CASE_USERS_URL = `${CASES_INTERNAL_URL}/{case_id}/_users` as const;
 
 /**
  * Action routes
@@ -112,18 +120,21 @@ export const GENERAL_CASES_OWNER = APP_ID;
 
 export const OWNER_INFO = {
   [SECURITY_SOLUTION_OWNER]: {
+    id: SECURITY_SOLUTION_OWNER,
     appId: 'securitySolutionUI',
     label: 'Security',
     iconType: 'logoSecurity',
     appRoute: '/app/security',
   },
   [OBSERVABILITY_OWNER]: {
+    id: OBSERVABILITY_OWNER,
     appId: 'observability-overview',
     label: 'Observability',
     iconType: 'logoObservability',
     appRoute: '/app/observability',
   },
   [GENERAL_CASES_OWNER]: {
+    id: GENERAL_CASES_OWNER,
     appId: 'management',
     label: 'Stack',
     iconType: 'casesApp',
@@ -135,7 +146,9 @@ export const OWNER_INFO = {
  * Searching
  */
 export const MAX_DOCS_PER_PAGE = 10000 as const;
+export const MAX_BULK_GET_ATTACHMENTS = MAX_DOCS_PER_PAGE;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
+export const MAX_BULK_GET_CASES = 1000 as const;
 
 /**
  * Validation
@@ -189,4 +202,7 @@ export const SEARCH_DEBOUNCE_MS = 500;
 /**
  * Local storage keys
  */
-export const LOCAL_STORAGE_KEYS = { casesFiltering: 'cases.list.filtering' };
+export const LOCAL_STORAGE_KEYS = {
+  casesQueryParams: 'cases.list.queryParams',
+  casesFilterOptions: 'cases.list.filterOptions',
+};

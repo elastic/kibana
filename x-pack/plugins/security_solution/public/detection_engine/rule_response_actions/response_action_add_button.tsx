@@ -74,7 +74,7 @@ export const ResponseActionAddButton = ({
           <EuiKeyPadMenuItem
             key={index}
             isDisabled={!isGoldLicense}
-            data-test-subj={`${item.id}-ResponseActionTypeSelectOption`}
+            data-test-subj={`${item.name}-response-action-type-selection-option`}
             label={item.name}
             onClick={() => handleAddActionType(item)}
           >

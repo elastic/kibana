@@ -12,6 +12,7 @@ import type {
   FullAgentPolicy,
   PackagePolicy,
   Output,
+  ShipperOutput,
   FullAgentPolicyOutput,
   FleetProxy,
   FleetServerHost,
@@ -23,6 +24,7 @@ import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
+import { appContextService } from '../app_context';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -107,7 +109,7 @@ export async function getFullAgentPolicy(
     revision: agentPolicy.revision,
     agent: {
       download: {
-        source_uri: sourceUri,
+        sourceURI: sourceUri,
       },
       monitoring:
         agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
@@ -119,6 +121,19 @@ export async function getFullAgentPolicy(
               metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
             }
           : { enabled: false, logs: false, metrics: false },
+      features: (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
+        acc[name] = featureConfig;
+        return acc;
+      }, {} as NonNullable<FullAgentPolicy['agent']>['features']),
+      protection: {
+        enabled: false,
+        uninstall_token_hash: '',
+        signing_key: '',
+      },
+    },
+    signed: {
+      data: '',
+      signature: '',
     },
   };
 
@@ -168,6 +183,32 @@ export async function getFullAgentPolicy(
   if (!standalone && fleetServerHosts) {
     fullAgentPolicy.fleet = generateFleetConfig(fleetServerHosts, proxies);
   }
+
+  // populate protection and signed properties
+  const messageSigningService = appContextService.getMessageSigningService();
+  if (messageSigningService?.isEncryptionAvailable && fullAgentPolicy.agent) {
+    const publicKey = await messageSigningService.getPublicKey();
+
+    fullAgentPolicy.agent.protection = {
+      enabled: true,
+      uninstall_token_hash: '',
+      signing_key: publicKey,
+    };
+
+    const dataToSign = {
+      id: fullAgentPolicy.id,
+      agent: {
+        protection: fullAgentPolicy.agent.protection,
+      },
+    };
+
+    const { data: signedData, signature } = await messageSigningService.sign(dataToSign);
+    fullAgentPolicy.signed = {
+      data: signedData.toString('base64'),
+      signature,
+    };
+  }
+
   return fullAgentPolicy;
 }
 
@@ -203,12 +244,44 @@ export function transformOutputToFullPolicyOutput(
   standalone = false
 ): FullAgentPolicyOutput {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl } = output;
+  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl, shipper } = output;
+
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
+
+  // build logic to read config_yaml and transform it with the new shipper data
+  const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
+  let shipperDiskQueueData = {};
+  let generalShipperData;
+
+  if (shipper) {
+    if (!isShipperDisabled) {
+      shipperDiskQueueData = buildShipperQueueData(shipper);
+    }
+    /* eslint-disable @typescript-eslint/naming-convention */
+    const {
+      loadbalance,
+      compression_level,
+      queue_flush_timeout,
+      max_batch_bytes,
+      mem_queue_events,
+    } = shipper;
+    /* eslint-enable @typescript-eslint/naming-convention */
+
+    generalShipperData = {
+      loadbalance,
+      compression_level,
+      queue_flush_timeout,
+      max_batch_bytes,
+      mem_queue_events,
+    };
+  }
+
   const newOutput: FullAgentPolicyOutput = {
     ...configJs,
+    ...shipperDiskQueueData,
     type,
     hosts,
+    ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ssl ? { ssl } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
@@ -262,3 +335,27 @@ function getOutputIdForAgentPolicy(output: Output) {
 
   return output.id;
 }
+
+/* eslint-disable @typescript-eslint/naming-convention */
+function buildShipperQueueData(shipper: ShipperOutput) {
+  const {
+    disk_queue_enabled,
+    disk_queue_path,
+    disk_queue_max_size,
+    disk_queue_compression_enabled,
+  } = shipper;
+  if (!disk_queue_enabled) return {};
+
+  return {
+    shipper: {
+      queue: {
+        disk: {
+          path: disk_queue_path,
+          max_size: disk_queue_max_size,
+          use_compression: disk_queue_compression_enabled,
+        },
+      },
+    },
+  };
+}
+/* eslint-enable @typescript-eslint/naming-convention */

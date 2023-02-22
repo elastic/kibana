@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -13,5 +11,17 @@
     "index.ts",
     "../../../typings/**/*"
   ],
-  "kbn_references": [{ "path": "../../core/tsconfig.json" }]
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/expect",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/utility-types-jest",
+    "@kbn/test-jest-helpers",
+    "@kbn/rison",
+    "@kbn/crypto-browser",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
 }

@@ -146,7 +146,7 @@ export const getGeoContainmentExecutor = (): GeoContainmentAlertType['executor']
     rule: { id: ruleId },
     state,
     logger,
-  }): Promise<GeoContainmentState> {
+  }): Promise<{ state: GeoContainmentState }> {
     const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
       ? state
       : await getShapesFilters(
@@ -218,8 +218,10 @@ export const getGeoContainmentExecutor = (): GeoContainmentAlertType['executor']
     }
 
     return {
-      shapesFilters,
-      shapesIdsNamesMap,
-      prevLocationMap: Object.fromEntries(activeEntities),
+      state: {
+        shapesFilters,
+        shapesIdsNamesMap,
+        prevLocationMap: Object.fromEntries(activeEntities),
+      },
     };
   };

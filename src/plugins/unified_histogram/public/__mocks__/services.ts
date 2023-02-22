@@ -17,6 +17,9 @@ dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
 export const unifiedHistogramServicesMock = {
   data: dataPlugin,
   fieldFormats: fieldFormatsMock,
+  uiActions: {
+    getTriggerCompatibleActions: jest.fn(() => Promise.resolve([])),
+  },
   uiSettings: {
     get: jest.fn(),
     isDefault: jest.fn(() => true),
@@ -24,5 +27,12 @@ export const unifiedHistogramServicesMock = {
   theme: {
     useChartsTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
     useChartsBaseTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
+  },
+  lens: { EmbeddableComponent: jest.fn(() => null), navigateToPrefilledEditor: jest.fn() },
+  storage: {
+    get: jest.fn(),
+    set: jest.fn(),
+    remove: jest.fn(),
+    clear: jest.fn(),
   },
 } as unknown as UnifiedHistogramServices;

@@ -116,6 +116,25 @@ export const EventSchema = schema.maybe(
             action_subgroup: ecsString(),
             status: ecsString(),
             outcome: ecsString(),
+            summary: schema.maybe(
+              schema.object({
+                new: schema.maybe(
+                  schema.object({
+                    count: ecsStringOrNumber(),
+                  })
+                ),
+                ongoing: schema.maybe(
+                  schema.object({
+                    count: ecsStringOrNumber(),
+                  })
+                ),
+                recovered: schema.maybe(
+                  schema.object({
+                    count: ecsStringOrNumber(),
+                  })
+                ),
+              })
+            ),
           })
         ),
         alert: schema.maybe(
@@ -170,11 +189,23 @@ export const EventSchema = schema.maybe(
               id: ecsString(),
               type: ecsString(),
               type_id: ecsString(),
+              space_agnostic: ecsBoolean(),
             })
           )
         ),
         space_ids: ecsStringMulti(),
         version: ecsVersion(),
+        action: schema.maybe(
+          schema.object({
+            name: ecsString(),
+            id: ecsString(),
+            execution: schema.maybe(
+              schema.object({
+                uuid: ecsString(),
+              })
+            ),
+          })
+        ),
       })
     ),
   })

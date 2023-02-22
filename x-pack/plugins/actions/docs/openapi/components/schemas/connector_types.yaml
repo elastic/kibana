@@ -1,0 +1,22 @@
+title: Connector types
+type: string
+description: The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.
+enum:
+  - .cases-webhook
+  - .email
+  - .index
+  - .jira
+  - .opsgenie
+  - .pagerduty
+  - .resilient
+  - .servicenow
+  - .servicenow-itom
+  - .servicenow-sir
+  - .server-log
+  - .slack
+  - .swimlane
+  - .teams
+  - .tines
+  - .webhook
+  - .xmatters
+example: .server-log

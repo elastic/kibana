@@ -7,13 +7,13 @@
 
 import { FetchParameters, FetchExecution, MonitoredProduct } from '../types';
 
-import type { MetricbeatProducts } from './build_metricbeat_errors';
+import type { Products } from '../errors_helpers/build_errors';
 
-import { metricbeatErrorsQuery } from './metricbeat_errors_query';
-import { buildMetricbeatErrors } from './build_metricbeat_errors';
+import { errorsQuery } from '../errors_helpers/errors_query';
+import { buildErrors } from '../errors_helpers/build_errors';
 
 interface MetricbeatResponse {
-  products?: MetricbeatProducts;
+  products?: Products;
   execution: FetchExecution;
 }
 
@@ -29,7 +29,7 @@ export const fetchMetricbeatErrors = async ({
   const getMetricbeatErrors = async () => {
     const { aggregations, timed_out: timedOut } = await search({
       index: metricbeatIndex,
-      body: metricbeatErrorsQuery({
+      body: errorsQuery({
         timeRange,
         timeout,
         products: [
@@ -39,12 +39,13 @@ export const fetchMetricbeatErrors = async ({
           MonitoredProduct.Kibana,
           MonitoredProduct.Logstash,
         ],
+        errorQueryType: 'metricbeatErrorsQuery',
       }),
       size: 0,
       ignore_unavailable: true,
     });
     const buckets = aggregations?.errors_aggregation?.buckets ?? [];
-    return { products: buildMetricbeatErrors(buckets), timedOut: Boolean(timedOut) };
+    return { products: buildErrors(buckets), timedOut: Boolean(timedOut) };
   };
 
   try {

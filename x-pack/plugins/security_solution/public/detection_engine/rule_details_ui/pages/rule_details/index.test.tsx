@@ -8,8 +8,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
-
 import '../../../../common/mock/match_media';
 import {
   createSecuritySolutionStorageMock,
@@ -66,6 +64,9 @@ jest.mock('../../../../common/containers/sourcerer', () => {
       .mockReturnValue({ indexPattern: ['fakeindex'], loading: false }),
   };
 });
+
+jest.mock('../../../../common/hooks/use_data_table_filters');
+
 jest.mock('../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',
@@ -163,13 +164,7 @@ const mockRule = {
   exceptions_list: [],
 };
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {

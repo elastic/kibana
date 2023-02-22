@@ -18,7 +18,7 @@ import {
   Start as DataViewPublicStart,
 } from '@kbn/data-views-plugin/public/mocks';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { FieldButton } from '@kbn/react-field';
+import { EuiHighlight } from '@elastic/eui';
 
 import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
 
@@ -208,7 +208,9 @@ describe('TextBased Query Languages Data Panel', () => {
   it('should render a search box', async () => {
     const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
 
-    expect(wrapper.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"]').length).toEqual(1);
+    expect(
+      wrapper.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"] input').length
+    ).toEqual(1);
   });
 
   it('should list all supported fields in the pattern', async () => {
@@ -217,8 +219,8 @@ describe('TextBased Query Languages Data Panel', () => {
     expect(
       wrapper
         .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
-        .find(FieldButton)
-        .map((fieldItem) => fieldItem.prop('fieldName'))
+        .find(EuiHighlight)
+        .map((item) => item.prop('children'))
     ).toEqual(['bytes', 'memory', 'timestamp']);
 
     expect(wrapper.find('[data-test-subj="lnsTextBasedLanguagesEmptyFields"]').exists()).toBe(
@@ -250,20 +252,26 @@ describe('TextBased Query Languages Data Panel', () => {
   it('should list all supported fields in the pattern that match the search input', async () => {
     const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
 
-    const searchBox = wrapper.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"]');
-
-    act(() => {
-      searchBox.prop('onChange')!({
-        target: { value: 'mem' },
-      } as React.ChangeEvent<HTMLInputElement>);
-    });
-
-    await wrapper.update();
     expect(
       wrapper
         .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
-        .find(FieldButton)
-        .map((fieldItem) => fieldItem.prop('fieldName'))
+        .find(EuiHighlight)
+        .map((item) => item.prop('children'))
+    ).toEqual(['bytes', 'memory', 'timestamp']);
+
+    act(() => {
+      wrapper.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"] input').simulate('change', {
+        target: { value: 'mem' },
+      });
+    });
+
+    await wrapper.update();
+
+    expect(
+      wrapper
+        .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
+        .find(EuiHighlight)
+        .map((item) => item.prop('children'))
     ).toEqual(['memory']);
   });
 });

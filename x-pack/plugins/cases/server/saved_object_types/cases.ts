@@ -138,9 +138,14 @@ export const createCaseSavedObjectType = (
       },
       title: {
         type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
       },
       status: {
-        type: 'keyword',
+        type: 'short',
       },
       tags: {
         type: 'keyword',
@@ -172,7 +177,13 @@ export const createCaseSavedObjectType = (
         },
       },
       severity: {
-        type: 'keyword',
+        type: 'short',
+      },
+      total_alerts: {
+        type: 'integer',
+      },
+      total_comments: {
+        type: 'integer',
       },
     },
   },

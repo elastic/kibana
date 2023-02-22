@@ -21,12 +21,14 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_RULE_TAGS,
+  ALERT_RULE_TYPE_ID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { formatAlertEvaluationValue } from '../../../utils/format_alert_evaluation_value';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSummaryProps } from '../types';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
@@ -34,7 +36,6 @@ import { DEFAULT_DATE_FORMAT } from '../constants';
 
 export function AlertSummary({ alert }: AlertSummaryProps) {
   const tags = alert?.fields[ALERT_RULE_TAGS];
-
   return (
     <div data-test-subj="alert-summary-container">
       <EuiFlexGroup>
@@ -49,7 +50,10 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            {alert?.fields[ALERT_EVALUATION_VALUE] ?? '-'}
+            {formatAlertEvaluationValue(
+              alert?.fields[ALERT_RULE_TYPE_ID],
+              alert?.fields[ALERT_EVALUATION_VALUE]
+            )}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -63,7 +67,10 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            {alert?.fields[ALERT_EVALUATION_THRESHOLD] ?? '-'}
+            {formatAlertEvaluationValue(
+              alert?.fields[ALERT_RULE_TYPE_ID],
+              alert?.fields[ALERT_EVALUATION_THRESHOLD]
+            )}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -94,7 +101,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
             <AlertStatusIndicator
               textSize="s"
               alertStatus={
-                alert?.fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE
+                alert.fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE
                   ? ALERT_STATUS_ACTIVE
                   : ALERT_STATUS_RECOVERED
               }

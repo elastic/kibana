@@ -7,7 +7,7 @@
  */
 
 import { Appender, LogLevel, LogMeta, LogRecord } from '@kbn/logging';
-import { getLoggerContext } from '@kbn/core-logging-common-internal';
+import { getLoggerContext } from '..';
 import { AbstractLogger, CreateLogRecordFn } from './logger';
 
 describe('AbstractLogger', () => {

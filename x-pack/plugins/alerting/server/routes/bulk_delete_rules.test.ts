@@ -26,7 +26,7 @@ beforeEach(() => {
 
 describe('bulkDeleteRulesRoute', () => {
   const bulkDeleteRequest = { filter: '' };
-  const bulkDeleteResult = { errors: [], total: 1, taskIdsFailedToBeDeleted: [] };
+  const bulkDeleteResult = { rules: [], errors: [], total: 1, taskIdsFailedToBeDeleted: [] };
 
   it('should delete rules with proper parameters', async () => {
     const licenseState = licenseStateMock.create();

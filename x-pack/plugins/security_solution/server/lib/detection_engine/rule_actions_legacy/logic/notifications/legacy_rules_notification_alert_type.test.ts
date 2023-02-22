@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
 // eslint-disable-next-line no-restricted-imports
@@ -65,8 +66,11 @@ describe('legacyRules_notification_alert_type', () => {
         updatedAt: new Date('2019-12-14T16:40:33.400Z'),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     };
 
     alert = legacyRulesNotificationAlertType({

@@ -10,15 +10,15 @@ import { useDispatch } from 'react-redux';
 import { EuiContextMenuItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_EXCEPTIONS_LIST } from '@kbn/rule-data-utils';
+import { ALERT_RULE_EXCEPTIONS_LIST, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import type { ExceptionListId } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import type { Filter } from '@kbn/es-query';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
-import type { Ecs } from '../../../../../common/ecs';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
@@ -52,9 +52,27 @@ export const useInvestigateInTimeline = ({
 
   const getExceptionFilter = useCallback(
     async (ecsData: Ecs): Promise<Filter | undefined> => {
-      const exceptionsLists = (getField(ecsData, ALERT_RULE_EXCEPTIONS_LIST) ?? []).reduce(
-        (acc: ExceptionListId[], next: string) => {
-          const parsedList = JSON.parse(next);
+      // This pulls exceptions list information from `_source`
+      // This primarily matters for the old `signal` alerts a user may be viewing
+      // as new exception lists are pulled from kibana.alert.rule.parameters[0].exception_lists;
+      // Source was removed in favour of the fields api which passes the exceptions_list via `kibana.alert.rule.parameters`
+      let exceptionsList = getField(ecsData, ALERT_RULE_EXCEPTIONS_LIST) ?? [];
+
+      if (exceptionsList.length === 0) {
+        try {
+          const ruleParameters = getField(ecsData, ALERT_RULE_PARAMETERS) ?? {};
+          if (ruleParameters.length > 0) {
+            const parametersObject = JSON.parse(ruleParameters[0]);
+            exceptionsList = parametersObject?.exceptions_list ?? [];
+          }
+        } catch (error) {
+          // do nothing, just fail silently as parametersObject is initialized
+        }
+      }
+      const detectionExceptionsLists = exceptionsList.reduce(
+        (acc: ExceptionListId[], next: string | object) => {
+          // parsed rule.parameters returns an object else use the default string representation
+          const parsedList = typeof next === 'string' ? JSON.parse(next) : next;
           if (parsedList.type === 'detection') {
             const formattedList = {
               exception_list_id: parsedList.list_id,
@@ -67,14 +85,15 @@ export const useInvestigateInTimeline = ({
         []
       );
 
-      if (exceptionsLists.length > 0) {
+      let exceptionFilter;
+      if (detectionExceptionsLists.length > 0) {
         await getExceptionFilterFromIds({
-          exceptionListIds: exceptionsLists,
+          exceptionListIds: detectionExceptionsLists,
           excludeExceptions: true,
           chunkSize: 20,
           alias: 'Exceptions',
           onSuccess: (filter) => {
-            return filter;
+            exceptionFilter = filter;
           },
           onError: (err: string[]) => {
             addError(err, {
@@ -86,7 +105,7 @@ export const useInvestigateInTimeline = ({
           },
         });
       }
-      return undefined;
+      return exceptionFilter;
     },
     [addError, getExceptionFilterFromIds]
   );

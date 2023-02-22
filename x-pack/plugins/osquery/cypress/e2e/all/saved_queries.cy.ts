@@ -32,4 +32,13 @@ describe('ALL - Saved queries', () => {
       cy.contains('Snapshot');
     });
   });
+  it('checks result type on prebuilt saved query', () => {
+    cy.contains('Saved queries').click();
+    cy.react('CustomItemAction', {
+      props: { index: 1, item: { attributes: { id: 'users_elastic' } } },
+    }).click();
+    cy.getBySel('resultsTypeField').within(() => {
+      cy.contains('Snapshot');
+    });
+  });
 });

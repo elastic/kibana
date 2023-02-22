@@ -22,5 +22,13 @@ export const aggBasedVisualizationTrigger: Trigger = {
   description: 'Triggered when user navigates from a agg based visualization to Lens.',
 };
 
+export const DASHBOARD_VISUALIZATION_PANEL_TRIGGER = 'DASHBOARD_VISUALIZATION_PANEL_TRIGGER';
+export const dashboardVisualizationPanelTrigger: Trigger = {
+  id: DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
+  title: 'Convert legacy visualization panel on dashboard to Lens',
+  description: 'Triggered when user use "Edit in Lens" action on dashboard panel',
+};
+
 export const ACTION_CONVERT_TO_LENS = 'ACTION_CONVERT_TO_LENS';
 export const ACTION_CONVERT_AGG_BASED_TO_LENS = 'ACTION_CONVERT_AGG_BASED_TO_LENS';
+export const ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS = 'ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS';

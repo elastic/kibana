@@ -7,7 +7,7 @@
 
 import { mockLogger } from '../test_utils';
 
-import { createBuffer, Entity, OperationError, BulkOperation } from './bulk_operation_buffer';
+import { createBuffer, Entity, ErrorOutput, BulkOperation } from './bulk_operation_buffer';
 import { mapErr, asOk, asErr, Ok, Err } from './result_type';
 
 interface TaskInstance extends Entity {
@@ -29,21 +29,20 @@ function incrementAttempts(task: TaskInstance): Ok<TaskInstance> {
   });
 }
 
-function errorAttempts(task: TaskInstance): Err<OperationError<TaskInstance, Error>> {
+function errorAttempts(task: TaskInstance): Err<ErrorOutput> {
   return asErr({
-    entity: incrementAttempts(task).value,
-    error: { name: '', message: 'Oh no, something went terribly wrong', statusCode: 500 },
+    type: 'task',
+    id: task.id,
+    error: { error: '', message: 'Oh no, something went terribly wrong', statusCode: 500 },
   });
 }
 
 describe('Bulk Operation Buffer', () => {
   describe('createBuffer()', () => {
     test('batches up multiple Operation calls', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
-        ([task1, task2]) => {
-          return Promise.resolve([incrementAttempts(task1), incrementAttempts(task2)]);
-        }
-      );
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn(([task1, task2]) => {
+        return Promise.resolve([incrementAttempts(task1), incrementAttempts(task2)]);
+      });
 
       const bufferedUpdate = createBuffer(bulkUpdate);
 
@@ -58,7 +57,7 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('batch updates can be customised to execute after a certain period', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn((tasks) => {
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn((tasks) => {
         return Promise.resolve(tasks.map(incrementAttempts));
       });
 
@@ -95,7 +94,7 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('batch updates are executed once queue hits a certain bound', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn((tasks) => {
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn((tasks) => {
         return Promise.resolve(tasks.map(incrementAttempts));
       });
 
@@ -128,7 +127,7 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('queue upper bound is reset after each flush', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn((tasks) => {
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn((tasks) => {
         return Promise.resolve(tasks.map(incrementAttempts));
       });
 
@@ -164,7 +163,7 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('handles both resolutions and rejections at individual task level', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn(
         ([task1, task2, task3]) => {
           return Promise.resolve([
             incrementAttempts(task1),
@@ -183,10 +182,7 @@ describe('Bulk Operation Buffer', () => {
       await Promise.all([
         expect(bufferedUpdate(task1)).resolves.toMatchObject(incrementAttempts(task1)),
         expect(bufferedUpdate(task2)).rejects.toMatchObject(
-          mapErr(
-            (err: OperationError<TaskInstance, Error>) => asErr(err.error),
-            errorAttempts(task2)
-          )
+          mapErr((err: ErrorOutput) => asErr(err), errorAttempts(task2))
         ),
         expect(bufferedUpdate(task3)).resolves.toMatchObject(incrementAttempts(task3)),
       ]);
@@ -195,7 +191,7 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('handles bulkUpdate failure', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(() => {
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn(() => {
         return Promise.reject(new Error('bulkUpdate is an illusion'));
       });
 
@@ -230,7 +226,7 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('logs unknown bulk operation results', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance>> = jest.fn(
         ([task1, task2, task3]) => {
           return Promise.resolve([
             incrementAttempts(task1),

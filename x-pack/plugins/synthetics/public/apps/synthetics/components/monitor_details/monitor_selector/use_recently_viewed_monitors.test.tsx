@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
 import { mockCore, WrappedHelper } from '../../../utils/testing';
 import { syntheticsMonitorType } from '../../../../../../common/types/saved_objects';
@@ -19,6 +20,7 @@ const resultData = {
 
         attributes: {
           name: 'Test Monitor',
+          locations: [],
         },
       },
     },
@@ -68,16 +70,19 @@ describe('useRecentlyViewedMonitors', () => {
 
     await waitForNextUpdate();
 
-    expect(result.current).toEqual([
-      {
-        isGroupLabel: true,
-        key: 'recently_viewed',
-        label: 'Recently viewed',
-      },
-      {
-        key: 'c9322230-2a11-11ed-962b-d3e7eeedf9d1',
-        label: 'Test Monitor',
-      },
-    ]);
+    await waitFor(() => {
+      expect(result.current).toEqual([
+        {
+          isGroupLabel: true,
+          key: 'recently_viewed',
+          label: 'Recently viewed',
+        },
+        {
+          key: 'c9322230-2a11-11ed-962b-d3e7eeedf9d1',
+          label: 'Test Monitor',
+          locationIds: [],
+        },
+      ]);
+    });
   });
 });

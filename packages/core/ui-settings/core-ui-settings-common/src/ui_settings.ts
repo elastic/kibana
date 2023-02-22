@@ -87,13 +87,12 @@ export interface UiSettingsParams<T = unknown> {
     type: UiCounterMetricType;
     name: string;
   };
+  /**
+   * Scope of the setting. `Global` denotes a setting globally available across namespaces. `Namespace` denotes a setting
+   * scoped to a namespace. The default value is 'namespace'
+   */
+  scope?: UiSettingsScope;
 }
-
-/**
- * A sub-set of {@link UiSettingsParams} exposed to the client-side.
- * @public
- * */
-export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
 /**
  * Describes the values explicitly set by user.
@@ -103,3 +102,8 @@ export interface UserProvidedValues<T = any> {
   userValue?: T;
   isOverridden?: boolean;
 }
+
+/**
+ * Denotes the scope of the setting
+ */
+export type UiSettingsScope = 'namespace' | 'global';

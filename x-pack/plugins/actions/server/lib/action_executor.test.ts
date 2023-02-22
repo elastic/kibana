@@ -32,6 +32,7 @@ const executeParams = {
   },
   executionId: '123abc',
   request: {} as KibanaRequest,
+  actionExecutionId: '2',
 };
 
 const spacesMock = spacesServiceMock.createStartContract();
@@ -139,6 +140,13 @@ test('successfully executes', async () => {
             "kind": "action",
           },
           "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "1",
+              "name": "1",
+            },
             "alert": Object {
               "rule": Object {
                 "execution": Object {
@@ -170,6 +178,13 @@ test('successfully executes', async () => {
             "outcome": "success",
           },
           "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "1",
+              "name": "1",
+            },
             "alert": Object {
               "rule": Object {
                 "execution": Object {
@@ -240,6 +255,13 @@ test('successfully executes with preconfigured connector', async () => {
             "kind": "action",
           },
           "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "preconfigured",
+              "name": "Preconfigured",
+            },
             "alert": Object {
               "rule": Object {
                 "execution": Object {
@@ -252,6 +274,7 @@ test('successfully executes with preconfigured connector', async () => {
                 "id": "preconfigured",
                 "namespace": "some-namespace",
                 "rel": "primary",
+                "space_agnostic": true,
                 "type": "action",
                 "type_id": "test",
               },
@@ -271,6 +294,13 @@ test('successfully executes with preconfigured connector', async () => {
             "outcome": "success",
           },
           "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "preconfigured",
+              "name": "Preconfigured",
+            },
             "alert": Object {
               "rule": Object {
                 "execution": Object {
@@ -283,6 +313,7 @@ test('successfully executes with preconfigured connector', async () => {
                 "id": "preconfigured",
                 "namespace": "some-namespace",
                 "rel": "primary",
+                "space_agnostic": true,
                 "type": "action",
                 "type_id": "test",
               },
@@ -692,6 +723,13 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
             "kind": "action",
           },
           "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "preconfigured",
+              "name": "Preconfigured",
+            },
             "alert": Object {
               "rule": Object {
                 "execution": Object {
@@ -704,6 +742,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
                 "id": "preconfigured",
                 "namespace": "some-namespace",
                 "rel": "primary",
+                "space_agnostic": true,
                 "type": "action",
                 "type_id": "test",
               },
@@ -723,6 +762,13 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
             "outcome": "success",
           },
           "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "preconfigured",
+              "name": "Preconfigured",
+            },
             "alert": Object {
               "rule": Object {
                 "execution": Object {
@@ -735,6 +781,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
                 "id": "preconfigured",
                 "namespace": "some-namespace",
                 "rel": "primary",
+                "space_agnostic": true,
                 "type": "action",
                 "type_id": "test",
               },
@@ -815,6 +862,7 @@ test('writes to event log for execute timeout', async () => {
     consumer: 'test-consumer',
     relatedSavedObjects: [],
     request: {} as KibanaRequest,
+    actionExecutionId: '2',
   });
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
   expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
@@ -823,6 +871,13 @@ test('writes to event log for execute timeout', async () => {
       kind: 'action',
     },
     kibana: {
+      action: {
+        execution: {
+          uuid: '2',
+        },
+        name: undefined,
+        id: 'action1',
+      },
       alert: {
         rule: {
           consumer: 'test-consumer',
@@ -833,16 +888,17 @@ test('writes to event log for execute timeout', async () => {
       },
       saved_objects: [
         {
+          id: 'action1',
+          namespace: 'some-namespace',
           rel: 'primary',
           type: 'action',
-          id: 'action1',
           type_id: 'test',
-          namespace: 'some-namespace',
         },
       ],
       space_ids: ['some-namespace'],
     },
-    message: `action: test:action1: 'action-1' execution cancelled due to timeout - exceeded default timeout of "5m"`,
+    message:
+      'action: test:action1: \'action-1\' execution cancelled due to timeout - exceeded default timeout of "5m"',
   });
 });
 
@@ -860,6 +916,13 @@ test('writes to event log for execute and execute start', async () => {
       kind: 'action',
     },
     kibana: {
+      action: {
+        execution: {
+          uuid: '2',
+        },
+        name: 'action-1',
+        id: '1',
+      },
       alert: {
         rule: {
           execution: {
@@ -869,43 +932,16 @@ test('writes to event log for execute and execute start', async () => {
       },
       saved_objects: [
         {
+          id: '1',
+          namespace: 'some-namespace',
           rel: 'primary',
           type: 'action',
-          id: '1',
           type_id: 'test',
-          namespace: 'some-namespace',
         },
       ],
       space_ids: ['some-namespace'],
     },
     message: 'action started: test:1: action-1',
-  });
-  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
-    event: {
-      action: 'execute',
-      kind: 'action',
-      outcome: 'success',
-    },
-    kibana: {
-      alert: {
-        rule: {
-          execution: {
-            uuid: '123abc',
-          },
-        },
-      },
-      saved_objects: [
-        {
-          rel: 'primary',
-          type: 'action',
-          id: '1',
-          type_id: 'test',
-          namespace: 'some-namespace',
-        },
-      ],
-      space_ids: ['some-namespace'],
-    },
-    message: 'action executed: test:1: action-1',
   });
 });
 
@@ -933,6 +969,13 @@ test('writes to event log for execute and execute start when consumer and relate
       kind: 'action',
     },
     kibana: {
+      action: {
+        execution: {
+          uuid: '2',
+        },
+        name: 'action-1',
+        id: '1',
+      },
       alert: {
         rule: {
           consumer: 'test-consumer',
@@ -944,57 +987,23 @@ test('writes to event log for execute and execute start when consumer and relate
       },
       saved_objects: [
         {
+          id: '1',
+          namespace: 'some-namespace',
           rel: 'primary',
           type: 'action',
-          id: '1',
           type_id: 'test',
-          namespace: 'some-namespace',
         },
         {
+          id: '12',
+          namespace: undefined,
           rel: 'primary',
           type: 'alert',
-          id: '12',
           type_id: '.rule-type',
         },
       ],
       space_ids: ['some-namespace'],
     },
     message: 'action started: test:1: action-1',
-  });
-  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
-    event: {
-      action: 'execute',
-      kind: 'action',
-      outcome: 'success',
-    },
-    kibana: {
-      alert: {
-        rule: {
-          consumer: 'test-consumer',
-          execution: {
-            uuid: '123abc',
-          },
-          rule_type_id: '.rule-type',
-        },
-      },
-      saved_objects: [
-        {
-          rel: 'primary',
-          type: 'action',
-          id: '1',
-          type_id: 'test',
-          namespace: 'some-namespace',
-        },
-        {
-          rel: 'primary',
-          type: 'alert',
-          id: '12',
-          type_id: '.rule-type',
-        },
-      ],
-      space_ids: ['some-namespace'],
-    },
-    message: 'action executed: test:1: action-1',
   });
 });
 

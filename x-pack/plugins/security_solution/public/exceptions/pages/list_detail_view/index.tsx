@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { FC } from 'react';
 
 import {
@@ -13,6 +13,7 @@ import {
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
 import { EuiLoadingContent } from '@elastic/eui';
+import { useParams } from 'react-router-dom';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
@@ -23,8 +24,12 @@ import { AutoDownload } from '../../../common/components/auto_download/auto_down
 import { ListWithSearch, ManageRules, ListDetailsLinkAnchor } from '../../components';
 import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
+import { ExportExceptionsListModal } from '../../components/export_exceptions_list_modal';
 
 export const ListsDetailViewComponent: FC = () => {
+  const { detailName: exceptionListId } = useParams<{
+    detailName: string;
+  }>();
   const {
     isLoading,
     invalidListId,
@@ -34,6 +39,7 @@ export const ListsDetailViewComponent: FC = () => {
     listId,
     linkedRules,
     exportedList,
+    handleOnDownload,
     viewerStatus,
     listName,
     listDescription,
@@ -53,7 +59,13 @@ export const ListsDetailViewComponent: FC = () => {
     handleDelete,
     handleCloseReferenceErrorModal,
     handleReferenceDelete,
-  } = useListDetailsView();
+  } = useListDetailsView(exceptionListId);
+
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  const onModalClose = useCallback(() => setShowExportModal(false), [setShowExportModal]);
+
+  const onModalOpen = useCallback(() => setShowExportModal(true), [setShowExportModal]);
 
   const detailsViewContent = useMemo(() => {
     if (viewerStatus === ViewerStatus.ERROR)
@@ -75,12 +87,12 @@ export const ListsDetailViewComponent: FC = () => {
           backOptions={headerBackOptions}
           securityLinkAnchorComponent={ListDetailsLinkAnchor}
           onEditListDetails={onEditListDetails}
-          onExportList={onExportList}
+          onExportList={onModalOpen}
           onDeleteList={handleDelete}
           onManageRules={onManageRules}
         />
 
-        <AutoDownload blob={exportedList} name={listId} />
+        <AutoDownload blob={exportedList} name={`${listId}.ndjson`} onDownload={handleOnDownload} />
         <ListWithSearch list={list} refreshExceptions={refreshExceptions} isReadOnly={isReadOnly} />
         <ReferenceErrorModal
           cancelText={i18n.REFERENCE_MODAL_CANCEL_BUTTON}
@@ -103,12 +115,19 @@ export const ListsDetailViewComponent: FC = () => {
             onRuleSelectionChange={onRuleSelectionChange}
           />
         ) : null}
+        {showExportModal && (
+          <ExportExceptionsListModal
+            onModalConfirm={onExportList}
+            handleCloseModal={onModalClose}
+          />
+        )}
       </>
     );
   }, [
     canUserEditList,
     disableManageButton,
     exportedList,
+    handleOnDownload,
     headerBackOptions,
     invalidListId,
     isLoading,
@@ -124,6 +143,7 @@ export const ListsDetailViewComponent: FC = () => {
     showManageButtonLoader,
     showManageRulesFlyout,
     showReferenceErrorModal,
+    showExportModal,
     viewerStatus,
     onCancelManageRules,
     onEditListDetails,
@@ -134,6 +154,8 @@ export const ListsDetailViewComponent: FC = () => {
     handleCloseReferenceErrorModal,
     handleDelete,
     handleReferenceDelete,
+    onModalClose,
+    onModalOpen,
   ]);
   return (
     <>

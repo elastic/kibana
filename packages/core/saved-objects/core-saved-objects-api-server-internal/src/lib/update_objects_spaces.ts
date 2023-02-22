@@ -18,23 +18,19 @@ import type {
   SavedObjectsUpdateObjectsSpacesResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from '@kbn/core-saved-objects-api-server';
-import {
-  AuditAction,
-  type ISavedObjectsSecurityExtension,
-  type ISavedObjectTypeRegistry,
-  type SavedObjectsRawDocSource,
+import type {
+  SavedObject,
+  AuthorizeObjectWithExistingSpaces,
+  ISavedObjectsSecurityExtension,
+  ISavedObjectTypeRegistry,
+  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectsErrorHelpers,
-  ALL_NAMESPACES_STRING,
-  type DecoratedError,
-  SavedObjectsUtils,
-} from '@kbn/core-saved-objects-utils-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
   SavedObjectsSerializer,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   getBulkOperationError,
   getExpectedVersionProperties,
@@ -180,57 +176,23 @@ export async function updateObjectsSpaces({
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
   }
 
-  const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-  const addToSpaces = spacesToAdd.length ? spacesToAdd : undefined;
-  const deleteFromSpaces = spacesToRemove.length ? spacesToRemove : undefined;
-  const typesAndSpaces = new Map<string, Set<string>>();
-  const spacesToAuthorize = new Set<string>();
-  for (const { value } of validObjects) {
-    const { type, esRequestIndex: index } = value;
+  const authObjects: AuthorizeObjectWithExistingSpaces[] = validObjects.map((element) => {
+    const { type, id, esRequestIndex: index } = element.value;
     const preflightResult = index !== undefined ? bulkGetResponse?.body.docs[index] : undefined;
-
-    const spacesToEnforce =
-      typesAndSpaces.get(type) ?? new Set([...spacesToAdd, ...spacesToRemove, namespaceString]); // Always enforce authZ for the active space
-    typesAndSpaces.set(type, spacesToEnforce);
-    for (const space of spacesToEnforce) {
-      spacesToAuthorize.add(space);
-    }
-    // @ts-expect-error MultiGetHit._source is optional
-    for (const space of preflightResult?._source?.namespaces ?? []) {
-      // Existing namespaces are included so we can later redact if necessary
-      // If this is a specific space, add it to the spaces we'll check privileges for (don't accidentally check for global privileges)
-      if (space === ALL_NAMESPACES_STRING) continue;
-      spacesToAuthorize.add(space);
-    }
-  }
-
-  const authorizationResult = await securityExtension?.checkAuthorization({
-    types: new Set(typesAndSpaces.keys()),
-    spaces: spacesToAuthorize,
-    actions: new Set(['share_to_space']),
-    // If a user tries to share/unshare an object to/from '*', they need to have 'share_to_space' privileges for the Global Resource (e.g.,
-    // All privileges for All Spaces).
-    options: { allowGlobalResource: true },
+    return {
+      type,
+      id,
+      // @ts-expect-error MultiGetHit._source is optional
+      existingNamespaces: preflightResult?._source?.namespaces ?? [],
+    };
   });
-  if (authorizationResult) {
-    securityExtension!.enforceAuthorization({
-      typesAndSpaces,
-      action: 'share_to_space',
-      typeMap: authorizationResult.typeMap,
-      auditCallback: (error) => {
-        for (const { value } of validObjects) {
-          securityExtension!.addAuditEvent({
-            action: AuditAction.UPDATE_OBJECTS_SPACES,
-            savedObject: { type: value.type, id: value.id },
-            addToSpaces,
-            deleteFromSpaces,
-            error,
-            ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the update operation has not occurred yet
-          });
-        }
-      },
-    });
-  }
+
+  const authorizationResult = await securityExtension?.authorizeUpdateSpaces({
+    namespace,
+    spacesToAdd,
+    spacesToRemove,
+    objects: authObjects,
+  });
 
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;

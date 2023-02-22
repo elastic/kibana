@@ -321,32 +321,32 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   return (
     <ModalContainer direction="column" gutterSize="none">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiModalHeaderTitle>
               <FormattedMessage
                 id="xpack.cases.markdownEditor.plugins.lens.addVisualizationModalTitle"
                 defaultMessage="Add visualization"
               />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <BetaBadgeWrapper>
-                <EuiBetaBadge
-                  label={i18n.translate('xpack.cases.markdownEditor.plugins.lens.betaLabel', {
-                    defaultMessage: 'Beta',
-                  })}
-                  tooltipContent={i18n.translate(
-                    'xpack.cases.markdownEditor.plugins.lens.betaDescription',
-                    {
-                      defaultMessage:
-                        'This module is not GA. You can only insert one lens per comment for now. Please help us by reporting bugs.',
-                    }
-                  )}
-                />
-              </BetaBadgeWrapper>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiModalHeaderTitle>
+            </EuiModalHeaderTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <BetaBadgeWrapper>
+              <EuiBetaBadge
+                label={i18n.translate('xpack.cases.markdownEditor.plugins.lens.betaLabel', {
+                  defaultMessage: 'Beta',
+                })}
+                tooltipContent={i18n.translate(
+                  'xpack.cases.markdownEditor.plugins.lens.betaDescription',
+                  {
+                    defaultMessage:
+                      'This module is not GA. You can only insert one lens per comment for now. Please help us by reporting bugs.',
+                  }
+                )}
+              />
+            </BetaBadgeWrapper>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
         <SavedObjectFinderUi

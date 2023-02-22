@@ -94,7 +94,7 @@ export const SplitCards: FC<Props> = memo(
           {(fieldValues.length === 0 || numberOfDetectors === 0) && <>{children}</>}
           {fieldValues.length > 0 && numberOfDetectors > 0 && splitField !== null && (
             <Fragment>
-              {jobType === JOB_TYPE.MULTI_METRIC && (
+              {(jobType === JOB_TYPE.MULTI_METRIC || jobType === JOB_TYPE.GEO) && (
                 <Fragment>
                   <div
                     style={{ fontSize: 'small' }}

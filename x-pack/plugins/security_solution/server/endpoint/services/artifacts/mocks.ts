@@ -45,6 +45,12 @@ export const createEndpointArtifactClientMock = (
       const response = await endpointArtifactClient.createArtifact(...args);
       return response;
     }),
+    bulkCreateArtifacts: jest.fn(async (...args) => {
+      const fleetArtifactClient = new FleetArtifactsClient(esClient, 'endpoint');
+      const endpointArtifactClient = new EndpointArtifactClient(fleetArtifactClient);
+      const response = await endpointArtifactClient.bulkCreateArtifacts(...args);
+      return response;
+    }),
     listArtifacts: jest.fn((...args) => endpointArtifactClientMocked.listArtifacts(...args)),
     getArtifact: jest.fn((...args) => endpointArtifactClientMocked.getArtifact(...args)),
     deleteArtifact: jest.fn((...args) => endpointArtifactClientMocked.deleteArtifact(...args)),

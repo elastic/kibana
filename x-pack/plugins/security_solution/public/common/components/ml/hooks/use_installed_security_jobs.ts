@@ -72,3 +72,18 @@ export const useInstalledSecurityJobsIds = () => {
 
   return { jobIds, loading };
 };
+
+export const useInstalledSecurityJobNameById = () => {
+  const { jobs, loading } = useInstalledSecurityJobs();
+
+  const jobNameById = useMemo(
+    () =>
+      jobs.reduce<Record<string, string | undefined>>((acc, job) => {
+        acc[job.id] = job.customSettings?.security_app_display_name;
+        return acc;
+      }, {}),
+    [jobs]
+  );
+
+  return { jobNameById, loading };
+};

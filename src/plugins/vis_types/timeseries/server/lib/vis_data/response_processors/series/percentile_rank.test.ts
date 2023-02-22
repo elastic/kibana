@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error no typed yet
 import { percentileRank } from './percentile_rank';
 import type { Panel, Series } from '../../../../../common/types';
 

@@ -1,6 +1,11 @@
 {
   "type": "browser",
   "enabled": true,
+  "alert": {
+    "status": {
+      "enabled": true
+    }
+  },
   "journey_id": "",
   "project_id": "",
   "schedule": {
@@ -9,10 +14,7 @@
   },
   "service.name": "",
   "config_id": "",
-  "tags": [
-    "cookie-test",
-    "browser"
-  ],
+  "tags": ["cookie-test", "browser"],
   "timeout": "16",
   "__ui": {
     "script_source": {
@@ -29,7 +31,6 @@
   "source.zip_url.proxy_url": "",
   "source.inline.script": "step(\"Visit /users api route\", async () => {\\n  const response = await page.goto('https://nextjs-test-synthetics.vercel.app/api/users');\\n  expect(response.status()).toEqual(200);\\n});",
   "source.project.content": "",
-  "is_push_monitor": false,
   "params": "",
   "screenshots": "on",
   "synthetics_args": [],
@@ -49,5 +50,12 @@
   "urls": "",
   "url.port": null,
   "id": "",
-  "hash": ""
+  "hash": "",
+  "playwright_options": "",
+  "playwright_text_assertion": "",
+  "ssl.certificate": "",
+  "ssl.certificate_authorities": "",
+  "ssl.supported_protocols": ["TLSv1.1", "TLSv1.2", "TLSv1.3"],
+  "ssl.verification_mode": "full",
+  "revision": 1
 }

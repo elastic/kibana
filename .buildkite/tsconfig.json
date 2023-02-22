@@ -1,12 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "incremental": false,
-    "composite": false,
-    "emitDeclarationOnly": true,
-    "outDir": "./target/types",
+    "outDir": "target/types",
     "types": ["node", "mocha"],
     "paths": {
       "#pipeline-utils": [".buildkite/pipeline-utils/index.ts"],
@@ -19,5 +14,8 @@
     "scripts/**/*",
     "pipelines/flaky_tests/groups.json",
     "pull_requests.json"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

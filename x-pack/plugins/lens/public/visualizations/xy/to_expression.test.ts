@@ -60,7 +60,8 @@ describe('#toExpression', () => {
     const datasourceExpression = mockDatasource.toExpression(
       frame.datasourceLayers.first,
       'first',
-      frame.dataViews.indexPatterns
+      frame.dataViews.indexPatterns,
+      frame.dateRange
     ) ?? {
       type: 'expression',
       chain: [],

@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { CoreTheme } from '@kbn/core/public';
 import {
   ExpressionRenderDefinition,
@@ -17,12 +18,8 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { CoreSetup } from '@kbn/core/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { ProgressRendererConfig } from '../../common/types';
-import { LazyProgressComponent } from '../components/progress';
-
-const ProgressComponent = withSuspense(LazyProgressComponent);
 
 const strings = {
   getDisplayName: () =>
@@ -47,16 +44,19 @@ export const getProgressRenderer =
       config: ProgressRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
+      const { ProgressComponent } = await import('../components/progress');
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });
 
       render(
-        <KibanaThemeProvider theme$={theme$}>
-          <I18nProvider>
-            <ProgressComponent {...config} parentNode={domNode} onLoaded={handlers.done} />
-          </I18nProvider>
-        </KibanaThemeProvider>,
+        <EuiErrorBoundary>
+          <KibanaThemeProvider theme$={theme$}>
+            <I18nProvider>
+              <ProgressComponent {...config} parentNode={domNode} onLoaded={handlers.done} />
+            </I18nProvider>
+          </KibanaThemeProvider>
+        </EuiErrorBoundary>,
         domNode
       );
     },

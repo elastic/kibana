@@ -46,6 +46,7 @@ describe('useExpViewTimeRange', function () {
       infra_logs: mockDataView,
       infra_metrics: mockDataView,
       synthetics: mockDataView,
+      alerts: mockDataView,
     },
   });
   jest.spyOn(theme, 'useTheme').mockReturnValue({

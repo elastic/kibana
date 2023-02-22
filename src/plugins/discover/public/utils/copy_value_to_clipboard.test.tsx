@@ -24,7 +24,7 @@ describe('copyValueToClipboard', () => {
     convertValueToString({
       rows: discoverGridContextComplexMock.rows,
       dataView: discoverGridContextComplexMock.dataView,
-      services: discoverServiceMock,
+      fieldFormats: discoverServiceMock.fieldFormats,
       rowIndex,
       columnId,
       options,
@@ -50,7 +50,7 @@ describe('copyValueToClipboard', () => {
   it('should copy a value to clipboard', () => {
     execCommandMock.mockImplementationOnce(() => true);
     const result = copyValueToClipboard({
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
       columnId: 'keyword_key',
       rowIndex: 0,
       valueToStringConverter,
@@ -68,7 +68,7 @@ describe('copyValueToClipboard', () => {
     execCommandMock.mockImplementationOnce(() => false);
 
     const result = copyValueToClipboard({
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
       columnId: 'keyword_key',
       rowIndex: 0,
       valueToStringConverter,
@@ -85,7 +85,7 @@ describe('copyValueToClipboard', () => {
   it('should copy a column name to clipboard', () => {
     execCommandMock.mockImplementationOnce(() => true);
     const result = copyColumnNameToClipboard({
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
       columnDisplayName: 'text_message',
     });
 
@@ -99,7 +99,7 @@ describe('copyValueToClipboard', () => {
   it('should inform when copy a column name to clipboard failed', () => {
     execCommandMock.mockImplementationOnce(() => false);
     const result = copyColumnNameToClipboard({
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
       columnDisplayName: 'text_message',
     });
 
@@ -115,7 +115,7 @@ describe('copyValueToClipboard', () => {
     execCommandMock.mockImplementationOnce(() => true);
 
     const result = await copyColumnValuesToClipboard({
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
       columnId: 'bool_enabled',
       columnDisplayName: 'custom_bool_enabled',
       rowsCount: 2,
@@ -134,7 +134,7 @@ describe('copyValueToClipboard', () => {
   it('should copy column values to clipboard with a warning', async () => {
     execCommandMock.mockImplementationOnce(() => true);
     const result = await copyColumnValuesToClipboard({
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
       columnId: 'scripted_string',
       columnDisplayName: 'custom_scripted_string',
       rowsCount: 2,

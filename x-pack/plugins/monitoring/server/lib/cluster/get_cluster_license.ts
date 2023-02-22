@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { createQuery } from '../create_query';
-// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';

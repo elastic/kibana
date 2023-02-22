@@ -7,14 +7,9 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../scenarios';
-import {
-  ESTestIndexTool,
-  ES_TEST_INDEX_NAME,
-  getUrlPrefix,
-  ObjectRemover,
-  getEventLog,
-} from '../../../common/lib';
+import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

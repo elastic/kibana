@@ -7,11 +7,11 @@
  */
 
 import { Observable, firstValueFrom } from 'rxjs';
-import { ISavedObjectsRepository, SavedObjectsClient } from '@kbn/core/server';
+import { ISavedObjectsRepository } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry_repository';
-import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../../common/telemetry_config';
+import { getTelemetrySavedObject, TelemetrySavedObject } from '../../saved_objects';
 import { TelemetryConfigType } from '../../config';
+import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../telemetry_config';
 
 export interface TelemetryUsageStats {
   opt_in_status?: boolean | null;
@@ -39,9 +39,7 @@ export function createCollectorFetch({
 
     try {
       const internalRepository = getSavedObjectsClient()!;
-      telemetrySavedObject = await getTelemetrySavedObject(
-        new SavedObjectsClient(internalRepository)
-      );
+      telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
     } catch (err) {
       // no-op
     }

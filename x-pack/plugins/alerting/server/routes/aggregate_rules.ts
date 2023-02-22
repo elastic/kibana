@@ -93,4 +93,29 @@ export const aggregateRulesRoute = (
       })
     )
   );
+  router.post(
+    {
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
+      validate: {
+        body: querySchema,
+      },
+    },
+    router.handleLegacyErrors(
+      verifyAccessAndContext(licenseState, async function (context, req, res) {
+        const rulesClient = (await context.alerting).getRulesClient();
+        const options = rewriteQueryReq({
+          ...req.body,
+          has_reference: req.body.has_reference || undefined,
+        });
+        trackLegacyTerminology(
+          [req.body.search, req.body.search_fields].filter(Boolean) as string[],
+          usageCounter
+        );
+        const aggregateResult = await rulesClient.aggregate({ options });
+        return res.ok({
+          body: rewriteBodyRes(aggregateResult),
+        });
+      })
+    )
+  );
 };

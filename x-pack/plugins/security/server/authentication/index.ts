@@ -32,5 +32,6 @@ export type {
   InvalidateAPIKeyResult,
   CreateAPIKeyParams,
   InvalidateAPIKeysParams,
+  ValidateAPIKeyParams,
   GrantAPIKeyResult,
 } from './api_keys';

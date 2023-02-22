@@ -23,6 +23,7 @@ import { ESCalendarInterval, ESFixedInterval, roundDateToESInterval } from '@ela
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { i18n } from '@kbn/i18n';
 import { handleRequest } from './handle_request';
 import {
   ANNOTATIONS_PER_BUCKET,
@@ -134,6 +135,19 @@ export const requestEventAnnotations = (
           searchSourceService: searchSource,
           getNow,
           executionContext: getExecutionContext(),
+          title: i18n.translate(
+            'eventAnnotation.fetchEventAnnotations.inspector.dataRequest.title',
+            {
+              defaultMessage: 'Annotations',
+            }
+          ),
+          description: i18n.translate(
+            'eventAnnotation.fetchEventAnnotations.inspector.dataRequest.description',
+            {
+              defaultMessage:
+                'This request queries Elasticsearch to fetch the data for the annotations.',
+            }
+          ),
         })
       );
 

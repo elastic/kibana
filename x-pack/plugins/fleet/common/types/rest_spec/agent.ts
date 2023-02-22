@@ -14,6 +14,7 @@ import type {
   CurrentUpgrade,
   NewAgentAction,
   AgentDiagnostics,
+  AgentStatus,
 } from '../models';
 
 import type { ListResult, ListWithKuery } from './common';
@@ -22,13 +23,14 @@ export interface GetAgentsRequest {
   query: ListWithKuery & {
     showInactive: boolean;
     showUpgradeable?: boolean;
+    withMetrics?: boolean;
   };
 }
 
 export interface GetAgentsResponse extends ListResult<Agent> {
-  totalInactive: number;
   // deprecated in 8.x
   list?: Agent[];
+  statusSummary?: Record<AgentStatus, number>;
 }
 
 export interface GetAgentTagsResponse {
@@ -38,6 +40,9 @@ export interface GetAgentTagsResponse {
 export interface GetOneAgentRequest {
   params: {
     agentId: string;
+  };
+  query: {
+    withMetrics?: boolean;
   };
 }
 
@@ -180,12 +185,17 @@ export interface GetAgentStatusRequest {
 export interface GetAgentStatusResponse {
   results: {
     events: number;
+    // deprecated
     total: number;
     online: number;
     error: number;
     offline: number;
     other: number;
     updating: number;
+    inactive: number;
+    unenrolled: number;
+    all: number;
+    active: number;
   };
 }
 

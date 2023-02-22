@@ -7,6 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { buildAgentStatusRuntimeField } from '@kbn/fleet-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
@@ -52,84 +54,6 @@ export const MetadataSortMethod: estypes.SortCombinations[] = [
     },
   },
 ];
-
-export async function kibanaRequestToMetadataListESQuery(
-  queryBuilderOptions: QueryBuilderOptions
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<Record<string, any>> {
-  return {
-    body: {
-      query: buildQueryBody(
-        queryBuilderOptions?.kuery,
-        IGNORED_ELASTIC_AGENT_IDS.concat(queryBuilderOptions?.unenrolledAgentIds ?? []),
-        queryBuilderOptions?.statusAgentIds
-      ),
-      track_total_hits: true,
-      sort: MetadataSortMethod,
-    },
-    from: queryBuilderOptions.page * queryBuilderOptions.pageSize,
-    size: queryBuilderOptions.pageSize,
-    index: metadataCurrentIndexPattern,
-  };
-}
-
-function buildQueryBody(
-  kuery: string = '',
-  unerolledAgentIds: string[] | undefined,
-  statusAgentIds: string[] | undefined
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Record<string, any> {
-  // the filtered properties may be preceded by 'HostDetails' under an older index mapping
-  const filterUnenrolledAgents =
-    unerolledAgentIds && unerolledAgentIds.length > 0
-      ? {
-          must_not: [
-            { terms: { 'elastic.agent.id': unerolledAgentIds } }, // OR
-            { terms: { 'HostDetails.elastic.agent.id': unerolledAgentIds } },
-          ],
-        }
-      : null;
-  const filterStatusAgents =
-    statusAgentIds && statusAgentIds.length
-      ? {
-          filter: [
-            {
-              bool: {
-                // OR's the two together
-                should: [
-                  { terms: { 'elastic.agent.id': statusAgentIds } },
-                  { terms: { 'HostDetails.elastic.agent.id': statusAgentIds } },
-                ],
-              },
-            },
-          ],
-        }
-      : null;
-
-  const idFilter = {
-    bool: {
-      ...filterUnenrolledAgents,
-      ...filterStatusAgents,
-    },
-  };
-
-  if (kuery) {
-    const kqlQuery = toElasticsearchQuery(fromKueryExpression(kuery));
-    const q = [];
-    if (filterUnenrolledAgents || filterStatusAgents) {
-      q.push(idFilter);
-    }
-    q.push({ ...kqlQuery });
-    return {
-      bool: { must: q },
-    };
-  }
-  return filterUnenrolledAgents || filterStatusAgents
-    ? idFilter
-    : {
-        match_all: {},
-      };
-}
 
 export function getESQueryHostMetadataByID(agentID: string): estypes.SearchRequest {
   return {
@@ -205,6 +129,8 @@ interface BuildUnitedIndexQueryResponse {
     query: Record<string, unknown>;
     track_total_hits: boolean;
     sort: estypes.SortCombinations[];
+    runtime_mappings: Record<string, unknown>;
+    fields?: string[];
   };
   from: number;
   size: number;
@@ -212,6 +138,7 @@ interface BuildUnitedIndexQueryResponse {
 }
 
 export async function buildUnitedIndexQuery(
+  soClient: SavedObjectsClientContract,
   queryOptions: GetMetadataListRequestQuery,
   endpointPolicyIds: string[] = []
 ): Promise<BuildUnitedIndexQueryResponse> {
@@ -273,11 +200,15 @@ export async function buildUnitedIndexQuery(
     };
   }
 
+  const runtimeMappings = await buildAgentStatusRuntimeField(soClient, 'united.agent.');
+  const fields = Object.keys(runtimeMappings);
   return {
     body: {
       query,
       track_total_hits: true,
       sort: MetadataSortMethod,
+      fields,
+      runtime_mappings: runtimeMappings,
     },
     from: page * pageSize,
     size: pageSize,

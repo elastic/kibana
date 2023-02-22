@@ -9,13 +9,12 @@ import { formatMitreAttackDescription } from '../../helpers/rules';
 import type { Mitre } from '../../objects/rule';
 import { getEqlRule, getEqlSequenceRule, getIndexPatterns } from '../../objects/rule';
 
-import { ALERT_DATA_GRID, NUMBER_OF_ALERTS } from '../../screens/alerts';
+import { ALERTS_COUNT, ALERT_DATA_GRID } from '../../screens/alerts';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
+  RULES_MANAGEMENT_TABLE,
   RULE_NAME,
-  RULES_ROW,
-  RULES_TABLE,
   RULE_SWITCH,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
@@ -44,7 +43,11 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import { goToRuleDetails, goToTheRuleDetailsOf } from '../../tasks/alerts_detection_rules';
+import {
+  expectNumberOfRules,
+  goToRuleDetails,
+  goToTheRuleDetailsOf,
+} from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
@@ -100,9 +103,7 @@ describe('EQL rules', () => {
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-      cy.get(RULES_TABLE).then(($table) => {
-        cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-      });
+      expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 
       cy.get(RULE_NAME).should('have.text', this.rule.name);
       cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
@@ -147,7 +148,7 @@ describe('EQL rules', () => {
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
-      cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
+      cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts);
       cy.get(ALERT_DATA_GRID)
         .invoke('text')
         .then((text) => {
@@ -191,7 +192,7 @@ describe('EQL rules', () => {
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
-      cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfSequenceAlerts);
+      cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfSequenceAlerts);
       cy.get(ALERT_DATA_GRID)
         .invoke('text')
         .then((text) => {

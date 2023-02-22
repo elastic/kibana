@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RisonValue } from 'rison-node';
-import { encode } from 'rison-node';
+import type { RisonValue } from '@kbn/rison';
+import { encode } from '@kbn/rison';
 import { decodeRison, isRisonObject, isRegularString } from './rison_helpers';
 
 export const entityToKql = (entityNames: string[], entity: string): string => {

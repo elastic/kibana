@@ -8,30 +8,28 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
+import { DataViewsContract } from '@kbn/data-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
-import { AppState, GetStateReturn } from '../services/discover_state';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../types';
-import { DataDocuments$, RecordRawType } from './use_saved_search';
+import { DataDocuments$, RecordRawType } from '../services/discover_data_state_container';
 import { DataTableRecord } from '../../../types';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 
 function getHookProps(
-  replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>,
-  query: AggregateQuery | Query | undefined
+  query: AggregateQuery | Query | undefined,
+  dataViewsService?: DataViewsContract
 ) {
-  const stateContainer = {
-    replaceUrlAppState,
-    appStateContainer: {
-      getState: () => {
-        return [];
-      },
-    },
-  } as unknown as GetStateReturn;
+  const replaceUrlState = jest.fn();
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  stateContainer.appState.replaceUrlState = replaceUrlState;
+  stateContainer.setAppState({ columns: [] });
+  stateContainer.internalState.transitions.setSavedDataViews([dataViewMock as DataViewListItem]);
 
   const msgLoading = {
     recordRawType: RecordRawType.PLAIN,
@@ -43,10 +41,10 @@ function getHookProps(
 
   return {
     documents$,
-    dataViews: discoverServiceMock.dataViews,
+    dataViews: dataViewsService ?? discoverServiceMock.dataViews,
     stateContainer,
-    dataViewList: [dataViewMock as DataViewListItem],
     savedSearch: savedSearchMock,
+    replaceUrlState,
   };
 }
 const query = { sql: 'SELECT * from the-data-view-title' };
@@ -65,37 +63,35 @@ const msgComplete = {
 
 describe('useTextBasedQueryLanguage', () => {
   test('a text based query should change state when loading and finished', async () => {
-    const replaceUrlAppState = jest.fn();
-    const props = getHookProps(replaceUrlAppState, query);
-    const { documents$ } = props;
+    const props = getHookProps(query);
+    const { documents$, replaceUrlState } = props;
 
     renderHook(() => useTextBasedQueryLanguage(props));
 
-    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
-    expect(replaceUrlAppState).toHaveBeenCalledWith({ index: 'the-data-view-id' });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledWith({ index: 'the-data-view-id' });
 
-    replaceUrlAppState.mockReset();
+    replaceUrlState.mockReset();
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
 
     await waitFor(() => {
-      expect(replaceUrlAppState).toHaveBeenCalledWith({
+      expect(replaceUrlState).toHaveBeenCalledWith({
         index: 'the-data-view-id',
         columns: ['field1', 'field2'],
       });
     });
   });
   test('changing a text based query with different result columns should change state when loading and finished', async () => {
-    const replaceUrlAppState = jest.fn();
-    const props = getHookProps(replaceUrlAppState, query);
-    const { documents$ } = props;
+    const props = getHookProps(query);
+    const { documents$, replaceUrlState } = props;
 
     renderHook(() => useTextBasedQueryLanguage(props));
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(2));
-    replaceUrlAppState.mockReset();
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    replaceUrlState.mockReset();
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
@@ -109,25 +105,24 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT field1 from the-data-view-title' },
     });
-    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
 
     await waitFor(() => {
-      expect(replaceUrlAppState).toHaveBeenCalledWith({
+      expect(replaceUrlState).toHaveBeenCalledWith({
         index: 'the-data-view-id',
         columns: ['field1'],
       });
     });
   });
   test('only changing a text based query with same result columns should not change columns', async () => {
-    const replaceUrlAppState = jest.fn();
-    const props = getHookProps(replaceUrlAppState, query);
-    const { documents$ } = props;
+    const props = getHookProps(query);
+    const { documents$, replaceUrlState } = props;
 
     renderHook(() => useTextBasedQueryLanguage(props));
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(2));
-    replaceUrlAppState.mockReset();
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    replaceUrlState.mockReset();
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
@@ -141,8 +136,8 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT field1 from the-data-view-title' },
     });
-    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
-    replaceUrlAppState.mockReset();
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    replaceUrlState.mockReset();
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
@@ -158,21 +153,20 @@ describe('useTextBasedQueryLanguage', () => {
     });
 
     await waitFor(() => {
-      expect(replaceUrlAppState).toHaveBeenCalledWith({
+      expect(replaceUrlState).toHaveBeenCalledWith({
         index: 'the-data-view-id',
       });
     });
   });
   test('if its not a text based query coming along, it should be ignored', async () => {
-    const replaceUrlAppState = jest.fn();
-    const props = getHookProps(replaceUrlAppState, query);
-    const { documents$ } = props;
+    const props = getHookProps(query);
+    const { documents$, replaceUrlState } = props;
 
     renderHook(() => useTextBasedQueryLanguage(props));
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(2));
-    replaceUrlAppState.mockReset();
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    replaceUrlState.mockReset();
 
     documents$.next({
       recordRawType: RecordRawType.DOCUMENT,
@@ -200,7 +194,7 @@ describe('useTextBasedQueryLanguage', () => {
     });
 
     await waitFor(() => {
-      expect(replaceUrlAppState).toHaveBeenCalledWith({
+      expect(replaceUrlState).toHaveBeenCalledWith({
         index: 'the-data-view-id',
         columns: ['field1'],
       });
@@ -208,12 +202,11 @@ describe('useTextBasedQueryLanguage', () => {
   });
 
   test('it should not overwrite existing state columns on initial fetch', async () => {
-    const replaceUrlAppState = jest.fn();
-    const props = getHookProps(replaceUrlAppState, query);
-    props.stateContainer.appStateContainer.getState = jest.fn(() => {
+    const props = getHookProps(query);
+    props.stateContainer.appState.getState = jest.fn(() => {
       return { columns: ['field1'], index: 'the-data-view-id' };
     });
-    const { documents$ } = props;
+    const { documents$, replaceUrlState } = props;
 
     renderHook(() => useTextBasedQueryLanguage(props));
     documents$.next({
@@ -241,19 +234,18 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT field1 from the-data-view-title' },
     });
-    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
-    expect(replaceUrlAppState).toHaveBeenCalledWith({
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledWith({
       columns: ['field1'],
     });
   });
 
   test('it should not overwrite state column when successfully fetching after an error fetch', async () => {
-    const replaceUrlAppState = jest.fn();
-    const props = getHookProps(replaceUrlAppState, query);
-    props.stateContainer.appStateContainer.getState = jest.fn(() => {
+    const props = getHookProps(query);
+    props.stateContainer.appState.getState = jest.fn(() => {
       return { columns: [], index: 'the-data-view-id' };
     });
-    const { documents$ } = props;
+    const { documents$, replaceUrlState } = props;
 
     renderHook(() => useTextBasedQueryLanguage(props));
     documents$.next({
@@ -261,7 +253,7 @@ describe('useTextBasedQueryLanguage', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(0));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.COMPLETE,
@@ -274,11 +266,11 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
-    props.stateContainer.appStateContainer.getState = jest.fn(() => {
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    props.stateContainer.appState.getState = jest.fn(() => {
       return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
     });
-    replaceUrlAppState.mockReset();
+    replaceUrlState.mockReset();
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
@@ -310,9 +302,49 @@ describe('useTextBasedQueryLanguage', () => {
       query: { sql: 'SELECT field1 from the-data-view-title' },
     });
 
-    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
-    expect(replaceUrlAppState).toHaveBeenCalledWith({
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledWith({
       columns: ['field1'],
+    });
+  });
+
+  test('changing a text based query with an index pattern that not corresponds to a dataview should return results', async () => {
+    const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
+    dataViewsCreateMock.mockImplementation(() => ({
+      ...dataViewMock,
+    }));
+    const dataViewsService = {
+      ...discoverServiceMock.dataViews,
+      create: dataViewsCreateMock,
+    };
+    const props = getHookProps(query, dataViewsService);
+    const { documents$, replaceUrlState } = props;
+
+    renderHook(() => useTextBasedQueryLanguage(props));
+
+    documents$.next(msgComplete);
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    replaceUrlState.mockReset();
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.COMPLETE,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { sql: 'SELECT field1 from the-data-view-*' },
+    });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        index: 'the-data-view-id',
+        columns: ['field1'],
+      });
     });
   });
 });

@@ -5,36 +5,61 @@
  * 2.0.
  */
 
-import { SLO } from '../../domain/models';
-import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '../../types/rest_specs';
-import { Criteria, Paginated, Pagination, SLORepository } from './slo_repository';
+import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
+import { SLO, SLOId, SLOWithSummary, Summary } from '../../domain/models';
+import {
+  Criteria,
+  Paginated,
+  Pagination,
+  SLORepository,
+  Sort,
+  SortField,
+  SortDirection,
+} from './slo_repository';
+import { SummaryClient } from './summary_client';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
 
 export class FindSLO {
-  constructor(private repository: SLORepository) {}
+  constructor(private repository: SLORepository, private summaryClient: SummaryClient) {}
 
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
     const pagination: Pagination = toPagination(params);
     const criteria: Criteria = toCriteria(params);
-    const result = await this.repository.find(criteria, pagination);
-    return this.toResponse(result);
-  }
+    const sort: Sort = toSort(params);
 
-  private toResponse(result: Paginated<SLO>): FindSLOResponse {
+    const { results: sloList, ...resultMeta }: Paginated<SLO> = await this.repository.find(
+      criteria,
+      sort,
+      pagination
+    );
+    const summaryBySlo = await this.summaryClient.fetchSummary(sloList);
+
+    const sloListWithSummary = mergeSloWithSummary(sloList, summaryBySlo);
+
     return findSLOResponseSchema.encode({
-      page: result.page,
-      per_page: result.perPage,
-      total: result.total,
-      results: result.results,
+      page: resultMeta.page,
+      perPage: resultMeta.perPage,
+      total: resultMeta.total,
+      results: sloListWithSummary,
     });
   }
 }
 
+function mergeSloWithSummary(
+  sloList: SLO[],
+  summaryBySlo: Record<SLOId, Summary>
+): SLOWithSummary[] {
+  return sloList.map((slo) => ({
+    ...slo,
+    summary: summaryBySlo[slo.id],
+  }));
+}
+
 function toPagination(params: FindSLOParams): Pagination {
   const page = Number(params.page);
-  const perPage = Number(params.per_page);
+  const perPage = Number(params.perPage);
 
   return {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
@@ -43,5 +68,12 @@ function toPagination(params: FindSLOParams): Pagination {
 }
 
 function toCriteria(params: FindSLOParams): Criteria {
-  return { name: params.name };
+  return { name: params.name, indicatorTypes: params.indicatorTypes };
+}
+
+function toSort(params: FindSLOParams): Sort {
+  return {
+    field: params.sortBy === 'indicatorType' ? SortField.IndicatorType : SortField.Name,
+    direction: params.sortDirection === 'desc' ? SortDirection.Desc : SortDirection.Asc,
+  };
 }

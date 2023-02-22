@@ -25,6 +25,9 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { Filter } from '@kbn/es-query';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ToastsStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
+import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -48,7 +51,6 @@ import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selecti
 import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
 import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
 
@@ -187,6 +189,20 @@ export interface DiscoverGridProps {
    * Saved search id used for links to single doc and surrounding docs in the flyout
    */
   savedSearchId?: string;
+  /**
+   * Document detail view component
+   */
+  DocumentView?: typeof DiscoverGridFlyout;
+  /**
+   * Service dependencies
+   */
+  services: {
+    fieldFormats: FieldFormatsStart;
+    addBasePath: HttpStart['basePath']['prepend'];
+    uiSettings: IUiSettingsClient;
+    dataViewFieldEditor: DataViewFieldEditorStart;
+    toastNotifications: ToastsStart;
+  };
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -226,9 +242,11 @@ export const DiscoverGrid = ({
   rowsPerPageState,
   onUpdateRowsPerPage,
   onFieldEdited,
+  DocumentView,
+  services,
 }: DiscoverGridProps) => {
+  const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings } = services;
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
@@ -268,11 +286,11 @@ export const DiscoverGrid = ({
         rows: displayedRows,
         dataView,
         columnId,
-        services,
+        fieldFormats,
         options,
       });
     },
-    [displayedRows, dataView, services]
+    [displayedRows, dataView, fieldFormats]
   );
 
   /**
@@ -405,7 +423,11 @@ export const DiscoverGrid = ({
         showTimeCol,
         defaultColumns,
         isSortEnabled,
-        services,
+        services: {
+          uiSettings,
+          toastNotifications,
+        },
+        hasEditDataViewPermission: () => dataViewFieldEditor.userPermissions.editIndexPattern(),
         valueToStringConverter,
         onFilter,
         editField,
@@ -419,7 +441,9 @@ export const DiscoverGrid = ({
       settings,
       defaultColumns,
       isSortEnabled,
-      services,
+      uiSettings,
+      toastNotifications,
+      dataViewFieldEditor,
       valueToStringConverter,
       editField,
     ]
@@ -445,9 +469,13 @@ export const DiscoverGrid = ({
     }
     return { columns: sortingColumns, onSort: () => {} };
   }, [sortingColumns, onTableSort, isSortEnabled]);
+
+  const canSetExpandedDoc = Boolean(setExpandedDoc && DocumentView);
+
   const lead = useMemo(
-    () => getLeadControlColumns(setExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
-    [controlColumnIds, setExpandedDoc]
+    () =>
+      getLeadControlColumns(canSetExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
+    [controlColumnIds, canSetExpandedDoc]
   );
 
   const additionalControls = useMemo(
@@ -625,8 +653,8 @@ export const DiscoverGrid = ({
             </p>
           </EuiScreenReaderOnly>
         )}
-        {setExpandedDoc && expandedDoc && (
-          <DiscoverGridFlyout
+        {setExpandedDoc && expandedDoc && DocumentView && (
+          <DocumentView
             dataView={dataView}
             hit={expandedDoc}
             hits={displayedRows}

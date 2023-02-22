@@ -11,75 +11,23 @@ import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsTable } from './latest_findings_table';
 import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
-import type { EcsEvent } from '@kbn/logging';
 import { TestProvider } from '../../../test/test_provider';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
+import { getFindingsFixture } from '../../../test/fixtures/findings_fixture';
 
 const chance = new Chance();
-
-const getFakeFindings = (name: string): CspFinding & { id: string } => ({
-  cluster_id: chance.guid(),
-  id: chance.word(),
-  result: {
-    expected: {
-      source: {},
-    },
-    evaluation: chance.weighted(['passed', 'failed'], [0.5, 0.5]),
-    evidence: {
-      filemode: chance.word(),
-    },
-  },
-  rule: {
-    audit: chance.paragraph(),
-    benchmark: {
-      name: 'CIS Kubernetes',
-      version: '1.6.0',
-      id: 'cis_k8s',
-    },
-    default_value: chance.sentence(),
-    description: chance.paragraph(),
-    id: chance.guid(),
-    impact: chance.word(),
-    name,
-    profile_applicability: chance.sentence(),
-    rationale: chance.paragraph(),
-    references: chance.paragraph(),
-    rego_rule_id: 'cis_X_X_X',
-    remediation: chance.word(),
-    section: chance.sentence(),
-    tags: [],
-    version: '1.0',
-  },
-  agent: {
-    id: chance.string(),
-    name: chance.string(),
-    type: chance.string(),
-    version: chance.string(),
-  },
-  resource: {
-    name: chance.string(),
-    type: chance.string(),
-    raw: {} as any,
-    sub_type: chance.string(),
-    id: chance.string(),
-  },
-  host: {} as any,
-  ecs: {} as any,
-  event: {} as EcsEvent,
-  '@timestamp': new Date().toISOString(),
-});
 
 type TableProps = PropsOf<typeof FindingsTable>;
 
 describe('<FindingsTable />', () => {
-  it('renders the zero state when status success and data has a length of zero ', async () => {
+  const renderWrapper = (opts?: Partial<TableProps>) => {
     const props: TableProps = {
       loading: false,
-      items: [],
+      items: opts?.items || [],
       sorting: { sort: { field: '@timestamp', direction: 'desc' } },
-      pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
+      pagination: { pageSize: 10, pageIndex: 1, totalItemCount: opts?.items?.length || 0 },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
+      ...opts,
     };
 
     render(
@@ -87,6 +35,24 @@ describe('<FindingsTable />', () => {
         <FindingsTable {...props} />
       </TestProvider>
     );
+    return props;
+  };
+
+  it('opens/closes the flyout when clicked on expand/close buttons ', () => {
+    renderWrapper({ items: [getFindingsFixture()] });
+
+    expect(screen.queryByTestId(TEST_SUBJECTS.FINDINGS_FLYOUT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJECTS.FINDINGS_TABLE_EXPAND_COLUMN)).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId(TEST_SUBJECTS.FINDINGS_TABLE_EXPAND_COLUMN));
+    expect(screen.getByTestId(TEST_SUBJECTS.FINDINGS_FLYOUT)).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    expect(screen.queryByTestId(TEST_SUBJECTS.FINDINGS_FLYOUT)).not.toBeInTheDocument();
+  });
+
+  it('renders the zero state when status success and data has a length of zero ', async () => {
+    renderWrapper({ items: [] });
 
     expect(
       screen.getByTestId(TEST_SUBJECTS.LATEST_FINDINGS_TABLE_NO_FINDINGS_EMPTY_STATE)
@@ -95,22 +61,12 @@ describe('<FindingsTable />', () => {
 
   it('renders the table with provided items', () => {
     const names = chance.unique(chance.sentence, 10);
-    const data = names.map(getFakeFindings);
+    const data = names.map((name) => {
+      const fixture = getFindingsFixture();
+      return { ...fixture, rule: { ...fixture.rule, name } };
+    });
 
-    const props: TableProps = {
-      loading: false,
-      items: data,
-      sorting: { sort: { field: '@timestamp', direction: 'desc' } },
-      pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
-      setTableOptions: jest.fn(),
-      onAddFilter: jest.fn(),
-    };
-
-    render(
-      <TestProvider>
-        <FindingsTable {...props} />
-      </TestProvider>
-    );
+    renderWrapper({ items: data });
 
     data.forEach((item) => {
       expect(screen.getByText(item.rule.name)).toBeInTheDocument();
@@ -119,33 +75,21 @@ describe('<FindingsTable />', () => {
 
   it('adds filter with a cell button click', () => {
     const names = chance.unique(chance.sentence, 10);
-    const data = names.map(getFakeFindings);
+    const data = names.map((name) => {
+      const fixture = getFindingsFixture();
+      return { ...fixture, rule: { ...fixture.rule, name } };
+    });
 
-    const filterProps = { onAddFilter: jest.fn() };
-    const props: TableProps = {
-      loading: false,
-      items: data,
-      sorting: { sort: { field: '@timestamp', direction: 'desc' } },
-      pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
-      setTableOptions: jest.fn(),
-      ...filterProps,
-    };
-
-    render(
-      <TestProvider>
-        <FindingsTable {...props} />
-      </TestProvider>
-    );
+    const props = renderWrapper({ items: data });
 
     const row = data[0];
 
     const columns = [
-      'resource.id',
       'result.evaluation',
-      'resource.sub_type',
+      'resource.id',
       'resource.name',
+      'resource.sub_type',
       'rule.name',
-      'cluster_id',
     ];
 
     columns.forEach((field) => {

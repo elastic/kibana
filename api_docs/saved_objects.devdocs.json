@@ -632,14 +632,6 @@
             "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
             "plugin": "presentationUtil",
             "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
@@ -649,11 +641,19 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/top_nav/save_modal.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
           },
           {
             "plugin": "graph",
@@ -793,7 +793,7 @@
           },
           ">, \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
           "SavedObjectKibanaServices",
-          ", \"savedObjectsClient\" | \"overlays\">) => Promise<true>"
+          ", \"overlays\" | \"savedObjectsClient\">) => Promise<true>"
         ],
         "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
         "deprecated": false,
@@ -870,7 +870,7 @@
             "signature": [
               "Pick<",
               "SavedObjectKibanaServices",
-              ", \"savedObjectsClient\" | \"overlays\">"
+              ", \"overlays\" | \"savedObjectsClient\">"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
@@ -889,21 +889,21 @@
         "label": "getSavedObjectFinder",
         "description": [],
         "signature": [
-          "(savedObject: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-            "section": "def-common.SavedObjectsStart",
-            "text": "SavedObjectsStart"
-          },
-          ", uiSettings: ",
+          "(uiSettings: ",
           {
             "pluginId": "@kbn/core-ui-settings-browser",
             "scope": "common",
             "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
             "section": "def-common.IUiSettingsClient",
             "text": "IUiSettingsClient"
+          },
+          ", http: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
           },
           ") => (props: ",
           "SavedObjectFinderProps",
@@ -918,15 +918,15 @@
             "id": "def-public.getSavedObjectFinder.$1",
             "type": "Object",
             "tags": [],
-            "label": "savedObject",
+            "label": "uiSettings",
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/core-saved-objects-browser",
+                "pluginId": "@kbn/core-ui-settings-browser",
                 "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-                "section": "def-common.SavedObjectsStart",
-                "text": "SavedObjectsStart"
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
               }
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -939,15 +939,15 @@
             "id": "def-public.getSavedObjectFinder.$2",
             "type": "Object",
             "tags": [],
-            "label": "uiSettings",
+            "label": "http",
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/core-ui-settings-browser",
+                "pluginId": "@kbn/core-http-browser",
                 "scope": "common",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
               }
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -1280,7 +1280,7 @@
         "label": "showSaveModal",
         "description": [],
         "signature": [
-          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>, I18nContext: ({ children }: { children: React.ReactNode; }) => JSX.Element, Wrapper: React.FC<{}> | undefined) => void"
+          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{}> | undefined) => void"
         ],
         "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
         "deprecated": false,
@@ -1306,21 +1306,6 @@
             "id": "def-public.showSaveModal.$2",
             "type": "Function",
             "tags": [],
-            "label": "I18nContext",
-            "description": [],
-            "signature": [
-              "({ children }: { children: React.ReactNode; }) => JSX.Element"
-            ],
-            "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.showSaveModal.$3",
-            "type": "Function",
-            "tags": [],
             "label": "Wrapper",
             "description": [],
             "signature": [
@@ -1337,6 +1322,59 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "savedObjects",
+        "id": "def-public.FinderAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "FinderAttributes",
+        "description": [],
+        "path": "src/plugins/saved_objects/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.FinderAttributes.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.FinderAttributes.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.FinderAttributes.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "savedObjects",
         "id": "def-public.OnSaveProps",
@@ -1655,15 +1693,15 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
           }
         ],
         "children": [
@@ -2778,11 +2816,11 @@
             "signature": [
               "(savedObject: ",
               {
-                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "pluginId": "savedObjects",
                 "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SimpleSavedObject",
-                "text": "SimpleSavedObject"
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-common.SavedObjectCommon",
+                "text": "SavedObjectCommon"
               },
               "<T>) => ",
               "IconType"
@@ -2800,11 +2838,11 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "pluginId": "savedObjects",
                     "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                    "section": "def-common.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
+                    "docId": "kibSavedObjectsPluginApi",
+                    "section": "def-common.SavedObjectCommon",
+                    "text": "SavedObjectCommon"
                   },
                   "<T>"
                 ],
@@ -2826,11 +2864,11 @@
             "signature": [
               "((savedObject: ",
               {
-                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "pluginId": "savedObjects",
                 "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SimpleSavedObject",
-                "text": "SimpleSavedObject"
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-common.SavedObjectCommon",
+                "text": "SavedObjectCommon"
               },
               "<T>) => string) | undefined"
             ],
@@ -2847,11 +2885,11 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "pluginId": "savedObjects",
                     "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                    "section": "def-common.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
+                    "docId": "kibSavedObjectsPluginApi",
+                    "section": "def-common.SavedObjectCommon",
+                    "text": "SavedObjectCommon"
                   },
                   "<T>"
                 ],
@@ -2873,11 +2911,11 @@
             "signature": [
               "((savedObject: ",
               {
-                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "pluginId": "savedObjects",
                 "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SimpleSavedObject",
-                "text": "SimpleSavedObject"
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-common.SavedObjectCommon",
+                "text": "SavedObjectCommon"
               },
               "<T>) => boolean) | undefined"
             ],
@@ -2894,11 +2932,11 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "pluginId": "savedObjects",
                     "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                    "section": "def-common.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
+                    "docId": "kibSavedObjectsPluginApi",
+                    "section": "def-common.SavedObjectCommon",
+                    "text": "SavedObjectCommon"
                   },
                   "<T>"
                 ],
@@ -2920,11 +2958,11 @@
             "signature": [
               "((savedObject: ",
               {
-                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "pluginId": "savedObjects",
                 "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SimpleSavedObject",
-                "text": "SimpleSavedObject"
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-common.SavedObjectCommon",
+                "text": "SavedObjectCommon"
               },
               "<T>) => string) | undefined"
             ],
@@ -2941,11 +2979,11 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/core-saved-objects-api-browser",
+                    "pluginId": "savedObjects",
                     "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                    "section": "def-common.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
+                    "docId": "kibSavedObjectsPluginApi",
+                    "section": "def-common.SavedObjectCommon",
+                    "text": "SavedObjectCommon"
                   },
                   "<T>"
                 ],
@@ -3223,21 +3261,21 @@
         "label": "SavedObjectFinderUiProps",
         "description": [],
         "signature": [
-          "{ savedObjects: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-            "section": "def-common.SavedObjectsStart",
-            "text": "SavedObjectsStart"
-          },
-          "; uiSettings: ",
+          "{ uiSettings: ",
           {
             "pluginId": "@kbn/core-ui-settings-browser",
             "scope": "common",
             "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
             "section": "def-common.IUiSettingsClient",
             "text": "IUiSettingsClient"
+          },
+          "; http: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
           },
           "; } & ",
           "SavedObjectFinderProps"
@@ -3407,7 +3445,279 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "savedObjects",
+        "id": "def-common.FinderAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "FinderAttributes",
+        "description": [],
+        "path": "src/plugins/saved_objects/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FinderAttributes.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FinderAttributes.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FinderAttributes.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjects",
+        "id": "def-common.FindQueryHTTP",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindQueryHTTP",
+        "description": [],
+        "path": "src/plugins/saved_objects/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FindQueryHTTP.perPage",
+            "type": "number",
+            "tags": [],
+            "label": "perPage",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FindQueryHTTP.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FindQueryHTTP.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FindQueryHTTP.search",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FindQueryHTTP.searchFields",
+            "type": "Array",
+            "tags": [],
+            "label": "searchFields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FindQueryHTTP.defaultSearchOperator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultSearchOperator",
+            "description": [],
+            "signature": [
+              "\"AND\" | \"OR\" | undefined"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FindQueryHTTP.sortField",
+            "type": "string",
+            "tags": [],
+            "label": "sortField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FindQueryHTTP.sortOrder",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sortOrder",
+            "description": [],
+            "signature": [
+              "\"asc\" | \"desc\" | undefined"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FindQueryHTTP.fields",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "string | string[] | undefined"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjects",
+        "id": "def-common.FindResponseHTTP",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindResponseHTTP",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "savedObjects",
+            "scope": "common",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-common.FindResponseHTTP",
+            "text": "FindResponseHTTP"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/saved_objects/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FindResponseHTTP.saved_objects",
+            "type": "Array",
+            "tags": [],
+            "label": "saved_objects",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjects",
+                "scope": "common",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-common.SavedObjectCommon",
+                "text": "SavedObjectCommon"
+              },
+              "<T>[]"
+            ],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FindResponseHTTP.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FindResponseHTTP.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-common.FindResponseHTTP.per_page",
+            "type": "number",
+            "tags": [],
+            "label": "per_page",
+            "description": [],
+            "path": "src/plugins/saved_objects/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -3436,6 +3746,28 @@
           "\"savedObjects:perPage\""
         ],
         "path": "src/plugins/saved_objects/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjects",
+        "id": "def-common.SavedObjectCommon",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectCommon",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/saved_objects/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

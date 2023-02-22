@@ -10,12 +10,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  describe('synthetics CRUD routes', () => {
+  describe('Synthetics API Tests', () => {
     before(async () => {
       await esDeleteAllIndices('heartbeat*');
       await esDeleteAllIndices('synthetics*');
     });
 
+    loadTestFile(require.resolve('./enable_default_alerting'));
     loadTestFile(require.resolve('./get_monitor'));
     loadTestFile(require.resolve('./get_monitor_overview'));
     loadTestFile(require.resolve('./add_monitor'));
@@ -27,5 +28,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./delete_monitor'));
     loadTestFile(require.resolve('./delete_monitor_project'));
     loadTestFile(require.resolve('./synthetics_enablement'));
+    loadTestFile(require.resolve('./sync_global_params'));
   });
 }

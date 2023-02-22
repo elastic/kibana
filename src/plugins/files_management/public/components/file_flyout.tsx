@@ -23,7 +23,7 @@ import {
 import numeral from '@elastic/numeral';
 import type { FileJSON } from '@kbn/files-plugin/common';
 import type { FunctionComponent } from 'react';
-import { Image } from '@kbn/files-plugin/public';
+import { FileImage as Image } from '@kbn/shared-ux-file-image';
 import React from 'react';
 import { i18nTexts } from '../i18n_texts';
 import { useFilesManagementContext } from '../context';

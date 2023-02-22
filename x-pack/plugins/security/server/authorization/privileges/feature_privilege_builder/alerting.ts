@@ -24,8 +24,9 @@ const readOperations: Record<AlertingEntity, string[]> = {
     'getExecutionLog',
     'find',
     'getRuleExecutionKPI',
+    'runSoon',
   ],
-  alert: ['get', 'find', 'getAuthorizedAlertsIndices'],
+  alert: ['get', 'find', 'getAuthorizedAlertsIndices', 'getAlertSummary'],
 };
 
 const writeOperations: Record<AlertingEntity, string[]> = {

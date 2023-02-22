@@ -91,6 +91,7 @@ describe('renderApp', () => {
           },
           reportUiCounter: jest.fn(),
         },
+        kibanaVersion: '8.7.0',
       });
       unmount();
     }).not.toThrowError();

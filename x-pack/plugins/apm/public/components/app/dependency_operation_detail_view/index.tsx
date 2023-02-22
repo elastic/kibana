@@ -17,13 +17,12 @@ import { useDependencyDetailOperationsBreadcrumb } from '../../../hooks/use_depe
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DependencyMetricCharts } from '../../shared/dependency_metric_charts';
-import { DetailViewHeader } from '../../shared/detail_view_header';
+import { DetailViewHeader } from './detail_view_header';
 import { ResettingHeightRetainer } from '../../shared/height_retainer/resetting_height_container';
 import { push, replace } from '../../shared/links/url_helpers';
 import { SortFunction } from '../../shared/managed_table';
 import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
-import { DependencyOperationDetailTraceList } from './dependency_operation_detail_trace_list';
 import { DependencyOperationDistributionChart } from './dependency_operation_distribution_chart';
 import { maybeRedirectToAvailableSpanSample } from './maybe_redirect_to_available_span_sample';
 
@@ -165,14 +164,6 @@ export function DependencyOperationDetailView() {
       <EuiFlexItem>
         <EuiPanel hasBorder>
           <DependencyOperationDistributionChart />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel hasBorder>
-          <DependencyOperationDetailTraceList
-            spanFetch={spanFetch}
-            sortFn={getSortedSamples}
-          />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>

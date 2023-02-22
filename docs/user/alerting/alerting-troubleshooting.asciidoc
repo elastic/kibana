@@ -55,7 +55,7 @@ Diagnosing these may be difficult - but there may be log messages for error cond
 === Use the REST APIs
 
 There is a rich set of HTTP endpoints to introspect and manage rules and connectors.
-One of the HTTP endpoints available for actions is the POST <<execute-connector-api,_execute API>>. You can use this to “test” an action.  For instance, if you have a server log action created, you can run it via curling the endpoint:
+One of the HTTP endpoints available for actions is the <<execute-connector-api,run connector API>>. You can use this to “test” an action.  For instance, if you have a server log action created, you can run it via curling the endpoint:
 [source, txt]
 --------------------------------------------------
 curl -X POST -k \
@@ -67,12 +67,14 @@ curl -X POST -k \
 
 experimental[] In addition, there is a command-line client that uses legacy rule APIs, which can be easier to use, but must be updated for the new APIs.
 CLI tools to list, create, edit, and delete alerts (rules) and actions (connectors) are available in https://github.com/pmuellr/kbn-action[kbn-action], which you can install as follows:
+
 [source, txt]
 --------------------------------------------------
 npm install -g pmuellr/kbn-action  
 --------------------------------------------------
 
 The same REST POST _execute API command will be:
+
 [source, txt]
 --------------------------------------------------
 kbn-action execute a692dc89-15b9-4a3c-9e47-9fb6872e49ce ‘{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}’
@@ -104,95 +106,88 @@ Task Manager uses the `.kibana_task_manager` index, an internal index that conta
 ==== Getting from a rule to its task
 When a rule is created, a task is created, scheduled to run at the interval specified. For example, when a rule is created and configured to check every 5 minutes, then the underlying task will be expected to run every 5 minutes. In practice, after each time the rule runs, the task is scheduled to run again in 5 minutes, rather than being scheduled to run every 5 minutes indefinitely.
 
-If you use the <<alerting-apis,Alerting REST APIs>> to fetch the underlying rule, you’ll get an object like so:
+If you use the <<alerting-apis,alerting APIs>>, such as the get rule API or find rules API, you'll get an object that contains rule details:
+
 [source, txt]
 --------------------------------------------------
 {
-  "id": "0a037d60-6b62-11eb-9e0d-85d233e3ee35",
-  "notify_when": "onActionGroupChange",
-  "params": {
-    "aggType": "avg",
-  },
-  "consumer": "alerts",
-  "rule_type_id": "test.rule.type",
-  "schedule": {
-    "interval": "1m"
-  },
-  "actions": [],
-  "tags": [],
-  "name": "test rule",
-  "enabled": true,
-  "throttle": null,
-  "api_key_owner": "elastic",
-  "created_by": "elastic",
-  "updated_by": "elastic",
-  "mute_all": false,
-  "muted_alert_ids": [],
-  "updated_at": "2021-02-10T05:37:19.086Z",
-  "created_at": "2021-02-10T05:37:19.086Z",
-  "scheduled_task_id": "31563950-b14b-11eb-9a7c-9df284da9f99",
-  "execution_status": {
-    "last_execution_date": "2021-02-10T17:55:14.262Z",
-    "status": "ok"
-  }
+  "id":"ed30d1b0-7c9e-11ed-ba24-0b137d501cb7",
+  "name":"cluster_health_rule",
+  "consumer":"alerts",
+  "enabled":true,
+  ...
+  "scheduled_task_id":"ed30d1b0-7c9e-11ed-ba24-0b137d501cb7",
+  ...
+  "next_run":"2022-12-15T17:56:55.713Z"
 }
 --------------------------------------------------
 
-The field you’re looking for is the one called `scheduled_task_id` which includes the _id of the Task Manager task, so if you then go to the Console and run the following query, you’ll get the underlying task.
+The field you're looking for is the one called `scheduled_task_id` which includes the identifier for the Task Manager task. You can then go to the Console and find more information about that task in system indices:
+
 [source, txt]
 --------------------------------------------------
-GET .kibana_task_manager/_doc/task:31563950-b14b-11eb-9a7c-9df284da9f99
+GET .kibana_task_manager/_doc/task:ed30d1b0-7c9e-11ed-ba24-0b137d501cb7
+--------------------------------------------------
+
+For example:
+
+[source, txt]
+--------------------------------------------------
 {
-  "_index" : ".kibana_task_manager_8.0.0_001",
-  "_id" : "task:31563950-b14b-11eb-9a7c-9df284da9f99",
-  "_version" : 838,
-  "_seq_no" : 8791,
-  "_primary_term" : 1,
-  "found" : true,
-  "_source" : {
-    "migrationVersion" : {
-      "task" : "7.6.0"
+  "_index": ".kibana_task_manager_8.7.0_001",
+  "_id": "task:ed30d1b0-7c9e-11ed-ba24-0b137d501cb7",
+  "_version": 85,
+  "_seq_no": 13009,
+  "_primary_term": 3,
+  "found": true,
+  "_source": {
+    "migrationVersion": {
+      "task": "8.5.0"
     },
-    "task" : {
-      "schedule" : {
-        "interval" : "5s"
+    "task": {
+      "retryAt": null,
+      "runAt": "2022-12-15T18:05:19.804Z",
+      "startedAt": null,
+      "params": """{"alertId":"ed30d1b0-7c9e-11ed-ba24-0b137d501cb7","spaceId":"default","consumer":"alerts"}""",
+      "ownerId": null,
+      "enabled": true,
+      "schedule": {
+        "interval": "1m"
       },
-      "taskType" : "alerting:.index-threshold",
-      "retryAt" : null,
-      "runAt" : "2021-05-10T05:18:02.704Z",
-      "scope" : [
+      "taskType": "alerting:monitoring_alert_cluster_health",
+      "scope": [
         "alerting"
       ],
-      "startedAt" : null,
-      "state" : """{"alertInstances":{},"previousStartedAt":"2021-05-10T05:17:45.671Z"}""",
-      "params" : """{"alertId":"30d856c0-b14b-11eb-9a7c-9df284da9f99","spaceId":"default"}""",
-      "ownerId" : null,
-      "scheduledAt" : "2021-05-10T04:50:07.333Z",
-      "attempts" : 0,
-      "status" : "idle"
+      "traceparent": "",
+      "state": """{"alertTypeState":{"lastChecked":1671127459923},"alertInstances":{},"alertRecoveredInstances":{},"previousStartedAt":"2022-12-15T18:04:19.804Z"}""",
+      "scheduledAt": "2022-12-15T18:04:16.824Z",
+      "attempts": 0,
+      "status": "idle"
     },
-    "references" : [ ],
-    "updated_at" : "2021-05-10T05:17:58.000Z",
-    "coreMigrationVersion" : "8.0.0",
-    "type" : "task"
+    "references": [],
+    "updated_at": "2022-12-15T18:04:19.998Z",
+    "coreMigrationVersion": "8.7.0",
+    "created_at": "2022-12-15T17:35:55.204Z",
+    "type": "task"
   }
 }
 --------------------------------------------------
 
-What you can see above is the task that backs the rule, and for the rule to work, this task must be in a healthy state. This information is available via <<task-manager-api-health, health API>> or via verbose logs if debug logging is enabled.
+For the rule to work, this task must be in a healthy state. Its health information is available in the
+<<task-manager-api-health,Task Manager health API>> or in verbose logs if debug logging is enabled.
 When diagnosing the health state of the task, you will most likely be interested in the following fields:
 
-`status`:: This is the current status of the task.  Is Task Manager is currently running? Is Task Manager idle,  and you’re waiting for it to run?  Or has Task Manager has tried to run it and failed?
-`runAt`:: This is when the task is scheduled to run next. If this is in the past and the status is idle, Task Manager has fallen behind or isn’t running. If it’s in the past, but the status is running, then Task Manager has picked it up and is working on it, which is considered healthy.
-`retryAt`:: Another time field, like runAt. If this field is populated, then Task Manager is currently running the task. If the task doesn’t complete (and isn't marked as failed), then Task Manager will give it another attempt at the time specified under retryAt.
+`status`:: This is the current status of the task.  Is Task Manager currently running? Is Task Manager idle,  and you're waiting for it to run?  Or has Task Manager has tried to run and failed?
+`runAt`:: This is when the task is scheduled to run next. If this is in the past and the status is idle, Task Manager has fallen behind or isn't running. If it's in the past, but the status is running, then Task Manager has picked it up and is working on it, which is considered healthy.
+`retryAt`:: Another time field, like `runAt`. If this field is populated, then Task Manager is currently running the task. If the task doesn't complete (and isn't marked as failed), then Task Manager will give it another attempt at the time specified under `retryAt`.
 
-Investigating the underlying task can help you gauge whether the problem you’re seeing is rooted in the rule not running at all, whether it’s running and failing, or whether it is running, but exhibiting behavior that is different than what was expected (at which point you should focus on the rule itself, rather than the task).
+Investigating the underlying task can help you gauge whether the problem you're seeing is rooted in the rule not running at all, whether it's running and failing, or whether it's running but exhibiting behavior that is different than what was expected (at which point you should focus on the rule itself, rather than the task).
 
 In addition to the above methods, refer to the following approaches and common issues:
 
-* <<alerting-common-issues, Alerting common issues>>
-* <<event-log-index, Querying Event log index>>
-* <<testing-connectors, Testing connectors using {connectors-ui} UI and `kbn-action` tool>>
+* <<alerting-common-issues,Alerting common issues>>
+* <<event-log-index,Querying event log index>>
+* <<testing-connectors,Testing connectors using {connectors-ui} UI and the `kbn-action` tool>>
 
 [discrete]
 [[alerting-limitations]]

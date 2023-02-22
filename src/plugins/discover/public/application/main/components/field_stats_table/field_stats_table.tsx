@@ -22,8 +22,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
-import type { GetStateReturn } from '../../services/discover_state';
-import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../hooks/use_saved_search';
+import type { DiscoverStateContainer } from '../../services/discover_state';
 export interface RandomSamplingOption {
   mode: 'random_sampling';
   seed: string;
@@ -95,7 +94,7 @@ export interface FieldStatisticsTableProps {
   /**
    * State container with persisted settings
    */
-  stateContainer?: GetStateReturn;
+  stateContainer?: DiscoverStateContainer;
   /**
    * Callback to add a filter to filter bar
    */
@@ -106,15 +105,11 @@ export interface FieldStatisticsTableProps {
    * @param eventName
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  savedSearchRefetch$?: DataRefetch$;
-  availableFields$?: AvailableFields$;
   searchSessionId?: string;
-  savedSearchDataTotalHits$?: DataTotalHits$;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
-    availableFields$,
     dataView,
     savedSearch,
     query,
@@ -123,10 +118,9 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     stateContainer,
     onAddFilter,
     trackUiMetric,
-    savedSearchRefetch$,
     searchSessionId,
-    savedSearchDataTotalHits$,
   } = props;
+  const totalHits$ = stateContainer?.dataState.data$.totalHits$;
   const services = useDiscoverServices();
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
@@ -136,19 +130,19 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
   const showPreviewByDefault = useMemo(
-    () =>
-      stateContainer ? !stateContainer.appStateContainer.getState().hideAggregatedPreview : true,
+    () => (stateContainer ? !stateContainer.appState.getState().hideAggregatedPreview : true),
     [stateContainer]
   );
 
   useEffect(() => {
+    const availableFields$ = stateContainer?.dataState.data$.availableFields$;
     const sub = embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
       if (output.showDistributions !== undefined && stateContainer) {
         stateContainer.setAppState({ hideAggregatedPreview: !output.showDistributions });
       }
     });
 
-    const refetch = savedSearchRefetch$?.subscribe(() => {
+    const refetch = stateContainer?.dataState.refetch$.subscribe(() => {
       if (embeddable && !isErrorEmbeddable(embeddable)) {
         embeddable.updateInput({ lastReloadRequestTime: Date.now() });
       }
@@ -165,7 +159,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
       refetch?.unsubscribe();
       fields?.unsubscribe();
     };
-  }, [embeddable, stateContainer, savedSearchRefetch$, availableFields$]);
+  }, [embeddable, stateContainer]);
 
   useEffect(() => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
@@ -178,10 +172,8 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         visibleFieldNames: columns,
         onAddFilter,
         sessionId: searchSessionId,
-        fieldsToFetch: availableFields$?.getValue().fields,
-        totalDocuments: savedSearchDataTotalHits$
-          ? savedSearchDataTotalHits$.getValue()?.result
-          : undefined,
+        fieldsToFetch: stateContainer?.dataState.data$.availableFields$?.getValue().fields,
+        totalDocuments: totalHits$ ? totalHits$.getValue()?.result : undefined,
         samplingOption: {
           mode: 'normal_sampling',
           shardSize: 5000,
@@ -199,8 +191,8 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     filters,
     onAddFilter,
     searchSessionId,
-    availableFields$,
-    savedSearchDataTotalHits$,
+    totalHits$,
+    stateContainer,
   ]);
 
   useEffect(() => {

@@ -66,6 +66,7 @@ describe('Changing alert status', () => {
         .then((numberOfOpenedAlertsText) => {
           const numberOfOpenedAlerts = parseInt(numberOfOpenedAlertsText, 10);
           goToClosedAlerts();
+          waitForAlerts();
           cy.get(ALERTS_COUNT)
             .invoke('text')
             .then((alertNumberString) => {
@@ -95,6 +96,8 @@ describe('Changing alert status', () => {
 
               goToOpenedAlerts();
               waitForAlerts();
+
+              selectCountTable();
 
               cy.get(ALERTS_COUNT).should(
                 'have.text',
@@ -151,7 +154,7 @@ describe('Changing alert status', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
-      createCustomRuleEnabled(getNewRule(), '1', '100m', 100);
+      createCustomRuleEnabled(getNewRule(), '1', 100);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();

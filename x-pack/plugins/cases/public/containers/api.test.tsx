@@ -11,9 +11,11 @@ import { KibanaServices } from '../common/lib/kibana';
 
 import { ConnectorTypes, CommentType, CaseStatuses, CaseSeverity } from '../../common/api';
 import {
+  CASES_INTERNAL_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   SECURITY_SOLUTION_OWNER,
+  MAX_DOCS_PER_PAGE,
 } from '../../common/constants';
 
 import {
@@ -22,7 +24,7 @@ import {
   getActionLicense,
   getCase,
   getCases,
-  getCaseUserActions,
+  findCaseUserActions,
   getTags,
   patchCase,
   updateCases,
@@ -33,6 +35,7 @@ import {
   resolveCase,
   getFeatureIds,
   postComment,
+  getCaseConnectors,
 } from './api';
 
 import {
@@ -45,20 +48,22 @@ import {
   casesStatus,
   casesSnake,
   cases,
-  caseUserActions,
   pushedCase,
   tags,
-  caseUserActionsSnake,
+  findCaseUserActionsResponse,
   casesStatusSnake,
   basicCaseId,
   caseWithRegisteredAttachmentsSnake,
   caseWithRegisteredAttachments,
-  caseUserActionsWithRegisteredAttachments,
   caseUserActionsWithRegisteredAttachmentsSnake,
+  basicPushSnake,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { getCasesStatus } from '../api';
+import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
+import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep } from 'lodash';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -457,29 +462,39 @@ describe('Cases API', () => {
     });
   });
 
-  describe('getCaseUserActions', () => {
+  describe('findCaseUserActions', () => {
+    const findCaseUserActionsSnake = {
+      page: 1,
+      perPage: 1000,
+      total: 20,
+      userActions: [...caseUserActionsWithRegisteredAttachmentsSnake],
+    };
+
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(caseUserActionsSnake);
+      fetchMock.mockResolvedValue(findCaseUserActionsSnake);
     });
 
     it('should be called with correct check url, method, signal', async () => {
-      await getCaseUserActions(basicCase.id, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions`, {
+      await findCaseUserActions(basicCase.id, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
         method: 'GET',
         signal: abortCtrl.signal,
+        query: {
+          perPage: MAX_DOCS_PER_PAGE,
+        },
       });
     });
 
     it('should return correct response', async () => {
-      const resp = await getCaseUserActions(basicCase.id, abortCtrl.signal);
-      expect(resp).toEqual(caseUserActions);
+      const resp = await findCaseUserActions(basicCase.id, abortCtrl.signal);
+      expect(resp).toEqual(findCaseUserActionsResponse);
     });
 
     it('should not covert to camel case registered attachments', async () => {
-      fetchMock.mockResolvedValue(caseUserActionsWithRegisteredAttachmentsSnake);
-      const resp = await getCaseUserActions(basicCase.id, abortCtrl.signal);
-      expect(resp).toEqual(caseUserActionsWithRegisteredAttachments);
+      fetchMock.mockResolvedValue(findCaseUserActionsSnake);
+      const resp = await findCaseUserActions(basicCase.id, abortCtrl.signal);
+      expect(resp).toEqual(findCaseUserActionsResponse);
     });
   });
 
@@ -835,6 +850,33 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
       const resp = await postComment(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseWithRegisteredAttachments);
+    });
+  });
+
+  describe('getCaseConnectors', () => {
+    const caseConnectors = getCaseConnectorsMockResponse();
+    const connectorCamelCase = caseConnectors['servicenow-1'];
+
+    const snakeCaseConnector = cloneDeep(connectorCamelCase);
+    set(snakeCaseConnector, 'push.details.externalService', basicPushSnake);
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({ 'servicenow-1': snakeCaseConnector });
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await getCaseConnectors(basicCase.id, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/${basicCase.id}/_connectors`, {
+        method: 'GET',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should return correct response', async () => {
+      const resp = await getCaseConnectors(basicCase.id, abortCtrl.signal);
+      expect(resp).toEqual({ 'servicenow-1': connectorCamelCase });
     });
   });
 });

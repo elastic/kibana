@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { timeWindowSchema } from '../../types/schema/time_window';
+import { timeWindowSchema } from '@kbn/slo-schema';
 
 type TimeWindow = t.TypeOf<typeof timeWindowSchema>;
 

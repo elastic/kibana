@@ -1,0 +1,39 @@
+{
+  "attributes": {
+    "title": "I am hidden from http apis but the client can still see me"
+  },
+  "id": "hidden-from-http-apis-1",
+  "references": [],
+  "type": "test-hidden-from-http-apis-importable-exportable",
+  "version": "WzQ0LDFd"
+}
+
+{
+  "attributes": {
+    "title": "I am not hidden from http apis"
+  },
+  "id": "not-hidden-from-http-apis-1",
+  "references": [],
+  "type": "test-not-hidden-from-http-apis-importable-exportable",
+  "version": "WzQ5LDFd"
+}
+
+{
+  "attributes": {
+    "title": "I am also hidden from http apis but the client can still see me"
+  },
+  "id": "hidden-from-http-apis-2",
+  "references": [],
+  "type": "test-hidden-from-http-apis-importable-exportable",
+  "version": "WzcyLDFd"
+}
+
+{
+  "attributes": {
+    "title": "I am also not hidden from http apis"
+  },
+  "id": "not-hidden-from-http-apis-2",
+  "references": [],
+  "type": "test-not-hidden-from-http-apis-importable-exportable",
+  "version": "WzczLDFd"
+}

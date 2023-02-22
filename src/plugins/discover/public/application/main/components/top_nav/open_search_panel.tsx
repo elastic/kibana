@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -57,7 +57,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
       <EuiFlyoutBody>
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,

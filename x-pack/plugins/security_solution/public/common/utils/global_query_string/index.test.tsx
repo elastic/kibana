@@ -26,7 +26,6 @@ import {
 import { createStore } from '../../store';
 import type { LinkInfo } from '../../links';
 import { SecurityPageName } from '../../../app/types';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 const mockDispatch = jest.fn();
 
@@ -66,7 +65,6 @@ describe('global query string', () => {
         globalUrlParam,
       },
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
       kibanaObservable,
       storage
     );
@@ -132,7 +130,7 @@ describe('global query string', () => {
       expect(mockDispatch).toBeCalledWith(
         globalUrlParamActions.registerUrlParam({
           key: urlParamKey,
-          initialValue: initialValue.toString(),
+          initialValue,
         })
       );
     });
@@ -142,7 +140,6 @@ describe('global query string', () => {
     it('dispatch updateUrlParam action', () => {
       const urlParamKey = 'testKey';
       const value = { test: 123 };
-      const encodedVaue = '(test:123)';
 
       const globalUrlParam = {
         [urlParamKey]: 'oldValue',
@@ -158,7 +155,7 @@ describe('global query string', () => {
       expect(mockDispatch).toBeCalledWith(
         globalUrlParamActions.updateUrlParam({
           key: urlParamKey,
-          value: encodedVaue,
+          value,
         })
       );
     });
@@ -188,14 +185,15 @@ describe('global query string', () => {
         {
           ...mockGlobalState,
           globalUrlParam: {
-            testNumber: '123',
-            testObject: '(test:321)',
+            testNumber: 123,
+            testObject: { testKey: 321 },
+            testEmptyObject: {},
+            testEmptyArray: [],
             testNull: null,
-            testEmpty: '',
+            testEmptyString: '',
           },
         },
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
         kibanaObservable,
         storage
       );
@@ -205,7 +203,7 @@ describe('global query string', () => {
 
       const { result } = renderHook(() => useGlobalQueryString(), { wrapper });
 
-      expect(result.current).toEqual('testNumber=123&testObject=(test:321)');
+      expect(result.current).toEqual(`testNumber=123&testObject=(testKey:321)`);
     });
   });
 
@@ -221,7 +219,7 @@ describe('global query string', () => {
       renderHook(() => useSyncGlobalQueryString(), { wrapper: makeWrapper(globalUrlParam) });
 
       expect(mockHistory.replace).toHaveBeenCalledWith({
-        search: `firstKey=111&${urlParamKey}=${value}&lastKey=999`,
+        search: `firstKey=111&${urlParamKey}='${value}'&lastKey=999`,
       });
     });
 
@@ -239,7 +237,7 @@ describe('global query string', () => {
       renderHook(() => useSyncGlobalQueryString(), { wrapper: makeWrapper(globalUrlParam) });
 
       expect(mockHistory.replace).toHaveBeenCalledWith({
-        search: `${urlParamKey1}=${value1}&${urlParamKey2}=${value2}`,
+        search: `${urlParamKey1}='${value1}'&${urlParamKey2}='${value2}'`,
       });
     });
 

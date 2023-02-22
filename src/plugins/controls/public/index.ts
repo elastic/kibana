@@ -22,6 +22,7 @@ export type {
   ControlStyle,
   ParentIgnoreSettings,
   ControlInput,
+  DataControlInput,
 } from '../common/types';
 
 export {
@@ -32,9 +33,12 @@ export {
 } from '../common';
 
 export {
+  type AddDataControlProps,
+  type AddOptionsListControlProps,
   type ControlGroupContainer,
   ControlGroupContainerFactory,
   type ControlGroupInput,
+  controlGroupInputBuilder,
   type ControlGroupOutput,
 } from './control_group';
 
@@ -50,8 +54,11 @@ export {
   type RangeSliderEmbeddableInput,
 } from './range_slider';
 
-export { LazyControlsCallout, type CalloutProps } from './controls_callout';
-export { LazyControlGroupRenderer, type ControlGroupRendererProps } from './control_group';
+export {
+  LazyControlGroupRenderer,
+  useControlGroupContainerContext,
+  type ControlGroupRendererProps,
+} from './control_group';
 
 export function plugin() {
   return new ControlsPlugin();

@@ -21,6 +21,12 @@ import { useListExceptionItems } from '../use_list_exception_items';
 import * as i18n from '../../translations';
 import { checkIfListCannotBeEdited } from '../../utils/list.utils';
 
+interface ExportListAction {
+  id: string;
+  listId: string;
+  namespaceType: NamespaceType;
+  includeExpiredExceptions: boolean;
+}
 interface ListAction {
   id: string;
   listId: string;
@@ -30,15 +36,23 @@ export const useExceptionsListCard = ({
   exceptionsList,
   handleExport,
   handleDelete,
+  handleManageRules,
 }: {
   exceptionsList: ExceptionListInfo;
-  handleExport: ({ id, listId, namespaceType }: ListAction) => () => Promise<void>;
+  handleExport: ({
+    id,
+    listId,
+    namespaceType,
+    includeExpiredExceptions,
+  }: ExportListAction) => () => Promise<void>;
   handleDelete: ({ id, listId, namespaceType }: ListAction) => () => Promise<void>;
+  handleManageRules: () => void;
 }) => {
   const [viewerStatus, setViewerStatus] = useState<ViewerStatus | string>(ViewerStatus.LOADING);
   const [exceptionToEdit, setExceptionToEdit] = useState<ExceptionListItemSchema>();
   const [showAddExceptionFlyout, setShowAddExceptionFlyout] = useState(false);
   const [showEditExceptionFlyout, setShowEditExceptionFlyout] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const {
     name: listName,
@@ -109,13 +123,7 @@ export const useExceptionsListCard = ({
         key: 'Export',
         icon: 'exportAction',
         label: i18n.EXPORT_EXCEPTION_LIST,
-        onClick: (e: React.MouseEvent<Element, MouseEvent>) => {
-          handleExport({
-            id: exceptionsList.id,
-            listId: exceptionsList.list_id,
-            namespaceType: exceptionsList.namespace_type,
-          })();
-        },
+        onClick: (e: React.MouseEvent<Element, MouseEvent>) => setShowExportModal(true),
       },
       {
         key: 'Delete',
@@ -130,14 +138,24 @@ export const useExceptionsListCard = ({
           })();
         },
       },
+      {
+        key: 'ManageRules',
+        icon: 'gear',
+        disabled: listCannotBeEdited,
+        label: 'Manage Rules',
+        onClick: (e: React.MouseEvent<Element, MouseEvent>) => {
+          handleManageRules();
+        },
+      },
     ],
     [
       exceptionsList.id,
       exceptionsList.list_id,
       exceptionsList.namespace_type,
       handleDelete,
-      handleExport,
+      setShowExportModal,
       listCannotBeEdited,
+      handleManageRules,
     ]
   );
 
@@ -161,7 +179,28 @@ export const useExceptionsListCard = ({
     [fetchItems, setShowAddExceptionFlyout, setShowEditExceptionFlyout]
   );
 
+  const onExportListClick = useCallback(() => {
+    setShowExportModal(true);
+  }, [setShowExportModal]);
+
+  const handleCancelExportModal = () => {
+    setShowExportModal(false);
+  };
+
+  const handleConfirmExportModal = useCallback(
+    (includeExpiredExceptions: boolean): void => {
+      handleExport({
+        id: exceptionsList.id,
+        listId: exceptionsList.list_id,
+        namespaceType: exceptionsList.namespace_type,
+        includeExpiredExceptions,
+      })();
+    },
+    [handleExport, exceptionsList]
+  );
+
   // routes to x-pack/plugins/security_solution/public/exceptions/routes.tsx
+  // details component is here: x-pack/plugins/security_solution/public/exceptions/pages/list_detail_view/index.tsx
   const { onClick: goToExceptionDetail } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.exceptions,
     path: `/details/${exceptionsList.list_id}`,
@@ -198,5 +237,9 @@ export const useExceptionsListCard = ({
     emptyViewerTitle,
     emptyViewerBody,
     emptyViewerButtonText,
+    showExportModal,
+    onExportListClick,
+    handleCancelExportModal,
+    handleConfirmExportModal,
   };
 };

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TableId, TimelineId } from '../../../common/types/timeline';
+import { TableId } from '../../../common/types';
+import { TimelineId } from '../../../common/types/timeline';
 import { skipQueryForDetectionsPage } from './helpers';
 
 describe('skipQueryForDetectionsPage', () => {

@@ -27,11 +27,12 @@ import { createPrebuiltRules } from '../../logic/create_prebuilt_rules';
 import { updatePrebuiltRules } from '../../logic/update_prebuilt_rules';
 import { getRulesToInstall } from '../../logic/get_rules_to_install';
 import { getRulesToUpdate } from '../../logic/get_rules_to_update';
-import { ruleAssetSavedObjectsClientFactory } from '../../logic/rule_asset/rule_asset_saved_objects_client';
+import { ruleAssetsClientFactory } from '../../logic/rule_asset/rule_asset_saved_objects_client';
 import { rulesToMap } from '../../logic/utils';
 
 import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { buildSiemResponse } from '../../../routes/utils';
+import { installPrebuiltRulesPackage } from './install_prebuilt_rules_package';
 
 export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.put(
@@ -90,13 +91,9 @@ export const createPrepackagedRules = async (
   const savedObjectsClient = context.core.savedObjects.client;
   const siemClient = context.getAppClient();
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
-  const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
+  const ruleAssetsClient = ruleAssetsClientFactory(savedObjectsClient);
 
-  const {
-    maxTimelineImportExportSize,
-    prebuiltRulesFromFileSystem,
-    prebuiltRulesFromSavedObjects,
-  } = config;
+  const { maxTimelineImportExportSize } = config;
 
   if (!siemClient || !rulesClient) {
     throw new PrepackagedRulesError('', 404);
@@ -107,11 +104,14 @@ export const createPrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrepackagedRulesMap = await getLatestPrebuiltRules(
-    ruleAssetsClient,
-    prebuiltRulesFromFileSystem,
-    prebuiltRulesFromSavedObjects
-  );
+  let latestPrepackagedRulesMap = await getLatestPrebuiltRules(ruleAssetsClient);
+  if (latestPrepackagedRulesMap.size === 0) {
+    // Seems no packages with prepackaged rules were installed, try to install the default rules package
+    await installPrebuiltRulesPackage(config, context);
+
+    // Try to get the prepackaged rules again
+    latestPrepackagedRulesMap = await getLatestPrebuiltRules(ruleAssetsClient);
+  }
   const installedPrePackagedRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
   const rulesToInstall = getRulesToInstall(latestPrepackagedRulesMap, installedPrePackagedRules);
   const rulesToUpdate = getRulesToUpdate(latestPrepackagedRulesMap, installedPrePackagedRules);

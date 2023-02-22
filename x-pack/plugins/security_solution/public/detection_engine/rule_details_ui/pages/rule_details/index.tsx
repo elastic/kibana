@@ -17,8 +17,10 @@ import {
   EuiToolTip,
   EuiWindowEvent,
 } from '@elastic/eui';
+import type { Filter } from '@kbn/es-query';
 import { i18n as i18nTranslate } from '@kbn/i18n';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { noop, omit } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -31,22 +33,24 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
+import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
+import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/grouped_alerts';
+import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
+import { FILTER_OPEN, TableId } from '../../../../../common/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
+import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
-import { TableId } from '../../../../../common/types/timeline';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { tableDefaults } from '../../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../../common/store/data_table';
 import {
-  getRulesUrl,
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -57,7 +61,6 @@ import { useListsConfig } from '../../../../detections/containers/detection_engi
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../detections/components/rules/step_about_rule_details';
 import { AlertsHistogramPanel } from '../../../../detections/components/alerts_kpis/alerts_histogram_panel';
-import { AlertsTable } from '../../../../detections/components/alerts_table';
 import { useUserData } from '../../../../detections/components/user_info';
 import { StepDefineRule } from '../../../../detections/components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../detections/components/rules/step_schedule_rule';
@@ -82,12 +85,13 @@ import { hasMlAdminPermissions } from '../../../../../common/machine_learning/ha
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../app/types';
 import {
+  ALERTS_TABLE_REGISTRY_CONFIG_IDS,
   APP_UI_ID,
   DEFAULT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_KEY,
 } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { Display } from '../../../../hosts/pages/display';
+import { Display } from '../../../../explore/hosts/pages/display';
 
 import {
   focusUtilityBarAction,
@@ -123,10 +127,7 @@ import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_wit
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  AlertsTableFilterGroup,
-  FILTER_OPEN,
-} from '../../../../detections/components/alerts_table/alerts_filter_group';
+import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
@@ -188,6 +189,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
+
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).graphEventId
   );
@@ -195,7 +197,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).updated
   );
   const isAlertsLoading = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
+    (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).isLoading
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -213,10 +215,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       isAuthenticated,
       hasEncryptionKey,
       canUserCRUD,
-      hasIndexWrite,
       hasIndexRead,
-      hasIndexMaintenance,
       signalIndexName,
+      hasIndexWrite,
+      hasIndexMaintenance,
     },
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
@@ -238,6 +240,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     loading: ruleLoading,
     isExistingRule,
   } = useRuleWithFallback(ruleId);
+
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
@@ -304,11 +307,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     };
     fetchDataViewTitle();
   }, [data.dataViews, defineRuleData?.dataViewId]);
-  const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
-  const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
+
+  const { showBuildingBlockAlerts, setShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } =
+    useDataTableFilters(TableId.alertsOnRuleDetailsPage);
+
   const mlCapabilities = useMlCapabilities();
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
 
   const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(rule?.saved_id, {
@@ -506,7 +512,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
   useEffect(() => {
     setShowBuildingBlockAlerts(rule?.building_block_type != null);
-  }, [rule]);
+  }, [rule, setShowBuildingBlockAlerts]);
 
   const alertDefaultFilters = useMemo(
     () => [
@@ -516,15 +522,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
     [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
-  );
-
-  const alertsTableDefaultFilters = useMemo(
-    () => [
-      ...buildAlertsFilter(rule?.rule_id ?? ''),
-      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-    ],
-    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const alertMergedFilters = useMemo(
@@ -591,20 +588,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     setRule((currentRule) => (currentRule ? { ...currentRule, enabled } : currentRule));
   }, []);
 
-  const onShowBuildingBlockAlertsChangedCallback = useCallback(
-    (newShowBuildingBlockAlerts: boolean) => {
-      setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
-    },
-    [setShowBuildingBlockAlerts]
-  );
-
-  const onShowOnlyThreatIndicatorAlertsCallback = useCallback(
-    (newShowOnlyThreatIndicatorAlerts: boolean) => {
-      setShowOnlyThreatIndicatorAlerts(newShowOnlyThreatIndicatorAlerts);
-    },
-    [setShowOnlyThreatIndicatorAlerts]
-  );
-
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     focusUtilityBarAction(containerElement.current);
   }, [containerElement]);
@@ -625,6 +608,21 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       }
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
+  );
+
+  const renderGroupedAlertTable = useCallback(
+    (groupingFilters: Filter[]) => {
+      return (
+        <AlertsTableComponent
+          configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}
+          flyoutSize="m"
+          inputFilters={[...alertMergedFilters, ...groupingFilters]}
+          tableId={TableId.alertsOnRuleDetailsPage}
+          onRuleChange={refreshRule}
+        />
+      );
+    },
+    [alertMergedFilters, refreshRule]
   );
 
   const {
@@ -675,12 +673,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
               <HeaderPage
-                backOptions={{
-                  path: getRulesUrl(),
-                  text: i18n.BACK_TO_RULES,
-                  pageId: SecurityPageName.rules,
-                  dataTestSubj: 'ruleDetailsBackToAllRules',
-                }}
                 border
                 subtitle={subTitle}
                 subtitle2={
@@ -812,7 +804,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
-              <SecuritySolutionTabNavigation navTabs={pageTabs} />
+              <TabNavigationWithBreadcrumbs navTabs={pageTabs} />
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>
@@ -847,22 +839,18 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       <EuiSpacer />
                     </Display>
                     {ruleId != null && (
-                      <AlertsTable
-                        filterGroup={filterGroup}
+                      <GroupedAlertsTable
                         tableId={TableId.alertsOnRuleDetailsPage}
-                        defaultFilters={alertsTableDefaultFilters}
+                        defaultFilters={alertMergedFilters}
                         hasIndexWrite={hasIndexWrite ?? false}
                         hasIndexMaintenance={hasIndexMaintenance ?? false}
                         from={from}
                         loading={loading}
-                        showBuildingBlockAlerts={showBuildingBlockAlerts}
-                        showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-                        onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-                        onShowOnlyThreatIndicatorAlertsChanged={
-                          onShowOnlyThreatIndicatorAlertsCallback
-                        }
-                        onRuleChange={refreshRule}
                         to={to}
+                        signalIndexName={signalIndexName}
+                        runtimeMappings={runtimeMappings}
+                        currentAlertStatusFilterValue={filterGroup}
+                        renderChildComponent={renderGroupedAlertTable}
                       />
                     )}
                   </>

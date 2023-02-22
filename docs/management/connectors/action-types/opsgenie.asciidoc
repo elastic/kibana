@@ -1,6 +1,5 @@
-[role="xpack"]
 [[opsgenie-action-type]]
-=== Opsgenie connector and action
+== Opsgenie connector and action
 ++++
 <titleabbrev>Opsgenie</titleabbrev>
 ++++
@@ -8,10 +7,20 @@
 The Opsgenie connector uses the https://docs.opsgenie.com/docs/alert-api[Opsgenie alert API].
 
 [float]
+[[define-opsgenie-ui]]
+=== Create connectors in {kib}
+
+You can create connectors in *{stack-manage-app} > {connectors-ui}*
+or as needed when you're creating a rule. For example:
+
+[role="screenshot"]
+image::management/connectors/images/opsgenie-connector.png[Opsgenie connector]
+
+[float]
 [[opsgenie-connector-configuration]]
 ==== Connector configuration
 
-Opsgenie connectors have the following configuration properties.
+Opsgenie connectors have the following configuration properties:
 
 Name:: The name of the connector. The name is used to identify a connector in the management UI connector listing, or in the connector list when configuring an action.
 URL:: The Opsgenie URL. For example, https://api.opsgenie.com or https://api.eu.opsgenie.com.
@@ -20,24 +29,23 @@ NOTE: If you are using the <<action-settings, `xpack.actions.allowedHosts`>> set
 API Key::   The Opsgenie API authentication key for HTTP Basic authentication. For more details about generating Opsgenie API keys, refer to https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/[Opsgenie documentation].
 
 [float]
-[[opgenie-connector-networking-configuration]]
-==== Connector networking configuration
+[[preconfigured-opsgenie-configuration]]
+=== Create preconfigured connectors
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
-[[Preconfigured-opsgenie-configuration]]
-==== Preconfigured connector type
+If you are running {kib} on-prem, you can define connectors by
+adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
+For example:
 
 [source,text]
 --
- my-opsgenie:
-   name: preconfigured-opsgenie-connector-type
-   actionTypeId: .opsgenie
-   config:
-    apiUrl: https://api.opsgenie.com
-   secrets:
-     apiKey: apikey
+xpack.actions.preconfigured:
+  my-opsgenie:
+    name: preconfigured-opsgenie-connector-type
+    actionTypeId: .opsgenie
+    config:
+      apiUrl: https://api.opsgenie.com
+    secrets:
+      apiKey: apikey
 --
 
 Config defines information for the connector type.
@@ -49,22 +57,14 @@ Secrets defines sensitive information for the connector type.
 `apiKey`:: A string that corresponds to *API Key*.
 
 [float]
-[[define-opsgenie-ui]]
-==== Define connector in {stack-manage-app}
+[[opsgenie-action-configuration]]
+=== Test connectors
 
-Define Opsgenie connector properties.
-
-[role="screenshot"]
-image::management/connectors/images/opsgenie-connector.png[Opsgenie connector]
-
-Test Opsgenie action parameters.
+You can test connectors with the <<execute-connector-api,run connector API>> or
+as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/opsgenie-params-test.png[Opsgenie params test]
-
-[float]
-[[opsgenie-action-configuration]]
-==== Action configuration
 
 The Opsgenie connector supports two types of actions: Create alert and Close alert. The properties supported for each action are different because Opsgenie defines different properties for each operation.
 
@@ -74,13 +74,13 @@ Action:: Select *Create alert* to configure the actions that occur when a rule's
 
 [float]
 [[opsgenie-action-create-alert-configuration]]
-===== Configure the create alert action
+==== Configure the create alert action
 
 You can configure the create alert action through the form view or using a JSON editor.
 
 [float]
 [[opsgenie-action-create-alert-form-configuration]]
-====== Form view
+===== Form view
 
 The create alert action form has the following configuration properties.
 
@@ -88,7 +88,7 @@ Message::   The message for the alert (required).
 Opsgenie tags::   The tags for the alert (optional).
 Priority::  The priority level for the alert.
 Description::   A description that provides detailed information about the alert (optional).
-Alias::   The alert identifier, which is used for alert de-duplication in Opsgenie. For more information, refer to the https://support.atlassian.com/opsgenie/docs/what-is-alert-de-duplication/[Opsgenie documentation] (optional).
+Alias::   The alert identifier, which is used for alert deduplication in Opsgenie. For more information, refer to the https://support.atlassian.com/opsgenie/docs/what-is-alert-de-duplication/[Opsgenie documentation] (optional).
 Entity::  The domain of the alert (optional).
 Source::  The source of the alert (optional).
 User::    The display name of the owner (optional).
@@ -96,7 +96,7 @@ Note::    Additional information for the alert (optional).
 
 [float]
 [[opsgenie-action-create-alert-json-configuration]]
-====== JSON editor
+===== JSON editor
 
 A JSON editor is provided as an alternative to the form view and supports additional fields not shown in the form view. The JSON editor supports all of the forms configuration properties but as lowercase keys as https://docs.opsgenie.com/docs/alert-api#create-alert[described in the Opsgenie API documentation]. The JSON editor supports the following additional properties:
 
@@ -141,18 +141,25 @@ Example JSON editor contents
 
 [float]
 [[opsgenie-action-close-alert-configuration]]
-===== Close alert configuration
+==== Close alert configuration
 
 The close alert action has the following configuration properties.
 
-Alias::   The alert identifier, which is used for alert de-duplication in Opsgenie (required). The alias must match the value used when creating the alert. For more information, refer to the https://support.atlassian.com/opsgenie/docs/what-is-alert-de-duplication/[Opsgenie documentation].
+Alias::   The alert identifier, which is used for alert deduplication in Opsgenie (required). The alias must match the value used when creating the alert. For more information, refer to the https://support.atlassian.com/opsgenie/docs/what-is-alert-de-duplication/[Opsgenie documentation].
 Note::    Additional information for the alert (optional).
 Source::  The display name of the source (optional).
 User::    The display name of the owner (optional).
 
 [float]
+[[opgenie-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+
+[float]
 [[configuring-opsgenie]]
-==== Configure an Opsgenie account
+=== Configure an Opsgenie account
 
 After obtaining an Opsgenie instance, configure the API integration. For details, refer to the https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/[Opsgenie documentation].
 

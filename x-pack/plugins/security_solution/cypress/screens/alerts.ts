@@ -12,7 +12,7 @@ export const ADD_ENDPOINT_EXCEPTION_BTN = '[data-test-subj="add-endpoint-excepti
 export const ALERT_COUNT_TABLE_FIRST_ROW_COUNT =
   '[data-test-subj="alertsCountTable"] tr:nth-child(1) td:nth-child(2) .euiTableCellContent__text';
 
-export const ALERT_CHECKBOX = '[data-test-subj~="select-event"].euiCheckbox__input';
+export const ALERT_CHECKBOX = '[data-test-subj="bulk-actions-row-cell"].euiCheckbox__input';
 
 export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';
 
@@ -26,23 +26,20 @@ export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
 export const ALERTS = '[data-test-subj="events-viewer-panel"][data-test-subj="event"]';
 
-export const ALERTS_COUNT =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
+export const ALERTS_COUNT = '[data-test-subj="toolbar-alerts-count"]';
 
 export const ALERTS_TREND_SIGNAL_RULE_NAME_PANEL =
   '[data-test-subj="render-content-kibana.alert.rule.name"]';
 
-export const CHART_SELECT = '[data-test-subj="chartSelect"]';
-
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 
-export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="close-alert-status"]';
+export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="closed-alert-status"]';
 
 export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
 export const DESTINATION_IP = '[data-test-subj^=formatted-field][data-test-subj$=destination\\.ip]';
 
-export const EMPTY_ALERT_TABLE = '[data-test-subj="tGridEmptyState"]';
+export const EMPTY_ALERT_TABLE = '[data-test-subj="alertsStateTableEmptyState"]';
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 
@@ -64,8 +61,11 @@ export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-d
 
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
 
-export const NUMBER_OF_ALERTS =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
+export const ALERTS_REFRESH_BTN = '[data-test-subj="querySubmitButton"]';
+
+export const ALERTS_HISTOGRAM_PANEL_LOADER = '[data-test-subj="loadingPanelAlertsHistogram"]';
+
+export const ALERTS_CONTAINER_LOADING_BAR = '[data-test-subj="events-container-loading-true"]';
 
 export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 
@@ -86,7 +86,7 @@ export const RULE_NAME = '[data-test-subj^=formatted-field][data-test-subj$=rule
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
 
-export const SELECT_TABLE = '[data-test-subj="table"]';
+export const SELECT_AGGREGATION_CHART = '[data-test-subj="chart-select-table"]';
 
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
 
@@ -101,6 +101,8 @@ export const SOURCE_IP = '[data-test-subj^=formatted-field][data-test-subj$=sour
 export const TAKE_ACTION_POPOVER_BTN = '[data-test-subj="selectedShowBulkActionsButton"]';
 
 export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu-button"]';
+
+export const TIMELINE_CONTEXT_MENU = '[data-test-subj="actions-context-menu"]';
 
 export const USER_NAME = '[data-test-subj^=formatted-field][data-test-subj$=user\\.name]';
 
@@ -120,4 +122,38 @@ export const USER_RISK_HEADER_COLIMN =
 
 export const USER_RISK_COLUMN = '[data-gridcell-column-id="user.risk.calculated_level"]';
 
-export const ACTION_COLUMN = '[data-gridcell-column-id="default-timeline-control-column"]';
+export const ACTION_COLUMN = '[data-gridcell-column-id="expandColumn"]';
+
+export const DATAGRID_CHANGES_IN_PROGRESS = '[data-test-subj="body-data-grid"] .euiProgress';
+
+export const EVENT_CONTAINER_TABLE_LOADING = '[data-test-subj="internalAlertsPageLoading"]';
+
+export const SELECT_ALL_VISIBLE_ALERTS = '[data-test-subj="bulk-actions-header"]';
+
+export const SELECT_ALL_ALERTS = '[data-test-subj="selectAllAlertsButton"]';
+
+export const EVENT_CONTAINER_TABLE_NOT_LOADING =
+  '[data-test-subj="events-container-loading-false"]';
+
+export const FILTER_BADGE = '[data-test-subj^="filter-badge"]';
+
+export const CELL_FILTER_IN_BUTTON =
+  '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-filterIn"]';
+export const CELL_FILTER_OUT_BUTTON =
+  '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-filterOut"]';
+export const CELL_ADD_TO_TIMELINE_BUTTON =
+  '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-addToTimeline"]';
+export const CELL_SHOW_TOP_FIELD_BUTTON =
+  '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-showTopN"]';
+export const CELL_COPY_BUTTON =
+  '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-copyToClipboard"]';
+
+export const ACTIONS_EXPAND_BUTTON = '[data-test-subj="euiDataGridCellExpandButton"]';
+
+export const SHOW_TOP_N_HEADER =
+  '[data-test-subj="topN-container"] [data-test-subj="header-section-title"]';
+
+export const ALERTS_HISTOGRAM_LEGEND =
+  '[data-test-subj="alerts-histogram-panel"] [data-test-subj="withHoverActionsButton"]';
+
+export const SELECT_HISTOGRAM = '[data-test-subj="chart-select-trend"]';

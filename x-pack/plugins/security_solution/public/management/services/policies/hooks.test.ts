@@ -7,7 +7,7 @@
 
 import type { UseQueryOptions } from '@tanstack/react-query';
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
-import type { GetPackagesResponse } from '@kbn/fleet-plugin/common';
+import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import { useGetEndpointSecurityPackage } from './hooks';
 import { getFakeHttpService, renderQuery } from '../../hooks/test_utils';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
@@ -19,7 +19,7 @@ describe('useGetEndpointSecurityPackage hook', () => {
   let result: ReturnType<typeof useGetEndpointSecurityPackage>;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
   let generator: EndpointDocGenerator;
-  let options: UseQueryOptions<GetPackagesResponse['items'][number], IHttpFetchError> | undefined;
+  let options: UseQueryOptions<GetInfoResponse['item'], IHttpFetchError> | undefined;
 
   beforeEach(() => {
     fakeHttpServices = getFakeHttpService();
@@ -33,7 +33,7 @@ describe('useGetEndpointSecurityPackage hook', () => {
 
   it('retrieves the endpoint package', async () => {
     const apiResponse = {
-      items: [generator.generateEpmPackage()],
+      item: [generator.generateEpmPackageInfo()],
     };
     fakeHttpServices.get.mockResolvedValue(apiResponse);
     const onSuccessMock: jest.Mock = jest.fn();
@@ -47,7 +47,7 @@ describe('useGetEndpointSecurityPackage hook', () => {
       () => useGetEndpointSecurityPackage({ customQueryOptions: options }),
       'isSuccess'
     );
-    expect(result.data).toBe(apiResponse.items[0]);
+    expect(result.data).toBe(apiResponse.item);
     expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
     expect(onSuccessMock).toHaveBeenCalledTimes(1);
   });

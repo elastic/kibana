@@ -79,7 +79,8 @@ export const getLayers = (
             syncColors,
             isDarkMode,
             formatter,
-            col.format
+            col,
+            formatters
           ),
       },
     };

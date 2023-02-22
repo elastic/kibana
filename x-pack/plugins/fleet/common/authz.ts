@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 
 import { ENDPOINT_PRIVILEGES } from './constants';
@@ -95,14 +94,17 @@ export function calculatePackagePrivilegesFromCapabilities(
     return {};
   }
 
-  const endpointActions = ENDPOINT_PRIVILEGES.reduce((acc, privilege) => {
-    return {
-      ...acc,
-      [privilege]: {
-        executePackageAction: capabilities.siem[privilege] || false,
-      },
-    };
-  }, {});
+  const endpointActions = Object.entries(ENDPOINT_PRIVILEGES).reduce(
+    (acc, [privilege, { privilegeName }]) => {
+      return {
+        ...acc,
+        [privilege]: {
+          executePackageAction: capabilities.siem[privilegeName] || false,
+        },
+      };
+    },
+    {}
+  );
 
   return {
     endpoint: {
@@ -117,10 +119,11 @@ function getAuthorizationFromPrivileges(
     privilege: string;
     authorized: boolean;
   }>,
+  prefix: string,
   searchPrivilege: string
 ): boolean {
   const privilege = kibanaPrivileges.find((p) =>
-    p.privilege.endsWith(`${DEFAULT_APP_CATEGORIES.security.id}-${searchPrivilege}`)
+    p.privilege.endsWith(`${prefix}${searchPrivilege}`)
   );
   return privilege?.authorized || false;
 }
@@ -138,15 +141,22 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
     return {};
   }
 
-  const endpointActions = ENDPOINT_PRIVILEGES.reduce((acc, privilege: string) => {
-    const kibanaPrivilege = getAuthorizationFromPrivileges(kibanaPrivileges, privilege);
-    return {
-      ...acc,
-      [privilege]: {
-        executePackageAction: kibanaPrivilege,
-      },
-    };
-  }, {});
+  const endpointActions = Object.entries(ENDPOINT_PRIVILEGES).reduce(
+    (acc, [privilege, { appId, privilegeSplit, privilegeName }]) => {
+      const kibanaPrivilege = getAuthorizationFromPrivileges(
+        kibanaPrivileges,
+        `${appId}${privilegeSplit}`,
+        privilegeName
+      );
+      return {
+        ...acc,
+        [privilege]: {
+          executePackageAction: kibanaPrivilege,
+        },
+      };
+    },
+    {}
+  );
 
   return {
     endpoint: {

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { EsFieldName } from '../../../../../../../common/types/fields';
 
 import {
@@ -24,7 +25,6 @@ import {
   PivotConfigDefinition,
 } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
-
 import { RUNTIME_FIELD_TYPES } from '../../../../../../../common/shared_imports';
 
 export interface ErrorMessage {
@@ -62,13 +62,15 @@ export interface StepDefineExposedState {
   sourceConfigUpdated: boolean;
   valid: boolean;
   validationStatus: { isValid: boolean; errorMessage?: string };
+  runtimeMappings?: RuntimeMappings;
+  runtimeMappingsUpdated: boolean;
+  isRuntimeMappingsEditorEnabled: boolean;
+  timeRangeMs?: TimeRangeMs;
+  isDatePickerApplyEnabled: boolean;
   /**
    * Undefined when the form is incomplete or invalid
    */
   previewRequest: { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition } | undefined;
-  runtimeMappings?: RuntimeMappings;
-  runtimeMappingsUpdated: boolean;
-  isRuntimeMappingsEditorEnabled: boolean;
 }
 
 export function isPivotPartialRequest(arg: unknown): arg is { pivot: PivotConfigDefinition } {

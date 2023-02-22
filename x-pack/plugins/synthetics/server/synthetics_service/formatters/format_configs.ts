@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { isNil, omitBy } from 'lodash';
+import { isEmpty, isNil, omitBy } from 'lodash';
 import {
   BrowserFields,
   ConfigKey,
   MonitorFields,
   SyntheticsMonitor,
   HeartbeatConfig,
+  TLSFields,
 } from '../../../common/runtime_types';
 import { formatters } from '.';
 
@@ -28,6 +29,7 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.FORM_MONITOR_TYPE,
   ConfigKey.TEXT_ASSERTION,
   ConfigKey.CONFIG_HASH,
+  ConfigKey.ALERT_CONFIG,
   'secrets',
 ];
 
@@ -52,6 +54,13 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
     }
   });
 
+  if (!config[ConfigKey.METADATA]?.is_tls_enabled) {
+    const sslKeys = Object.keys(formattedMonitor).filter((key) =>
+      key.includes('ssl')
+    ) as unknown as Array<keyof TLSFields>;
+    sslKeys.forEach((key) => (formattedMonitor[key] = null));
+  }
+
   Object.keys(uiToHeartbeatKeyMap).forEach((key) => {
     const hbKey = key as YamlKeys;
     const configKey = uiToHeartbeatKeyMap[hbKey];
@@ -68,14 +77,34 @@ export const formatHeartbeatRequest = ({
   heartbeatId,
   runOnce,
   testRunId,
+  params: globalParams,
 }: {
   monitor: SyntheticsMonitor;
   monitorId: string;
   heartbeatId: string;
   runOnce?: boolean;
   testRunId?: string;
+  params: Record<string, string>;
 }): HeartbeatConfig => {
   const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
+
+  let params = { ...(globalParams ?? {}) };
+
+  let paramsString = '';
+
+  try {
+    const monParamsStr = (monitor as BrowserFields)[ConfigKey.PARAMS];
+
+    if (monParamsStr) {
+      const monitorParams = JSON.parse(monParamsStr);
+      params = { ...params, ...monitorParams };
+    }
+
+    paramsString = isEmpty(params) ? '' : JSON.stringify(params);
+  } catch (e) {
+    // ignore
+  }
+
   return {
     ...monitor,
     id: heartbeatId,
@@ -87,5 +116,6 @@ export const formatHeartbeatRequest = ({
       test_run_id: testRunId,
     },
     fields_under_root: true,
+    params: paramsString,
   };
 };

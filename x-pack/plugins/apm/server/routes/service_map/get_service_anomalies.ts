@@ -9,15 +9,12 @@ import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../common/transaction_types';
+import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import { MlClient } from '../../lib/helpers/get_ml_client';
@@ -64,8 +61,8 @@ export async function getServiceAnomalies({
               ),
               {
                 terms: {
-                  // Only retrieving anomalies for transaction types "request" and "page-load"
-                  by_field_value: [TRANSACTION_REQUEST, TRANSACTION_PAGE_LOAD],
+                  // Only retrieving anomalies for default transaction types
+                  by_field_value: defaultTransactionTypes,
                 },
               },
             ] as estypes.QueryDslQueryContainer[],
@@ -154,7 +151,7 @@ export async function getServiceAnomalies({
 }
 
 export async function getMLJobs(
-  anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
+  anomalyDetectors: MlAnomalyDetectors,
   environment?: string
 ) {
   const jobs = await getMlJobsWithAPMGroup(anomalyDetectors);
@@ -173,7 +170,7 @@ export async function getMLJobs(
 }
 
 export async function getMLJobIds(
-  anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
+  anomalyDetectors: MlAnomalyDetectors,
   environment?: string
 ) {
   const mlJobs = await getMLJobs(anomalyDetectors, environment);

@@ -28,10 +28,10 @@ import {
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
-import { createIncident, getDurationInSeconds } from './utils';
+import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
 import { createCaseError } from '../../common/error';
 import {
-  createAlertUpdateRequest,
+  createAlertUpdateStatusRequest,
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
@@ -68,7 +68,7 @@ const changeAlertsStatusToClose = async (
 
   const alerts = alertAttachments.saved_objects
     .map((attachment) =>
-      createAlertUpdateRequest({
+      createAlertUpdateStatusRequest({
         comment: attachment.attributes,
         status: CaseStatuses.closed,
       })
@@ -241,7 +241,6 @@ export const push = async (
       }),
 
       attachmentService.bulkUpdate({
-        unsecuredSavedObjectsClient,
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
@@ -257,9 +256,8 @@ export const push = async (
     ]);
 
     if (shouldMarkAsClosed) {
-      await userActionService.createUserAction({
+      await userActionService.creator.createUserAction({
         type: ActionTypes.status,
-        unsecuredSavedObjectsClient,
         payload: { status: CaseStatuses.closed },
         user,
         caseId,
@@ -272,9 +270,8 @@ export const push = async (
       }
     }
 
-    await userActionService.createUserAction({
+    await userActionService.creator.createUserAction({
       type: ActionTypes.pushed,
-      unsecuredSavedObjectsClient,
       payload: { externalService },
       user,
       caseId,
@@ -320,17 +317,11 @@ const getProfiles = async (
     ...(caseInfo.created_by?.profile_uid != null ? [caseInfo.created_by.profile_uid] : []),
   ]);
 
-  if (uids.size <= 0) {
+  const userProfiles = await getUserProfiles(securityStartPlugin, uids);
+
+  if (userProfiles.size <= 0) {
     return;
   }
 
-  const userProfiles =
-    (await securityStartPlugin.userProfiles.bulkGet({
-      uids,
-    })) ?? [];
-
-  return userProfiles.reduce<Map<string, UserProfile>>((acc, profile) => {
-    acc.set(profile.uid, profile);
-    return acc;
-  }, new Map());
+  return userProfiles;
 };

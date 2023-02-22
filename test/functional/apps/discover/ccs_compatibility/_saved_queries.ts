@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(hitCount).to.be('4,731');
     });
 
-    await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
+    await filterBar.addFilter({ field: 'extension.raw', operation: 'is one of', value: ['jpg'] });
     await retry.try(async function tryingForTime() {
       const hitCount = await PageObjects.discover.getHitCount();
       expect(hitCount).to.be('3,029');

@@ -12,26 +12,31 @@ import { buildDataViewMock } from './data_view';
 const fields = [
   {
     name: '_index',
+    displayName: '_index',
     type: 'string',
     scripted: false,
     filterable: true,
   },
   {
     name: 'timestamp',
+    displayName: 'timestamp',
     type: 'date',
     scripted: false,
     filterable: true,
     aggregatable: true,
     sortable: true,
+    visualizable: true,
   },
   {
     name: 'message',
+    displayName: 'message',
     type: 'string',
     scripted: false,
     filterable: false,
   },
   {
     name: 'extension',
+    displayName: 'extension',
     type: 'string',
     scripted: false,
     filterable: true,
@@ -39,6 +44,7 @@ const fields = [
   },
   {
     name: 'bytes',
+    displayName: 'bytes',
     type: 'number',
     scripted: false,
     filterable: true,
@@ -46,6 +52,7 @@ const fields = [
   },
   {
     name: 'scripted',
+    displayName: 'scripted',
     type: 'number',
     scripted: true,
     filterable: false,

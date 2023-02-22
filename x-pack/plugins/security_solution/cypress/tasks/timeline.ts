@@ -163,10 +163,11 @@ export const addNotesToTimeline = (notes: string) => {
 
         cy.get(NOTES_TEXT_AREA).type(notes, {
           parseSpecialCharSequences: false,
-          delay: 0,
           force: true,
         });
-        cy.get(ADD_NOTE_BUTTON).trigger('click');
+        cy.get(ADD_NOTE_BUTTON)
+          .pipe(($ele) => $ele.trigger('click'))
+          .should('have.attr', 'disabled');
         cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
       });
   });
@@ -328,6 +329,7 @@ export const deleteTimeline = () => {
 export const markAsFavorite = () => {
   const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
   cy.get(STAR_ICON).should('be.visible').pipe(click);
+  cy.get(LOADING_INDICATOR).should('exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
 };
 

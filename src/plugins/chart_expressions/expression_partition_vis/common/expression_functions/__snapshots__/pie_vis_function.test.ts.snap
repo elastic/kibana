@@ -104,6 +104,7 @@ Object {
       "emptySizeRatio": 0.3,
       "isDonut": true,
       "labels": Object {
+        "colorOverrides": Object {},
         "last_level": false,
         "percentDecimals": 2,
         "position": "default",
@@ -244,6 +245,7 @@ Object {
       "emptySizeRatio": 0.3,
       "isDonut": false,
       "labels": Object {
+        "colorOverrides": Object {},
         "last_level": false,
         "percentDecimals": 2,
         "position": "default",

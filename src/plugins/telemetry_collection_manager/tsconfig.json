@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
     "isolatedModules": true
   },
   "include": [
@@ -11,7 +9,10 @@
     "common/*"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../../plugins/usage_collection/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/usage-collection-plugin"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

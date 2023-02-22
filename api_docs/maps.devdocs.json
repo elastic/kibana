@@ -471,13 +471,15 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.getDescription",
+            "id": "def-public.MapEmbeddable.getLayerList",
             "type": "Function",
             "tags": [],
-            "label": "getDescription",
+            "label": "getLayerList",
             "description": [],
             "signature": [
-              "() => string | undefined"
+              "() => ",
+              "ILayer",
+              "[]"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
@@ -4377,6 +4379,18 @@
         "type": "Enum",
         "tags": [],
         "label": "LABEL_BORDER_SIZES",
+        "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.LABEL_POSITIONS",
+        "type": "Enum",
+        "tags": [],
+        "label": "LABEL_POSITIONS",
         "description": [],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,

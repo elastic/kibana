@@ -57,7 +57,10 @@ export const AddDomainForm: React.FC = () => {
         >
           <EuiFlexGroup>
             <EuiFlexItem grow>
-              <EuiFormControlLayout clear={{ onClick: () => setAddDomainFormInputValue('') }}>
+              <EuiFormControlLayout
+                clear={{ onClick: () => setAddDomainFormInputValue('') }}
+                fullWidth
+              >
                 <EuiFieldText
                   autoFocus
                   value={addDomainFormInputValue}

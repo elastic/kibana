@@ -8,7 +8,7 @@
 
 import { SavedObjectsClient } from '@kbn/core/server';
 import { findActiveGuide } from './guide_state_utils';
-import { PluginState, PluginStatus } from '../../common/types';
+import type { PluginState, PluginStatus } from '../../common';
 import {
   pluginStateSavedObjectsId,
   pluginStateSavedObjectsType,
@@ -40,14 +40,7 @@ export const getPluginState = async (savedObjectsClient: SavedObjectsClient) => 
     return pluginState;
   } else {
     // create a SO to keep track of the correct creation date
-    try {
-      await updatePluginStatus(savedObjectsClient, 'not_started');
-      // @yulia, we need to add a user permissions
-      // check here instead of swallowing this error
-      // see issue: https://github.com/elastic/kibana/issues/145434
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
-
+    await updatePluginStatus(savedObjectsClient, 'not_started');
     return {
       status: 'not_started',
       isActivePeriod: true,

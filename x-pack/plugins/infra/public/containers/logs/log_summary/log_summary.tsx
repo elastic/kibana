@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { useState } from 'react';
-
-import { useCancellableEffect } from '../../../utils/cancellable_effect';
+import { useEffect } from 'react';
+import { exhaustMap, map, Observable } from 'rxjs';
+import { HttpHandler } from '@kbn/core-http-browser';
+import { useObservableState, useReplaySubject } from '../../../utils/use_observable';
 import { fetchLogSummary } from './api/fetch_log_summary';
-import { LogEntriesSummaryResponse } from '../../../../common/http_api';
+import { LogEntriesSummaryRequest, LogEntriesSummaryResponse } from '../../../../common/http_api';
 import { useBucketSize } from './bucket_size';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
@@ -22,32 +23,35 @@ export const useLogSummary = (
   filterQuery: string | null
 ) => {
   const { services } = useKibanaContextForPlugin();
-  const [logSummaryBuckets, setLogSummaryBuckets] = useState<LogSummaryBuckets>([]);
   const bucketSize = useBucketSize(startTimestamp, endTimestamp);
 
-  useCancellableEffect(
-    (getIsCancelled) => {
-      if (startTimestamp === null || endTimestamp === null || bucketSize === null) {
-        return;
-      }
+  const [logSummaryBuckets$, pushLogSummaryBucketsArgs] = useReplaySubject(fetchLogSummary$);
+  const { latestValue: logSummaryBuckets } = useObservableState(logSummaryBuckets$, NO_BUCKETS);
 
-      fetchLogSummary(
-        {
-          sourceId,
-          startTimestamp,
-          endTimestamp,
-          bucketSize,
-          query: filterQuery,
-        },
-        services.http.fetch
-      ).then((response) => {
-        if (!getIsCancelled()) {
-          setLogSummaryBuckets(response.data.buckets);
-        }
-      });
-    },
-    [sourceId, filterQuery, startTimestamp, endTimestamp, bucketSize]
-  );
+  useEffect(() => {
+    if (startTimestamp === null || endTimestamp === null || bucketSize === null) {
+      return;
+    }
+
+    pushLogSummaryBucketsArgs([
+      {
+        sourceId,
+        startTimestamp,
+        endTimestamp,
+        bucketSize,
+        query: filterQuery,
+      },
+      services.http.fetch,
+    ]);
+  }, [
+    bucketSize,
+    endTimestamp,
+    filterQuery,
+    pushLogSummaryBucketsArgs,
+    services.http.fetch,
+    sourceId,
+    startTimestamp,
+  ]);
 
   return {
     buckets: logSummaryBuckets,
@@ -55,3 +59,15 @@ export const useLogSummary = (
     end: endTimestamp,
   };
 };
+
+const NO_BUCKETS: LogSummaryBuckets = [];
+
+type FetchLogSummaryArgs = [args: LogEntriesSummaryRequest, fetch: HttpHandler];
+
+const fetchLogSummary$ = (
+  fetchArguments$: Observable<FetchLogSummaryArgs>
+): Observable<LogSummaryBuckets> =>
+  fetchArguments$.pipe(
+    exhaustMap(([args, fetch]) => fetchLogSummary(args, fetch)),
+    map(({ data: { buckets } }) => buckets)
+  );

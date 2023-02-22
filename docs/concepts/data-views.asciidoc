@@ -2,8 +2,6 @@
 === Create a {data-source}
 
 {kib} requires a {data-source} to access the {es} data that you want to explore.
-A {data-source} selects the data to use and allows you to define properties of the fields.
-
 A {data-source} can point to one or more indices, {ref}/data-streams.html[data streams], or {ref}/alias.html[index aliases].
 For example, a {data-source} can point to your log data from yesterday,
 or all indices that contain your data.
@@ -19,7 +17,7 @@ or all indices that contain your data.
 `view_index_metadata`.
 
 * If a read-only indicator appears in {kib}, you have insufficient privileges
-to create or save {data-sources}. The buttons to create {data-sources} or
+to create or save {data-sources}. In addition, the buttons to create {data-sources} or
 save existing {data-sources} are not visible. For more information,
 refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
@@ -32,51 +30,67 @@ uploaded a file, or added sample data,
 you get a {data-source} for free, and can start exploring your data.
 If you loaded your own data, follow these steps to create a {data-source}.
 
-. Open the main menu, then click *Stack Management > Data Views*.
+. Open *Lens* or *Discover*, and then open the data view menu.
++
+[role="screenshot"]
+image::images/discover-data-view.png[How to set the {data-source} in Discover, width="40%"]
 
-. Click *Create {data-source}*.
+. Click *Create a {data-source}*.
 
-. Start typing in the *name* field, and {kib} looks for the names of
+. Give your {data-source} a name.
+
+. Start typing in the *Index pattern* field, and {kib} looks for the names of
 indices, data streams, and aliases that match your input.
 +
 [role="screenshot"]
 image:management/index-patterns/images/create-data-view.png["Create data view"]
 +
-** To match multiple sources, use a wildcard (*). For example, `filebeat-*` matches
+** To match multiple sources, use a wildcard (*). `filebeat-*` matches
 `filebeat-apache-a`, `filebeat-apache-b`, and so on.
 +
 ** To match multiple single sources, enter their names,
 separated by a comma.  Do not include a space after the comma.
-`filebeat-a,filebeat-b` matches two indices, but does not match `filebeat-c`.
+`filebeat-a,filebeat-b` matches two indices.
 +
 ** To exclude a source, use a minus sign (-), for example, `-test3`.
 
-. If {kib} detects an index with a timestamp, expand the *Timestamp field* menu,
+. Open the *Timestamp field* dropdown,
 and then select the default field for filtering your data by time.
-+
-** If your index doesn’t have time-based data, choose *I don’t want to use the time filter*.
 +
 ** If you don’t set a default time field, you can't use
 global time filters on your dashboards. This is useful if
 you have multiple time fields and want to create dashboards that combine visualizations
 based on different timestamps.
-
-. To display all indices, click *Show advanced settings*, then select *Allow hidden and system indices*.
-
-. To specify your own {data-source} name, click *Show advanced settings*, then enter the name in the *Custom {data-source} ID* field. For example, enter your {es} index alias name.
-
-. [[reload-fields]] To use this data in searches and visualizations that you intend to save, click *Save {data-source} to {kib}*.
-
-. To explore your data without creating a {data-source}, click *Use without saving*.
 +
-This allows you to explore your data in *Discover*, *Lens*, and *Maps*
-without making it visible to others in your space. You can save the {data-source} later
-if you create a search or visualization that you want to share.
+** If your index doesn’t have time-based data, choose *I don’t want to use the time filter*.
 
+. Click *Show advanced settings* to:
+** Display hidden and system indices.
+** Specify your own {data-source} name. For example, enter your {es} index alias name.
+
+. [[reload-fields]] Click *Save {data-source} to {kib}*.
++
+You can manage your data view from *Stack Management*.
+
+[float]
+==== Create a temporary {data-source}
+
+Want to explore your data or create a visualization without saving it as a data view?
+Select *Use without saving* in the *Create {data-source}* form in *Discover*
+or *Lens*. With a temporary {data-source}, you can add fields and create an {es}
+query alert, just like you would a regular {data-source}.  Your work won't be visible to others in your space.
+
+A temporary {data-source} remains in your space until you change apps, or until you save it.
+
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte3a4f3994c44c0cc/637eb0c95834861044c21a25/ad-hoc-data-view.gif[how to create an ad-hoc data view]
+
+NOTE: Temporary {data-sources} are not available in *Stack Management.*
 
 [float]
 [[rollup-data-view]]
-==== Create a data view for rolled up data
+==== Use {data-sources} with rolled up data
 
 A {data-source} can match one rollup index.  For a combination rollup
 {data-source} with both raw and rolled up data, use the standard notation:
@@ -88,11 +102,11 @@ For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up d
 
 [float]
 [[management-cross-cluster-search]]
-==== Create a data view that searches across clusters
+==== Use {data-sources} with {ccs}
 
 If your {es} clusters are configured for {ref}/modules-cross-cluster-search.html[{ccs}],
 you can create a {data-source} to search across the clusters of your choosing.
-You specify data streams, indices, and aliases in a remote cluster using the
+Specify data streams, indices, and aliases in a remote cluster using the
 following syntax:
 
 ```ts
@@ -139,14 +153,14 @@ aggregations using that {data-source} in {kib} take advantage of {ccs}.
 
 [float]
 [[delete-data-view]]
-=== Delete {data-sources}
+=== Delete a {data-source}
 
 When you delete a {data-source}, you cannot recover the associated field formatters, runtime fields, source filters,
 and field popularity data. Deleting a {data-source} does not remove any indices or data documents from {es}.
 
 WARNING: Deleting a {data-source} breaks all visualizations, saved searches, and other saved objects that reference the data view.
 
-. Open the main menu, then click *Stack Management > Data Views*.
+. Open the main menu, and then click *Stack Management > Data Views*.
 
 . Find the {data-source} that you want to delete, and then
 click image:management/index-patterns/images/delete.png[Delete icon] in the *Actions* column.

@@ -75,17 +75,15 @@ export function GroupDetails({
     <>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h1>
-            {isEdit
-              ? i18n.translate(
-                  'xpack.apm.serviceGroups.groupDetailsForm.edit.title',
-                  { defaultMessage: 'Edit group' }
-                )
-              : i18n.translate(
-                  'xpack.apm.serviceGroups.groupDetailsForm.create.title',
-                  { defaultMessage: 'Create group' }
-                )}
-          </h1>
+          {isEdit
+            ? i18n.translate(
+                'xpack.apm.serviceGroups.groupDetailsForm.edit.title',
+                { defaultMessage: 'Edit group' }
+              )
+            : i18n.translate(
+                'xpack.apm.serviceGroups.groupDetailsForm.create.title',
+                { defaultMessage: 'Create group' }
+              )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
@@ -101,6 +99,7 @@ export function GroupDetails({
                   isInvalid={isInvalidName}
                 >
                   <EuiFieldText
+                    data-test-subj="apmGroupNameInput"
                     value={name}
                     onChange={(e) => {
                       setName(e.target.value);
@@ -172,6 +171,7 @@ export function GroupDetails({
                 }}
                 color="danger"
                 isDisabled={isLoading}
+                data-test-subj="apmDeleteGroupButton"
               >
                 {i18n.translate(
                   'xpack.apm.serviceGroups.groupDetailsForm.deleteGroup',

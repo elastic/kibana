@@ -43,7 +43,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
       refreshCases();
     }, [deselectCases, refreshCases]);
 
-    const { panels, modals } = useBulkActions({
+    const { panels, modals, flyouts } = useBulkActions({
       selectedCases,
       onAction: closePopover,
       onActionSuccess: onRefresh,
@@ -135,6 +135,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
           </EuiFlexItem>
         </EuiFlexGroup>
         {modals}
+        {flyouts}
       </>
     );
   }

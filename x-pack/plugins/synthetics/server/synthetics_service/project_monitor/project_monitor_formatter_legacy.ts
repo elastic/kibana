@@ -135,6 +135,7 @@ export class ProjectMonitorFormatterLegacy {
       const normM = await this.validateProjectMonitor({
         monitor,
       });
+
       if (normM) {
         if (previousMonitor) {
           this.updatedMonitors.push(monitor.id);

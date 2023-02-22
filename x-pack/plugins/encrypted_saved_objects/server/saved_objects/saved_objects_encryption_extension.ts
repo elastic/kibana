@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   EncryptedObjectDescriptor,
   ISavedObjectsEncryptionExtension,
   ISavedObjectTypeRegistry,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 

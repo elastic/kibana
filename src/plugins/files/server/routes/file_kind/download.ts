@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { Readable } from 'stream';
-
+import type { FilesClient } from '../../../common/files_client';
 import type { FileKind } from '../../../common/types';
 import { fileNameWithExt } from '../common_schemas';
 import { fileErrors } from '../../file';
@@ -26,7 +26,7 @@ const rt = {
   }),
 };
 
-export type Endpoint = CreateRouteDefinition<typeof rt, any>;
+export type Endpoint = CreateRouteDefinition<typeof rt, any, FilesClient['download']>;
 
 type Response = Readable;
 

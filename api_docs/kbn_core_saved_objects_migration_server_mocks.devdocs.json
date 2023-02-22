@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-        "id": "def-server.createSavedObjectsMigrationLoggerMock",
+        "id": "def-common.createSavedObjectsMigrationLoggerMock",
         "type": "Function",
         "tags": [],
         "label": "createSavedObjectsMigrationLoggerMock",
@@ -22,9 +30,9 @@
           "() => jest.Mocked<",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsMigrationLogger",
+            "section": "def-common.SavedObjectsMigrationLogger",
             "text": "SavedObjectsMigrationLogger"
           },
           ">"
@@ -38,7 +46,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-        "id": "def-server.retryAsync",
+        "id": "def-common.retryAsync",
         "type": "Function",
         "tags": [],
         "label": "retryAsync",
@@ -52,7 +60,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-            "id": "def-server.retryAsync.$1",
+            "id": "def-common.retryAsync.$1",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -67,7 +75,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-            "id": "def-server.retryAsync.$2",
+            "id": "def-common.retryAsync.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -78,7 +86,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-                "id": "def-server.retryAsync.$2.retryAttempts",
+                "id": "def-common.retryAsync.$2.retryAttempts",
                 "type": "number",
                 "tags": [],
                 "label": "retryAttempts",
@@ -89,7 +97,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-                "id": "def-server.retryAsync.$2.retryDelayMs",
+                "id": "def-common.retryAsync.$2.retryDelayMs",
                 "type": "number",
                 "tags": [],
                 "label": "retryDelayMs",
@@ -111,7 +119,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-        "id": "def-server.migrationMocks",
+        "id": "def-common.migrationMocks",
         "type": "Object",
         "tags": [],
         "label": "migrationMocks",
@@ -122,7 +130,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-            "id": "def-server.migrationMocks.createContext",
+            "id": "def-common.migrationMocks.createContext",
             "type": "Function",
             "tags": [],
             "label": "createContext",
@@ -131,9 +139,9 @@
               "({ migrationVersion, convertToMultiNamespaceTypeVersion, isSingleNamespaceType, }?: { migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; }) => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectMigrationContext",
+                "section": "def-common.SavedObjectMigrationContext",
                 "text": "SavedObjectMigrationContext"
               },
               ">"
@@ -145,7 +153,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-                "id": "def-server.migrationMocks.createContext.$1",
+                "id": "def-common.migrationMocks.createContext.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -164,7 +172,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-        "id": "def-server.mockKibanaMigrator",
+        "id": "def-common.mockKibanaMigrator",
         "type": "Object",
         "tags": [],
         "label": "mockKibanaMigrator",
@@ -175,7 +183,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-            "id": "def-server.mockKibanaMigrator.create",
+            "id": "def-common.mockKibanaMigrator.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -184,9 +192,9 @@
               "({ types, }?: { types: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsType",
+                "section": "def-common.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
               "<any>[]; }) => jest.Mocked<",
@@ -200,7 +208,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-                "id": "def-server.mockKibanaMigrator.create.$1",
+                "id": "def-common.mockKibanaMigrator.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -209,9 +217,9 @@
                   "{ types: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.SavedObjectsType",
+                    "section": "def-common.SavedObjectsType",
                     "text": "SavedObjectsType"
                   },
                   "<any>[]; }"
@@ -226,13 +234,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

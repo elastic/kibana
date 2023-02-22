@@ -104,6 +104,14 @@ export const POLICY_ARTIFACT_TRUSTED_APPS_LABELS = Object.freeze({
       defaultMessage: 'Manage trusted applications',
     }
   ),
+  emptyUnassignedNoPrivilegesMessage: (policyName: string): string =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.policy.trustedApps.empty.unassigned.noPrivileges.content',
+      {
+        defaultMessage: 'There are currently no trusted applications assigned to {policyName}.',
+        values: { policyName },
+      }
+    ),
   emptyUnexistingTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.trustedApps.empty.unexisting.title',
     { defaultMessage: 'No trusted applications exist' }

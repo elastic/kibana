@@ -60,7 +60,6 @@ describe('ObservabilityActions component', () => {
       },
       data: inventoryThresholdAlert as unknown as TimelineNonEcsData[],
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      setEventsDeleted: jest.fn(),
       setFlyoutAlert: jest.fn(),
       id: pageId,
     };

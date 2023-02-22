@@ -35,7 +35,7 @@ export const MonitorListTabs = ({
 
   const history = useHistory();
 
-  const { type: viewType } = useParams<{ type: 'all' | 'invalid' }>();
+  const { type: viewType = 'all' } = useParams<{ type: 'all' | 'invalid' }>();
 
   useEffect(() => {
     setSelectedTabId(viewType);
@@ -52,7 +52,7 @@ export const MonitorListTabs = ({
       id: 'all',
       name: ALL_MONITORS_LABEL,
       content: <Fragment />,
-      href: history.createHref({ pathname: '/manage-monitors/all' }),
+      href: history.createHref({ pathname: '/manage-monitors' }),
       disabled: false,
     },
     {

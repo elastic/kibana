@@ -8,7 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -29,7 +29,6 @@ import type { Writable } from '@kbn/utility-types';
 
 // @ts-ignore
 import { SeriesEditor } from '../series_editor';
-// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { ColorRules } from '../color_rules';
@@ -56,7 +55,7 @@ export class GaugePanelConfig extends Component<
     const { model } = this.props;
     const parts: Writable<Partial<TimeseriesVisParams>> = {};
     if (!model.gauge_color_rules || !model.gauge_color_rules.length) {
-      parts.gauge_color_rules = [{ id: uuid.v1() }];
+      parts.gauge_color_rules = [{ id: uuidv1() }];
     }
     if (model.gauge_width == null) parts.gauge_width = 10;
     if (model.gauge_inner_width == null) parts.gauge_inner_width = 10;

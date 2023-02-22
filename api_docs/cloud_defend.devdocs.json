@@ -1,0 +1,55 @@
+{
+  "id": "cloudDefend",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "cloudDefend",
+      "id": "def-public.CloudDefendPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CloudDefendPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/cloud_defend/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "cloudDefend",
+      "id": "def-public.CloudDefendPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "CloudDefendPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/cloud_defend/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -29,7 +29,9 @@ export type {
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
   GetSummarizedAlertsFnOpts,
+  ExecutorType,
 } from './types';
+export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 export type {
@@ -51,6 +53,10 @@ export {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
+export {
+  DEFAULT_ALERTS_ILM_POLICY,
+  DEFAULT_ALERTS_ILM_POLICY_NAME,
+} from './alerts_service/default_lifecycle_policy';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 

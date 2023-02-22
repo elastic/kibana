@@ -20,9 +20,14 @@ import { EuiButtonTo } from '../react_router_helpers';
 interface Props {
   productSupportUrl: string;
   backToLink?: string;
+  backToContent?: React.ReactNode;
 }
 
-export const NotFoundPrompt: React.FC<Props> = ({ productSupportUrl, backToLink = '/' }) => {
+export const NotFoundPrompt: React.FC<Props> = ({
+  productSupportUrl,
+  backToLink = '/',
+  backToContent,
+}) => {
   const { hasGoldLicense } = useValues(LicensingLogic);
   const supportUrl = hasGoldLicense ? LICENSED_SUPPORT_URL : productSupportUrl;
 
@@ -47,9 +52,10 @@ export const NotFoundPrompt: React.FC<Props> = ({ productSupportUrl, backToLink 
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiButtonTo to={backToLink} fill>
-              {i18n.translate('xpack.enterpriseSearch.notFound.action1', {
-                defaultMessage: 'Back to your dashboard',
-              })}
+              {backToContent ??
+                i18n.translate('xpack.enterpriseSearch.notFound.action1', {
+                  defaultMessage: 'Back to your dashboard',
+                })}
             </EuiButtonTo>
           </EuiFlexItem>
           <EuiFlexItem>

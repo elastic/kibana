@@ -37,6 +37,7 @@ import { NameField } from './name_field';
 import { DescriptionField } from './description_field';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 import { PackTypeSelectable } from './shards/pack_type_selectable';
+import { overflowCss } from '../utils';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
 
@@ -80,7 +81,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   });
 
   const deserializer = (payload: PackItem) => {
-    const defaultPolicyIds = filter(payload.policy_ids, (policyId) => !payload.shards?.[policyId]);
+    const defaultPolicyIds = filter(
+      payload.policy_ids,
+      (policyId) => payload.shards?.[policyId] == null
+    );
 
     return {
       ...payload,
@@ -259,14 +263,14 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         {packType === 'policy' && (
           <>
             <EuiFlexGroup>
-              <EuiFlexItem>
+              <EuiFlexItem css={overflowCss}>
                 <PolicyIdComboBoxField options={availableOptions} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
 
             <EuiFlexGroup>
-              <EuiFlexItem>
+              <EuiFlexItem css={overflowCss}>
                 <StyledEuiAccordion
                   id="shardsToggle"
                   forceState={shardsToggleState}

@@ -52,14 +52,14 @@ export function useAlertSearchBarStateContainer(urlStorageKey: string) {
   );
 
   return {
-    rangeFrom,
-    setRangeFrom,
-    rangeTo,
-    setRangeTo,
     kuery,
-    setKuery,
+    onKueryChange: setKuery,
+    onRangeFromChange: setRangeFrom,
+    onRangeToChange: setRangeTo,
+    onStatusChange: setStatus,
+    rangeFrom,
+    rangeTo,
     status,
-    setStatus,
   };
 }
 

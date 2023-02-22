@@ -7,7 +7,6 @@
  */
 
 import { Observable } from 'rxjs';
-import { get } from 'lodash';
 
 import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
@@ -16,10 +15,10 @@ import { SearchRequest } from '@kbn/data-plugin/common';
 import { schema } from '@kbn/config-schema';
 
 import { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';
-import {
-  getSuggestionAggregationBuilder,
-  getValidationAggregationBuilder,
-} from './options_list_queries';
+import { getValidationAggregationBuilder } from './options_list_validation_queries';
+import { getExpensiveSuggestionAggregationBuilder } from './options_list_expensive_suggestion_queries';
+import { getCheapSuggestionAggregationBuilder } from './options_list_cheap_suggestion_queries';
+import { OptionsListSuggestionAggregationBuilder } from './types';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,
@@ -39,9 +38,12 @@ export const setupOptionsListSuggestionsRoute = (
         ),
         body: schema.object(
           {
+            size: schema.number(),
             fieldName: schema.string(),
+            sort: schema.maybe(schema.any()),
             filters: schema.maybe(schema.any()),
             fieldSpec: schema.maybe(schema.any()),
+            allowExpensiveQueries: schema.boolean(),
             searchString: schema.maybe(schema.string()),
             selectedOptions: schema.maybe(schema.arrayOf(schema.string())),
           },
@@ -54,6 +56,7 @@ export const setupOptionsListSuggestionsRoute = (
         const suggestionRequest: OptionsListRequestBody = request.body;
         const { index } = request.params;
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
         const suggestionsResponse = await getOptionsListSuggestions({
           abortedEvent$: request.events.aborted$,
           request: suggestionRequest,
@@ -85,21 +88,21 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, fieldName, runtimeFieldMap } = request;
+    const { runPastTimeout, filters, runtimeFieldMap, allowExpensiveQueries } = request;
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
       : { timeout: `${timeout}ms`, terminate_after: terminateAfter };
 
-    const suggestionBuilder = getSuggestionAggregationBuilder(request);
+    let suggestionBuilder: OptionsListSuggestionAggregationBuilder;
+    if (allowExpensiveQueries) {
+      suggestionBuilder = getExpensiveSuggestionAggregationBuilder(request);
+    } else {
+      suggestionBuilder = getCheapSuggestionAggregationBuilder(request);
+    }
     const validationBuilder = getValidationAggregationBuilder();
 
-    const builtSuggestionAggregation = suggestionBuilder.buildAggregation(request);
-    const suggestionAggregation = builtSuggestionAggregation
-      ? {
-          suggestions: builtSuggestionAggregation,
-        }
-      : {};
+    const suggestionAggregation: any = suggestionBuilder.buildAggregation(request) ?? {};
     const builtValidationAggregation = validationBuilder.buildAggregation(request);
     const validationAggregations = builtValidationAggregation
       ? {
@@ -117,17 +120,11 @@ export const setupOptionsListSuggestionsRoute = (
       aggs: {
         ...suggestionAggregation,
         ...validationAggregations,
-        unique_terms: {
-          cardinality: {
-            field: fieldName,
-          },
-        },
       },
       runtime_mappings: {
         ...runtimeFieldMap,
       },
     };
-
     /**
      * Run ES query
      */
@@ -136,11 +133,11 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Parse ES response into Options List Response
      */
-    const totalCardinality = get(rawEsResult, 'aggregations.unique_terms.value');
-    const suggestions = suggestionBuilder.parse(rawEsResult);
+    const results = suggestionBuilder.parse(rawEsResult, request);
+    const totalCardinality = results.totalCardinality;
     const invalidSelections = validationBuilder.parse(rawEsResult);
     return {
-      suggestions,
+      suggestions: results.suggestions,
       totalCardinality,
       invalidSelections,
     };

@@ -15,12 +15,17 @@ import * as i18n from './translations';
  * @param id desired Rule ID's (not rule_id)
  *
  */
-export const useRule = (id: string) => {
+export const useRule = (id: string, showToast = true) => {
   const { addError } = useAppToasts();
 
-  return useFetchRuleByIdQuery(id, {
-    onError: (error) => {
-      addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
-    },
-  });
+  return useFetchRuleByIdQuery(
+    id,
+    showToast
+      ? {
+          onError: (error) => {
+            addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
+          },
+        }
+      : undefined
+  );
 };

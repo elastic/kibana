@@ -107,7 +107,7 @@ export function getOperationParams(
   }, {});
 }
 
-function getTypeI18n(type: string) {
+export function getTypeI18n(type: string) {
   if (type === 'number') {
     return i18n.translate('xpack.lens.formula.number', { defaultMessage: 'number' });
   }

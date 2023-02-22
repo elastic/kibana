@@ -7,9 +7,8 @@
 
 import React, { FormEvent } from 'react';
 import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { DiscoverSetup } from '@kbn/discover-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
-import { getHref, isCompatible } from './open_in_discover_helpers';
+import { DiscoverAppLocator, getHref, isCompatible } from './open_in_discover_helpers';
 import { mount } from 'enzyme';
 import { Filter } from '@kbn/es-query';
 import {
@@ -35,7 +34,7 @@ describe('open in discover drilldown', () => {
 
   beforeEach(() => {
     drilldown = new OpenInDiscoverDrilldown({
-      discover: {} as DiscoverSetup,
+      locator: () => ({} as DiscoverAppLocator),
       dataViews: () => ({} as DataViewsService),
       hasDiscoverAccess: () => true,
       application: () => ({} as ApplicationStart),

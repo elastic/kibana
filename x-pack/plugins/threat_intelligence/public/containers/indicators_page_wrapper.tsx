@@ -13,20 +13,12 @@ import { IntegrationsGuard } from './integrations_guard/integrations_guard';
 import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugin_template_wrapper';
 import { useKibana } from '../hooks';
 
-// export const APP_ID = 'threatIntdelligence';
 export const APP_ID = 'securitySolution';
 
 export const IndicatorsPageWrapper: VFC = () => {
   const { cases } = useKibana().services;
   const CasesContext = cases.ui.getCasesContext();
-  const permissions: CasesPermissions = {
-    all: true,
-    create: true,
-    read: true,
-    update: true,
-    delete: true,
-    push: true,
-  };
+  const permissions: CasesPermissions = cases.helpers.canUseCases();
 
   const queryClient = new QueryClient();
 

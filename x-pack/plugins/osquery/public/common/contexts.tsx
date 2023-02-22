@@ -6,10 +6,6 @@
  */
 
 import React from 'react';
+import type { Ecs } from '../../common/ecs';
 
-export interface AlertEcsData {
-  _id: string;
-  _index?: string;
-}
-
-export const AlertAttachmentContext = React.createContext<AlertEcsData | null>(null);
+export const AlertAttachmentContext = React.createContext<Ecs | null>(null);

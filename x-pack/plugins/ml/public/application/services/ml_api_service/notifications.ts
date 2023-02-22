@@ -6,7 +6,7 @@
  */
 
 import { omitBy } from 'lodash';
-import { isDefined } from '../../../../common/types/guards';
+import { isDefined } from '@kbn/ml-is-defined';
 import type {
   NotificationsQueryParams,
   NotificationsSearchResponse,

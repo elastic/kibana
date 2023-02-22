@@ -24,12 +24,13 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   //
   // const NEW_SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
   // const NEW_SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
+  before(() => {
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
+  });
+
   beforeEach(() => {
     login(ROLES.t2_analyst);
     navigateTo('/app/osquery');
-  });
-  before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
   });
 
   after(() => {
@@ -100,6 +101,7 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
       });
     });
   });
+
   it('to click the edit button and edit pack', () => {
     navigateTo('/app/osquery/saved_queries');
     cy.getBySel('pagination-button-next').click();
@@ -109,9 +111,11 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
-    cy.get('[data-test-subj="ECSMappingEditorForm"]').within(() => {
-      cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
-    });
+    cy.get('[data-test-subj="ECSMappingEditorForm"]')
+      .first()
+      .within(() => {
+        cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
+      });
     cy.react('EuiButton').contains('Update query').click();
     cy.wait(5000);
 

@@ -11,7 +11,7 @@ import { isEmpty } from 'lodash';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { MLSingleMetricLink } from '../../links/machine_learning_links/mlsingle_metric_link';
 
 interface Props {
@@ -36,7 +36,10 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
 
   const {
     query: { kuery },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   if (!hasValidMlLicense || !mlJobId) {
     return null;

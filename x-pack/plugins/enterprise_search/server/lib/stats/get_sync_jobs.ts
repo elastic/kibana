@@ -45,7 +45,7 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
     },
   });
 
-  const longRunningProgressJobsCountResponse = await client.asCurrentUser.count({
+  const idleJobsCountResponse = await client.asCurrentUser.count({
     index: CONNECTORS_JOBS_INDEX,
     query: {
       bool: {
@@ -57,8 +57,8 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
           },
           {
             range: {
-              started_at: {
-                lt: moment().subtract(1, 'day').toISOString(),
+              last_seen: {
+                lt: moment().subtract(1, 'minute').toISOString(),
               },
             },
           },
@@ -127,9 +127,9 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
   const response = {
     connected: connectedResponse.count,
     errors: errorResponse.count,
+    idle: idleJobsCountResponse.count,
     in_progress: inProgressJobsCountResponse.count,
     incomplete: incompleteResponse.count,
-    long_running: longRunningProgressJobsCountResponse.count,
     orphaned_jobs: orphanedJobsCountResponse.count,
   };
 

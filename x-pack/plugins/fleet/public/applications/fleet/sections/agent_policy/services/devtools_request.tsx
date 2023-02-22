@@ -105,7 +105,12 @@ function formatVars(vars: NewPackagePolicy['inputs'][number]['vars']) {
   }
 
   return Object.entries(vars).reduce((acc, [varKey, varRecord]) => {
-    acc[varKey] = varRecord?.value;
+    // the data_stream.dataset var uses an internal format before we send it
+    if (varKey === 'data_stream.dataset' && varRecord?.value?.dataset) {
+      acc[varKey] = varRecord?.value.dataset;
+    } else {
+      acc[varKey] = varRecord?.value;
+    }
 
     return acc;
   }, {} as SimplifiedVars);

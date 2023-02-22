@@ -48,7 +48,12 @@ import { AddToCaseWrapper } from '../cases/add_to_cases';
 const DataContext = createContext<ResultEdges>([]);
 
 const StyledEuiDataGrid = styled(EuiDataGrid)`
-  max-height: 500px;
+  :not(.euiDataGrid--fullScreen) {
+    .euiDataGrid__virtualized {
+      height: 100% !important;
+      max-height: 500px;
+    }
+  }
 `;
 
 export interface ResultsTableComponentProps {
@@ -59,6 +64,7 @@ export interface ResultsTableComponentProps {
   endDate?: string;
   startDate?: string;
   liveQueryActionId?: string;
+  error?: string;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -68,6 +74,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   startDate,
   endDate,
   liveQueryActionId,
+  error,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -365,7 +372,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   useEffect(
     () =>
       setIsLive(() => {
-        if (!agentIds?.length || expired) return false;
+        if (!agentIds?.length || expired || error) return false;
 
         return !!(
           aggregations.totalResponded !== agentIds?.length ||
@@ -379,6 +386,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       aggregations?.totalRowCount,
       allResultsData?.edges.length,
       allResultsData?.total,
+      error,
       expired,
     ]
   );

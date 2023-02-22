@@ -12,7 +12,7 @@ import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 /**
  * The sub action connector is defined here
- * x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/sub_action_connector.ts
+ * x-pack/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts
  */
 const createSubActionConnector = async ({
   supertest,

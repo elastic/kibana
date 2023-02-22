@@ -10,6 +10,7 @@ import { useValues } from 'kea';
 import { EuiBreadcrumb } from '@elastic/eui';
 
 import {
+  ENGINES_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
@@ -134,5 +135,11 @@ export const useEnterpriseSearchContentBreadcrumbs = (breadcrumbs: Breadcrumbs =
 export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEnterpriseSearchBreadcrumbs([
     { text: SEARCH_EXPERIENCES_PLUGIN.NAV_TITLE, path: '/' },
+    ...breadcrumbs,
+  ]);
+
+export const useEnterpriseSearchEnginesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([
+    { text: ENGINES_PLUGIN.NAV_TITLE, path: '/engines' },
     ...breadcrumbs,
   ]);

@@ -282,6 +282,7 @@ export const createMockPartitionVisParams = (): PartitionVisParams => {
       values: true,
       valuesFormat: ValueFormats.PERCENT,
       percentDecimals: 2,
+      colorOverrides: {},
     },
     legendPosition: 'right',
     nestedLegend: false,

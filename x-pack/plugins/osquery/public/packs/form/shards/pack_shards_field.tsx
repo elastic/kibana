@@ -9,6 +9,7 @@ import React, { useEffect, useMemo } from 'react';
 import type { InternalFieldErrors } from 'react-hook-form';
 import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, last, reject } from 'lodash';
@@ -111,7 +112,7 @@ const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
       <EuiSpacer size="s" />
 
       {fields.map((item, index, array) => (
-        <div key={item.id}>
+        <EuiFlexItem key={item.id}>
           <ShardsForm
             index={index}
             onDelete={remove}
@@ -120,7 +121,7 @@ const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
             options={options}
           />
           <EuiSpacer size="xs" />
-        </div>
+        </EuiFlexItem>
       ))}
     </>
   );

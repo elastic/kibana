@@ -19,8 +19,8 @@ import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 import { getOrEmptyTagFromValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
-import { Port } from '../../../../../network/components/port';
-import { PORT_NAMES } from '../../../../../network/components/port/helpers';
+import { Port } from '../../../../../explore/network/components/port';
+import { PORT_NAMES } from '../../../../../explore/network/components/port/helpers';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import {
   DATE_FIELD_TYPE,

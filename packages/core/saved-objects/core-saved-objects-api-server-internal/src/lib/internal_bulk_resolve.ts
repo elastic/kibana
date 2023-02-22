@@ -9,7 +9,6 @@
 import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsBulkResolveObject,
@@ -18,17 +17,14 @@ import type {
   SavedObjectsIncrementCounterOptions,
 } from '@kbn/core-saved-objects-api-server';
 import {
-  AuditAction,
   type ISavedObjectsEncryptionExtension,
   type ISavedObjectsSecurityExtension,
   type ISavedObjectTypeRegistry,
   type SavedObjectsRawDocSource,
-} from '@kbn/core-saved-objects-server';
-import {
+  type SavedObject,
+  type BulkResolveError,
   SavedObjectsErrorHelpers,
-  SavedObjectsUtils,
-  type DecoratedError,
-} from '@kbn/core-saved-objects-utils-server';
+} from '@kbn/core-saved-objects-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
   type LegacyUrlAlias,
@@ -83,25 +79,14 @@ export interface InternalBulkResolveParams {
  * @public
  */
 export interface InternalSavedObjectsBulkResolveResponse<T = unknown> {
-  resolved_objects: Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>;
-}
-
-/**
- * Error result for the internal bulkResolve function.
- *
- * @internal
- */
-export interface InternalBulkResolveError {
-  type: string;
-  id: string;
-  error: DecoratedError;
+  resolved_objects: Array<SavedObjectsResolveResponse<T> | BulkResolveError>;
 }
 
 /** Type guard used in the repository. */
 export function isBulkResolveError<T>(
-  result: SavedObjectsResolveResponse<T> | InternalBulkResolveError
-): result is InternalBulkResolveError {
-  return !!(result as InternalBulkResolveError).error;
+  result: SavedObjectsResolveResponse<T> | BulkResolveError
+): result is BulkResolveError {
+  return !!(result as BulkResolveError).error;
 }
 
 type AliasInfo = Pick<LegacyUrlAlias, 'targetId' | 'purpose'>;
@@ -201,9 +186,7 @@ export async function internalBulkResolve<T>(
   }
 
   // map function for pMap below
-  const mapper = async (
-    either: Either<InternalBulkResolveError, SavedObjectsBulkResolveObject>
-  ) => {
+  const mapper = async (either: Either<BulkResolveError, SavedObjectsBulkResolveObject>) => {
     if (isLeft(either)) {
       return either.value;
     }
@@ -271,96 +254,18 @@ export async function internalBulkResolve<T>(
     { refresh: false }
   ).catch(() => {}); // if the call fails for some reason, intentionally swallow the error
 
-  const redacted = await authorizeAuditAndRedact(resolvedObjects, securityExtension, namespace);
-  return { resolved_objects: redacted };
-}
+  if (!securityExtension) return { resolved_objects: resolvedObjects };
 
-/**
- * Checks authorization, writes audit events, and redacts namespaces from the bulkResolve response. In other SavedObjectsRepository
- * functions we do this before decrypting attributes. However, because of the bulkResolve logic involved in deciding between the exact match
- * or alias match, it's cleaner to do authorization, auditing, and redaction all afterwards.
- */
-async function authorizeAuditAndRedact<T>(
-  resolvedObjects: Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>,
-  securityExtension: ISavedObjectsSecurityExtension | undefined,
-  namespace: string | undefined
-) {
-  if (!securityExtension) {
-    return resolvedObjects;
-  }
-
-  const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-  const typesAndSpaces = new Map<string, Set<string>>();
-  const spacesToAuthorize = new Set<string>();
-  const auditableObjects: Array<{ type: string; id: string }> = [];
-
-  for (const result of resolvedObjects) {
-    let auditableObject: { type: string; id: string } | undefined;
-    if (isBulkResolveError(result)) {
-      const { type, id, error } = result;
-      if (!SavedObjectsErrorHelpers.isBadRequestError(error)) {
-        // Only "not found" errors should show up as audit events (not "unsupported type" errors)
-        auditableObject = { type, id };
-      }
-    } else {
-      const { type, id, namespaces = [] } = result.saved_object;
-      auditableObject = { type, id };
-      for (const space of namespaces) {
-        spacesToAuthorize.add(space);
-      }
-    }
-    if (auditableObject) {
-      auditableObjects.push(auditableObject);
-      const spacesToEnforce =
-        typesAndSpaces.get(auditableObject.type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
-      spacesToEnforce.add(namespaceString);
-      typesAndSpaces.set(auditableObject.type, spacesToEnforce);
-      spacesToAuthorize.add(namespaceString);
-    }
-  }
-
-  if (typesAndSpaces.size === 0) {
-    // We only had "unsupported type" errors, there are no types to check privileges for, just return early
-    return resolvedObjects;
-  }
-
-  const authorizationResult = await securityExtension.checkAuthorization({
-    types: new Set(typesAndSpaces.keys()),
-    spaces: spacesToAuthorize,
-    actions: new Set(['bulk_get']),
+  const redactedObjects = await securityExtension?.authorizeAndRedactInternalBulkResolve({
+    namespace,
+    objects: resolvedObjects,
   });
-  securityExtension.enforceAuthorization({
-    typesAndSpaces,
-    action: 'bulk_get',
-    typeMap: authorizationResult.typeMap,
-    auditCallback: (error) => {
-      for (const { type, id } of auditableObjects) {
-        securityExtension.addAuditEvent({
-          action: AuditAction.RESOLVE,
-          savedObject: { type, id },
-          error,
-        });
-      }
-    },
-  });
-
-  return resolvedObjects.map((result) => {
-    if (isBulkResolveError(result)) {
-      return result;
-    }
-    return {
-      ...result,
-      saved_object: securityExtension.redactNamespaces({
-        typeMap: authorizationResult.typeMap,
-        savedObject: result.saved_object,
-      }),
-    };
-  });
+  return { resolved_objects: redactedObjects };
 }
 
 /** Separates valid and invalid object types */
 function validateObjectTypes(objects: SavedObjectsBulkResolveObject[], allowedTypes: string[]) {
-  return objects.map<Either<InternalBulkResolveError, SavedObjectsBulkResolveObject>>((object) => {
+  return objects.map<Either<BulkResolveError, SavedObjectsBulkResolveObject>>((object) => {
     const { type, id } = object;
     if (!allowedTypes.includes(type)) {
       return {

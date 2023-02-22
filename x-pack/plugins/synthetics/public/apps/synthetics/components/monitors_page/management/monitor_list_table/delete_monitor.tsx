@@ -17,17 +17,17 @@ import { kibanaService } from '../../../../../../utils/kibana_service';
 import * as labels from './labels';
 
 export const DeleteMonitor = ({
-  configId,
   name,
   reloadPage,
+  configId,
   isProjectMonitor,
-  setIsDeleteModalVisible,
+  setMonitorPendingDeletion,
 }: {
   configId: string;
   name: string;
+  isProjectMonitor: boolean;
   reloadPage: () => void;
-  isProjectMonitor?: boolean;
-  setIsDeleteModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setMonitorPendingDeletion: (val: null) => void;
 }) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
@@ -37,7 +37,7 @@ export const DeleteMonitor = ({
 
   const { status: monitorDeleteStatus } = useFetcher(() => {
     if (isDeleting) {
-      return fetchDeleteMonitor({ id: configId });
+      return fetchDeleteMonitor({ configId });
     }
   }, [configId, isDeleting]);
 
@@ -78,9 +78,9 @@ export const DeleteMonitor = ({
       monitorDeleteStatus === FETCH_STATUS.FAILURE
     ) {
       setIsDeleting(false);
-      setIsDeleteModalVisible(false);
+      setMonitorPendingDeletion(null);
     }
-  }, [setIsDeleting, isDeleting, reloadPage, monitorDeleteStatus, setIsDeleteModalVisible, name]);
+  }, [setIsDeleting, isDeleting, reloadPage, monitorDeleteStatus, setMonitorPendingDeletion, name]);
 
   return (
     <EuiConfirmModal
@@ -88,7 +88,7 @@ export const DeleteMonitor = ({
         defaultMessage: 'Delete "{name}" monitor?',
         values: { name },
       })}
-      onCancel={() => setIsDeleteModalVisible(false)}
+      onCancel={() => setMonitorPendingDeletion(null)}
       onConfirm={handleConfirmDelete}
       cancelButtonText={labels.NO_LABEL}
       confirmButtonText={labels.YES_LABEL}

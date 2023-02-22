@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Props, UpdateConnector } from './update_connector';
 import { act } from 'react-dom/test-utils';
-import { render, act as reactAct } from '@testing-library/react';
+import { render, act as reactAct, waitFor } from '@testing-library/react';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
@@ -245,6 +245,9 @@ describe('UpdateConnector renders', () => {
       await userEvent.type(passwordInput, 'pass', { delay: 100 });
       userEvent.click(getByTestId('snUpdateInstallationSubmit'));
     });
+
+    // Wait for click event to be processed
+    await waitFor(() => expect(onConfirm).toHaveBeenCalled(), { timeout: 3000 });
 
     expect(onConfirm).toHaveBeenCalledWith({
       config: {

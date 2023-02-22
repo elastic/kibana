@@ -10,7 +10,6 @@ export { useMlKibana } from './kibana_context';
 export type { NavigateToPath } from './use_navigate_to_path';
 export { useNavigateToPath } from './use_navigate_to_path';
 export { useUiSettings } from './use_ui_settings_context';
-export { useTimefilter } from './use_timefilter';
 export { useNotifications } from './use_notifications_context';
 export { useMlLocator, useMlLink } from './use_create_url';
 export { useMlApiContext } from './use_ml_api_context';

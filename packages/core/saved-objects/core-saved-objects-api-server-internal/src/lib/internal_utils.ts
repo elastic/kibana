@@ -7,17 +7,14 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type {
-  ISavedObjectTypeRegistry,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-} from '@kbn/core-saved-objects-server';
 import {
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsRawDoc,
+  type SavedObjectsRawDocSource,
+  type SavedObject,
   SavedObjectsErrorHelpers,
-  SavedObjectsUtils,
-  ALL_NAMESPACES_STRING,
-} from '@kbn/core-saved-objects-utils-server';
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
   decodeRequestVersion,
   encodeHitVersion,

@@ -7,9 +7,8 @@
 
 import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
 import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
-import { ChromeStart, I18nStart, OverlayStart, SavedObjectsClientContract } from '@kbn/core/public';
+import { ChromeStart, OverlayStart, SavedObjectsClientContract } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
-import { ReactElement } from 'react';
 import {
   fieldsReducer,
   FieldsState,
@@ -48,12 +47,10 @@ export interface GraphStoreDependencies {
   http: CoreStart['http'];
   overlays: OverlayStart;
   savedObjectsClient: SavedObjectsClientContract;
-  showSaveModal: (el: ReactElement, I18nContext: I18nStart['Context']) => void;
   savePolicy: GraphSavePolicy;
   changeUrl: (newUrl: string) => void;
   notifyReact: () => void;
   chrome: ChromeStart;
-  I18nContext: I18nStart['Context'];
   basePath: string;
   handleSearchQueryError: (err: Error | string) => void;
 }

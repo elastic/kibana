@@ -13,6 +13,8 @@ get:
                 $ref: ../components/schemas/fleet_server_host.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-one-fleet-server-hosts
 parameters:
   - schema:
@@ -35,12 +37,9 @@ delete:
                 type: string
             required:
               - id
+    '400':
+      $ref: ../components/responses/error.yaml
   parameters:
-    - schema:
-        type: string
-      name: itemId
-      in: path
-      required: true
     - $ref: ../components/headers/kbn_xsrf.yaml
 put:
   summary: Fleet Server Hosts - Update
@@ -71,10 +70,7 @@ put:
                 $ref: ../components/schemas/fleet_server_host.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   parameters:
-    - schema:
-        type: string
-      name: itemId
-      in: path
-      required: true
     - $ref: ../components/headers/kbn_xsrf.yaml

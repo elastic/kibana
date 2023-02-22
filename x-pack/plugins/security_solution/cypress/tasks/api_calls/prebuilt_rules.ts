@@ -31,6 +31,6 @@ export const waitTillPrebuiltRulesReadyToInstall = () => {
         return availablePrebuiltRulesCount > 0;
       });
     },
-    { interval: 100, timeout: 60000 }
+    { interval: 2000, timeout: 60000 }
   );
 };

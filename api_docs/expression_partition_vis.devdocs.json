@@ -143,9 +143,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"
@@ -272,9 +272,9 @@
               "<{}, ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               "> | undefined; }"
@@ -474,6 +474,20 @@
           },
           {
             "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.LabelsParams.colorOverrides",
+            "type": "Object",
+            "tags": [],
+            "label": "colorOverrides",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
             "id": "def-common.LabelsParams.truncate",
             "type": "CompoundType",
             "tags": [
@@ -542,7 +556,7 @@
             "section": "def-common.MosaicVisConfig",
             "text": "MosaicVisConfig"
           },
-          " extends Omit<VisCommonConfig, \"metrics\" | \"metricsToLabels\">"
+          " extends Omit<VisCommonConfig, \"metrics\" | \"metricsToLabels\" | \"colorOverrides\">"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
@@ -1078,7 +1092,7 @@
             "section": "def-common.ValueFormats",
             "text": "ValueFormats"
           },
-          "; percentDecimals: number; truncate?: number | null | undefined; last_level?: boolean | undefined; }"
+          "; percentDecimals: number; colorOverrides: Record<string, string>; truncate?: number | null | undefined; last_level?: boolean | undefined; }"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
         "deprecated": false,
@@ -1160,9 +1174,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"
@@ -1254,9 +1268,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"
@@ -1341,9 +1355,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"
@@ -1458,9 +1472,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"
@@ -1545,9 +1559,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"

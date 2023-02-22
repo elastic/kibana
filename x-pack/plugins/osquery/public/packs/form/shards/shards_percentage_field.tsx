@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useController } from 'react-hook-form';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRange } from '@elastic/eui';
+import type { EuiRangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ShardsFormReturn } from './shards_form';
 
@@ -32,8 +33,8 @@ const ShardsPercentageFieldComponent = ({
     defaultValue: 100,
   });
 
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleChange: EuiRangeProps['onChange'] = useCallback(
+    (e) => {
       const numberValue = (e.target as { valueAsNumber: number }).valueAsNumber
         ? (e.target as { valueAsNumber: number }).valueAsNumber
         : 0;

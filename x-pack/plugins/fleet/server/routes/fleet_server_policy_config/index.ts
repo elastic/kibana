@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { FleetAuthzRouter } from '../../services/security';
+
 import { FLEET_SERVER_HOST_API_ROUTES } from '../../../common/constants';
 import {
   GetAllFleetServerHostRequestSchema,
@@ -12,8 +14,6 @@ import {
   PostFleetServerHostRequestSchema,
   PutFleetServerHostRequestSchema,
 } from '../../types';
-
-import type { FleetAuthzRouter } from '../security';
 
 import {
   deleteFleetServerPolicyHandler,

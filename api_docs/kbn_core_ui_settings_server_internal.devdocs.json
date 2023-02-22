@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-ui-settings-server-internal",
-        "id": "def-server.UiSettingsClient",
+        "id": "def-common.UiSettingsClient",
         "type": "Class",
         "tags": [],
         "label": "UiSettingsClient",
@@ -20,21 +28,21 @@
         "signature": [
           {
             "pluginId": "@kbn/core-ui-settings-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreUiSettingsServerInternalPluginApi",
-            "section": "def-server.UiSettingsClient",
+            "section": "def-common.UiSettingsClient",
             "text": "UiSettingsClient"
           },
           " extends ",
-          "BaseUiSettingsClient"
+          "UiSettingsClientCommon"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
+        "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.UiSettingsClient.Unnamed",
+            "id": "def-common.UiSettingsClient.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -42,27 +50,80 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
+            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-server.UiSettingsClient.Unnamed.$1",
+                "id": "def-common.UiSettingsClient.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-ui-settings-server-internal",
-                    "scope": "server",
-                    "docId": "kibKbnCoreUiSettingsServerInternalPluginApi",
-                    "section": "def-server.UiSettingsServiceOptions",
-                    "text": "UiSettingsServiceOptions"
-                  }
+                  "UiSettingsServiceOptions"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-server-internal",
+        "id": "def-common.UiSettingsGlobalClient",
+        "type": "Class",
+        "tags": [],
+        "label": "UiSettingsGlobalClient",
+        "description": [
+          "\nGlobal UiSettingsClient"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-ui-settings-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsServerInternalPluginApi",
+            "section": "def-common.UiSettingsGlobalClient",
+            "text": "UiSettingsGlobalClient"
+          },
+          " extends ",
+          "UiSettingsClientCommon"
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_global_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-server-internal",
+            "id": "def-common.UiSettingsGlobalClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_global_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-server-internal",
+                "id": "def-common.UiSettingsGlobalClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "UiSettingsServiceOptions"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_global_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -72,23 +133,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.UiSettingsClient.getUserProvided",
-            "type": "Function",
-            "tags": [],
-            "label": "getUserProvided",
-            "description": [],
-            "signature": [
-              "<T = unknown>() => Promise<UserProvided<T>>"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.UiSettingsClient.setMany",
+            "id": "def-common.UiSettingsGlobalClient.setMany",
             "type": "Function",
             "tags": [],
             "label": "setMany",
@@ -96,13 +141,13 @@
             "signature": [
               "(changes: Record<string, any>) => Promise<void>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
+            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_global_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-server.UiSettingsClient.setMany.$1",
+                "id": "def-common.UiSettingsGlobalClient.setMany.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "changes",
@@ -110,7 +155,7 @@
                 "signature": [
                   "Record<string, any>"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_global_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -120,7 +165,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.UiSettingsClient.set",
+            "id": "def-common.UiSettingsGlobalClient.set",
             "type": "Function",
             "tags": [],
             "label": "set",
@@ -128,13 +173,13 @@
             "signature": [
               "(key: string, value: any) => Promise<void>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
+            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_global_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-server.UiSettingsClient.set.$1",
+                "id": "def-common.UiSettingsGlobalClient.set.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -142,14 +187,14 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_global_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-server.UiSettingsClient.set.$2",
+                "id": "def-common.UiSettingsGlobalClient.set.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "value",
@@ -157,71 +202,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.UiSettingsClient.remove",
-            "type": "Function",
-            "tags": [],
-            "label": "remove",
-            "description": [],
-            "signature": [
-              "(key: string) => Promise<void>"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-server.UiSettingsClient.remove.$1",
-                "type": "string",
-                "tags": [],
-                "label": "key",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.UiSettingsClient.removeMany",
-            "type": "Function",
-            "tags": [],
-            "label": "removeMany",
-            "description": [],
-            "signature": [
-              "(keys: string[]) => Promise<void>"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-server.UiSettingsClient.removeMany.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "keys",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_global_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -236,7 +217,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-ui-settings-server-internal",
-        "id": "def-server.createOrUpgradeSavedConfig",
+        "id": "def-common.createOrUpgradeSavedConfig",
         "type": "Function",
         "tags": [],
         "label": "createOrUpgradeSavedConfig",
@@ -250,7 +231,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.createOrUpgradeSavedConfig.$1",
+            "id": "def-common.createOrUpgradeSavedConfig.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -268,137 +249,13 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [
-      {
-        "parentPluginId": "@kbn/core-ui-settings-server-internal",
-        "id": "def-server.UiSettingsServiceOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "UiSettingsServiceOptions",
-        "description": [],
-        "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.UiSettingsServiceOptions.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.UiSettingsServiceOptions.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.UiSettingsServiceOptions.buildNum",
-            "type": "number",
-            "tags": [],
-            "label": "buildNum",
-            "description": [],
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.UiSettingsServiceOptions.savedObjectsClient",
-            "type": "Object",
-            "tags": [],
-            "label": "savedObjectsClient",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              }
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.UiSettingsServiceOptions.overrides",
-            "type": "Object",
-            "tags": [],
-            "label": "overrides",
-            "description": [],
-            "signature": [
-              "Record<string, any> | undefined"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.UiSettingsServiceOptions.defaults",
-            "type": "Object",
-            "tags": [],
-            "label": "defaults",
-            "description": [],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsParams",
-                "text": "UiSettingsParams"
-              },
-              "<unknown>> | undefined"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.UiSettingsServiceOptions.log",
-            "type": "Object",
-            "tags": [],
-            "label": "log",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              }
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-ui-settings-server-internal",
-        "id": "def-server.uiSettingsConfig",
+        "id": "def-common.uiSettingsConfig",
         "type": "Object",
         "tags": [],
         "label": "uiSettingsConfig",
@@ -409,7 +266,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.uiSettingsConfig.path",
+            "id": "def-common.uiSettingsConfig.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -420,7 +277,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.uiSettingsConfig.schema",
+            "id": "def-common.uiSettingsConfig.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -428,17 +285,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ObjectType",
+                "section": "def-common.ObjectType",
                 "text": "ObjectType"
               },
               "<{ overrides: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ObjectType",
+                "section": "def-common.ObjectType",
                 "text": "ObjectType"
               },
               "<{}>; }>"
@@ -449,7 +306,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-server-internal",
-            "id": "def-server.uiSettingsConfig.deprecations",
+            "id": "def-common.uiSettingsConfig.deprecations",
             "type": "Function",
             "tags": [],
             "label": "deprecations",
@@ -458,17 +315,17 @@
               "(factory: ",
               {
                 "pluginId": "@kbn/config",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-server.ConfigDeprecationFactory",
+                "section": "def-common.ConfigDeprecationFactory",
                 "text": "ConfigDeprecationFactory"
               },
               ") => ",
               {
                 "pluginId": "@kbn/config",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-server.ConfigDeprecation",
+                "section": "def-common.ConfigDeprecation",
                 "text": "ConfigDeprecation"
               },
               "[]"
@@ -480,7 +337,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-server-internal",
-                "id": "def-server.uiSettingsConfig.deprecations.$1",
+                "id": "def-common.uiSettingsConfig.deprecations.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "factory",
@@ -488,9 +345,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-server.ConfigDeprecationFactory",
+                    "section": "def-common.ConfigDeprecationFactory",
                     "text": "ConfigDeprecationFactory"
                   }
                 ],
@@ -504,13 +361,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

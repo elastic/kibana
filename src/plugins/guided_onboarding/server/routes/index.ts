@@ -7,12 +7,16 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import type { GuidesConfig } from '../../common/types';
 import { registerGetGuideStateRoute } from './guide_state_routes';
 import { registerGetPluginStateRoute, registerPutPluginStateRoute } from './plugin_state_routes';
+import { registerGetConfigRoute } from './config_routes';
 
-export function defineRoutes(router: IRouter) {
+export function defineRoutes(router: IRouter, guidesConfig: GuidesConfig) {
   registerGetGuideStateRoute(router);
 
   registerGetPluginStateRoute(router);
   registerPutPluginStateRoute(router);
+
+  registerGetConfigRoute(router, guidesConfig);
 }

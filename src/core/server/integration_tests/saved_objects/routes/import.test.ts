@@ -9,7 +9,7 @@
 jest.mock('uuid');
 
 import supertest from 'supertest';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
@@ -491,8 +491,8 @@ describe(`POST ${URL}`, () => {
       const mockUuid = jest.requireMock('uuid');
       mockUuid.v4 = jest
         .fn()
-        .mockReturnValueOnce('foo') // a uuid.v4() is generated for the request.id
-        .mockReturnValueOnce('foo') // another uuid.v4() is used for the request.uuid
+        .mockReturnValueOnce('foo') // a uuidv4() is generated for the request.id
+        .mockReturnValueOnce('foo') // another uuidv4() is used for the request.uuid
         .mockReturnValueOnce('new-id-1')
         .mockReturnValueOnce('new-id-2');
       savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });

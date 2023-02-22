@@ -45,6 +45,7 @@ export const useEndpointActionItems = (
     canIsolateHost,
     canUnIsolateHost,
     canAccessEndpointActionsLogManagement,
+    canAccessFleet,
   } = useUserPrivileges().endpointPrivileges;
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
@@ -173,79 +174,83 @@ export const useEndpointActionItems = (
             />
           ),
         },
-        {
-          icon: 'gear',
-          key: 'agentConfigLink',
-          'data-test-subj': 'agentPolicyLink',
-          navigateAppId: 'fleet',
-          navigateOptions: {
-            path: `${
-              pagePathGetters.policy_details({
-                policyId: fleetAgentPolicies[endpointPolicyId],
-              })[1]
-            }`,
-          },
-          href: `${getAppUrl({ appId: 'fleet' })}${
-            pagePathGetters.policy_details({
-              policyId: fleetAgentPolicies[endpointPolicyId],
-            })[1]
-          }`,
-          disabled: fleetAgentPolicies[endpointPolicyId] === undefined,
-          children: (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.actions.agentPolicy"
-              defaultMessage="View agent policy"
-            />
-          ),
-        },
-        {
-          icon: 'gear',
-          key: 'agentDetailsLink',
-          'data-test-subj': 'agentDetailsLink',
-          navigateAppId: 'fleet',
-          navigateOptions: {
-            path: `${
-              pagePathGetters.agent_details({
-                agentId: fleetAgentId,
-              })[1]
-            }`,
-          },
-          href: `${getAppUrl({ appId: 'fleet' })}${
-            pagePathGetters.agent_details({
-              agentId: fleetAgentId,
-            })[1]
-          }`,
-          children: (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.actions.agentDetails"
-              defaultMessage="View agent details"
-            />
-          ),
-        },
-        {
-          icon: 'gear',
-          key: 'agentPolicyReassignLink',
-          'data-test-subj': 'agentPolicyReassignLink',
-          navigateAppId: 'fleet',
-          navigateOptions: {
-            path: `${
-              pagePathGetters.agent_details({
-                agentId: fleetAgentId,
-              })[1]
-            }?openReassignFlyout=true`,
-          },
-          href: `${getAppUrl({ appId: 'fleet' })}${
-            pagePathGetters.agent_details({
-              agentId: fleetAgentId,
-            })[1]
-          }?openReassignFlyout=true`,
-          children: (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.actions.agentPolicyReassign"
-              defaultMessage="Reassign agent policy"
-            />
-          ),
-        },
+        ...(canAccessFleet
+          ? [
+              {
+                icon: 'gear',
+                key: 'agentConfigLink',
+                'data-test-subj': 'agentPolicyLink',
+                navigateAppId: 'fleet',
+                navigateOptions: {
+                  path: `${
+                    pagePathGetters.policy_details({
+                      policyId: fleetAgentPolicies[endpointPolicyId],
+                    })[1]
+                  }`,
+                },
+                href: `${getAppUrl({ appId: 'fleet' })}${
+                  pagePathGetters.policy_details({
+                    policyId: fleetAgentPolicies[endpointPolicyId],
+                  })[1]
+                }`,
+                disabled: fleetAgentPolicies[endpointPolicyId] === undefined,
+                children: (
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.actions.agentPolicy"
+                    defaultMessage="View agent policy"
+                  />
+                ),
+              },
+              {
+                icon: 'gear',
+                key: 'agentDetailsLink',
+                'data-test-subj': 'agentDetailsLink',
+                navigateAppId: 'fleet',
+                navigateOptions: {
+                  path: `${
+                    pagePathGetters.agent_details({
+                      agentId: fleetAgentId,
+                    })[1]
+                  }`,
+                },
+                href: `${getAppUrl({ appId: 'fleet' })}${
+                  pagePathGetters.agent_details({
+                    agentId: fleetAgentId,
+                  })[1]
+                }`,
+                children: (
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.actions.agentDetails"
+                    defaultMessage="View agent details"
+                  />
+                ),
+              },
+              {
+                icon: 'gear',
+                key: 'agentPolicyReassignLink',
+                'data-test-subj': 'agentPolicyReassignLink',
+                navigateAppId: 'fleet',
+                navigateOptions: {
+                  path: `${
+                    pagePathGetters.agent_details({
+                      agentId: fleetAgentId,
+                    })[1]
+                  }?openReassignFlyout=true`,
+                },
+                href: `${getAppUrl({ appId: 'fleet' })}${
+                  pagePathGetters.agent_details({
+                    agentId: fleetAgentId,
+                  })[1]
+                }?openReassignFlyout=true`,
+                children: (
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.actions.agentPolicyReassign"
+                    defaultMessage="Reassign agent policy"
+                  />
+                ),
+              },
+            ]
+          : []),
       ];
     }
 
@@ -262,5 +267,6 @@ export const useEndpointActionItems = (
     options?.isEndpointList,
     canIsolateHost,
     canUnIsolateHost,
+    canAccessFleet,
   ]);
 };

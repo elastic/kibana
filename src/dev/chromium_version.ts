@@ -8,7 +8,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import chalk from 'chalk';
 import cheerio from 'cheerio';
 import fs from 'fs';
@@ -46,7 +46,7 @@ async function getChromiumRevision(
   kibanaPuppeteerVersion: PuppeteerRelease,
   log: ToolingLog
 ): Promise<ChromiumRevision> {
-  const url = `https://raw.githubusercontent.com/puppeteer/puppeteer/v${kibanaPuppeteerVersion}/src/revisions.ts`;
+  const url = `https://raw.githubusercontent.com/puppeteer/puppeteer/puppeteer-v${kibanaPuppeteerVersion}/packages/puppeteer-core/src/revisions.ts`;
   let body: string;
   try {
     log.info(`Fetching code from Puppeteer source: ${url}`);

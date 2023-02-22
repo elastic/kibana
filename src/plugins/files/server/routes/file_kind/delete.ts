@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { FileKind } from '../../../common/types';
+import { FilesClient } from '../../../common/files_client';
 import { fileErrors } from '../../file';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 import type { CreateHandler, FileKindRouter } from './types';
@@ -22,7 +23,7 @@ const rt = {
   }),
 };
 
-export type Endpoint = CreateRouteDefinition<typeof rt, { ok: true }>;
+export type Endpoint = CreateRouteDefinition<typeof rt, { ok: true }, FilesClient['delete']>;
 
 export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req, res) => {
   const {

@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-node-server-internal",
-        "id": "def-server.InternalNodeServiceStart",
+        "id": "def-common.InternalNodeServiceStart",
         "type": "Interface",
         "tags": [],
         "label": "InternalNodeServiceStart",
@@ -25,7 +33,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server-internal",
-            "id": "def-server.InternalNodeServiceStart.roles",
+            "id": "def-common.InternalNodeServiceStart.roles",
             "type": "Object",
             "tags": [],
             "label": "roles",
@@ -35,9 +43,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-node-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreNodeServerPluginApi",
-                "section": "def-server.NodeRoles",
+                "section": "def-common.NodeRoles",
                 "text": "NodeRoles"
               }
             ],
@@ -50,7 +58,7 @@
       },
       {
         "parentPluginId": "@kbn/core-node-server-internal",
-        "id": "def-server.PrebootDeps",
+        "id": "def-common.PrebootDeps",
         "type": "Interface",
         "tags": [],
         "label": "PrebootDeps",
@@ -61,7 +69,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server-internal",
-            "id": "def-server.PrebootDeps.loggingSystem",
+            "id": "def-common.PrebootDeps.loggingSystem",
             "type": "Object",
             "tags": [],
             "label": "loggingSystem",
@@ -82,7 +90,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-node-server-internal",
-        "id": "def-server.nodeConfig",
+        "id": "def-common.nodeConfig",
         "type": "Object",
         "tags": [],
         "label": "nodeConfig",
@@ -93,7 +101,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server-internal",
-            "id": "def-server.nodeConfig.path",
+            "id": "def-common.nodeConfig.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -107,7 +115,7 @@
           },
           {
             "parentPluginId": "@kbn/core-node-server-internal",
-            "id": "def-server.nodeConfig.schema",
+            "id": "def-common.nodeConfig.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -115,17 +123,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ObjectType",
+                "section": "def-common.ObjectType",
                 "text": "ObjectType"
               },
               "<{ roles: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<\"*\"[] | (\"ui\" | \"background_tasks\")[]>; }>"
@@ -138,13 +146,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

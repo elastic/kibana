@@ -52,8 +52,8 @@ describe('AggsService - public', () => {
     test('registers default agg types', () => {
       service.setup(setupDeps);
       const start = service.start(startDeps);
-      expect(start.types.getAll().buckets.length).toBe(16);
-      expect(start.types.getAll().metrics.length).toBe(26);
+      expect(start.types.getAll().buckets.length).toBe(17);
+      expect(start.types.getAll().metrics.length).toBe(27);
     });
 
     test('registers custom agg types', () => {
@@ -68,9 +68,9 @@ describe('AggsService - public', () => {
       );
 
       const start = service.start(startDeps);
-      expect(start.types.getAll().buckets.length).toBe(17);
+      expect(start.types.getAll().buckets.length).toBe(18);
       expect(start.types.getAll().buckets.some(({ name }) => name === 'foo')).toBe(true);
-      expect(start.types.getAll().metrics.length).toBe(27);
+      expect(start.types.getAll().metrics.length).toBe(28);
       expect(start.types.getAll().metrics.some(({ name }) => name === 'bar')).toBe(true);
     });
   });

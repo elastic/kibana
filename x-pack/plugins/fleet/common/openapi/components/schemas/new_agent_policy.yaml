@@ -28,6 +28,10 @@ properties:
   download_source_id:
     type: string
     nullable: true
+  unenroll_timeout:
+    type: number
+  inactivity_timeout:
+    type: number
 required:
   - name
   - namespace

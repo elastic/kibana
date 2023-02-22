@@ -146,7 +146,12 @@ export function toElasticsearchQuery(
       const query = isKeywordField
         ? {
             wildcard: {
-              [field.name]: value,
+              [field.name]: {
+                value,
+                ...(typeof config.caseInsensitive === 'boolean' && {
+                  case_insensitive: config.caseInsensitive,
+                }),
+              },
             },
           }
         : {
@@ -177,8 +182,22 @@ export function toElasticsearchQuery(
           },
         }),
       ];
+    } else if (isKeywordField) {
+      return [
+        ...accumulator,
+        wrapWithNestedQuery({
+          term: {
+            [field.name]: {
+              value,
+              ...(typeof config.caseInsensitive === 'boolean' && {
+                case_insensitive: config.caseInsensitive,
+              }),
+            },
+          },
+        }),
+      ];
     } else {
-      const queryType = isKeywordField ? 'term' : type === 'phrase' ? 'match_phrase' : 'match';
+      const queryType = type === 'phrase' ? 'match_phrase' : 'match';
       return [
         ...accumulator,
         wrapWithNestedQuery({

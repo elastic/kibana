@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import type { UseDeleteComment } from './use_delete_comment';
 import { useDeleteComment } from './use_delete_comment';
 import * as api from './api';
 import { basicCaseId } from './mock';
+import { TestProviders } from '../common/mock';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('../common/lib/kibana');
 jest.mock('./api');
@@ -18,81 +21,95 @@ jest.mock('../components/case_view/use_on_refresh_case_view_page');
 
 const commentId = 'ab124';
 
+const wrapper: React.FC<string> = ({ children }) => <TestProviders>{children}</TestProviders>;
+
 describe('useDeleteComment', () => {
+  const addSuccess = jest.fn();
+  const addError = jest.fn();
+
+  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteComment>(() =>
-        useDeleteComment()
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isError: false,
-        deleteComment: result.current.deleteComment,
-      });
+    const { result } = renderHook<string, UseDeleteComment>(() => useDeleteComment(), {
+      wrapper,
     });
+
+    expect(result.current).toBeTruthy();
   });
 
   it('calls deleteComment with correct arguments - case', async () => {
     const spyOnDeleteComment = jest.spyOn(api, 'deleteComment');
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteComment>(() =>
-        useDeleteComment()
-      );
-      await waitForNextUpdate();
+    const { waitForNextUpdate, result } = renderHook<string, UseDeleteComment>(
+      () => useDeleteComment(),
+      {
+        wrapper,
+      }
+    );
 
-      result.current.deleteComment({
+    act(() => {
+      result.current.mutate({
         caseId: basicCaseId,
         commentId,
       });
-      await waitForNextUpdate();
-      expect(spyOnDeleteComment).toBeCalledWith({
-        caseId: basicCaseId,
-        commentId,
-        signal: expect.any(AbortSignal),
-      });
-      expect(result.current.isError).toBe(false);
+    });
+
+    await waitForNextUpdate();
+
+    expect(spyOnDeleteComment).toBeCalledWith({
+      caseId: basicCaseId,
+      commentId,
+      signal: expect.any(AbortSignal),
     });
   });
 
   it('refreshes the case page view after delete', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteComment>(() =>
-        useDeleteComment()
-      );
-      await waitForNextUpdate();
+    const { waitForNextUpdate, result } = renderHook<string, UseDeleteComment>(
+      () => useDeleteComment(),
+      {
+        wrapper,
+      }
+    );
 
-      result.current.deleteComment({
-        caseId: basicCaseId,
-        commentId,
-      });
-      await waitForNextUpdate();
-      expect(useRefreshCaseViewPage()).toBeCalled();
+    result.current.mutate({
+      caseId: basicCaseId,
+      commentId,
     });
+
+    await waitForNextUpdate();
+
+    expect(useRefreshCaseViewPage()).toBeCalled();
   });
 
   it('sets isError when fails to delete a case', async () => {
     const spyOnDeleteComment = jest.spyOn(api, 'deleteComment');
     spyOnDeleteComment.mockRejectedValue(new Error('Not possible :O'));
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseDeleteComment>(() =>
-        useDeleteComment()
-      );
-      await waitForNextUpdate();
+    const { waitForNextUpdate, result } = renderHook<string, UseDeleteComment>(
+      () => useDeleteComment(),
+      {
+        wrapper,
+      }
+    );
 
-      result.current.deleteComment({
-        caseId: basicCaseId,
-        commentId,
-      });
-      await waitForNextUpdate();
-      expect(spyOnDeleteComment).toBeCalledWith({
-        caseId: basicCaseId,
-        commentId,
-        signal: expect.any(AbortSignal),
-      });
-
-      expect(result.current.isError).toBe(true);
+    result.current.mutate({
+      caseId: basicCaseId,
+      commentId,
     });
+
+    await waitForNextUpdate();
+
+    expect(spyOnDeleteComment).toBeCalledWith({
+      caseId: basicCaseId,
+      commentId,
+      signal: expect.any(AbortSignal),
+    });
+
+    expect(addError).toHaveBeenCalled();
+    expect(result.current.isError).toBe(true);
   });
 });

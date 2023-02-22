@@ -8,11 +8,11 @@
 export type { AsDuration, AsPercent, TimeUnitChar } from './utils/formatters';
 
 export { formatDurationFromTimeUnitChar } from './utils/formatters';
+export { getInspectResponse } from './utils/get_inspect_response';
 
 export { ProcessorEvent } from './processor_event';
 
 export {
-  enableNewSyntheticsView,
   enableInspectEsQueries,
   maxSuggestions,
   enableComparisonByDefault,
@@ -21,21 +21,24 @@ export {
   apmServiceInventoryOptimizedSorting,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
-  apmOperationsTab,
   apmLabsButton,
   enableInfrastructureHostsView,
-  enableServiceMetrics,
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
   enableCriticalPath,
+  profilingElasticsearchPlugin,
 } from './ui_settings_keys';
 
 export {
   ProgressiveLoadingQuality,
   getProbabilityFromProgressiveLoadingQuality,
 } from './progressive_loading';
+
+export const sloFeatureId = 'slo';
 
 export const casesFeatureId = 'observabilityCases';
 
@@ -55,6 +58,7 @@ export const casesPath = '/cases';
 export const uptimeOverviewLocatorID = 'UPTIME_OVERVIEW_LOCATOR';
 export const syntheticsMonitorDetailLocatorID = 'SYNTHETICS_MONITOR_DETAIL_LOCATOR';
 export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
+export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
 
 export {
   NETWORK_TIMINGS_FIELDS,

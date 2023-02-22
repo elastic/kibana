@@ -6,9 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { EuiFilterSelectItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiSelectableOption,
+  EuiSelectable,
+  EuiSpacer,
+  EuiTitle,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListReduxState } from '../types';
@@ -26,28 +32,59 @@ export const OptionsListPopoverInvalidSelections = () => {
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
+  const fieldName = select((state) => state.explicitInput.fieldName);
+
+  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
+  useEffect(() => {
+    /* This useEffect makes selectableOptions responsive to unchecking options */
+    const options: EuiSelectableOption[] = (invalidSelections ?? []).map((key) => {
+      return {
+        key,
+        label: key,
+        checked: 'on',
+        className: 'optionsList__selectionInvalid',
+        'data-test-subj': `optionsList-control-ignored-selection-${key}`,
+        prepend: (
+          <EuiScreenReaderOnly>
+            <div>
+              {OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
+              {'" "'} {/* Adds a pause for the screen reader */}
+            </div>
+          </EuiScreenReaderOnly>
+        ),
+      };
+    });
+    setSelectableOptions(options);
+  }, [invalidSelections]);
 
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiTitle size="xxs" className="optionsList-control-ignored-selection-title">
+      <EuiTitle
+        size="xxs"
+        className="optionsList-control-ignored-selection-title"
+        data-test-subj="optionList__ignoredSelectionLabel"
+      >
         <label>
           {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
             invalidSelections?.length ?? 0
           )}
         </label>
       </EuiTitle>
-      {invalidSelections?.map((ignoredSelection, index) => (
-        <EuiFilterSelectItem
-          data-test-subj={`optionsList-control-ignored-selection-${ignoredSelection}`}
-          checked={'on'}
-          className="optionsList__selectionInvalid"
-          key={index}
-          onClick={() => dispatch(deselectOption(ignoredSelection))}
-        >
-          {`${ignoredSelection}`}
-        </EuiFilterSelectItem>
-      ))}
+      <EuiSelectable
+        aria-label={OptionsListStrings.popover.getInvalidSelectionsSectionAriaLabel(
+          fieldName,
+          invalidSelections?.length ?? 0
+        )}
+        options={selectableOptions}
+        listProps={{ onFocusBadge: false, isVirtualized: false }}
+        onChange={(newSuggestions, _, changedOption) => {
+          setSelectableOptions(newSuggestions);
+          dispatch(deselectOption(changedOption.label));
+        }}
+      >
+        {(list) => list}
+      </EuiSelectable>
     </>
   );
 };

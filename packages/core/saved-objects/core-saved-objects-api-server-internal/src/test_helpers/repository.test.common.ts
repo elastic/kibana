@@ -9,19 +9,21 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging-mocks';
-import { isEqual } from 'lodash';
 import { Payload } from 'elastic-apm-node';
-import {
+import type {
   AuthorizationTypeEntry,
-  EnforceAuthorizationParams,
+  AuthorizeAndRedactMultiNamespaceReferencesParams,
+  CheckAuthorizationResult,
   ISavedObjectsSecurityExtension,
   SavedObjectsMappingProperties,
   SavedObjectsRawDocSource,
   SavedObjectsType,
   SavedObjectsTypeMappingDefinition,
+  SavedObject,
+  SavedObjectReference,
+  AuthorizeFindParams,
 } from '@kbn/core-saved-objects-server';
-import { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
-import {
+import type {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkDeleteObject,
@@ -34,8 +36,6 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
-
 import {
   encodeHitVersion,
   SavedObjectsSerializer,
@@ -43,9 +43,15 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
   elasticsearchClientMock,
-  ElasticsearchClientMock,
+  type ElasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
+import {
+  AuthorizeAndRedactInternalBulkResolveParams,
+  GetFindRedactTypeMapParams,
+  AuthorizationTypeMap,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core-saved-objects-server';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
 import { SavedObjectsRepository } from '../lib/repository';
 
@@ -97,6 +103,7 @@ export const expectErrorInvalidType = (obj: TypeIdTuple, overrides?: Record<stri
   expectErrorResult(obj, createUnsupportedTypeErrorPayload(obj.type), overrides);
 
 export const KIBANA_VERSION = '2.0.0';
+export const ALLOWED_CONVERT_VERSION = '8.0.0';
 export const CUSTOM_INDEX_TYPE = 'customIndex';
 /** This type has namespaceType: 'agnostic'. */
 export const NAMESPACE_AGNOSTIC_TYPE = 'globalType';
@@ -235,52 +242,76 @@ export const enforceError = SavedObjectsErrorHelpers.decorateForbiddenError(
   'User lacks privileges'
 );
 
-export const setupCheckAuthorized = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+// Note: Only using 'any' here because we don't care about/use the method parameters of the mock
+// The only alternative I can see is to use a union of all the parameter interfaces which would
+// be lengthy.
+export const setupAuthorizeFunc = (
+  jestMock: jest.MockInstance<Promise<CheckAuthorizationResult<string>>, any>,
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
 ) => {
-  mockSecurityExt.checkAuthorization.mockResolvedValue({
-    status: 'fully_authorized',
-    typeMap: authMap,
+  jestMock.mockImplementation((): Promise<CheckAuthorizationResult<string>> => {
+    if (status === 'unauthorized') throw enforceError;
+    return Promise.resolve({ status, typeMap: authMap });
   });
 };
 
-export const setupCheckPartiallyAuthorized = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+export const setupAuthorizeFind = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
 ) => {
-  mockSecurityExt.checkAuthorization.mockResolvedValue({
-    status: 'partially_authorized',
-    typeMap: authMap,
-  });
-};
-
-export const setupCheckUnauthorized = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
-) => {
-  mockSecurityExt.checkAuthorization.mockResolvedValue({
-    status: 'unauthorized',
-    typeMap: new Map([]),
-  });
-};
-
-export const setupEnforceSuccess = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
-) => {
-  mockSecurityExt.enforceAuthorization.mockImplementation(
-    (params: EnforceAuthorizationParams<string>) => {
-      const { auditCallback } = params;
-      auditCallback?.(undefined);
+  mockSecurityExt.authorizeFind.mockImplementation(
+    (params: AuthorizeFindParams): Promise<CheckAuthorizationResult<string>> => {
+      return Promise.resolve({ status, typeMap: authMap });
     }
   );
 };
 
-export const setupEnforceFailure = (
+export const setupGetFindRedactTypeMap = (
   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
 ) => {
-  mockSecurityExt.enforceAuthorization.mockImplementation(
-    (params: EnforceAuthorizationParams<string>) => {
-      const { auditCallback } = params;
-      auditCallback?.(enforceError);
+  mockSecurityExt.getFindRedactTypeMap.mockImplementation(
+    (params: GetFindRedactTypeMapParams): Promise<AuthorizationTypeMap<string>> => {
+      return Promise.resolve(authMap);
+    }
+  );
+};
+
+export const setupAuthorizeAndRedactInternalBulkResolveFailure = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.authorizeAndRedactInternalBulkResolve.mockImplementation(
+    (params: AuthorizeAndRedactInternalBulkResolveParams<unknown>) => {
       throw enforceError;
+    }
+  );
+};
+
+export const setupAuthorizeAndRedactInternalBulkResolveSuccess = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.authorizeAndRedactInternalBulkResolve.mockImplementation(
+    (params: AuthorizeAndRedactInternalBulkResolveParams<unknown>) => {
+      return Promise.resolve(params.objects);
+    }
+  );
+};
+
+export const setupAuthorizeAndRedactMultiNamespaceReferenencesFailure = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mockImplementation(
+    (params: AuthorizeAndRedactMultiNamespaceReferencesParams) => {
+      throw enforceError;
+    }
+  );
+};
+
+export const setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mockImplementation(
+    (params: AuthorizeAndRedactMultiNamespaceReferencesParams) => {
+      return Promise.resolve(params.objects);
     }
   );
 };
@@ -374,6 +405,7 @@ export const createDocumentMigrator = (registry: SavedObjectTypeRegistry) => {
   return new DocumentMigrator({
     typeRegistry: registry,
     kibanaVersion: KIBANA_VERSION,
+    convertVersion: ALLOWED_CONVERT_VERSION,
     log: loggerMock.create(),
   });
 };
@@ -484,7 +516,7 @@ export const mockUpdateResponse = (
   );
 };
 
-export const updateSuccess = async <T>(
+export const updateSuccess = async <T extends Partial<unknown>>(
   client: ElasticsearchClientMock,
   repository: SavedObjectsRepository,
   registry: SavedObjectTypeRegistry,
@@ -596,7 +628,6 @@ export const expectCreateResult = (obj: {
 }) => ({
   ...obj,
   migrationVersion: { [obj.type]: '1.1.1' },
-  coreMigrationVersion: KIBANA_VERSION,
   version: mockVersion,
   namespaces: obj.namespaces ?? [obj.namespace ?? 'default'],
   ...mockTimestampFieldsWithCreated,
@@ -849,27 +880,6 @@ export const getSuccess = async (
   expect(client.get).toHaveBeenCalledTimes(1);
   return result;
 };
-
-export function setsAreEqual<T>(setA: Set<T>, setB: Set<T>) {
-  return isEqual(Array(setA).sort(), Array(setB).sort());
-}
-
-export function typeMapsAreEqual(mapA: Map<string, Set<string>>, mapB: Map<string, Set<string>>) {
-  return (
-    mapA.size === mapB.size &&
-    Array.from(mapA.keys()).every((key) => setsAreEqual(mapA.get(key)!, mapB.get(key)!))
-  );
-}
-
-export function namespaceMapsAreEqual(
-  mapA: Map<string, string[] | undefined>,
-  mapB: Map<string, string[] | undefined>
-) {
-  return (
-    mapA.size === mapB.size &&
-    Array.from(mapA.keys()).every((key) => isEqual(mapA.get(key)?.sort(), mapB.get(key)?.sort()))
-  );
-}
 
 export const getMockEsBulkDeleteResponse = (
   registry: SavedObjectTypeRegistry,

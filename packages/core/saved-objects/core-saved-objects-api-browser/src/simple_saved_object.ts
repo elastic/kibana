@@ -16,6 +16,7 @@ import type { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-com
  * but doesn't include any type-specific implementations.
  *
  * @public
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export interface SimpleSavedObject<T = unknown> {
   /** attributes of the object, templated */
@@ -71,11 +72,13 @@ export interface SimpleSavedObject<T = unknown> {
 
   /**
    * Saves this object
+   * @deprecated See https://github.com/elastic/kibana/issues/149098
    */
   save(): Promise<SimpleSavedObject<T>>;
 
   /**
    * Deletes this object
+   * @deprecated See https://github.com/elastic/kibana/issues/149098
    */
   delete(): Promise<{}>;
 }

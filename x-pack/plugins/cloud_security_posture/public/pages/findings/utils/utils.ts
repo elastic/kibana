@@ -120,9 +120,11 @@ export const getFindingsCountAggQuery = () => ({
   count: { terms: { field: 'result.evaluation' } },
 });
 
-export const getAggregationCount = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]) => {
-  const passed = buckets.find((bucket) => bucket.key === 'passed');
-  const failed = buckets.find((bucket) => bucket.key === 'failed');
+export const getAggregationCount = (
+  buckets: Array<estypes.AggregationsStringRareTermsBucketKeys | undefined>
+) => {
+  const passed = buckets.find((bucket) => bucket?.key === 'passed');
+  const failed = buckets.find((bucket) => bucket?.key === 'failed');
 
   return {
     passed: passed?.doc_count || 0,

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { defaults, get, set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { defaults, get } from 'lodash';
 import { DataViewsService, DataView } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
@@ -151,6 +152,14 @@ describe('IndexPatterns', () => {
 
     expect(await indexPatternPromise).toBe(await indexPatterns.get(id));
     SOClientGetDelay = 0;
+  });
+
+  test('force field refresh', async () => {
+    const id = '1';
+    await indexPatterns.get(id);
+    expect(apiClient.getFieldsForWildcard).toBeCalledTimes(1);
+    await indexPatterns.get(id, undefined, true);
+    expect(apiClient.getFieldsForWildcard).toBeCalledTimes(2);
   });
 
   test('does cache ad-hoc data views', async () => {
@@ -412,7 +421,7 @@ describe('IndexPatterns', () => {
   describe('getDefaultDataView', () => {
     beforeEach(() => {
       indexPatterns.clearCache();
-      jest.resetAllMocks();
+      jest.clearAllMocks();
     });
 
     test('gets default data view', async () => {
@@ -424,6 +433,44 @@ describe('IndexPatterns', () => {
       // make sure we're not pulling from cache
       expect(savedObjectsClient.get).toBeCalledTimes(1);
       expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+
+    test('gets default data view and passes down defined arguments (refreshFields and displayErrors)', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      jest.spyOn(indexPatterns, 'get');
+      jest.spyOn(indexPatterns, 'refreshFields');
+
+      const dataView = await indexPatterns.get(indexPatternObj.id); // and to cache the result
+
+      const refreshFields = true;
+      const displayErrors = false;
+      expect(
+        await indexPatterns.getDefaultDataView({ refreshFields, displayErrors })
+      ).toBeInstanceOf(DataView);
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+
+      expect(indexPatterns.get).toBeCalledWith(indexPatternObj.id, displayErrors, refreshFields);
+      expect(indexPatterns.refreshFields).toBeCalledWith(dataView, displayErrors);
+    });
+
+    test('gets default data view and passes down undefined arguments (refreshFields and displayErrors)', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      jest.spyOn(indexPatterns, 'get');
+      jest.spyOn(indexPatterns, 'refreshFields');
+
+      await indexPatterns.get(indexPatternObj.id); // to cache the result
+
+      expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+
+      expect(indexPatterns.get).toBeCalledWith(indexPatternObj.id, true, undefined);
+      expect(indexPatterns.refreshFields).not.toBeCalled();
     });
 
     test('returns undefined if no data views exist', async () => {
@@ -479,6 +526,7 @@ describe('IndexPatterns', () => {
     });
 
     test('dont set defaultIndex without capability allowing advancedSettings save', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(null);
       savedObjectsClient.find = jest.fn().mockResolvedValue([
         {
           id: 'id1',

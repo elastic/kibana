@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';
 
 import '../../../common/mock/match_media';
@@ -29,6 +29,11 @@ import { TimelineTabsStyle } from './types';
 import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
 import { useTimelineTypes } from './use_timeline_types';
 import { deleteTimelinesByIds } from '../../containers/api';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import {
+  RULE_FROM_EQL_URL_PARAM,
+  RULE_FROM_TIMELINE_URL_PARAM,
+} from '../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -55,9 +60,17 @@ jest.mock('../../containers/all', () => {
     useGetAllTimeline: jest.fn(),
   };
 });
-
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/components/link_to');
+const mockNavigateTo = jest.fn();
+jest.mock('../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...actual,
+    useNavigation: () => ({
+      getAppUrl: jest.fn(),
+      navigateTo: mockNavigateTo,
+    }),
+  };
+});
 
 jest.mock('../../../common/components/link_to', () => {
   const originalModule = jest.requireActual('../../../common/components/link_to');
@@ -78,6 +91,9 @@ jest.mock('../../containers/api', () => ({
   deleteTimelinesByIds: jest.fn(),
 }));
 
+jest.mock('../../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+
 describe('StatefulOpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
   let mockHistory: History[];
@@ -87,6 +103,9 @@ describe('StatefulOpenTimeline', () => {
     (useParams as jest.Mock).mockReturnValue({
       tabName: TimelineType.default,
       pageName: SecurityPageName.timelines,
+    });
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
     });
     mockHistory = [];
     (useHistory as jest.Mock).mockReturnValue(mockHistory);
@@ -654,6 +673,97 @@ describe('StatefulOpenTimeline', () => {
         mockOpenTimelineQueryResults.timeline[0].savedObjectId
       );
       expect((queryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(true);
+    });
+  });
+
+  describe('Create rule from timeline', () => {
+    const timeline = mockOpenTimelineQueryResults.timeline[0];
+    beforeEach(() => {
+      const lastTimeline = getAllTimeline('', [timeline])[0];
+      (useGetAllTimeline as jest.Mock).mockReturnValue({
+        fetchAllTimeline: jest.fn(),
+        timelines: [
+          {
+            ...lastTimeline,
+            queryType: {
+              hasQuery: true,
+              hasEql: true,
+            },
+          },
+        ],
+        loading: false,
+        totalCount: 1,
+        refetch: jest.fn(),
+      });
+    });
+    test('navigates to create rule page with timeline id in URL when Create rule from timeline query click', async () => {
+      const { getAllByTestId } = render(
+        <TestProviders>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
+        </TestProviders>
+      );
+
+      fireEvent.click(getAllByTestId('euiCollapsedItemActionsButton')[0]);
+      fireEvent.click(getAllByTestId('create-rule-from-timeline')[0]);
+      expect(mockNavigateTo.mock.calls[0][0].path).toEqual(
+        `?${RULE_FROM_TIMELINE_URL_PARAM}='${timeline?.savedObjectId}'`
+      );
+    });
+    test('navigates to create rule page with timeline id in URL when Create rule from timeline eql click', async () => {
+      const { getAllByTestId } = render(
+        <TestProviders>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
+        </TestProviders>
+      );
+
+      fireEvent.click(getAllByTestId('euiCollapsedItemActionsButton')[0]);
+      fireEvent.click(getAllByTestId('create-rule-from-eql')[0]);
+      expect(mockNavigateTo.mock.calls[0][0].path).toEqual(
+        `?${RULE_FROM_EQL_URL_PARAM}='${timeline?.savedObjectId}'`
+      );
+    });
+
+    test('Does not display Create rule from timeline/eql when no query', async () => {
+      const lastTimeline = getAllTimeline('', [timeline])[0];
+      (useGetAllTimeline as jest.Mock).mockReturnValue({
+        fetchAllTimeline: jest.fn(),
+        timelines: [
+          {
+            ...lastTimeline,
+            queryType: {
+              hasQuery: false,
+              hasEql: false,
+            },
+          },
+        ],
+        loading: false,
+        totalCount: 1,
+        refetch: jest.fn(),
+      });
+      const { getAllByTestId, queryByTestId } = render(
+        <TestProviders>
+          <StatefulOpenTimeline
+            data-test-subj="stateful-timeline"
+            isModal={false}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            title={title}
+          />
+        </TestProviders>
+      );
+
+      fireEvent.click(getAllByTestId('euiCollapsedItemActionsButton')[0]);
+      expect(queryByTestId('create-rule-from-eql')).not.toBeInTheDocument();
+      expect(queryByTestId('create-rule-from-timeline')).not.toBeInTheDocument();
     });
   });
 });

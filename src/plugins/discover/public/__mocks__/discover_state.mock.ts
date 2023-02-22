@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 import { createBrowserHistory } from 'history';
-import { getState } from '../application/main/services/discover_state';
+import { getDiscoverStateContainer } from '../application/main/services/discover_state';
 import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
 import { discoverServiceMock } from './services';
 
 export function getDiscoverStateMock({ isTimeBased = true }) {
   const history = createBrowserHistory();
   history.push('/');
-  return getState({
+  return getDiscoverStateContainer({
     savedSearch: isTimeBased ? savedSearchMockWithTimeField : savedSearchMock,
     services: discoverServiceMock,
     history,

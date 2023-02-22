@@ -11,6 +11,8 @@ import { ReportTypes } from '@kbn/observability-plugin/public';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../plugin';
+import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
+import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 
 export const NetworkTimingsBreakdown = ({ monitorId }: { monitorId: string }) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
@@ -18,6 +20,11 @@ export const NetworkTimingsBreakdown = ({ monitorId }: { monitorId: string }) =>
   const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
 
   const { stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
+
+  const selectedLocation = useSelectedLocation();
+  if (!selectedLocation) {
+    return <LoadingState />;
+  }
 
   return (
     <>
@@ -46,6 +53,10 @@ export const NetworkTimingsBreakdown = ({ monitorId }: { monitorId: string }) =>
               {
                 field: 'synthetics.step.index',
                 values: [stepIndex],
+              },
+              {
+                field: 'observer.geo.name',
+                values: [selectedLocation.label],
               },
             ],
           },

@@ -29,27 +29,27 @@ describe('DescriptionPropertyActions', () => {
   it('renders the correct number of actions', async () => {
     const result = appMock.render(<DescriptionPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-description')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-ellipses'));
+    userEvent.click(result.getByTestId('property-actions-description-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.getByTestId('property-actions-group').children.length).toBe(2);
-    expect(result.queryByTestId('property-actions-pencil')).toBeInTheDocument();
-    expect(result.queryByTestId('property-actions-quote')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-description-group').children.length).toBe(2);
+    expect(result.queryByTestId('property-actions-description-pencil')).toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-description-quote')).toBeInTheDocument();
   });
 
   it('edits the description correctly', async () => {
     const result = appMock.render(<DescriptionPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-description')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-ellipses'));
+    userEvent.click(result.getByTestId('property-actions-description-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.queryByTestId('property-actions-pencil')).toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-description-pencil')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-pencil'));
+    userEvent.click(result.getByTestId('property-actions-description-pencil'));
 
     expect(props.onEdit).toHaveBeenCalled();
   });
@@ -57,14 +57,14 @@ describe('DescriptionPropertyActions', () => {
   it('quotes the description correctly', async () => {
     const result = appMock.render(<DescriptionPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-description')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-ellipses'));
+    userEvent.click(result.getByTestId('property-actions-description-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.queryByTestId('property-actions-quote')).toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-description-quote')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-quote'));
+    userEvent.click(result.getByTestId('property-actions-description-quote'));
 
     expect(props.onQuote).toHaveBeenCalled();
   });
@@ -73,6 +73,6 @@ describe('DescriptionPropertyActions', () => {
     appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
     const result = appMock.render(<DescriptionPropertyActions {...props} />);
 
-    expect(result.queryByTestId('property-actions')).not.toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-description')).not.toBeInTheDocument();
   });
 });

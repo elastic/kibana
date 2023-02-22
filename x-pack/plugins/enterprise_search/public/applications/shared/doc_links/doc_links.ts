@@ -34,6 +34,8 @@ class DocLinks {
   public appSearchWebCrawler: string;
   public appSearchWebCrawlerEventLogs: string;
   public appSearchWebCrawlerReference: string;
+  public behavioralAnalytics: string;
+  public behavioralAnalyticsEvents: string;
   public bulkApi: string;
   public clientsGoIndex: string;
   public clientsGuide: string;
@@ -61,6 +63,7 @@ class DocLinks {
   public connectorsMongoDB: string;
   public connectorsMySQL: string;
   public connectorsWorkplaceSearch: string;
+  public crawlerExtractionRules: string;
   public crawlerManaging: string;
   public crawlerOverview: string;
   public deployTrainedModels: string;
@@ -70,6 +73,7 @@ class DocLinks {
   public elasticsearchMapping: string;
   public elasticsearchSecureCluster: string;
   public enterpriseSearchConfig: string;
+  public enterpriseSearchEngines: string;
   public enterpriseSearchMailService: string;
   public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
@@ -78,6 +82,7 @@ class DocLinks {
   public languageAnalyzers: string;
   public languageClients: string;
   public licenseManagement: string;
+  public machineLearningStart: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
   public searchUIAppSearch: string;
@@ -147,6 +152,8 @@ class DocLinks {
     this.appSearchWebCrawler = '';
     this.appSearchWebCrawlerEventLogs = '';
     this.appSearchWebCrawlerReference = '';
+    this.behavioralAnalytics = '';
+    this.behavioralAnalyticsEvents = '';
     this.bulkApi = '';
     this.clientsGoIndex = '';
     this.clientsGuide = '';
@@ -174,6 +181,7 @@ class DocLinks {
     this.connectorsMongoDB = '';
     this.connectorsMySQL = '';
     this.connectorsWorkplaceSearch = '';
+    this.crawlerExtractionRules = '';
     this.crawlerManaging = '';
     this.crawlerOverview = '';
     this.deployTrainedModels = '';
@@ -183,6 +191,7 @@ class DocLinks {
     this.elasticsearchMapping = '';
     this.elasticsearchSecureCluster = '';
     this.enterpriseSearchConfig = '';
+    this.enterpriseSearchEngines = '';
     this.enterpriseSearchMailService = '';
     this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
@@ -191,6 +200,7 @@ class DocLinks {
     this.languageAnalyzers = '';
     this.languageClients = '';
     this.licenseManagement = '';
+    this.machineLearningStart = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
     this.searchUIAppSearch = '';
@@ -262,6 +272,8 @@ class DocLinks {
     this.appSearchWebCrawler = docLinks.links.appSearch.webCrawler;
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
     this.appSearchWebCrawlerReference = docLinks.links.appSearch.webCrawlerReference;
+    this.behavioralAnalytics = docLinks.links.enterpriseSearch.behavioralAnalytics;
+    this.behavioralAnalyticsEvents = docLinks.links.enterpriseSearch.behavioralAnalyticsEvents;
     this.bulkApi = docLinks.links.enterpriseSearch.bulkApi;
     this.clientsGoIndex = docLinks.links.clients.goIndex;
     this.clientsGuide = docLinks.links.clients.guide;
@@ -274,7 +286,6 @@ class DocLinks {
     this.clientsNetIntroduction = docLinks.links.clients.netIntroduction;
     this.clientsNetNest = docLinks.links.clients.netNest;
     this.clientsNetSingleNode = docLinks.links.clients.netSingleNode;
-    this.clientsPerlGuide = docLinks.links.clients.perlGuide;
     this.clientsPhpConnecting = docLinks.links.clients.phpConnecting;
     this.clientsPhpGuide = docLinks.links.clients.phpGuide;
     this.clientsPhpInstallation = docLinks.links.clients.phpInstallation;
@@ -289,6 +300,7 @@ class DocLinks {
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
+    this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
     this.deployTrainedModels = docLinks.links.enterpriseSearch.deployTrainedModels;
@@ -298,6 +310,7 @@ class DocLinks {
     this.elasticsearchMapping = docLinks.links.elasticsearch.mapping;
     this.elasticsearchSecureCluster = docLinks.links.elasticsearch.secureCluster;
     this.enterpriseSearchConfig = docLinks.links.enterpriseSearch.configuration;
+    this.enterpriseSearchEngines = docLinks.links.enterpriseSearch.engines;
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
@@ -306,6 +319,7 @@ class DocLinks {
     this.languageAnalyzers = docLinks.links.enterpriseSearch.languageAnalyzers;
     this.languageClients = docLinks.links.enterpriseSearch.languageClients;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
+    this.machineLearningStart = docLinks.links.enterpriseSearch.machineLearningStart;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;

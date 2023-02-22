@@ -12,7 +12,6 @@ import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { SecuritySolutionContext } from '../../../application/security_solution_context';
-import * as TEST_SUBJECTS from '../test_subjects';
 import type { FindingsBaseURLQuery } from '../types';
 import type { CspClientPluginStartDeps } from '../../../types';
 import { PLUGIN_NAME } from '../../../../common';
@@ -42,7 +41,6 @@ export const FindingsSearchBar = ({
     <div css={getContainerStyle(euiTheme)}>
       <SearchBar
         appName={PLUGIN_NAME}
-        dataTestSubj={TEST_SUBJECTS.FINDINGS_SEARCH_BAR}
         showFilterBar={true}
         showQueryInput={true}
         showDatePicker={false}

@@ -102,7 +102,7 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
   const isCurrentUser = currentUser?.username === username;
   const isSystemUser = username === 'kibana' || username === 'kibana_system';
 
-  const [form, eventHandlers] = useForm({
+  const [form, { onBlur, ...eventHandlers }] = useForm({
     onSubmit: async (values) => {
       try {
         await new UserAPIClient(services.http!).changePassword(
@@ -141,6 +141,13 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
     defaultValues,
   });
 
+  // For some reason, the focus-lock dependency that EuiModal uses to accessibly trap focus
+  // is fighting the form `onBlur` and causing focus to be lost when clicking between password
+  // fields, so this workaround waits a tick before validating the form on blur
+  const validateFormOnBlur = (event: React.FocusEvent<HTMLFormElement & HTMLInputElement>) => {
+    requestAnimationFrame(() => onBlur(event));
+  };
+
   const firstFieldRef = useInitialFocus<HTMLInputElement>([isLoading]);
   const modalFormId = useGeneratedHtmlId({ prefix: 'modalForm' });
 
@@ -158,7 +165,13 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
         {isLoading ? (
           <EuiLoadingContent />
         ) : (
-          <EuiForm id={modalFormId} component="form" noValidate {...eventHandlers}>
+          <EuiForm
+            id={modalFormId}
+            component="form"
+            noValidate
+            {...eventHandlers}
+            onBlur={validateFormOnBlur}
+          >
             {isSystemUser ? (
               <>
                 <EuiCallOut

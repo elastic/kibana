@@ -7,14 +7,13 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiComboBox } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { SecuritySolutionDataViewBase } from '../../../../../types';
 import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
 import { useStyles } from './styles';
-
-export const DROPDOWN_TEST_ID = 'tiIndicatorFieldSelectorDropdown';
+import { DROPDOWN_TEST_ID } from './test_ids';
+import { COMBOBOX_PREPEND_LABEL } from './translations';
 
 export interface IndicatorsFieldSelectorProps {
   indexPattern: SecuritySolutionDataViewBase;
@@ -23,12 +22,6 @@ export interface IndicatorsFieldSelectorProps {
 }
 
 const DEFAULT_STACK_BY_VALUE = RawIndicatorFieldId.Feed;
-const COMBOBOX_PREPEND_LABEL = i18n.translate(
-  'xpack.threatIntelligence.indicator.fieldSelector.label',
-  {
-    defaultMessage: 'Stack by',
-  }
-);
 const COMBOBOX_SINGLE_SELECTION = { asPlainText: true };
 
 export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
@@ -53,11 +46,9 @@ export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
 
     const selectedFieldChange = useCallback(
       (values: Array<EuiComboBoxOptionOption<string>>) => {
-        if (!values || values.length === 0) {
-          return;
+        if (values && values.length > 0) {
+          valueChange(values[0].label);
         }
-
-        valueChange(values[0].label);
         setSelectedField(values);
       },
       [valueChange]

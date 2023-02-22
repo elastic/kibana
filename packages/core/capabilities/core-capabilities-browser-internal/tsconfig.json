@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
@@ -11,6 +9,16 @@
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/std",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-capabilities-common"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

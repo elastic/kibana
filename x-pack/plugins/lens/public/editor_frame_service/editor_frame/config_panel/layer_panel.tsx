@@ -32,6 +32,7 @@ import {
   isOperation,
   LayerAction,
   VisualizationDimensionGroupConfig,
+  UserMessagesGetter,
 } from '../../../types';
 import { DragDropIdentifier, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
@@ -91,6 +92,7 @@ export function LayerPanel(
       visualizationId?: string;
     }) => void;
     indexPatternService: IndexPatternServiceAPI;
+    getUserMessages: UserMessagesGetter;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -343,7 +345,12 @@ export function LayerPanel(
           isOnlyLayer,
           isTextBasedLanguage,
           hasLayerSettings: Boolean(
-            activeVisualization.renderLayerSettings ||
+            (activeVisualization.hasLayerSettings?.({
+              layerId,
+              state: visualizationState,
+              frame: props.framePublicAPI,
+            }) &&
+              activeVisualization.renderLayerSettings) ||
               (layerDatasource?.renderLayerSettings && DISPLAY_RANDOM_SAMPLING_SETTINGS)
           ),
           openLayerSettings: () => setPanelSettingsOpen(true),
@@ -356,11 +363,12 @@ export function LayerPanel(
       core,
       isOnlyLayer,
       isTextBasedLanguage,
-      layerDatasource,
+      layerDatasource?.renderLayerSettings,
       layerId,
       layerIndex,
       onCloneLayer,
       onRemoveLayer,
+      props.framePublicAPI,
       updateVisualization,
       visualizationState,
     ]
@@ -503,6 +511,11 @@ export function LayerPanel(
                     <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
                       {group.accessors.map((accessorConfig, accessorIndex) => {
                         const { columnId } = accessorConfig;
+
+                        const messages = props.getUserMessages('dimensionButton', {
+                          dimensionId: columnId,
+                        });
+
                         return (
                           <DraggableDimensionButton
                             activeVisualization={activeVisualization}
@@ -554,15 +567,7 @@ export function LayerPanel(
                                   props.onRemoveDimension({ columnId: id, layerId });
                                   removeButtonRef(id);
                                 }}
-                                invalid={
-                                  layerDatasource &&
-                                  !layerDatasource?.isValidColumn(
-                                    layerDatasourceState,
-                                    dataViews.indexPatterns,
-                                    layerId,
-                                    columnId
-                                  )
-                                }
+                                message={messages[0]}
                               >
                                 {layerDatasource ? (
                                   <NativeRenderer
@@ -572,9 +577,6 @@ export function LayerPanel(
                                       columnId: accessorConfig.columnId,
                                       groupId: group.groupId,
                                       filterOperations: group.filterOperations,
-                                      hideTooltip,
-                                      invalid: group.invalid,
-                                      invalidMessage: group.invalidMessage,
                                       indexPatterns: dataViews.indexPatterns,
                                     }}
                                   />
@@ -584,13 +586,6 @@ export function LayerPanel(
                                       columnId,
                                       label: columnLabelMap?.[columnId] ?? '',
                                       hideTooltip,
-                                      ...(activeVisualization?.validateColumn?.(
-                                        visualizationState,
-                                        { dataViews },
-                                        layerId,
-                                        columnId,
-                                        group
-                                      ) || { invalid: false }),
                                     })}
                                   </>
                                 )}

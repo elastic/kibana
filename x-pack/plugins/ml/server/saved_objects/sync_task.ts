@@ -129,6 +129,10 @@ export class SavedObjectsSyncService {
       return null;
     }
   }
+
+  public async unscheduleSyncTask(taskManager: TaskManagerStartContract) {
+    await taskManager.removeIfExists(SAVED_OBJECTS_SYNC_TASK_ID);
+  }
 }
 
 function createLocalLogger(logger: Logger, preText: string) {

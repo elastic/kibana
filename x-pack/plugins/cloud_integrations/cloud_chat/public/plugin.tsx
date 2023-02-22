@@ -82,7 +82,10 @@ export class CloudChatPlugin implements Plugin {
       });
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.debug(`[cloud.chat] Could not retrieve chat config: ${e.res.status} ${e.message}`, e);
+      console.debug(
+        `[cloud.chat] Could not retrieve chat config: ${e.response.status} ${e.message}`,
+        e
+      );
     }
   }
 }

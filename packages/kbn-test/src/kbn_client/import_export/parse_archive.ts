@@ -14,9 +14,19 @@ export interface SavedObject {
   [key: string]: unknown;
 }
 
-export async function parseArchive(path: string): Promise<SavedObject[]> {
+export async function parseArchive(
+  path: string,
+  { stripSummary = false }: { stripSummary?: boolean } = {}
+): Promise<SavedObject[]> {
   return (await Fs.readFile(path, 'utf-8'))
     .split(/\r?\n\r?\n/)
     .filter((line) => !!line)
-    .map((line) => JSON.parse(line));
+    .map((line) => JSON.parse(line))
+    .filter(
+      stripSummary
+        ? (object) => {
+            return object.type && object.id;
+          }
+        : () => true
+    );
 }

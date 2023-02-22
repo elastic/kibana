@@ -19,10 +19,12 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { pluginsServiceMock } from '@kbn/core-plugins-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { integrationsServiceMock } from '@kbn/core-integrations-browser-mocks';
 import { coreAppsMock } from '@kbn/core-apps-browser-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 
 export const analyticsServiceStartMock = analyticsServiceMock.createAnalyticsServiceStart();
 export const MockAnalyticsService = analyticsServiceMock.create();
@@ -77,10 +79,20 @@ export const MockUiSettingsService = uiSettingsServiceMock.create();
 export const UiSettingsServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockUiSettingsService);
+export const MockSettingsService = settingsServiceMock.create();
+export const SettingsServiceConstructor = jest.fn().mockImplementation(() => MockSettingsService);
 jest.doMock('@kbn/core-ui-settings-browser-internal', () => ({
   UiSettingsService: UiSettingsServiceConstructor,
+  SettingsService: SettingsServiceConstructor,
 }));
 
+export const MockCustomBrandingService = customBrandingServiceMock.create();
+export const CustomBrandingServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockCustomBrandingService);
+jest.doMock('@kbn/core-custom-branding-browser-internal', () => ({
+  CustomBrandingService: CustomBrandingServiceConstructor,
+}));
 export const MockChromeService = chromeServiceMock.create();
 export const ChromeServiceConstructor = jest.fn().mockImplementation(() => MockChromeService);
 jest.doMock('@kbn/core-chrome-browser-internal', () => ({

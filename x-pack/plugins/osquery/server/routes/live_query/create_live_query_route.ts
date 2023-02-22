@@ -7,11 +7,11 @@
 
 import type { IRouter } from '@kbn/core/server';
 import unified from 'unified';
-import markdown from 'remark-parse';
+import markdown from 'remark-parse-no-trim';
 import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
+import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -32,6 +32,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
     },
     async (context, request, response) => {
       const [coreStartServices] = await osqueryContext.getStartServices();
+      const soClient = (await context.core).savedObjects.client;
 
       const {
         osquery: { writeLiveQueries, runSavedQueries },
@@ -42,15 +43,17 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         (runSavedQueries && (request.body.saved_query_id || request.body.pack_id))
       );
 
+      const client = await osqueryContext.service
+        .getRuleRegistryService()
+        ?.getRacClientWithRequest(request);
+
+      const alertData = request.body.alert_ids?.length
+        ? await client?.get({ id: request.body.alert_ids[0] })
+        : undefined;
+
       if (isInvalid) {
         if (request.body.alert_ids?.length) {
           try {
-            const client = await osqueryContext.service
-              .getRuleRegistryService()
-              ?.getRacClientWithRequest(request);
-
-            const alertData = await client?.get({ id: request.body.alert_ids[0] });
-
             if (alertData?.['kibana.alert.rule.note']) {
               const parsedAlertInvestigationGuide = unified()
                 .use([[markdown, {}], OsqueryParser])
@@ -65,9 +68,17 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
                 osqueryQueries,
                 (payload: {
                   configuration: { query: string; ecs_mapping: ECSMappingOrUndefined };
-                }) =>
-                  payload?.configuration?.query === request.body.query &&
-                  deepEqual(payload?.configuration?.ecs_mapping, request.body.ecs_mapping)
+                }) => {
+                  const { result: replacedConfigurationQuery } = replaceParamsQuery(
+                    payload.configuration.query,
+                    alertData
+                  );
+
+                  return (
+                    replacedConfigurationQuery === request.body.query &&
+                    deepEqual(payload.configuration.ecs_mapping, request.body.ecs_mapping)
+                  );
+                }
               );
 
               if (!requestQueryExistsInTheInvestigationGuide) throw new Error();
@@ -85,7 +96,11 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         const { response: osqueryAction } = await createActionHandler(
           osqueryContext,
           request.body,
-          { currentUser }
+          {
+            soClient,
+            metadata: { currentUser },
+            alertData,
+          }
         );
 
         return response.ok({

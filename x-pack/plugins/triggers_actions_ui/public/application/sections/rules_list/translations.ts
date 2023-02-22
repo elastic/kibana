@@ -379,6 +379,43 @@ export const getSuccessfulDeletionNotificationText = (
       },
     }
   );
+
+export const getSuccessfulEnablingNotificationText = (
+  numSuccesses: number,
+  singleTitle: string,
+  multipleTitle: string
+) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.enableSelectedIdsSuccessNotification.descriptionText',
+    {
+      defaultMessage:
+        'Enabled {numSuccesses, number} {numSuccesses, plural, one {{singleTitle}} other {{multipleTitle}}}',
+      values: {
+        numSuccesses,
+        singleTitle,
+        multipleTitle,
+      },
+    }
+  );
+
+export const getSuccessfulDisablingNotificationText = (
+  numSuccesses: number,
+  singleTitle: string,
+  multipleTitle: string
+) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.disableSelectedIdsSuccessNotification.descriptionText',
+    {
+      defaultMessage:
+        'Disabled {numSuccesses, number} {numSuccesses, plural, one {{singleTitle}} other {{multipleTitle}}}',
+      values: {
+        numSuccesses,
+        singleTitle,
+        multipleTitle,
+      },
+    }
+  );
+
 export const getFailedDeletionNotificationText = (
   numErrors: number,
   singleTitle: string,
@@ -389,6 +426,42 @@ export const getFailedDeletionNotificationText = (
     {
       defaultMessage:
         'Failed to delete {numErrors, number} {numErrors, plural, one {{singleTitle}} other {{multipleTitle}}}',
+      values: {
+        numErrors,
+        singleTitle,
+        multipleTitle,
+      },
+    }
+  );
+
+export const getFailedEnablingNotificationText = (
+  numErrors: number,
+  singleTitle: string,
+  multipleTitle: string
+) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.enableSelectedIdsErrorNotification.descriptionText',
+    {
+      defaultMessage:
+        'Failed to enable {numErrors, number} {numErrors, plural, one {{singleTitle}} other {{multipleTitle}}}',
+      values: {
+        numErrors,
+        singleTitle,
+        multipleTitle,
+      },
+    }
+  );
+
+export const getFailedDisablingNotificationText = (
+  numErrors: number,
+  singleTitle: string,
+  multipleTitle: string
+) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.disableSelectedIdsErrorNotification.descriptionText',
+    {
+      defaultMessage:
+        'Failed to disable {numErrors, number} {numErrors, plural, one {{singleTitle}} other {{multipleTitle}}}',
       values: {
         numErrors,
         singleTitle,
@@ -408,6 +481,46 @@ export const getPartialSuccessDeletionNotificationText = (
     {
       defaultMessage:
         'Deleted {numberOfSuccess, number} {numberOfSuccess, plural, one {{singleTitle}} other {{multipleTitle}}}, {numberOfErrors, number} {numberOfErrors, plural, one {{singleTitle}} other {{multipleTitle}}} encountered errors',
+      values: {
+        numberOfSuccess,
+        numberOfErrors,
+        singleTitle,
+        multipleTitle,
+      },
+    }
+  );
+
+export const getPartialSuccessEnablingNotificationText = (
+  numberOfSuccess: number,
+  numberOfErrors: number,
+  singleTitle: string,
+  multipleTitle: string
+) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.enableSelectedIdsPartialSuccessNotification.descriptionText',
+    {
+      defaultMessage:
+        'Enabled {numberOfSuccess, number} {numberOfSuccess, plural, one {{singleTitle}} other {{multipleTitle}}}, {numberOfErrors, number} {numberOfErrors, plural, one {{singleTitle}} other {{multipleTitle}}} encountered errors',
+      values: {
+        numberOfSuccess,
+        numberOfErrors,
+        singleTitle,
+        multipleTitle,
+      },
+    }
+  );
+
+export const getPartialSuccessDisablingNotificationText = (
+  numberOfSuccess: number,
+  numberOfErrors: number,
+  singleTitle: string,
+  multipleTitle: string
+) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.disableSelectedIdsPartialSuccessNotification.descriptionText',
+    {
+      defaultMessage:
+        'Disabled {numberOfSuccess, number} {numberOfSuccess, plural, one {{singleTitle}} other {{multipleTitle}}}, {numberOfErrors, number} {numberOfErrors, plural, one {{singleTitle}} other {{multipleTitle}}} encountered errors',
       values: {
         numberOfSuccess,
         numberOfErrors,

@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-lifecycle-server-mocks",
-        "id": "def-server.coreInternalLifecycleMock",
+        "id": "def-common.coreInternalLifecycleMock",
         "type": "Object",
         "tags": [],
         "label": "coreInternalLifecycleMock",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-lifecycle-server-mocks",
-            "id": "def-server.coreInternalLifecycleMock.createInternalPreboot",
+            "id": "def-common.coreInternalLifecycleMock.createInternalPreboot",
             "type": "Function",
             "tags": [],
             "label": "createInternalPreboot",
@@ -37,9 +45,9 @@
               "() => { analytics: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-analytics-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreAnalyticsServerPluginApi",
-                "section": "def-server.AnalyticsServicePreboot",
+                "section": "def-common.AnalyticsServicePreboot",
                 "text": "AnalyticsServicePreboot"
               },
               ">; context: jest.Mocked<",
@@ -47,17 +55,17 @@
               ">; elasticsearch: MockedElasticSearchServicePreboot; http: ",
               {
                 "pluginId": "@kbn/core-http-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerMocksPluginApi",
-                "section": "def-server.InternalHttpServicePrebootMock",
+                "section": "def-common.InternalHttpServicePrebootMock",
                 "text": "InternalHttpServicePrebootMock"
               },
               "; httpResources: { createRegistrar: jest.Mock<jest.Mocked<",
               {
                 "pluginId": "@kbn/core-http-resources-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-server.HttpResources",
+                "section": "def-common.HttpResources",
                 "text": "HttpResources"
               },
               ">, []>; }; uiSettings: jest.Mocked<",
@@ -67,9 +75,9 @@
               ">; preboot: ",
               {
                 "pluginId": "@kbn/core-preboot-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCorePrebootServerMocksPluginApi",
-                "section": "def-server.InternalPrebootServicePrebootMock",
+                "section": "def-common.InternalPrebootServicePrebootMock",
                 "text": "InternalPrebootServicePrebootMock"
               },
               "; }"
@@ -82,7 +90,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server-mocks",
-            "id": "def-server.coreInternalLifecycleMock.createInternalSetup",
+            "id": "def-common.coreInternalLifecycleMock.createInternalSetup",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetup",
@@ -91,17 +99,17 @@
               "() => { analytics: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-analytics-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreAnalyticsServerPluginApi",
-                "section": "def-server.AnalyticsServiceSetup",
+                "section": "def-common.AnalyticsServiceSetup",
                 "text": "AnalyticsServiceSetup"
               },
               ">; capabilities: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-capabilities-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                "section": "def-server.CapabilitiesSetup",
+                "section": "def-common.CapabilitiesSetup",
                 "text": "CapabilitiesSetup"
               },
               ">; context: jest.Mocked<",
@@ -109,17 +117,17 @@
               ">; docLinks: ",
               {
                 "pluginId": "@kbn/core-doc-links-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreDocLinksServerPluginApi",
-                "section": "def-server.DocLinksServiceSetup",
+                "section": "def-common.DocLinksServiceSetup",
                 "text": "DocLinksServiceSetup"
               },
               "; elasticsearch: MockedInternalElasticSearchServiceSetup; http: ",
               {
                 "pluginId": "@kbn/core-http-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerMocksPluginApi",
-                "section": "def-server.InternalHttpServiceSetupMock",
+                "section": "def-common.InternalHttpServiceSetupMock",
                 "text": "InternalHttpServiceSetupMock"
               },
               "; savedObjects: jest.Mocked<",
@@ -139,9 +147,9 @@
               ">; httpResources: { createRegistrar: jest.Mock<jest.Mocked<",
               {
                 "pluginId": "@kbn/core-http-resources-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-server.HttpResources",
+                "section": "def-common.HttpResources",
                 "text": "HttpResources"
               },
               ">, []>; }; rendering: jest.Mocked<",
@@ -149,9 +157,9 @@
               ">; uiSettings: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.UiSettingsServiceSetup",
+                "section": "def-common.UiSettingsServiceSetup",
                 "text": "UiSettingsServiceSetup"
               },
               ">; logging: jest.Mocked<",
@@ -159,24 +167,24 @@
               ">; metrics: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.MetricsServiceSetup",
+                "section": "def-common.MetricsServiceSetup",
                 "text": "MetricsServiceSetup"
               },
               ">; deprecations: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.DeprecationRegistryProvider",
+                "section": "def-common.DeprecationRegistryProvider",
                 "text": "DeprecationRegistryProvider"
               },
               ">; executionContext: jest.Mocked<",
               "IExecutionContext",
               ">; coreUsageData: jest.Mocked<",
               "InternalCoreUsageDataSetup",
-              ">; }"
+              ">; customBranding: { register: jest.Mock<any, any>; getBrandingFor: jest.Mock<any, any>; }; }"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
             "deprecated": false,
@@ -186,7 +194,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server-mocks",
-            "id": "def-server.coreInternalLifecycleMock.createInternalStart",
+            "id": "def-common.coreInternalLifecycleMock.createInternalStart",
             "type": "Function",
             "tags": [],
             "label": "createInternalStart",
@@ -195,73 +203,73 @@
               "() => { analytics: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-analytics-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreAnalyticsServerPluginApi",
-                "section": "def-server.AnalyticsServiceStart",
+                "section": "def-common.AnalyticsServiceStart",
                 "text": "AnalyticsServiceStart"
               },
               ">; capabilities: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-capabilities-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                "section": "def-server.CapabilitiesStart",
+                "section": "def-common.CapabilitiesStart",
                 "text": "CapabilitiesStart"
               },
               ">; docLinks: ",
               {
                 "pluginId": "@kbn/core-doc-links-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreDocLinksServerPluginApi",
-                "section": "def-server.DocLinksServiceSetup",
+                "section": "def-common.DocLinksServiceSetup",
                 "text": "DocLinksServiceSetup"
               },
               "; elasticsearch: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerMocksPluginApi",
-                "section": "def-server.MockedElasticSearchServiceStart",
+                "section": "def-common.MockedElasticSearchServiceStart",
                 "text": "MockedElasticSearchServiceStart"
               },
               "; http: ",
               {
                 "pluginId": "@kbn/core-http-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerMocksPluginApi",
-                "section": "def-server.InternalHttpServiceStartMock",
+                "section": "def-common.InternalHttpServiceStartMock",
                 "text": "InternalHttpServiceStartMock"
               },
               "; metrics: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.MetricsServiceSetup",
+                "section": "def-common.MetricsServiceSetup",
                 "text": "MetricsServiceSetup"
               },
               ">; savedObjects: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsServiceStart",
+                "section": "def-common.SavedObjectsServiceStart",
                 "text": "SavedObjectsServiceStart"
               },
               ">; uiSettings: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.UiSettingsServiceStart",
+                "section": "def-common.UiSettingsServiceStart",
                 "text": "UiSettingsServiceStart"
               },
               ">; coreUsageData: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.CoreUsageDataStart",
+                "section": "def-common.CoreUsageDataStart",
                 "text": "CoreUsageDataStart"
               },
               ">; executionContext: jest.Mocked<",
@@ -269,12 +277,12 @@
               ">; deprecations: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-deprecations-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreDeprecationsServerInternalPluginApi",
-                "section": "def-server.InternalDeprecationsServiceStart",
+                "section": "def-common.InternalDeprecationsServiceStart",
                 "text": "InternalDeprecationsServiceStart"
               },
-              ">; }"
+              ">; customBranding: {}; }"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
             "deprecated": false,
@@ -287,7 +295,7 @@
       },
       {
         "parentPluginId": "@kbn/core-lifecycle-server-mocks",
-        "id": "def-server.coreLifecycleMock",
+        "id": "def-common.coreLifecycleMock",
         "type": "Object",
         "tags": [],
         "label": "coreLifecycleMock",
@@ -298,7 +306,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-lifecycle-server-mocks",
-            "id": "def-server.coreLifecycleMock.createPreboot",
+            "id": "def-common.coreLifecycleMock.createPreboot",
             "type": "Function",
             "tags": [],
             "label": "createPreboot",
@@ -314,7 +322,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server-mocks",
-            "id": "def-server.coreLifecycleMock.createCoreSetup",
+            "id": "def-common.coreLifecycleMock.createCoreSetup",
             "type": "Function",
             "tags": [],
             "label": "createCoreSetup",
@@ -329,7 +337,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-lifecycle-server-mocks",
-                "id": "def-server.coreLifecycleMock.createCoreSetup.$1",
+                "id": "def-common.coreLifecycleMock.createCoreSetup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -345,7 +353,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server-mocks",
-            "id": "def-server.coreLifecycleMock.createCoreStart",
+            "id": "def-common.coreLifecycleMock.createCoreStart",
             "type": "Function",
             "tags": [],
             "label": "createCoreStart",
@@ -354,17 +362,17 @@
               "() => ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.MockedKeys",
+                "section": "def-common.MockedKeys",
                 "text": "MockedKeys"
               },
               "<",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ">"
@@ -379,13 +387,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

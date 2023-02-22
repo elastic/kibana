@@ -9,6 +9,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { useMemo } from 'react';
 import { HttpFetchQuery } from '@kbn/core/public';
+import { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { HttpService } from '../http_service';
 import { basePath } from '.';
 import { useMlKibana } from '../../contexts/kibana';
@@ -17,6 +18,7 @@ import type {
   ModelPipelines,
   TrainedModelStat,
   NodesOverviewResponse,
+  MemoryUsageInfo,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -119,7 +121,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     getTrainedModelsNodesOverview() {
       return httpService.http<NodesOverviewResponse>({
-        path: `${apiBasePath}/trained_models/nodes_overview`,
+        path: `${apiBasePath}/model_management/nodes_overview`,
         method: 'GET',
       });
     },
@@ -183,6 +185,14 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         path: `${apiBasePath}/trained_models/pipeline_simulate`,
         method: 'POST',
         body,
+      });
+    },
+
+    memoryUsage(type?: MlSavedObjectType, node?: string, showClosedJobs = false) {
+      return httpService.http<MemoryUsageInfo[]>({
+        path: `${apiBasePath}/model_management/memory_usage`,
+        method: 'GET',
+        query: { type, node, showClosedJobs },
       });
     },
   };

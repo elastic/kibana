@@ -23,9 +23,10 @@ export interface ResultsServiceProvider {
 export function getResultsServiceProvider(getGuards: GetGuards): ResultsServiceProvider {
   return {
     resultsServiceProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
+      const guards = getGuards(request, savedObjectsClient);
       return {
         async getAnomaliesTableData(...args) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(async ({ mlClient }) => {

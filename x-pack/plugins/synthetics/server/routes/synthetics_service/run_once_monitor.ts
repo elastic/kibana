@@ -26,12 +26,16 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
 
     const validationResult = validateMonitor(monitor);
 
+    const spaceId = server.spaces.spacesService.getSpaceId(request);
+
     if (!validationResult.valid || !validationResult.decodedMonitor) {
       const { reason: message, details, payload } = validationResult;
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
     const { syntheticsService } = syntheticsMonitorClient;
+
+    const paramsBySpace = await syntheticsService.getSyntheticsParams({ spaceId });
 
     const errors = await syntheticsService.runOnceConfigs([
       formatHeartbeatRequest({
@@ -40,6 +44,8 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
         monitorId,
         heartbeatId: monitorId,
         runOnce: true,
+        testRunId: monitorId,
+        params: paramsBySpace[spaceId],
       }),
     ]);
 

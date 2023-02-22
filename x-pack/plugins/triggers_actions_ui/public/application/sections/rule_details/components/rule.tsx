@@ -8,7 +8,7 @@
 import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
-import { ActionGroup, AlertStatusValues } from '@kbn/alerting-plugin/common';
+import { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import {
@@ -68,7 +68,7 @@ export function RuleComponent({
   const { ruleTypeRegistry, actionTypeRegistry } = useKibana().services;
 
   const alerts = Object.entries(ruleSummary.alerts)
-    .map(([alertId, alert]) => alertToListItem(durationEpoch, ruleType, alertId, alert))
+    .map(([alertId, alert]) => alertToListItem(durationEpoch, alertId, alert))
     .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
 
   const onMuteAction = async (alert: AlertListItem) => {
@@ -179,39 +179,13 @@ export function RuleComponent({
 }
 export const RuleWithApi = withBulkRuleOperations(RuleComponent);
 
-const ACTIVE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.active',
-  { defaultMessage: 'Active' }
-);
-
-const INACTIVE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.inactive',
-  { defaultMessage: 'Recovered' }
-);
-
-function getActionGroupName(ruleType: RuleType, actionGroupId?: string): string | undefined {
-  actionGroupId = actionGroupId || ruleType.defaultActionGroupId;
-  const actionGroup = ruleType?.actionGroups?.find(
-    (group: ActionGroup<string>) => group.id === actionGroupId
-  );
-  return actionGroup?.name;
-}
-
 export function alertToListItem(
   durationEpoch: number,
-  ruleType: RuleType,
   alertId: string,
   alert: AlertStatus
 ): AlertListItem {
   const isMuted = !!alert?.muted;
-  const status =
-    alert?.status === 'Active'
-      ? {
-          label: ACTIVE_LABEL,
-          actionGroup: getActionGroupName(ruleType, alert?.actionGroupId),
-          healthColor: 'primary',
-        }
-      : { label: INACTIVE_LABEL, healthColor: 'subdued' };
+  const status = alert.status;
   const start = alert?.activeStartDate ? new Date(alert.activeStartDate) : undefined;
   const duration = start ? durationEpoch - start.valueOf() : 0;
   const sortPriority = getSortPriorityByStatus(alert?.status);
@@ -222,6 +196,7 @@ export function alertToListItem(
     duration,
     isMuted,
     sortPriority,
+    flapping: alert.flapping,
   };
 }
 

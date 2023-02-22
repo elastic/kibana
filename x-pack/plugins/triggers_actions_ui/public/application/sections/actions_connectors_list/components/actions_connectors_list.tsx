@@ -9,7 +9,6 @@ import { ClassNames } from '@emotion/react';
 import React, { useState, useEffect } from 'react';
 import {
   EuiInMemoryTable,
-  EuiSpacer,
   EuiButton,
   EuiLink,
   EuiIconTip,
@@ -412,57 +411,41 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             options: actionTypesList,
           },
         ],
-        toolsLeft:
-          selectedItems.length === 0 || !canDelete
-            ? []
-            : [
-                <EuiButton
-                  key="delete"
-                  iconType="trash"
-                  color="danger"
-                  data-test-subj="bulkDelete"
-                  onClick={() => onDelete(selectedItems)}
-                  title={
-                    canDelete
-                      ? undefined
-                      : i18n.translate(
-                          'xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle',
-                          { defaultMessage: 'Unable to delete connectors' }
-                        )
-                  }
-                >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel"
-                    defaultMessage="Delete {count}"
-                    values={{
-                      count: selectedItems.length,
-                    }}
-                  />
-                </EuiButton>,
-              ],
-      }}
-    />
-  );
-
-  return (
-    <>
-      {actionConnectorTableItems.length !== 0 && (
-        <EuiPageTemplate.Header
-          paddingSize="none"
-          pageTitle={i18n.translate('xpack.triggersActionsUI.connectors.home.appTitle', {
-            defaultMessage: 'Connectors',
-          })}
-          description={i18n.translate('xpack.triggersActionsUI.connectors.home.description', {
-            defaultMessage: 'Connect third-party software with your alerting data.',
-          })}
-          rightSideItems={(canSave
+        toolsLeft: (selectedItems.length === 0 || !canDelete
+          ? []
+          : [
+              <EuiButton
+                key="delete"
+                iconType="trash"
+                color="danger"
+                data-test-subj="bulkDelete"
+                onClick={() => onDelete(selectedItems)}
+                title={
+                  canDelete
+                    ? undefined
+                    : i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle',
+                        { defaultMessage: 'Unable to delete connectors' }
+                      )
+                }
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel"
+                  defaultMessage="Delete {count}"
+                  values={{
+                    count: selectedItems.length,
+                  }}
+                />
+              </EuiButton>,
+            ]
+        ).concat(
+          canSave
             ? [
                 <EuiButton
                   data-test-subj="createActionButton"
                   key="create-action"
                   fill
                   onClick={() => setAddFlyoutVisibility(true)}
-                  iconType="plusInCircle"
                 >
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
@@ -471,21 +454,13 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                 </EuiButton>,
               ]
             : []
-          ).concat([
-            <EuiButtonEmpty
-              data-test-subj="documentationButton"
-              key="documentation-button"
-              href={docLinks.links.alerting.connectors}
-              iconType="help"
-            >
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionsConnectorsList.documentationButtonLabel"
-                defaultMessage="Documentation"
-              />
-            </EuiButtonEmpty>,
-          ])}
-        />
-      )}
+        ),
+      }}
+    />
+  );
+
+  return (
+    <>
       <EuiPageTemplate.Section
         paddingSize="none"
         data-test-subj="actionsList"
@@ -535,7 +510,6 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           setIsLoadingState={(isLoading: boolean) => setIsLoadingActionTypes(isLoading)}
         />
 
-        <EuiSpacer size="m" />
         {/* Render the view based on if there's data or if they can save */}
         {(isLoadingActions || isLoadingActionTypes) && <CenterJustifiedSpinner />}
         {actionConnectorTableItems.length !== 0 && table}

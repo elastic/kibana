@@ -8,7 +8,10 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { generateMlInferencePipelineBody } from '../../../common/ml_inference_pipeline';
-import { MlInferencePipeline } from '../../../common/types/pipelines';
+import {
+  InferencePipelineInferenceConfig,
+  MlInferencePipeline,
+} from '../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
 
 export interface CreatedPipelines {
@@ -221,6 +224,7 @@ export const createIndexPipelineDefinitions = async (
  * @param modelId modelId selected by user.
  * @param sourceField The document field that model will read.
  * @param destinationField The document field that the model will write to.
+ * @param inferenceConfig The configuration for the model.
  * @param esClient the Elasticsearch Client to use when retrieving model details.
  */
 export const formatMlPipelineBody = async (
@@ -228,6 +232,7 @@ export const formatMlPipelineBody = async (
   modelId: string,
   sourceField: string,
   destinationField: string,
+  inferenceConfig: InferencePipelineInferenceConfig | undefined,
   esClient: ElasticsearchClient
 ): Promise<MlInferencePipeline> => {
   // this will raise a 404 if model doesn't exist
@@ -235,6 +240,7 @@ export const formatMlPipelineBody = async (
   const model = models.trained_model_configs[0];
   return generateMlInferencePipelineBody({
     destinationField,
+    inferenceConfig,
     model,
     pipelineName,
     sourceField,

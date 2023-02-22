@@ -9,6 +9,7 @@ import {
   RuleDataClientMock,
 } from '../rule_data_client/rule_data_client.mock';
 import {
+  ALERT_ACTION_GROUP,
   ALERT_END,
   ALERT_INSTANCE_ID,
   ALERT_RULE_EXECUTION_UUID,
@@ -18,7 +19,7 @@ import {
   EVENT_ACTION,
   TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
-import { createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
+import { AlertDocument, createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
 
 describe('createGetSummarizedAlertsFn', () => {
   let ruleDataClientMock: RuleDataClientMock;
@@ -43,7 +44,12 @@ describe('createGetSummarizedAlertsFn', () => {
       isLifecycleAlert: false,
     })();
 
-    await getSummarizedAlertsFn({ executionUuid: 'abc', ruleId: 'rule-id', spaceId: 'space-id' });
+    await getSummarizedAlertsFn({
+      executionUuid: 'abc',
+      ruleId: 'rule-id',
+      spaceId: 'space-id',
+      excludedAlertInstanceIds: [],
+    });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
   });
 
@@ -54,7 +60,12 @@ describe('createGetSummarizedAlertsFn', () => {
       isLifecycleAlert: false,
     })();
 
-    await getSummarizedAlertsFn({ executionUuid: 'abc', ruleId: 'rule-id', spaceId: 'space-id' });
+    await getSummarizedAlertsFn({
+      executionUuid: 'abc',
+      ruleId: 'rule-id',
+      spaceId: 'space-id',
+      excludedAlertInstanceIds: [],
+    });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
   });
 
@@ -66,6 +77,8 @@ describe('createGetSummarizedAlertsFn', () => {
         },
         hits: [
           {
+            _id: '1',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -76,6 +89,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '2',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -95,6 +110,8 @@ describe('createGetSummarizedAlertsFn', () => {
         },
         hits: [
           {
+            _id: '3',
+            _index: '.alerts-default-000001',
             _source: {
               '@timestamp': '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -105,6 +122,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '4',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -115,6 +134,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '5',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -134,6 +155,8 @@ describe('createGetSummarizedAlertsFn', () => {
         },
         hits: [
           {
+            _id: '6',
+            _index: '.alerts-default-000001',
             _source: {
               '@timestamp': '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -156,12 +179,13 @@ describe('createGetSummarizedAlertsFn', () => {
       executionUuid: 'abc',
       ruleId: 'rule-id',
       spaceId: 'space-id',
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(3);
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(1, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -181,6 +205,15 @@ describe('createGetSummarizedAlertsFn', () => {
                   [EVENT_ACTION]: 'open',
                 },
               },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
@@ -188,7 +221,7 @@ describe('createGetSummarizedAlertsFn', () => {
     });
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(2, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -208,6 +241,15 @@ describe('createGetSummarizedAlertsFn', () => {
                   [EVENT_ACTION]: 'active',
                 },
               },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
@@ -215,7 +257,7 @@ describe('createGetSummarizedAlertsFn', () => {
     });
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(3, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -235,6 +277,15 @@ describe('createGetSummarizedAlertsFn', () => {
                   [EVENT_ACTION]: 'close',
                 },
               },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
@@ -243,58 +294,142 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(summarizedAlerts.new.count).toEqual(2);
     expect(summarizedAlerts.ongoing.count).toEqual(3);
     expect(summarizedAlerts.recovered.count).toEqual(1);
-    expect(summarizedAlerts.new.alerts).toEqual([
+    expect(summarizedAlerts.new.data).toEqual([
       {
+        _id: '1',
+        _index: '.alerts-default-000001',
         '@timestamp': '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [EVENT_ACTION]: 'open',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
-        [ALERT_UUID]: 'uuid1',
+        event: {
+          action: 'open',
+        },
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_3',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid1',
+          },
+        },
       },
       {
+        _id: '2',
+        _index: '.alerts-default-000001',
         '@timestamp': '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [EVENT_ACTION]: 'open',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_4',
-        [ALERT_UUID]: 'uuid2',
+        event: {
+          action: 'open',
+        },
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_4',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid2',
+          },
+        },
       },
     ]);
-    expect(summarizedAlerts.ongoing.alerts).toEqual([
+    expect(summarizedAlerts.ongoing.data).toEqual([
       {
+        _id: '3',
+        _index: '.alerts-default-000001',
         '@timestamp': '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [EVENT_ACTION]: 'active',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
-        [ALERT_UUID]: 'uuid3',
+        event: {
+          action: 'active',
+        },
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_1',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid3',
+          },
+        },
       },
       {
+        _id: '4',
+        _index: '.alerts-default-000001',
         '@timestamp': '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [EVENT_ACTION]: 'active',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
-        [ALERT_UUID]: 'uuid4',
+        event: {
+          action: 'active',
+        },
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_2',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid4',
+          },
+        },
       },
       {
+        _id: '5',
+        _index: '.alerts-default-000001',
         '@timestamp': '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [EVENT_ACTION]: 'active',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_5',
-        [ALERT_UUID]: 'uuid5',
+        event: {
+          action: 'active',
+        },
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_5',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid5',
+          },
+        },
       },
     ]);
-    expect(summarizedAlerts.recovered.alerts).toEqual([
+    expect(summarizedAlerts.recovered.data).toEqual([
       {
+        _id: '6',
+        _index: '.alerts-default-000001',
         '@timestamp': '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [EVENT_ACTION]: 'close',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_9',
-        [ALERT_UUID]: 'uuid6',
+        event: {
+          action: 'close',
+        },
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_9',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid6',
+          },
+        },
       },
     ]);
   });
@@ -307,6 +442,8 @@ describe('createGetSummarizedAlertsFn', () => {
         },
         hits: [
           {
+            _id: '1',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -318,6 +455,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '2',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -329,6 +468,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '3',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:10:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -349,6 +490,8 @@ describe('createGetSummarizedAlertsFn', () => {
         },
         hits: [
           {
+            _id: '4',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -360,6 +503,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '5',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -380,6 +525,8 @@ describe('createGetSummarizedAlertsFn', () => {
         },
         hits: [
           {
+            _id: '6',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -405,12 +552,13 @@ describe('createGetSummarizedAlertsFn', () => {
       end: new Date('2020-01-01T12:25:00.000Z'),
       ruleId: 'rule-id',
       spaceId: 'space-id',
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(3);
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(1, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -426,6 +574,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
                 },
               },
               {
@@ -442,7 +599,7 @@ describe('createGetSummarizedAlertsFn', () => {
     });
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(2, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -458,6 +615,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
                 },
               },
               {
@@ -483,7 +649,7 @@ describe('createGetSummarizedAlertsFn', () => {
     });
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(3, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -502,6 +668,15 @@ describe('createGetSummarizedAlertsFn', () => {
                 },
               },
               {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
+              {
                 range: {
                   [ALERT_END]: {
                     gte: '2020-01-01T11:00:00.000Z',
@@ -517,65 +692,137 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(summarizedAlerts.new.count).toEqual(3);
     expect(summarizedAlerts.ongoing.count).toEqual(2);
     expect(summarizedAlerts.recovered.count).toEqual(1);
-    expect(summarizedAlerts.new.alerts).toEqual([
+    expect(summarizedAlerts.new.data).toEqual([
       {
+        _id: '1',
+        _index: '.alerts-default-000001',
         [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
-        [ALERT_UUID]: 'uuid1',
-        [ALERT_START]: '2020-01-01T12:00:00.000Z',
         alert_type: 'new',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_3',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            start: '2020-01-01T12:00:00.000Z',
+            uuid: 'uuid1',
+          },
+        },
       },
       {
+        _id: '2',
+        _index: '.alerts-default-000001',
         [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_4',
-        [ALERT_UUID]: 'uuid2',
-        [ALERT_START]: '2020-01-01T12:00:00.000Z',
         alert_type: 'new',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_4',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            start: '2020-01-01T12:00:00.000Z',
+            uuid: 'uuid2',
+          },
+        },
       },
       {
+        _id: '3',
+        _index: '.alerts-default-000001',
         [TIMESTAMP]: '2020-01-01T12:10:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
-        [ALERT_UUID]: 'uuid3',
-        [ALERT_START]: '2020-01-01T12:10:00.000Z',
         alert_type: 'new',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_1',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            start: '2020-01-01T12:10:00.000Z',
+            uuid: 'uuid3',
+          },
+        },
       },
     ]);
-    expect(summarizedAlerts.ongoing.alerts).toEqual([
+    expect(summarizedAlerts.ongoing.data).toEqual([
       {
+        _id: '4',
+        _index: '.alerts-default-000001',
         [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
-        [ALERT_UUID]: 'uuid4',
-        [ALERT_START]: '2020-01-01T12:00:00.000Z',
         alert_type: 'ongoing',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_2',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            start: '2020-01-01T12:00:00.000Z',
+            uuid: 'uuid4',
+          },
+        },
       },
       {
+        _id: '5',
+        _index: '.alerts-default-000001',
         [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_5',
-        [ALERT_UUID]: 'uuid5',
-        [ALERT_START]: '2020-01-01T11:00:00.000Z',
         alert_type: 'ongoing',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_5',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            start: '2020-01-01T11:00:00.000Z',
+            uuid: 'uuid5',
+          },
+        },
       },
     ]);
-    expect(summarizedAlerts.recovered.alerts).toEqual([
+    expect(summarizedAlerts.recovered.data).toEqual([
       {
+        _id: '6',
+        _index: '.alerts-default-000001',
         [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_9',
-        [ALERT_UUID]: 'uuid6',
-        [ALERT_START]: '2020-01-01T11:00:00.000Z',
-        [ALERT_END]: '2020-01-01T12:20:00.000Z',
         alert_type: 'recovered',
+        kibana: {
+          alert: {
+            end: '2020-01-01T12:20:00.000Z',
+            instance: {
+              id: 'TEST_ALERT_9',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            start: '2020-01-01T11:00:00.000Z',
+            uuid: 'uuid6',
+          },
+        },
       },
     ]);
   });
@@ -588,6 +835,8 @@ describe('createGetSummarizedAlertsFn', () => {
         },
         hits: [
           {
+            _id: '1',
+            _index: '.alerts-default-000001',
             _source: {
               '@timestamp': '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -597,6 +846,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '2',
+            _index: '.alerts-default-000001',
             _source: {
               '@timestamp': '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -606,6 +857,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '3',
+            _index: '.alerts-default-000001',
             _source: {
               '@timestamp': '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -615,6 +868,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '4',
+            _index: '.alerts-default-000001',
             _source: {
               '@timestamp': '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -624,16 +879,19 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '5',
+            _index: '.alerts-default-000001',
             _source: {
               '@timestamp': '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
               [ALERT_RULE_UUID]: 'rule-id',
-              [EVENT_ACTION]: 'active',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_5',
               [ALERT_UUID]: 'uuid5',
             },
           },
           {
+            _id: '6',
+            _index: '.alerts-default-000001',
             _source: {
               '@timestamp': '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -655,12 +913,13 @@ describe('createGetSummarizedAlertsFn', () => {
       executionUuid: 'abc',
       ruleId: 'rule-id',
       spaceId: 'space-id',
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledWith({
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -675,6 +934,15 @@ describe('createGetSummarizedAlertsFn', () => {
                   [ALERT_RULE_UUID]: 'rule-id',
                 },
               },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
@@ -683,53 +951,124 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(summarizedAlerts.new.count).toEqual(6);
     expect(summarizedAlerts.ongoing.count).toEqual(0);
     expect(summarizedAlerts.recovered.count).toEqual(0);
-    expect(summarizedAlerts.new.alerts).toEqual([
+    expect(summarizedAlerts.new.data).toEqual([
       {
-        '@timestamp': '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
-        [ALERT_UUID]: 'uuid1',
+        _id: '1',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_3',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid1',
+          },
+        },
       },
       {
-        '@timestamp': '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_4',
-        [ALERT_UUID]: 'uuid2',
+        _id: '2',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_4',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid2',
+          },
+        },
       },
       {
-        '@timestamp': '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
-        [ALERT_UUID]: 'uuid3',
+        _id: '3',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_1',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid3',
+          },
+        },
       },
       {
-        '@timestamp': '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
-        [ALERT_UUID]: 'uuid4',
+        _id: '4',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_2',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid4',
+          },
+        },
       },
       {
-        '@timestamp': '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [EVENT_ACTION]: 'active',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_5',
-        [ALERT_UUID]: 'uuid5',
+        _id: '5',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_5',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid5',
+          },
+        },
       },
       {
-        '@timestamp': '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_9',
-        [ALERT_UUID]: 'uuid6',
+        _id: '6',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_9',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid6',
+          },
+        },
       },
     ]);
-    expect(summarizedAlerts.ongoing.alerts).toEqual([]);
-    expect(summarizedAlerts.recovered.alerts).toEqual([]);
+    expect(summarizedAlerts.ongoing.data).toEqual([]);
+    expect(summarizedAlerts.recovered.data).toEqual([]);
   });
 
   it('creates function that correctly returns non-lifecycle alerts using time range', async () => {
@@ -740,6 +1079,8 @@ describe('createGetSummarizedAlertsFn', () => {
         },
         hits: [
           {
+            _id: '1',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -749,6 +1090,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '2',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -758,6 +1101,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '3',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:10:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -767,6 +1112,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '4',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -776,6 +1123,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '5',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -785,6 +1134,8 @@ describe('createGetSummarizedAlertsFn', () => {
             },
           },
           {
+            _id: '6',
+            _index: '.alerts-default-000001',
             _source: {
               [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
               [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -807,12 +1158,13 @@ describe('createGetSummarizedAlertsFn', () => {
       end: new Date('2020-01-01T12:25:00.000Z'),
       ruleId: 'rule-id',
       spaceId: 'space-id',
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledWith({
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -830,6 +1182,15 @@ describe('createGetSummarizedAlertsFn', () => {
                   [ALERT_RULE_UUID]: 'rule-id',
                 },
               },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
@@ -838,52 +1199,788 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(summarizedAlerts.new.count).toEqual(6);
     expect(summarizedAlerts.ongoing.count).toEqual(0);
     expect(summarizedAlerts.recovered.count).toEqual(0);
-    expect(summarizedAlerts.new.alerts).toEqual([
+    expect(summarizedAlerts.new.data).toEqual([
       {
+        _id: '1',
+        _index: '.alerts-default-000001',
         [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
-        [ALERT_UUID]: 'uuid1',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_3',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid1',
+          },
+        },
       },
       {
+        _id: '2',
+        _index: '.alerts-default-000001',
         [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_4',
-        [ALERT_UUID]: 'uuid2',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_4',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid2',
+          },
+        },
       },
       {
+        _id: '3',
+        _index: '.alerts-default-000001',
         [TIMESTAMP]: '2020-01-01T12:10:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
-        [ALERT_UUID]: 'uuid3',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_1',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid3',
+          },
+        },
       },
       {
+        _id: '4',
+        _index: '.alerts-default-000001',
         [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
-        [ALERT_UUID]: 'uuid4',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_2',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid4',
+          },
+        },
       },
       {
+        _id: '5',
+        _index: '.alerts-default-000001',
         [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_5',
-        [ALERT_UUID]: 'uuid5',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_5',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid5',
+          },
+        },
       },
       {
+        _id: '6',
+        _index: '.alerts-default-000001',
         [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
-        [ALERT_RULE_EXECUTION_UUID]: 'abc',
-        [ALERT_RULE_UUID]: 'rule-id',
-        [ALERT_INSTANCE_ID]: 'TEST_ALERT_9',
-        [ALERT_UUID]: 'uuid6',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_9',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid6',
+          },
+        },
       },
     ]);
-    expect(summarizedAlerts.ongoing.alerts).toEqual([]);
-    expect(summarizedAlerts.recovered.alerts).toEqual([]);
+    expect(summarizedAlerts.ongoing.data).toEqual([]);
+    expect(summarizedAlerts.recovered.data).toEqual([]);
+  });
+
+  it('creates function that correctly formats alerts', async () => {
+    ruleDataClientMock.getReader().search.mockResolvedValueOnce({
+      hits: {
+        total: {
+          value: 6,
+        },
+        hits: [
+          {
+            _id: '1',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
+              [ALERT_UUID]: 'uuid1',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_3',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid1',
+                },
+              },
+            },
+          },
+          {
+            _id: '2',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_4',
+              [ALERT_UUID]: 'uuid2',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_4',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid2',
+                },
+              },
+            },
+          },
+          {
+            _id: '3',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:10:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
+              [ALERT_UUID]: 'uuid3',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_1',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid3',
+                },
+              },
+            },
+          },
+          {
+            _id: '4',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
+              [ALERT_UUID]: 'uuid4',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_2',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid4',
+                },
+              },
+            },
+          },
+          {
+            _id: '5',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_5',
+              [ALERT_UUID]: 'uuid5',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_5',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid5',
+                },
+              },
+            },
+          },
+          {
+            _id: '6',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_9',
+              [ALERT_UUID]: 'uuid6',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_9',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid6',
+                },
+              },
+            },
+          },
+        ],
+      },
+    } as any);
+    const getSummarizedAlertsFn = createGetSummarizedAlertsFn({
+      ruleDataClient: ruleDataClientMock,
+      useNamespace: true,
+      isLifecycleAlert: false,
+    })();
+
+    const summarizedAlerts = await getSummarizedAlertsFn({
+      start: new Date('2020-01-01T11:00:00.000Z'),
+      end: new Date('2020-01-01T12:25:00.000Z'),
+      ruleId: 'rule-id',
+      spaceId: 'space-id',
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
+    });
+    expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
+    expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
+    expect(ruleDataClientMock.getReader().search).toHaveBeenCalledWith({
+      body: {
+        size: 100,
+        track_total_hits: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  [TIMESTAMP]: {
+                    gte: '2020-01-01T11:00:00.000Z',
+                    lt: '2020-01-01T12:25:00.000Z',
+                  },
+                },
+              },
+              {
+                term: {
+                  [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    expect(summarizedAlerts.new.count).toEqual(6);
+    expect(summarizedAlerts.ongoing.count).toEqual(0);
+    expect(summarizedAlerts.recovered.count).toEqual(0);
+    expect(summarizedAlerts.new.data).toEqual([
+      {
+        _id: '1',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_3',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid1',
+          },
+        },
+      },
+      {
+        _id: '2',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_4',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid2',
+          },
+        },
+      },
+      {
+        _id: '3',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:10:00.000Z',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_1',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid3',
+          },
+        },
+      },
+      {
+        _id: '4',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_2',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid4',
+          },
+        },
+      },
+      {
+        _id: '5',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_5',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid5',
+          },
+        },
+      },
+      {
+        _id: '6',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
+        kibana: {
+          alert: {
+            instance: {
+              id: 'TEST_ALERT_9',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid6',
+          },
+        },
+      },
+    ]);
+    expect(summarizedAlerts.ongoing.data).toEqual([]);
+    expect(summarizedAlerts.recovered.data).toEqual([]);
+  });
+
+  it('creates function that uses a custom format alerts function if defined', async () => {
+    ruleDataClientMock.getReader().search.mockResolvedValueOnce({
+      hits: {
+        total: {
+          value: 6,
+        },
+        hits: [
+          {
+            _id: '1',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
+              [ALERT_UUID]: 'uuid1',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_3',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid1',
+                },
+              },
+            },
+          },
+          {
+            _id: '2',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_4',
+              [ALERT_UUID]: 'uuid2',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_4',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid2',
+                },
+              },
+            },
+          },
+          {
+            _id: '3',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:10:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
+              [ALERT_UUID]: 'uuid3',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_1',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid3',
+                },
+              },
+            },
+          },
+          {
+            _id: '4',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
+              [ALERT_UUID]: 'uuid4',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_2',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid4',
+                },
+              },
+            },
+          },
+          {
+            _id: '5',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_5',
+              [ALERT_UUID]: 'uuid5',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_5',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid5',
+                },
+              },
+            },
+          },
+          {
+            _id: '6',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_9',
+              [ALERT_UUID]: 'uuid6',
+              kibana: {
+                alert: {
+                  instance: {
+                    id: 'TEST_ALERT_9',
+                  },
+                  rule: {
+                    execution: {
+                      uuid: 'abc',
+                    },
+                  },
+                  uuid: 'uuid6',
+                },
+              },
+            },
+          },
+        ],
+      },
+    } as any);
+    const getSummarizedAlertsFn = createGetSummarizedAlertsFn({
+      ruleDataClient: ruleDataClientMock,
+      useNamespace: true,
+      isLifecycleAlert: false,
+      formatAlert: (alert: AlertDocument) => {
+        return {
+          ...alert,
+          [ALERT_ACTION_GROUP]: 'boopboopdedoo',
+        };
+      },
+    })();
+
+    const summarizedAlerts = await getSummarizedAlertsFn({
+      start: new Date('2020-01-01T11:00:00.000Z'),
+      end: new Date('2020-01-01T12:25:00.000Z'),
+      ruleId: 'rule-id',
+      spaceId: 'space-id',
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
+    });
+    expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
+    expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
+    expect(ruleDataClientMock.getReader().search).toHaveBeenCalledWith({
+      body: {
+        size: 100,
+        track_total_hits: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  [TIMESTAMP]: {
+                    gte: '2020-01-01T11:00:00.000Z',
+                    lt: '2020-01-01T12:25:00.000Z',
+                  },
+                },
+              },
+              {
+                term: {
+                  [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    expect(summarizedAlerts.new.count).toEqual(6);
+    expect(summarizedAlerts.ongoing.count).toEqual(0);
+    expect(summarizedAlerts.recovered.count).toEqual(0);
+    expect(summarizedAlerts.new.data).toEqual([
+      {
+        _id: '1',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+        kibana: {
+          alert: {
+            action_group: 'boopboopdedoo',
+            instance: {
+              id: 'TEST_ALERT_3',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid1',
+          },
+        },
+      },
+      {
+        _id: '2',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+        kibana: {
+          alert: {
+            action_group: 'boopboopdedoo',
+            instance: {
+              id: 'TEST_ALERT_4',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid2',
+          },
+        },
+      },
+      {
+        _id: '3',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:10:00.000Z',
+        kibana: {
+          alert: {
+            action_group: 'boopboopdedoo',
+            instance: {
+              id: 'TEST_ALERT_1',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid3',
+          },
+        },
+      },
+      {
+        _id: '4',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
+        kibana: {
+          alert: {
+            action_group: 'boopboopdedoo',
+            instance: {
+              id: 'TEST_ALERT_2',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid4',
+          },
+        },
+      },
+      {
+        _id: '5',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+        kibana: {
+          alert: {
+            action_group: 'boopboopdedoo',
+            instance: {
+              id: 'TEST_ALERT_5',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid5',
+          },
+        },
+      },
+      {
+        _id: '6',
+        _index: '.alerts-default-000001',
+        [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
+        kibana: {
+          alert: {
+            action_group: 'boopboopdedoo',
+            instance: {
+              id: 'TEST_ALERT_9',
+            },
+            rule: {
+              execution: {
+                uuid: 'abc',
+              },
+              uuid: 'rule-id',
+            },
+            uuid: 'uuid6',
+          },
+        },
+      },
+    ]);
+    expect(summarizedAlerts.ongoing.data).toEqual([]);
+    expect(summarizedAlerts.recovered.data).toEqual([]);
   });
 
   it('throws error if search throws error', async () => {
@@ -897,7 +1994,12 @@ describe('createGetSummarizedAlertsFn', () => {
     })();
 
     await expect(
-      getSummarizedAlertsFn({ executionUuid: 'abc', ruleId: 'rule-id', spaceId: 'space-id' })
+      getSummarizedAlertsFn({
+        executionUuid: 'abc',
+        ruleId: 'rule-id',
+        spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"search error"`);
   });
 
@@ -909,7 +2011,11 @@ describe('createGetSummarizedAlertsFn', () => {
     })();
 
     await expect(
-      getSummarizedAlertsFn({ ruleId: 'rule-id', spaceId: 'space-id' })
+      getSummarizedAlertsFn({
+        ruleId: 'rule-id',
+        spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Must specify either execution UUID or time range for summarized alert query."`
     );
@@ -929,6 +2035,7 @@ describe('createGetSummarizedAlertsFn', () => {
         end: new Date(),
         ruleId: 'rule-id',
         spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Must specify either execution UUID or time range for summarized alert query."`
@@ -943,7 +2050,12 @@ describe('createGetSummarizedAlertsFn', () => {
     })();
 
     await expect(
-      getSummarizedAlertsFn({ start: new Date(), ruleId: 'rule-id', spaceId: 'space-id' })
+      getSummarizedAlertsFn({
+        start: new Date(),
+        ruleId: 'rule-id',
+        spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Must specify either execution UUID or time range for summarized alert query."`
     );
@@ -957,7 +2069,12 @@ describe('createGetSummarizedAlertsFn', () => {
     })();
 
     await expect(
-      getSummarizedAlertsFn({ end: new Date(), ruleId: 'rule-id', spaceId: 'space-id' })
+      getSummarizedAlertsFn({
+        end: new Date(),
+        ruleId: 'rule-id',
+        spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Must specify either execution UUID or time range for summarized alert query."`
     );

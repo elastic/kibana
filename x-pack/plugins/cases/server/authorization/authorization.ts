@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AuthFilterHelpers, OwnerEntity } from './types';
-import { getOwnersFilter } from './utils';
+import { getOwnersFilter, groupByAuthorization } from './utils';
 import type { OperationDetails } from '.';
 import { AuthorizationAuditLogger } from '.';
 import { createCaseError } from '../common/error';
@@ -56,19 +57,21 @@ export class Authorization {
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
-    spaces: SpacesPluginStart;
+    spaces?: SpacesPluginStart;
     features: FeaturesPluginStart;
     auditLogger: AuthorizationAuditLogger;
     logger: Logger;
   }): Promise<Authorization> {
-    const getSpace = async (): Promise<Space> => {
-      return spaces.spacesService.getActiveSpace(request);
+    const getSpace = async (): Promise<Space | undefined> => {
+      return spaces?.spacesService.getActiveSpace(request);
     };
 
     // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseOwners: Set<string>;
+
     try {
-      const disabledFeatures = new Set((await getSpace()).disabledFeatures ?? []);
+      const maybeSpace = await getSpace();
+      const disabledFeatures = new Set(maybeSpace?.disabledFeatures ?? []);
 
       caseOwners = new Set(
         features
@@ -107,23 +110,79 @@ export class Authorization {
     entities: OwnerEntity[];
     operation: OperationDetails;
   }) {
-    const logSavedObjects = (error?: Error) => {
-      for (const entity of entities) {
-        this.auditLogger.log({ operation, error, entity });
-      }
-    };
-
     try {
-      await this._ensureAuthorized(
-        entities.map((entity) => entity.owner),
-        operation
-      );
+      const uniqueOwners = Array.from(new Set(entities.map((entity) => entity.owner)));
+
+      await this._ensureAuthorized(uniqueOwners, operation);
     } catch (error) {
-      logSavedObjects(error);
+      this.logSavedObjects({ entities, operation, error });
       throw error;
     }
 
-    logSavedObjects();
+    this.logSavedObjects({ entities, operation });
+  }
+
+  /**
+   *
+   * Returns all authorized entities for an operation. It throws error if the user is not authorized
+   * to any of the owners
+   *
+   * @param savedObjects an array of saved objects to be authorized. Each saved objects should contain
+   * an ID and an owner
+   * @param operation the operation that should be authorized
+   */
+  public async getAndEnsureAuthorizedEntities<T extends { owner: string }>({
+    savedObjects,
+    operation,
+  }: {
+    savedObjects: Array<SavedObject<T>>;
+    operation: OperationDetails;
+  }): Promise<{ authorized: Array<SavedObject<T>>; unauthorized: Array<SavedObject<T>> }> {
+    const entities = savedObjects.map((so) => ({
+      id: so.id,
+      owner: so.attributes.owner,
+    }));
+
+    const { authorizedOwners } = await this.getAuthorizedOwners([operation]);
+
+    if (!authorizedOwners.length) {
+      const error = Boom.forbidden(
+        AuthorizationAuditLogger.createFailureMessage({
+          owners: [],
+          operation,
+        })
+      );
+
+      this.logSavedObjects({ entities, error, operation });
+
+      throw error;
+    }
+
+    const { authorized, unauthorized } = groupByAuthorization(savedObjects, authorizedOwners);
+
+    await this.ensureAuthorized({
+      operation,
+      entities: authorized.map((so) => ({
+        owner: so.attributes.owner,
+        id: so.id,
+      })),
+    });
+
+    return { authorized, unauthorized };
+  }
+
+  private async logSavedObjects({
+    entities,
+    operation,
+    error,
+  }: {
+    entities: OwnerEntity[];
+    operation: OperationDetails;
+    error?: Error;
+  }) {
+    for (const entity of entities) {
+      this.auditLogger.log({ operation, error, entity });
+    }
   }
 
   /**

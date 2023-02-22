@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { TableState } from '@kbn/timelines-plugin/public';
 import type { AnyAction, CombinedState, Reducer } from 'redux';
 import * as dataTableActions from './actions';
 import * as dataTableSelectors from './selectors';
+import type { TableState } from './types';
 
 export { dataTableActions, dataTableSelectors };
 

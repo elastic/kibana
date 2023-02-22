@@ -35,6 +35,7 @@ export const host: InventoryModel = {
     name: 'host.name',
     os: 'host.os.name',
     ip: 'host.ip',
+    cloudProvider: 'cloud.provider',
   },
   metrics,
   requiredMetrics: [

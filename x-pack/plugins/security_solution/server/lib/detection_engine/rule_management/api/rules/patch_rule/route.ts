@@ -23,6 +23,7 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/crud/read_rules';
 import { patchRules } from '../../../logic/crud/patch_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
+import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 // eslint-disable-next-line no-restricted-imports
 import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { getIdError } from '../../../utils/utils';
@@ -51,7 +52,6 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
       try {
         const params = request.body;
         const rulesClient = (await context.alerting).getRulesClient();
-        const ruleExecutionLog = (await context.securitySolution).getRuleExecutionLog();
         const savedObjectsClient = (await context.core).savedObjects.client;
 
         const mlAuthz = buildMlAuthz({
@@ -76,6 +76,12 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
         }
 
         checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
+        await validateRuleDefaultExceptionList({
+          exceptionsList: params.exceptions_list,
+          rulesClient,
+          ruleRuleId: params.rule_id,
+          ruleId: params.id,
+        });
 
         const migratedRule = await legacyMigrate({
           rulesClient,
@@ -89,9 +95,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
           nextParams: params,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
-          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-
-          const [validated, errors] = transformValidate(rule, ruleExecutionSummary);
+          const [validated, errors] = transformValidate(rule);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

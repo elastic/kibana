@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { FleetAuthzRouter } from '../../services/security';
+
 import { FLEET_PROXY_API_ROUTES } from '../../../common/constants';
 import {
   GetOneFleetProxyRequestSchema,
   PostFleetProxyRequestSchema,
   PutFleetProxyRequestSchema,
 } from '../../types';
-
-import type { FleetAuthzRouter } from '../security';
 
 import {
   getAllFleetProxyHandler,

@@ -94,7 +94,6 @@ export const LandingCards = memo(() => {
           <EuiFlexItem>
             <iframe
               allowFullScreen
-              allowTransparency
               className="vidyard_iframe"
               frameBorder="0"
               height="100%"

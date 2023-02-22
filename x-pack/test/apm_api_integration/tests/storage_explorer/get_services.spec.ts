@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { IndexLifecyclePhaseSelectOption } from '@kbn/apm-plugin/common/storage_explorer_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -81,7 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceC.transaction({ transactionName: 'GET /api' }).duration(1000).timestamp(timestamp)
         );
 
-      await synthtraceEsClient.index(eventsWithinTimerange.merge(eventsOutsideOfTimerange));
+      await synthtraceEsClient.index([eventsWithinTimerange, eventsOutsideOfTimerange]);
     });
 
     after(() => synthtraceEsClient.clean());

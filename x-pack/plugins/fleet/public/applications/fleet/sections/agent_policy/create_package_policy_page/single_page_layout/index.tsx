@@ -25,9 +25,9 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import { splitPkgKey } from '../../../../../../../common/services';
-import { dataTypes } from '../../../../../../../common/constants';
+import { generateNewAgentPolicyWithDefaults } from '../../../../services';
 import type { NewAgentPolicy } from '../../../../types';
-import { useConfig, sendGetAgentStatus, useGetPackageInfoByKey } from '../../../../hooks';
+import { useConfig, sendGetAgentStatus, useGetPackageInfoByKeyQuery } from '../../../../hooks';
 import {
   Loading,
   Error as ErrorComponent,
@@ -73,18 +73,16 @@ const CustomEuiBottomBar = styled(EuiBottomBar)`
 export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   from,
   queryParamsPolicyId,
+  prerelease,
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
   const { params } = useRouteMatch<AddToPolicyParams>();
 
-  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
-    name: 'Agent policy 1',
-    description: '',
-    namespace: 'default',
-    monitoring_enabled: Object.values(dataTypes),
-  });
+  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
+    generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
+  );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
   const validation = agentPolicyFormValidation(newAgentPolicy);
@@ -99,7 +97,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion, { full: true, prerelease: true });
+  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, { full: true, prerelease });
   const packageInfo = useMemo(() => {
     if (packageInfoData && packageInfoData.item) {
       return packageInfoData.item;
@@ -107,6 +105,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }, [packageInfoData]);
 
   const [agentCount, setAgentCount] = useState<number>(0);
+
+  const integrationInfo = useMemo(
+    () =>
+      (params as AddToPolicyParams).integration
+        ? packageInfo?.policy_templates?.find(
+            (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
+          )
+        : undefined,
+    [packageInfo?.policy_templates, params]
+  );
 
   // Save package policy
   const {
@@ -123,6 +131,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     setHasAgentPolicyError,
     validationResults,
     hasAgentPolicyError,
+    isInitialized,
   } = useOnSubmit({
     agentCount,
     packageInfo,
@@ -130,6 +139,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedPolicyTab,
     withSysMonitoring,
     queryParamsPolicyId,
+    integrationToEnable: integrationInfo?.name,
   });
 
   const setPolicyValidation = useCallback(
@@ -214,16 +224,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     packageInfo,
   });
 
-  const integrationInfo = useMemo(
-    () =>
-      (params as AddToPolicyParams).integration
-        ? packageInfo?.policy_templates?.find(
-            (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
-          )
-        : undefined,
-    [packageInfo?.policy_templates, params]
-  );
-
   const layoutProps = useMemo(
     () => ({
       from,
@@ -267,10 +267,33 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
+  const replaceDefineStepView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-replace-define-step'
+  );
+
+  if (replaceDefineStepView && extensionView) {
+    throw new Error(
+      "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
+    );
+  }
+
+  const replaceStepConfigurePackagePolicy = replaceDefineStepView && packageInfo?.name && (
+    <ExtensionWrapper>
+      <replaceDefineStepView.Component
+        agentPolicy={agentPolicy}
+        packageInfo={packageInfo}
+        newPolicy={packagePolicy}
+        onChange={handleExtensionViewOnChange}
+        validationResults={validationResults}
+        isEditPage={false}
+      />
+    </ExtensionWrapper>
+  );
 
   const stepConfigurePackagePolicy = useMemo(
     () =>
-      isPackageInfoLoading ? (
+      isPackageInfoLoading || !isInitialized ? (
         <Loading />
       ) : packageInfo ? (
         <>
@@ -281,7 +304,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
             submitAttempted={formState === 'INVALID'}
-            integrationToEnable={integrationInfo?.name}
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
@@ -310,6 +332,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         <div />
       ),
     [
+      isInitialized,
       isPackageInfoLoading,
       agentPolicy,
       packageInfo,
@@ -329,7 +352,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         defaultMessage: 'Configure integration',
       }),
       'data-test-subj': 'dataCollectionSetupStep',
-      children: stepConfigurePackagePolicy,
+      children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
     },
     {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {

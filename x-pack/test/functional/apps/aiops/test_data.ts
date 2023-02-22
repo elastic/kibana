@@ -55,7 +55,7 @@ export const artificialLogDataViewTestData: TestData = {
     totalDocCountFormatted: '8,400',
     analysisGroupsTable: [
       { group: 'user: Peter', docCount: '1981' },
-      { group: 'response_code: 500url: login.php', docCount: '792' },
+      { group: 'response_code: 500url: home.phpurl: login.php', docCount: '792' },
     ],
     analysisTable: [
       {

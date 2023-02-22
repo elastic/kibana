@@ -11,7 +11,6 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import { createMockAgentClient, createMockAgentService } from '@kbn/fleet-plugin/server/mocks';
 import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
 import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import {
@@ -29,7 +28,7 @@ import {
   requestContextMock,
 } from '../../../lib/detection_engine/routes/__mocks__';
 import type { Agent } from '@kbn/fleet-plugin/common/types/models';
-import type { AgentClient, AgentService } from '@kbn/fleet-plugin/server/services';
+import type { AgentClient } from '@kbn/fleet-plugin/server/services';
 import { get } from 'lodash';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
@@ -99,7 +98,6 @@ describe('test policy response handler', () => {
   });
 
   describe('test agent policy summary handler', () => {
-    let mockAgentService: jest.Mocked<AgentService>;
     let mockAgentClient: jest.Mocked<AgentClient>;
 
     let agentListResult: {
@@ -121,9 +119,6 @@ describe('test policy response handler', () => {
       mockSavedObjectClient = savedObjectsClientMock.create();
       mockResponse = httpServerMock.createResponseFactory();
       endpointAppContextService = new EndpointAppContextService();
-      mockAgentService = createMockAgentService();
-      mockAgentClient = createMockAgentClient();
-      mockAgentService.asScoped.mockReturnValue(mockAgentClient);
       emptyAgentListResult = {
         agents: [],
         total: 2,
@@ -168,8 +163,9 @@ describe('test policy response handler', () => {
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...createMockEndpointAppContextServiceStartContract(),
-        ...{ agentService: mockAgentService },
       });
+      mockAgentClient = endpointAppContextService.getInternalFleetServices()
+        .agent as jest.Mocked<AgentClient>;
     });
 
     afterEach(() => endpointAppContextService.stop());

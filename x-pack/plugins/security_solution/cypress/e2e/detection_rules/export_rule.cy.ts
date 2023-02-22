@@ -16,7 +16,7 @@ import {
 import {
   exportFirstRule,
   loadPrebuiltDetectionRulesFromHeaderBtn,
-  switchToElasticRules,
+  filterByElasticRules,
   selectNumberOfRules,
   bulkExportRules,
   selectAllRules,
@@ -24,7 +24,7 @@ import {
 import { createExceptionList, deleteExceptionList } from '../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../objects/exception';
 import { createCustomRule } from '../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
@@ -39,6 +39,8 @@ describe('Export rules', () => {
   });
 
   beforeEach(() => {
+    // Make sure persisted rules table state is cleared
+    resetRulesTableState();
     deleteAlertsAndRules();
     // Rules get exported via _bulk_action endpoint
     cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
@@ -59,7 +61,7 @@ describe('Export rules', () => {
 
     loadPrebuiltDetectionRulesFromHeaderBtn();
 
-    switchToElasticRules();
+    filterByElasticRules();
     selectNumberOfRules(expectedElasticRulesCount);
     bulkExportRules();
 

@@ -1,0 +1,295 @@
+{
+  "id": "@kbn/shared-ux-file-util",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-util",
+        "id": "def-common.fitToBox",
+        "type": "Function",
+        "tags": [],
+        "label": "fitToBox",
+        "description": [
+          "\nCalculate the size of an image, fitting to our limits see {@link boxDimensions},\nwhile preserving the aspect ratio."
+        ],
+        "signature": [
+          "(width: number, height: number) => { width: number; height: number; }"
+        ],
+        "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-util",
+            "id": "def-common.fitToBox.$1",
+            "type": "number",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-util",
+            "id": "def-common.fitToBox.$2",
+            "type": "number",
+            "tags": [],
+            "label": "height",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-util",
+        "id": "def-common.getBlurhashSrc",
+        "type": "Function",
+        "tags": [],
+        "label": "getBlurhashSrc",
+        "description": [],
+        "signature": [
+          "({\n  width,\n  height,\n  hash,\n}: { width: number; height: number; hash: string; }) => string"
+        ],
+        "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-util",
+            "id": "def-common.getBlurhashSrc.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  width,\n  height,\n  hash,\n}",
+            "description": [],
+            "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-util",
+                "id": "def-common.getBlurhashSrc.$1.width",
+                "type": "number",
+                "tags": [],
+                "label": "width",
+                "description": [],
+                "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-file-util",
+                "id": "def-common.getBlurhashSrc.$1.height",
+                "type": "number",
+                "tags": [],
+                "label": "height",
+                "description": [],
+                "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-file-util",
+                "id": "def-common.getBlurhashSrc.$1.hash",
+                "type": "string",
+                "tags": [],
+                "label": "hash",
+                "description": [],
+                "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-util",
+        "id": "def-common.getImageMetadata",
+        "type": "Function",
+        "tags": [],
+        "label": "getImageMetadata",
+        "description": [
+          "\nExtract image metadata, assumes that file or blob as an image!"
+        ],
+        "signature": [
+          "(file: Blob | File) => Promise<",
+          "FileImageMetadata",
+          " | undefined>"
+        ],
+        "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-util",
+            "id": "def-common.getImageMetadata.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "file",
+            "description": [],
+            "signature": [
+              "Blob | File"
+            ],
+            "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-util",
+        "id": "def-common.isImage",
+        "type": "Function",
+        "tags": [],
+        "label": "isImage",
+        "description": [],
+        "signature": [
+          "(file: { type?: string | undefined; }) => boolean"
+        ],
+        "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-util",
+            "id": "def-common.isImage.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "file",
+            "description": [],
+            "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-util",
+                "id": "def-common.isImage.$1.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-util",
+        "id": "def-common.useBehaviorSubject",
+        "type": "Function",
+        "tags": [],
+        "label": "useBehaviorSubject",
+        "description": [],
+        "signature": [
+          "(o$: ",
+          "BehaviorSubject",
+          "<T>) => T"
+        ],
+        "path": "packages/shared-ux/file/util/src/use_behavior_subject.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-util",
+            "id": "def-common.useBehaviorSubject.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "o$",
+            "description": [],
+            "signature": [
+              "BehaviorSubject",
+              "<T>"
+            ],
+            "path": "packages/shared-ux/file/util/src/use_behavior_subject.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-util",
+        "id": "def-common.ImageMetadataFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "ImageMetadataFactory",
+        "description": [],
+        "signature": [
+          "(file: Blob | File) => Promise<",
+          "FileImageMetadata",
+          " | undefined>"
+        ],
+        "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-util",
+            "id": "def-common.ImageMetadataFactory.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "file",
+            "description": [],
+            "signature": [
+              "Blob | File"
+            ],
+            "path": "packages/shared-ux/file/util/src/image_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

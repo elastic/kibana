@@ -46,7 +46,7 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
           <p>
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.thresholdHelp.threshold"
-              defaultMessage="Each time the rule runs, it checks whether the number of documents that match your query meets this threshold."
+              defaultMessage="Each time the rule runs, it checks whether the number of documents that match your query meets this threshold. If there is a grouped over clause, the rule checks the condition for the specified number of top groups."
             />
           </p>
           <p>
@@ -77,6 +77,7 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
     return (
       <EuiPopover
         id="thresholdHelpPopover"
+        data-test-subj="thresholdHelpPopover"
         anchorPosition="upLeft"
         button={
           <EuiButtonIcon
@@ -95,7 +96,7 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
         <EuiPopoverTitle>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.thresholdHelp.title"
-            defaultMessage="Set the threshold and time window"
+            defaultMessage="Set the group, threshold and time window"
           />
         </EuiPopoverTitle>
         {this._renderContent()}

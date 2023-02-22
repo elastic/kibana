@@ -1,6 +1,6 @@
 post:
   summary: Package policy - Upgrade Dry run
-  operationId: upgrade-package-policy
+  operationId: upgrade-package-policy-dry-run
   requestBody:
     content:
       application/json:
@@ -33,3 +33,5 @@ post:
                   $ref: ../components/schemas/upgrade_agent_diff.yaml
               required:
                 - hasErrors
+    '400':
+      $ref: ../components/responses/error.yaml

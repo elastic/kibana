@@ -10,13 +10,14 @@ import type { Client } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import * as cborx from 'cbor-x';
 import { basename } from 'path';
+import { generateFileMetadataDocumentMock } from '../../../../server/endpoint/services/actions/mocks';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
 import { checkInFleetAgent } from '../../common/fleet_services';
 import { sendEndpointMetadataUpdate } from '../../common/endpoint_metadata_services';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
-  ENDPOINTS_ACTION_LIST_ROUTE,
+  BASE_ENDPOINT_ACTION_ROUTE,
   FILE_STORAGE_DATA_INDEX,
   FILE_STORAGE_METADATA_INDEX,
 } from '../../../../common/endpoint/constants';
@@ -29,6 +30,8 @@ import type {
   GetProcessesActionOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  FileUploadMetadata,
+  ResponseActionExecuteOutputContent,
 } from '../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -49,7 +52,7 @@ export const fetchEndpointActionList = async (
     return (
       await kbn.request<ActionListApiResponse>({
         method: 'GET',
-        path: ENDPOINTS_ACTION_LIST_ROUTE,
+        path: BASE_ENDPOINT_ACTION_ROUTE,
         query: options,
       })
     ).data;
@@ -139,6 +142,12 @@ export const sendEndpointActionResponse = async (
         endpointResponse.EndpointActions.data.output?.content as ResponseActionGetFileOutputContent
       ).code = endpointActionGenerator.randomGetFileFailureCode();
     }
+
+    if (endpointResponse.EndpointActions.data.command === 'execute') {
+      (
+        endpointResponse.EndpointActions.data.output?.content as ResponseActionExecuteOutputContent
+      ).stderr = 'execute command timed out';
+    }
   }
 
   await esClient.index({
@@ -186,47 +195,53 @@ export const sendEndpointActionResponse = async (
   }
 
   // For `get-file`, upload a file to ES
-  if (action.command === 'get-file' && !endpointResponse.error) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const filePath = (
-      action as ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>
-    )?.parameters?.path!;
+  if ((action.command === 'execute' || action.command === 'get-file') && !endpointResponse.error) {
+    const filePath =
+      action.command === 'execute'
+        ? '/execute/file/path'
+        : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          (
+            action as ActionDetails<
+              ResponseActionGetFileOutputContent,
+              ResponseActionGetFileParameters
+            >
+          )?.parameters?.path!;
 
     const fileName = basename(filePath.replace(/\\/g, '/'));
+    const fileMetaDoc: FileUploadMetadata = generateFileMetadataDocumentMock({
+      action_id: action.id,
+      agent_id: action.agents[0],
+      contents: [
+        {
+          sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
+          file_name: fileName ?? 'bad_file.txt',
+          path: filePath,
+          size: 4,
+          type: 'file',
+        },
+      ],
+      file: {
+        attributes: ['archive', 'compressed'],
+        ChunkSize: 4194304,
+        compression: 'deflate',
+        hash: {
+          sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
+        },
+        mime_type: 'application/zip',
+        name: action.command === 'execute' ? 'full-output.zip' : 'upload.zip',
+        extension: 'zip',
+        size: 125,
+        Status: 'READY',
+        type: 'file',
+      },
+      src: 'endpoint',
+    });
 
     // Index the file's metadata
     const fileMeta = await esClient.index({
       index: FILE_STORAGE_METADATA_INDEX,
       id: getFileDownloadId(action, action.agents[0]),
-      body: {
-        action_id: action.id,
-        agent_id: action.agents[0],
-        contents: [
-          {
-            hash: {
-              sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
-            },
-            name: fileName ?? 'bad_file.txt',
-            path: filePath,
-            size: 4,
-            type: 'file',
-          },
-        ],
-        file: {
-          attributes: ['archive', 'compressed'],
-          ChunkSize: 4194304,
-          Compression: 'deflate',
-          hash: {
-            sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
-          },
-          mime_type: 'application/zip',
-          name: 'upload.zip',
-          size: 125,
-          Status: 'READY',
-          type: 'file',
-        },
-        source: 'endpoint',
-      },
+      body: fileMetaDoc,
       refresh: 'wait_for',
     });
 
@@ -300,6 +315,16 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
           },
         },
       } as ResponseOutput<ResponseActionGetFileOutputContent>;
+
+    case 'execute':
+      const outputFileId = getFileDownloadId(action, action.agents[0]);
+      return {
+        output: endpointActionGenerator.generateExecuteActionResponseOutput({
+          content: {
+            outputFileId,
+          },
+        }),
+      } as ResponseOutput<ResponseActionExecuteOutputContent>;
 
     default:
       return { output: undefined };

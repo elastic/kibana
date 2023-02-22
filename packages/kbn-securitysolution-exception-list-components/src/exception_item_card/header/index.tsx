@@ -29,6 +29,7 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <HeaderMenu
+            iconType="boxesHorizontal"
             disableActions={disableActions}
             actions={actions}
             aria-label="Exception item actions menu"

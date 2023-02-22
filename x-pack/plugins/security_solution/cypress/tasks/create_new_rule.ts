@@ -11,6 +11,7 @@ import type {
   ThreatSubtechnique,
   ThreatTechnique,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import { parseInt } from 'lodash';
 import type {
   CustomRule,
   MachineLearningRule,
@@ -32,7 +33,6 @@ import {
   APPLY_SELECTED_SAVED_QUERY_BUTTON,
   AT_LEAST_ONE_INDEX_PATTERN,
   AT_LEAST_ONE_VALID_MATCH,
-  BACK_TO_ALL_RULES_LINK,
   COMBO_BOX_CLEAR_BTN,
   CREATE_AND_ENABLE_BTN,
   CUSTOM_QUERY_INPUT,
@@ -105,6 +105,8 @@ import {
   ACTIONS_THROTTLE_INPUT,
   CONTINUE_BUTTON,
   CREATE_WITHOUT_ENABLING_BTN,
+  RULE_INDICES,
+  ALERTS_INDEX_BUTTON,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -113,24 +115,27 @@ import {
 } from '../screens/common/rule_actions';
 import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
-import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
+import { ALERTS_TABLE_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
-import { refreshPage } from './security_header';
 import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
+import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
+import { waitForAlerts } from './alerts';
+import { refreshPage } from './security_header';
+import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
-  cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
-  cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
+  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
+  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const createRuleWithoutEnabling = () => {
   cy.get(CREATE_WITHOUT_ENABLING_BTN).click({ force: true });
   cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
-  cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
-  cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
+  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
+  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const fillAboutRule = (
@@ -239,6 +244,7 @@ export const importSavedQuery = (timelineId: string) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(timelineId)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('not.be.empty');
+  removeAlertsIndex();
 };
 
 export const fillRuleName = (ruleName: string = ruleFields.ruleName) => {
@@ -344,11 +350,25 @@ const fillCustomQuery = (rule: CustomRule | OverrideRule) => {
     cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
     cy.get(TIMELINE(rule.timeline.id)).click();
     cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
+    if (rule.dataSource.type === 'indexPatterns') {
+      removeAlertsIndex();
+    }
   } else {
     cy.get(CUSTOM_QUERY_INPUT)
       .first()
       .type(rule.customQuery || '');
   }
+};
+
+// called after import rule from saved timeline
+// if alerts index is created, it is included in the timeline
+// to be consistent in multiple test runs, remove it if it's there
+export const removeAlertsIndex = () => {
+  cy.get(RULE_INDICES).then(($body) => {
+    if ($body.find(ALERTS_INDEX_BUTTON).length > 0) {
+      cy.get(ALERTS_INDEX_BUTTON).click();
+    }
+  });
 };
 
 export const continueWithNextSection = () => {
@@ -600,11 +620,14 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRul
 };
 
 export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRule) => {
-  rule.machineLearningJobs.forEach((machineLearningJob) => {
-    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
-    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(`${machineLearningJob}{enter}`);
-    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
-  });
+  const text = rule.machineLearningJobs
+    .map((machineLearningJob) => `${machineLearningJob}{downArrow}{enter}`)
+    .join('');
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(text);
+
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
+
   cy.get(ANOMALY_THRESHOLD_INPUT).type(
     `{selectall}${getMachineLearningRule().anomalyScoreThreshold}`,
     {
@@ -650,17 +673,22 @@ export const selectNewTermsRuleType = () => {
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
+      cy.log('Waiting for alerts to appear');
       refreshPage();
-      return cy
-        .get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((countText) => {
-          const alertCount = parseInt(countText, 10) || 0;
-          return alertCount >= alertCountThreshold;
-        });
+      return cy.root().then(($el) => {
+        const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
+        if (emptyTableState.length > 0) {
+          cy.log('Table is empty', emptyTableState.length);
+          return false;
+        }
+        const countEl = $el.find(ALERTS_TABLE_COUNT);
+        const alertCount = parseInt(countEl.text(), 10) || 0;
+        return alertCount >= alertCountThreshold;
+      });
     },
     { interval: 500, timeout: 12000 }
   );
+  waitForAlerts();
 };
 
 export const waitForTheRuleToBeExecuted = () => {
@@ -690,20 +718,3 @@ export const checkLoadQueryDynamically = () => {
 export const uncheckLoadQueryDynamically = () => {
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).click({ force: true }).should('not.be.checked');
 };
-
-export const defineSection = { importSavedQuery };
-export const aboutSection = {
-  fillRuleName,
-  fillDescription,
-  fillSeverity,
-  fillRiskScore,
-  fillRuleTags,
-  expandAdvancedSettings,
-  fillReferenceUrls,
-  fillFalsePositiveExamples,
-  fillThreat,
-  fillThreatTechnique,
-  fillThreatSubtechnique,
-  fillNote,
-};
-export const scheduleSection = { fillFrom };

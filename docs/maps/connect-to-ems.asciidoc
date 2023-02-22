@@ -66,7 +66,7 @@ endif::[]
 [[elastic-maps-server-configuration]]
 ==== Configuration
 
-{hosted-ems} reads properties from a configuration file in YAML format that is validated on startup. The location of this file is provided by the `EMS_PATH_CONF` environment variable and defaults to `/usr/src/app/server/config/elastic-maps-server.yml`.
+{hosted-ems} reads properties from a configuration file in YAML format that is validated on startup. The location of this file is provided by the `EMS_PATH_CONF` container environment variable and defaults to `/usr/src/app/server/config/elastic-maps-server.yml`. This environment variable can be changed by making use of the `-e` docker flag of the start command.
 
 *General settings*
 
@@ -130,7 +130,7 @@ endif::[]
 
 | `ssl.supportedProtocols`
  | An array of supported protocols with versions.
-Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. *Default: `TLSv1.1`, `TLSv1.2`, `TLSv1.3`*. <<server-ssl-supportedProtocols,Equivalent {kib} setting>>.
+Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`. *Default: `TLSv1.1`, `TLSv1.2`*. <<server-ssl-supportedProtocols,Equivalent {kib} setting>>.
 
 | `ssl.cipherSuites`
  | Details on the format, and the valid options, are available via the

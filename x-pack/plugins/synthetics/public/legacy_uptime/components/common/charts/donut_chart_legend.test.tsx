@@ -10,7 +10,10 @@ import { renderWithIntl } from '@kbn/test-jest-helpers';
 
 import { DonutChartLegend } from './donut_chart_legend';
 
-import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../translations';
+import {
+  STATUS_DOWN_LABEL,
+  STATUS_UP_LABEL,
+} from '../../../../../common/translations/translations';
 
 describe('DonutChartLegend', () => {
   it('applies valid props as expected', () => {

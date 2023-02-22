@@ -25,7 +25,6 @@ export class MigrationLogger implements SavedObjectsMigrationLogger {
 
   public info = (msg: string) => this.logger.info(msg);
   public debug = (msg: string) => this.logger.debug(msg);
-  public warning = (msg: string) => this.logger.warn(msg);
   public warn = (msg: string) => this.logger.warn(msg);
   public error = (msg: string, meta: LogMeta) => this.logger.error(msg, meta);
 }

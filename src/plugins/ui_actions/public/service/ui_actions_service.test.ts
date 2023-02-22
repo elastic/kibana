@@ -7,7 +7,7 @@
  */
 
 import { UiActionsService } from './ui_actions_service';
-import { Action, ActionDefinition, ActionInternal, createAction } from '../actions';
+import { ActionDefinition, ActionInternal } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
 import { TriggerRegistry, ActionRegistry } from '../types';
 import { Trigger } from '../triggers';
@@ -17,7 +17,7 @@ const FOO_TRIGGER = 'FOO_TRIGGER';
 const BAR_TRIGGER = 'BAR_TRIGGER';
 const MY_TRIGGER = 'MY_TRIGGER';
 
-const testAction1: Action = {
+const testAction1: ActionDefinition = {
   id: 'action1',
   order: 1,
   type: 'type1',
@@ -27,7 +27,7 @@ const testAction1: Action = {
   isCompatible: async () => true,
 };
 
-const testAction2: Action = {
+const testAction2: ActionDefinition = {
   id: 'action2',
   order: 2,
   type: 'type2',
@@ -108,7 +108,7 @@ describe('UiActionsService', () => {
   });
 
   describe('.getTriggerActions()', () => {
-    const action1: Action = {
+    const action1: ActionDefinition = {
       id: 'action1',
       order: 1,
       type: 'type1',
@@ -117,7 +117,7 @@ describe('UiActionsService', () => {
       getIconType: () => '',
       isCompatible: async () => true,
     };
-    const action2: Action = {
+    const action2: ActionDefinition = {
       id: 'action2',
       order: 2,
       type: 'type2',
@@ -194,12 +194,12 @@ describe('UiActionsService', () => {
 
     test('filters out actions not applicable based on the context', async () => {
       const service = new UiActionsService();
-      const action = createAction({
+      const action = {
         id: 'test',
         type: 'test',
         isCompatible: ({ accept }: { accept: boolean }) => Promise.resolve(accept),
         execute: () => Promise.resolve(),
-      });
+      };
 
       service.registerAction(action);
 

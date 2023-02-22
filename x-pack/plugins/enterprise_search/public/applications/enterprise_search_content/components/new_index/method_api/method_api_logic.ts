@@ -10,8 +10,6 @@ import { kea, MakeLogicType } from 'kea';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
-import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
-
 import { KibanaLogic } from '../../../../shared/kibana';
 import {
   CreateApiIndexApiLogic,
@@ -23,17 +21,14 @@ import { SearchIndexTabId } from '../../search_index/search_index';
 
 type MethodApiActions = Pick<
   Actions<CreateApiIndexApiLogicArgs, CreateApiIndexApiLogicResponse>,
-  'apiError' | 'apiSuccess' | 'makeRequest'
+  'apiSuccess' | 'makeRequest'
 >;
 
 export const MethodApiLogic = kea<MakeLogicType<{}, MethodApiActions>>({
   connect: {
-    actions: [CreateApiIndexApiLogic, ['apiError', 'apiSuccess', 'makeRequest']],
+    actions: [CreateApiIndexApiLogic, ['apiSuccess', 'makeRequest']],
   },
   listeners: {
-    apiError: (error) => {
-      flashAPIErrors(error);
-    },
     apiSuccess: ({ indexName }) => {
       KibanaLogic.values.navigateToUrl(
         generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
@@ -42,7 +37,6 @@ export const MethodApiLogic = kea<MakeLogicType<{}, MethodApiActions>>({
         })
       );
     },
-    makeRequest: () => clearFlashMessages(),
   },
   path: ['enterprise_search', 'method_api'],
 });

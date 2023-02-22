@@ -1,13 +1,19 @@
 [[list-connector-types-api]]
-=== List connector types API
+== List connector types API
 ++++
 <titleabbrev>List all connector types</titleabbrev>
 ++++
 
 Retrieves a list of all connector types.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification]. For a preview, check out <<connector-apis>>.
+====
+
 [[list-connector-types-api-request]]
-==== {api-request-title}
+=== {api-request-title}
 
 `GET <kibana host>:<port>/api/actions/connector_types`
 
@@ -21,7 +27,7 @@ You do not need any <<kibana-feature-privileges,{kib} feature privileges>> to
 run this API.
 
 [[list-connector-types-api-path-params]]
-==== {api-path-parms-title}
+=== {api-path-parms-title}
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
@@ -33,13 +39,13 @@ run this API.
 (Optional, string) Filters list of connector types to those that support the feature id.
 
 [[list-connector-types-api-codes]]
-==== {api-response-codes-title}
+=== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[list-connector-types-api-example]]
-==== {api-examples-title}
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------

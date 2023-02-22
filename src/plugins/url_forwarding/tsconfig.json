@@ -1,12 +1,13 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": ["public/**/*"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
+    "@kbn/core",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

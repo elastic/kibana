@@ -57,6 +57,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
     await this._readUntil(rowLimit, sizeLimit);
     return {
       features: [...this._features],
+      invalidFeatures: [...this._invalidFeatures],
       previewCoverage: this._hasNext
         ? Math.round(this._getProgress(this._features.length, this._blockSizeInBytes))
         : 100,

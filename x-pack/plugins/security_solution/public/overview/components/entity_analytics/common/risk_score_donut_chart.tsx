@@ -9,11 +9,11 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import type { ShapeTreeNode } from '@elastic/charts';
 import styled from 'styled-components';
-import type { SeverityCount } from '../../../../common/components/severity/types';
+import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
 import { useRiskDonutChartData } from './use_risk_donut_chart_data';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
-import { RISK_SEVERITY_COLOUR } from '../../../../common/components/severity/common';
+import { RISK_SEVERITY_COLOUR } from '../../../../explore/components/risk_score/severity/common';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { Legend } from '../../../../common/components/charts/legend';
 import { ChartLabel } from '../../detection_response/alerts_by_status/chart_label';
@@ -43,7 +43,7 @@ export const RiskScoreDonutChart = ({ severityCount }: RiskScoreDonutChartProps)
   const [donutChartData, legendItems, total] = useRiskDonutChartData(severityCount);
 
   return (
-    <EuiFlexGroup responsive={false}>
+    <EuiFlexGroup responsive={false} data-test-subj="risk-score-donut-chart">
       <StyledLegendItems grow={false}>
         {legendItems.length > 0 && <Legend legendItems={legendItems} />}
       </StyledLegendItems>

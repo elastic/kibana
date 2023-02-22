@@ -6,6 +6,8 @@
  */
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { selectRefreshInterval, selectRefreshPaused } from '../state';
 
 interface SyntheticsRefreshContext {
   lastRefresh: number;
@@ -24,21 +26,32 @@ export const SyntheticsRefreshContext = createContext(defaultContext);
 export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
+  const refreshPaused = useSelector(selectRefreshPaused);
+  const refreshInterval = useSelector(selectRefreshInterval);
+
   const refreshApp = useCallback(() => {
     const refreshTime = Date.now();
     setLastRefresh(refreshTime);
   }, [setLastRefresh]);
 
   const value = useMemo(() => {
-    return { lastRefresh, refreshApp };
+    return {
+      lastRefresh,
+      refreshApp,
+    };
   }, [lastRefresh, refreshApp]);
 
   useEffect(() => {
+    if (refreshPaused) {
+      return;
+    }
     const interval = setInterval(() => {
-      refreshApp();
-    }, 1000 * 30);
+      if (document.visibilityState !== 'hidden') {
+        refreshApp();
+      }
+    }, refreshInterval * 1000);
     return () => clearInterval(interval);
-  }, [refreshApp]);
+  }, [refreshPaused, refreshApp, refreshInterval]);
 
   return <SyntheticsRefreshContext.Provider value={value} children={children} />;
 };

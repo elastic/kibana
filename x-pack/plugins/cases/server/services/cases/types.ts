@@ -20,13 +20,34 @@ export type ExternalServicesWithoutConnectorId = Omit<
   'connector_id'
 >;
 
+export enum ESCaseSeverity {
+  LOW = 0,
+  MEDIUM = 10,
+  HIGH = 20,
+  CRITICAL = 30,
+}
+
+export enum ESCaseStatus {
+  OPEN = 0,
+  IN_PROGRESS = 10,
+  CLOSED = 20,
+}
+
 /**
  * This type should only be used within the cases service and its helper functions (e.g. the transforms).
  *
- * The type represents how the Cases object will be layed out in ES. It will not have connector.id or external_service.connector_id.
- * Instead those fields will be transformed into the references field.
+ * The type represents how the Cases object will be layed out in ES.
+ * 1 - It will not have connector.id or external_service.connector_id. Instead those fields will be transformed into the references field.
+ * 2 - The Severity type is internally a number.
  */
-export type ESCaseAttributes = Omit<CaseAttributes, 'connector' | 'external_service'> & {
+export type ESCaseAttributes = Omit<
+  CaseAttributes,
+  'connector' | 'external_service' | 'severity' | 'status'
+> & {
+  severity: ESCaseSeverity;
+  status: ESCaseStatus;
   connector: ESCaseConnector;
   external_service: ExternalServicesWithoutConnectorId | null;
+  total_alerts: number;
+  total_comments: number;
 };

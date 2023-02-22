@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error no typed yet
 import { mathAgg } from '../series/math';
 
 import type { TableResponseProcessorsFunction } from './types';

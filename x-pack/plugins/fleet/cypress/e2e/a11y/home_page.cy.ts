@@ -33,15 +33,15 @@ import { setFleetServerHost } from '../../tasks/fleet_server';
 describe('Home page', () => {
   before(() => {
     setFleetServerHost('https://fleetserver:8220');
-    navigateTo(FLEET);
-    cy.getBySel(LANDING_PAGE_ADD_FLEET_SERVER_BUTTON).click();
   });
 
   describe('Agents', () => {
-    before(() => {
+    beforeEach(() => {
+      navigateTo(FLEET);
+      cy.getBySel(LANDING_PAGE_ADD_FLEET_SERVER_BUTTON).click();
       cy.getBySel(AGENT_FLYOUT.QUICK_START_TAB_BUTTON, { timeout: 15000 }).should('be.visible');
-      setFleetServerHost('https://fleetserver:8220');
     });
+
     const fleetServerHost = 'https://localhost:8220';
 
     describe('Quick Start', () => {
@@ -63,7 +63,10 @@ describe('Home page', () => {
     });
 
     describe('Advanced', () => {
-      before(() => {
+      beforeEach(() => {
+        navigateTo(FLEET);
+        cy.getBySel(LANDING_PAGE_ADD_FLEET_SERVER_BUTTON).click();
+        cy.getBySel(AGENT_FLYOUT.QUICK_START_TAB_BUTTON, { timeout: 15000 }).should('be.visible');
         cy.getBySel(AGENT_FLYOUT.ADVANCED_TAB_BUTTON).click();
       });
       it('Select policy for fleet', () => {
@@ -88,7 +91,7 @@ describe('Home page', () => {
   });
 
   describe('Agent Policies', () => {
-    before(() => {
+    beforeEach(() => {
       navigateTo(FLEET);
       cy.getBySel(AGENT_POLICIES_TAB).click();
       cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.CREATE_BUTTON, {
@@ -111,6 +114,11 @@ describe('Home page', () => {
       checkA11y({ skipFailures: false });
     });
     it('Agent Table After Adding Another Agent', () => {
+      cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.CREATE_BUTTON).click();
+      cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.TITLE, { timeout: 15000 }).should(
+        'be.visible'
+      );
+      cy.getBySel(AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD).type('testName');
       cy.getBySel(AGENT_POLICY_FLYOUT_CREATE_BUTTON).click();
       cy.getBySel(AGENT_POLICY_NAME_LINK, { timeout: 15000 }).should('be.visible');
       checkA11y({ skipFailures: true });
@@ -118,7 +126,7 @@ describe('Home page', () => {
   });
 
   describe('Enrollment Tokens', () => {
-    before(() => {
+    beforeEach(() => {
       navigateTo(FLEET);
       cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
     });
@@ -137,7 +145,7 @@ describe('Home page', () => {
 
   describe('Data Streams', () => {
     before(() => {
-      cy.getBySel('confirmModalCancelButton').click();
+      navigateTo(FLEET);
       cy.getBySel(DATA_STREAMS_TAB, { timeout: 15000 }).should('be.visible');
       cy.getBySel(DATA_STREAMS_TAB).click();
     });

@@ -29,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const retry = getService('retry');
   const elasticChart = getService('elasticChart');
-  const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const xyChartSelector = 'xyVisChart';
 
@@ -43,18 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/139762
   describe.skip('dashboard state', function describeIndexTests() {
     // Used to track flag before and after reset
-    let isNewChartsLibraryEnabled = true;
 
     before(async function () {
-      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
 
-      if (!isNewChartsLibraryEnabled) {
-        await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyPieChartsLibrary': true,
-        });
-      }
       await browser.refresh();
     });
 
@@ -288,9 +280,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets a pie slice color to the original when removed', async function () {
           const currentUrl = await getUrlFromShare();
-          const newUrl = isNewChartsLibraryEnabled
-            ? currentUrl.replace(`'80000':%23FFFFFF`, '')
-            : currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
+          const newUrl = currentUrl.replace(`'80000':%23FFFFFF`, '');
 
           await hardRefresh(newUrl);
           await PageObjects.header.waitUntilLoadingHasFinished();

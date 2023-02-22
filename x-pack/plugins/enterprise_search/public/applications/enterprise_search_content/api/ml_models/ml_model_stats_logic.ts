@@ -22,7 +22,11 @@ export const getMLModelsStats = async () => {
 
 export const MLModelsStatsApiLogic = createApiLogic(
   ['ml_models_stats_api_logic'],
-  getMLModelsStats
+  getMLModelsStats,
+  {
+    clearFlashMessagesOnMakeRequest: false,
+    showErrorFlash: false,
+  }
 );
 
 export type MLModelsStatsApiLogicActions = Actions<GetMlModelsStatsArgs, GetMlModelsStatsResponse>;

@@ -10,24 +10,27 @@ import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { rulesClientMock, RulesClientMock } from '../rules_client.mock';
+import { rulesSettingsClientMock, RulesSettingsClientMock } from '../rules_settings_client.mock';
 import { AlertsHealth, RuleType } from '../../common';
 import type { AlertingRequestHandlerContext } from '../types';
 
 export function mockHandlerArguments(
   {
     rulesClient = rulesClientMock.create(),
+    rulesSettingsClient = rulesSettingsClientMock.create(),
     listTypes: listTypesRes = [],
     getFrameworkHealth,
     areApiKeysEnabled,
   }: {
     rulesClient?: RulesClientMock;
+    rulesSettingsClient?: RulesSettingsClientMock;
     listTypes?: RuleType[];
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
     areApiKeysEnabled?: () => Promise<boolean>;
   },
-  req: unknown,
-  res?: Array<MethodKeysOf<KibanaResponseFactory>>
+  request: unknown,
+  response?: Array<MethodKeysOf<KibanaResponseFactory>>
 ): [
   AlertingRequestHandlerContext,
   KibanaRequest<unknown, unknown, unknown>,
@@ -41,12 +44,15 @@ export function mockHandlerArguments(
         getRulesClient() {
           return rulesClient || rulesClientMock.create();
         },
+        getRulesSettingsClient() {
+          return rulesSettingsClient || rulesSettingsClientMock.create();
+        },
         getFrameworkHealth,
         areApiKeysEnabled: areApiKeysEnabled ? areApiKeysEnabled : () => Promise.resolve(true),
       },
     } as unknown as AlertingRequestHandlerContext,
-    req as KibanaRequest<unknown, unknown, unknown>,
-    mockResponseFactory(res),
+    request as KibanaRequest<unknown, unknown, unknown>,
+    mockResponseFactory(response),
   ];
 }
 

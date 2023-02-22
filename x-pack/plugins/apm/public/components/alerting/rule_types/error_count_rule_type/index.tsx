@@ -94,11 +94,17 @@ export function ErrorCountRuleType(props: Props) {
   const fields = [
     <ServiceField
       currentValue={params.serviceName}
-      onChange={(value) => setRuleParams('serviceName', value)}
+      onChange={(value) => {
+        if (value !== params.serviceName) {
+          setRuleParams('serviceName', value);
+          setRuleParams('environment', ENVIRONMENT_ALL.value);
+        }
+      }}
     />,
     <EnvironmentField
       currentValue={params.environment}
       onChange={(value) => setRuleParams('environment', value)}
+      serviceName={params.serviceName}
     />,
     <IsAboveField
       value={params.threshold}

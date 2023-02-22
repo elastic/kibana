@@ -1,9 +1,7 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
     "isolatedModules": true
   },
   "include": [
@@ -13,12 +11,23 @@
   ],
   "kbn_references": [
     { "path": "../tsconfig.json" },
-    { "path": "../../../core/tsconfig.json" },
-    { "path": "../../expressions/tsconfig.json" },
-    { "path": "../../presentation_util/tsconfig.json" },
-    { "path": "../../field_formats/tsconfig.json" },
-    { "path": "../../charts/tsconfig.json" },
-    { "path": "../../usage_collection/tsconfig.json" },
-    { "path": "../../visualizations/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/expressions-plugin",
+    "@kbn/presentation-util-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/i18n",
+    "@kbn/coloring",
+    "@kbn/utility-types",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/analytics",
+    "@kbn/kibana-react-plugin",
+    "@kbn/ui-theme",
+    "@kbn/chart-expressions-common",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

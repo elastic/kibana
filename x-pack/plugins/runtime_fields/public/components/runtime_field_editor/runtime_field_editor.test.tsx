@@ -72,7 +72,9 @@ describe('Runtime field editor', () => {
 
     let data;
     await act(async () => {
-      ({ data } = await lastState.submit());
+      const submit = lastState.submit();
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+      ({ data } = await submit);
     });
     expect(data).toEqual(defaultValue);
 
@@ -93,6 +95,7 @@ describe('Runtime field editor', () => {
 
     await act(async () => {
       form.setInputValue('nameField.input', existingConcreteFields[0].name);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
     component.update();
 
@@ -117,7 +120,9 @@ describe('Runtime field editor', () => {
       });
 
       await act(async () => {
-        await lastOnChangeCall()[0].submit();
+        const submit = lastOnChangeCall()[0].submit();
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+        await submit;
       });
 
       component.update();
@@ -145,7 +150,9 @@ describe('Runtime field editor', () => {
       const { form } = testBed;
 
       await act(async () => {
-        await lastOnChangeCall()[0].submit();
+        const submit = lastOnChangeCall()[0].submit();
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+        await submit;
       });
 
       expect(lastOnChangeCall()[0].isValid).toBe(true);

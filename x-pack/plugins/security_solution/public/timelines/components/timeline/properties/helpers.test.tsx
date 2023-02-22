@@ -21,7 +21,6 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../../common/mock';
 import { createStore } from '../../../../common/store';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('./use_create_timeline');
 
@@ -150,7 +149,6 @@ describe('Favorite Button', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
         kibanaObservable,
         storage
       );
@@ -187,7 +185,6 @@ describe('Favorite Button', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
         kibanaObservable,
         storage
       );
@@ -223,7 +220,6 @@ describe('Favorite Button', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
         kibanaObservable,
         storage
       );

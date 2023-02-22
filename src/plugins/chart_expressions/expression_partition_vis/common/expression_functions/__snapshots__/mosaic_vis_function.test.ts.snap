@@ -103,6 +103,7 @@ Object {
         "splitRow": undefined,
       },
       "labels": Object {
+        "colorOverrides": Object {},
         "last_level": false,
         "percentDecimals": 2,
         "position": "default",

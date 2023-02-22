@@ -17,8 +17,7 @@ import {
   checkForDataLayerType,
 } from './utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn, getFilter, combineErrorMessages } from '../helpers';
-import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 import { DOCUMENT_FIELD_NAME } from '../../../../../../common';
 
 const ofName = buildLabelFunction((name?: string) => {
@@ -107,16 +106,13 @@ export const cumulativeSumOperation: OperationDefinition<
     return true;
   },
   getErrorMessage: (layer: FormBasedLayer, columnId: string) => {
-    return combineErrorMessages([
-      getErrorsForDateReference(
-        layer,
-        columnId,
-        i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
-          defaultMessage: 'Cumulative sum',
-        })
-      ),
-      getDisallowedPreviousShiftMessage(layer, columnId),
-    ]);
+    return getErrorsForDateReference(
+      layer,
+      columnId,
+      i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
+        defaultMessage: 'Cumulative sum',
+      })
+    );
   },
   getDisabledStatus(indexPattern, layer, layerType) {
     const opName = i18n.translate('xpack.lens.indexPattern.cumulativeSum', {

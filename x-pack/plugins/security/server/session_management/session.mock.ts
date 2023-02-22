@@ -29,6 +29,7 @@ export const sessionMock = {
     provider: { type: 'basic', name: 'basic1' },
     idleTimeoutExpiration: null,
     lifespanExpiration: null,
+    createdAt: 1234567890,
     state: undefined,
     metadata: { index: sessionIndexMock.createValue(sessionValue.metadata?.index) },
     ...sessionValue,

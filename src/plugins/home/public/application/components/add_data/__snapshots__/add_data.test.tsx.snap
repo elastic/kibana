@@ -103,10 +103,36 @@ exports[`AddData render 1`] = `
       </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiImage
-        alt="Illustration of Elastic data integrations"
-        className="homDataAdd__illustration"
-        src="/plugins/kibanaReact/assets/illustration_integrations_lightmode.svg"
+      <MoveData
+        addBasePath={
+          [MockFunction] {
+            "calls": Array [
+              Array [
+                "/app/integrations/browse",
+              ],
+              Array [
+                "#/tutorial_directory/sampleData",
+              ],
+              Array [
+                "#/tutorial_directory/fileDataViz",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/app/integrations/browse",
+              },
+              Object {
+                "type": "return",
+                "value": "#/tutorial_directory/sampleData",
+              },
+              Object {
+                "type": "return",
+                "value": "#/tutorial_directory/fileDataViz",
+              },
+            ],
+          }
+        }
       />
     </EuiFlexItem>
   </EuiFlexGroup>

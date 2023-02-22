@@ -88,7 +88,7 @@ export const EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER = i18n.translate(
 export const ALL_EXCEPTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitle',
   {
-    defaultMessage: 'Rule Exceptions',
+    defaultMessage: 'Shared Exception Lists',
   }
 );
 
@@ -356,5 +356,33 @@ export const SORT_BY_CREATE_AT = i18n.translate(
   'xpack.securitySolution.exceptions.sortByCreateAt',
   {
     defaultMessage: 'Created At',
+  }
+);
+
+export const EXPORT_MODAL_CANCEL_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.exportModalCancelButton',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const EXPORT_MODAL_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.exportModalTitle',
+  {
+    defaultMessage: 'Export exception list',
+  }
+);
+
+export const EXPORT_MODAL_INCLUDE_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.exportModalIncludeSwitchLabel',
+  {
+    defaultMessage: 'Include expired exceptions',
+  }
+);
+
+export const EXPORT_MODAL_CONFIRM_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.exportModalConfirmButton',
+  {
+    defaultMessage: 'Export',
   }
 );

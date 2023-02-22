@@ -7,20 +7,17 @@
 
 import React, { useState, VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { CopyToClipboardContextMenu } from '../../copy_to_clipboard';
 import { FilterInContextMenu, FilterOutContextMenu } from '../../../../query_bar';
 import { AddToTimelineContextMenu } from '../../../../timeline';
-
-export const POPOVER_BUTTON_TEST_ID = 'tiBarchartPopoverButton';
-export const TIMELINE_BUTTON_TEST_ID = 'tiBarchartTimelineButton';
-export const FILTER_IN_BUTTON_TEST_ID = 'tiBarchartFilterInButton';
-export const FILTER_OUT_BUTTON_TEST_ID = 'tiBarchartFilterOutButton';
-export const COPY_TO_CLIPBOARD_BUTTON_TEST_ID = 'tiBarchartCopyToClipboardButton';
-
-const BUTTON_LABEL = i18n.translate('xpack.threatIntelligence.indicator.barChart.popover', {
-  defaultMessage: 'More actions',
-});
+import {
+  COPY_TO_CLIPBOARD_BUTTON_TEST_ID,
+  FILTER_IN_BUTTON_TEST_ID,
+  FILTER_OUT_BUTTON_TEST_ID,
+  POPOVER_BUTTON_TEST_ID,
+  TIMELINE_BUTTON_TEST_ID,
+} from './test_ids';
+import { BUTTON_LABEL } from './translations';
 
 export interface IndicatorBarchartLegendActionProps {
   /**

@@ -116,7 +116,7 @@ export function registerExpressionsLanguage(functions: ExpressionFunction[]) {
   expressionsLanguage.keywords = functions.map((fn) => fn.name);
   expressionsLanguage.deprecated = functions.filter((fn) => fn.deprecated).map((fn) => fn.name);
   monaco.languages.onLanguage(EXPRESSIONS_LANGUAGE_ID, () => {
-    monaco.languages.register({ id: EXPRESSIONS_LANGUAGE_ID });
     monaco.languages.setMonarchTokensProvider(EXPRESSIONS_LANGUAGE_ID, expressionsLanguage);
   });
+  monaco.languages.register({ id: EXPRESSIONS_LANGUAGE_ID });
 }

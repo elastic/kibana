@@ -17,7 +17,6 @@ import { ValuesType } from 'utility-types';
 import { AgentExplorerFieldName } from '../../../../../../common/agent_explorer';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { unit } from '../../../../../utils/style';
 import { AgentIcon } from '../../../../shared/agent_icon';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../shared/item_badge';
@@ -41,7 +40,7 @@ export function getAgentsColumns({
     {
       field: AgentExplorerFieldName.ServiceName,
       name: '',
-      width: `${unit * 3}px`,
+      width: '5%',
       render: (_, agent) => {
         const isSelected = selectedAgent === agent;
 
@@ -78,6 +77,8 @@ export function getAgentsColumns({
         }
       ),
       sortable: true,
+      width: '35%',
+      truncateText: true,
       render: (_, { serviceName, agentName }) => (
         <TruncateWithTooltip
           data-test-subj="apmAgentExplorerListServiceLink"
@@ -103,7 +104,8 @@ export function getAgentsColumns({
           defaultMessage: 'Environment',
         }
       ),
-      width: `${unit * 16}px`,
+      width: '15%',
+      truncateText: true,
       sortable: true,
       render: (_, { environments }) => (
         <EnvironmentBadge environments={environments} />
@@ -117,12 +119,12 @@ export function getAgentsColumns({
           defaultMessage: 'Instances',
         }
       ),
-      width: `${unit * 8}px`,
+      width: '10%',
       sortable: true,
     },
     {
       field: AgentExplorerFieldName.AgentName,
-      width: `${unit * 12}px`,
+      width: '15%',
       name: i18n.translate(
         'xpack.apm.agentExplorerTable.agentNameColumnLabel',
         { defaultMessage: 'Agent Name' }
@@ -135,7 +137,8 @@ export function getAgentsColumns({
         'xpack.apm.agentExplorerTable.agentVersionColumnLabel',
         { defaultMessage: 'Agent Version' }
       ),
-      width: `${unit * 8}px`,
+      width: '10%',
+      truncateText: true,
       render: (_, { agentVersion }) => (
         <ItemsBadge
           items={agentVersion}
@@ -156,7 +159,8 @@ export function getAgentsColumns({
         'xpack.apm.agentExplorerTable.agentDocsColumnLabel',
         { defaultMessage: 'Agent Docs' }
       ),
-      width: `${unit * 8}px`,
+      width: '10%',
+      truncateText: true,
       render: (_, { agentName, agentDocsPageUrl }) => (
         <EuiToolTip content={`${agentName} agent docs`}>
           <AgentExplorerDocsLink

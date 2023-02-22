@@ -17,10 +17,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 
 const CA_CERT = readFileSync(CA_CERT_PATH);
-const FIRST_CLIENT_CERT = readFileSync(resolve(__dirname, '../../fixtures/pki/first_client.p12'));
-const SECOND_CLIENT_CERT = readFileSync(resolve(__dirname, '../../fixtures/pki/second_client.p12'));
+const FIRST_CLIENT_CERT = readFileSync(
+  require.resolve('@kbn/security-api-integration-helpers/pki/first_client.p12')
+);
+const SECOND_CLIENT_CERT = readFileSync(
+  require.resolve('@kbn/security-api-integration-helpers/pki/second_client.p12')
+);
 const UNTRUSTED_CLIENT_CERT = readFileSync(
-  resolve(__dirname, '../../fixtures/pki/untrusted_client.p12')
+  require.resolve('@kbn/security-api-integration-helpers/pki/untrusted_client.p12')
 );
 
 export default function ({ getService }: FtrProviderContext) {
@@ -76,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(401);
 
       expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-      expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+      expect(unauthenticatedResponse.text).to.contain('error');
     });
 
     it('does not prevent basic login', async () => {
@@ -464,7 +468,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../fixtures/audit/pki.log');
+      const logFilePath = resolve(__dirname, '../../packages/helpers/audit/pki.log');
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {

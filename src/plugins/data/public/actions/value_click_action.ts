@@ -8,7 +8,7 @@
 
 import type { Filter } from '@kbn/es-query';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { Action, createAction, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '../triggers';
 import { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 
@@ -31,10 +31,10 @@ export interface ValueClickContext {
   };
 }
 
-export function createValueClickAction(
+export function createValueClickActionDefinition(
   getStartServices: () => { uiActions: UiActionsStart }
-): Action {
-  return createAction({
+): UiActionsActionDefinition<ValueClickContext> {
+  return {
     type: ACTION_VALUE_CLICK,
     id: ACTION_VALUE_CLICK,
     shouldAutoExecute: async () => true,
@@ -59,5 +59,5 @@ export function createValueClickAction(
         );
       }
     },
-  });
+  };
 }

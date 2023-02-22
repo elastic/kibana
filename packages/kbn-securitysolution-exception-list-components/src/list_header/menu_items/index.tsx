@@ -18,9 +18,9 @@ interface MenuItemsProps {
   linkedRules: Rule[];
   canUserEditList?: boolean;
   securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
-  onExportList: () => void;
   onDeleteList: () => void;
   onManageRules: () => void;
+  onExportList: () => void;
 }
 
 const MenuItemsComponent: FC<MenuItemsProps> = ({
@@ -29,9 +29,9 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
   securityLinkAnchorComponent,
   isReadonly,
   canUserEditList = true,
-  onExportList,
   onDeleteList,
   onManageRules,
+  onExportList,
 }) => {
   const referencedLinks = useMemo(
     () =>
@@ -78,7 +78,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
             data-test-subj={`${dataTestSubj || ''}ManageRulesButton`}
             fill
             onClick={() => {
-              if (typeof onExportList === 'function') onManageRules();
+              if (typeof onManageRules === 'function') onManageRules();
             }}
           >
             {i18n.EXCEPTION_LIST_HEADER_MANAGE_RULES_BUTTON}
@@ -87,6 +87,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
       )}
       <EuiFlexItem>
         <HeaderMenu
+          iconType="boxesHorizontal"
           dataTestSubj={`${dataTestSubj || ''}MenuActions`}
           actions={[
             {

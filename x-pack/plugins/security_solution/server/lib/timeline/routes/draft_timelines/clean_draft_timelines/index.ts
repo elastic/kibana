@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { ConfigType } from '../../../../..';
@@ -74,7 +74,7 @@ export const cleanDraftTimelinesRoute = (
           request.body.timelineType === TimelineType.template
             ? {
                 timelineType: request.body.timelineType,
-                templateTimelineId: uuid.v4(),
+                templateTimelineId: uuidv4(),
                 templateTimelineVersion: 1,
               }
             : {};

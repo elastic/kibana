@@ -24,6 +24,7 @@ import {
   NotificationServiceConstructor,
   OverlayServiceConstructor,
   UiSettingsServiceConstructor,
+  SettingsServiceConstructor,
   MockApplicationService,
   MockDocLinksService,
   MockRenderingService,
@@ -40,6 +41,9 @@ import {
   fetchOptionalMemoryInfoMock,
   MockLoggingSystem,
   LoggingSystemConstructor,
+  MockSettingsService,
+  MockCustomBrandingService,
+  CustomBrandingServiceConstructor,
 } from './core_system.test.mocks';
 import type { EnvironmentMode } from '@kbn/config';
 import { CoreSystem } from './core_system';
@@ -131,6 +135,7 @@ describe('constructor', () => {
     expect(NotificationServiceConstructor).toHaveBeenCalledTimes(1);
     expect(HttpServiceConstructor).toHaveBeenCalledTimes(1);
     expect(UiSettingsServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(SettingsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(OverlayServiceConstructor).toHaveBeenCalledTimes(1);
     expect(RenderingServiceConstructor).toHaveBeenCalledTimes(1);
@@ -139,6 +144,7 @@ describe('constructor', () => {
     expect(ThemeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(AnalyticsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
+    expect(CustomBrandingServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -264,6 +270,16 @@ describe('#setup()', () => {
   it('calls uiSettings#setup()', async () => {
     await setupCore();
     expect(MockUiSettingsService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls settings#setup()', async () => {
+    await setupCore();
+    expect(MockSettingsService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls customBranding#setup()', async () => {
+    await setupCore();
+    expect(MockCustomBrandingService.setup).toHaveBeenCalledTimes(1);
   });
 
   it('calls fatalErrors#setup()', async () => {
@@ -409,6 +425,16 @@ describe('#start()', () => {
   it('calls uiSettings#start()', async () => {
     await startCore();
     expect(MockUiSettingsService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls settings#start()', async () => {
+    await startCore();
+    expect(MockSettingsService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls customBranding#start()', async () => {
+    await startCore();
+    expect(MockCustomBrandingService.start).toHaveBeenCalledTimes(1);
   });
 
   it('calls i18n#start()', async () => {

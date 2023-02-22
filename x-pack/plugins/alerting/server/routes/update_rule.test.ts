@@ -14,7 +14,7 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { UpdateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
-import { RuleNotifyWhenType } from '../../common';
+import { RuleNotifyWhen } from '../../common';
 import { AsApiContract } from './lib';
 import { PartialRule } from '../types';
 
@@ -42,6 +42,7 @@ describe('updateRuleRoute', () => {
     updatedAt: new Date(),
     actions: [
       {
+        uuid: '1234-5678',
         group: 'default',
         id: '2',
         actionTypeId: 'test',
@@ -50,7 +51,7 @@ describe('updateRuleRoute', () => {
         },
       },
     ],
-    notifyWhen: 'onActionGroupChange' as RuleNotifyWhenType,
+    notifyWhen: RuleNotifyWhen.CHANGE,
   };
 
   const updateRequest: AsApiContract<UpdateOptions<{ otherField: boolean }>['data']> = {
@@ -58,6 +59,7 @@ describe('updateRuleRoute', () => {
     notify_when: mockedAlert.notifyWhen,
     actions: [
       {
+        uuid: '1234-5678',
         group: mockedAlert.actions[0].group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
@@ -114,6 +116,7 @@ describe('updateRuleRoute', () => {
                 "params": Object {
                   "baz": true,
                 },
+                "uuid": "1234-5678",
               },
             ],
             "name": "abc",

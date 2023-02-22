@@ -145,3 +145,24 @@ export const EXPORT_EXCEPTION_LIST = i18n.translate(
     defaultMessage: 'Export exception list',
   }
 );
+
+export const EXCEPTION_MANAGE_RULES_ERROR = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.manageRulesError',
+  {
+    defaultMessage: 'Manage rules error',
+  }
+);
+
+export const EXCEPTION_MANAGE_RULES_ERROR_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.manageRulesErrorDescription',
+  {
+    defaultMessage: 'An error occurred linking or unlinking rules',
+  }
+);
+
+export const EXCEPTION_EXPORT_ERROR_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.exportListDescription',
+  {
+    defaultMessage: 'An error occurred exporting a list',
+  }
+);

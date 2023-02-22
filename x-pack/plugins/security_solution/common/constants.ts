@@ -12,7 +12,6 @@
  * https://mariusschulz.com/blog/literal-type-widening-in-typescript
  * Please follow this convention when adding to this file
  */
-
 export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
@@ -61,6 +60,7 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
 export const SECURITY_FEATURE_ID = 'Security' as const;
+export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
 export const DEFAULT_RELATIVE_DATE_THRESHOLD = 24 as const;
 
@@ -90,7 +90,9 @@ export enum SecurityPageName {
   cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
   cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
   cloudSecurityPostureFindings = 'cloud_security_posture-findings',
+  cloudSecurityPostureRules = 'cloud_security_posture-rules',
   dashboardsLanding = 'dashboards',
+  dataQuality = 'data_quality',
   detections = 'detections',
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
@@ -142,6 +144,7 @@ export const TIMELINES_PATH = '/timelines' as const;
 export const CASES_PATH = '/cases' as const;
 export const OVERVIEW_PATH = '/overview' as const;
 export const LANDING_PATH = '/get_started' as const;
+export const DATA_QUALITY_PATH = '/data_quality' as const;
 export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
@@ -189,6 +192,7 @@ export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
 export const APP_ENTITY_ANALYTICS_PATH = `${APP_PATH}${ENTITY_ANALYTICS_PATH}` as const;
+export const APP_DATA_QUALITY_PATH = `${APP_PATH}${DATA_QUALITY_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -439,7 +443,6 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrenc
  * We decided add this limit(number of ids less than 100) in bulk edit API as well, to prevent a huge number of single rule fetches
  */
 export const RULES_TABLE_MAX_PAGE_SIZE = 100;
-export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];
 
 /**
  * Local storage keys we use to store the state of our new features tours we currently show in the app.
@@ -448,7 +451,7 @@ export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAG
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.4',
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.6',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -472,3 +475,40 @@ export const RISKY_USERS_DOC_LINK =
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 
 export const BULK_ADD_TO_TIMELINE_LIMIT = 2000;
+
+export const DEFAULT_DETECTION_PAGE_FILTERS = [
+  {
+    title: 'Status',
+    fieldName: 'kibana.alert.workflow_status',
+    selectedOptions: ['open'],
+    hideActionBar: true,
+  },
+  {
+    title: 'Severity',
+    fieldName: 'kibana.alert.severity',
+    selectedOptions: [],
+    hideActionBar: true,
+  },
+  {
+    title: 'User',
+    fieldName: 'user.name',
+  },
+  {
+    title: 'Host',
+    fieldName: 'host.name',
+  },
+];
+
+/** This local storage key stores the `Grid / Event rendered view` selection */
+export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.view-selection';
+
+export const VIEW_SELECTION = {
+  gridView: 'gridView',
+  eventRenderedView: 'eventRenderedView',
+} as const;
+
+export const ALERTS_TABLE_REGISTRY_CONFIG_IDS = {
+  ALERTS_PAGE: `${APP_ID}-alerts-page`,
+  RULE_DETAILS: `${APP_ID}-rule-details`,
+  CASE: `${APP_ID}-case`,
+} as const;

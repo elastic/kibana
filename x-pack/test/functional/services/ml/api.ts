@@ -860,12 +860,13 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createAndRunAnomalyDetectionLookbackJob(
       jobConfig: Job,
       datafeedConfig: Datafeed,
-      space?: string
+      options: { space?: string; end?: string } = {}
     ) {
+      const { space = undefined, end = `${Date.now()}` } = options;
       await this.createAnomalyDetectionJob(jobConfig, space);
       await this.createDatafeed(datafeedConfig, space);
       await this.openAnomalyDetectionJob(jobConfig.job_id);
-      await this.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end: `${Date.now()}` });
+      await this.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end });
       await this.waitForDatafeedState(datafeedConfig.datafeed_id, DATAFEED_STATE.STOPPED);
       await this.waitForJobState(jobConfig.job_id, JOB_STATE.CLOSED);
     },
@@ -979,6 +980,27 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           } else {
             throw new Error(
               `expected anomaly detection job '${jobId}' to have processed_record_count > 0 (got ${processedRecordCount})`
+            );
+          }
+        }
+      );
+    },
+
+    async waitForADJobRecordCount(
+      jobId: string,
+      expectedCount: number,
+      timeout: number = 2 * 60 * 1000
+    ) {
+      await retry.waitForWithTimeout(
+        `job ${jobId} record count to be ${expectedCount}`,
+        timeout,
+        async () => {
+          const count = await this.getADJobRecordCount(jobId);
+          if (count === expectedCount) {
+            return true;
+          } else {
+            throw new Error(
+              `expected job ${jobId} record count to be ${expectedCount} but got ${count}`
             );
           }
         }
@@ -1116,6 +1138,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           throw new Error(errorMsg ?? `annotation '${annotationId}' should not exist`);
         }
       });
+    },
+
+    async assertAnnotationsCount(jobId: string, expectedCount: number) {
+      const annotations = await this.getAnnotations(jobId);
+      expect(annotations.length).to.eql(
+        expectedCount,
+        `expected annotation count of ${expectedCount}, got ${annotations.length}`
+      );
     },
 
     async runDFAJob(dfaId: string) {

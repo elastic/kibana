@@ -9,7 +9,7 @@
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
-import { getTelemetrySavedObject, updateTelemetrySavedObject } from '../telemetry_repository';
+import { getTelemetrySavedObject, updateTelemetrySavedObject } from '../saved_objects';
 
 export function registerTelemetryLastReported(
   router: IRouter,
