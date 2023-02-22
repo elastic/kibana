@@ -65,7 +65,7 @@ describe('Alert details with unmapped fields', () => {
     };
 
     openTable();
-    cy.get(ALERT_FLYOUT).find(tablePageSelector(4)).click({ force: true });
+    cy.get(ALERT_FLYOUT).find(tablePageSelector(6)).click({ force: true });
     cy.get(ALERT_FLYOUT)
       .find(TABLE_ROWS)
       .last()
