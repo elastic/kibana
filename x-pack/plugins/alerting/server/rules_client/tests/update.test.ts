@@ -2709,6 +2709,7 @@ describe('update()', () => {
         name: 'abc',
         notifyWhen: null,
         params: { bar: true, risk_score: 40, severity: 'low' },
+        revision: 1,
         schedule: { interval: '1m' },
         scheduledTaskId: 'task-123',
         tags: ['foo'],

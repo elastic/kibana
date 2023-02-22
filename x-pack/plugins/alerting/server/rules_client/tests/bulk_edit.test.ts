@@ -586,6 +586,7 @@ describe('bulkEdit()', () => {
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
               tags: ['foo'],
+              revision: 1,
             },
             references: [{ id: '1', name: 'action_0', type: 'action' }],
           },
