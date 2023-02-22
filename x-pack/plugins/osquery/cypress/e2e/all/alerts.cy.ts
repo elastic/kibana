@@ -77,7 +77,6 @@ describe('Alert Event Details', () => {
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.get(LIVE_QUERY_EDITOR);
     });
-    cy.contains('Save changes').wait(500).click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('Query is a required field');
       inputQuery('select * from uptime1');
