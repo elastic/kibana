@@ -29,7 +29,12 @@ const CHARTS_IN_ORDER: Array<Pick<MetricChartProps, 'title' | 'type'> & { fullRo
       defaultMessage: 'Memory Usage',
     }),
     type: 'memory',
-    fullRow: true,
+  },
+  {
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memoryTotal', {
+      defaultMessage: 'Memory Total',
+    }),
+    type: 'memoryTotal',
   },
   {
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.rx', {
