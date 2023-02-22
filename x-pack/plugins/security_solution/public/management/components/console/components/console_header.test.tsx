@@ -21,19 +21,19 @@ describe('Console header area', () => {
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
   });
 
-  it('should display the help button', async () => {
+  it('should display the help button', () => {
     render();
 
     expect(renderResult.getByTestId('test-header-helpButton').textContent).toEqual(HELP_LABEL);
   });
 
-  it('should not display a title component', async () => {
+  it('should not display a title component', () => {
     render();
 
     expect(renderResult.getByTestId('test-header-titleComponentContainer').textContent).toEqual('');
   });
 
-  it('should show a title component if one was provided', async () => {
+  it('should show a title component if one was provided', () => {
     render({ TitleComponent: () => <>{'header component here'}</> });
 
     expect(renderResult.getByTestId('test-header-titleComponentContainer').textContent).toEqual(
@@ -41,7 +41,7 @@ describe('Console header area', () => {
     );
   });
 
-  it('should open the side panel when help button is clicked', async () => {
+  it('should open the side panel when help button is clicked', () => {
     render();
     renderResult.getByTestId('test-header-helpButton').click();
 

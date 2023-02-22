@@ -42,7 +42,7 @@ describe('When rendering the command list (help output)', () => {
       };
     });
 
-    it('should display the help panel header', async () => {
+    it('should display the help panel header', () => {
       renderAndOpenHelpPanel();
 
       expect(renderResult.getByTestId('test-sidePanel-header')).toHaveTextContent(
@@ -57,14 +57,14 @@ describe('When rendering the command list (help output)', () => {
       expect(renderResult.getByTestId('test-commandList')).toBeTruthy();
     });
 
-    it('should close the side panel when close button is clicked', async () => {
+    it('should close the side panel when close button is clicked', () => {
       renderAndOpenHelpPanel();
       consoleSelectors.closeHelpPanel();
 
       expect(renderResult.queryByTestId('test-sidePanel')).toBeNull();
     });
 
-    it('should display helpful tips', async () => {
+    it('should display helpful tips', () => {
       renderAndOpenHelpPanel();
 
       expect(renderResult.getByTestId('test-commandList-helpfulTips')).toHaveTextContent(
@@ -77,7 +77,7 @@ describe('When rendering the command list (help output)', () => {
       expect(renderResult.getByTestId('test-commandList-helpfulHintDocLink')).toBeTruthy();
     });
 
-    it('should display common commands and parameters section', async () => {
+    it('should display common commands and parameters section', () => {
       renderAndOpenHelpPanel();
 
       expect(
@@ -85,7 +85,7 @@ describe('When rendering the command list (help output)', () => {
       ).toBeTruthy();
     });
 
-    it('should group commands by group label', async () => {
+    it('should group commands by group label', () => {
       renderAndOpenHelpPanel();
       const groups = helpPanelSelectors.getHelpGroupLabels();
 

@@ -68,8 +68,8 @@ describe('When displaying Endpoint Response Actions', () => {
       'processes',
       'kill-process --pid',
       'suspend-process --pid',
-      'execute --command',
       'get-file --path',
+      'execute --command',
     ]);
   });
 });

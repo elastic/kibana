@@ -41,7 +41,7 @@ const otherCommandsGroupLabel = i18n.translate(
 );
 
 /**
- * Take a string and removes all non-letters/number from it.
+ * Takes a string and removes all non-letters/number from it.
  * @param value
  */
 export const convertToTestId = (value: string): string => {
@@ -160,7 +160,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         groupEntry.list.push(allowedCommand);
 
         // Its possible (but probably not intentionally) that the same Group Label might
-        // has different positions defined (ex. one has a position, and another does not,
+        // have different positions defined (ex. one has a position, and another does not,
         // which defaults to `Infinity`. If we detect that here, then update the group
         // position. In the end, the group label will have the last explicitly defined
         // position found.
