@@ -96,6 +96,11 @@ export interface JourneyConfigOptions<CtxExt> {
    * be merged with the default context provided to each step function.
    */
   extendContext?: (ctx: BaseStepCtx) => CtxExt;
+  /**
+   * Use this to define actions that will be executed after Kibana & ES were started,
+   * but before archives are loaded. APM traces are not collected for this hook.
+   */
+  beforeSteps?: (ctx: BaseStepCtx & CtxExt) => Promise<void>;
 }
 
 export class JourneyConfig<CtxExt extends object> {
@@ -160,5 +165,13 @@ export class JourneyConfig<CtxExt extends object> {
       ...ctx,
       ...ext(ctx),
     };
+  }
+
+  async getBeforeStepsFn(ctx: BaseStepCtx & CtxExt) {
+    if (this.#opts.beforeSteps) {
+      await this.#opts.beforeSteps(ctx);
+    } else {
+      new Promise<void>((resolve) => resolve());
+    }
   }
 }
