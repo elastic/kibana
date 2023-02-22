@@ -97,6 +97,7 @@ export const setRecoveredAlertsContext = ({
     const state = alert.getState() as SyntheticsCommonState;
 
     let recoveryReason = '';
+    let isUp = false;
 
     if (state?.idWithLocation && staleDownConfigs[state.idWithLocation]) {
       const { idWithLocation } = state;
@@ -113,6 +114,7 @@ export const setRecoveredAlertsContext = ({
     }
 
     if (state?.idWithLocation && upConfigs[state.idWithLocation]) {
+      isUp = Boolean(upConfigs[state.idWithLocation]) || false;
       recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck', {
         defaultMessage: `Monitor has recovered with status Up`,
       });
@@ -120,6 +122,7 @@ export const setRecoveredAlertsContext = ({
 
     alert.setContext({
       ...state,
+      ...(isUp ? { status: 'up' } : {}),
       ...(recoveryReason ? { [RECOVERY_REASON]: recoveryReason } : {}),
       ...(basePath && spaceId && alertUuid
         ? { [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid) }
