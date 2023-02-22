@@ -52,9 +52,8 @@ function createRule(id: string, name: string, tags?: string[], enabled = false):
 
   rule.name = name;
   rule.tags = tags;
-  rule.enabled = enabled;
 
-  createCustomRule(rule, id);
+  createCustomRule(rule, { ruleId: id, enabled });
 }
 
 function createTestRules(): void {
