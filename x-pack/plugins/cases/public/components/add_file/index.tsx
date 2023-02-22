@@ -9,6 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { FilePicker } from '@kbn/shared-ux-file-picker';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { CommentType, ExternalReferenceStorageType } from '../../../common';
 import type { Case } from '../../../common';
 import { CASES_FILE_KIND } from '../../../common/constants';
@@ -56,7 +57,8 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId, onFileAdded }) => {
             type: CommentType.externalReference,
             externalReferenceId: ids[0],
             externalReferenceStorage: {
-              type: ExternalReferenceStorageType.elasticSearchDoc,
+              type: ExternalReferenceStorageType.savedObject,
+              soType: FILE_SO_TYPE,
             },
             externalReferenceAttachmentTypeId: '.files',
             externalReferenceMetadata: {
