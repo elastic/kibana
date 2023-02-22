@@ -31,12 +31,12 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
-      getBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
+      getByTestId(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
     }
   }
 }
 
-Cypress.Commands.add('getBySel', (selector, ...args) =>
+Cypress.Commands.add('getByTestId', (selector, ...args) =>
   cy.get(`[data-test-subj="${selector}"]`, ...args)
 );
 
