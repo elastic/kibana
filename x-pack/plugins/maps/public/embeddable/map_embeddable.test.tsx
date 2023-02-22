@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { map, distinctUntilChanged } from 'rxjs/operators';
 import { MapEmbeddable } from './map_embeddable';
 
 jest.mock('../kibana_services', () => {
@@ -26,8 +25,8 @@ jest.mock('../kibana_services', () => {
         session: {
           getSearchOptions() {
             return undefined;
-          }
-        }
+          },
+        },
       };
     },
     getShowMapsInspectorAdapter() {
@@ -37,9 +36,9 @@ jest.mock('../kibana_services', () => {
       return {
         getTime() {
           return { from: 'now-7d', to: 'now' };
-        }
-      }
-    }
+        },
+      };
+    },
   };
 });
 
@@ -51,30 +50,28 @@ jest.mock('../connected_components/map_container', () => {
   };
 });
 
-import { MapContainer } from '../connected_components/map_container';
-
 jest.mock('../routes/map_page', () => {
   class MockSavedMap {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     private _store = require('../reducers/store').createMapStore();
     private _attributes = {
-      title: 'myMap'
+      title: 'myMap',
     };
-    
-    whenReady = async function() {}
 
-    getStore = function() {
+    whenReady = async function () {};
+
+    getStore = function () {
       return this._store;
-    }
-    getAttributes = function() {
+    };
+    getAttributes = function () {
       return this._attributes;
-    }
-    getAutoFitToBounds = function() {
+    };
+    getAutoFitToBounds = function () {
       return true;
-    }
-    getSharingSavedObjectProps = function() {
+    };
+    getSharingSavedObjectProps = function () {
       return null;
-    }
+    };
   }
   return { SavedMap: MockSavedMap };
 });
@@ -83,7 +80,7 @@ function untilInitialized(mapEmbeddable: MapEmbeddable) {
   return new Promise((resolve) => {
     mapEmbeddable.setInitializationFinished = () => {
       resolve();
-    }
+    };
   });
 }
 
@@ -105,7 +102,7 @@ describe('shouldFetch$', () => {
     const fetchSpy = jest.spyOn(mapEmbeddable, '_dispatchSetQuery');
 
     mapEmbeddable.updateInput({
-      title: 'updated map title'
+      title: 'updated map title',
     });
 
     await onNextTick();
@@ -127,7 +124,7 @@ describe('shouldFetch$', () => {
       const fetchSpy = jest.spyOn(mapEmbeddable, '_dispatchSetQuery');
 
       mapEmbeddable.updateInput({
-        searchSessionId: uuidv4()
+        searchSessionId: uuidv4(),
       });
 
       await onNextTick();
@@ -148,7 +145,7 @@ describe('shouldFetch$', () => {
       const fetchSpy = jest.spyOn(mapEmbeddable, '_dispatchSetQuery');
 
       mapEmbeddable.updateInput({
-        searchSessionId: uuidv4()
+        searchSessionId: uuidv4(),
       });
 
       await onNextTick();
