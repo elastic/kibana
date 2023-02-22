@@ -12,7 +12,7 @@ import mdx from '../../../README.mdx';
 
 export default {
   title: 'Button Toolbar/Buttons',
-  description: 'An implementation of the toolbar button',
+  description: 'A button that is a part of a toolbar.',
   parameters: {
     docs: {
       page: mdx,

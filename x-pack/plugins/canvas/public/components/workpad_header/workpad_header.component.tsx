@@ -28,6 +28,10 @@ import { LabsControl } from './labs_control';
 import { EditorMenu } from './editor_menu';
 
 const strings = {
+  getQuickCreateButtonGroupLegend: () =>
+    i18n.translate('xpack.canvas.workpadHeader.quickCreateButtonGroupLegend', {
+      defaultMessage: 'Shortcuts to popular element types',
+    }),
   getFullScreenButtonAriaLabel: () =>
     i18n.translate('xpack.canvas.workpadHeader.fullscreenButtonAriaLabel', {
       defaultMessage: 'View fullscreen',
@@ -162,7 +166,12 @@ export const WorkpadHeader: FC<Props> = ({
             <Toolbar>
               {{
                 primaryButton: <ElementMenu addElement={addElement} elements={elements} />,
-                iconButtonGroup: <IconButtonGroup buttons={quickButtons} legend={'Test'} />,
+                iconButtonGroup: (
+                  <IconButtonGroup
+                    buttons={quickButtons}
+                    legend={strings.getQuickCreateButtonGroupLegend()}
+                  />
+                ),
                 extraButtons: [
                   <AddFromLibraryButton
                     onClick={showEmbedPanel}

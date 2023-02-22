@@ -19,7 +19,10 @@ import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_das
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
 import { pluginServices } from '../../services/plugin_services';
-import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
+import {
+  getCreateVisualizationButtonTitle,
+  getQuickCreateButtonGroupLegend,
+} from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 
@@ -192,7 +195,9 @@ export function DashboardEditingToolbar() {
               data-test-subj="dashboardAddNewPanelButton"
             />
           ),
-          iconButtonGroup: <IconButtonGroup buttons={quickButtons} legend={'Test'} />,
+          iconButtonGroup: (
+            <IconButtonGroup buttons={quickButtons} legend={getQuickCreateButtonGroupLegend()} />
+          ),
           extraButtons,
         }}
       </Toolbar>

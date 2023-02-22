@@ -57,7 +57,7 @@ export const IconButtonGroup = ({ buttons, legend }: Props) => {
     const { label, title = label, ...rest } = button;
     return {
       ...rest,
-      'aria-label': title,
+      'aria-label': title ?? label,
       id: `${htmlIdGenerator()()}${index}`,
       label,
       title,
