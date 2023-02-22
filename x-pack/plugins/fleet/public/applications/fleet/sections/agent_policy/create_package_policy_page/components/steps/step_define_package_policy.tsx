@@ -86,18 +86,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       });
     }
 
-    // Update package policy's package and agent policy info
-    useEffect(() => {
-      //  TODO move this to parent hook
-      // If agent policy has changed, update package policy's agent policy ID and namespace
-      if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
-        updatePackagePolicy({
-          policy_id: agentPolicy.id,
-          namespace: agentPolicy.namespace,
-        });
-      }
-    }, [packagePolicy, agentPolicy, packageInfo, updatePackagePolicy]);
-
     const isManaged = packagePolicy.is_managed;
 
     return validationResults ? (
