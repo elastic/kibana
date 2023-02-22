@@ -107,7 +107,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
         connector: caseConnector,
         closureType,
       });
-
     },
     [onConnectorUpdated, setConnector, persistCaseConfigure]
   );
@@ -158,7 +157,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
   );
 
   useEffect(() => {
-
     if (
       !isLoadingConnectors &&
       connector.id !== 'none' &&
@@ -187,7 +185,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         ? triggersActionsUi.getAddConnectorFlyout({
             onClose: onCloseAddFlyout,
             featureId: CasesConnectorFeatureId,
-            onConnectorCreated: onConnectorCreated,
+            onConnectorCreated,
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -41,9 +41,9 @@ export const openAddNewConnectorOption = () => {
 };
 
 export const verifyNewConnector = (connector: Connector) => {
-  cy.get(CONNECTORS_DROPDOWN).should('have.text',connector.connectorName);
+  cy.get(CONNECTORS_DROPDOWN).should('have.text', connector.connectorName);
   cy.get(UPDATE_CONNECTOR_BUTTON).should('have.text', `Update ${connector.connectorName}`);
-}
+};
 
 export const selectLastConnectorCreated = (id: string) => {
   cy.get(CONNECTORS_DROPDOWN).click({ force: true });

@@ -14,7 +14,6 @@ import { cleanKibana, deleteCases } from '../../tasks/common';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
-  selectLastConnectorCreated,
   verifyNewConnector,
 } from '../../tasks/configure_cases';
 import { login, visitWithoutDateRange } from '../../tasks/login';
