@@ -5,40 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiDataGridColumn,
-  EuiTableActionsColumnType,
-  EuiTableComputedColumnType,
-  EuiTableFieldDataColumnType,
-  useDataGridColumnSelector,
-} from '@elastic/eui';
+import { EuiDataGridColumn, useDataGridColumnSelector } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RuleTableItem } from '../../../../types';
+import { RulesListVisibleColumn, RulesListColumn, RulesListTableColumn } from '../../../../types';
 
-type RulesListTableColumns =
-  | EuiTableFieldDataColumnType<RuleTableItem>
-  | EuiTableComputedColumnType<RuleTableItem>
-  | EuiTableActionsColumnType<RuleTableItem>;
-
-export type RulesListColumns = {
-  id?: RulesListVisibleColumns | string;
-  selectorName?: string;
-} & RulesListTableColumns;
-
-export type RulesListVisibleColumns =
-  | 'ruleName'
-  | 'ruleTags'
-  | 'ruleExecutionStatusLastDate'
-  | 'ruleSnoozeNotify'
-  | 'ruleScheduleInterval'
-  | 'ruleExecutionStatusLastDuration'
-  | 'ruleExecutionPercentile'
-  | 'ruleExecutionSuccessRatio'
-  | 'ruleExecutionStatus'
-  | 'ruleExecutionState';
-
-export const originalRulesListVisibleColumns: RulesListVisibleColumns[] = [
+export const originalRulesListVisibleColumns: RulesListVisibleColumn[] = [
   'ruleName',
   'ruleTags',
   'ruleExecutionStatusLastDate',
@@ -52,12 +24,12 @@ export const originalRulesListVisibleColumns: RulesListVisibleColumns[] = [
 ];
 
 interface RulesListColumnSelector {
-  allRuleColumns: RulesListColumns[];
+  allRuleColumns: RulesListColumn[];
   rulesListKey?: string;
   visibleColumns?: string[];
 }
 
-type UseRulesListColumnSelector = [RulesListTableColumns[], React.ReactNode];
+type UseRulesListColumnSelector = [RulesListTableColumn[], React.ReactNode];
 
 const RULES_LIST_COLUMNS_KEY = 'triggersActionsUi_rulesListColumns';
 
@@ -88,7 +60,7 @@ export const useRulesListColumnSelector = ({
         selectorName = '',
         ...colAttr
       } = ruleColumnsWithId.find((col) => col.id === coldId) ?? {};
-      return colAttr as RulesListTableColumns;
+      return colAttr as RulesListTableColumn;
     });
     columns.push(...ruleColumnsWithoutId);
     return columns;

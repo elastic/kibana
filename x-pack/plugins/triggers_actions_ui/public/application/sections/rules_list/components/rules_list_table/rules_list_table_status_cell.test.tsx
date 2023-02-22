@@ -12,11 +12,11 @@ import {
   RulesListTableStatusCell,
   RulesListTableStatusCellProps,
 } from './rules_list_table_status_cell';
-import { RuleTableItem } from '../../../../types';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { RuleTableItem } from '../../../../../types';
+import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-jest.mock('../../../../common/get_experimental_features', () => ({
+jest.mock('../../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
