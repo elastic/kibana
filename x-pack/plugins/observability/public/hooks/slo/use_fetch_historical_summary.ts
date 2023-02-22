@@ -38,7 +38,7 @@ export function useFetchHistoricalSummary({
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: ['fetchHistoricalSummary', sloIds],
+      queryKey: ['fetchHistoricalSummary', sloIds.sort()],
       queryFn: async ({ signal }) => {
         try {
           const response = await http.post<FetchHistoricalSummaryResponse>(
