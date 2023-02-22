@@ -337,6 +337,8 @@ describe('Alert Event Details', () => {
     viewRecentCaseAndCheckResults();
   });
   it('can visit discover from response action results', () => {
+    const discoverRegex = new RegExp(`action_id ${UUID_REGEX}`);
+
     cy.visit('/app/security/alerts');
     cy.getBySel('header-page-title').contains('Alerts').should('exist');
     cy.getBySel('expand-event').first().click({ force: true });
@@ -355,9 +357,7 @@ describe('Alert Event Details', () => {
         // @ts-expect-error-next-line href string - check types
         cy.visit($href);
         cy.getBySel('breadcrumbs').contains('Discover').should('exist');
-        cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
-          'action_data.queryselect * from uptime'
-        );
+        cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(discoverRegex);
       });
   });
   it('can visit lens from response action results', () => {

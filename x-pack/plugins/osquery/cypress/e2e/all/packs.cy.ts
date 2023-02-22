@@ -220,6 +220,8 @@ describe('ALL - Packs', () => {
           });
       });
       preparePack(PACK_NAME);
+      cy.getBySel('docsLoading').should('exist');
+      cy.getBySel('docsLoading').should('not.exist');
       cy.get(`[aria-label="View in Lens"]`).click();
       cy.window()
         .its('open')
@@ -516,6 +518,8 @@ describe('ALL - Packs', () => {
     it('add proper shard to policies packs config', () => {
       const shardPack = 'shardPack';
       cy.contains('Packs').click();
+      cy.getBySel('pagination-button-next').click();
+
       findAndClickButton('Add pack');
       findFormFieldByRowsLabelAndType('Name', shardPack);
 

@@ -199,6 +199,7 @@ describe('ALL - Live Query', () => {
     cy.get(LIVE_QUERY_EDITOR).click().invoke('val', multilineQuery);
 
     inputQuery(multilineQuery);
+    cy.wait(1000);
     cy.react('ReactAce').invoke('height').should('be.gt', 250).and('be.lt', 300);
     selectAllAgents();
     submitQuery();
