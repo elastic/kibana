@@ -1018,7 +1018,7 @@ interface VisualizationStateFromContextChangeProps {
   context: VisualizeEditorContext;
 }
 
-export interface Visualization<T = unknown, P = unknown> {
+export interface Visualization<T = unknown, P = T> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
 
@@ -1028,7 +1028,13 @@ export interface Visualization<T = unknown, P = unknown> {
    * - Loading from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (addNewLayer: () => string, state?: T, mainPalette?: PaletteOutput) => T;
+  initialize: (
+    addNewLayer: () => string,
+    state?: T | P,
+    mainPalette?: PaletteOutput,
+    references?: SavedObjectReference[],
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext
+  ) => T;
 
   getUsedDataView?: (state: T, layerId: string) => string | undefined;
   /**
@@ -1060,12 +1066,6 @@ export interface Visualization<T = unknown, P = unknown> {
   getDescription: (state: T) => { icon?: IconType; label: string };
   /** Visualizations can have references as well */
   getPersistableState?: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
-  /** Hydrate from persistable state and references to final state */
-  fromPersistableState?: (
-    state: P,
-    references?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext | VisualizeEditorContext
-  ) => T;
   /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];
   /** Reset button on each layer triggers this */

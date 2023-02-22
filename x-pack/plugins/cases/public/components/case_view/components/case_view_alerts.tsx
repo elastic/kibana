@@ -39,9 +39,12 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
   const { isLoading: isLoadingAlertFeatureIds, data: alertFeatureIds } =
     useGetFeatureIds(alertRegistrationContexts);
 
+  const configId =
+    caseData.owner === SECURITY_SOLUTION_OWNER ? `${caseData.owner}-case` : caseData.owner;
+
   const alertStateProps = {
     alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
-    configurationId: caseData.owner,
+    configurationId: configId,
     id: `case-details-alerts-${caseData.owner}`,
     flyoutSize: (alertFeatureIds?.includes('siem') ? 'm' : 's') as EuiFlyoutSize,
     featureIds: alertFeatureIds ?? [],
