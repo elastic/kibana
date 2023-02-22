@@ -66,6 +66,7 @@ export function useFetchSloList({
       },
       refetchOnWindowFocus: false,
       keepPreviousData: true,
+      staleTime: 1000,
     }
   );
 

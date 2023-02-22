@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -20,14 +20,8 @@ export interface Props {
 }
 
 export function SloListItems({ sloList, loading, error }: Props) {
-  const [sloIds, setSloIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    setSloIds(sloList.map((slo) => slo.id));
-  }, [sloList]);
-
   const { isLoading: historicalSummaryLoading, sloHistoricalSummaryResponse } =
-    useFetchHistoricalSummary({ sloIds });
+    useFetchHistoricalSummary({ sloIds: sloList.map((slo) => slo.id) });
 
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
