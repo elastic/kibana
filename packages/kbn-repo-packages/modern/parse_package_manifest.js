@@ -122,7 +122,6 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
   const segs = path.split(Path.sep);
   const gitRepoRoot = getGitRepoRootSync(repoRoot);
   const isBuild = segs.includes('node_modules') || gitRepoRoot && path.startsWith(Path.join(gitRepoRoot, 'build', 'kibana'))
-
   // TODO: evaluate if __category__ should be removed
   if (__category__ !== undefined) {
     if (!isBuild) {
