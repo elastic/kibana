@@ -27,6 +27,10 @@ describe('<FindingsTable />', () => {
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
+      onOpenFlyout: jest.fn(),
+      onCloseFlyout: jest.fn(),
+      onPaginateFlyout: jest.fn(),
+      flyoutFindingIndex: 0,
     };
 
     render(
@@ -51,6 +55,10 @@ describe('<FindingsTable />', () => {
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
+      onOpenFlyout: jest.fn(),
+      onCloseFlyout: jest.fn(),
+      onPaginateFlyout: jest.fn(),
+      flyoutFindingIndex: 0,
     };
 
     render(
@@ -60,7 +68,7 @@ describe('<FindingsTable />', () => {
     );
 
     data.forEach((item) => {
-      expect(screen.getByText(item.rule.name)).toBeInTheDocument();
+      expect(screen.getAllByText(item.rule.name)[0]).toBeInTheDocument();
     });
   });
 
@@ -75,6 +83,10 @@ describe('<FindingsTable />', () => {
       sorting: { sort: { field: '@timestamp', direction: 'desc' } },
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
       setTableOptions: jest.fn(),
+      onOpenFlyout: jest.fn(),
+      onCloseFlyout: jest.fn(),
+      onPaginateFlyout: jest.fn(),
+      flyoutFindingIndex: 0,
       ...filterProps,
     };
 
