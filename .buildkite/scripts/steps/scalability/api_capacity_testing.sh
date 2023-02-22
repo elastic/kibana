@@ -18,6 +18,9 @@ rm -rf "${KIBANA_BUILD_LOCATION}"
 rm -rf "${KIBANA_LOAD_TESTING_DIR}"
 rm -rf "${GCS_ARTIFACTS_DIR}"
 
+echo "--- Download the build artifacts"
+.buildkite/scripts/download_build_artifacts.sh
+
 checkout_and_compile_load_runner() {
   mkdir -p "${KIBANA_LOAD_TESTING_DIR}" && cd "${KIBANA_LOAD_TESTING_DIR}"
 
@@ -51,9 +54,6 @@ upload_test_results() {
 
 echo "--- Clone kibana-load-testing repo and compile project"
 checkout_and_compile_load_runner
-
-echo "--- Download the latest artifacts from single user performance pipeline"
-.buildkite/scripts/download_build_artifacts.sh
 
 echo "--- Run single apis capacity tests"
 cd "$KIBANA_DIR"
