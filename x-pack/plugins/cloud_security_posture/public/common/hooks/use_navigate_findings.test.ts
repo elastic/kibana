@@ -35,37 +35,52 @@ describe('useNavigateFindings', () => {
     const push = jest.fn();
     (useHistory as jest.Mock).mockReturnValueOnce({ push });
 
-    const filter = { foo: 1 };
-
     const { result } = renderHook(() => useNavigateFindings());
 
     act(() => {
-      result.current({ filter });
+      result.current({ foo: 1 });
     });
 
     expect(push).toHaveBeenCalledWith({
       pathname: '/cloud_security_posture/findings/default',
       search:
-        "cspq=(filters:!((meta:(alias:!n,disabled:!f,key:filter,negate:!f,params:(query:(foo:1)),type:phrase),query:(match_phrase:(filter:(foo:1))))),query:(language:kuery,query:''))",
+        "cspq=(filters:!((meta:(alias:!n,disabled:!f,key:foo,negate:!f,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
     });
     expect(push).toHaveBeenCalledTimes(1);
   });
+
+  it('creates a URL to findings page with correct path and negated filter', () => {
+    const push = jest.fn();
+    (useHistory as jest.Mock).mockReturnValueOnce({ push });
+
+    const { result } = renderHook(() => useNavigateFindings());
+
+    act(() => {
+      result.current({ foo: { value: 1, negate: true } });
+    });
+
+    expect(push).toHaveBeenCalledWith({
+      pathname: '/cloud_security_posture/findings/default',
+      search:
+        "cspq=(filters:!((meta:(alias:!n,disabled:!f,key:foo,negate:!t,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
+    });
+    expect(push).toHaveBeenCalledTimes(1);
+  });
+
   it('creates a URL to findings resource page with correct path and filter', () => {
     const push = jest.fn();
     (useHistory as jest.Mock).mockReturnValueOnce({ push });
 
-    const filter = { foo: 1 };
-
     const { result } = renderHook(() => useNavigateFindingsByResource());
 
     act(() => {
-      result.current({ filter });
+      result.current({ foo: 1 });
     });
 
     expect(push).toHaveBeenCalledWith({
       pathname: '/cloud_security_posture/findings/resource',
       search:
-        "cspq=(filters:!((meta:(alias:!n,disabled:!f,key:filter,negate:!f,params:(query:(foo:1)),type:phrase),query:(match_phrase:(filter:(foo:1))))),query:(language:kuery,query:''))",
+        "cspq=(filters:!((meta:(alias:!n,disabled:!f,key:foo,negate:!f,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
     });
     expect(push).toHaveBeenCalledTimes(1);
   });

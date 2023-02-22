@@ -224,10 +224,10 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const tableProps =
     selectedTab === AllRulesTabs.management
       ? {
-          'data-test-subj': 'rules-table',
+          'data-test-subj': 'rules-management-table',
           columns: rulesColumns,
         }
-      : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
+      : { 'data-test-subj': 'rules-monitoring-table', columns: monitoringColumns };
 
   const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
   const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
