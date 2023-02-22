@@ -34,7 +34,7 @@ export const MonitorAddPage = () => {
     }
   }, [dispatch, locationsLoaded]);
 
-  if (!locationsError) {
+  if (locationsError) {
     return <LocationsLoadingError />;
   }
 
