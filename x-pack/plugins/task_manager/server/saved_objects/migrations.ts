@@ -14,8 +14,22 @@ import {
   SavedObjectsUtils,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { RuleTaskState } from '@kbn/alerting-plugin/common';
-import { TrackedLifecycleAlertState } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_executor';
+
+// import { RuleTaskState } from '../../../alerting/common';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RuleTaskState = any;
+
+// import {
+//   TrackedLifecycleAlertState,
+//   WrappedLifecycleRuleState,
+//   // eslint-disable-next-line @kbn/imports/uniform_imports
+// } from '../../../rule_registry/server/utils/create_lifecycle_executor';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TrackedLifecycleAlertState = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type WrappedLifecycleRuleState<T> = any;
+
 import { REMOVED_TYPES } from '../task_type_dictionary';
 import { SerializedConcreteTaskInstance, TaskStatus } from '../task';
 
@@ -223,41 +237,35 @@ function addAlertUUID(doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInsta
   if (!doc.attributes.taskType.startsWith('alerting:')) return doc;
   if (!doc.attributes.state) return doc;
 
-  const ruleState: RuleTaskState = JSON.parse(doc.attributes.state);
+  const taskState: RuleTaskState = JSON.parse(doc.attributes.state);
+  const ruleState = taskState?.alertTypeState;
   if (!ruleState) return doc;
 
-  const trackedAlerts = getTrackedAlerts(ruleState.alertTypeState);
+  // get existing alert uuid's from the rule registry's rule state wrapper
+  const alertToTrackedMap = getAlertsToTrackedMap(ruleState);
 
-  const alertUUIDs = new Map<string, string>();
-  addAlertUUIDs(ruleState.alertInstances, trackedAlerts, alertUUIDs);
-  addAlertUUIDs(ruleState.alertRecoveredInstances, trackedAlerts, alertUUIDs);
+  // we are iterating over two collections of alerts, so in case there are
+  // duplicates, keep track of all uuid's assigned, so the same one will be used
+  const currentUUIDs = new Map<string, string>();
+
+  // add the uuids to the framework's meta object; the objects are mutated in-line
+  addAlertUUIDsToAlerts(taskState.alertInstances, alertToTrackedMap, currentUUIDs);
+  addAlertUUIDsToAlerts(taskState.alertRecoveredInstances, alertToTrackedMap, currentUUIDs);
 
   return {
     ...doc,
     attributes: {
       ...doc.attributes,
-      state: JSON.stringify(ruleState),
+      state: JSON.stringify(taskState),
     },
   };
 }
 
-function getTrackedAlerts(
-  trAlerts?: Record<string, unknown>
-): Map<string, TrackedLifecycleAlertState> {
-  const result = new Map<string, TrackedLifecycleAlertState>();
-  if (!trAlerts) return result;
-
-  for (const id of Object.keys(trAlerts)) {
-    result.set(id, trAlerts[id] as unknown as TrackedLifecycleAlertState);
-  }
-  return result;
-}
-
 // mutates alerts passed in
-function addAlertUUIDs(
+function addAlertUUIDsToAlerts(
   alerts: RuleTaskState['alertInstances'] | undefined,
-  trackedAlerts: Map<string, TrackedLifecycleAlertState>,
-  alertUUIDs: Map<string, string>
+  alertToTrackedMap: Map<string, TrackedLifecycleAlertState>,
+  currentUUIDs: Map<string, string>
 ): void {
   if (!alerts) return;
 
@@ -265,8 +273,9 @@ function addAlertUUIDs(
     const alert = alerts[id];
     if (!alert.meta) alert.meta = {};
 
-    const trackedAlert = trackedAlerts.get(id);
-    const recentUUID = alertUUIDs.get(id);
+    const trackedAlert = alertToTrackedMap.get(id);
+    const recentUUID = currentUUIDs.get(id);
+
     if (trackedAlert?.alertUuid) {
       alert.meta.uuid = trackedAlert.alertUuid;
     } else if (recentUUID) {
@@ -275,6 +284,33 @@ function addAlertUUIDs(
       alert.meta.uuid = uuidv4();
     }
 
-    alertUUIDs.set(id, alert.meta.uuid);
+    currentUUIDs.set(id, alert.meta.uuid);
   }
+}
+
+// gets a map of alertId => tracked alert state, which is from the
+// rule registry wrapper, which contains the uuid and other info
+function getAlertsToTrackedMap(
+  ruleState: Record<string, unknown>
+): Map<string, TrackedLifecycleAlertState> {
+  const result = new Map<string, TrackedLifecycleAlertState>();
+
+  if (!isRuleRegistryWrappedState(ruleState)) return result;
+
+  return new Map([
+    ...Object.entries(
+      (ruleState.trackedAlerts as Record<string, TrackedLifecycleAlertState>) || {}
+    ),
+    ...Object.entries(
+      (ruleState.trackedAlertsRecovered as Record<string, TrackedLifecycleAlertState>) || {}
+    ),
+  ]);
+}
+
+function isRuleRegistryWrappedState(
+  ruleState: Record<string, unknown>
+): ruleState is WrappedLifecycleRuleState<never> {
+  // specifically not checking trackedAlertsRecovered since it's
+  // "new", possibly may not be set?
+  return ruleState.wrapped != null && ruleState.trackedAlerts != null;
 }

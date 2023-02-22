@@ -17,9 +17,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/es-types",
     "@kbn/apm-utils",
-    "@kbn/core-saved-objects-common",
-    "@kbn/alerting-plugin",
-    "@kbn/rule-registry-plugin",
+    "@kbn/core-saved-objects-common"
   ],
   "exclude": [
     "target/**/*",
