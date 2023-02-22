@@ -13,7 +13,6 @@ import {
   getSAMLRequestId,
   getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -214,6 +213,8 @@ export default function ({ getService }: FtrProviderContext) {
         Array.from({ length: 10 }).map(() => loginWithBasic(testUser))
       );
 
+      await es.indices.refresh({ index: '.kibana_security_session*' });
+
       // Since logins were concurrent we cannot know upfront their `createdAt` timestamps and
       // hence which specific sessions will be outside the limit.
       const statusCodes = [];
@@ -223,9 +224,6 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', basicSessionCookie.cookieString());
         statusCodes.push(statusCode);
-        await setTimeoutAsync(1000);
-        await es.indices.refresh({ index: '.kibana_security_session*' });
-        await setTimeoutAsync(2000);
       }
 
       log.debug(`Collected status codes: ${JSON.stringify(statusCodes)}.`);
