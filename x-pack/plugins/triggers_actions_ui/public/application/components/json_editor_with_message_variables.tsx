@@ -79,7 +79,8 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
     if (!xJson && inputTargetValue != null) {
       setXJson(inputTargetValue);
     }
-  }, [inputTargetValue, xJson, setXJson]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputTargetValue]);
 
   const onSelectMessageVariable = (variable: ActionVariable) => {
     const editor = editorRef.current;
