@@ -165,7 +165,6 @@ export const createLifecycleExecutor =
       services: { alertFactory, shouldWriteAlerts },
       state: previousState,
       flappingSettings,
-      rule: { notifyWhen },
     } = options;
 
     const ruleDataClientWriter = await ruleDataClient.getWriter();
@@ -333,8 +332,8 @@ export const createLifecycleExecutor =
     const trackedEventsToIndex = makeEventsDataMapFor(trackedAlertIds);
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
     const trackedRecoveredEventsToIndex = makeEventsDataMapFor(trackedAlertRecoveredIds);
-    const allEventsToNotify = [
-      ...getAlertsForNotification(flappingSettings, trackedEventsToIndex, notifyWhen),
+    const allEventsToIndex = [
+      ...getAlertsForNotification(flappingSettings, trackedEventsToIndex),
       ...newEventsToIndex,
     ];
 
@@ -346,11 +345,11 @@ export const createLifecycleExecutor =
     //   - if execution has been cancelled due to timeout, if feature flags are configured to write alerts anyway
     const writeAlerts = ruleDataClient.isWriteEnabled() && shouldWriteAlerts();
 
-    if (allEventsToNotify.length > 0 && writeAlerts) {
-      logger.debug(`[Rule Registry] Preparing to index ${allEventsToNotify.length} alerts.`);
+    if (allEventsToIndex.length > 0 && writeAlerts) {
+      logger.debug(`[Rule Registry] Preparing to index ${allEventsToIndex.length} alerts.`);
 
       await ruleDataClientWriter.bulk({
-        body: allEventsToNotify.flatMap(({ event, indexName }) => [
+        body: allEventsToIndex.flatMap(({ event, indexName }) => [
           indexName
             ? { index: { _id: event[ALERT_UUID]!, _index: indexName, require_alias: false } }
             : { index: { _id: event[ALERT_UUID]! } },
@@ -360,12 +359,12 @@ export const createLifecycleExecutor =
       });
     } else {
       logger.debug(
-        `[Rule Registry] Not indexing ${allEventsToNotify.length} alerts because writing has been disabled.`
+        `[Rule Registry] Not indexing ${allEventsToIndex.length} alerts because writing has been disabled.`
       );
     }
 
     const nextTrackedAlerts = Object.fromEntries(
-      [...trackedEventsToIndex, ...newEventsToIndex]
+      allEventsToIndex
         .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
         .map(({ event, flappingHistory, flapping, pendingRecoveredCount }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
@@ -379,7 +378,7 @@ export const createLifecycleExecutor =
     );
 
     const nextTrackedAlertsRecovered = Object.fromEntries(
-      [...trackedEventsToIndex, ...trackedRecoveredEventsToIndex]
+      [...allEventsToIndex, ...trackedRecoveredEventsToIndex]
         .filter(
           ({ event, flappingHistory, flapping }) =>
             // return recovered alerts if they are flapping or if the flapping array is not at capacity

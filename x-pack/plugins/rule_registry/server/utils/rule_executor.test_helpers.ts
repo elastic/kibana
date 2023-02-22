@@ -22,7 +22,6 @@ import { Logger } from '@kbn/logging';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
-import { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends RuleTypeParams = never,
@@ -40,7 +39,6 @@ export const createDefaultAlertExecutorOptions = <
   startedAt = new Date(),
   updatedAt = new Date(),
   shouldWriteAlerts = true,
-  notifyWhen,
 }: {
   alertId?: string;
   ruleName?: string;
@@ -51,7 +49,6 @@ export const createDefaultAlertExecutorOptions = <
   startedAt?: Date;
   updatedAt?: Date;
   shouldWriteAlerts?: boolean;
-  notifyWhen?: RuleNotifyWhenType;
 }): RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
   startedAt,
   rule: {
@@ -68,7 +65,7 @@ export const createDefaultAlertExecutorOptions = <
     throttle: null,
     createdAt,
     updatedAt,
-    notifyWhen: notifyWhen ? notifyWhen : null,
+    notifyWhen: null,
     ruleTypeId: 'RULE_TYPE_ID',
     ruleTypeName: 'RULE_TYPE_NAME',
     muteAll: false,

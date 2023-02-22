@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   DEFAULT_FLAPPING_SETTINGS,
   DISABLE_FLAPPING_SETTINGS,
@@ -13,7 +12,6 @@ import {
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { cloneDeep } from 'lodash';
 import { getAlertsForNotification } from './get_alerts_for_notification';
-
 describe('getAlertsForNotification', () => {
   const alert1 = {
     event: {
@@ -44,128 +42,80 @@ describe('getAlertsForNotification', () => {
 
   test('should set pendingRecoveredCount to zero for all active alerts', () => {
     const trackedEvents = [alert4];
-    const expected = [
-      {
-        event: {
-          'kibana.alert.status': 'active',
+    expect(getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, trackedEvents))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "event": Object {
+            "kibana.alert.status": "active",
+          },
+          "flappingHistory": Array [
+            true,
+            true,
+          ],
+          "pendingRecoveredCount": 0,
         },
-        flappingHistory: [true, true],
-        pendingRecoveredCount: 0,
-      },
-    ];
-    const alertsToNotify = getAlertsForNotification(
-      DEFAULT_FLAPPING_SETTINGS,
-      trackedEvents,
-      RuleNotifyWhen.CHANGE
-    );
-    expect(alertsToNotify).toEqual(expected);
-    expect(trackedEvents).toEqual(expected);
+      ]
+    `);
   });
 
-  test('should return flapping pending recovered alerts as active if the num of recovered alerts is not at the limit', () => {
+  test('should not remove alerts if the num of recovered alerts is not at the limit', () => {
     const trackedEvents = cloneDeep([alert1, alert2, alert3]);
-    const expected = [
-      {
-        event: {
-          'kibana.alert.status': 'recovered',
+    expect(getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, trackedEvents))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "event": Object {
+            "kibana.alert.status": "recovered",
+          },
+          "flapping": true,
+          "pendingRecoveredCount": 0,
         },
-        flapping: true,
-        pendingRecoveredCount: 0,
-      },
-      {
-        event: {
-          'kibana.alert.status': 'recovered',
+        Object {
+          "event": Object {
+            "kibana.alert.status": "recovered",
+          },
+          "flapping": false,
         },
-        flapping: false,
-      },
-      {
-        event: {
-          'event.action': 'active',
-          'kibana.alert.status': 'active',
+        Object {
+          "event": Object {
+            "event.action": "active",
+            "kibana.alert.status": "active",
+          },
+          "flapping": true,
+          "pendingRecoveredCount": 1,
         },
-        flapping: true,
-        pendingRecoveredCount: 1,
-      },
-    ];
-    const alertsToNotify = getAlertsForNotification(
-      DEFAULT_FLAPPING_SETTINGS,
-      trackedEvents,
-      RuleNotifyWhen.CHANGE
-    );
-
-    expect(alertsToNotify).toEqual(expected);
-    expect(trackedEvents).toEqual(expected);
+      ]
+    `);
   });
 
   test('should reset counts and not modify alerts if flapping is disabled', () => {
     const trackedEvents = cloneDeep([alert1, alert2, alert3]);
-    const expected = [
-      {
-        event: {
-          'kibana.alert.status': 'recovered',
+    expect(getAlertsForNotification(DISABLE_FLAPPING_SETTINGS, trackedEvents))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "event": Object {
+            "kibana.alert.status": "recovered",
+          },
+          "flapping": true,
+          "pendingRecoveredCount": 0,
         },
-        flapping: true,
-        pendingRecoveredCount: 0,
-      },
-      {
-        event: {
-          'kibana.alert.status': 'recovered',
+        Object {
+          "event": Object {
+            "kibana.alert.status": "recovered",
+          },
+          "flapping": false,
+          "pendingRecoveredCount": 0,
         },
-        flapping: false,
-        pendingRecoveredCount: 0,
-      },
-      {
-        event: {
-          'kibana.alert.status': 'recovered',
+        Object {
+          "event": Object {
+            "kibana.alert.status": "recovered",
+          },
+          "flapping": true,
+          "pendingRecoveredCount": 0,
         },
-        flapping: true,
-        pendingRecoveredCount: 0,
-      },
-    ];
-
-    const alertsToNotify = getAlertsForNotification(
-      DISABLE_FLAPPING_SETTINGS,
-      trackedEvents,
-      RuleNotifyWhen.CHANGE
-    );
-    expect(alertsToNotify).toEqual(expected);
-    expect(trackedEvents).toEqual(expected);
-  });
-
-  test('should not return flapping pending recovered alerts as active when notifyWhen is not onActionGroupChange', () => {
-    const trackedEvents = cloneDeep([alert1, alert2, alert3]);
-    const expected = [
-      {
-        event: {
-          'kibana.alert.status': 'recovered',
-        },
-        flapping: true,
-        pendingRecoveredCount: 0,
-      },
-      {
-        event: {
-          'kibana.alert.status': 'recovered',
-        },
-        flapping: false,
-      },
-    ];
-    const alertsToNotify = getAlertsForNotification(
-      DEFAULT_FLAPPING_SETTINGS,
-      trackedEvents,
-      RuleNotifyWhen.ACTIVE
-    );
-
-    expect(alertsToNotify).toEqual(expected);
-    expect(trackedEvents).toEqual([
-      ...expected,
-      {
-        event: {
-          'event.action': 'active',
-          'kibana.alert.status': 'active',
-        },
-        flapping: true,
-        pendingRecoveredCount: 1,
-      },
-    ]);
+      ]
+    `);
   });
 });

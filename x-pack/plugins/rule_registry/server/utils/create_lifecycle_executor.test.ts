@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { pick } from 'lodash';
 import {
@@ -1226,7 +1225,6 @@ describe('createLifecycleExecutor', () => {
             trackedAlertsRecovered: {},
           },
           logger,
-          notifyWhen: RuleNotifyWhen.CHANGE,
         })
       );
 
