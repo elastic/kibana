@@ -181,6 +181,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // @ts-expect-error
         body.forEach((response) => {
+          const bodyToCompare = removeServerGeneratedProperties(response);
           const outputRule = getSimpleRuleOutput(response.rule_id, false);
           outputRule.actions = [
             {
@@ -191,10 +192,10 @@ export default ({ getService }: FtrProviderContext) => {
                 message:
                   'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
+              uuid: bodyToCompare.actions[0].uuid,
             },
           ];
           outputRule.throttle = '1h';
-          const bodyToCompare = removeServerGeneratedProperties(response);
           expect(bodyToCompare).to.eql(outputRule);
         });
       });
