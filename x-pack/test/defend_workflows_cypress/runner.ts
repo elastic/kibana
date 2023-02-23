@@ -67,7 +67,7 @@ export async function DefendWorkflowsCypressEndpointTestRunner(context: FtrProvi
 
 function startDefendWorkflowsCypress(
   context: FtrProviderContext,
-  cypressCommand: string,
+  cypressCommand: 'dw:endpoint:open' | 'dw:open' | 'dw:run',
   runnerEnv?: RunnerEnv
 ) {
   const log = context.getService('log');
