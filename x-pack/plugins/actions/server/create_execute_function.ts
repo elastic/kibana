@@ -120,6 +120,7 @@ export function createExecutionEnqueuerFunction({
         apiKey,
         executionId,
         consumer,
+        source: source.type,
         relatedSavedObjects: relatedSavedObjectWithRefs,
       },
       {
@@ -206,6 +207,7 @@ export function createBulkExecutionEnqueuerFunction({
           apiKey: actionToExecute.apiKey,
           executionId: actionToExecute.executionId,
           consumer: actionToExecute.consumer,
+          source: actionToExecute.source.type,
           relatedSavedObjects: relatedSavedObjectWithRefs,
         },
         references: taskReferences,

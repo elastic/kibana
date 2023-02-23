@@ -132,6 +132,7 @@ test('successfully executes', async () => {
           "kibana": Object {
             "action": Object {
               "execution": Object {
+                "source": "HTTP_REQUEST",
                 "uuid": "2",
               },
               "id": "1",
@@ -170,6 +171,7 @@ test('successfully executes', async () => {
           "kibana": Object {
             "action": Object {
               "execution": Object {
+                "source": "HTTP_REQUEST",
                 "uuid": "2",
               },
               "id": "1",
@@ -246,6 +248,7 @@ test('successfully executes with preconfigured connector', async () => {
           "kibana": Object {
             "action": Object {
               "execution": Object {
+                "source": "HTTP_REQUEST",
                 "uuid": "2",
               },
               "id": "preconfigured",
@@ -285,6 +288,7 @@ test('successfully executes with preconfigured connector', async () => {
           "kibana": Object {
             "action": Object {
               "execution": Object {
+                "source": "HTTP_REQUEST",
                 "uuid": "2",
               },
               "id": "preconfigured",
@@ -664,6 +668,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
           "kibana": Object {
             "action": Object {
               "execution": Object {
+                "source": "HTTP_REQUEST",
                 "uuid": "2",
               },
               "id": "preconfigured",
@@ -703,6 +708,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
           "kibana": Object {
             "action": Object {
               "execution": Object {
+                "source": "HTTP_REQUEST",
                 "uuid": "2",
               },
               "id": "preconfigured",
@@ -813,6 +819,7 @@ test('writes to event log for execute timeout', async () => {
     kibana: {
       action: {
         execution: {
+          source: 'HTTP_REQUEST',
           uuid: '2',
         },
         name: undefined,
@@ -858,6 +865,7 @@ test('writes to event log for execute and execute start', async () => {
     kibana: {
       action: {
         execution: {
+          source: 'HTTP_REQUEST',
           uuid: '2',
         },
         name: 'action-1',
@@ -911,6 +919,7 @@ test('writes to event log for execute and execute start when consumer and relate
     kibana: {
       action: {
         execution: {
+          source: 'HTTP_REQUEST',
           uuid: '2',
         },
         name: 'action-1',

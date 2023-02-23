@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { asNotificationExecutionSource, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import {
+  asNotificationExecutionSource,
+  type IUnsecuredActionsClient,
+} from '@kbn/actions-plugin/server';
 import type { EmailService, PlainTextEmail } from './types';
 
 export class ConnectorsEmailService implements EmailService {
