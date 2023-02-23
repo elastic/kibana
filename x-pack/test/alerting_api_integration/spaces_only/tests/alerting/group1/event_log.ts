@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { Spaces } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -546,8 +547,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .auth('superuser', 'superuser')
             .send({
               enabled: true,
-              look_back_window: 3,
-              status_change_threshold: 2,
+              look_back_window: 6,
+              status_change_threshold: 4,
             })
             .expect(200);
           const { body: createdAction } = await supertest
@@ -562,7 +563,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           // pattern of when the alert should fire
-          const instance = [true, false, true, true, true, true, true];
+          const instance = [true, false, false, true, false, true, false, true, false].concat(
+            ...new Array(8).fill(true),
+            false
+          );
           const pattern = {
             instance,
           };
@@ -584,91 +588,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     group: 'default',
                     params: {},
                   },
-                ],
-              })
-            );
-
-          expect(response.status).to.eql(200);
-          const alertId = response.body.id;
-          objectRemover.add(space.id, alertId, 'rule', 'alerting');
-
-          // get the events we're expecting
-          const events = await retry.try(async () => {
-            return await getEventLog({
-              getService,
-              spaceId: space.id,
-              type: 'alert',
-              id: alertId,
-              provider: 'alerting',
-              actions: new Map([
-                // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 6 }],
-                ['execute', { gte: 6 }],
-                ['execute-action', { equal: 7 }],
-                ['new-instance', { equal: 1 }],
-                ['active-instance', { gte: 6 }],
-                ['recovered-instance', { equal: 1 }],
-              ]),
-            });
-          });
-
-          const flapping = events
-            .filter(
-              (event) =>
-                event?.event?.action === 'active-instance' ||
-                event?.event?.action === 'recovered-instance'
-            )
-            .map((event) => event?.kibana?.alert?.flapping);
-          const result = [false, true, true, true, false, false, false, false];
-          expect(flapping).to.eql(result);
-        });
-
-        it('should generate expected events for flapping alerts that are mainly recovered', async () => {
-          await supertest
-            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
-            .set('kbn-xsrf', 'foo')
-            .auth('superuser', 'superuser')
-            .send({
-              enabled: true,
-              look_back_window: 3,
-              status_change_threshold: 2,
-            })
-            .expect(200);
-          const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              name: 'MY action',
-              connector_type_id: 'test.noop',
-              config: {},
-              secrets: {},
-            })
-            .expect(200);
-
-          // pattern of when the alert should fire
-          const instance = [true, false, true, false, false, false, true];
-          const pattern = {
-            instance,
-          };
-
-          const response = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(
-              getTestRuleData({
-                rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
-                throttle: null,
-                params: {
-                  pattern,
-                },
-                actions: [
                   {
                     id: createdAction.id,
-                    group: 'default',
+                    group: 'recovered',
                     params: {},
                   },
                 ],
+                notify_when: RuleNotifyWhen.CHANGE,
               })
             );
 
@@ -689,9 +615,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 ['execute-start', { gte: 6 }],
                 ['execute', { gte: 6 }],
                 ['execute-action', { equal: 6 }],
-                ['new-instance', { equal: 2 }],
+                ['new-instance', { equal: 3 }],
                 ['active-instance', { gte: 6 }],
-                ['recovered-instance', { equal: 2 }],
+                ['recovered-instance', { equal: 3 }],
               ]),
             });
           });
@@ -703,7 +629,106 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          expect(flapping).to.eql([false, true, true, true, true, true, true, true]);
+          const result = [false, false, false, false, false].concat(
+            new Array(9).fill(true),
+            false,
+            false,
+            false
+          );
+          expect(flapping).to.eql(result);
+        });
+
+        it('should generate expected events for flapping alerts that are mainly recovered', async () => {
+          await supertest
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
+            .set('kbn-xsrf', 'foo')
+            .auth('superuser', 'superuser')
+            .send({
+              enabled: true,
+              look_back_window: 6,
+              status_change_threshold: 4,
+            })
+            .expect(200);
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
+          // pattern of when the alert should fire
+          const instance = [true, false, false, true, false, true, false, true, false, true].concat(
+            new Array(11).fill(false)
+          );
+          const pattern = {
+            instance,
+          };
+
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: {
+                  pattern,
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                  {
+                    id: createdAction.id,
+                    group: 'recovered',
+                    params: {},
+                  },
+                ],
+                notify_when: RuleNotifyWhen.CHANGE,
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // get the events we're expecting
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                // make sure the counts of the # of events per type are as expected
+                ['execute-start', { gte: 6 }],
+                ['execute', { gte: 6 }],
+                ['execute-action', { equal: 6 }],
+                ['new-instance', { equal: 3 }],
+                ['active-instance', { gte: 3 }],
+                ['recovered-instance', { equal: 3 }],
+              ]),
+            });
+          });
+
+          const flapping = events
+            .filter(
+              (event) =>
+                event?.event?.action === 'active-instance' ||
+                event?.event?.action === 'recovered-instance'
+            )
+            .map((event) => event?.kibana?.alert?.flapping);
+          expect(flapping).to.eql(
+            [false, false, false, false, false].concat(new Array(8).fill(true))
+          );
         });
       });
     }

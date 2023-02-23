@@ -170,6 +170,12 @@ export class LegacyAlertsClient<
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAndScheduleActionsForAlerts,
     });
+
+    setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+      flappingSettings,
+      this.processedAlerts.active,
+      this.processedAlerts.recovered
+    );
   }
 
   public getProcessedAlerts(type: 'new' | 'active' | 'recovered' | 'recoveredCurrent') {
