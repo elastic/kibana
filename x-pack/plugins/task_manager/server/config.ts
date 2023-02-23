@@ -134,6 +134,9 @@ export const configSchema = schema.object(
     unsafe: schema.object({
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
     }),
+    k8s_task_partitioning_enabled: schema.boolean({
+      defaultValue: false,
+    }),
   },
   {
     validate: (config) => {

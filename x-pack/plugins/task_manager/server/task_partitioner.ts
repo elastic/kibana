@@ -17,12 +17,14 @@ function range(start: number, end: number) {
 }
 
 export class TaskPartitioner {
+  private readonly enabled: boolean;
   private readonly podName: string = process.env.HOSTNAME!;
   private readonly allPartitions: number[];
   private readonly k8sNamespace: string;
   private readonly k8sServiceLabelSelector: string;
 
-  constructor(k8sNamespace: string, k8sServiceLabelSelector: string) {
+  constructor(enabled: boolean, k8sNamespace: string, k8sServiceLabelSelector: string) {
+    this.enabled = enabled;
     this.allPartitions = range(0, 360);
     this.k8sNamespace = k8sNamespace;
     this.k8sServiceLabelSelector = k8sServiceLabelSelector;
@@ -30,6 +32,10 @@ export class TaskPartitioner {
 
   // TODO: Implement some form of caching
   async getPartitions(): Promise<number[]> {
+    if (!this.enabled) {
+      return this.allPartitions;
+    }
+
     const allPodNames = await this.getAllPodNames();
     const podPartitions = rendezvousHash(this.podName, allPodNames, this.allPartitions, 2);
     return podPartitions;
