@@ -513,6 +513,211 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.FleetStartServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "FleetStartServices",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.FleetStartServices",
+            "text": "FleetStartServices"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreStart",
+            "text": "CoreStart"
+          },
+          ",",
+          "FleetStartDeps"
+        ],
+        "path": "x-pack/plugins/fleet/public/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.storage",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ toggleShareContextMenu: (options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; }"
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.cloud",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cloud",
+            "description": [],
+            "signature": [
+              "(",
+              {
+                "pluginId": "cloud",
+                "scope": "public",
+                "docId": "kibCloudPluginApi",
+                "section": "def-public.CloudSetup",
+                "text": "CloudSetup"
+              },
+              " & ",
+              {
+                "pluginId": "cloud",
+                "scope": "public",
+                "docId": "kibCloudPluginApi",
+                "section": "def-public.CloudStart",
+                "text": "CloudStart"
+              },
+              ") | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.discover",
+            "type": "Object",
+            "tags": [],
+            "label": "discover",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverStart",
+                "text": "DiscoverStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "public",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-public.SpacesApi",
+                "text": "SpacesApi"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.authz",
+            "type": "Object",
+            "tags": [],
+            "label": "authz",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.FleetAuthz",
+                "text": "FleetAuthz"
+              }
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.FleetStartServices.guidedOnboarding",
+            "type": "Object",
+            "tags": [],
+            "label": "guidedOnboarding",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "public",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-public.GuidedOnboardingPluginStart",
+                "text": "GuidedOnboardingPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/fleet/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.IntegrationsAppBrowseRouteState",
         "type": "Interface",
         "tags": [],
@@ -4356,7 +4561,7 @@
               "\nReturn the status by the Agent's Policy id"
             ],
             "signature": [
-              "(agentPolicyId?: string | undefined, filterKuery?: string | undefined) => Promise<{ events: number; total: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; }>"
+              "(agentPolicyId?: string | undefined, filterKuery?: string | undefined) => Promise<{ events: number; total: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; all: number; active: number; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
             "deprecated": false,
@@ -18154,7 +18359,7 @@
             "label": "results",
             "description": [],
             "signature": [
-              "{ events: number; total: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; }"
+              "{ events: number; total: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; all: number; active: number; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
             "deprecated": false,
