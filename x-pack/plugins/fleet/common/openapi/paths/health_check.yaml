@@ -15,6 +15,8 @@ post:
                 type: string
               host:
                 type: string
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: fleet-server-health-check
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
