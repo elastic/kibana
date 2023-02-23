@@ -37,4 +37,9 @@ export interface NodeRoles {
    * to handle http traffic from the browser.
    */
   ui: boolean;
+  /**
+   * Start Kibana with the specific purpose of running up to migrations phase then shutting down.
+   * @remark This role is special as it precludes the use of other roles.
+   */
+  migrator: boolean;
 }
