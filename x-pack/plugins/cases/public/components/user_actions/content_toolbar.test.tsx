@@ -6,36 +6,26 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
-import { UserActionContentToolbar, UserActionContentToolbarProps } from './content_toolbar';
-import { TestProviders } from '../../common/mock';
+import { UserActionContentToolbar } from './content_toolbar';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/lib/kibana');
 
-const props: UserActionContentToolbarProps = {
-  commentMarkdown: '',
-  id: '1',
-  editLabel: 'edit',
-  quoteLabel: 'quote',
-  isLoading: false,
-  onEdit: jest.fn(),
-  onQuote: jest.fn(),
-};
-
 describe('UserActionContentToolbar ', () => {
-  let wrapper: ReactWrapper;
+  let appMockRenderer: AppMockRenderer;
 
-  beforeAll(() => {
-    wrapper = mount(
-      <TestProviders>
-        <UserActionContentToolbar {...props} />
-      </TestProviders>
-    );
+  beforeEach(() => {
+    appMockRenderer = createAppMockRenderer();
   });
 
-  it('it renders', async () => {
-    expect(wrapper.find(`[data-test-subj="copy-link-${props.id}"]`).first().exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="property-actions"]').first().exists()).toBeTruthy();
+  it('renders', async () => {
+    const res = appMockRenderer.render(
+      <UserActionContentToolbar id="1">{'My children'}</UserActionContentToolbar>
+    );
+
+    res.getByTestId('copy-link-1');
+    res.getByText('My children');
   });
 });

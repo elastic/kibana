@@ -151,6 +151,22 @@
             "path": "src/plugins/data_view_editor/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorProps.showManagementLink",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showManagementLink",
+            "description": [
+              "\nif set to true a link to the management page is shown"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_view_editor/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

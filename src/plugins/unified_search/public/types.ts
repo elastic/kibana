@@ -7,6 +7,7 @@
  */
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -17,6 +18,7 @@ import { CoreStart, DocLinksStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
+import type { FiltersBuilderProps } from './filters_builder/filters_builder';
 
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;
@@ -45,6 +47,7 @@ export interface UnifiedSearchPublicPluginStartUi {
   AggregateQuerySearchBar: <QT extends Query | AggregateQuery = Query>(
     props: StatefulSearchBarProps<QT>
   ) => React.ReactElement;
+  FiltersBuilderLazy: React.ComponentType<FiltersBuilderProps>;
 }
 
 /**
@@ -86,5 +89,7 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   storage: IStorageWrapper;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   usageCollection?: UsageCollectionStart;
 }

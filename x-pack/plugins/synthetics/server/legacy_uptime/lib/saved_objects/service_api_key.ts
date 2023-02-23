@@ -11,8 +11,8 @@ import {
   SavedObjectsErrorHelpers,
   SavedObjectsType,
 } from '@kbn/core/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SyntheticsServiceApiKey } from '../../../../common/runtime_types/synthetics_service_api_key';
+import { UptimeServerSetup } from '../adapters';
 
 export const syntheticsApiKeyID = 'ba997842-b0cf-4429-aa9d-578d9bf0d391';
 export const syntheticsApiKeyObjectType = 'uptime-synthetics-api-key';
@@ -49,9 +49,17 @@ export const syntheticsServiceApiKey: SavedObjectsType = {
   },
 };
 
-export const getSyntheticsServiceAPIKey = async (client: EncryptedSavedObjectsClient) => {
+const getEncryptedSOClient = (server: UptimeServerSetup) => {
+  const encryptedClient = server.encryptedSavedObjects.getClient({
+    includedHiddenTypes: [syntheticsServiceApiKey.name],
+  });
+  return encryptedClient;
+};
+
+const getSyntheticsServiceAPIKey = async (server: UptimeServerSetup) => {
   try {
-    const obj = await client.getDecryptedAsInternalUser<SyntheticsServiceApiKey>(
+    const soClient = getEncryptedSOClient(server);
+    const obj = await soClient.getDecryptedAsInternalUser<SyntheticsServiceApiKey>(
       syntheticsServiceApiKey.name,
       syntheticsApiKeyID
     );
@@ -64,20 +72,26 @@ export const getSyntheticsServiceAPIKey = async (client: EncryptedSavedObjectsCl
   }
 };
 
-export const setSyntheticsServiceApiKey = async (
-  client: SavedObjectsClientContract,
+const setSyntheticsServiceApiKey = async (
+  soClient: SavedObjectsClientContract,
   apiKey: SyntheticsServiceApiKey
 ) => {
-  await client.create(syntheticsServiceApiKey.name, apiKey, {
+  await soClient.create(syntheticsServiceApiKey.name, apiKey, {
     id: syntheticsApiKeyID,
     overwrite: true,
   });
 };
 
-export const deleteSyntheticsServiceApiKey = async (client: SavedObjectsClientContract) => {
+const deleteSyntheticsServiceApiKey = async (soClient: SavedObjectsClientContract) => {
   try {
-    return await client.delete(syntheticsServiceApiKey.name, syntheticsApiKeyID);
+    return await soClient.delete(syntheticsServiceApiKey.name, syntheticsApiKeyID);
   } catch (e) {
     throw e;
   }
+};
+
+export const syntheticsServiceAPIKeySavedObject = {
+  get: getSyntheticsServiceAPIKey,
+  set: setSyntheticsServiceApiKey,
+  delete: deleteSyntheticsServiceApiKey,
 };

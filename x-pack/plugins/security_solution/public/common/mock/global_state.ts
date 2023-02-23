@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TableId } from '../../../common/types';
 import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
@@ -27,17 +28,24 @@ import {
   DEFAULT_INDEX_PATTERN,
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_SIGNALS_INDEX,
+  VIEW_SELECTION,
 } from '../../../common/constants';
-import { networkModel } from '../../network/store';
-import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
+import { networkModel } from '../../explore/network/store';
+import {
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+  TimelineId,
+} from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../store/sourcerer/helpers';
 import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
-import { usersModel } from '../../users/store';
+import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
+import { defaultGroup } from '../store/grouping/defaults';
 
 export const mockSourcererState = {
   ...initialSourcererState,
@@ -300,15 +308,14 @@ export const mockGlobalState: State = {
       newTimelineModel: null,
     },
     timelineById: {
-      test: {
+      [TimelineId.test]: {
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.notes,
         dataViewId: DEFAULT_DATA_VIEW_ID,
         deletedEventIds: [],
         documentType: '',
         queryFields: [],
-        selectAll: false,
-        id: 'test',
+        id: TimelineId.test,
         savedObjectId: null,
         columns: defaultHeaders,
         defaultColumns: defaultHeaders,
@@ -328,7 +335,6 @@ export const mockGlobalState: State = {
         historyIds: [],
         isFavorite: false,
         isLive: false,
-        isSelectAllChecked: false,
         isLoading: false,
         kqlMode: 'filter',
         kqlQuery: { filterQuery: null },
@@ -342,27 +348,79 @@ export const mockGlobalState: State = {
           start: '2020-07-07T08:20:18.966Z',
           end: '2020-07-08T08:20:18.966Z',
         },
-        selectedEventIds: {},
-        sessionViewConfig: null,
-        show: false,
-        showCheckboxes: false,
+        resolveTimelineConfig: undefined,
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
-        itemsPerPageOptions: [5, 10, 20],
+        selectAll: false,
+        sessionViewConfig: null,
+        show: false,
         sort: [
           {
             columnId: '@timestamp',
             columnType: 'date',
             esTypes: ['date'],
-            sortDirection: Direction.desc,
+            sortDirection: 'desc',
           },
         ],
-        isSaving: false,
+        status: TimelineStatus.draft,
         version: null,
-        status: TimelineStatus.active,
+        selectedEventIds: {},
+        isSelectAllChecked: false,
+        filters: [],
+        isSaving: false,
+        itemsPerPageOptions: [10, 25, 50, 100],
       },
     },
     insertTimeline: null,
+  },
+  dataTable: {
+    tableById: {
+      [TableId.test]: {
+        columns: defaultHeaders,
+        defaultColumns: defaultHeaders,
+        dataViewId: 'security-solution-default',
+        deletedEventIds: [],
+        expandedDetail: {},
+        filters: [],
+        indexNames: ['.alerts-security.alerts-default'],
+        isSelectAllChecked: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        loadingEventIds: [],
+        selectedEventIds: {},
+        showCheckboxes: false,
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: 'desc',
+          },
+        ],
+        graphEventId: '',
+        sessionViewConfig: null,
+        selectAll: false,
+        id: TableId.test,
+        title: '',
+        initialized: true,
+        updated: 1663882629000,
+        isLoading: false,
+        queryFields: [],
+        totalCount: 0,
+        viewMode: VIEW_SELECTION.gridView,
+        additionalFilters: {
+          showBuildingBlockAlerts: false,
+          showOnlyThreatIndicatorAlerts: false,
+        },
+      },
+    },
+  },
+  groups: {
+    groupById: {
+      testing: {
+        ...defaultGroup,
+      },
+    },
   },
   sourcerer: {
     ...mockSourcererState,

@@ -73,6 +73,7 @@ export const useEngineNav = () => {
     hasSchemaConflicts,
     hasUnconfirmedSchemaFields,
     engine,
+    hasIncompleteFields,
   } = useValues(EngineLogic);
 
   if (!isEngineRoute) return undefined;
@@ -186,6 +187,20 @@ export const useEngineNav = () => {
                 defaultMessage: 'Schema conflicts',
               })}
               data-test-subj="EngineNavSchemaConflicts"
+            />
+          )}
+          {hasIncompleteFields && (
+            <EuiIcon
+              type="alert"
+              color="warning"
+              className="appSearchNavIcon"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.schema.hasIncompleteFields',
+                {
+                  defaultMessage: 'Precision tuning is not enabled on all fields',
+                }
+              )}
+              data-test-subj="EngineNavPrecisionTuningWarning"
             />
           )}
         </>

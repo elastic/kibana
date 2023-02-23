@@ -10,15 +10,11 @@ Most developers who contribute code directly to the {kib} repo are writing code 
 start. However, there are a few differences when developing plugins outside the {kib} repo. These differences are covered here.
 
 * <<plugin-tooling>>
-* <<migrating-legacy-plugins>>
-* <<migrating-legacy-plugins-examples>>
 * <<external-plugin-functional-tests>>
 * <<external-plugin-localization>>
 * <<testing-kibana-plugin>>
 
 include::plugin-tooling.asciidoc[leveloffset=+1]
-include::migrating-legacy-plugins.asciidoc[leveloffset=+1]
-include::migrating-legacy-plugins-examples.asciidoc[leveloffset=+1]
 include::external-plugin-functional-tests.asciidoc[leveloffset=+1]
 include::external-plugin-localization.asciidoc[leveloffset=+1]
 include::testing-kibana-plugin.asciidoc[leveloffset=+1]

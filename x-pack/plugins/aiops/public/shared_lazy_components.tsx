@@ -15,7 +15,7 @@ const ExplainLogRateSpikesAppStateLazy = React.lazy(
   () => import('./components/explain_log_rate_spikes')
 );
 
-const ExplainLogRateSpikesLazyWrapper: FC = ({ children }) => (
+const LazyWrapper: FC = ({ children }) => (
   <EuiErrorBoundary>
     <Suspense fallback={<EuiLoadingContent lines={3} />}>{children}</Suspense>
   </EuiErrorBoundary>
@@ -26,25 +26,30 @@ const ExplainLogRateSpikesLazyWrapper: FC = ({ children }) => (
  * @param {ExplainLogRateSpikesAppStateProps}  props - properties specifying the data on which to run the analysis.
  */
 export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesAppStateProps> = (props) => (
-  <ExplainLogRateSpikesLazyWrapper>
+  <LazyWrapper>
     <ExplainLogRateSpikesAppStateLazy {...props} />
-  </ExplainLogRateSpikesLazyWrapper>
+  </LazyWrapper>
 );
 
 const LogCategorizationAppStateLazy = React.lazy(() => import('./components/log_categorization'));
-
-const LogCategorizationLazyWrapper: FC = ({ children }) => (
-  <EuiErrorBoundary>
-    <Suspense fallback={<EuiLoadingContent lines={3} />}>{children}</Suspense>
-  </EuiErrorBoundary>
-);
 
 /**
  * Lazy-wrapped LogCategorizationAppStateProps React component
  * @param {LogCategorizationAppStateProps}  props - properties specifying the data on which to run the analysis.
  */
 export const LogCategorization: FC<LogCategorizationAppStateProps> = (props) => (
-  <LogCategorizationLazyWrapper>
+  <LazyWrapper>
     <LogCategorizationAppStateLazy {...props} />
-  </LogCategorizationLazyWrapper>
+  </LazyWrapper>
+);
+
+const ChangePointDetectionLazy = React.lazy(() => import('./components/change_point_detection'));
+/**
+ * Lazy-wrapped LogCategorizationAppStateProps React component
+ * @param {LogCategorizationAppStateProps}  props - properties specifying the data on which to run the analysis.
+ */
+export const ChangePointDetection: FC<LogCategorizationAppStateProps> = (props) => (
+  <LazyWrapper>
+    <ChangePointDetectionLazy {...props} />
+  </LazyWrapper>
 );

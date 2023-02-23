@@ -53,6 +53,11 @@ describe('PrivilegeSummaryCalculator', () => {
           primary: undefined,
           subFeature: [],
         },
+        with_require_all_spaces_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: undefined,
+          subFeature: [],
+        },
       });
     });
 
@@ -98,6 +103,13 @@ describe('PrivilegeSummaryCalculator', () => {
             id: 'all',
           }),
           subFeature: ['cool_all', 'cool_read', 'cool_toggle_1', 'cool_toggle_2'],
+        },
+        with_require_all_spaces_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: expect.objectContaining({
+            id: 'all',
+          }),
+          subFeature: ['cool_toggle_1'],
         },
       });
     });
@@ -154,6 +166,13 @@ describe('PrivilegeSummaryCalculator', () => {
             'cool_toggle_2',
             'cool_excluded_toggle',
           ],
+        },
+        with_require_all_spaces_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: expect.objectContaining({
+            id: 'all',
+          }),
+          subFeature: ['cool_toggle_1'],
         },
       });
     });
@@ -214,6 +233,13 @@ describe('PrivilegeSummaryCalculator', () => {
             'cool_excluded_toggle',
           ],
         },
+        with_require_all_spaces_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: expect.objectContaining({
+            id: 'all',
+          }),
+          subFeature: ['cool_toggle_1'],
+        },
       });
     });
 
@@ -255,6 +281,13 @@ describe('PrivilegeSummaryCalculator', () => {
           }),
           subFeature: ['cool_all', 'cool_read', 'cool_toggle_1', 'cool_toggle_2'],
         },
+        with_require_all_spaces_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: expect.objectContaining({
+            id: 'all',
+          }),
+          subFeature: ['cool_toggle_1'],
+        },
       });
     });
 
@@ -294,6 +327,11 @@ describe('PrivilegeSummaryCalculator', () => {
           primary: undefined,
           subFeature: [],
         },
+        with_require_all_spaces_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: undefined,
+          subFeature: [],
+        },
       });
     });
 
@@ -329,6 +367,11 @@ describe('PrivilegeSummaryCalculator', () => {
           subFeature: [],
         },
         with_sub_features: {
+          hasCustomizedSubFeaturePrivileges: false,
+          primary: undefined,
+          subFeature: [],
+        },
+        with_require_all_spaces_sub_features: {
           hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],

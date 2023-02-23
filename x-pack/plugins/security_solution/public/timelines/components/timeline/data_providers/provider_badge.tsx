@@ -11,12 +11,13 @@ import { isString } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { getEmptyString } from '../../../../common/components/empty_value';
 import { ProviderContainer } from '../../../../common/components/drag_and_drop/provider_container';
 
 import type { QueryOperator } from './data_provider';
-import { DataProviderType, EXISTS_OPERATOR } from './data_provider';
+import { DataProviderType, EXISTS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
 
 import * as i18n from './translations';
 
@@ -50,18 +51,6 @@ const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
       box-shadow: 0 1px 1px -1px rgba(152, 162, 179, 0.2), 0 3px 2px -2px rgba(152, 162, 179, 0.2),
         inset 0 0 0 1px #bd271e;
     }
-  }
-
-  .euiBadge.euiBadge--iconLeft &.euiBadge.euiBadge--iconRight .euiBadge__content {
-    flex-direction: row;
-  }
-
-  .euiBadge.euiBadge--iconLeft
-    &.euiBadge.euiBadge--iconRight
-    .euiBadge__content
-    .euiBadge__iconButton {
-    margin-right: 0;
-    margin-left: 4px;
   }
 `;
 
@@ -114,7 +103,8 @@ interface ProviderBadgeProps {
   providerId: string;
   togglePopover: () => void;
   toggleType: () => void;
-  val: string | number;
+  displayValue: string;
+  val: PrimitiveOrArrayOfPrimitives;
   operator: QueryOperator;
   type: DataProviderType;
   timelineType: TimelineType;
@@ -136,6 +126,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
     providerId,
     togglePopover,
     toggleType,
+    displayValue,
     val,
     type,
     timelineType,
@@ -172,7 +163,9 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
         <>
           {prefix}
           {operator !== EXISTS_OPERATOR ? (
-            <span className="field-value">{`${field}: "${formattedValue}"`}</span>
+            <span className="field-value">{`${field}: "${
+              operator === 'includes' ? displayValue : formattedValue
+            }"`}</span>
           ) : (
             <span className="field-value">
               {field} {i18n.EXISTS_LABEL}
@@ -180,7 +173,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
           )}
         </>
       ),
-      [field, formattedValue, operator, prefix]
+      [displayValue, field, formattedValue, operator, prefix]
     );
 
     const ariaLabel = useMemo(
@@ -208,7 +201,10 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
             {content}
           </ProviderBadgeStyled>
 
-          {timelineType === TimelineType.template && (
+          {/* Add a UI feature to let users know the is one of operator doesnt work with timeline templates: 
+          https://github.com/elastic/kibana/issues/142437 */}
+
+          {timelineType === TimelineType.template && operator !== IS_ONE_OF_OPERATOR && (
             <TemplateFieldBadge toggleType={toggleType} type={type} />
           )}
         </>

@@ -9,7 +9,7 @@ exports[`Storyshots components/WorkpadHeader/ViewMenu edit mode 1`] = `
   >
     <button
       aria-label="View options"
-      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+      className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -37,7 +37,7 @@ exports[`Storyshots components/WorkpadHeader/ViewMenu read only mode 1`] = `
   >
     <button
       aria-label="View options"
-      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+      className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -65,7 +65,7 @@ exports[`Storyshots components/WorkpadHeader/ViewMenu with autoplay enabled 1`] 
   >
     <button
       aria-label="View options"
-      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+      className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -93,7 +93,7 @@ exports[`Storyshots components/WorkpadHeader/ViewMenu with refresh enabled 1`] =
   >
     <button
       aria-label="View options"
-      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+      className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
       disabled={false}
       onClick={[Function]}
       type="button"

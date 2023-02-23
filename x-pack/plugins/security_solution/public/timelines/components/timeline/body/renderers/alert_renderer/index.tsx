@@ -37,6 +37,21 @@ import * as i18n from './translations';
 
 export const DEFAULT_CONTEXT_ID = 'alert-renderer';
 
+export const ALERT_RENDERER_FIELDS = [
+  DESTINATION_IP,
+  DESTINATION_PORT,
+  EVENT_CATEGORY,
+  FILE_NAME,
+  HOST_NAME,
+  KIBANA_ALERT_RULE_NAME,
+  KIBANA_ALERT_SEVERITY,
+  PROCESS_NAME,
+  PROCESS_PARENT_NAME,
+  SOURCE_IP,
+  SOURCE_PORT,
+  USER_NAME,
+];
+
 const AlertRendererFlexGroup = styled(EuiFlexGroup)`
   gap: ${({ theme }) => theme.eui.euiSizeXS};
 `;
@@ -44,7 +59,7 @@ const AlertRendererFlexGroup = styled(EuiFlexGroup)`
 export const alertRenderer: RowRenderer = {
   id: RowRendererId.alert,
   isInstance: (ecs) => eventKindMatches(get('event.kind', ecs)),
-  renderRow: ({ contextId = DEFAULT_CONTEXT_ID, data, isDraggable, timelineId }) => {
+  renderRow: ({ contextId = DEFAULT_CONTEXT_ID, data, isDraggable, scopeId }) => {
     const eventId = get(ID, data);
     const destinationIp = get(DESTINATION_IP, data);
     const destinationPort = get(DESTINATION_PORT, data);
@@ -74,7 +89,7 @@ export const alertRenderer: RowRenderer = {
               eventId={eventId}
               field={EVENT_CATEGORY}
               isDraggable={isDraggable}
-              timelineId={timelineId}
+              scopeId={scopeId}
               values={eventCategory}
             />
 
@@ -99,7 +114,7 @@ export const alertRenderer: RowRenderer = {
               isDraggable={isDraggable}
               prefix={` ${i18n.PROCESS} `}
               suffix=", "
-              timelineId={timelineId}
+              scopeId={scopeId}
               values={processName}
             />
 
@@ -111,7 +126,7 @@ export const alertRenderer: RowRenderer = {
               isDraggable={isDraggable}
               prefix={` ${i18n.PARENT_PROCESS} `}
               suffix=", "
-              timelineId={timelineId}
+              scopeId={scopeId}
               values={processParentName}
             />
 
@@ -123,7 +138,7 @@ export const alertRenderer: RowRenderer = {
               isDraggable={isDraggable}
               prefix={` ${i18n.FILE} `}
               suffix=", "
-              timelineId={timelineId}
+              scopeId={scopeId}
               values={fileName}
             />
 
@@ -134,7 +149,7 @@ export const alertRenderer: RowRenderer = {
               field={SOURCE_IP}
               isDraggable={isDraggable}
               prefix={` ${i18n.SOURCE} `}
-              timelineId={timelineId}
+              scopeId={scopeId}
               values={sourceIp}
             />
 
@@ -146,7 +161,7 @@ export const alertRenderer: RowRenderer = {
               isDraggable={isDraggable}
               prefix=":"
               suffix=", "
-              timelineId={timelineId}
+              scopeId={scopeId}
               values={sourcePort}
             />
 
@@ -157,7 +172,7 @@ export const alertRenderer: RowRenderer = {
               field={DESTINATION_IP}
               isDraggable={isDraggable}
               prefix={` ${i18n.DESTINATION} `}
-              timelineId={timelineId}
+              scopeId={scopeId}
               values={destinationIp}
             />
 
@@ -169,7 +184,7 @@ export const alertRenderer: RowRenderer = {
               isDraggable={isDraggable}
               prefix=":"
               suffix=", "
-              timelineId={timelineId}
+              scopeId={scopeId}
               values={destinationPort}
             />
 
@@ -180,7 +195,7 @@ export const alertRenderer: RowRenderer = {
               field={USER_NAME}
               isDraggable={isDraggable}
               prefix={` ${i18n.BY} `}
-              timelineId={timelineId}
+              scopeId={scopeId}
               values={userName}
             />
 
@@ -191,7 +206,7 @@ export const alertRenderer: RowRenderer = {
               field={HOST_NAME}
               isDraggable={isDraggable}
               prefix={` ${i18n.ON} `}
-              timelineId={timelineId}
+              scopeId={scopeId}
               values={hostName}
             />
 
@@ -203,7 +218,7 @@ export const alertRenderer: RowRenderer = {
               isDraggable={isDraggable}
               prefix={` ${i18n.CREATED} `}
               suffix={` ${i18n.ALERT} `}
-              timelineId={timelineId}
+              scopeId={scopeId}
               values={kibanaAlertSeverity}
             />
 
@@ -214,7 +229,7 @@ export const alertRenderer: RowRenderer = {
               field={KIBANA_ALERT_RULE_NAME}
               isDraggable={isDraggable}
               suffix="."
-              timelineId={timelineId}
+              scopeId={scopeId}
               values={kibanaAlertRuleName}
             />
           </AlertRendererFlexGroup>

@@ -14,12 +14,13 @@ import {
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   METRICSET_NAME,
+  METRICSET_INTERVAL,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
   SPAN_DURATION,
   SPAN_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../setup_request';
+} from '../../../../common/es_fields/apm';
+import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 export function getProcessorEventForServiceDestinationStatistics(
   searchServiceDestinationMetrics: boolean
@@ -33,7 +34,18 @@ export function getDocumentTypeFilterForServiceDestinationStatistics(
   searchServiceDestinationMetrics: boolean
 ) {
   return searchServiceDestinationMetrics
-    ? termQuery(METRICSET_NAME, 'service_destination')
+    ? [
+        {
+          bool: {
+            filter: termQuery(METRICSET_NAME, 'service_destination'),
+            must_not: {
+              terms: {
+                [METRICSET_INTERVAL]: ['10m', '60m'],
+              },
+            },
+          },
+        },
+      ]
     : [];
 }
 
@@ -54,20 +66,18 @@ export function getDocCountFieldForServiceDestinationStatistics(
 }
 
 export async function getIsUsingServiceDestinationMetrics({
-  setup,
+  apmEventClient,
   useSpanName,
   kuery,
   start,
   end,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   useSpanName: boolean;
   kuery: string;
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
-
   async function getServiceDestinationMetricsCount(
     query?: QueryDslQueryContainer
   ) {
@@ -79,7 +89,7 @@ export async function getIsUsingServiceDestinationMetrics({
         },
         body: {
           track_total_hits: 1,
-          size: 1,
+          size: 0,
           terminate_after: 1,
           query: {
             bool: {

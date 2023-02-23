@@ -52,14 +52,16 @@ describe('Search Sessions Management API', () => {
               attributes: {
                 name: 'Veggie',
                 appId: 'pizza',
-                status: 'complete',
                 initialState: {},
                 restoreState: {},
                 idMapping: [],
               },
             },
           ],
-        } as SavedObjectsFindResponse;
+          statuses: {
+            'hello-pizza-123': { status: 'complete' },
+          },
+        };
       });
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
@@ -78,8 +80,10 @@ describe('Search Sessions Management API', () => {
             ],
             "appId": "pizza",
             "created": undefined,
+            "errors": undefined,
             "expires": undefined,
             "id": "hello-pizza-123",
+            "idMapping": Array [],
             "initialState": Object {},
             "name": "Veggie",
             "numSearches": 0,
@@ -93,7 +97,7 @@ describe('Search Sessions Management API', () => {
       `);
     });
 
-    test('completed session with expired time is showed as expired', async () => {
+    test('expired session is showed as expired', async () => {
       sessionsClient.find = jest.fn().mockImplementation(async () => {
         return {
           saved_objects: [
@@ -102,7 +106,6 @@ describe('Search Sessions Management API', () => {
               attributes: {
                 name: 'Veggie',
                 appId: 'pizza',
-                status: 'complete',
                 expires: moment().subtract(3, 'days'),
                 initialState: {},
                 restoreState: {},
@@ -110,7 +113,10 @@ describe('Search Sessions Management API', () => {
               },
             },
           ],
-        } as SavedObjectsFindResponse;
+          statuses: {
+            'hello-pizza-123': { status: 'expired' },
+          },
+        };
       });
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
@@ -188,7 +194,7 @@ describe('Search Sessions Management API', () => {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
       });
-      await api.sendCancel('abc-123-cool-session-ID');
+      await api.sendDelete('abc-123-cool-session-ID');
 
       expect(mockCoreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'The search session was deleted.',
@@ -203,7 +209,7 @@ describe('Search Sessions Management API', () => {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
       });
-      await api.sendCancel('abc-123-cool-session-ID');
+      await api.sendDelete('abc-123-cool-session-ID');
 
       expect(mockCoreStart.notifications.toasts.addError).toHaveBeenCalledWith(
         new Error('implementation is so bad'),

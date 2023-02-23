@@ -40,7 +40,7 @@ describe('formatHit', () => {
     const formatted = formatHit(
       row,
       dataViewMock,
-      ['message', 'extension', 'object.value'],
+      (fieldName) => ['message', 'extension', 'object.value'].includes(fieldName),
       220,
       discoverServiceMock.fieldFormats
     );
@@ -65,7 +65,7 @@ describe('formatHit', () => {
     const formatted = formatHit(
       highlightHit,
       dataViewMock,
-      ['message', 'extension', 'object.value'],
+      (fieldName) => ['message', 'extension', 'object.value'].includes(fieldName),
       220,
       discoverServiceMock.fieldFormats
     );
@@ -82,7 +82,7 @@ describe('formatHit', () => {
     const formatted = formatHit(
       row,
       dataViewMock,
-      ['message', 'extension', 'object.value'],
+      (fieldName) => ['message', 'extension', 'object.value'].includes(fieldName),
       2,
       discoverServiceMock.fieldFormats
     );
@@ -97,7 +97,7 @@ describe('formatHit', () => {
     const formatted = formatHit(
       row,
       dataViewMock,
-      ['message', 'object.value'],
+      (fieldName) => ['message', 'object.value'].includes(fieldName),
       220,
       discoverServiceMock.fieldFormats
     );
@@ -113,7 +113,7 @@ describe('formatHit', () => {
     const formatted = formatHit(
       row,
       dataViewMock,
-      ['bytes'],
+      (fieldName) => ['bytes'].includes(fieldName),
       220,
       discoverServiceMock.fieldFormats
     );

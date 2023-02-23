@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   ISavedObjectsRepository,
   Logger,
   PluginInitializerContext,
-  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { collectTelemetryData } from './collect_telemetry_data';
 import {
   CASE_TELEMETRY_SAVED_OBJECT,
@@ -21,7 +21,7 @@ import {
   CASE_TELEMETRY_SAVED_OBJECT_ID,
   SAVED_OBJECT_TYPES,
 } from '../../common/constants';
-import { CasesTelemetry } from './types';
+import type { CasesTelemetry } from './types';
 import { casesSchema } from './schema';
 
 export { scheduleCasesTelemetryTask } from './schedule_telemetry_task';

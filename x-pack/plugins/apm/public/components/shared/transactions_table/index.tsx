@@ -7,30 +7,33 @@
 
 import {
   EuiBasicTable,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import uuid from 'uuid';
-import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
-import { OverviewTableContainer } from '../overview_table_container';
-import { getColumns } from './get_columns';
-import { ElasticDocsLink } from '../links/elastic_docs_link';
-import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { v4 as uuidv4 } from 'uuid';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import { txGroupsDroppedBucketName } from '../links/apm/transaction_detail_link';
+import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { fromQuery, toQuery } from '../links/url_helpers';
+import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
+import { getColumns } from './get_columns';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -46,8 +49,8 @@ const INITIAL_STATE: InitialState = {
   requestId: '',
   mainStatisticsData: {
     transactionGroups: [],
-    isAggregationAccurate: true,
-    bucketSize: 0,
+    maxTransactionGroupsExceeded: false,
+    transactionOverflowCount: 0,
     transactionGroupsTotalItems: 0,
   },
 };
@@ -64,7 +67,7 @@ interface Props {
   isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
   showPerPageOptions?: boolean;
-  showAggregationAccurateCallout?: boolean;
+  showMaxTransactionGroupsExceededWarning?: boolean;
   environment: string;
   fixedHeight?: boolean;
   kuery: string;
@@ -79,7 +82,7 @@ export function TransactionsTable({
   isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
   showPerPageOptions = true,
-  showAggregationAccurateCallout = false,
+  showMaxTransactionGroupsExceededWarning = false,
   environment,
   kuery,
   start,
@@ -100,7 +103,9 @@ export function TransactionsTable({
     },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions',
-    '/services/{serviceName}/overview'
+    '/services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/transactions',
+    '/mobile-services/{serviceName}/overview'
   );
 
   const [tableOptions, setTableOptions] = useState<{
@@ -148,13 +153,17 @@ export function TransactionsTable({
       ).then((response) => {
         const currentPageTransactionGroups = orderBy(
           response.transactionGroups,
-          field,
-          direction
+          [
+            (transactionItem) =>
+              transactionItem.name === txGroupsDroppedBucketName ? -1 : 0,
+            field,
+          ],
+          ['asc', direction]
         ).slice(index * size, (index + 1) * size);
 
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
-          requestId: uuid(),
+          requestId: uuidv4(),
           mainStatisticsData: {
             ...response,
             transactionGroups: currentPageTransactionGroups,
@@ -187,8 +196,8 @@ export function TransactionsTable({
     requestId,
     mainStatisticsData: {
       transactionGroups,
-      isAggregationAccurate,
-      bucketSize,
+      maxTransactionGroupsExceeded,
+      transactionOverflowCount,
       transactionGroupsTotalItems,
     },
   } = data;
@@ -241,17 +250,19 @@ export function TransactionsTable({
   const columns = getColumns({
     serviceName,
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-    transactionGroupDetailedStatisticsLoading:
-      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
-      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED,
+    transactionGroupDetailedStatisticsLoading: isPending(
+      transactionGroupDetailedStatisticsStatus
+    ),
     transactionGroupDetailedStatistics,
     comparisonEnabled,
     shouldShowSparkPlots,
     offset,
+    transactionOverflowCount,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING;
   const isNotInitiated = status === FETCH_STATUS.NOT_INITIATED;
+  const hasFailed = status === FETCH_STATUS.FAILURE;
 
   const pagination = useMemo(
     () => ({
@@ -300,40 +311,24 @@ export function TransactionsTable({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {showAggregationAccurateCallout && !isAggregationAccurate && (
+      {showMaxTransactionGroupsExceededWarning && maxTransactionGroupsExceeded && (
         <EuiFlexItem>
           <EuiCallOut
             title={i18n.translate(
-              'xpack.apm.transactionsTable.cardinalityWarning.title',
+              'xpack.apm.transactionsCallout.cardinalityWarning.title',
               {
                 defaultMessage:
-                  'This view shows a subset of reported transactions.',
+                  'Number of transaction groups exceed the allowed maximum(1,000) that are displayed.',
               }
             )}
-            color="danger"
+            color="warning"
             iconType="alert"
           >
             <p>
               <FormattedMessage
-                id="xpack.apm.transactionsTable.cardinalityWarning.body"
-                defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
-                values={{
-                  bucketSize,
-                  codeBlock: (
-                    <EuiCode>xpack.apm.ui.transactionGroupBucketSize</EuiCode>
-                  ),
-                }}
+                id="xpack.apm.transactionsCallout.transactionGroupLimit.exceeded"
+                defaultMessage="The maximum number of transaction groups displayed in Kibana has been reached. Try narrowing down results by using the query bar."
               />
-
-              <ElasticDocsLink
-                section="/kibana"
-                path="/troubleshooting.html#troubleshooting-too-many-transactions"
-              >
-                {i18n.translate(
-                  'xpack.apm.transactionsTable.cardinalityWarning.docsLink',
-                  { defaultMessage: 'Learn more in the docs' }
-                )}
-              </ElasticDocsLink>
             </p>
           </EuiCallOut>
         </EuiFlexItem>
@@ -348,8 +343,17 @@ export function TransactionsTable({
           >
             <EuiBasicTable
               loading={isLoading}
+              noItemsMessage={
+                isLoading
+                  ? i18n.translate('xpack.apm.transactionsTable.loading', {
+                      defaultMessage: 'Loading...',
+                    })
+                  : i18n.translate('xpack.apm.transactionsTable.noResults', {
+                      defaultMessage: 'No transactions found',
+                    })
+              }
               error={
-                status === FETCH_STATUS.FAILURE
+                hasFailed
                   ? i18n.translate('xpack.apm.transactionsTable.errorMessage', {
                       defaultMessage: 'Failed to fetch',
                     })

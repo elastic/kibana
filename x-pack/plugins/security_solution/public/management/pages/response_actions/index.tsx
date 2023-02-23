@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
-import { MANAGEMENT_ROUTING_ACTION_HISTORY_PATH } from '../../common/constants';
+import { MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 import { ResponseActionsListPage } from './view/response_actions_list_page';
 
@@ -15,7 +15,7 @@ export const ResponseActionsContainer = memo(() => {
   return (
     <Switch>
       <Route
-        path={MANAGEMENT_ROUTING_ACTION_HISTORY_PATH}
+        path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
         exact
         component={ResponseActionsListPage}
       />

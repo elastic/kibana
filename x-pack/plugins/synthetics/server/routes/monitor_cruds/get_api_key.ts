@@ -13,11 +13,8 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) =>
   path: API_URLS.SYNTHETICS_APIKEY,
   validate: {},
   handler: async ({ request, server }): Promise<any> => {
-    const { security } = server;
-
     const apiKey = await generateAPIKey({
       request,
-      security,
       server,
       uptimePrivileges: true,
     });

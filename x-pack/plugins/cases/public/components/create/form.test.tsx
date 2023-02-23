@@ -7,22 +7,26 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, render } from '@testing-library/react';
+import { act, render, within, fireEvent } from '@testing-library/react';
+import { waitFor } from '@testing-library/dom';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { NONE_CONNECTOR_ID } from '../../../common/api';
-import { useForm, Form, FormHook } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { connectorsMock } from '../../containers/mock';
-import { schema, FormProps } from './schema';
-import { CreateCaseForm, CreateCaseFormProps } from './form';
+import type { FormProps } from './schema';
+import { schema } from './schema';
+import type { CreateCaseFormProps } from './form';
+import { CreateCaseForm } from './form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { TestProviders } from '../../common/mock';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_configure');
 jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 jest.mock('../app/use_available_owners', () => ({
@@ -30,7 +34,7 @@ jest.mock('../app/use_available_owners', () => ({
 }));
 
 const useGetTagsMock = useGetTags as jest.Mock;
-const useGetConnectorsMock = useGetConnectors as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 
 const initialCaseValue: FormProps = {
@@ -50,6 +54,7 @@ const casesFormProps: CreateCaseFormProps = {
 
 describe('CreateCaseForm', () => {
   let globalForm: FormHook;
+  const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
 
   const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
     children,
@@ -75,6 +80,10 @@ describe('CreateCaseForm', () => {
     useGetTagsMock.mockReturnValue({ data: ['test'] });
     useGetConnectorsMock.mockReturnValue({ isLoading: false, data: connectorsMock });
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem(draftStorageKey);
   });
 
   it('renders with steps', async () => {
@@ -178,5 +187,77 @@ describe('CreateCaseForm', () => {
     );
 
     expect(result.getByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
+  });
+
+  it('should not prefill the form when no initialValue provided', () => {
+    const { getByTestId } = render(
+      <MockHookWrapperComponent>
+        <CreateCaseForm {...casesFormProps} />
+      </MockHookWrapperComponent>
+    );
+
+    const titleInput = within(getByTestId('caseTitle')).getByTestId('input');
+    const descriptionInput = within(getByTestId('caseDescription')).getByRole('textbox');
+    expect(titleInput).toHaveValue('');
+    expect(descriptionInput).toHaveValue('');
+  });
+
+  it('should prefill the form when provided with initialValue', () => {
+    const { getByTestId } = render(
+      <MockHookWrapperComponent>
+        <CreateCaseForm
+          {...casesFormProps}
+          initialValue={{ title: 'title', description: 'description' }}
+        />
+      </MockHookWrapperComponent>
+    );
+
+    const titleInput = within(getByTestId('caseTitle')).getByTestId('input');
+    const descriptionInput = within(getByTestId('caseDescription')).getByRole('textbox');
+
+    expect(titleInput).toHaveValue('title');
+    expect(descriptionInput).toHaveValue('description');
+  });
+
+  describe('draft comment ', () => {
+    it('should clear session storage key on cancel', () => {
+      const result = render(
+        <MockHookWrapperComponent>
+          <CreateCaseForm
+            {...casesFormProps}
+            initialValue={{ title: 'title', description: 'description' }}
+          />
+        </MockHookWrapperComponent>
+      );
+
+      const cancelBtn = result.getByTestId('create-case-cancel');
+
+      fireEvent.click(cancelBtn);
+
+      fireEvent.click(result.getByTestId('confirmModalConfirmButton'));
+
+      expect(casesFormProps.onCancel).toHaveBeenCalled();
+      expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
+    });
+
+    it('should clear session storage key on submit', () => {
+      const result = render(
+        <MockHookWrapperComponent>
+          <CreateCaseForm
+            {...casesFormProps}
+            initialValue={{ title: 'title', description: 'description' }}
+          />
+        </MockHookWrapperComponent>
+      );
+
+      const submitBtn = result.getByTestId('create-case-submit');
+
+      fireEvent.click(submitBtn);
+
+      waitFor(() => {
+        expect(casesFormProps.onSuccess).toHaveBeenCalled();
+        expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
+      });
+    });
   });
 });

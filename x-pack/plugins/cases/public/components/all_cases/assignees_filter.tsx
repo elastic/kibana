@@ -6,24 +6,27 @@
  */
 
 import { EuiFilterButton } from '@elastic/eui';
-import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserProfilesPopover } from '@kbn/user-profile-components';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useIsUserTyping } from '../../common/use_is_user_typing';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { CurrentUserProfile } from '../types';
+import type { CurrentUserProfile } from '../types';
 import { EmptyMessage } from '../user_profiles/empty_message';
 import { NoMatches } from '../user_profiles/no_matches';
-import { SelectedStatusMessage } from '../user_profiles/selected_status_message';
-import { bringCurrentUserToFrontAndSort } from '../user_profiles/sort';
+import { bringCurrentUserToFrontAndSort, orderAssigneesIncludingNone } from '../user_profiles/sort';
+import type { AssigneesFilteringSelection } from '../user_profiles/types';
 import * as i18n from './translations';
 
+export const NO_ASSIGNEES_VALUE = null;
+
 export interface AssigneesFilterPopoverProps {
-  selectedAssignees: UserProfileWithAvatar[];
+  selectedAssignees: AssigneesFilteringSelection[];
   currentUserProfile: CurrentUserProfile;
   isLoading: boolean;
-  onSelectionChange: (users: UserProfileWithAvatar[]) => void;
+  onSelectionChange: (users: AssigneesFilteringSelection[]) => void;
 }
 
 const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = ({
@@ -37,38 +40,31 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
   const availableOwners = useAvailableCasesOwners(['read']);
   const [searchTerm, setSearchTerm] = useState('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
 
   const togglePopover = useCallback(() => setIsPopoverOpen((value) => !value), []);
 
   const onChange = useCallback(
-    (users: UserProfileWithAvatar[]) => {
-      const sortedUsers = bringCurrentUserToFrontAndSort(currentUserProfile, users);
-      onSelectionChange(sortedUsers ?? []);
+    (users: AssigneesFilteringSelection[]) => {
+      const sortedUsers = orderAssigneesIncludingNone(currentUserProfile, users);
+
+      onSelectionChange(sortedUsers);
     },
     [currentUserProfile, onSelectionChange]
   );
 
   const selectedStatusMessage = useCallback(
-    (selectedCount: number) => (
-      <SelectedStatusMessage
-        selectedCount={selectedCount}
-        message={i18n.TOTAL_ASSIGNEES_FILTERED(selectedCount)}
-      />
-    ),
+    (selectedCount: number) => i18n.TOTAL_ASSIGNEES_FILTERED(selectedCount),
     []
   );
 
-  const onSearchChange = useCallback((term: string) => {
-    setSearchTerm(term);
-
-    if (!isEmpty(term)) {
-      setIsUserTyping(true);
-    }
-  }, []);
-
-  const [isUserTyping, setIsUserTyping] = useState(false);
-
-  const onDebounce = useCallback(() => setIsUserTyping(false), []);
+  const onSearchChange = useCallback(
+    (term: string) => {
+      setSearchTerm(term);
+      onContentChange(term);
+    },
+    [onContentChange]
+  );
 
   const { data: userProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
     name: searchTerm,
@@ -76,10 +72,15 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
     onDebounce,
   });
 
-  const searchResultProfiles = useMemo(
-    () => bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles),
-    [userProfiles, currentUserProfile]
-  );
+  const searchResultProfiles = useMemo(() => {
+    const sortedUsers = bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles) ?? [];
+
+    if (isEmpty(searchTerm)) {
+      return [null, ...sortedUsers];
+    }
+
+    return sortedUsers;
+  }, [currentUserProfile, userProfiles, searchTerm]);
 
   const isLoadingData = isLoading || isLoadingSuggest;
 
@@ -117,6 +118,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
         emptyMessage: <EmptyMessage />,
         noMatchesMessage: !isUserTyping && !isLoadingData ? <NoMatches /> : <EmptyMessage />,
         singleSelection: false,
+        nullOptionLabel: i18n.NO_ASSIGNEES,
       }}
     />
   );

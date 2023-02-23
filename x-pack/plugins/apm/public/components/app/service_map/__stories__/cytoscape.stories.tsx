@@ -6,13 +6,23 @@
  */
 
 import cytoscape from 'cytoscape';
-import React from 'react';
+import React, { ComponentType } from 'react';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { Cytoscape } from '../cytoscape';
 import { Centerer } from './centerer';
 
 export default {
   title: 'app/ServiceMap/cytoscape',
   component: Cytoscape,
+  decorators: [
+    (StoryComponent: ComponentType) => {
+      return (
+        <MockApmPluginStorybook>
+          <StoryComponent />
+        </MockApmPluginStorybook>
+      );
+    },
+  ],
 };
 
 export function Example() {

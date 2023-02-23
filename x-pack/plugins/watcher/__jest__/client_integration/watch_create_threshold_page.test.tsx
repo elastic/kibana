@@ -26,14 +26,12 @@ const ES_FIELDS = [{ name: '@timestamp', type: 'date' }];
 // Since watchID's are dynamically created, we have to mock
 // the function that generates them in order to be able to match
 // against it.
-jest.mock('uuid/v4', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { WATCH_ID: watchId } = require('./helpers/jest_constants');
-
-  return function () {
-    return watchId;
-  };
-});
+jest.mock('uuid', () => ({
+  v4: () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require('./helpers/jest_constants').WATCH_ID;
+  },
+}));
 
 const SETTINGS = {
   action_types: {
@@ -84,7 +82,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
   let testBed: WatchCreateThresholdTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

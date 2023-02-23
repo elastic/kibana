@@ -11,11 +11,8 @@ import Path from 'path';
 
 import webpack from 'webpack';
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
-import normalizePath from 'normalize-path';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { isNormalModule, isConcatenatedModule } from '@kbn/optimizer-webpack-helpers';
-import { RUNTIME_SIZE_LIMIT } from './runtime_size_limit';
 
 const IGNORED_EXTNAME = ['.map', '.br', '.gz'];
 
@@ -91,10 +88,6 @@ export class CiStatsPlugin {
           group: `canvas shareable runtime`,
           id: 'total size',
           value: entry.size,
-          limit: RUNTIME_SIZE_LIMIT,
-          limitConfigPath: normalizePath(
-            Path.relative(REPO_ROOT, require.resolve('./runtime_size_limit'))
-          ),
         },
         {
           group: `canvas shareable runtime`,

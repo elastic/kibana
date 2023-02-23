@@ -254,11 +254,7 @@ export class TaskPollingLifecycle {
     return fillPool(
       // claim available tasks
       () => {
-        return claimAvailableTasks(
-          tasksToClaim.splice(0, this.pool.availableWorkers),
-          this.taskClaiming,
-          this.logger
-        ).pipe(
+        return claimAvailableTasks(this.taskClaiming, this.logger).pipe(
           tap(
             mapOk(({ timing }: ClaimOwnershipResult) => {
               if (timing) {
@@ -313,7 +309,6 @@ export class TaskPollingLifecycle {
 }
 
 export function claimAvailableTasks(
-  claimTasksById: string[],
   taskClaiming: TaskClaiming,
   logger: Logger
 ): Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
@@ -321,7 +316,6 @@ export function claimAvailableTasks(
     taskClaiming
       .claimAvailableTasksIfCapacityIsAvailable({
         claimOwnershipUntil: intervalFromNow('30s')!,
-        claimTasksById,
       })
       .subscribe(
         (claimResult) => {

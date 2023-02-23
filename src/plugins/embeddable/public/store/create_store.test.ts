@@ -211,10 +211,7 @@ describe('createStore', () => {
       await new Promise((resolve) => setTimeout(resolve));
 
       expect(store.getState()).toHaveProperty('input.custom', 'something else');
-      expect(container.getInput()).toHaveProperty(
-        'input.custom',
-        expect.not.stringMatching('something else')
-      );
+      expect(container.getInput()).not.toHaveProperty('input.custom');
     });
 
     it('should restore value from the inherited input', async () => {

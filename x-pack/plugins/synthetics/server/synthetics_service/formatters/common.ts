@@ -17,6 +17,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.NAME]: null,
   [ConfigKey.LOCATIONS]: null,
   [ConfigKey.ENABLED]: null,
+  [ConfigKey.ALERT_CONFIG]: null,
   [ConfigKey.MONITOR_TYPE]: null,
   [ConfigKey.CONFIG_ID]: null,
   [ConfigKey.LOCATIONS]: null,
@@ -31,6 +32,11 @@ export const commonFormatters: CommonFormatMap = {
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,
   [ConfigKey.FORM_MONITOR_TYPE]: null,
   [ConfigKey.JOURNEY_ID]: null,
+  [ConfigKey.PROJECT_ID]: null,
+  [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
+  [ConfigKey.ORIGINAL_SPACE]: null,
+  [ConfigKey.CONFIG_HASH]: null,
+  [ConfigKey.MONITOR_QUERY_ID]: null,
 };
 
 export const arrayFormatter = (value: string[] = []) => (value.length ? value : null);

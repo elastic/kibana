@@ -34,6 +34,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('delete and force delete scenarios', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     before(async () => {
       await installPackage(requiredPackage, pkgVersion);
     });

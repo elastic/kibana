@@ -5,21 +5,12 @@
  * 2.0.
  */
 
-import type * as H from 'history';
-import type { ParsedQuery } from 'query-string';
-import { parse, stringify } from 'query-string';
 import { useCallback, useEffect, useMemo } from 'react';
-
-import { url } from '@kbn/kibana-utils-plugin/public';
-import { isEmpty, pickBy } from 'lodash/fp';
-import { useHistory } from 'react-router-dom';
+import { difference, isEmpty, pickBy } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
-import {
-  decodeRisonUrlState,
-  encodeRisonUrlState,
-  getParamFromQueryString,
-  getQueryStringFromLocation,
-} from './helpers';
+import usePrevious from 'react-use/lib/usePrevious';
+import { encode } from '@kbn/rison';
+import { encodeQueryString, useGetInitialUrlParamValue, useReplaceUrlParams } from './helpers';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { globalUrlParamActions, globalUrlParamSelectors } from '../../store/global_url_param';
 import { useRouteSpy } from '../route/use_route_spy';
@@ -34,7 +25,7 @@ import { getLinkInfo } from '../../links';
  * @param urlParamKey Must not change.
  * @param onInitialize Called once when initializing. It must not change.
  */
-export const useInitializeUrlParam = <State>(
+export const useInitializeUrlParam = <State extends {}>(
   urlParamKey: string,
   /**
    * @param state Decoded URL param value.
@@ -43,23 +34,20 @@ export const useInitializeUrlParam = <State>(
 ) => {
   const dispatch = useDispatch();
 
+  const getInitialUrlParamValue = useGetInitialUrlParamValue(urlParamKey);
+
   useEffect(() => {
-    // window.location.search provides the most updated representation of the url search.
-    // It also guarantees that we don't overwrite URL param managed outside react-router.
-    const initialValue = getParamFromQueryString(
-      getQueryStringFromLocation(window.location.search),
-      urlParamKey
-    );
+    const value = getInitialUrlParamValue();
 
     dispatch(
       globalUrlParamActions.registerUrlParam({
         key: urlParamKey,
-        initialValue: initialValue ?? null,
+        initialValue: value,
       })
     );
 
     // execute consumer initialization
-    onInitialize(decodeRisonUrlState<State>(initialValue ?? undefined));
+    onInitialize(value as State);
 
     return () => {
       dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
@@ -73,13 +61,12 @@ export const useInitializeUrlParam = <State>(
  *
  * Make sure to call `useInitializeUrlParam` before calling this function.
  */
-export const useUpdateUrlParam = <State>(urlParamKey: string) => {
+export const useUpdateUrlParam = <State extends {}>(urlParamKey: string) => {
   const dispatch = useDispatch();
 
   const updateUrlParam = useCallback(
     (value: State | null) => {
-      const encodedValue = value !== null ? encodeRisonUrlState(value) : null;
-      dispatch(globalUrlParamActions.updateUrlParam({ key: urlParamKey, value: encodedValue }));
+      dispatch(globalUrlParamActions.updateUrlParam({ key: urlParamKey, value }));
     },
     [dispatch, urlParamKey]
   );
@@ -89,11 +76,29 @@ export const useUpdateUrlParam = <State>(urlParamKey: string) => {
 
 export const useGlobalQueryString = (): string => {
   const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
+  const globalQueryString = useMemo(() => {
+    const encodedGlobalUrlParam: Record<string, string> = {};
 
-  const globalQueryString = useMemo(
-    () => encodeQueryString(pickBy((value) => !isEmpty(value), globalUrlParam)),
-    [globalUrlParam]
-  );
+    if (!globalUrlParam) {
+      return '';
+    }
+
+    Object.keys(globalUrlParam).forEach((paramName) => {
+      const value = globalUrlParam[paramName];
+
+      if (!value || (typeof value === 'object' && isEmpty(value))) {
+        return;
+      }
+
+      try {
+        encodedGlobalUrlParam[paramName] = encode(value);
+      } catch {
+        // Just ignore parameters which unable to encode
+      }
+    });
+
+    return encodeQueryString(pickBy((value) => !isEmpty(value), encodedGlobalUrlParam));
+  }, [globalUrlParam]);
 
   return globalQueryString;
 };
@@ -103,47 +108,34 @@ export const useGlobalQueryString = (): string => {
  * - It updates the URL when globalUrlParam store updates.
  */
 export const useSyncGlobalQueryString = () => {
-  const history = useHistory();
   const [{ pageName }] = useRouteSpy();
   const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
+  const previousGlobalUrlParams = usePrevious(globalUrlParam);
+  const replaceUrlParams = useReplaceUrlParams();
 
   useEffect(() => {
     const linkInfo = getLinkInfo(pageName) ?? { skipUrlState: true };
-    const params = Object.entries(globalUrlParam).map(([key, value]) => ({
-      key,
-      value: linkInfo.skipUrlState ? null : value,
-    }));
+    const paramsToUpdate = { ...globalUrlParam };
 
-    if (params.length > 0) {
-      // window.location.search provides the most updated representation of the url search.
-      // It prevents unnecessary re-renders which useLocation would create because 'replaceUrlParams' does update the location.
-      // window.location.search also guarantees that we don't overwrite URL param managed outside react-router.
-      replaceUrlParams(params, history, window.location.search);
+    if (linkInfo.skipUrlState) {
+      Object.keys(paramsToUpdate).forEach((key) => {
+        paramsToUpdate[key] = null;
+      });
     }
-  }, [globalUrlParam, pageName, history]);
-};
 
-const encodeQueryString = (urlParams: ParsedQuery<string>): string =>
-  stringify(url.encodeQuery(urlParams), { sort: false, encode: false });
+    // Url params that got deleted from GlobalUrlParams
+    const unregisteredKeys = difference(
+      Object.keys(previousGlobalUrlParams ?? {}),
+      Object.keys(globalUrlParam)
+    );
 
-const replaceUrlParams = (
-  params: Array<{ key: string; value: string | null }>,
-  history: H.History,
-  search: string
-) => {
-  const urlParams = parse(search, { sort: false });
+    // Delete unregistered Url params
+    unregisteredKeys.forEach((key) => {
+      paramsToUpdate[key] = null;
+    });
 
-  params.forEach(({ key, value }) => {
-    if (value == null || value === '') {
-      delete urlParams[key];
-    } else {
-      urlParams[key] = value;
+    if (Object.keys(paramsToUpdate).length > 0) {
+      replaceUrlParams(paramsToUpdate);
     }
-  });
-
-  const newSearch = encodeQueryString(urlParams);
-
-  if (getQueryStringFromLocation(search) !== newSearch) {
-    history.replace({ search: newSearch });
-  }
+  }, [previousGlobalUrlParams, globalUrlParam, pageName, replaceUrlParams]);
 };

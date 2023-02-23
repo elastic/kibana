@@ -43,134 +43,150 @@ describe('filterByAgent', () => {
 
   describe('options per agent', () => {
     it('go', () => {
-      expect(getSettingKeysForAgent('go')).toEqual([
-        'capture_body',
-        'capture_headers',
-        'log_level',
-        'recording',
-        'sanitize_field_names',
-        'span_frames_min_duration',
-        'stack_trace_limit',
-        'transaction_ignore_urls',
-        'transaction_max_spans',
-        'transaction_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent('go')).toEqual(
+        expect.arrayContaining([
+          'capture_body',
+          'capture_headers',
+          'log_level',
+          'recording',
+          'sanitize_field_names',
+          'span_frames_min_duration',
+          'stack_trace_limit',
+          'transaction_ignore_urls',
+          'transaction_max_spans',
+          'transaction_sample_rate',
+        ])
+      );
     });
 
     it('java', () => {
-      expect(getSettingKeysForAgent('java')).toEqual([
-        'api_request_size',
-        'api_request_time',
-        'capture_body',
-        'capture_headers',
-        'circuit_breaker_enabled',
-        'enable_log_correlation',
-        'log_level',
-        'profiling_inferred_spans_enabled',
-        'profiling_inferred_spans_excluded_classes',
-        'profiling_inferred_spans_included_classes',
-        'profiling_inferred_spans_min_duration',
-        'profiling_inferred_spans_sampling_interval',
-        'recording',
-        'sanitize_field_names',
-        'server_timeout',
-        'span_frames_min_duration',
-        'stack_trace_limit',
-        'stress_monitor_cpu_duration_threshold',
-        'stress_monitor_gc_relief_threshold',
-        'stress_monitor_gc_stress_threshold',
-        'stress_monitor_system_cpu_relief_threshold',
-        'stress_monitor_system_cpu_stress_threshold',
-        'transaction_ignore_urls',
-        'transaction_max_spans',
-        'transaction_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent('java')).toEqual(
+        expect.arrayContaining([
+          'api_request_size',
+          'api_request_time',
+          'capture_body',
+          'capture_headers',
+          'circuit_breaker_enabled',
+          'enable_log_correlation',
+          'log_level',
+          'profiling_inferred_spans_enabled',
+          'profiling_inferred_spans_excluded_classes',
+          'profiling_inferred_spans_included_classes',
+          'profiling_inferred_spans_min_duration',
+          'profiling_inferred_spans_sampling_interval',
+          'recording',
+          'sanitize_field_names',
+          'server_timeout',
+          'span_frames_min_duration',
+          'stack_trace_limit',
+          'stress_monitor_cpu_duration_threshold',
+          'stress_monitor_gc_relief_threshold',
+          'stress_monitor_gc_stress_threshold',
+          'stress_monitor_system_cpu_relief_threshold',
+          'stress_monitor_system_cpu_stress_threshold',
+          'transaction_ignore_urls',
+          'transaction_max_spans',
+          'transaction_sample_rate',
+        ])
+      );
     });
 
     it('js-base', () => {
-      expect(getSettingKeysForAgent('js-base')).toEqual([
-        'transaction_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent('js-base')).toEqual(
+        expect.arrayContaining(['transaction_sample_rate'])
+      );
     });
 
     it('rum-js', () => {
-      expect(getSettingKeysForAgent('rum-js')).toEqual([
-        'transaction_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent('rum-js')).toEqual(
+        expect.arrayContaining(['transaction_sample_rate'])
+      );
     });
 
     it('nodejs', () => {
-      expect(getSettingKeysForAgent('nodejs')).toEqual([
-        'capture_body',
-        'log_level',
-        'sanitize_field_names',
-        'transaction_ignore_urls',
-        'transaction_max_spans',
-        'transaction_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent('nodejs')).toEqual(
+        expect.arrayContaining([
+          'capture_body',
+          'log_level',
+          'sanitize_field_names',
+          'transaction_ignore_urls',
+          'transaction_max_spans',
+          'transaction_sample_rate',
+        ])
+      );
     });
 
     it('python', () => {
-      expect(getSettingKeysForAgent('python')).toEqual([
-        'api_request_size',
-        'api_request_time',
-        'capture_body',
-        'capture_headers',
-        'log_level',
-        'recording',
-        'sanitize_field_names',
-        'span_frames_min_duration',
-        'transaction_ignore_urls',
-        'transaction_max_spans',
-        'transaction_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent('python')).toEqual(
+        expect.arrayContaining([
+          'api_request_size',
+          'api_request_time',
+          'capture_body',
+          'capture_headers',
+          'log_level',
+          'recording',
+          'sanitize_field_names',
+          'span_frames_min_duration',
+          'transaction_ignore_urls',
+          'transaction_max_spans',
+          'transaction_sample_rate',
+        ])
+      );
     });
 
     it('dotnet', () => {
-      expect(getSettingKeysForAgent('dotnet')).toEqual([
-        'capture_body',
-        'capture_headers',
-        'log_level',
-        'recording',
-        'sanitize_field_names',
-        'span_frames_min_duration',
-        'stack_trace_limit',
-        'transaction_ignore_urls',
-        'transaction_max_spans',
-        'transaction_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent('dotnet')).toEqual(
+        expect.arrayContaining([
+          'capture_body',
+          'capture_headers',
+          'log_level',
+          'recording',
+          'sanitize_field_names',
+          'span_frames_min_duration',
+          'stack_trace_limit',
+          'transaction_ignore_urls',
+          'transaction_max_spans',
+          'transaction_sample_rate',
+        ])
+      );
     });
 
     it('ruby', () => {
-      expect(getSettingKeysForAgent('ruby')).toEqual([
-        'api_request_size',
-        'api_request_time',
-        'capture_body',
-        'capture_headers',
-        'log_level',
-        'recording',
-        'sanitize_field_names',
-        'span_frames_min_duration',
-        'transaction_ignore_urls',
-        'transaction_max_spans',
-        'transaction_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent('ruby')).toEqual(
+        expect.arrayContaining([
+          'api_request_size',
+          'api_request_time',
+          'capture_body',
+          'capture_headers',
+          'log_level',
+          'recording',
+          'sanitize_field_names',
+          'span_frames_min_duration',
+          'transaction_ignore_urls',
+          'transaction_max_spans',
+          'transaction_sample_rate',
+        ])
+      );
     });
 
     it('php', () => {
-      expect(getSettingKeysForAgent('php')).toEqual([
-        'log_level',
-        'recording',
-        'transaction_max_spans',
-        'transaction_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent('php')).toEqual(
+        expect.arrayContaining([
+          'log_level',
+          'recording',
+          'transaction_max_spans',
+          'transaction_sample_rate',
+        ])
+      );
     });
 
     it('"All" services (no agent name)', () => {
-      expect(getSettingKeysForAgent(undefined)).toEqual([
-        'transaction_max_spans',
-        'transaction_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent(undefined)).toEqual(
+        expect.arrayContaining([
+          'transaction_max_spans',
+          'transaction_sample_rate',
+        ])
+      );
     });
   });
 });

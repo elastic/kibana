@@ -71,7 +71,7 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
     ],
     state: {
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: dataLayer,
           },

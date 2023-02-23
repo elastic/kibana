@@ -9,7 +9,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { UserToolTip } from './user_tooltip';
 import { SmallUserAvatar } from './small_user_avatar';
-import { Username, UsernameProps } from './username';
+import type { UsernameProps } from './username';
+import { Username } from './username';
 
 export type HoverableUserWithAvatarProps = UsernameProps;
 

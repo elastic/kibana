@@ -19,15 +19,17 @@ import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
 
-const IMPORTABLE_FROM: Record<ModuleType, ModuleType[] | '*'> = {
+const ANY = Symbol();
+
+const IMPORTABLE_FROM: Record<ModuleType, ModuleType[] | typeof ANY> = {
   'non-package': ['non-package', 'server package', 'browser package', 'common package', 'static'],
   'server package': ['common package', 'server package', 'static'],
   'browser package': ['common package', 'browser package', 'static'],
   'common package': ['common package', 'static'],
 
   static: [],
-  'tests or mocks': '*',
-  tooling: '*',
+  'tests or mocks': ANY,
+  tooling: ANY,
 };
 
 const toList = (strings: string[]) => {
@@ -98,12 +100,7 @@ export const NoBoundaryCrossingRule: Rule.RuleModule = {
     const self = classifier.classify(sourcePath);
     const importable = IMPORTABLE_FROM[self.type];
 
-    if (importable === '*') {
-      // don't check imports in files which can import anything
-      return {};
-    }
-
-    return visitAllImportStatements((req, { node, importer }) => {
+    return visitAllImportStatements((req, { node, importer, type }) => {
       if (
         req === null ||
         // we can ignore imports using the raw-loader, they will need to be resolved but can be managed on a case by case basis
@@ -120,6 +117,10 @@ export const NoBoundaryCrossingRule: Rule.RuleModule = {
       }
 
       const imported = classifier.classify(result.absolute);
+
+      if (importable === ANY) {
+        return;
+      }
 
       if (!importable.includes(imported.type)) {
         context.report({

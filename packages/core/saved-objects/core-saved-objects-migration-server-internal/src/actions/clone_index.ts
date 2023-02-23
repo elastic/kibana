@@ -13,7 +13,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import type { IndexNotFound, AcknowledgeResponse } from '.';
 import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
@@ -24,7 +24,7 @@ import {
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
 import { isClusterShardLimitExceeded } from './es_errors';
-import { ClusterShardLimitExceeded } from './create_index';
+import type { ClusterShardLimitExceeded } from './create_index';
 
 export type CloneIndexResponse = AcknowledgeResponse;
 

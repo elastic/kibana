@@ -46,28 +46,6 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine
   defaultMessage: 'Rules',
 });
 
-export const EXPERIMENTAL_ON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalOn',
-  {
-    defaultMessage: 'Technical preview: On',
-  }
-);
-
-export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalDescription',
-  {
-    defaultMessage:
-      'The experimental rules table view is in technical preview and allows for advanced sorting capabilities. If you experience performance issues when working with the table, you can turn this setting off.',
-  }
-);
-
-export const EXPERIMENTAL_OFF = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalOff',
-  {
-    defaultMessage: 'Technical preview: Off',
-  }
-);
-
 export const ADD_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addPageTitle',
   {
@@ -484,10 +462,17 @@ export const EDIT_RULE_SETTINGS = i18n.translate(
   }
 );
 
-export const EDIT_RULE_SETTINGS_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsToolTip',
+export const LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaActionsFeaturePrivileges',
   {
     defaultMessage: 'You do not have Kibana Actions privileges',
+  }
+);
+
+export const LACK_OF_KIBANA_SECURITY_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaSecurityPrivileges',
+  {
+    defaultMessage: 'You do not have Kibana Security privileges',
   }
 );
 
@@ -551,13 +536,6 @@ export const COLUMN_LAST_RESPONSE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.lastResponseTitle',
   {
     defaultMessage: 'Last response',
-  }
-);
-
-export const COLUMN_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.versionTitle',
-  {
-    defaultMessage: 'Version',
   }
 );
 
@@ -631,6 +609,20 @@ export const MONITORING_TAB = i18n.translate(
   }
 );
 
+export const ENABLED_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.enabledRulesTitle',
+  {
+    defaultMessage: 'Enabled rules',
+  }
+);
+
+export const DISABLED_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.disabledRulesTitle',
+  {
+    defaultMessage: 'Disabled rules',
+  }
+);
+
 export const CUSTOM_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.customRulesTitle',
   {
@@ -649,6 +641,20 @@ export const TAGS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.tagsLabel',
   {
     defaultMessage: 'Tags',
+  }
+);
+
+export const SEARCH_TAGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.searchTagsPlaceholder',
+  {
+    defaultMessage: 'Search tags',
+  }
+);
+
+export const RULES_TAG_SEARCH = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.rulesTagSearchText',
+  {
+    defaultMessage: 'Rules tag search',
   }
 );
 
@@ -851,6 +857,13 @@ export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverLabel',
   {
     defaultMessage: 'Refresh settings',
+  }
+);
+
+export const CLEAR_RULES_TABLE_FILTERS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.clearRulesTableFilters',
+  {
+    defaultMessage: 'Clear filters',
   }
 );
 
@@ -1058,15 +1071,27 @@ export const RULES_BULK_EDIT_SUCCESS = i18n.translate(
   }
 );
 
-export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (rulesCount: number) =>
+export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (
+  succeededRulesCount: number,
+  skippedRulesCount: number
+) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successToastDescription',
     {
-      values: { rulesCount },
-      defaultMessage:
-        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}. If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.",
+      values: { succeededRulesCount, skippedRulesCount },
+      defaultMessage: `{succeededRulesCount, plural, =0 {} =1 {You've successfully updated # rule. } other {You've successfully updated # rules. }}
+        {skippedRulesCount, plural, =0 {} =1 { # rule was skipped.} other { # rules were skipped.}}
+        `,
     }
   );
+
+export const RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successIndexEditToastDescription',
+  {
+    defaultMessage:
+      'If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.',
+  }
+);
 
 export const RULES_BULK_EDIT_FAILURE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.errorToastTitle',
@@ -1075,28 +1100,18 @@ export const RULES_BULK_EDIT_FAILURE = i18n.translate(
   }
 );
 
-export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
+export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (
+  failedRulesCount: number,
+  skippedRulesCount: number
+) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.errorToastDescription',
     {
-      values: { rulesCount },
-      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update.',
+      values: { failedRulesCount, skippedRulesCount },
+      defaultMessage:
+        '{failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}} failed to update. {skippedRulesCount, plural, =0 {} =1 { # rule was skipped.} other { # rules were skipped.}}',
     }
   );
-
-export const NEW_TERMS_TOUR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.tour.newTermsTitle',
-  {
-    defaultMessage: 'A new Security Rule type is available!',
-  }
-);
-
-export const NEW_TERMS_TOUR_CONTENT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.tour.newTermsContent',
-  {
-    defaultMessage: '"New Terms" rules alert on values that have not previously been seen',
-  }
-);
 
 export const RULE_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
@@ -1105,17 +1120,16 @@ export const RULE_PREVIEW_TITLE = i18n.translate(
   }
 );
 
-export const RULE_PREVIEW_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.rulePreviewDescription',
-  {
-    defaultMessage:
-      'Rule preview reflects the current configuration of your rule settings and exceptions, click refresh icon to see the updated preview.',
-  }
-);
-
 export const CANCEL_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',
   {
     defaultMessage: 'Cancel',
+  }
+);
+
+export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
+  'xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage',
+  {
+    defaultMessage: 'Failed to load the saved query',
   }
 );

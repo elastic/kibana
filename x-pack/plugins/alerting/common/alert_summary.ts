@@ -20,7 +20,7 @@ export interface AlertSummary {
   ruleTypeId: string;
   consumer: string;
   muteAll: boolean;
-  throttle: string | null;
+  throttle?: string | null;
   enabled: boolean;
   statusStartDate: string;
   statusEndDate: string;
@@ -35,6 +35,6 @@ export interface AlertStatus {
   status: AlertStatusValues;
   muted: boolean;
   actionGroupId?: string;
-  actionSubgroup?: string;
   activeStartDate?: string;
+  flapping: boolean;
 }

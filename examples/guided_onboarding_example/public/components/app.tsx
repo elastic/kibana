@@ -8,7 +8,8 @@
 
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { Router, Switch, Route } from 'react-router-dom';
+import { Router, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import {
   EuiPage,
@@ -23,6 +24,7 @@ import { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 import { StepTwo } from './step_two';
 import { StepOne } from './step_one';
+import { StepThree } from './step_three';
 import { Main } from './main';
 
 interface GuidedOnboardingExampleAppDeps {
@@ -58,7 +60,10 @@ export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps
                   <StepOne guidedOnboarding={guidedOnboarding} />
                 </Route>
                 <Route exact path="/stepTwo">
-                  <StepTwo guidedOnboarding={guidedOnboarding} />
+                  <StepTwo />
+                </Route>
+                <Route exact path="/stepThree">
+                  <StepThree guidedOnboarding={guidedOnboarding} />
                 </Route>
               </Switch>
             </Router>

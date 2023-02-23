@@ -10,7 +10,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { Workspace } from '../types';
 import { createGraphStore } from '../state_management';
 import { createWorkspace } from '../services/workspace/graph_client_workspace';
@@ -43,6 +42,7 @@ export const WorkspaceRoute = ({
     setHeaderActionMenu,
     spaces,
     indexPatterns: getIndexPatternProvider,
+    inspect,
   },
 }: WorkspaceRouteProps) => {
   /**
@@ -64,11 +64,6 @@ export const WorkspaceRoute = ({
     [getIndexPatternProvider.get]
   );
 
-  const { loading, callNodeProxy, callSearchNodeProxy, handleSearchQueryError } = useGraphLoader({
-    toastNotifications,
-    coreStart,
-  });
-
   const services = useMemo(
     () => ({
       appName: 'graph',
@@ -79,6 +74,12 @@ export const WorkspaceRoute = ({
     }),
     [coreStart, data, storage, unifiedSearch]
   );
+
+  const { loading, requestAdapter, callNodeProxy, callSearchNodeProxy, handleSearchQueryError } =
+    useGraphLoader({
+      toastNotifications,
+      coreStart,
+    });
 
   const [store] = useState(() =>
     createGraphStore({
@@ -106,12 +107,10 @@ export const WorkspaceRoute = ({
       http: coreStart.http,
       overlays: coreStart.overlays,
       savedObjectsClient,
-      showSaveModal,
       savePolicy: graphSavePolicy,
       changeUrl: (newUrl) => history.push(newUrl),
       notifyReact: () => setRenderCounter((cur) => cur + 1),
       chrome,
-      I18nContext: coreStart.i18n.Context,
       handleSearchQueryError,
     })
   );
@@ -150,6 +149,8 @@ export const WorkspaceRoute = ({
             overlays={overlays}
             savedWorkspace={savedWorkspace}
             indexPatternProvider={indexPatternProvider}
+            inspect={inspect}
+            requestAdapter={requestAdapter}
           />
         </Provider>
       </KibanaContextProvider>

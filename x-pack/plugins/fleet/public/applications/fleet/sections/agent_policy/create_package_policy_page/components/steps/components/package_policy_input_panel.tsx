@@ -26,6 +26,7 @@ import type {
   PackagePolicyInputStream,
   RegistryInput,
   RegistryStream,
+  RegistryStreamWithDataStream,
 } from '../../../../../../types';
 import type { PackagePolicyInputValidationResults } from '../../../services';
 import { hasInvalidButRequiredVar, countValidationErrors } from '../../../services';
@@ -73,12 +74,13 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
-  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type: string } }>;
+  packageInputStreams: RegistryStreamWithDataStream[];
   packagePolicyInput: NewPackagePolicyInput;
   updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
+  isEditPage?: boolean;
 }> = memo(
   ({
     packageInput,
@@ -90,6 +92,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     updatePackagePolicyInput,
     inputValidationResults,
     forceShowErrors,
+    isEditPage = false,
   }) => {
     const defaultDataStreamId = useDataStreamId();
     // Showing streams toggle state
@@ -212,7 +215,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
 
         {/* Header rule break */}
         {isShowingStreams ? <EuiSpacer size="l" /> : null}
-
         {/* Input level policy */}
         {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
           <Fragment>
@@ -223,6 +225,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               updatePackagePolicyInput={updatePackagePolicyInput}
               inputVarsValidationResults={{ vars: inputValidationResults?.vars }}
               forceShowErrors={forceShowErrors}
+              isEditPage={isEditPage}
             />
             {hasInputStreams ? <ShortenedHorizontalRule margin="m" /> : <EuiSpacer size="l" />}
           </Fragment>
@@ -272,6 +275,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     inputValidationResults?.streams![packagePolicyInputStream!.data_stream!.dataset]
                   }
                   forceShowErrors={forceShowErrors}
+                  isEditPage={isEditPage}
                 />
                 {index !== inputStreams.length - 1 ? (
                   <>

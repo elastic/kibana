@@ -2,7 +2,7 @@
 
 exports[`SessionUserHostWorkingDir rendering it renders the default SessionUserHostWorkingDir 1`] = `
 <span
-  className="euiFlexItem euiFlexItem--flexGrowZero"
+  css="unknown styles"
 >
   <SessionUserHostWorkingDir
     contextId="contextid-123"

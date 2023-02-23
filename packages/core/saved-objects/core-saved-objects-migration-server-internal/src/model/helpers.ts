@@ -14,7 +14,7 @@ import type {
 import * as Either from 'fp-ts/lib/Either';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { State } from '../state';
-import type { FetchIndexResponse } from '../actions';
+import type { AliasAction, FetchIndexResponse } from '../actions';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -66,6 +66,19 @@ export function mergeMigrationMappingPropertyHashes(
       },
     },
   };
+}
+
+/**
+ * If `.kibana` and the version specific aliases both exists and
+ * are pointing to the same index. This version's migration has already
+ * been completed.
+ */
+export function versionMigrationCompleted(
+  currentAlias: string,
+  versionAlias: string,
+  aliases: Record<string, string | undefined>
+): boolean {
+  return aliases[currentAlias] != null && aliases[currentAlias] === aliases[versionAlias];
 }
 
 export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: string): boolean {
@@ -157,16 +170,17 @@ export function getAliases(
   indices: FetchIndexResponse
 ): Either.Either<
   { type: 'multiple_indices_per_alias'; alias: string; indices: string[] },
-  Record<string, string>
+  Record<string, string | undefined>
 > {
-  const aliases = {} as Record<string, string>;
+  const aliases = {} as Record<string, string | undefined>;
   for (const index of Object.getOwnPropertyNames(indices)) {
     for (const alias of Object.getOwnPropertyNames(indices[index].aliases || {})) {
-      if (aliases[alias] != null) {
+      const secondIndexThisAliasPointsTo = aliases[alias];
+      if (secondIndexThisAliasPointsTo != null) {
         return Either.left({
           type: 'multiple_indices_per_alias',
           alias,
-          indices: [aliases[alias], index],
+          indices: [secondIndexThisAliasPointsTo, index],
         });
       }
       aliases[alias] = index;
@@ -174,4 +188,20 @@ export function getAliases(
   }
 
   return Either.right(aliases);
+}
+
+/**
+ * Build a list of alias actions to remove the provided aliases from the given index.
+ */
+export function buildRemoveAliasActions(
+  index: string,
+  aliases: string[],
+  exclude: string[]
+): AliasAction[] {
+  return aliases.flatMap((alias) => {
+    if (exclude.includes(alias)) {
+      return [];
+    }
+    return [{ remove: { index, alias, must_exist: true } }];
+  });
 }

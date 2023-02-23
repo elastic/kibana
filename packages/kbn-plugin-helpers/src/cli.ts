@@ -11,7 +11,7 @@ import Path from 'path';
 import { RunWithCommands } from '@kbn/dev-cli-runner';
 import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 
-import { findKibanaJson } from './find_kibana_json';
+import { findPluginDir } from './find_plugin_dir';
 import { loadKibanaPlatformPlugin } from './load_kibana_platform_plugin';
 import * as Tasks from './tasks';
 import { BuildContext } from './build_context';
@@ -56,14 +56,18 @@ export function runCli() {
           throw createFlagError('expected a single --skip-archive flag');
         }
 
-        const pluginDir = await findKibanaJson(process.cwd());
-        if (!pluginDir) {
+        const found = await findPluginDir();
+        if (!found) {
           throw createFailError(
             `Unable to find Kibana Platform plugin in [${process.cwd()}] or any of its parent directories. Has it been migrated properly? Does it have a kibana.json file?`
           );
         }
 
-        const plugin = loadKibanaPlatformPlugin(pluginDir);
+        if (found.type === 'package') {
+          throw createFailError(`the plugin helpers do not currently support "package plugins"`);
+        }
+
+        const plugin = loadKibanaPlatformPlugin(found.dir);
         const config = await loadConfig(log, plugin);
         const kibanaVersion = await resolveKibanaVersion(versionFlag, plugin);
         const sourceDir = plugin.directory;

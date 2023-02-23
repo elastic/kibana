@@ -7,11 +7,10 @@
 
 import React, { VFC } from 'react';
 
-import { EuiEmptyPrompt, EuiImage, EuiButton, EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
-import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
+import { IMAGE } from './translations';
+import { useIntegrationsPageLink, useTIDocumentationLink } from '../../hooks';
 import illustration from './integrations_light.svg';
 import { SecuritySolutionPluginTemplateWrapper } from '../../containers/security_solution_plugin_template_wrapper';
 
@@ -26,15 +25,7 @@ export const EmptyPage: VFC = () => {
   return (
     <SecuritySolutionPluginTemplateWrapper isEmptyState>
       <EuiEmptyPrompt
-        icon={
-          <EuiImage
-            size="fullWidth"
-            alt={i18n.translate('xpack.threatIntelligence.common.emptyPage.imgAlt', {
-              defaultMessage: 'Enable Threat Intelligence Integrations',
-            })}
-            src={illustration}
-          />
-        }
+        icon={<EuiImage size="fullWidth" alt={IMAGE} src={illustration} />}
         title={
           <h3>
             <FormattedMessage

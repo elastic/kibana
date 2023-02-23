@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { SLO, SLITypes } from '../../types/models';
+import { SLO, IndicatorTypes } from '../../domain/models';
 import { retryTransientEsErrors } from '../../utils/retry';
 import { TransformGenerator } from './transform_generators';
 
@@ -22,26 +22,25 @@ export interface TransformManager {
 
 export class DefaultTransformManager implements TransformManager {
   constructor(
-    private generators: Record<SLITypes, TransformGenerator>,
+    private generators: Record<IndicatorTypes, TransformGenerator>,
     private esClient: ElasticsearchClient,
-    private logger: Logger,
-    private spaceId: string
+    private logger: Logger
   ) {}
 
   async install(slo: SLO): Promise<TransformId> {
     const generator = this.generators[slo.indicator.type];
     if (!generator) {
       this.logger.error(`No transform generator found for ${slo.indicator.type} SLO type`);
-      throw new Error(`Unsupported SLO type: ${slo.indicator.type}`);
+      throw new Error(`Unsupported SLI type: ${slo.indicator.type}`);
     }
 
-    const transformParams = generator.getTransformParams(slo, this.spaceId);
+    const transformParams = generator.getTransformParams(slo);
     try {
       await retryTransientEsErrors(() => this.esClient.transform.putTransform(transformParams), {
         logger: this.logger,
       });
     } catch (err) {
-      this.logger.error(`Cannot create transform for ${slo.indicator.type} SLO type: ${err}`);
+      this.logger.error(`Cannot create transform for ${slo.indicator.type} SLI type: ${err}`);
       throw err;
     }
 

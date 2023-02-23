@@ -6,9 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { PrePackagedRulesAndTimelinesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response';
+import {
+  PREBUILT_RULES_STATUS_URL,
+  PREBUILT_RULES_URL,
+  InstallPrebuiltRulesAndTimelinesResponse,
+} from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
 
-import { DETECTION_ENGINE_PREPACKAGED_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -18,6 +21,8 @@ import {
   installPrePackagedRules,
   waitFor,
 } from '../../utils';
+import { createPrebuiltRuleAssetSavedObjects } from '../../utils/create_prebuilt_rule_saved_objects';
+import { deleteAllPrebuiltRules } from '../../utils/delete_all_prebuilt_rules';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -29,12 +34,14 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('creating prepackaged rules', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);
+        await createPrebuiltRuleAssetSavedObjects(es);
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
         await deleteAllAlerts(supertest, log);
         await deleteAllTimelines(es);
+        await deleteAllPrebuiltRules(es);
       });
 
       it('should create the prepackaged rules and return a count greater than zero, rules_updated to be zero, and contain the correct keys', async () => {
@@ -42,7 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await waitFor(
           async () => {
             const { body, status } = await supertest
-              .put(DETECTION_ENGINE_PREPACKAGED_URL)
+              .put(PREBUILT_RULES_URL)
               .set('kbn-xsrf', 'true')
               .send();
             if (status === 200) {
@@ -50,11 +57,11 @@ export default ({ getService }: FtrProviderContext): void => {
             }
             return status === 200;
           },
-          DETECTION_ENGINE_PREPACKAGED_URL,
+          PREBUILT_RULES_URL,
           log
         );
 
-        const prepackagedRules = responseBody as PrePackagedRulesAndTimelinesSchema;
+        const prepackagedRules = responseBody as InstallPrebuiltRulesAndTimelinesResponse;
         expect(prepackagedRules.rules_installed).to.be.greaterThan(0);
         expect(prepackagedRules.rules_updated).to.eql(0);
         expect(Object.keys(prepackagedRules)).to.eql([
@@ -66,19 +73,19 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should be possible to call the API twice and the second time the number of rules installed should be zero as well as timeline', async () => {
-        await installPrePackagedRules(supertest, log);
+        await installPrePackagedRules(supertest, es, log);
 
         // NOTE: I call the GET call until eventually it becomes consistent and that the number of rules to install are zero.
         // This is to reduce flakiness where it can for a short period of time try to install the same rule twice.
         await waitFor(
           async () => {
             const { body } = await supertest
-              .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+              .get(PREBUILT_RULES_STATUS_URL)
               .set('kbn-xsrf', 'true')
               .expect(200);
             return body.rules_not_installed === 0;
           },
-          `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
+          PREBUILT_RULES_STATUS_URL,
           log
         );
 
@@ -86,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await waitFor(
           async () => {
             const { body, status } = await supertest
-              .put(DETECTION_ENGINE_PREPACKAGED_URL)
+              .put(PREBUILT_RULES_URL)
               .set('kbn-xsrf', 'true')
               .send();
             if (status === 200) {
@@ -94,11 +101,11 @@ export default ({ getService }: FtrProviderContext): void => {
             }
             return status === 200;
           },
-          DETECTION_ENGINE_PREPACKAGED_URL,
+          PREBUILT_RULES_URL,
           log
         );
 
-        const prepackagedRules = responseBody as PrePackagedRulesAndTimelinesSchema;
+        const prepackagedRules = responseBody as InstallPrebuiltRulesAndTimelinesResponse;
         expect(prepackagedRules.rules_installed).to.eql(0);
         expect(prepackagedRules.timelines_installed).to.eql(0);
       });

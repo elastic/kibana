@@ -14,6 +14,7 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiIcon,
+  EuiIconTip,
   EuiTableSortingType,
   EuiToolTip,
 } from '@elastic/eui';
@@ -34,6 +35,7 @@ import { useSpikeAnalysisTableRowContext } from './spike_analysis_table_row_prov
 
 const NARROW_COLUMN_WIDTH = '120px';
 const ACTIONS_COLUMN_WIDTH = '60px';
+const UNIQUE_COLUMN_WIDTH = '40px';
 const NOT_AVAILABLE = '--';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
@@ -50,12 +52,14 @@ interface SpikeAnalysisTableProps {
   changePoints: ChangePoint[];
   dataViewId?: string;
   loading: boolean;
+  isExpandedRow?: boolean;
 }
 
 export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   changePoints,
   dataViewId,
   loading,
+  isExpandedRow,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
@@ -142,8 +146,9 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       name: i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.fieldValueLabel', {
         defaultMessage: 'Field value',
       }),
-      render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
+      render: (_, { fieldValue }) => String(fieldValue),
       sortable: true,
+      textOnly: true,
       valign: 'top',
     },
     {
@@ -276,6 +281,34 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       valign: 'top',
     },
   ];
+
+  if (isExpandedRow === true) {
+    columns.unshift({
+      'data-test-subj': 'aiopsSpikeAnalysisTableColumnUnique',
+      width: UNIQUE_COLUMN_WIDTH,
+      field: 'unique',
+      name: '',
+      render: (_, { unique }) => {
+        if (unique) {
+          return (
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.uniqueColumnTooltip',
+                {
+                  defaultMessage: 'This field/value pair only appears in this group',
+                }
+              )}
+              position="top"
+              type="asterisk"
+            />
+          );
+        }
+        return '';
+      },
+      sortable: false,
+      valign: 'top',
+    });
+  }
 
   const onChange = useCallback((tableSettings) => {
     const { index, size } = tableSettings.page;

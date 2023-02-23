@@ -15,6 +15,9 @@ import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
  * Registers the endpoint activity_log route
+ * @deprecated
+ * @removeBy 9.0.0
+ *
  */
 export function registerActionAuditLogRoutes(
   router: SecuritySolutionPluginRouter,

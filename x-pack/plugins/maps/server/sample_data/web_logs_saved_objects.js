@@ -242,7 +242,7 @@ export const getWebLogsSavedObjects = () => {
       id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
       type: 'map',
       updated_at: '2019-01-15T20:30:25.436Z',
-      version: 5,
+      version: '5',
       references: [
         {
           name: 'layer_1_join_0_index_pattern',

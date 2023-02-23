@@ -14,28 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
-  const PageObjects = getPageObjects(['dashboard', 'tagManagement', 'common', 'header']);
-
-  /**
-   * Select tags in the searchbar's tag filter.
-   */
-  const selectFilterTags = async (...tagNames: string[]) => {
-    // open the filter dropdown
-    const filterButton = await find.byCssSelector('.euiFilterGroup .euiFilterButton');
-    await filterButton.click();
-    // select the tags
-    for (const tagName of tagNames) {
-      await testSubjects.click(
-        `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(tagName)}`
-      );
-    }
-    // click elsewhere to close the filter dropdown
-    const searchFilter = await find.byCssSelector('.euiPageTemplate .euiFieldSearch');
-    await searchFilter.click();
-    // wait until the table refreshes
-    await listingTable.waitUntilTableIsLoaded();
-  };
+  const PageObjects = getPageObjects(['dashboard', 'tagManagement', 'common']);
 
   describe('dashboard integration', () => {
     before(async () => {
@@ -68,26 +47,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await listingTable.expectItemsCount('dashboard', 2);
         const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.eql([
-          'dashboard 4 with real data (tag-1)',
+        expect(itemNames.sort()).to.eql([
           'dashboard 3 (tag-1 and tag-3)',
+          'dashboard 4 with real data (tag-1)',
         ]);
       });
 
       it('allows to filter by selecting a tag in the filter menu', async () => {
-        await selectFilterTags('tag-3');
+        await listingTable.selectFilterTags('tag-3');
 
         await listingTable.expectItemsCount('dashboard', 2);
         const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.eql(['dashboard 2 (tag-3)', 'dashboard 3 (tag-1 and tag-3)']);
+        expect(itemNames.sort()).to.eql(['dashboard 2 (tag-3)', 'dashboard 3 (tag-1 and tag-3)']);
       });
 
       it('allows to filter by multiple tags', async () => {
-        await selectFilterTags('tag-2', 'tag-3');
+        await listingTable.selectFilterTags('tag-2', 'tag-3');
 
         await listingTable.expectItemsCount('dashboard', 3);
         const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.eql([
+        expect(itemNames.sort()).to.eql([
           'dashboard 1 (tag-2)',
           'dashboard 2 (tag-3)',
           'dashboard 3 (tag-1 and tag-3)',
@@ -112,7 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        await selectFilterTags('tag-1');
+        await listingTable.selectFilterTags('tag-1');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('my-new-dashboard');
       });
@@ -149,14 +128,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        await selectFilterTags('my-new-tag');
+        await listingTable.selectFilterTags('my-new-tag');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('dashboard-with-new-tag');
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/106547
-    describe.skip('editing', () => {
+    describe('editing', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -175,7 +153,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        await selectFilterTags('tag-3');
+        await listingTable.selectFilterTags('tag-3');
+        const itemNames = await listingTable.getAllItemsNames();
+        expect(itemNames).to.contain('dashboard 4 with real data (tag-1)');
+      });
+
+      it('retains dashboard saved object tags after quicksave', async () => {
+        // edit and save dashboard
+        await PageObjects.dashboard.gotoDashboardEditMode('dashboard 4 with real data (tag-1)');
+        await PageObjects.dashboard.useMargins(false); // turn margins off to cause quicksave to be enabled
+        await PageObjects.dashboard.clickQuickSave();
+
+        // verify dashboard still has original tags
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
+        await listingTable.selectFilterTags('tag-3');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('dashboard 4 with real data (tag-1)');
       });

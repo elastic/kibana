@@ -14,17 +14,24 @@ import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
-import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { EmbeddableError, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
-  return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
+  if (input.hidePanelTitles) return '';
+  return input.title ?? output.defaultTitle;
 }
+function getPanelDescription(input: EmbeddableInput, output: EmbeddableOutput) {
+  if (input.hidePanelTitles) return '';
+  return input.description ?? output.defaultDescription;
+}
+
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-  TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
-> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput>
+  TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput,
+  TNode = any
+> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput, TNode>
 {
   static runtimeId: number = 0;
 
@@ -33,6 +40,7 @@ export abstract class Embeddable<
   public readonly parent?: IContainer;
   public readonly isContainer: boolean = false;
   public readonly deferEmbeddableLoad: boolean = false;
+  public catchError?(error: EmbeddableError, domNode: HTMLElement | Element): TNode | (() => void);
 
   public abstract readonly type: string;
   public readonly id: string;
@@ -59,6 +67,7 @@ export abstract class Embeddable<
 
     this.output = {
       title: getPanelTitle(input, output),
+      description: getPanelDescription(input, output),
       ...(this.reportsEmbeddableLoad()
         ? {}
         : {
@@ -182,7 +191,11 @@ export abstract class Embeddable<
   }
 
   public getTitle(): string {
-    return this.output.title || '';
+    return this.output.title ?? '';
+  }
+
+  public getDescription(): string {
+    return this.output.description ?? '';
   }
 
   /**
@@ -209,14 +222,13 @@ export abstract class Embeddable<
     }
   }
 
-  public render(el: HTMLElement): void {
+  public render(el: HTMLElement): TNode | void {
     this.renderComplete.setEl(el);
     this.renderComplete.setTitle(this.output.title || '');
 
     if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }
-    return;
   }
 
   /**
@@ -282,6 +294,7 @@ export abstract class Embeddable<
       this.inputSubject.next(newInput);
       this.updateOutput({
         title: getPanelTitle(this.input, this.output),
+        description: getPanelDescription(this.input, this.output),
       } as Partial<TEmbeddableOutput>);
       if (oldLastReloadRequestTime !== newInput.lastReloadRequestTime) {
         this.reload();

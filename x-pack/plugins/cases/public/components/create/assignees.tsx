@@ -7,28 +7,25 @@
 
 import { isEmpty } from 'lodash';
 import React, { memo, useCallback, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHighlight,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiLink,
-  EuiSelectableListItem,
   EuiTextColor,
 } from '@elastic/eui';
-import {
-  UserProfileWithAvatar,
-  UserAvatar,
-  getUserDisplayName,
-  UserProfile,
-} from '@kbn/user-profile-components';
-import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
-import { CaseAssignees } from '../../../common/api';
+import type { UserProfileWithAvatar, UserProfile } from '@kbn/user-profile-components';
+import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
+import type { FieldConfig, FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   UseField,
-  FieldConfig,
-  FieldHook,
   getFieldValidityAndErrorMessage,
-} from '../../common/shared_imports';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
+import type { CaseAssignees } from '../../../common/api';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
@@ -37,6 +34,7 @@ import * as i18n from './translations';
 import { bringCurrentUserToFrontAndSort } from '../user_profiles/sort';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { getAllPermissionsExceptFrom } from '../../utils/permissions';
+import { useIsUserTyping } from '../../common/use_is_user_typing';
 
 interface Props {
   isLoading: boolean;
@@ -117,18 +115,42 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
 
     const renderOption = useCallback(
       (option: EuiComboBoxOptionOption, searchValue: string, contentClassName: string) => {
-        const { user, data, value } = option as EuiComboBoxOptionOption<string> &
-          UserProfileWithAvatar;
+        const { user, data } = option as EuiComboBoxOptionOption<string> & UserProfileWithAvatar;
+
+        const displayName = getUserDisplayName(user);
 
         return (
-          <EuiSelectableListItem
-            key={value}
-            prepend={<UserAvatar user={user} avatar={data.avatar} size="s" />}
-            className={contentClassName}
-            append={<EuiTextColor color="subdued">{user.email}</EuiTextColor>}
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexStart"
+            gutterSize="s"
+            responsive={false}
           >
-            {getUserDisplayName(user)}
-          </EuiSelectableListItem>
+            <EuiFlexItem grow={false}>
+              <UserAvatar user={user} avatar={data.avatar} size="s" />
+            </EuiFlexItem>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="none"
+              responsive={false}
+            >
+              <EuiFlexItem>
+                <EuiHighlight search={searchValue} className={contentClassName}>
+                  {displayName}
+                </EuiHighlight>
+              </EuiFlexItem>
+              {user.email && user.email !== displayName ? (
+                <EuiFlexItem grow={false}>
+                  <EuiTextColor color={'subdued'}>
+                    <EuiHighlight search={searchValue} className={contentClassName}>
+                      {user.email}
+                    </EuiHighlight>
+                  </EuiTextColor>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexGroup>
         );
       },
       []
@@ -169,6 +191,7 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
           onChange={onComboChange}
           onSearchChange={onSearchComboChange}
           renderOption={renderOption}
+          rowHeight={35}
         />
       </EuiFormRow>
     );
@@ -182,13 +205,11 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>();
-  const [isUserTyping, setIsUserTyping] = useState(false);
+  const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
   const hasOwners = owners.length > 0;
 
   const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
     useGetCurrentUserProfile();
-
-  const onDebounce = useCallback(() => setIsUserTyping(false), []);
 
   const {
     data: userProfiles,
@@ -208,8 +229,9 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
   const onSearchComboChange = (value: string) => {
     if (!isEmpty(value)) {
       setSearchTerm(value);
-      setIsUserTyping(true);
     }
+
+    onContentChange(value);
   };
 
   const isLoading =

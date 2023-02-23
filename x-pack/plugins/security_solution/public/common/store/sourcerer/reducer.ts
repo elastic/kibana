@@ -14,7 +14,6 @@ import {
   setSignalIndexName,
   setDataView,
   setDataViewLoading,
-  updateSourcererDataViews,
 } from './actions';
 import type { SourcererModel } from './model';
 import { initDataView, initialSourcererState, SourcererScopeName } from './model';
@@ -46,12 +45,6 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       ...(state.kibanaDataViews.find(({ id }) => id === dataView.id) ?? initDataView),
       ...dataView,
     })),
-  }))
-  .case(updateSourcererDataViews, (state, { dataView }) => ({
-    ...state,
-    kibanaDataViews: state.kibanaDataViews.map((dv) =>
-      dv.id === dataView.id ? { ...dv, ...dataView } : dv
-    ),
   }))
   .case(setSourcererScopeLoading, (state, { id, loading }) => ({
     ...state,

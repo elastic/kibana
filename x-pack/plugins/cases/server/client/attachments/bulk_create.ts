@@ -12,25 +12,17 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import {
-  BulkCreateCommentRequest,
-  BulkCreateCommentRequestRt,
-  CaseResponse,
-  CommentRequest,
-  throwErrors,
-} from '../../../common/api';
+import type { CaseResponse, CommentRequest } from '../../../common/api';
+import { BulkCreateCommentRequestRt, throwErrors } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 
 import { decodeCommentRequest } from '../utils';
-import { Operations, OwnerEntity } from '../../authorization';
-
-export interface BulkCreateArgs {
-  caseId: string;
-  attachments: BulkCreateCommentRequest;
-}
+import type { OwnerEntity } from '../../authorization';
+import { Operations } from '../../authorization';
+import type { BulkCreateArgs } from './types';
 
 /**
  * Create an attachment to a case.
@@ -68,7 +60,7 @@ export const bulkCreate = async (
       );
 
     await authorization.ensureAuthorized({
-      operation: Operations.createComment,
+      operation: Operations.bulkCreateAttachments,
       entities,
     });
 

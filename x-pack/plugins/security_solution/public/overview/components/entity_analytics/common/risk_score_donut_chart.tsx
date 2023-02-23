@@ -6,16 +6,14 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { MouseEventHandler } from 'react';
 import React from 'react';
 import type { ShapeTreeNode } from '@elastic/charts';
 import styled from 'styled-components';
-import { LinkAnchor } from '../../../../common/components/links';
-import type { SeverityCount } from '../../../../common/components/severity/types';
+import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
 import { useRiskDonutChartData } from './use_risk_donut_chart_data';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
-import { RISK_SEVERITY_COLOUR } from '../../../../common/components/severity/common';
+import { RISK_SEVERITY_COLOUR } from '../../../../explore/components/risk_score/severity/common';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { Legend } from '../../../../common/components/charts/legend';
 import { ChartLabel } from '../../detection_response/alerts_by_status/chart_label';
@@ -39,15 +37,13 @@ const StyledLegendItems = styled(EuiFlexItem)`
 
 interface RiskScoreDonutChartProps {
   severityCount: SeverityCount;
-  onClick: MouseEventHandler<Element>;
-  href: string;
 }
 
-export const RiskScoreDonutChart = ({ severityCount, onClick, href }: RiskScoreDonutChartProps) => {
+export const RiskScoreDonutChart = ({ severityCount }: RiskScoreDonutChartProps) => {
   const [donutChartData, legendItems, total] = useRiskDonutChartData(severityCount);
 
   return (
-    <EuiFlexGroup responsive={false}>
+    <EuiFlexGroup responsive={false} data-test-subj="risk-score-donut-chart">
       <StyledLegendItems grow={false}>
         {legendItems.length > 0 && <Legend legendItems={legendItems} />}
       </StyledLegendItems>
@@ -56,11 +52,7 @@ export const RiskScoreDonutChart = ({ severityCount, onClick, href }: RiskScoreD
           data={donutChartData ?? null}
           fillColor={fillColor}
           height={DONUT_HEIGHT}
-          label={
-            <LinkAnchor data-test-subj="view-total-button" onClick={onClick} href={href}>
-              {i18n.TOTAL_LABEL}
-            </LinkAnchor>
-          }
+          label={i18n.TOTAL_LABEL}
           title={<ChartLabel count={total} />}
           totalCount={total}
         />

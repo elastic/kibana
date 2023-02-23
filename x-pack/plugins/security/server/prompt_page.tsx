@@ -17,11 +17,14 @@ import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/al
 // @ts-expect-error no definitions in component folder
 import { appendIconComponentCache } from '@elastic/eui/lib/components/icon/icon';
 import createCache from '@emotion/cache';
+import createEmotionServer from '@emotion/server/create-instance';
 import type { ReactNode } from 'react';
 import React from 'react';
+import { renderToString } from 'react-dom/server';
 
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import { Fonts } from '@kbn/core-rendering-server-internal';
 import type { IBasePath } from '@kbn/core/server';
-import { Fonts } from '@kbn/core/server/rendering/views/fonts';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
@@ -34,6 +37,8 @@ appendIconComponentCache({
   alert: EuiIconAlert,
 });
 
+const emotionCache = createCache({ key: 'eui' });
+
 interface Props {
   buildNumber: number;
   basePath: IBasePath;
@@ -41,6 +46,7 @@ interface Props {
   title: ReactNode;
   body: ReactNode;
   actions: ReactNode;
+  customBranding: CustomBranding;
 }
 
 export function PromptPage({
@@ -50,7 +56,33 @@ export function PromptPage({
   title,
   body,
   actions,
+  customBranding,
 }: Props) {
+  const content = (
+    <I18nProvider>
+      <EuiProvider colorMode="light" cache={emotionCache}>
+        <EuiPage paddingSize="none" style={{ minHeight: '100vh' }} data-test-subj="promptPage">
+          <EuiPageBody>
+            <EuiPageContent verticalPosition="center" horizontalPosition="center">
+              <EuiEmptyPrompt
+                iconType="alert"
+                iconColor="danger"
+                title={<h2>{title}</h2>}
+                body={body}
+                actions={actions}
+              />
+            </EuiPageContent>
+          </EuiPageBody>
+        </EuiPage>
+      </EuiProvider>
+    </I18nProvider>
+  );
+
+  const { extractCriticalToChunks, constructStyleTagsFromChunks } =
+    createEmotionServer(emotionCache);
+  const chunks = extractCriticalToChunks(renderToString(content));
+  const emotionStyles = constructStyleTagsFromChunks(chunks);
+
   const uiPublicURL = `${basePath.serverBasePath}/ui`;
   const regularBundlePath = `${basePath.serverBasePath}/${buildNumber}/bundles`;
   const styleSheetPaths = [
@@ -60,48 +92,38 @@ export function PromptPage({
     `${basePath.serverBasePath}/ui/legacy_light_theme.css`,
   ];
 
-  // Emotion SSR styles will be prepended to the <body> and emit a console log warning about :first-child selectors
-  const emotionCache = createCache({
-    key: 'css',
-    prepend: true,
-  });
-
   return (
     <html lang={i18n.getLocale()}>
       <head>
-        <title>Elastic</title>
+        <title>{customBranding.pageTitle ? customBranding.pageTitle : 'Elastic'}</title>
+        {/* eslint-disable-next-line react/no-danger */}
+        <style dangerouslySetInnerHTML={{ __html: `</style>${emotionStyles}` }} />
         {styleSheetPaths.map((path) => (
           <link href={path} rel="stylesheet" key={path} />
         ))}
         <Fonts url={uiPublicURL} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
-        <link rel="alternate icon" type="image/png" href={`${uiPublicURL}/favicons/favicon.png`} />
-        <link rel="icon" type="image/svg+xml" href={`${uiPublicURL}/favicons/favicon.svg`} />
+        {customBranding.faviconPNG ? (
+          <link rel="alternate icon" type="image/png" href={customBranding.faviconPNG} />
+        ) : (
+          <link
+            rel="alternate icon"
+            type="image/png"
+            href={`${uiPublicURL}/favicons/favicon.png`}
+          />
+        )}
+        {customBranding.faviconSVG ? (
+          <link rel="icon" type="image/svg+xml" href={customBranding.faviconSVG} />
+        ) : (
+          <link rel="icon" type="image/svg+xml" href={`${uiPublicURL}/favicons/favicon.svg`} />
+        )}
         {scriptPaths.map((path) => (
           <script src={basePath.prepend(path)} key={path} />
         ))}
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content="light dark" />
       </head>
-      <body>
-        <I18nProvider>
-          <EuiProvider colorMode="light" cache={emotionCache}>
-            <EuiPage paddingSize="none" style={{ minHeight: '100vh' }} data-test-subj="promptPage">
-              <EuiPageBody>
-                <EuiPageContent verticalPosition="center" horizontalPosition="center">
-                  <EuiEmptyPrompt
-                    iconType="alert"
-                    iconColor="danger"
-                    title={<h2>{title}</h2>}
-                    body={body}
-                    actions={actions}
-                  />
-                </EuiPageContent>
-              </EuiPageBody>
-            </EuiPage>
-          </EuiProvider>
-        </I18nProvider>
-      </body>
+      <body>{content}</body>
     </html>
   );
 }

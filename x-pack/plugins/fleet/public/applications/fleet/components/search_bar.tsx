@@ -45,6 +45,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
 }) => {
   const {
     data,
+    dataViews,
     unifiedSearch,
     storage,
     notifications,
@@ -54,7 +55,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
     usageCollection,
   } = useStartServices();
 
-  const [indexPatternFields, setIndexPatternFields] = useState<FieldSpec[]>();
+  const [dataView, setDataView] = useState<DataView | undefined>();
 
   const isQueryValid = useMemo(() => {
     if (!value || value === '') {
@@ -85,9 +86,14 @@ export const SearchBar: React.FunctionComponent<Props> = ({
             return true;
           }
         });
-        setIndexPatternFields(fields);
+        const fieldsMap = fields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
+          acc[curr.name] = curr;
+          return acc;
+        }, {});
+        const newDataView = await data.dataViews.create({ title: indexPattern, fields: fieldsMap });
+        setDataView(newDataView);
       } catch (err) {
-        setIndexPatternFields(undefined);
+        setDataView(undefined);
       }
     };
     fetchFields();
@@ -97,16 +103,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
     <NoWrapQueryStringInput
       iconType="search"
       disableLanguageSwitcher={true}
-      indexPatterns={
-        indexPatternFields
-          ? ([
-              {
-                title: indexPattern,
-                fields: indexPatternFields,
-              },
-            ] as DataView[])
-          : []
-      }
+      indexPatterns={dataView ? [dataView] : []}
       query={{
         query: value,
         language: 'kuery',
@@ -131,6 +128,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
         docLinks,
         uiSettings,
         data,
+        dataViews,
         storage,
         usageCollection,
       }}

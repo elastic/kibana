@@ -45,6 +45,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
       {...props}
       id={`checkableCard-${serviceType}`}
       className="connectorCheckable"
+      data-telemetry-id={`entSearchContent-connector-selectConnector-${serviceType}-select`}
       label={
         <EuiFlexGroup alignItems="center" gutterSize="s">
           {icon && (
@@ -69,15 +70,6 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
             {
               defaultMessage: 'Search over your {name} content with Enterprise Search.',
               values: { name },
-            }
-          )}
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.basicAuthenticationLabel',
-            {
-              defaultMessage: 'Basic authentication',
             }
           )}
         </EuiText>

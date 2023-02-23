@@ -36,6 +36,12 @@ export class SettingsPageObject extends FtrService {
     await this.testSubjects.existOrFail('managementSettingsTitle');
   }
 
+  async clickKibanaGlobalSettings() {
+    await this.testSubjects.click('settings');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.click('advancedSettingsTab-global-settings');
+  }
+
   async clickKibanaSavedObjects() {
     await this.testSubjects.click('objects');
     await this.savedObjects.waitTableIsLoaded();
@@ -130,6 +136,13 @@ export class SettingsPageObject extends FtrService {
       `advancedSetting-editField-${propertyName}-editor`,
       propertyValue
     );
+    await this.testSubjects.click(`advancedSetting-saveButton`);
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  async setAdvancedSettingsImage(propertyName: string, path: string) {
+    const input = await this.testSubjects.find(`advancedSetting-editField-${propertyName}`);
+    await input.type(path);
     await this.testSubjects.click(`advancedSetting-saveButton`);
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -306,9 +319,11 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clearFieldTypeFilter(type: string) {
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
+      await this.find.byCssSelector(
+        '.euiPopover-isOpen[data-test-subj="indexedFieldTypeFilterDropdown-popover"]'
+      );
     });
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
@@ -319,8 +334,12 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setFieldTypeFilter(type: string) {
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
-    await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
+    await this.retry.try(async () => {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
+      await this.find.byCssSelector(
+        '.euiPopover-isOpen[data-test-subj="indexedFieldTypeFilterDropdown-popover"]'
+      );
+    });
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
@@ -782,6 +801,7 @@ export class SettingsPageObject extends FtrService {
   async setFieldType(type: string) {
     this.log.debug('set type = ' + type);
     await this.testSubjects.setValue('typeField', type);
+    await this.browser.pressKeys(this.browser.keys.ENTER);
   }
 
   async setFieldTypeComposite() {
@@ -793,6 +813,12 @@ export class SettingsPageObject extends FtrService {
   async setFieldScript(script: string) {
     this.log.debug('set script = ' + script);
     await this.toggleRow('valueRow');
+    await this.monacoEditor.waitCodeEditorReady('valueRow');
+    await this.monacoEditor.setCodeEditorValue(script);
+  }
+
+  async setFieldScriptWithoutToggle(script: string) {
+    this.log.debug('set script without toggle = ' + script);
     await this.monacoEditor.waitCodeEditorReady('valueRow');
     await this.monacoEditor.setCodeEditorValue(script);
   }

@@ -17,6 +17,7 @@ import { useUrl } from './hooks/use_url';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
 import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
+import { DiscoverMainProvider } from './services/discover_state_provider';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -48,25 +49,21 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    * State related logic
    */
   const {
-    data$,
-    dataView,
     inspectorAdapters,
     onChangeDataView,
     onUpdateQuery,
     persistDataView,
     updateAdHocDataViewId,
-    refetch$,
     resetSavedSearch,
     searchSource,
-    state,
     stateContainer,
-    adHocDataViewList,
+    searchSessionManager,
+    updateDataViewList,
   } = useDiscoverState({
     services,
     history: usedHistory,
     savedSearch,
     setExpandedDoc,
-    dataViewList,
   });
 
   /**
@@ -93,6 +90,14 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     addHelpMenuToAppChrome(chrome, docLinks);
   }, [stateContainer, chrome, docLinks]);
 
+  /**
+   * Set initial data view list
+   * Can be removed once the state container work was completed
+   */
+  useEffect(() => {
+    stateContainer.internalState.transitions.setSavedDataViews(dataViewList);
+  }, [stateContainer, dataViewList]);
+
   const resetCurrentSavedSearch = useCallback(() => {
     resetSavedSearch(savedSearch.id);
   }, [resetSavedSearch, savedSearch]);
@@ -100,25 +105,23 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
-    <DiscoverLayoutMemoized
-      dataView={dataView}
-      dataViewList={dataViewList}
-      inspectorAdapters={inspectorAdapters}
-      expandedDoc={expandedDoc}
-      onChangeDataView={onChangeDataView}
-      onUpdateQuery={onUpdateQuery}
-      resetSavedSearch={resetCurrentSavedSearch}
-      setExpandedDoc={setExpandedDoc}
-      navigateTo={navigateTo}
-      savedSearch={savedSearch}
-      savedSearchData$={data$}
-      savedSearchRefetch$={refetch$}
-      searchSource={searchSource}
-      state={state}
-      stateContainer={stateContainer}
-      persistDataView={persistDataView}
-      updateAdHocDataViewId={updateAdHocDataViewId}
-      adHocDataViewList={adHocDataViewList}
-    />
+    <DiscoverMainProvider value={stateContainer}>
+      <DiscoverLayoutMemoized
+        inspectorAdapters={inspectorAdapters}
+        expandedDoc={expandedDoc}
+        onChangeDataView={onChangeDataView}
+        onUpdateQuery={onUpdateQuery}
+        resetSavedSearch={resetCurrentSavedSearch}
+        setExpandedDoc={setExpandedDoc}
+        navigateTo={navigateTo}
+        savedSearch={savedSearch}
+        searchSource={searchSource}
+        stateContainer={stateContainer}
+        persistDataView={persistDataView}
+        updateAdHocDataViewId={updateAdHocDataViewId}
+        searchSessionManager={searchSessionManager}
+        updateDataViewList={updateDataViewList}
+      />
+    </DiscoverMainProvider>
   );
 }

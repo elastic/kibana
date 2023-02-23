@@ -1,0 +1,221 @@
+{
+  "id": "@kbn/repo-path",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/repo-path",
+        "id": "def-common.RepoPath",
+        "type": "Class",
+        "tags": [],
+        "label": "RepoPath",
+        "description": [],
+        "path": "packages/kbn-repo-path/repo_path.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/repo-path",
+            "id": "def-common.RepoPath.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-repo-path/repo_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-path",
+                "id": "def-common.RepoPath.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "repoRoot",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-repo-path/repo_path.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/repo-path",
+                "id": "def-common.RepoPath.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "repoRel",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-repo-path/repo_path.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-path",
+            "id": "def-common.RepoPath.abs",
+            "type": "string",
+            "tags": [],
+            "label": "abs",
+            "description": [
+              "\nabsolute path to the file\n(lazy and cached getter)"
+            ],
+            "path": "packages/kbn-repo-path/repo_path.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/repo-path",
+            "id": "def-common.RepoPath.ext",
+            "type": "string",
+            "tags": [],
+            "label": "ext",
+            "description": [
+              "\nextension to the filename\n(lazy and cached getter)"
+            ],
+            "path": "packages/kbn-repo-path/repo_path.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/repo-path",
+            "id": "def-common.RepoPath.basename",
+            "type": "string",
+            "tags": [],
+            "label": "basename",
+            "description": [
+              "\nbasename of the path (including extension)\n(lazy and cached getter)"
+            ],
+            "path": "packages/kbn-repo-path/repo_path.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/repo-path",
+            "id": "def-common.RepoPath.repoRelDir",
+            "type": "string",
+            "tags": [],
+            "label": "repoRelDir",
+            "description": [
+              "\nrepoRelDir of the path\n(lazy and cached getter)"
+            ],
+            "path": "packages/kbn-repo-path/repo_path.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/repo-path",
+            "id": "def-common.RepoPath.isTypeScript",
+            "type": "Function",
+            "tags": [],
+            "label": "isTypeScript",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-repo-path/repo_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-path",
+            "id": "def-common.RepoPath.isTypeScriptAmbient",
+            "type": "Function",
+            "tags": [],
+            "label": "isTypeScriptAmbient",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-repo-path/repo_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-path",
+            "id": "def-common.RepoPath.isJavaScript",
+            "type": "Function",
+            "tags": [],
+            "label": "isJavaScript",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-repo-path/repo_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-path",
+            "id": "def-common.RepoPath.isJsTsCode",
+            "type": "Function",
+            "tags": [],
+            "label": "isJsTsCode",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-repo-path/repo_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-path",
+            "id": "def-common.RepoPath.isFixture",
+            "type": "Function",
+            "tags": [],
+            "label": "isFixture",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-repo-path/repo_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

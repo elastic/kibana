@@ -32,14 +32,18 @@ export type FleetRequestHandlerContext = CustomRequestHandlerContext<{
       asCurrentUser: PackagePolicyClient;
       asInternalUser: PackagePolicyClient;
     };
-    epm: {
-      /**
-       * Saved Objects client configured to use kibana_system privileges instead of end-user privileges. Should only be
-       * used by routes that have additional privilege checks for authorization (such as requiring superuser).
-       */
-      readonly internalSoClient: SavedObjectsClientContract;
-    };
+    /**
+     * Saved Objects client configured to use kibana_system privileges instead of end-user privileges. Should only be
+     * used by routes that have additional privilege checks for authorization (such as requiring superuser).
+     */
+    readonly internalSoClient: SavedObjectsClientContract;
+
     spaceId: string;
+    /**
+     * If data is to be limited to the list of integration package names. This will be set when
+     * authz to the API was granted only based on Package Privileges.
+     */
+    limitedToPackages: string[] | undefined;
   };
 }>;
 

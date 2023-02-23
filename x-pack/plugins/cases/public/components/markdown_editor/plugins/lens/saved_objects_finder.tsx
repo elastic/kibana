@@ -11,12 +11,12 @@ import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import type { EuiFieldSearchProps, IconType, EuiFormRowProps } from '@elastic/eui';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFieldSearch,
-  EuiFieldSearchProps,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -28,14 +28,12 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiTablePagination,
-  IconType,
   EuiFormRow,
-  EuiFormRowProps,
 } from '@elastic/eui';
-import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
+import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
-import { SimpleSavedObject, CoreStart } from '@kbn/core/public';
+import type { SimpleSavedObject, CoreStart } from '@kbn/core/public';
 
 import { LISTING_LIMIT_SETTING } from '@kbn/saved-objects-plugin/public';
 

@@ -8,13 +8,17 @@
 import React from 'react';
 import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../../types';
+import {
+  DatasourcePublicAPI,
+  FramePublicAPI,
+  VisualizationDimensionEditorProps,
+} from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TableDimensionEditorAdditionalSection } from './dimension_editor_addtional_section';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { layerTypes } from '../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 
 describe('data table dimension editor additional section', () => {
   let frame: FramePublicAPI;
@@ -27,7 +31,7 @@ describe('data table dimension editor additional section', () => {
   function testState(): DatatableVisualizationState {
     return {
       layerId: 'first',
-      layerType: layerTypes.DATA,
+      layerType: LayerTypes.DATA,
       columns: [
         {
           columnId: 'foo',
@@ -67,6 +71,9 @@ describe('data table dimension editor additional section', () => {
       setState,
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
+      addLayer: jest.fn(),
+      removeLayer: jest.fn(),
+      datasource: {} as DatasourcePublicAPI,
     };
   });
 

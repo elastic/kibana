@@ -47,6 +47,7 @@ const pluginInitializerContextParams = {
   monitored_aggregated_stats_refresh_rate: 5000,
   monitored_stats_health_verbose_log: {
     enabled: false,
+    level: 'debug' as const,
     warn_delayed_task_start_in_seconds: 60,
   },
   monitored_stats_required_freshness: 5000,

@@ -159,7 +159,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         toasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
       });
-      const expects = ['2 of 4 shards failed', 'Query result'];
+      const expects = ['Query result', '2 of 4 shards failed'];
       await asyncForEach(toasts, async (t, index) => {
         expect(await t.getVisibleText()).to.eql(expects[index]);
       });
@@ -198,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           type: 'shard_failure',
           message: '2 of 4 shards failed',
           reason: { reason: shardFailureReason, type: shardFailureType },
-          text: 'The data you are seeing might be incomplete or wrong.',
+          text: 'The data might be incomplete or wrong.',
         },
       ]);
     });

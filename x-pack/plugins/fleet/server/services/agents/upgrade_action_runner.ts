@@ -7,12 +7,12 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
+import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
-import uuid from 'uuid';
 
 import { isAgentUpgradeable } from '../../../common/services';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 
 import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../errors';
 
@@ -21,21 +21,15 @@ import { appContextService } from '../app_context';
 import { ActionRunner } from './action_runner';
 
 import type { GetAgentsOptions } from './crud';
-import { errorsToResults, bulkUpdateAgents } from './crud';
-import { bulkCreateAgentActionResults, createAgentAction } from './actions';
+import { bulkUpdateAgents } from './crud';
+import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
-import { BulkActionTaskType } from './bulk_actions_resolver';
+import { BulkActionTaskType } from './bulk_action_types';
+import { getCancelledActions } from './action_status';
 
 export class UpgradeActionRunner extends ActionRunner {
-  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
-    return await upgradeBatch(
-      this.soClient,
-      this.esClient,
-      agents,
-      {},
-      this.actionParams! as any,
-      true
-    );
+  protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
+    return await upgradeBatch(this.soClient, this.esClient, agents, {}, this.actionParams! as any);
   }
 
   protected getTaskType() {
@@ -46,6 +40,11 @@ export class UpgradeActionRunner extends ActionRunner {
     return 'UPGRADE';
   }
 }
+
+const isActionIdCancelled = async (esClient: ElasticsearchClient, actionId: string) => {
+  const cancelledActions = await getCancelledActions(esClient);
+  return cancelledActions.filter((action) => action.actionId === actionId).length > 0;
+};
 
 export async function upgradeBatch(
   soClient: SavedObjectsClientContract,
@@ -60,9 +59,8 @@ export async function upgradeBatch(
     upgradeDurationSeconds?: number;
     startTime?: string;
     total?: number;
-  },
-  skipSuccess?: boolean
-): Promise<{ items: BulkActionResult[] }> {
+  }
+): Promise<{ actionId: string }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
@@ -108,7 +106,7 @@ export async function upgradeBatch(
   const now = new Date().toISOString();
   const data = {
     version: options.version,
-    source_uri: options.sourceUri,
+    sourceURI: options.sourceUri,
   };
 
   const rollingUpgradeOptions = getRollingUpgradeOptions(
@@ -116,9 +114,38 @@ export async function upgradeBatch(
     options.upgradeDurationSeconds
   );
 
-  const actionId = options.actionId ?? uuid();
-  const errorCount = Object.keys(errors).length;
-  const total = options.total ?? agentsToUpdate.length + errorCount;
+  if (options.actionId && (await isActionIdCancelled(esClient, options.actionId))) {
+    appContextService
+      .getLogger()
+      .info(
+        `Skipping batch of actionId:${options.actionId} of ${givenAgents.length} agents as the upgrade was cancelled`
+      );
+    return {
+      actionId: options.actionId,
+    };
+  }
+  if (options.actionId) {
+    appContextService
+      .getLogger()
+      .info(
+        `Continuing batch of actionId:${options.actionId} of ${givenAgents.length} agents of upgrade`
+      );
+  }
+
+  await bulkUpdateAgents(
+    esClient,
+    agentsToUpdate.map((agent) => ({
+      agentId: agent.id,
+      data: {
+        upgraded_at: null,
+        upgrade_started_at: now,
+      },
+    })),
+    errors
+  );
+
+  const actionId = options.actionId ?? uuidv4();
+  const total = options.total ?? givenAgents.length;
 
   await createAgentAction(esClient, {
     id: actionId,
@@ -131,59 +158,41 @@ export async function upgradeBatch(
     ...rollingUpgradeOptions,
   });
 
-  if (errorCount > 0) {
-    appContextService
-      .getLogger()
-      .info(
-        `Skipping ${errorCount} agents, as failed validation (cannot upgrade hosted agent or agent not upgradeable)`
-      );
-
-    // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
-    await bulkCreateAgentActionResults(
-      esClient,
-      Object.keys(errors).map((agentId) => ({
-        agentId,
-        actionId,
-        error: errors[agentId].message,
-      }))
-    );
-  }
-
-  await bulkUpdateAgents(
+  await createErrorActionResults(
     esClient,
-    agentsToUpdate.map((agent) => ({
-      agentId: agent.id,
-      data: {
-        upgrade_started_at: now,
-        upgrade_status: 'started',
-      },
-    }))
+    actionId,
+    errors,
+    'cannot upgrade hosted agent or agent not upgradeable'
   );
 
   return {
-    items: errorsToResults(
-      givenAgents,
-      errors,
-      'agentIds' in options ? options.agentIds : undefined,
-      skipSuccess
-    ),
+    actionId,
   };
 }
 
-const MINIMUM_EXECUTION_DURATION_SECONDS = 60 * 60 * 2; // 2h
+export const MINIMUM_EXECUTION_DURATION_SECONDS = 60 * 60 * 2; // 2h
 
-const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
+export const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
   const now = new Date().toISOString();
   // Perform a rolling upgrade
   if (upgradeDurationSeconds) {
+    const minExecutionDuration = Math.min(
+      MINIMUM_EXECUTION_DURATION_SECONDS,
+      upgradeDurationSeconds
+    );
     return {
       start_time: startTime ?? now,
-      minimum_execution_duration: Math.min(
-        MINIMUM_EXECUTION_DURATION_SECONDS,
-        upgradeDurationSeconds
-      ),
+      rollout_duration_seconds: upgradeDurationSeconds,
+      minimum_execution_duration: minExecutionDuration,
+      // expiration will not be taken into account with Fleet Server version >=8.7, it is kept for BWC
+      // in the next major, expiration and minimum_execution_duration should be removed
       expiration: moment(startTime ?? now)
-        .add(upgradeDurationSeconds, 'seconds')
+        .add(
+          upgradeDurationSeconds <= MINIMUM_EXECUTION_DURATION_SECONDS
+            ? minExecutionDuration * 2
+            : upgradeDurationSeconds,
+          'seconds'
+        )
         .toISOString(),
     };
   }

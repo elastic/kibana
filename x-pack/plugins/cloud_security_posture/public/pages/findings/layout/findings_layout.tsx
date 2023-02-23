@@ -6,11 +6,12 @@
  */
 import React from 'react';
 import {
-  EuiBadge,
+  EuiBottomBar,
   EuiButtonIcon,
   EuiSpacer,
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
+  EuiText,
   EuiTitle,
   EuiToolTip,
   PropsOf,
@@ -19,13 +20,15 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Serializable } from '@kbn/utility-types';
-import { getPrimaryRuleTags } from '../../../common/utils/get_primary_rule_tags';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import {
   FINDINGS_TABLE_CELL_ADD_FILTER,
   FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER,
+  FINDINGS_TABLE_EXPAND_COLUMN,
 } from '../test_subjects';
 
 export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate: boolean) => void;
@@ -49,6 +52,7 @@ export const getExpandColumn = <T extends unknown>({
   width: '40px',
   actions: [
     {
+      'data-test-subj': FINDINGS_TABLE_EXPAND_COLUMN,
       name: i18n.translate('xpack.csp.expandColumnNameLabel', { defaultMessage: 'Expand' }),
       description: i18n.translate('xpack.csp.expandColumnDescriptionLabel', {
         defaultMessage: 'Expand',
@@ -121,9 +125,10 @@ const baseColumns = [
   },
   {
     field: 'rule.name',
-    name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.ruleColumnLabel', {
-      defaultMessage: 'Rule',
-    }),
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNameColumnLabel',
+      { defaultMessage: 'Rule Name' }
+    ),
     sortable: true,
     render: (name: string) => (
       <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
@@ -132,12 +137,29 @@ const baseColumns = [
     ),
   },
   {
-    field: 'rule.benchmark.name',
+    field: 'rule.benchmark.rule_number',
     name: i18n.translate(
-      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnLabel',
-      { defaultMessage: 'Benchmark' }
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNumberColumnLabel',
+      {
+        defaultMessage: 'Rule Number',
+      }
     ),
-    width: '10%',
+    width: '120px',
+  },
+  {
+    field: 'rule.benchmark.name',
+    name: (
+      <ColumnNameWithTooltip
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnLabel',
+          { defaultMessage: 'Applicable Benchmark' }
+        )}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnTooltipLabel',
+          { defaultMessage: 'The benchmark(s) rules used to evaluate this resource came from' }
+        )}
+      />
+    ),
     sortable: true,
     truncateText: true,
   },
@@ -147,44 +169,6 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
       { defaultMessage: 'CIS Section' }
     ),
-    width: '7%',
-    sortable: true,
-    truncateText: true,
-    render: (section: string) => (
-      <EuiToolTip content={section} anchorClassName="eui-textTruncate">
-        <>{section}</>
-      </EuiToolTip>
-    ),
-  },
-  {
-    field: 'rule.tags',
-    name: i18n.translate(
-      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleTagsColumnLabel',
-      { defaultMessage: 'Rule Tags' }
-    ),
-    width: '15%',
-    sortable: false,
-    truncateText: true,
-    render: (tags: string[]) => {
-      const primaryTags = getPrimaryRuleTags(tags);
-      return primaryTags.map((tag) => <EuiBadge key={tag}>{tag}</EuiBadge>);
-    },
-  },
-  {
-    field: 'cluster_id',
-    name: (
-      <ColumnNameWithTooltip
-        columnName={i18n.translate(
-          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
-          { defaultMessage: 'Cluster ID' }
-        )}
-        tooltipContent={i18n.translate(
-          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
-          { defaultMessage: 'Kube-System Namespace ID' }
-        )}
-      />
-    ),
-    width: '150px',
     sortable: true,
     truncateText: true,
     render: (section: string) => (
@@ -195,6 +179,7 @@ const baseColumns = [
   },
   {
     field: '@timestamp',
+    align: 'right',
     width: '10%',
     name: i18n.translate(
       'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',
@@ -251,7 +236,9 @@ const FilterableCell: React.FC<{
       }
     `}
   >
-    <div className="__filter_value eui-textTruncate">{children}</div>
+    <div className="__filter_value eui-textTruncate" data-test-subj="filter_cell_value">
+      {children}
+    </div>
     <div
       className="__filter_buttons"
       css={css`
@@ -262,24 +249,61 @@ const FilterableCell: React.FC<{
         display: flex;
       `}
     >
-      <EuiButtonIcon
-        iconType="plusInCircleFilled"
-        onClick={onAddFilter}
-        data-test-subj={FINDINGS_TABLE_CELL_ADD_FILTER}
-        aria-label={i18n.translate('xpack.csp.findings.findingsTableCell.addFilterButton', {
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.csp.findings.findingsTableCell.addFilterButtonTooltip', {
           defaultMessage: 'Add {field} filter',
           values: { field },
         })}
-      />
-      <EuiButtonIcon
-        iconType="minusInCircleFilled"
-        onClick={onAddNegateFilter}
-        data-test-subj={FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER}
-        aria-label={i18n.translate('xpack.csp.findings.findingsTableCell.addNegateFilterButton', {
-          defaultMessage: 'Add {field} negated filter',
-          values: { field },
-        })}
-      />
+      >
+        <EuiButtonIcon
+          iconType="plusInCircleFilled"
+          onClick={onAddFilter}
+          data-test-subj={FINDINGS_TABLE_CELL_ADD_FILTER}
+          aria-label={i18n.translate('xpack.csp.findings.findingsTableCell.addFilterButton', {
+            defaultMessage: 'Add {field} filter',
+            values: { field },
+          })}
+        />
+      </EuiToolTip>
+
+      <EuiToolTip
+        position="top"
+        content={i18n.translate(
+          'xpack.csp.findings.findingsTableCell.addNegatedFilterButtonTooltip',
+          {
+            defaultMessage: 'Add {field} negated filter',
+            values: { field },
+          }
+        )}
+      >
+        <EuiButtonIcon
+          iconType="minusInCircleFilled"
+          onClick={onAddNegateFilter}
+          data-test-subj={FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER}
+          aria-label={i18n.translate('xpack.csp.findings.findingsTableCell.addNegateFilterButton', {
+            defaultMessage: 'Add {field} negated filter',
+            values: { field },
+          })}
+        />
+      </EuiToolTip>
     </div>
   </div>
+);
+
+export const LimitedResultsBar = () => (
+  <>
+    <EuiSpacer size="xxl" />
+    <EuiBottomBar data-test-subj="test-bottom-bar">
+      <EuiText textAlign="center">
+        <FormattedMessage
+          id="xpack.csp.findings..bottomBarLabel"
+          defaultMessage="These are the first {maxItems} findings matching your search, refine your search to see others."
+          values={{
+            maxItems: MAX_FINDINGS_TO_LOAD,
+          }}
+        />
+      </EuiText>
+    </EuiBottomBar>
+  </>
 );

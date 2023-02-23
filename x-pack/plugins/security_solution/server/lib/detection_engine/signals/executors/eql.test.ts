@@ -12,8 +12,8 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
-import type { EqlRuleParams } from '../../schemas/rule_schemas';
-import { getCompleteRuleMock, getEqlRuleParams } from '../../schemas/rule_schemas.mock';
+import type { EqlRuleParams } from '../../rule_schema';
+import { getCompleteRuleMock, getEqlRuleParams } from '../../rule_schema/mocks';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { eqlExecutor } from './eql';
 
@@ -45,7 +45,7 @@ describe('eql_executor', () => {
 
   describe('eqlExecutor', () => {
     it('should set a warning when exception list for eql rule contains value list exceptions', async () => {
-      await eqlExecutor({
+      const result = await eqlExecutor({
         inputIndex: DEFAULT_INDEX_PATTERN,
         runtimeMappings: {},
         completeRule: eqlCompleteRule,
@@ -60,10 +60,11 @@ describe('eql_executor', () => {
         exceptionFilter: undefined,
         unprocessedExceptions: [getExceptionListItemSchemaMock()],
       });
-      expect(ruleExecutionLogger.warn).toHaveBeenCalled();
-      expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
-        "The following exceptions won't be applied to rule execution"
-      );
+      expect(result.warningMessages).toEqual([
+        `The following exceptions won't be applied to rule execution: ${
+          getExceptionListItemSchemaMock().name
+        }`,
+      ]);
     });
   });
 });

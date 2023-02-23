@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedQueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { SavedQueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { getRuleForSignalTesting } from './get_rule_for_signal_testing';
 
 /**
@@ -19,7 +19,7 @@ export const getSavedQueryRuleForSignalTesting = (
   index: string[],
   ruleId = 'saved-query-rule',
   enabled = true
-): SavedQueryCreateSchema => ({
+): SavedQueryRuleCreateProps => ({
   ...getRuleForSignalTesting(index, ruleId, enabled),
   type: 'saved_query',
   saved_id: 'abcd',

@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { ErrorStateCodec } from './error_state';
 import { DateRangeType } from '../common';
 import { SyntheticsDataType } from './synthetics';
 
@@ -93,12 +94,12 @@ export const MonitorType = t.intersection([
     id: t.string,
     status: t.string,
     type: t.string,
+    check_group: t.string,
   }),
   t.partial({
     duration: t.type({
       us: t.number,
     }),
-    check_group: t.string,
     ip: t.string,
     name: t.string,
     timespan: t.type({
@@ -119,6 +120,45 @@ export const PingHeadersType = t.record(t.string, t.union([t.string, t.array(t.s
 
 export type PingHeaders = t.TypeOf<typeof PingHeadersType>;
 
+export const ObserverType = t.partial({
+  hostname: t.string,
+  ip: t.array(t.string),
+  mac: t.array(t.string),
+  geo: t.partial({
+    name: t.string,
+    continent_name: t.string,
+    city_name: t.string,
+    country_iso_code: t.string,
+    location: t.union([
+      t.string,
+      t.partial({ lat: t.number, lon: t.number }),
+      t.partial({ lat: t.string, lon: t.string }),
+    ]),
+  }),
+});
+
+export const AgentType = t.intersection([
+  t.type({
+    ephemeral_id: t.string,
+    id: t.string,
+    type: t.string,
+    version: t.string,
+  }),
+  t.partial({
+    name: t.string,
+    hostname: t.string,
+  }),
+]);
+
+// should this be partial?
+export const UrlType = t.partial({
+  domain: t.string,
+  full: t.string,
+  port: t.number,
+  scheme: t.string,
+  path: t.string,
+});
+
 export const PingType = t.intersection([
   t.type({
     timestamp: t.string,
@@ -126,18 +166,7 @@ export const PingType = t.intersection([
     docId: t.string,
   }),
   t.partial({
-    agent: t.intersection([
-      t.type({
-        ephemeral_id: t.string,
-        id: t.string,
-        type: t.string,
-        version: t.string,
-      }),
-      t.partial({
-        name: t.string,
-        hostname: t.string,
-      }),
-    ]),
+    agent: AgentType,
     container: t.partial({
       id: t.string,
       image: t.partial({
@@ -184,22 +213,7 @@ export const PingType = t.intersection([
         uid: t.string,
       }),
     }),
-    observer: t.partial({
-      hostname: t.string,
-      ip: t.array(t.string),
-      mac: t.array(t.string),
-      geo: t.partial({
-        name: t.string,
-        continent_name: t.string,
-        city_name: t.string,
-        country_iso_code: t.string,
-        location: t.union([
-          t.string,
-          t.partial({ lat: t.number, lon: t.number }),
-          t.partial({ lat: t.string, lon: t.string }),
-        ]),
-      }),
-    }),
+    observer: ObserverType,
     resolve: t.partial({
       ip: t.string,
       rtt: t.partial({
@@ -221,17 +235,12 @@ export const PingType = t.intersection([
     }),
     tls: TlsType,
     // should this be partial?
-    url: t.partial({
-      domain: t.string,
-      full: t.string,
-      port: t.number,
-      scheme: t.string,
-      path: t.string,
-    }),
+    url: UrlType,
     service: t.partial({
       name: t.string,
     }),
     config_id: t.string,
+    state: ErrorStateCodec,
     data_stream: t.interface({
       namespace: t.string,
       type: t.string,
@@ -240,7 +249,34 @@ export const PingType = t.intersection([
   }),
 ]);
 
+export const PingStateType = t.type({
+  timestamp: t.string,
+  '@timestamp': t.string,
+  monitor: MonitorType,
+  docId: t.string,
+  state: ErrorStateCodec,
+  error: PingErrorType,
+});
 export type Ping = t.TypeOf<typeof PingType>;
+export type PingState = t.TypeOf<typeof PingStateType>;
+
+export const PingStatusType = t.intersection([
+  t.type({
+    timestamp: t.string,
+    docId: t.string,
+    config_id: t.string,
+    locationId: t.string,
+    summary: t.partial({
+      down: t.number,
+      up: t.number,
+    }),
+  }),
+  t.partial({
+    error: PingErrorType,
+  }),
+]);
+
+export type PingStatus = t.TypeOf<typeof PingStatusType>;
 
 // Convenience function for tests etc that makes an empty ping
 // object with the minimum of fields.
@@ -266,6 +302,7 @@ export const makePing = (f: {
       status: f.status || 'up',
       duration: { us: f.duration || 100000 },
       name: f.name,
+      check_group: 'myCheckGroup',
     },
     ...(f.location ? { observer: { geo: { name: f.location } } } : {}),
     ...(f.url ? { url: { full: f.url } } : {}),
@@ -279,6 +316,15 @@ export const PingsResponseType = t.type({
 
 export type PingsResponse = t.TypeOf<typeof PingsResponseType>;
 
+export const PingStatusesResponseType = t.type({
+  total: t.number,
+  pings: t.array(PingStatusType),
+  from: t.string,
+  to: t.string,
+});
+
+export type PingStatusesResponse = t.TypeOf<typeof PingStatusesResponseType>;
+
 export const GetPingsParamsType = t.intersection([
   t.type({
     dateRange: DateRangeType,
@@ -287,6 +333,7 @@ export const GetPingsParamsType = t.intersection([
     excludedLocations: t.string,
     index: t.number,
     size: t.number,
+    pageIndex: t.number,
     locations: t.string,
     monitorId: t.string,
     sort: t.string,

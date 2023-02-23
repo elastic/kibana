@@ -11,7 +11,7 @@
         "label": "getPositions",
         "description": [],
         "signature": [
-          "() => ({ text: string; value: \"top\"; } | { text: string; value: \"left\"; } | { text: string; value: \"right\"; } | { text: string; value: \"bottom\"; })[]"
+          "() => ({ text: any; value: \"top\"; } | { text: any; value: \"left\"; } | { text: any; value: \"right\"; } | { text: any; value: \"bottom\"; })[]"
         ],
         "path": "src/plugins/vis_types/xy/public/editor/positions.ts",
         "deprecated": false,
@@ -28,7 +28,7 @@
         "label": "getScaleTypes",
         "description": [],
         "signature": [
-          "() => { text: string; value: ",
+          "() => { text: any; value: ",
           {
             "pluginId": "visTypeXy",
             "scope": "public",
@@ -132,7 +132,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"top\" | \"bottom\" | \"left\" | \"right\""
+              "\"right\" | \"left\" | \"top\" | \"bottom\""
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
@@ -825,12 +825,20 @@
           "Omit<",
           {
             "pluginId": "visualizations",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.SchemaConfig",
+            "section": "def-common.SchemaConfig",
             "text": "SchemaConfig"
           },
-          ", \"params\"> & { params: {} | ",
+          "<",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.SupportedAggregation",
+            "text": "SupportedAggregation"
+          },
+          ">, \"params\"> & { params: {} | ",
           {
             "pluginId": "visualizations",
             "scope": "common",

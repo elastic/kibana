@@ -20,6 +20,8 @@ import {
   EuiCodeBlock,
   EuiMarkdownFormat,
   EuiIcon,
+  EuiPagination,
+  EuiFlyoutFooter,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +35,7 @@ import { RuleTab } from './rule_tab';
 import type { BenchmarkId } from '../../../../common/types';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { BenchmarkName } from '../../../../common/types';
+import { FINDINGS_FLYOUT } from '../test_subjects';
 
 const tabs = [
   {
@@ -61,11 +64,18 @@ const tabs = [
   },
 ] as const;
 
+const PAGINATION_LABEL = i18n.translate('xpack.csp.findings.findingsFlyout.paginationLabel', {
+  defaultMessage: 'Finding navigation',
+});
+
 type FindingsTab = typeof tabs[number];
 
 interface FindingFlyoutProps {
   onClose(): void;
   findings: CspFinding;
+  flyoutIndex: number;
+  findingsCount: number;
+  onPaginate: (pageIndex: number) => void;
 }
 
 export const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
@@ -108,11 +118,17 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
   }
 };
 
-export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) => {
+export const FindingsRuleFlyout = ({
+  onClose,
+  findings,
+  flyoutIndex,
+  findingsCount,
+  onPaginate,
+}: FindingFlyoutProps) => {
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   return (
-    <EuiFlyout ownFocus={false} onClose={onClose}>
+    <EuiFlyout onClose={onClose} data-test-subj={FINDINGS_FLYOUT}>
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
@@ -129,7 +145,12 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
         <EuiSpacer />
         <EuiTabs>
           {tabs.map((v) => (
-            <EuiTab key={v.id} isSelected={tab.id === v.id} onClick={() => setTab(v)}>
+            <EuiTab
+              key={v.id}
+              isSelected={tab.id === v.id}
+              onClick={() => setTab(v)}
+              data-test-subj={`findings_flyout_tab_${v.id}`}
+            >
               {v.title}
             </EuiTab>
           ))}
@@ -138,6 +159,19 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
       <EuiFlyoutBody key={tab.id}>
         <FindingsTab tab={tab} findings={findings} />
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiPagination
+              aria-label={PAGINATION_LABEL}
+              pageCount={findingsCount}
+              activePage={flyoutIndex}
+              onPageClick={onPaginate}
+              compressed
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

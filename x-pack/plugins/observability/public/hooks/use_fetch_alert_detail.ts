@@ -21,7 +21,6 @@ interface AlertDetailParams {
 
 export const useFetchAlertDetail = (id: string): [boolean, TopAlert | null] => {
   const { observabilityRuleTypeRegistry } = usePluginContext();
-
   const params = useMemo(
     () => ({ id, ruleType: observabilityRuleTypeRegistry }),
     [id, observabilityRuleTypeRegistry]

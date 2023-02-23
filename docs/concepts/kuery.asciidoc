@@ -1,326 +1,248 @@
 [[kuery-query]]
-=== Kibana Query Language
+=== {kib} Query Language
 
-The Kibana Query Language (KQL) is a simple syntax for filtering {es} data using
-free text search or field-based search. KQL is only used for filtering data, and has
-no role in sorting or aggregating the data.
+The {kib} Query Language (KQL) is a simple text-based query language for filtering data.
 
-KQL is able to suggest field names, values, and operators as you type.
-The performance of the suggestions is controlled by <<settings, {kib} settings>>.
+* KQL only filters data, and has no role in aggregating, transforming, or sorting data.
+* KQL is not to be confused with the <<lucene-query,Lucene query language>>, which has a different feature set.
 
-KQL has a different set of features than the <<lucene-query>>. KQL is able to query
-nested fields and <<scripted-fields, scripted fields>>. KQL does not support regular expressions
-or searching with fuzzy terms.
+Use KQL to filter documents where a value for a field exists, matches a given value, or is within a given range.
 
 [discrete]
-=== Terms query
+=== Filter for documents where a field exists
 
-A terms query uses *exact search terms*. Spaces separate each search term, and only one term
-is required to match the document. Use quotation marks to indicate a *phrase match*.
-
-To query using *exact search terms*, enter the field name followed by `:` and
-then the values separated by spaces:
+To filter documents for which an indexed value exists for a given field, use the `*` operator.
+For example, to filter for documents where the `http.request.method` field exists, use the following syntax:
 
 [source,yaml]
 -------------------
-http.response.status_code:400 401 404
+http.request.method: *
 -------------------
 
-For text fields, this will match any value regardless of order:
-
-[source,yaml]
--------------------
-http.response.body.content.text:quick brown fox
--------------------
-
-To query for an *exact phrase*, use quotation marks around the values:
-
-[source,yaml]
--------------------
-http.response.body.content.text:"quick brown fox"
--------------------
-
-Field names are not required by KQL. When a field name is not provided, terms
-will be matched by the default fields in your index settings. To search across fields:
-
-[source,yaml]
--------------------
-"quick brown fox"
--------------------
+This checks for any indexed value, including an empty string.
 
 [discrete]
-=== Boolean queries
+=== Filter for documents that match  a value
 
-KQL supports `or`, `and`, and `not`. By default, `and` has a higher precedence than `or`.
-To override the default precedence, group operators in parentheses. These operators can
-be upper or lower case.
-
-To match documents where response is `200`, extension is `php`, or both:
+Use KQL to filter for documents that match a specific number, text, date, or boolean value.
+For example, to filter for documents where the `http.request.method` is GET, use the following query:
 
 [source,yaml]
 -------------------
-response:200 or extension:php
+http.request.method: GET
 -------------------
 
-To match documents where response is `200` and extension is `php`:
-
-[source,yaml]
--------------------
-response:200 and extension:php
--------------------
-
-To match documents where response is `200` or `404`.
+The field parameter is optional. If not provided, all fields are searched for the given value.
+For example, to search all fields for “Hello”, use the following:
 
 [source,yaml]
 -------------------
-response:(200 or 404)
+Hello
 -------------------
 
-To match documents where response is `200` and extension is either `php` or `css`:
-
-[source,yaml]
--------------------
-response:200 and (extension:php or extension:css)
--------------------
-
-To match documents where `response` is 200 and `extension` is
-`php` or extension is `css`, and response is anything:
+When querying keyword, numeric, date, or boolean fields, the value must be an exact match,
+including punctuation and case. However, when querying text fields, {es} analyzes the
+value provided according to the {ref}/analysis.html[field’s mapping settings].
+For example, to search for documents where `http.request.body.content` (a `text` field)
+contains the text “null pointer”:
 
 [source,yaml]
 -------------------
-response:200 and extension:php or extension:css
+http.request.body.content: null pointer
 -------------------
 
-To match documents where response is not `200`:
-
-[source,yaml]
--------------------
-not response:200
--------------------
-
-To match documents where response is `200` but extension is not `php` or `css`.
+Because this is a `text` field, the order of these search terms does not matter, and
+even documents containing “pointer null” are returned. To search `text` fields where the
+terms are in the order provided, surround the value in quotation marks, as follows:
 
 [source,yaml]
 -------------------
-response:200 and not (extension:php or extension:css)
+http.request.body.content: "null pointer"
 -------------------
 
-To match multi-value fields that contain a list of terms:
+Certain characters must be escaped by a backslash (unless surrounded by quotes).
+For example, to search for documents where `http.request.referrer` is https://example.com,
+use either of the following queries:
 
 [source,yaml]
 -------------------
-tags:(success and info and security)
+http.request.referrer: "https://example.com"
+http.request.referrer: https\://example.com
+-------------------
+
+You must escape following characters:
+
+[source,yaml]
+-------------------
+\():<>"*
 -------------------
 
 [discrete]
-=== Range queries
+=== Filter for documents within a range
 
-KQL supports `>`, `>=`, `<`, and `<=` on numeric and date types.
+To search documents that contain terms within a provided range, use KQL’s range syntax.
+For example, to search for all documents for which `http.response.bytes` is less than 10000,
+use the following syntax:
 
 [source,yaml]
 -------------------
-account_number >= 100 and items_sold <= 200
+http.response.bytes < 10000
+-------------------
+
+To search for an inclusive range, combine multiple range queries.
+For example, to search for documents where `http.response.bytes` is greater than 10000
+but less than or equal to 20000, use the following syntax:
+
+[source,yaml]
+-------------------
+http.response.bytes > 10000 and http.response.bytes <= 20000
+-------------------
+
+You can also use range syntax for string values, IP addresses, and timestamps.
+For example, to search for documents earlier than two weeks ago, use the following syntax:
+
+[source,yaml]
+-------------------
+@timestamp < now-2w
+-------------------
+
+For more examples on acceptable date formats, refer to {ref}/common-options.html#date-math[Date Math].
+
+[discrete]
+=== Filter for documents using wildcards
+
+To search for documents matching a pattern, use the wildcard syntax.
+For example, to find documents where `http.response.status_code` begins with a 4, use the following syntax:
+
+[source,yaml]
+-------------------
+http.response.status_code: 4*
+-------------------
+
+By default, leading wildcards are not allowed for performance reasons.
+You can modify this with the <<query-allowleadingwildcards,`query:allowLeadingWildcards`>> advanced setting.
+
+NOTE: Only `*` is currently supported. This matches zero or more characters.
+
+[discrete]
+=== Negating a query
+
+To negate or exclude a set of documents, use the `not` keyword (not case-sensitive).
+For example, to filter documents where the `http.request.method` is *not* GET, use the following query:
+
+[source,yaml]
+-------------------
+NOT http.request.method: GET
 -------------------
 
 [discrete]
-=== Date range queries
+=== Combining multiple queries
 
-Typically, Kibana's <<set-time-filter,time filter>> is sufficient for setting a time range,
-but in some cases you might need to search on dates. Include the date range in quotes.
-
-[source,yaml]
--------------------
-@timestamp < "2021-01-02T21:55:59"
--------------------
+To combine multiple queries, use the `and`/`or` keywords (not case-sensitive).
+For example, to find documents where the `http.request.method` is GET *or* the `http.response.status_code` is 400,
+use the following query:
 
 [source,yaml]
 -------------------
-@timestamp < "2021-01"
+http.request.method: GET OR http.response.status_code: 400
 -------------------
+
+Similarly, to find documents where the `http.request.method` is GET *and* the
+`http.response.status_code` is 400, use this query:
 
 [source,yaml]
 -------------------
-@timestamp < "2021"
+http.request.method: GET AND http.response.status_code: 400
 -------------------
 
-KQL supports date math expressions.
-
-[source,yaml]
--------------------
-@timestamp < now-1d
--------------------
+To specify precedence when combining multiple queries, use parentheses.
+For example, to find documents where the `http.request.method` is GET *and*
+the `http.response.status_code` is 200, *or* the `http.request.method` is POST *and*
+`http.response.status_code` is 400, use the following:
 
 [source,yaml]
 -------------------
-updated_at > 2022-02-17||+1M/d
+(http.request.method: GET AND http.response.status_code: 200) OR
+(http.request.method: POST AND http.response.status_code: 400)
 -------------------
 
-Check the
-{ref}/common-options.html#date-math[date math documentation] for more examples.
+You can also use parentheses for shorthand syntax when querying multiple values for the same field.
+For example, to find documents where the `http.request.method` is GET, POST, *or* DELETE, use the following:
+
+[source,yaml]
+-------------------
+http.request.method: (GET OR POST OR DELETE)
+-------------------
 
 [discrete]
-=== Exist queries
+=== Matching multiple fields
 
-An exist query matches documents that contain any value for a field, in this case,
-response:
+Wildcards can also be used to query multiple fields. For example, to search for
+documents where any sub-field of `http.response` contains “error”, use the following:
 
 [source,yaml]
 -------------------
-response:*
+http.response.*: error
 -------------------
-
-Existence is defined by {es} and includes all values, including empty text.
 
 [discrete]
-=== Wildcard queries
+=== Querying nested fields
 
-Wildcards queries can be used to *search by a term prefix* or to *search multiple fields*.
-The default settings of {kib} *prevent leading wildcards* for performance reasons,
-but this can be allowed with an <<query-allowleadingwildcards, advanced setting>>.
-
-To match documents where `machine.os` starts with `win`, such
-as "windows 7" and "windows 10":
+Querying {ref}/nested.html[nested fields] requires a special syntax. Consider the
+following document, where `user` is a nested field:
 
 [source,yaml]
 -------------------
-machine.os:win*
--------------------
-
-To match multiple fields:
-
-[source,yaml]
--------------------
-machine.os*:windows 10
--------------------
-
-This syntax is handy when you have text and keyword
-versions of a field. The query checks machine.os and machine.os.keyword
-for the term
-`windows 10`.
-
-
-[discrete]
-=== Nested field queries
-
-A main consideration for querying {ref}/nested.html[nested fields] is how to
-match parts of the nested query to the individual nested documents.
-You can:
-
-* *Match parts of the query to a single nested document only.* This is what most users want when querying on a nested field.
-* *Match parts of the query to different nested documents.* This is how a regular object field works.
- This query is generally less useful than matching to a single document.
-
-In the following document, `items` is a nested field. Each document in the nested
-field contains a name, stock, and category.
-
-[source,json]
-----------------------------------
 {
-  "grocery_name": "Elastic Eats",
-  "items": [
+  "user" : [
     {
-      "name": "banana",
-      "stock": "12",
-      "category": "fruit"
+      "first" : "John",
+      "last" :  "Smith"
     },
     {
-      "name": "peach",
-      "stock": "10",
-      "category": "fruit"
-    },
-    {
-      "name": "carrot",
-      "stock": "9",
-      "category": "vegetable"
-    },
-    {
-      "name": "broccoli",
-      "stock": "5",
-      "category": "vegetable"
+      "first" : "Alice",
+      "last" :  "White"
     }
   ]
 }
-----------------------------------
+-------------------
 
-[discrete]
-==== Match a single document
-
-To match stores that have more than 10 bananas in stock:
+To find documents where a single value inside the `user` array contains a first name of
+“Alice” and last name of “White”, use the following:
 
 [source,yaml]
 -------------------
-items:{ name:banana and stock > 10 }
+user:{ first: "Alice" and last: "White" }
 -------------------
 
-`items` is the nested path. Everything inside the curly braces (the nested group)
-must match a single nested document.
-
-The following query does not return any matches because no single nested
-document has bananas with a stock of 9.
+Because nested fields can be inside other nested fields,
+you must specify the full path of the nested field you want to query.
+For example, consider the following document where `user` and `names` are both nested fields:
 
 [source,yaml]
 -------------------
-items:{ name:banana and stock:9 }
--------------------
-
-[discrete]
-==== Match different documents
-
-The following subqueries are in separate nested groups
-and can match different nested documents:
-
-[source,yaml]
--------------------
-items:{ name:banana } and items:{ stock:9 }
--------------------
-
-`name:banana` matches the first document in the array and `stock:9`
-matches the third document in the array.
-
-[discrete]
-==== Match single and different documents
-
-To find a store with more than 10
-bananas that *also* stocks vegetables:
-
-[source,yaml]
--------------------
-items:{ name:banana and stock > 10 } and items:{ category:vegetable }
--------------------
-
-The first nested group (`name:banana and stock > 10`) must match a single document, but the `category:vegetables`
-subquery can match a different nested document because it is in a separate group.
-
-[discrete]
-==== Nested fields inside other nested fields
-
-KQL supports nested fields inside other nested fields&mdash;you have to
-specify the full path. In this document,
-`level1` and `level2` are nested fields:
-
-[source,json]
-----------------------------------
 {
-  "level1": [
+  "user": [
     {
-      "level2": [
+      "names": [
         {
-          "prop1": "foo",
-          "prop2": "bar"
+          "first": "John",
+          "last": "Smith"
         },
         {
-          "prop1": "baz",
-          "prop2": "qux"
+          "first": "Alice",
+          "last": "White"
         }
       ]
     }
   ]
 }
-----------------------------------
+-------------------
 
-To match on a single nested document:
+To find documents where a single value inside the `user.names` array contains a first name of “Alice” *and*
+last name of “White”, use the following:
 
 [source,yaml]
 -------------------
-level1.level2:{ prop1:foo and prop2:bar }
+user.names:{ first: "Alice" and last: "White" }
 -------------------

@@ -534,12 +534,8 @@ function getTopSuggestion(
     );
   });
 
-  // We prefer unchanged or reduced suggestions when switching
-  // charts since that allows you to switch from A to B and back
-  // to A with the greatest chance of preserving your original state.
   return (
-    suggestions.find((s) => s.changeType === 'unchanged') ||
-    suggestions.find((s) => s.changeType === 'reduced') ||
+    suggestions.find((s) => s.changeType === 'unchanged' || s.changeType === 'reduced') ||
     suggestions[0]
   );
 }

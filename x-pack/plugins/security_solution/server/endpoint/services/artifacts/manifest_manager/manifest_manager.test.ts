@@ -629,13 +629,14 @@ describe('ManifestManager', () => {
         )
       ).resolves.toStrictEqual([]);
 
-      expect(artifactClient.createArtifact).toHaveBeenCalledTimes(2);
-      expect(artifactClient.createArtifact).toHaveBeenNthCalledWith(1, {
-        ...ARTIFACT_EXCEPTIONS_MACOS,
-      });
-      expect(artifactClient.createArtifact).toHaveBeenNthCalledWith(2, {
-        ...ARTIFACT_EXCEPTIONS_WINDOWS,
-      });
+      expect(artifactClient.bulkCreateArtifacts).toHaveBeenCalledWith([
+        {
+          ...ARTIFACT_EXCEPTIONS_MACOS,
+        },
+        {
+          ...ARTIFACT_EXCEPTIONS_WINDOWS,
+        },
+      ]);
       expect(
         JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
       ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));
@@ -652,13 +653,9 @@ describe('ManifestManager', () => {
       const error = new Error();
       const { body, ...incompleteArtifact } = ARTIFACT_TRUSTED_APPS_MACOS;
 
-      artifactClient.createArtifact.mockImplementation(
-        async (artifact: InternalArtifactCompleteSchema) => {
-          if (getArtifactId(artifact) === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
-            throw error;
-          } else {
-            return artifact;
-          }
+      artifactClient.bulkCreateArtifacts.mockImplementation(
+        async (artifacts: InternalArtifactCompleteSchema[]) => {
+          return { artifacts: [artifacts[0]], errors: [error] };
         }
       );
 
@@ -672,17 +669,21 @@ describe('ManifestManager', () => {
           newManifest
         )
       ).resolves.toStrictEqual([
-        error,
         new EndpointError(
           `Incomplete artifact: ${ARTIFACT_ID_TRUSTED_APPS_MACOS}`,
           ARTIFACTS_BY_ID[ARTIFACT_ID_TRUSTED_APPS_MACOS]
         ),
+        error,
       ]);
 
-      expect(artifactClient.createArtifact).toHaveBeenCalledTimes(2);
-      expect(artifactClient.createArtifact).toHaveBeenNthCalledWith(1, {
-        ...ARTIFACT_EXCEPTIONS_MACOS,
-      });
+      expect(artifactClient.bulkCreateArtifacts).toHaveBeenCalledWith([
+        {
+          ...ARTIFACT_EXCEPTIONS_MACOS,
+        },
+        {
+          ...ARTIFACT_EXCEPTIONS_WINDOWS,
+        },
+      ]);
       expect(
         JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
       ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));

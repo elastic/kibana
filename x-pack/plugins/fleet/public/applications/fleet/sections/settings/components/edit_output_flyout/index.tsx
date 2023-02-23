@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
@@ -26,11 +26,12 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiLink,
+  EuiComboBox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { MultiRowInput } from '../multi_row_input';
-import type { Output } from '../../../../types';
+import type { Output, FleetProxy } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 import { LogstashInstructions } from '../logstash_instructions';
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
@@ -38,10 +39,12 @@ import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 import { YamlCodeEditorWithPlaceholder } from './yaml_code_editor_with_placeholder';
 import { useOutputForm } from './use_output_form';
 import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
+import { AdvancedOptionsSection } from './advanced_options_section';
 
 export interface EditOutputFlyoutProps {
   output?: Output;
   onClose: () => void;
+  proxies: FleetProxy[];
 }
 
 const OUTPUT_TYPE_OPTIONS = [
@@ -52,11 +55,17 @@ const OUTPUT_TYPE_OPTIONS = [
 export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
   onClose,
   output,
+  proxies,
 }) => {
   useBreadcrumbs('settings');
   const form = useOutputForm(onClose, output);
   const inputs = form.inputs;
   const { docLinks } = useStartServices();
+
+  const proxiesOptions = useMemo(
+    () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
+    [proxies]
+  );
 
   const isLogstashOutput = inputs.typeInput.value === 'logstash';
   const isESOutput = inputs.typeInput.value === 'elasticsearch';
@@ -175,6 +184,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 }
               )}
               {...inputs.elasticsearchUrlInput.props}
+              isUrl
             />
           )}
           {isLogstashOutput && (
@@ -302,6 +312,36 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             </EuiFormRow>
           )}
           <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.proxyIdLabel"
+                defaultMessage="Proxy"
+              />
+            }
+          >
+            <EuiComboBox
+              fullWidth
+              data-test-subj="settingsOutputsFlyout.proxyIdInput"
+              {...inputs.proxyIdInput.props}
+              onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
+              selectedOptions={
+                inputs.proxyIdInput.value !== ''
+                  ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
+                  : []
+              }
+              options={proxiesOptions}
+              singleSelection={{ asPlainText: true }}
+              isClearable={true}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.proxyIdPlaceholder',
+                {
+                  defaultMessage: 'Select proxy',
+                }
+              )}
+            />
+          </EuiFormRow>
+          <EuiFormRow
             label={i18n.translate('xpack.fleet.settings.editOutputFlyout.yamlConfigInputLabel', {
               defaultMessage: 'Advanced YAML configuration',
             })}
@@ -363,6 +403,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               }
             />
           </EuiFormRow>
+          <EuiSpacer size="l" />
+          <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

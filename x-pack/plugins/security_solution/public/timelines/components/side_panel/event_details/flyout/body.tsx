@@ -8,8 +8,8 @@
 import { EuiFlyoutBody } from '@elastic/eui';
 import styled from 'styled-components';
 import React from 'react';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EndpointIsolateSuccess } from '../../../../../common/components/endpoint/host_isolation';
-import type { Ecs } from '../../../../../../common/ecs';
 import { HostIsolationPanel } from '../../../../../detections/components/host_isolation';
 import type {
   BrowserFields,
@@ -50,7 +50,7 @@ interface FlyoutBodyComponentProps {
   loading: boolean;
   rawEventData: object | undefined;
   showAlertDetails: () => void;
-  timelineId: string;
+  scopeId: string;
 }
 
 const FlyoutBodyComponent = ({
@@ -71,7 +71,7 @@ const FlyoutBodyComponent = ({
   loading,
   rawEventData,
   showAlertDetails,
-  timelineId,
+  scopeId,
 }: FlyoutBodyComponentProps) => {
   return (
     <StyledEuiFlyoutBody>
@@ -99,7 +99,7 @@ const FlyoutBodyComponent = ({
           isDraggable={isDraggable}
           loading={loading}
           rawEventData={rawEventData}
-          timelineId={timelineId}
+          scopeId={scopeId}
           timelineTabType="flyout"
           handleOnEventClosed={handleOnEventClosed}
           isReadOnly={isReadOnly}

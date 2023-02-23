@@ -60,7 +60,7 @@ beforeEach(() => {
     maxPayload: new ByteSizeValue(1024),
     port: 10002,
     ssl: { enabled: false },
-    compression: { enabled: true },
+    compression: { enabled: true, brotli: { enabled: false, quality: 3 } },
     requestId: {
       allowFromAnyIp: true,
       ipAllowlist: [],
@@ -865,7 +865,7 @@ describe('conditional compression', () => {
   test('with `compression.enabled: false`', async () => {
     const listener = await setupServer({
       ...config,
-      compression: { enabled: false },
+      compression: { enabled: false, brotli: { enabled: false, quality: 3 } },
     });
 
     const response = await supertest(listener).get('/').set('accept-encoding', 'gzip');
@@ -873,12 +873,38 @@ describe('conditional compression', () => {
     expect(response.header).not.toHaveProperty('content-encoding');
   });
 
+  test('with `compression.brotli.enabled: false`', async () => {
+    const listener = await setupServer({
+      ...config,
+      compression: { enabled: true, brotli: { enabled: false, quality: 3 } },
+    });
+
+    const response = await supertest(listener).get('/').set('accept-encoding', 'br');
+
+    expect(response.header).not.toHaveProperty('content-encoding', 'br');
+  });
+
+  test('with `compression.brotli.enabled: true`', async () => {
+    const listener = await setupServer({
+      ...config,
+      compression: { enabled: true, brotli: { enabled: true, quality: 3 } },
+    });
+
+    const response = await supertest(listener).get('/').set('accept-encoding', 'br');
+
+    expect(response.header).toHaveProperty('content-encoding', 'br');
+  });
+
   describe('with defined `compression.referrerWhitelist`', () => {
     let listener: Server;
     beforeEach(async () => {
       listener = await setupServer({
         ...config,
-        compression: { enabled: true, referrerWhitelist: ['foo'] },
+        compression: {
+          enabled: true,
+          referrerWhitelist: ['foo'],
+          brotli: { enabled: false, quality: 3 },
+        },
       });
     });
 

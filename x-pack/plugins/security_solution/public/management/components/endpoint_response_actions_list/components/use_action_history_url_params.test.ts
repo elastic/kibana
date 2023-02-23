@@ -5,8 +5,18 @@
  * 2.0.
  */
 import { actionsLogFiltersFromUrlParams } from './use_action_history_url_params';
+import type { ConsoleResponseActionCommands } from '../../../../../common/endpoint/service/response_actions/constants';
+import { CONSOLE_RESPONSE_ACTION_COMMANDS } from '../../../../../common/endpoint/service/response_actions/constants';
 
 describe('#actionsLogFiltersFromUrlParams', () => {
+  const getConsoleCommandsAsString = (): string => {
+    return [...CONSOLE_RESPONSE_ACTION_COMMANDS].sort().join(',');
+  };
+
+  const getConsoleCommandsAsArray = (): ConsoleResponseActionCommands[] => {
+    return [...CONSOLE_RESPONSE_ACTION_COMMANDS].sort();
+  };
+
   it('should not use invalid command values from URL params', () => {
     expect(actionsLogFiltersFromUrlParams({ commands: 'asa,was' })).toEqual({
       commands: undefined,
@@ -21,10 +31,10 @@ describe('#actionsLogFiltersFromUrlParams', () => {
   it('should use valid command values from URL params', () => {
     expect(
       actionsLogFiltersFromUrlParams({
-        commands: 'kill-process,isolate,processes,release,suspend-process',
+        commands: getConsoleCommandsAsString(),
       })
     ).toEqual({
-      commands: ['isolate', 'kill-process', 'processes', 'release', 'suspend-process'],
+      commands: getConsoleCommandsAsArray(),
       endDate: undefined,
       hosts: undefined,
       startDate: undefined,
@@ -62,7 +72,7 @@ describe('#actionsLogFiltersFromUrlParams', () => {
   it('should use valid command and status along with given host, user and date values from URL params', () => {
     expect(
       actionsLogFiltersFromUrlParams({
-        commands: 'release,kill-process,isolate,processes,suspend-process',
+        commands: getConsoleCommandsAsString(),
         statuses: 'successful,pending,failed',
         hosts: 'host-1,host-2',
         users: 'user-1,user-2',
@@ -70,7 +80,7 @@ describe('#actionsLogFiltersFromUrlParams', () => {
         endDate: '2022-09-12T08:30:33.140Z',
       })
     ).toEqual({
-      commands: ['isolate', 'kill-process', 'processes', 'release', 'suspend-process'],
+      commands: getConsoleCommandsAsArray(),
       endDate: '2022-09-12T08:30:33.140Z',
       hosts: ['host-1', 'host-2'],
       startDate: '2022-09-12T08:00:00.000Z',

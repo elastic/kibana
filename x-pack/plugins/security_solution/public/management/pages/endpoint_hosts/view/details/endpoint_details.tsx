@@ -7,6 +7,7 @@
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { ResponseActionsLog } from '../../../../components/endpoint_response_actions_list/response_actions_log';
 import { PolicyResponseWrapper } from '../../../../components/policy_response';
 import type { HostMetadata } from '../../../../../../common/endpoint/types';
@@ -26,6 +27,7 @@ import { ActionsMenu } from './components/actions_menu';
 import {
   EndpointDetailsFlyoutTabs,
   EndpointDetailsTabsTypes,
+  type EndpointDetailsTabs,
 } from './components/endpoint_details_tabs';
 import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { EndpointDetailsFlyoutHeader } from './components/flyout_header';
@@ -41,6 +43,7 @@ export const EndpointDetails = memo(() => {
   const policyInfo = useEndpointSelector(policyVersionInfo);
   const hostStatus = useEndpointSelector(hostStatusInfo);
   const show = useEndpointSelector(showView);
+  const { canAccessEndpointActionsLogManagement } = useUserPrivileges().endpointPrivileges;
 
   const ContentLoadingMarkup = useMemo(
     () => (
@@ -54,38 +57,53 @@ export const EndpointDetails = memo(() => {
   );
 
   const getTabs = useCallback(
-    (id: string) => [
-      {
-        id: EndpointDetailsTabsTypes.overview,
-        name: i18.OVERVIEW,
-        route: getEndpointDetailsPath({
-          ...queryParams,
-          name: 'endpointDetails',
-          selected_endpoint: id,
-        }),
-        content:
-          hostDetails === undefined ? (
-            ContentLoadingMarkup
-          ) : (
-            <EndpointDetailsContent
-              details={hostDetails}
-              policyInfo={policyInfo}
-              hostStatus={hostStatus}
-            />
-          ),
-      },
-      {
-        id: EndpointDetailsTabsTypes.activityLog,
-        name: i18.ACTIVITY_LOG.tabTitle,
-        route: getEndpointDetailsPath({
-          ...queryParams,
-          name: 'endpointActivityLog',
-          selected_endpoint: id,
-        }),
-        content: <ResponseActionsLog agentIds={id} />,
-      },
-    ],
-    [ContentLoadingMarkup, hostDetails, policyInfo, hostStatus, queryParams]
+    (id: string): EndpointDetailsTabs[] => {
+      const tabs: EndpointDetailsTabs[] = [
+        {
+          id: EndpointDetailsTabsTypes.overview,
+          name: i18.OVERVIEW,
+          route: getEndpointDetailsPath({
+            ...queryParams,
+            name: 'endpointDetails',
+            selected_endpoint: id,
+          }),
+          content:
+            hostDetails === undefined ? (
+              ContentLoadingMarkup
+            ) : (
+              <EndpointDetailsContent
+                details={hostDetails}
+                policyInfo={policyInfo}
+                hostStatus={hostStatus}
+              />
+            ),
+        },
+      ];
+
+      // show the response actions history tab
+      // only when the user has the required permission
+      if (canAccessEndpointActionsLogManagement) {
+        tabs.push({
+          id: EndpointDetailsTabsTypes.activityLog,
+          name: i18.ACTIVITY_LOG.tabTitle,
+          route: getEndpointDetailsPath({
+            ...queryParams,
+            name: 'endpointActivityLog',
+            selected_endpoint: id,
+          }),
+          content: <ResponseActionsLog agentIds={id} />,
+        });
+      }
+      return tabs;
+    },
+    [
+      canAccessEndpointActionsLogManagement,
+      ContentLoadingMarkup,
+      hostDetails,
+      policyInfo,
+      hostStatus,
+      queryParams,
+    ]
   );
 
   const showFlyoutFooter =
@@ -103,6 +121,7 @@ export const EndpointDetails = memo(() => {
       });
     }
   }, [hostDetailsError, show, toasts]);
+
   return (
     <>
       {(show === 'policy_response' || show === 'isolate' || show === 'unisolate') && (
@@ -121,7 +140,9 @@ export const EndpointDetails = memo(() => {
           {(show === 'details' || show === 'activity_log') && (
             <EndpointDetailsFlyoutTabs
               hostname={hostDetails.host.hostname}
-              show={show}
+              // show overview tab if forcing response actions history
+              // tab via URL without permission
+              show={!canAccessEndpointActionsLogManagement ? 'details' : show}
               tabs={getTabs(hostDetails.agent.id)}
             />
           )}

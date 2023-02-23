@@ -9,7 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { createGlobalStyle } from '@kbn/kibana-react-plugin/common';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LENS_VISUALIZATION_HEIGHT } from './constants';
 
@@ -19,7 +19,7 @@ const Container = styled.div`
 
 // when displaying chart in modal the tooltip is render under the modal
 const LensChartTooltipFix = createGlobalStyle`
-  div.euiOverlayMask.euiOverlayMask--aboveHeader ~ [id^='echTooltipPortal'] {
+  div.euiOverlayMask[data-relative-to-header=above] ~ [id^='echTooltipPortal'] {
     z-index: ${({ theme }) => theme.eui.euiZLevel7} !important;
   }
 `;

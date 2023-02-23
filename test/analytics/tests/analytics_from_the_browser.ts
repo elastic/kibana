@@ -9,8 +9,8 @@
 import expect from '@kbn/expect';
 import type { Event, TelemetryCounter } from '@kbn/core/server';
 import type { Action } from '@kbn/analytics-plugin-a-plugin/public/custom_shipper';
-import type { FtrProviderContext } from '../services';
 import '@kbn/analytics-plugin-a-plugin/public/types';
+import type { FtrProviderContext } from '../services';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common } = getPageObjects(['common']);
@@ -168,6 +168,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Validating the remote user_agent because that's the only field that it's added by the FTR plugin.
         expect(event.context).to.have.property('user_agent');
         expect(event.context.user_agent).to.be.a('string');
+      });
+
+      it('should call flush when using the window-exposed flush method', async () => {
+        await browser.execute(() => window.__kbnAnalytics.flush());
+        // @ts-ignore-next-line Property 'getFlushAction' does not exist on type '{ getActionsUntilReportTestPluginLifecycleEvent:
+        const action = await browser.execute(() => window.__analyticsPluginA__.getFlushAction());
+        expect(action).to.eql({ action: 'flush', meta: {} });
       });
 
       describe('Test helpers capabilities', () => {

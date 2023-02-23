@@ -9,10 +9,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'timePicker', 'lens', 'dashboard']);
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
   const es = getService('es');
   const log = getService('log');
   const indexPatterns = getService('indexPatterns');
@@ -118,38 +116,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('median-partial-warning');
         await testSubjects.click('lns-indexPatternDimension-median');
         await PageObjects.lens.waitForVisualization('xyVisChart');
-        await PageObjects.lens.assertEditorWarning(
-          '"Median of kubernetes.container.memory.available.bytes" does not work for all indices in the selected data view because it\'s using a function which is not supported on rolled up data. Please edit the visualization to use another function or change the time range.'
+        await PageObjects.lens.assertMessageListContains(
+          'Median of kubernetes.container.memory.available.bytes uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+          'warning'
         );
       });
       it('shows warnings in dashboards as well', async () => {
         await PageObjects.lens.save('New', false, false, false, 'new');
 
         await PageObjects.dashboard.waitForRenderComplete();
-        await PageObjects.lens.assertInlineWarning(
-          '"Median of kubernetes.container.memory.available.bytes" does not work for all indices in the selected data view because it\'s using a function which is not supported on rolled up data. Please edit the visualization to use another function or change the time range.'
+        await PageObjects.lens.assertMessageListContains(
+          'Median of kubernetes.container.memory.available.bytes uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+          'warning'
         );
-      });
-      it('still shows other warnings as toast', async () => {
-        await es.indices.delete({ index: [testRollupIndex] });
-        // index a document which will produce a shard failure because a string field doesn't support median
-        await es.create({
-          id: '1',
-          index: testRollupIndex,
-          document: {
-            'kubernetes.container.memory.available.bytes': 'fsdfdsf',
-            '@timestamp': '2022-06-20',
-          },
-          wait_for_active_shards: 1,
-        });
-        await retry.try(async () => {
-          await queryBar.clickQuerySubmitButton();
-          expect(
-            await (await testSubjects.find('euiToastHeader__title', 1000)).getVisibleText()
-          ).to.equal('1 of 3 shards failed');
-        });
-        // as the rollup index is gone, there is no inline warning left
-        await PageObjects.lens.assertNoInlineWarning();
       });
     });
   });

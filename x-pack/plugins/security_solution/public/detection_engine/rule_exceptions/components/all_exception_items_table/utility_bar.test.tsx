@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mount } from 'enzyme';
 
 import { ExceptionsViewerUtility } from './utility_bar';
 import { TestProviders } from '../../../../common/mock';
 
 describe('ExceptionsViewerUtility', () => {
   it('it renders correct item counts', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ExceptionsViewerUtility
           pagination={{
@@ -22,6 +22,8 @@ describe('ExceptionsViewerUtility', () => {
             totalItemCount: 105,
             pageSizeOptions: [5, 10, 20, 50, 100],
           }}
+          exceptionsToShow={{ active: true }}
+          onChangeExceptionsToShow={(optionId: string) => {}}
           lastUpdated={1660534202}
         />
       </TestProviders>
@@ -33,7 +35,7 @@ describe('ExceptionsViewerUtility', () => {
   });
 
   it('it renders last updated message', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ExceptionsViewerUtility
           pagination={{
@@ -42,6 +44,8 @@ describe('ExceptionsViewerUtility', () => {
             totalItemCount: 1,
             pageSizeOptions: [5, 10, 20, 50, 100],
           }}
+          exceptionsToShow={{ active: true }}
+          onChangeExceptionsToShow={(optionId: string) => {}}
           lastUpdated={Date.now()}
         />
       </TestProviders>

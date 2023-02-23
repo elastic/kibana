@@ -44,6 +44,20 @@ export function MachineLearningAnomalyExplorerProvider(
       return influencerFieldLabels;
     },
 
+    async getQueryBarText() {
+      const queryBarElement = await testSubjects.find('explorerQueryInput');
+      const queryBarText = await queryBarElement.getVisibleText();
+      return queryBarText;
+    },
+
+    async assertQueryBarContent(contentString: string) {
+      const queryBarText = await this.getQueryBarText();
+      expect(queryBarText).to.eql(
+        contentString,
+        `Expected influencer filter to be '${contentString}' (got '${queryBarText}')`
+      );
+    },
+
     async assertInfluencerListContainsLabel(influencerField: string, label: string) {
       const influencerFieldLabels = await this.getInfluencerFieldLabels(influencerField);
       expect(influencerFieldLabels).to.contain(
@@ -82,6 +96,20 @@ export function MachineLearningAnomalyExplorerProvider(
       await testSubjects.existOrFail(`mlAnomalyExplorerAnnotationsPanel ${state}`, {
         timeout: 30 * 1000,
       });
+    },
+
+    async addFilterForInfluencer(influencerField: string, influencerValue: string) {
+      await testSubjects.existOrFail(
+        `mlAnomaliesTableEntityCellAddFilterButton-${influencerValue}`
+      );
+      await testSubjects.click(`mlAnomaliesTableEntityCellAddFilterButton-${influencerValue}`);
+    },
+
+    async removeFilterForInfluencer(influencerField: string, influencerValue: string) {
+      await testSubjects.existOrFail(
+        `mlAnomaliesTableEntityCellRemoveFilterButton-${influencerValue}`
+      );
+      await testSubjects.click(`mlAnomaliesTableEntityCellRemoveFilterButton-${influencerValue}`);
     },
 
     async openAddToDashboardControl() {

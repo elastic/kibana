@@ -152,4 +152,20 @@ describe('KibanaSocket', () => {
       expect(socket.authorizationError).toBe(authorizationError);
     });
   });
+
+  describe('remoteAddress', () => {
+    it('mirrors the value of net.Socket instance', () => {
+      const socket = new KibanaSocket({ remoteAddress: '1.1.1.1' } as Socket);
+      expect(socket.remoteAddress).toBe('1.1.1.1');
+    });
+  });
+
+  describe('getFakeSocket', () => {
+    it('returns a stub', async () => {
+      const fakeSocket = KibanaSocket.getFakeSocket();
+      expect(fakeSocket.getPeerCertificate()).toBeNull();
+      expect(fakeSocket.getProtocol()).toBeNull();
+      await expect(fakeSocket.renegotiate({})).resolves.toBeUndefined();
+    });
+  });
 });

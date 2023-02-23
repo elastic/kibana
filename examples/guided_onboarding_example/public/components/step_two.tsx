@@ -6,37 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-import { EuiButton, EuiSpacer, EuiText, EuiTitle, EuiTourStep } from '@elastic/eui';
+import { EuiText, EuiTitle } from '@elastic/eui';
 
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
 
-interface StepTwoProps {
-  guidedOnboarding: GuidedOnboardingPluginStart;
-}
-
-export const StepTwo = (props: StepTwoProps) => {
-  const {
-    guidedOnboarding: { guidedOnboardingApi },
-  } = props;
-
-  const [isTourStepOpen, setIsTourStepOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    const subscription = guidedOnboardingApi
-      ?.isGuideStepActive$('search', 'browse_docs')
-      .subscribe((isStepActive) => {
-        setIsTourStepOpen(isStepActive);
-      });
-    return () => subscription?.unsubscribe();
-  }, [guidedOnboardingApi]);
-
+export const StepTwo = () => {
   return (
     <>
       <EuiPageContentHeader>
@@ -54,36 +34,11 @@ export const StepTwo = (props: StepTwoProps) => {
           <p>
             <FormattedMessage
               id="guidedOnboardingExample.guidesSelection.stepTwo.explanation"
-              defaultMessage="The code on this page is listening to the guided setup state using an Observable subscription. If the state is set to
-              Search guide, step Search experience, a EUI tour will be displayed, pointing to the button below."
+              defaultMessage="This page is used for the manual completion of Test guide, step 2. The manual completion popover
+              should appear on the header button 'Setup guide' to open the panel and mark the step done."
             />
           </p>
         </EuiText>
-        <EuiSpacer />
-        <EuiTourStep
-          content={
-            <EuiText>
-              <p>Click this button to complete step 2.</p>
-            </EuiText>
-          }
-          isStepOpen={isTourStepOpen}
-          minWidth={300}
-          onFinish={() => {
-            setIsTourStepOpen(false);
-          }}
-          step={1}
-          stepsTotal={1}
-          title="Step Search experience"
-          anchorPosition="rightUp"
-        >
-          <EuiButton
-            onClick={async () => {
-              await guidedOnboardingApi?.completeGuideStep('search', 'browse_docs');
-            }}
-          >
-            Complete step 2
-          </EuiButton>
-        </EuiTourStep>
       </EuiPageContentBody>
     </>
   );

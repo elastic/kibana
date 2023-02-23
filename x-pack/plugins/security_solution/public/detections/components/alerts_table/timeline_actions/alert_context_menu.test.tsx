@@ -7,16 +7,25 @@
 
 import { mount } from 'enzyme';
 import { AlertContextMenu } from './alert_context_menu';
-import { TimelineId } from '../../../../../common/types';
+import { TableId, TimelineId } from '../../../../../common/types';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/components/user_privileges');
+
+const testSecuritySolutionLinkHref = 'test-url';
+jest.mock('../../../../common/components/links', () => ({
+  useGetSecuritySolutionLinkProps: () => () => ({ href: testSecuritySolutionLinkHref }),
+}));
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
 
 const ecsRowData: Ecs = {
   _id: '1',
@@ -44,7 +53,7 @@ const props = {
   disabled: false,
   ecsRowData,
   refetch: jest.fn(),
-  timelineId: 'detections-page',
+  timelineId: 'alerts-page',
 };
 
 jest.mock('../../../../common/lib/kibana', () => ({
@@ -52,6 +61,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
     addError: jest.fn(),
     addSuccess: jest.fn(),
     addWarning: jest.fn(),
+    remove: jest.fn(),
   }),
   useKibana: () => ({
     services: {
@@ -83,182 +93,230 @@ const markAsOpenButton = '[data-test-subj="open-alert-status"]';
 const markAsAcknowledgedButton = '[data-test-subj="acknowledged-alert-status"]';
 const markAsClosedButton = '[data-test-subj="close-alert-status"]';
 const addEndpointEventFilterButton = '[data-test-subj="add-event-filter-menu-item"]';
+const openAlertDetailsPageButton = '[data-test-subj="open-alert-details-page-menu-item"]';
 
-describe('InvestigateInResolverAction', () => {
-  test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', () => {
-    const wrapper = mount(<AlertContextMenu {...props} timelineId={TimelineId.detectionsPage} />, {
-      wrappingComponent: TestProviders,
-    });
-
-    wrapper.find(actionMenuButton).simulate('click');
-    expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(true);
-    expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
-  });
-
-  test('it render AddToCase context menu item if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
-    const wrapper = mount(
-      <AlertContextMenu {...props} timelineId={TimelineId.detectionsRulesDetailsPage} />,
-      {
+describe('Alert table context menu', () => {
+  describe('Case actions', () => {
+    test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', () => {
+      const wrapper = mount(<AlertContextMenu {...props} scopeId={TableId.alertsOnAlertsPage} />, {
         wrappingComponent: TestProviders,
-      }
-    );
+      });
 
-    wrapper.find(actionMenuButton).simulate('click');
-    expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(true);
-    expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
-  });
-
-  test('it render AddToCase context menu item if timelineId === TimelineId.active', () => {
-    const wrapper = mount(<AlertContextMenu {...props} timelineId={TimelineId.active} />, {
-      wrappingComponent: TestProviders,
+      wrapper.find(actionMenuButton).simulate('click');
+      expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(true);
+      expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
     });
 
-    wrapper.find(actionMenuButton).simulate('click');
-    expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(true);
-    expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
-  });
+    test('it render AddToCase context menu item if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
+      const wrapper = mount(
+        <AlertContextMenu {...props} scopeId={TableId.alertsOnRuleDetailsPage} />,
+        {
+          wrappingComponent: TestProviders,
+        }
+      );
 
-  test('it does NOT render AddToCase context menu item when timelineId is not in the allowed list', () => {
-    const wrapper = mount(<AlertContextMenu {...props} timelineId="timeline-test" />, {
-      wrappingComponent: TestProviders,
-    });
-    wrapper.find(actionMenuButton).simulate('click');
-    expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(false);
-    expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(false);
-  });
-
-  test('it renders the correct status action buttons', () => {
-    const wrapper = mount(<AlertContextMenu {...props} timelineId={TimelineId.active} />, {
-      wrappingComponent: TestProviders,
+      wrapper.find(actionMenuButton).simulate('click');
+      expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(true);
+      expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
     });
 
-    wrapper.find(actionMenuButton).simulate('click');
+    test('it render AddToCase context menu item if timelineId === TimelineId.active', () => {
+      const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
+        wrappingComponent: TestProviders,
+      });
 
-    expect(wrapper.find(markAsOpenButton).first().exists()).toEqual(false);
-    expect(wrapper.find(markAsAcknowledgedButton).first().exists()).toEqual(true);
-    expect(wrapper.find(markAsClosedButton).first().exists()).toEqual(true);
+      wrapper.find(actionMenuButton).simulate('click');
+      expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(true);
+      expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
+    });
+
+    test('it does NOT render AddToCase context menu item when timelineId is not in the allowed list', () => {
+      const wrapper = mount(<AlertContextMenu {...props} scopeId="timeline-test" />, {
+        wrappingComponent: TestProviders,
+      });
+      wrapper.find(actionMenuButton).simulate('click');
+      expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(false);
+      expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(false);
+    });
   });
 
-  describe('AddEndpointEventFilter', () => {
-    const endpointEventProps = {
-      ...props,
-      ecsRowData: { ...ecsRowData, agent: { type: ['endpoint'] }, event: { kind: ['event'] } },
-    };
+  describe('Alert status actions', () => {
+    test('it renders the correct status action buttons', () => {
+      const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
+        wrappingComponent: TestProviders,
+      });
 
-    describe('when users can access endpoint management', () => {
-      beforeEach(() => {
-        (useUserPrivileges as jest.Mock).mockReturnValue({
-          ...mockInitialUserPrivilegesState(),
-          endpointPrivileges: { loading: false, canAccessEndpointManagement: true },
+      wrapper.find(actionMenuButton).simulate('click');
+
+      expect(wrapper.find(markAsOpenButton).first().exists()).toEqual(false);
+      expect(wrapper.find(markAsAcknowledgedButton).first().exists()).toEqual(true);
+      expect(wrapper.find(markAsClosedButton).first().exists()).toEqual(true);
+    });
+  });
+
+  describe('Endpoint event filter actions', () => {
+    describe('AddEndpointEventFilter', () => {
+      const endpointEventProps = {
+        ...props,
+        ecsRowData: { ...ecsRowData, agent: { type: ['endpoint'] }, event: { kind: ['event'] } },
+      };
+
+      describe('when users has write event filters privilege', () => {
+        beforeEach(() => {
+          (useUserPrivileges as jest.Mock).mockReturnValue({
+            ...mockInitialUserPrivilegesState(),
+            endpointPrivileges: { loading: false, canWriteEventFilters: true },
+          });
+        });
+
+        test('it disables AddEndpointEventFilter when timeline id is not host events page', () => {
+          const wrapper = mount(
+            <AlertContextMenu {...endpointEventProps} scopeId={TimelineId.active} />,
+            {
+              wrappingComponent: TestProviders,
+            }
+          );
+
+          wrapper.find(actionMenuButton).simulate('click');
+          expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
+          expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
+        });
+
+        test('it enables AddEndpointEventFilter when timeline id is host events page', () => {
+          const wrapper = mount(
+            <AlertContextMenu {...endpointEventProps} scopeId={TableId.hostsPageEvents} />,
+            {
+              wrappingComponent: TestProviders,
+            }
+          );
+
+          wrapper.find(actionMenuButton).simulate('click');
+          expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
+          expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(
+            false
+          );
+        });
+
+        test('it disables AddEndpointEventFilter when timeline id is host events page but is not from endpoint', () => {
+          const customProps = {
+            ...props,
+            ecsRowData: { ...ecsRowData, agent: { type: ['other'] }, event: { kind: ['event'] } },
+          };
+          const wrapper = mount(
+            <AlertContextMenu {...customProps} scopeId={TableId.hostsPageEvents} />,
+            {
+              wrappingComponent: TestProviders,
+            }
+          );
+
+          wrapper.find(actionMenuButton).simulate('click');
+          expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
+          expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
+        });
+
+        test('it enables AddEndpointEventFilter when timeline id is user events page', () => {
+          const wrapper = mount(
+            <AlertContextMenu {...endpointEventProps} scopeId={TableId.usersPageEvents} />,
+            {
+              wrappingComponent: TestProviders,
+            }
+          );
+
+          wrapper.find(actionMenuButton).simulate('click');
+          expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
+          expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(
+            false
+          );
+        });
+
+        test('it disables AddEndpointEventFilter when timeline id is user events page but is not from endpoint', () => {
+          const customProps = {
+            ...props,
+            ecsRowData: { ...ecsRowData, agent: { type: ['other'] }, event: { kind: ['event'] } },
+          };
+          const wrapper = mount(
+            <AlertContextMenu {...customProps} scopeId={TableId.usersPageEvents} />,
+            {
+              wrappingComponent: TestProviders,
+            }
+          );
+
+          wrapper.find(actionMenuButton).simulate('click');
+          expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
+          expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
         });
       });
 
-      test('it disables AddEndpointEventFilter when timeline id is not host events page', () => {
-        const wrapper = mount(
-          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.active} />,
-          {
-            wrappingComponent: TestProviders,
-          }
-        );
+      describe("when users don't have write event filters privilege", () => {
+        beforeEach(() => {
+          (useUserPrivileges as jest.Mock).mockReturnValue({
+            ...mockInitialUserPrivilegesState(),
+            endpointPrivileges: { loading: false, canWriteEventFilters: false },
+          });
+        });
 
-        wrapper.find(actionMenuButton).simulate('click');
-        expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-        expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
-      });
+        test('it removes AddEndpointEventFilter option when timeline id is host events page but does not has write event filters privilege', () => {
+          const wrapper = mount(
+            <AlertContextMenu {...endpointEventProps} scopeId={TableId.hostsPageEvents} />,
+            {
+              wrappingComponent: TestProviders,
+            }
+          );
 
-      test('it enables AddEndpointEventFilter when timeline id is host events page', () => {
-        const wrapper = mount(
-          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.hostsPageEvents} />,
-          {
-            wrappingComponent: TestProviders,
-          }
-        );
+          // Entire actionMenuButton is removed as there is no option available
+          expect(wrapper.find(actionMenuButton).first().exists()).toEqual(false);
+        });
 
-        wrapper.find(actionMenuButton).simulate('click');
-        expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-        expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(false);
-      });
+        test('it removes AddEndpointEventFilter option when timeline id is user events page but does not has write event filters privilege', () => {
+          const wrapper = mount(
+            <AlertContextMenu {...endpointEventProps} scopeId={TableId.usersPageEvents} />,
+            {
+              wrappingComponent: TestProviders,
+            }
+          );
 
-      test('it disables AddEndpointEventFilter when timeline id is host events page but is not from endpoint', () => {
-        const customProps = {
-          ...props,
-          ecsRowData: { ...ecsRowData, agent: { type: ['other'] }, event: { kind: ['event'] } },
-        };
-        const wrapper = mount(
-          <AlertContextMenu {...customProps} timelineId={TimelineId.hostsPageEvents} />,
-          {
-            wrappingComponent: TestProviders,
-          }
-        );
-
-        wrapper.find(actionMenuButton).simulate('click');
-        expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-        expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
-      });
-
-      test('it enables AddEndpointEventFilter when timeline id is user events page', () => {
-        const wrapper = mount(
-          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.usersPageEvents} />,
-          {
-            wrappingComponent: TestProviders,
-          }
-        );
-
-        wrapper.find(actionMenuButton).simulate('click');
-        expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-        expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(false);
-      });
-
-      test('it disables AddEndpointEventFilter when timeline id is user events page but is not from endpoint', () => {
-        const customProps = {
-          ...props,
-          ecsRowData: { ...ecsRowData, agent: { type: ['other'] }, event: { kind: ['event'] } },
-        };
-        const wrapper = mount(
-          <AlertContextMenu {...customProps} timelineId={TimelineId.usersPageEvents} />,
-          {
-            wrappingComponent: TestProviders,
-          }
-        );
-
-        wrapper.find(actionMenuButton).simulate('click');
-        expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-        expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
-      });
-    });
-    describe('when users can NOT access endpoint management', () => {
-      beforeEach(() => {
-        (useUserPrivileges as jest.Mock).mockReturnValue({
-          ...mockInitialUserPrivilegesState(),
-          endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
+          // Entire actionMenuButton is removed as there is no option available
+          expect(wrapper.find(actionMenuButton).first().exists()).toEqual(false);
         });
       });
+    });
+  });
 
-      test('it disables AddEndpointEventFilter when timeline id is host events page but cannot acces endpoint management', () => {
-        const wrapper = mount(
-          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.hostsPageEvents} />,
-          {
-            wrappingComponent: TestProviders,
-          }
-        );
+  describe('Open  alert details action', () => {
+    test('it does not render the open alert details page action if kibana.alert.rule.uuid is not set', () => {
+      const nonAlertProps = {
+        ...props,
+        ecsRowData: {
+          ...ecsRowData,
+          kibana: {
+            alert: {
+              workflow_status: ['open'],
+              rule: {
+                parameters: {},
+                uuid: [],
+              },
+            },
+          },
+        },
+      };
 
-        wrapper.find(actionMenuButton).simulate('click');
-        expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-        expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
+      const wrapper = mount(<AlertContextMenu {...nonAlertProps} scopeId={TimelineId.active} />, {
+        wrappingComponent: TestProviders,
       });
 
-      test('it disables AddEndpointEventFilter when timeline id is user events page but cannot acces endpoint management', () => {
-        const wrapper = mount(
-          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.usersPageEvents} />,
-          {
-            wrappingComponent: TestProviders,
-          }
-        );
+      wrapper.find(actionMenuButton).simulate('click');
 
-        wrapper.find(actionMenuButton).simulate('click');
-        expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-        expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
+      expect(wrapper.find(openAlertDetailsPageButton).first().exists()).toEqual(false);
+    });
+
+    test('it renders the open alert details action button', () => {
+      const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
+        wrappingComponent: TestProviders,
       });
+
+      wrapper.find(actionMenuButton).simulate('click');
+
+      expect(wrapper.find(openAlertDetailsPageButton).first().exists()).toEqual(true);
     });
   });
 });

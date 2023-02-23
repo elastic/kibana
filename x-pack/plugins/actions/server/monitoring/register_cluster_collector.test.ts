@@ -12,7 +12,7 @@ import { registerClusterCollector } from './register_cluster_collector';
 import { ActionsPluginsStart } from '../plugin';
 import { ClusterActionsMetric } from './types';
 
-jest.useFakeTimers('modern');
+jest.useFakeTimers();
 jest.setSystemTime(new Date('2020-03-09').getTime());
 
 describe('registerClusterCollector()', () => {

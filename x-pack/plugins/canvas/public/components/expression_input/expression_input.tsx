@@ -23,7 +23,7 @@ const Input = withSuspense(LazyExpressionInput);
 
 export const ExpressionInput = ({ error, ...rest }: Props) => {
   return (
-    <div className="canvasExpressionInput">
+    <div className="canvasExpressionInput" data-test-subj="canvasExpressionInput">
       <EuiFormRow
         className="canvasExpressionInput__inner"
         fullWidth

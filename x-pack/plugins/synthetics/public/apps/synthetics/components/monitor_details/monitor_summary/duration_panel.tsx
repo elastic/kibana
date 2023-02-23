@@ -8,33 +8,56 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
-import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
-import { KpiWrapper } from './kpi_wrapper';
+interface DurationPanelProps {
+  from: string;
+  to: string;
+  id: string;
+}
 
-export const DurationPanel = () => {
+export const DurationPanel = (props: DurationPanelProps) => {
   const {
     services: {
       observability: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const selectedLocation = useSelectedLocation();
+
+  const monitorId = useMonitorQueryId();
+
+  if (!selectedLocation || !monitorId) {
+    return null;
+  }
 
   return (
-    <KpiWrapper>
-      <ExploratoryViewEmbeddable
-        reportType={ReportTypes.SINGLE_METRIC}
-        attributes={[
-          {
-            time: { from: 'now-30d', to: 'now' },
-            name: 'Monitor duration',
-            dataType: 'synthetics',
-            selectedMetricField: 'monitor_duration',
-            reportDefinitions: { 'monitor.id': [monitorId] },
+    <ExploratoryViewEmbeddable
+      id={props.id}
+      align="left"
+      customHeight="70px"
+      reportType={ReportTypes.SINGLE_METRIC}
+      attributes={[
+        {
+          time: props,
+          name: AVG_DURATION_LABEL,
+          dataType: 'synthetics',
+          selectedMetricField: 'monitor_duration',
+          reportDefinitions: {
+            'monitor.id': [monitorId],
+            'observer.geo.name': [selectedLocation?.label],
           },
-        ]}
-      />
-    </KpiWrapper>
+        },
+      ]}
+    />
   );
 };
+
+export const AVG_DURATION_LABEL = i18n.translate(
+  'xpack.synthetics.monitorDetails.summary.avgDuration',
+  {
+    defaultMessage: 'Avg. duration',
+  }
+);

@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 
-import { ClosureOptionsRadio, ClosureOptionsRadioComponentProps } from './closure_options_radio';
+import type { ClosureOptionsRadioComponentProps } from './closure_options_radio';
+import { ClosureOptionsRadio } from './closure_options_radio';
 import { TestProviders } from '../../common/mock';
 
 describe('ClosureOptionsRadio', () => {

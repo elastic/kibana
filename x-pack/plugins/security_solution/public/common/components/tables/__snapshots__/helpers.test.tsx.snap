@@ -10,11 +10,12 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
       size="xs"
     >
       <MoreContainer
-        attrName="attrName"
+        fieldName="attrName"
+        fieldType="keyword"
         idPrefix="idPrefix"
         moreMaxHeight="none"
         overflowIndexStart={1}
-        rowItems={
+        values={
           Array [
             "item1",
             "item2",
@@ -40,118 +41,6 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
     </EuiText>
   </Popover>
 </Fragment>
-`;
-
-exports[`Table Helpers #getRowItemDraggable it returns correctly against snapshot 1`] = `
-<DraggableWrapper
-  dataProvider={
-    Object {
-      "and": Array [],
-      "enabled": true,
-      "excluded": false,
-      "id": "idPrefix-attrName-item1",
-      "kqlQuery": "",
-      "name": "item1",
-      "queryMatch": Object {
-        "displayValue": "item1",
-        "field": "attrName",
-        "operator": ":",
-        "value": "item1",
-      },
-    }
-  }
-  key="idPrefix-attrName-item1"
-  render={[Function]}
-/>
-`;
-
-exports[`Table Helpers #getRowItemDraggables it returns correctly against snapshot 1`] = `
-<DragDropContext
-  onDragEnd={[MockFunction]}
->
-  <DraggableWrapper
-    dataProvider={
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "idPrefix-attrName-item1-0",
-        "kqlQuery": "",
-        "name": "item1",
-        "queryMatch": Object {
-          "displayValue": "item1",
-          "field": "attrName",
-          "operator": ":",
-          "value": "item1",
-        },
-      }
-    }
-    fieldType="keyword"
-    isAggregatable={false}
-    key="idPrefix-attrName-item1-0"
-    render={[Function]}
-  />
-  <DraggableWrapper
-    dataProvider={
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "idPrefix-attrName-item2-1",
-        "kqlQuery": "",
-        "name": "item2",
-        "queryMatch": Object {
-          "displayValue": "item2",
-          "field": "attrName",
-          "operator": ":",
-          "value": "item2",
-        },
-      }
-    }
-    fieldType="keyword"
-    isAggregatable={false}
-    key="idPrefix-attrName-item2-1"
-    render={[Function]}
-  />
-  <DraggableWrapper
-    dataProvider={
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "idPrefix-attrName-item3-2",
-        "kqlQuery": "",
-        "name": "item3",
-        "queryMatch": Object {
-          "displayValue": "item3",
-          "field": "attrName",
-          "operator": ":",
-          "value": "item3",
-        },
-      }
-    }
-    fieldType="keyword"
-    isAggregatable={false}
-    key="idPrefix-attrName-item3-2"
-    render={[Function]}
-  />
-   
-  <Memo(RowItemOverflowComponent)
-    attrName="attrName"
-    fieldType="keyword"
-    idPrefix="idPrefix"
-    isAggregatable={false}
-    maxOverflowItems={5}
-    overflowIndexStart={5}
-    rowItems={
-      Array [
-        "item1",
-        "item2",
-        "item3",
-      ]
-    }
-  />
-</DragDropContext>
 `;
 
 exports[`Table Helpers OverflowField it returns correctly against snapshot 1`] = `

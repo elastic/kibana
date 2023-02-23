@@ -8,6 +8,7 @@
 import * as Rx from 'rxjs';
 
 import type { ObjectType } from '@kbn/config-schema';
+import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { RouteValidatorConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import {
@@ -163,7 +164,7 @@ describe('copy to space', () => {
       await copyToSpace.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
       expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
-        excludedWrappers: ['spaces'],
+        excludedExtensions: [SPACES_EXTENSION_ID],
       });
     });
 
@@ -326,7 +327,7 @@ describe('copy to space', () => {
       await resolveConflicts.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
       expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
-        excludedWrappers: ['spaces'],
+        excludedExtensions: [SPACES_EXTENSION_ID],
       });
     });
 

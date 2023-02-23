@@ -22,7 +22,6 @@ import type { TimeRange } from '@kbn/es-query';
 import type { EditorRenderProps } from '@kbn/visualizations-plugin/public';
 import type { IndexPatternValue, TimeseriesVisData } from '../../../common/types';
 
-// @ts-expect-error
 import { VisEditorVisualization } from './vis_editor_visualization';
 import { PanelConfig } from './panel_config';
 import { extractIndexPatternValues } from '../../../common/index_patterns_utils';

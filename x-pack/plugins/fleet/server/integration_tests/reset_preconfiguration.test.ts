@@ -7,7 +7,12 @@
 
 import Path from 'path';
 
-import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
+import {
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  createRootWithCorePlugins,
+  createTestServers,
+} from '@kbn/core-test-helpers-kbn-server';
 
 import type { AgentPolicySOAttributes } from '../types';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../common';
@@ -17,13 +22,13 @@ import { useDockerRegistry, waitForFleetSetup, getSupertestWithAdminUser } from 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
 describe('Fleet preconfiguration reset', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
-  let kbnServer: kbnTestServer.TestKibanaUtils;
+  let esServer: TestElasticsearchUtils;
+  let kbnServer: TestKibanaUtils;
 
   const registryUrl = useDockerRegistry();
 
   const startServers = async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t) => jest.setTimeout(t),
       settings: {
         es: {
@@ -35,7 +40,7 @@ describe('Fleet preconfiguration reset', () => {
 
     esServer = await startES();
     const startKibana = async () => {
-      const root = kbnTestServer.createRootWithCorePlugins(
+      const root = createRootWithCorePlugins(
         {
           xpack: {
             fleet: {
@@ -172,7 +177,8 @@ describe('Fleet preconfiguration reset', () => {
     await stopServers();
   });
 
-  describe('Reset all policy', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/124779
+  describe.skip('Reset all policy', () => {
     it('Works and reset all preconfigured policies', async () => {
       const resetAPI = getSupertestWithAdminUser(
         kbnServer.root,
@@ -201,7 +207,10 @@ describe('Fleet preconfiguration reset', () => {
     });
   });
 
-  describe('Reset one preconfigured policy', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/124780
+  // FLAKY: https://github.com/elastic/kibana/issues/124781
+  // FLAKY: https://github.com/elastic/kibana/issues/134529
+  describe.skip('Reset one preconfigured policy', () => {
     const POLICY_ID = 'test-12345';
 
     it('Works and reset one preconfigured policies if the policy is already deleted (with a ghost package policy)', async () => {

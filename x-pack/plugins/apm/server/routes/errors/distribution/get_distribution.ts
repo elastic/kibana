@@ -6,10 +6,10 @@
  */
 
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
 import { getBuckets } from './get_buckets';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 function getBucketSize({ start, end }: { start: number; end: number }) {
   return Math.floor((end - start) / BUCKET_TARGET_COUNT);
@@ -20,7 +20,7 @@ export async function getErrorDistribution({
   kuery,
   serviceName,
   groupId,
-  setup,
+  apmEventClient,
   start,
   end,
   offset,
@@ -29,7 +29,7 @@ export async function getErrorDistribution({
   kuery: string;
   serviceName: string;
   groupId?: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   offset?: string;
@@ -50,7 +50,7 @@ export async function getErrorDistribution({
     kuery,
     serviceName,
     groupId,
-    setup,
+    apmEventClient,
     bucketSize,
   };
   const currentPeriodPromise = getBuckets({

@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import type { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   mockDnsEvent,
   mockEndpointProcessExecutionMalwarePreventionAlert,
@@ -80,6 +80,7 @@ import {
 } from './generic_row_renderer';
 import * as i18n from './translations';
 import type { RowRenderer } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types';
 
 // EuiIcons coming from .testenv render the icon's aria-label as a span
 // extractEuiIcon removes the aria-label before checking for equality
@@ -119,7 +120,7 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         data: system,
         isDraggable: true,
-        timelineId: 'test',
+        scopeId: TimelineId.test,
       });
 
       const wrapper = shallow(<span>{children}</span>);
@@ -148,7 +149,7 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         data: system,
         isDraggable: true,
-        timelineId: 'test',
+        scopeId: TimelineId.test,
       });
       const wrapper = mount(
         <TestProviders>
@@ -179,7 +180,7 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         data: systemFile,
         isDraggable: true,
-        timelineId: 'test',
+        scopeId: TimelineId.test,
       });
 
       const wrapper = shallow(<span>{children}</span>);
@@ -207,7 +208,7 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         data: systemFile,
         isDraggable: true,
-        timelineId: 'test',
+        scopeId: TimelineId.test,
       });
       const wrapper = mount(
         <TestProviders>
@@ -238,7 +239,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               data: mockEndpointFileCreationMalwarePreventionAlert,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -265,7 +266,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               data: mockEndpointFileCreationMalwareDetectionAlert,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -294,7 +295,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               data: mockEndpointFilesEncryptedRansomwarePreventionAlert,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -323,7 +324,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               data: mockEndpointFilesEncryptedRansomwareDetectionAlert,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -352,7 +353,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               data: mockEndpointFileModificationMalwarePreventionAlert,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -381,7 +382,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               data: mockEndpointFileModificationMalwareDetectionAlert,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -408,7 +409,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               data: mockEndpointFileRenameMalwarePreventionAlert,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -435,7 +436,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               data: mockEndpointFileRenameMalwareDetectionAlert,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -464,7 +465,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               data: mockEndpointProcessExecutionMalwarePreventionAlert,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -493,7 +494,7 @@ describe('GenericRowRenderer', () => {
             endpointAlertsRowRenderer.renderRow({
               data: mockEndpointProcessExecutionMalwareDetectionAlert,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -520,7 +521,7 @@ describe('GenericRowRenderer', () => {
             endpointProcessStartRowRenderer.renderRow({
               data: mockEndpointProcessExecEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -545,7 +546,7 @@ describe('GenericRowRenderer', () => {
             endpointProcessStartRowRenderer.renderRow({
               data: mockEndpointProcessForkEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -570,7 +571,7 @@ describe('GenericRowRenderer', () => {
             endpointProcessStartRowRenderer.renderRow({
               data: mockEndpointProcessStartEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -598,7 +599,7 @@ describe('GenericRowRenderer', () => {
             endgameProcessCreationEventRowRenderer.renderRow({
               data: endgameCreationEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -623,7 +624,7 @@ describe('GenericRowRenderer', () => {
             endpointProcessEndRowRenderer.renderRow({
               data: mockEndpointProcessEndEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -651,7 +652,7 @@ describe('GenericRowRenderer', () => {
             endgameProcessTerminationEventRowRenderer.renderRow({
               data: endgameTerminationEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -679,7 +680,7 @@ describe('GenericRowRenderer', () => {
             endgameProcessCreationEventRowRenderer.renderRow({
               data: endgameCreationEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -709,7 +710,7 @@ describe('GenericRowRenderer', () => {
             endgameProcessCreationEventRowRenderer.renderRow({
               data: endgameCreationEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -739,7 +740,7 @@ describe('GenericRowRenderer', () => {
             endgameProcessCreationEventRowRenderer.renderRow({
               data: endgameCreationEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -764,7 +765,7 @@ describe('GenericRowRenderer', () => {
             endpointFileCreationRowRenderer.renderRow({
               data: mockEndpointFileCreationEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -792,7 +793,7 @@ describe('GenericRowRenderer', () => {
             endgameFileCreateEventRowRenderer.renderRow({
               data: endgameFileCreateEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -817,7 +818,7 @@ describe('GenericRowRenderer', () => {
             endpointFileDeletionRowRenderer.renderRow({
               data: mockEndpointFileDeletionEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -842,7 +843,7 @@ describe('GenericRowRenderer', () => {
             endpointFileModificationRowRenderer.renderRow({
               data: mockEndpointFileModificationEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -867,7 +868,7 @@ describe('GenericRowRenderer', () => {
             endpointFileOverwriteRowRenderer.renderRow({
               data: mockEndpointFileOverwriteEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -892,7 +893,7 @@ describe('GenericRowRenderer', () => {
             endpointFileRenameRowRenderer.renderRow({
               data: mockEndpointFileRenameEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -920,7 +921,7 @@ describe('GenericRowRenderer', () => {
             endgameFileDeleteEventRowRenderer.renderRow({
               data: endgameFileDeleteEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -948,7 +949,7 @@ describe('GenericRowRenderer', () => {
             fileCreatedEventRowRenderer.renderRow({
               data: fimFileCreatedEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -974,7 +975,7 @@ describe('GenericRowRenderer', () => {
             fileDeletedEventRowRenderer.renderRow({
               data: fimFileDeletedEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1002,7 +1003,7 @@ describe('GenericRowRenderer', () => {
             endgameFileCreateEventRowRenderer.renderRow({
               data: endgameFileCreateEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1032,7 +1033,7 @@ describe('GenericRowRenderer', () => {
             endgameFileCreateEventRowRenderer.renderRow({
               data: endgameFileCreateEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1062,7 +1063,7 @@ describe('GenericRowRenderer', () => {
             fileCreatedEventRowRenderer.renderRow({
               data: fimFileCreatedEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1089,7 +1090,7 @@ describe('GenericRowRenderer', () => {
             endpointConnectionAcceptedRowRenderer.renderRow({
               data: mockEndpointNetworkConnectionAcceptedEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1117,7 +1118,7 @@ describe('GenericRowRenderer', () => {
               endpointRegistryModificationRowRenderer.renderRow({
                 data: mockEndpointRegistryModificationEvent,
                 isDraggable: true,
-                timelineId: 'test',
+                scopeId: TimelineId.test,
               })}
           </TestProviders>
         );
@@ -1144,7 +1145,7 @@ describe('GenericRowRenderer', () => {
               endpointLibraryLoadRowRenderer.renderRow({
                 data: mockEndpointLibraryLoadEvent,
                 isDraggable: true,
-                timelineId: 'test',
+                scopeId: TimelineId.test,
               })}
           </TestProviders>
         );
@@ -1170,7 +1171,7 @@ describe('GenericRowRenderer', () => {
             endpointHttpRequestEventRowRenderer.renderRow({
               data: mockEndpointNetworkHttpRequestEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1198,7 +1199,7 @@ describe('GenericRowRenderer', () => {
             endgameIpv4ConnectionAcceptEventRowRenderer.renderRow({
               data: ipv4ConnectionAcceptEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1226,7 +1227,7 @@ describe('GenericRowRenderer', () => {
             endgameIpv6ConnectionAcceptEventRowRenderer.renderRow({
               data: ipv6ConnectionAcceptEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1251,7 +1252,7 @@ describe('GenericRowRenderer', () => {
             endpointDisconnectReceivedRowRenderer.renderRow({
               data: mockEndpointDisconnectReceivedEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1279,7 +1280,7 @@ describe('GenericRowRenderer', () => {
             endgameIpv4DisconnectReceivedEventRowRenderer.renderRow({
               data: ipv4DisconnectReceivedEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1307,7 +1308,7 @@ describe('GenericRowRenderer', () => {
             endgameIpv6DisconnectReceivedEventRowRenderer.renderRow({
               data: ipv6DisconnectReceivedEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1335,7 +1336,7 @@ describe('GenericRowRenderer', () => {
             socketOpenedEventRowRenderer.renderRow({
               data: socketOpenedEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1363,7 +1364,7 @@ describe('GenericRowRenderer', () => {
             socketClosedEventRowRenderer.renderRow({
               data: socketClosedEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1391,7 +1392,7 @@ describe('GenericRowRenderer', () => {
             endgameIpv4ConnectionAcceptEventRowRenderer.renderRow({
               data: ipv4ConnectionAcceptEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1412,7 +1413,7 @@ describe('GenericRowRenderer', () => {
             securityLogOnRowRenderer.renderRow({
               data: mockEndpointSecurityLogOnSuccessEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1433,7 +1434,7 @@ describe('GenericRowRenderer', () => {
             securityLogOnRowRenderer.renderRow({
               data: mockEndpointSecurityLogOnFailureEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1457,7 +1458,7 @@ describe('GenericRowRenderer', () => {
             userLogonEventRowRenderer.renderRow({
               data: userLogonEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1481,7 +1482,7 @@ describe('GenericRowRenderer', () => {
             adminLogonEventRowRenderer.renderRow({
               data: adminLogonEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1505,7 +1506,7 @@ describe('GenericRowRenderer', () => {
             explicitUserLogonEventRowRenderer.renderRow({
               data: explicitUserLogonEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1526,7 +1527,7 @@ describe('GenericRowRenderer', () => {
             securityLogOffRowRenderer.renderRow({
               data: mockEndpointSecurityLogOffEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1550,7 +1551,7 @@ describe('GenericRowRenderer', () => {
             userLogoffEventRowRenderer.renderRow({
               data: userLogoffEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1574,7 +1575,7 @@ describe('GenericRowRenderer', () => {
             userLogonEventRowRenderer.renderRow({
               data: userLogonEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1593,7 +1594,7 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               data: mockEndpointNetworkLookupRequestedEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1612,7 +1613,7 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               data: mockEndpointNetworkLookupResultEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1635,7 +1636,7 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               data: requestEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1658,7 +1659,7 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               data: dnsEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1687,7 +1688,7 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               data: requestEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );
@@ -1714,7 +1715,7 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               data: requestEvent,
               isDraggable: true,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
         </TestProviders>
       );

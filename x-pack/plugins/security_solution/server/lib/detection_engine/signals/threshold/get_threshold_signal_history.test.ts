@@ -12,10 +12,10 @@ describe('buildPreviousThresholdAlertRequest', () => {
     const bucketByFields: string[] = [];
     const to = 'now';
     const from = 'now-6m';
-    const ruleId = 'threshold-rule';
+    const frameworkRuleId = 'threshold-rule';
 
     expect(
-      buildPreviousThresholdAlertRequest({ from, to, ruleId, bucketByFields })
+      buildPreviousThresholdAlertRequest({ from, to, frameworkRuleId, bucketByFields })
     ).toMatchSnapshot();
   });
 
@@ -23,10 +23,10 @@ describe('buildPreviousThresholdAlertRequest', () => {
     const bucketByFields: string[] = ['host.name', 'user.name'];
     const to = 'now';
     const from = 'now-6m';
-    const ruleId = 'threshold-rule';
+    const frameworkRuleId = 'threshold-rule';
 
     expect(
-      buildPreviousThresholdAlertRequest({ from, to, ruleId, bucketByFields })
+      buildPreviousThresholdAlertRequest({ from, to, frameworkRuleId, bucketByFields })
     ).toMatchSnapshot();
   });
 });

@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useReducer, useCallback, useState, useMemo } from 'react';
+import React, { useEffect, useReducer, useCallback, useState, useRef } from 'react';
 import { EuiDragDropContext, DragDropContextProps, useEuiPaddingSize } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
-import { css } from '@emotion/css';
-import { FiltersBuilderContextType } from './filters_builder_context';
-import { ConditionTypes } from '../utils';
-import { FilterGroup } from './filters_builder_filter_group';
-import { FiltersBuilderReducer } from './filters_builder_reducer';
+import { type Filter, BooleanRelation, compareFilters } from '@kbn/es-query';
+import { FiltersBuilderContextType } from './context';
+import { FilterGroup } from './filter_group';
+import { FiltersBuilderReducer } from './reducer';
+import { getPathInArray } from './utils';
+import { FilterLocation } from './types';
+import { filtersBuilderCss } from './filters_builder.styles';
 
 export interface FiltersBuilderProps {
   filters: Filter[];
@@ -23,9 +24,10 @@ export interface FiltersBuilderProps {
   timeRangeForSuggestionsOverride?: boolean;
   maxDepth?: number;
   hideOr?: boolean;
+  disabled?: boolean;
 }
 
-const rootLevelConditionType = ConditionTypes.AND;
+const rootLevelConditionType = BooleanRelation.AND;
 const DEFAULT_MAX_DEPTH = 10;
 
 function FiltersBuilder({
@@ -35,59 +37,70 @@ function FiltersBuilder({
   timeRangeForSuggestionsOverride,
   maxDepth = DEFAULT_MAX_DEPTH,
   hideOr = false,
+  disabled = false,
 }: FiltersBuilderProps) {
+  const filtersRef = useRef(filters);
   const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
   const [dropTarget, setDropTarget] = useState('');
-  const mPaddingSize = useEuiPaddingSize('m');
-
-  const filtersBuilderStyles = useMemo(
-    () => css`
-      .filter-builder__panel {
-        &.filter-builder__panel-nested {
-          padding: ${mPaddingSize} 0;
-        }
-      }
-
-      .filter-builder__item {
-        &.filter-builder__item-nested {
-          padding: 0 ${mPaddingSize};
-        }
-      }
-    `,
-    [mPaddingSize]
-  );
+  const sPaddingSize = useEuiPaddingSize('s');
+  useEffect(() => {
+    if (
+      !compareFilters(filters, filtersRef.current, {
+        index: true,
+        state: true,
+        negate: true,
+        disabled: true,
+        alias: true,
+      })
+    ) {
+      filtersRef.current = filters;
+      dispatch({ type: 'updateFilters', payload: { filters } });
+    }
+  }, [filters]);
 
   useEffect(() => {
-    if (state.filters !== filters) {
+    if (state.filters !== filtersRef.current) {
+      filtersRef.current = state.filters;
       onChange(state.filters);
     }
-  }, [filters, onChange, state.filters]);
+  }, [onChange, state.filters]);
 
   const handleMoveFilter = useCallback(
-    (pathFrom: string, pathTo: string, conditionalType: ConditionTypes) => {
-      if (pathFrom === pathTo) {
+    (from: FilterLocation, to: FilterLocation, booleanRelation: BooleanRelation) => {
+      if (from.path === to.path) {
         return null;
       }
 
       dispatch({
         type: 'moveFilter',
         payload: {
-          pathFrom,
-          pathTo,
-          conditionalType,
+          from,
+          to,
+          booleanRelation,
+          dataView,
         },
       });
     },
-    []
+    [dataView]
   );
 
-  const onDragEnd: DragDropContextProps['onDragEnd'] = ({ combine, source, destination }) => {
+  const onDragEnd: DragDropContextProps['onDragEnd'] = (args) => {
+    const { combine, source, destination } = args;
     if (source && destination) {
-      handleMoveFilter(source.droppableId, destination.droppableId, ConditionTypes.AND);
+      handleMoveFilter(
+        { path: source.droppableId, index: source.index },
+        { path: destination.droppableId, index: destination.index },
+        BooleanRelation.AND
+      );
     }
 
     if (source && combine) {
-      handleMoveFilter(source.droppableId, combine.droppableId, ConditionTypes.OR);
+      const path = getPathInArray(combine.droppableId);
+      handleMoveFilter(
+        { path: source.droppableId, index: source.index },
+        { path: combine.droppableId, index: path.at(-1) ?? 0 },
+        BooleanRelation.OR
+      );
     }
     setDropTarget('');
   };
@@ -103,7 +116,7 @@ function FiltersBuilder({
   };
 
   return (
-    <div className={filtersBuilderStyles}>
+    <div className={filtersBuilderCss(sPaddingSize)}>
       <FiltersBuilderContextType.Provider
         value={{
           globalParams: { hideOr, maxDepth },
@@ -111,10 +124,11 @@ function FiltersBuilder({
           dispatch,
           dropTarget,
           timeRangeForSuggestionsOverride,
+          disabled,
         }}
       >
         <EuiDragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragActive}>
-          <FilterGroup filters={state.filters} conditionType={rootLevelConditionType} path={''} />
+          <FilterGroup filters={state.filters} booleanRelation={rootLevelConditionType} path={''} />
         </EuiDragDropContext>
       </FiltersBuilderContextType.Provider>
     </div>

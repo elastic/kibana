@@ -120,7 +120,7 @@ export class Screenshots {
         {
           browserTimezone,
           openUrlTimeout: durationToNumber(this.config.capture.timeouts.openUrl),
-          defaultViewport: { width: layout.width },
+          defaultViewport: { width: layout.width, deviceScaleFactor: layout.getBrowserZoom() },
         },
         this.logger
       )
@@ -201,8 +201,8 @@ export class Screenshots {
       {
         timeouts: {
           openUrl: 60000,
-          waitForElements: 30000,
-          renderComplete: 30000,
+          waitForElements: 60000,
+          renderComplete: 120000,
         },
         urls: [],
       }

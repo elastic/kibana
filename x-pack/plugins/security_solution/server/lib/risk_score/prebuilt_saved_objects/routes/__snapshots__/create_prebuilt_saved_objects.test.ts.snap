@@ -17,7 +17,7 @@ Array [
     },
     "references": Array [
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -136,7 +136,7 @@ Array [
         "type": "index-pattern",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -159,7 +159,7 @@ Array [
     },
     "references": Array [
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -190,7 +190,7 @@ Array [
         "type": "index-pattern",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -221,7 +221,7 @@ Array [
         "type": "index-pattern",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -252,7 +252,7 @@ Array [
         "type": "index-pattern",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -270,7 +270,7 @@ Array [
     "id": "id-7",
     "references": Array [
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -323,7 +323,7 @@ Array [
         "type": "tag",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -346,7 +346,7 @@ Array [
     },
     "references": Array [
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -459,7 +459,7 @@ Array [
         "type": "index-pattern",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -502,7 +502,7 @@ Array [
         "type": "tag",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -531,7 +531,7 @@ Array [
     },
     "references": Array [
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -649,7 +649,7 @@ Array [
         "type": "index-pattern",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -673,7 +673,7 @@ Array [
     },
     "references": Array [
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -798,7 +798,7 @@ Array [
         "type": "index-pattern",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -822,7 +822,7 @@ Array [
     },
     "references": Array [
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -853,7 +853,7 @@ Array [
         "type": "index-pattern",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -884,7 +884,7 @@ Array [
         "type": "index-pattern",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -915,7 +915,7 @@ Array [
         "type": "index-pattern",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -936,7 +936,7 @@ Array [
     },
     "references": Array [
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -995,7 +995,7 @@ Array [
         "type": "tag",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },
@@ -1044,7 +1044,7 @@ Array [
         "type": "tag",
       },
       Object {
-        "id": "tagID",
+        "id": "mockTagId",
         "name": "my tag",
         "type": "tag",
       },

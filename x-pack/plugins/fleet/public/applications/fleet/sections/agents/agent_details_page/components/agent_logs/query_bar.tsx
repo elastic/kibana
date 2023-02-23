@@ -28,7 +28,7 @@ export const LogQueryBar: React.FunctionComponent<{
   isQueryValid: boolean;
   onUpdateQuery: (query: string, runQuery?: boolean) => void;
 }> = memo(({ query, isQueryValid, onUpdateQuery }) => {
-  const { data, notifications, http, docLinks, uiSettings, unifiedSearch, storage } =
+  const { data, notifications, http, docLinks, uiSettings, unifiedSearch, storage, dataViews } =
     useStartServices();
   const [indexPatternFields, setIndexPatternFields] = useState<FieldSpec[]>();
 
@@ -81,7 +81,7 @@ export const LogQueryBar: React.FunctionComponent<{
         onUpdateQuery(newQuery.query as string, true);
       }}
       appName={i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' })}
-      deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
+      deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, dataViews, storage }}
     />
   );
 });

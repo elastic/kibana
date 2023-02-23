@@ -8,7 +8,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/react';
-import { setHeaderActionMenuMounter } from '../../kibana_services';
+import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverMainRoute } from './discover_main_route';
@@ -20,12 +20,14 @@ import { DiscoverMainApp } from './discover_main_app';
 import { SearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { scopedHistoryMock } from '@kbn/core/public/mocks';
 jest.mock('./discover_main_app', () => {
   return {
     DiscoverMainApp: jest.fn().mockReturnValue(<></>),
   };
 });
 
+setScopedHistory(scopedHistoryMock.create());
 describe('DiscoverMainRoute', () => {
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
     const component = mountComponent(true, true);

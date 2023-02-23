@@ -12,7 +12,7 @@ import {
   ADD_TO_CASE_DISABLED,
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
-} from '../pages/alerts/containers/alerts_table_t_grid/translations';
+} from '../pages/alerts/containers/alerts_table/translations';
 import { useGetUserCasesPermissions } from './use_get_user_cases_permissions';
 import { ObservabilityAppServices } from '../application/types';
 
@@ -69,4 +69,13 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
     userCasesPermissions.read,
     selectCaseModal,
   ]);
+};
+
+/*
+ * Wrapper hook to support trigger actions
+ * registry props for the alert table
+ *
+ * */
+export const useBulkAddToCaseTriggerActions = () => {
+  return useBulkAddToCaseActions({});
 };

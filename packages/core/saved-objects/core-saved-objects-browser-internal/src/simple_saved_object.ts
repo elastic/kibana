@@ -18,6 +18,7 @@ import type {
  * Core internal implementation of {@link SimpleSavedObject}
  *
  * @internal Should use the {@link SimpleSavedObject} interface instead
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> {
   public attributes: T;
@@ -29,6 +30,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
   public error: SavedObjectType<T>['error'];
   public references: SavedObjectType<T>['references'];
   public updatedAt: SavedObjectType<T>['updated_at'];
+  public createdAt: SavedObjectType<T>['created_at'];
   public namespaces: SavedObjectType<T>['namespaces'];
 
   constructor(
@@ -44,6 +46,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
       coreMigrationVersion,
       namespaces,
       updated_at: updatedAt,
+      created_at: createdAt,
     }: SavedObjectType<T>
   ) {
     this.id = id;
@@ -55,6 +58,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
     this.coreMigrationVersion = coreMigrationVersion;
     this.namespaces = namespaces;
     this.updatedAt = updatedAt;
+    this.createdAt = createdAt;
     if (error) {
       this.error = error;
     }

@@ -34,7 +34,9 @@ get:
               - other
               - total
               - updating
-  operationId: get-agent-status
+    '400':
+      $ref: ../components/responses/error.yaml
+  operationId: get-agent-status-deprecated
   parameters:
     - schema:
         type: string

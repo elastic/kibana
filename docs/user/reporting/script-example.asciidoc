@@ -3,7 +3,7 @@ URL that you use to download the report. Use the `GET` method in the HTTP reques
 
 To queue CSV report generation using the `POST` URL with cURL:
 
-["source","sh",subs="attributes"]
+[source,curl]
 ---------------------------------------------------------
 curl \
 -XPOST \ <1>
@@ -11,7 +11,6 @@ curl \
 -H 'kbn-xsrf: true' \ <3>
 'http://0.0.0.0:5601/api/reporting/generate/csv?jobParams=...' <4>
 ---------------------------------------------------------
-// CONSOLE
 
 <1> The required `POST` method.
 <2> The user credentials for a user with permission to access {kib} and {report-features}.
@@ -20,7 +19,7 @@ curl \
 
 An example response for a successfully queued report:
 
-[source,json]
+[source,js]
 ---------------------------------------------------------
 {
   "path": "/api/reporting/jobs/download/jxzaofkc0ykpf4062305t068", <1>
@@ -35,7 +34,6 @@ An example response for a successfully queued report:
   }
 }
 ---------------------------------------------------------
-// CONSOLE
 
 <1> The relative path on the {kib} host for downloading the report.
 <2> (Not included in the example) Internal representation of the reporting job, as found in the `.reporting-*` index.

@@ -7,41 +7,42 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, useEuiTheme } from '@elastic/eui';
-import { Route, Switch, useHistory } from 'react-router-dom';
+import { EuiButtonEmpty, EuiLink, useEuiTheme } from '@elastic/eui';
+import { Route } from '@kbn/shared-ux-router';
+import { Switch, useHistory, useLocation } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { useInspectorContext } from '@kbn/observability-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
-import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
-import { MonitorDetailsPageHeader } from './components/monitor_details/monitor_details_page_header';
-import { MonitorDetailsPageTitle } from './components/monitor_details/monitor_details_page_title';
-import { MonitorDetailsPage } from './components/monitor_details/monitor_details_page';
+import { useInspectorContext } from '@kbn/observability-plugin/public';
+import { ClientPluginsStart } from '../../plugin';
+import { getMonitorsRoute } from './components/monitors_page/route_config';
+import { getMonitorDetailsRoute } from './components/monitor_details/route_config';
+import { getStepDetailsRoute } from './components/step_details_page/route_config';
+import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
+import { getSettingsRouteConfig } from './components/settings/route_config';
+import { TestRunDetails } from './components/test_run_details/test_run_details';
+import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/monitor_add_page';
+import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
-import { MonitorsPageHeader } from './components/monitors_page/management/page_header/monitors_page_header';
-import { OverviewPage } from './components/monitors_page/overview/overview_page';
-import { SyntheticsPageTemplateComponent } from './components/common/pages/synthetics_page_template';
-import { NotFoundPage } from './components/common/pages/not_found';
-import { ServiceAllowedWrapper } from './components/common/wrappers/service_allowed_wrapper';
 import {
-  MonitorTypePortalNode,
   MonitorDetailsLinkPortalNode,
+  MonitorTypePortalNode,
 } from './components/monitor_add_edit/portals';
 import {
+  GETTING_STARTED_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
-  MONITORS_ROUTE,
-  OVERVIEW_ROUTE,
-  GETTING_STARTED_ROUTE,
-  MONITOR_ROUTE,
+  TEST_RUN_DETAILS_ROUTE,
 } from '../../../common/constants';
-import { MonitorPage } from './components/monitors_page/monitor_page';
+import { PLUGIN } from '../../../common/constants/plugin';
 import { apiService } from '../../utils/api_service';
+import { getErrorDetailsRouteConfig } from './components/error_details/route_config';
 
-type RouteProps = LazyObservabilityPageTemplateProps & {
+export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
   component: React.FC;
   dataTestSubj: string;
@@ -61,122 +62,28 @@ export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
 
 const getRoutes = (
   euiTheme: EuiThemeComputed,
-  history: ReturnType<typeof useHistory>
+  history: ReturnType<typeof useHistory>,
+  location: ReturnType<typeof useLocation>,
+  syntheticsPath: string
 ): RouteProps[] => {
   return [
+    ...getSettingsRouteConfig(history, syntheticsPath, baseTitle),
+    getErrorDetailsRouteConfig(history, syntheticsPath, baseTitle),
+    getTestRunDetailsRoute(history, syntheticsPath, baseTitle),
+    getStepDetailsRoute(history, syntheticsPath, baseTitle),
+    ...getMonitorDetailsRoute(history, syntheticsPath, baseTitle),
+    ...getMonitorsRoute(history, location, syntheticsPath, baseTitle),
     {
       title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
         defaultMessage: 'Synthetics Getting Started | {baseTitle}',
         values: { baseTitle },
       }),
       path: GETTING_STARTED_ROUTE,
-      component: () => <GettingStartedPage />,
+      component: GettingStartedPage,
       dataTestSubj: 'syntheticsGettingStartedPage',
       pageSectionProps: {
         alignment: 'center',
         paddingSize: 'none',
-      },
-    },
-    {
-      title: i18n.translate('xpack.synthetics.monitorDetails.title', {
-        defaultMessage: 'Synthetics Monitor Details | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: MONITOR_ROUTE,
-      component: () => <MonitorDetailsPage />,
-      dataTestSubj: 'syntheticsMonitorDetailsPage',
-      pageHeader: {
-        children: <MonitorDetailsPageHeader />,
-        pageTitle: <MonitorDetailsPageTitle />,
-        // rightSideItems: [<RunTestManually />],
-      },
-    },
-    {
-      title: i18n.translate('xpack.synthetics.overviewRoute.title', {
-        defaultMessage: 'Synthetics Overview | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: OVERVIEW_ROUTE,
-      component: () => <OverviewPage />,
-      dataTestSubj: 'syntheticsOverviewPage',
-      pageHeader: {
-        pageTitle: (
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.synthetics.overview.pageHeader.title"
-                defaultMessage="Overview"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        rightSideItems: [
-          /* <AddMonitorBtn />*/
-        ],
-        tabs: [
-          {
-            label: (
-              <FormattedMessage
-                id="xpack.synthetics.monitorManagement.overviewTab.title"
-                defaultMessage="Overview"
-              />
-            ),
-            isSelected: true,
-          },
-          {
-            label: (
-              <FormattedMessage
-                id="xpack.synthetics.monitorManagement.monitorsTab.title"
-                defaultMessage="Management"
-              />
-            ),
-            onClick: () =>
-              history.push({
-                pathname: MONITORS_ROUTE,
-              }),
-          },
-        ],
-      },
-    },
-    {
-      title: i18n.translate('xpack.synthetics.monitorManagementRoute.title', {
-        defaultMessage: 'Monitor Management | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: MONITORS_ROUTE,
-      component: () => (
-        <>
-          <ServiceAllowedWrapper>
-            <MonitorPage />
-          </ServiceAllowedWrapper>
-        </>
-      ),
-      dataTestSubj: 'syntheticsMonitorManagementPage',
-      pageHeader: {
-        pageTitle: <MonitorsPageHeader />,
-        tabs: [
-          {
-            label: (
-              <FormattedMessage
-                id="xpack.synthetics.monitorManagement.overviewTab.title"
-                defaultMessage="Overview"
-              />
-            ),
-            onClick: () =>
-              history.push({
-                pathname: OVERVIEW_ROUTE,
-              }),
-          },
-          {
-            label: (
-              <FormattedMessage
-                id="xpack.synthetics.monitorManagement.monitorsTab.title"
-                defaultMessage="Management"
-              />
-            ),
-            isSelected: true,
-          },
-        ],
       },
     },
     {
@@ -185,12 +92,9 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_ADD_ROUTE,
-      component: () => (
-        <ServiceAllowedWrapper>
-          <MonitorAddPage />
-        </ServiceAllowedWrapper>
-      ),
+      component: MonitorAddPageWithServiceAllowed,
       dataTestSubj: 'syntheticsMonitorAddPage',
+      restrictWidth: true,
       pageHeader: {
         pageTitle: (
           <FormattedMessage
@@ -222,12 +126,9 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_EDIT_ROUTE,
-      component: () => (
-        <ServiceAllowedWrapper>
-          <MonitorEditPage />
-        </ServiceAllowedWrapper>
-      ),
+      component: MonitorEditPageWithServiceAllowed,
       dataTestSubj: 'syntheticsMonitorEditPage',
+      restrictWidth: true,
       pageHeader: {
         pageTitle: (
           <FormattedMessage
@@ -243,6 +144,23 @@ const getRoutes = (
         ],
       },
     },
+    {
+      title: i18n.translate('xpack.synthetics.testRunDetailsRoute.title', {
+        defaultMessage: 'Test run details | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: TEST_RUN_DETAILS_ROUTE,
+      component: TestRunDetails,
+      dataTestSubj: 'syntheticsMonitorTestRunDetailsPage',
+      pageHeader: {
+        pageTitle: (
+          <FormattedMessage
+            id="xpack.synthetics.testRunDetailsRoute.page.title"
+            defaultMessage="Test run details"
+          />
+        ),
+      },
+    },
   ];
 };
 
@@ -254,10 +172,19 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }
 };
 
 export const PageRouter: FC = () => {
+  const { application, observability } = useKibana<ClientPluginsStart>().services;
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
-  const routes = getRoutes(euiTheme, history);
+  const location = useLocation();
+
+  const routes = getRoutes(
+    euiTheme,
+    history,
+    location,
+    application.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)
+  );
+  const PageTemplateComponent = observability.navigation.PageTemplate;
 
   apiService.addInspectorRequest = addInspectorRequest;
 
@@ -275,18 +202,39 @@ export const PageRouter: FC = () => {
           <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
-              <SyntheticsPageTemplateComponent
-                path={path}
+              <PageTemplateComponent
                 pageHeader={pageHeader}
+                data-test-subj={'synthetics-page-template'}
+                isPageDataLoaded={true}
                 {...pageTemplateProps}
               >
                 <RouteComponent />
-              </SyntheticsPageTemplateComponent>
+              </PageTemplateComponent>
             </div>
           </Route>
         )
       )}
-      <Route component={NotFoundPage} />
+      <Route
+        component={() => (
+          <PageTemplateComponent>
+            <NotFoundPrompt
+              actions={[
+                <EuiButtonEmpty
+                  iconType="arrowLeft"
+                  flush="both"
+                  onClick={() => {
+                    application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID);
+                  }}
+                >
+                  {i18n.translate('xpack.synthetics.routes.goToSynthetics', {
+                    defaultMessage: 'Go to Synthetics Home Page',
+                  })}
+                </EuiButtonEmpty>,
+              ]}
+            />
+          </PageTemplateComponent>
+        )}
+      />
     </Switch>
   );
 };

@@ -18,6 +18,7 @@ import {
   useGlobalFullScreen,
 } from '../../../../common/containers/use_full_screen';
 import { useSessionView, useSessionViewNavigation } from './use_session_view';
+import { TableId } from '../../../../../common/types';
 
 const mockDispatch = jest.fn();
 jest.mock('../../../../common/hooks/use_selector');
@@ -61,22 +62,17 @@ jest.mock('../../../../common/lib/kibana', () => {
         timelines: {
           getLastUpdated: jest.fn(),
           getLoadingPanel: jest.fn(),
-          getUseDraggableKeyboardWrapper: () =>
-            jest.fn().mockReturnValue({
-              onBlur: jest.fn(),
-              onKeyDown: jest.fn(),
-            }),
         },
       },
     }),
   };
 });
-const mockDetails = () => {};
+const mockOpenDetailFn = jest.fn();
 
 jest.mock('../../side_panel/hooks/use_detail_panel', () => {
   return {
     useDetailPanel: () => ({
-      openDetailsPanel: mockDetails,
+      openEventDetailsPanel: mockOpenDetailFn,
       handleOnDetailsPanelClosed: () => {},
       DetailsPanel: () => <div />,
       shouldShowDetailsPanel: false,
@@ -123,7 +119,7 @@ describe('useSessionView with active timeline and a session id and graph event i
     renderHook(
       () => {
         const testProps = {
-          timelineId: TimelineId.active,
+          scopeId: TimelineId.active,
         };
         return useSessionView(testProps);
       },
@@ -136,7 +132,7 @@ describe('useSessionView with active timeline and a session id and graph event i
     const { result } = renderHook(
       () => {
         const testProps = {
-          timelineId: TimelineId.active,
+          scopeId: TimelineId.active,
         };
         return useSessionViewNavigation(testProps);
       },
@@ -151,7 +147,7 @@ describe('useSessionView with active timeline and a session id and graph event i
     renderHook(
       () => {
         const testProps = {
-          timelineId: TimelineId.test,
+          scopeId: TimelineId.test,
           height: 1118,
         };
         return useSessionView(testProps);
@@ -161,7 +157,8 @@ describe('useSessionView with active timeline and a session id and graph event i
     expect(kibana.services.sessionView.getSessionView).toHaveBeenCalledWith({
       height: 1000,
       sessionEntityId: 'test',
-      loadAlertDetails: mockDetails,
+      loadAlertDetails: mockOpenDetailFn,
+      canAccessEndpointManagement: false,
     });
   });
 
@@ -191,7 +188,7 @@ describe('useSessionView with active timeline and a session id and graph event i
       const { result } = renderHook(
         () => {
           const testProps = {
-            timelineId: TimelineId.hostsPageEvents,
+            scopeId: TableId.hostsPageEvents,
           };
           return useSessionViewNavigation(testProps);
         },
@@ -232,7 +229,7 @@ describe('useSessionView with active timeline and a session id and graph event i
       const { result } = renderHook(
         () => {
           const testProps = {
-            timelineId: TimelineId.active,
+            scopeId: TimelineId.active,
           };
           return useSessionView(testProps);
         },
@@ -240,7 +237,7 @@ describe('useSessionView with active timeline and a session id and graph event i
       );
       expect(kibana.services.sessionView.getSessionView).toHaveBeenCalled();
 
-      expect(result.current).toHaveProperty('openDetailsPanel');
+      expect(result.current).toHaveProperty('openEventDetailsPanel');
       expect(result.current).toHaveProperty('shouldShowDetailsPanel');
       expect(result.current).toHaveProperty('SessionView');
       expect(result.current).toHaveProperty('DetailsPanel');
@@ -253,7 +250,7 @@ describe('useSessionView with active timeline and a session id and graph event i
       const { result } = renderHook(
         () => {
           const testProps = {
-            timelineId: TimelineId.hostsPageEvents,
+            scopeId: TableId.hostsPageEvents,
           };
           return useSessionViewNavigation(testProps);
         },

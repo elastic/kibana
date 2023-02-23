@@ -15,6 +15,7 @@ export const policyFactory = (): PolicyConfig => {
   return {
     windows: {
       events: {
+        credential_access: true,
         dll_and_driver_load: true,
         dns: true,
         file: true,
@@ -104,6 +105,9 @@ export const policyFactory = (): PolicyConfig => {
       logging: {
         file: 'info',
       },
+      advanced: {
+        capture_env_vars: 'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
+      },
     },
     linux: {
       events: {
@@ -141,6 +145,9 @@ export const policyFactory = (): PolicyConfig => {
       },
       logging: {
         file: 'info',
+      },
+      advanced: {
+        capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
       },
     },
   };
@@ -200,7 +207,7 @@ export const policyFactoryWithoutPaidFeatures = (
         ...policy.windows.popup,
         malware: {
           message: '',
-          enabled: true,
+          enabled: true, // disabling/configuring malware popup is a paid feature
         },
         ransomware: {
           message: '',
@@ -230,7 +237,7 @@ export const policyFactoryWithoutPaidFeatures = (
         ...policy.mac.popup,
         malware: {
           message: '',
-          enabled: true,
+          enabled: true, // disabling/configuring malware popup is a paid feature
         },
         memory_protection: {
           message: '',
@@ -256,7 +263,7 @@ export const policyFactoryWithoutPaidFeatures = (
         ...policy.linux.popup,
         malware: {
           message: '',
-          enabled: true,
+          enabled: true, // disabling/configuring malware popup is a paid feature
         },
         memory_protection: {
           message: '',
@@ -272,7 +279,7 @@ export const policyFactoryWithoutPaidFeatures = (
 };
 
 /**
- * Strips paid features from an existing or new `PolicyConfig` for gold and below license
+ * Enables support for paid features for an existing or new `PolicyConfig` for platinum and above license
  */
 export const policyFactoryWithSupportedFeatures = (
   policy: PolicyConfig = policyFactory()

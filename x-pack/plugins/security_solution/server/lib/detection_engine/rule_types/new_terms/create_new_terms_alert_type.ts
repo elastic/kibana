@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { NewTermsRuleParams } from '../../schemas/rule_schemas';
-import { newTermsRuleParams } from '../../schemas/rule_schemas';
+import type { NewTermsRuleParams } from '../../rule_schema';
+import { newTermsRuleParams } from '../../rule_schema';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { singleSearchAfter } from '../../signals/single_search_after';
 import { getFilter } from '../../signals/get_filter';
 import { wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
+import type { EventsAndTerms } from '../factories/utils/wrap_new_terms_alerts';
 import type {
   DocFetchAggResult,
   RecentTermsAggResult,
@@ -26,13 +26,19 @@ import {
   buildRecentTermsAgg,
   buildNewTermsAgg,
 } from './build_new_terms_aggregation';
-import type { SignalSource } from '../../signals/types';
 import { validateIndexPatterns } from '../utils';
-import { parseDateString, validateHistoryWindowStart } from './utils';
+import {
+  parseDateString,
+  validateHistoryWindowStart,
+  transformBucketsToValues,
+  getNewTermsRuntimeMappings,
+  getAggregationField,
+  decodeMatchedValues,
+} from './utils';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
-  logUnprocessedExceptionsWarnings,
+  getUnprocessedExceptionsWarnings,
 } from '../../signals/utils';
 import { createEnrichEventsFunction } from '../../signals/enrichments';
 
@@ -100,6 +106,7 @@ export const createNewTermsAlertType = (
           aggregatableTimestampField,
           exceptionFilter,
           unprocessedExceptions,
+          alertTimestampOverride,
         },
         services,
         params,
@@ -113,8 +120,6 @@ export const createNewTermsAlertType = (
         historyWindowStart: params.historyWindowStart,
         from: params.from,
       });
-
-      logUnprocessedExceptionsWarnings(unprocessedExceptions, ruleExecutionLogger);
 
       const esFilter = await getFilter({
         filters: params.filters,
@@ -137,6 +142,11 @@ export const createNewTermsAlertType = (
 
       const result = createSearchAfterReturnType();
 
+      const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+      if (exceptionsWarning) {
+        result.warningMessages.push(exceptionsWarning);
+      }
+
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
       // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
       // exactly enough new alerts to hit maxSignals without truncating the array of alerts. We check both because
@@ -149,7 +159,7 @@ export const createNewTermsAlertType = (
         // ones are new.
         const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
           aggregations: buildRecentTermsAgg({
-            field: params.newTermsFields[0],
+            fields: params.newTermsFields,
             after: afterKey,
           }),
           searchAfterSortIds: undefined,
@@ -182,9 +192,11 @@ export const createNewTermsAlertType = (
           break;
         }
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
-        const includeValues = bucketsForField
-          .map((bucket) => Object.values(bucket.key)[0])
-          .filter((value): value is string | number => value != null);
+        const includeValues = transformBucketsToValues(params.newTermsFields, bucketsForField);
+        const newTermsRuntimeMappings = getNewTermsRuntimeMappings(
+          params.newTermsFields,
+          bucketsForField
+        );
 
         // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
         // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
@@ -197,10 +209,13 @@ export const createNewTermsAlertType = (
           aggregations: buildNewTermsAgg({
             newValueWindowStart: tuple.from,
             timestampField: aggregatableTimestampField,
-            field: params.newTermsFields[0],
+            field: getAggregationField(params.newTermsFields),
             include: includeValues,
           }),
-          runtimeMappings,
+          runtimeMappings: {
+            ...runtimeMappings,
+            ...newTermsRuntimeMappings,
+          },
           searchAfterSortIds: undefined,
           index: inputIndex,
           // For Phase 2, we expand the time range to aggregate over the history window
@@ -240,10 +255,13 @@ export const createNewTermsAlertType = (
           } = await singleSearchAfter({
             aggregations: buildDocFetchAgg({
               timestampField: aggregatableTimestampField,
-              field: params.newTermsFields[0],
+              field: getAggregationField(params.newTermsFields),
               include: actualNewTerms,
             }),
-            runtimeMappings,
+            runtimeMappings: {
+              ...runtimeMappings,
+              ...newTermsRuntimeMappings,
+            },
             searchAfterSortIds: undefined,
             index: inputIndex,
             // For phase 3, we go back to aggregating only over the rule interval - excluding the history window
@@ -265,13 +283,14 @@ export const createNewTermsAlertType = (
             throw new Error('Aggregations were missing on document fetch search result');
           }
 
-          const eventsAndTerms: Array<{
-            event: estypes.SearchHit<SignalSource>;
-            newTerms: Array<string | number | null>;
-          }> = docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => ({
-            event: bucket.docs.hits.hits[0],
-            newTerms: [bucket.key],
-          }));
+          const eventsAndTerms: EventsAndTerms[] =
+            docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => {
+              const newTerms = decodeMatchedValues(params.newTermsFields, bucket.key);
+              return {
+                event: bucket.docs.hits.hits[0],
+                newTerms,
+              };
+            });
 
           const wrappedAlerts = wrapNewTermsAlerts({
             eventsAndTerms,
@@ -279,6 +298,8 @@ export const createNewTermsAlertType = (
             completeRule,
             mergeStrategy,
             indicesToQuery: inputIndex,
+            alertTimestampOverride,
+            ruleExecutionLogger,
           });
 
           const bulkCreateResult = await bulkCreate(

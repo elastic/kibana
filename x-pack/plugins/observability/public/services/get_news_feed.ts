@@ -6,6 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
+import semverCoerce from 'semver/functions/coerce';
 
 export interface NewsItem {
   title: { en: string };
@@ -17,10 +18,27 @@ export interface NewsItem {
 interface NewsFeed {
   items: NewsItem[];
 }
+/**
+ * Removes the suffix that is sometimes appended to the Kibana version,
+ * (e.g. `8.0.0-SNAPSHOT-rc1`), which is typically only seen in non-production
+ * environments
+ */
+const removeSuffixFromVersion = (kibanaVersion?: string) =>
+  semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
 
-export async function getNewsFeed({ http }: { http: HttpSetup }): Promise<NewsFeed> {
+export async function getNewsFeed({
+  http,
+  kibanaVersion,
+}: {
+  http: HttpSetup;
+  kibanaVersion: string;
+}): Promise<NewsFeed> {
   try {
-    return await http.get('https://feeds.elastic.co/observability-solution/v8.0.0.json');
+    return await http.get(
+      `https://feeds.elastic.co/observability-solution/v${removeSuffixFromVersion(
+        kibanaVersion
+      )}.json`
+    );
   } catch (e) {
     console.error('Error while fetching news feed', e);
     return { items: [] };

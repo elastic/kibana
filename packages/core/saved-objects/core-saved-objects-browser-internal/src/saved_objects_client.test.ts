@@ -612,6 +612,7 @@ describe('SavedObjectsClient', () => {
         defaultSearchOperator: 'OR' as const,
         fields: ['title'],
         hasReference: { id: '1', type: 'reference' },
+        hasNoReference: { id: '1', type: 'reference' },
         page: 10,
         perPage: 100,
         search: 'what is the meaning of life?|life',
@@ -633,6 +634,7 @@ describe('SavedObjectsClient', () => {
                 "fields": Array [
                   "title",
                 ],
+                "has_no_reference": "{\\"id\\":\\"1\\",\\"type\\":\\"reference\\"}",
                 "has_reference": "{\\"id\\":\\"1\\",\\"type\\":\\"reference\\"}",
                 "page": 10,
                 "per_page": 100,

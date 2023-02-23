@@ -11,7 +11,7 @@ import fs from 'fs';
 import del from 'del';
 
 import { cleanPrevious, cleanArtifacts } from './cleanup';
-import { Logger } from '../lib/logger';
+import { Logger } from '../../cli/logger';
 
 describe('kibana cli', function () {
   describe('plugin installer', function () {

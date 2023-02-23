@@ -5,23 +5,57 @@
  * 2.0.
  */
 
+import type { SingleCaseMetricsFeature, CaseUserActionTypeWithAll } from './types';
+
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
-export const DEFAULT_TABLE_LIMIT = 5;
+export const DEFAULT_TABLE_LIMIT = 10;
 
-export const CASE_VIEW_CACHE_KEY = 'case';
-export const CASE_VIEW_ACTIONS_CACHE_KEY = 'user-actions';
-export const CASE_VIEW_METRICS_CACHE_KEY = 'metrics';
-export const CASE_CONFIGURATION_CACHE_KEY = 'case-configuration';
-export const CASE_LIST_CACHE_KEY = 'case-list';
-export const CASE_CONNECTORS_CACHE_KEY = 'case-connectors';
-export const CASE_LICENSE_CACHE_KEY = 'case-license-action';
-export const CASE_TAGS_CACHE_KEY = 'case-tags';
+export const casesQueriesKeys = {
+  all: ['cases'] as const,
+  users: ['users'] as const,
+  connectors: ['connectors'] as const,
+  alerts: ['alerts'] as const,
+  userActions: ['user-actions'] as const,
+  connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
+  casesList: () => [...casesQueriesKeys.all, 'list'] as const,
+  casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
+  casesStatuses: () => [...casesQueriesKeys.casesList(), 'statuses'] as const,
+  cases: (params: unknown) => [...casesQueriesKeys.casesList(), 'all-cases', params] as const,
+  caseView: () => [...casesQueriesKeys.all, 'case'] as const,
+  case: (id: string) => [...casesQueriesKeys.caseView(), id] as const,
+  caseMetrics: (id: string, features: SingleCaseMetricsFeature[]) =>
+    [...casesQueriesKeys.case(id), 'metrics', features] as const,
+  caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
+  caseUsers: (id: string) => [...casesQueriesKeys.case(id), 'users'],
+  caseUserActions: (
+    id: string,
+    filterActionType: CaseUserActionTypeWithAll,
+    sortOrder: 'asc' | 'desc'
+  ) =>
+    [
+      ...casesQueriesKeys.case(id),
+      ...casesQueriesKeys.userActions,
+      filterActionType,
+      sortOrder,
+    ] as const,
+  caseUserActionsStats: (id: string) => [
+    ...casesQueriesKeys.case(id),
+    ...casesQueriesKeys.userActions,
+    'stats',
+  ],
+  userProfiles: () => [...casesQueriesKeys.users, 'user-profiles'] as const,
+  userProfilesList: (ids: string[]) => [...casesQueriesKeys.userProfiles(), ids] as const,
+  currentUser: () => [...casesQueriesKeys.users, 'current-user'] as const,
+  suggestUsers: (params: unknown) => [...casesQueriesKeys.users, 'suggest', params] as const,
+  connectorTypes: () => [...casesQueriesKeys.connectors, 'types'] as const,
+  license: () => [...casesQueriesKeys.connectors, 'license'] as const,
+  tags: () => [...casesQueriesKeys.all, 'tags'] as const,
+  alertFeatureIds: (alertRegistrationContexts: string[]) =>
+    [...casesQueriesKeys.alerts, 'features', alertRegistrationContexts] as const,
+};
 
-/**
- * User profiles
- */
-
-export const USER_PROFILES_CACHE_KEY = 'user-profiles';
-export const USER_PROFILES_SUGGEST_CACHE_KEY = 'suggest';
-export const USER_PROFILES_BULK_GET_CACHE_KEY = 'bulk-get';
-export const USER_PROFILES_GET_CURRENT_CACHE_KEY = 'get-current';
+export const casesMutationsKeys = {
+  deleteCases: ['delete-cases'] as const,
+  updateCases: ['update-cases'] as const,
+  deleteComment: ['delete-comment'] as const,
+};

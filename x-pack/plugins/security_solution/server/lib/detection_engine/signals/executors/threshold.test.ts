@@ -11,10 +11,10 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { thresholdExecutor } from './threshold';
-import { getThresholdRuleParams, getCompleteRuleMock } from '../../schemas/rule_schemas.mock';
+import { getThresholdRuleParams, getCompleteRuleMock } from '../../rule_schema/mocks';
 import { sampleEmptyAggsSearchResults } from '../__mocks__/es_results';
 import { getThresholdTermsHash } from '../utils';
-import type { ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { ThresholdRuleParams } from '../../rule_schema';
 import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
@@ -141,7 +141,7 @@ describe('threshold_executor', () => {
           [`${getThresholdTermsHash(terms2)}`]: signalHistoryRecord2,
         },
       };
-      await thresholdExecutor({
+      const result = await thresholdExecutor({
         completeRule: thresholdCompleteRule,
         tuple,
         services: alertServices,
@@ -165,10 +165,11 @@ describe('threshold_executor', () => {
         exceptionFilter: undefined,
         unprocessedExceptions: [getExceptionListItemSchemaMock()],
       });
-      expect(ruleExecutionLogger.warn).toHaveBeenCalled();
-      expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
-        "The following exceptions won't be applied to rule execution"
-      );
+      expect(result.warningMessages).toEqual([
+        `The following exceptions won't be applied to rule execution: ${
+          getExceptionListItemSchemaMock().name
+        }`,
+      ]);
     });
   });
 });

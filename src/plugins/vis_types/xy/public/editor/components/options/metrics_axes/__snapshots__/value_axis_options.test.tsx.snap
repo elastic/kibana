@@ -3,6 +3,7 @@
 exports[`ValueAxisOptions component should init with the default set of props 1`] = `
 <Fragment>
   <SelectOption
+    data-test-subj="valueAxisPosition-ValueAxis-1"
     label="Position"
     options={
       Array [

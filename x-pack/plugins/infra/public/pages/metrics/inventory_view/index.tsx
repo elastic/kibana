@@ -6,14 +6,11 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { css } from '@emotion/react';
 import { FilterBar } from './components/filter_bar';
-
-import { DocumentTitle } from '../../../components/document_title';
-
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
@@ -27,6 +24,7 @@ import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
 import { fullHeightContentStyles } from '../../../page_template.styles';
+import { SurveyKubernetes } from './components/survey_kubernetes';
 
 export const SnapshotPage = () => {
   const {
@@ -49,16 +47,6 @@ export const SnapshotPage = () => {
 
   return (
     <EuiErrorBoundary>
-      <DocumentTitle
-        title={(previousTitle: string) =>
-          i18n.translate('xpack.infra.infrastructureSnapshotPage.documentTitle', {
-            defaultMessage: '{previousTitle} | Inventory',
-            values: {
-              previousTitle,
-            },
-          })
-        }
-      />
       {isLoading && !source ? (
         <SourceLoadingPage />
       ) : metricIndicesExist ? (
@@ -73,11 +61,14 @@ export const SnapshotPage = () => {
                 hasData={metricIndicesExist}
                 pageHeader={{
                   pageTitle: inventoryTitle,
-                  rightSideItems: [<SavedViews />],
+                  rightSideItems: [<SavedViews />, <SurveyKubernetes />],
                 }}
                 pageSectionProps={{
                   contentProps: {
-                    css: fullHeightContentStyles,
+                    css: css`
+                      ${fullHeightContentStyles};
+                      padding-bottom: 0;
+                    `,
                   },
                 }}
               >

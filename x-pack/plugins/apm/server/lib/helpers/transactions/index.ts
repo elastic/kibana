@@ -13,11 +13,15 @@ import {
   TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_ROOT,
   PARENT_ID,
-} from '../../../../common/elasticsearch_fieldnames';
+  METRICSET_INTERVAL,
+  METRICSET_NAME,
+  TRANSACTION_DURATION_SUMMARY,
+} from '../../../../common/es_fields/apm';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../../common/document_type';
 
-export async function getHasAggregatedTransactions({
+export async function getHasTransactionsEvents({
   start,
   end,
   apmEventClient,
@@ -26,7 +30,7 @@ export async function getHasAggregatedTransactions({
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
-  kuery: string;
+  kuery?: string;
 }) {
   const response = await apmEventClient.search(
     'get_has_aggregated_transactions',
@@ -37,7 +41,7 @@ export async function getHasAggregatedTransactions({
       body: {
         track_total_hits: 1,
         terminate_after: 1,
-        size: 1,
+        size: 0,
         query: {
           bool: {
             filter: [
@@ -54,7 +58,7 @@ export async function getHasAggregatedTransactions({
   return response.hits.total.value > 0;
 }
 
-export async function getSearchAggregatedTransactions({
+export async function getSearchTransactionsEvents({
   config,
   start,
   end,
@@ -65,16 +69,16 @@ export async function getSearchAggregatedTransactions({
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
-  kuery: string;
+  kuery?: string;
 }): Promise<boolean> {
   switch (config.searchAggregatedTransactions) {
     case SearchAggregatedTransactionSetting.always:
       return kuery
-        ? getHasAggregatedTransactions({ start, end, apmEventClient, kuery })
+        ? getHasTransactionsEvents({ start, end, apmEventClient, kuery })
         : true;
 
     case SearchAggregatedTransactionSetting.auto:
-      return getHasAggregatedTransactions({
+      return getHasTransactionsEvents({
         start,
         end,
         apmEventClient,
@@ -87,18 +91,47 @@ export async function getSearchAggregatedTransactions({
 }
 
 export function getDurationFieldForTransactions(
-  searchAggregatedTransactions: boolean
+  typeOrSearchAgggregatedTransactions:
+    | ApmDocumentType.ServiceTransactionMetric
+    | ApmDocumentType.TransactionMetric
+    | ApmDocumentType.TransactionEvent
+    | boolean
 ) {
-  return searchAggregatedTransactions
-    ? TRANSACTION_DURATION_HISTOGRAM
-    : TRANSACTION_DURATION;
+  let type: ApmDocumentType;
+  if (typeOrSearchAgggregatedTransactions === true) {
+    type = ApmDocumentType.TransactionMetric;
+  } else if (typeOrSearchAgggregatedTransactions === false) {
+    type = ApmDocumentType.TransactionEvent;
+  } else {
+    type = typeOrSearchAgggregatedTransactions;
+  }
+
+  if (type === ApmDocumentType.ServiceTransactionMetric) {
+    return TRANSACTION_DURATION_SUMMARY;
+  }
+
+  if (type === ApmDocumentType.TransactionMetric) {
+    return TRANSACTION_DURATION_HISTOGRAM;
+  }
+
+  return TRANSACTION_DURATION;
 }
 
 export function getDocumentTypeFilterForTransactions(
   searchAggregatedTransactions: boolean
 ) {
   return searchAggregatedTransactions
-    ? [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }]
+    ? [
+        {
+          bool: {
+            filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
+            must_not: [
+              { terms: { [METRICSET_INTERVAL]: ['10m', '60m'] } },
+              { term: { [METRICSET_NAME]: 'service_transaction' } },
+            ],
+          },
+        },
+      ]
     : [];
 }
 

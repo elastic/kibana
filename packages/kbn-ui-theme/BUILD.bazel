@@ -1,8 +1,8 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
+load("//src/dev/bazel:index.bzl", "pkg_npm", "ts_project")
 
-PKG_BASE_NAME = "kbn-ui-theme"
+PKG_DIRNAME = "kbn-ui-theme"
 PKG_REQUIRE_NAME = "@kbn/ui-theme"
 
 SOURCE_FILES = glob(
@@ -45,25 +45,11 @@ TYPES_DEPS = [
   "@npm//tslib",
 ]
 
-jsts_transpiler(
-  name = "target_node",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-)
-
-jsts_transpiler(
-  name = "target_web",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-  web = True,
-)
-
 ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
   deps = [
     "//:tsconfig.base.json",
-    "//:tsconfig.bazel.json",
   ],
 )
 
@@ -73,48 +59,29 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   tsconfig = ":tsconfig",
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
+  srcs = NPM_MODULE_EXTRA_FILES + SRCS,
+  deps = RUNTIME_DEPS,
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+js_library(
+  name = "npm_module_types",
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
+  deps = RUNTIME_DEPS + [":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 
 pkg_npm(
-  name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
-)
-
-filegroup(
-  name = "build",
-  srcs = [
-    ":npm_module",
-  ],
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
   name = "build_types",
-  srcs = [
-    ":npm_module_types",
-  ],
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

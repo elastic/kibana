@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -33,10 +33,10 @@ import { DescriptionListStyled, OverviewWrapper } from '../../../common/componen
 import * as i18n from './translations';
 
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { useUserRiskScore } from '../../../risk_score/containers';
-import { RiskScore } from '../../../common/components/severity/common';
+import { useRiskScore } from '../../../explore/containers/risk_score';
+import { RiskScore } from '../../../explore/components/risk_score/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
-import { RiskScoreHeaderTitle } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
+import { RiskScoreHeaderTitle } from '../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -52,6 +52,7 @@ export interface UserSummaryProps {
   narrowDateRange: NarrowDateRange;
   userName: string;
   indexPatterns: string[];
+  jobNameById: Record<string, string | undefined>;
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup)`
@@ -74,6 +75,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     endDate,
     userName,
     indexPatterns,
+    jobNameById,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -85,10 +87,19 @@ export const UserOverview = React.memo<UserSummaryProps>(
 
     const { from, to } = useGlobalTime();
 
-    const [_, { data: userRisk, isLicenseValid }] = useUserRiskScore({
+    const timerange = useMemo(
+      () => ({
+        from,
+        to,
+      }),
+      [from, to]
+    );
+
+    const { data: userRisk, isLicenseValid } = useRiskScore({
       filterQuery,
       skip: userName == null,
-      timerange: { to, from },
+      timerange,
+      riskEntity: RiskScoreEntity.user,
     });
 
     const getDefaultRenderer = useCallback(
@@ -111,7 +122,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
             <RiskScoreHeaderTitle
               title={i18n.USER_RISK_SCORE}
               riskScoreEntity={RiskScoreEntity.user}
-              showTooltip={false}
             />
           ),
           description: (
@@ -127,7 +137,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
             <RiskScoreHeaderTitle
               title={i18n.USER_RISK_CLASSIFICATION}
               riskScoreEntity={RiskScoreEntity.host}
-              showTooltip={false}
             />
           ),
           description: (
@@ -172,6 +181,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
                     endDate={endDate}
                     isLoading={isLoadingAnomaliesData}
                     narrowDateRange={narrowDateRange}
+                    jobNameById={jobNameById}
                   />
                 ),
               },
@@ -185,6 +195,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
         narrowDateRange,
         startDate,
         userPermissions,
+        jobNameById,
       ]
     );
 

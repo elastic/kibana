@@ -31,7 +31,7 @@ describe('Http server', () => {
       maxPayload: new ByteSizeValue(1024),
       port: 10002,
       ssl: { enabled: false },
-      compression: { enabled: true },
+      compression: { enabled: true, brotli: { enabled: false } },
       requestId: {
         allowFromAnyIp: true,
         ipAllowlist: [],

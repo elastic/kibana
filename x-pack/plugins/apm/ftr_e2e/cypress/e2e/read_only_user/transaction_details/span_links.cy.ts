@@ -50,8 +50,8 @@ describe('Span links', () => {
         );
         cy.contains('Transaction A').click();
         cy.contains('2 Span links');
-        cy.get(
-          `[data-test-subj="spanLinksBadge_${ids.producerInternalOnlyIds.spanAId}"]`
+        cy.getByTestSubj(
+          `spanLinksBadge_${ids.producerInternalOnlyIds.spanAId}`
         ).realHover();
         cy.contains('2 Span links found');
         cy.contains('2 incoming');
@@ -64,8 +64,8 @@ describe('Span links', () => {
         );
         cy.contains('Transaction B').click();
         cy.contains('2 Span links');
-        cy.get(
-          `[data-test-subj="spanLinksBadge_${ids.producerExternalOnlyIds.spanBId}"]`
+        cy.getByTestSubj(
+          `spanLinksBadge_${ids.producerExternalOnlyIds.spanBId}`
         ).realHover();
         cy.contains('2 Span links found');
         cy.contains('1 incoming');
@@ -78,8 +78,8 @@ describe('Span links', () => {
         );
         cy.contains('Transaction C').click();
         cy.contains('2 Span links');
-        cy.get(
-          `[data-test-subj="spanLinksBadge_${ids.producerConsumerIds.transactionCId}"]`
+        cy.getByTestSubj(
+          `spanLinksBadge_${ids.producerConsumerIds.transactionCId}`
         ).realHover();
         cy.contains('2 Span links found');
         cy.contains('1 incoming');
@@ -92,8 +92,8 @@ describe('Span links', () => {
         );
         cy.contains('Transaction C').click();
         cy.contains('1 Span link');
-        cy.get(
-          `[data-test-subj="spanLinksBadge_${ids.producerConsumerIds.spanCId}"]`
+        cy.getByTestSubj(
+          `spanLinksBadge_${ids.producerConsumerIds.spanCId}`
         ).realHover();
         cy.contains('1 Span link found');
         cy.contains('1 incoming');
@@ -106,8 +106,8 @@ describe('Span links', () => {
         );
         cy.contains('Transaction D').click();
         cy.contains('2 Span links');
-        cy.get(
-          `[data-test-subj="spanLinksBadge_${ids.producerMultipleIds.transactionDId}"]`
+        cy.getByTestSubj(
+          `spanLinksBadge_${ids.producerMultipleIds.transactionDId}`
         ).realHover();
         cy.contains('2 Span links found');
         cy.contains('0 incoming');
@@ -120,8 +120,8 @@ describe('Span links', () => {
         );
         cy.contains('Transaction D').click();
         cy.contains('2 Span links');
-        cy.get(
-          `[data-test-subj="spanLinksBadge_${ids.producerMultipleIds.spanEId}"]`
+        cy.getByTestSubj(
+          `spanLinksBadge_${ids.producerMultipleIds.spanEId}`
         ).realHover();
         cy.contains('2 Span links found');
         cy.contains('0 incoming');
@@ -136,7 +136,7 @@ describe('Span links', () => {
         );
         cy.contains('Transaction A').click();
         cy.contains('Span A').click();
-        cy.get('[data-test-subj="spanLinksTab"]').click();
+        cy.getByTestSubj('spanLinksTab').click();
         cy.contains('producer-consumer')
           .should('have.attr', 'href')
           .and('include', '/services/producer-consumer/overview');
@@ -155,7 +155,7 @@ describe('Span links', () => {
             'include',
             `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.transactionDId}`
           );
-        cy.get('[data-test-subj="spanLinkTypeSelect"]').should(
+        cy.getByTestSubj('spanLinkTypeSelect').should(
           'contain.text',
           'Outgoing links (0)'
         );
@@ -167,7 +167,7 @@ describe('Span links', () => {
         );
         cy.contains('Transaction B').click();
         cy.contains('Span B').click();
-        cy.get('[data-test-subj="spanLinksTab"]').click();
+        cy.getByTestSubj('spanLinksTab').click();
 
         cy.contains('consumer-multiple')
           .should('have.attr', 'href')
@@ -178,9 +178,7 @@ describe('Span links', () => {
             'include',
             `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.spanEId}`
           );
-        cy.get('[data-test-subj="spanLinkTypeSelect"]').select(
-          'Outgoing links (1)'
-        );
+        cy.getByTestSubj('spanLinkTypeSelect').select('Outgoing links (1)');
         cy.contains('Unknown');
         cy.contains('trace#1-span#1');
       });
@@ -193,7 +191,7 @@ describe('Span links', () => {
         cy.get(
           `[aria-controls="${ids.producerConsumerIds.transactionCId}"]`
         ).click();
-        cy.get('[data-test-subj="spanLinksTab"]').click();
+        cy.getByTestSubj('spanLinksTab').click();
 
         cy.contains('consumer-multiple')
           .should('have.attr', 'href')
@@ -205,9 +203,7 @@ describe('Span links', () => {
             `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.spanEId}`
           );
 
-        cy.get('[data-test-subj="spanLinkTypeSelect"]').select(
-          'Outgoing links (1)'
-        );
+        cy.getByTestSubj('spanLinkTypeSelect').select('Outgoing links (1)');
         cy.contains('producer-internal-only')
           .should('have.attr', 'href')
           .and('include', '/services/producer-internal-only/overview');
@@ -225,7 +221,7 @@ describe('Span links', () => {
         );
         cy.contains('Transaction C').click();
         cy.contains('Span C').click();
-        cy.get('[data-test-subj="spanLinksTab"]').click();
+        cy.getByTestSubj('spanLinksTab').click();
 
         cy.contains('consumer-multiple')
           .should('have.attr', 'href')
@@ -237,7 +233,7 @@ describe('Span links', () => {
             `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.transactionDId}`
           );
 
-        cy.get('[data-test-subj="spanLinkTypeSelect"]').should(
+        cy.getByTestSubj('spanLinkTypeSelect').should(
           'contain.text',
           'Outgoing links (0)'
         );
@@ -251,7 +247,7 @@ describe('Span links', () => {
         cy.get(
           `[aria-controls="${ids.producerMultipleIds.transactionDId}"]`
         ).click();
-        cy.get('[data-test-subj="spanLinksTab"]').click();
+        cy.getByTestSubj('spanLinksTab').click();
 
         cy.contains('producer-consumer')
           .should('have.attr', 'href')
@@ -273,7 +269,7 @@ describe('Span links', () => {
             `link-to/transaction/${ids.producerInternalOnlyIds.transactionAId}?waterfallItemId=${ids.producerInternalOnlyIds.spanAId}`
           );
 
-        cy.get('[data-test-subj="spanLinkTypeSelect"]').should(
+        cy.getByTestSubj('spanLinkTypeSelect').should(
           'contain.text',
           'Incoming links (0)'
         );
@@ -285,7 +281,7 @@ describe('Span links', () => {
         );
         cy.contains('Transaction D').click();
         cy.contains('Span E').click();
-        cy.get('[data-test-subj="spanLinksTab"]').click();
+        cy.getByTestSubj('spanLinksTab').click();
 
         cy.contains('producer-external-only')
           .should('have.attr', 'href')
@@ -307,7 +303,7 @@ describe('Span links', () => {
             `link-to/transaction/${ids.producerConsumerIds.transactionCId}?waterfallItemId=${ids.producerConsumerIds.transactionCId}`
           );
 
-        cy.get('[data-test-subj="spanLinkTypeSelect"]').should(
+        cy.getByTestSubj('spanLinkTypeSelect').should(
           'contain.text',
           'Incoming links (0)'
         );

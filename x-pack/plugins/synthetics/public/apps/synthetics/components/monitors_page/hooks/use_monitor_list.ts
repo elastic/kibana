@@ -5,59 +5,76 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
-import { useGetUrlParams } from '../../../hooks';
+import { useDebounce } from 'react-use';
+import { useOverviewStatus } from './use_overview_status';
 import {
   fetchMonitorListAction,
+  quietFetchMonitorListAction,
   MonitorListPageState,
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
+  updateManagementPageStateAction,
 } from '../../../state';
+import { useSyntheticsRefreshContext } from '../../../contexts';
+import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 
 export function useMonitorList() {
   const dispatch = useDispatch();
-  const [isDataQueried, setIsDataQueried] = useState(false);
+  const isInitialMount = useRef(true);
 
   const { pageState, loading, loaded, error, data } = useSelector(selectMonitorListState);
   const syntheticsMonitors = useSelector(selectEncryptedSyntheticsSavedMonitors);
 
-  const { query, tags, monitorType, locations: locationFilters } = useGetUrlParams();
+  const { status: overviewStatus } = useOverviewStatus();
 
-  const { search } = useLocation();
+  const { handleFilterChange } = useMonitorFiltersState();
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   const loadPage = useCallback(
-    (state: MonitorListPageState) =>
-      dispatch(
-        fetchMonitorListAction.get({
-          ...state,
-          query,
-          tags,
-          monitorType,
-          locations: locationFilters,
-        })
-      ),
-    [dispatch, locationFilters, monitorType, query, tags]
+    (state: MonitorListPageState) => {
+      dispatch(updateManagementPageStateAction(state));
+    },
+    [dispatch]
   );
-
   const reloadPage = useCallback(() => loadPage(pageState), [pageState, loadPage]);
 
+  // Periodically refresh
   useEffect(() => {
-    reloadPage();
+    if (!isInitialMount.current) {
+      dispatch(quietFetchMonitorListAction(pageState));
+    }
+    // specifically only want to run this on refreshInterval change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, [lastRefresh]);
 
-  // Initial loading
+  // On initial mount, load the page
   useEffect(() => {
-    if (!loading && !isDataQueried) {
-      reloadPage();
+    if (isInitialMount.current) {
+      if (loaded) {
+        dispatch(quietFetchMonitorListAction(pageState));
+      } else {
+        dispatch(fetchMonitorListAction.get(pageState));
+      }
     }
+    // we don't use pageState here, for pageState, useDebounce will handle it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
 
-    if (loading) {
-      setIsDataQueried(true);
-    }
-  }, [reloadPage, isDataQueried, syntheticsMonitors, loading]);
+  useDebounce(
+    () => {
+      // Don't load on initial mount, only meant to handle pageState changes
+      if (isInitialMount.current || !loaded) {
+        // setting false here to account for debounce timing
+        isInitialMount.current = false;
+        return;
+      }
+      dispatch(fetchMonitorListAction.get(pageState));
+    },
+    200,
+    [pageState]
+  );
 
   return {
     loading,
@@ -68,7 +85,8 @@ export function useMonitorList() {
     total: data?.total ?? 0,
     loadPage,
     reloadPage,
-    isDataQueried,
     absoluteTotal: data.absoluteTotal ?? 0,
+    overviewStatus,
+    handleFilterChange,
   };
 }

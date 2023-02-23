@@ -122,7 +122,6 @@ describe('LogstashVersionMismatchRule', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
@@ -176,7 +175,6 @@ describe('LogstashVersionMismatchRule', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});

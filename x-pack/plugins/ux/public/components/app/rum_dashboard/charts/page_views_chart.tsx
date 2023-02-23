@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   AllSeries,
   fromQuery,
@@ -51,24 +51,27 @@ export function PageViewsChart({ breakdown }: Props) {
       filters: getExploratoryViewFilter(uxUiFilters, urlParams),
     },
   ];
-  const onBrushEnd = ({ range }: { range: number[] }) => {
-    if (!range) {
-      return;
-    }
-    const [minX, maxX] = range;
+  const onBrushEnd = useCallback(
+    ({ range }: { range: number[] }) => {
+      if (!range) {
+        return;
+      }
+      const [minX, maxX] = range;
 
-    const rangeFrom = moment(minX).toISOString();
-    const rangeTo = moment(maxX).toISOString();
+      const rangeFrom = moment(minX).toISOString();
+      const rangeTo = moment(maxX).toISOString();
 
-    history.push({
-      ...history.location,
-      search: fromQuery({
-        ...toQuery(history.location.search),
-        rangeFrom,
-        rangeTo,
-      }),
-    });
-  };
+      history.push({
+        ...history.location,
+        search: fromQuery({
+          ...toQuery(history.location.search),
+          rangeFrom,
+          rangeTo,
+        }),
+      });
+    },
+    [history]
+  );
 
   if (!dataViewTitle) {
     return null;
@@ -76,11 +79,10 @@ export function PageViewsChart({ breakdown }: Props) {
 
   return (
     <ExploratoryViewEmbeddable
-      customHeight="300px"
+      customHeight={'300px'}
       attributes={allSeries}
       onBrushEnd={onBrushEnd}
       reportType="kpi-over-time"
-      dataTypesIndexPatterns={{ ux: dataViewTitle }}
       isSingleMetric={true}
       axisTitlesVisibility={{ x: false, yRight: true, yLeft: true }}
       legendIsVisible={Boolean(breakdown)}

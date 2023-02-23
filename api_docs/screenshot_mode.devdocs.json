@@ -140,10 +140,10 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandlerContext",
+            "pluginId": "@kbn/core-http-request-handler-context-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+            "section": "def-common.RequestHandlerContext",
             "text": "RequestHandlerContext"
           },
           " & { screenshotMode: Promise<{ isScreenshot: boolean; }>; }"
@@ -280,7 +280,13 @@
           ],
           "signature": [
             "(request: ",
-            "KibanaRequest",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "common",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-common.KibanaRequest",
+              "text": "KibanaRequest"
+            },
             "<unknown, unknown, unknown, any>) => boolean"
           ],
           "path": "src/plugins/screenshot_mode/server/types.ts",
@@ -295,7 +301,13 @@
               "label": "request",
               "description": [],
               "signature": [
-                "KibanaRequest",
+                {
+                  "pluginId": "@kbn/core-http-server",
+                  "scope": "common",
+                  "docId": "kibKbnCoreHttpServerPluginApi",
+                  "section": "def-common.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "src/plugins/screenshot_mode/server/types.ts",

@@ -14,7 +14,7 @@ import { isRumAgentName } from '../../../../../../../common/agent_name';
 import {
   TRACE_ID,
   TRANSACTION_ID,
-} from '../../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
@@ -83,6 +83,31 @@ const ItemText = euiStyled.span`
   }
 `;
 
+const CriticalPathItemBar = euiStyled.div`
+  box-sizing: border-box;
+  position: relative;
+  height: ${({ theme }) => theme.eui.euiSizeS};
+  top : ${({ theme }) => theme.eui.euiSizeS};
+  min-width: 2px;
+  background-color: transparent;
+  display: flex;
+  flex-direction: row;
+`;
+
+const CriticalPathItemSegment = euiStyled.div<{
+  left: number;
+  width: number;
+  color: string;
+}>`
+  box-sizing: border-box;
+  position: absolute;
+  height: ${({ theme }) => theme.eui.euiSizeS};
+  left: ${(props) => props.left * 100}%;
+  width: ${(props) => props.width * 100}%;
+  min-width: 2px;
+  background-color: ${(props) => props.color};
+`;
+
 interface IWaterfallItemProps {
   timelineMargins: Margins;
   totalDuration?: number;
@@ -92,7 +117,12 @@ interface IWaterfallItemProps {
   isSelected: boolean;
   errorCount: number;
   marginLeftLevel: number;
-  onClick: () => unknown;
+  segments?: Array<{
+    left: number;
+    width: number;
+    color: string;
+  }>;
+  onClick: (flyoutDetailTab: string) => unknown;
 }
 
 function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
@@ -194,6 +224,7 @@ export function WaterfallItem({
   errorCount,
   marginLeftLevel,
   onClick,
+  segments,
 }: IWaterfallItemProps) {
   const [widthFactor, setWidthFactor] = useState(1);
   const waterfallItemRef: React.RefObject<any> = useRef(null);
@@ -217,9 +248,13 @@ export function WaterfallItem({
     100;
 
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
+
   const itemBarStyle = getItemBarStyle(item, color, width, left);
+
   const isServerlessColdstart =
     item.docType === 'transaction' && item.doc.faas?.coldstart;
+
+  const waterfallItemFlyoutTab = 'metadata';
 
   return (
     <Container
@@ -230,14 +265,26 @@ export function WaterfallItem({
       hasToggle={hasToggle}
       onClick={(e: React.MouseEvent) => {
         e.stopPropagation();
-        onClick();
+        onClick(waterfallItemFlyoutTab);
       }}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item
         style={itemBarStyle}
         color={isCompositeSpan ? 'transparent' : color}
         type={item.docType}
-      />
+      >
+        {segments?.length ? (
+          <CriticalPathItemBar>
+            {segments?.map((segment) => (
+              <CriticalPathItemSegment
+                color={segment.color}
+                left={segment.left}
+                width={segment.width}
+              />
+            ))}
+          </CriticalPathItemBar>
+        ) : null}
+      </ItemBar>
       <ItemText // using inline styles instead of props to avoid generating a css class for each item
         style={{ minWidth: `${Math.max(100 - left, 0)}%` }}
       >
@@ -259,6 +306,7 @@ export function WaterfallItem({
           linkedParents={item.spanLinksCount.linkedParents}
           linkedChildren={item.spanLinksCount.linkedChildren}
           id={item.id}
+          onClick={onClick}
         />
         {isServerlessColdstart && <ColdStartBadge />}
       </ItemText>
@@ -277,7 +325,9 @@ function RelatedErrors({
   const theme = useTheme();
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/traces/explorer'
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer',
+    '/dependencies/operation'
   );
 
   let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;

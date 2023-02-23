@@ -18,13 +18,14 @@ import {
   isMetricElementEvent,
   RenderChangeListener,
   Settings,
+  MetricWTrend,
+  MetricWNumber,
 } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type {
   Datatable,
   DatatableColumn,
-  DatatableRow,
   IInterpreterRenderHandlers,
   RenderMode,
 } from '@kbn/expressions-plugin/common';
@@ -34,7 +35,8 @@ import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/commo
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useResizeObserver } from '@elastic/eui';
+import { useResizeObserver, useEuiScrollBar } from '@elastic/eui';
+import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
 import {
   getPaletteService,
@@ -172,6 +174,7 @@ const getColor = (
 };
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
+  const column = table.columns[columnIdx];
   return {
     name: 'filter',
     data: {
@@ -180,6 +183,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
           table,
           column: columnIdx,
           row: rowIdx,
+          value: table.rows[rowIdx][column.id],
         },
       ],
     },
@@ -222,28 +226,20 @@ export const MetricVis = ({
       .getConverterFor('text');
   }
 
-  let getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({});
-
   const maxColId = config.dimensions.max
     ? getColumnByAccessor(config.dimensions.max, data.columns)?.id
     : undefined;
-  if (maxColId) {
-    getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({
-      domainMax: _row[maxColId],
-      progressBarDirection: config.metric.progressDirection,
-    });
-  }
 
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : data.rows.slice(0, 1)
   ).map((row, rowIdx) => {
-    const value = row[primaryMetricColumn.id];
+    const value: number = row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
     const title = breakdownByColumn
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
     const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
-    return {
+    const baseMetric: MetricWNumber = {
       value,
       valueFormatter: formatPrimaryMetric,
       title,
@@ -272,8 +268,39 @@ export const MetricVis = ({
               rowIdx
             ) ?? defaultColor
           : config.metric.color ?? defaultColor,
-      ...getProgressBarConfig(row),
     };
+
+    const trendId = breakdownByColumn ? row[breakdownByColumn.id] : DEFAULT_TRENDLINE_NAME;
+    if (config.metric.trends && config.metric.trends[trendId]) {
+      const metricWTrend: MetricWTrend = {
+        ...baseMetric,
+        trend: config.metric.trends[trendId],
+        trendShape: 'area',
+        trendA11yTitle: i18n.translate('expressionMetricVis.trendA11yTitle', {
+          defaultMessage: '{dataTitle} over time.',
+          values: {
+            dataTitle: primaryMetricColumn.name,
+          },
+        }),
+        trendA11yDescription: i18n.translate('expressionMetricVis.trendA11yDescription', {
+          defaultMessage: 'A line chart showing the trend of the primary metric over time.',
+        }),
+      };
+
+      return metricWTrend;
+    }
+
+    if (maxColId && config.metric.progressDirection) {
+      const metricWProgress: MetricWProgress = {
+        ...baseMetric,
+        domainMax: row[maxColId],
+        progressBarDirection: config.metric.progressDirection,
+      };
+
+      return metricWProgress;
+    }
+
+    return baseMetric;
   });
 
   if (config.metric.minTiles) {
@@ -311,9 +338,9 @@ export const MetricVis = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollDimensions = useResizeObserver(scrollContainerRef.current);
 
-  const {
-    metric: { minHeight },
-  } = getThemeService().useChartsBaseTheme();
+  const baseTheme = getThemeService().useChartsBaseTheme();
+
+  const minHeight = chartTheme.metric?.minHeight ?? baseTheme.metric.minHeight;
 
   useEffect(() => {
     const minimumRequiredVerticalSpace = minHeight * grid.length;
@@ -333,6 +360,7 @@ export const MetricVis = ({
         max-height: 100%;
         max-width: 100%;
         overflow-y: auto;
+        ${useEuiScrollBar()}
       `}
     >
       <div
@@ -352,6 +380,7 @@ export const MetricVis = ({
               },
               chartTheme,
             ]}
+            baseTheme={baseTheme}
             onRenderChange={onRenderChange}
             onElementClick={(events) => {
               if (!filterable) {

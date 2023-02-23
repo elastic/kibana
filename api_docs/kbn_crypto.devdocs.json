@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/crypto",
-        "id": "def-server.createSHA256Hash",
+        "id": "def-common.createSHA256Hash",
         "type": "Function",
         "tags": [],
         "label": "createSHA256Hash",
@@ -29,7 +37,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.createSHA256Hash.$1",
+            "id": "def-common.createSHA256Hash.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "input",
@@ -44,7 +52,7 @@
           },
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.createSHA256Hash.$2",
+            "id": "def-common.createSHA256Hash.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "outputEncoding",
@@ -63,7 +71,7 @@
       },
       {
         "parentPluginId": "@kbn/crypto",
-        "id": "def-server.readPkcs12Keystore",
+        "id": "def-common.readPkcs12Keystore",
         "type": "Function",
         "tags": [
           "privateRemarks"
@@ -76,9 +84,9 @@
           "(path: string, password?: string | undefined) => ",
           {
             "pluginId": "@kbn/crypto",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCryptoPluginApi",
-            "section": "def-server.Pkcs12ReadResult",
+            "section": "def-common.Pkcs12ReadResult",
             "text": "Pkcs12ReadResult"
           }
         ],
@@ -88,7 +96,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.readPkcs12Keystore.$1",
+            "id": "def-common.readPkcs12Keystore.$1",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -105,7 +113,7 @@
           },
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.readPkcs12Keystore.$2",
+            "id": "def-common.readPkcs12Keystore.$2",
             "type": "string",
             "tags": [],
             "label": "password",
@@ -128,7 +136,7 @@
       },
       {
         "parentPluginId": "@kbn/crypto",
-        "id": "def-server.readPkcs12Truststore",
+        "id": "def-common.readPkcs12Truststore",
         "type": "Function",
         "tags": [],
         "label": "readPkcs12Truststore",
@@ -144,7 +152,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.readPkcs12Truststore.$1",
+            "id": "def-common.readPkcs12Truststore.$1",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -161,7 +169,7 @@
           },
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.readPkcs12Truststore.$2",
+            "id": "def-common.readPkcs12Truststore.$2",
             "type": "string",
             "tags": [],
             "label": "password",
@@ -186,7 +194,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/crypto",
-        "id": "def-server.Pkcs12ReadResult",
+        "id": "def-common.Pkcs12ReadResult",
         "type": "Interface",
         "tags": [],
         "label": "Pkcs12ReadResult",
@@ -197,7 +205,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.Pkcs12ReadResult.ca",
+            "id": "def-common.Pkcs12ReadResult.ca",
             "type": "Array",
             "tags": [],
             "label": "ca",
@@ -211,7 +219,7 @@
           },
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.Pkcs12ReadResult.cert",
+            "id": "def-common.Pkcs12ReadResult.cert",
             "type": "string",
             "tags": [],
             "label": "cert",
@@ -225,7 +233,7 @@
           },
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.Pkcs12ReadResult.key",
+            "id": "def-common.Pkcs12ReadResult.key",
             "type": "string",
             "tags": [],
             "label": "key",
@@ -241,14 +249,6 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

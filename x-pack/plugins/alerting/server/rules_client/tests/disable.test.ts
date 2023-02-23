@@ -224,6 +224,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -250,7 +251,6 @@ describe('disable()', () => {
             meta: {
               lastScheduledActions: {
                 group: 'default',
-                subgroup: 'newSubgroup',
                 date: new Date().toISOString(),
               },
             },
@@ -295,6 +295,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -319,7 +320,6 @@ describe('disable()', () => {
         },
         alerting: {
           action_group_id: 'default',
-          action_subgroup: 'newSubgroup',
           instance_id: '1',
         },
         saved_objects: [
@@ -377,6 +377,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -420,6 +421,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -511,6 +513,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -558,6 +561,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',

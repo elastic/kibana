@@ -39,19 +39,11 @@ export const manageLinks: LinkItem = {
   description: i18n.translate(
     'xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription',
     {
-      defaultMessage: 'View, enable, and or disable benchmark rules.',
+      defaultMessage: 'View benchmark rules.',
     }
   ),
   landingIcon: IconExceptionLists,
   ...commonLinkProperties,
-  links: [
-    {
-      ...getSecuritySolutionLink<SecurityPageName>('rules'),
-      sideNavDisabled: true,
-      globalSearchDisabled: true,
-      ...commonLinkProperties,
-    },
-  ],
 };
 
 export const manageCategories: LinkCategories = [

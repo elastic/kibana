@@ -22,11 +22,9 @@ jest.mock('../../../../../kibana_services', () => {
   };
 });
 
-jest.mock('uuid/v4', () => {
-  return function () {
-    return '12345';
-  };
-});
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('12345'),
+}));
 
 import { createSecurityLayerDescriptors } from './create_layer_descriptors';
 
@@ -42,6 +40,7 @@ describe('createLayerDescriptor', () => {
         label: 'apm-*-transaction* | Source Point',
         maxZoom: 24,
         minZoom: 0,
+        parent: '12345',
         disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
@@ -119,6 +118,7 @@ describe('createLayerDescriptor', () => {
         label: 'apm-*-transaction* | Destination point',
         maxZoom: 24,
         minZoom: 0,
+        parent: '12345',
         disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
@@ -196,6 +196,7 @@ describe('createLayerDescriptor', () => {
         label: 'apm-*-transaction* | Line',
         maxZoom: 24,
         minZoom: 0,
+        parent: '12345',
         disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
@@ -248,6 +249,13 @@ describe('createLayerDescriptor', () => {
         type: 'GEOJSON_VECTOR',
         visible: true,
       },
+      {
+        id: '12345',
+        label: 'apm-*-transaction*',
+        sourceDescriptor: null,
+        type: 'LAYER_GROUP',
+        visible: true,
+      },
     ]);
   });
 
@@ -262,6 +270,7 @@ describe('createLayerDescriptor', () => {
         label: 'filebeat-* | Source Point',
         maxZoom: 24,
         minZoom: 0,
+        parent: '12345',
         disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
@@ -339,6 +348,7 @@ describe('createLayerDescriptor', () => {
         label: 'filebeat-* | Destination point',
         maxZoom: 24,
         minZoom: 0,
+        parent: '12345',
         disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
@@ -410,6 +420,7 @@ describe('createLayerDescriptor', () => {
         label: 'filebeat-* | Line',
         maxZoom: 24,
         minZoom: 0,
+        parent: '12345',
         disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
@@ -462,6 +473,13 @@ describe('createLayerDescriptor', () => {
         type: 'GEOJSON_VECTOR',
         visible: true,
       },
+      {
+        id: '12345',
+        label: 'filebeat-*',
+        sourceDescriptor: null,
+        type: 'LAYER_GROUP',
+        visible: true,
+      },
     ]);
   });
 
@@ -476,6 +494,7 @@ describe('createLayerDescriptor', () => {
         label: 'traces-apm-opbean-node | Source Point',
         maxZoom: 24,
         minZoom: 0,
+        parent: '12345',
         disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
@@ -553,6 +572,7 @@ describe('createLayerDescriptor', () => {
         label: 'traces-apm-opbean-node | Destination point',
         maxZoom: 24,
         minZoom: 0,
+        parent: '12345',
         disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
@@ -624,6 +644,7 @@ describe('createLayerDescriptor', () => {
         label: 'traces-apm-opbean-node | Line',
         maxZoom: 24,
         minZoom: 0,
+        parent: '12345',
         disableTooltips: false,
         sourceDescriptor: {
           applyGlobalQuery: true,
@@ -674,6 +695,13 @@ describe('createLayerDescriptor', () => {
           type: 'VECTOR',
         },
         type: 'GEOJSON_VECTOR',
+        visible: true,
+      },
+      {
+        id: '12345',
+        label: 'traces-apm-opbean-node',
+        sourceDescriptor: null,
+        type: 'LAYER_GROUP',
         visible: true,
       },
     ]);

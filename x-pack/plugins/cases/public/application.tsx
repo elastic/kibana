@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
+
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiErrorBoundary } from '@elastic/eui';
 
@@ -17,10 +18,10 @@ import {
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { RenderAppProps } from './types';
+import type { RenderAppProps } from './types';
 import { CasesApp } from './components/app';
-import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;

@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
-  const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
@@ -106,48 +105,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      it('should modify the time range when the histogram is brushed', async function () {
-        // this is the number of renderings of the histogram needed when new data is fetched
-        // this needs to be improved
-        const renderingCountInc = 2;
-        const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await retry.waitFor('chart rendering complete', async () => {
-          const actualCount = await elasticChart.getVisualizationRenderingCount();
-          const expectedCount = prevRenderingCount + renderingCountInc;
-          log.debug(
-            `renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`
-          );
-          return actualCount === expectedCount;
-        });
-        let prevRowData = '';
-        // to make sure the table is already rendered
-        await retry.try(async () => {
-          prevRowData = await PageObjects.discover.getDocTableField(1);
-          log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
-        });
-
-        await PageObjects.discover.brushHistogram();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await retry.waitFor('chart rendering complete after being brushed', async () => {
-          const actualCount = await elasticChart.getVisualizationRenderingCount();
-          const expectedCount = prevRenderingCount + renderingCountInc * 2;
-          log.debug(
-            `renderings after brushing - actual: ${actualCount} expected: ${expectedCount}`
-          );
-          return actualCount === expectedCount;
-        });
-        const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(26);
-
-        await retry.waitFor('doc table containing the documents of the brushed range', async () => {
-          const rowData = await PageObjects.discover.getDocTableField(1);
-          log.debug(`The first timestamp value in doc table after brushing: ${rowData}`);
-          return prevRowData !== rowData;
-        });
-      });
-
       it('should show correct initial chart interval of Auto', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -201,6 +158,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should suggest a new time range is picked', async () => {
         const isVisible = await PageObjects.discover.hasNoResultsTimepicker();
         expect(isVisible).to.be(true);
+      });
+
+      it('should show matches when time range is expanded', async () => {
+        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await retry.try(async function () {
+          expect(await PageObjects.discover.hasNoResults()).to.be(false);
+          expect(await PageObjects.discover.getHitCountInt()).to.be.above(0);
+        });
       });
     });
 
@@ -262,26 +228,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be('~ 15 minutes ago');
         expect(time.end).to.be('now');
-      });
-    });
-
-    describe('empty query', function () {
-      it('should update the histogram timerange when the query is resubmitted', async function () {
-        await kibanaServer.uiSettings.update({
-          'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
-        });
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
-        const initialTimeString = await PageObjects.discover.getChartTimespan();
-        await queryBar.submitQuery();
-
-        await retry.waitFor('chart timespan to have changed', async () => {
-          const refreshedTimeString = await PageObjects.discover.getChartTimespan();
-          log.debug(
-            `Timestamp before: ${initialTimeString}, Timestamp after: ${refreshedTimeString}`
-          );
-          return refreshedTimeString !== initialTimeString;
-        });
       });
     });
 
@@ -347,9 +293,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('resizable layout panels', () => {
       it('should allow resizing the layout panels', async () => {
         const resizeDistance = 100;
-        const topPanel = await testSubjects.find('dscResizablePanelTop');
-        const mainPanel = await testSubjects.find('dscResizablePanelMain');
-        const resizeButton = await testSubjects.find('dsc-resizable-button');
+        const topPanel = await testSubjects.find('unifiedHistogramResizablePanelTop');
+        const mainPanel = await testSubjects.find('unifiedHistogramResizablePanelMain');
+        const resizeButton = await testSubjects.find('unifiedHistogramResizableButton');
         const topPanelSize = (await topPanel.getPosition()).height;
         const mainPanelSize = (await mainPanel.getPosition()).height;
         await browser.dragAndDrop(
@@ -360,6 +306,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const newMainPanelSize = (await mainPanel.getPosition()).height;
         expect(newTopPanelSize).to.be(topPanelSize + resizeDistance);
         expect(newMainPanelSize).to.be(mainPanelSize - resizeDistance);
+      });
+    });
+
+    describe('URL state', () => {
+      it('should show a warning and fall back to the default data view when navigating to a URL with an invalid data view ID', async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const dataViewId = await PageObjects.discover.getCurrentDataViewId();
+        const originalUrl = await browser.getCurrentUrl();
+        const newUrl = originalUrl.replace(dataViewId, 'invalid-data-view-id');
+        await browser.get(newUrl);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.try(async () => {
+          expect(await browser.getCurrentUrl()).to.be(originalUrl);
+          expect(await testSubjects.exists('dscDataViewNotFoundShowDefaultWarning')).to.be(true);
+        });
+      });
+
+      it('should show a warning and fall back to the current data view if the URL is updated to an invalid data view ID', async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        const originalHash = await browser.execute<[], string>('return window.location.hash');
+        const dataViewId = await PageObjects.discover.getCurrentDataViewId();
+        const newHash = originalHash.replace(dataViewId, 'invalid-data-view-id');
+        await browser.execute(`window.location.hash = "${newHash}"`);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.try(async () => {
+          const currentHash = await browser.execute<[], string>('return window.location.hash');
+          expect(currentHash).to.be(originalHash);
+          expect(await testSubjects.exists('dscDataViewNotFoundShowSavedWarning')).to.be(true);
+        });
       });
     });
   });

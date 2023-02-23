@@ -8,7 +8,8 @@
 import { GENERAL_CASES_OWNER } from '../../../common/constants';
 import { renderHook } from '@testing-library/react-hooks';
 import { useToasts } from '../../common/lib/kibana';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import * as api from './api';
 import { useSuggestUserProfiles } from './use_suggest_user_profiles';
 

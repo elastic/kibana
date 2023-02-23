@@ -16,9 +16,6 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
   hidden: true,
   mappings: {
     properties: {
-      persisted: {
-        type: 'boolean',
-      },
       sessionId: {
         type: 'keyword',
       },
@@ -31,15 +28,6 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
       expires: {
         type: 'date',
       },
-      touched: {
-        type: 'date',
-      },
-      completed: {
-        type: 'date',
-      },
-      status: {
-        type: 'keyword',
-      },
       appId: {
         type: 'keyword',
       },
@@ -47,16 +35,16 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
         type: 'keyword',
       },
       initialState: {
-        type: 'object',
-        enabled: false,
+        dynamic: false,
+        properties: {},
       },
       restoreState: {
-        type: 'object',
-        enabled: false,
+        dynamic: false,
+        properties: {},
       },
       idMapping: {
-        type: 'object',
-        enabled: false,
+        dynamic: false,
+        properties: {},
       },
       realmType: {
         type: 'keyword',
@@ -69,6 +57,9 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
       },
       version: {
         type: 'keyword',
+      },
+      isCanceled: {
+        type: 'boolean',
       },
     },
   },

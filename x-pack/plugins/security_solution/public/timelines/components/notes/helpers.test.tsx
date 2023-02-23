@@ -13,9 +13,10 @@ describe('createNote', () => {
     // Notice the required trailing whitespace which is required otherwise
     // markdown renderers will not render the list correctly
     const note = '- [ ] \n\n- [ ] ';
-    expect(createNote({ newNote: note })).toEqual(
+    expect(createNote({ newNote: note, user: 'elastic' })).toEqual(
       expect.objectContaining({
         note,
+        user: 'elastic',
       })
     );
   });

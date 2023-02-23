@@ -7,17 +7,32 @@
  */
 
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
+
 import { ControlOutput } from '../types';
-import { OptionsListEmbeddableInput, OptionsListField } from '../../common/options_list/types';
+import {
+  OptionsListSuggestions,
+  OptionsListEmbeddableInput,
+} from '../../common/options_list/types';
+
+export const MIN_OPTIONS_LIST_REQUEST_SIZE = 10;
+export const MAX_OPTIONS_LIST_REQUEST_SIZE = 1000;
+
+interface SearchString {
+  value: string;
+  valid: boolean;
+}
 
 // Component state is only used by public components.
 export interface OptionsListComponentState {
-  field?: OptionsListField;
-  totalCardinality?: number;
-  availableOptions?: string[];
+  availableOptions?: OptionsListSuggestions;
+  allowExpensiveQueries: boolean;
   invalidSelections?: string[];
+  searchString: SearchString;
   validSelections?: string[];
-  searchString: string;
+  totalCardinality?: number;
+  popoverOpen: boolean;
+  field?: FieldSpec;
 }
 
 // public only - redux embeddable state type

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-
 import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 
 import { sampleDocNoSortId, sampleRuleGuid } from '../../../signals/__mocks__/es_results';
@@ -16,8 +14,9 @@ import {
   objectPairIntersection,
 } from './build_alert_group_from_sequence';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
-import { getCompleteRuleMock, getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
-import type { QueryRuleParams } from '../../../schemas/rule_schemas';
+import { getCompleteRuleMock, getQueryRuleParams } from '../../../rule_schema/mocks';
+import type { QueryRuleParams } from '../../../rule_schema';
+import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -27,12 +26,7 @@ import {
 
 const SPACE_ID = 'space';
 
-const loggerMock = {
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-} as unknown as Logger;
+const ruleExecutionLoggerMock = ruleExecutionLogMock.forExecutors.create();
 
 describe('buildAlert', () => {
   beforeEach(() => {
@@ -53,13 +47,14 @@ describe('buildAlert', () => {
       ],
     };
     const alertGroup = buildAlertGroupFromSequence(
-      loggerMock,
+      ruleExecutionLoggerMock,
       eqlSequence,
       completeRule,
       'allFields',
       SPACE_ID,
       jest.fn(),
-      completeRule.ruleParams.index as string[]
+      completeRule.ruleParams.index as string[],
+      undefined
     );
     expect(alertGroup.length).toEqual(3);
     expect(alertGroup[0]).toEqual(

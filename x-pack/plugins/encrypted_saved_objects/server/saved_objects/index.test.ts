@@ -12,8 +12,6 @@ import type {
 } from '@kbn/core/server';
 import {
   coreMock,
-  httpServerMock,
-  savedObjectsClientMock,
   savedObjectsRepositoryMock,
   savedObjectsTypeRegistryMock,
 } from '@kbn/core/server/mocks';
@@ -23,7 +21,6 @@ import type { ClientInstanciator } from '.';
 import { setupSavedObjects } from '.';
 import type { EncryptedSavedObjectsService } from '../crypto';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
-import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
 describe('#setupSavedObjects', () => {
   let setupContract: ClientInstanciator;
@@ -53,42 +50,6 @@ describe('#setupSavedObjects', () => {
       security: securityMock.createSetup(),
       getStartServices: coreSetupMock.getStartServices,
     });
-  });
-
-  it('properly registers client wrapper factory', () => {
-    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
-    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledWith(
-      Number.MAX_SAFE_INTEGER,
-      'encryptedSavedObjects',
-      expect.any(Function)
-    );
-
-    const [[, , clientFactory]] = coreSetupMock.savedObjects.addClientWrapper.mock.calls;
-    expect(
-      clientFactory({
-        client: savedObjectsClientMock.create(),
-        typeRegistry: savedObjectsTypeRegistryMock.create(),
-        request: httpServerMock.createKibanaRequest(),
-      })
-    ).toBeInstanceOf(EncryptedSavedObjectsClientWrapper);
-  });
-
-  it('properly registers client wrapper factory with', () => {
-    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
-    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledWith(
-      Number.MAX_SAFE_INTEGER,
-      'encryptedSavedObjects',
-      expect.any(Function)
-    );
-
-    const [[, , clientFactory]] = coreSetupMock.savedObjects.addClientWrapper.mock.calls;
-    expect(
-      clientFactory({
-        client: savedObjectsClientMock.create(),
-        typeRegistry: savedObjectsTypeRegistryMock.create(),
-        request: httpServerMock.createKibanaRequest(),
-      })
-    ).toBeInstanceOf(EncryptedSavedObjectsClientWrapper);
   });
 
   describe('#setupContract', () => {
@@ -331,6 +292,33 @@ describe('#setupSavedObjects', () => {
       for await (const res of finder.find()) {
         expect(res.saved_objects[0].error).toHaveProperty('message', 'Test failure');
       }
+    });
+
+    it('properly re-exposes `close` method of the underlying point in time finder ', async () => {
+      // The finder that underlying repository returns is an instance of a `PointInTimeFinder` class that cannot, and
+      // unlike object literal it cannot be "copied" with the spread operator. We should make sure we properly re-expose
+      // `close` function.
+      const mockClose = jest.fn();
+      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockImplementation(() => {
+        class MockPointInTimeFinder {
+          async close() {
+            mockClose();
+          }
+          async *find() {}
+        }
+
+        return new MockPointInTimeFinder();
+      });
+
+      const finder = await setupContract().createPointInTimeFinderDecryptedAsInternalUser({
+        type: 'known-type',
+      });
+
+      expect(finder.find).toBeInstanceOf(Function);
+      expect(finder.close).toBeInstanceOf(Function);
+
+      await finder.close();
+      expect(mockClose).toHaveBeenCalledTimes(1);
     });
   });
 });

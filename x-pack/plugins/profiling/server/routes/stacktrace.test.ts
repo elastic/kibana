@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { createStackFrameID, StackTrace } from '../../common/profiling';
-import {
-  decodeStackTrace,
-  EncodedStackTrace,
-  runLengthDecode,
-  runLengthEncode,
-} from './stacktrace';
+import LRUCache from 'lru-cache';
+import { createStackFrameID, StackFrame, StackFrameID, StackTrace } from '../../common/profiling';
+import { runLengthEncode } from '../../common/run_length_encoding';
+import { decodeStackTrace, EncodedStackTrace, updateStackFrameMap } from './stacktrace';
 
 enum fileID {
   A = 'aQpJmTLWydNvOapSFZOwKg',
@@ -89,92 +86,110 @@ describe('Stack trace operations', () => {
       expect(decodeStackTrace(t.original)).toEqual(t.expected);
     }
   });
+});
 
-  test('run length is fully reversible', () => {
-    const tests: number[][] = [[], [0], [0, 1, 2, 3], [0, 1, 1, 2, 2, 2, 3, 3, 3, 3]];
+describe('Stack frame operations', () => {
+  test('updateStackFrameMap with no frames', () => {
+    const stackFrameMap = new Map<StackFrameID, StackFrame>();
+    const stackFrameCache = new LRUCache<StackFrameID, StackFrame>();
 
-    for (const t of tests) {
-      expect(runLengthDecode(runLengthEncode(t))).toEqual(t);
-    }
+    const hits = updateStackFrameMap([], stackFrameMap, stackFrameCache);
+
+    expect(hits).toEqual(0);
+    expect(stackFrameMap.size).toEqual(0);
+    expect(stackFrameCache.length).toEqual(0);
   });
 
-  test('runLengthDecode with optional parameter', () => {
-    const tests: Array<{
-      bytes: Buffer;
-      expected: number[];
-    }> = [
+  test('updateStackFrameMap with missing frames', () => {
+    const stackFrameMap = new Map<StackFrameID, StackFrame>();
+    const stackFrameCache = new LRUCache<StackFrameID, StackFrame>();
+
+    const stackFrames = [
       {
-        bytes: Buffer.from([0x5, 0x0, 0x2, 0x2]),
-        expected: [0, 0, 0, 0, 0, 2, 2],
-      },
-      {
-        bytes: Buffer.from([0x1, 0x8]),
-        expected: [8],
+        _index: 'profiling-stackframes',
+        _id: 'stackframe-001',
+        found: false,
       },
     ];
 
-    for (const t of tests) {
-      expect(runLengthDecode(t.bytes, t.expected.length)).toEqual(t.expected);
-    }
+    const hits = updateStackFrameMap(stackFrames, stackFrameMap, stackFrameCache);
+
+    expect(hits).toEqual(0);
+    expect(stackFrameMap.size).toEqual(1);
+    expect(stackFrameCache.length).toEqual(1);
   });
 
-  test('runLengthDecode without optional parameter', () => {
-    const tests: Array<{
-      bytes: Buffer;
-      expected: number[];
-    }> = [
+  test('updateStackFrameMap with one partial non-inlined frame', () => {
+    const stackFrameMap = new Map<StackFrameID, StackFrame>();
+    const stackFrameCache = new LRUCache<StackFrameID, StackFrame>();
+
+    const id = 'stackframe-001';
+    const source = {
+      'ecs.version': '1.0.0',
+      'Stackframe.function.name': 'calloc',
+    };
+    const expected = {
+      FileName: undefined,
+      FunctionName: 'calloc',
+      FunctionOffset: undefined,
+      LineNumber: undefined,
+      SourceType: undefined,
+    };
+
+    const stackFrames = [
       {
-        bytes: Buffer.from([0x5, 0x0, 0x2, 0x2]),
-        expected: [0, 0, 0, 0, 0, 2, 2],
-      },
-      {
-        bytes: Buffer.from([0x1, 0x8]),
-        expected: [8],
+        _index: 'profiling-stackframes',
+        _id: id,
+        _version: 1,
+        _seq_no: 1,
+        _primary_term: 1,
+        found: true,
+        _source: source,
       },
     ];
 
-    for (const t of tests) {
-      expect(runLengthDecode(t.bytes)).toEqual(t.expected);
-    }
+    const hits = updateStackFrameMap(stackFrames, stackFrameMap, stackFrameCache);
+
+    expect(hits).toEqual(1);
+    expect(stackFrameMap.size).toEqual(1);
+    expect(stackFrameCache.length).toEqual(1);
+    expect(stackFrameMap.get(id)).toEqual(expected);
   });
 
-  test('runLengthDecode works for very long runs', () => {
-    const tests: Array<{
-      bytes: Buffer;
-      expected: number[];
-    }> = [
+  test('updateStackFrameMap with one partial inlined frame', () => {
+    const stackFrameMap = new Map<StackFrameID, StackFrame>();
+    const stackFrameCache = new LRUCache<StackFrameID, StackFrame>();
+
+    const id = 'stackframe-001';
+    const source = {
+      'ecs.version': '1.0.0',
+      'Stackframe.function.name': ['calloc', 'memset'],
+    };
+    const expected = {
+      FileName: undefined,
+      FunctionName: 'calloc',
+      FunctionOffset: undefined,
+      LineNumber: undefined,
+      SourceType: undefined,
+    };
+
+    const stackFrames = [
       {
-        bytes: Buffer.from([0x5, 0x2, 0xff, 0x0]),
-        expected: [2, 2, 2, 2, 2].concat(Array(255).fill(0)),
-      },
-      {
-        bytes: Buffer.from([0xff, 0x2, 0x1, 0x2]),
-        expected: Array(256).fill(2),
+        _index: 'profiling-stackframes',
+        _id: id,
+        _version: 1,
+        _seq_no: 1,
+        _primary_term: 1,
+        found: true,
+        _source: source,
       },
     ];
 
-    for (const t of tests) {
-      expect(runLengthDecode(t.bytes)).toEqual(t.expected);
-    }
-  });
+    const hits = updateStackFrameMap(stackFrames, stackFrameMap, stackFrameCache);
 
-  test('runLengthEncode works for very long runs', () => {
-    const tests: Array<{
-      numbers: number[];
-      expected: Buffer;
-    }> = [
-      {
-        numbers: [2, 2, 2, 2, 2].concat(Array(255).fill(0)),
-        expected: Buffer.from([0x5, 0x2, 0xff, 0x0]),
-      },
-      {
-        numbers: Array(256).fill(2),
-        expected: Buffer.from([0xff, 0x2, 0x1, 0x2]),
-      },
-    ];
-
-    for (const t of tests) {
-      expect(runLengthEncode(t.numbers)).toEqual(t.expected);
-    }
+    expect(hits).toEqual(1);
+    expect(stackFrameMap.size).toEqual(1);
+    expect(stackFrameCache.length).toEqual(1);
+    expect(stackFrameMap.get(id)).toEqual(expected);
   });
 });

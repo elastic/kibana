@@ -17,14 +17,14 @@ exports[`TagLabel component renders correctly against snapshot 1`] = `
   class="c0"
 >
   <span
-    class="euiBadge euiBadge--iconLeft"
+    class="euiBadge emotion-euiBadge"
     style="background-color:#ff7e62;color:#000"
   >
     <span
-      class="euiBadge__content"
+      class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__text"
+        class="euiBadge__text emotion-euiBadge__text"
       >
         US-East
       </span>

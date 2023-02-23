@@ -16,7 +16,9 @@ import {
 import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
 
 export const GetPackagePoliciesRequestSchema = {
-  query: ListWithKuerySchema,
+  query: ListWithKuerySchema.extends({
+    withAgentCount: schema.maybe(schema.boolean()),
+  }),
 };
 
 export const BulkGetPackagePoliciesRequestSchema = {

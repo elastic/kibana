@@ -110,6 +110,7 @@ export const EditQueryDelay: FC<{
             <EuiFlexItem grow={false}>
               <EuiFieldText
                 value={newQueryDelay || queryDelay}
+                // @ts-expect-error queryDelay is of type estypes.Duration = string | -1 | 0
                 placeholder={queryDelay}
                 onChange={(e) => {
                   setNewQueryDelay(e.target.value);

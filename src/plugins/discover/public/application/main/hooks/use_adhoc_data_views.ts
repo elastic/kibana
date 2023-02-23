@@ -6,97 +6,91 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { DataViewsContract, type DataView } from '@kbn/data-views-plugin/public';
+import { useCallback, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
-import { getUiActions, getUrlTracker } from '../../../kibana_services';
-import { GetStateReturn } from '../services/discover_state';
+import { DiscoverStateContainer } from '../services/discover_state';
+import { useFiltersValidation } from './use_filters_validation';
+import { updateFiltersReferences } from '../utils/update_filter_references';
 
 export const useAdHocDataViews = ({
   dataView,
   savedSearch,
-  dataViews,
   stateContainer,
-  onChangeDataView,
+  setUrlTracking,
+  filterManager,
+  dataViews,
+  toastNotifications,
+  trackUiMetric,
+  isTextBasedMode,
 }: {
   dataView: DataView;
   savedSearch: SavedSearch;
+  stateContainer: DiscoverStateContainer;
+  setUrlTracking: (dataView: DataView) => void;
   dataViews: DataViewsContract;
-  stateContainer: GetStateReturn;
-  onChangeDataView: (dataViewId: string) => Promise<void>;
+  filterManager: FilterManager;
+  toastNotifications: ToastsStart;
+  trackUiMetric?: (metricType: string, eventName: string | string[], count?: number) => void;
+  isTextBasedMode?: boolean;
 }) => {
-  const [adHocDataViewList, setAdHocDataViewList] = useState<DataView[]>(
-    !dataView.isPersisted() ? [dataView] : []
-  );
-
   useEffect(() => {
     if (!dataView.isPersisted()) {
-      setAdHocDataViewList((prev) => {
-        const existing = prev.find((prevDataView) => prevDataView.id === dataView.id);
-        return existing ? prev : [...prev, dataView];
-      });
+      trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
-  }, [dataView]);
+  }, [dataView, isTextBasedMode, trackUiMetric]);
+
+  /**
+   * Takes care of checking data view id references in filters
+   */
+  useFiltersValidation({ savedSearch, filterManager, toastNotifications });
 
   /**
    * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
    * This is to prevent duplicate ids messing with our system
    */
   const updateAdHocDataViewId = useCallback(
-    async (dataViewToUpdate: DataView) => {
-      const newDataView = await dataViews.create({ ...dataViewToUpdate.toSpec(), id: undefined });
+    async (prevDataView: DataView) => {
+      const newDataView = await dataViews.create({ ...prevDataView.toSpec(), id: uuidv4() });
+      dataViews.clearInstanceCache(prevDataView.id);
 
-      dataViews.clearInstanceCache(dataViewToUpdate.id);
-      setAdHocDataViewList((prev) =>
-        prev.filter((d) => d.id && dataViewToUpdate.id && d.id !== dataViewToUpdate.id)
-      );
+      updateFiltersReferences(prevDataView, newDataView);
 
-      savedSearch.searchSource.setField('index', newDataView);
+      stateContainer.actions.replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
+      await stateContainer.appState.update({ index: newDataView.id }, true);
 
-      // update filters references
-      const uiActions = await getUiActions();
-      const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-      const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
-      action?.execute({
-        trigger,
-        fromDataView: dataViewToUpdate.id,
-        toDataView: newDataView.id,
-        usedDataViews: [],
-      } as ActionExecutionContext);
-
+      setUrlTracking(newDataView);
       return newDataView;
     },
-    [dataViews, savedSearch.searchSource]
+    [dataViews, setUrlTracking, stateContainer]
   );
 
-  const { openConfirmSavePrompt, updateSavedSearch } =
-    useConfirmPersistencePrompt(updateAdHocDataViewId);
+  const { openConfirmSavePrompt, updateSavedSearch } = useConfirmPersistencePrompt(stateContainer);
   const persistDataView = useCallback(async () => {
     const currentDataView = savedSearch.searchSource.getField('index')!;
-    if (currentDataView && !currentDataView.isPersisted()) {
-      const createdDataView = await openConfirmSavePrompt(currentDataView);
-      if (createdDataView) {
-        savedSearch.searchSource.setField('index', createdDataView);
-        await onChangeDataView(createdDataView.id!);
-
-        // update saved search with saved data view
-        if (savedSearch.id) {
-          const currentState = stateContainer.appStateContainer.getState();
-          await updateSavedSearch({ savedSearch, dataView: createdDataView, state: currentState });
-        }
-        getUrlTracker().setTrackingEnabled(true);
-        return createdDataView;
-      }
-      return undefined;
+    if (!currentDataView || currentDataView.isPersisted()) {
+      return currentDataView;
     }
-    return currentDataView;
-  }, [stateContainer, onChangeDataView, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
 
-  return { adHocDataViewList, persistDataView, updateAdHocDataViewId };
+    const createdDataView = await openConfirmSavePrompt(currentDataView);
+    if (!createdDataView) {
+      return currentDataView; // persistance cancelled
+    }
+
+    if (savedSearch.id) {
+      // update saved search with saved data view
+      const currentState = stateContainer.appState.getState();
+      await updateSavedSearch({ savedSearch, dataView: createdDataView, state: currentState });
+    }
+
+    return createdDataView;
+  }, [stateContainer, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
+
+  return { persistDataView, updateAdHocDataViewId };
 };

@@ -6,18 +6,18 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import type { OverrideRule } from '../../objects/rule';
-import { getIndexPatterns, getNewOverrideRule, getSeveritiesOverride } from '../../objects/rule';
+import type { Mitre, OverrideRule } from '../../objects/rule';
+import { getNewOverrideRule, getSeveritiesOverride } from '../../objects/rule';
+import type { CompleteTimeline } from '../../objects/timeline';
 
-import { NUMBER_OF_ALERTS, ALERT_GRID_CELL } from '../../screens/alerts';
+import { ALERT_GRID_CELL, ALERTS_COUNT } from '../../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
+  RULES_MANAGEMENT_TABLE,
   RULE_NAME,
   RULE_SWITCH,
-  RULES_ROW,
-  RULES_TABLE,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
 import {
@@ -49,13 +49,13 @@ import {
   TIMESTAMP_OVERRIDE_DETAILS,
 } from '../../screens/rule_details';
 
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { expectNumberOfRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleWithOverrideAndContinue,
-  fillDefineCustomRuleWithImportedQueryAndContinue,
+  fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
@@ -66,21 +66,23 @@ import { getDetails } from '../../tasks/rule_details';
 import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Detection rules, override', () => {
-  const expectedUrls = getNewOverrideRule().referenceUrls.join('');
-  const expectedFalsePositives = getNewOverrideRule().falsePositivesExamples.join('');
-  const expectedTags = getNewOverrideRule().tags.join('');
-  const expectedMitre = formatMitreAttackDescription(getNewOverrideRule().mitre);
+  const expectedUrls = getNewOverrideRule().referenceUrls?.join('');
+  const expectedFalsePositives = getNewOverrideRule().falsePositivesExamples?.join('');
+  const expectedTags = getNewOverrideRule().tags?.join('');
+  const mitreAttack = getNewOverrideRule().mitre as Mitre[];
+  const expectedMitre = formatMitreAttackDescription(mitreAttack);
 
   before(() => {
     cleanKibana();
     login();
   });
   beforeEach(() => {
-    createTimeline(getNewOverrideRule().timeline).then((response) => {
+    const timeline = getNewOverrideRule().timeline as CompleteTimeline;
+    createTimeline(timeline).then((response) => {
       cy.wrap({
         ...getNewOverrideRule(),
         timeline: {
-          ...getNewOverrideRule().timeline,
+          ...timeline,
           id: response.body.data.persistTimeline.timeline.savedObjectId,
         },
       }).as('rule');
@@ -89,17 +91,14 @@ describe('Detection rules, override', () => {
 
   it('Creates and enables a new custom rule with override option', function () {
     visitWithoutDateRange(RULE_CREATION);
-    fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
+    fillDefineCustomRuleAndContinue(this.rule);
     fillAboutRuleWithOverrideAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);
     createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    const expectedNumberOfRules = 1;
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-    });
+    expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 
     cy.get(RULE_NAME).should('have.text', this.rule.name);
     cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
@@ -143,7 +142,7 @@ describe('Detection rules, override', () => {
     cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
+      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', 'auditbeat-*');
       getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
@@ -162,7 +161,7 @@ describe('Detection rules, override', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS)
+    cy.get(ALERTS_COUNT)
       .invoke('text')
       .should('match', /^[1-9].+$/); // Any number of alerts
     cy.get(ALERT_GRID_CELL).contains('auditbeat');

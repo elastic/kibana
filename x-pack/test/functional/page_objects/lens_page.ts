@@ -11,6 +11,16 @@ import { WebElementWrapper } from '../../../../test/functional/services/lib/web_
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
+declare global {
+  interface Window {
+    /**
+     * Debug setting to test CSV download
+     */
+    ELASTIC_LENS_CSV_DOWNLOAD_DEBUG?: boolean;
+    ELASTIC_LENS_CSV_CONTENT?: Record<string, { content: string; type: string }>;
+  }
+}
+
 export function LensPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const findService = getService('find');
@@ -38,7 +48,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Clicks the index pattern filters toggle.
      */
     async toggleIndexPatternFiltersPopover() {
-      await testSubjects.click('lnsIndexPatternFiltersToggle');
+      await testSubjects.click('lnsIndexPatternFieldTypeFilterToggle');
     },
 
     async findAllFields() {
@@ -290,17 +300,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`lnsFieldListPanelField-${field}`);
     },
 
-    async editField() {
+    async editField(field: string) {
       await retry.try(async () => {
-        await testSubjects.click('lnsFieldListPanelEdit');
-        await testSubjects.missingOrFail('lnsFieldListPanelEdit');
+        await testSubjects.click(`fieldPopoverHeader_editField-${field}`);
+        await testSubjects.missingOrFail(`fieldPopoverHeader_editField-${field}`);
       });
     },
 
-    async removeField() {
+    async removeField(field: string) {
       await retry.try(async () => {
-        await testSubjects.click('lnsFieldListPanelRemove');
-        await testSubjects.missingOrFail('lnsFieldListPanelRemove');
+        await testSubjects.click(`fieldPopoverHeader_deleteField-${field}`);
+        await testSubjects.missingOrFail(`fieldPopoverHeader_deleteField-${field}`);
       });
     },
 
@@ -543,9 +553,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param dimension - the selector of the dimension panel to open
      * @param layerIndex - the index of the layer
      */
-    async openDimensionEditor(dimension: string, layerIndex = 0) {
+    async openDimensionEditor(dimension: string, layerIndex = 0, dimensionIndex = 0) {
       await retry.try(async () => {
-        await testSubjects.click(`lns-layerPanel-${layerIndex} > ${dimension}`);
+        const dimensionEditor = (
+          await testSubjects.findAll(`lns-layerPanel-${layerIndex} > ${dimension}`)
+        )[dimensionIndex];
+        await dimensionEditor.click();
       });
     },
 
@@ -595,6 +608,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async useFixAction() {
       await testSubjects.click('errorFixAction');
       await this.waitForVisualization();
+    },
+
+    async dragRangeInput(testId: string, steps: number = 1, direction: 'left' | 'right' = 'right') {
+      const inputEl = await testSubjects.find(testId);
+      await inputEl.focus();
+      const browserKey = direction === 'left' ? browser.keys.LEFT : browser.keys.RIGHT;
+      while (steps--) {
+        await browser.pressKeys(browserKey);
+      }
+    },
+
+    async getRangeInputValue(testId: string) {
+      return (await testSubjects.find(testId)).getAttribute('value');
     },
 
     async isTopLevelAggregation() {
@@ -694,6 +720,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async saveAndReturn() {
       await testSubjects.click('lnsApp_saveAndReturnButton');
+    },
+
+    async replaceInDashboard() {
+      await testSubjects.click('lnsApp_replaceInDashboardButton');
     },
 
     async expectSaveAndReturnButtonDisabled() {
@@ -796,18 +826,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`lnsXY_axisSide_groups_${newSide}`);
     },
 
+    async getSelectedAxisSide() {
+      const axisSideGroups = await find.allByCssSelector(
+        `[data-test-subj^="lnsXY_axisSide_groups_"]`
+      );
+      for (const axisSideGroup of axisSideGroups) {
+        const input = await axisSideGroup.findByTagName('input');
+        const isSelected = await input.isSelected();
+        if (isSelected) {
+          return axisSideGroup?.getVisibleText();
+        }
+      }
+    },
+
     /** Counts the visible warnings in the config panel */
-    async getErrorCount() {
-      const moreButton = await testSubjects.exists('configuration-failure-more-errors');
+    async getWorkspaceErrorCount() {
+      const moreButton = await testSubjects.exists('workspace-more-errors-button');
       if (moreButton) {
         await retry.try(async () => {
-          await testSubjects.click('configuration-failure-more-errors');
-          await testSubjects.missingOrFail('configuration-failure-more-errors');
+          await testSubjects.click('workspace-more-errors-button');
+          await testSubjects.missingOrFail('workspace-more-errors-button');
         });
       }
-      const errors = await testSubjects.findAll('configuration-failure-error');
-      const expressionErrors = await testSubjects.findAll('expression-failure');
-      return (errors?.length ?? 0) + (expressionErrors?.length ?? 0);
+      const errors = await testSubjects.findAll('workspace-error-message');
+      return errors?.length ?? 0;
     },
 
     async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {
@@ -880,8 +922,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Changes the index pattern in the data panel
      */
-    async switchDataPanelIndexPattern(dataViewTitle: string) {
-      await PageObjects.unifiedSearch.switchDataView('lns-dataView-switch-link', dataViewTitle);
+    async switchDataPanelIndexPattern(
+      dataViewTitle: string,
+      transitionFromTextBasedLanguages?: boolean
+    ) {
+      await PageObjects.unifiedSearch.switchDataView(
+        'lns-dataView-switch-link',
+        dataViewTitle,
+        transitionFromTextBasedLanguages
+      );
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -923,8 +972,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param dimension - the selector of the dimension
      * @param index - the index of the dimension trigger in group
      */
-    async getDimensionTriggerText(dimension: string, index = 0) {
-      const dimensionTexts = await this.getDimensionTriggersTexts(dimension);
+    async getDimensionTriggerText(dimension: string, index = 0, isTextBased: boolean = false) {
+      const dimensionTexts = await this.getDimensionTriggersTexts(dimension, isTextBased);
       return dimensionTexts[index];
     },
     /**
@@ -932,9 +981,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      *
      * @param dimension - the selector of the dimension
      */
-    async getDimensionTriggersTexts(dimension: string) {
+    async getDimensionTriggersTexts(dimension: string, isTextBased: boolean = false) {
       return retry.try(async () => {
-        const dimensionElements = await testSubjects.findAll(`${dimension} > lns-dimensionTrigger`);
+        const dimensionElements = await testSubjects.findAll(
+          `${dimension} > lns-dimensionTrigger${isTextBased ? '-textBased' : ''}`
+        );
         const dimensionTexts = await Promise.all(
           await dimensionElements.map(async (el) => await el.getVisibleText())
         );
@@ -1025,7 +1076,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         );
       } else {
         buttonEl = await find.byCssSelector(
-          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class$="selected"] [title^="Sort"]`
+          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class*="selected"] [title^="Sort"]`
         );
       }
       return buttonEl.click();
@@ -1092,6 +1143,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         'lnsPalettePanel_dynamicColoring_progression_custom_stops_value',
         String(value)
       );
+    },
+
+    async openLayerContextMenu(index: number = 0) {
+      await testSubjects.click(`lnsLayerSplitButton--${index}`);
     },
 
     async toggleColumnVisibility(dimension: string, no = 1) {
@@ -1179,6 +1234,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         color: await (
           await this.getMetricElementIfExists('.echMetric', tile)
         )?.getComputedStyle('background-color'),
+        showingTrendline: Boolean(
+          await this.getMetricElementIfExists('.echSingleMetricSparkline', tile)
+        ),
       };
     },
 
@@ -1186,14 +1244,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const tiles = await this.getMetricTiles();
       const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));
 
-      const metricData = [];
+      const metricDataPromises = [];
       for (const tile of tiles) {
-        metricData.push({
-          ...(await this.getMetricDatum(tile)),
-          showingBar,
-        });
+        metricDataPromises.push(this.getMetricDatum(tile));
       }
-      return metricData;
+      const metricData = await Promise.all(metricDataPromises);
+      return metricData.map((d) => ({ ...d, showingBar }));
     },
 
     /**
@@ -1292,9 +1348,38 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('indexPattern-add-field');
     },
 
-    async createAdHocDataView(name: string) {
+    async createAdHocDataView(name: string, hasTimeField?: boolean) {
       await testSubjects.click('lns-dataView-switch-link');
-      await PageObjects.unifiedSearch.createNewDataView(name, true);
+      await PageObjects.unifiedSearch.createNewDataView(name, true, hasTimeField);
+    },
+
+    async switchToTextBasedLanguage(language: string) {
+      await testSubjects.click('lns-dataView-switch-link');
+      await PageObjects.unifiedSearch.selectTextBasedLanguage(language);
+    },
+
+    async configureTextBasedLanguagesDimension(opts: {
+      dimension: string;
+      field: string;
+      keepOpen?: boolean;
+      palette?: string;
+    }) {
+      await retry.try(async () => {
+        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+          await testSubjects.click(opts.dimension);
+        }
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
+      });
+
+      await this.selectOptionFromComboBox('text-based-dimension-field', opts.field);
+
+      if (opts.palette) {
+        await this.setPalette(opts.palette);
+      }
+
+      if (!opts.keepOpen) {
+        await this.closeDimensionEditor();
+      }
     },
 
     /** resets visualization/layer or removes a layer */
@@ -1515,40 +1600,151 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.missingOrFail('lens-editor-warning');
     },
 
-    async assertInlineWarning(warningText: string) {
-      await testSubjects.click('chart-inline-warning-button');
-      await testSubjects.existOrFail('chart-inline-warning');
-      const warnings = await testSubjects.findAll('chart-inline-warning');
+    /**
+     * Applicable both on the embeddable and in the editor. In both scenarios, a popover containing user messages (errors, warnings) is shown.
+     *
+     * If you're going to use this many times in your test consider retrieving all the messages in one go using getMessageListTexts
+     * and running your own assertions for performance reasons.
+     */
+    async assertMessageListContains(assertText: string, severity: 'warning' | 'error') {
+      await testSubjects.click('lens-message-list-trigger');
+      const messageSelector = `lens-message-list-${severity}`;
+      await testSubjects.existOrFail(messageSelector);
+      const messages = await testSubjects.findAll(messageSelector);
       let found = false;
-      for (const warning of warnings) {
-        const text = await warning.getVisibleText();
+      for (const message of messages) {
+        const text = await message.getVisibleText();
         log.info(text);
-        if (text === warningText) {
+        if (text === assertText) {
           found = true;
         }
       }
-      await testSubjects.click('chart-inline-warning-button');
+      await testSubjects.click('lens-message-list-trigger');
       if (!found) {
-        throw new Error(`Warning with text "${warningText}" not found`);
+        throw new Error(`Message with text "${assertText}" not found`);
       }
     },
 
-    async assertEditorWarning(warningText: string) {
-      await testSubjects.click('lens-editor-warning-button');
-      await testSubjects.existOrFail('lens-editor-warning');
-      const warnings = await testSubjects.findAll('lens-editor-warning');
-      let found = false;
-      for (const warning of warnings) {
-        const text = await warning.getVisibleText();
-        log.info(text);
-        if (text === warningText) {
-          found = true;
-        }
+    async getMessageListTexts(severity: 'warning' | 'error') {
+      await testSubjects.click('lens-message-list-trigger');
+
+      const messageSelector = `lens-message-list-${severity}`;
+
+      await testSubjects.existOrFail(messageSelector);
+
+      const messageEls = await testSubjects.findAll(messageSelector);
+
+      const messages = await Promise.all(messageEls.map((el) => el.getVisibleText()));
+
+      await testSubjects.click('lens-message-list-trigger');
+
+      return messages;
+    },
+
+    async getPaletteColorStops() {
+      const stops = await find.allByCssSelector(
+        `[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]`
+      );
+      const colorsElements = await testSubjects.findAll('euiColorPickerAnchor');
+      const colors = await Promise.all(
+        colorsElements.map((c) => c.getComputedStyle('background-color'))
+      );
+
+      return await Promise.all(
+        stops.map(async (stop, index) => {
+          return { stop: await stop.getAttribute('value'), color: colors[index] };
+        })
+      );
+    },
+
+    async findFieldIdsByType(
+      type: 'string' | 'number' | 'date' | 'geo_point' | 'ip_range',
+      group: 'available' | 'empty' | 'meta' = 'available'
+    ) {
+      const groupCapitalized = `${group[0].toUpperCase()}${group.slice(1).toLowerCase()}`;
+      const allFieldsForType = await find.allByCssSelector(
+        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .lnsFieldItem--${type}`
+      );
+      // map to testSubjId
+      return Promise.all(allFieldsForType.map((el) => el.getAttribute('data-test-subj')));
+    },
+
+    async clickShareMenu() {
+      await testSubjects.click('lnsApp_shareButton');
+    },
+
+    async isShareable() {
+      return await testSubjects.isEnabled('lnsApp_shareButton');
+    },
+
+    async isShareActionEnabled(action: 'csvDownload' | 'permalinks') {
+      switch (action) {
+        case 'csvDownload':
+          return await testSubjects.isEnabled('sharePanel-CSVDownload');
+        case 'permalinks':
+          return await testSubjects.isEnabled('sharePanel-Permalinks');
       }
-      await testSubjects.click('lens-editor-warning-button');
-      if (!found) {
-        throw new Error(`Warning with text "${warningText}" not found`);
+    },
+
+    async ensureShareMenuIsOpen(action: 'csvDownload' | 'permalinks') {
+      await this.clickShareMenu();
+
+      if (!(await testSubjects.exists('shareContextMenu'))) {
+        await this.clickShareMenu();
       }
+      if (!(await this.isShareActionEnabled(action))) {
+        throw Error(`${action} sharing feature is disabled`);
+      }
+    },
+
+    async openPermalinkShare() {
+      await this.ensureShareMenuIsOpen('permalinks');
+      await testSubjects.click('sharePanel-Permalinks');
+    },
+
+    async getAvailableUrlSharingOptions() {
+      if (!(await testSubjects.exists('shareUrlForm'))) {
+        await this.openPermalinkShare();
+      }
+      const el = await testSubjects.find('shareUrlForm');
+      const available = await el.findAllByCssSelector('input:not([disabled])');
+      const ids = await Promise.all(available.map((node) => node.getAttribute('id')));
+      return ids;
+    },
+
+    async getUrl(type: 'snapshot' | 'savedObject' = 'snapshot') {
+      if (!(await testSubjects.exists('shareUrlForm'))) {
+        await this.openPermalinkShare();
+      }
+      const options = await this.getAvailableUrlSharingOptions();
+      const optionIndex = options.findIndex((option) => option === type);
+      if (optionIndex < 0) {
+        throw Error(`Sharing URL of type ${type} is not available`);
+      }
+      const testSubFrom = `exportAs${type[0].toUpperCase()}${type.substring(1)}`;
+      await testSubjects.click(testSubFrom);
+      const copyButton = await testSubjects.find('copyShareUrlButton');
+      const url = await copyButton.getAttribute('data-share-url');
+      return url;
+    },
+
+    async openCSVDownloadShare() {
+      await this.ensureShareMenuIsOpen('csvDownload');
+      await testSubjects.click('sharePanel-CSVDownload');
+    },
+
+    async setCSVDownloadDebugFlag(value: boolean = true) {
+      await browser.execute<[boolean], void>((v) => {
+        window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = v;
+      }, value);
+    },
+
+    async getCSVContent() {
+      await testSubjects.click('lnsApp_downloadCSVButton');
+      return await browser.execute<
+        [void],
+        Record<string, { content: string; type: string }> | undefined
+      >(() => window.ELASTIC_LENS_CSV_CONTENT);
     },
   });
 }

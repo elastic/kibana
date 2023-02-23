@@ -24,9 +24,11 @@ import {
   STEP_DURATION_LABEL,
   UP_LABEL,
   PAGE_LOAD_TIME_LABEL,
+  NETWORK_TIMINGS_LABEL,
 } from '../constants/labels';
 import {
   MONITOR_DURATION_US,
+  NETWORK_TIMINGS_FIELDS,
   SYNTHETICS_CLS,
   SYNTHETICS_DCL,
   SYNTHETICS_DOCUMENT_ONLOAD,
@@ -66,7 +68,7 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         operationType: 'median',
       },
     ],
-    hasOperationType: false,
+    hasOperationType: true,
     filterFields: ['observer.geo.name', 'monitor.type', 'tags', 'url.full'],
     breakdownFields: [
       'observer.geo.name',
@@ -91,7 +93,43 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         label: 'Monitor availability',
         id: 'monitor_availability',
         columnType: FORMULA_COLUMN,
-        formula: "1- (count(kql='summary.down > 0') / count())",
+        formula: "1- (count(kql='summary.down > 0') / count(kql='summary: *'))",
+      },
+      {
+        label: 'Monitor Errors',
+        id: 'monitor_errors',
+        columnType: OPERATION_COLUMN,
+        field: 'state.id',
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `summary.down > 0`,
+          },
+        ],
+      },
+      {
+        label: 'Monitor Complete',
+        id: 'state.up',
+        field: 'state.up',
+        columnType: OPERATION_COLUMN,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `summary: * and summary.down: 0 and monitor.status: "up"`,
+          },
+        ],
+      },
+      {
+        label: 'Total runs',
+        id: 'monitor.check_group',
+        field: 'monitor.check_group',
+        columnType: OPERATION_COLUMN,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `summary: *`,
+          },
+        ],
       },
       {
         field: SUMMARY_UP,
@@ -149,16 +187,31 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         columnType: OPERATION_COLUMN,
         columnFilters: getStepMetricColumnFilter(SYNTHETICS_CLS),
       },
+      {
+        label: NETWORK_TIMINGS_LABEL,
+        id: 'network_timings',
+        columnType: OPERATION_COLUMN,
+        items: NETWORK_TIMINGS_FIELDS.map((field) => ({
+          label: FieldLabels[field] ?? field,
+          field,
+          id: field,
+          columnType: OPERATION_COLUMN,
+          columnFilters: getStepMetricColumnFilter(field, 'journey/network_info'),
+        })),
+      },
     ],
     labels: { ...FieldLabels, [SUMMARY_UP]: UP_LABEL, [SUMMARY_DOWN]: DOWN_LABEL },
   };
 }
 
-const getStepMetricColumnFilter = (field: string): ColumnFilter[] => {
+const getStepMetricColumnFilter = (
+  field: string,
+  stepType: 'step/metrics' | 'step/end' | 'journey/network_info' = 'step/metrics'
+): ColumnFilter[] => {
   return [
     {
       language: 'kuery',
-      query: `synthetics.type: step/metrics and ${field}: *`,
+      query: `synthetics.type: ${stepType} and ${field}: * and ${field} > 0`,
     },
   ];
 };

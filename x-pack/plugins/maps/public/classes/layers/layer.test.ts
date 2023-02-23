@@ -18,7 +18,7 @@ class MockSource {
     this._fitToBounds = fitToBounds;
   }
   cloneDescriptor() {
-    return {};
+    return [{}];
   }
 
   async supportsFitToBounds() {

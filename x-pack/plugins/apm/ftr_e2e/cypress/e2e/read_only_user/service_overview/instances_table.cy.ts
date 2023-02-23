@@ -63,7 +63,7 @@ describe('Instances table', () => {
     it('shows empty message', () => {
       cy.visitKibana(testServiveHref);
       cy.contains('test-service');
-      cy.get('[data-test-subj="serviceInstancesTableContainer"]').contains(
+      cy.getByTestSubj('serviceInstancesTableContainer').contains(
         'No instances found'
       );
     });
@@ -77,9 +77,7 @@ describe('Instances table', () => {
     it('hides instances table', () => {
       cy.visitKibana(serviceRumOverviewHref);
       cy.contains('opbeans-rum');
-      cy.get('[data-test-subj="serviceInstancesTableContainer"]').should(
-        'not.exist'
-      );
+      cy.getByTestSubj('serviceInstancesTableContainer').should('not.exist');
     });
   });
 
@@ -109,10 +107,8 @@ describe('Instances table', () => {
       cy.contains(serviceNodeName);
 
       cy.wait('@instancesDetailsRequest');
-      cy.get(
-        `[data-test-subj="instanceDetailsButton_${serviceNodeName}"]`
-      ).realClick();
-      cy.get('[data-test-subj="loadingSpinner"]').should('be.visible');
+      cy.getByTestSubj(`instanceDetailsButton_${serviceNodeName}`).realClick();
+      cy.getByTestSubj('loadingSpinner').should('be.visible');
       cy.wait('@instanceDetailsRequest').then(() => {
         cy.contains('Service');
       });
@@ -130,9 +126,7 @@ describe('Instances table', () => {
       cy.contains(serviceNodeName);
 
       cy.wait('@instancesDetailsRequest');
-      cy.get(
-        `[data-test-subj="instanceActionsButton_${serviceNodeName}"]`
-      ).click();
+      cy.getByTestSubj(`instanceActionsButton_${serviceNodeName}`).click();
       cy.contains('Pod logs');
       cy.contains('Pod metrics');
       // cy.contains('Container logs');

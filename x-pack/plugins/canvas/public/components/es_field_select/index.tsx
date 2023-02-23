@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { getFields } from '../../lib/es_service';
+import { useDataViewsService } from '../../services';
 import { ESFieldSelect as Component, ESFieldSelectProps as Props } from './es_field_select';
 
 type ESFieldSelectProps = Omit<Props, 'fields'>;
@@ -15,15 +15,17 @@ export const ESFieldSelect: React.FunctionComponent<ESFieldSelectProps> = (props
   const { index, value, onChange } = props;
   const [fields, setFields] = useState<string[]>([]);
   const loadingFields = useRef(false);
+  const { getFields } = useDataViewsService();
 
   useEffect(() => {
     loadingFields.current = true;
+
     getFields(index)
       .then((newFields) => setFields(newFields || []))
       .finally(() => {
         loadingFields.current = false;
       });
-  }, [index]);
+  }, [index, getFields]);
 
   useEffect(() => {
     if (!loadingFields.current && value && !fields.includes(value)) {

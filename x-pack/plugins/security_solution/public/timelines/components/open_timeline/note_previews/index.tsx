@@ -53,7 +53,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
       timelineActions.toggleDetailPanel({
         panelView: 'eventDetail',
         tabType: TimelineTabs.notes,
-        timelineId,
+        id: timelineId,
         params: {
           eventId,
           indexName: selectedPatterns.join(','),

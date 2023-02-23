@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Authorization } from './authorization';
+import type { Authorization } from './authorization';
 
 type Schema = PublicMethodsOf<Authorization>;
 export type AuthorizationMock = jest.Mocked<Schema>;
@@ -14,7 +14,10 @@ export type AuthorizationMock = jest.Mocked<Schema>;
 export const createAuthorizationMock = () => {
   const mocked: AuthorizationMock = {
     ensureAuthorized: jest.fn(),
-    getAuthorizationFilter: jest.fn(),
+    getAuthorizationFilter: jest.fn().mockImplementation(async () => {
+      return { filter: undefined, ensureSavedObjectsAreAuthorized: () => {} };
+    }),
+    getAndEnsureAuthorizedEntities: jest.fn(),
   };
   return mocked;
 };

@@ -15,6 +15,10 @@
   min-width: $euiSizeXXL * 15;
 }
 
+.timeSlider-playToggle {
+  background-color: $euiColorPrimary !important;
+}
+
 .timeSlider__anchor {
   text-decoration: none;
   width: 100%;

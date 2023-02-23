@@ -5,19 +5,38 @@
  * 2.0.
  */
 
+import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import { UserActionParameters, BuilderReturnValue } from '../types';
+import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
 export class ConnectorUserActionBuilder extends UserActionBuilder {
-  build(args: UserActionParameters<'connector'>): BuilderReturnValue {
-    return this.buildCommonUserAction({
+  build(args: UserActionParameters<'connector'>): UserActionEvent {
+    const action = Actions.update;
+
+    const parameters = this.buildCommonUserAction({
       ...args,
-      action: Actions.update,
+      action,
       valueKey: 'connector',
       value: this.extractConnectorId(args.payload.connector),
       type: ActionTypes.connector,
       connectorId: args.payload.connector.id,
     });
+
+    const getMessage = (id?: string) =>
+      `User changed the case connector to id: ${args.payload.connector.id} for case id: ${args.caseId} - user action id: ${id}`;
+
+    const eventDetails: EventDetails = {
+      getMessage,
+      action,
+      descriptiveAction: 'case_user_action_update_case_connector',
+      savedObjectId: args.caseId,
+      savedObjectType: CASE_SAVED_OBJECT,
+    };
+
+    return {
+      parameters,
+      eventDetails,
+    };
   }
 }

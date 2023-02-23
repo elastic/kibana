@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -28,10 +27,12 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
-    it('should show 404 page when the feature flag is disabled', async () => {
-      await observability.alerts.common.navigateToAlertDetails(uuid.v4());
+    it('should show 404 page when the feature flag is disabled but the alert exists', async () => {
+      await observability.alerts.common.navigateToAlertDetails(
+        '4c87bd11-ff31-4a05-8a04-833e2da94858'
+      );
       await retry.waitFor(
-        'Alerts page to be visible',
+        'The 404 - Not found page to be visible',
         async () => await testSubjects.exists('pageNotFound')
       );
     });

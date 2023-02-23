@@ -34,7 +34,11 @@ export type {
   FatalErrorsStart,
   FatalErrorInfo,
 } from '@kbn/core-fatal-errors-browser';
-export type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+export type {
+  UiSettingsState,
+  IUiSettingsClient,
+  PublicUiSettingsParams,
+} from '@kbn/core-ui-settings-browser';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
@@ -76,7 +80,6 @@ export {
 } from '@kbn/core-application-common';
 export type {
   UiSettingsParams,
-  PublicUiSettingsParams,
   UserProvidedValues,
   UiSettingsType,
 } from '@kbn/core-ui-settings-common';
@@ -206,6 +209,8 @@ export type {
 
 export type { ToastsApi } from '@kbn/core-notifications-browser-internal';
 
+export type { CustomBrandingStart, CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
+
 export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
 
 export type {
@@ -226,6 +231,6 @@ export type {
 
 export type { CoreSetup, CoreStart, StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 
-export type { CoreSystem } from './core_system';
+export type { CoreSystem } from '@kbn/core-root-browser-internal';
 
-export { __kbnBootstrap__ } from './kbn_bootstrap';
+export { __kbnBootstrap__ } from '@kbn/core-root-browser-internal';

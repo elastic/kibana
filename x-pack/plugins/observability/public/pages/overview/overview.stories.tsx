@@ -75,11 +75,17 @@ const withCore = makeDecorator({
       },
     } as unknown as Partial<CoreStart>);
 
-    const config = {
+    const config: ConfigSchema = {
       unsafe: {
-        alertDetails: { enabled: false },
+        slo: { enabled: false },
+        alertDetails: {
+          apm: { enabled: false },
+          logs: { enabled: false },
+          metrics: { enabled: false },
+          uptime: { enabled: false },
+        },
       },
-    } as ConfigSchema;
+    };
 
     return (
       <MemoryRouter>

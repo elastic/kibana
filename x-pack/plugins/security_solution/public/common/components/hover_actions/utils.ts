@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useCallback, useState } from 'react';
+
 export const getAdditionalScreenReaderOnlyContext = ({
   field,
   value,
@@ -17,4 +19,21 @@ export const getAdditionalScreenReaderOnlyContext = ({
   }
 
   return Array.isArray(value) ? `${field} ${value.join(' ')}` : `${field} ${value}`;
+};
+
+export const useTopNPopOver = (setIsPopoverVisible?: (isVisible: boolean) => void) => {
+  const [isShowingTopN, setShowTopN] = useState<boolean>(false);
+  const toggleTopN = useCallback(() => {
+    setShowTopN((prevShowTopN) => {
+      const newShowTopN = !prevShowTopN;
+      if (setIsPopoverVisible) setIsPopoverVisible(newShowTopN);
+      return newShowTopN;
+    });
+  }, [setIsPopoverVisible]);
+
+  const closeTopN = useCallback(() => {
+    setShowTopN(false);
+  }, []);
+
+  return { closeTopN, toggleTopN, isShowingTopN };
 };

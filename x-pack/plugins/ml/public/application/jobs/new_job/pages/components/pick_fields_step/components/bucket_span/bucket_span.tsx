@@ -52,6 +52,7 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
         <EuiFlexItem>
           <BucketSpanInput
             setBucketSpan={setBucketSpan}
+            // @ts-expect-error bucketSpan is of type `estypes.Duration`
             bucketSpan={bucketSpan}
             isInvalid={validation.valid === false}
             disabled={estimating}

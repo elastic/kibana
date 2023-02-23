@@ -45,6 +45,7 @@ const DescriptionListStyled = styled(EuiDescriptionList)`
 DescriptionListStyled.displayName = 'DescriptionListStyled';
 
 export interface ModalInspectProps {
+  adHocDataViews?: string[] | null;
   additionalRequests?: string[] | null;
   additionalResponses?: string[] | null;
   closeModal: () => void;
@@ -70,6 +71,8 @@ interface Response {
 }
 
 const MyEuiModal = styled(EuiModal)`
+  width: min(768px, calc(100vw - 16px));
+  min-height: 41vh;
   .euiModal__flex {
     width: 60vw;
   }
@@ -106,6 +109,7 @@ export const formatIndexPatternRequested = (indices: string[] = []) => {
 };
 
 export const ModalInspectQuery = ({
+  adHocDataViews,
   additionalRequests,
   additionalResponses,
   closeModal,
@@ -118,6 +122,7 @@ export const ModalInspectQuery = ({
   const { selectedPatterns } = useSourcererDataView(
     inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname)
   );
+
   const requests: string[] = [request, ...(additionalRequests != null ? additionalRequests : [])];
   const responses: string[] = [
     response,
@@ -128,7 +133,10 @@ export const ModalInspectQuery = ({
   const inspectResponses: Response[] = parseInspectStrings(responses);
 
   const isSourcererPattern = useMemo(
-    () => (inspectRequests[0]?.index ?? []).every((pattern) => selectedPatterns.includes(pattern)),
+    () =>
+      (inspectRequests[0]?.index ?? []).every((pattern) =>
+        selectedPatterns.includes(pattern.trim())
+      ),
     [inspectRequests, selectedPatterns]
   );
 
@@ -145,7 +153,13 @@ export const ModalInspectQuery = ({
       ),
       description: (
         <span data-test-subj="index-pattern-description">
-          <p>{formatIndexPatternRequested(inspectRequests[0]?.index ?? [])}</p>
+          <p>
+            {formatIndexPatternRequested(
+              adHocDataViews != null && adHocDataViews.length > 0
+                ? adHocDataViews
+                : inspectRequests[0]?.index ?? []
+            )}
+          </p>
 
           {!isSourcererPattern && (
             <p>

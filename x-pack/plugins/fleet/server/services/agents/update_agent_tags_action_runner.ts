@@ -6,22 +6,24 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import uuid from 'uuid';
-import { difference, uniq } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
+import { uniq } from 'lodash';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
+
+import { AGENTS_INDEX } from '../../constants';
 
 import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
 
-import { errorsToResults, bulkUpdateAgents } from './crud';
-import { BulkActionTaskType } from './bulk_actions_resolver';
+import { BulkActionTaskType } from './bulk_action_types';
 import { filterHostedPolicies } from './filter_hosted_agents';
 import { bulkCreateAgentActionResults, createAgentAction } from './actions';
+import { MAX_RETRY_COUNT } from './retry_helper';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
-  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
+  protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
     return await updateTagsBatch(
       this.soClient,
       this.esClient,
@@ -32,9 +34,7 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
         tagsToRemove: this.actionParams?.tagsToRemove,
         actionId: this.actionParams.actionId,
         total: this.actionParams.total,
-      },
-      undefined,
-      true
+      }
     );
   }
 
@@ -57,83 +57,154 @@ export async function updateTagsBatch(
     tagsToRemove: string[];
     actionId?: string;
     total?: number;
-  },
-  agentIds?: string[],
-  skipSuccess?: boolean
-): Promise<{ items: BulkActionResult[] }> {
+    kuery?: string;
+    retryCount?: number;
+  }
+): Promise<{ actionId: string; updated?: number; took?: number }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
+  const hostedAgentError = `Cannot modify tags on a hosted agent`;
 
   const filteredAgents = await filterHostedPolicies(
     soClient,
     givenAgents,
     errors,
-    `Cannot modify tags on a hosted agent`
+    hostedAgentError
   );
+  const agentIds = filteredAgents.map((agent) => agent.id);
 
-  const getNewTags = (agent: Agent): string[] => {
-    const existingTags = agent.tags ?? [];
-
-    if (options.tagsToAdd.length === 1 && options.tagsToRemove.length === 1) {
-      const removableTagIndex = existingTags.indexOf(options.tagsToRemove[0]);
-      if (removableTagIndex > -1) {
-        const newTags = uniq([
-          ...existingTags.slice(0, removableTagIndex),
-          options.tagsToAdd[0],
-          ...existingTags.slice(removableTagIndex + 1),
-        ]);
-        return newTags;
-      }
-    }
-    return uniq(difference(existingTags, options.tagsToRemove).concat(options.tagsToAdd));
-  };
-
-  await bulkUpdateAgents(
-    esClient,
-    filteredAgents.map((agent) => ({
-      agentId: agent.id,
-      data: {
-        tags: getNewTags(agent),
-      },
-    }))
-  );
-
-  const actionId = options.actionId ?? uuid();
-  const total = options.total ?? givenAgents.length;
-  const errorCount = Object.keys(errors).length;
-
-  // creating an action doc so that update tags  shows up in activity
-  await createAgentAction(esClient, {
-    id: actionId,
-    agents: [],
-    created_at: new Date().toISOString(),
-    type: 'UPDATE_TAGS',
-    total,
-  });
-  await bulkCreateAgentActionResults(
-    esClient,
-    filteredAgents.map((agent) => ({
-      agentId: agent.id,
-      actionId,
-    }))
-  );
-
-  if (errorCount > 0) {
-    appContextService
-      .getLogger()
-      .info(
-        `Skipping ${errorCount} agents, as failed validation (cannot modified tags on hosted agents)`
-      );
-
-    // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
-    await bulkCreateAgentActionResults(
-      esClient,
-      Object.keys(errors).map((agentId) => ({
-        agentId,
-        actionId,
-        error: errors[agentId].message,
-      }))
-    );
+  const actionId = options.actionId ?? uuidv4();
+  if (agentIds.length === 0) {
+    appContextService.getLogger().debug('No agents to update tags, returning');
+    return { actionId, updated: 0, took: 0 };
   }
 
-  return { items: errorsToResults(filteredAgents, errors, agentIds, skipSuccess) };
+  appContextService
+    .getLogger()
+    .debug(
+      `Agents to update tags in batch: ${agentIds.length}, tagsToAdd: ${options.tagsToAdd}, tagsToRemove: ${options.tagsToRemove}`
+    );
+
+  let res;
+  try {
+    res = await esClient.updateByQuery({
+      query: {
+        terms: {
+          _id: agentIds,
+        },
+      },
+      index: AGENTS_INDEX,
+      refresh: true,
+      wait_for_completion: true,
+      script: {
+        source: `
+      if (ctx._source.tags == null) {
+        ctx._source.tags = [];
+      }
+      if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) {
+        ctx._source.tags.replaceAll(tag -> params.tagsToRemove[0] == tag ? params.tagsToAdd[0] : tag);
+      } else {
+        ctx._source.tags.removeAll(params.tagsToRemove);
+      }
+      ctx._source.tags.addAll(params.tagsToAdd);
+
+      LinkedHashSet uniqueSet = new LinkedHashSet();
+      uniqueSet.addAll(ctx._source.tags);
+
+      ctx._source.tags = uniqueSet.toArray();
+
+      ctx._source.updated_at = params.updatedAt;
+      `,
+        lang: 'painless',
+        params: {
+          tagsToAdd: uniq(options.tagsToAdd),
+          tagsToRemove: uniq(options.tagsToRemove),
+          updatedAt: new Date().toISOString(),
+        },
+      },
+      conflicts: 'proceed', // relying on the task to retry in case of conflicts - retry only conflicted agents
+    });
+  } catch (error) {
+    throw new Error('Caught error: ' + JSON.stringify(error).slice(0, 1000));
+  }
+
+  appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
+
+  // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
+  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuidv4());
+
+  const updatedCount = res.updated ?? 0;
+  const updatedIds = getUuidArray(updatedCount);
+
+  const failures = res.failures ?? [];
+  const failureCount = failures.length;
+
+  const isLastRetry = options.retryCount === MAX_RETRY_COUNT;
+
+  const versionConflictCount = res.version_conflicts ?? 0;
+  const versionConflictIds = isLastRetry ? getUuidArray(versionConflictCount) : [];
+
+  // creating an action doc so that update tags  shows up in activity
+  // the logic only saves agent count in the action that updated, failed or in case of last retry, conflicted
+  // this ensures that the action status count will be accurate
+  await createAgentAction(esClient, {
+    id: actionId,
+    agents: updatedIds
+      .concat(failures.map((failure) => failure.id))
+      .concat(isLastRetry ? versionConflictIds : []),
+    created_at: new Date().toISOString(),
+    type: 'UPDATE_TAGS',
+    total: options.total ?? res.total,
+  });
+  appContextService
+    .getLogger()
+    .debug(
+      `action doc wrote on ${
+        updatedCount + failureCount + (isLastRetry ? versionConflictCount : 0)
+      } agentIds, updated: ${updatedCount}, failed: ${failureCount}, version_conflicts: ${versionConflictCount}`
+    );
+
+  // writing successful action results
+  if (updatedCount > 0) {
+    await bulkCreateAgentActionResults(
+      esClient,
+      updatedIds.map((id) => ({
+        agentId: id,
+        actionId,
+      }))
+    );
+    appContextService.getLogger().debug(`action updated result wrote on ${updatedCount} agents`);
+  }
+
+  // writing failures from es update
+  if (failures.length > 0) {
+    await bulkCreateAgentActionResults(
+      esClient,
+      failures.map((failure) => ({
+        agentId: failure.id,
+        actionId,
+        error: failure.cause.reason,
+      }))
+    );
+    appContextService.getLogger().debug(`action failed result wrote on ${failureCount} agents`);
+  }
+
+  if (versionConflictCount > 0) {
+    // write out error results on last retry, so action is not stuck in progress
+    if (options.retryCount === MAX_RETRY_COUNT) {
+      await bulkCreateAgentActionResults(
+        esClient,
+        versionConflictIds.map((id) => ({
+          agentId: id,
+          actionId,
+          error: 'version conflict on last retry',
+        }))
+      );
+      appContextService
+        .getLogger()
+        .debug(`action conflict result wrote on ${versionConflictCount} agents`);
+    }
+    throw new Error(`version conflict of ${versionConflictCount} agents`);
+  }
+
+  return { actionId, updated: res.updated, took: res.took };
 }

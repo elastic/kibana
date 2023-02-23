@@ -7,11 +7,11 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isEmpty } from 'lodash';
 import type { Filter } from '@kbn/es-query';
+import type { OverrideBodyQuery } from './types';
 import type {
-  FiltersOrUndefined,
-  TimestampOverrideOrUndefined,
+  RuleFilterArray,
   TimestampOverride,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../common/detection_engine/rule_schema';
 import { getQueryFilter } from './get_query_filter';
 
 interface BuildEventsSearchQuery {
@@ -25,8 +25,10 @@ interface BuildEventsSearchQuery {
   sortOrder?: estypes.SortOrder;
   searchAfterSortIds: estypes.SortResults | undefined;
   primaryTimestamp: TimestampOverride;
-  secondaryTimestamp: TimestampOverrideOrUndefined;
+  secondaryTimestamp: TimestampOverride | undefined;
   trackTotalHits?: boolean;
+  additionalFilters?: estypes.QueryDslQueryContainer[];
+  overrideBody?: OverrideBodyQuery;
 }
 
 interface BuildEqlSearchRequestParams {
@@ -35,9 +37,9 @@ interface BuildEqlSearchRequestParams {
   from: string;
   to: string;
   size: number;
-  filters: FiltersOrUndefined;
+  filters: RuleFilterArray | undefined;
   primaryTimestamp: TimestampOverride;
-  secondaryTimestamp: TimestampOverrideOrUndefined;
+  secondaryTimestamp: TimestampOverride | undefined;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   eventCategoryOverride?: string;
   timestampField?: string;
@@ -45,7 +47,7 @@ interface BuildEqlSearchRequestParams {
   exceptionFilter: Filter | undefined;
 }
 
-const buildTimeRangeFilter = ({
+export const buildTimeRangeFilter = ({
   to,
   from,
   primaryTimestamp,
@@ -54,7 +56,7 @@ const buildTimeRangeFilter = ({
   to: string;
   from: string;
   primaryTimestamp: TimestampOverride;
-  secondaryTimestamp: TimestampOverrideOrUndefined;
+  secondaryTimestamp: TimestampOverride | undefined;
 }): estypes.QueryDslQueryContainer => {
   // The primaryTimestamp is always provided and will contain either the timestamp override field or `@timestamp` otherwise.
   // The secondaryTimestamp is `undefined` if
@@ -131,6 +133,8 @@ export const buildEventsSearchQuery = ({
   primaryTimestamp,
   secondaryTimestamp,
   trackTotalHits,
+  additionalFilters,
+  overrideBody,
 }: BuildEventsSearchQuery) => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
@@ -147,7 +151,11 @@ export const buildEventsSearchQuery = ({
     secondaryTimestamp,
   });
 
-  const filterWithTime: estypes.QueryDslQueryContainer[] = [filter, rangeFilter];
+  const filterWithTime: estypes.QueryDslQueryContainer[] = [
+    filter,
+    rangeFilter,
+    ...(additionalFilters ? additionalFilters : []),
+  ];
 
   const sort: estypes.Sort = [];
   sort.push({
@@ -175,12 +183,7 @@ export const buildEventsSearchQuery = ({
     body: {
       query: {
         bool: {
-          filter: [
-            ...filterWithTime,
-            {
-              match_all: {},
-            },
-          ],
+          filter: filterWithTime,
         },
       },
       fields: [
@@ -193,6 +196,7 @@ export const buildEventsSearchQuery = ({
       ...(aggregations ? { aggregations } : {}),
       runtime_mappings: runtimeMappings,
       sort,
+      ...overrideBody,
     },
   };
 

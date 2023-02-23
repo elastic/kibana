@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiCheckboxGroup, EuiFormRow, EuiText, EuiBadge, EuiIconTip } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useRouteMatch } from 'react-router-dom';
+import { formatLocation } from '../../../../../common/utils/location_formatter';
 import { monitorManagementListSelector } from '../../../state/selectors';
 import { MonitorServiceLocations, LocationStatus } from '../../../../../common/runtime_types';
 import { ClientPluginsStart } from '../../../../plugin';
@@ -44,9 +45,7 @@ export const ServiceLocations = ({
     const location = locations.find((loc) => loc.id === optionId);
     if (isSelected) {
       setLocations((prevLocations) =>
-        location
-          ? [...prevLocations, { id: location.id, isServiceManaged: location.isServiceManaged }]
-          : prevLocations
+        location ? [...prevLocations, formatLocation(location)] : prevLocations
       );
     } else {
       setLocations((prevLocations) => [...prevLocations].filter((loc) => loc.id !== optionId));

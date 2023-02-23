@@ -31,6 +31,7 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
     docLinks,
     uiSettings,
     data,
+    dataViews,
     unifiedSearch,
     storage,
     usageCollection,
@@ -72,6 +73,7 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
         deps={{
           unifiedSearch,
           data,
+          dataViews,
           storage,
           notifications,
           http,

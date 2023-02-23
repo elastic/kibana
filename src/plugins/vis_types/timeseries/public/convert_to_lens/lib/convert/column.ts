@@ -14,7 +14,7 @@ import {
   GenericColumnWithMeta,
   FormatParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Metric, Series } from '../../../../common/types';
 import { DATA_FORMATTERS } from '../../../../common/enums';
 import { getTimeScale } from '../metrics';
@@ -27,11 +27,12 @@ interface ExtraColumnFields {
   isSplit?: boolean;
   reducedTimeRange?: string;
   timeShift?: string;
+  isAssignTimeScale?: boolean;
 }
 
 const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].includes(format);
 
-export const getFormat = (series: Series): FormatParams => {
+export const getFormat = (series: Pick<Series, 'formatter' | 'value_template'>): FormatParams => {
   let suffix;
 
   if (!series.formatter || series.formatter === 'default') {
@@ -56,9 +57,15 @@ export const createColumn = (
   series: Series,
   metric: Metric,
   field?: DataViewField,
-  { isBucketed = false, isSplit = false, reducedTimeRange, timeShift }: ExtraColumnFields = {}
+  {
+    isBucketed = false,
+    isSplit = false,
+    reducedTimeRange,
+    timeShift,
+    isAssignTimeScale = true,
+  }: ExtraColumnFields = {}
 ): GeneralColumnWithMeta => ({
-  columnId: uuid(),
+  columnId: uuidv4(),
   dataType: (field?.type as DataType) ?? undefined,
   label: series.label,
   isBucketed,
@@ -66,7 +73,7 @@ export const createColumn = (
   reducedTimeRange,
   filter: series.filter,
   timeShift,
-  timeScale: getTimeScale(metric),
+  timeScale: isAssignTimeScale ? getTimeScale(metric) : undefined,
   meta: { metricId: metric.id },
 });
 

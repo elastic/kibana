@@ -59,11 +59,15 @@ function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: strin
   if (tooLongs.length > 0) {
     bk.setAnnotation(
       `test-group-too-long:${typeName}`,
-      'error',
+      'warning',
       [
         tooLongs.length === 1
-          ? `The following "${typeName}" config has a duration that exceeds the maximum amount of time desired for a single CI job. Please split it up.`
-          : `The following "${typeName}" configs have durations that exceed the maximum amount of time desired for a single CI job. Please split them up.`,
+          ? `The following "${typeName}" config has a duration that exceeds the maximum amount of time desired for a single CI job. ` +
+            `This is not an error, and if you don't own this config then you can ignore this warning. ` +
+            `If you own this config please split it up ASAP and ask Operations if you have questions about how to do that.`
+          : `The following "${typeName}" configs have durations that exceed the maximum amount of time desired for a single CI job. ` +
+            `This is not an error, and if you don't own any of these configs then you can ignore this warning.` +
+            `If you own any of these configs please split them up ASAP and ask Operations if you have questions about how to do that.`,
         '',
         ...tooLongs.map(({ config, durationMin }) => ` - ${config}: ${durationMin} minutes`),
       ].join('\n')
@@ -175,6 +179,15 @@ export async function pickTestGroupRunOrder() {
     throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
   }
 
+  /**
+   * This env variable corresponds to the env stanza within
+   * https://github.com/elastic/kibana/blob/bc2cb5dc613c3d455a5fed9c54450fd7e46ffd92/.buildkite/pipelines/code_coverage/daily.yml#L17
+   *
+   * It is a flag that signals the job for which test runners will be executed.
+   *
+   * For example in code coverage pipeline definition, it is "limited"
+   * to 'unit,integration'.  This means FTR tests will not be executed.
+   */
   const LIMIT_CONFIG_TYPE = process.env.LIMIT_CONFIG_TYPE
     ? process.env.LIMIT_CONFIG_TYPE.split(',')
         .map((t) => t.trim())
@@ -214,9 +227,10 @@ export async function pickTestGroupRunOrder() {
       : ['build'];
 
   const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
-  if (!LIMIT_CONFIG_TYPE.includes('functional')) {
-    ftrConfigsByQueue.clear();
-  }
+
+  const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
+
+  if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
   const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
     ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
@@ -230,6 +244,7 @@ export async function pickTestGroupRunOrder() {
     ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
         cwd: process.cwd(),
         absolute: false,
+        ignore: DISABLED_JEST_CONFIGS,
       })
     : [];
 
@@ -289,14 +304,14 @@ export async function pickTestGroupRunOrder() {
     groups: [
       {
         type: UNIT_TYPE,
-        defaultMin: 3,
+        defaultMin: 4,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
         names: jestUnitConfigs,
       },
       {
         type: INTEGRATION_TYPE,
-        defaultMin: 10,
+        defaultMin: 60,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
         names: jestIntegrationConfigs,
@@ -372,9 +387,11 @@ export async function pickTestGroupRunOrder() {
   Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit, integration }, null, 2));
   bk.uploadArtifacts('jest_run_order.json');
 
-  // write the config for functional steps to an artifact that can be used by the individual functional jobs
-  Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
-  bk.uploadArtifacts('ftr_run_order.json');
+  if (ftrConfigsIncluded) {
+    // write the config for functional steps to an artifact that can be used by the individual functional jobs
+    Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
+    bk.uploadArtifacts('ftr_run_order.json');
+  }
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(
@@ -384,7 +401,7 @@ export async function pickTestGroupRunOrder() {
             label: 'Jest Tests',
             command: getRequiredEnv('JEST_UNIT_SCRIPT'),
             parallelism: unit.count,
-            timeout_in_minutes: 90,
+            timeout_in_minutes: 120,
             key: 'jest',
             agents: {
               queue: 'n2-4-spot',
@@ -441,7 +458,7 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 150,
+                  timeout_in_minutes: 90,
                   agents: {
                     queue,
                   },

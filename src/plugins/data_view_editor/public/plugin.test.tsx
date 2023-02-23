@@ -24,6 +24,8 @@ import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/m
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';
 import { DataViewEditorPlugin } from './plugin';
 
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+
 const noop = () => {};
 
 describe('DataViewEditorPlugin', () => {
@@ -31,7 +33,7 @@ describe('DataViewEditorPlugin', () => {
   const pluginStart = {
     data: dataPluginMock.createStartContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
-    dataViews: dataPluginMock.createStartContract().dataViews,
+    dataViews: dataPluginMock.createStartContract().dataViews as DataViewsServicePublic,
   };
 
   let plugin: DataViewEditorPlugin;

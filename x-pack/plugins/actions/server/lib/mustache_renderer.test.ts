@@ -340,4 +340,75 @@ describe('mustache_renderer', () => {
     const expected = '1 - {"c":2,"d":[3,4]} -- 5,{"f":6,"g":7}';
     expect(renderMustacheString('{{a}} - {{b}} -- {{e}}', deepVariables, 'none')).toEqual(expected);
   });
+
+  describe('converting dot variables', () => {
+    it('handles multiple dots', () => {
+      const dotVariables = {
+        context: [
+          {
+            _index: '.internal.alerts-observability.metrics.alerts-default-000001',
+            _id: 'a8616ced-c22b-466c-a964-8db53af930ef',
+            '_score.test': 1,
+            _source: {
+              'kibana.alert.rule.category': 'Metric threshold',
+              'kibana.alert.rule.consumer': 'infrastructure',
+              'kibana.alert.rule.execution.uuid': 'c42da290-30be-4e90-a7fb-75e160bac758',
+              'kibana.alert.rule.name': 'test rule',
+              'kibana.alert.rule.producer': 'infrastructure',
+              'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+              'kibana.alert.rule.uuid': '534c0f20-5533-11ed-b0da-c1155191eec9',
+              'kibana.space_ids': ['default'],
+              'kibana.alert.rule.tags': [],
+              '@timestamp': '2022-10-26T13:50:06.516Z',
+              'kibana.alert.reason':
+                'event.duration is 235,545,454.54545 in the last 1 min for execute. Alert when > 0.',
+              'kibana.alert.duration.us': 759925000,
+              'kibana.alert.time_range': {
+                gte: '2022-10-26T13:37:26.591Z',
+              },
+              'kibana.alert.instance.id': 'execute',
+              'kibana.alert.start': '2022-10-26T13:37:26.591Z',
+              'kibana.alert.uuid': 'a8616ced-c22b-466c-a964-8db53af930ef',
+              'kibana.alert.status': 'active',
+              'kibana.alert.workflow_status': 'open',
+              'event.kind': 'signal',
+              'event.action': 'active',
+              'kibana.version': '8.6.0',
+              tags: [],
+            },
+          },
+        ],
+      };
+
+      expect(
+        renderMustacheObject(
+          {
+            x: '{{context.0._source.kibana.alert.rule.category}} - {{context.0._score.test}} - {{context.0._source.kibana.alert.time_range.gte}}',
+          },
+          dotVariables
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "x": "Metric threshold - 1 - 2022-10-26T13:37:26.591Z",
+        }
+      `);
+
+      expect(
+        renderMustacheString(
+          '{{context.0._source.kibana.alert.rule.category}} - {{context.0._score.test}} - {{context.0._source.kibana.alert.time_range.gte}}',
+          dotVariables,
+          'none'
+        )
+      ).toEqual('Metric threshold - 1 - 2022-10-26T13:37:26.591Z');
+    });
+
+    it('should replace single value with the object', () => {
+      expect(renderMustacheObject({ x: '{{a}}' }, { a: 1, 'a.b': 2 })).toMatchInlineSnapshot(`
+        Object {
+          "x": "{\\"b\\":2}",
+        }
+      `);
+      expect(renderMustacheString('{{a}}', { a: 1, 'a.b': 2 }, 'none')).toEqual('{"b":2}');
+    });
+  });
 });

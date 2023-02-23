@@ -9,13 +9,14 @@ import React, { useMemo } from 'react';
 import { EuiSwitch, EuiSwitchEvent, EuiLoadingSpinner } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
-import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
+import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
+import { useCanUpdatePrivateMonitor, useMonitorEnableHandler } from '../../../../hooks';
+import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import * as labels from './labels';
-import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
 
 interface Props {
-  id: string;
+  configId: string;
   monitor: EncryptedSyntheticsMonitor;
   reloadPage: () => void;
   initialLoading?: boolean;
@@ -23,13 +24,14 @@ interface Props {
 }
 
 export const MonitorEnabled = ({
-  id,
+  configId,
   monitor,
   reloadPage,
   initialLoading = false,
   isSwitchable = true,
 }: Props) => {
-  const isDisabled = !useCanEditSynthetics();
+  const canUpdatePrivateMonitor = useCanUpdatePrivateMonitor(monitor);
+  const canEditSynthetics = useCanEditSynthetics();
 
   const monitorName = monitor[ConfigKey.NAME];
   const statusLabels = useMemo(() => {
@@ -41,7 +43,8 @@ export const MonitorEnabled = ({
   }, [monitorName]);
 
   const { isEnabled, updateMonitorEnabledState, status } = useMonitorEnableHandler({
-    id,
+    configId,
+    isEnabled: monitor[ConfigKey.ENABLED],
     reloadPage,
     labels: statusLabels,
   });
@@ -51,32 +54,41 @@ export const MonitorEnabled = ({
 
   const handleEnabledChange = (event: EuiSwitchEvent) => {
     const checked = event.target.checked;
-    updateMonitorEnabledState(monitor, checked);
+    updateMonitorEnabledState(checked);
   };
+
+  const enabledDisableLabel = enabled ? labels.DISABLE_MONITOR_LABEL : labels.ENABLE_MONITOR_LABEL;
 
   return (
     <>
       {isLoading || initialLoading ? (
         <EuiLoadingSpinner size="m" />
       ) : (
-        <SwitchWithCursor
-          compressed={true}
-          checked={enabled}
-          disabled={isLoading || isDisabled}
-          showLabel={false}
-          label={enabled ? labels.DISABLE_MONITOR_LABEL : labels.ENABLE_MONITOR_LABEL}
-          title={enabled ? labels.DISABLE_MONITOR_LABEL : labels.ENABLE_MONITOR_LABEL}
-          data-test-subj="syntheticsIsMonitorEnabled"
-          isSwitchable={isSwitchable}
-          onChange={handleEnabledChange}
-        />
+        <NoPermissionsTooltip
+          canEditSynthetics={canEditSynthetics}
+          canUpdatePrivateMonitor={canUpdatePrivateMonitor}
+        >
+          <SwitchWithCursor
+            compressed={true}
+            checked={enabled}
+            disabled={isLoading || !canEditSynthetics || !canUpdatePrivateMonitor}
+            showLabel={false}
+            label={enabledDisableLabel}
+            title={enabledDisableLabel}
+            data-test-subj="syntheticsIsMonitorEnabled"
+            data-is-switchable={isSwitchable}
+            onChange={handleEnabledChange}
+          />
+        </NoPermissionsTooltip>
       )}
     </>
   );
 };
 
-const SwitchWithCursor = euiStyled(EuiSwitch)<{ isSwitchable: boolean }>`
+// data-* is the DOM compatible prop format
+const SwitchWithCursor = euiStyled(EuiSwitch)<{ 'data-is-switchable': boolean }>`
   & > button {
-    cursor: ${({ isSwitchable }) => (isSwitchable ? undefined : 'not-allowed')};
+    cursor: ${({ 'data-is-switchable': isSwitchable }) =>
+      isSwitchable ? undefined : 'not-allowed'};
   }
 `;

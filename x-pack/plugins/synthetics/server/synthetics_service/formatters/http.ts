@@ -14,6 +14,7 @@ export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
 export const httpFormatters: HTTPFormatMap = {
   [ConfigKey.METADATA]: (fields) => objectFormatter(fields[ConfigKey.METADATA]),
   [ConfigKey.URLS]: null,
+  [ConfigKey.PORT]: null,
   [ConfigKey.MAX_REDIRECTS]: null,
   [ConfigKey.USERNAME]: null,
   [ConfigKey.PASSWORD]: null,

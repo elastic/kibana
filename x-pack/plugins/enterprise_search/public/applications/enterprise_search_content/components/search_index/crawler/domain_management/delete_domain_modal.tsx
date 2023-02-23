@@ -74,8 +74,19 @@ export const DeleteDomainModal: React.FC = () => {
         </EuiText>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={hideModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
-        <EuiButton onClick={deleteDomain} isLoading={isLoading} color="danger" fill>
+        <EuiButtonEmpty
+          data-telemetry-id="entSearchContent-crawler-domainManagement-deleteDomain-cancel"
+          onClick={hideModal}
+        >
+          {CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
+        <EuiButton
+          data-telemetry-id="entSearchContent-crawler-domainManagement-deleteDomain-delete"
+          onClick={deleteDomain}
+          isLoading={isLoading}
+          color="danger"
+          fill
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.crawler.deleteDomainModal.deleteDomainButtonLabel',
             {

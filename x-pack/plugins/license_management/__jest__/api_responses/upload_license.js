@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+/** @type {[number, Record<string, string>, string]} */
 export const UPLOAD_LICENSE_EXPIRED = [
   200,
   { 'Content-Type': 'application/json' },
   '{"acknowledged": "true", "license_status": "expired"}',
 ];
 
+/** @type {[number, Record<string, string>, string]} */
 export const UPLOAD_LICENSE_REQUIRES_ACK = [
   200,
   { 'Content-Type': 'application/json' },
@@ -25,18 +27,21 @@ export const UPLOAD_LICENSE_REQUIRES_ACK = [
     }`,
 ];
 
+/** @type {[number, Record<string, string>, string]} */
 export const UPLOAD_LICENSE_SUCCESS = [
   200,
   { 'Content-Type': 'application/json' },
   '{"acknowledged": "true", "license_status": "valid"}',
 ];
 
+/** @type {[number, Record<string, string>, string]} */
 export const UPLOAD_LICENSE_INVALID = [
   200,
   { 'Content-Type': 'application/json' },
   '{"acknowledged": "true", "license_status": "invalid"}',
 ];
 
+/** @type {[number, Record<string, string>, string]} */
 export const UPLOAD_LICENSE_TLS_NOT_ENABLED = [
   200,
   { 'Content-Type': 'application/json' },

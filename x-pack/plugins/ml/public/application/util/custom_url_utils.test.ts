@@ -514,7 +514,7 @@ describe('ML - custom URL utils', () => {
       const urlConfig = {
         url_name: 'Hosts Details by process name',
         url_value:
-          'metrics/detail/host/$host.name$?metricTime=(autoReload:!f,refreshInterval:5000,time:(from:%27$earliest$%27,interval:%3E%3D1m,to:%27$latest$%27))',
+          'metrics/detail/host/$host.name$?_a=(autoReload:!f,refreshInterval:5000,time:(from:%27$earliest$%27,interval:%3E%3D1m,to:%27$latest$%27))',
       };
 
       const testRecord = {
@@ -545,7 +545,7 @@ describe('ML - custom URL utils', () => {
       };
 
       expect(getUrlForRecord(urlConfig, testRecord)).toBe(
-        "metrics/detail/host/gke-dev-next-oblt-dev-next-oblt-pool-404d7f0c-2bfl?metricTime=(autoReload:!f,refreshInterval:5000,time:(from:'2019-09-08T12:00:00.000Z',interval:>=1m,to:'2019-09-08T14:59:59.999Z'))"
+        "metrics/detail/host/gke-dev-next-oblt-dev-next-oblt-pool-404d7f0c-2bfl?_a=(autoReload:!f,refreshInterval:5000,time:(from:'2019-09-08T12:00:00.000Z',interval:>=1m,to:'2019-09-08T14:59:59.999Z'))"
       );
     });
 

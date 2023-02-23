@@ -7,9 +7,9 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 
@@ -53,7 +53,7 @@ export async function unenrollAgent(
     await unenrollAgentIsAllowed(soClient, esClient, agentId);
   }
   if (options?.revoke) {
-    return forceUnenrollAgent(esClient, agentId);
+    return forceUnenrollAgent(esClient, soClient, agentId);
   }
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
@@ -74,21 +74,21 @@ export async function unenrollAgents(
     revoke?: boolean;
     batchSize?: number;
   }
-): Promise<{ items: BulkActionResult[]; actionId?: string }> {
+): Promise<{ actionId: string }> {
   if ('agentIds' in options) {
-    const givenAgents = await getAgents(esClient, options);
+    const givenAgents = await getAgents(esClient, soClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, options);
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-  const res = await getAgentsByKuery(esClient, {
+  const res = await getAgentsByKuery(esClient, soClient, {
     kuery: options.kuery,
     showInactive: options.showInactive ?? false,
     page: 1,
     perPage: batchSize,
   });
   if (res.total <= batchSize) {
-    const givenAgents = await getAgents(esClient, options);
+    const givenAgents = await getAgents(esClient, soClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, options);
   } else {
     return await new UnenrollActionRunner(
@@ -106,11 +106,12 @@ export async function unenrollAgents(
 
 export async function forceUnenrollAgent(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentIdOrAgent: string | Agent
 ) {
   const agent =
     typeof agentIdOrAgent === 'string'
-      ? await getAgentById(esClient, agentIdOrAgent)
+      ? await getAgentById(esClient, soClient, agentIdOrAgent)
       : agentIdOrAgent;
 
   await invalidateAPIKeysForAgents([agent]);
@@ -118,5 +119,5 @@ export async function forceUnenrollAgent(
     active: false,
     unenrolled_at: new Date().toISOString(),
   });
-  await updateActionsForForceUnenroll(esClient, [agent.id], uuid(), 1);
+  await updateActionsForForceUnenroll(esClient, [agent.id], uuidv4(), 1);
 }

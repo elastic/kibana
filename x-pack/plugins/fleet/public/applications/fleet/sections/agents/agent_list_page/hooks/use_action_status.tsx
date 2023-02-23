@@ -54,14 +54,15 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
       try {
         const confirmRes = await overlays.openConfirm(
           i18n.translate('xpack.fleet.currentUpgrade.confirmDescription', {
-            defaultMessage: 'This action will abort upgrade of {nbAgents} agents',
+            defaultMessage:
+              'This action will cancel upgrade of {nbAgents, plural, one {# agent} other {# agents}}',
             values: {
               nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
             },
           }),
           {
             title: i18n.translate('xpack.fleet.currentUpgrade.confirmTitle', {
-              defaultMessage: 'Abort upgrade?',
+              defaultMessage: 'Cancel upgrade?',
             }),
           }
         );
@@ -74,7 +75,7 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
       } catch (err) {
         notifications.toasts.addError(err, {
           title: i18n.translate('xpack.fleet.currentUpgrade.abortRequestError', {
-            defaultMessage: 'An error happened while aborting upgrade',
+            defaultMessage: 'An error happened while cancelling upgrade',
           }),
         });
       }

@@ -5,56 +5,46 @@
  * 2.0.
  */
 import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiButton,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
-  EuiTitle,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
   EuiLoadingContent,
 } from '@elastic/eui';
 
-import { FullTimeRangeSelector } from '../full_time_range_selector';
-import { DatePickerWrapper } from '../date_picker_wrapper';
+import { Filter, Query } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useUrlState } from '@kbn/ml-url-state';
+
+import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
-import { SearchPanel } from '../search_panel';
-import type {
-  SearchQueryLanguage,
-  SavedSearchSavedObject,
-} from '../../application/utils/search_utils';
-import { useUrlState } from '../../hooks/use_url_state';
+import type { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+
 import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
-import { useCategorizeRequest } from './use_categorize_request';
+import { SearchPanel } from '../search_panel';
+import { PageHeader } from '../page_header';
+
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
+import { useCategorizeRequest } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
-
-export interface LogCategorizationPageProps {
-  dataView: DataView;
-  savedSearch: SavedSearch | SavedSearchSavedObject | null;
-}
+import { InformationText } from './information_text';
 
 const BAR_TARGET = 20;
 
-export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
-  dataView,
-  savedSearch,
-}) => {
+export const LogCategorizationPage: FC = () => {
   const {
     notifications: { toasts },
   } = useAiopsAppContext();
+  const { dataView, savedSearch } = useDataSource();
 
   const { runCategorizeRequest, cancelRequest } = useCategorizeRequest();
   const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
@@ -62,12 +52,18 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
   const [selectedField, setSelectedField] = useState<string | undefined>();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
-  const [currentSavedSearch, setCurrentSavedSearch] = useState(savedSearch);
+  const [selectedSavedSearch, setSelectedDataView] = useState(savedSearch);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [eventRate, setEventRate] = useState<EventRate>([]);
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [sparkLines, setSparkLines] = useState<SparkLinesPerCategory>({});
+
+  useEffect(() => {
+    if (savedSearch) {
+      setSelectedDataView(savedSearch);
+    }
+  }, [savedSearch]);
 
   useEffect(
     function cancelRequestOnLeave() {
@@ -87,8 +83,8 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
     }) => {
       // When the user loads saved search and then clear or modify the query
       // we should remove the saved search and replace it with the index pattern id
-      if (currentSavedSearch !== null) {
-        setCurrentSavedSearch(null);
+      if (selectedSavedSearch !== null) {
+        setSelectedDataView(null);
       }
 
       setAiopsListState({
@@ -99,7 +95,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
         filters: searchParams.filters,
       });
     },
-    [currentSavedSearch, aiopsListState, setAiopsListState]
+    [selectedSavedSearch, aiopsListState, setAiopsListState]
   );
 
   const {
@@ -112,7 +108,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
     searchQuery,
     intervalMs,
   } = useData(
-    { currentDataView: dataView, currentSavedSearch },
+    { selectedDataView: dataView, selectedSavedSearch },
     aiopsListState,
     setGlobalState,
     undefined,
@@ -160,6 +156,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
           docCount,
         }))
       );
+      setCategories(null);
       setTotalCount(documentStats.totalCount);
     }
   }, [documentStats, earliest, latest, searchQueryLanguage, searchString, searchQuery]);
@@ -210,45 +207,13 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
   ]);
 
   const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
+    setCategories(null);
     setSelectedField(value && value.length ? value[0].label : undefined);
   };
 
   return (
-    <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiPageContentHeader className="aiopsPageHeader">
-            <EuiPageContentHeaderSection>
-              <div className="dataViewTitleHeader">
-                <EuiTitle size="s">
-                  <h2>{dataView.getName()}</h2>
-                </EuiTitle>
-              </div>
-            </EuiPageContentHeaderSection>
-
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="s"
-              data-test-subj="aiopsTimeRangeSelectorSection"
-            >
-              {dataView.timeFieldName !== undefined && (
-                <EuiFlexItem grow={false}>
-                  <FullTimeRangeSelector
-                    dataView={dataView}
-                    query={undefined}
-                    disabled={false}
-                    timefilter={timefilter}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <DatePickerWrapper />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentHeader>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiPageBody data-test-subj="aiopsLogCategorizationPage" paddingSize="none" panelled={false}>
+      <PageHeader />
       <EuiSpacer />
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
@@ -313,8 +278,17 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
           <EuiSpacer />
         </>
       ) : null}
+
       {loading === true ? <EuiLoadingContent lines={10} /> : null}
-      {categories !== null ? (
+
+      <InformationText
+        loading={loading}
+        categoriesLength={categories?.length ?? null}
+        eventRateLength={eventRate.length}
+        fieldSelected={selectedField !== null}
+      />
+
+      {selectedField !== undefined && categories !== null && categories.length > 0 ? (
         <CategoryTable
           categories={categories}
           aiopsListState={aiopsListState}

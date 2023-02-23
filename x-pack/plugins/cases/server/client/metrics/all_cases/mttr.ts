@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CasesMetricsResponse } from '../../../../common/api';
+import type { CasesMetricsResponse } from '../../../../common/api';
 import { Operations } from '../../../authorization';
 import { createCaseError } from '../../../common/error';
 import { constructQueryOptions } from '../../utils';
 import { AllCasesAggregationHandler } from '../all_cases_aggregation_handler';
-import { AggregationBuilder, AllCasesBaseHandlerCommonOptions } from '../types';
+import type { AggregationBuilder, AllCasesBaseHandlerCommonOptions } from '../types';
 import { AverageDuration } from './aggregations/avg_duration';
 
 export class MTTR extends AllCasesAggregationHandler {

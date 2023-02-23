@@ -28,6 +28,7 @@ export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
   items: Item[];
   defaultItem?: Partial<Item>;
+  emptyPropertyAllowed?: boolean;
   title: string;
   addButtonText?: string;
   canRemoveLastItem?: boolean;
@@ -87,6 +88,7 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
 
 export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   columns,
+  emptyPropertyAllowed,
   items,
   title,
   addButtonText,
@@ -117,6 +119,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   const updatedColumns = getUpdatedColumns({
     columns,
     displayedItems,
+    emptyPropertyAllowed,
     isActivelyEditing,
     canRemoveLastItem,
     isLoading,

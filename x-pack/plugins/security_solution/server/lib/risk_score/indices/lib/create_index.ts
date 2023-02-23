@@ -6,21 +6,38 @@
  */
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 export const createEsIndexBodySchema = schema.object({
   index: schema.string({ minLength: 1 }),
-  mappings: schema.maybe(schema.recordOf(schema.string({ minLength: 1 }), schema.any())),
+  mappings: schema.maybe(
+    schema.oneOf([schema.string(), schema.recordOf(schema.string({ minLength: 1 }), schema.any())])
+  ),
 });
 
 type CreateEsIndexBodySchema = TypeOf<typeof createEsIndexBodySchema>;
 
 export const createIndex = async ({
-  client,
+  esClient,
+  logger,
   options,
 }: {
-  client: IScopedClusterClient;
+  esClient: ElasticsearchClient;
+  logger: Logger;
   options: CreateEsIndexBodySchema;
 }) => {
-  await client.asCurrentUser.indices.create(options);
+  try {
+    await esClient.indices.create({
+      index: options.index,
+      mappings:
+        typeof options.mappings === 'string' ? JSON.parse(options.mappings) : options.mappings,
+    });
+    return { [options.index]: { success: true, error: null } };
+  } catch (err) {
+    const error = transformError(err);
+    logger.error(`Failed to create index: ${options.index}: ${error.message}`);
+
+    return { [options.index]: { success: false, error } };
+  }
 };

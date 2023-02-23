@@ -14,34 +14,36 @@ import routeData from 'react-router';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import {
   basicCase,
-  basicPush,
   getUserAction,
   getHostIsolationUserAction,
   hostIsolationComment,
-  hostReleaseComment,
 } from '../../containers/mock';
 import { UserActions } from '.';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { Actions } from '../../../common/api';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
+import { connectorsMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import type { UserActivityFilter } from '../user_actions_activity_bar/types';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
 const updateCase = jest.fn();
 const onShowAlertDetails = jest.fn();
 
+const filterOptions: UserActivityFilter = 'all';
+
 const defaultProps = {
-  caseServices: {},
+  caseConnectors: getCaseConnectorsMockResponse(),
   caseUserActions: [],
   userProfiles: new Map(),
   currentUserProfile: undefined,
-  connectors: [],
+  connectors: connectorsMock,
   actionsNavigation: { href: jest.fn(), onClick: jest.fn() },
   getRuleDetailsHref: jest.fn(),
   onRuleDetailsClick: jest.fn(),
   data: basicCase,
   fetchUserActions,
-  isLoadingDescription: false,
   isLoadingUserActions: false,
   onUpdateField,
   selectedAlertPatterns: ['some-test-pattern'],
@@ -53,6 +55,7 @@ const defaultProps = {
   ],
   alerts: {},
   onShowAlertDetails,
+  filterOptions,
 };
 
 jest.mock('../../containers/use_update_comment');
@@ -90,34 +93,30 @@ describe(`UserActions`, () => {
 
     expect(screen.getByTestId('user-actions-loading')).toBeInTheDocument();
     expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
-    expect(screen.getByText('LK')).toBeInTheDocument();
-    expect(screen.getByText('Leslie Knope')).toBeInTheDocument();
+    expect(screen.getByText('DR')).toBeInTheDocument();
   });
 
   it('Renders service now update line with top and bottom when push is required', async () => {
+    const caseConnectors = getCaseConnectorsMockResponse({ 'push.needsToBePushed': true });
+
     const ourActions = [
-      getUserAction('pushed', 'push_to_service'),
-      getUserAction('comment', Actions.update),
+      getUserAction('pushed', 'push_to_service', {
+        createdAt: '2023-01-17T09:46:29.813Z',
+      }),
     ];
 
     const props = {
       ...defaultProps,
-      caseServices: {
-        '123': {
-          ...basicPush,
-          firstPushIndex: 0,
-          lastPushIndex: 0,
-          commentsToUpdate: [`${ourActions[ourActions.length - 1].commentId}`],
-          hasDataToPush: true,
-        },
-      },
+      caseConnectors,
       caseUserActions: ourActions,
     };
+
     const wrapper = mount(
       <TestProviders>
         <UserActions {...props} />
       </TestProviders>
     );
+
     await waitFor(() => {
       expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
       expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(true);
@@ -125,19 +124,15 @@ describe(`UserActions`, () => {
   });
 
   it('Renders service now update line with top only when push is up to date', async () => {
-    const ourActions = [getUserAction('pushed', 'push_to_service')];
+    const ourActions = [
+      getUserAction('pushed', 'push_to_service', {
+        createdAt: '2023-01-17T09:46:29.813Z',
+      }),
+    ];
+
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
-      caseServices: {
-        '123': {
-          ...basicPush,
-          firstPushIndex: 0,
-          lastPushIndex: 0,
-          commentsToUpdate: [],
-          hasDataToPush: false,
-        },
-      },
     };
 
     const wrapper = mount(
@@ -150,6 +145,7 @@ describe(`UserActions`, () => {
       expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(false);
     });
   });
+
   it('Outlines comment when update move to link is clicked', async () => {
     const ourActions = [
       getUserAction('comment', Actions.create),
@@ -174,7 +170,7 @@ describe(`UserActions`, () => {
 
     wrapper
       .find(
-        `[data-test-subj="comment-update-action-${ourActions[1].actionId}"] [data-test-subj="move-to-link-${props.data.comments[0].id}"]`
+        `[data-test-subj="comment-update-action-${ourActions[1].id}"] [data-test-subj="move-to-link-${props.data.comments[0].id}"]`
       )
       .first()
       .simulate('click');
@@ -203,13 +199,13 @@ describe(`UserActions`, () => {
 
     wrapper
       .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-ellipses"]`
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-ellipses"]`
       )
       .first()
       .simulate('click');
     wrapper
       .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-pencil"]`
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-pencil"]`
       )
       .first()
       .simulate('click');
@@ -247,14 +243,14 @@ describe(`UserActions`, () => {
 
     wrapper
       .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-ellipses"]`
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-ellipses"]`
       )
       .first()
       .simulate('click');
 
     wrapper
       .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-pencil"]`
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-pencil"]`
       )
       .first()
       .simulate('click');
@@ -268,7 +264,7 @@ describe(`UserActions`, () => {
 
     wrapper
       .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-save-markdown"]`
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] button[data-test-subj="user-action-save-markdown"]`
       )
       .first()
       .simulate('click');
@@ -291,71 +287,49 @@ describe(`UserActions`, () => {
     });
   });
 
-  it('calls update description when description markdown is saved', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <UserActions {...defaultProps} />
-      </TestProviders>
-    );
-
-    wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
-      .first()
-      .simulate('click');
-
-    wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-pencil"]`)
-      .first()
-      .simulate('click');
-
-    wrapper
-      .find(`.euiMarkdownEditorTextArea`)
-      .first()
-      .simulate('change', {
-        target: { value: sampleData.content },
-      });
-
-    wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="user-action-save-markdown"]`)
-      .first()
-      .simulate('click');
-
-    await waitFor(() => {
-      wrapper.update();
-      expect(
-        wrapper
-          .find(
-            `[data-test-subj="description-action"] [data-test-subj="user-action-markdown-form"]`
-          )
-          .exists()
-      ).toEqual(false);
-      expect(onUpdateField).toBeCalledWith({ key: 'description', value: sampleData.content });
-    });
-  });
-
   it('shows quoted text in last MarkdownEditorTextArea', async () => {
-    const quoteableText = `> ${defaultProps.data.description} \n\n`;
+    const quoteableText = `> Solve this fast! \n\n`;
+
+    const ourActions = [getUserAction('comment', Actions.create)];
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+    };
 
     const wrapper = mount(
       <TestProviders>
-        <UserActions {...defaultProps} />
+        <UserActions {...props} />
       </TestProviders>
     );
 
     expect(wrapper.find(`.euiMarkdownEditorTextArea`).text()).not.toContain(quoteableText);
 
     wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
+      .find(
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-ellipses"]`
+      )
       .first()
       .simulate('click');
 
     wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-quote"]`)
+      .find(
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-quote"]`
+      )
       .first()
       .simulate('click');
 
     await waitFor(() => {
-      expect(wrapper.find(`.euiMarkdownEditorTextArea`).text()).toContain(quoteableText);
+      expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).first().text()).toContain(
+        quoteableText
+      );
+    });
+  });
+
+  it('does not show add comment markdown when history filter is selected', async () => {
+    appMockRender.render(<UserActions {...defaultProps} filterOptions="action" />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('add-comment')).not.toBeInTheDocument();
     });
   });
 
@@ -382,6 +356,74 @@ describe(`UserActions`, () => {
           .hasClass('outlined')
       ).toEqual(true);
     });
+  });
+
+  it('it should persist the draft of new comment while existing old comment is updated', async () => {
+    const editedComment = 'it is an edited comment';
+    const newComment = 'another cool comment';
+    const ourActions = [getUserAction('comment', Actions.create)];
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <UserActions {...props} />
+      </TestProviders>
+    );
+
+    // type new comment in text area
+    wrapper
+      .find(`[data-test-subj="add-comment"] textarea`)
+      .first()
+      .simulate('change', { target: { value: newComment } });
+
+    wrapper
+      .find(
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-ellipses"]`
+      )
+      .first()
+      .simulate('click');
+
+    wrapper
+      .find(
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-pencil"]`
+      )
+      .first()
+      .simulate('click');
+
+    wrapper
+      .find(`.euiMarkdownEditorTextArea`)
+      .first()
+      .simulate('change', {
+        target: { value: editedComment },
+      });
+
+    wrapper
+      .find(
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] button[data-test-subj="user-action-save-markdown"]`
+      )
+      .first()
+      .simulate('click');
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(
+        wrapper
+          .find(
+            `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
+          )
+          .exists()
+      ).toEqual(false);
+      expect(patchComment).toBeCalledWith({
+        commentUpdate: editedComment,
+        caseId: 'case-id',
+        commentId: props.data.comments[0].id,
+        version: props.data.comments[0].version,
+      });
+    });
+
+    expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(newComment);
   });
 
   describe('Host isolation action', () => {
@@ -422,46 +464,6 @@ describe(`UserActions`, () => {
       expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
       expect(screen.getByText('DR')).toBeInTheDocument();
       expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-    });
-
-    it('shows a lock icon if the action is isolate', async () => {
-      const isolateAction = [getHostIsolationUserAction()];
-      const props = {
-        ...defaultProps,
-        caseUserActions: isolateAction,
-        data: { ...defaultProps.data, comments: [hostIsolationComment()] },
-      };
-
-      const wrapper = mount(
-        <TestProviders>
-          <UserActions {...props} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(
-          wrapper.find(`[data-test-subj="endpoint-action-icon"]`).first().prop('iconType')
-        ).toBe('lock');
-      });
-    });
-
-    it('shows a lockOpen icon if the action is unisolate/release', async () => {
-      const isolateAction = [getHostIsolationUserAction()];
-      const props = {
-        ...defaultProps,
-        caseUserActions: isolateAction,
-        data: { ...defaultProps.data, comments: [hostReleaseComment()] },
-      };
-
-      const wrapper = mount(
-        <TestProviders>
-          <UserActions {...props} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(
-          wrapper.find(`[data-test-subj="endpoint-action-icon"]`).first().prop('iconType')
-        ).toBe('lockOpen');
-      });
     });
   });
 });

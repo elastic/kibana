@@ -7,37 +7,40 @@
 
 import Boom from '@hapi/boom';
 import { nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
-import { UserProfile } from '@kbn/security-plugin/common';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { UserProfile } from '@kbn/security-plugin/common';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   ActionConnector,
-  CaseResponseRt,
   CaseResponse,
-  CaseStatuses,
   ExternalServiceResponse,
   CasesConfigureAttributes,
+  CommentRequestAlertType,
+  CommentAttributes,
+} from '../../../common/api';
+import {
+  CaseResponseRt,
+  CaseStatuses,
   ActionTypes,
   OWNER_FIELD,
   CommentType,
-  CommentRequestAlertType,
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
-import { createIncident, getCommentContextFromAttributes, getDurationInSeconds } from './utils';
+import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
 import { createCaseError } from '../../common/error';
 import {
-  createAlertUpdateRequest,
+  createAlertUpdateStatusRequest,
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
-import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
+import type { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
-import { ICaseResponse } from '../typedoc_interfaces';
+import type { ICaseResponse } from '../typedoc_interfaces';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.
@@ -65,7 +68,7 @@ const changeAlertsStatusToClose = async (
 
   const alerts = alertAttachments.saved_objects
     .map((attachment) =>
-      createAlertUpdateRequest({
+      createAlertUpdateStatusRequest({
         comment: attachment.attributes,
         status: CaseStatuses.closed,
       })
@@ -114,6 +117,8 @@ export const push = async (
     logger,
     authorization,
     securityStartPlugin,
+    spaceId,
+    publicBaseUrl,
   } = clientArgs;
 
   try {
@@ -139,32 +144,18 @@ export const push = async (
     }
 
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
-
     const alerts = await getAlerts(alertsInfo, clientArgs);
-
-    const getMappingsResponse = await casesClientInternal.configuration.getMappings({
-      connector: theCase.connector,
-    });
-
-    const mappings =
-      getMappingsResponse.length === 0
-        ? await casesClientInternal.configuration.createMappings({
-            connector: theCase.connector,
-            owner: theCase.owner,
-          })
-        : getMappingsResponse[0].attributes.mappings;
-
     const profiles = await getProfiles(theCase, securityStartPlugin);
 
     const externalServiceIncident = await createIncident({
-      actionsClient,
       theCase,
       userActions,
       connector: connector as ActionConnector,
-      mappings,
       alerts,
       casesConnectors,
       userProfiles: profiles,
+      spaceId,
+      publicBaseUrl,
     });
 
     const pushRes = await actionsClient.execute({
@@ -250,7 +241,6 @@ export const push = async (
       }),
 
       attachmentService.bulkUpdate({
-        unsecuredSavedObjectsClient,
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
@@ -266,9 +256,8 @@ export const push = async (
     ]);
 
     if (shouldMarkAsClosed) {
-      await userActionService.createUserAction({
+      await userActionService.creator.createUserAction({
         type: ActionTypes.status,
-        unsecuredSavedObjectsClient,
         payload: { status: CaseStatuses.closed },
         user,
         caseId,
@@ -281,9 +270,8 @@ export const push = async (
       }
     }
 
-    await userActionService.createUserAction({
+    await userActionService.creator.createUserAction({
       type: ActionTypes.pushed,
-      unsecuredSavedObjectsClient,
       payload: { externalService },
       user,
       caseId,
@@ -308,8 +296,7 @@ export const push = async (
             attributes: {
               ...origComment.attributes,
               ...updatedComment?.attributes,
-              ...getCommentContextFromAttributes(origComment.attributes),
-            },
+            } as CommentAttributes,
             version: updatedComment?.version ?? origComment.version,
             references: origComment?.references ?? [],
           };
@@ -330,17 +317,11 @@ const getProfiles = async (
     ...(caseInfo.created_by?.profile_uid != null ? [caseInfo.created_by.profile_uid] : []),
   ]);
 
-  if (uids.size <= 0) {
+  const userProfiles = await getUserProfiles(securityStartPlugin, uids);
+
+  if (userProfiles.size <= 0) {
     return;
   }
 
-  const userProfiles =
-    (await securityStartPlugin.userProfiles.bulkGet({
-      uids,
-    })) ?? [];
-
-  return userProfiles.reduce<Map<string, UserProfile>>((acc, profile) => {
-    acc.set(profile.uid, profile);
-    return acc;
-  }, new Map());
+  return userProfiles;
 };

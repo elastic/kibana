@@ -13,7 +13,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import { pickupUpdatedMappings } from './pickup_updated_mappings';
 import { DEFAULT_TIMEOUT } from './constants';
@@ -45,11 +45,13 @@ export const updateAndPickupMappings = ({
     RetryableEsClientError,
     'update_mappings_succeeded'
   > = () => {
+    // ._meta property will be updated on a later step
+    const { _meta, ...mappingsWithoutMeta } = mappings;
     return client.indices
       .putMapping({
         index,
         timeout: DEFAULT_TIMEOUT,
-        ...mappings,
+        ...mappingsWithoutMeta,
       })
       .then(() => {
         // Ignore `acknowledged: false`. When the coordinating node accepts

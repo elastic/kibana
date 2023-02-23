@@ -1,0 +1,332 @@
+{
+  "id": "@kbn/shared-ux-link-redirect-app",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+        "id": "def-common.RedirectAppLinks",
+        "type": "Function",
+        "tags": [],
+        "label": "RedirectAppLinks",
+        "description": [
+          "\nA service-enabled component that provides Kibana-specific functionality to the `RedirectAppLinks`\npure component.\n"
+        ],
+        "signature": [
+          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.container.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+            "id": "def-common.RedirectAppLinks.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children }",
+            "description": [],
+            "signature": [
+              "{ children?: React.ReactNode; }"
+            ],
+            "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+        "id": "def-common.RedirectAppLinks",
+        "type": "Function",
+        "tags": [],
+        "label": "RedirectAppLinks",
+        "description": [
+          "\nUtility component that will intercept click events on children anchor (`<a>`) elements to call\n`navigateToUrl` with the link's href. This will trigger SPA friendly navigation when the link points\nto a valid Kibana app.\n"
+        ],
+        "signature": [
+          "({ children, navigateToUrl, currentAppId, }: React.PropsWithChildren<",
+          "RedirectAppLinksComponentProps",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.component.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+            "id": "def-common.RedirectAppLinks.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  navigateToUrl,\n  currentAppId,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "RedirectAppLinksComponentProps",
+              ">"
+            ],
+            "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.component.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+        "id": "def-common.RedirectAppLinks",
+        "type": "Function",
+        "tags": [],
+        "label": "RedirectAppLinks",
+        "description": [
+          "\nThis component composes `RedirectAppLinksContainer` with either `RedirectAppLinksProvider` or\n`RedirectAppLinksKibanaProvider` based on the services provided, creating a single component\nwith which consumers can wrap their components or solutions."
+        ],
+        "signature": [
+          "({ children, ...props }: React.PropsWithChildren<",
+          "RedirectAppLinksProps",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+            "id": "def-common.RedirectAppLinks.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ children, ...props }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "RedirectAppLinksProps",
+              ">"
+            ],
+            "path": "packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+        "id": "def-common.RedirectAppLinksKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "RedirectAppLinksKibanaProvider",
+        "description": [
+          "\nKibana-specific contextual services Provider."
+        ],
+        "signature": [
+          "({ children, coreStart, }: React.PropsWithChildren<",
+          "RedirectAppLinksKibanaDependencies",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/link/redirect_app/impl/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+            "id": "def-common.RedirectAppLinksKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  coreStart,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "RedirectAppLinksKibanaDependencies",
+              ">"
+            ],
+            "path": "packages/shared-ux/link/redirect_app/impl/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+        "id": "def-common.RedirectAppLinksProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "RedirectAppLinksProvider",
+        "description": [
+          "\nContextual services Provider."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          "RedirectAppLinksServices",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/link/redirect_app/impl/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+            "id": "def-common.RedirectAppLinksProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...services\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "RedirectAppLinksServices",
+              ">"
+            ],
+            "path": "packages/shared-ux/link/redirect_app/impl/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+        "id": "def-common.RedirectAppLinksKibanaDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "RedirectAppLinksKibanaDependencies",
+        "description": [
+          "\nKibana-specific contextual services to be adapted for this component."
+        ],
+        "path": "packages/shared-ux/link/redirect_app/types/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+            "id": "def-common.RedirectAppLinksKibanaDependencies.coreStart",
+            "type": "Object",
+            "tags": [],
+            "label": "coreStart",
+            "description": [],
+            "signature": [
+              "{ application: { currentAppId$: ",
+              "Observable",
+              "<string | undefined>; navigateToUrl: ",
+              "NavigateToUrl",
+              "; }; }"
+            ],
+            "path": "packages/shared-ux/link/redirect_app/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+        "id": "def-common.RedirectAppLinksServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "RedirectAppLinksServices",
+        "description": [
+          "\nContextual services for this component."
+        ],
+        "path": "packages/shared-ux/link/redirect_app/types/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+            "id": "def-common.RedirectAppLinksServices.navigateToUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "navigateToUrl",
+            "description": [],
+            "signature": [
+              "(url: string) => void | Promise<void>"
+            ],
+            "path": "packages/shared-ux/link/redirect_app/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+                "id": "def-common.RedirectAppLinksServices.navigateToUrl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "path": "packages/shared-ux/link/redirect_app/types/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+            "id": "def-common.RedirectAppLinksServices.currentAppId",
+            "type": "string",
+            "tags": [],
+            "label": "currentAppId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/link/redirect_app/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-link-redirect-app",
+        "id": "def-common.RedirectAppLinksProps",
+        "type": "Type",
+        "tags": [],
+        "label": "RedirectAppLinksProps",
+        "description": [
+          "Props for the `RedirectAppLinks` component."
+        ],
+        "signature": [
+          "RedirectAppLinksKibanaDependencies",
+          " | ",
+          "RedirectAppLinksServices"
+        ],
+        "path": "packages/shared-ux/link/redirect_app/types/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, pickBy, some } from 'lodash';
+import { isEmpty, pickBy, some, isBoolean } from 'lodash';
 import type { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
 import type { CreateSavedQueryRequestSchemaDecoded } from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
@@ -76,7 +76,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             updated_by: currentUser,
             updated_at: new Date().toISOString(),
           },
-          (value) => !isEmpty(value) || value === false
+          (value) => !isEmpty(value) || isBoolean(value)
         )
       );
 

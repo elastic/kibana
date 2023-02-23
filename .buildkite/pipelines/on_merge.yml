@@ -39,8 +39,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/on_merge_ts_refs_api_docs.sh
-    label: Build TS Refs and Check Public API Docs
+  - command: .buildkite/scripts/steps/on_merge_api_docs.sh
+    label: Check Public API Docs
     key: public-api-docs
     agents:
       queue: n2-4-spot
@@ -149,3 +149,11 @@ steps:
     timeout_in_minutes: 10
     agents:
       queue: kibana-default
+
+  - wait
+
+  - command: '.buildkite/scripts/steps/artifacts/docker_image_trigger.sh'
+    label: Trigger container image build
+    timeout_in_minutes: 10
+    agents:
+      queue: 'kibana-default'

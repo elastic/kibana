@@ -48,7 +48,7 @@ import {
   updateTimelineSort,
   updateTimelineTitleAndDescription,
   upsertTimelineColumn,
-  updateGraphEventId,
+  updateTimelineGraphEventId,
 } from './helpers';
 import type { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
@@ -127,7 +127,6 @@ const basicTimeline: TimelineModel = {
   selectedEventIds: {},
   sessionViewConfig: null,
   show: true,
-  showCheckboxes: false,
   sort: [
     {
       columnId: '@timestamp',
@@ -1807,7 +1806,7 @@ describe('Timeline', () => {
 
   describe('#updateGraphEventId', () => {
     test('should return a new reference and not the same reference', () => {
-      const update = updateGraphEventId({
+      const update = updateTimelineGraphEventId({
         id: 'foo',
         graphEventId: '123',
         timelineById: timelineByIdMock,
@@ -1816,7 +1815,7 @@ describe('Timeline', () => {
     });
 
     test('should empty graphEventId', () => {
-      const update = updateGraphEventId({
+      const update = updateTimelineGraphEventId({
         id: 'foo',
         graphEventId: '',
         timelineById: timelineByIdMock,
@@ -1825,7 +1824,7 @@ describe('Timeline', () => {
     });
 
     test('should empty graphEventId and not change activeTab and prevActiveTab because TimelineId !== TimelineId.active', () => {
-      const update = updateGraphEventId({
+      const update = updateTimelineGraphEventId({
         id: 'foo',
         graphEventId: '',
         timelineById: timelineByIdMock,
@@ -1844,7 +1843,7 @@ describe('Timeline', () => {
       };
       delete mock.foo;
 
-      const update = updateGraphEventId({
+      const update = updateTimelineGraphEventId({
         id: TimelineId.active,
         graphEventId: '',
         timelineById: mock,

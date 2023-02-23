@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
-import { createCommentsMigrations, CreateCommentsMigrationsDeps } from './migrations';
+import type { CreateCommentsMigrationsDeps } from './migrations';
+import { createCommentsMigrations } from './migrations';
 
 export const createCaseCommentSavedObjectType = ({
   migrationDeps,
@@ -83,16 +84,14 @@ export const createCaseCommentSavedObjectType = ({
       },
       externalReferenceMetadata: {
         dynamic: false,
-        type: 'object',
-        enabled: false,
+        properties: {},
       },
       persistableStateAttachmentTypeId: {
         type: 'keyword',
       },
       persistableStateAttachmentState: {
         dynamic: false,
-        type: 'object',
-        enabled: false,
+        properties: {},
       },
       pushed_at: {
         type: 'date',

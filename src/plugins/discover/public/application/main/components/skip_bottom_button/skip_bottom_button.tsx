@@ -8,7 +8,7 @@
 
 import React from 'react';
 import './skip_bottom_button.scss';
-import { EuiSkipLink } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface SkipBottomButtonProps {
@@ -20,22 +20,19 @@ export interface SkipBottomButtonProps {
 
 export function SkipBottomButton({ onClick }: SkipBottomButtonProps) {
   return (
-    <EuiSkipLink
-      size="s"
-      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-        // prevent the anchor to reload the page on click
-        event.preventDefault();
-        // The destinationId prop cannot be leveraged here as the table needs
-        // to be updated firsts
-        onClick();
-      }}
-      className="dscSkipButton"
-      id="dscSkipButton"
-      destinationId=""
-      data-test-subj="discoverSkipTableButton"
-      position="absolute"
-    >
-      <FormattedMessage id="discover.skipToBottomButtonLabel" defaultMessage="Go to end of table" />
-    </EuiSkipLink>
+    <EuiScreenReaderOnly showOnFocus>
+      <EuiButton
+        fill
+        size="s"
+        onClick={onClick}
+        className="dscSkipButton"
+        data-test-subj="discoverSkipTableButton"
+      >
+        <FormattedMessage
+          id="discover.skipToBottomButtonLabel"
+          defaultMessage="Go to end of table"
+        />
+      </EuiButton>
+    </EuiScreenReaderOnly>
   );
 }

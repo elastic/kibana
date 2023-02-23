@@ -23,11 +23,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
+  const log = getService('log');
+  const queryBar = getService('queryBar');
 
   describe('discover histogram', function describeIndexTests() {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('test/functional/fixtures/es_archiver/long_window_logstash');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
@@ -51,6 +54,83 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       }
     }
+
+    it('should modify the time range when the histogram is brushed', async function () {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      // this is the number of renderings of the histogram needed when new data is fetched
+      let renderingCountInc = 1;
+      const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await retry.waitFor('chart rendering complete', async () => {
+        const actualCount = await elasticChart.getVisualizationRenderingCount();
+        const expectedCount = prevRenderingCount + renderingCountInc;
+        log.debug(`renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`);
+        return actualCount === expectedCount;
+      });
+      let prevRowData = '';
+      // to make sure the table is already rendered
+      await retry.try(async () => {
+        prevRowData = await PageObjects.discover.getDocTableField(1);
+        log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
+      });
+
+      await PageObjects.discover.brushHistogram();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      renderingCountInc = 2;
+      await retry.waitFor('chart rendering complete after being brushed', async () => {
+        const actualCount = await elasticChart.getVisualizationRenderingCount();
+        const expectedCount = prevRenderingCount + renderingCountInc * 2;
+        log.debug(`renderings after brushing - actual: ${actualCount} expected: ${expectedCount}`);
+        return actualCount <= expectedCount;
+      });
+      const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+      expect(Math.round(newDurationHours)).to.be(26);
+
+      await retry.waitFor('doc table containing the documents of the brushed range', async () => {
+        const rowData = await PageObjects.discover.getDocTableField(1);
+        log.debug(`The first timestamp value in doc table after brushing: ${rowData}`);
+        return prevRowData !== rowData;
+      });
+    });
+
+    it('should update correctly when switching data views and brushing the histogram', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.selectIndexPattern('logstash-*');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.brushHistogram();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      expect(await PageObjects.discover.getHitCount()).to.be('7');
+    });
+
+    it('should update the histogram timerange when the query is resubmitted', async function () {
+      await kibanaServer.uiSettings.update({
+        'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
+      });
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.header.awaitKibanaChrome();
+      const initialTimeString = await PageObjects.discover.getChartTimespan();
+      await queryBar.clickQuerySubmitButton();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await retry.waitFor('chart timespan to have changed', async () => {
+        const refreshedTimeString = await PageObjects.discover.getChartTimespan();
+        await queryBar.clickQuerySubmitButton();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        log.debug(
+          `Timestamp before: ${initialTimeString}, Timestamp after: ${refreshedTimeString}`
+        );
+        return refreshedTimeString !== initialTimeString;
+      });
+    });
 
     it('should visualize monthly data with different day intervals', async () => {
       const from = 'Nov 1, 2017 @ 00:00:00.000';
@@ -81,19 +161,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await prepareTest({ from, to });
       let canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(true);
-      await testSubjects.click('discoverChartOptionsToggle');
-      await testSubjects.click('discoverChartToggle');
-      canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(false);
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(false);
+      });
       // histogram is hidden, when reloading the page it should remain hidden
       await browser.refresh();
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(false);
-      await testSubjects.click('discoverChartOptionsToggle');
-      await testSubjects.click('discoverChartToggle');
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(true);
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(true);
+      });
     });
     it('should allow hiding the histogram, persisted in saved search', async () => {
       const from = 'Jan 1, 2010 @ 00:00:00.000';
@@ -102,10 +186,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await prepareTest({ from, to });
 
       // close chart for saved search
-      await testSubjects.click('discoverChartOptionsToggle');
-      await testSubjects.click('discoverChartToggle');
-      let canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(false);
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
+      let canvasExists: boolean;
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(false);
+      });
 
       // save search
       await PageObjects.discover.saveSearch(savedSearch);
@@ -122,8 +209,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(canvasExists).to.be(false);
 
       // open chart for saved search
-      await testSubjects.click('discoverChartOptionsToggle');
-      await testSubjects.click('discoverChartToggle');
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
       await retry.waitFor(`Discover histogram to be displayed`, async () => {
         canvasExists = await elasticChart.canvasExists();
         return canvasExists;
@@ -145,20 +232,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     it('should show permitted hidden histogram state when returning back to discover', async () => {
       // close chart
-      await testSubjects.click('discoverChartOptionsToggle');
-      await testSubjects.click('discoverChartToggle');
-      let canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(false);
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
+      let canvasExists: boolean;
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(false);
+      });
 
       // save search
       await PageObjects.discover.saveSearch('persisted hidden histogram');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // open chart
-      await testSubjects.click('discoverChartOptionsToggle');
-      await testSubjects.click('discoverChartToggle');
-      canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(true);
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(true);
+      });
 
       // go to dashboard
       await PageObjects.common.navigateToApp('dashboard');
@@ -171,10 +263,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(canvasExists).to.be(true);
 
       // close chart
-      await testSubjects.click('discoverChartOptionsToggle');
-      await testSubjects.click('discoverChartToggle');
-      canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(false);
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(false);
+      });
     });
   });
 }

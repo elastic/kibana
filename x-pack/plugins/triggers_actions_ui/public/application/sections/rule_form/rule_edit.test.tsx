@@ -21,9 +21,13 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-jest.mock('../../lib/rule_api', () => ({
+jest.mock('../../lib/rule_api/rule_types', () => ({
   loadRuleTypes: jest.fn(),
+}));
+jest.mock('../../lib/rule_api/update', () => ({
   updateRule: jest.fn().mockRejectedValue({ body: { message: 'Fail message' } }),
+}));
+jest.mock('../../lib/rule_api/health', () => ({
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
@@ -83,7 +87,7 @@ describe('rule_edit', () => {
       },
     };
 
-    const { loadRuleTypes } = jest.requireMock('../../lib/rule_api');
+    const { loadRuleTypes } = jest.requireMock('../../lib/rule_api/rule_types');
     const ruleTypes = [
       {
         id: 'my-rule-type',
@@ -212,7 +216,7 @@ describe('rule_edit', () => {
     await setup({ name: undefined });
 
     await act(async () => {
-      wrapper.find('[data-test-subj="saveEditedRuleButton"]').first().simulate('click');
+      wrapper.find('[data-test-subj="saveEditedRuleButton"]').last().simulate('click');
     });
     expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
       'Fail message'
@@ -232,7 +236,7 @@ describe('rule_edit', () => {
 
   it('should render an alert icon next to save button stating the potential change in permissions', async () => {
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     await setup();
 
     expect(wrapper.find('[data-test-subj="changeInPrivilegesTip"]').exists()).toBeTruthy();
@@ -241,10 +245,10 @@ describe('rule_edit', () => {
     });
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').text()).toBe(
+    expect(wrapper.find('.euiToolTipPopover').last().text()).toBe(
       'Saving this rule will change its privileges and might change its behavior.'
     );
   });

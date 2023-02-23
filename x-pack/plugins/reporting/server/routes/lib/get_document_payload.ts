@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import { ResponseHeaders } from '@kbn/core-http-server';
 import { Stream } from 'stream';
-// @ts-ignore
-import contentDisposition from 'content-disposition';
+import { ReportingCore } from '../..';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
 import { ReportApiJSON } from '../../../common/types';
-import { ReportingCore } from '../..';
 import { getContentStream, statuses } from '../../lib';
 import { ExportTypeDefinition } from '../../types';
 import { jobsQueryFactory } from './jobs_query';
@@ -20,11 +19,11 @@ export interface ErrorFromPayload {
 }
 
 // interface of the API result
-interface Payload {
+export interface Payload {
   statusCode: number;
   content: string | Stream | ErrorFromPayload;
   contentType: string | null;
-  headers: Record<string, string | number>;
+  headers: ResponseHeaders;
 }
 
 type TaskRunResult = Required<ReportApiJSON>['output'];
@@ -65,15 +64,16 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     const content = await getContentStream(reporting, { id, index }, { encoding });
     const filename = getTitle(exportType, title);
     const headers = getReportingHeaders(output, exportType);
+    const contentType = output.content_type ?? 'text/plain';
 
     return {
       content,
       statusCode: 200,
-      contentType: output.content_type,
+      contentType,
       headers: {
         ...headers,
-        'Content-Disposition': contentDisposition(filename, { type: 'inline' }),
-        'Content-Length': output.size,
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Length': `${output.size ?? ''}`,
       },
     };
   }
@@ -99,7 +99,7 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
       statusCode: 503,
       content: status,
       contentType: 'text/plain',
-      headers: { 'retry-after': 30 },
+      headers: { 'retry-after': '30' },
     };
   }
 

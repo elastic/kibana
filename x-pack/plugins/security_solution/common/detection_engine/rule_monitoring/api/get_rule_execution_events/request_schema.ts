@@ -15,7 +15,7 @@ import { TRuleExecutionEventType } from '../../model/execution_event';
 import { TLogLevel } from '../../model/log_level';
 
 /**
- * Path parameters of the API route.
+ * URL path parameters of the API route.
  */
 export type GetRuleExecutionEventsRequestParams = t.TypeOf<
   typeof GetRuleExecutionEventsRequestParams

@@ -22,9 +22,16 @@ import { appContextService } from '../../app_context';
 
 import { PackageNotFoundError } from '../../../errors';
 
-import { getPackageInfo, getPackageUsageStats } from './get';
+import { getSettings } from '../../settings';
 
-const MockRegistry = Registry as jest.Mocked<typeof Registry>;
+import { getPackageInfo, getPackages, getPackageUsageStats } from './get';
+
+const MockRegistry = jest.mocked(Registry);
+
+jest.mock('../../settings');
+
+const mockGetSettings = getSettings as jest.Mock;
+mockGetSettings.mockResolvedValue({ prerelease_integrations_enabled: true });
 
 describe('When using EPM `get` services', () => {
   describe('and invoking getPackageUsageStats()', () => {
@@ -179,6 +186,113 @@ describe('When using EPM `get` services', () => {
     });
   });
 
+  describe('getPackages', () => {
+    beforeEach(() => {
+      const mockContract = createAppContextStartContractMock();
+      appContextService.start(mockContract);
+      jest.clearAllMocks();
+      MockRegistry.fetchList.mockResolvedValue([
+        {
+          name: 'nginx',
+          version: '1.0.0',
+          title: 'Nginx',
+        } as any,
+      ]);
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+      MockRegistry.fetchInfo.mockResolvedValue({} as any);
+      MockRegistry.pkgToPkgKey.mockImplementation(({ name, version }) => `${name}-${version}`);
+    });
+
+    it('should return installed package that is not in registry with package info', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      soClient.get.mockImplementation((type) => {
+        if (type === 'epm-packages-assets') {
+          return Promise.resolve({
+            attributes: {
+              data_utf8: `
+name: elasticsearch
+version: 0.0.1
+title: Elastic
+description: Elasticsearch description`,
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              package_assets: [],
+              data_utf8: `
+            name: elasticsearch
+            version: 0.0.1
+            title: Elastic
+            description: Elasticsearch description`,
+            },
+          });
+        }
+      });
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            references: [],
+            type: 'epm-package-assets',
+            attributes: {
+              asset_path: 'elasticsearch-0.0.1/manifest.yml',
+              data_utf8: `
+name: elasticsearch
+version: 0.0.1
+title: Elastic
+description: Elasticsearch description
+format_version: 0.0.1
+owner: elastic`,
+            },
+          },
+        ],
+      });
+      await getPackages({
+        savedObjectsClient: soClient,
+      });
+      await expect(
+        getPackages({
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toMatchObject([
+        {
+          id: 'elasticsearch',
+          name: 'elasticsearch',
+          version: '0.0.1',
+          title: 'Elastic',
+          description: 'Elasticsearch description',
+          savedObject: {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+            },
+          },
+        },
+        { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
+      ]);
+    });
+  });
+
   describe('getPackageInfo', () => {
     beforeEach(() => {
       const mockContract = createAppContextStartContractMock();
@@ -188,7 +302,11 @@ describe('When using EPM `get` services', () => {
         name: 'my-package',
         version: '1.0.0',
       } as RegistryPackage);
-      MockRegistry.getRegistryPackage.mockResolvedValue({
+      MockRegistry.fetchInfo.mockResolvedValue({
+        name: 'my-package',
+        version: '1.0.0',
+      } as RegistryPackage);
+      MockRegistry.getPackage.mockResolvedValue({
         paths: [],
         packageInfo: {
           name: 'my-package',
@@ -366,7 +484,7 @@ describe('When using EPM `get` services', () => {
           status: 'not_installed',
         });
 
-        expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
+        expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
 
       // when calling the get package endpoint without a package version we
@@ -392,7 +510,7 @@ describe('When using EPM `get` services', () => {
           status: 'not_installed',
         });
 
-        expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
+        expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
     });
   });

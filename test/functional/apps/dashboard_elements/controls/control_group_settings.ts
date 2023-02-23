@@ -65,10 +65,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const controlIds = await dashboardControls.getAllControlIds();
         const firstControl = await find.byXPath(`//div[@data-control-id="${controlIds[0]}"]`);
         expect(await firstControl.elementHasClass('controlFrameWrapper--medium')).to.be(true);
-        expect(await firstControl.elementHasClass('euiFlexItem--flexGrowZero')).to.be(false);
+        expect(await firstControl.getAttribute('class')).not.to.contain('euiFlexItem-growZero');
         const secondControl = await find.byXPath(`//div[@data-control-id="${controlIds[1]}"]`);
         expect(await secondControl.elementHasClass('controlFrameWrapper--small')).to.be(true);
-        expect(await secondControl.elementHasClass('euiFlexItem--flexGrowZero')).to.be(true);
+        expect(await secondControl.getAttribute('class')).to.contain('euiFlexItem-growZero');
 
         await dashboardControls.openCreateControlFlyout();
         const smallWidthButton = await testSubjects.find('control-editor-width-small');

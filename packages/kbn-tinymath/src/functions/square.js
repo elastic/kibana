@@ -18,8 +18,7 @@ const { pow } = require('./pow');
  * square([3, 4, 5]) // returns [9, 16, 25]
  */
 
-module.exports = { square };
-
 function square(a) {
   return pow(a, 2);
 }
+module.exports = { square };

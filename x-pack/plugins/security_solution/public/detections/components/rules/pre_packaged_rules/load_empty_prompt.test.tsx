@@ -13,7 +13,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { TestProviders } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
-import { getPrePackagedRulesStatus } from '../../../containers/detection_engine/rules/api';
+import { getPrePackagedRulesStatus } from '../../../../detection_engine/rule_management/api/api';
 import { PrePackagedRulesPrompt } from './load_empty_prompt';
 
 jest.mock('react-router-dom', () => {
@@ -43,7 +43,7 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
   };
 });
 
-jest.mock('../../../containers/detection_engine/rules/api', () => ({
+jest.mock('../../../../detection_engine/rule_management/api/api', () => ({
   getPrePackagedRulesStatus: jest.fn().mockResolvedValue({
     rules_not_installed: 0,
     rules_installed: 0,

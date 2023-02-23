@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { EuiFlyout, EuiFlyoutFooter, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { useHandleAddToTimeline } from '../../../common/components/event_details/add_to_timeline_button';
+import { useQueryClient } from '@tanstack/react-query';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
 import { ACTION_OSQUERY } from './translations';
@@ -19,19 +20,35 @@ const OsqueryActionWrapper = styled.div`
 
 export interface OsqueryFlyoutProps {
   agentId?: string;
-  defaultValues?: {};
+  defaultValues?: {
+    alertIds?: string[];
+    query?: string;
+    ecs_mapping?: { [key: string]: {} };
+    queryField?: boolean;
+  };
   onClose: () => void;
+  ecsData?: Ecs;
 }
-export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
+
+// Make sure we keep this and ACTIONS_QUERY_KEY in use_all_live_queries.ts in sync.
+const ACTIONS_QUERY_KEY = 'actions';
+
+const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
   agentId,
   defaultValues,
   onClose,
+  ecsData,
 }) => {
   const {
     services: { osquery },
   } = useKibana();
+  const queryClient = useQueryClient();
 
-  const handleAddToTimeline = useHandleAddToTimeline();
+  const invalidateQueries = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: [ACTIONS_QUERY_KEY, { alertId: defaultValues?.alertIds?.[0] }],
+    });
+  }, [defaultValues?.alertIds, queryClient]);
 
   if (osquery?.OsqueryAction) {
     return (
@@ -52,7 +69,8 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
               agentId={agentId}
               formType="steps"
               defaultValues={defaultValues}
-              addToTimeline={handleAddToTimeline}
+              ecsData={ecsData}
+              onSuccess={invalidateQueries}
             />
           </OsqueryActionWrapper>
         </EuiFlyoutBody>

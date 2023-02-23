@@ -27,6 +27,7 @@ import {
   BLOCKLIST,
   CREATE_NEW_RULE,
   DASHBOARDS,
+  DATA_QUALITY,
   DETECT,
   DETECTION_RESPONSE,
   ENDPOINTS,
@@ -42,7 +43,7 @@ import {
   NETWORK,
   OVERVIEW,
   POLICIES,
-  ACTION_HISTORY,
+  RESPONSE_ACTIONS_HISTORY,
   ENTITY_ANALYTICS,
   RULES,
   TIMELINES,
@@ -54,6 +55,7 @@ import {
   BLOCKLIST_PATH,
   CASES_FEATURE_ID,
   CASES_PATH,
+  DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
   ENDPOINTS_PATH,
   EVENT_FILTERS_PATH,
@@ -65,7 +67,7 @@ import {
   NETWORK_PATH,
   OVERVIEW_PATH,
   POLICIES_PATH,
-  ACTION_HISTORY_PATH,
+  RESPONSE_ACTIONS_HISTORY_PATH,
   ENTITY_ANALYTICS_PATH,
   RULES_CREATE_PATH,
   RULES_PATH,
@@ -177,6 +179,17 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         keywords: [
           i18n.translate('xpack.securitySolution.search.entityAnalytics', {
             defaultMessage: 'Entity Analytics',
+          }),
+        ],
+      },
+      {
+        id: SecurityPageName.dataQuality,
+        title: DATA_QUALITY,
+        path: DATA_QUALITY_PATH,
+        features: [FEATURE.general],
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.dataQualityDashboard', {
+            defaultMessage: 'Data quality',
           }),
         ],
       },
@@ -511,13 +524,12 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         path: BLOCKLIST_PATH,
       },
       {
-        id: SecurityPageName.actionHistory,
-        title: ACTION_HISTORY,
-        path: ACTION_HISTORY_PATH,
+        id: SecurityPageName.responseActionsHistory,
+        title: RESPONSE_ACTIONS_HISTORY,
+        path: RESPONSE_ACTIONS_HISTORY_PATH,
       },
       {
         ...getSecuritySolutionLink<SecurityPageName>('benchmarks'),
-        deepLinks: [getSecuritySolutionLink<SecurityPageName>('rules')],
       },
     ],
   },

@@ -16,6 +16,6 @@ export const pieVis: ElementFactory = () => ({
 | selectFilter
 | demodata
 | head 10
-| pieVis metric={visdimension "age"} buckets={visdimension "project"} buckets={visdimension "cost"} legendDisplay="default"
+| pieVis metrics={visdimension "age"} buckets={visdimension "project"} buckets={visdimension "cost"} legendDisplay="default"
 | render`,
 });

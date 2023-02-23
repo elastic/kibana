@@ -14,6 +14,7 @@ import type {
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { alertMappings } from './mappings';
+import { rulesSettingsMappings } from './rules_settings_mappings';
 import { getMigrations } from './migrations';
 import { transformRulesForExport } from './transform_rule_for_export';
 import { RawRule } from '../types';
@@ -21,6 +22,7 @@ import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
 export { partiallyUpdateAlert } from './partially_update_alert';
+import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 
 // Use caution when removing items from this array! Any field which has
 // ever existed in the rule SO must be included in this array to prevent
@@ -36,6 +38,9 @@ export const AlertAttributesExcludedFromAAD = [
   'snoozeEndTime', // field removed in 8.2, but must be retained in case an rule created/updated in 8.2 is being migrated
   'snoozeSchedule',
   'isSnoozedUntil',
+  'lastRun',
+  'nextRun',
+  'running',
 ];
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
@@ -52,7 +57,10 @@ export type AlertAttributesExcludedFromAADType =
   | 'monitoring'
   | 'snoozeEndTime'
   | 'snoozeSchedule'
-  | 'isSnoozedUntil';
+  | 'isSnoozedUntil'
+  | 'lastRun'
+  | 'nextRun'
+  | 'running';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -106,6 +114,13 @@ export function setupSavedObjects(
         },
       },
     },
+  });
+
+  savedObjects.registerType({
+    name: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+    hidden: true,
+    namespaceType: 'single',
+    mappings: rulesSettingsMappings,
   });
 
   // Encrypted attributes

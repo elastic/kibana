@@ -123,6 +123,57 @@
       },
       {
         "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.UserAvatarTip",
+        "type": "Function",
+        "tags": [],
+        "label": "UserAvatarTip",
+        "description": [
+          "\nRenders a user avatar with tooltip"
+        ],
+        "signature": [
+          "({ user, avatar, ...rest }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserAvatarProps",
+            "text": "UserAvatarProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/kbn-user-profile-components/src/user_avatar_tip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserAvatarTip.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ user, avatar, ...rest }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserAvatarProps",
+                "text": "UserAvatarProps"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_avatar_tip.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/user-profile-components",
         "id": "def-common.UserProfilesPopover",
         "type": "Function",
         "tags": [],
@@ -197,7 +248,7 @@
             "section": "def-common.UserProfileWithAvatar",
             "text": "UserProfileWithAvatar"
           },
-          " | null>({ selectedOptions, defaultOptions, options, onChange, onSearchChange, isLoading, singleSelection, height, loadingMessage, noMatchesMessage, emptyMessage, errorMessage, searchPlaceholder, searchInputId, selectedStatusMessage, nullOptionLabel, defaultOptionsLabel, clearButtonLabel, }: ",
+          " | null>({ selectedOptions, defaultOptions, options, onChange, onSearchChange, isLoading, singleSelection, limit, height, loadingMessage, noMatchesMessage, emptyMessage, errorMessage, searchPlaceholder, searchInputId, selectedStatusMessage, limitReachedMessage, nullOptionLabel, defaultOptionsLabel, clearButtonLabel, }: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -216,7 +267,7 @@
             "id": "def-common.UserProfilesSelectable.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  selectedOptions,\n  defaultOptions,\n  options,\n  onChange,\n  onSearchChange,\n  isLoading = false,\n  singleSelection = false,\n  height,\n  loadingMessage,\n  noMatchesMessage,\n  emptyMessage,\n  errorMessage,\n  searchPlaceholder,\n  searchInputId,\n  selectedStatusMessage,\n  nullOptionLabel,\n  defaultOptionsLabel,\n  clearButtonLabel,\n}",
+            "label": "{\n  selectedOptions,\n  defaultOptions,\n  options,\n  onChange,\n  onSearchChange,\n  isLoading = false,\n  singleSelection = false,\n  limit,\n  height,\n  loadingMessage,\n  noMatchesMessage,\n  emptyMessage,\n  errorMessage,\n  searchPlaceholder,\n  searchInputId,\n  selectedStatusMessage,\n  limitReachedMessage,\n  nullOptionLabel,\n  defaultOptionsLabel,\n  clearButtonLabel,\n}",
             "description": [],
             "signature": [
               {
@@ -229,6 +280,57 @@
               "<Option>"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.UserToolTip",
+        "type": "Function",
+        "tags": [],
+        "label": "UserToolTip",
+        "description": [
+          "\nRenders a tooltip with user information"
+        ],
+        "signature": [
+          "({ user, avatar, ...rest }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserToolTipProps",
+            "text": "UserToolTipProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserToolTip.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ user, avatar, ...rest }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserToolTipProps",
+                "text": "UserToolTipProps"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -319,7 +421,7 @@
           },
           " extends Omit<",
           "EuiAvatarProps",
-          ", \"name\" | \"type\" | \"color\" | \"iconColor\" | \"iconType\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
+          ", \"type\" | \"name\" | \"color\" | \"iconType\" | \"iconColor\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
@@ -673,6 +775,22 @@
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserProfilesSelectableProps.limit",
+            "type": "number",
+            "tags": [],
+            "label": "limit",
+            "description": [
+              "\nMaximum number of users allowed to be selected.\n\nThis limit is not enforced and only used to show a warning message."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
             "id": "def-common.UserProfilesSelectableProps.onChange",
             "type": "Function",
             "tags": [],
@@ -798,7 +916,7 @@
             "tags": [],
             "label": "selectedStatusMessage",
             "description": [
-              "\nReturns text for selected status."
+              "\nReturns message for number of selected users."
             ],
             "signature": [
               "((selectedCount: number) => React.ReactNode) | undefined"
@@ -815,6 +933,42 @@
                 "label": "selectedCount",
                 "description": [
                   "Number of selected users"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserProfilesSelectableProps.limitReachedMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "limitReachedMessage",
+            "description": [
+              "\nReturns message when maximum number of selected users are reached."
+            ],
+            "signature": [
+              "((limit: number) => React.ReactNode) | undefined"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/user-profile-components",
+                "id": "def-common.UserProfilesSelectableProps.limitReachedMessage.$1",
+                "type": "number",
+                "tags": [],
+                "label": "limit",
+                "description": [
+                  "Maximum number of users allowed to be selected"
                 ],
                 "signature": [
                   "number"
@@ -933,6 +1087,79 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.UserToolTipProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserToolTipProps",
+        "description": [
+          "\nProps of {@link UserToolTip} component"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserToolTipProps",
+            "text": "UserToolTipProps"
+          },
+          " extends Omit<",
+          "EuiToolTipProps",
+          ", \"title\" | \"content\">"
+        ],
+        "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserToolTipProps.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [
+              "\nUser to be rendered"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserProfileUserInfo",
+                "text": "UserProfileUserInfo"
+              }
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserToolTipProps.avatar",
+            "type": "Object",
+            "tags": [],
+            "label": "avatar",
+            "description": [
+              "\nAvatar data of user to be rendered"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserProfileAvatarData",
+                "text": "UserProfileAvatarData"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

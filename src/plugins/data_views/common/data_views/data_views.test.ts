@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { defaults } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { defaults, get } from 'lodash';
 import { DataViewsService, DataView } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
@@ -29,6 +30,10 @@ let object: any = {};
 
 function setDocsourcePayload(id: string | null, providedPayload: any) {
   object = defaults(providedPayload || {}, stubbedSavedObjectIndexPattern(id));
+}
+
+function doWithTimeout<T = unknown>(fn: () => T, timeout: number = 0): Promise<T> {
+  return new Promise((resolve) => setTimeout(() => resolve(fn()), timeout));
 }
 
 const savedObject = {
@@ -149,12 +154,55 @@ describe('IndexPatterns', () => {
     SOClientGetDelay = 0;
   });
 
+  test('force field refresh', async () => {
+    const id = '1';
+    await indexPatterns.get(id);
+    expect(apiClient.getFieldsForWildcard).toBeCalledTimes(1);
+    await indexPatterns.get(id, undefined, true);
+    expect(apiClient.getFieldsForWildcard).toBeCalledTimes(2);
+  });
+
   test('does cache ad-hoc data views', async () => {
     const id = '1';
-    const dataView = await indexPatterns.create({ id });
-    const gettedDataView = await indexPatterns.get(id);
 
-    expect(dataView).toBe(gettedDataView);
+    const createFromSpecOriginal = get(indexPatterns, 'createFromSpec');
+    let mockedCreateFromSpec: jest.Mock;
+
+    set(
+      indexPatterns,
+      'createFromSpec',
+      (mockedCreateFromSpec = jest
+        .fn()
+        .mockImplementation((spec: DataViewSpec, skipFetchFields = false, displayErrors = true) =>
+          doWithTimeout(
+            () => createFromSpecOriginal.call(indexPatterns, spec, skipFetchFields, displayErrors),
+            1000
+          )
+        ))
+    );
+
+    // run creating in parallel
+    await Promise.all([
+      indexPatterns.create({ id }),
+      indexPatterns.create({ id }),
+      indexPatterns.create({ id }),
+      doWithTimeout(() => indexPatterns.create({ id }), 1),
+      doWithTimeout(() => indexPatterns.create({ id }), 10),
+
+      doWithTimeout(() => indexPatterns.get(id), 10),
+      doWithTimeout(() => indexPatterns.get(id), 40),
+    ]).then((results) =>
+      results.forEach((value) => {
+        expect(value.id).toBe(id);
+      })
+    );
+
+    // tests after promise was resolved
+    expect((await indexPatterns.get(id)).id).toBe(id);
+    expect((await indexPatterns.create({ id })).id).toBe(id);
+
+    expect(mockedCreateFromSpec).toHaveBeenCalledTimes(1);
+    expect(mockedCreateFromSpec).toHaveBeenCalledWith({ id: '1' }, false, true);
   });
 
   test('allowNoIndex flag preserves existing fields when index is missing', async () => {
@@ -224,11 +272,11 @@ describe('IndexPatterns', () => {
 
     // This will conflict because samePattern did a save (from refreshFields)
     // but the resave should work fine
-    pattern.title = 'foo2';
+    pattern.setIndexPattern('foo2');
     await indexPatterns.updateSavedObject(pattern);
 
     // This should not be able to recover
-    samePattern.title = 'foo3';
+    samePattern.setIndexPattern('foo3');
 
     let result;
     try {
@@ -241,18 +289,18 @@ describe('IndexPatterns', () => {
   });
 
   test('create', async () => {
-    const title = 'kibana-*';
+    const indexPattern = 'kibana-*';
     indexPatterns.refreshFields = jest.fn();
 
-    const indexPattern = await indexPatterns.create({ title }, true);
-    expect(indexPattern).toBeInstanceOf(DataView);
-    expect(indexPattern.title).toBe(title);
+    const dataView = await indexPatterns.create({ title: indexPattern }, true);
+    expect(dataView).toBeInstanceOf(DataView);
+    expect(dataView.getIndexPattern()).toBe(indexPattern);
     expect(indexPatterns.refreshFields).not.toBeCalled();
 
-    await indexPatterns.create({ title });
+    await indexPatterns.create({ title: indexPattern });
     expect(indexPatterns.refreshFields).toBeCalled();
-    expect(indexPattern.id).toBeDefined();
-    expect(indexPattern.isPersisted()).toBe(false);
+    expect(dataView.id).toBeDefined();
+    expect(dataView.isPersisted()).toBe(false);
   });
 
   test('createSavedObject', async () => {
@@ -267,14 +315,14 @@ describe('IndexPatterns', () => {
       version,
       attributes: {
         ...savedObject.attributes,
-        title: dataView.title,
+        title: dataView.getIndexPattern(),
       },
     });
 
     const indexPattern = await indexPatterns.createSavedObject(dataView);
     expect(indexPattern).toBeInstanceOf(DataView);
     expect(indexPattern.id).toBe(dataView.id);
-    expect(indexPattern.title).toBe(title);
+    expect(indexPattern.getIndexPattern()).toBe(title);
     expect(indexPattern.isPersisted()).toBe(true);
   });
 
@@ -373,7 +421,7 @@ describe('IndexPatterns', () => {
   describe('getDefaultDataView', () => {
     beforeEach(() => {
       indexPatterns.clearCache();
-      jest.resetAllMocks();
+      jest.clearAllMocks();
     });
 
     test('gets default data view', async () => {
@@ -385,6 +433,44 @@ describe('IndexPatterns', () => {
       // make sure we're not pulling from cache
       expect(savedObjectsClient.get).toBeCalledTimes(1);
       expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+
+    test('gets default data view and passes down defined arguments (refreshFields and displayErrors)', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      jest.spyOn(indexPatterns, 'get');
+      jest.spyOn(indexPatterns, 'refreshFields');
+
+      const dataView = await indexPatterns.get(indexPatternObj.id); // and to cache the result
+
+      const refreshFields = true;
+      const displayErrors = false;
+      expect(
+        await indexPatterns.getDefaultDataView({ refreshFields, displayErrors })
+      ).toBeInstanceOf(DataView);
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+
+      expect(indexPatterns.get).toBeCalledWith(indexPatternObj.id, displayErrors, refreshFields);
+      expect(indexPatterns.refreshFields).toBeCalledWith(dataView, displayErrors);
+    });
+
+    test('gets default data view and passes down undefined arguments (refreshFields and displayErrors)', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      jest.spyOn(indexPatterns, 'get');
+      jest.spyOn(indexPatterns, 'refreshFields');
+
+      await indexPatterns.get(indexPatternObj.id); // to cache the result
+
+      expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+
+      expect(indexPatterns.get).toBeCalledWith(indexPatternObj.id, true, undefined);
+      expect(indexPatterns.refreshFields).not.toBeCalled();
     });
 
     test('returns undefined if no data views exist', async () => {
@@ -440,6 +526,7 @@ describe('IndexPatterns', () => {
     });
 
     test('dont set defaultIndex without capability allowing advancedSettings save', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(null);
       savedObjectsClient.find = jest.fn().mockResolvedValue([
         {
           id: 'id1',

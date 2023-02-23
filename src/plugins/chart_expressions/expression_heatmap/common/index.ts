@@ -18,6 +18,9 @@ export type {
   HeatmapLegendConfigResult,
   HeatmapGridConfigResult,
   HeatmapArguments,
+  HeatmapExpressionFunctionDefinition,
+  HeatmapLegendExpressionFunctionDefinition,
+  HeatmapGridExpressionFunctionDefinition,
 } from './types';
 
 export { heatmapFunction, heatmapLegendConfig, heatmapGridConfig } from './expression_functions';

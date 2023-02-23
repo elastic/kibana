@@ -10,10 +10,10 @@ import { waitFor } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
-import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import { timelineActions } from '../../../../store/timeline';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { UserName } from './user_name';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
@@ -125,7 +125,7 @@ describe('UserName', () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
-      timelineID: 'detection',
+      timelineID: TimelineId.test,
       tabType: TimelineTabs.query,
     };
     const wrapper = mount(
@@ -139,12 +139,12 @@ describe('UserName', () => {
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+        id: context.timelineID,
         panelView: 'userDetail',
         params: {
           userName: props.value,
         },
         tabType: context.tabType,
-        timelineId: context.timelineID,
       });
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });

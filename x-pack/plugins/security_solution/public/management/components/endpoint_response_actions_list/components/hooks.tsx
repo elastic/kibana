@@ -10,12 +10,14 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
-  ResponseActions,
+  ConsoleResponseActionCommands,
+  ResponseActionsApiCommandNames,
   ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
-  RESPONSE_ACTION_COMMANDS,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
@@ -131,8 +133,8 @@ export const getActionStatus = (status: ResponseActionStatus): string => {
  * running-processes -> processes
  */
 export const getUiCommand = (
-  command: ResponseActions
-): Exclude<ResponseActions, 'unisolate' | 'running-processes'> | 'release' | 'processes' => {
+  command: ResponseActionsApiCommandNames
+): ConsoleResponseActionCommands => {
   if (command === 'unisolate') {
     return 'release';
   } else if (command === 'running-processes') {
@@ -148,8 +150,8 @@ export const getUiCommand = (
  * processes -> running-processes
  */
 export const getCommandKey = (
-  uiCommand: Exclude<ResponseActions, 'unisolate' | 'running-processes'> | 'release' | 'processes'
-): ResponseActions => {
+  uiCommand: ConsoleResponseActionCommands
+): ResponseActionsApiCommandNames => {
   if (uiCommand === 'release') {
     return 'unisolate';
   } else if (uiCommand === 'processes') {
@@ -159,7 +161,6 @@ export const getCommandKey = (
   }
 };
 
-// TODO: add more filter names here
 export type FilterName = keyof typeof FILTER_NAMES;
 export const useActionsLogFilter = ({
   filterName,
@@ -232,7 +233,26 @@ export const useActionsLogFilter = ({
         }))
       : isHostsFilter
       ? []
-      : RESPONSE_ACTION_COMMANDS.map((commandName) => ({
+      : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
+          // `get-file` is currently behind FF
+          if (
+            commandName === 'get-file' &&
+            !ExperimentalFeaturesService.get().responseActionGetFileEnabled
+          ) {
+            return false;
+          }
+
+          // TODO: remove this when `execute` is no longer behind FF
+          // planned for 8.8
+          if (
+            commandName === 'execute' &&
+            !ExperimentalFeaturesService.get().responseActionExecuteEnabled
+          ) {
+            return false;
+          }
+
+          return true;
+        }).map((commandName) => ({
           key: commandName,
           label: getUiCommand(commandName),
           checked:

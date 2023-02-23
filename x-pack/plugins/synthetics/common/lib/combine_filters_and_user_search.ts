@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-export const combineFiltersAndUserSearch = (filters: string, search: string) => {
+export const combineFiltersAndUserSearch = (filters: string, search?: string) => {
   if (!filters && !search) {
     return '';
   }
   if (!filters) return search;
   if (!search) return filters;
-  return `(${filters}) and (${search})`;
+  return `(${filters}) AND (${search})`;
 };

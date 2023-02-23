@@ -10,17 +10,18 @@ import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
-  'dataView' | 'navigateTo' | 'savedSearch' | 'searchSource'
+  'navigateTo' | 'savedSearch' | 'searchSource'
 > & {
   onOpenInspector: () => void;
   query?: Query | AggregateQuery;
@@ -29,19 +30,19 @@ export type DiscoverTopNavProps = Pick<
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => void;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   resetSavedSearch: () => void;
   onChangeDataView: (dataView: string) => void;
+  onDataViewCreated: (dataView: DataView) => void;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
-  onFieldEdited: () => void;
+  onFieldEdited: () => Promise<void>;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
-  adHocDataViewList: DataView[];
+  updateDataViewList: (newAdHocDataViews: DataView[]) => void;
 };
 
 export const DiscoverTopNav = ({
-  dataView,
   onOpenInspector,
   query,
   savedQuery,
@@ -52,23 +53,27 @@ export const DiscoverTopNav = ({
   savedSearch,
   resetSavedSearch,
   onChangeDataView,
+  onDataViewCreated,
   isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
   persistDataView,
   updateAdHocDataViewId,
-  adHocDataViewList,
+  updateDataViewList,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
-
+  const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
+  const dataView = useInternalStateSelector((state) => state.dataView!);
+  const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
     [dataView]
   );
   const services = useDiscoverServices();
-  const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings } = services;
+  const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;
 
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+  const canEditDataView =
+    Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -110,7 +115,7 @@ export const DiscoverTopNav = ({
                 },
                 fieldName,
                 onSave: async () => {
-                  onFieldEdited();
+                  await onFieldEdited();
                 },
               });
             }
@@ -124,21 +129,26 @@ export const DiscoverTopNav = ({
     [editField, canEditDataView]
   );
 
-  const createNewDataView = useMemo(
-    () =>
-      canEditDataView
-        ? () => {
-            closeDataViewEditor.current = dataViewEditor.openEditor({
-              onSave: async (dataViewToSave) => {
-                if (dataViewToSave.id) {
-                  onChangeDataView(dataViewToSave.id);
-                }
-              },
-              allowAdHocDataView: true,
-            });
-          }
-        : undefined,
-    [canEditDataView, dataViewEditor, onChangeDataView]
+  const createNewDataView = useCallback(() => {
+    closeDataViewEditor.current = dataViewEditor.openEditor({
+      onSave: onDataViewCreated,
+      allowAdHocDataView: true,
+    });
+  }, [dataViewEditor, onDataViewCreated]);
+
+  const onCreateDefaultAdHocDataView = useCallback(
+    async (pattern: string) => {
+      const newDataView = await dataViews.create({
+        title: pattern,
+      });
+      if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
+        newDataView.timeFieldName = '@timestamp';
+      }
+
+      stateContainer.actions.appendAdHocDataViews(newDataView);
+      onChangeDataView(newDataView.id!);
+    },
+    [dataViews, onChangeDataView, stateContainer.actions]
   );
 
   const topNavMenu = useMemo(
@@ -153,6 +163,8 @@ export const DiscoverTopNav = ({
         searchSource,
         onOpenSavedSearch,
         isPlainRecord,
+        adHocDataViews,
+        updateDataViewList,
         persistDataView,
         updateAdHocDataViewId,
       }),
@@ -166,22 +178,37 @@ export const DiscoverTopNav = ({
       searchSource,
       onOpenSavedSearch,
       isPlainRecord,
+      adHocDataViews,
       persistDataView,
       updateAdHocDataViewId,
+      updateDataViewList,
     ]
   );
 
+  const onEditDataView = async (editedDataView: DataView) => {
+    if (editedDataView.isPersisted()) {
+      // Clear the current data view from the cache and create a new instance
+      // of it, ensuring we have a new object reference to trigger a re-render
+      dataViews.clearInstanceCache(editedDataView.id);
+      stateContainer.actions.setDataView(await dataViews.create(editedDataView.toSpec(), true));
+    } else {
+      await updateAdHocDataViewId(editedDataView);
+    }
+    stateContainer.actions.loadDataViewList();
+    stateContainer.dataState.fetch();
+  };
+
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
-    const { appStateContainer, setAppState } = stateContainer;
+    const { appState, setAppState } = stateContainer;
     if (newSavedQueryId) {
       setAppState({ savedQuery: newSavedQueryId });
     } else {
       // remove savedQueryId from state
       const newState = {
-        ...appStateContainer.getState(),
+        ...appState.getState(),
       };
       delete newState.savedQuery;
-      appStateContainer.set(newState);
+      appState.set(newState);
     }
   };
   const setMenuMountPoint = useMemo(() => {
@@ -192,18 +219,21 @@ export const DiscoverTopNav = ({
   if (isSQLModeEnabled) {
     supportedTextBasedLanguages.push('SQL');
   }
-  const dataViewPickerProps = {
+  const dataViewPickerProps: DataViewPickerProps = {
     trigger: {
       label: dataView?.getName() || '',
       'data-test-subj': 'discover-dataView-switch-link',
-      title: dataView?.title || '',
+      title: dataView?.getIndexPattern() || '',
     },
     currentDataViewId: dataView?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
+    onCreateDefaultAdHocDataView,
     onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
-    adHocDataViews: adHocDataViewList,
+    adHocDataViews,
+    savedDataViews,
+    onEditDataView,
   };
 
   const onTextBasedSavedAndExit = useCallback(

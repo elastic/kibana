@@ -5,9 +5,8 @@
  * 2.0.
  */
 import { SemVer } from 'semver';
-import { MAJOR_VERSION } from '../../../common/constants';
 
-const kibanaVersion = new SemVer(MAJOR_VERSION);
+const kibanaVersion = new SemVer('8.0.0');
 
 export const getMockVersionInfo = () => {
   const currentMajor = kibanaVersion.major;

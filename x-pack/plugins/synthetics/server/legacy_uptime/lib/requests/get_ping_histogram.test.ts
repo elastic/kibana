@@ -70,6 +70,7 @@ describe('getPingHistogram', () => {
       uptimeEsClient,
       dateStart: 'now-15m',
       dateEnd: 'now',
+      timeZone: 'UTC',
     });
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
@@ -92,6 +93,7 @@ describe('getPingHistogram', () => {
       dateStart: 'now-15m',
       dateEnd: 'now',
       filters: '',
+      timeZone: 'UTC',
     });
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
@@ -157,6 +159,7 @@ describe('getPingHistogram', () => {
       dateEnd: 'now',
       filters: JSON.stringify(searchFilter),
       monitorId: undefined,
+      timeZone: 'UTC',
     });
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
@@ -212,6 +215,7 @@ describe('getPingHistogram', () => {
       dateStart: 'now-15m',
       dateEnd: 'now',
       filters,
+      timeZone: 'UTC',
     });
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
@@ -232,7 +236,12 @@ describe('getPingHistogram', () => {
       },
     } as any);
 
-    const result = await getPingHistogram({ uptimeEsClient, dateStart: 'now-15m', dateEnd: 'now' });
+    const result = await getPingHistogram({
+      uptimeEsClient,
+      dateStart: 'now-15m',
+      dateEnd: 'now',
+      timeZone: 'UTC',
+    });
 
     expect(result.histogram).toEqual([]);
   });
@@ -251,7 +260,12 @@ describe('getPingHistogram', () => {
       },
     } as any);
 
-    const result = await getPingHistogram({ uptimeEsClient, dateStart: 'now-15m', dateEnd: 'now' });
+    const result = await getPingHistogram({
+      uptimeEsClient,
+      dateStart: 'now-15m',
+      dateEnd: 'now',
+      timeZone: 'UTC',
+    });
 
     expect(result.histogram).toEqual([]);
   });

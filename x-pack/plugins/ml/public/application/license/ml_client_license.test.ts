@@ -45,14 +45,12 @@ describe('MlClientLicense', () => {
 
     const license$ = new Subject();
 
-    mlLicense.setup(license$ as Observable<ILicense>, [
-      (license) => {
-        // when passed in via postInitFunction callback, the license should be valid
-        // even if the license$ observable gets triggered after this setup.
-        expect(license.isFullLicense()).toBe(true);
-        done();
-      },
-    ]);
+    mlLicense.setup(license$ as Observable<ILicense>, (license) => {
+      // when passed in via postInitFunction callback, the license should be valid
+      // even if the license$ observable gets triggered after this setup.
+      expect(license.isFullLicense()).toBe(true);
+      done();
+    });
 
     license$.next({
       check: () => ({ state: 'valid' }),

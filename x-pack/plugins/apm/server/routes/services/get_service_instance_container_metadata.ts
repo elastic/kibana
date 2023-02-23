@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
-  CONTAINER,
   CONTAINER_ID,
   CONTAINER_IMAGE,
   KUBERNETES,
-  KUBERNETES_CONTAINER_NAME,
-  KUBERNETES_NAMESPACE,
   KUBERNETES_POD_NAME,
   KUBERNETES_POD_UID,
+} from '../../../common/es_fields/apm';
+import {
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_NAMESPACE,
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/infra_metrics';
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { maybe } from '../../../common/utils/maybe';
+import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 type ServiceInstanceContainerMetadataDetails =
   | {
@@ -29,22 +30,16 @@ type ServiceInstanceContainerMetadataDetails =
   | undefined;
 
 export const getServiceInstanceContainerMetadata = async ({
-  esClient,
-  indexName,
+  infraMetricsClient,
   containerId,
   start,
   end,
 }: {
-  esClient: ElasticsearchClient;
-  indexName?: string;
+  infraMetricsClient: InfraMetricsClient;
   containerId: string;
   start: number;
   end: number;
 }): Promise<ServiceInstanceContainerMetadataDetails> => {
-  if (!indexName) {
-    return undefined;
-  }
-
   const should = [
     { exists: { field: KUBERNETES } },
     { exists: { field: CONTAINER_IMAGE } },
@@ -56,10 +51,9 @@ export const getServiceInstanceContainerMetadata = async ({
     { exists: { field: KUBERNETES_DEPLOYMENT_NAME } },
   ];
 
-  const response = await esClient.search<unknown>({
-    index: [indexName],
-    _source: [KUBERNETES, CONTAINER],
+  const response = await infraMetricsClient.search({
     size: 1,
+    track_total_hits: false,
     query: {
       bool: {
         filter: [

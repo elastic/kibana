@@ -17,6 +17,10 @@ export const REMOVED_TYPES: string[] = [
 
   // deprecated in https://github.com/elastic/kibana/pull/121442
   'alerting:siem.signals',
+
+  'search_sessions_monitor',
+  'search_sessions_cleanup',
+  'search_sessions_expire',
 ];
 
 /**

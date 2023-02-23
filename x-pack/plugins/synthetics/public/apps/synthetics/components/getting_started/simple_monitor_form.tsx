@@ -18,8 +18,11 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useSimpleMonitor } from './use_simple_monitor';
 import { ServiceLocationsField } from './form_fields/service_locations';
-import { ConfigKey, ServiceLocations } from '../../../../../common/runtime_types';
+import { ConfigKey, ServiceLocation, ServiceLocations } from '../../../../../common/runtime_types';
+import { useCanEditSynthetics } from '../../../../hooks/use_capabilities';
 import { useFormWrapped } from '../../../../hooks/use_form_wrapped';
+import { useFleetPermissions } from '../../hooks';
+import { NoPermissionsTooltip } from '../common/components/permissions';
 
 export interface SimpleFormData {
   urls: string;
@@ -32,6 +35,7 @@ export const SimpleMonitorForm = () => {
     register,
     handleSubmit,
     formState: { errors, isValid, isSubmitted },
+    getValues,
   } = useFormWrapped({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
@@ -45,7 +49,14 @@ export const SimpleMonitorForm = () => {
     setMonitorData(data);
   };
 
-  const { loading } = useSimpleMonitor({ monitorData });
+  const { loading, data: newMonitor } = useSimpleMonitor({ monitorData });
+
+  const canEditSynthetics = useCanEditSynthetics();
+  const { canSaveIntegrations } = useFleetPermissions();
+  const hasAnyPrivateLocationSelected = (getValues(ConfigKey.LOCATIONS) as ServiceLocations)?.some(
+    ({ isServiceManaged }: ServiceLocation) => !isServiceManaged
+  );
+  const canSavePrivateLocation = !hasAnyPrivateLocationSelected || canSaveIntegrations;
 
   const hasURLError = !!errors?.[ConfigKey.URLS];
 
@@ -53,7 +64,7 @@ export const SimpleMonitorForm = () => {
     <EuiForm
       onSubmit={handleSubmit(onSubmit)}
       component="form"
-      isInvalid={isSubmitted && !isValid && !loading}
+      isInvalid={isSubmitted && !isValid && !loading && !newMonitor?.id}
       noValidate
     >
       <EuiFormRow
@@ -77,27 +88,26 @@ export const SimpleMonitorForm = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            type="submit"
-            fill
-            iconType="plusInCircleFilled"
-            isLoading={loading}
-            data-test-subj="syntheticsMonitorConfigSubmitButton"
+          <NoPermissionsTooltip
+            canEditSynthetics={canEditSynthetics}
+            canAddPrivateMonitor={canSavePrivateLocation}
           >
-            {CREATE_MONITOR_LABEL}
-          </EuiButton>
+            <EuiButton
+              type="submit"
+              fill
+              iconType="plusInCircleFilled"
+              isLoading={loading}
+              data-test-subj="syntheticsMonitorConfigSubmitButton"
+              disabled={!canEditSynthetics || !canSavePrivateLocation}
+            >
+              {CREATE_MONITOR_LABEL}
+            </EuiButton>
+          </NoPermissionsTooltip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiForm>
   );
 };
-
-export const MY_FIRST_MONITOR = i18n.translate(
-  'xpack.synthetics.monitorManagement.myFirstMonitor',
-  {
-    defaultMessage: 'My first monitor',
-  }
-);
 
 export const WEBSITE_URL_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.websiteUrlLabel',

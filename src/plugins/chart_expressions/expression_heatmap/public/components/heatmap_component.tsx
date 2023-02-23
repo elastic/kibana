@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, FC, useMemo, useState, useCallback } from 'react';
+import React, { memo, FC, useMemo, useState, useCallback, useRef } from 'react';
 import {
   Chart,
   ElementClickListener,
@@ -25,7 +25,7 @@ import {
 } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
-import { LegendToggle, EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
 import {
   getAccessorByDimension,
   getFormatByAccessor,
@@ -138,14 +138,18 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     timeZone,
     formatFactory,
     chartsThemeService,
+    chartsActiveCursorService,
     datatableUtilities,
     onClickValue,
     onSelectRange,
     paletteService,
     uiState,
     interactive,
+    syncTooltips,
+    syncCursor,
     renderComplete,
   }) => {
+    const chartRef = useRef<Chart>(null);
     const chartTheme = chartsThemeService.useChartsTheme();
     const isDarkTheme = chartsThemeService.useDarkMode();
     // legacy heatmap legend is handled by the uiState
@@ -153,6 +157,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       const bwcLegendStateDefault = args.legend.isVisible ?? true;
       return uiState?.get('vis.legendOpen', bwcLegendStateDefault);
     });
+
+    const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
     const toggleLegend = useCallback(() => {
       if (!interactive) {
@@ -235,6 +241,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     let chartData = formattedTable.table.rows.filter(
       (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
     );
+
+    const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
+      datatables: [formattedTable.table],
+    });
 
     const onElementClick = useCallback(
       (e: HeatmapElementEvent[]) => {
@@ -564,12 +574,16 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             legendPosition: args.legend.position,
           }}
         >
-          <Chart>
+          <Chart ref={chartRef}>
             <Settings
               onRenderChange={onRenderChange}
               noResults={
                 <EmptyPlaceholder icon={IconChartHeatmap} renderComplete={onRenderChange} />
               }
+              onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
+              externalPointerEvents={{
+                tooltip: { visible: syncTooltips },
+              }}
               onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
               showLegend={showLegend ?? args.legend.isVisible}
               legendPosition={args.legend.position}
@@ -578,6 +592,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               debugState={window._echDebugStateFlag ?? false}
               tooltip={tooltip}
               theme={[themeOverrides, chartTheme]}
+              baseTheme={chartBaseTheme}
               xDomain={{
                 min:
                   dateHistogramMeta && dateHistogramMeta.timeRange
@@ -608,8 +623,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               xScale={xScale}
               ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
               xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
-              xAxisLabelName={xAxisColumn?.name}
-              yAxisLabelName={yAxisColumn?.name}
+              xAxisLabelName={xAxisColumn?.name || ''}
+              yAxisLabelName={yAxisColumn?.name || ''}
               xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
               yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
               xAxisLabelFormatter={(v) =>

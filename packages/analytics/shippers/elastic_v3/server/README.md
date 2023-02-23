@@ -22,4 +22,4 @@ analytics.registerShipper(ElasticV3ServerShipper, { channelName: 'myChannel', ve
 
 ## Transmission protocol
 
-This shipper sends the events to the Elastic Internal Telemetry Service. It holds up to 1000 events in a shared queue. Any additional incoming events once it's full will be dropped. It sends the events from the queue in batches of 10kB every 10 seconds. If not enough events are available in the queue for longer than 10 minutes, it will send any remaining events. When shutting down, it'll send all the remaining events in the queue.
+This shipper sends the events to the Elastic Internal Telemetry Service. It holds up to 1000 events in a shared queue. Any additional incoming events once it's full will be dropped. It sends the events from the queue in batches of up to 10kB every 10 seconds. When shutting down, it'll send all the remaining events in the queue.

@@ -47,7 +47,8 @@
         "winlogbeat-*"
       ],
       "query": "_id:*",
-      "filters": []
+      "filters": [],
+      "note": "!{osquery{\"query\":\"SELECT * FROM os_version where name='{{host.os.name}}';\",\"label\":\"Get processes\",\"ecs_mapping\":{\"labels\":{\"field\":\"arch\"}}}}\n\n!{osquery{\"query\":\"select * from users;\",\"label\":\"Get users\"}}"
     },
     "schedule": {
       "interval": "5m"

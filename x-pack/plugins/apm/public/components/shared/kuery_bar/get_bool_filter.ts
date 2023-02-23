@@ -12,7 +12,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { UIProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery } from '../../../../common/utils/environment_query';

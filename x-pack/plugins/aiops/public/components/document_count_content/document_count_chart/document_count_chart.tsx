@@ -127,9 +127,17 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   // TODO Let user choose between ZOOM and BRUSH mode.
   const [viewMode] = useState<VIEW_MODE>(VIEW_MODE.BRUSH);
 
+  const hasNoData = useMemo(
+    () =>
+      (chartPoints === undefined || chartPoints.length < 1) &&
+      (chartPointsSplit === undefined ||
+        (Array.isArray(chartPointsSplit) && chartPointsSplit.length < 1)),
+    [chartPoints, chartPointsSplit]
+  );
+
   const adjustedChartPoints = useMemo(() => {
-    // Display empty chart when no data in range
-    if (chartPoints.length < 1) return [{ time: timeRangeEarliest, value: 0 }];
+    // Display empty chart when no data in range and no split data to show
+    if (hasNoData) return [{ time: timeRangeEarliest, value: 0 }];
 
     // If chart has only one bucket
     // it won't show up correctly unless we add an extra data point
@@ -145,12 +153,11 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
 
   const adjustedChartPointsSplit = useMemo(() => {
     // Display empty chart when no data in range
-    if (!Array.isArray(chartPointsSplit) || chartPointsSplit.length < 1)
-      return [{ time: timeRangeEarliest, value: 0 }];
+    if (hasNoData) return [{ time: timeRangeEarliest, value: 0 }];
 
     // If chart has only one bucket
     // it won't show up correctly unless we add an extra data point
-    if (chartPointsSplit.length === 1) {
+    if (Array.isArray(chartPointsSplit) && chartPointsSplit.length === 1) {
       return [
         ...chartPointsSplit,
         {
@@ -349,18 +356,20 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
             timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
             style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
           />
-          <HistogramBarSeries
-            id={SPEC_ID}
-            name={chartPointsSplit ? overallSeriesNameWithSplit : overallSeriesName}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor="time"
-            yAccessors={['value']}
-            data={adjustedChartPoints}
-            timeZone={timeZone}
-            yNice
-          />
-          {chartPointsSplit && (
+          {adjustedChartPoints?.length && (
+            <HistogramBarSeries
+              id={SPEC_ID}
+              name={chartPointsSplit ? overallSeriesNameWithSplit : overallSeriesName}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="time"
+              yAccessors={['value']}
+              data={adjustedChartPoints}
+              timeZone={timeZone}
+              yNice
+            />
+          )}
+          {adjustedChartPointsSplit?.length && (
             <HistogramBarSeries
               id={`${SPEC_ID}_split`}
               name={chartPointsSplitLabel}

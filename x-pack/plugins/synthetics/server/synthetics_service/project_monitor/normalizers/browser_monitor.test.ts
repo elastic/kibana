@@ -18,6 +18,7 @@ import { normalizeProjectMonitors } from '.';
 
 describe('browser normalizers', () => {
   describe('normalize push monitors', () => {
+    const testHash = 'ljlkj';
     const playwrightOptions = {
       headless: true,
     };
@@ -67,9 +68,8 @@ describe('browser normalizers', () => {
         locations: ['us_central'],
         tags: ['tag1', 'tag2'],
         ignoreHTTPSErrors: true,
-        apmServiceName: 'cart-service',
-        type: DataStream.BROWSER,
-      },
+        hash: testHash,
+      } as ProjectMonitor, // test that normalizers defaults to browser when type is omitted
       {
         id: 'test-id-2',
         screenshot: ScreenshotOption.ON,
@@ -86,8 +86,8 @@ describe('browser normalizers', () => {
         locations: ['us_central', 'us_east'],
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
-        apmServiceName: 'bean-service',
         type: DataStream.BROWSER,
+        hash: testHash,
       },
       {
         id: 'test-id-3',
@@ -95,19 +95,15 @@ describe('browser normalizers', () => {
         name: 'test-name-3',
         content: 'test content 3',
         schedule: 10,
-        throttling: {
-          latency: 18,
-          upload: 15,
-          download: 10,
-        },
+        throttling: false,
         params,
         playwrightOptions,
         locations: ['us_central', 'us_east'],
         privateLocations: ['Germany'],
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
-        apmServiceName: 'bean-service',
         type: DataStream.BROWSER,
+        hash: testHash,
       },
     ];
 
@@ -118,6 +114,7 @@ describe('browser normalizers', () => {
         monitors,
         projectId,
         namespace: 'test-space',
+        version: '8.5.0',
       });
       expect(actual).toEqual([
         {
@@ -135,8 +132,6 @@ describe('browser normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
             ],
             name: 'test-name-1',
@@ -145,7 +140,7 @@ describe('browser normalizers', () => {
               unit: 'm',
             },
             screenshots: 'off',
-            'service.name': 'cart-service',
+            'service.name': '',
             'source.project.content': 'test content 1',
             tags: ['tag1', 'tag2'],
             'throttling.config': '5d/10u/20l',
@@ -160,8 +155,11 @@ describe('browser normalizers', () => {
             original_space: 'test-space',
             custom_heartbeat_id: 'test-id-1-test-project-id-test-space',
             timeout: null,
+            id: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
+          errors: [],
         },
         {
           normalizedFields: {
@@ -178,8 +176,6 @@ describe('browser normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
               {
                 geo: {
@@ -189,8 +185,6 @@ describe('browser normalizers', () => {
                 id: 'us_east',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
             ],
             name: 'test-name-2',
@@ -201,7 +195,7 @@ describe('browser normalizers', () => {
               unit: 'm',
             },
             screenshots: 'on',
-            'service.name': 'bean-service',
+            'service.name': '',
             'source.project.content': 'test content 2',
             tags: ['tag3', 'tag4'],
             'throttling.config': '10d/15u/18l',
@@ -215,8 +209,11 @@ describe('browser normalizers', () => {
             original_space: 'test-space',
             custom_heartbeat_id: 'test-id-2-test-project-id-test-space',
             timeout: null,
+            id: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
+          errors: [],
         },
         {
           normalizedFields: {
@@ -233,8 +230,6 @@ describe('browser normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
               {
                 geo: {
@@ -244,15 +239,11 @@ describe('browser normalizers', () => {
                 id: 'us_east',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
               {
                 id: 'germany',
                 isServiceManaged: false,
                 label: 'Germany',
-                agentPolicyId: 'germany',
-                concurrentMonitors: 1,
               },
             ],
             name: 'test-name-3',
@@ -263,22 +254,25 @@ describe('browser normalizers', () => {
               unit: 'm',
             },
             screenshots: 'on',
-            'service.name': 'bean-service',
+            'service.name': '',
             'source.project.content': 'test content 3',
             tags: ['tag3', 'tag4'],
-            'throttling.config': '10d/15u/18l',
-            'throttling.download_speed': '10',
-            'throttling.is_enabled': true,
-            'throttling.latency': '18',
-            'throttling.upload_speed': '15',
+            'throttling.config': '5d/3u/20l',
+            'throttling.download_speed': '5',
+            'throttling.is_enabled': false,
+            'throttling.latency': '20',
+            'throttling.upload_speed': '3',
             type: 'browser',
             project_id: projectId,
             namespace: 'test_space',
             original_space: 'test-space',
             custom_heartbeat_id: 'test-id-3-test-project-id-test-space',
             timeout: null,
+            id: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
+          errors: [],
         },
       ]);
     });

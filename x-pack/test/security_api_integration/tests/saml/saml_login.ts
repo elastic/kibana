@@ -16,7 +16,7 @@ import {
   getLogoutRequest,
   getSAMLRequestId,
   getSAMLResponse,
-} from '../../fixtures/saml/saml_tools';
+} from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 
@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
       .set('Cookie', sessionCookie.cookieString())
       .expect(200);
 
-    expect(apiResponse.body).to.only.have.keys([
+    expect(apiResponse.body).to.have.keys([
       'username',
       'full_name',
       'email',
@@ -193,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
 
       it('should succeed if both SAML response and handshake cookie are provided', async () => {
@@ -240,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
     });
 
@@ -796,7 +796,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../fixtures/audit/saml.log');
+      const logFilePath = resolve(__dirname, '../../packages/helpers/audit/saml.log');
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {

@@ -8,9 +8,14 @@
 
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
-export interface DashboardEmbeddableService {
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
-  getEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
-  getStateTransfer: EmbeddableStart['getStateTransfer'];
-  EmbeddablePanel: EmbeddableStart['EmbeddablePanel'];
-}
+export type DashboardEmbeddableService = Pick<
+  EmbeddableStart,
+  | 'getEmbeddableFactories'
+  | 'getEmbeddableFactory'
+  | 'getAllMigrations'
+  | 'getStateTransfer'
+  | 'EmbeddablePanel'
+  | 'telemetry'
+  | 'extract'
+  | 'inject'
+>;

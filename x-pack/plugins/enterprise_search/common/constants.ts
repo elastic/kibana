@@ -44,7 +44,7 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
 export const ANALYTICS_PLUGIN = {
   ID: 'enterpriseSearchAnalytics',
   NAME: i18n.translate('xpack.enterpriseSearch.analytics.productName', {
-    defaultMessage: 'Analytics',
+    defaultMessage: 'Behavioral Analytics',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.analytics.productDescription', {
     defaultMessage:
@@ -95,6 +95,32 @@ export const WORKPLACE_SEARCH_PLUGIN = {
   URL: '/app/enterprise_search/workplace_search',
   NON_ADMIN_URL: '/app/enterprise_search/workplace_search/p',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/workplace-search/',
+};
+
+export const SEARCH_EXPERIENCES_PLUGIN = {
+  ID: 'searchExperiences',
+  NAME: i18n.translate('xpack.enterpriseSearch.searchExperiences.productName', {
+    defaultMessage: 'Search Experiences',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.searchExperiences.navTitle', {
+    defaultMessage: 'Search Experiences',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.searchExperiences.productDescription', {
+    defaultMessage: 'Build an intuitive, engaging search experience without reinventing the wheel.',
+  }),
+  URL: '/app/enterprise_search/search_experiences',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+  GITHUB_URL: 'https://github.com/elastic/search-ui/',
+  DOCUMENTATION_URL: 'https://docs.elastic.co/search-ui/',
+  ELASTICSEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/elasticsearch',
+  APP_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/app-search',
+  WORKPLACE_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/workplace-search',
+};
+
+export const ENGINES_PLUGIN = {
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.engines.navTitle', {
+    defaultMessage: 'Engines',
+  }),
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';

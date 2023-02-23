@@ -46,8 +46,8 @@ const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   description: payload.description,
   query: payload.query,
   interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
-  snapshot: payload.snapshot,
-  removed: payload.removed,
+  snapshot: payload.snapshot ?? true,
+  removed: payload.removed ?? false,
   platform: payload.platform,
   version: payload.version ? [payload.version] : [],
   ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
@@ -70,11 +70,6 @@ export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuer
 
     if (draft.interval) {
       draft.interval = draft.interval + '';
-    }
-
-    if (draft.snapshot) {
-      delete draft.snapshot;
-      delete draft.removed;
     }
 
     return draft;
@@ -101,6 +96,7 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
             query: '',
             interval: 3600,
             ecs_mapping: {},
+            snapshot: true,
           },
     }),
   };

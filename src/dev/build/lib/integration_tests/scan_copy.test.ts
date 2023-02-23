@@ -89,7 +89,7 @@ it('applies filter function specified', async () => {
   await scanCopy({
     source: FIXTURES,
     destination,
-    filter: (record) => !record.name.includes('bar'),
+    filter: (record) => !record.source.name.includes('bar'),
   });
 
   expect((await getChildPaths(resolve(destination, 'foo_dir'))).sort()).toEqual([

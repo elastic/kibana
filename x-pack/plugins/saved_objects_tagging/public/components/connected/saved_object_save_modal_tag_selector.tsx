@@ -29,6 +29,7 @@ export const getConnectedSavedObjectModalTagSelectorComponent = ({
   return ({
     initialSelection,
     onTagsSelected: notifySelectionChange,
+    ...rest
   }: SavedObjectSaveModalTagSelectorComponentProps) => {
     const tags = useObservable(cache.getState$(), cache.getState());
     const [selected, setSelected] = useState<string[]>(initialSelection);
@@ -58,6 +59,7 @@ export const getConnectedSavedObjectModalTagSelectorComponent = ({
           data-test-subj="savedObjectTagSelector"
           allowCreate={capabilities.create}
           openCreateModal={openCreateModal}
+          {...rest}
         />
       </EuiFormRow>
     );

@@ -16,8 +16,7 @@ import {
   EuiProgress,
   EuiFlyoutSize,
 } from '@elastic/eui';
-import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { AlertsTableConfigurationRegistry } from '../../../../types';
+import type { Alert, AlertsTableConfigurationRegistry } from '../../../../types';
 
 const AlertsFlyoutHeader = lazy(() => import('./alerts_flyout_header'));
 const PAGINATION_LABEL = i18n.translate(
@@ -28,7 +27,7 @@ const PAGINATION_LABEL = i18n.translate(
 );
 
 interface AlertsFlyoutProps {
-  alert: EcsFieldsResponse;
+  alert: Alert;
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
   flyoutIndex: number;
   flyoutSize?: EuiFlyoutSize;
@@ -99,7 +98,7 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   );
 
   return (
-    <EuiFlyout onClose={onClose} size={flyoutSize} data-test-subj="alertsFlyout">
+    <EuiFlyout onClose={onClose} size={flyoutSize} data-test-subj="alertsFlyout" ownFocus={false}>
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
         <Suspense fallback={null}>

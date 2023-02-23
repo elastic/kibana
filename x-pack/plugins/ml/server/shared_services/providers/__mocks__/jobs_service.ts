@@ -8,4 +8,6 @@
 export const createJobServiceProviderMock = () =>
   jest.fn(() => ({
     jobsSummary: jest.fn(),
+    forceStartDatafeeds: jest.fn(),
+    stopDatafeeds: jest.fn(),
   }));

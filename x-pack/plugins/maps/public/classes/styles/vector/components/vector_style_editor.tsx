@@ -12,14 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
-// @ts-expect-error
 import { VectorStyleSymbolizeAsEditor } from './symbol/vector_style_symbolize_as_editor';
 import { VectorStyleIconEditor } from './symbol/vector_style_icon_editor';
 import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
 import { LabelZoomRangeEditor } from './label/label_zoom_range_editor';
-// @ts-expect-error
+import { LabelPositionEditor } from './label/label_position_editor';
 import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
-// @ts-expect-error
 import { OrientationEditor } from './orientation/orientation_editor';
 import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_palettes';
@@ -52,6 +50,7 @@ import { LabelBorderSizeProperty } from '../properties/label_border_size_propert
 import { StaticTextProperty } from '../properties/static_text_property';
 import { DynamicTextProperty } from '../properties/dynamic_text_property';
 import { StaticSizeProperty } from '../properties/static_size_property';
+import { LabelPositionProperty } from '../properties/label_position_property';
 import { LabelZoomRangeProperty } from '../properties/label_zoom_range_property';
 import { IVectorLayer } from '../../../layers/vector_layer';
 import { getHasLabel } from '../style_util';
@@ -266,7 +265,7 @@ export class VectorStyleEditor extends Component<Props, State> {
     );
   }
 
-  _renderLabelProperties() {
+  _renderLabelProperties(isPoint: boolean) {
     const hasLabel = getHasLabel(
       this.props.styleProperties[VECTOR_STYLES.LABEL_TEXT] as
         | StaticTextProperty
@@ -285,6 +284,7 @@ export class VectorStyleEditor extends Component<Props, State> {
     const labelBorderColorProperty = this.props.styleProperties[
       VECTOR_STYLES.LABEL_BORDER_COLOR
     ] as IStyleProperty<ColorDynamicOptions | ColorStaticOptions>;
+
     return (
       <Fragment>
         <VectorStyleLabelEditor
@@ -305,6 +305,19 @@ export class VectorStyleEditor extends Component<Props, State> {
           }
         />
         <EuiSpacer size="m" />
+
+        {isPoint ? (
+          <>
+            <LabelPositionEditor
+              hasLabel={hasLabel}
+              handlePropertyChange={this.props.handlePropertyChange}
+              styleProperty={
+                this.props.styleProperties[VECTOR_STYLES.LABEL_POSITION] as LabelPositionProperty
+              }
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
 
         <LabelZoomRangeEditor
           disabled={!hasLabel}
@@ -497,7 +510,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         />
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties()}
+        {this._renderLabelProperties(true)}
       </Fragment>
     );
   }
@@ -511,7 +524,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         {this._renderLineWidth()}
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties()}
+        {this._renderLabelProperties(false)}
       </Fragment>
     );
   }
@@ -528,7 +541,7 @@ export class VectorStyleEditor extends Component<Props, State> {
         {this._renderLineWidth()}
         <EuiSpacer size="m" />
 
-        {this._renderLabelProperties()}
+        {this._renderLabelProperties(false)}
       </Fragment>
     );
   }

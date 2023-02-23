@@ -9,10 +9,10 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   createTestServers,
-  TestElasticsearchUtils,
-  TestKibanaUtils,
-  TestUtils,
-} from '../../../test_helpers/kbn_server';
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  type TestUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createOrUpgradeSavedConfig } from '@kbn/core-ui-settings-server-internal';
@@ -80,6 +80,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       buildNum: 54099,
       log: logger,
       handleWriteErrors: false,
+      type: 'config',
     });
 
     const config540 = await savedObjectsClient.get('config', '5.4.0');
@@ -108,6 +109,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       buildNum: 54199,
       log: logger,
       handleWriteErrors: false,
+      type: 'config',
     });
 
     const config541 = await savedObjectsClient.get('config', '5.4.1');
@@ -136,6 +138,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       buildNum: 70010,
       log: logger,
       handleWriteErrors: false,
+      type: 'config',
     });
 
     const config700rc1 = await savedObjectsClient.get('config', '7.0.0-rc1');
@@ -165,6 +168,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       buildNum: 70099,
       log: logger,
       handleWriteErrors: false,
+      type: 'config',
     });
 
     const config700 = await savedObjectsClient.get('config', '7.0.0');
@@ -195,6 +199,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       buildNum: 62310,
       log: logger,
       handleWriteErrors: false,
+      type: 'config',
     });
 
     const config623rc1 = await savedObjectsClient.get('config', '6.2.3-rc1');

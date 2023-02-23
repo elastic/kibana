@@ -7,8 +7,22 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
-import type { RuleParams } from '../lib/detection_engine/schemas/rule_schemas';
+import type { RuleParams } from '../lib/detection_engine/rule_schema';
 import type { SetupPlugins } from '../plugin';
+
+export interface DashboardUsage {
+  created_at: string | undefined;
+  dashboard_id: string;
+  error_message?: string;
+  error_status_code?: number;
+}
+export interface DashboardMetrics {
+  dashboard_tag?: {
+    created_at: string | undefined;
+    linked_dashboards_count: number;
+  };
+  dashboards?: DashboardUsage[];
+}
 
 export type CollectorDependencies = {
   signalsIndex: string;
@@ -119,6 +133,15 @@ export interface SingleExecutionMetricAgg {
     value: number | null;
   };
   minTotalSearchDuration: {
+    value: number | null;
+  };
+  maxTotalEnrichmentDuration: {
+    value: number | null;
+  };
+  avgTotalEnrichmentDuration: {
+    value: number | null;
+  };
+  minTotalEnrichmentDuration: {
     value: number | null;
   };
 }

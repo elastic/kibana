@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { UserToolTip } from './user_tooltip';

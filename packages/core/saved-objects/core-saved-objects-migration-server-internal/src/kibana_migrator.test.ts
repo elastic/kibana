@@ -13,17 +13,17 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
-import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
-import { DocumentMigrator } from './core/document_migrator';
+import { type KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
+import { DocumentMigrator } from './document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { lastValueFrom } from 'rxjs';
 
-jest.mock('./core/document_migrator', () => {
+jest.mock('./document_migrator', () => {
   return {
     // Create a mock for spying on the constructor
     DocumentMigrator: jest.fn().mockImplementation((...args) => {
-      const { DocumentMigrator: RealDocMigrator } = jest.requireActual('./core/document_migrator');
+      const { DocumentMigrator: RealDocMigrator } = jest.requireActual('./document_migrator');
       return new RealDocMigrator(args[0]);
     }),
   };
@@ -253,6 +253,7 @@ const mockOptions = () => {
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
+    waitForMigrationCompletion: false,
     typeRegistry: createRegistry([
       {
         name: 'testtype',

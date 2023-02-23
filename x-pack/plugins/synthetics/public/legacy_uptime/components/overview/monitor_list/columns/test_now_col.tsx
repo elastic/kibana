@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ping } from '../../../../../../common/runtime_types';
 import { testNowMonitorAction } from '../../../../state/actions';
@@ -16,17 +16,21 @@ import * as labels from '../translations';
 export const TestNowColumn = ({
   monitorId,
   configId,
-  selectedMonitor,
+  summaryPings,
 }: {
   monitorId: string;
   configId?: string;
-  selectedMonitor: Ping;
+  summaryPings: Ping[];
 }) => {
   const dispatch = useDispatch();
 
   const testNowRun = useSelector(testNowRunSelector(configId));
 
-  if (selectedMonitor.monitor.fleet_managed) {
+  const isOnFleetManaged = useMemo(() => {
+    return summaryPings.every((ping) => !!ping.monitor.fleet_managed);
+  }, [summaryPings]);
+
+  if (isOnFleetManaged) {
     return (
       <EuiToolTip content={labels.PRIVATE_AVAILABLE_LABEL}>
         <>--</>

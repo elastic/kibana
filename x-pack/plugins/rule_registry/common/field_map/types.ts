@@ -12,5 +12,6 @@ export interface FieldMap {
     array?: boolean;
     path?: string;
     scaling_factor?: number;
+    dynamic?: 'strict' | boolean;
   };
 }

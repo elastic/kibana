@@ -38,6 +38,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
     size="s"
   />
   <EuiButton
+    color="primary"
     onClick={[Function]}
     size="s"
   >

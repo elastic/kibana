@@ -133,6 +133,8 @@ export function getTransformHealthRuleType(): RuleType<
           recoveredAlert.setContext(testResult.context);
         }
       }
+
+      return { state: {} };
     },
   };
 }

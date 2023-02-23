@@ -20,6 +20,7 @@ import { mount, shallow } from 'enzyme';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { MockLifecycle } from './test_helpers/test_types';
 import { ApplicationService } from './application_service';
 import {
@@ -56,6 +57,7 @@ describe('#setup()', () => {
       http,
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
+      customBranding: customBrandingServiceMock.createStartContract(),
     };
     service = new ApplicationService();
   });
@@ -480,6 +482,7 @@ describe('#start()', () => {
       http,
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
+      customBranding: customBrandingServiceMock.createStartContract(),
     };
     service = new ApplicationService();
   });
@@ -1189,6 +1192,7 @@ describe('#stop()', () => {
       http,
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
+      customBranding: customBrandingServiceMock.createStartContract(),
     };
     service = new ApplicationService();
   });

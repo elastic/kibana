@@ -28,10 +28,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { encode } from '@kbn/presentation-util-plugin/public';
+import { encode } from '@kbn/presentation-util-plugin/common';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { ElementCard } from '../element_card';
-
 const MAX_NAME_LENGTH = 40;
 const MAX_DESCRIPTION_LENGTH = 100;
 
@@ -161,9 +160,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
         initialFocus=".canvasCustomElementForm__name"
       >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <h3>{title}</h3>
-          </EuiModalHeaderTitle>
+          <EuiModalHeaderTitle component="h3">{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">

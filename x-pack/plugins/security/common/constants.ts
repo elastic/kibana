@@ -46,6 +46,13 @@ export const LOGOUT_REASON_QUERY_STRING_PARAMETER = 'msg';
 export const NEXT_URL_QUERY_STRING_PARAMETER = 'next';
 
 /**
+ * If there's a problem validating the session supplied in an AJAX request (i.e. a non-redirectable request),
+ * a 401 error is returned. A header with the name defined in `SESSION_ERROR_REASON_HEADER` is added to the
+ * HTTP response with more details of the problem.
+ */
+export const SESSION_ERROR_REASON_HEADER = 'kbn-session-error-reason';
+
+/**
  * Matches valid usernames and role names.
  *
  * - Must contain only letters, numbers, spaces, punctuation and printable symbols.

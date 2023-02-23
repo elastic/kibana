@@ -10,8 +10,8 @@ import { RuleNotifyWhenType } from '../types';
 export function getRuleNotifyWhenType(
   notifyWhen: RuleNotifyWhenType | null,
   throttle: string | null
-): RuleNotifyWhenType {
+): RuleNotifyWhenType | null {
   // We allow notifyWhen to be null for backwards compatibility. If it is null, determine its
   // value based on whether the throttle is set to a value or null
-  return notifyWhen ? notifyWhen! : throttle ? 'onThrottleInterval' : 'onActiveAlert';
+  return notifyWhen ? notifyWhen! : throttle ? 'onThrottleInterval' : null;
 }

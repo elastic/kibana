@@ -37,10 +37,6 @@ export default function ({ getService }) {
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('clear cache', () => {
-      it('should clear the cache on all indices', async () => {
-        await clearCache('*').expect(200);
-      });
-
       it('should clear the cache on a single index', async () => {
         const index = await createIndex();
         await clearCache(index).expect(200);

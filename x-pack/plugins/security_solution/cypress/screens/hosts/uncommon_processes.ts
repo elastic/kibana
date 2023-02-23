@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const PROCESS_NAME_FIELD = '[data-test-subj="render-content-process.name"]';
+export const PROCESS_NAME_FIELD = '[data-test-subj="cellActions-renderContent-process.name"]';
 
 export const UNCOMMON_PROCESSES_TABLE = '[data-test-subj="table-uncommonProcesses-loading-false"]';

@@ -15,6 +15,7 @@ import {
   TickFormatter,
   XYBrushEvent,
 } from '@elastic/charts';
+import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +23,7 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
+import { useTimeZone } from '../../../../hooks/use_time_zone';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
@@ -46,19 +48,31 @@ export function UptimeSection({ bucketSize }: Props) {
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
 
+  const timeZone = useTimeZone();
+
   const { data, status } = useFetcher(
     () => {
       if (bucketSize && absoluteStart && absoluteEnd) {
         return getDataHandler('synthetics')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
+          timeZone,
           ...bucketSize,
         });
       }
     },
     // `forceUpdate` and `lastUpdated` should trigger a reload
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate, lastUpdated]
+    [
+      bucketSize,
+      relativeStart,
+      relativeEnd,
+      absoluteStart,
+      absoluteEnd,
+      forceUpdate,
+      lastUpdated,
+      timeZone,
+    ]
   );
 
   if (!hasDataMap.synthetics?.hasData) {
@@ -68,7 +82,9 @@ export function UptimeSection({ bucketSize }: Props) {
   const min = moment.utc(absoluteStart).valueOf();
   const max = moment.utc(absoluteEnd).valueOf();
 
-  const formatter = niceTimeFormatter([min, max]);
+  const formatter = bucketSize?.dateFormat
+    ? timeFormatter(bucketSize?.dateFormat)
+    : niceTimeFormatter([min, max]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
 

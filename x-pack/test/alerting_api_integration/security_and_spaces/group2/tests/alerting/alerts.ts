@@ -11,11 +11,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  ESTestIndexTool,
-  ES_TEST_INDEX_NAME,
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
@@ -36,6 +35,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
   describe('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
+    const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
@@ -47,6 +47,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
+      await es.indices.delete({ index: alertAsDataIndex });
     });
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -55,6 +56,39 @@ export default function alertTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         let alertUtils: AlertUtils;
         let indexRecordActionId: string;
+
+        const getAlertInfo = (alertId: string, actions: any) => ({
+          id: alertId,
+          consumer: 'alertsFixture',
+          spaceId: space.id,
+          namespace: space.id,
+          name: 'abc',
+          enabled: true,
+          notifyWhen: 'onActiveAlert',
+          schedule: {
+            interval: '1m',
+          },
+          tags: ['tag-A', 'tag-B'],
+          throttle: '1m',
+          createdBy: user.fullName,
+          updatedBy: user.fullName,
+          actions: actions.map((action: any) => {
+            /* eslint-disable @typescript-eslint/naming-convention */
+            const { connector_type_id, group, id, params, uuid } = action;
+            return {
+              actionTypeId: connector_type_id,
+              group,
+              id,
+              params,
+              uuid,
+            };
+          }),
+          producer: 'alertsFixture',
+          ruleTypeId: 'test.always-firing',
+          ruleTypeName: 'Test: Always Firing',
+          muteAll: false,
+          snoozeSchedule: [],
+        });
 
         before(async () => {
           const { body: createdAction } = await supertest
@@ -143,35 +177,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   index: ES_TEST_INDEX_NAME,
                   reference,
                 },
-                alertInfo: {
-                  alertId,
-                  consumer: 'alertsFixture',
-                  spaceId: space.id,
-                  namespace: space.id,
-                  name: 'abc',
-                  enabled: true,
-                  notifyWhen: 'onActiveAlert',
-                  schedule: {
-                    interval: '1m',
-                  },
-                  tags: ['tag-A', 'tag-B'],
-                  throttle: '1m',
-                  createdBy: user.fullName,
-                  updatedBy: user.fullName,
-                  actions: response.body.actions.map((action: any) => {
-                    /* eslint-disable @typescript-eslint/naming-convention */
-                    const { connector_type_id, group, id, params } = action;
-                    return {
-                      actionTypeId: connector_type_id,
-                      group,
-                      id,
-                      params,
-                    };
-                  }),
-                  producer: 'alertsFixture',
-                  ruleTypeId: 'test.always-firing',
-                  ruleTypeName: 'Test: Always Firing',
-                },
+                alertInfo: getAlertInfo(alertId, response.body.actions),
               });
               // @ts-expect-error _source: unknown
               expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.createdAt).to.match(
@@ -295,35 +301,7 @@ instanceStateValue: true
                   index: ES_TEST_INDEX_NAME,
                   reference,
                 },
-                alertInfo: {
-                  alertId,
-                  consumer: 'alertsFixture',
-                  spaceId: space.id,
-                  namespace: space.id,
-                  name: 'abc',
-                  enabled: true,
-                  notifyWhen: 'onActiveAlert',
-                  schedule: {
-                    interval: '1m',
-                  },
-                  tags: ['tag-A', 'tag-B'],
-                  throttle: '1m',
-                  createdBy: user.fullName,
-                  updatedBy: user.fullName,
-                  actions: response.body.actions.map((action: any) => {
-                    /* eslint-disable @typescript-eslint/naming-convention */
-                    const { connector_type_id, group, id, params } = action;
-                    return {
-                      actionTypeId: connector_type_id,
-                      group,
-                      id,
-                      params,
-                    };
-                  }),
-                  producer: 'alertsFixture',
-                  ruleTypeId: 'test.always-firing',
-                  ruleTypeName: 'Test: Always Firing',
-                },
+                alertInfo: getAlertInfo(alertId, response.body.actions),
               });
 
               // @ts-expect-error _source: unknown
@@ -428,7 +406,7 @@ instanceStateValue: true
             ['createdAt', 'updatedAt']
           );
           expect(alertSearchResultInfoWithoutDates).to.eql({
-            alertId,
+            id: alertId,
             consumer: 'alertsFixture',
             spaceId: space.id,
             namespace: space.id,
@@ -444,17 +422,20 @@ instanceStateValue: true
             updatedBy: Superuser.fullName,
             actions: response2.body.actions.map((action: any) => {
               /* eslint-disable @typescript-eslint/naming-convention */
-              const { connector_type_id, group, id, params } = action;
+              const { connector_type_id, group, id, params, uuid } = action;
               return {
                 actionTypeId: connector_type_id,
                 group,
                 id,
                 params,
+                uuid,
               };
             }),
             producer: 'alertsFixture',
             ruleTypeId: 'test.always-firing',
             ruleTypeName: 'Test: Always Firing',
+            muteAll: false,
+            snoozeSchedule: [],
           });
 
           // @ts-expect-error _source: unknown
@@ -821,6 +802,65 @@ instanceStateValue: true
             overwrites: {
               schedule: { interval: '1s' },
             },
+            notifyWhen: 'onThrottleInterval',
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
+              // Wait until alerts scheduled actions 3 times before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForDisabled(response.body.id, testStart);
+
+              // Ensure actions only executed once
+              const searchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              // @ts-expect-error doesnt handle total: number
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should throttle alerts with throttled action when appropriate', async () => {
+          const testStart = new Date();
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              schedule: { interval: '1s' },
+            },
+            notifyWhen: 'onThrottleInterval',
+            throttle: '1m',
+            summary: false,
           });
 
           switch (scenario.id) {
@@ -947,82 +987,6 @@ instanceStateValue: true
                 (hit: { _source: { params: { message: string } } }) => hit._source.params.message
               );
               expect(messages.sort()).to.eql(['from:default', 'from:other']);
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
-        });
-
-        it('should not throttle when changing subgroups', async () => {
-          const testStart = new Date();
-          const reference = alertUtils.generateReference();
-          const response = await alertUtils.createAlwaysFiringAction({
-            reference,
-            overwrites: {
-              schedule: { interval: '1s' },
-              params: {
-                index: ES_TEST_INDEX_NAME,
-                reference,
-                groupsToScheduleActionsInSeries: ['default:prev', 'default:next'],
-              },
-              actions: [
-                {
-                  group: 'default',
-                  id: indexRecordActionId,
-                  params: {
-                    index: ES_TEST_INDEX_NAME,
-                    reference,
-                    message: 'from:{{alertActionGroup}}:{{alertActionSubgroup}}',
-                  },
-                },
-              ],
-            },
-          });
-
-          switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'space_1_all at space2':
-            case 'global_read at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'create',
-                  'test.always-firing',
-                  'alertsFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
-            case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: `Unauthorized to get actions`,
-                statusCode: 403,
-              });
-              break;
-            case 'space_1_all at space1':
-            case 'space_1_all_with_restricted_fixture at space1':
-            case 'superuser at space1':
-              expect(response.statusCode).to.eql(200);
-              // Wait for actions to execute twice before disabling the alert and waiting for tasks to finish
-              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
-              await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForDisabled(response.body.id, testStart);
-
-              // Ensure only 2 actions with proper params exists
-              const searchResult = await esTestIndexTool.search(
-                'action:test.index-record',
-                reference
-              );
-              // @ts-expect-error doesnt handle total: number
-              expect(searchResult.body.hits.total.value).to.eql(2);
-              const messages: string[] = searchResult.body.hits.hits.map(
-                // @ts-expect-error _source: unknown
-                (hit: { _source: { params: { message: string } } }) => hit._source.params.message
-              );
-              expect(messages.sort()).to.eql(['from:default:next', 'from:default:prev']);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1266,6 +1230,129 @@ instanceStateValue: true
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it('should schedule actions for summary of alerts per rule run', async () => {
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringSummaryAction({
+            reference,
+            overwrites: {
+              schedule: { interval: '1s' },
+            },
+            notifyWhen: 'onActiveAlert',
+            throttle: null,
+            summary: true,
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing-alert-as-data',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
+
+              await esTestIndexTool.waitForDocs('rule:test.always-firing-alert-as-data', reference);
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference);
+              const searchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+
+              // @ts-expect-error doesnt handle total: number
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              // @ts-expect-error _source: unknown
+              expect(searchResult.body.hits.hits[0]._source.params.message).to.eql(
+                'Alerts, all:2, new:2 IDs:[1,2,], ongoing:0 IDs:[], recovered:0 IDs:[]'
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should schedule actions for summary of alerts on a custom interval', async () => {
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringSummaryAction({
+            reference,
+            overwrites: {
+              schedule: { interval: '1s' },
+            },
+            notifyWhen: 'onThrottleInterval',
+            throttle: '10s',
+            summary: true,
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing-alert-as-data',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
+
+              await esTestIndexTool.waitForDocs('rule:test.always-firing-alert-as-data', reference); // rule execution
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2); // action execution
+              const searchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              // @ts-expect-error doesnt handle total: number
+              expect(searchResult.body.hits.total.value).to.eql(2);
+              // Summary action is executed on first rule run then skipped 4 times (throttle is 5s and schedule.interval is 1s)
+              // @ts-expect-error _source: unknown
+              expect(searchResult.body.hits.hits[0]._source.params.message).to.eql(
+                'Alerts, all:2, new:2 IDs:[1,2,], ongoing:0 IDs:[], recovered:0 IDs:[]'
+              );
+              // @ts-expect-error _source: unknown
+              // Summary action is executed on the fifth rule run. The new alerts in the first execution become ongoing
+              expect(searchResult.body.hits.hits[1]._source.params.message).to.eql(
+                'Alerts, all:2, new:0 IDs:[], ongoing:2 IDs:[1,2,], recovered:0 IDs:[]'
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
   });
@@ -1313,6 +1400,7 @@ instanceStateValue: true
     expect(eventEnd <= dateNow).to.equal(true);
 
     expect(event?.event?.outcome).to.equal(outcome);
+    expect(event?.kibana?.alerting?.outcome).to.equal(outcome);
 
     expect(event?.kibana?.saved_objects).to.eql([
       {
@@ -1344,9 +1432,12 @@ instanceStateValue: true
     expect(
       event?.kibana?.alert?.rule?.execution?.metrics?.rule_type_run_duration_ms
     ).to.be.greaterThan(0);
+    // Process alerts is fast enough that it will sometimes report 0ms
+    const procesAlertsDurationMs =
+      event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms;
     expect(
-      event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms
-    ).to.be.greaterThan(0);
+      (typeof procesAlertsDurationMs === 'number' ? procesAlertsDurationMs : -1) >= 0
+    ).to.be.ok();
     expect(
       event?.kibana?.alert?.rule?.execution?.metrics?.trigger_actions_duration_ms
     ).to.be.greaterThan(0);

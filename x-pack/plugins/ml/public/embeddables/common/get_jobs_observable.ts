@@ -29,6 +29,7 @@ export function getJobsObservable(
           id: job.job_id,
           selected: true,
           bucketSpanSeconds: bucketSpan!.asSeconds(),
+          modelPlotEnabled: job.model_plot_config?.enabled === true,
         };
       });
       return explorerJobs;

@@ -22,5 +22,6 @@ export const createFakeLogger = (log: ToolingLog) => {
     fatal: fakeLogger,
     log: sinon.stub(),
     get: sinon.stub(),
+    isLevelEnabled: sinon.stub(),
   } as Logger;
 };

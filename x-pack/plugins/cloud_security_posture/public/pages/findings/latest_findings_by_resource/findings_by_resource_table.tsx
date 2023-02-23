@@ -8,17 +8,18 @@ import React, { useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
-  EuiTextColor,
   type EuiTableFieldDataColumnType,
   type CriteriaWithPagination,
   type Pagination,
   EuiToolTip,
   EuiBasicTableProps,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { Link, generatePath } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
+import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import type { FindingsByResourcePage } from './use_findings_by_resource';
 import { findingsNavigation } from '../../../common/navigation/constants';
@@ -31,9 +32,7 @@ import {
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
 
-type Sorting = Required<
-  EuiBasicTableProps<Pick<FindingsByResourcePage, 'failed_findings'>>
->['sorting'];
+type Sorting = Required<EuiBasicTableProps<FindingsByResourcePage>>['sorting'];
 
 interface Props {
   items: FindingsByResourcePage[];
@@ -60,15 +59,32 @@ const FindingsByResourceTableComponent = ({
     'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
   });
 
+  const getNonSortableColumn = (column: EuiTableFieldDataColumnType<FindingsByResourcePage>) => ({
+    ...column,
+    sortable: false,
+  });
+
   const columns = useMemo(
     () => [
-      findingsByResourceColumns.resource_id,
-      createColumnWithFilters(findingsByResourceColumns['resource.sub_type'], { onAddFilter }),
-      createColumnWithFilters(findingsByResourceColumns['resource.name'], { onAddFilter }),
-      createColumnWithFilters(findingsByResourceColumns['rule.benchmark.name'], { onAddFilter }),
-      findingsByResourceColumns['rule.section'],
-      createColumnWithFilters(findingsByResourceColumns.cluster_id, { onAddFilter }),
-      findingsByResourceColumns.failed_findings,
+      {
+        ...getNonSortableColumn(findingsByResourceColumns.resource_id),
+        ['data-test-subj']: TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE_RESOURCE_ID_COLUMN,
+      },
+      createColumnWithFilters(
+        getNonSortableColumn(findingsByResourceColumns['resource.sub_type']),
+        { onAddFilter }
+      ),
+      createColumnWithFilters(getNonSortableColumn(findingsByResourceColumns['resource.name']), {
+        onAddFilter,
+      }),
+      createColumnWithFilters(
+        getNonSortableColumn(findingsByResourceColumns['rule.benchmark.name']),
+        { onAddFilter }
+      ),
+      createColumnWithFilters(getNonSortableColumn(findingsByResourceColumns.belongs_to), {
+        onAddFilter,
+      }),
+      findingsByResourceColumns.compliance_score,
     ],
     [onAddFilter]
   );
@@ -91,6 +107,7 @@ const FindingsByResourceTableComponent = ({
 
   return (
     <EuiBasicTable
+      data-test-subj={TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE}
       loading={loading}
       items={items}
       columns={columns}
@@ -106,6 +123,7 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
   {
     ...baseFindingsColumns['resource.id'],
     field: 'resource_id',
+    width: '15%',
     render: (resourceId: FindingsByResourcePage['resource_id']) => (
       <Link
         to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}
@@ -137,38 +155,38 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
       );
     },
   },
-  baseFindingsColumns.cluster_id,
   {
-    field: 'failed_findings',
+    field: 'belongs_to',
+    name: (
+      <ColumnNameWithTooltip
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
+          { defaultMessage: 'Belongs To' }
+        )}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
+          { defaultMessage: 'Kubernetes Cluster ID or Cloud Account Name' }
+        )}
+      />
+    ),
+    truncateText: true,
+  },
+  {
+    field: 'compliance_score',
     width: '150px',
     truncateText: true,
     sortable: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.findingsByResourceTable.failedFindingsColumnLabel"
-        defaultMessage="Failed Findings"
+        id="xpack.csp.findings.findingsByResourceTable.postureScoreColumnLabel"
+        defaultMessage="Posture Score"
       />
     ),
-    render: (failedFindings: FindingsByResourcePage['failed_findings']) => (
-      <EuiToolTip
-        content={i18n.translate(
-          'xpack.csp.findings.findingsByResourceTable.failedFindingsToolTip',
-          {
-            defaultMessage: '{failed} out of {total}',
-            values: {
-              failed: failedFindings.count,
-              total: failedFindings.total_findings,
-            },
-          }
-        )}
-      >
-        <>
-          <EuiTextColor color={failedFindings.count === 0 ? '' : 'danger'}>
-            {formatNumber(failedFindings.count)}
-          </EuiTextColor>
-          <span> ({numeral(failedFindings.normalized).format('0%')})</span>
-        </>
-      </EuiToolTip>
+    render: (complianceScore: FindingsByResourcePage['compliance_score'], data) => (
+      <ComplianceScoreBar
+        totalPassed={data.findings.passed_findings}
+        totalFailed={data.findings.failed_findings}
+      />
     ),
     dataType: 'number',
   },

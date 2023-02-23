@@ -106,7 +106,13 @@
             "text": "Accessors"
           },
           " | undefined, paletteParams?: ",
-          "CustomPaletteParams",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
           " | undefined, isRespectRanges?: boolean | undefined) => number"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
@@ -165,7 +171,13 @@
             "label": "paletteParams",
             "description": [],
             "signature": [
-              "CustomPaletteParams",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              },
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
@@ -217,7 +229,13 @@
             "text": "Accessors"
           },
           " | undefined, paletteParams?: ",
-          "CustomPaletteParams",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
           " | undefined, isRespectRanges?: boolean | undefined) => any"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
@@ -276,7 +294,13 @@
             "label": "paletteParams",
             "description": [],
             "signature": [
-              "CustomPaletteParams",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              },
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
@@ -536,7 +560,13 @@
               "; colorMode: ",
               "GaugeColorMode",
               "; palette?: ",
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<",
               {
                 "pluginId": "charts",
@@ -547,6 +577,17 @@
               },
               "> | undefined; ariaLabel?: string | undefined; }"
             ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.GaugeExpressionProps.canNavigateToLens",
+            "type": "boolean",
+            "tags": [],
+            "label": "canNavigateToLens",
+            "description": [],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -661,7 +702,7 @@
             "label": "ticksPosition",
             "description": [],
             "signature": [
-              "\"auto\" | \"hidden\" | \"bands\""
+              "\"hidden\" | \"auto\" | \"bands\""
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
@@ -675,7 +716,7 @@
             "label": "labelMajorMode",
             "description": [],
             "signature": [
-              "\"none\" | \"auto\" | \"custom\""
+              "\"none\" | \"custom\" | \"auto\""
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
@@ -761,9 +802,21 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<",
-              "CustomPaletteParams",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              },
               "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
@@ -778,7 +831,7 @@
             "label": "shape",
             "description": [],
             "signature": [
-              "\"horizontalBullet\" | \"verticalBullet\" | \"arc\" | \"circle\""
+              "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\""
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
@@ -872,7 +925,13 @@
             "text": "SerializedFieldFormat"
           },
           "<{}, ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           "> | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -903,7 +962,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
@@ -939,7 +1004,13 @@
           "; colorMode: ",
           "GaugeColorMode",
           "; palette?: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<",
           {
             "pluginId": "charts",
@@ -1019,7 +1090,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
@@ -1035,7 +1112,7 @@
         "label": "GaugeLabelMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"auto\" | \"custom\""
+          "\"none\" | \"custom\" | \"auto\""
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
@@ -1068,7 +1145,13 @@
           "; chartsThemeService: ",
           "Theme",
           "; paletteService: ",
-          "PaletteRegistry",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteRegistry",
+            "text": "PaletteRegistry"
+          },
           "; renderComplete: () => void; uiState: ",
           {
             "pluginId": "visualizations",
@@ -1092,7 +1175,7 @@
         "label": "GaugeShape",
         "description": [],
         "signature": [
-          "\"horizontalBullet\" | \"verticalBullet\" | \"arc\" | \"circle\""
+          "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\""
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
@@ -1107,7 +1190,7 @@
         "label": "GaugeTicksPosition",
         "description": [],
         "signature": [
-          "\"auto\" | \"hidden\" | \"bands\""
+          "\"hidden\" | \"auto\" | \"bands\""
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,

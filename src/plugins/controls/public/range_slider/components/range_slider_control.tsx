@@ -15,20 +15,19 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiDualRange,
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { rangeSliderReducers } from '../range_slider_reducers';
 import { RangeSliderReduxState } from '../types';
-import { RangeSliderPopover } from './range_slider_popover';
+import { RangeSliderPopover, EuiDualRangeRef } from './range_slider_popover';
 
 import './range_slider.scss';
 
 const INVALID_CLASS = 'rangeSliderAnchor__fieldNumber--invalid';
 
 export const RangeSliderControl: FC = () => {
-  const rangeRef = useRef<EuiDualRange | null>(null);
+  const rangeRef = useRef<EuiDualRangeRef>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   // Controls Services Context
@@ -143,13 +142,11 @@ export const RangeSliderControl: FC = () => {
       anchorPosition="downCenter"
       attachToAnchor={false}
       disableFocusTrap
-      onPanelResize={() => {
-        if (rangeRef?.current) {
-          rangeRef.current.onResize();
-        }
+      onPanelResize={(width) => {
+        rangeRef.current?.onResize(width);
       }}
     >
-      <RangeSliderPopover />
+      <RangeSliderPopover rangeRef={rangeRef} />
     </EuiInputPopover>
   );
 };

@@ -133,7 +133,7 @@ export const fetchEventsAndScopedAlerts = async (
 
     const processesWithIOEvents = await searchProcessWithIOEvents(client, sessionEntityId, range);
 
-    events = [...alertsBody.events, ...processesWithIOEvents, ...events]; // we place process events at the end, as they have proper cursor info. (putting the 'faked' io event indicators at end breaks pagination, since they lack a timestamp).
+    events = [...events, ...alertsBody.events, ...processesWithIOEvents];
   }
 
   return {

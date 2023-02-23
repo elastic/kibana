@@ -6,6 +6,7 @@
  */
 
 import { SavedObject } from '@kbn/core/types';
+import moment from 'moment';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsSavedMonitor,
@@ -15,28 +16,45 @@ import {
 } from '../../../../../common/runtime_types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
-export interface QueryParams {
-  monitorId: string;
-  dateStart: string;
-  dateEnd: string;
-}
-
-export const fetchMonitorRecentPings = async ({
+export const fetchMonitorLastRun = async ({
   monitorId,
   locationId,
 }: {
   monitorId: string;
   locationId: string;
 }): Promise<PingsResponse> => {
-  const from = new Date(0).toISOString();
-  const to = new Date().toISOString();
+  return fetchMonitorRecentPings({ monitorId, locationId, size: 1 });
+};
+
+export const fetchMonitorRecentPings = async ({
+  monitorId,
+  locationId,
+  from,
+  to,
+  size = 10,
+  pageIndex = 0,
+}: {
+  monitorId: string;
+  locationId: string;
+  from?: string;
+  to?: string;
+  size?: number;
+  pageIndex?: number;
+}): Promise<PingsResponse> => {
   const locations = JSON.stringify([locationId]);
   const sort = 'desc';
-  const size = 10;
 
   return await apiService.get(
     SYNTHETICS_API_URLS.PINGS,
-    { monitorId, from, to, locations, sort, size },
+    {
+      monitorId,
+      from: from ?? moment().subtract(30, 'days').toISOString(),
+      to: to ?? new Date().toISOString(),
+      locations,
+      sort,
+      size,
+      pageIndex,
+    },
     PingsResponseType
   );
 };
@@ -51,8 +69,8 @@ export const fetchSyntheticsMonitor = async ({
   )) as SavedObject<SyntheticsMonitor>;
 
   return {
-    id: savedObject.id,
     ...savedObject.attributes,
     updated_at: savedObject.updated_at,
+    created_at: savedObject.created_at,
   } as EncryptedSyntheticsSavedMonitor;
 };

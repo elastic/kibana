@@ -71,7 +71,7 @@ describe('useActionStatus', () => {
     expect(mockSendGetActionStatus).toHaveBeenCalledTimes(2);
   });
 
-  it('should post abort and invoke callback on abort upgrade', async () => {
+  it('should post cancel and invoke callback on cancel upgrade', async () => {
     mockSendPostCancelAction.mockResolvedValue({});
     let result: any | undefined;
     await act(async () => {
@@ -82,12 +82,28 @@ describe('useActionStatus', () => {
     });
     expect(mockSendPostCancelAction).toHaveBeenCalledWith('action1');
     expect(mockOnAbortSuccess).toHaveBeenCalled();
-    expect(mockOpenConfirm).toHaveBeenCalledWith('This action will abort upgrade of 1 agents', {
-      title: 'Abort upgrade?',
+    expect(mockOpenConfirm).toHaveBeenCalledWith('This action will cancel upgrade of 1 agent', {
+      title: 'Cancel upgrade?',
     });
   });
 
-  it('should report error on abort upgrade failure', async () => {
+  it('should post cancel and invoke callback on cancel upgrade - plural', async () => {
+    mockSendPostCancelAction.mockResolvedValue({});
+    let result: any | undefined;
+    await act(async () => {
+      ({ result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false)));
+    });
+    await act(async () => {
+      await result.current.abortUpgrade({ ...mockActionStatuses[0], nbAgentsAck: 0 });
+    });
+    expect(mockSendPostCancelAction).toHaveBeenCalledWith('action1');
+    expect(mockOnAbortSuccess).toHaveBeenCalled();
+    expect(mockOpenConfirm).toHaveBeenCalledWith('This action will cancel upgrade of 2 agents', {
+      title: 'Cancel upgrade?',
+    });
+  });
+
+  it('should report error on cancel upgrade failure', async () => {
     const error = new Error('error');
     mockSendPostCancelAction.mockRejectedValue(error);
     let result: any | undefined;
@@ -99,7 +115,7 @@ describe('useActionStatus', () => {
     });
     expect(mockOnAbortSuccess).not.toHaveBeenCalled();
     expect(mockErrorToast).toHaveBeenCalledWith(error, {
-      title: 'An error happened while aborting upgrade',
+      title: 'An error happened while cancelling upgrade',
     });
   });
 });

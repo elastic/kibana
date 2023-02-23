@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getActionsMigrations } from './actions_migrations';
 import { RawAction } from '../types';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
@@ -341,7 +341,7 @@ function getMockDataForWebhook(
       secrets,
       ...overwrites,
     },
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'action',
   };
 }
@@ -357,7 +357,7 @@ function getMockDataForEmail(
       secrets: { user: 'test', password: '123' },
       ...overwrites,
     },
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'action',
   };
 }
@@ -373,7 +373,7 @@ function getCasesMockData(
       secrets: {},
       ...overwrites,
     },
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'action',
   };
 }
@@ -389,7 +389,7 @@ function getMockData(
       secrets: {},
       ...overwrites,
     },
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'action',
   };
 }
@@ -405,7 +405,7 @@ function getMockDataForServiceNow716(
       secrets: { user: 'test', password: '123' },
       ...overwrites,
     },
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'action',
   };
 }

@@ -56,8 +56,8 @@ export function getScoresByRecord(
     ml.results
       .anomalySearch(
         {
-          size: 0,
           body: {
+            size: 0,
             query: {
               bool: {
                 filter: [

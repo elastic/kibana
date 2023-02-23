@@ -1,14 +1,10 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config")
-load("@npm//peggy:index.bzl", "peggy")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-es-query"
-PKG_REQUIRE_NAME = "@kbn/es-query"
-
-SOURCE_FILES = glob(
+SRCS = glob(
   [
     "**/*.ts",
+    "**/grammar.peggy.config.json",
+    "**/grammar.peggy",
   ],
   exclude = [
     "**/*.config.js",
@@ -27,20 +23,7 @@ SOURCE_FILES = glob(
   ],
 )
 
-SRCS = SOURCE_FILES
-
-filegroup(
-  name = "srcs",
-  srcs = SRCS,
-)
-
-NPM_MODULE_EXTRA_FILES = [
-  "package.json",
-  "README.md",
-]
-
-RUNTIME_DEPS = [
-  "//packages/kbn-utility-types",
+BUNDLER_DEPS = [
   "//packages/kbn-i18n",
   "@npm//@elastic/elasticsearch",
   "@npm//load-json-file",
@@ -48,102 +31,10 @@ RUNTIME_DEPS = [
   "@npm//moment-timezone",
 ]
 
-TYPES_DEPS = [
-  "//packages/kbn-utility-types:npm_module_types",
-  "//packages/kbn-i18n:npm_module_types",
-  "@npm//@elastic/elasticsearch",
-  "@npm//tslib",
-  "@npm//@types/jest",
-  "@npm//@types/lodash",
-  "@npm//@types/moment-timezone",
-  "@npm//@types/node",
-]
-
-peggy(
-  name = "grammar",
-  data = [
-    ":grammar/grammar.peggy"
-  ],
-  output_dir = True,
-  args = [
-    "--allowed-start-rules",
-    "start,Literal",
-    "-o",
-    "$(@D)/built_grammar.js",
-    "./%s/grammar/grammar.peggy" % package_name()
-  ],
-)
-
-jsts_transpiler(
-  name = "target_node",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-)
-
-jsts_transpiler(
-  name = "target_web",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-  web = True,
-)
-
-ts_config(
-  name = "tsconfig",
-  src = "tsconfig.json",
-  deps = [
-    "//:tsconfig.base.json",
-    "//:tsconfig.bazel.json",
-  ],
-)
-
-ts_project(
-  name = "tsc_types",
-  args = ['--pretty'],
-  srcs = SRCS,
-  deps = TYPES_DEPS,
-  declaration = True,
-  declaration_map = True,
-  emit_declaration_only = True,
-  out_dir = "target_types",
-  tsconfig = ":tsconfig",
-)
-
 js_library(
-  name = PKG_BASE_NAME,
-  srcs = NPM_MODULE_EXTRA_FILES + [":grammar"],
-  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
-  package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm(
-  name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
-)
-
-filegroup(
-  name = "build",
-  srcs = [
-    ":npm_module",
-  ],
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
-  name = "build_types",
-  srcs = [
-    ":npm_module_types",
-  ],
+  name = "kbn-es-query",
+  package_name = "@kbn/es-query",
+  srcs = ["package.json"] + SRCS,
+  deps = BUNDLER_DEPS,
   visibility = ["//visibility:public"],
 )

@@ -9,18 +9,18 @@
 import React, { useState } from 'react';
 import { storiesOf } from '@storybook/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { AppState } from '../../../services/discover_app_state_container';
 import { getDataViewMock } from '../../../../../__mocks__/__storybook_mocks__/get_data_view_mock';
 import { withDiscoverServices } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
 import { getDocumentsLayoutProps, getPlainRecordLayoutProps } from './get_layout_props';
 import { DiscoverLayout } from '../discover_layout';
 import { setHeaderActionMenuMounter } from '../../../../../kibana_services';
-import { AppState } from '../../../services/discover_state';
 import { DiscoverLayoutProps } from '../types';
 
 setHeaderActionMenuMounter(() => void 0);
 
 const DiscoverLayoutStory = (layoutProps: DiscoverLayoutProps) => {
-  const [state, setState] = useState(layoutProps.state);
+  const [state, setState] = useState({});
 
   const setAppState = (newState: Partial<AppState>) => {
     setState((prevState) => ({ ...prevState, ...newState }));
@@ -31,10 +31,9 @@ const DiscoverLayoutStory = (layoutProps: DiscoverLayoutProps) => {
   return (
     <DiscoverLayout
       {...layoutProps}
-      state={state}
       stateContainer={{
         ...layoutProps.stateContainer,
-        appStateContainer: { ...layoutProps.stateContainer.appStateContainer, getState },
+        appState: { ...layoutProps.stateContainer.appState, getState },
         setAppState,
       }}
     />

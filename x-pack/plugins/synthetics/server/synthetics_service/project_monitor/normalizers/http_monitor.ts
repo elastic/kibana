@@ -4,16 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getNormalizeCommonFields } from './common_fields';
-import { NormalizedProjectProps } from './browser_monitor';
+import { get } from 'lodash';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
   ConfigKey,
   DataStream,
   FormMonitorType,
   HTTPFields,
+  Mode,
+  TLSVersion,
 } from '../../../../common/runtime_types/monitor_management';
-import { normalizeYamlConfig, getValueInSeconds, getOptionalArrayField } from './common_fields';
+import {
+  NormalizedProjectProps,
+  NormalizerResult,
+  getNormalizeCommonFields,
+  normalizeYamlConfig,
+  getOptionalListField,
+  getOptionalArrayField,
+  getUnsupportedKeysError,
+  getInvalidUrlsOrHostsError,
+  getHasTLSFields,
+} from './common_fields';
 
 export const getNormalizeHTTPFields = ({
   locations = [],
@@ -21,17 +32,31 @@ export const getNormalizeHTTPFields = ({
   monitor,
   projectId,
   namespace,
-}: NormalizedProjectProps): { normalizedFields: HTTPFields; unsupportedKeys: string[] } => {
+  version,
+}: NormalizedProjectProps): NormalizerResult<HTTPFields> => {
   const defaultFields = DEFAULT_FIELDS[DataStream.HTTP];
+  const errors = [];
   const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
-
-  const commonFields = getNormalizeCommonFields({
+  const { errors: commonErrors, normalizedFields: commonFields } = getNormalizeCommonFields({
     locations,
     privateLocations,
     monitor,
     projectId,
     namespace,
+    version,
   });
+
+  // Add common erros to errors arary
+  errors.push(...commonErrors);
+
+  /* Check if monitor has multiple urls */
+  const urls = getOptionalListField(monitor.urls);
+  if (urls.length !== 1) {
+    errors.push(getInvalidUrlsOrHostsError(monitor, 'urls', version));
+  }
+  if (unsupportedKeys.length) {
+    errors.push(getUnsupportedKeysError(monitor, unsupportedKeys, version));
+  }
 
   const normalizedFields = {
     ...yamlConfig,
@@ -41,15 +66,45 @@ export const getNormalizeHTTPFields = ({
     [ConfigKey.URLS]: getOptionalArrayField(monitor.urls) || defaultFields[ConfigKey.URLS],
     [ConfigKey.MAX_REDIRECTS]:
       monitor[ConfigKey.MAX_REDIRECTS] || defaultFields[ConfigKey.MAX_REDIRECTS],
-    [ConfigKey.TIMEOUT]: monitor.timeout
-      ? getValueInSeconds(monitor.timeout)
-      : defaultFields[ConfigKey.TIMEOUT],
+    [ConfigKey.REQUEST_BODY_CHECK]: getRequestBodyField(
+      (yamlConfig as Record<keyof HTTPFields, unknown>)[ConfigKey.REQUEST_BODY_CHECK] as string,
+      defaultFields[ConfigKey.REQUEST_BODY_CHECK]
+    ),
+    [ConfigKey.TLS_VERSION]: get(monitor, ConfigKey.TLS_VERSION)
+      ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
+      : defaultFields[ConfigKey.TLS_VERSION],
+    [ConfigKey.METADATA]: {
+      ...DEFAULT_FIELDS[DataStream.HTTP][ConfigKey.METADATA],
+      is_tls_enabled: getHasTLSFields(monitor),
+    },
   };
+
   return {
     normalizedFields: {
       ...defaultFields,
       ...normalizedFields,
     },
     unsupportedKeys,
+    errors,
+  };
+};
+
+export const getRequestBodyField = (
+  value: string,
+  defaultValue: HTTPFields[ConfigKey.REQUEST_BODY_CHECK]
+): HTTPFields[ConfigKey.REQUEST_BODY_CHECK] => {
+  let parsedValue: string;
+  let type: Mode;
+
+  if (typeof value === 'object') {
+    parsedValue = JSON.stringify(value);
+    type = Mode.JSON;
+  } else {
+    parsedValue = value;
+    type = Mode.PLAINTEXT;
+  }
+  return {
+    type,
+    value: parsedValue || defaultValue.value,
   };
 };

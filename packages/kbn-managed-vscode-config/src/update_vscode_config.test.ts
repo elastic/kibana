@@ -133,7 +133,6 @@ it('persists comments in the original file', () => {
   `);
   expect(newJson).toMatchInlineSnapshot(`
     // @managed
-
     /**
      * This is a top level comment
      */

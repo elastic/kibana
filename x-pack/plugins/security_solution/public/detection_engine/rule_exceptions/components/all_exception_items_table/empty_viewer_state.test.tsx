@@ -8,8 +8,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-
 import { ExeptionItemsViewerEmptyPrompts } from './empty_viewer_state';
 import * as i18n from './translations';
 
@@ -18,7 +16,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
     const wrapper = mount(
       <ExeptionItemsViewerEmptyPrompts
         isReadOnly={false}
-        listType={ExceptionListTypeEnum.DETECTION}
+        isEndpoint={false}
         currentState="loading"
         onCreateExceptionListItem={jest.fn()}
       />
@@ -33,7 +31,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
     const wrapper = mount(
       <ExeptionItemsViewerEmptyPrompts
         isReadOnly={false}
-        listType={ExceptionListTypeEnum.DETECTION}
+        isEndpoint={false}
         currentState="empty_search"
         onCreateExceptionListItem={jest.fn()}
       />
@@ -44,11 +42,11 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
     ).toBeTruthy();
   });
 
-  it('it renders no endpoint items screen when "currentState" is "empty" and "listType" is "endpoint"', () => {
+  it('it renders no endpoint items screen when "currentState" is "empty" and "isEndpoint" is "true"', () => {
     const wrapper = mount(
       <ExeptionItemsViewerEmptyPrompts
         isReadOnly={false}
-        listType={ExceptionListTypeEnum.ENDPOINT}
+        isEndpoint={true}
         currentState="empty"
         onCreateExceptionListItem={jest.fn()}
       />
@@ -61,15 +59,15 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
       i18n.EXCEPTION_EMPTY_PROMPT_ENDPOINT_BUTTON
     );
     expect(
-      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-empty-endpoint"]').exists()
+      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-empty"]').exists()
     ).toBeTruthy();
   });
 
-  it('it renders no exception items screen when "currentState" is "empty" and "listType" is "detection"', () => {
+  it('it renders no exception items screen when "currentState" is "empty" and "isEndpoint" is "false"', () => {
     const wrapper = mount(
       <ExeptionItemsViewerEmptyPrompts
         isReadOnly={false}
-        listType={ExceptionListTypeEnum.DETECTION}
+        isEndpoint={false}
         currentState="empty"
         onCreateExceptionListItem={jest.fn()}
       />
@@ -82,7 +80,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
       i18n.EXCEPTION_EMPTY_PROMPT_BUTTON
     );
     expect(
-      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-empty-detection"]').exists()
+      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-empty"]').exists()
     ).toBeTruthy();
   });
 });

@@ -19,14 +19,15 @@ import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
-import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
+import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegrationInfo: jest.fn(),
 }));
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/hooks/use_subscription_status');
-jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+jest.mock('../../common/navigation/use_csp_integration_link');
+
 const chance = new Chance();
 
 const queryClient = new QueryClient({
@@ -78,7 +79,7 @@ describe('<Rules />', () => {
       })
     );
 
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
   });
 
   it('calls API with URL params', async () => {

@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-server.getNextRollingTime",
+        "id": "def-common.getNextRollingTime",
         "type": "Function",
         "tags": [],
         "label": "getNextRollingTime",
@@ -29,7 +37,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
-            "id": "def-server.getNextRollingTime.$1",
+            "id": "def-common.getNextRollingTime.$1",
             "type": "number",
             "tags": [],
             "label": "currentTime",
@@ -44,7 +52,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
-            "id": "def-server.getNextRollingTime.$2",
+            "id": "def-common.getNextRollingTime.$2",
             "type": "Object",
             "tags": [],
             "label": "interval",
@@ -59,7 +67,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
-            "id": "def-server.getNextRollingTime.$3",
+            "id": "def-common.getNextRollingTime.$3",
             "type": "boolean",
             "tags": [],
             "label": "modulate",
@@ -80,7 +88,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-server.PrebootDeps",
+        "id": "def-common.PrebootDeps",
         "type": "Interface",
         "tags": [],
         "label": "PrebootDeps",
@@ -91,7 +99,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-internal",
-            "id": "def-server.PrebootDeps.loggingSystem",
+            "id": "def-common.PrebootDeps.loggingSystem",
             "type": "Object",
             "tags": [],
             "label": "loggingSystem",
@@ -112,7 +120,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-server.appendersSchema",
+        "id": "def-common.appendersSchema",
         "type": "Object",
         "tags": [],
         "label": "appendersSchema",
@@ -120,12 +128,30 @@
           "\nConfig schema for validting the shape of the `appenders` key in in {@link LoggerContextConfigType} or\n{@link LoggingConfigType}.\n"
         ],
         "signature": [
-          "Type",
-          "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; fileName: string; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{} & { type: \"rolling-file\"; strategy: ",
-          "NumericRollingStrategyConfig",
-          "; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; fileName: string; policy: Readonly<{} & { type: \"size-limit\"; size: ",
-          "ByteSizeValue",
-          "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; }>>"
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; fileName: string; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{} & { type: \"rolling-file\"; strategy: ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "common",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-common.NumericRollingStrategyConfig",
+            "text": "NumericRollingStrategyConfig"
+          },
+          "; fileName: string; policy: Readonly<{} & { type: \"size-limit\"; size: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
+          "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; }>>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/appenders/appenders.ts",
         "deprecated": false,
@@ -134,7 +160,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-server.loggerContextConfigSchema",
+        "id": "def-common.loggerContextConfigSchema",
         "type": "Object",
         "tags": [],
         "label": "loggerContextConfigSchema",
@@ -142,14 +168,38 @@
           "\nConfig schema for validating the inputs to the {@link LoggingServiceStart.configure} API.\nSee {@link LoggerContextConfigType}.\n"
         ],
         "signature": [
-          "ObjectType",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
           "<{ appenders: ",
-          "Type",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
           "<Map<string, ",
-          "AppenderConfigType",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "common",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-common.AppenderConfigType",
+            "text": "AppenderConfigType"
+          },
           ">>; loggers: ",
-          "Type",
-          "<Readonly<{} & { name: string; level: \"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"warn\" | \"trace\" | \"fatal\"; appenders: string[]; }>[]>; }>"
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{} & { name: string; level: \"error\" | \"off\" | \"all\" | \"debug\" | \"info\" | \"warn\" | \"trace\" | \"fatal\"; appenders: string[]; }>[]>; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
         "deprecated": false,
@@ -158,7 +208,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server-internal",
-        "id": "def-server.loggerSchema",
+        "id": "def-common.loggerSchema",
         "type": "Object",
         "tags": [],
         "label": "loggerSchema",
@@ -166,14 +216,38 @@
           "\nConfig schema for validating the `loggers` key in {@link LoggerContextConfigType} or {@link LoggingConfigType}.\n"
         ],
         "signature": [
-          "ObjectType",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
           "<{ appenders: ",
-          "Type",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
           "<string[]>; name: ",
-          "Type",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
           "<string>; level: ",
-          "Type",
-          "<\"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"warn\" | \"trace\" | \"fatal\">; }>"
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"error\" | \"off\" | \"all\" | \"debug\" | \"info\" | \"warn\" | \"trace\" | \"fatal\">; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
         "deprecated": false,
@@ -181,13 +255,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

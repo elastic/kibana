@@ -9,6 +9,7 @@ declare namespace Cypress {
   interface Chainable {
     loginAsViewerUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAsEditorUser(): Cypress.Chainable<Cypress.Response<any>>;
+    loginAsMonitorUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAs(params: {
       username: string;
       password: string;
@@ -21,5 +22,7 @@ declare namespace Cypress {
       value: string;
     }): void;
     updateAdvancedSettings(settings: Record<string, unknown>): void;
+    getByTestSubj(selector: string): Chainable<JQuery<Element>>;
+    dismissServiceGroupsTour(): void;
   }
 }

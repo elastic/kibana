@@ -11,7 +11,6 @@ import { type blendMode, type EmsSpriteSheet, TMSService } from '@elastic/ems-cl
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
-// @ts-expect-error
 import { RGBAImage } from './image_utils';
 import { AbstractLayer, type LayerIcon } from '../layer';
 import {
@@ -271,7 +270,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
       const data = new RGBAImage({ width, height });
       RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
-      mbMap.addImage(imageId, data, { pixelRatio, sdf });
+      mbMap.addImage(imageId, data as RGBAImage & { width: number; height: number }, {
+        pixelRatio,
+        sdf,
+      });
     }
   }
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Dispatch, useCallback } from 'react';
+import React, { Dispatch, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBasicTableColumn,
@@ -14,6 +14,9 @@ import {
   EuiInMemoryTable,
   CriteriaWithPagination,
   PropertySort,
+  SearchFilterConfig,
+  Direction,
+  Query,
 } from '@elastic/eui';
 
 import { useServices } from '../services';
@@ -23,20 +26,35 @@ import type {
   Props as TableListViewProps,
   UserContentCommonSchema,
 } from '../table_list_view';
+import { TableSortSelect } from './table_sort_select';
+import { TagFilterPanel } from './tag_filter_panel';
+import { useTagFilterPanel } from './use_tag_filter_panel';
+import type { Params as UseTagFilterPanelParams } from './use_tag_filter_panel';
+import type { SortColumnField } from './table_sort_select';
 
 type State<T extends UserContentCommonSchema> = Pick<
   TableListViewState<T>,
   'items' | 'selectedIds' | 'searchQuery' | 'tableSort' | 'pagination'
 >;
 
-interface Props<T extends UserContentCommonSchema> extends State<T> {
+type TagManagementProps = Pick<
+  UseTagFilterPanelParams,
+  'addOrRemoveIncludeTagFilter' | 'addOrRemoveExcludeTagFilter' | 'tagsToTableItemMap'
+>;
+
+interface Props<T extends UserContentCommonSchema> extends State<T>, TagManagementProps {
   dispatch: Dispatch<Action<T>>;
   entityName: string;
   entityNamePlural: string;
   isFetchingItems: boolean;
   tableCaption: string;
   tableColumns: Array<EuiBasicTableColumn<T>>;
+  hasUpdatedAtMetadata: boolean;
   deleteItems: TableListViewProps<T>['deleteItems'];
+  onSortChange: (column: SortColumnField, direction: Direction) => void;
+  onTableChange: (criteria: CriteriaWithPagination<T>) => void;
+  onTableSearchChange: (arg: { query: Query | null; queryText: string }) => void;
+  clearTagSelection: () => void;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -48,12 +66,20 @@ export function Table<T extends UserContentCommonSchema>({
   pagination,
   tableColumns,
   tableSort,
+  hasUpdatedAtMetadata,
   entityName,
   entityNamePlural,
+  tagsToTableItemMap,
   deleteItems,
   tableCaption,
+  onTableChange,
+  onTableSearchChange,
+  onSortChange,
+  addOrRemoveExcludeTagFilter,
+  addOrRemoveIncludeTagFilter,
+  clearTagSelection,
 }: Props<T>) {
-  const { getSearchBarFilters } = useServices();
+  const { getTagList } = useServices();
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -87,19 +113,82 @@ export function Table<T extends UserContentCommonSchema>({
       }
     : undefined;
 
-  const searchFilters = getSearchBarFilters ? getSearchBarFilters() : [];
+  const {
+    isPopoverOpen,
+    isInUse,
+    closePopover,
+    onFilterButtonClick,
+    onSelectChange,
+    options,
+    totalActiveFilters,
+  } = useTagFilterPanel({
+    query: searchQuery.query,
+    getTagList,
+    tagsToTableItemMap,
+    addOrRemoveExcludeTagFilter,
+    addOrRemoveIncludeTagFilter,
+  });
 
-  const search = {
-    onChange: ({ queryText }: { queryText: string }) =>
-      dispatch({ type: 'onSearchQueryChange', data: queryText }),
-    toolsLeft: renderToolsLeft(),
-    defaultQuery: searchQuery,
-    box: {
-      incremental: true,
-      'data-test-subj': 'tableListSearchBox',
-    },
-    filters: searchFilters,
-  };
+  const tableSortSelectFilter = useMemo<SearchFilterConfig>(() => {
+    return {
+      type: 'custom_component',
+      component: () => {
+        return (
+          <TableSortSelect
+            tableSort={tableSort}
+            hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+            onChange={onSortChange}
+          />
+        );
+      },
+    };
+  }, [hasUpdatedAtMetadata, onSortChange, tableSort]);
+
+  const tagFilterPanel = useMemo<SearchFilterConfig>(() => {
+    return {
+      type: 'custom_component',
+      component: () => {
+        return (
+          <TagFilterPanel
+            isPopoverOpen={isPopoverOpen}
+            isInUse={isInUse}
+            closePopover={closePopover}
+            options={options}
+            totalActiveFilters={totalActiveFilters}
+            onFilterButtonClick={onFilterButtonClick}
+            onSelectChange={onSelectChange}
+            clearTagSelection={clearTagSelection}
+          />
+        );
+      },
+    };
+  }, [
+    isPopoverOpen,
+    isInUse,
+    closePopover,
+    options,
+    totalActiveFilters,
+    onFilterButtonClick,
+    onSelectChange,
+    clearTagSelection,
+  ]);
+
+  const searchFilters = useMemo(() => {
+    return [tableSortSelectFilter, tagFilterPanel];
+  }, [tableSortSelectFilter, tagFilterPanel]);
+
+  const search = useMemo(() => {
+    return {
+      onChange: onTableSearchChange,
+      toolsLeft: renderToolsLeft(),
+      query: searchQuery.query ?? undefined,
+      box: {
+        incremental: true,
+        'data-test-subj': 'tableListSearchBox',
+      },
+      filters: searchFilters,
+    };
+  }, [onTableSearchChange, renderToolsLeft, searchFilters, searchQuery.query]);
 
   const noItemsMessage = (
     <FormattedMessage
@@ -119,10 +208,9 @@ export function Table<T extends UserContentCommonSchema>({
       message={noItemsMessage}
       selection={selection}
       search={search}
+      executeQueryOptions={{ enabled: false }}
       sorting={tableSort ? { sort: tableSort as PropertySort } : undefined}
-      onChange={(criteria: CriteriaWithPagination<T>) =>
-        dispatch({ type: 'onTableChange', data: criteria })
-      }
+      onChange={onTableChange}
       data-test-subj="itemsInMemTable"
       rowHeader="attributes.title"
       tableCaption={tableCaption}

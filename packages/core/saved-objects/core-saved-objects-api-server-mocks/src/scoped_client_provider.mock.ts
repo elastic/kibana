@@ -9,9 +9,9 @@
 import type { ISavedObjectsClientProvider } from '@kbn/core-saved-objects-api-server-internal';
 
 const create = (): jest.Mocked<ISavedObjectsClientProvider> => ({
-  addClientWrapperFactory: jest.fn(),
   getClient: jest.fn(),
   setClientFactory: jest.fn(),
+  getExtensions: jest.fn(),
 });
 
 export const savedObjectsClientProviderMock = {

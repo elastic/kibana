@@ -6,7 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { EuiBadgeGroup, EuiBadge, EuiBadgeGroupProps } from '@elastic/eui';
+import type { EuiBadgeGroupProps } from '@elastic/eui';
+import { EuiBadgeGroup, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
 
 interface TagsProps {

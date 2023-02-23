@@ -461,11 +461,11 @@ export const DataSourceStrings = {
       }),
     getIndexTitle: () =>
       i18n.translate('xpack.canvas.uis.dataSources.esdocs.indexTitle', {
-        defaultMessage: 'Index',
+        defaultMessage: 'Data view',
       }),
     getIndexLabel: () =>
       i18n.translate('xpack.canvas.uis.dataSources.esdocs.indexLabel', {
-        defaultMessage: 'Enter an index name or select a data view',
+        defaultMessage: 'Select a data view or enter an index name.',
       }),
     getQueryTitle: () =>
       i18n.translate('xpack.canvas.uis.dataSources.esdocs.queryTitle', {

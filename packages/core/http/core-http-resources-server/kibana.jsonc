@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-http-resources-server",
+  "owner": "@elastic/kibana-core"
+}

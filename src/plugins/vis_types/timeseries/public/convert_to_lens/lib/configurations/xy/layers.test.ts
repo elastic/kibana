@@ -8,7 +8,7 @@
 
 import { XYLayerConfig } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import type { Panel } from '../../../../../common/types';
+import type { Panel, Metric } from '../../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 import {
   Layer,
@@ -20,9 +20,48 @@ import { createPanel, createSeries } from '../../__mocks__';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
+const mockExtractOrGenerateDatasourceInfo = jest.fn();
+
 jest.mock('uuid', () => ({
   v4: () => 'test-id',
 }));
+
+jest.mock('../../datasource', () => ({
+  extractOrGenerateDatasourceInfo: jest.fn(() => mockExtractOrGenerateDatasourceInfo()),
+}));
+
+const mockedIndices = [
+  {
+    id: 'test',
+    title: 'test',
+    timeFieldName: 'test_field',
+    getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
+  },
+  {
+    id: 'test2',
+    title: 'test2',
+    timeFieldName: 'test_field',
+    getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
+  },
+] as unknown as DataView[];
+
+const indexPatternsService = {
+  getDefault: jest.fn(() =>
+    Promise.resolve({
+      id: 'default',
+      title: 'index',
+      getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
+    })
+  ),
+  get: jest.fn((id) => Promise.resolve({ ...mockedIndices[0], id })),
+  find: jest.fn((search: string, size: number) => {
+    if (size !== 1) {
+      // shouldn't request more than one data view since there is a significant performance penalty
+      throw new Error('trying to fetch too many data views');
+    }
+    return Promise.resolve(mockedIndices || []);
+  }),
+} as unknown as DataViewsPublicPluginStart;
 
 describe('getLayers', () => {
   const dataSourceLayers: Record<number, Layer> = [
@@ -83,7 +122,6 @@ describe('getLayers', () => {
           params: {
             value: '100',
           },
-          meta: { metricId: 'metric-1' },
         },
       ],
       columnOrder: [],
@@ -186,7 +224,7 @@ describe('getLayers', () => {
         },
       ],
     },
-  ];
+  ] as Metric[];
 
   const percentileRankMetrics = [
     {
@@ -229,6 +267,31 @@ describe('getLayers', () => {
     ],
     series: [createSeries({ metrics: staticValueMetric })],
   });
+
+  const panelWithSingleAnnotationWithoutQueryStringAndTimefield = createPanel({
+    annotations: [
+      {
+        fields: 'geo.src,host',
+        template: 'Security Error from {{geo.src}} on {{host}}',
+        id: 'ann1',
+        color: 'rgba(211,49,21,0.7)',
+        icon: 'fa-asterisk',
+        ignore_global_filters: 1,
+        ignore_panel_filters: 1,
+        time_field: '',
+        query_string: {
+          query: '',
+          language: 'lucene',
+        },
+        hidden: true,
+        index_pattern: {
+          id: 'test',
+        },
+      },
+    ],
+    series: [createSeries({ metrics: staticValueMetric })],
+  });
+
   const panelWithMultiAnnotations = createPanel({
     annotations: [
       {
@@ -284,11 +347,46 @@ describe('getLayers', () => {
     ],
     series: [createSeries({ metrics: staticValueMetric })],
   });
+  const panelWithSingleAnnotationDefaultDataView = createPanel({
+    annotations: [
+      {
+        fields: 'geo.src,host',
+        template: 'Security Error from {{geo.src}} on {{host}}',
+        query_string: {
+          query: 'tags:error AND tags:security',
+          language: 'lucene',
+        },
+        id: 'ann1',
+        color: 'rgba(211,49,21,0.7)',
+        time_field: 'timestamp',
+        icon: 'fa-asterisk',
+        ignore_global_filters: 1,
+        ignore_panel_filters: 1,
+        hidden: true,
+        index_pattern: '',
+      },
+    ],
+    series: [createSeries({ metrics: staticValueMetric })],
+  });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockExtractOrGenerateDatasourceInfo.mockReturnValue({
+      indexPattern: mockedIndices[0],
+      indexPatternId: mockedIndices[0].id,
+      timeField: mockedIndices[0].timeFieldName,
+    });
+  });
 
-  test.each<[string, [Record<number, Layer>, Panel], Array<Partial<XYLayerConfig>>]>([
+  test.each<
+    [
+      string,
+      [Record<number, Layer>, Panel, DataViewsPublicPluginStart, boolean],
+      Array<Partial<XYLayerConfig>>
+    ]
+  >([
     [
       'data layer if columns do not include static column',
-      [dataSourceLayers, panel],
+      [dataSourceLayers, panel, indexPatternsService, false],
       [
         {
           layerType: 'data',
@@ -308,8 +406,29 @@ describe('getLayers', () => {
       ],
     ],
     [
+      'data layer with "left" axisMode if isSingleAxis is provided',
+      [dataSourceLayers, panel, indexPatternsService, true],
+      [
+        {
+          layerType: 'data',
+          accessors: ['column-id-1'],
+          xAccessor: 'column-id-2',
+          splitAccessor: 'column-id-3',
+          seriesType: 'area',
+          layerId: 'test-layer-1',
+          yConfig: [
+            {
+              forAccessor: 'column-id-1',
+              axisMode: 'left',
+              color: '#68BC00',
+            },
+          ],
+        },
+      ],
+    ],
+    [
       'reference line layer if columns include static column',
-      [dataSourceLayersWithStatic, panelWithStaticValue],
+      [dataSourceLayersWithStatic, panelWithStaticValue, indexPatternsService, false],
       [
         {
           layerType: 'referenceLine',
@@ -318,9 +437,10 @@ describe('getLayers', () => {
           yConfig: [
             {
               forAccessor: 'column-id-1',
-              axisMode: 'right',
+              axisMode: 'left',
               color: '#68BC00',
               fill: 'below',
+              lineWidth: 1,
             },
           ],
         },
@@ -328,7 +448,7 @@ describe('getLayers', () => {
     ],
     [
       'correct colors if columns include percentile columns',
-      [dataSourceLayersWithPercentile, panelWithPercentileMetric],
+      [dataSourceLayersWithPercentile, panelWithPercentileMetric, indexPatternsService, false],
       [
         {
           yConfig: [
@@ -348,7 +468,12 @@ describe('getLayers', () => {
     ],
     [
       'correct colors if columns include percentile rank columns',
-      [dataSourceLayersWithPercentileRank, panelWithPercentileRankMetric],
+      [
+        dataSourceLayersWithPercentileRank,
+        panelWithPercentileRankMetric,
+        indexPatternsService,
+        false,
+      ],
       [
         {
           yConfig: [
@@ -368,7 +493,7 @@ describe('getLayers', () => {
     ],
     [
       'annotation layer gets correct params and converts color, extraFields and icons',
-      [dataSourceLayersWithStatic, panelWithSingleAnnotation],
+      [dataSourceLayersWithStatic, panelWithSingleAnnotation, indexPatternsService, false],
       [
         {
           layerType: 'referenceLine',
@@ -377,9 +502,10 @@ describe('getLayers', () => {
           yConfig: [
             {
               forAccessor: 'column-id-1',
-              axisMode: 'right',
+              axisMode: 'left',
               color: '#68BC00',
               fill: 'below',
+              lineWidth: 1,
             },
           ],
         },
@@ -412,8 +538,13 @@ describe('getLayers', () => {
       ],
     ],
     [
-      'multiple annotations with different data views create separate layers',
-      [dataSourceLayersWithStatic, panelWithMultiAnnotations],
+      'annotation layer should gets correct default params',
+      [
+        dataSourceLayersWithStatic,
+        panelWithSingleAnnotationWithoutQueryStringAndTimefield,
+        indexPatternsService,
+        false,
+      ],
       [
         {
           layerType: 'referenceLine',
@@ -422,9 +553,78 @@ describe('getLayers', () => {
           yConfig: [
             {
               forAccessor: 'column-id-1',
-              axisMode: 'right',
+              axisMode: 'left',
               color: '#68BC00',
               fill: 'below',
+              lineWidth: 1,
+            },
+          ],
+        },
+        {
+          layerId: 'test-id',
+          layerType: 'annotations',
+          ignoreGlobalFilters: true,
+          annotations: [
+            {
+              color: '#D33115',
+              extraFields: ['geo.src'],
+              filter: {
+                language: 'lucene',
+                query: '*',
+                type: 'kibana_query',
+              },
+              icon: 'asterisk',
+              id: 'ann1',
+              isHidden: true,
+              key: {
+                type: 'point_in_time',
+              },
+              label: 'Event',
+              timeField: 'test_field',
+              type: 'query',
+            },
+          ],
+          indexPatternId: 'test',
+        },
+      ],
+    ],
+  ])('should return %s', async (_, input, expected) => {
+    const layers = await getLayers(...input);
+    expect(layers).toEqual(expected.map(expect.objectContaining));
+  });
+
+  test('should return multiple annotations with different data views create separate layers', async () => {
+    mockExtractOrGenerateDatasourceInfo.mockReturnValueOnce({
+      indexPattern: mockedIndices[0],
+      indexPatternId: mockedIndices[0].id,
+      timeField: mockedIndices[0].timeFieldName,
+    });
+    mockExtractOrGenerateDatasourceInfo.mockReturnValueOnce({
+      indexPattern: mockedIndices[1],
+      indexPatternId: mockedIndices[1].id,
+      timeField: mockedIndices[1].timeFieldName,
+    });
+
+    const layers = await getLayers(
+      dataSourceLayersWithStatic,
+      panelWithMultiAnnotations,
+      indexPatternsService,
+      false
+    );
+
+    expect(layers).toEqual(
+      [
+        {
+          layerType: 'referenceLine',
+          accessors: ['column-id-1'],
+          layerId: 'test-layer-1',
+          yConfig: [
+            {
+              forAccessor: 'column-id-1',
+              axisMode: 'left',
+              color: '#68BC00',
+              fill: 'below',
+              lineWidth: 1,
             },
           ],
         },
@@ -451,6 +651,14 @@ describe('getLayers', () => {
               timeField: 'timestamp',
               type: 'query',
             },
+          ],
+          indexPatternId: 'test',
+        },
+        {
+          layerId: 'test-id',
+          layerType: 'annotations',
+          ignoreGlobalFilters: false,
+          annotations: [
             {
               color: '#0000FF',
               filter: {
@@ -468,7 +676,7 @@ describe('getLayers', () => {
               type: 'query',
             },
           ],
-          indexPatternId: 'test',
+          indexPatternId: 'test2',
         },
         {
           layerId: 'test-id',
@@ -493,32 +701,71 @@ describe('getLayers', () => {
               type: 'query',
             },
           ],
-          indexPatternId: 'test2',
+          indexPatternId: 'test',
         },
-      ],
-    ],
-  ])('should return %s', async (_, input, expected) => {
-    const layers = await getLayers(...input, indexPatternsService as DataViewsPublicPluginStart);
-    expect(layers).toEqual(expected.map(expect.objectContaining));
+      ].map(expect.objectContaining)
+    );
+    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(3);
+  });
+
+  test('should return annotation layer gets correct dataView when none is defined', async () => {
+    mockExtractOrGenerateDatasourceInfo.mockReturnValue({
+      indexPattern: { ...mockedIndices[0], id: 'default' },
+      indexPatternId: 'default',
+      timeField: mockedIndices[0].timeFieldName,
+    });
+
+    const layers = await getLayers(
+      dataSourceLayersWithStatic,
+      panelWithSingleAnnotationDefaultDataView,
+      indexPatternsService,
+      false
+    );
+
+    expect(layers).toEqual(
+      [
+        {
+          layerType: 'referenceLine',
+          accessors: ['column-id-1'],
+          layerId: 'test-layer-1',
+          yConfig: [
+            {
+              forAccessor: 'column-id-1',
+              axisMode: 'left',
+              color: '#68BC00',
+              fill: 'below',
+              lineWidth: 1,
+            },
+          ],
+        },
+        {
+          layerId: 'test-id',
+          layerType: 'annotations',
+          ignoreGlobalFilters: true,
+          annotations: [
+            {
+              color: '#D33115',
+              extraFields: ['geo.src'],
+              filter: {
+                language: 'lucene',
+                query: 'tags:error AND tags:security',
+                type: 'kibana_query',
+              },
+              icon: 'asterisk',
+              id: 'ann1',
+              isHidden: true,
+              key: {
+                type: 'point_in_time',
+              },
+              label: 'Event',
+              timeField: 'timestamp',
+              type: 'query',
+            },
+          ],
+          indexPatternId: 'default',
+        },
+      ].map(expect.objectContaining)
+    );
+    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(1);
   });
 });
-
-const mockedIndices = [
-  {
-    id: 'test',
-    title: 'test',
-    getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
-  },
-] as unknown as DataView[];
-
-const indexPatternsService = {
-  getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
-  get: jest.fn(() => Promise.resolve(mockedIndices[0])),
-  find: jest.fn((search: string, size: number) => {
-    if (size !== 1) {
-      // shouldn't request more than one data view since there is a significant performance penalty
-      throw new Error('trying to fetch too many data views');
-    }
-    return Promise.resolve(mockedIndices || []);
-  }),
-} as unknown as DataViewsPublicPluginStart;

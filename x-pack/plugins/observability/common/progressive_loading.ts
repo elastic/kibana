@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const enum ProgressiveLoadingQuality {
+export enum ProgressiveLoadingQuality {
   low = 'low',
   medium = 'medium',
   high = 'high',

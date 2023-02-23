@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { QueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
  * @param ruleId
  * @param enabled Enables the rule on creation or not. Defaulted to true.
  */
-export const getSimpleRule = (ruleId = 'rule-1', enabled = false): QueryCreateSchema => ({
+export const getSimpleRule = (ruleId = 'rule-1', enabled = false): QueryRuleCreateProps => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
   enabled,

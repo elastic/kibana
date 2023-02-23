@@ -15,8 +15,8 @@ import type {
   ISearchOptions,
   ISearchStart,
 } from '@kbn/data-plugin/public';
-import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import type { FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
 import type { Field, DateFieldStats, Aggs } from '../../../../../common/types/field_stats';
 import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
@@ -26,7 +26,7 @@ export const getDateFieldsStatsRequest = (
   params: FieldStatsCommonRequestParams,
   fields: Field[]
 ) => {
-  const { index, query, runtimeFieldMap, samplerShardSize } = params;
+  const { index, query, runtimeFieldMap } = params;
 
   const size = 0;
 
@@ -45,7 +45,7 @@ export const getDateFieldsStatsRequest = (
 
   const searchBody = {
     query,
-    aggs: buildSamplerAggregation(aggs, samplerShardSize),
+    aggs: buildAggregationWithSamplingOption(aggs, params.samplingOption),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
   };
   return {
@@ -61,8 +61,6 @@ export const fetchDateFieldsStats = (
   fields: Field[],
   options: ISearchOptions
 ): Observable<DateFieldStats[] | FieldStatsError> => {
-  const { samplerShardSize } = params;
-
   const request: estypes.SearchRequest = getDateFieldsStatsRequest(params, fields);
   return dataSearch
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
@@ -76,15 +74,10 @@ export const fetchDateFieldsStats = (
       map((resp) => {
         if (!isIKibanaSearchResponse(resp)) return resp;
         const aggregations = resp.rawResponse.aggregations;
-        const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+        const aggsPath = ['sample'];
 
         const batchStats: DateFieldStats[] = fields.map((field, i) => {
           const safeFieldName = field.safeFieldName;
-          const docCount = get(
-            aggregations,
-            [...aggsPath, `${safeFieldName}_field_stats`, 'doc_count'],
-            0
-          );
           const fieldStatsResp = get(
             aggregations,
             [...aggsPath, `${safeFieldName}_field_stats`, 'actual_stats'],
@@ -92,7 +85,6 @@ export const fetchDateFieldsStats = (
           );
           return {
             fieldName: field.fieldName,
-            count: docCount,
             earliest: get(fieldStatsResp, 'min', 0),
             latest: get(fieldStatsResp, 'max', 0),
           } as DateFieldStats;

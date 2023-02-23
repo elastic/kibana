@@ -14,15 +14,12 @@ import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-  getActionsColumnWidth,
 } from '@kbn/timelines-plugin/public';
+import { getActionsColumnWidth } from '../../../../common/components/header_actions';
+import type { ControlColumnProps } from '../../../../../common/types';
 import type { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
-import type {
-  ControlColumnProps,
-  RowRenderer,
-  TimelineTabs,
-} from '../../../../../common/types/timeline';
+import type { RowRenderer, TimelineTabs } from '../../../../../common/types/timeline';
 import { RowRendererId } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import type { TimelineItem } from '../../../../../common/search_strategy/timeline';
@@ -81,7 +78,6 @@ export const StatefulBody = React.memo<Props>(
     const dispatch = useDispatch();
     const containerRef = useRef<HTMLDivElement | null>(null);
     const {
-      manageTimelineById: { queryFields, selectAll },
       timeline: {
         columns,
         eventIdToNoteIds,
@@ -90,8 +86,9 @@ export const StatefulBody = React.memo<Props>(
         loadingEventIds,
         pinnedEventIds,
         selectedEventIds,
-        showCheckboxes,
         show,
+        queryFields,
+        selectAll,
       } = timelineDefaults,
     } = useSelector((state: State) => timelineBodySelector(state, id));
 
@@ -236,7 +233,7 @@ export const StatefulBody = React.memo<Props>(
               onSelectAll={onSelectAll}
               show={show}
               showEventsSelect={false}
-              showSelectAllCheckbox={showCheckboxes}
+              showSelectAllCheckbox={false}
               sort={sort}
               tabType={tabType}
               timelineId={id}
@@ -261,7 +258,7 @@ export const StatefulBody = React.memo<Props>(
               rowRenderers={enabledRowRenderers}
               onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
-              showCheckboxes={showCheckboxes}
+              showCheckboxes={false}
               leadingControlColumns={leadingControlColumns}
               trailingControlColumns={trailingControlColumns}
               tabType={tabType}

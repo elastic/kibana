@@ -17,8 +17,13 @@ import type {
 import { createThreatSignal } from './create_threat_signal';
 import { createEventSignal } from './create_event_signal';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
-import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
-import { buildThreatEnrichment } from './build_threat_enrichment';
+import {
+  buildExecutionIntervalValidator,
+  combineConcurrentResults,
+  getMatchedFields,
+} from './utils';
+import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_query';
+
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../common/cti/constants';
@@ -55,6 +60,15 @@ export const createThreatSignals = async ({
   exceptionFilter,
   unprocessedExceptions,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const threatMatchedFields = getMatchedFields(threatMapping);
+  const allowedFieldsForTermsQuery = await getAllowedFieldsForTermQuery({
+    services,
+    threatMatchedFields,
+    inputIndex,
+    threatIndex,
+    ruleExecutionLogger,
+  });
+
   const params = completeRule.ruleParams;
   ruleExecutionLogger.debug('Indicator matching rule starting');
   const perPage = concurrentSearches * itemsPerSearch;
@@ -65,6 +79,7 @@ export const createThreatSignals = async ({
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
     warning: false,
+    enrichmentTimes: [],
     bulkCreateTimes: [],
     searchAfterTimes: [],
     lastLookBackDate: null,
@@ -123,19 +138,10 @@ export const createThreatSignals = async ({
     _source: false,
   };
 
-  const threatEnrichment = buildThreatEnrichment({
-    ruleExecutionLogger,
-    services,
-    threatFilters: allThreatFilters,
-    threatIndex,
-    threatIndicatorPath,
-    threatLanguage,
-    threatQuery,
-    pitId: threatPitId,
-    reassignPitId: reassignThreatPitId,
-    listClient,
-    exceptionFilter,
-  });
+  const eventListConfig = {
+    fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.field)).flat(),
+    _source: false,
+  };
 
   const createSignals = async ({
     getDocumentList,
@@ -196,6 +202,7 @@ export const createThreatSignals = async ({
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,
+          eventListConfig,
         }),
 
       createSignal: (slicedChunk) =>
@@ -217,7 +224,6 @@ export const createThreatSignals = async ({
           savedId,
           searchAfterSize,
           services,
-          threatEnrichment,
           threatFilters: allThreatFilters,
           threatIndex,
           threatIndicatorPath,
@@ -233,6 +239,8 @@ export const createThreatSignals = async ({
           secondaryTimestamp,
           exceptionFilter,
           unprocessedExceptions,
+          allowedFieldsForTermsQuery,
+          threatMatchedFields,
         }),
     });
   } else {
@@ -274,7 +282,6 @@ export const createThreatSignals = async ({
           savedId,
           searchAfterSize,
           services,
-          threatEnrichment,
           threatMapping,
           tuple,
           type,
@@ -284,6 +291,14 @@ export const createThreatSignals = async ({
           secondaryTimestamp,
           exceptionFilter,
           unprocessedExceptions,
+          threatFilters: allThreatFilters,
+          threatIndex,
+          threatIndicatorPath,
+          threatLanguage,
+          threatPitId,
+          threatQuery,
+          reassignThreatPitId,
+          allowedFieldsForTermsQuery,
         }),
     });
   }

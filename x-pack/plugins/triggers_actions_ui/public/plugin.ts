@@ -23,7 +23,8 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
+import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { TypeRegistry } from './application/type_registry';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
@@ -46,6 +47,7 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
+import { LazyLoadProps } from './types';
 
 import type {
   ActionTypeModel,
@@ -61,7 +63,7 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
   RulesListProps,
-  RulesListNotifyBadgeProps,
+  RulesListNotifyBadgePropsWithApi,
   AlertsTableConfigurationRegistry,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
@@ -70,15 +72,19 @@ import type {
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
-import { PLUGIN_ID } from './common/constants';
+import { PLUGIN_ID, CONNECTORS_PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
+import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
 import type { FieldBrowserProps } from './application/sections/field_browser/types';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
-import { RuleAlertsSummaryProps } from './application/sections/rule_details/components/alert_summary';
-import { getRuleAlertsSummaryLazy } from './common/get_rule_alerts_summary';
+import { AlertSummaryWidgetProps } from './application/sections/alert_summary_widget';
+import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
+import { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
+import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
+import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -106,7 +112,10 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
-  getAlertsStateTable: (props: AlertsTableStateProps) => ReactElement<AlertsTableStateProps>;
+  getAlertsStateTable: (
+    props: AlertsTableStateProps & LazyLoadProps
+  ) => ReactElement<AlertsTableStateProps>;
+  getAlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
   getFieldBrowser: (props: FieldBrowserProps) => ReactElement<FieldBrowserProps>;
   getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
   getRuleTagFilter: (props: RuleTagFilterProps) => ReactElement<RuleTagFilterProps>;
@@ -119,11 +128,13 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ) => ReactElement<RuleEventLogListProps<T>>;
   getRulesList: (props: RulesListProps) => ReactElement;
   getRulesListNotifyBadge: (
-    props: RulesListNotifyBadgeProps
-  ) => ReactElement<RulesListNotifyBadgeProps>;
+    props: RulesListNotifyBadgePropsWithApi
+  ) => ReactElement<RulesListNotifyBadgePropsWithApi>;
   getRuleDefinition: (props: RuleDefinitionProps) => ReactElement<RuleDefinitionProps>;
   getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
-  getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => ReactElement<RuleAlertsSummaryProps>;
+  getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
+  getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
+  getRulesSettingsLink: () => ReactElement;
 }
 
 interface PluginsSetup {
@@ -180,12 +191,24 @@ export class Plugin
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
 
     const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-      defaultMessage: 'Rules and Connectors',
+      defaultMessage: 'Rules',
     });
     const featureDescription = i18n.translate(
       'xpack.triggersActionsUI.managementSection.displayDescription',
       {
-        defaultMessage: 'Detect conditions using rules, and take actions using connectors.',
+        defaultMessage: 'Detect conditions using rules.',
+      }
+    );
+    const connectorsFeatureTitle = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.connectors.displayName',
+      {
+        defaultMessage: 'Connectors',
+      }
+    );
+    const connectorsFeatureDescription = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.connectors.displayDescription',
+      {
+        defaultMessage: 'Connect third-party software with your alerting data.',
       }
     );
 
@@ -195,7 +218,16 @@ export class Plugin
         title: featureTitle,
         description: featureDescription,
         icon: 'watchesApp',
-        path: '/app/management/insightsAndAlerting/triggersActions',
+        path: triggersActionsRoute,
+        showOnHomePage: false,
+        category: 'admin',
+      });
+      plugins.home.featureCatalogue.register({
+        id: CONNECTORS_PLUGIN_ID,
+        title: connectorsFeatureTitle,
+        description: connectorsFeatureDescription,
+        icon: 'watchesApp',
+        path: triggersActionsRoute,
         showOnHomePage: false,
         category: 'admin',
       });
@@ -248,10 +280,50 @@ export class Plugin
       },
     });
 
-    registerBuiltInActionTypes({
-      actionTypeRegistry: this.actionTypeRegistry,
-      services: {
-        validateEmailAddresses: plugins.actions.validateEmailAddresses,
+    plugins.management.sections.section.insightsAndAlerting.registerApp({
+      id: CONNECTORS_PLUGIN_ID,
+      title: connectorsFeatureTitle,
+      order: 2,
+      async mount(params: ManagementAppMountParams) {
+        const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+          CoreStart,
+          PluginsStart,
+          unknown
+        ];
+
+        const { renderApp } = await import('./application/connectors_app');
+
+        // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
+        // subset of this privilege are not authorized to access this endpoint and will receive a 404
+        // error that causes the Alerting view to fail to load.
+        let kibanaFeatures: KibanaFeature[];
+        try {
+          kibanaFeatures = await pluginsStart.features.getFeatures();
+        } catch (err) {
+          kibanaFeatures = [];
+        }
+
+        return renderApp({
+          ...coreStart,
+          actions: plugins.actions,
+          data: pluginsStart.data,
+          dataViews: pluginsStart.dataViews,
+          dataViewEditor: pluginsStart.dataViewEditor,
+          charts: pluginsStart.charts,
+          alerting: pluginsStart.alerting,
+          spaces: pluginsStart.spaces,
+          unifiedSearch: pluginsStart.unifiedSearch,
+          isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+          element: params.element,
+          theme$: params.theme$,
+          storage: new Storage(window.localStorage),
+          setBreadcrumbs: params.setBreadcrumbs,
+          history: params.history,
+          actionTypeRegistry,
+          ruleTypeRegistry,
+          alertsTableConfigurationRegistry,
+          kibanaFeatures,
+        });
       },
     });
 
@@ -312,8 +384,11 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getAlertsStateTable: (props: AlertsTableStateProps) => {
+      getAlertsStateTable: (props: AlertsTableStateProps & LazyLoadProps) => {
         return getAlertsTableStateLazy(props);
+      },
+      getAlertsSearchBar: (props: AlertsSearchBarProps) => {
+        return getAlertsSearchBarLazy(props);
       },
       getAlertsTable: (props: AlertsTableProps) => {
         return getAlertsTableLazy(props);
@@ -336,7 +411,7 @@ export class Plugin
       getRuleEventLogList: <T extends RuleEventLogListOptions>(props: RuleEventLogListProps<T>) => {
         return getRuleEventLogListLazy(props);
       },
-      getRulesListNotifyBadge: (props: RulesListNotifyBadgeProps) => {
+      getRulesListNotifyBadge: (props: RulesListNotifyBadgePropsWithApi) => {
         return getRulesListNotifyBadgeLazy(props);
       },
       getRulesList: (props: RulesListProps) => {
@@ -357,8 +432,14 @@ export class Plugin
       getRuleStatusPanel: (props: RuleStatusPanelProps) => {
         return getRuleStatusPanelLazy(props);
       },
-      getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => {
-        return getRuleAlertsSummaryLazy(props);
+      getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => {
+        return getAlertSummaryWidgetLazy(props);
+      },
+      getRuleSnoozeModal: (props: RuleSnoozeModalProps) => {
+        return getRuleSnoozeModalLazy(props);
+      },
+      getRulesSettingsLink: () => {
+        return getRulesSettingsLinkLazy();
       },
     };
   }

@@ -44,12 +44,19 @@ export const ASSIGNEES = i18n.translate('xpack.cases.userProfile.assigneesTitle'
   defaultMessage: 'Assignees',
 });
 
-export const NO_MATCHING_USERS = i18n.translate('xpack.cases.userProfiles.noMatchingUsers', {
-  defaultMessage: 'No matching users with required access.',
+export const USER_DOES_NOT_EXIST = i18n.translate('xpack.cases.userProfiles.userDoesNotExist', {
+  defaultMessage: "User doesn't exist or is unavailable",
 });
 
-export const TRY_MODIFYING_SEARCH = i18n.translate('xpack.cases.userProfiles.tryModifyingSearch', {
-  defaultMessage: 'Try modifying your search.',
+export const LEARN_PRIVILEGES_GRANT_ACCESS = i18n.translate(
+  'xpack.cases.userProfiles.learnPrivileges',
+  {
+    defaultMessage: 'Learn what privileges grant access to cases.',
+  }
+);
+
+export const MODIFY_SEARCH = i18n.translate('xpack.cases.userProfiles.modifySearch', {
+  defaultMessage: "Modify your search or check the user's privileges.",
 });
 
 export const INVALID_ASSIGNEES = i18n.translate('xpack.cases.create.invalidAssignees', {
@@ -58,3 +65,10 @@ export const INVALID_ASSIGNEES = i18n.translate('xpack.cases.create.invalidAssig
     maxAssignees: MAX_ASSIGNEES_PER_CASE,
   },
 });
+
+export const MAX_SELECTED_ASSIGNEES = (limit: number) =>
+  i18n.translate('xpack.cases.userProfile.maxSelectedAssignees', {
+    defaultMessage:
+      "You've selected the maximum number of {count, plural, one {# assignee} other {# assignees}}",
+    values: { count: limit },
+  });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetMapping } from './types';
+import type { GetMapping } from './types';
 
 export const getMapping: GetMapping = () => {
   return [
@@ -17,6 +17,11 @@ export const getMapping: GetMapping = () => {
     {
       source: 'description',
       target: 'description',
+      action_type: 'overwrite',
+    },
+    {
+      source: 'tags',
+      target: 'labels',
       action_type: 'overwrite',
     },
     {

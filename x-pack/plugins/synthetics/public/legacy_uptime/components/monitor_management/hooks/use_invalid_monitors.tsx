@@ -40,6 +40,7 @@ export const useInvalidMonitors = (errorSummaries?: Ping[]) => {
           .map(({ saved_object: savedObject }) => ({
             ...savedObject,
             updated_at: savedObject.updatedAt!,
+            created_at: savedObject.createdAt!,
           }));
       }
     }

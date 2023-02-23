@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { IndexLifecyclePhaseSelectOption } from '@kbn/apm-plugin/common/storage_explorer_types';
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   APIReturnType,
@@ -36,7 +36,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/storage_details'>['params']
     >
   ) {
-    return await apmApiClient.monitorIndicesUser({
+    return await apmApiClient.monitorClusterAndIndicesUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/storage_details',
       params: {
         path: {
@@ -70,8 +70,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when('Storage details', { config: 'basic', archives: [] }, () => {
-    describe('when data is loaded', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/144025
+  registry.when.skip('Storage details', { config: 'basic', archives: [] }, () => {
+    describe.skip('when data is loaded', () => {
       before(async () => {
         const serviceGo = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })

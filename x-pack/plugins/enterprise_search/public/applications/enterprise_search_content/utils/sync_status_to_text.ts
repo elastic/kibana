@@ -23,6 +23,22 @@ export function syncStatusToText(status: SyncStatus): string {
       return i18n.translate('xpack.enterpriseSearch.content.syncStatus.inProgress', {
         defaultMessage: 'Sync in progress',
       });
+    case SyncStatus.CANCELED:
+      return i18n.translate('xpack.enterpriseSearch.content.syncStatus.canceling', {
+        defaultMessage: 'Sync canceled',
+      });
+    case SyncStatus.CANCELING:
+      return i18n.translate('xpack.enterpriseSearch.content.syncStatus.canceled', {
+        defaultMessage: 'Canceling sync',
+      });
+    case SyncStatus.PENDING:
+      return i18n.translate('xpack.enterpriseSearch.content.syncStatus.pending', {
+        defaultMessage: 'Sync pending',
+      });
+    case SyncStatus.SUSPENDED:
+      return i18n.translate('xpack.enterpriseSearch.content.syncStatus.suspended', {
+        defaultMessage: 'Sync suspended',
+      });
   }
 }
 
@@ -31,8 +47,12 @@ export function syncStatusToColor(status: SyncStatus): string {
     case SyncStatus.COMPLETED:
       return 'success';
     case SyncStatus.ERROR:
+    case SyncStatus.CANCELED:
       return 'danger';
     case SyncStatus.IN_PROGRESS:
+    case SyncStatus.PENDING:
+    case SyncStatus.SUSPENDED:
+    case SyncStatus.CANCELING:
       return 'warning';
   }
 }

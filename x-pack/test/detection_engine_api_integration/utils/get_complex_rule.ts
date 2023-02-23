@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 /**
  * This will return a complex rule with all the outputs possible
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
-export const getComplexRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
+export const getComplexRule = (ruleId = 'rule-1'): RuleCreateProps => ({
   actions: [],
   author: [],
   name: 'Complex Rule Query',

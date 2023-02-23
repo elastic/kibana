@@ -1,14 +1,16 @@
 {
-  "extends": "../../../../../tsconfig.bazel.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "stripInternal": false,
+    "outDir": "target/types",
     "types": []
   },
   "include": [
     "*.d.ts"
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-card-no-data-types",
   ]
 }

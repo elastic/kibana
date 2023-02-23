@@ -6,24 +6,53 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
+import { fetchManualTestRunsEffect } from './manual_test_runs/effects';
+import { enableDefaultAlertingEffect, updateDefaultAlertingEffect } from './alert_rules/effects';
+import { executeEsQueryEffect } from './elasticsearch';
+import {
+  fetchAlertConnectorsEffect,
+  fetchDynamicSettingsEffect,
+  setDynamicSettingsEffect,
+} from './settings/effects';
+import { syncGlobalParamsEffect } from './settings';
+import { fetchAgentPoliciesEffect } from './private_locations';
+import { fetchNetworkEventsEffect } from './network_events/effects';
 import { fetchSyntheticsMonitorEffect } from './monitor_details';
-import { fetchIndexStatusEffect } from './index_status';
 import { fetchSyntheticsEnablementEffect } from './synthetics_enablement';
-import { fetchMonitorListEffect, upsertMonitorEffect } from './monitor_list';
-import { fetchMonitorOverviewEffect, quietFetchOverviewEffect } from './overview';
+import {
+  enableMonitorAlertEffect,
+  fetchMonitorListEffect,
+  upsertMonitorEffect,
+} from './monitor_list';
+import { fetchMonitorOverviewEffect } from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
-import { browserJourneyEffects } from './browser_journey';
+import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journey';
+import { fetchPingStatusesEffect } from './ping_status';
+import { fetchOverviewStatusEffect } from './overview_status';
 
 export const rootEffect = function* root(): Generator {
   yield all([
-    fork(fetchIndexStatusEffect),
     fork(fetchSyntheticsEnablementEffect),
     fork(upsertMonitorEffect),
     fork(fetchServiceLocationsEffect),
     fork(fetchMonitorListEffect),
     fork(fetchSyntheticsMonitorEffect),
     fork(fetchMonitorOverviewEffect),
-    fork(quietFetchOverviewEffect),
     fork(browserJourneyEffects),
+    fork(fetchOverviewStatusEffect),
+    fork(fetchNetworkEventsEffect),
+    fork(fetchPingStatusesEffect),
+    fork(fetchAgentPoliciesEffect),
+    fork(fetchDynamicSettingsEffect),
+    fork(setDynamicSettingsEffect),
+    fork(fetchAgentPoliciesEffect),
+    fork(fetchAlertConnectorsEffect),
+    fork(syncGlobalParamsEffect),
+    fork(enableDefaultAlertingEffect),
+    fork(enableMonitorAlertEffect),
+    fork(updateDefaultAlertingEffect),
+    fork(executeEsQueryEffect),
+    fork(fetchJourneyStepsEffect),
+    fork(fetchManualTestRunsEffect),
   ]);
 };

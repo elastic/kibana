@@ -68,7 +68,12 @@ describe('renderApp', () => {
 
     const config = {
       unsafe: {
-        alertDetails: { enabled: false },
+        alertDetails: {
+          apm: { enabled: false },
+          logs: { enabled: false },
+          metrics: { enabled: false },
+          uptime: { enabled: false },
+        },
       },
     } as ConfigSchema;
 
@@ -86,6 +91,7 @@ describe('renderApp', () => {
           },
           reportUiCounter: jest.fn(),
         },
+        kibanaVersion: '8.7.0',
       });
       unmount();
     }).not.toThrowError();

@@ -25,7 +25,6 @@ const apmIndexSettingsRoute = createApmServerRoute({
         | 'span'
         | 'error'
         | 'metric'
-        | 'sourcemap'
         | 'onboarding';
       defaultValue: string;
       savedValue: string | undefined;
@@ -66,7 +65,6 @@ const saveApmIndicesRoute = createApmServerRoute({
   },
   params: t.type({
     body: t.partial({
-      sourcemap: t.string,
       error: t.string,
       onboarding: t.string,
       span: t.string,

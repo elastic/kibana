@@ -13,14 +13,14 @@ import type { AnalyticsClient } from '@kbn/analytics-client';
  * {@link AnalyticsClient}
  * @public
  */
-export type AnalyticsServicePreboot = Omit<AnalyticsClient, 'shutdown'>;
+export type AnalyticsServicePreboot = Omit<AnalyticsClient, 'flush' | 'shutdown'>;
 
 /**
  * Exposes the public APIs of the AnalyticsClient during the setup phase.
  * {@link AnalyticsClient}
  * @public
  */
-export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
+export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'flush' | 'shutdown'>;
 
 /**
  * Exposes the public APIs of the AnalyticsClient during the start phase

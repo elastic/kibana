@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import { generateMlInferencePipelineBody } from '../../../common/ml_inference_pipeline';
+import {
+  InferencePipelineInferenceConfig,
+  MlInferencePipeline,
+} from '../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
-import { getMlModelTypesForModelConfig } from '../indices/fetch_ml_inference_pipeline_processors';
 
 export interface CreatedPipelines {
   created: string[];
-}
-
-export interface MlInferencePipeline extends IngestPipeline {
-  version?: number;
 }
 
 /**
@@ -31,24 +30,24 @@ export interface MlInferencePipeline extends IngestPipeline {
  * @param indexName the index for which the pipelines should be created.
  * @param esClient the Elasticsearch Client with which to create the pipelines.
  */
-export const createIndexPipelineDefinitions = (
+export const createIndexPipelineDefinitions = async (
   indexName: string,
   esClient: ElasticsearchClient
-): CreatedPipelines => {
+): Promise<CreatedPipelines> => {
   // TODO: add back descriptions (see: https://github.com/elastic/elasticsearch-specification/issues/1827)
-  esClient.ingest.putPipeline({
+  await esClient.ingest.putPipeline({
     description: `Enterprise Search Machine Learning Inference pipeline for the '${indexName}' index`,
     id: getInferencePipelineNameFromIndexName(indexName),
     processors: [],
     version: 1,
   });
-  esClient.ingest.putPipeline({
+  await esClient.ingest.putPipeline({
     description: `Enterprise Search customizable ingest pipeline for the '${indexName}' index`,
     id: `${indexName}@custom`,
     processors: [],
     version: 1,
   });
-  esClient.ingest.putPipeline({
+  await esClient.ingest.putPipeline({
     _meta: {
       managed: true,
       managed_by: 'Enterprise Search',
@@ -225,6 +224,7 @@ export const createIndexPipelineDefinitions = (
  * @param modelId modelId selected by user.
  * @param sourceField The document field that model will read.
  * @param destinationField The document field that the model will write to.
+ * @param inferenceConfig The configuration for the model.
  * @param esClient the Elasticsearch Client to use when retrieving model details.
  */
 export const formatMlPipelineBody = async (
@@ -232,48 +232,17 @@ export const formatMlPipelineBody = async (
   modelId: string,
   sourceField: string,
   destinationField: string,
+  inferenceConfig: InferencePipelineInferenceConfig | undefined,
   esClient: ElasticsearchClient
 ): Promise<MlInferencePipeline> => {
   // this will raise a 404 if model doesn't exist
   const models = await esClient.ml.getTrainedModels({ model_id: modelId });
   const model = models.trained_model_configs[0];
-  // if model returned no input field, insert a placeholder
-  const modelInputField =
-    model.input?.field_names?.length > 0 ? model.input.field_names[0] : 'MODEL_INPUT_FIELD';
-  const modelTypes = getMlModelTypesForModelConfig(model);
-  const modelVersion = model.version;
-  return {
-    description: '',
-    processors: [
-      {
-        remove: {
-          field: `ml.inference.${destinationField}`,
-          ignore_missing: true,
-        },
-      },
-      {
-        inference: {
-          field_map: {
-            [sourceField]: modelInputField,
-          },
-          model_id: modelId,
-          target_field: `ml.inference.${destinationField}`,
-        },
-      },
-      {
-        append: {
-          field: '_source._ingest.processors',
-          value: [
-            {
-              model_version: modelVersion,
-              pipeline: pipelineName,
-              processed_timestamp: '{{{ _ingest.timestamp }}}',
-              types: modelTypes,
-            },
-          ],
-        },
-      },
-    ],
-    version: 1,
-  };
+  return generateMlInferencePipelineBody({
+    destinationField,
+    inferenceConfig,
+    model,
+    pipelineName,
+    sourceField,
+  });
 };

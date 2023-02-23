@@ -41,6 +41,7 @@ export const httpFormatters: HTTPFormatMap = {
   [ConfigKey.REQUEST_HEADERS_CHECK]: (fields) =>
     objectToJsonFormatter(fields[ConfigKey.REQUEST_HEADERS_CHECK]),
   [ConfigKey.REQUEST_METHOD_CHECK]: null,
+  [ConfigKey.PORT]: null,
   ...tlsFormatters,
   ...commonFormatters,
 };

@@ -37,13 +37,14 @@ export type {
   PieVisualizationState,
   PieLayerState,
   SharedPieLayerState,
+  LayerType,
 } from '../common/types';
 
 export type { DatatableVisualizationState } from './visualizations/datatable/visualization';
 export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
-  IndexPatternPersistedState,
+  FormBasedPersistedState,
   PersistedIndexPatternLayer,
   OperationType,
   IncompleteColumn,
@@ -74,12 +75,11 @@ export type {
   FormulaPublicApi,
   StaticValueIndexPatternColumn,
   TimeScaleIndexPatternColumn,
-  IndexPatternLayer,
-} from './indexpattern_datasource/types';
+  FormBasedLayer,
+} from './datasources/form_based/types';
 export type {
   XYArgs,
   XYRender,
-  LayerType,
   LineStyle,
   FillStyle,
   YScaleType,
@@ -101,9 +101,13 @@ export type {
   ReferenceLineLayerArgs,
   ReferenceLineLayerConfig,
 } from '@kbn/expression-xy-plugin/common';
+
 export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
 
-export { layerTypes } from '../common';
+export type { ChartInfo } from './chart_info_api';
+
+export { layerTypes } from '../common/layer_types';
+export { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';
 

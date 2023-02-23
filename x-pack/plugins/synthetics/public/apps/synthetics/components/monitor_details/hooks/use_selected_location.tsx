@@ -22,7 +22,7 @@ export const useSelectedLocation = () => {
     if (!urlLocationId) {
       const firstLocationId = locations?.[0]?.id;
       if (firstLocationId) {
-        updateUrlParams({ locationId: firstLocationId });
+        updateUrlParams({ locationId: firstLocationId }, true);
       }
     }
 

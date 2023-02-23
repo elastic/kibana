@@ -20,7 +20,7 @@ import {
   DETAILS_ID,
   DETAILS_QUERY,
   DETAILS_TIMESTAMP,
-  mockCasesContext,
+  getMockedKibanaConfig,
 } from './test_utils';
 
 jest.mock('../../common/lib/kibana');
@@ -41,36 +41,13 @@ const defaultProps = {
   actionId: 'test-action-id',
   startDate: DETAILS_TIMESTAMP,
   queryId: '',
+  ecsData: {
+    _id: 'test',
+  },
 };
 const mockKibana = (permissionType: unknown = defaultPermissions) => {
-  useKibanaMock.mockReturnValue({
-    services: {
-      application: {
-        capabilities: permissionType,
-      },
-      cases: {
-        helpers: {
-          canUseCases: jest.fn(),
-        },
-        ui: {
-          getCasesContext: jest.fn().mockImplementation(() => mockCasesContext),
-        },
-      },
-      data: {
-        dataViews: {
-          getCanSaveSync: jest.fn(),
-          hasData: {
-            hasESData: jest.fn(),
-            hasUserDataView: jest.fn(),
-            hasDataView: jest.fn(),
-          },
-        },
-      },
-      notifications: {
-        toasts: jest.fn(),
-      },
-    },
-  } as unknown as ReturnType<typeof useKibana>);
+  const mockedKibana = getMockedKibanaConfig(permissionType);
+  useKibanaMock.mockReturnValue(mockedKibana);
 };
 
 const renderWithContext = (Element: React.ReactElement) =>

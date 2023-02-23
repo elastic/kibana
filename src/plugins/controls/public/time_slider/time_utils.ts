@@ -7,8 +7,10 @@
  */
 
 import moment from 'moment-timezone';
-import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import { EuiRangeTick } from '@elastic/eui';
 import { calcAutoIntervalNear } from '@kbn/data-plugin/common';
+
+const MAX_TICKS = 20; // eui range has hard limit of 20 ticks and throws when exceeded
 
 export const FROM_INDEX = 0;
 export const TO_INDEX = 1;
@@ -21,6 +23,10 @@ export function getMomentTimezone(dateFormatTZ: string) {
 function getScaledDateFormat(interval: number): string {
   if (interval >= moment.duration(1, 'y').asMilliseconds()) {
     return 'YYYY';
+  }
+
+  if (interval >= moment.duration(30, 'd').asMilliseconds()) {
+    return 'MMM YYYY';
   }
 
   if (interval >= moment.duration(1, 'd').asMilliseconds()) {
@@ -46,17 +52,19 @@ function getScaledDateFormat(interval: number): string {
   return 'ss.SSS';
 }
 
-export function getInterval(min: number, max: number, steps = 6): number {
+export function getInterval(min: number, max: number, steps = MAX_TICKS): number {
   const duration = max - min;
-  let interval = calcAutoIntervalNear(steps, duration).asMilliseconds();
-  // Sometimes auto interval is not quite right and returns 2X or 3X requested ticks
-  // Adjust the interval to get closer to the requested number of ticks
+  let interval = calcAutoIntervalNear(MAX_TICKS, duration).asMilliseconds();
+  // Sometimes auto interval is not quite right and returns 2X, 3X, 1/2X, or 1/3X  requested ticks
   const actualSteps = duration / interval;
-  if (actualSteps > steps * 1.5) {
-    const factor = Math.round(actualSteps / steps);
-    interval *= factor;
-  } else if (actualSteps < 5) {
-    interval *= 0.5;
+  if (actualSteps > MAX_TICKS) {
+    // EuiRange throws if ticks exceeds MAX_TICKS
+    // Adjust the interval to ensure MAX_TICKS is never exceeded
+    const factor = Math.ceil(actualSteps / MAX_TICKS);
+    interval = interval * factor;
+  } else if (actualSteps < MAX_TICKS / 2) {
+    // Increase number of ticks when ticks is less then half MAX_TICKS
+    interval = interval / 2;
   }
   return interval;
 }
@@ -67,7 +75,7 @@ export function getTicks(min: number, max: number, timezone: string): EuiRangeTi
 
   let tick = Math.ceil(min / interval) * interval;
   const ticks: EuiRangeTick[] = [];
-  while (tick < max) {
+  while (tick <= max) {
     ticks.push({
       value: tick,
       label: moment.tz(tick, getMomentTimezone(timezone)).format(format),
@@ -76,4 +84,68 @@ export function getTicks(min: number, max: number, timezone: string): EuiRangeTi
   }
 
   return ticks;
+}
+
+export function getStepSize(ticks: EuiRangeTick[]): {
+  stepSize: number;
+  format: string;
+} {
+  if (ticks.length < 2) {
+    return {
+      stepSize: 1,
+      format: 'MMM D, YYYY @ HH:mm:ss.SSS',
+    };
+  }
+
+  const tickRange = ticks[1].value - ticks[0].value;
+
+  if (tickRange >= moment.duration(2, 'y').asMilliseconds()) {
+    return {
+      stepSize: moment.duration(1, 'y').asMilliseconds(),
+      format: 'YYYY',
+    };
+  }
+
+  if (tickRange >= moment.duration(2, 'd').asMilliseconds()) {
+    return {
+      stepSize: moment.duration(1, 'd').asMilliseconds(),
+      format: 'MMM D, YYYY',
+    };
+  }
+
+  if (tickRange >= moment.duration(2, 'h').asMilliseconds()) {
+    return {
+      stepSize: moment.duration(1, 'h').asMilliseconds(),
+      format: 'MMM D, YYYY @ HH:mm',
+    };
+  }
+
+  if (tickRange >= moment.duration(2, 'm').asMilliseconds()) {
+    return {
+      stepSize: moment.duration(1, 'm').asMilliseconds(),
+      format: 'MMM D, YYYY @ HH:mm',
+    };
+  }
+
+  if (tickRange >= moment.duration(2, 's').asMilliseconds()) {
+    return {
+      stepSize: moment.duration(1, 's').asMilliseconds(),
+      format: 'MMM D, YYYY @ HH:mm:ss',
+    };
+  }
+
+  return {
+    stepSize: 1,
+    format: 'MMM D, YYYY @ HH:mm:ss.SSS',
+  };
+}
+
+export function roundDownToNextStepSizeFactor(value: number, stepSize: number) {
+  const remainder = value % stepSize;
+  return remainder === 0 ? value : value - remainder;
+}
+
+export function roundUpToNextStepSizeFactor(value: number, stepSize: number) {
+  const remainder = value % stepSize;
+  return remainder === 0 ? value : value + (stepSize - remainder);
 }

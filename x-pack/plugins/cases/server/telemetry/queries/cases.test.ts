@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { CaseAggregationResult } from '../types';
+import { ESCaseStatus } from '../../services/cases/types';
+import type { CaseAggregationResult } from '../types';
 import { getCasesTelemetryData } from './cases';
 
 describe('getCasesTelemetryData', () => {
@@ -93,7 +94,7 @@ describe('getCasesTelemetryData', () => {
         status: {
           buckets: [
             {
-              key: 'open',
+              key: ESCaseStatus.OPEN,
               doc_count: 2,
             },
           ],

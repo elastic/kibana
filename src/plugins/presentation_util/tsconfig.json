@@ -1,25 +1,35 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
-  "extraPublicDirs": ["common"],
   "include": [
     "common/**/*",
     "public/**/*",
     "public/**/*.json",
     "server/**/*",
+    "test_helpers/**/*",
     "storybook/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../saved_objects/tsconfig.json" },
-    { "path": "../embeddable/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../data/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/saved-objects-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n",
+    "@kbn/expressions-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/i18n-react",
+    "@kbn/monaco",
+    "@kbn/es-query",
+    "@kbn/field-formats-plugin",
+    "@kbn/interpreter",
+    "@kbn/react-field",
+    "@kbn/config-schema",
+    "@kbn/storybook",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

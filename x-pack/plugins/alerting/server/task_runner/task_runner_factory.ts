@@ -16,11 +16,13 @@ import type {
   ElasticsearchServiceStart,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
+import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import { RunContext } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import {
   RuleTypeParams,
   RuleTypeRegistry,
@@ -29,6 +31,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   RulesClientApi,
+  RulesSettingsClientApi,
 } from '../types';
 import { TaskRunner } from './task_runner';
 import { NormalizedRuleType } from '../rule_type_registry';
@@ -38,6 +41,8 @@ import { ActionsConfigMap } from '../lib/get_actions_config_map';
 export interface TaskRunnerContext {
   logger: Logger;
   data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
+  share: SharePluginStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   elasticsearch: ElasticsearchServiceStart;
@@ -57,6 +62,7 @@ export interface TaskRunnerContext {
   actionsConfigMap: ActionsConfigMap;
   cancelAlertsOnRuleTimeout: boolean;
   usageCounter?: UsageCounter;
+  getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
 }
 
 export class TaskRunnerFactory {

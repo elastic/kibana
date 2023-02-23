@@ -10,7 +10,7 @@ import { EventDetailsPanel } from '.';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   KibanaServices,
   useKibana,
@@ -94,27 +94,18 @@ jest.mock(
   }
 );
 jest.mock('../../../../detections/components/alerts_table/actions');
-jest.mock('../../../../risk_score/containers', () => {
+jest.mock('../../../../explore/containers/risk_score', () => {
   return {
-    useHostRiskScore: jest.fn().mockReturnValue([
-      true,
-      {
-        data: undefined,
-        isModuleEnabled: false,
-      },
-    ]),
-    useUserRiskScore: jest.fn().mockReturnValue([
-      true,
-      {
-        data: undefined,
-        isModuleEnabled: false,
-      },
-    ]),
+    useRiskScore: jest.fn().mockReturnValue({
+      loading: true,
+      data: undefined,
+      isModuleEnabled: false,
+    }),
   };
 });
 
 const defaultProps = {
-  timelineId: TimelineId.test,
+  scopeId: TimelineId.test,
   isHostIsolationPanelOpen: false,
   handleOnEventClosed: jest.fn(),
   onAddIsolationStatusClick: jest.fn(),
@@ -132,7 +123,7 @@ jest.mock('../../../containers/details', () => {
   };
 });
 
-describe('event details footer component', () => {
+describe('event details panel component', () => {
   beforeEach(() => {
     const coreStartMock = coreMock.createStart();
     (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);

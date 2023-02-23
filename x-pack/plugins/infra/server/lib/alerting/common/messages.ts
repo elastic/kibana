@@ -20,6 +20,13 @@ export const DOCUMENT_COUNT_I18N = i18n.translate(
   }
 );
 
+export const CUSTOM_EQUATION_I18N = i18n.translate(
+  'xpack.infra.metrics.alerting.threshold.customEquation',
+  {
+    defaultMessage: 'Custom equation',
+  }
+);
+
 export const stateToAlertMessage = {
   [AlertStates.ALERT]: i18n.translate('xpack.infra.metrics.alerting.threshold.alertState', {
     defaultMessage: 'ALERT',
@@ -76,7 +83,7 @@ const thresholdToI18n = ([a, b]: Array<number | string>) => {
   });
 };
 
-const formatGroup = (group: string) => (group === UNGROUPED_FACTORY_KEY ? 'all hosts' : group);
+const formatGroup = (group: string) => (group === UNGROUPED_FACTORY_KEY ? '' : ` for ${group}`);
 
 export const buildFiredAlertReason: (alertResult: {
   group: string;
@@ -89,7 +96,7 @@ export const buildFiredAlertReason: (alertResult: {
 }) => string = ({ group, metric, comparator, threshold, currentValue, timeSize, timeUnit }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.firedAlertReason', {
     defaultMessage:
-      '{metric} is {currentValue} in the last {duration} for {group}. Alert when {comparator} {threshold}.',
+      '{metric} is {currentValue} in the last {duration}{group}. Alert when {comparator} {threshold}.',
     values: {
       group: formatGroup(group),
       metric,
@@ -155,10 +162,10 @@ export const buildInvalidQueryAlertReason = (filterQueryText: string) =>
     },
   });
 
-export const groupActionVariableDescription = i18n.translate(
-  'xpack.infra.metrics.alerting.groupActionVariableDescription',
+export const groupByKeysActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.groupByKeysActionVariableDescription',
   {
-    defaultMessage: 'Name of the group reporting data',
+    defaultMessage: 'The object containing groups that are reporting data',
   }
 );
 
@@ -166,6 +173,14 @@ export const alertStateActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.alertStateActionVariableDescription',
   {
     defaultMessage: 'Current state of the alert',
+  }
+);
+
+export const alertDetailUrlActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.alertDetailUrlActionVariableDescription',
+  {
+    defaultMessage:
+      'Link to the view within Elastic that shows further details and context surrounding this alert',
   }
 );
 
@@ -211,6 +226,64 @@ export const viewInAppUrlActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.viewInAppUrlActionVariableDescription',
   {
     defaultMessage:
-      'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+      'Link to the view or feature within Elastic that can assist with further investigation',
+  }
+);
+
+export const cloudActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.cloudActionVariableDescription',
+  {
+    defaultMessage: 'The cloud object defined by ECS if available in the source.',
+  }
+);
+
+export const hostActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.hostActionVariableDescription',
+  {
+    defaultMessage: 'The host object defined by ECS if available in the source.',
+  }
+);
+
+export const containerActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.containerActionVariableDescription',
+  {
+    defaultMessage: 'The container object defined by ECS if available in the source.',
+  }
+);
+
+export const orchestratorActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.orchestratorActionVariableDescription',
+  {
+    defaultMessage: 'The orchestrator object defined by ECS if available in the source.',
+  }
+);
+
+export const labelsActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.labelsActionVariableDescription',
+  {
+    defaultMessage: 'List of labels associated with the entity where this alert triggered.',
+  }
+);
+
+export const tagsActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.tagsActionVariableDescription',
+  {
+    defaultMessage: 'List of tags associated with the entity where this alert triggered.',
+  }
+);
+
+export const originalAlertStateActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.originalAlertStateActionVariableDescription',
+  {
+    defaultMessage:
+      'The state of the alert before it recovered. This is only available in the recovery context',
+  }
+);
+
+export const originalAlertStateWasActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.originalAlertStateWasWARNINGActionVariableDescription',
+  {
+    defaultMessage:
+      'Boolean value of the state of the alert before it recovered. This can be used for template conditions. This is only available in the recovery context',
   }
 );

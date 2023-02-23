@@ -11,21 +11,29 @@ import { ThemeProvider } from 'styled-components';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 
+import { TestProviders } from '../../../../common/mock';
+
 import { EditExceptionFlyout } from '.';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { stubIndexPattern, createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
-import { useAddOrUpdateException } from '../../logic/use_add_exception';
+import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import type { Rule } from '../../../rule_management/logic/types';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
-} from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
-import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
+} from '../../../../../common/detection_engine/rule_schema/mocks';
+
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
+import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
+import { useFindExceptionListReferences } from '../../logic/use_find_references';
+import * as i18n from './translations';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -37,28 +45,30 @@ const mockTheme = getMockTheme({
 });
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../detections/containers/detection_engine/rules');
-jest.mock('../../logic/use_add_exception');
+jest.mock('../../logic/use_create_update_exception');
+jest.mock('../../logic/use_exception_flyout_data');
 jest.mock('../../../../common/containers/source');
+jest.mock('../../logic/use_find_references');
 jest.mock('../../logic/use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
+jest.mock('../../../rule_management/logic/use_rule');
 jest.mock('@kbn/lists-plugin/public');
 
 const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
   ReturnType<typeof getExceptionBuilderComponentLazy>
 >;
 const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
-const mockUseAddOrUpdateException = useAddOrUpdateException as jest.Mock<
-  ReturnType<typeof useAddOrUpdateException>
->;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseCurrentUser = useCurrentUser as jest.Mock<Partial<ReturnType<typeof useCurrentUser>>>;
-const mockUseRuleAsync = useRuleAsync as jest.Mock;
+const mockFetchIndexPatterns = useFetchIndexPatterns as jest.Mock<
+  ReturnType<typeof useFetchIndexPatterns>
+>;
+const mockUseAddOrUpdateException = useCreateOrUpdateException as jest.Mock<
+  ReturnType<typeof useCreateOrUpdateException>
+>;
+const mockUseFindExceptionListReferences = useFindExceptionListReferences as jest.Mock;
 
 describe('When the edit exception modal is opened', () => {
-  const ruleName = 'test rule';
-
   beforeEach(() => {
     const emptyComp = <span data-test-subj="edit-exception-builder" />;
     mockGetExceptionBuilderComponentLazy.mockReturnValue(emptyComp);
@@ -66,19 +76,42 @@ describe('When the edit exception modal is opened', () => {
       loading: false,
       signalIndexName: 'test-signal',
     });
-    mockUseAddOrUpdateException.mockImplementation(() => [{ isLoading: false }, jest.fn()]);
+    mockUseAddOrUpdateException.mockImplementation(() => [false, jest.fn()]);
     mockUseFetchIndex.mockImplementation(() => [
       false,
       {
         indexPatterns: createStubIndexPattern({
           spec: {
             id: '1234',
-            title: 'logstash-*',
+            title: 'filebeat-*',
             fields: {
-              response: {
-                name: 'response',
-                type: 'number',
-                esTypes: ['integer'],
+              'event.code': {
+                name: 'event.code',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+              },
+              'file.path.caseless': {
+                name: 'file.path.caseless',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+              },
+              subject_name: {
+                name: 'subject_name',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+              },
+              trusted: {
+                name: 'trusted',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+              },
+              'file.hash.sha256': {
+                name: 'file.hash.sha256',
+                type: 'string',
                 aggregatable: true,
                 searchable: true,
               },
@@ -88,9 +121,40 @@ describe('When the edit exception modal is opened', () => {
       },
     ]);
     mockUseCurrentUser.mockReturnValue({ username: 'test-username' });
-    mockUseRuleAsync.mockImplementation(() => ({
-      rule: getRulesSchemaMock(),
+    mockFetchIndexPatterns.mockImplementation(() => ({
+      isLoading: false,
+      indexPatterns: stubIndexPattern,
     }));
+    mockUseFindExceptionListReferences.mockImplementation(() => [
+      false,
+      false,
+      {
+        my_list_id: {
+          ...getExceptionListSchemaMock(),
+          id: '123',
+          list_id: 'my_list_id',
+          namespace_type: 'single',
+          type: ExceptionListTypeEnum.DETECTION,
+          name: 'My exception list',
+          referenced_rules: [
+            {
+              id: '345',
+              name: 'My rule',
+              rule_id: 'my_rule_id',
+              exception_lists: [
+                {
+                  id: '1234',
+                  list_id: 'my_list_id',
+                  namespace_type: 'single',
+                  type: ExceptionListTypeEnum.DETECTION,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      jest.fn(),
+    ]);
   });
 
   afterEach(() => {
@@ -100,24 +164,22 @@ describe('When the edit exception modal is opened', () => {
 
   describe('when the modal is loading', () => {
     it('renders the loading spinner', async () => {
-      mockUseFetchIndex.mockImplementation(() => [
-        true,
-        {
-          indexPatterns: stubIndexPattern,
-        },
-      ]);
+      // Mocks one of the hooks as loading
+      mockFetchIndexPatterns.mockImplementation(() => ({
+        isLoading: true,
+        indexPatterns: { fields: [], title: 'foo' },
+      }));
+
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <TestProviders>
           <EditExceptionFlyout
-            ruleIndices={[]}
-            ruleId="123"
-            ruleName={ruleName}
-            exceptionListType={'endpoint'}
+            list={getExceptionListSchemaMock()}
+            itemToEdit={getExceptionListItemSchemaMock()}
+            showAlertCloseOptions
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
-            exceptionItem={getExceptionListItemSchemaMock()}
           />
-        </ThemeProvider>
+        </TestProviders>
       );
       await waitFor(() => {
         expect(wrapper.find('[data-test-subj="loadingEditExceptionFlyout"]').exists()).toBeTruthy();
@@ -125,69 +187,198 @@ describe('When the edit exception modal is opened', () => {
     });
   });
 
-  describe('when an endpoint exception with exception data is passed', () => {
-    describe('when exception entry fields are included in the index pattern', () => {
+  describe('exception list type of "endpoint"', () => {
+    mockUseFindExceptionListReferences.mockImplementation(() => [
+      false,
+      false,
+      {
+        endpoint_list: {
+          ...getExceptionListSchemaMock(),
+          id: '123',
+          list_id: 'endpoint_list',
+          namespace_type: 'agnostic',
+          type: ExceptionListTypeEnum.ENDPOINT,
+          name: 'My exception list',
+          referenced_rules: [
+            {
+              id: '345',
+              name: 'My rule',
+              rule_id: 'my_rule_id',
+              exception_lists: [
+                {
+                  id: 'endpoint_list',
+                  list_id: 'endpoint_list',
+                  namespace_type: 'single',
+                  type: ExceptionListTypeEnum.ENDPOINT,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      jest.fn(),
+    ]);
+
+    describe('common functionality to test', () => {
+      let wrapper: ReactWrapper;
+      beforeEach(async () => {
+        wrapper = mount(
+          <TestProviders>
+            <EditExceptionFlyout
+              list={{
+                ...getExceptionListSchemaMock(),
+                type: 'endpoint',
+                namespace_type: 'agnostic',
+                list_id: 'endpoint_list',
+                id: 'endpoint_list',
+              }}
+              rule={
+                {
+                  ...getRulesSchemaMock(),
+                  exceptions_list: [
+                    {
+                      id: 'endpoint_list',
+                      list_id: 'endpoint_list',
+                      type: 'endpoint',
+                      namespace_type: 'agnostic',
+                    },
+                  ],
+                } as Rule
+              }
+              itemToEdit={getExceptionListItemSchemaMock()}
+              showAlertCloseOptions
+              onCancel={jest.fn()}
+              onConfirm={jest.fn()}
+            />
+          </TestProviders>
+        );
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+        );
+      });
+
+      it('displays proper flyout and button text', () => {
+        expect(wrapper.find('[data-test-subj="exceptionFlyoutTitle"]').at(1).text()).toEqual(
+          i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
+        );
+        expect(wrapper.find('[data-test-subj="editExceptionConfirmButton"]').at(1).text()).toEqual(
+          i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
+        );
+      });
+
+      it('should render item name input', () => {
+        expect(wrapper.find('[data-test-subj="exceptionFlyoutNameInput"]').exists()).toBeTruthy();
+      });
+
+      it('should render OS info', () => {
+        expect(wrapper.find('[data-test-subj="exceptionItemSelectedOs"]').exists()).toBeTruthy();
+      });
+
+      it('should render the exception builder', () => {
+        expect(wrapper.find('ExceptionsConditions').exists()).toBeTruthy();
+      });
+
+      it('does NOT render section showing list or rule item assigned to', () => {
+        expect(
+          wrapper.find('[data-test-subj="exceptionItemLinkedToListSection"]').exists()
+        ).toBeFalsy();
+        expect(
+          wrapper.find('[data-test-subj="exceptionItemLinkedToRuleSection"]').exists()
+        ).toBeFalsy();
+      });
+
+      it('should contain the endpoint specific documentation text', () => {
+        expect(wrapper.find('[data-test-subj="addExceptionEndpointText"]').exists()).toBeTruthy();
+      });
+
+      it('should NOT display the eql sequence callout', () => {
+        expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).not.toBeTruthy();
+      });
+    });
+
+    describe('when exception entry fields and index allow user to bulk close', () => {
       let wrapper: ReactWrapper;
       beforeEach(async () => {
         const exceptionItemMock = {
           ...getExceptionListItemSchemaMock(),
           entries: [
-            { field: 'response', operator: 'included', type: 'match', value: '3' },
+            { field: 'file.hash.sha256', operator: 'included', type: 'match' },
           ] as EntriesArray,
         };
         wrapper = mount(
           <ThemeProvider theme={mockTheme}>
             <EditExceptionFlyout
-              ruleIndices={['filebeat-*']}
-              ruleId="123"
-              ruleName={ruleName}
-              exceptionListType={'endpoint'}
+              rule={
+                {
+                  ...getRulesSchemaMock(),
+                  exceptions_list: [
+                    {
+                      id: 'endpoint_list',
+                      list_id: 'endpoint_list',
+                      type: 'endpoint',
+                      namespace_type: 'agnostic',
+                    },
+                  ],
+                } as Rule
+              }
+              list={{
+                ...getExceptionListSchemaMock(),
+                type: 'endpoint',
+                namespace_type: 'agnostic',
+                list_id: 'endpoint_list',
+                id: 'endpoint_list',
+              }}
+              itemToEdit={exceptionItemMock}
+              showAlertCloseOptions
               onCancel={jest.fn()}
               onConfirm={jest.fn()}
-              exceptionItem={exceptionItemMock}
             />
           </ThemeProvider>
         );
         const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-        await waitFor(() => {
-          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
-        });
+        await waitFor(() =>
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+        );
       });
-      it('has the edit exception button enabled', () => {
-        expect(
-          wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
-        ).not.toBeDisabled();
-      });
+
       it('should have the bulk close checkbox enabled', () => {
         expect(
-          wrapper
-            .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
-            .getDOMNode()
+          wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
         ).not.toBeDisabled();
-      });
-      it('renders the exceptions builder', () => {
-        expect(wrapper.find('[data-test-subj="edit-exception-builder"]').exists()).toBeTruthy();
-      });
-      it('should contain the endpoint specific documentation text', () => {
-        expect(
-          wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()
-        ).toBeTruthy();
       });
     });
 
-    describe("when exception entry fields aren't included in the index pattern", () => {
+    describe('when entry has non ecs type', () => {
       let wrapper: ReactWrapper;
       beforeEach(async () => {
         wrapper = mount(
           <ThemeProvider theme={mockTheme}>
             <EditExceptionFlyout
-              ruleIndices={['filebeat-*']}
-              ruleId="123"
-              ruleName={ruleName}
-              exceptionListType={'endpoint'}
+              list={{
+                ...getExceptionListSchemaMock(),
+                type: 'endpoint',
+                namespace_type: 'agnostic',
+                list_id: 'endpoint_list',
+                id: 'endpoint_list',
+              }}
+              rule={
+                {
+                  ...getRulesSchemaMock(),
+                  exceptions_list: [
+                    {
+                      id: 'endpoint_list',
+                      list_id: 'endpoint_list',
+                      type: 'endpoint',
+                      namespace_type: 'agnostic',
+                    },
+                  ],
+                } as Rule
+              }
+              itemToEdit={getExceptionListItemSchemaMock()}
+              showAlertCloseOptions
               onCancel={jest.fn()}
               onConfirm={jest.fn()}
-              exceptionItem={getExceptionListItemSchemaMock()}
             />
           </ThemeProvider>
         );
@@ -196,182 +387,310 @@ describe('When the edit exception modal is opened', () => {
           callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
         });
       });
-      it('has the edit exception button enabled', () => {
-        expect(
-          wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
-        ).not.toBeDisabled();
-      });
+
       it('should have the bulk close checkbox disabled', () => {
         expect(
-          wrapper
-            .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
-            .getDOMNode()
+          wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
         ).toBeDisabled();
       });
-      it('renders the exceptions builder', () => {
-        expect(wrapper.find('[data-test-subj="edit-exception-builder"]').exists()).toBeTruthy();
-      });
-      it('should contain the endpoint specific documentation text', () => {
-        expect(
-          wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()
-        ).toBeTruthy();
-      });
+    });
+  });
+
+  describe('exception list type of "detection"', () => {
+    let wrapper: ReactWrapper;
+    beforeEach(async () => {
+      wrapper = mount(
+        <TestProviders>
+          <EditExceptionFlyout
+            list={{
+              ...getExceptionListSchemaMock(),
+              type: 'detection',
+              namespace_type: 'single',
+              list_id: 'my_list_id',
+              id: '1234',
+            }}
+            rule={
+              {
+                ...getRulesSchemaMock(),
+                id: '345',
+                name: 'My rule',
+                rule_id: 'my_rule_id',
+                exceptions_list: [
+                  {
+                    id: '1234',
+                    list_id: 'my_list_id',
+                    type: 'detection',
+                    namespace_type: 'single',
+                  },
+                ],
+              } as Rule
+            }
+            itemToEdit={getExceptionListItemSchemaMock()}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
+    });
+
+    it('displays proper flyout and button text', () => {
+      expect(wrapper.find('[data-test-subj="exceptionFlyoutTitle"]').at(1).text()).toEqual(
+        i18n.EDIT_EXCEPTION_TITLE
+      );
+      expect(wrapper.find('[data-test-subj="editExceptionConfirmButton"]').at(1).text()).toEqual(
+        i18n.EDIT_EXCEPTION_TITLE
+      );
+    });
+
+    it('should render item name input', () => {
+      expect(wrapper.find('[data-test-subj="exceptionFlyoutNameInput"]').exists()).toBeTruthy();
+    });
+
+    it('should not render OS info', () => {
+      expect(wrapper.find('[data-test-subj="exceptionItemSelectedOs"]').exists()).toBeFalsy();
+    });
+
+    it('should render the exception builder', () => {
+      expect(wrapper.find('ExceptionsConditions').exists()).toBeTruthy();
+    });
+
+    it('does render section showing list item is assigned to', () => {
+      expect(
+        wrapper.find('[data-test-subj="exceptionItemLinkedToListSection"]').exists()
+      ).toBeTruthy();
+    });
+
+    it('does NOT render section showing rule item is assigned to', () => {
+      expect(
+        wrapper.find('[data-test-subj="exceptionItemLinkedToRuleSection"]').exists()
+      ).toBeFalsy();
+    });
+
+    it('should NOT contain the endpoint specific documentation text', () => {
+      expect(wrapper.find('[data-test-subj="addExceptionEndpointText"]').exists()).toBeFalsy();
+    });
+
+    it('should NOT display the eql sequence callout', () => {
+      expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).toBeFalsy();
+    });
+  });
+
+  describe('exception list type of "rule_default"', () => {
+    mockUseFindExceptionListReferences.mockImplementation(() => [
+      false,
+      false,
+      {
+        my_list_id: {
+          ...getExceptionListSchemaMock(),
+          id: '123',
+          list_id: 'my_list_id',
+          namespace_type: 'single',
+          type: ExceptionListTypeEnum.RULE_DEFAULT,
+          name: 'My exception list',
+          referenced_rules: [
+            {
+              id: '345',
+              name: 'My rule',
+              rule_id: 'my_rule_id',
+              exception_lists: [
+                {
+                  id: '1234',
+                  list_id: 'my_list_id',
+                  namespace_type: 'single',
+                  type: ExceptionListTypeEnum.RULE_DEFAULT,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      jest.fn(),
+    ]);
+
+    let wrapper: ReactWrapper;
+    beforeEach(async () => {
+      wrapper = mount(
+        <TestProviders>
+          <EditExceptionFlyout
+            list={{
+              ...getExceptionListSchemaMock(),
+              type: 'rule_default',
+              namespace_type: 'single',
+              list_id: 'my_list_id',
+              id: '1234',
+            }}
+            rule={
+              {
+                ...getRulesSchemaMock(),
+                id: '345',
+                name: 'My rule',
+                rule_id: 'my_rule_id',
+                exceptions_list: [
+                  {
+                    id: '1234',
+                    list_id: 'my_list_id',
+                    type: 'rule_default',
+                    namespace_type: 'single',
+                  },
+                ],
+              } as Rule
+            }
+            itemToEdit={getExceptionListItemSchemaMock()}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
+    });
+
+    it('displays proper flyout and button text', () => {
+      expect(wrapper.find('[data-test-subj="exceptionFlyoutTitle"]').at(1).text()).toEqual(
+        i18n.EDIT_EXCEPTION_TITLE
+      );
+      expect(wrapper.find('[data-test-subj="editExceptionConfirmButton"]').at(1).text()).toEqual(
+        i18n.EDIT_EXCEPTION_TITLE
+      );
+    });
+
+    it('should render item name input', () => {
+      expect(wrapper.find('[data-test-subj="exceptionFlyoutNameInput"]').exists()).toBeTruthy();
+    });
+
+    it('should not render OS info', () => {
+      expect(wrapper.find('[data-test-subj="exceptionItemSelectedOs"]').exists()).toBeFalsy();
+    });
+
+    it('should render the exception builder', () => {
+      expect(wrapper.find('ExceptionsConditions').exists()).toBeTruthy();
+    });
+
+    it('does NOT render section showing list item is assigned to', () => {
+      expect(
+        wrapper.find('[data-test-subj="exceptionItemLinkedToListSection"]').exists()
+      ).toBeFalsy();
+    });
+
+    it('does render section showing rule item is assigned to', () => {
+      expect(
+        wrapper.find('[data-test-subj="exceptionItemLinkedToRuleSection"]').exists()
+      ).toBeTruthy();
+    });
+
+    it('should NOT contain the endpoint specific documentation text', () => {
+      expect(wrapper.find('[data-test-subj="addExceptionEndpointText"]').exists()).toBeFalsy();
+    });
+
+    it('should NOT display the eql sequence callout', () => {
+      expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).toBeFalsy();
     });
   });
 
   describe('when an exception assigned to a sequence eql rule type is passed', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
-      (useRuleAsync as jest.Mock).mockImplementation(() => ({
-        rule: {
-          ...getRulesEqlSchemaMock(),
-          query:
-            'sequence [process where process.name = "test.exe"] [process where process.name = "explorer.exe"]',
-        },
-      }));
       wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <TestProviders>
           <EditExceptionFlyout
-            ruleIndices={['filebeat-*']}
-            ruleId="123"
-            ruleName={ruleName}
-            exceptionListType={'detection'}
+            list={{
+              ...getExceptionListSchemaMock(),
+              type: 'detection',
+              namespace_type: 'single',
+              list_id: 'my_list_id',
+              id: '1234',
+            }}
+            rule={
+              {
+                ...getRulesEqlSchemaMock(),
+                id: '345',
+                name: 'My rule',
+                rule_id: 'my_rule_id',
+                query:
+                  'sequence [process where process.name = "test.exe"] [process where process.name = "explorer.exe"]',
+                exceptions_list: [
+                  {
+                    id: '1234',
+                    list_id: 'my_list_id',
+                    type: 'detection',
+                    namespace_type: 'single',
+                  },
+                ],
+              } as Rule
+            }
+            itemToEdit={getExceptionListItemSchemaMock()}
+            showAlertCloseOptions
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
-            exceptionItem={getExceptionListItemSchemaMock()}
           />
-        </ThemeProvider>
+        </TestProviders>
       );
       const callProps = (getExceptionBuilderComponentLazy as jest.Mock).mock.calls[0][0];
       await waitFor(() => {
         callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
       });
     });
-    it('has the edit exception button enabled', () => {
-      expect(
-        wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
-      ).not.toBeDisabled();
-    });
-    it('renders the exceptions builder', () => {
-      expect(wrapper.find('[data-test-subj="edit-exception-builder"]').exists()).toBeTruthy();
-    });
-    it('should not contain the endpoint specific documentation text', () => {
-      expect(wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()).toBeFalsy();
-    });
+
     it('should have the bulk close checkbox disabled', () => {
       expect(
-        wrapper
-          .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
-          .getDOMNode()
+        wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
       ).toBeDisabled();
     });
+
     it('should display the eql sequence callout', () => {
-      expect(wrapper.find('[data-test-subj="eql-sequence-callout"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).toBeTruthy();
     });
   });
 
-  describe('when a detection exception with entries is passed', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(async () => {
-      wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+  describe('error states', () => {
+    test('when there are exception builder errors has submit button disabled', async () => {
+      const wrapper = mount(
+        <TestProviders>
           <EditExceptionFlyout
-            ruleIndices={['filebeat-*']}
-            ruleId="123"
-            ruleName={ruleName}
-            exceptionListType={'detection'}
+            list={{
+              ...getExceptionListSchemaMock(),
+              type: 'detection',
+              namespace_type: 'single',
+              list_id: 'my_list_id',
+              id: '1234',
+            }}
+            rule={
+              {
+                ...getRulesSchemaMock(),
+                id: '345',
+                name: 'My rule',
+                rule_id: 'my_rule_id',
+                exceptions_list: [
+                  {
+                    id: '1234',
+                    list_id: 'my_list_id',
+                    type: 'detection',
+                    namespace_type: 'single',
+                  },
+                ],
+              } as Rule
+            }
+            itemToEdit={getExceptionListItemSchemaMock()}
+            showAlertCloseOptions
             onCancel={jest.fn()}
             onConfirm={jest.fn()}
-            exceptionItem={getExceptionListItemSchemaMock()}
           />
-        </ThemeProvider>
+        </TestProviders>
       );
       const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-      await waitFor(() => {
-        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
-      });
-    });
-    it('has the edit exception button enabled', () => {
+      await waitFor(() => callProps.onChange({ exceptionItems: [], errorExists: true }));
+
       expect(
-        wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
-      ).not.toBeDisabled();
-    });
-    it('renders the exceptions builder', () => {
-      expect(wrapper.find('[data-test-subj="edit-exception-builder"]').exists()).toBeTruthy();
-    });
-    it('should not contain the endpoint specific documentation text', () => {
-      expect(wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()).toBeFalsy();
-    });
-    it('should have the bulk close checkbox disabled', () => {
-      expect(
-        wrapper
-          .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
-          .getDOMNode()
+        wrapper.find('button[data-test-subj="editExceptionConfirmButton"]').getDOMNode()
       ).toBeDisabled();
     });
-    it('should not display the eql sequence callout', () => {
-      expect(wrapper.find('[data-test-subj="eql-sequence-callout"]').exists()).not.toBeTruthy();
-    });
-  });
-
-  describe('when an exception with no entries is passed', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(async () => {
-      const exceptionItemMock = { ...getExceptionListItemSchemaMock(), entries: [] };
-      wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <EditExceptionFlyout
-            ruleIndices={['filebeat-*']}
-            ruleId="123"
-            ruleName={ruleName}
-            exceptionListType={'detection'}
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
-            exceptionItem={exceptionItemMock}
-          />
-        </ThemeProvider>
-      );
-      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-      await waitFor(() => {
-        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
-      });
-    });
-    it('has the edit exception button disabled', () => {
-      expect(
-        wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
-      ).toBeDisabled();
-    });
-    it('renders the exceptions builder', () => {
-      expect(wrapper.find('[data-test-subj="edit-exception-builder"]').exists()).toBeTruthy();
-    });
-    it('should have the bulk close checkbox disabled', () => {
-      expect(
-        wrapper
-          .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
-          .getDOMNode()
-      ).toBeDisabled();
-    });
-  });
-
-  test('when there are exception builder errors has the add exception button disabled', async () => {
-    const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <EditExceptionFlyout
-          ruleId="123"
-          ruleIndices={['filebeat-*']}
-          ruleName={ruleName}
-          exceptionListType={'endpoint'}
-          exceptionItem={{ ...getExceptionListItemSchemaMock(), entries: [] }}
-          onCancel={jest.fn()}
-          onConfirm={jest.fn()}
-        />
-      </ThemeProvider>
-    );
-    const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-    await waitFor(() => callProps.onChange({ exceptionItems: [], errorExists: true }));
-
-    expect(
-      wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
-    ).toBeDisabled();
   });
 });

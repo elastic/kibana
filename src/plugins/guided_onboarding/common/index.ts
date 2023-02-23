@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'guidedOnboarding';
-export const PLUGIN_NAME = 'guidedOnboarding';
-
-export const API_BASE_PATH = '/api/guided_onboarding';
+export { PLUGIN_ID, PLUGIN_NAME, API_BASE_PATH } from './constants';
+export type { PluginStatus, PluginState, GuidesConfig } from './types';

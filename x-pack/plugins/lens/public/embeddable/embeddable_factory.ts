@@ -7,6 +7,7 @@
 
 import type {
   Capabilities,
+  CoreStart,
   HttpSetup,
   IUiSettingsClient,
   ThemeServiceStart,
@@ -23,21 +24,21 @@ import {
   IContainer,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
-import { Document } from '../persistence/saved_object_store';
-import { LensAttributeService } from '../lens_attribute_service';
+import type { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
+import type { Document } from '../persistence/saved_object_store';
+import type { LensAttributeService } from '../lens_attribute_service';
 import { DOC_TYPE } from '../../common/constants';
-import { ErrorMessage } from '../editor_frame_service/types';
 import { extract, inject } from '../../common/embeddable_factory';
-import { DatasourceMap, VisualizationMap } from '../types';
+import type { DatasourceMap, IndexPatternMap, IndexPatternRef, VisualizationMap } from '../types';
 
 export interface LensEmbeddableStartServices {
   data: DataPublicPluginStart;
   timefilter: TimefilterContract;
   coreHttp: HttpSetup;
+  coreStart: CoreStart;
   inspector: InspectorStart;
   attributeService: LensAttributeService;
   capabilities: RecursiveReadonly<Capabilities>;
@@ -45,9 +46,11 @@ export interface LensEmbeddableStartServices {
   dataViews: DataViewsContract;
   uiActions?: UiActionsStart;
   usageCollection?: UsageCollectionSetup;
-  documentToExpression: (
-    doc: Document
-  ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  documentToExpression: (doc: Document) => Promise<{
+    ast: Ast | null;
+    indexPatterns: IndexPatternMap;
+    indexPatternRefs: IndexPatternRef[];
+  }>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -79,7 +82,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
 
   getDisplayName() {
     return i18n.translate('xpack.lens.embeddableDisplayName', {
-      defaultMessage: 'lens',
+      defaultMessage: 'Lens',
     });
   }
 
@@ -106,6 +109,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         datasourceMap,
         uiActions,
         coreHttp,
+        coreStart,
         attributeService,
         dataViews,
         capabilities,
@@ -139,6 +143,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
             navLinks: capabilities.navLinks,
             discover: capabilities.discover,
           },
+          coreStart,
           usageCollection,
           theme,
           spaces,

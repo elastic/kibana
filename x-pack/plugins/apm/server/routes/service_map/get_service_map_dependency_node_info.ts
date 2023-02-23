@@ -5,26 +5,30 @@
  * 2.0.
  */
 
-import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ApmDocumentType } from '../../../common/document_type';
 import {
-  EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-} from '../../../common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../common/event_outcome';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { withApmSpan } from '../../utils/with_apm_span';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
-import { Setup } from '../../lib/helpers/setup_request';
-import { getBucketSize } from '../../lib/helpers/get_bucket_size';
-import { getFailedTransactionRateTimeSeries } from '../../lib/helpers/transaction_error_rate';
+} from '../../../common/es_fields/apm';
 import { NodeStats } from '../../../common/service_map';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
+import {
+  calculateFailedTransactionRate,
+  getFailedTransactionRateTimeSeries,
+  getOutcomeAggregation,
+} from '../../lib/helpers/transaction_error_rate';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 interface Options {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   environment: string;
   dependencyName: string;
   start: number;
@@ -35,13 +39,12 @@ interface Options {
 export function getServiceMapDependencyNodeInfo({
   environment,
   dependencyName,
-  setup,
+  apmEventClient,
   start,
   end,
   offset,
 }: Options): Promise<NodeStats> {
   return withApmSpan('get_service_map_dependency_node_stats', async () => {
-    const { apmEventClient } = setup;
     const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
       start,
       end,
@@ -61,9 +64,7 @@ export function getServiceMapDependencyNodeInfo({
       count: {
         sum: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT },
       },
-      outcomes: {
-        terms: { field: EVENT_OUTCOME, include: [EventOutcome.failure] },
-      },
+      ...getOutcomeAggregation(ApmDocumentType.ServiceDestinationMetric),
     };
 
     const response = await apmEventClient.search(
@@ -78,6 +79,7 @@ export function getServiceMapDependencyNodeInfo({
           query: {
             bool: {
               filter: [
+                ...getDocumentTypeFilterForServiceDestinationStatistics(true),
                 {
                   term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName },
                 },
@@ -103,11 +105,13 @@ export function getServiceMapDependencyNodeInfo({
     );
 
     const count = response.aggregations?.count.value ?? 0;
-    const failedTransactionsRateCount =
-      response.aggregations?.outcomes.buckets[0]?.doc_count ?? 0;
+
     const latencySum = response.aggregations?.latency_sum.value ?? 0;
 
-    const avgFailedTransactionsRate = failedTransactionsRateCount / count;
+    const avgFailedTransactionsRate = response.aggregations
+      ? calculateFailedTransactionRate(response.aggregations)
+      : null;
+
     const latency = latencySum / count;
     const throughput = calculateThroughputWithRange({
       start: startWithOffset,

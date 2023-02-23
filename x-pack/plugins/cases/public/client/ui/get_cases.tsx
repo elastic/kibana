@@ -8,7 +8,8 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import type { CasesProps } from '../../components/app';
-import { CasesProvider, CasesContextProps } from '../../components/cases_context';
+import type { CasesContextProps } from '../../components/cases_context';
+import { CasesProvider } from '../../components/cases_context';
 
 type GetCasesPropsInternal = CasesProps & CasesContextProps;
 export type GetCasesProps = Omit<

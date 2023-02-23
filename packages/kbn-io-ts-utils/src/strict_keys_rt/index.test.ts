@@ -11,9 +11,15 @@ import { isRight, isLeft } from 'fp-ts/lib/Either';
 import { strictKeysRt } from '.';
 import { jsonRt } from '../json_rt';
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isoToEpochRt } from '../iso_to_epoch_rt';
 
 describe('strictKeysRt', () => {
   it('correctly and deeply validates object keys', () => {
+    const timeWindowRt = t.union([
+      t.type({ duration: t.string }),
+      t.type({ start_time: isoToEpochRt }),
+    ]);
+
     const metricQueryRt = t.union(
       [
         t.type({
@@ -179,6 +185,21 @@ describe('strictKeysRt', () => {
               },
             },
           },
+        ],
+      },
+      {
+        type: t.type({ body: timeWindowRt }),
+        passes: [
+          { body: { duration: '1d' } },
+          { body: { start_time: '2022-05-20T08:10:15.000Z' } },
+        ],
+        fails: [
+          { body: { duration: '1d', start_time: '2022-05-20T08:10:15.000Z' } },
+          { body: { duration: '1d', unknownKey: '' } },
+          { body: { start_time: '2022-05-20T08:10:15.000Z', unknownKey: '' } },
+          { body: { unknownKey: '' } },
+          { body: { start_time: 'invalid' } },
+          { body: { duration: false } },
         ],
       },
     ];

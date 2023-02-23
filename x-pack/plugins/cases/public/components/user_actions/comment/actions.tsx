@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import classNames from 'classnames';
-import { ThemeContext } from 'styled-components';
 
-import { EuiToken } from '@elastic/eui';
-import { CommentResponseActionsType } from '../../../../common/api';
-import { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import type { CommentResponseActionsType } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
-import { SnakeToCamelCase } from '../../../../common/types';
+import type { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionCopyLink } from '../copy_link';
 import { MarkdownRenderer } from '../../markdown_editor';
 import { ContentWrapper } from '../markdown_form';
@@ -54,7 +52,7 @@ export const createActionAttachmentUserActionBuilder = ({
         ),
         'data-test-subj': 'endpoint-action',
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-        timelineAvatar: <ActionIcon actionType={comment.actions.type} />,
+        timelineAvatar: comment.actions.type === 'isolate' ? 'lock' : 'lockOpen',
         actions: <UserActionCopyLink id={comment.id} />,
         children: comment.comment.trim().length > 0 && (
           <ContentWrapper data-test-subj="user-action-markdown">
@@ -65,21 +63,3 @@ export const createActionAttachmentUserActionBuilder = ({
     ];
   },
 });
-
-const ActionIcon = React.memo<{
-  actionType: string;
-}>(({ actionType }) => {
-  const theme = useContext(ThemeContext);
-  return (
-    <EuiToken
-      style={{ marginTop: '8px' }}
-      iconType={actionType === 'isolate' ? 'lock' : 'lockOpen'}
-      size="m"
-      shape="circle"
-      color={theme.eui.euiColorLightestShade}
-      data-test-subj="endpoint-action-icon"
-    />
-  );
-});
-
-ActionIcon.displayName = 'ActionIcon';

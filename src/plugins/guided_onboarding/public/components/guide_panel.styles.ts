@@ -8,6 +8,10 @@
 
 import { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
+import panelBgTop from '../../assets/panel_bg_top.svg';
+import panelBgTopDark from '../../assets/panel_bg_top_dark.svg';
+import panelBgBottom from '../../assets/panel_bg_bottom.svg';
+import panelBgBottomDark from '../../assets/panel_bg_bottom_dark.svg';
 
 /**
  *
@@ -16,32 +20,55 @@ import { css } from '@emotion/react';
  * In order to leverage a11y features, we are using the EuiFlyout and applying customizations
  * See https://github.com/elastic/eui/issues/6241 for more details
  */
-export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
+export const getGuidePanelStyles = ({
+  euiTheme,
+  isDarkTheme,
+}: {
+  euiTheme: EuiThemeComputed;
+  isDarkTheme: boolean;
+}) => ({
+  setupButton: css`
+    margin-right: ${euiTheme.size.m};
+  `,
+  wellDoneAnimatedPrompt: css`
+    text-align: left;
+  `,
   flyoutOverrides: {
+    flyoutHeader: css`
+      background: url(${isDarkTheme ? panelBgTopDark : panelBgTop}) top right no-repeat;
+    `,
     flyoutContainer: css`
       top: 55px !important;
-      bottom: 25px !important;
-      right: 128px;
+      // Unsetting bottom and height default values to create auto height
+      bottom: unset !important;
+      right: calc(${euiTheme.size.s} + 128px); // Accounting for margin on button
       border-radius: 6px;
-      width: 480px;
-      height: auto;
       animation: euiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1);
       box-shadow: none;
-      "@media only screen and (max-width: 574px)": {
-        right: 25px;
-        width: 100%;
-      },
+      max-height: 76vh;
+      @media (max-width: ${euiTheme.breakpoint.s}px) {
+        right: 25px !important;
+      }
     `,
     flyoutBody: css`
+      overflow: auto;
       .euiFlyoutBody__overflowContent {
         width: 480px;
         padding-top: 10px;
+        @media (max-width: ${euiTheme.breakpoint.s}px) {
+          width: 100%;
+        }
       }
     `,
     flyoutFooter: css`
       border-radius: 0 0 6px 6px;
-      background: ${euiTheme.colors.ghost};
+      background: url(${isDarkTheme ? panelBgBottomDark : panelBgBottom}) 0 7px no-repeat;
       padding: 24px 30px;
+      height: 125px;
+    `,
+    flyoutFooterLink: css`
+      color: ${euiTheme.colors.darkShade};
+      font-weight: 400;
     `,
   },
 });

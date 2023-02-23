@@ -34,6 +34,9 @@ import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
+import { GenerateApiKeyLogic } from '../../../../api/generate_api_key/generate_api_key_logic';
+import { IndexViewLogic } from '../../index_view_logic';
+
 import { GenerateApiKeyModalLogic } from './generate_api_key_modal.logic';
 
 interface GenerateApiKeyModalProps {
@@ -43,7 +46,9 @@ interface GenerateApiKeyModalProps {
 
 export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexName, onClose }) => {
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
-  const { setKeyName, makeRequest } = useActions(GenerateApiKeyModalLogic);
+  const { ingestionMethod } = useValues(IndexViewLogic);
+  const { setKeyName } = useActions(GenerateApiKeyModalLogic);
+  const { makeRequest } = useActions(GenerateApiKeyLogic);
 
   return (
     <EuiModal onClose={onClose}>
@@ -81,6 +86,7 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                       <EuiFlexItem>
                         <EuiFormRow label="Name your API key" fullWidth>
                           <EuiFieldText
+                            data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-editName`}
                             fullWidth
                             placeholder="Type a name for your API key"
                             onChange={(event) => setKeyName(event.currentTarget.value)}
@@ -91,6 +97,7 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
 
                       <EuiFlexItem grow={false}>
                         <EuiButton
+                          data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-generate `}
                           data-test-subj="generateApiKeyButton"
                           iconSide="left"
                           iconType="plusInCircle"
@@ -130,6 +137,7 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
+                            data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-download`}
                             aria-label={i18n.translate(
                               'xpack.enterpriseSearch.content.overview.generateApiKeyModal.csvDownloadButton',
                               { defaultMessage: 'Download API key' }
@@ -166,7 +174,10 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
         </>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>
+        <EuiButtonEmpty
+          data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-cancel`}
+          onClick={onClose}
+        >
           {i18n.translate('xpack.enterpriseSearch.content.overview.generateApiKeyModal.cancel', {
             defaultMessage: 'Cancel',
           })}

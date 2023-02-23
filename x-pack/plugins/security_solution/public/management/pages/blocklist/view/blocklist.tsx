@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinks } from '@kbn/doc-links';
 import { EuiLink } from '@elastic/eui';
 
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
 import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
@@ -83,6 +84,12 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
       defaultMessage: '"{itemName}" has been removed from blocklist.',
       values: { itemName },
     }),
+  emptyStateTitleNoEntries: i18n.translate(
+    'xpack.securitySolution.blocklist.emptyStateTitleNoEntries',
+    {
+      defaultMessage: 'There are no blocklist entries to display.',
+    }
+  ),
   emptyStateTitle: i18n.translate('xpack.securitySolution.blocklist.emptyStateTitle', {
     defaultMessage: 'Add your first blocklist entry',
   }),
@@ -100,6 +107,7 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
 };
 
 export const Blocklist = memo(() => {
+  const { canWriteBlocklist } = useUserPrivileges().endpointPrivileges;
   const http = useHttp();
   const blocklistsApiClient = BlocklistsApiClient.getInstance(http);
 
@@ -110,6 +118,9 @@ export const Blocklist = memo(() => {
       labels={BLOCKLIST_PAGE_LABELS}
       data-test-subj="blocklistPage"
       flyoutSize="l"
+      allowCardCreateAction={canWriteBlocklist}
+      allowCardEditAction={canWriteBlocklist}
+      allowCardDeleteAction={canWriteBlocklist}
     />
   );
 });

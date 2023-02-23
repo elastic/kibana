@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { createEsClientForTesting } from '@kbn/test';
 
 const plugin: Cypress.PluginConfig = (on, config) => {
@@ -35,6 +34,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
         query,
         ignore_unavailable: ignoreUnavailable,
         refresh: true,
+        conflicts: 'proceed',
       });
     },
   });

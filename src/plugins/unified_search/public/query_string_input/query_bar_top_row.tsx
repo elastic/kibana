@@ -27,9 +27,9 @@ import {
   useIsWithinBreakpoints,
   EuiSuperUpdateButton,
 } from '@elastic/eui';
-import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -43,10 +43,26 @@ import {
   DataViewPickerProps,
   OnSaveTextLanguageQueryProps,
 } from '../dataview_picker';
+
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { TextBasedLanguagesEditor } from './text_based_languages_editor';
 import './query_bar.scss';
+
+export const strings = {
+  getNeedsUpdatingLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
+      defaultMessage: 'Needs updating',
+    }),
+  getRefreshQueryLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refresh', {
+      defaultMessage: 'Refresh query',
+    }),
+  getRunQueryLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
+      defaultMessage: 'Run query',
+    }),
+};
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -188,6 +204,7 @@ export const QueryBarTopRow = React.memo(
       notifications,
       docLinks,
       http,
+      dataViews,
     } = kibana.services;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
@@ -388,6 +405,7 @@ export const QueryBarTopRow = React.memo(
             onRefreshChange={props.onRefreshChange}
             showUpdateButton={false}
             recentlyUsedRanges={recentlyUsedRanges}
+            locale={i18n.getLocale()}
             commonlyUsedRanges={commonlyUsedRanges}
             dateFormat={uiSettings.get('dateFormat')}
             isAutoRefreshOnly={showAutoRefreshOnly}
@@ -404,19 +422,9 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
       }
-      const buttonLabelUpdate = i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
-        defaultMessage: 'Needs updating',
-      });
-      const buttonLabelRefresh = i18n.translate(
-        'unifiedSearch.queryBarTopRow.submitButton.refresh',
-        {
-          defaultMessage: 'Refresh query',
-        }
-      );
-
-      const buttonLabelRun = i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
-        defaultMessage: 'Run query',
-      });
+      const buttonLabelUpdate = strings.getNeedsUpdatingLabel();
+      const buttonLabelRefresh = strings.getRefreshQueryLabel();
+      const buttonLabelRun = strings.getRunQueryLabel();
 
       const iconDirty = Boolean(isQueryLangSelected) ? 'play' : 'kqlFunction';
       const tooltipDirty = Boolean(isQueryLangSelected) ? buttonLabelRun : buttonLabelUpdate;
@@ -435,6 +443,7 @@ export const QueryBarTopRow = React.memo(
             size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
             color={props.isDirty ? 'success' : 'primary'}
             fill={props.isDirty}
+            needsUpdate={props.isDirty}
             data-test-subj="querySubmitButton"
             // @ts-expect-error Need to fix expecting `children` in EUI
             toolTipProps={{
@@ -550,6 +559,7 @@ export const QueryBarTopRow = React.memo(
                   docLinks,
                   http,
                   uiSettings,
+                  dataViews,
                 }}
               />
             </EuiFlexItem>

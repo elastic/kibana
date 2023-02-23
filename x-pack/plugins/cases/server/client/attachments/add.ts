@@ -16,28 +16,16 @@ import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
 } from '../../../common/utils/attachments';
-import { CaseResponse, CommentRequest, CommentRequestRt, throwErrors } from '../../../common/api';
+import type { CaseResponse } from '../../../common/api';
+import { CommentRequestRt, throwErrors } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
-
-/**
- * The arguments needed for creating a new attachment to a case.
- */
-export interface AddArgs {
-  /**
-   * The case ID that this attachment will be associated with
-   */
-  caseId: string;
-  /**
-   * The attachment values.
-   */
-  comment: CommentRequest;
-}
+import type { AddArgs } from './types';
 
 /**
  * Create an attachment to a case.

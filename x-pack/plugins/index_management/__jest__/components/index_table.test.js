@@ -421,13 +421,13 @@ describe('index table', () => {
     const rowIndex = 0;
     openMenuAndClickButton(rendered, rowIndex, 'forcemergeIndexMenuButton');
     snapshot(status(rendered, rowIndex));
-    expect(rendered.find('.euiModal').length).toBe(1);
+    expect(rendered.find('div.euiModal').length).toBe(1);
 
     let count = 0;
     store.subscribe(() => {
       if (count === 1) {
         snapshot(status(rendered, rowIndex));
-        expect(rendered.find('.euiModal').length).toBe(0);
+        expect(rendered.find('div.euiModal').length).toBe(0);
       }
       count++;
     });

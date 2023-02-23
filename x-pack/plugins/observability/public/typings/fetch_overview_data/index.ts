@@ -31,6 +31,7 @@ export interface FetchDataParams {
   bucketSize: number;
   // Bucket size in seconds (string)
   intervalString: string;
+  timeZone?: string;
 }
 
 export interface HasDataParams {

@@ -36,7 +36,7 @@ import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
-  defaultViewport: { width?: number };
+  defaultViewport: { width?: number; deviceScaleFactor?: number };
   openUrlTimeout: number;
 }
 
@@ -145,6 +145,7 @@ export class HeadlessChromiumDriverFactory {
       const viewport = {
         ...DEFAULT_VIEWPORT,
         width: defaultViewport.width ?? DEFAULT_VIEWPORT.width,
+        deviceScaleFactor: defaultViewport.deviceScaleFactor ?? DEFAULT_VIEWPORT.deviceScaleFactor,
       };
 
       logger.debug(
@@ -293,16 +294,14 @@ export class HeadlessChromiumDriverFactory {
    */
   private async getErrorMessage(message: ConsoleMessage): Promise<undefined | string> {
     for (const arg of message.args()) {
-      const errorMessage = await arg
-        .executionContext()
-        .evaluate<undefined | string>((_arg: unknown) => {
-          /* !! We are now in the browser context !! */
-          if (_arg instanceof Error) {
-            return _arg.message;
-          }
-          return undefined;
-          /* !! End of browser context !! */
-        }, arg);
+      const errorMessage = await arg.evaluate((_arg: unknown) => {
+        /* !! We are now in the browser context !! */
+        if (_arg instanceof Error) {
+          return _arg.message;
+        }
+        return undefined;
+        /* !! End of browser context !! */
+      }, arg);
       if (errorMessage) {
         return errorMessage;
       }

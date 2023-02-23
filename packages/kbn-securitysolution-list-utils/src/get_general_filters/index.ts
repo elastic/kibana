@@ -7,6 +7,7 @@
  */
 
 import { ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
+import { isArray } from 'lodash';
 import { get } from 'lodash/fp';
 import { SavedObjectType } from '../types';
 
@@ -17,11 +18,14 @@ export const getGeneralFilters = (
   return Object.keys(filters)
     .map((filterKey) => {
       const value = get(filterKey, filters);
-      if (value != null && value.trim() !== '') {
+      if (isArray(value) || (value != null && value.trim() !== '')) {
         const filtersByNamespace = namespaceTypes
           .map((namespace) => {
-            const fieldToSearch = filterKey === 'name' ? 'name.text' : filterKey;
-            return `${namespace}.attributes.${fieldToSearch}:${value}`;
+            const fieldToSearch =
+              filterKey === 'name' ? 'name.text' : filterKey === 'types' ? 'type' : filterKey;
+            return isArray(value)
+              ? value.map((val) => `${namespace}.attributes.${fieldToSearch}:${val}`).join(' OR ')
+              : `${namespace}.attributes.${fieldToSearch}:${value}`;
           })
           .join(' OR ');
         return `(${filtersByNamespace})`;

@@ -86,7 +86,7 @@ export const HeaderComponent: React.FC<Props> = ({
     [dispatch, timelineId]
   );
 
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { isLoading } = useDeepEqualSelector(
     (state) => getManageTimeline(state, timelineId) || { isLoading: false }
   );

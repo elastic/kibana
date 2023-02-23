@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -36,9 +36,9 @@ import { DescriptionListStyled, OverviewWrapper } from '../../../common/componen
 import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { useHostRiskScore } from '../../../risk_score/containers';
-import { RiskScore } from '../../../common/components/severity/common';
-import { RiskScoreHeaderTitle } from '../../../common/components/risk_score/risk_score_onboarding/risk_score_header_title';
+import { useRiskScore } from '../../../explore/containers/risk_score';
+import { RiskScore } from '../../../explore/components/risk_score/severity/common';
+import { RiskScoreHeaderTitle } from '../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -54,6 +54,7 @@ interface HostSummaryProps {
   endDate: string;
   narrowDateRange: NarrowDateRange;
   hostName: string;
+  jobNameById: Record<string, string | undefined>;
 }
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup)`
@@ -76,6 +77,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     narrowDateRange,
     startDate,
     hostName,
+    jobNameById,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -86,10 +88,18 @@ export const HostOverview = React.memo<HostSummaryProps>(
     );
     const { from, to } = useGlobalTime();
 
-    const [_, { data: hostRisk, isLicenseValid }] = useHostRiskScore({
+    const timerange = useMemo(
+      () => ({
+        from,
+        to,
+      }),
+      [from, to]
+    );
+    const { data: hostRisk, isLicenseValid } = useRiskScore({
       filterQuery,
+      riskEntity: RiskScoreEntity.host,
       skip: hostName == null,
-      timerange: { to, from },
+      timerange,
     });
 
     const getDefaultRenderer = useCallback(
@@ -112,7 +122,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
             <RiskScoreHeaderTitle
               title={i18n.HOST_RISK_SCORE}
               riskScoreEntity={RiskScoreEntity.host}
-              showTooltip={false}
             />
           ),
           description: (
@@ -128,7 +137,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
             <RiskScoreHeaderTitle
               title={i18n.HOST_RISK_CLASSIFICATION}
               riskScoreEntity={RiskScoreEntity.host}
-              showTooltip={false}
             />
           ),
           description: (
@@ -192,6 +200,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
                     endDate={endDate}
                     isLoading={isLoadingAnomaliesData}
                     narrowDateRange={narrowDateRange}
+                    jobNameById={jobNameById}
                   />
                 ),
               },
@@ -205,6 +214,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
         narrowDateRange,
         startDate,
         userPermissions,
+        jobNameById,
       ]
     );
 

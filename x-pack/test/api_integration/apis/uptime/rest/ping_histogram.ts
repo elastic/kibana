@@ -13,6 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('pingHistogram', () => {
     const supertest = getService('supertest');
 
+    const timeZone = 'UTC';
+
     it('will fetch histogram data for all monitors', async () => {
       const dateStart = '2019-09-11T03:31:04.380Z';
       const dateEnd = '2019-09-11T03:40:34.410Z';
@@ -20,6 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await supertest.get(API_URLS.PING_HISTOGRAM).query({
         dateStart,
         dateEnd,
+        timeZone,
       });
       const data = apiResponse.body;
 
@@ -35,6 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
         monitorId,
         dateStart,
         dateEnd,
+        timeZone,
       });
       const data = apiResponse.body;
 
@@ -51,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         dateStart,
         dateEnd,
         filters,
+        timeZone,
       });
       const data = apiResponse.body;
 

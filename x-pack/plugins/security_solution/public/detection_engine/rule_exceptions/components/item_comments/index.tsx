@@ -18,13 +18,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { Comment } from '@kbn/securitysolution-io-ts-list-types';
-import * as i18n from '../../utils/translations';
+import * as i18n from './translations';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { getFormattedComments } from '../../utils/helpers';
 
 interface ExceptionItemCommentsProps {
   exceptionItemComments?: Comment[];
   newCommentValue: string;
+  accordionTitle?: JSX.Element;
   newCommentOnChange: (value: string) => void;
 }
 
@@ -48,10 +49,27 @@ const CommentAccordion = styled(EuiAccordion)`
 export const ExceptionItemComments = memo(function ExceptionItemComments({
   exceptionItemComments,
   newCommentValue,
+  accordionTitle,
   newCommentOnChange,
 }: ExceptionItemCommentsProps) {
   const [shouldShowComments, setShouldShowComments] = useState(false);
   const currentUser = useCurrentUser();
+  const fullName = currentUser?.fullName;
+  const userName = currentUser?.username;
+  const userEmail = currentUser?.email;
+  const avatarName = useMemo(() => {
+    if (fullName && fullName.length > 0) {
+      return fullName;
+    }
+
+    // Did email second because for cloud users, username is a uuid,
+    // so favor using name or email prior to using the cloud generated id
+    if (userEmail && userEmail.length > 0) {
+      return userEmail;
+    }
+
+    return userName && userName.length > 0 ? userName : i18n.UNKNOWN_AVATAR_NAME;
+  }, [fullName, userEmail, userName]);
 
   const handleOnChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -63,10 +81,6 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
   const handleTriggerOnClick = useCallback((isOpen: boolean) => {
     setShouldShowComments(isOpen);
   }, []);
-
-  const shouldShowAccordion: boolean = useMemo(() => {
-    return exceptionItemComments != null && exceptionItemComments.length > 0;
-  }, [exceptionItemComments]);
 
   const commentsAccordionTitle = useMemo(() => {
     if (exceptionItemComments && exceptionItemComments.length > 0) {
@@ -92,34 +106,30 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
 
   return (
     <div>
-      {shouldShowAccordion && (
-        <CommentAccordion
-          id={'add-exception-comments-accordion'}
-          buttonClassName={COMMENT_ACCORDION_BUTTON_CLASS_NAME}
-          buttonContent={commentsAccordionTitle}
-          data-test-subj="ExceptionItemCommentsAccordion"
-          onToggle={(isOpen) => handleTriggerOnClick(isOpen)}
-        >
-          <EuiCommentList comments={formattedComments} />
-        </CommentAccordion>
-      )}
-      <EuiFlexGroup gutterSize={'none'}>
-        <EuiFlexItem grow={false}>
-          <MyAvatar
-            name={currentUser != null ? currentUser.username.toUpperCase() ?? '' : ''}
-            size="l"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiTextArea
-            placeholder={i18n.ADD_COMMENT_PLACEHOLDER}
-            aria-label="Comment Input"
-            value={newCommentValue}
-            onChange={handleOnChange}
-            fullWidth={true}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <CommentAccordion
+        id={'add-exception-comments-accordion'}
+        buttonClassName={COMMENT_ACCORDION_BUTTON_CLASS_NAME}
+        buttonContent={accordionTitle ?? commentsAccordionTitle}
+        data-test-subj="exceptionItemCommentsAccordion"
+        onToggle={(isOpen) => handleTriggerOnClick(isOpen)}
+      >
+        <EuiCommentList comments={formattedComments} />
+        <EuiFlexGroup gutterSize={'none'}>
+          <EuiFlexItem grow={false}>
+            <MyAvatar name={avatarName} size="l" data-test-subj="exceptionItemCommentAvatar" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiTextArea
+              placeholder={i18n.ADD_COMMENT_PLACEHOLDER}
+              aria-label="Comment Input"
+              value={newCommentValue}
+              onChange={handleOnChange}
+              fullWidth={true}
+              data-test-subj="newExceptionItemCommentTextArea"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </CommentAccordion>
     </div>
   );
 });

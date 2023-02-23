@@ -27,10 +27,9 @@ export type {
 export {
   enableInspectEsQueries,
   enableComparisonByDefault,
-  enableServiceGroups,
-  enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
   enableInfrastructureHostsView,
+  enableAgentExplorerView,
 } from '../common/ui_settings_keys';
 export { uptimeOverviewLocatorID } from '../common';
 
@@ -47,6 +46,7 @@ export * from './components/shared/action_menu';
 
 export type { UXMetrics } from './components/shared/core_web_vitals';
 export { DatePickerContextProvider } from './context/date_picker_context';
+
 export {
   getCoreVitalsComponent,
   HeaderMenuPortal,
@@ -56,6 +56,8 @@ export {
   SelectableUrlList,
   ExploratoryView,
   DatePicker,
+  LoadWhenInView,
+  ObservabilityAlertSearchBar,
 } from './components/shared';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';
@@ -79,6 +81,8 @@ export * from './typings';
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
+export { useTimeZone } from './hooks/use_time_zone';
+export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
 export type { LinkDescriptor } from './hooks/use_link_props';
@@ -115,5 +119,8 @@ export {
 } from './components/shared/exploratory_view/configurations/constants';
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
 export { fromQuery, toQuery } from './utils/url';
+export { getAlertSummaryTimeRange } from './utils/alert_summary_widget';
+export { calculateTimeRangeBucketSize } from './pages/overview/containers/overview_page/helpers';
 
 export type { NavigationSection } from './services/navigation_registry';
+export { convertTo } from '../common/utils/formatters/duration';

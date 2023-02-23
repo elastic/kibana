@@ -26,8 +26,8 @@ import { useTimelineEventsDetails } from '../../../containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
-import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import * as helpers from '../../../../common/lib/kuery';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -53,47 +53,7 @@ const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        theme: {
-          theme$: {},
-        },
-        application: {
-          navigateToApp: jest.fn(),
-          getUrlForApp: jest.fn(),
-        },
-        cases: {
-          ui: {
-            getCasesContext: () => mockCasesContext,
-          },
-        },
-        uiSettings: {
-          get: jest.fn(),
-        },
-        savedObjects: {
-          client: {},
-        },
-        triggersActionsUi: {
-          getFieldBrowser: jest.fn(),
-        },
-        timelines: {
-          getLastUpdated: jest.fn(),
-          getLoadingPanel: jest.fn(),
-          getUseDraggableKeyboardWrapper: () =>
-            jest.fn().mockReturnValue({
-              onBlur: jest.fn(),
-              onKeyDown: jest.fn(),
-            }),
-        },
-      },
-    }),
-    useGetUserSavedObjectPermissions: jest.fn(),
-  };
-});
+jest.mock('../../../../common/lib/kibana');
 
 describe('Timeline', () => {
   let props = {} as QueryTabContentComponentProps;
@@ -109,7 +69,11 @@ describe('Timeline', () => {
   const endDate = '2018-03-24T03:33:52.253Z';
 
   const mount = useMountAppended();
-
+  const getWrapper = async (childrenComponent: JSX.Element) => {
+    const wrapper = mount(childrenComponent);
+    await waitFor(() => wrapper.find('[data-test-subj="timelineHeader"]').exists());
+    return wrapper;
+  };
   beforeEach(() => {
     (useTimelineEvents as jest.Mock).mockReturnValue([
       false,
@@ -137,6 +101,7 @@ describe('Timeline', () => {
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: ' ',
+      kqlQueryLanguage: 'kuery',
       onEventClosed: jest.fn(),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
@@ -161,8 +126,8 @@ describe('Timeline', () => {
       spyCombineQueries.mockClear();
     });
 
-    test('should trim kqlQueryExpression', () => {
-      mount(
+    test('should trim kqlQueryExpression', async () => {
+      await getWrapper(
         <TestProviders>
           <QueryTabContentComponent {...props} />
         </TestProviders>
@@ -183,8 +148,8 @@ describe('Timeline', () => {
       expect(wrapper.find('QueryTabContentComponent')).toMatchSnapshot();
     });
 
-    test('it renders the timeline header', () => {
-      const wrapper = mount(
+    test('it renders the timeline header', async () => {
+      const wrapper = await getWrapper(
         <TestProviders>
           <QueryTabContentComponent {...props} />
         </TestProviders>
@@ -193,8 +158,8 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
     });
 
-    test('it renders the timeline table', () => {
-      const wrapper = mount(
+    test('it renders the timeline table', async () => {
+      const wrapper = await getWrapper(
         <TestProviders>
           <QueryTabContentComponent {...props} />
         </TestProviders>
@@ -205,7 +170,7 @@ describe('Timeline', () => {
       ).toEqual(true);
     });
 
-    test('it does render the timeline table when the source is loading with no events', () => {
+    test('it does render the timeline table when the source is loading with no events', async () => {
       (useSourcererDataView as jest.Mock).mockReturnValue({
         browserFields: {},
         loading: true,
@@ -213,7 +178,7 @@ describe('Timeline', () => {
         selectedPatterns: [],
         missingPatterns: [],
       });
-      const wrapper = mount(
+      const wrapper = await getWrapper(
         <TestProviders>
           <QueryTabContentComponent {...props} />
         </TestProviders>
@@ -225,8 +190,8 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
-    test('it does NOT render the timeline table when start is empty', () => {
-      const wrapper = mount(
+    test('it does NOT render the timeline table when start is empty', async () => {
+      const wrapper = await getWrapper(
         <TestProviders>
           <QueryTabContentComponent {...props} start={''} />
         </TestProviders>
@@ -238,8 +203,8 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
-    test('it does NOT render the timeline table when end is empty', () => {
-      const wrapper = mount(
+    test('it does NOT render the timeline table when end is empty', async () => {
+      const wrapper = await getWrapper(
         <TestProviders>
           <QueryTabContentComponent {...props} end={''} />
         </TestProviders>
@@ -251,8 +216,8 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
-    test('it does NOT render the paging footer when you do NOT have any data providers', () => {
-      const wrapper = mount(
+    test('it does NOT render the paging footer when you do NOT have any data providers', async () => {
+      const wrapper = await getWrapper(
         <TestProviders>
           <QueryTabContentComponent {...props} />
         </TestProviders>
@@ -261,8 +226,8 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
     });
 
-    it('it shows the timeline footer', () => {
-      const wrapper = mount(
+    it('it shows the timeline footer', async () => {
+      const wrapper = await getWrapper(
         <TestProviders>
           <QueryTabContentComponent {...props} />
         </TestProviders>

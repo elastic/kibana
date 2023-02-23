@@ -12,5 +12,6 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('endpoint', function () {
     loadTestFile(require.resolve('./agents_page'));
+    loadTestFile(require.resolve('./integration_smoke'));
   });
 }

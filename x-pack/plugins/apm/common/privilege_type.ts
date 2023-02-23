@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-export const enum PrivilegeType {
+export enum PrivilegeType {
   EVENT = 'event:write',
   AGENT_CONFIG = 'config_agent:read',
 }

@@ -30,7 +30,7 @@ describe('Error handling', () => {
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup);
     });
 
     const { component, find } = testBed;
@@ -55,7 +55,7 @@ describe('Error handling', () => {
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup);
     });
 
     const { component, find } = testBed;
@@ -78,7 +78,7 @@ describe('Error handling', () => {
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup);
     });
 
     const { component, find } = testBed;
@@ -98,7 +98,7 @@ describe('Error handling', () => {
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup);
     });
 
     const { component, find } = testBed;

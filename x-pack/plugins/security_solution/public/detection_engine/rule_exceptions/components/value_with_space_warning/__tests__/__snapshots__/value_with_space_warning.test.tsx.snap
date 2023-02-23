@@ -136,7 +136,7 @@ Object {
         class="c0"
       >
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <span
             color="warning"
@@ -152,7 +152,7 @@ Object {
       class="sc-AxjAm dmOCRD"
     >
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <span
           color="warning"

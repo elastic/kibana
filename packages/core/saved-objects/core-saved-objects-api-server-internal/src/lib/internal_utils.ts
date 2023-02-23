@@ -7,17 +7,14 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type {
-  ISavedObjectTypeRegistry,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-} from '@kbn/core-saved-objects-server';
 import {
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsRawDoc,
+  type SavedObjectsRawDocSource,
+  type SavedObject,
   SavedObjectsErrorHelpers,
-  SavedObjectsUtils,
-  ALL_NAMESPACES_STRING,
-} from '@kbn/core-saved-objects-utils-server';
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
   decodeRequestVersion,
   encodeHitVersion,
@@ -72,7 +69,7 @@ export function getBulkOperationError(
   id: string,
   rawResponse: {
     status: number;
-    error?: { type: string; reason: string; index: string };
+    error?: { type: string; reason?: string; index: string };
     // Other fields are present on a bulk operation result but they are irrelevant for this function
   }
 ): Payload | undefined {
@@ -131,7 +128,7 @@ export function getSavedObjectFromSource<T>(
   id: string,
   doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
 ): SavedObject<T> {
-  const { originId, updated_at: updatedAt } = doc._source;
+  const { originId, updated_at: updatedAt, created_at: createdAt } = doc._source;
 
   let namespaces: string[] = [];
   if (!registry.isNamespaceAgnostic(type)) {
@@ -146,6 +143,7 @@ export function getSavedObjectFromSource<T>(
     namespaces,
     ...(originId && { originId }),
     ...(updatedAt && { updated_at: updatedAt }),
+    ...(createdAt && { created_at: createdAt }),
     version: encodeHitVersion(doc),
     attributes: doc._source[type],
     references: doc._source.references || [],

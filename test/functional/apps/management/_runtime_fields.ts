@@ -62,10 +62,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.filterField(fieldName);
         await testSubjects.click('editFieldFormat');
         await PageObjects.settings.setFieldType('Long');
-        await PageObjects.settings.setFieldScript('emit(6);');
+        await PageObjects.settings.setFieldScriptWithoutToggle('emit(6);');
+        await PageObjects.settings.toggleRow('formatRow');
+        await PageObjects.settings.setFieldFormat('bytes');
         await testSubjects.find('changeWarning');
         await PageObjects.settings.clickSaveField();
         await PageObjects.settings.confirmSave();
+      });
+
+      it('verify field format', async function () {
+        await testSubjects.click('editFieldFormat');
+        const select = await testSubjects.find('editorSelectedFormatId');
+        expect(await select.getAttribute('value')).to.be('bytes');
+        await PageObjects.settings.closeIndexPatternFieldEditor();
       });
 
       it('should delete runtime field', async function () {

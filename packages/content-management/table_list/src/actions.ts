@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { CriteriaWithPagination } from '@elastic/eui';
+import type { Query } from '@elastic/eui';
+
+import type { State, UserContentCommonSchema } from './table_list_view';
 
 /** Action to trigger a fetch of the table items */
 export interface OnFetchItemsAction {
@@ -47,9 +49,15 @@ export interface OnSelectionChangeAction<T> {
 }
 
 /** Action to update the state of the table whenever the sort or page size changes */
-export interface OnTableChangeAction<T> {
+export interface OnTableChangeAction<T extends UserContentCommonSchema> {
   type: 'onTableChange';
-  data: CriteriaWithPagination<T>;
+  data: {
+    sort?: State<T>['tableSort'];
+    page?: {
+      pageIndex: number;
+      pageSize: number;
+    };
+  };
 }
 
 /** Action to display the delete confirmation modal  */
@@ -60,10 +68,13 @@ export interface ShowConfirmDeleteItemsModalAction {
 /** Action to update the search bar query text */
 export interface OnSearchQueryChangeAction {
   type: 'onSearchQueryChange';
-  data: string;
+  data: {
+    query: Query;
+    text: string;
+  };
 }
 
-export type Action<T> =
+export type Action<T extends UserContentCommonSchema> =
   | OnFetchItemsAction
   | OnFetchItemsSuccessAction<T>
   | OnFetchItemsErrorAction

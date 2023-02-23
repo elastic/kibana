@@ -36,6 +36,13 @@ export class ComboBoxService extends FtrService {
     await this.setElement(comboBox, value);
   }
 
+  public async setForLastInput(comboBoxSelector: string, value: string): Promise<void> {
+    this.log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}`);
+    const comboBoxes = await this.testSubjects.findAll(comboBoxSelector);
+    const comboBox = comboBoxes[comboBoxes.length - 1];
+    await this.setElement(comboBox, value);
+  }
+
   /**
    * Clicks option in combobox dropdown
    *
@@ -305,6 +312,14 @@ export class ComboBoxService extends FtrService {
   public async clearInputField(comboBoxSelector: string): Promise<void> {
     this.log.debug(`comboBox.clearInputField, comboBoxSelector:${comboBoxSelector}`);
     const comboBoxElement = await this.testSubjects.find(comboBoxSelector);
+    const input = await comboBoxElement.findByTagName('input');
+    await input.clearValueWithKeyboard();
+  }
+
+  public async clearLastInputField(comboBoxSelector: string): Promise<void> {
+    this.log.debug(`comboBox.clearInputField, comboBoxSelector:${comboBoxSelector}`);
+    const comboBoxElements = await this.testSubjects.findAll(comboBoxSelector);
+    const comboBoxElement = comboBoxElements[comboBoxElements.length - 1];
     const input = await comboBoxElement.findByTagName('input');
     await input.clearValueWithKeyboard();
   }

@@ -1,5 +1,4 @@
-@import '@elastic/eui/src/components/flyout/variables';
-@import '@elastic/eui/src/components/flyout/mixins';
+@import '../../mixins';
 
 .lnsPalettePanelContainer {
   // Use the EuiFlyout style
@@ -10,7 +9,7 @@
   left: 0;
   top: 0;
   bottom: 0;
-  animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
+  animation: euiFlyoutAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
   // making just a bit higher than the dimension flyout to stack on top of it
   z-index: $euiZLevel3 + 1
 }

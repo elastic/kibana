@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AlertTypeCount } from '../../../common/types/process_tree';
 import { useButtonStyles } from './use_button_styles';
+import { ALERT_ICONS } from '../../../common/constants';
 
 const MAX_ALERT_COUNT = 99;
 
@@ -53,14 +55,24 @@ export const ChildrenProcessesButton = ({
 
 export const AlertButton = ({
   isExpanded,
+  alertTypeCounts,
   onToggle,
   alertsCount,
 }: {
   isExpanded: boolean;
+  alertTypeCounts: AlertTypeCount[];
   onToggle: () => void;
   alertsCount: number;
 }) => {
   const { alertButton, buttonArrow } = useButtonStyles();
+
+  const alertIcons: string[] = useMemo(
+    () =>
+      alertTypeCounts
+        ?.filter((alertTypeCount) => alertTypeCount.count > 0)
+        ?.map(({ category }, i) => ALERT_ICONS[category]),
+    [alertTypeCounts]
+  );
 
   return (
     <EuiButton
@@ -74,6 +86,9 @@ export const AlertButton = ({
       {alertsCount > 1 ? ALERTS : ALERT}
       {alertsCount > 1 &&
         (alertsCount > MAX_ALERT_COUNT ? ` (${MAX_ALERT_COUNT}+)` : ` (${alertsCount})`)}
+      {alertIcons?.map((icon: string) => (
+        <EuiIcon className="alertIcon" key={icon} size="s" type={icon} />
+      ))}
       <EuiIcon css={buttonArrow} size="s" type="arrowDown" />
     </EuiButton>
   );

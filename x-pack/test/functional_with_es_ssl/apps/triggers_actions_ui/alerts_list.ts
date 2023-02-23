@@ -27,11 +27,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const objectRemover = new ObjectRemover(supertest);
 
   async function refreshAlertsList() {
+    await testSubjects.click('logsTab');
     await testSubjects.click('rulesTab');
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/141093
-  describe.skip('rules list', function () {
+  describe('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
         const rules = await pageObjects.triggersActionsUI.getAlertsList();
@@ -198,6 +198,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
 
+      await retry.waitForWithTimeout('disable button to show up', 30000, async () => {
+        return await testSubjects.isDisplayed('disableButton');
+      });
+
       await testSubjects.click('disableButton');
 
       await refreshAlertsList();
@@ -220,11 +224,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(secondAlert.name);
 
       await testSubjects.click('collapsedItemActions');
-
       await testSubjects.click('deleteRule');
-      await testSubjects.existOrFail('deleteIdsConfirmation');
-      await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('deleteIdsConfirmation');
+      await testSubjects.exists('rulesDeleteIdsConfirmation');
+      await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
@@ -242,13 +244,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
-
       await testSubjects.click('bulkAction');
+      await testSubjects.click('bulkDisable');
 
-      await testSubjects.click('disableAll');
-
-      // Enable all button shows after clicking disable all
-      await testSubjects.existOrFail('enableAll');
+      await retry.try(async () => {
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql('Disabled 1 rule');
+      });
 
       await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
@@ -259,19 +261,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should enable all selection', async () => {
       const createdAlert = await createAlert({ supertest, objectRemover });
+      await disableAlert({ supertest, alertId: createdAlert.id });
+
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
-
       await testSubjects.click('bulkAction');
-
-      await testSubjects.click('disableAll');
-
-      await testSubjects.click('enableAll');
-
-      // Disable all button shows after clicking enable all
-      await testSubjects.existOrFail('disableAll');
+      await testSubjects.click('bulkEnable');
 
       await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
@@ -345,10 +342,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('bulkAction');
 
-      await testSubjects.click('deleteAll');
-      await testSubjects.existOrFail('deleteIdsConfirmation');
-      await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('deleteIdsConfirmation');
+      await testSubjects.click('bulkDelete');
+      await testSubjects.exists('rulesDeleteIdsConfirmation');
+      await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
@@ -368,19 +364,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await refreshAlertsList();
         await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
         const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
-        expect(refreshResults.map((item: any) => item.status).sort()).to.eql(['Error', 'Ok']);
+        expect(refreshResults.map((item: any) => item.status).sort()).to.eql([
+          'Failed',
+          'Succeeded',
+        ]);
       });
       await refreshAlertsList();
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-      await testSubjects.click('ruleExecutionStatusFilterButton');
-      await testSubjects.click('ruleExecutionStatuserrorFilterOption'); // select Error status filter
+      await testSubjects.click('ruleLastRunOutcomeFilterButton');
+      await testSubjects.click('ruleLastRunOutcomefailedFilterOption'); // select Error status filter
       await retry.try(async () => {
         const filterErrorOnlyResults =
           await pageObjects.triggersActionsUI.getAlertsListWithStatus();
         expect(filterErrorOnlyResults.length).to.equal(1);
         expect(filterErrorOnlyResults[0].name).to.equal(`${failingAlert.name}Test: Failing`);
         expect(filterErrorOnlyResults[0].interval).to.equal('30 sec');
-        expect(filterErrorOnlyResults[0].status).to.equal('Error');
+        expect(filterErrorOnlyResults[0].status).to.equal('Failed');
         expect(filterErrorOnlyResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
     });
@@ -393,7 +392,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(refreshResults.length).to.equal(1);
         expect(refreshResults[0].name).to.equal(`${createdAlert.name}Test: Noop`);
         expect(refreshResults[0].interval).to.equal('1 min');
-        expect(refreshResults[0].status).to.equal('Ok');
+        expect(refreshResults[0].status).to.equal('Succeeded');
         expect(refreshResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
 
@@ -417,11 +416,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         await refreshAlertsList();
         expect(await testSubjects.getVisibleText('totalRulesCount')).to.be('2 rules');
-        expect(await testSubjects.getVisibleText('totalActiveRulesCount')).to.be('Active: 0');
-        expect(await testSubjects.getVisibleText('totalOkRulesCount')).to.be('Ok: 1');
-        expect(await testSubjects.getVisibleText('totalErrorRulesCount')).to.be('Error: 1');
-        expect(await testSubjects.getVisibleText('totalPendingRulesCount')).to.be('Pending: 0');
-        expect(await testSubjects.getVisibleText('totalUnknownRulesCount')).to.be('Unknown: 0');
+        expect(await testSubjects.getVisibleText('totalSucceededRulesCount')).to.be('Succeeded: 1');
+        expect(await testSubjects.getVisibleText('totalFailedRulesCount')).to.be('Failed: 1');
+        expect(await testSubjects.getVisibleText('totalWarningRulesCount')).to.be('Warning: 0');
       });
     });
 
@@ -433,7 +430,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(refreshResults.length).to.equal(1);
         expect(refreshResults[0].name).to.equal(`${createdAlert.name}Test: Noop`);
         expect(refreshResults[0].interval).to.equal('1 min');
-        expect(refreshResults[0].status).to.equal('Ok');
+        expect(refreshResults[0].status).to.equal('Succeeded');
         expect(refreshResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
 
@@ -496,6 +493,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               id: action.id,
               group: 'default',
               params: { level: 'info', message: 'gfghfhg' },
+              frequency: {
+                summary: false,
+                notify_when: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
         },
@@ -672,6 +674,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               id: action.id,
               group: 'default',
               params: { level: 'info', message: 'gfghfhg' },
+              frequency: {
+                summary: false,
+                notify_when: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
         },

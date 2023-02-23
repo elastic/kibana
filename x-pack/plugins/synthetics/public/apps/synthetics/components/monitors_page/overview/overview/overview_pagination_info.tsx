@@ -5,42 +5,83 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiLoadingSpinner, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { selectOverviewState } from '../../../../state/overview';
 
-export const OverviewPaginationInfo = ({ page }: { page: number }) => {
-  const {
-    data: { total, pages },
-    loaded,
-    pageState: { perPage },
-  } = useSelector(selectOverviewState);
-  const startRange = (page + 1) * perPage - perPage + 1;
-  const endRange = startRange + (pages[`${page}`]?.length || 0) - 1;
+export const OverviewPaginationInfo = ({
+  page,
+  loading,
+  total,
+  startRange,
+  endRange,
+}: {
+  page: number;
+  loading: boolean;
+  total?: number;
+  startRange?: number;
+  endRange?: number;
+}) => {
+  const { loaded } = useSelector(selectOverviewState);
 
-  if (loaded && !Object.keys(pages).length) {
-    return null;
-  }
-
-  return loaded ? (
+  return loaded && total !== undefined ? (
     <EuiText size="xs">
-      <FormattedMessage
-        id="xpack.synthetics.overview.pagination.description"
-        defaultMessage="Showing {currentCount} of {total} {monitors}"
-        values={{
-          currentCount: <strong>{`${startRange}-${endRange}`}</strong>,
-          total,
-          monitors: (
-            <strong>
-              <FormattedMessage
-                id="xpack.synthetics.overview.monitors.label"
-                defaultMessage="Monitors"
-              />
-            </strong>
-          ),
-        }}
-      />
+      {startRange && endRange ? (
+        <FormattedMessage
+          id="xpack.synthetics.overview.pagination.description"
+          defaultMessage="Showing {currentCount} of {total} {monitors}"
+          values={{
+            currentCount: <strong>{`${startRange}-${endRange}`}</strong>,
+            total,
+            monitors: (
+              <strong>
+                <FormattedMessage
+                  id="xpack.synthetics.overview.monitors.label"
+                  defaultMessage="Monitors"
+                />
+              </strong>
+            ),
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.synthetics.management.monitorList.recordTotal"
+          defaultMessage="Showing {total} {monitorsLabel}"
+          values={{
+            total: (
+              <strong>
+                <EuiI18nNumber value={total} />
+              </strong>
+            ),
+            monitorsLabel: (
+              <strong>
+                <FormattedMessage
+                  id="xpack.synthetics.management.monitorList.recordRangeLabel"
+                  defaultMessage="{monitorCount, plural, one {Monitor} other {Monitors}}"
+                  values={{
+                    monitorCount: total,
+                  }}
+                />
+              </strong>
+            ),
+          }}
+        />
+      )}
     </EuiText>
-  ) : null;
+  ) : (
+    <EuiText size="xs">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="xpack.synthetics.overview.pagination.loading"
+            defaultMessage="Loading Monitors..."
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiText>
+  );
 };

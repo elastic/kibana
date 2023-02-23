@@ -34,13 +34,17 @@ export async function findSharedOriginObjects(
 
   const uniqueObjectTypes = objects.reduce((acc, { type }) => acc.add(type), new Set<string>());
   const filter = createAliasKueryFilter(objects);
-  const finder = createPointInTimeFinder({
-    type: [...uniqueObjectTypes],
-    perPage,
-    filter,
-    fields: ['not-a-field'], // Specify a non-existent field to avoid fetching all type-level fields (we only care about root-level fields)
-    namespaces: [ALL_NAMESPACES_STRING], // We need to search across all spaces to have accurate results
-  });
+  const finder = createPointInTimeFinder(
+    {
+      type: [...uniqueObjectTypes],
+      perPage,
+      filter,
+      fields: ['not-a-field'], // Specify a non-existent field to avoid fetching all type-level fields (we only care about root-level fields)
+      namespaces: [ALL_NAMESPACES_STRING], // We need to search across all spaces to have accurate results
+    },
+    undefined,
+    { disableExtensions: true }
+  );
   // NOTE: this objectsMap is only used internally (not in an API that is documented for public consumption), and it contains the minimal
   // amount of information to satisfy our UI needs today. We will need to change this in the future when we implement merging in #130311.
   const objectsMap = new Map<string, Set<string>>();

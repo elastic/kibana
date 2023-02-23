@@ -15,14 +15,14 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
       className="euiFlexItem canvasElementCard__wrapper"
     >
       <div
-        className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard emotion-euiPanel-grow-m-m-plain-hasShadow-isClickable"
+        className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard emotion-euiPanel-grow-m-m-plain-hasShadow-isClickable-euiCard-left-vertical"
         onClick={[Function]}
       >
         <div
-          className="euiCard__top"
+          className="euiCard__top emotion-euiCard__top-vertical"
         >
           <div
-            className="euiCard__image"
+            className="euiCard__image emotion-euiCard__image"
           >
             <img
               alt=""
@@ -31,23 +31,23 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           </div>
         </div>
         <div
-          className="euiCard__content"
+          className="euiCard__content emotion-euiCard__content-vertical"
         >
-          <span
+          <p
             className="euiTitle euiCard__title emotion-euiTitle-s"
             id="generated-idTitle"
           >
             <button
               aria-describedby=" generated-idDescription"
-              className="euiCard__titleButton"
+              className="euiCard__titleButton emotion-euiCard__text-left-interactive"
               disabled={false}
               onClick={[Function]}
             >
               Custom Element 1
             </button>
-          </span>
+          </p>
           <div
-            className="euiText euiCard__description emotion-euiText-s"
+            className="euiText emotion-euiText-s-euiCard__description"
             id="generated-idDescription"
           >
             <p>
@@ -56,7 +56,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           </div>
         </div>
         <div
-          className="euiCard__footer"
+          className="emotion-euiCard__footer"
         />
       </div>
       <div
@@ -66,14 +66,15 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <button
               aria-label="Edit element"
-              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+              className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
               data-test-subj="canvasElementCard__editButton"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -95,14 +96,15 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <button
               aria-label="Delete element"
-              className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
+              className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-danger-hoverStyles"
               data-test-subj="canvasElementCard__deleteButton"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -126,14 +128,14 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
       className="euiFlexItem canvasElementCard__wrapper"
     >
       <div
-        className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard emotion-euiPanel-grow-m-m-plain-hasShadow-isClickable"
+        className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard emotion-euiPanel-grow-m-m-plain-hasShadow-isClickable-euiCard-left-vertical"
         onClick={[Function]}
       >
         <div
-          className="euiCard__top"
+          className="euiCard__top emotion-euiCard__top-vertical"
         >
           <div
-            className="euiCard__image"
+            className="euiCard__image emotion-euiCard__image"
           >
             <img
               alt=""
@@ -142,23 +144,23 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           </div>
         </div>
         <div
-          className="euiCard__content"
+          className="euiCard__content emotion-euiCard__content-vertical"
         >
-          <span
+          <p
             className="euiTitle euiCard__title emotion-euiTitle-s"
             id="generated-idTitle"
           >
             <button
               aria-describedby=" generated-idDescription"
-              className="euiCard__titleButton"
+              className="euiCard__titleButton emotion-euiCard__text-left-interactive"
               disabled={false}
               onClick={[Function]}
             >
               Custom Element 2
             </button>
-          </span>
+          </p>
           <div
-            className="euiText euiCard__description emotion-euiText-s"
+            className="euiText emotion-euiText-s-euiCard__description"
             id="generated-idDescription"
           >
             <p>
@@ -167,7 +169,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           </div>
         </div>
         <div
-          className="euiCard__footer"
+          className="emotion-euiCard__footer"
         />
       </div>
       <div
@@ -177,14 +179,15 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <button
               aria-label="Edit element"
-              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+              className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
               data-test-subj="canvasElementCard__editButton"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -206,14 +209,15 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <button
               aria-label="Delete element"
-              className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
+              className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-danger-hoverStyles"
               data-test-subj="canvasElementCard__deleteButton"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -237,14 +241,14 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
       className="euiFlexItem canvasElementCard__wrapper"
     >
       <div
-        className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard emotion-euiPanel-grow-m-m-plain-hasShadow-isClickable"
+        className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard emotion-euiPanel-grow-m-m-plain-hasShadow-isClickable-euiCard-left-vertical"
         onClick={[Function]}
       >
         <div
-          className="euiCard__top"
+          className="euiCard__top emotion-euiCard__top-vertical"
         >
           <div
-            className="euiCard__image"
+            className="euiCard__image emotion-euiCard__image"
           >
             <img
               alt=""
@@ -253,23 +257,23 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           </div>
         </div>
         <div
-          className="euiCard__content"
+          className="euiCard__content emotion-euiCard__content-vertical"
         >
-          <span
+          <p
             className="euiTitle euiCard__title emotion-euiTitle-s"
             id="generated-idTitle"
           >
             <button
               aria-describedby=" generated-idDescription"
-              className="euiCard__titleButton"
+              className="euiCard__titleButton emotion-euiCard__text-left-interactive"
               disabled={false}
               onClick={[Function]}
             >
               Custom Element 3
             </button>
-          </span>
+          </p>
           <div
-            className="euiText euiCard__description emotion-euiText-s"
+            className="euiText emotion-euiText-s-euiCard__description"
             id="generated-idDescription"
           >
             <p>
@@ -278,7 +282,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           </div>
         </div>
         <div
-          className="euiCard__footer"
+          className="emotion-euiCard__footer"
         />
       </div>
       <div
@@ -288,14 +292,15 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <button
               aria-label="Edit element"
-              className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+              className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
               data-test-subj="canvasElementCard__editButton"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -317,14 +322,15 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <span
-            className="euiToolTipAnchor"
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <button
               aria-label="Delete element"
-              className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
+              className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-danger-hoverStyles"
               data-test-subj="canvasElementCard__deleteButton"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}

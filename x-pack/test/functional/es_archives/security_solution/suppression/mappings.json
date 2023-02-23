@@ -1,0 +1,50 @@
+{
+  "type": "index",
+  "value": {
+    "index": "suppression-data",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "ip": {
+              "type": "ip"
+            }
+          }
+        },
+        "user": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "source": {
+          "properties": {
+            "ip": {
+              "type": "ip"
+            }
+          }
+        },
+        "destination": {
+          "properties": {
+            "ip": {
+              "type": "ip"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

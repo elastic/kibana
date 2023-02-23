@@ -8,10 +8,9 @@
 import { useContext } from 'react';
 import moment from 'moment';
 import { DataProvider } from '@kbn/timelines-plugin/common';
-import { generateDataProvider } from '../lib/data_provider';
+import { generateDataProvider } from '../utils';
 import { SecuritySolutionContext } from '../../../containers/security_solution_context';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/lib/field_value';
-import { unwrapValue } from '../../indicators/lib/unwrap_value';
+import { fieldAndValueValid, getIndicatorFieldAndValue, unwrapValue } from '../../indicators';
 import {
   Indicator,
   IndicatorFieldEventEnrichmentMap,
@@ -26,7 +25,10 @@ export interface UseInvestigateInTimelineParam {
 }
 
 export interface UseInvestigateInTimelineValue {
-  onClick: (() => Promise<void>) | undefined;
+  /**
+   * Investigate in Timeline function to run on click event.
+   */
+  investigateInTimelineFn: (() => Promise<void>) | undefined;
 }
 
 /**
@@ -40,24 +42,35 @@ export const useInvestigateInTimeline = ({
   const securitySolutionContext = useContext(SecuritySolutionContext);
 
   const { key, value } = getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Name);
-  if (!fieldAndValueValid(key, value)) {
+  const sourceEventField = IndicatorFieldEventEnrichmentMap[key];
+
+  if (!fieldAndValueValid(key, value) || !sourceEventField) {
     return {} as unknown as UseInvestigateInTimelineValue;
   }
 
-  const dataProviders: DataProvider[] = [...IndicatorFieldEventEnrichmentMap[key], key].map(
-    (e: string) => generateDataProvider(e, value as string)
+  const dataProviders: DataProvider[] = [...sourceEventField, key].map((e: string) =>
+    generateDataProvider(e, value as string)
   );
 
-  const to = unwrapValue(indicator, RawIndicatorFieldId.TimeStamp) as string;
-  const from = moment(to).subtract(10, 'm').toISOString();
+  const indicatorTimestamp: string = unwrapValue(
+    indicator,
+    RawIndicatorFieldId.TimeStamp
+  ) as string;
 
-  const investigateInTimelineClick = securitySolutionContext?.getUseInvestigateInTimeline({
+  const from = moment(indicatorTimestamp).subtract(7, 'd').toISOString();
+  const to = moment(indicatorTimestamp).add(7, 'd').toISOString();
+
+  if (!to || !from) {
+    return {} as unknown as UseInvestigateInTimelineValue;
+  }
+
+  const investigateInTimelineFn = securitySolutionContext?.getUseInvestigateInTimeline({
     dataProviders,
     from,
     to,
   });
 
   return {
-    onClick: investigateInTimelineClick,
+    investigateInTimelineFn,
   };
 };

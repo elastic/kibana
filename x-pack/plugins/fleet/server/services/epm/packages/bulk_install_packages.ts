@@ -22,6 +22,7 @@ interface BulkInstallPackagesParams {
   force?: boolean;
   spaceId: string;
   preferredSource?: 'registry' | 'bundled';
+  prerelease?: boolean;
 }
 
 export async function bulkInstallPackages({
@@ -30,6 +31,7 @@ export async function bulkInstallPackages({
   esClient,
   spaceId,
   force,
+  prerelease,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
 
@@ -39,7 +41,7 @@ export async function bulkInstallPackages({
         return Promise.resolve(pkg);
       }
 
-      return Registry.fetchFindLatestPackageOrThrow(pkg);
+      return Registry.fetchFindLatestPackageOrThrow(pkg, { prerelease });
     })
   );
 
@@ -91,6 +93,7 @@ export async function bulkInstallPackages({
         installSource: 'registry',
         spaceId,
         force,
+        prerelease,
       });
 
       if (installResult.error) {

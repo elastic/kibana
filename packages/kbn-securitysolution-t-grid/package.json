@@ -3,7 +3,5 @@
   "version": "1.0.0",
   "description": "security solution t-grid packages will allow sharing components between timelines and security_solution plugin until we transfer all functionality to timelines plugin",
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "browser": "./target_web/index.js",
-  "main": "./target_node/index.js",
   "private": true
 }

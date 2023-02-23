@@ -130,13 +130,14 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
 
     const visConfig: PartitionVisParams = {
       ...args,
+      metricsToLabels: {},
       ariaLabel:
         args.ariaLabel ??
         (handlers.variables?.embeddableTitle as string) ??
         handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
-        metric: args.metric,
+        metrics: [args.metric],
         buckets: args.buckets,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,

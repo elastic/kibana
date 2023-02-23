@@ -13,29 +13,33 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const { setup, tearDown } = getLifecycleMethods(getService);
 
-  describe('overview mb', () => {
-    const archive = 'x-pack/test/functional/es_archives/monitoring/logstash_pipelines_mb';
-    const timeRange = {
-      min: '2018-01-22T09:33:13.000Z',
-      max: '2018-01-22T09:41:04.000Z',
-    };
+  describe('overview - metricbeat and package', () => {
+    ['mb', 'package'].forEach((source) => {
+      describe(`overview ${source}`, () => {
+        const archive = `x-pack/test/functional/es_archives/monitoring/logstash_pipelines_${source}`;
+        const timeRange = {
+          min: '2018-01-22T09:33:13.000Z',
+          max: '2018-01-22T09:41:04.000Z',
+        };
 
-    before('load archive', () => {
-      return setup(archive);
-    });
+        before('load archive', () => {
+          return setup(archive);
+        });
 
-    after('unload archive', () => {
-      return tearDown();
-    });
+        after('unload archive', () => {
+          return tearDown(archive);
+        });
 
-    it('should summarize two Logstash nodes with metrics', async () => {
-      const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/1rhApLfQShSh3JsNqYCkmA/logstash')
-        .set('kbn-xsrf', 'xxx')
-        .send({ timeRange })
-        .expect(200);
+        it('should summarize two Logstash nodes with metrics', async () => {
+          const { body } = await supertest
+            .post('/api/monitoring/v1/clusters/1rhApLfQShSh3JsNqYCkmA/logstash')
+            .set('kbn-xsrf', 'xxx')
+            .send({ timeRange })
+            .expect(200);
 
-      expect(body).to.eql(overviewFixture);
+          expect(body).to.eql(overviewFixture);
+        });
+      });
     });
   });
 }

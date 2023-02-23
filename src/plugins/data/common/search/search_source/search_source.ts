@@ -59,7 +59,7 @@
  */
 
 import { setWith } from '@kbn/safer-lodash-set';
-import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, uniqWith } from 'lodash';
+import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, concat } from 'lodash';
 import {
   catchError,
   finalize,
@@ -72,7 +72,13 @@ import {
 } from 'rxjs/operators';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildEsQuery, Filter, isOfQueryType } from '@kbn/es-query';
+import {
+  buildEsQuery,
+  Filter,
+  isOfQueryType,
+  isPhraseFilter,
+  isPhrasesFilter,
+} from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -81,7 +87,6 @@ import {
   buildExpression,
   buildExpressionFunction,
 } from '@kbn/expressions-plugin/common';
-import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
@@ -251,7 +256,6 @@ export class SearchSource {
 
   getActiveIndexFilter() {
     const { filter: originalFilters, query } = this.getFields();
-
     let filters: Filter[] = [];
     if (originalFilters) {
       filters = this.getFilters(originalFilters);
@@ -270,16 +274,20 @@ export class SearchSource {
             return acc.concat(this.parseActiveIndexPatternFromQueryString(currStr));
           }, []) ?? [];
 
-    const activeIndexPattern: string[] = filters?.reduce<string[]>((acc, f) => {
-      if (f.meta.key === '_index' && f.meta.disabled === false) {
-        if (f.meta.negate === false) {
-          return _.concat(acc, f.meta.params.query ?? f.meta.params);
-        } else {
-          if (Array.isArray(f.meta.params)) {
-            return _.difference(acc, f.meta.params);
+    const activeIndexPattern = filters?.reduce((acc, f) => {
+      const isPhraseFilterType = isPhraseFilter(f);
+      const isPhrasesFilterType = isPhrasesFilter(f);
+      const filtersToChange = isPhraseFilterType ? f.meta.params?.query : f.meta.params;
+      const filtersArray = Array.isArray(filtersToChange) ? filtersToChange : [filtersToChange];
+      if (isPhraseFilterType || isPhrasesFilterType) {
+        if (f.meta.key === '_index' && f.meta.disabled === false) {
+          if (f.meta.negate === false) {
+            return concat(acc, filtersArray);
           } else {
-            return _.difference(acc, [f.meta.params.query]);
+            return difference(acc, filtersArray);
           }
+        } else {
+          return acc;
         }
       } else {
         return acc;
@@ -511,7 +519,8 @@ export class SearchSource {
             this,
             options.inspector?.adapter,
             options.abortSignal,
-            options.sessionId
+            options.sessionId,
+            options.disableShardFailureWarning
           );
         }
       }
@@ -666,6 +675,8 @@ export class SearchSource {
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
+      case 'pit':
+        return addToRoot(key, val);
       case 'aggs':
         if ((val as unknown) instanceof AggConfigs) {
           return addToBody('aggs', val.toDsl());
@@ -767,7 +778,7 @@ export class SearchSource {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
-    const { body, index, query, filters, highlightAll } = searchRequest;
+    const { body, index, query, filters, highlightAll, pit } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
     const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
@@ -868,28 +879,28 @@ export class SearchSource {
         // inject the format from the computed fields if one isn't given
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
         const bodyFields = this.getFieldsWithoutSourceFilters(index, body.fields);
-        body.fields = uniqWith(
-          bodyFields.concat(filteredDocvalueFields),
-          (fld1: SearchFieldValue, fld2: SearchFieldValue) => {
-            const field1Name = this.getFieldName(fld1);
-            const field2Name = this.getFieldName(fld2);
-            return field1Name === field2Name;
+
+        const uniqueFieldNames = new Set();
+        const uniqueFields = [];
+        for (const field of bodyFields.concat(filteredDocvalueFields)) {
+          const fieldName = this.getFieldName(field);
+          if (metaFields.includes(fieldName) || uniqueFieldNames.has(fieldName)) {
+            continue;
           }
-        )
-          .filter((fld: SearchFieldValue) => {
-            return !metaFields.includes(this.getFieldName(fld));
-          })
-          .map((fld: SearchFieldValue) => {
-            const fieldName = this.getFieldName(fld);
-            if (Object.keys(docvaluesIndex).includes(fieldName)) {
-              // either provide the field object from computed docvalues,
-              // or merge the user-provided field with the one in docvalues
-              return typeof fld === 'string'
-                ? docvaluesIndex[fld]
-                : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
-            }
-            return fld;
-          });
+          uniqueFieldNames.add(fieldName);
+          if (Object.keys(docvaluesIndex).includes(fieldName)) {
+            // either provide the field object from computed docvalues,
+            // or merge the user-provided field with the one in docvalues
+            uniqueFields.push(
+              typeof field === 'string'
+                ? docvaluesIndex[field]
+                : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, field, index)
+            );
+          } else {
+            uniqueFields.push(field);
+          }
+        }
+        body.fields = uniqueFields;
       }
     } else {
       body.fields = filteredDocvalueFields;
@@ -910,13 +921,17 @@ export class SearchSource {
       delete searchRequest.highlightAll;
     }
 
+    if (pit) {
+      body.pit = pit;
+    }
+
     return searchRequest;
   }
 
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields(recurse = false): SerializedSearchSourceFields {
+  public getSerializedFields(recurse = false, includeFields = true): SerializedSearchSourceFields {
     const {
       filter: originalFilters,
       aggs: searchSourceAggs,
@@ -931,7 +946,9 @@ export class SearchSource {
       ...searchSourceFields,
     };
     if (index) {
-      serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toSpec();
+      serializedSearchSourceFields.index = index.isPersisted()
+        ? index.id
+        : index.toSpec(includeFields);
     }
     if (sort) {
       serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;
@@ -1004,6 +1021,7 @@ export class SearchSource {
     const filters = (
       typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters
     ) as Filter[] | Filter | undefined;
+
     const ast = buildExpression([
       buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
         q: query?.map(queryToAst),

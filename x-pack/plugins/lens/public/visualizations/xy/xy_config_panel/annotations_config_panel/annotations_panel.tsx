@@ -23,6 +23,7 @@ import {
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-plugin/common';
 import moment from 'moment';
+import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
 import {
   FieldOption,
   FieldOptionValue,
@@ -31,7 +32,6 @@ import {
 import { FormatFactory } from '../../../../../common';
 import {
   DimensionEditorSection,
-  fieldExists,
   NameInput,
   useDebouncedValue,
 } from '../../../../shared_components';
@@ -58,6 +58,7 @@ export const AnnotationsPanel = (
 ) => {
   const { state, setState, layerId, accessor, frame } = props;
   const isHorizontal = isHorizontalChart(state.layers);
+  const { hasFieldData } = useExistingFieldsReader();
 
   const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
     value: state,
@@ -248,10 +249,7 @@ export const AnnotationsPanel = (
                           field: field.name,
                           dataType: field.type,
                         },
-                        exists: fieldExists(
-                          frame.dataViews.existingFields[currentIndexPattern.title],
-                          field.name
-                        ),
+                        exists: hasFieldData(currentIndexPattern.id, field.name),
                         compatible: true,
                         'data-test-subj': `lnsXY-annotation-fieldOption-${field.name}`,
                       } as FieldOption<FieldOptionValue>)
@@ -352,7 +350,11 @@ export const AnnotationsPanel = (
             defaultMessage: 'Color',
           })}
         />
-        <ConfigPanelHideSwitch
+        <ConfigPanelGenericSwitch
+          label={i18n.translate('xpack.lens.xyChart.annotation.hide', {
+            defaultMessage: 'Hide annotation',
+          })}
+          data-test-subj="lns-annotations-hide-annotation"
           value={Boolean(currentAnnotation?.isHidden)}
           onChange={(ev) => setAnnotations({ isHidden: ev.target.checked })}
         />
@@ -375,7 +377,6 @@ export const AnnotationsPanel = (
               currentConfig={currentAnnotation}
               setConfig={setAnnotations}
               indexPattern={frame.dataViews.indexPatterns[localLayer.indexPatternId]}
-              existingFields={frame.dataViews.existingFields}
             />
           </EuiFormRow>
         </DimensionEditorSection>
@@ -384,31 +385,25 @@ export const AnnotationsPanel = (
   );
 };
 
-const ConfigPanelHideSwitch = ({
+const ConfigPanelGenericSwitch = ({
+  label,
+  ['data-test-subj']: dataTestSubj,
   value,
   onChange,
 }: {
+  label: string;
+  'data-test-subj': string;
   value: boolean;
   onChange: (event: EuiSwitchEvent) => void;
-}) => {
-  return (
-    <EuiFormRow
-      label={i18n.translate('xpack.lens.xyChart.annotation.name', {
-        defaultMessage: 'Hide annotation',
-      })}
-      display="columnCompressedSwitch"
-      fullWidth
-    >
-      <EuiSwitch
-        compressed
-        label={i18n.translate('xpack.lens.xyChart.annotation.name', {
-          defaultMessage: 'Hide annotation',
-        })}
-        showLabel={false}
-        data-test-subj="lns-annotations-hide-annotation"
-        checked={value}
-        onChange={onChange}
-      />
-    </EuiFormRow>
-  );
-};
+}) => (
+  <EuiFormRow label={label} display="columnCompressedSwitch" fullWidth>
+    <EuiSwitch
+      compressed
+      label={label}
+      showLabel={false}
+      data-test-subj={dataTestSubj}
+      checked={value}
+      onChange={onChange}
+    />
+  </EuiFormRow>
+);

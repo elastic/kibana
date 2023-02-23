@@ -34,7 +34,7 @@ export const useUpdateTags = () => {
         const message =
           successMessage ??
           i18n.translate('xpack.fleet.updateAgentTags.successNotificationTitle', {
-            defaultMessage: 'Tags updated',
+            defaultMessage: 'Tag(s) updated',
           });
         notifications.toasts.addSuccess(message);
 
@@ -43,7 +43,7 @@ export const useUpdateTags = () => {
         const errorTitle =
           errorMessage ??
           i18n.translate('xpack.fleet.updateAgentTags.errorNotificationTitle', {
-            defaultMessage: 'Tags update failed',
+            defaultMessage: 'Tag(s) update failed',
           });
         notifications.toasts.addError(error, { title: errorTitle });
       }

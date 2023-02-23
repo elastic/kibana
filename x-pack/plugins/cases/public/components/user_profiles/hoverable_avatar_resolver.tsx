@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import React from 'react';
-import { ElasticUser } from '../../containers/types';
+import type { CaseUser } from '../../containers/types';
 import { convertToUserInfo } from './user_converter';
 import { HoverableAvatar } from './hoverable_avatar';
 
 const HoverableAvatarResolverComponent: React.FC<{
-  user: ElasticUser;
+  user: CaseUser;
   userProfiles?: Map<string, UserProfileWithAvatar>;
 }> = ({ user, userProfiles }) => {
   const { userInfo } = convertToUserInfo(user, userProfiles) ?? { userInfo: undefined };

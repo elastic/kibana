@@ -16,7 +16,11 @@ import { cleanKibana } from '../../tasks/common';
 
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
-import { executeTimelineKQL } from '../../tasks/timeline';
+import {
+  changeTimelineQueryLanguage,
+  executeTimelineKQL,
+  executeTimelineSearch,
+} from '../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { HOSTS_URL, TIMELINES_URL } from '../../urls/navigation';
@@ -26,6 +30,7 @@ describe('Timeline search and filters', () => {
     cleanKibana();
     login();
   });
+
   describe('timeline search or filter KQL bar', () => {
     beforeEach(() => {
       visit(HOSTS_URL);
@@ -38,16 +43,22 @@ describe('Timeline search and filters', () => {
 
       cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
     });
+
+    it('executes a Lucene query', () => {
+      const messageProcessQuery = 'message:Process\\ zsh*';
+      openTimelineUsingToggle();
+      changeTimelineQueryLanguage('lucene');
+      executeTimelineSearch(messageProcessQuery);
+
+      cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
+    });
   });
 
   describe('Update kqlMode for timeline', () => {
-    before(() => {
+    beforeEach(() => {
       visitWithoutDateRange(TIMELINES_URL);
       waitForTimelinesPanelToBeLoaded();
       openTimelineUsingToggle();
-    });
-
-    beforeEach(() => {
       cy.intercept('PATCH', '/api/timeline').as('update');
       cy.get(TIMELINE_SEARCH_OR_FILTER)
         .pipe(($el) => $el.trigger('click'))

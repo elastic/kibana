@@ -50,16 +50,12 @@ describe('Errors table', () => {
 
   it('clicking on type adds a filter in the kuerybar and navigates to errors page', () => {
     cy.visitKibana(serviceOverviewHref);
-    cy.get('[data-test-subj="headerFilterKuerybar"]')
-      .invoke('val')
-      .should('be.empty');
+    cy.getByTestSubj('headerFilterKuerybar').invoke('val').should('be.empty');
     // `force: true` because Cypress says the element is 0x0
     cy.contains('Exception').click({
       force: true,
     });
-    cy.get('[data-test-subj="headerFilterKuerybar"]')
-      .its('length')
-      .should('be.gt', 0);
+    cy.getByTestSubj('headerFilterKuerybar').its('length').should('be.gt', 0);
     cy.get('table').find('td:contains("Exception")').should('have.length', 1);
   });
 

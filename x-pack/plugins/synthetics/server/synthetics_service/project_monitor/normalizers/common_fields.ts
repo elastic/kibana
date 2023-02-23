@@ -6,6 +6,9 @@
  */
 
 import { omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { formatLocation } from '../../../../common/utils/location_formatter';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import {
   BrowserFields,
@@ -20,7 +23,27 @@ import {
 } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
-import { NormalizedProjectProps } from '.';
+
+export interface NormalizedProjectProps {
+  locations: Locations;
+  privateLocations: PrivateLocation[];
+  monitor: ProjectMonitor;
+  projectId: string;
+  namespace: string;
+  version: string;
+}
+
+export interface Error {
+  id: string;
+  reason: string;
+  details: string;
+}
+
+export interface NormalizerResult<MonitorTypeFields> {
+  normalizedFields: MonitorTypeFields;
+  unsupportedKeys: string[];
+  errors: Error[];
+}
 
 export const getNormalizeCommonFields = ({
   locations = [],
@@ -28,9 +51,15 @@ export const getNormalizeCommonFields = ({
   monitor,
   projectId,
   namespace,
-}: NormalizedProjectProps): CommonFields => {
+}: NormalizedProjectProps): { errors: Error[]; normalizedFields: Partial<CommonFields> } => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
-
+  const errors = [];
+  if (monitor.namespace) {
+    const namespaceError = isValidNamespace(monitor.namespace).error;
+    if (namespaceError) {
+      errors.push(getInvalidNamespaceError(monitor, namespaceError));
+    }
+  }
   const normalizedFields = {
     [ConfigKey.JOURNEY_ID]: monitor.id || defaultFields[ConfigKey.JOURNEY_ID],
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
@@ -45,18 +74,31 @@ export const getNormalizeCommonFields = ({
       privateLocations,
       publicLocations: locations,
     }),
-    [ConfigKey.APM_SERVICE_NAME]:
-      monitor.apmServiceName || defaultFields[ConfigKey.APM_SERVICE_NAME],
     [ConfigKey.TAGS]: getOptionalListField(monitor.tags) || defaultFields[ConfigKey.TAGS],
-    [ConfigKey.NAMESPACE]: formatKibanaNamespace(namespace) || defaultFields[ConfigKey.NAMESPACE],
+    [ConfigKey.NAMESPACE]:
+      monitor.namespace || formatKibanaNamespace(namespace) || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: getCustomHeartbeatId(monitor, projectId, namespace),
     [ConfigKey.ENABLED]: monitor.enabled ?? defaultFields[ConfigKey.ENABLED],
+    [ConfigKey.TIMEOUT]: monitor.timeout
+      ? getValueInSeconds(monitor.timeout)
+      : defaultFields[ConfigKey.TIMEOUT],
+    [ConfigKey.CONFIG_HASH]: monitor.hash || defaultFields[ConfigKey.CONFIG_HASH],
+    // picking out keys specifically, so users can't add arbitrary fields
+    [ConfigKey.ALERT_CONFIG]: monitor.alert
+      ? {
+          ...defaultFields[ConfigKey.ALERT_CONFIG],
+          status: {
+            ...defaultFields[ConfigKey.ALERT_CONFIG]?.status,
+            enabled:
+              monitor.alert?.status?.enabled ??
+              defaultFields[ConfigKey.ALERT_CONFIG]?.status?.enabled ??
+              true,
+          },
+        }
+      : defaultFields[ConfigKey.ALERT_CONFIG],
   };
-  return {
-    ...defaultFields,
-    ...normalizedFields,
-  };
+  return { normalizedFields, errors };
 };
 
 export const getCustomHeartbeatId = (
@@ -89,10 +131,72 @@ export const getMonitorLocations = ({
       );
     }) || [];
 
-  return [...publicLocs, ...privateLocs].filter(
-    (location) => location !== undefined
-  ) as BrowserFields[ConfigKey.LOCATIONS];
+  return [...publicLocs, ...privateLocs]
+    .filter((location) => location !== undefined)
+    .map((loc) => formatLocation(loc!)) as BrowserFields[ConfigKey.LOCATIONS];
 };
+
+const UNSUPPORTED_OPTION_TITLE = i18n.translate(
+  'xpack.synthetics.projectMonitorApi.validation.unsupportedOption.title',
+  {
+    defaultMessage: 'Unsupported Heartbeat option',
+  }
+);
+
+const INVALID_CONFIGURATION_TITLE = i18n.translate(
+  'xpack.synthetics.projectMonitorApi.validation.invalidConfiguration.title',
+  {
+    defaultMessage: 'Invalid Heartbeat configuration',
+  }
+);
+
+const INVALID_NAMESPACE_TITLE = i18n.translate(
+  'xpack.synthetics.projectMonitorApi.validation.invalidNamespace.title',
+  {
+    defaultMessage: 'Invalid namespace',
+  }
+);
+
+export const getUnsupportedKeysError = (
+  monitor: ProjectMonitor,
+  unsupportedKeys: string[],
+  version: string
+) => ({
+  id: monitor.id,
+  reason: UNSUPPORTED_OPTION_TITLE,
+  details: `The following Heartbeat options are not supported for ${
+    monitor.type
+  } project monitors in ${version}: ${unsupportedKeys.join(
+    '|'
+  )}. You monitor was not created or updated.`,
+});
+
+export const getInvalidUrlsOrHostsError = (
+  monitor: ProjectMonitor,
+  key: 'hosts' | 'urls',
+  version: string
+) => ({
+  id: monitor.id,
+  reason: INVALID_CONFIGURATION_TITLE,
+  details: i18n.translate(
+    'xpack.synthetics.projectMonitorApi.validation.invalidUrlOrHosts.description',
+    {
+      defaultMessage:
+        '`{monitorType}` project monitors must have exactly one value for field `{key}` in version `{version}`. Your monitor was not created or updated.',
+      values: {
+        monitorType: monitor.type,
+        key,
+        version,
+      },
+    }
+  ),
+});
+
+export const getInvalidNamespaceError = (monitor: ProjectMonitor, error: string) => ({
+  id: monitor.id,
+  reason: INVALID_NAMESPACE_TITLE,
+  details: error,
+});
 
 export const getValueInSeconds = (value: string) => {
   const keyMap = {
@@ -125,7 +229,7 @@ export const getOptionalListField = (value?: string[] | string): string[] => {
  * @param {Array | string} [value]
  * @returns {string} Returns first item when the value is an array, or the value itself
  */
-export const getOptionalArrayField = (value: string[] | string = '') => {
+export const getOptionalArrayField = (value: string[] | string = ''): string | undefined => {
   const array = getOptionalListField(value);
   return array[0];
 };
@@ -136,7 +240,7 @@ export const getOptionalArrayField = (value: string[] | string = '') => {
  * @param {Object} [monitor]
  * @returns {Object} Returns an object containing synthetics-compatible configuration keys
  */
-const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = '', keys: string[]) =>
+export const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = '', keys: string[]) =>
   Object.keys(obj).reduce<Record<string, unknown>>((acc, k) => {
     const pre = prefix.length ? prefix + '.' : '';
     const key = pre + k;
@@ -182,3 +286,7 @@ export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) 
     unsupportedKeys,
   };
 };
+
+// returns true when any ssl fields are defined
+export const getHasTLSFields = (monitor: ProjectMonitor) =>
+  Object.keys(monitor).some((key) => key.includes('ssl'));

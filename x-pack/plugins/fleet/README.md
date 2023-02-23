@@ -181,7 +181,6 @@ As part of the bundled package update process, we'll likely also need to update 
 - `x-pack/test/fleet_api_integration/config.ts`
 - `x-pack/plugins/fleet/server/integration_tests/helpers/docker_registry_helper.ts`
 - `x-pack/test/functional/config.base.js`
-- `x-pack/test/functional_synthetics/config.js`
 
 To update this registry image, pull the digest SHA from the package storage Jenkins pipeline at https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/activity and update the files above. The digest value should appear in the "publish Docker image" step as part of the `docker push` command in the logs.
 

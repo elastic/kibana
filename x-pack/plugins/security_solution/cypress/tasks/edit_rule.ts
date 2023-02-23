@@ -6,6 +6,7 @@
  */
 
 import { BACK_TO_RULE_DETAILS, EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
+import { ACTIONS_THROTTLE_INPUT } from '../screens/create_new_rule';
 
 export const saveEditedRule = () => {
   cy.get(EDIT_SUBMIT_BUTTON).should('exist').click({ force: true });
@@ -15,4 +16,8 @@ export const saveEditedRule = () => {
 export const goBackToRuleDetails = () => {
   cy.get(BACK_TO_RULE_DETAILS).should('exist').click();
   cy.get(BACK_TO_RULE_DETAILS).should('not.exist');
+};
+
+export const assertSelectedActionFrequency = (frequency: string) => {
+  cy.get(ACTIONS_THROTTLE_INPUT).find('option:selected').should('have.text', frequency);
 };

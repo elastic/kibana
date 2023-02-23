@@ -13,8 +13,9 @@ import { createTimelineEpic } from '../../timelines/store/timeline/epic';
 import { createTimelineFavoriteEpic } from '../../timelines/store/timeline/epic_favorite';
 import { createTimelineNoteEpic } from '../../timelines/store/timeline/epic_note';
 import { createTimelinePinnedEventEpic } from '../../timelines/store/timeline/epic_pinned_event';
-import { createTimelineLocalStorageEpic } from '../../timelines/store/timeline/epic_local_storage';
 import type { TimelineEpicDependencies } from '../../timelines/store/timeline/types';
+import { createDataTableLocalStorageEpic } from './data_table/epic_local_storage';
+import { createGroupingLocalStorageEpic } from './grouping/epic_local_storage_epic';
 
 export const createRootEpic = <State>(): Epic<
   Action,
@@ -27,5 +28,6 @@ export const createRootEpic = <State>(): Epic<
     createTimelineFavoriteEpic<State>(),
     createTimelineNoteEpic<State>(),
     createTimelinePinnedEventEpic<State>(),
-    createTimelineLocalStorageEpic<State>()
+    createDataTableLocalStorageEpic<State>(),
+    createGroupingLocalStorageEpic<State>()
   );

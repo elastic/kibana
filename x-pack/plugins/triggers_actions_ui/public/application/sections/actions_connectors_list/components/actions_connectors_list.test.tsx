@@ -88,7 +88,7 @@ describe('actions_connectors_list', () => {
 
     test('if click create button should render CreateConnectorFlyout', async () => {
       await setup();
-      wrapper.find('[data-test-subj="createFirstActionButton"]').first().simulate('click');
+      wrapper.find('[data-test-subj="createFirstActionButton"]').last().simulate('click');
       expect(wrapper.find('[data-test-subj="create-connector-flyout"]').exists()).toBeTruthy();
     });
   });
@@ -284,7 +284,7 @@ describe('actions_connectors_list', () => {
 
     it('renders table with preconfigured connectors', async () => {
       await setup();
-      expect(wrapper.find('[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(2);
+      expect(wrapper.find('span[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(1);
     });
 
     it('renders unknown connector type as disabled', async () => {
@@ -329,7 +329,7 @@ describe('actions_connectors_list', () => {
         "pageIndex": 0,
       }
     `);
-      wrapper.find('[data-test-subj="pagination-button-1"]').first().simulate('click');
+      wrapper.find('[data-test-subj="pagination-button-1"]').last().simulate('click');
       expect(wrapper.find('[data-test-subj="actionsTable"]').first().prop('pagination'))
         .toMatchInlineSnapshot(`
       Object {

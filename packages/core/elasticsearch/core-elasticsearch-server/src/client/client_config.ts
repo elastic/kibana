@@ -17,6 +17,8 @@ export interface ElasticsearchClientConfig {
   customHeaders: Record<string, string>;
   requestHeadersWhitelist: string[];
   maxSockets: number;
+  maxIdleSockets: number;
+  idleSocketTimeout: Duration;
   compression: boolean;
   sniffOnStart: boolean;
   sniffOnConnectionFault: boolean;

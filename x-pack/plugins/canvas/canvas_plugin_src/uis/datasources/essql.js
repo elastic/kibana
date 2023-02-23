@@ -7,7 +7,7 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EsqlLang } from '@kbn/monaco';
+import { SQLLang } from '@kbn/monaco';
 import { EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
@@ -78,7 +78,7 @@ class EssqlDatasource extends PureComponent {
         }
       >
         <CodeEditorField
-          languageId={EsqlLang.ID}
+          languageId={SQLLang.ID}
           value={this.getQuery()}
           onChange={this.onChange}
           className="canvasTextArea__code"

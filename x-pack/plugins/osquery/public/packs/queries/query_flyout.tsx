@@ -17,7 +17,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
@@ -36,6 +36,7 @@ import { usePackQueryForm } from './use_pack_query_form';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
 import { useKibana } from '../../common/lib/kibana';
+import { overflowCss } from '../utils';
 
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
@@ -62,9 +63,9 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     formState: { isSubmitting },
     resetField,
   } = hooksForm;
-  const onSubmit = (payload: PackQueryFormData) => {
+  const onSubmit = async (payload: PackQueryFormData) => {
     const serializedData: PackSOQueryFormData = serializer(payload);
-    onSave(serializedData);
+    await onSave(serializedData);
     onClose();
   };
 
@@ -79,22 +80,20 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         resetField('version', { defaultValue: savedQuery.version ? [savedQuery.version] : [] });
         resetField('interval', { defaultValue: savedQuery.interval ? savedQuery.interval : 3600 });
         resetField('snapshot', { defaultValue: savedQuery.snapshot ?? true });
-        resetField('removed');
+        resetField('removed', { defaultValue: savedQuery.removed });
         resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
       }
     },
     [resetField]
   );
-  /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
-  const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);
 
   return (
     <EuiFlyout
       size="m"
       onClose={onClose}
       aria-labelledby="flyoutTitle"
+      ownFocus={true}
       outsideClickCloses={false}
-      maskProps={maskProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -153,7 +152,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           </EuiFlexGroup>
           <EuiSpacer />
           <EuiFlexGroup>
-            <EuiFlexItem>
+            <EuiFlexItem css={overflowCss}>
               <ECSMappingEditorField />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { pick } from 'lodash';
+
 import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+
 import type { DashboardStartDependencies } from '../../plugin';
 import type { DashboardEmbeddableService } from './types';
 
@@ -15,14 +18,16 @@ export type EmbeddableServiceFactory = KibanaPluginServiceFactory<
   DashboardStartDependencies
 >;
 export const embeddableServiceFactory: EmbeddableServiceFactory = ({ startPlugins }) => {
-  const {
-    embeddable: { getEmbeddableFactory, getEmbeddableFactories, getStateTransfer, EmbeddablePanel },
-  } = startPlugins;
+  const { embeddable } = startPlugins;
 
-  return {
-    getEmbeddableFactory,
-    getEmbeddableFactories,
-    getStateTransfer,
-    EmbeddablePanel,
-  };
+  return pick(embeddable, [
+    'getEmbeddableFactory',
+    'getEmbeddableFactories',
+    'getStateTransfer',
+    'EmbeddablePanel',
+    'getAllMigrations',
+    'telemetry',
+    'extract',
+    'inject',
+  ]);
 };

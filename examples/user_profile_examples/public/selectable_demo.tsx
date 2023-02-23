@@ -62,6 +62,7 @@ export const SelectableDemo: FunctionComponent = () => {
         selectedOptions={selectedOptions}
         defaultOptions={defaultOptions}
         onChange={setSelectedOptions}
+        limit={2}
       />
     </PanelWithCodeBlock>
   );

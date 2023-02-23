@@ -103,6 +103,10 @@ export interface RuleExecutionContext {
   spaceId: string;
 }
 
+export interface RunningStatusChangeArgs {
+  newStatus: RuleExecutionStatus.running;
+}
+
 /**
  * Information about the status change event.
  */
@@ -115,5 +119,6 @@ export interface StatusChangeArgs {
 export interface MetricsArgs {
   searchDurations?: string[];
   indexingDurations?: string[];
+  enrichmentDurations?: string[];
   executionGap?: Duration;
 }

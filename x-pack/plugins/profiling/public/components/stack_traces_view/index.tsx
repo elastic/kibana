@@ -8,7 +8,7 @@ import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPanel } from '
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { StackTracesDisplayOption, TopNType } from '../../../common/stack_traces';
-import { groupSamplesByCategory, TopNResponse, TopNSubchart } from '../../../common/topn';
+import { groupSamplesByCategory, TopNResponse, TopNSample } from '../../../common/topn';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
@@ -50,33 +50,40 @@ export function StackTracesView() {
     rangeTo,
   });
 
-  const state = useTimeRangeAsync(() => {
-    if (!topNType) {
-      return Promise.resolve({ charts: [], metadata: {} });
-    }
-    return fetchTopN({
-      type: topNType,
-      timeFrom: new Date(timeRange.start).getTime() / 1000,
-      timeTo: new Date(timeRange.end).getTime() / 1000,
-      kuery,
-    }).then((response: TopNResponse) => {
-      const totalCount = response.TotalCount;
-      const samples = response.TopN;
-      const charts = groupSamplesByCategory({
-        samples,
-        totalCount,
-        metadata: response.Metadata,
-        labels: response.Labels,
+  const state = useTimeRangeAsync(
+    ({ http }) => {
+      if (!topNType) {
+        return Promise.resolve({ charts: [], metadata: {} });
+      }
+      return fetchTopN({
+        http,
+        type: topNType,
+        timeFrom: new Date(timeRange.start).getTime() / 1000,
+        timeTo: new Date(timeRange.end).getTime() / 1000,
+        kuery,
+      }).then((response: TopNResponse) => {
+        const totalCount = response.TotalCount;
+        const samples = response.TopN;
+        const charts = groupSamplesByCategory({
+          samples,
+          totalCount,
+          metadata: response.Metadata,
+          labels: response.Labels,
+        });
+        return {
+          charts,
+        };
       });
-      return {
-        charts,
-      };
-    });
-  }, [topNType, timeRange.start, timeRange.end, fetchTopN, kuery]);
-
-  const [highlightedSubchart, setHighlightedSubchart] = useState<TopNSubchart | undefined>(
-    undefined
+    },
+    [topNType, timeRange.start, timeRange.end, fetchTopN, kuery]
   );
+
+  const [highlightedSample, setHighlightedSample] = useState<TopNSample | null>(null);
+
+  const highlightedSubchart =
+    (highlightedSample &&
+      state.data?.charts.find((chart) => chart.Category === highlightedSample?.Category)) ||
+    null;
 
   const { data } = state;
 
@@ -139,14 +146,13 @@ export function StackTracesView() {
                         },
                       });
                     }}
-                    onSampleClick={(sample) => {
-                      setHighlightedSubchart(
-                        data?.charts.find((subchart) => subchart.Category === sample.Category)
-                      );
+                    onSampleOver={(sample) => {
+                      setHighlightedSample(sample);
                     }}
                     onSampleOut={() => {
-                      setHighlightedSubchart(undefined);
+                      setHighlightedSample(null);
                     }}
+                    highlightedSample={highlightedSample}
                     highlightedSubchart={highlightedSubchart}
                     showFrames={topNType === TopNType.Traces}
                   />

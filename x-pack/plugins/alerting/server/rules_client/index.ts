@@ -6,3 +6,4 @@
  */
 
 export * from './rules_client';
+export * from './types';

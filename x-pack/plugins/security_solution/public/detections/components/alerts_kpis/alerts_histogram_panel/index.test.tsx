@@ -21,6 +21,7 @@ import * as helpers from './helpers';
 import { mockAlertSearchResponse } from './mock_data';
 import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
 import { AlertsHistogramPanel, LEGEND_WITH_COUNTS_WIDTH } from '.';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../common/containers/query_toggle');
 
@@ -95,23 +96,36 @@ jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
     useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
   };
 });
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/components/page/use_refetch_by_session');
+jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
+
+jest.mock('../../../../common/components/page/use_refetch_by_session');
+jest.mock('../common/hooks', () => {
+  const actual = jest.requireActual('../common/hooks');
+  return {
+    ...actual,
+    useInspectButton: jest.fn(),
+  };
+});
+
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+jest.mock('../../../../common/hooks/use_experimental_features');
+
+const defaultProps = {
+  setQuery: jest.fn(),
+  showBuildingBlockAlerts: false,
+  showOnlyThreatIndicatorAlerts: false,
+  signalIndexName: 'signalIndexName',
+  updateDateRange: jest.fn(),
+};
+const mockSetToggle = jest.fn();
+const mockUseQueryToggle = useQueryToggle as jest.Mock;
 
 describe('AlertsHistogramPanel', () => {
-  const defaultProps = {
-    signalIndexName: 'signalIndexName',
-    setQuery: jest.fn(),
-    updateDateRange: jest.fn(),
-  };
-
-  const mockSetToggle = jest.fn();
-  const mockUseQueryToggle = useQueryToggle as jest.Mock;
   beforeEach(() => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
   });
 
   it('renders correctly', () => {
@@ -165,8 +179,8 @@ describe('AlertsHistogramPanel', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').first().getDOMNode()
-    ).toHaveClass('euiFlexGroup--alignItemsFlexEnd');
+      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').last().getDOMNode().className
+    ).toContain('flexEnd');
   });
 
   describe('inspect button', () => {
@@ -211,9 +225,9 @@ describe('AlertsHistogramPanel', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="panelFlexGroup"]').first().getDOMNode()).toHaveClass(
-      'euiFlexGroup--alignItemsFlexStart'
-    );
+    expect(
+      wrapper.find('[data-test-subj="panelFlexGroup"]').last().getDOMNode().className
+    ).toContain('flexStart');
   });
 
   test('it invokes onFieldSelected when a field is selected', async () => {
@@ -675,26 +689,118 @@ describe('AlertsHistogramPanel', () => {
         expect(mockSetToggle).toBeCalledWith(false);
       });
     });
-    it('toggleStatus=true, render', async () => {
-      await act(async () => {
-        const wrapper = mount(
-          <TestProviders>
-            <AlertsHistogramPanel {...defaultProps} />
-          </TestProviders>
-        );
 
-        expect(wrapper.find(MatrixLoader).exists()).toEqual(true);
+    describe('when alertsPageChartsEnabled = false', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for chartEmbeddablesEnabled flag
+        mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for alertsPageChartsEnabled flag
+      });
+
+      it('toggleStatus=true, render', async () => {
+        await act(async () => {
+          const wrapper = mount(
+            <TestProviders>
+              <AlertsHistogramPanel {...defaultProps} />
+            </TestProviders>
+          );
+
+          expect(wrapper.find(MatrixLoader).exists()).toEqual(true);
+        });
+      });
+      it('toggleStatus=false, hide', async () => {
+        mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+        await act(async () => {
+          const wrapper = mount(
+            <TestProviders>
+              <AlertsHistogramPanel {...defaultProps} />
+            </TestProviders>
+          );
+          expect(wrapper.find(MatrixLoader).exists()).toEqual(false);
+        });
       });
     });
-    it('toggleStatus=false, hide', async () => {
-      mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+
+    describe('when alertsPageChartsEnabled = true', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for chartEmbeddablesEnabled flag
+        mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(true); // for alertsPageChartsEnabled flag
+      });
+
+      it('isExpanded=true, render', async () => {
+        await act(async () => {
+          const wrapper = mount(
+            <TestProviders>
+              <AlertsHistogramPanel {...defaultProps} isExpanded={true} />
+            </TestProviders>
+          );
+          expect(wrapper.find(MatrixLoader).exists()).toEqual(true);
+        });
+      });
+      it('isExpanded=false, hide', async () => {
+        await act(async () => {
+          const wrapper = mount(
+            <TestProviders>
+              <AlertsHistogramPanel {...defaultProps} isExpanded={false} />
+            </TestProviders>
+          );
+          expect(wrapper.find(MatrixLoader).exists()).toEqual(false);
+        });
+      });
+      it('isExpanded is not passed in and toggleStatus =true, render', async () => {
+        await act(async () => {
+          const wrapper = mount(
+            <TestProviders>
+              <AlertsHistogramPanel {...defaultProps} />
+            </TestProviders>
+          );
+          expect(wrapper.find(MatrixLoader).exists()).toEqual(true);
+        });
+      });
+      it('isExpanded is not passed in and toggleStatus =false, hide', async () => {
+        mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+        await act(async () => {
+          const wrapper = mount(
+            <TestProviders>
+              <AlertsHistogramPanel {...defaultProps} />
+            </TestProviders>
+          );
+          expect(wrapper.find(MatrixLoader).exists()).toEqual(false);
+        });
+      });
+    });
+  });
+
+  describe('when isChartEmbeddablesEnabled = true', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+      mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(true); // for chartEmbeddablesEnabled flag
+      mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for alertsPageChartsEnabled flag
+    });
+
+    it('renders LensEmbeddable', async () => {
       await act(async () => {
         const wrapper = mount(
           <TestProviders>
             <AlertsHistogramPanel {...defaultProps} />
           </TestProviders>
         );
-        expect(wrapper.find(MatrixLoader).exists()).toEqual(false);
+        expect(
+          wrapper.find('[data-test-subj="embeddable-matrix-histogram"]').exists()
+        ).toBeTruthy();
+      });
+    });
+
+    it('should skip calling getAlertsRiskQuery', async () => {
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(mockUseQueryAlerts.mock.calls[0][0].skip).toBeTruthy();
       });
     });
   });

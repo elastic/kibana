@@ -16,8 +16,11 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { InfraPluginSetup } from '@kbn/infra-plugin/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -29,10 +32,20 @@ import {
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  SEARCH_EXPERIENCES_PLUGIN,
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
 } from '../common/constants';
+
+import {
+  appSearchGuideId,
+  websiteSearchGuideId,
+  databaseSearchGuideId,
+  appSearchGuideConfig,
+  websiteSearchGuideConfig,
+  databaseSearchGuideConfig,
+} from '../common/guided_onboarding/search_guide_config';
 
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
@@ -53,6 +66,7 @@ import { registerConfigDataRoute } from './routes/enterprise_search/config_data'
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
 import { registerCreateAPIKeyRoute } from './routes/enterprise_search/create_api_key';
+import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -70,11 +84,14 @@ interface PluginsSetup {
   features: FeaturesPluginSetup;
   infra: InfraPluginSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
+  ml?: MlPluginSetup;
+  guidedOnboarding: GuidedOnboardingPluginSetup;
 }
 
 interface PluginsStart {
   spaces: SpacesPluginStart;
   security: SecurityPluginStart;
+  data: DataPluginStart;
 }
 
 export interface RouteDependencies {
@@ -83,6 +100,7 @@ export interface RouteDependencies {
   log: Logger;
   enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
   getSavedObjectsService?(): SavedObjectsServiceStart;
+  ml?: MlPluginSetup;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -96,7 +114,15 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public setup(
     { capabilities, http, savedObjects, getStartServices, uiSettings }: CoreSetup<PluginsStart>,
-    { usageCollection, security, features, infra, customIntegrations }: PluginsSetup
+    {
+      usageCollection,
+      security,
+      features,
+      infra,
+      customIntegrations,
+      ml,
+      guidedOnboarding,
+    }: PluginsSetup
   ) {
     const config = this.config;
     const log = this.logger;
@@ -107,6 +133,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       ANALYTICS_PLUGIN.ID,
       APP_SEARCH_PLUGIN.ID,
       WORKPLACE_SEARCH_PLUGIN.ID,
+      SEARCH_EXPERIENCES_PLUGIN.ID,
     ];
 
     if (customIntegrations) {
@@ -142,7 +169,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     capabilities.registerSwitcher(async (request: KibanaRequest) => {
       const [, { spaces }] = await getStartServices();
 
-      const dependencies = { config, security, spaces, request, log };
+      const dependencies = { config, security, spaces, request, log, ml };
 
       const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
       const showEnterpriseSearch = hasAppSearchAccess || hasWorkplaceSearchAccess;
@@ -155,6 +182,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
+          searchExperiences: showEnterpriseSearch,
         },
         catalogue: {
           enterpriseSearch: showEnterpriseSearch,
@@ -163,6 +191,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
+          searchExperiences: showEnterpriseSearch,
         },
       };
     });
@@ -172,7 +201,7 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
     const router = http.createRouter();
     const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({ config, log });
-    const dependencies = { router, config, log, enterpriseSearchRequestHandler };
+    const dependencies = { router, config, log, enterpriseSearchRequestHandler, ml };
 
     registerConfigDataRoute(dependencies);
     registerAppSearchRoutes(dependencies);
@@ -181,7 +210,12 @@ export class EnterpriseSearchPlugin implements Plugin {
     // Enterprise Search Routes
     registerConnectorRoutes(dependencies);
     registerCrawlerRoutes(dependencies);
-    registerAnalyticsRoutes(dependencies);
+    registerStatsRoutes(dependencies);
+
+    // Analytics Routes (stand-alone product)
+    getStartServices().then(([coreStart, { data }]) => {
+      registerAnalyticsRoutes({ ...dependencies, data, savedObjects: coreStart.savedObjects });
+    });
 
     getStartServices().then(([, { security: securityStart }]) => {
       registerCreateAPIKeyRoute(dependencies, securityStart);
@@ -210,29 +244,36 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register logs source configuration, used by LogStream components
      * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
      */
-    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
-      name: 'Enterprise Search Search Relevance Logs',
+    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
       logIndices: {
-        type: 'index_name',
         indexName: 'logs-app_search.search_relevance_suggestions-*',
+        type: 'index_name',
       },
+      name: 'Enterprise Search Search Relevance Logs',
     });
 
-    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID, {
-      name: 'Enterprise Search Audit Logs',
+    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID, {
       logIndices: {
-        type: 'index_name',
         indexName: 'logs-enterprise_search*',
+        type: 'index_name',
       },
+      name: 'Enterprise Search Audit Logs',
     });
 
-    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID, {
-      name: 'Enterprise Search Behaviorial Analytics Logs',
+    infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID, {
       logIndices: {
-        type: 'index_name',
         indexName: 'logs-elastic_analytics.events-*',
+        type: 'index_name',
       },
+      name: 'Enterprise Search Behavioral Analytics Logs',
     });
+
+    /**
+     * Register a config for the search guide
+     */
+    guidedOnboarding.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
+    guidedOnboarding.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
+    guidedOnboarding.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
   }
 
   public start() {}

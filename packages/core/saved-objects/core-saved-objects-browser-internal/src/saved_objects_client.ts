@@ -32,7 +32,6 @@ import type {
   SimpleSavedObject,
   SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-browser';
-
 import { SimpleSavedObjectImpl } from './simple_saved_object';
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
@@ -104,6 +103,7 @@ const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
  * HTTP API for interacting with Saved Objects.
  *
  * @internal
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export class SavedObjectsClient implements SavedObjectsClientContract {
   private http: HttpSetup;
@@ -292,6 +292,8 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
       fields: 'fields',
       hasReference: 'has_reference',
       hasReferenceOperator: 'has_reference_operator',
+      hasNoReference: 'has_no_reference',
+      hasNoReferenceOperator: 'has_no_reference_operator',
       page: 'page',
       perPage: 'per_page',
       search: 'search',
@@ -314,6 +316,9 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     // is not doing it implicitly.
     if (query.has_reference) {
       query.has_reference = JSON.stringify(query.has_reference);
+    }
+    if (query.has_no_reference) {
+      query.has_no_reference = JSON.stringify(query.has_no_reference);
     }
 
     // `aggs` is a structured object. we need to stringify it before sending it, as `fetch`

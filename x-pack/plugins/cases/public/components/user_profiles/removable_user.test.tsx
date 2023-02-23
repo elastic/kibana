@@ -7,13 +7,11 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { RemovableUser, UserRepresentationProps } from './removable_user';
+import type { UserRepresentationProps } from './removable_user';
+import { RemovableUser } from './removable_user';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
-import {
-  AppMockRenderer,
-  createAppMockRenderer,
-  noUpdateCasesPermissions,
-} from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, noUpdateCasesPermissions } from '../../common/mock';
 
 describe('UserRepresentation', () => {
   const dataTestSubjGroup = `user-profile-assigned-user-group-${userProfiles[0].user.username}`;

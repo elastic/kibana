@@ -23,6 +23,7 @@ import {
   FieldFormatParams as BaseFieldFormatParams,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
+import { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { FORMULA_COLUMN } from './configurations/constants';
 
 export const ReportViewTypes = {
@@ -31,6 +32,7 @@ export const ReportViewTypes = {
   cwv: 'core-web-vitals',
   mdd: 'device-data-distribution',
   smt: 'single-metric',
+  htm: 'heatmap',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -67,8 +69,11 @@ export interface MetricOption {
   timeScale?: string;
   showPercentileAnnotations?: boolean;
   formula?: string;
-  metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette' | 'titlePosition'>;
+  metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette' | 'titlePosition' | 'textAlign'>;
   palette?: PaletteOutput;
+  format?: 'percent' | 'number';
+  emptyAsNull?: boolean;
+  timestampField?: string;
 }
 
 export interface SeriesConfig {
@@ -90,7 +95,10 @@ export interface SeriesConfig {
       }
   >;
   textDefinitionFields?: string[];
-  metricOptions?: MetricOption[];
+  metricOptions?: Array<
+    | MetricOption
+    | { id: string; field?: string; label: string; items: MetricOption[]; columnType?: string }
+  >;
   labels: Record<string, string>;
   hasOperationType: boolean;
   palette?: PaletteOutput;
@@ -123,8 +131,8 @@ export interface SeriesUrl {
 
 export interface UrlFilter {
   field: string;
-  values?: string[];
-  notValues?: string[];
+  values?: Array<string | number>;
+  notValues?: Array<string | number>;
   wildcards?: string[];
   notWildcards?: string[];
 }
@@ -132,13 +140,21 @@ export interface UrlFilter {
 export interface ConfigProps {
   dataView?: DataView;
   series?: SeriesUrl;
+  spaceId?: string;
 }
 
 interface FormatType extends SerializedFieldFormat<FieldFormatParams> {
   id: 'duration' | 'number' | 'bytes' | 'percent';
 }
 
-export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
+export type AppDataType =
+  | 'synthetics'
+  | 'ux'
+  | 'infra_logs'
+  | 'infra_metrics'
+  | 'apm'
+  | 'mobile'
+  | 'alerts';
 
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
 type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize' | 'humanizePrecise';
@@ -163,3 +179,7 @@ export interface BuilderItem {
 }
 
 export type SupportedOperations = 'average' | 'median' | 'sum' | 'unique_count' | 'min' | 'max';
+
+type TermColumnParams = TermsIndexPatternColumn['params'];
+
+export type TermColumnParamsOrderBy = TermColumnParams['orderBy'];

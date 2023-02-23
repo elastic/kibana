@@ -65,13 +65,7 @@ export const TTYTextSizer = ({
         onFontSizeChanged(newSize);
       }
     }
-  }, [containerHeight, fit, fontSize, onFontSizeChanged, tty?.rows]);
-
-  useEffect(() => {
-    if (isFullscreen) {
-      setFit(true);
-    }
-  }, [isFullscreen]);
+  }, [isFullscreen, containerHeight, fit, fontSize, onFontSizeChanged, tty?.rows]);
 
   const onToggleFit = useCallback(() => {
     const newValue = !fit;
@@ -100,7 +94,8 @@ export const TTYTextSizer = ({
             display={fit ? 'fill' : 'empty'}
             iconType={fit ? 'expand' : 'minimize'}
             onClick={onToggleFit}
-            {...commonButtonProps}
+            size="s"
+            color="ghost"
           />
         </EuiToolTip>
       </EuiFlexItem>

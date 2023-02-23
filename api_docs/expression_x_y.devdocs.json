@@ -37,7 +37,23 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-public.LayerTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "LayerTypes",
+        "description": [],
+        "signature": [
+          "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],
@@ -386,7 +402,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"custom\" | \"full\" | \"dataBounds\""
+              "\"full\" | \"custom\" | \"dataBounds\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -426,6 +442,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "enforce",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.AxisExtentConfig.niceValues",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "niceValues",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -531,7 +561,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"bar\" | \"line\" | \"area\""
+              "\"area\" | \"line\" | \"bar\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -695,7 +725,7 @@
             "label": "xScaleType",
             "description": [],
             "signature": [
-              "\"linear\" | \"time\" | \"ordinal\""
+              "\"time\" | \"linear\" | \"ordinal\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -753,7 +783,13 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<{ [key: string]: unknown; }>"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
@@ -839,7 +875,7 @@
               "\nPosition of the legend relative to the chart"
             ],
             "signature": [
-              "\"top\" | \"bottom\" | \"left\" | \"right\""
+              "\"right\" | \"left\" | \"top\" | \"bottom\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -887,7 +923,7 @@
               "\nHorizontal Alignment of the legend when it is set inside chart"
             ],
             "signature": [
-              "\"left\" | \"right\" | undefined"
+              "\"right\" | \"left\" | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -1775,6 +1811,53 @@
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYChartProps.syncTooltips",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncTooltips",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYChartProps.syncCursor",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncCursor",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYChartProps.syncColors",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncColors",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYChartProps.canNavigateToLens",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "canNavigateToLens",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1939,7 +2022,7 @@
         "label": "AvailableReferenceLineIcon",
         "description": [],
         "signature": [
-          "\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\" | \"empty\""
+          "\"alert\" | \"circle\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"empty\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -1976,7 +2059,7 @@
         "label": "AxisExtentMode",
         "description": [],
         "signature": [
-          "\"custom\" | \"full\" | \"dataBounds\""
+          "\"full\" | \"custom\" | \"dataBounds\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2152,6 +2235,68 @@
       },
       {
         "parentPluginId": "expressionXY",
+        "id": "def-common.DataDecorationConfigFn",
+        "type": "Type",
+        "tags": [],
+        "label": "DataDecorationConfigFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"dataDecorationConfig\", null, ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.DataDecorationConfig",
+            "text": "DataDecorationConfig"
+          },
+          ", ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.DataDecorationConfigResult",
+            "text": "DataDecorationConfigResult"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
         "id": "def-common.DataDecorationConfigResult",
         "type": "Type",
         "tags": [],
@@ -2189,7 +2334,13 @@
             "text": "DataLayerArgs"
           },
           ", \"palette\"> & { type: \"dataLayer\"; layerType: \"data\"; palette: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<{ [key: string]: unknown; }>; table: ",
           {
             "pluginId": "expressions",
@@ -2223,7 +2374,13 @@
             "text": "DataLayerArgs"
           },
           ", \"palette\"> & { type: \"dataLayer\"; layerType: \"data\"; palette: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<{ [key: string]: unknown; }>; table: ",
           {
             "pluginId": "expressions",
@@ -2256,6 +2413,134 @@
       },
       {
         "parentPluginId": "expressionXY",
+        "id": "def-common.EventAnnotationResultFn",
+        "type": "Type",
+        "tags": [],
+        "label": "EventAnnotationResultFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"event_annotations_result\", null, ",
+          "EventAnnotationResultArgs",
+          ", ",
+          "EventAnnotationResultResult",
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.ExtendedAnnotationLayerConfigResult",
+        "type": "Type",
+        "tags": [],
+        "label": "ExtendedAnnotationLayerConfigResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.AnnotationLayerArgs",
+            "text": "AnnotationLayerArgs"
+          },
+          " & { layerId: string; } & { type: \"extendedAnnotationLayer\"; layerType: \"annotations\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.ExtendedAnnotationLayerFn",
+        "type": "Type",
+        "tags": [],
+        "label": "ExtendedAnnotationLayerFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"extendedAnnotationLayer\", null, ",
+          "ExtendedAnnotationLayerArgs",
+          ", ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ExtendedAnnotationLayerConfigResult",
+            "text": "ExtendedAnnotationLayerConfigResult"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
         "id": "def-common.ExtendedDataLayerConfigResult",
         "type": "Type",
         "tags": [],
@@ -2265,7 +2550,13 @@
           "Omit<",
           "ExtendedDataLayerArgs",
           ", \"palette\"> & { type: \"extendedDataLayer\"; layerType: \"data\"; palette: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<{ [key: string]: unknown; }>; table: ",
           {
             "pluginId": "expressions",
@@ -2283,13 +2574,77 @@
       },
       {
         "parentPluginId": "expressionXY",
+        "id": "def-common.ExtendedDataLayerFn",
+        "type": "Type",
+        "tags": [],
+        "label": "ExtendedDataLayerFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"extendedDataLayer\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          "ExtendedDataLayerArgs",
+          ", Promise<",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ExtendedDataLayerConfigResult",
+            "text": "ExtendedDataLayerConfigResult"
+          },
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
         "id": "def-common.FillStyle",
         "type": "Type",
         "tags": [],
         "label": "FillStyle",
         "description": [],
         "signature": [
-          "\"above\" | \"below\" | \"none\""
+          "\"none\" | \"above\" | \"below\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2304,7 +2659,7 @@
         "label": "FittingFunction",
         "description": [],
         "signature": [
-          "\"None\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Average\""
+          "\"None\" | \"Average\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2319,7 +2674,71 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"above\" | \"below\" | \"auto\" | \"left\" | \"right\""
+          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.LayeredXyVisFn",
+        "type": "Type",
+        "tags": [],
+        "label": "LayeredXyVisFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"layeredXyVis\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          "LayeredXYArgs",
+          ", Promise<",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.XYRender",
+            "text": "XYRender"
+          },
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2334,7 +2753,69 @@
         "label": "LayerType",
         "description": [],
         "signature": [
-          "\"data\" | \"referenceLine\" | \"annotations\""
+          "\"data\" | \"annotations\" | \"referenceLine\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.LegendConfigFn",
+        "type": "Type",
+        "tags": [],
+        "label": "LegendConfigFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"legendConfig\", null, ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.LegendConfig",
+            "text": "LegendConfig"
+          },
+          ", Promise<",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.LegendConfigResult",
+            "text": "LegendConfigResult"
+          },
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2404,6 +2885,68 @@
           "\"expressionXy\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.ReferenceLineDecorationConfigFn",
+        "type": "Type",
+        "tags": [],
+        "label": "ReferenceLineDecorationConfigFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"referenceLineDecorationConfig\", null, ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ReferenceLineDecorationConfig",
+            "text": "ReferenceLineDecorationConfig"
+          },
+          ", ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ReferenceLineDecorationConfigResult",
+            "text": "ReferenceLineDecorationConfigResult"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2493,13 +3036,83 @@
       },
       {
         "parentPluginId": "expressionXY",
+        "id": "def-common.ReferenceLineLayerFn",
+        "type": "Type",
+        "tags": [],
+        "label": "ReferenceLineLayerFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"referenceLineLayer\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ReferenceLineLayerArgs",
+            "text": "ReferenceLineLayerArgs"
+          },
+          ", Promise<",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ReferenceLineLayerConfigResult",
+            "text": "ReferenceLineLayerConfigResult"
+          },
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
         "id": "def-common.SeriesType",
         "type": "Type",
         "tags": [],
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"bar\" | \"line\" | \"area\""
+          "\"area\" | \"line\" | \"bar\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2515,6 +3128,68 @@
         "description": [],
         "signature": [
           "\"hide\" | \"show\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.XAxisConfigFn",
+        "type": "Type",
+        "tags": [],
+        "label": "XAxisConfigFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"xAxisConfig\", null, ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.AxisConfig",
+            "text": "AxisConfig"
+          },
+          ", ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.XAxisConfigResult",
+            "text": "XAxisConfigResult"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2551,7 +3226,7 @@
         "label": "XScaleType",
         "description": [],
         "signature": [
-          "\"linear\" | \"time\" | \"ordinal\""
+          "\"time\" | \"linear\" | \"ordinal\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2637,6 +3312,68 @@
       },
       {
         "parentPluginId": "expressionXY",
+        "id": "def-common.YAxisConfigFn",
+        "type": "Type",
+        "tags": [],
+        "label": "YAxisConfigFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"yAxisConfig\", null, ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.YAxisConfig",
+            "text": "YAxisConfig"
+          },
+          ", ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.YAxisConfigResult",
+            "text": "YAxisConfigResult"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
         "id": "def-common.YAxisConfigResult",
         "type": "Type",
         "tags": [],
@@ -2665,7 +3402,7 @@
         "label": "YScaleType",
         "description": [],
         "signature": [
-          "\"linear\" | \"log\" | \"time\" | \"sqrt\""
+          "\"log\" | \"time\" | \"sqrt\" | \"linear\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2673,6 +3410,22 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.LayerTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "LayerTypes",
+        "description": [],
+        "signature": [
+          "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

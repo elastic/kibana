@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
-import { KueryNode } from '@kbn/es-query';
-import { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { KueryNode } from '@kbn/es-query';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import { buildFilter } from '../../client/utils';
-import {
+import type {
   CasesTelemetry,
   CollectTelemetryDataParams,
   MaxBucketOnCaseAggregation,

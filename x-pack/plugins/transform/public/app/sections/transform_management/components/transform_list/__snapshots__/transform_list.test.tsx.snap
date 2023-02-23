@@ -24,6 +24,7 @@ exports[`Transform: Transform List <TransformList /> Minimal initialization 1`] 
               fill={true}
               isDisabled={true}
               onClick={[MockFunction]}
+              size="m"
             >
               Create your first transform
             </EuiButton>,

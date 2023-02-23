@@ -34,6 +34,7 @@ export const {
   rollbackSuggestion,
   submitSuggestion,
   switchDatasource,
+  switchAndCleanDatasource,
   updateIndexPatterns,
   setToggleFullscreen,
   initEmpty,
@@ -43,6 +44,7 @@ export const {
   cloneLayer,
   addLayer,
   setLayerDefaultDimension,
+  removeDimension,
 } = lensActions;
 
 export const makeConfigureStore = (

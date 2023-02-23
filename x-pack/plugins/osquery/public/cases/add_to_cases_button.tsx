@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { CommentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useKibana } from '../common/lib/kibana';
+import { AlertAttachmentContext } from '../common/contexts';
 
 const ADD_TO_CASE = i18n.translate(
   'xpack.osquery.pack.queriesTable.addToCaseResultsActionAriaLabel',
@@ -19,8 +20,8 @@ const ADD_TO_CASE = i18n.translate(
   }
 );
 
-interface IProps {
-  queryId: string;
+export interface AddToCaseButtonProps {
+  queryId?: string;
   agentIds?: string[];
   actionId: string;
   isIcon?: boolean;
@@ -28,7 +29,7 @@ interface IProps {
   iconProps?: Record<string, string>;
 }
 
-export const AddToCaseButton: React.FC<IProps> = ({
+export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   actionId,
   agentIds = [],
   queryId = '',
@@ -37,6 +38,24 @@ export const AddToCaseButton: React.FC<IProps> = ({
   iconProps,
 }) => {
   const { cases } = useKibana().services;
+  const ecsData = useContext(AlertAttachmentContext);
+  const alertAttachments = useMemo(
+    () =>
+      ecsData?._id
+        ? [
+            {
+              alertId: ecsData?._id ?? '',
+              index: ecsData?._index ?? '',
+              rule: cases.helpers.getRuleIdFromEvent({
+                ecs: ecsData,
+                data: [],
+              }),
+              type: CommentType.alert as const,
+            },
+          ]
+        : [],
+    [cases.helpers, ecsData]
+  );
 
   const casePermissions = cases.helpers.canUseCases();
   const hasCasesPermissions =
@@ -45,6 +64,7 @@ export const AddToCaseButton: React.FC<IProps> = ({
 
   const handleClick = useCallback(() => {
     const attachments: CaseAttachmentsWithoutOwner = [
+      ...alertAttachments,
       {
         type: CommentType.externalReference,
         externalReferenceId: actionId,
@@ -58,7 +78,7 @@ export const AddToCaseButton: React.FC<IProps> = ({
     if (hasCasesPermissions) {
       selectCaseModal.open({ attachments });
     }
-  }, [actionId, agentIds, hasCasesPermissions, queryId, selectCaseModal]);
+  }, [actionId, agentIds, alertAttachments, hasCasesPermissions, queryId, selectCaseModal]);
 
   if (isIcon) {
     return (
@@ -67,6 +87,7 @@ export const AddToCaseButton: React.FC<IProps> = ({
           iconType={'casesApp'}
           onClick={handleClick}
           isDisabled={isDisabled || !hasCasesPermissions}
+          aria-label={ADD_TO_CASE}
           {...iconProps}
         />
       </EuiToolTip>
@@ -79,6 +100,7 @@ export const AddToCaseButton: React.FC<IProps> = ({
       iconType="casesApp"
       onClick={handleClick}
       isDisabled={isDisabled || !hasCasesPermissions}
+      aria-label={ADD_TO_CASE}
     >
       {ADD_TO_CASE}
     </EuiButtonEmpty>

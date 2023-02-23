@@ -466,6 +466,7 @@ export class WebElementWrapper {
    * @return {Promise<WebElementWrapper>}
    */
   public async findByCssSelector(selector: string) {
+    this.logger.debug(`WebElementWrapper.findByCssSelector(${selector})`);
     return await this.retryCall(async function findByCssSelector(wrapper) {
       return wrapper._wrap(
         await wrapper._webElement.findElement(wrapper.By.css(selector)),

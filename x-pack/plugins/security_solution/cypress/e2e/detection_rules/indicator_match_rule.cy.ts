@@ -6,6 +6,7 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
+import type { Mitre } from '../../objects/rule';
 import {
   getIndexPatterns,
   getNewThreatIndicatorRule,
@@ -16,14 +17,13 @@ import {
   ALERT_RULE_NAME,
   ALERT_RISK_SCORE,
   ALERT_SEVERITY,
-  NUMBER_OF_ALERTS,
+  ALERTS_COUNT,
 } from '../../screens/alerts';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
+  RULES_MANAGEMENT_TABLE,
   RULE_NAME,
-  RULES_ROW,
-  RULES_TABLE,
   RULE_SWITCH,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
@@ -63,6 +63,7 @@ import {
   goToRuleDetails,
   selectNumberOfRules,
   checkDuplicatedRule,
+  expectNumberOfRules,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
@@ -102,17 +103,18 @@ import {
 import { goBackToRuleDetails } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
-import { goBackToAllRulesTable, getDetails } from '../../tasks/rule_details';
+import { goBackToRulesTable, getDetails } from '../../tasks/rule_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL, RULE_CREATION } from '../../urls/navigation';
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
-    const expectedUrls = getNewThreatIndicatorRule().referenceUrls.join('');
-    const expectedFalsePositives = getNewThreatIndicatorRule().falsePositivesExamples.join('');
-    const expectedTags = getNewThreatIndicatorRule().tags.join('');
-    const expectedMitre = formatMitreAttackDescription(getNewThreatIndicatorRule().mitre);
+    const expectedUrls = getNewThreatIndicatorRule().referenceUrls?.join('');
+    const expectedFalsePositives = getNewThreatIndicatorRule().falsePositivesExamples?.join('');
+    const expectedTags = getNewThreatIndicatorRule().tags?.join('');
+    const mitreAttack = getNewThreatIndicatorRule().mitre as Mitre[];
+    const expectedMitre = formatMitreAttackDescription(mitreAttack);
     const expectedNumberOfRules = 1;
     const expectedNumberOfAlerts = '1 alert';
 
@@ -122,18 +124,19 @@ describe('indicator match', () => {
       esArchiverLoad('suspicious_source_event');
       login();
     });
+
     after(() => {
       esArchiverUnload('threat_indicator');
       esArchiverUnload('suspicious_source_event');
     });
 
     describe('Creating new indicator match rules', () => {
-      before(() => {
-        visitWithoutDateRange(RULE_CREATION);
-        selectIndicatorMatchType();
-      });
-
       describe('Index patterns', () => {
+        beforeEach(() => {
+          visitWithoutDateRange(RULE_CREATION);
+          selectIndicatorMatchType();
+        });
+
         it('Contains a predefined index pattern', () => {
           getIndicatorIndex().should('have.text', getIndexPatterns().join(''));
         });
@@ -152,7 +155,7 @@ describe('indicator match', () => {
       });
 
       describe('Indicator index patterns', () => {
-        before(() => {
+        beforeEach(() => {
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -173,7 +176,7 @@ describe('indicator match', () => {
       });
 
       describe('custom query input', () => {
-        before(() => {
+        beforeEach(() => {
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -189,10 +192,11 @@ describe('indicator match', () => {
       });
 
       describe('custom indicator query input', () => {
-        before(() => {
+        beforeEach(() => {
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
+
         it(`Has a default set of ${DEFAULT_THREAT_MATCH_QUERY}`, () => {
           getCustomIndicatorQueryInput().should('have.text', DEFAULT_THREAT_MATCH_QUERY);
         });
@@ -429,9 +433,7 @@ describe('indicator match', () => {
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-        cy.get(RULES_TABLE).then(($table) => {
-          cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-        });
+        expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 
         cy.get(RULE_NAME).should('have.text', rule.name);
         cy.get(RISK_SCORE).should('have.text', rule.riskScore);
@@ -479,20 +481,20 @@ describe('indicator match', () => {
         cy.get(SCHEDULE_DETAILS).within(() => {
           getDetails(RUNS_EVERY_DETAILS).should(
             'have.text',
-            `${rule.runsEvery.interval}${rule.runsEvery.type}`
+            `${rule.runsEvery?.interval}${rule.runsEvery?.type}`
           );
           getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
             'have.text',
-            `${rule.lookBack.interval}${rule.lookBack.type}`
+            `${rule.lookBack?.interval}${rule.lookBack?.type}`
           );
         });
 
         waitForTheRuleToBeExecuted();
         waitForAlertsToPopulate();
 
-        cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
+        cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts);
         cy.get(ALERT_RULE_NAME).first().should('have.text', rule.name);
-        cy.get(ALERT_SEVERITY).first().should('have.text', rule.severity.toLowerCase());
+        cy.get(ALERT_SEVERITY).first().should('have.text', rule.severity?.toLowerCase());
         cy.get(ALERT_RISK_SCORE).first().should('have.text', rule.riskScore);
       });
 
@@ -538,7 +540,7 @@ describe('indicator match', () => {
       it('Allows the rule to be duplicated from the table', () => {
         duplicateFirstRule();
         goBackToRuleDetails();
-        goBackToAllRulesTable();
+        goBackToRulesTable();
         checkDuplicatedRule();
       });
 
@@ -552,7 +554,7 @@ describe('indicator match', () => {
         goToRuleDetails();
         duplicateRuleFromMenu();
         goBackToRuleDetails();
-        goBackToAllRulesTable();
+        goBackToRulesTable();
         checkDuplicatedRule();
       });
     });

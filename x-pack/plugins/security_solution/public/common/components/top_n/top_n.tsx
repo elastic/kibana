@@ -17,11 +17,7 @@ import type { InputsModelId } from '../../store/inputs/constants';
 import type { TimelineEventsType } from '../../../../common/types/timeline';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import type { TopNOption } from './helpers';
-import {
-  isDetectionsAlertsTable,
-  getSourcererScopeName,
-  removeIgnoredAlertFilters,
-} from './helpers';
+import { getSourcererScopeName, removeIgnoredAlertFilters } from './helpers';
 import * as i18n from './translations';
 import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
@@ -38,11 +34,12 @@ const CloseButton = styled(EuiButtonIcon)`
 
 const ViewSelect = styled(EuiSuperSelect)`
   z-index: 999999;
-  width: 155px;
+  width: 170px;
 `;
 
 const TopNContent = styled.div`
   margin-top: 4px;
+  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
 
   .euiPanel {
     border: none;
@@ -60,7 +57,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   query: Query;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
   showLegend?: boolean;
-  timelineId?: string;
+  scopeId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
   value?: string[] | string | null;
@@ -80,7 +77,7 @@ const TopNComponent: React.FC<Props> = ({
   showLegend,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
-  timelineId,
+  scopeId,
   to,
   toggleTopN,
 }) => {
@@ -90,7 +87,7 @@ const TopNComponent: React.FC<Props> = ({
     [setView]
   );
   const { selectedPatterns, runtimeMappings } = useSourcererDataView(
-    getSourcererScopeName({ timelineId, view })
+    getSourcererScopeName({ scopeId, view })
   );
 
   useEffect(() => {
@@ -101,20 +98,20 @@ const TopNComponent: React.FC<Props> = ({
     () => (
       <ViewSelect
         data-test-subj="view-select"
-        disabled={!isDetectionsAlertsTable(timelineId)}
+        disabled={options.length === 1}
         onChange={onViewSelected}
         options={options}
         valueOfSelected={view}
       />
     ),
-    [onViewSelected, options, timelineId, view]
+    [onViewSelected, options, view]
   );
 
   // alert workflow statuses (e.g. open | closed) and other alert-specific
   // filters must be ignored when viewing raw alerts
   const applicableFilters = useMemo(
-    () => removeIgnoredAlertFilters({ filters, timelineId, view }),
-    [filters, timelineId, view]
+    () => removeIgnoredAlertFilters({ filters, tableId: scopeId, view }),
+    [filters, scopeId, view]
   );
 
   return (
@@ -146,8 +143,9 @@ const TopNComponent: React.FC<Props> = ({
             setQuery={setQuery}
             showSpacer={false}
             toggleTopN={toggleTopN}
-            timelineId={timelineId}
+            scopeId={scopeId}
             to={to}
+            hideQueryToggle
           />
         ) : (
           <SignalsByCategory
@@ -159,8 +157,8 @@ const TopNComponent: React.FC<Props> = ({
             query={query}
             showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
-            timelineId={timelineId}
             runtimeMappings={runtimeMappings}
+            hideQueryToggle
           />
         )}
       </TopNContent>

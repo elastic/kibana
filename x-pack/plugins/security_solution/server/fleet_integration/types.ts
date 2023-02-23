@@ -8,7 +8,7 @@
 export interface PolicyCreateEndpointConfig {
   type: 'endpoint';
   endpointConfig: {
-    preset: 'NGAV' | 'EDREssential' | 'EDRComplete';
+    preset: 'NGAV' | 'EDREssential' | 'EDRComplete' | 'DataCollection';
   };
 }
 
@@ -18,12 +18,6 @@ export interface PolicyCreateEventFilters {
 
 export interface PolicyCreateCloudConfig {
   type: 'cloud';
-  cloudConfig: {
-    preventions: {
-      malware: boolean;
-      behavior_protection: boolean;
-    };
-  };
   eventFilters?: PolicyCreateEventFilters;
 }
 

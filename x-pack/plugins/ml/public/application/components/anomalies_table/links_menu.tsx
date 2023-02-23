@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import rison, { RisonValue } from 'rison-node';
+import rison from '@kbn/rison';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import {
@@ -53,6 +53,7 @@ import { useMlKibana } from '../../contexts/kibana';
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import type { AnomaliesTableRecord } from '../../../../common/types/anomalies';
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
+import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
 interface LinksMenuProps {
   anomaly: AnomaliesTableRecord;
   bounds: TimeRangeBounds;
@@ -78,7 +79,14 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     services: { data, share, application },
   } = kibana;
 
+  const job = useMemo(() => {
+    return mlJobService.getJob(props.anomaly.jobId);
+  }, [props.anomaly.jobId]);
+
   const getAnomaliesMapsLink = async (anomaly: AnomaliesTableRecord) => {
+    const index = job.datafeed_config.indices[0];
+    const dataViewId = await getDataViewIdFromName(index);
+
     const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
     const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
     const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
@@ -104,6 +112,10 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             },
           }
         : {}),
+      filters:
+        dataViewId === null
+          ? []
+          : getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
     });
     return location;
   };
@@ -112,6 +124,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     anomaly: AnomaliesTableRecord,
     sourceIndicesWithGeoFields: SourceIndicesWithGeoFields
   ) => {
+    const index = job.datafeed_config.indices[0];
+    const dataViewId = await getDataViewIdFromName(index);
+
     // Create a layer for each of the geoFields
     const initialLayers = getInitialSourceIndexFieldLayers(
       sourceIndicesWithGeoFields[anomaly.jobId]
@@ -138,10 +153,17 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     );
 
     const locator = share.url.locators.get(MAPS_APP_LOCATOR);
+    const filtersFromDatafeedQuery =
+      dataViewId === null
+        ? []
+        : getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id);
     const location = await locator?.getLocation({
       initialLayers,
       timeRange,
-      filters: data.query.filterManager.getFilters(),
+      filters:
+        filtersFromDatafeedQuery.length > 0
+          ? filtersFromDatafeedQuery
+          : data.query.filterManager.getFilters(),
       ...(anomaly.entityName && anomaly.entityValue
         ? {
             query: {
@@ -175,7 +197,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     }
 
     const getDataViewId = async () => {
-      const job = mlJobService.getJob(props.anomaly.jobId);
       const index = job.datafeed_config.indices[0];
 
       const dataViewId = await getDataViewIdFromName(index);
@@ -232,11 +253,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
       const url = await discoverLocator.getRedirectUrl({
         indexPatternId: dataViewId,
-        refreshInterval: {
-          display: 'Off',
-          pause: true,
-          value: 0,
-        },
         timeRange: {
           from,
           to,
@@ -246,7 +262,10 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           language: 'kuery',
           query: kqlQuery,
         },
-        sort: [['timestamp, asc']],
+        filters:
+          dataViewId === null
+            ? []
+            : getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
       });
 
       if (!unmounted) {
@@ -440,7 +459,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     const categoryId = props.anomaly.entityValue;
     const record = props.anomaly.source;
 
-    const job = mlJobService.getJob(props.anomaly.jobId);
     if (job === undefined) {
       // eslint-disable-next-line no-console
       console.log(`viewExamples(): no job found with ID: ${props.anomaly.jobId}`);
@@ -543,13 +561,15 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             },
           });
 
-          const appStateProps: RisonValue = {
+          const appStateProps = {
             index: dataViewId,
-            filters: [],
+            filters: getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
+            ...(query !== null
+              ? {
+                  query,
+                }
+              : {}),
           };
-          if (query !== null) {
-            appStateProps.query = query;
-          }
           const _a = rison.encode(appStateProps);
 
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.

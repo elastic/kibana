@@ -44,6 +44,15 @@ const setup = () => {
   };
 };
 
+const tick = (ms: number = 1) => new Promise((r) => setTimeout(r, ms));
+
+const until = async (check: () => Promise<boolean>, pollInterval: number = 1) => {
+  do {
+    if (await check()) return;
+    await tick(pollInterval);
+  } while (true);
+};
+
 describe('ServerShortUrlClient', () => {
   describe('.create()', () => {
     test('can create a short URL', async () => {
@@ -72,6 +81,20 @@ describe('ServerShortUrlClient', () => {
         },
       });
     });
+
+    test('initializes "accessDate" and "accessCount" fields on URL creation', async () => {
+      const { client, locator } = setup();
+      const { data } = await client.create({
+        locator,
+        slug: 'lala',
+        params: {
+          url: '/app/test#foo/bar/baz',
+        },
+      });
+
+      expect(data.accessDate).toBeGreaterThan(Date.now() - 1000000);
+      expect(data.accessCount).toBe(0);
+    });
   });
 
   describe('.resolve()', () => {
@@ -85,7 +108,7 @@ describe('ServerShortUrlClient', () => {
       });
       const shortUrl2 = await client.resolve(shortUrl1.data.slug);
 
-      expect(shortUrl2.data).toMatchObject(shortUrl1.data);
+      expect(shortUrl2.data).toStrictEqual(shortUrl1.data);
     });
 
     test('can create short URL with custom slug', async () => {
@@ -128,6 +151,33 @@ describe('ServerShortUrlClient', () => {
         })
       ).rejects.toThrowError(new UrlServiceError(`Slug "lala" already exists.`, 'SLUG_EXISTS'));
     });
+
+    test('updates "accessCount" and "accessDate" on URL resolution by slug', async () => {
+      const { client, locator } = setup();
+      const shortUrl1 = await client.create({
+        locator,
+        params: {
+          url: '/app/test#foo/bar/baz',
+        },
+      });
+
+      expect(shortUrl1.data.accessDate).toBeGreaterThan(Date.now() - 1000000);
+      expect(shortUrl1.data.accessCount).toBe(0);
+
+      await client.resolve(shortUrl1.data.slug);
+      await until(async () => (await client.get(shortUrl1.data.id)).data.accessCount === 1);
+      const shortUrl2 = await client.get(shortUrl1.data.id);
+
+      expect(shortUrl2.data.accessDate).toBeGreaterThanOrEqual(shortUrl1.data.accessDate);
+      expect(shortUrl2.data.accessCount).toBe(1);
+
+      await client.resolve(shortUrl1.data.slug);
+      await until(async () => (await client.get(shortUrl1.data.id)).data.accessCount === 2);
+      const shortUrl3 = await client.get(shortUrl1.data.id);
+
+      expect(shortUrl3.data.accessDate).toBeGreaterThanOrEqual(shortUrl2.data.accessDate);
+      expect(shortUrl3.data.accessCount).toBe(2);
+    });
   });
 
   describe('.get()', () => {
@@ -141,7 +191,7 @@ describe('ServerShortUrlClient', () => {
       });
       const shortUrl2 = await client.get(shortUrl1.data.id);
 
-      expect(shortUrl2.data).toMatchObject(shortUrl1.data);
+      expect(shortUrl2.data).toStrictEqual(shortUrl1.data);
     });
 
     test('throws when fetching non-existing short URL', async () => {

@@ -34,6 +34,7 @@ export interface FormFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
   submitButtonColor?: EuiButtonProps['color'];
   isLoading?: EuiButtonProps['isLoading'];
   isDisabled?: EuiButtonProps['isDisabled'];
+  isSubmitButtonHidden?: boolean;
 }
 
 export const FormFlyout: FunctionComponent<FormFlyoutProps> = ({
@@ -44,6 +45,7 @@ export const FormFlyout: FunctionComponent<FormFlyoutProps> = ({
   onSubmit,
   isLoading,
   isDisabled,
+  isSubmitButtonHidden,
   children,
   initialFocus,
   ...rest
@@ -80,18 +82,20 @@ export const FormFlyout: FunctionComponent<FormFlyoutProps> = ({
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="formFlyoutSubmitButton"
-                isLoading={isLoading}
-                isDisabled={isDisabled}
-                color={submitButtonColor}
-                fill
-                onClick={onSubmit}
-              >
-                {submitButtonText}
-              </EuiButton>
-            </EuiFlexItem>
+            {!isSubmitButtonHidden && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="formFlyoutSubmitButton"
+                  isLoading={isLoading}
+                  isDisabled={isDisabled}
+                  color={submitButtonColor}
+                  fill
+                  onClick={onSubmit}
+                >
+                  {submitButtonText}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>

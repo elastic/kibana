@@ -12,6 +12,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
+import { useTimeBuckets } from '../../../../components/custom_hooks/use_time_buckets';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { getJobCreatorTitle } from '../../common/job_creator/util/general';
@@ -20,6 +22,7 @@ import {
   isAdvancedJobCreator,
   isCategorizationJobCreator,
   isRareJobCreator,
+  isGeoJobCreator,
 } from '../../common/job_creator';
 import {
   JOB_TYPE,
@@ -27,11 +30,11 @@ import {
   DEFAULT_BUCKET_SPAN,
 } from '../../../../../../common/constants/new_job';
 import { ChartLoader } from '../../common/chart_loader';
+import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useMlContext } from '../../../../contexts/ml';
-import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
-import { getTimeBucketsFromCache } from '../../../../util/time_buckets';
+import { useMlKibana } from '../../../../contexts/kibana';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
@@ -49,21 +52,30 @@ export interface PageProps {
 }
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
+  const timefilter = useTimefilter();
   const mlContext = useMlContext();
+  const {
+    services: { maps: mapsPlugin },
+  } = useMlKibana();
+
+  const chartInterval = useTimeBuckets();
+
   const jobCreator = useMemo(
     () =>
       jobCreatorFactory(jobType)(
         mlContext.currentDataView,
-        mlContext.currentSavedSearch,
+        mlContext.deprecatedSavedSearchObj,
         mlContext.combinedQuery
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobType]
   );
 
+  const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
+
   const { displayErrorToast } = useToastNotificationService();
 
-  const { from, to } = getTimeFilterRange();
+  const { from, to } = getTimeFilterRange(timefilter);
   jobCreator.setTimeRange(from, to);
 
   let firstWizardStep =
@@ -136,7 +148,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       jobCreator.modelChangeAnnotations = true;
     }
 
-    if (mlContext.currentSavedSearch !== null) {
+    if (mlContext.selectedSavedSearch !== null) {
       // Jobs created from saved searches cannot be cloned in the wizard as the
       // ML job config holds no reference to the saved search ID.
       jobCreator.createdBy = null;
@@ -179,26 +191,29 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       const rare = newJobCapsService.getAggById('rare');
       const freqRare = newJobCapsService.getAggById('freq_rare');
       jobCreator.setDefaultDetectorProperties(rare, freqRare);
+    } else if (isGeoJobCreator(jobCreator)) {
+      const geo = newJobCapsService.getAggById('lat_long');
+      jobCreator.setDefaultDetectorProperties(geo);
     }
   }
 
-  const chartInterval = getTimeBucketsFromCache();
   chartInterval.setBarTarget(BAR_TARGET);
   chartInterval.setMaxBars(MAX_BARS);
   chartInterval.setInterval('auto');
 
   const chartLoader = useMemo(
     () => new ChartLoader(mlContext.currentDataView, jobCreator.query),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [mlContext.currentDataView, jobCreator.query]
   );
 
-  const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
+  const mapLoader = useMemo(
+    () => new MapLoader(mlContext.currentDataView, jobCreator.query, mapsPlugin),
+    [mlContext.currentDataView, jobCreator.query, mapsPlugin]
+  );
 
   const resultsLoader = useMemo(
     () => new ResultsLoader(jobCreator, chartInterval, chartLoader),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [jobCreator, chartInterval, chartLoader]
   );
 
   useEffect(() => {
@@ -230,6 +245,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
         <Wizard
           jobCreator={jobCreator}
           chartLoader={chartLoader}
+          mapLoader={mapLoader}
           resultsLoader={resultsLoader}
           chartInterval={chartInterval}
           jobValidator={jobValidator}

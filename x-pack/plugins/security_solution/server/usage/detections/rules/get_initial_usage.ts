@@ -144,6 +144,7 @@ export const getInitialSingleEventMetric = (): SingleEventMetric => ({
   succeeded: 0,
   index_duration: getInitialMaxAvgMin(),
   search_duration: getInitialMaxAvgMin(),
+  enrichment_duration: getInitialMaxAvgMin(),
   gap_duration: getInitialMaxAvgMin(),
   gap_count: 0,
 });

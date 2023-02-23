@@ -4,19 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fromKueryExpression } from '@kbn/es-query';
-import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { fromKueryExpression } from '@kbn/es-query';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { TelemetryTask } from '.';
+import { createHash } from 'crypto';
+import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
-  SavedServiceGroup,
-  APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
-} from '../../../../common/service_groups';
-import { getKueryFields } from '../../helpers/get_kuery_fields';
-import {
+  AGENT_ACTIVATION_METHOD,
   AGENT_NAME,
   AGENT_VERSION,
   CLIENT_GEO_COUNTRY_ISO_CODE,
@@ -28,9 +24,9 @@ import {
   FAAS_TRIGGER_TYPE,
   HOST_NAME,
   HOST_OS_PLATFORM,
+  KUBERNETES_POD_NAME,
   OBSERVER_HOSTNAME,
   PARENT_ID,
-  KUBERNETES_POD_NAME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_FRAMEWORK_NAME,
@@ -38,6 +34,7 @@ import {
   SERVICE_LANGUAGE_NAME,
   SERVICE_LANGUAGE_VERSION,
   SERVICE_NAME,
+  SERVICE_NODE_NAME,
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
   SERVICE_VERSION,
@@ -45,17 +42,42 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
   USER_AGENT_ORIGINAL,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
+import {
+  APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
+  MAX_NUMBER_OF_SERVICE_GROUPS,
+  SavedServiceGroup,
+} from '../../../../common/service_groups';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
 import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { APMTelemetry, APMPerService } from '../types';
+import { APMTelemetry, APMPerService, APMDataTelemetry } from '../types';
+import {
+  ApmIndicesConfig,
+  APM_AGENT_CONFIGURATION_INDEX,
+} from '../../../routes/settings/apm_indices/get_apm_indices';
+import { TelemetryClient } from '../telemetry_client';
+
+type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
 
 const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
 const timeout = '5m';
+
+interface TelemetryTask {
+  name: string;
+  executor: (params: TelemetryTaskExecutorParams) => Promise<APMDataTelemetry>;
+}
+
+export interface TelemetryTaskExecutorParams {
+  telemetryClient: TelemetryClient;
+  indices: ApmIndicesConfig;
+  savedObjectsClient: ISavedObjectsClient;
+}
 
 export const tasks: TelemetryTask[] = [
   {
@@ -64,7 +86,7 @@ export const tasks: TelemetryTask[] = [
     // adding a composite aggregation on a number of fields and counting the number of buckets. The resulting count is an
     // approximation of the amount of metric documents that will be created. We record both the expected metric document count plus
     // the transaction count for that time range.
-    executor: async ({ indices, search }) => {
+    executor: async ({ indices, telemetryClient }) => {
       async function getBucketCountFromPaginatedQuery(
         sources: estypes.AggregationsCompositeAggregationSource[],
         prevResult?: {
@@ -86,6 +108,7 @@ export const tasks: TelemetryTask[] = [
         const params = {
           index: [indices.transaction],
           body: {
+            track_total_hits: true,
             size: 0,
             timeout,
             query: {
@@ -96,7 +119,6 @@ export const tasks: TelemetryTask[] = [
                 ],
               },
             },
-            track_total_hits: true,
             aggs: {
               transaction_metric_groups: {
                 composite: {
@@ -113,7 +135,7 @@ export const tasks: TelemetryTask[] = [
           },
         };
 
-        const result = await search(params);
+        const result = await telemetryClient.search(params);
 
         let nextAfter: any;
 
@@ -123,12 +145,14 @@ export const tasks: TelemetryTask[] = [
             result.aggregations.transaction_metric_groups.buckets.length;
         }
 
+        const transactionCount = result.hits.total.value;
+
         if (nextAfter) {
           return await getBucketCountFromPaginatedQuery(
             sources,
             {
               expected_metric_document_count,
-              transaction_count: result.hits.total.value,
+              transaction_count: transactionCount,
             },
             nextAfter
           );
@@ -136,16 +160,17 @@ export const tasks: TelemetryTask[] = [
 
         return {
           expected_metric_document_count,
-          transaction_count: result.hits.total.value,
-          ratio: expected_metric_document_count / result.hits.total.value,
+          transaction_count: transactionCount,
+          ratio: expected_metric_document_count / transactionCount,
         };
       }
 
       // fixed date range for reliable results
       const lastTransaction = (
-        await search({
+        await telemetryClient.search({
           index: indices.transaction,
           body: {
+            timeout,
             query: {
               bool: {
                 filter: [
@@ -154,6 +179,7 @@ export const tasks: TelemetryTask[] = [
               },
             },
             size: 1,
+            track_total_hits: false,
             sort: {
               '@timestamp': 'desc' as const,
             },
@@ -241,7 +267,7 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'cloud',
-    executor: async ({ indices, search }) => {
+    executor: async ({ indices, telemetryClient }) => {
       function getBucketKeys({
         buckets,
       }: {
@@ -257,7 +283,7 @@ export const tasks: TelemetryTask[] = [
       const region = 'region';
       const provider = 'provider';
 
-      const response = await search({
+      const response = await telemetryClient.search({
         index: [
           indices.error,
           indices.metric,
@@ -265,6 +291,7 @@ export const tasks: TelemetryTask[] = [
           indices.transaction,
         ],
         body: {
+          track_total_hits: false,
           size: 0,
           timeout,
           aggs: {
@@ -302,7 +329,7 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'host',
-    executor: async ({ indices, search }) => {
+    executor: async ({ indices, telemetryClient }) => {
       function getBucketKeys({
         buckets,
       }: {
@@ -314,7 +341,7 @@ export const tasks: TelemetryTask[] = [
         return buckets.map((bucket) => bucket.key as string);
       }
 
-      const response = await search({
+      const response = await telemetryClient.search({
         index: [
           indices.error,
           indices.metric,
@@ -322,6 +349,7 @@ export const tasks: TelemetryTask[] = [
           indices.transaction,
         ],
         body: {
+          track_total_hits: false,
           size: 0,
           timeout,
           aggs: {
@@ -349,13 +377,16 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'environments',
-    executor: async ({ indices, search }) => {
-      const response = await search({
+    executor: async ({ indices, telemetryClient }) => {
+      const response = await telemetryClient.search({
         index: [indices.transaction],
         body: {
+          track_total_hits: false,
+          size: 0,
+          timeout,
           query: {
             bool: {
-              filter: [{ range: { '@timestamp': { gte: 'now-1d' } } }],
+              filter: [range1d],
             },
           },
           aggs: {
@@ -430,14 +461,13 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'processor_events',
-    executor: async ({ indices, search }) => {
+    executor: async ({ indices, telemetryClient }) => {
       const indicesByProcessorEvent = {
         error: indices.error,
         metric: indices.metric,
         span: indices.span,
         transaction: indices.transaction,
         onboarding: indices.onboarding,
-        sourcemap: indices.sourcemap,
       };
 
       type ProcessorEvent = keyof typeof indicesByProcessorEvent;
@@ -456,10 +486,11 @@ export const tasks: TelemetryTask[] = [
         return prevJob.then(async (data) => {
           const { processorEvent, timeRange } = current;
 
-          const totalHitsResponse = await search({
+          const totalHitsResponse = await telemetryClient.search({
             index: indicesByProcessorEvent[processorEvent],
             body: {
               size: 0,
+              track_total_hits: true,
               timeout,
               query: {
                 bool: {
@@ -469,15 +500,17 @@ export const tasks: TelemetryTask[] = [
                   ],
                 },
               },
-              track_total_hits: true,
             },
           });
 
           const retainmentResponse =
             timeRange === 'all'
-              ? await search({
+              ? await telemetryClient.search({
                   index: indicesByProcessorEvent[processorEvent],
+                  size: 10,
                   body: {
+                    track_total_hits: false,
+                    size: 0,
                     timeout,
                     query: {
                       bool: {
@@ -526,22 +559,20 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'agent_configuration',
-    executor: async ({ indices, search }) => {
-      const agentConfigurationCount = (
-        await search({
-          index: indices.apmAgentConfigurationIndex,
-          body: {
-            size: 0,
-            timeout,
-            track_total_hits: true,
-          },
-        })
-      ).hits.total.value;
+    executor: async ({ indices, telemetryClient }) => {
+      const agentConfigurationCount = await telemetryClient.search({
+        index: APM_AGENT_CONFIGURATION_INDEX,
+        body: {
+          size: 0,
+          timeout,
+          track_total_hits: true,
+        },
+      });
 
       return {
         counts: {
           agent_configuration: {
-            all: agentConfigurationCount,
+            all: agentConfigurationCount.hits.total.value,
           },
         },
       };
@@ -549,11 +580,11 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'services',
-    executor: async ({ indices, search }) => {
+    executor: async ({ indices, telemetryClient }) => {
       const servicesPerAgent = await AGENT_NAMES.reduce(
         (prevJob, agentName) => {
           return prevJob.then(async (data) => {
-            const response = await search({
+            const response = await telemetryClient.search({
               index: [
                 indices.error,
                 indices.span,
@@ -562,6 +593,7 @@ export const tasks: TelemetryTask[] = [
               ],
               body: {
                 size: 0,
+                track_total_hits: false,
                 timeout,
                 query: {
                   bool: {
@@ -602,8 +634,8 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'versions',
-    executor: async ({ search, indices }) => {
-      const response = await search({
+    executor: async ({ indices, telemetryClient }) => {
+      const response = await telemetryClient.search({
         index: [indices.transaction, indices.span, indices.error],
         terminate_after: 1,
         body: {
@@ -612,6 +644,7 @@ export const tasks: TelemetryTask[] = [
               field: 'observer.version',
             },
           },
+          track_total_hits: false,
           size: 1,
           timeout,
           sort: {
@@ -646,13 +679,14 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'groupings',
-    executor: async ({ search, indices }) => {
+    executor: async ({ indices, telemetryClient }) => {
       const errorGroupsCount = (
-        await search({
+        await telemetryClient.search({
           index: indices.error,
           body: {
             size: 0,
             timeout,
+            track_total_hits: false,
             query: {
               bool: {
                 filter: [
@@ -684,9 +718,10 @@ export const tasks: TelemetryTask[] = [
       ).aggregations?.top_service.buckets[0]?.error_groups.value;
 
       const transactionGroupsCount = (
-        await search({
+        await telemetryClient.search({
           index: indices.transaction,
           body: {
+            track_total_hits: false,
             size: 0,
             timeout,
             query: {
@@ -720,7 +755,7 @@ export const tasks: TelemetryTask[] = [
       ).aggregations?.top_service.buckets[0]?.transaction_groups.value;
 
       const tracesPerDayCount = (
-        await search({
+        await telemetryClient.search({
           index: indices.transaction,
           body: {
             query: {
@@ -742,9 +777,10 @@ export const tasks: TelemetryTask[] = [
       ).hits.total.value;
 
       const servicesCount = (
-        await search({
+        await telemetryClient.search({
           index: [indices.transaction, indices.error, indices.metric],
           body: {
+            track_total_hits: false,
             size: 0,
             timeout,
             query: {
@@ -783,10 +819,10 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'integrations',
-    executor: async ({ transportRequest }) => {
+    executor: async ({ telemetryClient }) => {
       const apmJobs = ['apm-*', '*-high_mean_response_time'];
 
-      const response = (await transportRequest({
+      const response = (await telemetryClient.transportRequest({
         method: 'get',
         path: `/_ml/anomaly_detectors/${apmJobs.join(',')}`,
       })) as { body?: { count: number } };
@@ -802,15 +838,16 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'agents',
-    executor: async ({ search, indices }) => {
+    executor: async ({ indices, telemetryClient }) => {
       const size = 3;
 
       const agentData = await AGENT_NAMES.reduce(async (prevJob, agentName) => {
         const data = await prevJob;
 
-        const response = await search({
+        const response = await telemetryClient.search({
           index: [indices.error, indices.metric, indices.transaction],
           body: {
+            track_total_hits: false,
             size: 0,
             timeout,
             query: {
@@ -822,6 +859,12 @@ export const tasks: TelemetryTask[] = [
               '@timestamp': 'desc',
             },
             aggs: {
+              [AGENT_ACTIVATION_METHOD]: {
+                terms: {
+                  field: AGENT_ACTIVATION_METHOD,
+                  size,
+                },
+              },
               [AGENT_VERSION]: {
                 terms: {
                   field: AGENT_VERSION,
@@ -907,6 +950,9 @@ export const tasks: TelemetryTask[] = [
           ...data,
           [agentName]: {
             agent: {
+              activation_method: aggregations[AGENT_ACTIVATION_METHOD].buckets
+                .map((bucket) => bucket.key as string)
+                .slice(0, size),
               version: aggregations[AGENT_VERSION].buckets.map(
                 (bucket) => bucket.key as string
               ),
@@ -996,21 +1042,62 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'indices_stats',
-    executor: async ({ indicesStats, indices }) => {
-      const response = await indicesStats({
+    executor: async ({ indices, telemetryClient }) => {
+      const response = await telemetryClient.indicesStats({
         index: [
-          indices.apmAgentConfigurationIndex,
+          APM_AGENT_CONFIGURATION_INDEX,
           indices.error,
           indices.metric,
           indices.onboarding,
-          indices.sourcemap,
           indices.span,
           indices.transaction,
         ],
       });
 
+      const metricIndicesResponse = await telemetryClient.indicesStats({
+        index: [indices.metric],
+      });
+
+      const tracesIndicesResponse = await telemetryClient.indicesStats({
+        index: [indices.span, indices.transaction],
+      });
+
       return {
         indices: {
+          metric: {
+            shards: {
+              total: metricIndicesResponse._shards?.total ?? 0,
+            },
+            all: {
+              total: {
+                docs: {
+                  count: metricIndicesResponse._all?.total?.docs?.count ?? 0,
+                },
+                store: {
+                  size_in_bytes:
+                    metricIndicesResponse._all?.total?.store?.size_in_bytes ??
+                    0,
+                },
+              },
+            },
+          },
+          traces: {
+            shards: {
+              total: tracesIndicesResponse._shards?.total ?? 0,
+            },
+            all: {
+              total: {
+                docs: {
+                  count: tracesIndicesResponse._all?.total?.docs?.count ?? 0,
+                },
+                store: {
+                  size_in_bytes:
+                    tracesIndicesResponse._all?.total?.store?.size_in_bytes ??
+                    0,
+                },
+              },
+            },
+          },
           shards: {
             total: response._shards?.total ?? 0,
           },
@@ -1030,9 +1117,11 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'cardinality',
-    executor: async ({ search }) => {
-      const allAgentsCardinalityResponse = await search({
+    executor: async ({ indices, telemetryClient }) => {
+      const allAgentsCardinalityResponse = await telemetryClient.search({
+        index: [indices.transaction],
         body: {
+          track_total_hits: false,
           size: 0,
           timeout,
           query: {
@@ -1055,8 +1144,10 @@ export const tasks: TelemetryTask[] = [
         },
       });
 
-      const rumAgentCardinalityResponse = await search({
+      const rumAgentCardinalityResponse = await telemetryClient.search({
+        index: [indices.transaction],
         body: {
+          track_total_hits: false,
           size: 0,
           timeout,
           query: {
@@ -1133,9 +1224,10 @@ export const tasks: TelemetryTask[] = [
       const response = await savedObjectsClient.find<SavedServiceGroup>({
         type: APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
         page: 1,
-        perPage: 50,
+        perPage: MAX_NUMBER_OF_SERVICE_GROUPS,
         sortField: 'updated_at',
         sortOrder: 'desc',
+        namespaces: ['*'],
       });
 
       const kueryNodes = response.saved_objects.map(
@@ -1146,41 +1238,59 @@ export const tasks: TelemetryTask[] = [
 
       return {
         service_groups: {
-          kuery_fields: kueryFields,
+          kuery_fields: uniq(kueryFields),
+          total: response.total ?? 0,
         },
       };
     },
   },
   {
     name: 'per_service',
-    executor: async ({ indices, search }) => {
-      const response = await search({
-        index: [indices.metric],
+    executor: async ({ indices, telemetryClient }) => {
+      const response = await telemetryClient.search({
+        index: [indices.transaction],
         body: {
+          track_total_hits: false,
           size: 0,
           timeout,
           query: {
             bool: {
-              filter: [{ range: { '@timestamp': { gte: 'now-1h' } } }],
+              filter: [
+                { range: { '@timestamp': { gte: 'now-1h' } } },
+                { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+              ],
             },
           },
           aggs: {
-            environments: {
+            service_names: {
               terms: {
-                field: SERVICE_ENVIRONMENT,
-                size: 1000,
+                field: SERVICE_NAME,
+                size: 2500,
               },
               aggs: {
-                service_names: {
+                environments: {
                   terms: {
-                    field: SERVICE_NAME,
-                    size: 1000,
+                    field: SERVICE_ENVIRONMENT,
+                    size: 5,
                   },
                   aggs: {
+                    instances: {
+                      cardinality: {
+                        field: SERVICE_NODE_NAME,
+                      },
+                    },
+                    transaction_types: {
+                      cardinality: {
+                        field: TRANSACTION_TYPE,
+                      },
+                    },
                     top_metrics: {
                       top_metrics: {
                         sort: '_score',
                         metrics: [
+                          {
+                            field: AGENT_ACTIVATION_METHOD,
+                          },
                           {
                             field: AGENT_NAME,
                           },
@@ -1245,83 +1355,88 @@ export const tasks: TelemetryTask[] = [
           },
         },
       });
-      const envBuckets = response.aggregations?.environments.buckets ?? [];
-      const data: APMPerService[] = envBuckets.flatMap((envBucket) => {
-        const env = envBucket.key;
-        const serviceBuckets = envBucket.service_names?.buckets ?? [];
-        return serviceBuckets.map((serviceBucket) => {
-          const name = serviceBucket.key;
-          const fullServiceName = `${env}~${name}`;
+      const serviceBuckets = response.aggregations?.service_names.buckets ?? [];
+      const data: APMPerService[] = serviceBuckets.flatMap((serviceBucket) => {
+        const envHash = createHash('sha256')
+          .update(serviceBucket.key as string)
+          .digest('hex');
+        const envBuckets = serviceBucket.environments?.buckets ?? [];
+        return envBuckets.map((envBucket) => {
+          const nameHash = createHash('sha256')
+            .update(envBucket.key as string)
+            .digest('hex');
+          const fullServiceName = `${nameHash}~${envHash}`;
           return {
             service_id: fullServiceName,
             timed_out: response.timed_out,
+            num_service_nodes: envBucket.instances.value ?? 1,
+            num_transaction_types: envBucket.transaction_types.value ?? 0,
             cloud: {
               availability_zones:
-                serviceBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map(
+                envBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
               regions:
-                serviceBucket[CLOUD_REGION]?.buckets.map(
+                envBucket[CLOUD_REGION]?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
               providers:
-                serviceBucket[CLOUD_PROVIDER]?.buckets.map(
+                envBucket[CLOUD_PROVIDER]?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
             },
             faas: {
               trigger: {
                 type:
-                  serviceBucket[FAAS_TRIGGER_TYPE]?.buckets.map(
+                  envBucket[FAAS_TRIGGER_TYPE]?.buckets.map(
                     (inner) => inner.key as string
                   ) ?? [],
               },
             },
             agent: {
-              name: serviceBucket.top_metrics?.top[0].metrics[
-                AGENT_NAME
+              name: envBucket.top_metrics?.top[0].metrics[AGENT_NAME] as string,
+              activation_method: envBucket.top_metrics?.top[0].metrics[
+                AGENT_ACTIVATION_METHOD
               ] as string,
-              version: serviceBucket.top_metrics?.top[0].metrics[
+              version: envBucket.top_metrics?.top[0].metrics[
                 AGENT_VERSION
               ] as string,
             },
             service: {
               language: {
-                name: serviceBucket.top_metrics?.top[0].metrics[
+                name: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_LANGUAGE_NAME
                 ] as string,
-                version: serviceBucket.top_metrics?.top[0].metrics[
+                version: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_LANGUAGE_VERSION
                 ] as string,
               },
               framework: {
-                name: serviceBucket.top_metrics?.top[0].metrics[
+                name: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_FRAMEWORK_NAME
                 ] as string,
-                version: serviceBucket.top_metrics?.top[0].metrics[
+                version: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_FRAMEWORK_VERSION
                 ] as string,
               },
               runtime: {
-                name: serviceBucket.top_metrics?.top[0].metrics[
+                name: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_RUNTIME_NAME
                 ] as string,
-                version: serviceBucket.top_metrics?.top[0].metrics[
+                version: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_RUNTIME_VERSION
                 ] as string,
               },
             },
             kubernetes: {
               pod: {
-                name: serviceBucket.top_metrics?.top[0].metrics[
+                name: envBucket.top_metrics?.top[0].metrics[
                   KUBERNETES_POD_NAME
                 ] as string,
               },
             },
             container: {
-              id: serviceBucket.top_metrics?.top[0].metrics[
-                CONTAINER_ID
-              ] as string,
+              id: envBucket.top_metrics?.top[0].metrics[CONTAINER_ID] as string,
             },
           };
         });

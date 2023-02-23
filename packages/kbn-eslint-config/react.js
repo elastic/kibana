@@ -1,5 +1,5 @@
 const semver = require('semver');
-const { kibanaPackageJson: PKG } = require('@kbn/utils');
+const { PKG_JSON } = require('@kbn/repo-info');
 
 module.exports = {
   plugins: [
@@ -16,7 +16,7 @@ module.exports = {
 
   settings: {
     react: {
-      version: semver.valid(semver.coerce(PKG.dependencies.react)),
+      version: semver.valid(semver.coerce(PKG_JSON.dependencies.react)),
     },
   },
 

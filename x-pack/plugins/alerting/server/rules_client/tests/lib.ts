@@ -51,6 +51,9 @@ export function getBeforeSetup(
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
   taskManager.runSoon.mockResolvedValue({ id: '' });
+  taskManager.bulkRemoveIfExist.mockResolvedValue({
+    statuses: [{ id: 'taskId', type: 'alert', success: true }],
+  });
   const actionsClient = actionsClientMock.create();
 
   actionsClient.getBulk.mockResolvedValueOnce([
@@ -92,7 +95,9 @@ export function getBeforeSetup(
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
     producer: 'alerts',
   }));
   rulesClientParams.getEventLogClient.mockResolvedValue(

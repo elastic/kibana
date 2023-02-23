@@ -5,28 +5,55 @@
  * 2.0.
  */
 
+import {
+  InfraTimerangeInput,
+  MetricsAPIRequest,
+  SnapshotRequest,
+} from '../../../../common/http_api';
+import moment from 'moment';
 import { transformMetricsApiResponseToSnapshotResponse } from './transform_metrics_ui_response';
 
 jest.mock('./apply_metadata_to_last_path', () => ({
   applyMetadataToLastPath: (series: any) => [{ label: series.id }],
 }));
 
-const now = 1630597319235;
+const now = moment('2020-01-01T00:00:00Z').add(5, 'minute').valueOf();
+
+const timerange: InfraTimerangeInput = {
+  from: moment('2020-01-01T00:00:00Z').valueOf(),
+  to: now,
+  interval: '1m',
+};
+
+const snapshotApiRequest: SnapshotRequest = {
+  metrics: [{ type: 'cpu' }],
+  includeTimeseries: false,
+  timerange,
+  groupBy: [],
+  nodeType: 'host',
+  sourceId: '',
+};
+
+const metricsApiRequest: MetricsAPIRequest = {
+  metrics: [
+    {
+      id: 'cpu',
+      aggregations: { cpu: { avg: { field: 'system.cpu.user.pct' } } },
+    },
+  ],
+  includeTimeseries: false,
+  timerange,
+  indexPattern: 'metrics-*',
+};
 
 describe('transformMetricsApiResponseToSnapshotResponse', () => {
   test('filters out nodes from APM which report no data', () => {
     const result = transformMetricsApiResponseToSnapshotResponse(
-      {
-        // @ts-ignore
-        metrics: [{ id: 'cpu' }],
-      },
-      {
-        includeTimeseries: false,
-        nodeType: 'host',
-      },
-      {},
+      metricsApiRequest,
+      snapshotApiRequest,
       {
         info: {
+          afterKey: null,
           interval: 60,
         },
         series: [

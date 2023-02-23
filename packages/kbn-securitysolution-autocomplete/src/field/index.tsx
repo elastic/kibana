@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { FieldProps } from './types';
 import { useField } from './use_field';
@@ -25,6 +26,8 @@ export const FieldComponent: React.FC<FieldProps> = ({
   onChange,
   placeholder,
   selectedField,
+  acceptsCustomOptions = false,
+  showMappingConflicts = false,
 }): JSX.Element => {
   const {
     isInvalid,
@@ -35,14 +38,43 @@ export const FieldComponent: React.FC<FieldProps> = ({
     renderFields,
     handleTouch,
     handleValuesChange,
+    handleCreateCustomOption,
   } = useField({
     indexPattern,
     fieldTypeFilter,
     isRequired,
     selectedField,
     fieldInputWidth,
+    showMappingConflicts,
     onChange,
   });
+
+  if (acceptsCustomOptions) {
+    return (
+      <EuiComboBox
+        placeholder={placeholder}
+        options={comboOptions}
+        selectedOptions={selectedComboOptions}
+        onChange={handleValuesChange}
+        isLoading={isLoading}
+        isDisabled={isDisabled}
+        isClearable={isClearable}
+        isInvalid={isInvalid}
+        onFocus={handleTouch}
+        singleSelection={AS_PLAIN_TEXT}
+        data-test-subj="fieldAutocompleteComboBox"
+        style={fieldWidth}
+        onCreateOption={handleCreateCustomOption}
+        customOptionText={i18n.translate('autocomplete.customOptionText', {
+          defaultMessage: 'Add {searchValuePlaceholder} as a custom field',
+          values: { searchValuePlaceholder: '{searchValue}' },
+        })}
+        fullWidth
+        renderOption={renderFields}
+      />
+    );
+  }
+
   return (
     <EuiComboBox
       placeholder={placeholder}

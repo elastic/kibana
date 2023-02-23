@@ -17,7 +17,7 @@ import {
   Ping,
   PingType,
 } from '../../../../../common/runtime_types';
-import { API_URLS } from '../../../../../common/constants';
+import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;
@@ -30,11 +30,11 @@ export async function fetchScreenshotBlockSet(params: string[]): Promise<Screens
   });
 }
 
-export async function fetchJourneySteps(
+export async function fetchBrowserJourney(
   params: FetchJourneyStepsParams
 ): Promise<SyntheticsJourneyApiResponse> {
   return apiService.get(
-    API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
+    SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
     { syntheticEventTypes: params.syntheticEventTypes },
     SyntheticsJourneyApiResponseType
   );
@@ -72,14 +72,26 @@ export async function fetchLastSuccessfulCheck({
 }
 
 export async function getJourneyScreenshot(
-  imgSrc: string
+  imgSrc: string,
+  shouldBackoff = true,
+  maxRetry = 15,
+  initialBackoff = 100
 ): Promise<ScreenshotImageBlob | ScreenshotRefImageData | null> {
   try {
-    const imgRequest = new Request(imgSrc);
+    let retryCount = 0;
 
-    const response = await fetch(imgRequest);
+    let response: Response | null = null;
+    let backoff = initialBackoff;
+    while (response?.status !== 200) {
+      const imgRequest = new Request(imgSrc);
 
-    if (response.status !== 200) {
+      response = await fetch(imgRequest);
+      if (!shouldBackoff || retryCount >= maxRetry || response.status !== 404) break;
+      await new Promise((r) => setTimeout(r, (backoff *= 2)));
+      retryCount++;
+    }
+
+    if (response?.status !== 200) {
       return null;
     }
 

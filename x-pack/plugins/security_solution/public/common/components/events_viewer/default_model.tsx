@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { tableDefaults } from '../../store/data_table/defaults';
+import type { SubsetDataTableModel } from '../../store/data_table/model';
 import { defaultEventHeaders } from './default_event_headers';
-import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
-export const eventsDefaultModel: SubsetTimelineModel = {
-  ...timelineDefaults,
+export const eventsDefaultModel: SubsetDataTableModel = {
+  ...tableDefaults,
   columns: defaultEventHeaders,
 };

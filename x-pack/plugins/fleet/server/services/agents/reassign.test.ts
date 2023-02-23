@@ -73,6 +73,13 @@ describe('reassignAgents (plural)', () => {
       agentInHostedDoc2,
       regularAgentPolicySO2,
     } = createClientMock();
+
+    esClient.search.mockResponse({
+      hits: {
+        hits: [agentInRegularDoc, agentInHostedDoc, agentInHostedDoc2],
+      },
+    } as any);
+
     const idsToReassign = [agentInRegularDoc._id, agentInHostedDoc._id, agentInHostedDoc2._id];
     await reassignAgents(soClient, esClient, { agentIds: idsToReassign }, regularAgentPolicySO2.id);
 
@@ -93,6 +100,31 @@ describe('reassignAgents (plural)', () => {
       agent_id: 'agent-in-hosted-policy',
       error:
         'Cannot reassign an agent from hosted agent policy hosted-agent-policy in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
+    });
+    expect(calledWithActionResults.body?.[1] as any).toEqual(expectedObject);
+  });
+
+  it('should report errors from ES agent update call', async () => {
+    const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO2 } = createClientMock();
+    esClient.bulk.mockResponse({
+      items: [
+        {
+          update: {
+            _id: agentInRegularDoc._id,
+            error: new Error('version conflict'),
+          },
+        },
+      ],
+    } as any);
+    const idsToReassign = [agentInRegularDoc._id];
+    await reassignAgents(soClient, esClient, { agentIds: idsToReassign }, regularAgentPolicySO2.id);
+
+    const calledWithActionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;
+    const expectedObject = expect.objectContaining({
+      '@timestamp': expect.anything(),
+      action_id: expect.anything(),
+      agent_id: agentInRegularDoc._id,
+      error: 'version conflict',
     });
     expect(calledWithActionResults.body?.[1] as any).toEqual(expectedObject);
   });

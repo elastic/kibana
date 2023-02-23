@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type {
   CoreSetup,
   CoreStart,
@@ -43,6 +44,7 @@ export interface PluginSetupDependencies {
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
   share?: SharePluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginStartDependencies {
@@ -51,6 +53,7 @@ export interface PluginStartDependencies {
   management?: ManagementStart;
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;
+  cloud?: CloudStart;
 }
 
 export class SecurityPlugin
@@ -81,7 +84,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    { home, licensing, management, share }: PluginSetupDependencies
+    { cloud, home, licensing, management, share }: PluginSetupDependencies
   ): SecurityPluginSetup {
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
@@ -106,7 +109,13 @@ export class SecurityPlugin
       securityApiClients: this.securityApiClients,
     });
 
-    this.analyticsService.setup({ securityLicense: license });
+    this.analyticsService.setup({
+      analytics: core.analytics,
+      authc: this.authc,
+      cloudId: cloud?.cloudId,
+      http: core.http,
+      securityLicense: license,
+    });
 
     accountManagementApp.create({
       authc: this.authc,

@@ -109,7 +109,7 @@ function getUnitLabelAndConvertedValue(unitKey: DurationTimeUnit, value: number)
 /**
  * Converts a microseconds value into the unit defined.
  */
-function convertTo({
+export function convertTo({
   unit,
   microseconds,
   defaultValue = NOT_AVAILABLE_LABEL,

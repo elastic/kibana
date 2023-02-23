@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiFieldPassword,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -41,21 +42,38 @@ export const ConnectorConfigurationForm = () => {
       }}
       component="form"
     >
-      {localConfigView.map(({ key, label, value }) => (
-        <EuiFormRow label={label ?? ''} key={key}>
-          <EuiFieldText
-            value={value}
-            disabled={status === Status.LOADING}
-            onChange={(event) => {
-              setLocalConfigEntry({ key, label, value: event.target.value });
-            }}
-          />
-        </EuiFormRow>
-      ))}
+      {localConfigView.map((configEntry) => {
+        const { key, isPasswordField, label, value } = configEntry;
+        return (
+          <EuiFormRow label={label ?? ''} key={key}>
+            {isPasswordField ? (
+              <EuiFieldPassword
+                value={value}
+                disabled={status === Status.LOADING}
+                onChange={(event) => {
+                  setLocalConfigEntry({ ...configEntry, value: event.target.value });
+                }}
+              />
+            ) : (
+              <EuiFieldText
+                value={value}
+                disabled={status === Status.LOADING}
+                onChange={(event) => {
+                  setLocalConfigEntry({ ...configEntry, value: event.target.value });
+                }}
+              />
+            )}
+          </EuiFormRow>
+        );
+      })}
       <EuiFormRow>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton type="submit" isLoading={status === Status.LOADING}>
+            <EuiButton
+              data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
+              type="submit"
+              isLoading={status === Status.LOADING}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.config.submitButton.title',
                 {
@@ -66,6 +84,7 @@ export const ConnectorConfigurationForm = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-telemetry-id="entSearchContent-connector-configuration-cancelEdit"
               isDisabled={status === Status.LOADING}
               onClick={() => {
                 setIsEditing(false);

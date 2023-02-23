@@ -7,12 +7,12 @@
 
 import * as t from 'io-ts';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
-import { getSuggestions } from './get_suggestions';
+import { getSuggestionsWithTermsEnum } from './get_suggestions_with_terms_enum';
 import { getSuggestionsWithTermsAggregation } from './get_suggestions_with_terms_aggregation';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const suggestionsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/suggestions',
@@ -28,12 +28,12 @@ const suggestionsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ terms: string[] }> => {
-    const setup = await setupRequest(resources);
-    const { context, params } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const { context, params, config } = resources;
     const { fieldName, fieldValue, serviceName, start, end } = params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
-      config: setup.config,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
+      config,
       kuery: '',
     });
     const coreContext = await context.core;
@@ -41,28 +41,35 @@ const suggestionsRoute = createApmServerRoute({
       maxSuggestions
     );
 
-    const suggestions = serviceName
-      ? await getSuggestionsWithTermsAggregation({
-          fieldName,
-          fieldValue,
-          searchAggregatedTransactions,
-          serviceName,
-          setup,
-          size,
-          start,
-          end,
-        })
-      : await getSuggestions({
-          fieldName,
-          fieldValue,
-          searchAggregatedTransactions,
-          setup,
-          size,
-          start,
-          end,
-        });
+    if (!serviceName) {
+      const suggestions = await getSuggestionsWithTermsEnum({
+        fieldName,
+        fieldValue,
+        searchAggregatedTransactions,
+        apmEventClient,
+        size,
+        start,
+        end,
+      });
 
-    return suggestions;
+      // if no terms are found using terms enum it will fall back to using ordinary terms agg search
+      // This is useful because terms enum can only find terms that start with the search query
+      // whereas terms agg approach can find terms that contain the search query
+      if (suggestions.terms.length > 0) {
+        return suggestions;
+      }
+    }
+
+    return getSuggestionsWithTermsAggregation({
+      fieldName,
+      fieldValue,
+      searchAggregatedTransactions,
+      serviceName,
+      apmEventClient,
+      size,
+      start,
+      end,
+    });
   },
 });
 

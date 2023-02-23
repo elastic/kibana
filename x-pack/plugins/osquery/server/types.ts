@@ -11,6 +11,7 @@ import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
+
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { PluginSetupContract } from '@kbn/features-plugin/server';
@@ -20,10 +21,15 @@ import type {
   TaskManagerStartContract as TaskManagerPluginStart,
 } from '@kbn/task-manager-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
 
 export interface OsqueryPluginSetup {
-  osqueryCreateAction: (payload: CreateLiveQueryRequestBodySchema) => void;
+  osqueryCreateAction: (
+    payload: CreateLiveQueryRequestBodySchema,
+    alertData?: ParsedTechnicalFields
+  ) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -46,4 +52,5 @@ export interface StartPlugins {
   fleet?: FleetStartContract;
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;
+  ruleRegistry?: RuleRegistryPluginStartContract;
 }

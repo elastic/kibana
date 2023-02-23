@@ -45,7 +45,7 @@ describe('RelatedAlertsBySourceEvent', () => {
           browserFields={{}}
           data={testData}
           eventId={testEventId}
-          timelineId=""
+          scopeId=""
         />
       </TestProviders>
     );
@@ -65,7 +65,7 @@ describe('RelatedAlertsBySourceEvent', () => {
           browserFields={{}}
           data={testData}
           eventId={testEventId}
-          timelineId=""
+          scopeId=""
         />
       </TestProviders>
     );
@@ -85,7 +85,7 @@ describe('RelatedAlertsBySourceEvent', () => {
           browserFields={{}}
           data={testData}
           eventId={testEventId}
-          timelineId=""
+          scopeId=""
         />
       </TestProviders>
     );
@@ -109,7 +109,7 @@ describe('RelatedAlertsBySourceEvent', () => {
           browserFields={{}}
           data={testData}
           eventId={testEventId}
-          timelineId=""
+          scopeId=""
         />
       </TestProviders>
     );

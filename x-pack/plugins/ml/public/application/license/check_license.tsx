@@ -24,10 +24,10 @@ let mlLicense: MlClientLicense | null = null;
 export function setLicenseCache(
   licensingStart: LicensingPluginStart,
   application: CoreStart['application'],
-  postInitFunctions?: Array<(lic: MlLicense) => void>
+  callback?: (lic: MlLicense) => void
 ) {
   mlLicense = new MlClientLicense(application);
-  mlLicense.setup(licensingStart.license$, postInitFunctions);
+  mlLicense.setup(licensingStart.license$, callback);
   return mlLicense;
 }
 
@@ -83,4 +83,16 @@ export function hasLicenseExpired() {
  */
 export function isFullLicense() {
   return mlLicense !== null && mlLicense.isFullLicense();
+}
+
+/**
+ * Check to see if the current license is trial.
+ * Note, this is not accurate for cloud trials.
+ * For cloud trials use isCloudTrial returned from the mlInfo endpoint
+ *
+ * @export
+ * @returns {boolean}
+ */
+export function isTrialLicense() {
+  return mlLicense !== null && mlLicense.isTrialLicense();
 }

@@ -6,6 +6,7 @@
  */
 
 import { parse as parseCookie } from 'tough-cookie';
+import { expect } from 'expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -62,6 +63,10 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       const { body: profileWithSomeData } = await supertestWithoutAuth
         .get('/internal/security/user_profile?dataPath=some')
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+      const { body: userWithProfileId } = await supertestWithoutAuth
+        .get('/internal/security/me')
         .set('Cookie', sessionCookie.cookieString())
         .expect(200);
 
@@ -134,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         }
       `);
+      expect(userWithProfileId.profile_uid).toBe('u_K1WXIRQbRoHiuJylXp842IEhAO_OdqT7SDHrJSzUIjU_0');
     });
   });
 }

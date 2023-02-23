@@ -6,26 +6,23 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SimpleSavedObject, SavedObjectAttributes } from '@kbn/core/public';
-import React from 'react';
-import { IUiSettingsClient, SavedObjectsStart } from '@kbn/core/public';
+import { IUiSettingsClient, HttpStart } from '@kbn/core/public';
 
 import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
 import type { BaseVisType } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
+import { showSavedObject } from './show_saved_object';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
   visType: BaseVisType;
   uiSettings: IUiSettingsClient;
-  savedObjects: SavedObjectsStart;
+  http: HttpStart;
   goBack: () => void;
-}
-interface SavedSearchesAttributes extends SavedObjectAttributes {
-  isTextBasedQuery: boolean;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps> {
@@ -71,11 +68,8 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                   }
                 ),
                 // ignore the saved searches that have text-based languages queries
-                includeFields: ['isTextBasedQuery'],
-                showSavedObject: (savedObject) => {
-                  const so = savedObject as unknown as SimpleSavedObject<SavedSearchesAttributes>;
-                  return !so.attributes.isTextBasedQuery;
-                },
+                includeFields: ['isTextBasedQuery', 'usesAdHocDataView'],
+                showSavedObject,
               },
               {
                 type: 'index-pattern',
@@ -91,7 +85,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
             ]}
             fixedPageSize={this.fixedPageSize}
             uiSettings={this.props.uiSettings}
-            savedObjects={this.props.savedObjects}
+            http={this.props.http}
           />
         </EuiModalBody>
       </React.Fragment>

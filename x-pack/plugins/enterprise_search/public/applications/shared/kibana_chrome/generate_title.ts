@@ -10,6 +10,7 @@ import {
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  SEARCH_EXPERIENCES_PLUGIN,
 } from '../../../../common/constants';
 
 /**
@@ -43,3 +44,6 @@ export const appSearchTitle = (page: Title = []) =>
 
 export const workplaceSearchTitle = (page: Title = []) =>
   generateTitle([...page, WORKPLACE_SEARCH_PLUGIN.NAME]);
+
+export const searchExperiencesTitle = (page: Title = []) =>
+  generateTitle([...page, SEARCH_EXPERIENCES_PLUGIN.NAME]);

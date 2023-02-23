@@ -16,47 +16,51 @@ import {
   Plugin,
   CoreTheme,
   ApplicationStart,
-  PluginInitializerContext,
+  NotificationsStart,
+  IUiSettingsClient,
 } from '@kbn/core/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  ClientConfigType,
+import type {
+  AppPluginStartDependencies,
   GuidedOnboardingPluginSetup,
   GuidedOnboardingPluginStart,
 } from './types';
 import { GuidePanel } from './components';
-import { ApiService, apiService } from './services/api';
+import { ApiService, apiService } from './services/api.service';
 
 export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>
 {
-  constructor(private ctx: PluginInitializerContext) {}
+  constructor() {}
   public setup(core: CoreSetup): GuidedOnboardingPluginSetup {
     return {};
   }
 
-  public start(core: CoreStart): GuidedOnboardingPluginStart {
-    const { ui: isGuidedOnboardingUiEnabled } = this.ctx.config.get<ClientConfigType>();
-    if (!isGuidedOnboardingUiEnabled) {
-      return {};
-    }
-
-    const { chrome, http, theme, application } = core;
+  public start(
+    core: CoreStart,
+    { cloud }: AppPluginStartDependencies
+  ): GuidedOnboardingPluginStart {
+    const { chrome, http, theme, application, notifications, uiSettings } = core;
 
     // Initialize services
-    apiService.setup(http);
+    apiService.setup(http, !!cloud?.isCloudEnabled);
 
-    chrome.navControls.registerExtension({
-      order: 1000,
-      mount: (target) =>
-        this.mount({
-          targetDomElement: target,
-          theme$: theme.theme$,
-          api: apiService,
-          application,
-        }),
-    });
+    // Guided onboarding UI is only available on cloud
+    if (cloud?.isCloudEnabled) {
+      chrome.navControls.registerExtension({
+        order: 1000,
+        mount: (target) =>
+          this.mount({
+            targetDomElement: target,
+            theme$: theme.theme$,
+            api: apiService,
+            application,
+            notifications,
+            uiSettings,
+          }),
+      });
+    }
 
     // Return methods that should be available to other plugins
     return {
@@ -71,16 +75,25 @@ export class GuidedOnboardingPlugin
     theme$,
     api,
     application,
+    notifications,
+    uiSettings,
   }: {
     targetDomElement: HTMLElement;
     theme$: Rx.Observable<CoreTheme>;
     api: ApiService;
     application: ApplicationStart;
+    notifications: NotificationsStart;
+    uiSettings: IUiSettingsClient;
   }) {
     ReactDOM.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>
-          <GuidePanel api={api} application={application} />
+          <GuidePanel
+            api={api}
+            application={application}
+            notifications={notifications}
+            uiSettings={uiSettings}
+          />
         </I18nProvider>
       </KibanaThemeProvider>,
       targetDomElement

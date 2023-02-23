@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { getFileDataIndexName, getFileMetadataIndexName } from '../../common';
+
 import { getESAssetMetadata } from '../services/epm/elasticsearch/meta';
 
 const meta = getESAssetMetadata();
 
 export const FLEET_INSTALL_FORMAT_VERSION = '1.0.0';
 
-export const FLEET_AGENT_POLICIES_SCHEMA_VERSION = '1.0.0';
+export const FLEET_AGENT_POLICIES_SCHEMA_VERSION = '1.1.0';
 
 export const FLEET_FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
@@ -194,3 +196,7 @@ on_failure:
       field: error.message
       value:
         - 'failed in Fleet agent final_pipeline: {{ _ingest.on_failure_message }}'`;
+
+// Fleet Agent indexes for storing files
+export const FILE_STORAGE_METADATA_AGENT_INDEX = getFileMetadataIndexName('agent');
+export const FILE_STORAGE_DATA_AGENT_INDEX = getFileDataIndexName('agent');

@@ -18,11 +18,8 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { Filter } from '@kbn/es-query';
 import { assertUnreachable } from '../../../../common/utility_types';
-import type {
-  QueryOrUndefined,
-  SavedIdOrUndefined,
-  IndexOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+import type { IndexPatternArray, RuleQuery } from '../../../../common/detection_engine/rule_schema';
+import type { SavedIdOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 import type { PartialFilter } from '../types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { ESBoolQuery } from '../../../../common/typed_json';
@@ -32,10 +29,10 @@ interface GetFilterArgs {
   type: Type;
   filters: unknown | undefined;
   language: LanguageOrUndefined;
-  query: QueryOrUndefined;
+  query: RuleQuery | undefined;
   savedId: SavedIdOrUndefined;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  index: IndexOrUndefined;
+  index: IndexPatternArray | undefined;
   exceptionFilter: Filter | undefined;
 }
 
@@ -97,13 +94,10 @@ export const getFilter = async ({
             index,
             exceptionFilter,
           });
-        } else if (savedId && index != null) {
-          // if savedId present and we ending up here, then saved query failed to be fetched
-          // and we also didn't fall back to saved in rule query
-          throw Error(`Failed to fetch saved query. "${err.message}"`);
         } else {
           // user did not give any additional fall back mechanism for generating a rule
           // rethrow error for activity monitoring
+          err.message = `Failed to fetch saved query. "${err.message}"`;
           throw err;
         }
       }

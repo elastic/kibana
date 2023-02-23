@@ -109,7 +109,7 @@ describe('hashedItemStore', () => {
 
           beforeEach(() => {
             // Control time.
-            jest.useFakeTimers();
+            jest.useFakeTimers({ legacyFakeTimers: true });
 
             sessionStorage = new StubBrowserStorage();
             hashedItemStore = new HashedItemStore(sessionStorage);
@@ -199,7 +199,7 @@ describe('hashedItemStore', () => {
 
         beforeEach(() => {
           // Control time.
-          jest.useFakeTimers();
+          jest.useFakeTimers({ legacyFakeTimers: true });
 
           sessionStorage = new StubBrowserStorage();
           hashedItemStore = new HashedItemStore(sessionStorage);
@@ -350,7 +350,7 @@ describe('hashedItemStore', () => {
 
     beforeEach(() => {
       // Control time.
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
       sessionStorage = new StubBrowserStorage();
       hashedItemStore = new HashedItemStore(sessionStorage);
     });

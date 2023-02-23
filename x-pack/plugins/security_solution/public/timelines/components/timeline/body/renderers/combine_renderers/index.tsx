@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { RowRenderer, RowRendererId } from '../../../../../../../common/types';
 
 export const combineRenderers = ({
@@ -25,16 +25,16 @@ export const combineRenderers = ({
     contextId,
     data,
     isDraggable,
-    timelineId,
+    scopeId,
   }: {
     contextId?: string;
     data: Ecs;
     isDraggable: boolean;
-    timelineId: string;
+    scopeId: string;
   }) => (
     <>
-      {a.isInstance(data) && a.renderRow({ contextId, data, isDraggable, timelineId })}
-      {b.isInstance(data) && b.renderRow({ contextId, data, isDraggable, timelineId })}
+      {a.isInstance(data) && a.renderRow({ contextId, data, isDraggable, scopeId })}
+      {b.isInstance(data) && b.renderRow({ contextId, data, isDraggable, scopeId })}
     </>
   ),
 });

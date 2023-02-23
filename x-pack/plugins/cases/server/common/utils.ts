@@ -5,23 +5,32 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObject,
   SavedObjectReference,
+  IBasePath,
 } from '@kbn/core/server';
 import { flatMap, uniqWith, xorWith } from 'lodash';
-import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { AlertInfo } from './types';
-
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { isValidOwner } from '../../common/utils/owner';
 import {
+  CASE_VIEW_COMMENT_PATH,
+  CASE_VIEW_PATH,
+  CASE_VIEW_TAB_PATH,
+  GENERAL_CASES_OWNER,
+  OWNER_INFO,
+} from '../../common/constants';
+import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
+import type { AlertInfo, CaseSavedObject } from './types';
+
+import type {
   CaseAttributes,
   CasePostRequest,
   CaseResponse,
-  CaseSeverity,
   CasesFindResponse,
-  CaseStatuses,
   CommentAttributes,
   CommentRequest,
   CommentRequestActionsType,
@@ -30,12 +39,16 @@ import {
   CommentRequestUserType,
   CommentResponse,
   CommentsResponse,
+  User,
+} from '../../common/api';
+import {
+  CaseSeverity,
+  CaseStatuses,
   CommentType,
   ConnectorTypes,
   ExternalReferenceStorageType,
-  User,
 } from '../../common/api';
-import { UpdateAlertRequest } from '../client/alerts/types';
+import type { UpdateAlertStatusRequest } from '../client/alerts/types';
 import {
   parseCommentString,
   getLensVisualizations,
@@ -105,7 +118,7 @@ export const flattenCaseSavedObject = ({
   totalComment = comments.length,
   totalAlerts = 0,
 }: {
-  savedObject: SavedObject<CaseAttributes>;
+  savedObject: CaseSavedObject;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
@@ -254,13 +267,13 @@ export const isCommentRequestTypeExternalReferenceSO = (
 /**
  * Adds the ids and indices to a map of statuses
  */
-export function createAlertUpdateRequest({
+export function createAlertUpdateStatusRequest({
   comment,
   status,
 }: {
   comment: CommentRequest;
   status: CaseStatuses;
-}): UpdateAlertRequest[] {
+}): UpdateAlertStatusRequest[] {
   return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status }));
 }
 
@@ -393,4 +406,53 @@ export const asArray = <T>(field?: T | T[] | null): T[] => {
 
 export const assertUnreachable = (x: never): never => {
   throw new Error('You should not reach this part of code');
+};
+
+export const getApplicationRoute = (
+  appRouteInfo: { [K in keyof typeof OWNER_INFO]: { appRoute: string } },
+  owner: string
+): string => {
+  const appRoute = isValidOwner(owner)
+    ? appRouteInfo[owner].appRoute
+    : OWNER_INFO[GENERAL_CASES_OWNER].appRoute;
+
+  return appRoute.startsWith('/') ? appRoute : `/${appRoute}`;
+};
+
+export const getCaseViewPath = (params: {
+  publicBaseUrl: NonNullable<IBasePath['publicBaseUrl']>;
+  spaceId: string;
+  caseId: string;
+  owner: string;
+  commentId?: string;
+  tabId?: CASE_VIEW_PAGE_TABS;
+}): string => {
+  const normalizePath = (path: string): string => path.replaceAll('//', '/');
+  const removeEndingSlash = (path: string): string =>
+    path.endsWith('/') ? path.slice(0, -1) : path;
+
+  const { publicBaseUrl, caseId, owner, commentId, tabId, spaceId } = params;
+
+  const publicBaseUrlWithoutEndingSlash = removeEndingSlash(publicBaseUrl);
+  const publicBaseUrlWithSpace = addSpaceIdToPath(publicBaseUrlWithoutEndingSlash, spaceId);
+  const appRoute = getApplicationRoute(OWNER_INFO, owner);
+  const basePath = `${publicBaseUrlWithSpace}${appRoute}/cases`;
+
+  if (commentId) {
+    const commentPath = normalizePath(
+      CASE_VIEW_COMMENT_PATH.replace(':detailName', caseId).replace(':commentId', commentId)
+    );
+
+    return `${basePath}${commentPath}`;
+  }
+
+  if (tabId) {
+    const tabPath = normalizePath(
+      CASE_VIEW_TAB_PATH.replace(':detailName', caseId).replace(':tabId', tabId)
+    );
+
+    return `${basePath}${tabPath}`;
+  }
+
+  return `${basePath}${normalizePath(CASE_VIEW_PATH.replace(':detailName', caseId))}`;
 };

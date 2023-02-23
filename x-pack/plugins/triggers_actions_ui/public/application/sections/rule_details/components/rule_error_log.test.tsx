@@ -12,7 +12,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { Rule } from '../../../../types';
-import { RefineSearchPrompt } from '../refine_search_prompt';
+import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
 import { RuleErrorLog } from './rule_error_log';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -255,7 +255,7 @@ describe('rule_error_log', () => {
     expect(wrapper.find('.euiPagination').exists()).toBeTruthy();
 
     // Paginate to the next page
-    wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
+    wrapper.find('[data-test-subj="pagination-button-next"]').last().simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -358,7 +358,7 @@ describe('rule_error_log', () => {
     expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
 
     // // Go to the last page
-    wrapper.find('[data-test-subj="pagination-button-99"]').first().simulate('click');
+    wrapper.find('[data-test-subj="pagination-button-99"]').last().simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -371,7 +371,7 @@ describe('rule_error_log', () => {
     );
 
     // Go to the second last page
-    wrapper.find('[data-test-subj="pagination-button-98"]').first().simulate('click');
+    wrapper.find('[data-test-subj="pagination-button-98"]').last().simulate('click');
 
     await act(async () => {
       await nextTick();

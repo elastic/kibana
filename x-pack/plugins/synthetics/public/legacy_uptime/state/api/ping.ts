@@ -28,6 +28,7 @@ export const fetchPingHistogram: APIFn<GetPingHistogramParams, HistogramResult> 
   filters,
   bucketSize,
   query,
+  timeZone,
 }) => {
   const queryParams = {
     dateStart,
@@ -36,6 +37,7 @@ export const fetchPingHistogram: APIFn<GetPingHistogramParams, HistogramResult> 
     filters,
     bucketSize,
     query,
+    timeZone,
   };
 
   return await apiService.get(API_URLS.PING_HISTOGRAM, queryParams);

@@ -55,7 +55,7 @@ interface Range {
 export interface RangeParams extends FormatParams {
   type: RangeMode;
   maxBars: 'auto' | number;
-  ranges: Range[];
+  ranges?: Range[];
   includeEmptyRows?: boolean;
   parentFormat?: {
     id: string;

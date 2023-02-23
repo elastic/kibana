@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import { find } from 'lodash/fp';
 
 import * as i18n from './translations';
@@ -23,11 +25,18 @@ import { RelatedAlertsBySourceEvent } from './related_alerts_by_source_event';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { RelatedAlertsUpsell } from './related_alerts_upsell';
 
+const StyledInsightItem = euiStyled(EuiFlexItem)`
+  border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  padding: 10px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+`;
+
 interface Props {
   browserFields: BrowserFields;
   eventId: string;
   data: TimelineEventsDetailsItem[];
-  timelineId: string;
+  scopeId: string;
   isReadOnly?: boolean;
 }
 
@@ -35,12 +44,11 @@ interface Props {
  * Displays several key insights for the associated alert.
  */
 export const Insights = React.memo<Props>(
-  ({ browserFields, eventId, data, isReadOnly, timelineId }) => {
+  ({ browserFields, eventId, data, isReadOnly, scopeId }) => {
     const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
       'insightsRelatedAlertsByProcessAncestry'
     );
     const hasAtLeastPlatinum = useLicense().isPlatinumPlus();
-    const processEntityField = find({ category: 'process', field: 'process.entity_id' }, data);
     const originalDocumentId = find(
       { category: 'kibana', field: 'kibana.alert.ancestors.id' },
       data
@@ -49,7 +57,12 @@ export const Insights = React.memo<Props>(
       { category: 'kibana', field: 'kibana.alert.rule.parameters.index' },
       data
     );
-    const hasProcessEntityInfo = hasData(processEntityField);
+    const agentTypeField = find({ category: 'agent', field: 'agent.type' }, data);
+    const eventModuleField = find({ category: 'event', field: 'event.module' }, data);
+    const processEntityField = find({ category: 'process', field: 'process.entity_id' }, data);
+    const hasProcessEntityInfo =
+      hasData(processEntityField) &&
+      hasCorrectAgentTypeAndEventModule(agentTypeField, eventModuleField);
 
     const processSessionField = find(
       { category: 'process', field: 'process.entry_leader.entity_id' },
@@ -63,6 +76,12 @@ export const Insights = React.memo<Props>(
       data
     );
     const hasSourceEventInfo = hasData(sourceEventField);
+
+    const alertSuppressionField = find(
+      { category: 'kibana', field: ALERT_SUPPRESSION_DOCS_COUNT },
+      data
+    );
+    const hasAlertSuppressionField = hasData(alertSuppressionField);
 
     const userCasesPermissions = useGetUserCasesPermissions();
     const hasCasesReadPermissions = userCasesPermissions.read;
@@ -97,6 +116,20 @@ export const Insights = React.memo<Props>(
             </EuiTitle>
           </EuiFlexItem>
 
+          {hasAlertSuppressionField && (
+            <StyledInsightItem>
+              <div>
+                <EuiIcon type="layers" style={{ marginLeft: '4px', marginRight: '8px' }} />
+                {i18n.SUPPRESSED_ALERTS_COUNT(parseInt(alertSuppressionField.values[0], 10))}
+                <EuiBetaBadge
+                  label={i18n.SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW}
+                  style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+                  size="s"
+                />
+              </div>
+            </StyledInsightItem>
+          )}
+
           {hasCasesReadPermissions && (
             <EuiFlexItem>
               <RelatedCases eventId={eventId} />
@@ -109,7 +142,7 @@ export const Insights = React.memo<Props>(
                 browserFields={browserFields}
                 data={sourceEventField}
                 eventId={eventId}
-                timelineId={timelineId}
+                scopeId={scopeId}
               />
             </EuiFlexItem>
           )}
@@ -120,7 +153,7 @@ export const Insights = React.memo<Props>(
                 browserFields={browserFields}
                 data={processSessionField}
                 eventId={eventId}
-                timelineId={timelineId}
+                scopeId={scopeId}
               />
             </EuiFlexItem>
           )}
@@ -133,7 +166,7 @@ export const Insights = React.memo<Props>(
                   originalDocumentId={originalDocumentId}
                   index={originalDocumentIndex}
                   eventId={eventId}
-                  timelineId={timelineId}
+                  scopeId={scopeId}
                 />
               </EuiFlexItem>
             ) : (
@@ -146,5 +179,18 @@ export const Insights = React.memo<Props>(
     );
   }
 );
+
+function hasCorrectAgentTypeAndEventModule(
+  agentTypeField?: TimelineEventsDetailsItem,
+  eventModuleField?: TimelineEventsDetailsItem
+): boolean {
+  return (
+    hasData(agentTypeField) &&
+    (agentTypeField.values[0] === 'endpoint' ||
+      (agentTypeField.values[0] === 'winlogbeat' &&
+        hasData(eventModuleField) &&
+        eventModuleField.values[0] === 'sysmon'))
+  );
+}
 
 Insights.displayName = 'Insights';

@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('context link in discover', () => {
+  describe('context link in discover classic', () => {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
@@ -146,10 +146,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const rowActions = await docTable.getRowActions({ rowIndex: 0 });
       await rowActions[1].click();
       await PageObjects.common.sleep(250);
-      // accept alert if it pops up
+
+      // close popup
       const alert = await browser.getAlert();
       await alert?.accept();
-      expect(await browser.getCurrentUrl()).to.contain('#/doc');
+      if (await testSubjects.exists('confirmModalConfirmButton')) {
+        await testSubjects.click('confirmModalConfirmButton');
+      }
+
+      await retry.waitFor('navigate to doc view', async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        return currentUrl.includes('#/doc');
+      });
       await retry.waitFor('doc view being rendered', async () => {
         return await PageObjects.discover.isShowingDocViewer();
       });

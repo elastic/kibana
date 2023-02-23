@@ -9,7 +9,8 @@ import { History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Router, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import '../index.scss';
@@ -45,8 +46,8 @@ export const renderApp = (
   );
 
   return () => {
+    core.chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(element);
-    plugins.data.search.session.clear();
   };
 };
 

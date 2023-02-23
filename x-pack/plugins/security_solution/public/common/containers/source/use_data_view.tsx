@@ -24,7 +24,7 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { sourcererActions } from '../../store/sourcerer';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { getSourcererDataView } from '../sourcerer/api';
+import { getSourcererDataView } from '../sourcerer/get_sourcerer_data_view';
 import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../../common/constants';
 
@@ -33,6 +33,7 @@ export type IndexFieldSearch = (param: {
   scopeId?: SourcererScopeName;
   needToBeInit?: boolean;
   cleanCache?: boolean;
+  skipScopeUpdate?: boolean;
 }) => Promise<void>;
 
 type DangerCastForBrowserFieldsMutation = Record<
@@ -49,7 +50,7 @@ interface DataViewInfo {
  * VERY mutatious on purpose to improve the performance of the transform.
  */
 export const getDataViewStateFromIndexFields = memoizeOne(
-  (_title: string, fields: IndexField[]): DataViewInfo => {
+  (_title: string, fields: IndexField[], _includeUnmapped: boolean = false): DataViewInfo => {
     // Adds two dangerous casts to allow for mutations within this function
     type DangerCastForMutation = Record<string, {}>;
 
@@ -77,7 +78,10 @@ export const getDataViewStateFromIndexFields = memoizeOne(
       }
     );
   },
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
+  (newArgs, lastArgs) =>
+    newArgs[0] === lastArgs[0] &&
+    newArgs[1].length === lastArgs[1].length &&
+    newArgs[2] === lastArgs[2]
 );
 
 export const useDataView = (): {
@@ -102,6 +106,7 @@ export const useDataView = (): {
       scopeId = SourcererScopeName.default,
       needToBeInit = false,
       cleanCache = false,
+      skipScopeUpdate = false,
     }) => {
       const unsubscribe = () => {
         searchSubscription$.current[dataViewId]?.unsubscribe();
@@ -119,15 +124,8 @@ export const useDataView = (): {
         const { endTracking } = startTracking({ name: `${APP_UI_ID} indexFieldsSearch` });
 
         if (needToBeInit) {
-          const dataViewToUpdate = await getSourcererDataView(
-            dataViewId,
-            abortCtrl.current[dataViewId].signal
-          );
-          dispatch(
-            sourcererActions.updateSourcererDataViews({
-              dataView: dataViewToUpdate,
-            })
-          );
+          const dataView = await getSourcererDataView(dataViewId, data.dataViews);
+          dispatch(sourcererActions.setDataView(dataView));
         }
 
         return new Promise<void>((resolve) => {
@@ -148,7 +146,7 @@ export const useDataView = (): {
                   endTracking('success');
 
                   const patternString = response.indicesExist.sort().join();
-                  if (needToBeInit && scopeId) {
+                  if (needToBeInit && scopeId && !skipScopeUpdate) {
                     dispatch(
                       sourcererActions.setSelectedDataView({
                         id: scopeId,
@@ -210,7 +208,7 @@ export const useDataView = (): {
       }
       return asyncSearch();
     },
-    [addError, addWarning, data.search, dispatch, setLoading, startTracking]
+    [addError, addWarning, data.search, dispatch, setLoading, startTracking, data.dataViews]
   );
 
   useEffect(() => {

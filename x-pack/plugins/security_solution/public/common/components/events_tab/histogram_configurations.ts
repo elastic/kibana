@@ -8,7 +8,7 @@ import numeral from '@elastic/numeral';
 
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { getExternalAlertLensAttributes } from '../visualization_actions/lens_attributes/common/external_alert';
-import { getEventsHistogramLensAttributes } from '../visualization_actions/lens_attributes/hosts/events';
+import { getEventsHistogramLensAttributes } from '../visualization_actions/lens_attributes/common/events';
 import type { MatrixHistogramConfigs, MatrixHistogramOption } from '../matrix_histogram/types';
 import * as i18n from './translations';
 
@@ -17,7 +17,7 @@ const DEFAULT_EVENTS_STACK_BY = 'event.action';
 export const getSubtitleFunction =
   (defaultNumberFormat: string, isAlert: boolean) => (totalCount: number) =>
     `${i18n.SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${
-      isAlert ? i18n.ALERTS_UNIT(totalCount) : i18n.EVENTS_UNIT(totalCount)
+      isAlert ? i18n.EXTERNAL_ALERTS_UNIT(totalCount) : i18n.EVENTS_UNIT(totalCount)
     }`;
 
 export const eventsStackByOptions: MatrixHistogramOption[] = [

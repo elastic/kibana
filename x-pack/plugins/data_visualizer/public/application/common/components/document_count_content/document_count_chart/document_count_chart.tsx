@@ -9,7 +9,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   Axis,
-  BarSeries,
+  HistogramBarSeries,
   BrushEndListener,
   Chart,
   ElementClickListener,
@@ -22,7 +22,7 @@ import {
 import moment from 'moment';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-import { EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
 
 export interface DocumentCountChartPoint {
@@ -137,8 +137,9 @@ export const DocumentCountChart: FC<Props> = ({
   const timeZone = getTimezone(uiSettings);
 
   return (
-    <div
-      style={{ width: width ?? '100%', height: 120, display: 'flex', alignItems: 'center' }}
+    <EuiFlexGroup
+      alignItems="center"
+      css={{ width: width ?? '100%' }}
       data-test-subj="dataVisualizerDocumentCountChart"
     >
       {loading ? (
@@ -147,6 +148,7 @@ export const DocumentCountChart: FC<Props> = ({
         <Chart
           size={{
             width: '100%',
+            height: 120,
           }}
         >
           <Settings
@@ -161,11 +163,13 @@ export const DocumentCountChart: FC<Props> = ({
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={(value) => xAxisFormatter.convert(value)}
+            // temporary fix to reduce horizontal chart margin until fixed in Elastic Charts itself
+            labelFormat={useLegacyTimeAxis ? undefined : () => ''}
             timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
             style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
           />
           <Axis id="left" position={Position.Left} />
-          <BarSeries
+          <HistogramBarSeries
             id={SPEC_ID}
             name={seriesName}
             xScaleType={ScaleType.Time}
@@ -174,9 +178,10 @@ export const DocumentCountChart: FC<Props> = ({
             yAccessors={['value']}
             data={adjustedChartPoints}
             timeZone={timeZone}
+            yNice
           />
         </Chart>
       )}
-    </div>
+    </EuiFlexGroup>
   );
 };

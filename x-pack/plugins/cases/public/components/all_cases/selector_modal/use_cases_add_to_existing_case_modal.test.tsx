@@ -10,8 +10,10 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import AllCasesSelectorModal from '.';
-import { Case, CaseStatuses, StatusAll } from '../../../../common';
-import { allCasesPermissions, AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
+import type { Case } from '../../../../common';
+import { CaseStatuses, StatusAll } from '../../../../common';
+import type { AppMockRenderer } from '../../../common/mock';
+import { allCasesPermissions, createAppMockRenderer } from '../../../common/mock';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
@@ -81,6 +83,7 @@ describe('use cases add to existing case modal hook', () => {
   const defaultParams = () => {
     return { onRowClick: jest.fn() };
   };
+
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     dispatch.mockReset();
@@ -164,7 +167,7 @@ describe('use cases add to existing case modal hook', () => {
     expect(mockedToastSuccess).toHaveBeenCalled();
   });
 
-  it('should not call createAttachments nor show toast success when  a case is not selected', async () => {
+  it('should not call createAttachments nor show toast success when a case is not selected', async () => {
     const mockBulkCreateAttachments = jest.fn();
     useCreateAttachmentsMock.mockReturnValueOnce({
       createAttachments: mockBulkCreateAttachments,
@@ -176,11 +179,11 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick();
       return null;
     });
 
     const result = appMockRender.render(<TestComponent />);
+
     userEvent.click(result.getByTestId('open-modal'));
     // give a small delay for the reducer to run
 

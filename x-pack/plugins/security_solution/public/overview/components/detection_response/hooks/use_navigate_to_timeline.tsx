@@ -5,22 +5,28 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { sourcererActions } from '../../../../common/store/sourcerer';
-import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
-import type { DataProvider } from '../../../../../common/types/timeline';
+import {
+  getDataProvider,
+  getDataProviderAnd,
+} from '../../../../common/components/event_details/table/use_action_cell_data_provider';
+import type { DataProvider, QueryOperator } from '../../../../../common/types/timeline';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/timeline/actions';
 import { sourcererSelectors } from '../../../../common/store';
+import type { TimeRange } from '../../../../common/store/inputs/model';
 
 export interface Filter {
   field: string;
-  value: string;
+  value: string | string[];
+  operator?: QueryOperator;
 }
 
 export const useNavigateToTimeline = () => {
@@ -39,71 +45,67 @@ export const useNavigateToTimeline = () => {
     timelineType: TimelineType.default,
   });
 
-  const navigateToTimeline = (dataProvider: DataProvider) => {
-    // Reset the current timeline
-    clearTimeline();
-    // Update the timeline's providers to match the current prevalence field query
-    dispatch(
-      updateProviders({
-        id: TimelineId.active,
-        providers: [dataProvider],
-      })
-    );
+  const navigateToTimeline = useCallback(
+    (dataProviders: DataProvider[], timeRange?: TimeRange) => {
+      // Reset the current timeline
+      clearTimeline({ timeRange });
+      // Update the timeline's providers to match the current prevalence field query
+      dispatch(
+        updateProviders({
+          id: TimelineId.active,
+          providers: dataProviders,
+        })
+      );
 
-    dispatch(
-      sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.timeline,
-        selectedDataViewId: defaultDataView.id,
-        selectedPatterns: [signalIndexName || ''],
-      })
-    );
-  };
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: SourcererScopeName.timeline,
+          selectedDataViewId: defaultDataView.id,
+          selectedPatterns: [signalIndexName || ''],
+        })
+      );
+    },
+    [clearTimeline, defaultDataView.id, dispatch, signalIndexName]
+  );
 
-  const openEntityInTimeline = (entityFilters: [Filter, ...Filter[]]) => {
-    const mainFilter = entityFilters.shift();
+  /** *
+   * Open a timeline with the given filters prepopulated.
+   * It accepts an array of Filter[]s where each item represents a set of AND queries, and each top level comma represents an OR.
+   *
+   * [[filter1 & filter2] OR [filter3 & filter4]]
+   *
+   * @param timeRange Defines the timeline time range field and removes the time range lock
+   */
+  const openTimelineWithFilters = useCallback(
+    (filters: Array<[...Filter[]]>, timeRange?: TimeRange) => {
+      const dataProviders = [];
 
-    if (mainFilter) {
-      const dataProvider = getDataProvider(mainFilter.field, '', mainFilter.value);
+      for (const orFilterGroup of filters) {
+        const mainFilter = orFilterGroup[0];
 
-      for (const filter of entityFilters) {
-        dataProvider.and.push(getDataProvider(filter.field, '', filter.value));
+        if (mainFilter) {
+          const dataProvider = getDataProvider(
+            mainFilter.field,
+            uuidv4(),
+            mainFilter.value,
+            mainFilter.operator
+          );
+
+          for (const filter of orFilterGroup.slice(1)) {
+            dataProvider.and.push(
+              getDataProviderAnd(filter.field, uuidv4(), filter.value, filter.operator)
+            );
+          }
+          dataProviders.push(dataProvider);
+        }
       }
 
-      navigateToTimeline(dataProvider);
-    }
-  };
-
-  // TODO: Replace the usage of functions with openEntityInTimeline
-
-  const openHostInTimeline = ({ hostName, severity }: { hostName: string; severity?: string }) => {
-    const dataProvider = getDataProvider('host.name', '', hostName);
-
-    if (severity) {
-      dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
-    }
-
-    navigateToTimeline(dataProvider);
-  };
-
-  const openUserInTimeline = ({ userName, severity }: { userName: string; severity?: string }) => {
-    const dataProvider = getDataProvider('user.name', '', userName);
-
-    if (severity) {
-      dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
-    }
-    navigateToTimeline(dataProvider);
-  };
-
-  const openRuleInTimeline = (ruleName: string) => {
-    const dataProvider = getDataProvider('kibana.alert.rule.name', '', ruleName);
-
-    navigateToTimeline(dataProvider);
-  };
+      navigateToTimeline(dataProviders, timeRange);
+    },
+    [navigateToTimeline]
+  );
 
   return {
-    openEntityInTimeline,
-    openHostInTimeline,
-    openRuleInTimeline,
-    openUserInTimeline,
+    openTimelineWithFilters,
   };
 };

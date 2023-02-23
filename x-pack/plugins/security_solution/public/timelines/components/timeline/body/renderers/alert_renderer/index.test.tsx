@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import type { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TestProviders } from '../../../../../../common/mock';
 import {
   DESTINATION_IP,
@@ -27,6 +27,7 @@ import {
   WITH_FIELD_NAMES,
 } from './helpers';
 import { alertRenderer } from '.';
+import { TimelineId } from '../../../../../../../common/types';
 
 const dataWithAllFields: Ecs = {
   _id: 'abcd',
@@ -173,7 +174,7 @@ describe('alertRenderer', () => {
             {alertRenderer.renderRow({
               data: dataWithAllFields,
               isDraggable: false,
-              timelineId: 'test',
+              scopeId: TimelineId.test,
             })}
           </TestProviders>
         );
@@ -189,7 +190,7 @@ describe('alertRenderer', () => {
         {alertRenderer.renderRow({
           data: dataWithAllFields,
           isDraggable: false,
-          timelineId: 'test',
+          scopeId: TimelineId.test,
         })}
       </TestProviders>
     );
@@ -204,7 +205,7 @@ describe('alertRenderer', () => {
           {alertRenderer.renderRow({
             data: dataWithAllFields,
             isDraggable: false,
-            timelineId: 'test',
+            scopeId: TimelineId.test,
           })}
         </TestProviders>
       );
@@ -218,7 +219,7 @@ describe('alertRenderer', () => {
           {alertRenderer.renderRow({
             data: omit(WITH_FIELD_NAMES, dataWithAllFields) as Ecs,
             isDraggable: false,
-            timelineId: 'test',
+            scopeId: TimelineId.test,
           })}
         </TestProviders>
       );
@@ -233,7 +234,7 @@ describe('alertRenderer', () => {
         {alertRenderer.renderRow({
           data: dataWithAllFields,
           isDraggable: false,
-          timelineId: 'test',
+          scopeId: TimelineId.test,
         })}
       </TestProviders>
     );

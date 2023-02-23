@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { UserInfoWithAvatar } from './types';
+import type { UserInfoWithAvatar } from './types';
 import { CaseUserAvatar } from './user_avatar';
 import { UserToolTip } from './user_tooltip';
 

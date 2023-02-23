@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { Connector } from '../../../../../common/types/connectors';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
@@ -16,17 +18,15 @@ export type PutConnectorNameAndDescriptionArgs = Partial<
   indexName: string;
 };
 
-export type PutConnectorNameAndDescriptionResponse = Partial<
-  Pick<Connector, 'name' | 'description'>
-> & {
+export type PutConnectorNameAndDescriptionResponse = Pick<Connector, 'name' | 'description'> & {
   indexName: string;
 };
 
 export const putConnectorNameAndDescription = async ({
   connectorId,
-  description,
+  description = null,
   indexName,
-  name,
+  name = '',
 }: PutConnectorNameAndDescriptionArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/name_and_description`;
 
@@ -38,5 +38,12 @@ export const putConnectorNameAndDescription = async ({
 
 export const ConnectorNameAndDescriptionApiLogic = createApiLogic(
   ['content', 'connector_name_and_description_api_logic'],
-  putConnectorNameAndDescription
+  putConnectorNameAndDescription,
+  {
+    showSuccessFlashFn: () =>
+      i18n.translate(
+        'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescription.successToast.title',
+        { defaultMessage: 'Connector name and description updated' }
+      ),
+  }
 );

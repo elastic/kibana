@@ -53,10 +53,10 @@ export class ProfilingPlugin implements Plugin {
       map(([_, kuery]) => {
         const sections: NavigationSection[] = [
           {
-            // TODO: add beta badge to section label, needs support in Observability plugin
             label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
               defaultMessage: 'Universal Profiling',
             }),
+            isBetaFeature: true,
             entries: links.map((link) => {
               return {
                 app: 'profiling',
@@ -83,14 +83,14 @@ export class ProfilingPlugin implements Plugin {
       appRoute: '/app/profiling',
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: links,
-      async mount({ element, history, theme$ }: AppMountParameters) {
+      async mount({ element, history, theme$, setHeaderActionMenu }: AppMountParameters) {
         const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
           CoreStart,
           ProfilingPluginPublicStartDeps,
           unknown
         ];
 
-        const profilingFetchServices = getServices(coreStart);
+        const profilingFetchServices = getServices();
         const { renderApp } = await import('./app');
 
         function pushKueryToSubject(location: Location) {
@@ -111,6 +111,7 @@ export class ProfilingPlugin implements Plugin {
             pluginsSetup,
             history,
             theme$,
+            setHeaderActionMenu,
           },
           element
         );

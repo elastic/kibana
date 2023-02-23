@@ -19,13 +19,13 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../../common/environment_filter_values';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 
 function getEnvironmentDefinition(environment: string) {
   switch (environment) {
@@ -43,7 +43,10 @@ export function AnalyzeDataButton() {
 
   const {
     query: { rangeFrom, rangeTo, environment },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const basepath = services.http?.basePath.get();
   const canShowDashboard = services.application?.capabilities.dashboard.show;

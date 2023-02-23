@@ -62,12 +62,7 @@ export function updateLayerInList(
 
   const updatedLayer = {
     ...layerList[layerIdx],
-    // Update layer w/ new value. If no value provided, toggle boolean value
-    // allow empty strings, 0-value
-    [attribute]:
-      newValue || newValue === '' || newValue === 0
-        ? newValue
-        : !(layerList[layerIdx][attribute] as boolean),
+    [attribute]: newValue,
   };
   const updatedList = [
     ...layerList.slice(0, layerIdx),

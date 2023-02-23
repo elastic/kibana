@@ -60,6 +60,8 @@ interface DataVisualizerTableProps<T> {
   /** Callback to receive any updates when table or page state is changed **/
   onChange?: (update: Partial<DataVisualizerTableState>) => void;
   loading?: boolean;
+  totalCount?: number;
+  overallStatsRunning: boolean;
 }
 
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -71,6 +73,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   showPreviewByDefault,
   onChange,
   loading,
+  totalCount,
+  overallStatsRunning,
 }: DataVisualizerTableProps<T>) => {
   const { euiTheme } = useEuiTheme();
 
@@ -84,7 +88,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   );
   const [showDistributions, setShowDistributions] = useState<boolean>(showPreviewByDefault ?? true);
   const [dimensions, setDimensions] = useState(calculateTableColumnsDimensions());
-  const [tableWidth, setTableWidth] = useState<number>(1400);
 
   const toggleExpandAll = useCallback(
     (shouldExpandAll: boolean) => {
@@ -105,10 +108,9 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     throttle((e: { width: number; height: number }) => {
       // When window or table is resized,
       // update the column widths and other settings accordingly
-      setTableWidth(e.width);
       setDimensions(calculateTableColumnsDimensions(e.width));
     }, 500),
-    [tableWidth]
+    []
   );
 
   const toggleShowDistribution = useCallback(() => {
@@ -134,6 +136,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   const columns = useMemo(() => {
     const expanderColumn: EuiTableComputedColumnType<DataVisualizerTableItem> = {
       name:
+        // EUI will automatically show an expander button when table is mobile view (where width <700)
+        // so we need to not render any addition button
         dimensions.breakPoint !== 'small' ? (
           <EuiButtonIcon
             data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
@@ -217,12 +221,40 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       {
         field: 'docCount',
-        name: i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
-          defaultMessage: 'Documents (%)',
-        }),
-        render: (value: number | undefined, item: DataVisualizerTableItem) => (
-          <DocumentStat config={item} showIcon={dimensions.showIcon} />
+        name: (
+          <div className={'columnHeader__title'}>
+            {i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
+              defaultMessage: 'Documents (%)',
+            })}
+            {
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.dataVisualizer.dataGrid.documentsCountColumnTooltip',
+                  {
+                    defaultMessage:
+                      'Document count found is based on a smaller set of sampled records.',
+                  }
+                )}
+              >
+                <EuiIcon type="questionInCircle" />
+              </EuiToolTip>
+            }
+          </div>
         ),
+
+        render: (value: number | undefined, item: DataVisualizerTableItem) => {
+          if (overallStatsRunning) {
+            return (
+              <EuiText textAlign="center">
+                <EuiLoadingSpinner size="s" />
+              </EuiText>
+            );
+          }
+
+          return (
+            <DocumentStat config={item} showIcon={dimensions.showIcon} totalCount={totalCount} />
+          );
+        },
         sortable: (item: DataVisualizerTableItem) => item?.stats?.count,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDocumentsCount',
@@ -233,9 +265,19 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         name: i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesColumnName', {
           defaultMessage: 'Distinct values',
         }),
-        render: (_: undefined, item: DataVisualizerTableItem) => (
-          <DistinctValues cardinality={item?.stats?.cardinality} showIcon={dimensions.showIcon} />
-        ),
+        render: (_: undefined, item: DataVisualizerTableItem) => {
+          if (overallStatsRunning) {
+            return (
+              <EuiText textAlign="center">
+                <EuiLoadingSpinner size="s" />
+              </EuiText>
+            );
+          }
+
+          return (
+            <DistinctValues cardinality={item?.stats?.cardinality} showIcon={dimensions.showIcon} />
+          );
+        },
         sortable: (item: DataVisualizerTableItem) => item?.stats?.cardinality,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDistinctValues',
@@ -333,6 +375,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     extendedColumns,
     dimensions.breakPoint,
     toggleExpandAll,
+    overallStatsRunning,
   ]);
 
   const itemIdToExpandedRowMap = useMemo(() => {

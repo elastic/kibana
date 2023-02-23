@@ -7,7 +7,7 @@
 
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
-import { MemoryRouterProps } from 'react-router';
+import type { MemoryRouterProps } from 'react-router';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import {
@@ -17,7 +17,7 @@ import {
   TestProviders,
 } from '../../common/mock';
 import { CasesRoutes } from './routes';
-import { CasesPermissions } from '../../../common';
+import type { CasesPermissions } from '../../../common';
 
 jest.mock('../all_cases', () => ({
   AllCases: () => <div>{'All cases'}</div>,

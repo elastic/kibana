@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import icon from './no_results.svg';
+import { PANEL_TEST_ID } from './test_ids';
 
 const heights = {
   tall: 490,
@@ -21,7 +22,7 @@ const panelStyle = {
 
 export const EmptyState: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
   return (
-    <EuiPanel color="subdued" data-test-subj="indicatorsTableEmptyState">
+    <EuiPanel color="subdued" data-test-subj={PANEL_TEST_ID}>
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={true} style={panelStyle}>

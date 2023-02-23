@@ -6,14 +6,19 @@
  */
 
 import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
-import type { CollectorDependencies } from './types';
+
+import type { CollectorDependencies, DashboardMetrics } from './types';
 import { getDetectionsMetrics } from './detections/get_metrics';
 import { getInternalSavedObjectsClient } from './get_internal_saved_objects_client';
+import { getEndpointMetrics } from './endpoint/get_metrics';
+import { getDashboardMetrics } from './dashboards/get_dashboards_metrics';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 
 export interface UsageData {
   detectionMetrics: {};
+  endpointMetrics: {};
+  dashboardMetrics: DashboardMetrics;
 }
 
 export const registerCollector: RegisterCollector = ({
@@ -414,6 +419,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -487,6 +506,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -586,6 +619,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -659,6 +706,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -758,6 +819,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -831,6 +906,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -946,6 +1035,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -1019,6 +1122,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -1118,6 +1235,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -1191,6 +1322,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -1290,6 +1435,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -1363,6 +1522,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -1478,6 +1651,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -1551,6 +1738,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -1650,6 +1851,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -1723,6 +1938,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -1822,6 +2051,20 @@ export const registerCollector: RegisterCollector = ({
                     _meta: { description: 'The min duration' },
                   },
                 },
+                enrichment_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
                 gap_duration: {
                   max: {
                     type: 'float',
@@ -1895,6 +2138,20 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
                 search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                enrichment_duration: {
                   max: {
                     type: 'float',
                     _meta: { description: 'The max duration' },
@@ -2145,20 +2402,68 @@ export const registerCollector: RegisterCollector = ({
           },
         },
       },
+      endpointMetrics: {
+        unique_endpoint_count: {
+          type: 'long',
+          _meta: { description: 'Number of active unique endpoints in last 24 hours' },
+        },
+      },
+      dashboardMetrics: {
+        dashboard_tag: {
+          created_at: {
+            type: 'keyword',
+            _meta: { description: 'The time the tab was created' },
+          },
+          linked_dashboards_count: {
+            type: 'long',
+            _meta: { description: 'Number of associated dashboards' },
+          },
+        },
+        dashboards: {
+          type: 'array',
+          items: {
+            created_at: {
+              type: 'keyword',
+              _meta: { description: 'The time the dashboard was created' },
+            },
+            dashboard_id: {
+              type: 'keyword',
+              _meta: { description: 'The dashboard saved object id' },
+            },
+            error_message: {
+              type: 'keyword',
+              _meta: { description: 'The relevant error message' },
+            },
+            error_status_code: {
+              type: 'long',
+              _meta: { description: 'The relevant error status code' },
+            },
+          },
+        },
+      },
     },
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
-      const detectionMetrics = await getDetectionsMetrics({
-        eventLogIndex,
-        signalsIndex,
-        esClient,
-        savedObjectsClient,
-        logger,
-        mlClient: ml,
-      });
+      const [detectionMetrics, endpointMetrics, dashboardMetrics] = await Promise.allSettled([
+        getDetectionsMetrics({
+          eventLogIndex,
+          signalsIndex,
+          esClient,
+          savedObjectsClient,
+          logger,
+          mlClient: ml,
+        }),
+        getEndpointMetrics({ esClient, logger }),
+        getDashboardMetrics({
+          savedObjectsClient,
+          logger,
+        }),
+      ]);
       return {
-        detectionMetrics: detectionMetrics || {},
+        detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},
+        endpointMetrics: endpointMetrics.status === 'fulfilled' ? endpointMetrics.value : {},
+        dashboardMetrics: dashboardMetrics.status === 'fulfilled' ? dashboardMetrics.value : {},
       };
     },
   });

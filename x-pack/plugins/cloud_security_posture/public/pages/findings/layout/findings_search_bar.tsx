@@ -10,8 +10,8 @@ import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
 import { SecuritySolutionContext } from '../../../application/security_solution_context';
-import * as TEST_SUBJECTS from '../test_subjects';
 import type { FindingsBaseURLQuery } from '../types';
 import type { CspClientPluginStartDeps } from '../../../types';
 import { PLUGIN_NAME } from '../../../../common';
@@ -41,16 +41,13 @@ export const FindingsSearchBar = ({
     <div css={getContainerStyle(euiTheme)}>
       <SearchBar
         appName={PLUGIN_NAME}
-        dataTestSubj={TEST_SUBJECTS.FINDINGS_SEARCH_BAR}
         showFilterBar={true}
-        showQueryBar={true}
         showQueryInput={true}
         showDatePicker={false}
         showSaveQuery={false}
         isLoading={loading}
         indexPatterns={[dataView]}
         onQuerySubmit={setQuery}
-        // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
         onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
         placeholder={i18n.translate('xpack.csp.findings.searchBar.searchPlaceholder', {
           defaultMessage: 'Search findings (eg. rule.section : "API Server" )',

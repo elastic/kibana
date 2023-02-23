@@ -133,16 +133,25 @@ export const getFormulaEquivalent = (
       }${addAdditionalArgs({ reducedTimeRange, timeShift })})`;
     }
     case 'positive_rate': {
-      return buildCounterRateFormula(aggFormula, currentMetric.field!, {
+      const counterRateFormula = buildCounterRateFormula(aggFormula, currentMetric.field!, {
         reducedTimeRange,
         timeShift,
       });
+      return currentMetric.unit
+        ? `normalize_by_unit(${counterRateFormula}, unit='${getTimeScale(currentMetric)}')`
+        : counterRateFormula;
     }
     case 'filter_ratio': {
       return getFilterRatioFormula(currentMetric, { reducedTimeRange, timeShift });
     }
     case 'static': {
       return `${currentMetric.value}`;
+    }
+    case 'variance': {
+      return `${aggFormula}(standard_deviation(${currentMetric.field}${addAdditionalArgs({
+        reducedTimeRange,
+        timeShift,
+      })}), 2)`;
     }
     case 'std_deviation': {
       if (currentMetric.mode === 'lower') {

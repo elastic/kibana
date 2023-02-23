@@ -9,8 +9,8 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { SavedSearch, SortOrder, saveSavedSearch } from '@kbn/saved-search-plugin/public';
+import { AppState } from '../services/discover_app_state_container';
 import { updateSearchSource } from './update_search_source';
-import { AppState } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
 /**
  * Helper function to update and persist the given savedSearch
@@ -56,6 +56,12 @@ export async function persistSavedSearch(
     savedSearch.viewMode = state.viewMode;
   }
 
+  if (typeof state.breakdownField !== 'undefined') {
+    savedSearch.breakdownField = state.breakdownField;
+  } else if (savedSearch.breakdownField) {
+    savedSearch.breakdownField = '';
+  }
+
   if (state.hideAggregatedPreview) {
     savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
   }
@@ -66,6 +72,8 @@ export async function persistSavedSearch(
   if (savedSearch.isTextBasedQuery || isTextBasedQuery) {
     savedSearch.isTextBasedQuery = isTextBasedQuery;
   }
+
+  savedSearch.usesAdHocDataView = !dataView.isPersisted();
 
   const { from, to } = services.timefilter.getTime();
   const refreshInterval = services.timefilter.getRefreshInterval();

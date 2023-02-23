@@ -19,7 +19,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsBulkGetObject,
 } from '@kbn/core/server';
-
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
@@ -33,7 +33,11 @@ import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugi
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
+import {
+  IEventLogClientService,
+  IEventLogger,
+  IEventLogService,
+} from '@kbn/event-log-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import {
   ensureCleanupFailedExecutionsTaskScheduled,
@@ -101,6 +105,11 @@ import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
+import {
+  type IUnsecuredActionsClient,
+  UnsecuredActionsClient,
+} from './unsecured_actions_client/unsecured_actions_client';
+import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 
 export interface PluginSetupContract {
   registerType<
@@ -132,11 +141,15 @@ export interface PluginStartContract {
     options?: { notifyUsage: boolean }
   ): boolean;
 
+  getAllTypes: ActionTypeRegistry['getAllTypes'];
+
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
 
   preconfiguredActions: PreConfiguredAction[];
+
+  getUnsecuredActionsClient(): IUnsecuredActionsClient;
 
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
@@ -162,6 +175,7 @@ export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
   licensing: LicensingPluginStart;
+  eventLog: IEventLogClientService;
   spaces?: SpacesPluginStart;
 }
 
@@ -449,6 +463,24 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           encryptedSavedObjectsClient,
           logger: this.logger,
         }),
+        async getEventLogClient() {
+          return plugins.eventLog.getClient(request);
+        },
+      });
+    };
+
+    const getUnsecuredActionsClient = () => {
+      const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      ]);
+
+      return new UnsecuredActionsClient({
+        internalSavedObjectsRepository,
+        executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
+          taskManager: plugins.taskManager,
+          connectorTypeRegistry: actionTypeRegistry!,
+          preconfiguredConnectors: preconfiguredActions,
+        }),
       });
     };
 
@@ -528,10 +560,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ) => {
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
+      getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
+      getUnsecuredActionsClient,
       preconfiguredActions,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(actionTypeRegistry, ...args),
@@ -543,7 +577,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     request: KibanaRequest
   ) =>
     savedObjects.getScopedClient(request, {
-      excludedWrappers: ['security'],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes,
     });
 
@@ -594,7 +628,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
-      const [{ savedObjects }, { taskManager, encryptedSavedObjects }] =
+      const [{ savedObjects }, { taskManager, encryptedSavedObjects, eventLog }] =
         await core.getStartServices();
       const coreContext = await context.core;
 
@@ -606,7 +640,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             );
           }
           const unsecuredSavedObjectsClient = savedObjects.getScopedClient(request, {
-            excludedWrappers: ['security'],
+            excludedExtensions: [SECURITY_EXTENSION_ID],
             includedHiddenTypes,
           });
           return new ActionsClient({
@@ -646,6 +680,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               }),
               logger,
             }),
+            async getEventLogClient() {
+              return eventLog.getClient(request);
+            },
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),

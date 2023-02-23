@@ -252,7 +252,7 @@ Array [
               className="euiButtonGroup__buttons"
             >
               <label
-                className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected"
+                className="euiButtonGroupButton euiButtonGroupButton--small euiButtonGroupButton-isSelected css-qmwmig-fill-text-EuiButtonGroupButton"
                 disabled={false}
                 htmlFor="generated-id"
                 style={
@@ -282,7 +282,7 @@ Array [
                 </span>
               </label>
               <label
-                className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                className="euiButtonGroupButton euiButtonGroupButton--small  css-dbzl5z-empty-text-EuiButtonGroupButton"
                 disabled={false}
                 htmlFor="generated-id"
                 style={
@@ -325,21 +325,16 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--success euiButton--small euiButton--fill"
+            className="euiButton emotion-euiButtonDisplay-s-s-fill-success"
             disabled={false}
             onClick={[Function]}
-            style={
-              Object {
-                "minWidth": undefined,
-              }
-            }
             type="button"
           >
             <span
-              className="euiButtonContent euiButton__content"
+              className="emotion-euiButtonDisplayContent"
             >
               <span
-                className="euiButtonContent__icon"
+                className="emotion-euiButtonDisplayContent__icon-m"
                 color="inherit"
                 data-euiicon-type="save"
                 size="m"
@@ -347,7 +342,7 @@ Array [
                 
               </span>
               <span
-                className="euiButton__text"
+                className="eui-textTruncate"
               >
                 Save changes
               </span>
@@ -358,7 +353,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
             disabled={false}
             onClick={[Function]}
             type="button"
@@ -646,21 +641,16 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--success euiButton--small euiButton--fill"
+            className="euiButton emotion-euiButtonDisplay-s-s-fill-success"
             disabled={false}
             onClick={[Function]}
-            style={
-              Object {
-                "minWidth": undefined,
-              }
-            }
             type="button"
           >
             <span
-              className="euiButtonContent euiButton__content"
+              className="emotion-euiButtonDisplayContent"
             >
               <span
-                className="euiButtonContent__icon"
+                className="emotion-euiButtonDisplayContent__icon-m"
                 color="inherit"
                 data-euiicon-type="save"
                 size="m"
@@ -668,7 +658,7 @@ Array [
                 
               </span>
               <span
-                className="euiButton__text"
+                className="eui-textTruncate"
               >
                 Save changes
               </span>
@@ -679,7 +669,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
             disabled={false}
             onClick={[Function]}
             type="button"
@@ -967,21 +957,16 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--success euiButton--small euiButton--fill"
+            className="euiButton emotion-euiButtonDisplay-s-s-fill-success"
             disabled={false}
             onClick={[Function]}
-            style={
-              Object {
-                "minWidth": undefined,
-              }
-            }
             type="button"
           >
             <span
-              className="euiButtonContent euiButton__content"
+              className="emotion-euiButtonDisplayContent"
             >
               <span
-                className="euiButtonContent__icon"
+                className="emotion-euiButtonDisplayContent__icon-m"
                 color="inherit"
                 data-euiicon-type="save"
                 size="m"
@@ -989,7 +974,7 @@ Array [
                 
               </span>
               <span
-                className="euiButton__text"
+                className="eui-textTruncate"
               >
                 Save changes
               </span>
@@ -1000,7 +985,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
             disabled={false}
             onClick={[Function]}
             type="button"
@@ -1265,21 +1250,16 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--success euiButton--small euiButton--fill euiButton-isDisabled"
+            className="euiButton emotion-euiButtonDisplay-s-isDisabled-s-fill-disabled"
             disabled={true}
             onClick={[Function]}
-            style={
-              Object {
-                "minWidth": undefined,
-              }
-            }
             type="button"
           >
             <span
-              className="euiButtonContent euiButton__content"
+              className="emotion-euiButtonDisplayContent"
             >
               <span
-                className="euiButtonContent__icon"
+                className="emotion-euiButtonDisplayContent__icon-m"
                 color="inherit"
                 data-euiicon-type="save"
                 size="m"
@@ -1287,7 +1267,7 @@ Array [
                 
               </span>
               <span
-                className="euiButton__text"
+                className="eui-textTruncate"
               >
                 Save changes
               </span>
@@ -1298,7 +1278,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
             disabled={false}
             onClick={[Function]}
             type="button"

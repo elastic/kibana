@@ -9,6 +9,10 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
+import { useCurrentUser } from '../../../../common/lib/kibana/hooks';
+
+import { securityMock } from '@kbn/security-plugin/public/mocks';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { AddNote } from '.';
 
 const mockDispatch = jest.fn();
@@ -20,8 +24,17 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
+jest.mock('../../../../common/lib/kibana/hooks');
 
 describe('AddNote', () => {
+  let authenticatedUser: AuthenticatedUser;
+
+  beforeEach(() => {
+    (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
+    authenticatedUser = securityMock.createMockAuthenticatedUser({
+      roles: ['superuser'],
+    });
+  });
   const note = 'The contents of a new note';
   const props = {
     associateNote: jest.fn(),
@@ -124,7 +137,7 @@ describe('AddNote', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
 
     expect(associateNote).toBeCalled();
   });
@@ -156,7 +169,7 @@ describe('AddNote', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
 
     expect(updateNewNote).toBeCalled();
   });
@@ -168,7 +181,7 @@ describe('AddNote', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
 
     expect(mockDispatch).toBeCalled();
   });

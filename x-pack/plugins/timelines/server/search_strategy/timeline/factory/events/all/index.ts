@@ -38,6 +38,7 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
     // eslint-disable-next-line prefer-const
     let { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);
+
     const { activePage, querySize } = options.pagination;
     const producerBuckets = getOr([], 'aggregations.producers.buckets', response.rawResponse);
     const totalCount = response.rawResponse.hits.total || 0;

@@ -133,21 +133,23 @@ export interface TestBed<T = string> {
   };
 }
 
-export interface BaseTestBedConfig {
+export interface BaseTestBedConfig<T extends object = Record<string, any>> {
   /** The default props to pass to the mounted component. */
-  defaultProps?: Record<string, any>;
+  defaultProps?: Partial<T>;
   /** Configuration object for the react-router `MemoryRouter. */
   memoryRouter?: MemoryRouterConfig;
   /** An optional redux store. You can also provide a function that returns a store. */
   store?: (() => Store) | Store | null;
 }
 
-export interface AsyncTestBedConfig extends BaseTestBedConfig {
+export interface AsyncTestBedConfig<T extends object = Record<string, any>>
+  extends BaseTestBedConfig<T> {
   /* Mount the component asynchronously. When using "hooked" components with _useEffect()_ calls, you need to set this to "true". */
   doMountAsync: true;
 }
 
-export interface TestBedConfig extends BaseTestBedConfig {
+export interface TestBedConfig<T extends object = Record<string, any>>
+  extends BaseTestBedConfig<T> {
   /* Mount the component asynchronously. When using "hooked" components with _useEffect()_ calls, you need to set this to "true". */
   doMountAsync?: false;
 }

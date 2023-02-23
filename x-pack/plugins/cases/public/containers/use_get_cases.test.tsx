@@ -8,7 +8,8 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS, useGetCases } from './use_get_cases';
 import * as api from './api';
-import { AppMockRenderer, createAppMockRenderer } from '../common/mock';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');

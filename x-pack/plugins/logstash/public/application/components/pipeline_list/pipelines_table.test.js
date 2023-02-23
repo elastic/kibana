@@ -53,14 +53,14 @@ describe('PipelinesTable component', () => {
 
   it('calls createPipeline on create button clicked', () => {
     const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
-    wrapper.find('.euiButton--primary').simulate('click');
+    wrapper.find('button[data-test-subj="btnAdd"]').simulate('click');
     expect(createPipeline).toHaveBeenCalled();
   });
 
   it('calls delete prompt on delete click', () => {
     props.selection = [{ id: 'testPipeline' }];
     const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
-    wrapper.find('.euiButton--danger').simulate('click');
+    wrapper.find('button[data-test-subj="btnDeletePipeline"]').simulate('click');
     expect(onDeleteSelectedPipelines).toHaveBeenCalled();
   });
 

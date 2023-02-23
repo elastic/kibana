@@ -8,7 +8,7 @@
 import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObject } from '@kbn/core/server';
 
-import { StoredSLO } from '../types/models';
+import { StoredSLO } from '../domain/models';
 
 export const SO_SLO_TYPE = 'slo';
 
@@ -19,7 +19,8 @@ export const slo: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      name: { type: 'text' },
+      id: { type: 'keyword' },
+      name: { type: 'keyword' },
       description: { type: 'text' },
       indicator: {
         properties: {
@@ -27,20 +28,36 @@ export const slo: SavedObjectsType = {
           params: { type: 'flattened' },
         },
       },
-      time_window: {
+      timeWindow: {
         properties: {
           duration: { type: 'keyword' },
-          is_rolling: { type: 'boolean' },
+          isRolling: { type: 'boolean' },
+          calendar: {
+            properties: {
+              startTime: { type: 'date' },
+            },
+          },
         },
       },
-      budgeting_method: { type: 'keyword' },
+      budgetingMethod: { type: 'keyword' },
       objective: {
         properties: {
           target: { type: 'float' },
+          timesliceTarget: { type: 'float' },
+          timesliceWindow: { type: 'keyword' },
         },
       },
-      created_at: { type: 'date' },
-      updated_at: { type: 'date' },
+      settings: {
+        properties: {
+          timestampField: { type: 'keyword' },
+          syncDelay: { type: 'keyword' },
+          frequency: { type: 'keyword' },
+        },
+      },
+      revision: { type: 'short' },
+      enabled: { type: 'boolean' },
+      createdAt: { type: 'date' },
+      updatedAt: { type: 'date' },
     },
   },
   management: {

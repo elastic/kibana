@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
 import { StackAlertsPublicPlugin } from './plugin';
 
-export const plugin = (ctx: PluginInitializerContext) => new StackAlertsPublicPlugin(ctx);
+export const plugin = () => new StackAlertsPublicPlugin();

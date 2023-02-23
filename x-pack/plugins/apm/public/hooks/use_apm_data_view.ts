@@ -6,6 +6,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useState } from 'react';
 import { ApmPluginStartDeps } from '../plugin';
@@ -19,17 +20,38 @@ async function getApmDataViewTitle() {
 }
 
 export function useApmDataView() {
-  const { services } = useKibana<ApmPluginStartDeps>();
+  const { services, notifications } = useKibana<ApmPluginStartDeps>();
   const [dataView, setDataView] = useState<DataView | undefined>();
 
   useEffect(() => {
     async function fetchDataView() {
       const title = await getApmDataViewTitle();
-      return services.dataViews.create({ title });
+      try {
+        const displayError = false;
+        return await services.dataViews.create(
+          { title },
+          undefined,
+          displayError
+        );
+      } catch (e) {
+        const noDataScreen = e.message.includes('No matching indices found');
+        if (noDataScreen) {
+          return;
+        }
+
+        notifications.toasts.danger({
+          title: i18n.translate('xpack.apm.data_view.creation_failed', {
+            defaultMessage: 'An error occurred while creating the data view',
+          }),
+          body: e.message,
+        });
+
+        throw e;
+      }
     }
 
     fetchDataView().then(setDataView);
-  }, [services.dataViews]);
+  }, [notifications.toasts, services.dataViews]);
 
   return { dataView };
 }

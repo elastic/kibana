@@ -7,10 +7,14 @@
 
 export interface TestData {
   suiteTitle: string;
+  dataGenerator: string;
   isSavedSearch?: boolean;
   sourceIndexOrSavedSearch: string;
   rowsPerPage?: 10 | 25 | 50;
-  brushTargetTimestamp: number;
+  brushBaselineTargetTimestamp?: number;
+  brushDeviationTargetTimestamp: number;
+  brushIntervalFactor: number;
+  chartClickCoordinates: [number, number];
   expected: {
     totalDocCountFormatted: string;
     analysisGroupsTable: Array<{ group: string; docCount: string }>;

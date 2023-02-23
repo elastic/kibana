@@ -10,7 +10,7 @@ import { format as formatServiceNowITSM } from './itsm_format';
 import { getMapping as getServiceNowSIRMapping } from './sir_mapping';
 import { format as formatServiceNowSIR } from './sir_format';
 
-import { ServiceNowITSMCasesConnector, ServiceNowSIRCasesConnector } from './types';
+import type { ServiceNowITSMCasesConnector, ServiceNowSIRCasesConnector } from './types';
 
 export const getServiceNowITSMCaseConnector = (): ServiceNowITSMCasesConnector => ({
   getMapping: getServiceNowITSMMapping,

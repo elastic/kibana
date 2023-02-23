@@ -3,9 +3,6 @@
 // Some IDEs could not be running eslint with the correct extensions yet
 // as this package was moved from typescript-eslint-parser to @typescript-eslint/parser
 
-const semver = require('semver');
-const { kibanaPackageJson: PKG } = require('@kbn/utils');
-
 const eslintConfigPrettierRules = require('eslint-config-prettier').rules;
 
 // The current implementation excluded all the variables matching the regexp.
@@ -257,7 +254,14 @@ module.exports = {
           'import/no-default-export': 'error',
 
           'eslint-comments/no-unused-disable': 'error',
-          'eslint-comments/no-unused-enable': 'error'
+          'eslint-comments/no-unused-enable': 'error',
+          'no-restricted-syntax': [
+            'error',
+            {
+              "selector": "TSEnumDeclaration[const=true]",
+              "message": "Do not use `const` with enum declarations"
+            }
+          ]
         },
         eslintConfigPrettierRules
       )

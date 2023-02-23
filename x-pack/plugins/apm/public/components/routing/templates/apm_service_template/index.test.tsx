@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  isMetricsTabHidden,
-  isMetricsJVMsTabHidden,
-  isInfraTabHidden,
-} from '.';
+import { isMetricsTabHidden, isInfraTabHidden } from '.';
+import { ServerlessType } from '../../../../../common/serverless';
 
 describe('APM service template', () => {
   describe('isMetricsTabHidden', () => {
@@ -18,11 +15,8 @@ describe('APM service template', () => {
         { agentName: 'js-base' },
         { agentName: 'rum-js' },
         { agentName: 'opentelemetry/webjs' },
-        { agentName: 'java' },
-        { agentName: 'opentelemetry/java' },
-        { agentName: 'ios/swift' },
-        { agentName: 'ruby', runtimeName: 'jruby' },
-        { runtimeName: 'aws_lambda' },
+        { serverlessType: ServerlessType.AWS_LAMBDA },
+        { serverlessType: ServerlessType.AZURE_FUNCTIONS },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isMetricsTabHidden(input)).toBeTruthy();
@@ -38,39 +32,12 @@ describe('APM service template', () => {
         { agentName: 'nodejs' },
         { agentName: 'php' },
         { agentName: 'python' },
+        { agentName: 'ruby', runtimeName: 'jruby' },
+        { agentName: 'java' },
+        { agentName: 'opentelemetry/java' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isMetricsTabHidden(input)).toBeFalsy();
-        });
-      });
-    });
-  });
-  describe('isMetricsJVMsTabHidden', () => {
-    describe('hides metrics JVMs tab', () => {
-      [
-        { agentName: undefined },
-        { agentName: 'ruby', runtimeName: 'ruby' },
-        { agentName: 'ruby' },
-        { agentName: 'dotnet' },
-        { agentName: 'go' },
-        { agentName: 'nodejs' },
-        { agentName: 'php' },
-        { agentName: 'python' },
-        { runtimeName: 'aws_lambda' },
-      ].map((input) => {
-        it(`when input ${JSON.stringify(input)}`, () => {
-          expect(isMetricsJVMsTabHidden(input)).toBeTruthy();
-        });
-      });
-    });
-    describe('shows metrics JVMs tab', () => {
-      [
-        { agentName: 'java' },
-        { agentName: 'opentelemetry/java' },
-        { agentName: 'ruby', runtimeName: 'jruby' },
-      ].map((input) => {
-        it(`when input ${JSON.stringify(input)}`, () => {
-          expect(isMetricsJVMsTabHidden(input)).toBeFalsy();
         });
       });
     });
@@ -82,8 +49,8 @@ describe('APM service template', () => {
         { agentName: 'js-base' },
         { agentName: 'rum-js' },
         { agentName: 'opentelemetry/webjs' },
-        { agentName: 'ios/swift' },
-        { runtimeName: 'aws_lambda' },
+        { serverlessType: ServerlessType.AWS_LAMBDA },
+        { serverlessType: ServerlessType.AZURE_FUNCTIONS },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isInfraTabHidden(input)).toBeTruthy();

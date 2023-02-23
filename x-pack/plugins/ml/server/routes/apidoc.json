@@ -170,18 +170,23 @@
     "GetTrainedModel",
     "GetTrainedModelStats",
     "GetTrainedModelStatsById",
-    "GetTrainedModelsNodesOverview",
     "GetTrainedModelPipelines",
     "StartTrainedModelDeployment",
+    "UpdateTrainedModelDeployment",
     "StopTrainedModelDeployment",
     "PutTrainedModel",
     "DeleteTrainedModel",
+    "SimulateIngestPipeline",
     "InferTrainedModelDeployment",
 
     "Alerting",
     "PreviewAlert",
 
     "Management",
-    "ManagementList"
+    "ManagementList",
+
+    "ModelManagement",
+    "GetModelManagementNodesOverview",
+    "GetModelManagementMemoryUsage"
   ]
 }

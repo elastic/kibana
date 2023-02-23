@@ -17,8 +17,6 @@
  * min([1, 9], 4, [3, 5]) // returns [min([1, 4, 3]), min([9, 4, 5])] = [1, 4]
  */
 
-module.exports = { min };
-
 function min(...args) {
   if (args.length === 1) {
     if (Array.isArray(args[0]))
@@ -36,3 +34,4 @@ function min(...args) {
     return Math.min(result, current);
   });
 }
+module.exports = { min };

@@ -5,27 +5,24 @@
  * 2.0.
  */
 
-import { SLO } from '../../types/models';
-import { GetSLOResponse } from '../../types/rest_specs';
+import { GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
+import { SLO, SLOId, SLOWithSummary, Summary } from '../../domain/models';
 import { SLORepository } from './slo_repository';
+import { SummaryClient } from './summary_client';
 
 export class GetSLO {
-  constructor(private repository: SLORepository) {}
+  constructor(private repository: SLORepository, private summaryClient: SummaryClient) {}
 
   public async execute(sloId: string): Promise<GetSLOResponse> {
     const slo = await this.repository.findById(sloId);
-    return this.toResponse(slo);
-  }
+    const summaryBySlo = await this.summaryClient.fetchSummary([slo]);
 
-  private toResponse(slo: SLO): GetSLOResponse {
-    return {
-      id: slo.id,
-      name: slo.name,
-      description: slo.description,
-      indicator: slo.indicator,
-      time_window: slo.time_window,
-      budgeting_method: slo.budgeting_method,
-      objective: slo.objective,
-    };
+    const sloWithSummary = mergeSloWithSummary(slo, summaryBySlo);
+
+    return getSLOResponseSchema.encode(sloWithSummary);
   }
+}
+
+function mergeSloWithSummary(slo: SLO, summaryBySlo: Record<SLOId, Summary>): SLOWithSummary {
+  return { ...slo, summary: summaryBySlo[slo.id] };
 }

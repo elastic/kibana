@@ -21,6 +21,9 @@ import {
   EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
+import { css as classNameCss } from '@emotion/css';
+
+import type { MonacoError } from './helpers';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -28,13 +31,17 @@ const COMMAND_KEY = isMac ? '⌘' : '^';
 interface EditorFooterProps {
   lines: number;
   containerCSS: Interpolation<Theme>;
-  errors?: Array<{ startLineNumber: number; message: string }>;
+  errors?: MonacoError[];
+  onErrorClick: (error: MonacoError) => void;
+  refreshErrors: () => void;
 }
 
 export const EditorFooter = memo(function EditorFooter({
   lines,
   containerCSS,
   errors,
+  onErrorClick,
+  refreshErrors,
 }: EditorFooterProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
@@ -75,7 +82,10 @@ export const EditorFooter = memo(function EditorFooter({
                             text-decoration: underline;
                           }
                         `}
-                        onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                        onClick={() => {
+                          refreshErrors();
+                          setIsPopoverOpen(!isPopoverOpen);
+                        }}
                       >
                         <p>
                           {i18n.translate(
@@ -104,7 +114,15 @@ export const EditorFooter = memo(function EditorFooter({
                       <EuiDescriptionList>
                         {errors.map((error, index) => {
                           return (
-                            <EuiDescriptionListDescription key={index}>
+                            <EuiDescriptionListDescription
+                              key={index}
+                              className={classNameCss`
+                                &:hover {
+                                  cursor: pointer;
+                                }
+                              `}
+                              onClick={() => onErrorClick(error)}
+                            >
                               <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
                                 <EuiFlexItem grow={false}>
                                   <EuiFlexGroup gutterSize="s" alignItems="center">

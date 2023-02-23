@@ -316,8 +316,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       return mlApiServices.results
         .anomalySearch$(
           {
-            size: 0,
             body: {
+              size: 0,
               query: {
                 bool: {
                   filter: [
@@ -469,8 +469,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       return mlApiServices.results
         .anomalySearch$(
           {
-            size: maxResults !== undefined ? maxResults : 100,
             body: {
+              size: maxResults !== undefined ? maxResults : 100,
               query: {
                 bool: {
                   filter: [
@@ -555,8 +555,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       return mlApiServices.results
         .anomalySearch$(
           {
-            size: 0,
             body: {
+              size: 0,
               query: {
                 bool: {
                   filter: [
@@ -734,8 +734,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       return mlApiServices.results
         .anomalySearch$(
           {
-            size: maxResults !== undefined ? maxResults : 100,
             body: {
+              size: maxResults !== undefined ? maxResults : 100,
               query: {
                 bool: {
                   filter: [

@@ -33,11 +33,19 @@ export interface GlobalFilter {
   endDate: string;
 }
 
+export interface ResponseActionButtonProps {
+  tooltip: React.ReactNode;
+  canAccessResponseConsole: boolean;
+  isDisabled: boolean;
+}
 export interface KubernetesSecurityDeps {
   filter: React.ReactNode;
   renderSessionsView: (sessionsFilterQuery: string | undefined) => JSX.Element;
   indexPattern?: IndexPattern;
   globalFilter: GlobalFilter;
+  responseActionClick: () => void;
+  handleTreeNavSelection: (agentId: string) => void;
+  responseActionButtonProps: ResponseActionButtonProps;
 }
 
 export interface KubernetesSecurityStart {
@@ -56,6 +64,14 @@ export type KubernetesCollection =
   | 'pod'
   | 'containerImage';
 
+export enum KubernetesTreeViewLevels {
+  clusterId = 'clusterId',
+  clusterName = 'clusterName',
+  namespace = 'namespace',
+  node = 'node',
+  pod = 'pod',
+  containerImage = 'containerImage',
+}
 export type KubernetesCollectionMap<T = string> = Record<KubernetesCollection, T>;
 
 export type TreeViewIconProps = {

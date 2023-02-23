@@ -1,0 +1,107 @@
+{
+  "id": "@kbn/core-plugins-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-plugins-server-mocks",
+        "id": "def-common.pluginServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "pluginServiceMock",
+        "description": [],
+        "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-server-mocks",
+            "id": "def-common.pluginServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => PluginsServiceMock"
+            ],
+            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server-mocks",
+            "id": "def-common.pluginServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PluginsServiceSetup"
+            ],
+            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server-mocks",
+            "id": "def-common.pluginServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => { contracts: Map<any, any>; }"
+            ],
+            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server-mocks",
+            "id": "def-common.pluginServiceMock.createUiPlugins",
+            "type": "Function",
+            "tags": [],
+            "label": "createUiPlugins",
+            "description": [],
+            "signature": [
+              "() => { browserConfigs: Map<any, any>; internal: Map<any, any>; public: Map<any, any>; }"
+            ],
+            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

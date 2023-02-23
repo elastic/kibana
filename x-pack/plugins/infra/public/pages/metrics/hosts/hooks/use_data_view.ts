@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -15,7 +16,7 @@ import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
 export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
   const [metricsDataView, setMetricsDataView] = useState<DataView>();
   const {
-    services: { dataViews },
+    services: { dataViews, notifications },
   } = useKibana<InfraClientStartDeps>();
 
   const [createDataViewRequest, createDataView] = useTrackedPromise(
@@ -33,7 +34,7 @@ export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
 
   const [getDataViewRequest, getDataView] = useTrackedPromise(
     {
-      createPromise: (indexPattern: string): Promise<DataView[]> => {
+      createPromise: (_indexPattern: string): Promise<DataView[]> => {
         return dataViews.find(metricAlias, 1);
       },
       onResolve: (response: DataView[]) => {
@@ -58,17 +59,36 @@ export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
     }
   }, [metricAlias, createDataView, getDataView]);
 
-  const hasFailedFetchingDataView = getDataViewRequest.state === 'rejected';
-  const hasFailedCreatingDataView = createDataViewRequest.state === 'rejected';
+  const isDataViewLoading = useMemo(
+    () => getDataViewRequest.state === 'pending' || createDataViewRequest.state === 'pending',
+    [getDataViewRequest.state, createDataViewRequest.state]
+  );
+
+  const hasFailedLoadingDataView = useMemo(
+    () => getDataViewRequest.state === 'rejected' || createDataViewRequest.state === 'rejected',
+    [getDataViewRequest.state, createDataViewRequest.state]
+  );
 
   useEffect(() => {
     loadDataView();
   }, [metricAlias, loadDataView]);
 
+  useEffect(() => {
+    if (hasFailedLoadingDataView && notifications) {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.infra.hostsViewPage.errorOnCreateOrLoadDataview', {
+          defaultMessage:
+            'There was an error trying to load or create the Data View: {metricAlias}',
+          values: { metricAlias },
+        })
+      );
+    }
+  }, [hasFailedLoadingDataView, notifications, metricAlias]);
+
   return {
     metricsDataView,
-    hasFailedCreatingDataView,
-    hasFailedFetchingDataView,
+    isDataViewLoading,
+    hasFailedLoadingDataView,
   };
 };
 

@@ -14,6 +14,7 @@ import type {
   AgentPolicyServiceInterface,
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { ConfigType } from '../../common/config';
 import type { TelemetryEventsSender } from './telemetry/sender';
 
@@ -26,6 +27,7 @@ export type OsqueryAppContextServiceStartContract = Partial<
   logger: Logger;
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
+  ruleRegistryService?: RuleRegistryPluginStartContract;
 };
 
 /**
@@ -37,12 +39,14 @@ export class OsqueryAppContextService {
   private packageService: PackageService | undefined;
   private packagePolicyService: PackagePolicyClient | undefined;
   private agentPolicyService: AgentPolicyServiceInterface | undefined;
+  private ruleRegistryService: RuleRegistryPluginStartContract | undefined;
 
   public start(dependencies: OsqueryAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
     this.packageService = dependencies.packageService;
     this.packagePolicyService = dependencies.packagePolicyService;
     this.agentPolicyService = dependencies.agentPolicyService;
+    this.ruleRegistryService = dependencies.ruleRegistryService;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -62,6 +66,10 @@ export class OsqueryAppContextService {
 
   public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
     return this.agentPolicyService;
+  }
+
+  public getRuleRegistryService(): RuleRegistryPluginStartContract | undefined {
+    return this.ruleRegistryService;
   }
 }
 

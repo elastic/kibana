@@ -5,31 +5,28 @@
  * 2.0.
  */
 
-import Url from 'url';
+import {
+  ApmSynthtraceKibanaClient,
+  createLogger,
+  LogLevel,
+} from '@kbn/apm-synthtrace';
 import cypress from 'cypress';
-import { esTestConfig } from '@kbn/test';
-import { apm, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import path from 'path';
+import Url from 'url';
+import { createApmUsers } from '../server/test_helpers/create_apm_users/create_apm_users';
 import { FtrProviderContext } from './ftr_provider_context';
-import { createApmUsers } from '../scripts/create_apm_users/create_apm_users';
 
 export async function cypressTestRunner({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const kibanaVersion = esTestConfig.getVersion();
+
+  const username = config.get('servers.elasticsearch.username');
+  const password = config.get('servers.elasticsearch.password');
 
   const kibanaUrl = Url.format({
     protocol: config.get('servers.kibana.protocol'),
     hostname: config.get('servers.kibana.hostname'),
     port: config.get('servers.kibana.port'),
-  });
-
-  const username = config.get('servers.elasticsearch.username');
-  const password = config.get('servers.elasticsearch.password');
-
-  // Creates APM users
-  await createApmUsers({
-    elasticsearch: { username, password },
-    kibana: { hostname: kibanaUrl },
+    auth: `${username}:${password}`,
   });
 
   const esNode = Url.format({
@@ -39,17 +36,27 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
     auth: `${username}:${password}`,
   });
 
-  const esRequestTimeout = config.get('timeouts.esRequestTimeout');
-  const kibanaClient = new apm.ApmSynthtraceKibanaClient(
-    createLogger(LogLevel.info)
-  );
+  // Creates APM users
+  await createApmUsers({
+    elasticsearch: { node: esNode, username, password },
+    kibana: { hostname: kibanaUrl },
+  });
 
-  await kibanaClient.installApmPackage(
-    kibanaUrl,
-    kibanaVersion,
-    username,
-    password
-  );
+  const esRequestTimeout = config.get('timeouts.esRequestTimeout');
+  const kibanaClient = new ApmSynthtraceKibanaClient({
+    logger: createLogger(LogLevel.info),
+    target: kibanaUrl,
+  });
+
+  const packageVersion = await kibanaClient.fetchLatestApmPackageVersion();
+
+  await kibanaClient.installApmPackage(packageVersion);
+
+  const kibanaUrlWithoutAuth = Url.format({
+    protocol: config.get('servers.kibana.protocol'),
+    hostname: config.get('servers.kibana.hostname'),
+    port: config.get('servers.kibana.port'),
+  });
 
   const cypressProjectPath = path.join(__dirname);
   const { open, ...cypressCliArgs } = getCypressCliArgs();
@@ -59,11 +66,12 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
     project: cypressProjectPath,
     config: {
       e2e: {
-        baseUrl: kibanaUrl,
+        baseUrl: kibanaUrlWithoutAuth,
       },
     },
     env: {
-      KIBANA_URL: kibanaUrl,
+      KIBANA_URL: kibanaUrlWithoutAuth,
+      APM_PACKAGE_VERSION: packageVersion,
       ES_NODE: esNode,
       ES_REQUEST_TIMEOUT: esRequestTimeout,
       TEST_CLOUD: process.env.TEST_CLOUD,

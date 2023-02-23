@@ -35,7 +35,7 @@ export const registerActionDetailsRoutes = (
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { all: ['canReadSecuritySolution'] },
       endpointContext.logFactory.get('hostIsolationDetails'),
       getActionDetailsRequestHandler(endpointContext)
     )

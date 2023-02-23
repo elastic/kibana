@@ -13,24 +13,27 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  DEFAULT_ILM_POLICY_ID,
+  DEFAULT_ALERTS_ILM_POLICY,
+  DEFAULT_ALERTS_ILM_POLICY_NAME,
+} from '@kbn/alerting-plugin/server';
+import {
   ECS_COMPONENT_TEMPLATE_NAME,
   TECHNICAL_COMPONENT_TEMPLATE_NAME,
 } from '../../common/assets';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
-import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
 
 import type { IndexInfo } from './index_info';
 
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
-
+const TOTAL_FIELDS_LIMIT = 1900;
 interface ConstructorOptions {
   getResourceName(relativeName: string): string;
   getClusterClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isWriteEnabled: boolean;
   disabledRegistrationContexts: string[];
+  areFrameworkAlertsEnabled: boolean;
   pluginStop$: Observable<void>;
 }
 
@@ -95,16 +98,21 @@ export class ResourceInstaller {
    */
   public async installCommonResources(): Promise<void> {
     await this.installWithTimeout('common resources shared between all indices', async () => {
-      const { getResourceName, logger } = this.options;
+      const { getResourceName, logger, areFrameworkAlertsEnabled } = this.options;
 
       try {
         // We can install them in parallel
         await Promise.all([
-          this.createOrUpdateLifecyclePolicy({
-            name: getResourceName(DEFAULT_ILM_POLICY_ID),
-            body: defaultLifecyclePolicy,
-          }),
-
+          // Install ILM policy only if framework alerts are not enabled
+          // If framework alerts are enabled, the alerting framework will install this ILM policy
+          ...(areFrameworkAlertsEnabled
+            ? []
+            : [
+                this.createOrUpdateLifecyclePolicy({
+                  name: DEFAULT_ALERTS_ILM_POLICY_NAME,
+                  body: DEFAULT_ALERTS_ILM_POLICY,
+                }),
+              ]),
           this.createOrUpdateComponentTemplate({
             name: getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
             body: technicalComponentTemplate,
@@ -169,8 +177,30 @@ export class ResourceInstaller {
 
     // Find all concrete indices for all namespaces of the index.
     const concreteIndices = await this.fetchConcreteIndices(aliases, backingIndices);
+    // Update total field limit setting of found indices
+    await Promise.all(concreteIndices.map((item) => this.updateTotalFieldLimitSetting(item)));
     // Update mappings of the found indices.
     await Promise.all(concreteIndices.map((item) => this.updateAliasWriteIndexMapping(item)));
+  }
+
+  private async updateTotalFieldLimitSetting({ index, alias }: ConcreteIndexInfo) {
+    const { logger, getClusterClient } = this.options;
+    const clusterClient = await getClusterClient();
+
+    try {
+      await clusterClient.indices.putSettings({
+        index,
+        body: {
+          'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
+        },
+      });
+      return;
+    } catch (err) {
+      logger.error(
+        `Failed to PUT index.mapping.total_fields.limit settings for alias ${alias}: ${err.message}`
+      );
+      throw err;
+    }
   }
 
   // NOTE / IMPORTANT: Please note this will update the mappings of backing indices but
@@ -304,9 +334,7 @@ export class ResourceInstaller {
     const ownComponentNames = componentTemplates.map((template) =>
       indexInfo.getComponentTemplateName(template.name)
     );
-    const ilmPolicyName = ilmPolicy
-      ? indexInfo.getIlmPolicyName()
-      : getResourceName(DEFAULT_ILM_POLICY_ID);
+    const ilmPolicyName = ilmPolicy ? indexInfo.getIlmPolicyName() : DEFAULT_ALERTS_ILM_POLICY_NAME;
 
     const indexMetadata: estypes.Metadata = {
       ...indexTemplate._meta,
@@ -346,12 +374,11 @@ export class ResourceInstaller {
         template: {
           settings: {
             hidden: true,
-            // @ts-expect-error type only defines nested structure
             'index.lifecycle': {
               name: ilmPolicyName,
               rollover_alias: primaryNamespacedAlias,
             },
-            'index.mapping.total_fields.limit': 1900,
+            'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
             auto_expand_replicas: '0-1',
           },
           mappings: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin } from 'unified';
+import type { Plugin } from 'unified';
 import type { TimeRange } from '@kbn/es-query';
 import { LENS_ID } from './constants';
 

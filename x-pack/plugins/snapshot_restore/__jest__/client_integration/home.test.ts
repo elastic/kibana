@@ -58,7 +58,7 @@ describe('<SnapshotRestoreHome />', () => {
     /**
      * TODO: investigate why we need to skip this test.
      * My guess is a change in the useRequest() hook and maybe a setTimout() that hasn't been
-     * mocked with jest.useFakeTimers();
+     * mocked with jest.useFakeTimers({ legacyFakeTimers: true });
      * I tested locally and the loading spinner is present in the UI so skipping this test for now.
      */
     test.skip('should display a loading while fetching the repositories', () => {
@@ -748,7 +748,7 @@ describe('<SnapshotRestoreHome />', () => {
               const { find } = testBed;
 
               const tabs = find('snapshotDetail.tab');
-              const selectedTab = find('snapshotDetail').find('.euiTab-isSelected');
+              const selectedTab = find('snapshotDetail').find('.euiTab-isSelected').last();
 
               expect(selectedTab.instance()).toBe(tabs.at(0).instance());
             });

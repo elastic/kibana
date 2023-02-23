@@ -128,7 +128,7 @@ describe('Info session routes', () => {
       ];
 
       for (const [sessionInfo, expected] of assertions) {
-        session.get.mockResolvedValue(sessionMock.createValue(sessionInfo));
+        session.get.mockResolvedValue({ error: null, value: sessionMock.createValue(sessionInfo) });
 
         const expectedBody = {
           canBeExtended: expected.canBeExtended,
@@ -151,8 +151,6 @@ describe('Info session routes', () => {
     });
 
     it('returns empty response if session is not available.', async () => {
-      session.get.mockResolvedValue(null);
-
       await expect(
         routeHandler(
           {} as unknown as SecurityRequestHandlerContext,

@@ -41,7 +41,7 @@ describe('Discover tour', () => {
     expect(component.find(EuiTourStep)).toHaveLength(0);
 
     // one step should become visible after the tour is triggered
-    component.find(`[data-test-subj="${buttonSubjToTestStart}"]`).at(0).simulate('click');
+    component.find(`button[data-test-subj="${buttonSubjToTestStart}"]`).at(0).simulate('click');
 
     expect(component.find(EuiTourStep)).toHaveLength(5);
     expect(

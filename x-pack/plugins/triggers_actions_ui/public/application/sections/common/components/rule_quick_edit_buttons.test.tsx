@@ -18,12 +18,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
   }),
 }));
 
-const setRulesToUpdateAPIKey = jest.fn();
-const setRulesToSnooze = jest.fn();
-const setRulesToSchedule = jest.fn();
-const setRulesToSnoozeFilter = jest.fn();
-const setRulesToScheduleFilter = jest.fn();
-const setRulesToUpdateAPIKeyFilter = jest.fn();
+const updateRulesToBulkEdit = jest.fn();
 
 describe('rule_quick_edit_buttons', () => {
   afterEach(() => {
@@ -39,26 +34,24 @@ describe('rule_quick_edit_buttons', () => {
     const wrapper = mountWithIntl(
       <RuleQuickEditButtons
         isAllSelected={false}
-        getFilter={() => ''}
+        getFilter={() => null}
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
-        setRulesToDelete={() => {}}
-        setRulesToUpdateAPIKey={() => {}}
-        setRulesToSnooze={() => {}}
-        setRulesToSchedule={() => {}}
-        setRulesToSnoozeFilter={() => {}}
-        setRulesToScheduleFilter={() => {}}
-        setRulesToUpdateAPIKeyFilter={() => {}}
+        onEnable={async () => {}}
+        onDisable={async () => {}}
+        updateRulesToBulkEdit={() => {}}
       />
     );
 
-    expect(wrapper.find('[data-test-subj="enableAll"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="disableAll"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bulkEnable"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bulkDisable"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="updateAPIKeys"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="deleteAll"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bulkDelete"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="bulkSnooze"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bulkUnsnooze"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bulkRemoveSnoozeSchedule"]').exists()).toBeTruthy();
   });
 
   it('renders enableAll if rules are all disabled', async () => {
@@ -70,22 +63,18 @@ describe('rule_quick_edit_buttons', () => {
     const wrapper = mountWithIntl(
       <RuleQuickEditButtons
         isAllSelected={false}
-        getFilter={() => ''}
+        getFilter={() => null}
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
-        setRulesToDelete={() => {}}
-        setRulesToUpdateAPIKey={() => {}}
-        setRulesToSnooze={() => {}}
-        setRulesToSchedule={() => {}}
-        setRulesToSnoozeFilter={() => {}}
-        setRulesToScheduleFilter={() => {}}
-        setRulesToUpdateAPIKeyFilter={() => {}}
+        onEnable={async () => {}}
+        onDisable={async () => {}}
+        updateRulesToBulkEdit={() => {}}
       />
     );
 
-    expect(wrapper.find('[data-test-subj="enableAll"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="disableAll"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="bulkEnable"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bulkDisable"]').exists()).toBeTruthy();
   });
 
   it('disables the disable/enable/delete bulk actions if in select all mode', async () => {
@@ -97,27 +86,26 @@ describe('rule_quick_edit_buttons', () => {
     const wrapper = mountWithIntl(
       <RuleQuickEditButtons
         isAllSelected={true}
-        getFilter={() => ''}
+        getFilter={() => null}
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
-        setRulesToDelete={() => {}}
-        setRulesToUpdateAPIKey={() => {}}
-        setRulesToSnooze={() => {}}
-        setRulesToSchedule={() => {}}
-        setRulesToSnoozeFilter={() => {}}
-        setRulesToScheduleFilter={() => {}}
-        setRulesToUpdateAPIKeyFilter={() => {}}
+        onEnable={async () => {}}
+        onDisable={async () => {}}
+        updateRulesToBulkEdit={() => {}}
       />
     );
 
-    expect(wrapper.find('[data-test-subj="disableAll"]').first().prop('isDisabled')).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="deleteAll"]').first().prop('isDisabled')).toBeTruthy();
-
-    expect(wrapper.find('[data-test-subj="updateAPIKeys"]').first().prop('isDiabled')).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="bulkSnooze"]').first().prop('isDiabled')).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="bulkEnable"]').first().prop('isDisabled')).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="bulkDelete"]').first().prop('isDisabled')).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="updateAPIKeys"]').first().prop('isDisabled')).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="bulkSnooze"]').first().prop('isDisabled')).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="bulkUnsnooze"]').first().prop('isDisabled')).toBeFalsy();
     expect(
-      wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').first().prop('isDiabled')
+      wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').first().prop('isDisabled')
+    ).toBeFalsy();
+    expect(
+      wrapper.find('[data-test-subj="bulkRemoveSnoozeSchedule"]').first().prop('isDisabled')
     ).toBeFalsy();
   });
 
@@ -131,32 +119,18 @@ describe('rule_quick_edit_buttons', () => {
     const wrapper = mountWithIntl(
       <RuleQuickEditButtons
         isAllSelected={false}
-        getFilter={() => ''}
+        getFilter={() => null}
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
-        setRulesToDelete={() => {}}
-        setRulesToSnooze={setRulesToSnooze}
-        setRulesToSchedule={setRulesToSchedule}
-        setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
-        setRulesToSnoozeFilter={setRulesToSnoozeFilter}
-        setRulesToScheduleFilter={setRulesToScheduleFilter}
-        setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
+        onEnable={async () => {}}
+        onDisable={async () => {}}
+        updateRulesToBulkEdit={updateRulesToBulkEdit}
       />
     );
 
     wrapper.find('[data-test-subj="bulkSnooze"]').first().simulate('click');
-    expect(setRulesToSnooze).toHaveBeenCalledTimes(1);
-
-    wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').first().simulate('click');
-    expect(setRulesToSchedule).toHaveBeenCalledTimes(1);
-
-    wrapper.find('[data-test-subj="updateAPIKeys"]').first().simulate('click');
-    expect(setRulesToUpdateAPIKey).toHaveBeenCalledTimes(1);
-
-    expect(setRulesToSnoozeFilter).not.toHaveBeenCalled();
-    expect(setRulesToScheduleFilter).not.toHaveBeenCalled();
-    expect(setRulesToUpdateAPIKeyFilter).not.toHaveBeenCalled();
+    expect(updateRulesToBulkEdit).toHaveBeenCalledTimes(1);
   });
 
   it('properly sets rules or filters to delete when selecting all', async () => {
@@ -169,31 +143,17 @@ describe('rule_quick_edit_buttons', () => {
     const wrapper = mountWithIntl(
       <RuleQuickEditButtons
         isAllSelected={true}
-        getFilter={() => ''}
+        getFilter={() => null}
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
-        setRulesToDelete={() => {}}
-        setRulesToSnooze={setRulesToSnooze}
-        setRulesToSchedule={setRulesToSchedule}
-        setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
-        setRulesToSnoozeFilter={setRulesToSnoozeFilter}
-        setRulesToScheduleFilter={setRulesToScheduleFilter}
-        setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
+        onEnable={async () => {}}
+        onDisable={async () => {}}
+        updateRulesToBulkEdit={updateRulesToBulkEdit}
       />
     );
 
     wrapper.find('[data-test-subj="bulkSnooze"]').first().simulate('click');
-    expect(setRulesToSnoozeFilter).toHaveBeenCalledTimes(1);
-
-    wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').first().simulate('click');
-    expect(setRulesToScheduleFilter).toHaveBeenCalledTimes(1);
-
-    wrapper.find('[data-test-subj="updateAPIKeys"]').first().simulate('click');
-    expect(setRulesToUpdateAPIKeyFilter).toHaveBeenCalledTimes(1);
-
-    expect(setRulesToSchedule).not.toHaveBeenCalled();
-    expect(setRulesToSnooze).not.toHaveBeenCalled();
-    expect(setRulesToUpdateAPIKey).not.toHaveBeenCalled();
+    expect(updateRulesToBulkEdit).toHaveBeenCalledTimes(1);
   });
 });

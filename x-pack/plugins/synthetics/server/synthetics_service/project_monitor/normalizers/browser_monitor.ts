@@ -10,20 +10,14 @@ import {
   ConfigKey,
   DataStream,
   FormMonitorType,
-  Locations,
-  PrivateLocation,
-  ProjectMonitor,
 } from '../../../../common/runtime_types';
-import { getNormalizeCommonFields, getValueInSeconds } from './common_fields';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-
-export interface NormalizedProjectProps {
-  locations: Locations;
-  privateLocations: PrivateLocation[];
-  monitor: ProjectMonitor;
-  projectId: string;
-  namespace: string;
-}
+import {
+  NormalizedProjectProps,
+  NormalizerResult,
+  getNormalizeCommonFields,
+  getValueInSeconds,
+} from './common_fields';
 
 export const getNormalizeBrowserFields = ({
   locations = [],
@@ -31,15 +25,17 @@ export const getNormalizeBrowserFields = ({
   monitor,
   projectId,
   namespace,
-}: NormalizedProjectProps): { normalizedFields: BrowserFields; unsupportedKeys: string[] } => {
+  version,
+}: NormalizedProjectProps): NormalizerResult<BrowserFields> => {
   const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
 
-  const commonFields = getNormalizeCommonFields({
+  const { errors, normalizedFields: commonFields } = getNormalizeCommonFields({
     locations,
     privateLocations,
     monitor,
     projectId,
     namespace,
+    version,
   });
 
   const normalizedFields = {
@@ -48,18 +44,27 @@ export const getNormalizeBrowserFields = ({
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
     [ConfigKey.SOURCE_PROJECT_CONTENT]:
       monitor.content || defaultFields[ConfigKey.SOURCE_PROJECT_CONTENT],
-    [ConfigKey.THROTTLING_CONFIG]: monitor.throttling
-      ? `${monitor.throttling.download}d/${monitor.throttling.upload}u/${monitor.throttling.latency}l`
-      : defaultFields[ConfigKey.THROTTLING_CONFIG],
+    [ConfigKey.THROTTLING_CONFIG]:
+      typeof monitor.throttling !== 'boolean'
+        ? `${monitor.throttling?.download}d/${monitor.throttling?.upload}u/${monitor.throttling?.latency}l`
+        : defaultFields[ConfigKey.THROTTLING_CONFIG],
     [ConfigKey.DOWNLOAD_SPEED]: `${
-      monitor.throttling?.download || defaultFields[ConfigKey.DOWNLOAD_SPEED]
+      typeof monitor.throttling !== 'boolean'
+        ? monitor.throttling?.download
+        : defaultFields[ConfigKey.DOWNLOAD_SPEED]
     }`,
     [ConfigKey.UPLOAD_SPEED]: `${
-      monitor.throttling?.upload || defaultFields[ConfigKey.UPLOAD_SPEED]
+      typeof monitor.throttling !== 'boolean'
+        ? monitor.throttling?.upload
+        : defaultFields[ConfigKey.UPLOAD_SPEED]
     }`,
     [ConfigKey.IS_THROTTLING_ENABLED]:
-      Boolean(monitor.throttling) || defaultFields[ConfigKey.IS_THROTTLING_ENABLED],
-    [ConfigKey.LATENCY]: `${monitor.throttling?.latency || defaultFields[ConfigKey.LATENCY]}`,
+      Boolean(monitor.throttling) ?? defaultFields[ConfigKey.IS_THROTTLING_ENABLED],
+    [ConfigKey.LATENCY]: `${
+      typeof monitor.throttling !== 'boolean'
+        ? monitor.throttling?.latency
+        : defaultFields[ConfigKey.LATENCY]
+    }`,
     [ConfigKey.IGNORE_HTTPS_ERRORS]:
       monitor.ignoreHTTPSErrors || defaultFields[ConfigKey.IGNORE_HTTPS_ERRORS],
     [ConfigKey.SCREENSHOTS]: monitor.screenshot || defaultFields[ConfigKey.SCREENSHOTS],
@@ -81,5 +86,6 @@ export const getNormalizeBrowserFields = ({
       ...normalizedFields,
     },
     unsupportedKeys: [],
+    errors,
   };
 };

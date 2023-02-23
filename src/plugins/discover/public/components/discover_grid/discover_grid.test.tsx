@@ -21,6 +21,9 @@ import { getDocId } from '../../utils/get_doc_id';
 import { EsHitRecord } from '../../types';
 
 function getProps() {
+  const services = discoverServiceMock;
+  services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn().mockReturnValue(true);
+
   return {
     ariaLabelledBy: '',
     columns: [],
@@ -42,6 +45,7 @@ function getProps() {
     showTimeCol: true,
     sort: [],
     useNewFieldsApi: true,
+    services,
   };
 }
 

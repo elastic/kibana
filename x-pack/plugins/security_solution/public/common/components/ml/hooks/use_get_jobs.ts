@@ -28,6 +28,7 @@ export interface UseGetInstalledJobReturn {
   isLicensed: boolean;
 }
 
+// TODO react-query
 export const useGetInstalledJob = (jobIds: string[]): UseGetInstalledJobReturn => {
   const [jobs, setJobs] = useState<CombinedJobWithStats[]>([]);
   const { addError } = useAppToasts();

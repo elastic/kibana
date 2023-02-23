@@ -8,11 +8,11 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-plugin/public';
 import { AlertDropdown } from '../../alerting/log_threshold';
-import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
@@ -62,8 +62,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
   return (
     <>
-      <DocumentTitle title={pageTitle} />
-
       <HelpCenterContent feedbackLink={feedbackLinkUrl} appName={pageTitle} />
 
       {setHeaderActionMenu && theme$ && (

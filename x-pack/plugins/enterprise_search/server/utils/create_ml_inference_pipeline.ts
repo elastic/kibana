@@ -5,114 +5,12 @@
  * 2.0.
  */
 
-import { IngestGetPipelineResponse, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { ErrorCode } from '../../common/types/error_codes';
+import type { AttachMlInferencePipelineResponse } from '../../common/types/pipelines';
 
-import { formatMlPipelineBody } from '../lib/pipelines/create_pipeline_definitions';
-
-import {
-  getInferencePipelineNameFromIndexName,
-  getPrefixedInferencePipelineProcessorName,
-} from './ml_inference_pipeline_utils';
-
-/**
- * Details of a created pipeline.
- */
-export interface CreatedPipeline {
-  id: string;
-  created?: boolean;
-  addedToParentPipeline?: boolean;
-}
-
-/**
- * Creates a Machine Learning Inference pipeline with the given settings, if it doesn't exist yet,
- * then references it in the "parent" ML Inference pipeline that is associated with the index.
- * @param indexName name of the index this pipeline corresponds to.
- * @param pipelineName pipeline name set by the user.
- * @param modelId model ID selected by the user.
- * @param sourceField The document field that model will read.
- * @param destinationField The document field that the model will write to.
- * @param esClient the Elasticsearch Client to use when retrieving pipeline and model details.
- */
-export const createAndReferenceMlInferencePipeline = async (
-  indexName: string,
-  pipelineName: string,
-  modelId: string,
-  sourceField: string,
-  destinationField: string,
-  esClient: ElasticsearchClient
-): Promise<CreatedPipeline> => {
-  const createPipelineResult = await createMlInferencePipeline(
-    pipelineName,
-    modelId,
-    sourceField,
-    destinationField || modelId,
-    esClient
-  );
-
-  const addSubPipelineResult = await addSubPipelineToIndexSpecificMlPipeline(
-    indexName,
-    createPipelineResult.id,
-    esClient
-  );
-
-  return Promise.resolve({
-    ...createPipelineResult,
-    addedToParentPipeline: addSubPipelineResult.addedToParentPipeline,
-  });
-};
-
-/**
- * Creates a Machine Learning Inference pipeline with the given settings, if it doesn't exist yet.
- * @param pipelineName pipeline name set by the user.
- * @param modelId model ID selected by the user.
- * @param sourceField The document field that model will read.
- * @param destinationField The document field that the model will write to.
- * @param esClient the Elasticsearch Client to use when retrieving pipeline and model details.
- */
-export const createMlInferencePipeline = async (
-  pipelineName: string,
-  modelId: string,
-  sourceField: string,
-  destinationField: string,
-  esClient: ElasticsearchClient
-): Promise<CreatedPipeline> => {
-  const inferencePipelineGeneratedName = getPrefixedInferencePipelineProcessorName(pipelineName);
-
-  // Check that a pipeline with the same name doesn't already exist
-  let pipelineByName: IngestGetPipelineResponse | undefined;
-  try {
-    pipelineByName = await esClient.ingest.getPipeline({
-      id: inferencePipelineGeneratedName,
-    });
-  } catch (error) {
-    // Silently swallow error
-  }
-  if (pipelineByName?.[inferencePipelineGeneratedName]) {
-    throw new Error(ErrorCode.PIPELINE_ALREADY_EXISTS);
-  }
-
-  // Generate pipeline with default processors
-  const mlInferencePipeline = await formatMlPipelineBody(
-    inferencePipelineGeneratedName,
-    modelId,
-    sourceField,
-    destinationField,
-    esClient
-  );
-
-  await esClient.ingest.putPipeline({
-    id: inferencePipelineGeneratedName,
-    ...mlInferencePipeline,
-  });
-
-  return Promise.resolve({
-    id: inferencePipelineGeneratedName,
-    created: true,
-  });
-};
+import { getInferencePipelineNameFromIndexName } from './ml_inference_pipeline_utils';
 
 /**
  * Adds the supplied a Machine Learning Inference pipeline reference to the "parent" ML Inference
@@ -125,7 +23,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   indexName: string,
   pipelineName: string,
   esClient: ElasticsearchClient
-): Promise<CreatedPipeline> => {
+): Promise<AttachMlInferencePipelineResponse> => {
   const parentPipelineId = getInferencePipelineNameFromIndexName(indexName);
 
   // Fetch the parent pipeline
@@ -142,8 +40,8 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   // Verify the parent pipeline exists with a processors array
   if (!parentPipeline?.processors) {
     return Promise.resolve({
-      id: pipelineName,
       addedToParentPipeline: false,
+      id: pipelineName,
     });
   }
 
@@ -154,8 +52,8 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   );
   if (existingSubPipeline) {
     return Promise.resolve({
-      id: pipelineName,
       addedToParentPipeline: false,
+      id: pipelineName,
     });
   }
 
@@ -172,7 +70,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   });
 
   return Promise.resolve({
-    id: pipelineName,
     addedToParentPipeline: true,
+    id: pipelineName,
   });
 };

@@ -5,10 +5,11 @@
  * 2.0.
  */
 import type { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { EntityType, TimelineId } from '@kbn/timelines-plugin/common';
+import { EntityType } from '@kbn/timelines-plugin/common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { TimelineId } from '../../../../../../common/types';
 import { useHostIsolationTools } from '../use_host_isolation_tools';
 import { FlyoutHeaderContent } from './header';
 import { FlyoutBody } from './body';
@@ -78,7 +79,7 @@ export const useToGetInternalFlyout = () => {
           loading={isLoading || loading}
           rawEventData={rawEventData}
           showAlertDetails={showAlertDetails}
-          timelineId={TimelineId.casePage}
+          scopeId={TimelineId.casePage}
           isReadOnly={false}
         />
       );
@@ -106,6 +107,7 @@ export const useToGetInternalFlyout = () => {
         <FlyoutHeaderContent
           isHostIsolationPanelOpen={isHostIsolationPanelOpen}
           isAlert={isAlert}
+          eventId={alertId}
           isolateAction={isolateAction}
           loading={isLoading || loading}
           ruleName={ruleName}
@@ -116,6 +118,7 @@ export const useToGetInternalFlyout = () => {
     },
     [
       isAlert,
+      alertId,
       isHostIsolationPanelOpen,
       isolateAction,
       loading,
@@ -138,7 +141,7 @@ export const useToGetInternalFlyout = () => {
           isReadOnly={false}
           loadingEventDetails={isLoading || loading}
           onAddIsolationStatusClick={showHostIsolationPanel}
-          timelineId={TimelineId.casePage}
+          scopeId={TimelineId.casePage}
         />
       );
     },

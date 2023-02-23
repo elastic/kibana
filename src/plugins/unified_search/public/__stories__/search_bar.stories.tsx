@@ -22,7 +22,7 @@ const mockIndexPatterns = [
     title: 'logstash-*',
     fields: [
       {
-        name: 'response',
+        name: 'bytes',
         type: 'number',
         esTypes: ['integer'],
         aggregatable: true,
@@ -30,6 +30,7 @@ const mockIndexPatterns = [
         searchable: true,
       },
     ],
+    getName: () => 'logstash-*',
   },
   {
     id: '1235',
@@ -44,6 +45,7 @@ const mockIndexPatterns = [
         searchable: true,
       },
     ],
+    getName: () => 'test-*',
   },
 ] as DataView[];
 
@@ -162,6 +164,11 @@ const services = {
       ],
     },
   },
+  dataViewEditor: {
+    userPermissions: {
+      editDataView: action('editDataView'),
+    },
+  },
 };
 
 setIndexPatterns({
@@ -173,7 +180,6 @@ function wrapSearchBarInContext(testProps: SearchBarProps<Query>) {
     appName: 'test',
     timeHistory: mockTimeHistory,
     intl: null as any,
-    showQueryBar: true,
     showFilterBar: true,
     showDatePicker: true,
     showAutoRefreshOnly: false,
@@ -289,6 +295,15 @@ storiesOf('SearchBar', module)
       showDatePicker: false,
       showFilterBar: false,
       showQueryInput: true,
+      query: { query: 'Test: miaou', language: 'kuery' },
+    } as unknown as SearchBarProps)
+  )
+  .add('with query menu off', () =>
+    wrapSearchBarInContext({
+      showDatePicker: false,
+      showFilterBar: false,
+      showQueryInput: true,
+      showQueryMenu: false,
       query: { query: 'Test: miaou', language: 'kuery' },
     } as unknown as SearchBarProps)
   )

@@ -1,0 +1,20 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-storybook-mock",
+    "@kbn/shared-ux-markdown-types"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

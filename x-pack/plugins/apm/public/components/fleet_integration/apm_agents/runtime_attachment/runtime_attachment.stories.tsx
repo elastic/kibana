@@ -118,7 +118,6 @@ const policy = {
   namespace: 'default',
   policy_id: 'policy-elastic-agent-on-cloud',
   enabled: true,
-  output_id: '',
   inputs: [
     {
       type: 'apm',
@@ -341,7 +340,6 @@ const newPolicy = {
   namespace: 'default',
   policy_id: 'policy-elastic-agent-on-cloud',
   enabled: true,
-  output_id: '',
   package: {
     name: 'apm',
     title: 'Elastic APM',

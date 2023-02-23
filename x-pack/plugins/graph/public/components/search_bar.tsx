@@ -98,11 +98,11 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { services, overlays } = kibana;
   const {
-    savedObjects,
     uiSettings,
     appName,
     unifiedSearch,
     data,
+    dataViews,
     storage,
     notifications,
     http,
@@ -131,8 +131,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
               data-test-subj="graphDatasourceButton"
               onClick={() => {
                 confirmWipeWorkspace(
-                  () =>
-                    openSourceModal({ overlays, savedObjects, uiSettings }, onIndexPatternSelected),
+                  () => openSourceModal({ overlays, http, uiSettings }, onIndexPatternSelected),
                   i18n.translate('xpack.graph.clearWorkspace.confirmText', {
                     defaultMessage:
                       'If you change data sources, your current fields and vertices will be reset.',
@@ -176,6 +175,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
             deps={{
               unifiedSearch,
               data,
+              dataViews,
               storage,
               notifications,
               http,

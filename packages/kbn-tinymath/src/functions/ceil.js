@@ -17,11 +17,11 @@
  * ceil([1.1, 2.2, 3.3]) // returns [2, 3, 4]
  */
 
-module.exports = { ceil };
-
 function ceil(a) {
   if (Array.isArray(a)) {
     return a.map((a) => Math.ceil(a));
   }
   return Math.ceil(a);
 }
+
+module.exports = { ceil };

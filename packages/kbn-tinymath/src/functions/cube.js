@@ -18,8 +18,7 @@ const { pow } = require('./pow');
  * cube([3, 4, 5]) // returns [27, 64, 125]
  */
 
-module.exports = { cube };
-
 function cube(a) {
   return pow(a, 3);
 }
+module.exports = { cube };

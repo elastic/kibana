@@ -20,11 +20,11 @@ import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_d
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
+import { TimeseriesChartWithContext } from '../../shared/charts/timeseries_chart_with_context';
 import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
 import {
   ChartType,
@@ -47,7 +47,10 @@ export function ServiceOverviewThroughputChart({
 }) {
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { environment } = useEnvironmentsContext();
 
@@ -152,7 +155,7 @@ export function ServiceOverviewThroughputChart({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <TimeseriesChart
+      <TimeseriesChartWithContext
         id="throughput"
         height={height}
         showAnnotations={false}

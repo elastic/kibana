@@ -8,36 +8,14 @@
 import Boom from '@hapi/boom';
 import pMap from 'p-map';
 
-import { SavedObject } from '@kbn/core/server';
-import { Actions, ActionTypes, CommentAttributes } from '../../../common/api';
+import type { SavedObject } from '@kbn/core/server';
+import type { CommentAttributes } from '../../../common/api';
+import { Actions, ActionTypes } from '../../../common/api';
 import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
-import { CasesClientArgs } from '../types';
+import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
-
-/**
- * Parameters for deleting all comments of a case.
- */
-export interface DeleteAllArgs {
-  /**
-   * The case ID to delete all attachments for
-   */
-  caseID: string;
-}
-
-/**
- * Parameters for deleting a single attachment of a case.
- */
-export interface DeleteArgs {
-  /**
-   * The case ID to delete an attachment from
-   */
-  caseID: string;
-  /**
-   * The attachment ID to delete
-   */
-  attachmentID: string;
-}
+import type { DeleteAllArgs, DeleteArgs } from './types';
 
 /**
  * Delete all comments for a case.
@@ -50,7 +28,6 @@ export async function deleteAll(
 ): Promise<void> {
   const {
     user,
-    unsecuredSavedObjectsClient,
     services: { caseService, attachmentService, userActionService },
     logger,
     authorization,
@@ -75,7 +52,6 @@ export async function deleteAll(
 
     const mapper = async (comment: SavedObject<CommentAttributes>) =>
       attachmentService.delete({
-        unsecuredSavedObjectsClient,
         attachmentId: comment.id,
         refresh: false,
       });
@@ -85,8 +61,7 @@ export async function deleteAll(
       concurrency: MAX_CONCURRENT_SEARCHES,
     });
 
-    await userActionService.bulkCreateAttachmentDeletion({
-      unsecuredSavedObjectsClient,
+    await userActionService.creator.bulkCreateAttachmentDeletion({
       caseId: caseID,
       attachments: comments.saved_objects.map((comment) => ({
         id: comment.id,
@@ -115,15 +90,13 @@ export async function deleteComment(
 ) {
   const {
     user,
-    unsecuredSavedObjectsClient,
     services: { attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    const myComment = await attachmentService.get({
-      unsecuredSavedObjectsClient,
+    const myComment = await attachmentService.getter.get({
       attachmentId: attachmentID,
     });
 
@@ -145,15 +118,13 @@ export async function deleteComment(
     }
 
     await attachmentService.delete({
-      unsecuredSavedObjectsClient,
       attachmentId: attachmentID,
       refresh: false,
     });
 
-    await userActionService.createUserAction({
+    await userActionService.creator.createUserAction({
       type: ActionTypes.comment,
       action: Actions.delete,
-      unsecuredSavedObjectsClient,
       caseId: id,
       attachmentId: attachmentID,
       payload: { attachment: { ...myComment.attributes } },

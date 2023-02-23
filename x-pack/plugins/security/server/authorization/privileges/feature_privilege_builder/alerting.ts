@@ -17,8 +17,16 @@ enum AlertingEntity {
 }
 
 const readOperations: Record<AlertingEntity, string[]> = {
-  rule: ['get', 'getRuleState', 'getAlertSummary', 'getExecutionLog', 'find'],
-  alert: ['get', 'find', 'getAuthorizedAlertsIndices'],
+  rule: [
+    'get',
+    'getRuleState',
+    'getAlertSummary',
+    'getExecutionLog',
+    'find',
+    'getRuleExecutionKPI',
+    'runSoon',
+  ],
+  alert: ['get', 'find', 'getAuthorizedAlertsIndices', 'getAlertSummary'],
 };
 
 const writeOperations: Record<AlertingEntity, string[]> = {
@@ -35,6 +43,9 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'unmuteAlert',
     'snooze',
     'bulkEdit',
+    'bulkDelete',
+    'bulkEnable',
+    'bulkDisable',
     'unsnooze',
   ],
   alert: ['update'],

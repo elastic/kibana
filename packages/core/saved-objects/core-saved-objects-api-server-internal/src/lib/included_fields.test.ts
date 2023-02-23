@@ -20,6 +20,7 @@ describe('getRootFields', () => {
         "migrationVersion",
         "coreMigrationVersion",
         "updated_at",
+        "created_at",
         "originId",
       ]
     `);

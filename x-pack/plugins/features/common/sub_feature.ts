@@ -16,8 +16,24 @@ export interface SubFeatureConfig {
   /** Display name for this sub-feature */
   name: string;
 
+  /**
+   * Whether or not this privilege should only be granted to `All Spaces *`. Should be used for features that do not
+   * support Spaces. Defaults to `false`.
+   */
+  requireAllSpaces?: boolean;
+
+  /**
+   * Optional message to display on the Role Management screen when configuring permissions for this feature.
+   */
+  privilegesTooltip?: string;
+
   /** Collection of privilege groups */
   privilegeGroups: readonly SubFeaturePrivilegeGroupConfig[];
+
+  /**
+   * An optional description that will appear as subtext underneath the sub-feature name
+   */
+  description?: string;
 }
 
 /**
@@ -88,6 +104,14 @@ export class SubFeature {
 
   public get privilegeGroups() {
     return this.config.privilegeGroups;
+  }
+
+  public get requireAllSpaces() {
+    return this.config.requireAllSpaces ?? false;
+  }
+
+  public get description() {
+    return this.config.description || '';
   }
 
   public toRaw() {

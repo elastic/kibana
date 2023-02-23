@@ -8,6 +8,8 @@ import expect from '@kbn/expect';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { ValuesType } from 'utility-types';
+import { DependencyOperation } from '@kbn/apm-plugin/server/routes/dependencies/get_top_dependency_operations';
+import { meanBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 import { generateOperationData, generateOperationDataConfig } from './generate_operation_data';
@@ -37,10 +39,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     dependencyName,
     environment = ENVIRONMENT_ALL.value,
     kuery = '',
+    searchServiceDestinationMetrics = false,
   }: {
     dependencyName: string;
     environment?: string;
     kuery?: string;
+    searchServiceDestinationMetrics?: boolean;
   }) {
     return await apmApiClient
       .readUser({
@@ -52,6 +56,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             environment,
             kuery,
             dependencyName,
+            searchServiceDestinationMetrics,
           },
         },
       })
@@ -208,6 +213,61 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(searchOperation).not.to.be.ok();
         expect(bulkOperation).to.be.ok();
+      });
+    });
+
+    describe('Compare span metrics and span events', () => {
+      let bulkOperationSpanEventsResponse: ValuesType<TopOperations>;
+      let bulkOperationSpanMetricsResponse: ValuesType<TopOperations>;
+
+      before(async () => {
+        const [spanEventsResponse, spanMetricsResponse] = await Promise.all([
+          callApi({ dependencyName: 'elasticsearch', searchServiceDestinationMetrics: false }),
+          callApi({ dependencyName: 'elasticsearch', searchServiceDestinationMetrics: true }),
+        ]);
+        function findBulkOperation(op: DependencyOperation) {
+          return op.spanName === '/_bulk';
+        }
+        bulkOperationSpanEventsResponse = spanEventsResponse.find(findBulkOperation)!;
+        bulkOperationSpanMetricsResponse = spanMetricsResponse.find(findBulkOperation)!;
+      });
+
+      it('returns same latency', () => {
+        expect(bulkOperationSpanEventsResponse.latency).to.eql(
+          bulkOperationSpanMetricsResponse.latency
+        );
+
+        const meanSpanMetrics = meanBy(
+          bulkOperationSpanEventsResponse.timeseries.latency.filter(({ y }) => y !== null),
+          'y'
+        );
+        const meanSpanEvents = meanBy(
+          bulkOperationSpanMetricsResponse.timeseries.latency.filter(({ y }) => y !== null),
+          'y'
+        );
+        expect(meanSpanMetrics).to.eql(meanSpanEvents);
+      });
+
+      it('returns same throughput', () => {
+        expect(bulkOperationSpanEventsResponse.throughput).to.eql(
+          bulkOperationSpanMetricsResponse.throughput
+        );
+
+        const meanSpanMetrics = meanBy(
+          bulkOperationSpanEventsResponse.timeseries.throughput.filter(({ y }) => y !== 0),
+          'y'
+        );
+        const meanSpanEvents = meanBy(
+          bulkOperationSpanMetricsResponse.timeseries.throughput.filter(({ y }) => y !== 0),
+          'y'
+        );
+        expect(meanSpanMetrics).to.eql(meanSpanEvents);
+      });
+
+      it('returns same impact', () => {
+        expect(bulkOperationSpanEventsResponse.impact).to.eql(
+          bulkOperationSpanMetricsResponse.impact
+        );
       });
     });
   });

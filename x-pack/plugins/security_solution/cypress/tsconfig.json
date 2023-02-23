@@ -8,7 +8,6 @@
     "target/**/*"
   ],
   "compilerOptions": {
-    "target": "ES2019",
     "outDir": "target/types",
     "types": [
       "cypress",
@@ -17,7 +16,17 @@
       "node",
     ],
   },
-  "references": [
-    { "path": "../tsconfig.json" }
+  "kbn_references": [
+    "@kbn/securitysolution-io-ts-alerting-types",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/cypress-config",
+    // this cypress project uses code from the parent ts project
+    // in a way that can't be auto-matically deteceted at this time
+    // so we have to force the inclusion of this reference
+    {
+      "path": "../tsconfig.json",
+      "force": true
+    },
+    "@kbn/rison"
   ]
 }

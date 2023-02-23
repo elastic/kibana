@@ -361,7 +361,7 @@ describe('ES deprecation logs', () => {
 
     describe('Poll for logs count', () => {
       beforeEach(async () => {
-        jest.useFakeTimers();
+        jest.useFakeTimers({ legacyFakeTimers: true });
 
         // First request should make the step be complete
         httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({

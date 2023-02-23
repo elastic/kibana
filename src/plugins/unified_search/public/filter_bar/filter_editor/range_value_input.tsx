@@ -29,6 +29,7 @@ interface Props {
   intl: InjectedIntl;
   fullWidth?: boolean;
   compressed?: boolean;
+  disabled?: boolean;
 }
 
 export function isRangeParams(params: any): params is RangeParams {
@@ -37,12 +38,13 @@ export function isRangeParams(params: any): params is RangeParams {
 
 function RangeValueInputUI(props: Props) {
   const kibana = useKibana();
-  const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
 
   const formatDateChange = (value: string | number | boolean) => {
     if (typeof value !== 'string' && typeof value !== 'number') return value;
 
-    const momentParsedValue = moment(value).tz(tzConfig);
+    const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
+    const tz = !tzConfig || tzConfig === 'Browser' ? moment.tz.guess() : tzConfig;
+    const momentParsedValue = moment(value).tz(tz);
     if (momentParsedValue.isValid()) return momentParsedValue?.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
 
     return value;
@@ -65,6 +67,7 @@ function RangeValueInputUI(props: Props) {
   return (
     <div>
       <EuiFormControlLayoutDelimited
+        compressed={props.compressed}
         fullWidth={props.fullWidth}
         aria-label={props.intl.formatMessage({
           id: 'unifiedSearch.filter.filterEditor.rangeInputLabel',
@@ -82,8 +85,10 @@ function RangeValueInputUI(props: Props) {
             }}
             placeholder={props.intl.formatMessage({
               id: 'unifiedSearch.filter.filterEditor.rangeStartInputPlaceholder',
-              defaultMessage: 'Start of the range',
+              defaultMessage: 'Start',
             })}
+            disabled={props.disabled}
+            dataTestSubj="range-start"
           />
         }
         endControl={
@@ -98,8 +103,10 @@ function RangeValueInputUI(props: Props) {
             }}
             placeholder={props.intl.formatMessage({
               id: 'unifiedSearch.filter.filterEditor.rangeEndInputPlaceholder',
-              defaultMessage: 'End of the range',
+              defaultMessage: 'End',
             })}
+            disabled={props.disabled}
+            dataTestSubj="range-end"
           />
         }
       />

@@ -23,7 +23,12 @@ export function buildQueryFromKuery(
   { allowLeadingWildcards = false }: { allowLeadingWildcards?: boolean } = {
     allowLeadingWildcards: false,
   },
-  { filtersInMustClause = false, dateFormatTZ, nestedIgnoreUnmapped }: KueryQueryOptions = {
+  {
+    filtersInMustClause = false,
+    dateFormatTZ,
+    nestedIgnoreUnmapped,
+    caseInsensitive,
+  }: KueryQueryOptions = {
     filtersInMustClause: false,
   }
 ): BoolQuery {
@@ -35,6 +40,7 @@ export function buildQueryFromKuery(
     filtersInMustClause,
     dateFormatTZ,
     nestedIgnoreUnmapped,
+    caseInsensitive,
   });
 }
 

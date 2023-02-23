@@ -22,5 +22,19 @@ describe('upgrade handler', () => {
     it('should not throw if upgrade version is equal to kibana version with snapshot', () => {
       expect(() => checkKibanaVersion('8.4.0', '8.4.0-SNAPSHOT')).not.toThrowError();
     });
+
+    it('should not throw if force is specified and patch is newer', () => {
+      expect(() => checkKibanaVersion('8.4.1', '8.4.0', true)).not.toThrowError();
+      expect(() => checkKibanaVersion('8.4.1-SNAPSHOT', '8.4.0', true)).not.toThrowError();
+    });
+
+    it('should throw if force is specified and minor is newer', () => {
+      expect(() => checkKibanaVersion('8.5.0', '8.4.0', true)).toThrowError();
+    });
+
+    it('should not throw if force is specified and major and minor is newer', () => {
+      expect(() => checkKibanaVersion('7.5.0', '8.4.0', true)).not.toThrowError();
+      expect(() => checkKibanaVersion('8.4.0', '8.4.0', true)).not.toThrowError();
+    });
   });
 });

@@ -4,22 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CoreStart, HttpFetchQuery } from '@kbn/core/public';
+import { HttpFetchQuery } from '@kbn/core/public';
 import { getRoutePaths } from '../common';
-import { ElasticFlameGraph } from '../common/flamegraph';
+import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
-import { StackFrameMetadata } from '../common/profiling';
 import { TopNResponse } from '../common/topn';
+import type { SetupDataCollectionInstructions } from '../server/lib/setup/get_setup_instructions';
+import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
 
 export interface Services {
   fetchTopN: (params: {
+    http: AutoAbortedHttpService;
     type: string;
     timeFrom: number;
     timeTo: number;
     kuery: string;
   }) => Promise<TopNResponse>;
   fetchTopNFunctions: (params: {
+    http: AutoAbortedHttpService;
     timeFrom: number;
     timeTo: number;
     startIndex: number;
@@ -27,96 +29,69 @@ export interface Services {
     kuery: string;
   }) => Promise<TopNFunctions>;
   fetchElasticFlamechart: (params: {
+    http: AutoAbortedHttpService;
     timeFrom: number;
     timeTo: number;
     kuery: string;
   }) => Promise<ElasticFlameGraph>;
-  fetchFrameInformation: (params: {
-    frameID: string;
-    executableID: string;
-  }) => Promise<StackFrameMetadata>;
+  fetchHasSetup: (params: {
+    http: AutoAbortedHttpService;
+  }) => Promise<{ has_setup: boolean; has_data: boolean }>;
+  postSetupResources: (params: { http: AutoAbortedHttpService }) => Promise<void>;
+  setupDataCollectionInstructions: (params: {
+    http: AutoAbortedHttpService;
+  }) => Promise<SetupDataCollectionInstructions>;
 }
 
-export function getServices(core: CoreStart): Services {
+export function getServices(): Services {
   const paths = getRoutePaths();
 
   return {
-    fetchTopN: async ({ type, timeFrom, timeTo, kuery }) => {
-      try {
-        const query: HttpFetchQuery = {
-          timeFrom,
-          timeTo,
-          kuery,
-        };
-        return await core.http.get(`${paths.TopN}/${type}`, { query });
-      } catch (e) {
-        return e;
-      }
+    fetchTopN: async ({ http, type, timeFrom, timeTo, kuery }) => {
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+      };
+      return (await http.get(`${paths.TopN}/${type}`, { query })) as Promise<TopNResponse>;
     },
 
-    fetchTopNFunctions: async ({
-      timeFrom,
-      timeTo,
-      startIndex,
-      endIndex,
-      kuery,
-    }: {
-      timeFrom: number;
-      timeTo: number;
-      startIndex: number;
-      endIndex: number;
-      kuery: string;
-    }) => {
-      try {
-        const query: HttpFetchQuery = {
-          timeFrom,
-          timeTo,
-          startIndex,
-          endIndex,
-          kuery,
-        };
-        return await core.http.get(paths.TopNFunctions, { query });
-      } catch (e) {
-        return e;
-      }
+    fetchTopNFunctions: async ({ http, timeFrom, timeTo, startIndex, endIndex, kuery }) => {
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        startIndex,
+        endIndex,
+        kuery,
+      };
+      return (await http.get(paths.TopNFunctions, { query })) as Promise<TopNFunctions>;
     },
 
-    fetchElasticFlamechart: async ({
-      timeFrom,
-      timeTo,
-      kuery,
-    }: {
-      timeFrom: number;
-      timeTo: number;
-      kuery: string;
-    }) => {
-      try {
-        const query: HttpFetchQuery = {
-          timeFrom,
-          timeTo,
-          kuery,
-        };
-        return await core.http.get(paths.Flamechart, { query });
-      } catch (e) {
-        return e;
-      }
+    fetchElasticFlamechart: async ({ http, timeFrom, timeTo, kuery }) => {
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+      };
+      const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
+      return createFlameGraph(baseFlamegraph);
     },
-    fetchFrameInformation: async ({
-      frameID,
-      executableID,
-    }: {
-      frameID: string;
-      executableID: string;
-    }) => {
-      try {
-        const query: HttpFetchQuery = {
-          frameID,
-          executableID,
-        };
-        return await core.http.get(paths.FrameInformation, { query });
-      } catch (e) {
-        return e;
-      }
+    fetchHasSetup: async ({ http }) => {
+      const hasSetup = (await http.get(paths.HasSetupESResources, {})) as {
+        has_setup: boolean;
+        has_data: boolean;
+      };
+      return hasSetup;
+    },
+    postSetupResources: async ({ http }) => {
+      await http.post(paths.HasSetupESResources, {});
+    },
+    setupDataCollectionInstructions: async ({ http }) => {
+      const instructions = (await http.get(
+        paths.SetupDataCollectionInstructions,
+        {}
+      )) as SetupDataCollectionInstructions;
+      return instructions;
     },
   };
 }

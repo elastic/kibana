@@ -26,6 +26,7 @@ Object {
   "as": "legacyMetricVis",
   "type": "render",
   "value": Object {
+    "canNavigateToLens": false,
     "visConfig": Object {
       "dimensions": Object {
         "metrics": Array [

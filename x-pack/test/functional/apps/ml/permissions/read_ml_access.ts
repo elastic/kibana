@@ -88,8 +88,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await ml.commonUI.waitForDatePickerIndicatorLoaded();
 
             await ml.testExecution.logTestStep('should display a welcome callout');
-            await ml.overviewPage.assertGettingStartedCalloutVisible(true);
-            await ml.overviewPage.dismissGettingStartedCallout();
 
             await ml.testExecution.logTestStep('should not display ML Nodes panel');
             await ml.mlNodesPanel.assertNodesOverviewPanelExists(false);
@@ -106,7 +104,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           it('should redirect to the Overview page from the unrecognized routes', async () => {
-            await PageObjects.common.navigateToUrl('ml', 'magic-ai');
+            await PageObjects.common.navigateToUrl('ml', 'magic-ai', {
+              shouldUseHashForSubUrl: false,
+              insertTimestamp: false,
+            });
 
             await ml.testExecution.logTestStep('should display a warning banner');
             await ml.overviewPage.assertPageNotFoundBannerText('magic-ai');

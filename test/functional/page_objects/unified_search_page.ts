@@ -12,13 +12,22 @@ export class UnifiedSearchPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
+  private readonly comboBox = this.ctx.getService('comboBox');
 
-  public async switchDataView(switchButtonSelector: string, dataViewTitle: string) {
+  public async switchDataView(
+    switchButtonSelector: string,
+    dataViewTitle: string,
+    transitionFromTextBasedLanguages?: boolean
+  ) {
     await this.testSubjects.click(switchButtonSelector);
 
     const indexPatternSwitcher = await this.testSubjects.find('indexPattern-switcher', 500);
     await this.testSubjects.setValue('indexPattern-switcher--input', dataViewTitle);
     await (await indexPatternSwitcher.findByCssSelector(`[title="${dataViewTitle}"]`)).click();
+
+    if (Boolean(transitionFromTextBasedLanguages)) {
+      await this.testSubjects.click('unifiedSearch_switch_noSave');
+    }
 
     await this.retry.waitFor(
       'wait for updating switcher',
@@ -52,9 +61,24 @@ export class UnifiedSearchPageObject extends FtrService {
     await (await this.find.byClassName('indexPatternEditor__form')).click();
   }
 
-  public async createNewDataView(dataViewName: string, adHoc = false, hasTimeField = false) {
+  public async clickEditDataView() {
+    await this.retry.waitForWithTimeout('data create new to be visible', 15000, async () => {
+      return await this.testSubjects.isDisplayed('indexPattern-manage-field');
+    });
+    await this.testSubjects.click('indexPattern-manage-field');
+    await this.retry.waitForWithTimeout(
+      'index pattern editor form to be visible',
+      15000,
+      async () => {
+        return await (await this.find.byClassName('indexPatternEditor__form')).isDisplayed();
+      }
+    );
+    await (await this.find.byClassName('indexPatternEditor__form')).click();
+  }
+
+  public async createNewDataView(dataViewPattern: string, adHoc = false, hasTimeField = false) {
     await this.clickCreateNewDataView();
-    await this.testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
+    await this.testSubjects.setValue('createIndexPatternTitleInput', dataViewPattern, {
       clearWithKeyboard: true,
       typeCharByChar: true,
     });
@@ -65,5 +89,35 @@ export class UnifiedSearchPageObject extends FtrService {
         : true;
     });
     await this.testSubjects.click(adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton');
+  }
+
+  public async editDataView(newPattern?: string, newTimeField?: string) {
+    await this.clickEditDataView();
+    if (newPattern) {
+      await this.testSubjects.setValue('createIndexPatternTitleInput', newPattern, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+    }
+    if (newTimeField) {
+      await this.comboBox.set('timestampField', newTimeField);
+    }
+    await this.testSubjects.click('saveIndexPatternButton');
+    if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+      await this.testSubjects.click('confirmModalConfirmButton');
+    }
+  }
+
+  public async isAdHocDataView() {
+    const dataViewSwitcher = await this.testSubjects.find('discover-dataView-switch-link');
+    const dataViewName = await dataViewSwitcher.getVisibleText();
+    await dataViewSwitcher.click();
+    return await this.testSubjects.exists(`dataViewItemTempBadge-${dataViewName}`);
+  }
+
+  public async selectTextBasedLanguage(language: string) {
+    await this.find.clickByCssSelector(
+      `[data-test-subj="text-based-languages-switcher"] [title="${language}"]`
+    );
   }
 }

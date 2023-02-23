@@ -24,6 +24,7 @@ import { DataViewBase } from '@kbn/es-query';
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
 import { BuilderEntryItem } from './entry_renderer';
+import { EntryFieldError } from './reducer';
 
 const MyBeautifulLine = styled(EuiFlexItem)`
   &:after {
@@ -58,11 +59,12 @@ interface BuilderExceptionListItemProps {
   ) => DataViewBase;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
-  setErrorsExist: (arg: boolean) => void;
+  setErrorsExist: (arg: EntryFieldError) => void;
   setWarningsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
+  allowCustomOptions?: boolean;
 }
 
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
@@ -85,6 +87,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     onlyShowListOperators = false,
     isDisabled = false,
     operatorsList,
+    allowCustomOptions = false,
   }) => {
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
@@ -117,9 +120,9 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     const entries = useMemo((): FormattedBuilderEntry[] => {
       const hasIndexPatternAndEntries = indexPattern != null && exceptionItem.entries.length > 0;
       return hasIndexPatternAndEntries
-        ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries)
+        ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries, allowCustomOptions)
         : [];
-    }, [exceptionItem.entries, indexPattern]);
+    }, [exceptionItem.entries, indexPattern, allowCustomOptions]);
 
     return (
       <EuiFlexItem>
@@ -157,6 +160,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                             exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
                           }
                           operatorsList={operatorsList}
+                          allowCustomOptions={allowCustomOptions}
                         />
                       </MyOverflowContainer>
                       <BuilderEntryDeleteButtonComponent

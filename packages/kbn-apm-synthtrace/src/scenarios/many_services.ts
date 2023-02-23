@@ -6,41 +6,49 @@
  * Side Public License, v 1.
  */
 
-import { random } from 'lodash';
-
-import { apm, timerange } from '../..';
-import { Instance } from '../lib/apm/instance';
+import { ApmFields, apm, Instance } from '@kbn/apm-synthtrace-client';
+import { flatten, random } from 'lodash';
 import { Scenario } from '../cli/scenario';
-import { getLogger } from '../cli/utils/get_common_services';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
-import { ApmFields } from '../lib/apm/apm_fields';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
-  const logger = getLogger(runOptions);
-
+const scenario: Scenario<ApmFields> = async ({ logger }) => {
   const numServices = 500;
   const languages = ['go', 'dotnet', 'java', 'python'];
   const services = ['web', 'order-processing', 'api-backend', 'proxy'];
+  const agentVersions: Record<string, string[]> = {
+    go: ['2.1.0', '2.0.0', '1.15.0', '1.14.0', '1.13.1'],
+    dotnet: ['1.18.0', '1.17.0', '1.16.1', '1.16.0', '1.15.0'],
+    java: ['1.34.1', '1.34.0', '1.33.0', '1.32.0', '1.32.0'],
+    python: ['6.12.0', '6.11.0', '6.10.2', '6.10.1', '6.10.0'],
+  };
 
   return {
-    generate: ({ from, to }) => {
-      const range = timerange(from, to);
-
+    generate: ({ range }) => {
       const successfulTimestamps = range.ratePerMinute(180);
 
-      const instances = [...Array(numServices).keys()].map((index) =>
-        apm
-          .service({
-            name: `${services[index % services.length]}-${
-              languages[index % languages.length]
-            }-${index}`,
-            environment: ENVIRONMENT,
-            agentName: languages[index % languages.length],
-          })
-          .instance(`instance-${index}`)
+      const instances = flatten(
+        [...Array(numServices).keys()].map((index) => {
+          const language = languages[index % languages.length];
+          const agentLanguageVersions = agentVersions[language];
+
+          const numOfInstances = (index % 3) + 1;
+
+          return [...Array(numOfInstances).keys()].map((instanceIndex) =>
+            apm
+              .service({
+                name: `${services[index % services.length]}-${language}-${index}`,
+                environment: ENVIRONMENT,
+                agentName: language,
+              })
+              .instance(`instance-${index}-${instanceIndex}`)
+              .defaults({
+                'agent.version': agentLanguageVersions[index % agentLanguageVersions.length],
+                'service.language.name': language,
+              })
+          );
+        })
       );
 
       const urls = ['GET /order/{id}', 'POST /basket/{id}', 'DELETE /basket', 'GET /products'];
@@ -87,12 +95,11 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         return successfulTraceEvents;
       };
 
-      return instances
-        .flatMap((instance) => urls.map((url) => ({ instance, url })))
-        .map(({ instance, url }) =>
-          logger.perf('generating_apm_events', () => instanceSpans(instance, url))
-        )
-        .reduce((p, c) => p.merge(c));
+      return logger.perf('generating_apm_events', () =>
+        instances
+          .flatMap((instance) => urls.map((url) => ({ instance, url })))
+          .map(({ instance, url }) => instanceSpans(instance, url))
+      );
     },
   };
 };

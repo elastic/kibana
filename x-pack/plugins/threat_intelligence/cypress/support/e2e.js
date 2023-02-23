@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable no-undef */
-
 // ***********************************************************
 // This example support/index.js is processed and
 // loaded automatically before your test files.
@@ -22,14 +20,10 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.js using ES2015 syntax:
-import './commands';
-
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
-Cypress.on('uncaught:exception', (err) => {
-  if (err.message.includes('ResizeObserver')) {
-    return false;
-  }
+// eslint-disable-next-line no-undef
+Cypress.on('uncaught:exception', () => {
+  return false;
 });

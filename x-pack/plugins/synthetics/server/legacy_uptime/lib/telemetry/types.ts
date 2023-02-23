@@ -41,7 +41,7 @@ export interface MonitorErrorEvent {
   code?: string;
   status?: number;
   url?: string;
-  kibanaVersion: string;
+  stackVersion: string;
 }
 
 export interface MonitorUpdateTelemetryChannelEvents {

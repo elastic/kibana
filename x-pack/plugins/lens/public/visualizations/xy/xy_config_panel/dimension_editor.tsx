@@ -130,12 +130,6 @@ export function DataDimensionEditor(
   if (props.groupId === 'breakdown') {
     return (
       <>
-        <CollapseSetting
-          value={layer.collapseFn || ''}
-          onChange={(collapseFn) => {
-            setLocalState(updateLayer(localState, { ...layer, collapseFn }, index));
-          }}
-        />
         {!layer.collapseFn && (
           <PalettePicker
             palettes={props.paletteService}
@@ -216,4 +210,35 @@ export function DataDimensionEditor(
       </EuiFormRow>
     </>
   );
+}
+
+export function DataDimensionEditorDataSectionExtra(
+  props: VisualizationDimensionEditorProps<State> & {
+    formatFactory: FormatFactory;
+    paletteService: PaletteRegistry;
+  }
+) {
+  const { state, layerId } = props;
+  const index = state.layers.findIndex((l) => l.layerId === layerId);
+  const layer = state.layers[index] as XYDataLayerConfig;
+
+  const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
+    value: props.state,
+    onChange: props.setState,
+  });
+
+  if (props.groupId === 'breakdown') {
+    return (
+      <>
+        <CollapseSetting
+          value={layer.collapseFn || ''}
+          onChange={(collapseFn) => {
+            setLocalState(updateLayer(localState, { ...layer, collapseFn }, index));
+          }}
+        />
+      </>
+    );
+  }
+
+  return null;
 }

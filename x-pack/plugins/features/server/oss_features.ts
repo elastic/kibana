@@ -423,6 +423,78 @@ export const buildOSSFeatures = ({
       },
     },
     {
+      id: 'filesManagement',
+      name: i18n.translate('xpack.features.filesManagementFeatureName', {
+        defaultMessage: 'Files Management',
+      }),
+      order: 1600,
+      category: DEFAULT_APP_CATEGORIES.management,
+      app: ['kibana'],
+      catalogue: [],
+      management: {
+        kibana: ['filesManagement'],
+      },
+      privileges: {
+        all: {
+          app: ['kibana'],
+          management: {
+            kibana: ['filesManagement'],
+          },
+          savedObject: {
+            all: ['file', 'fileShare'],
+            read: [],
+          },
+          ui: [],
+          api: ['files:manageFiles', 'files:defaultImage'],
+        },
+        read: {
+          app: ['kibana'],
+          management: {
+            kibana: ['filesManagement'],
+          },
+          savedObject: {
+            all: [],
+            read: ['file', 'fileShare'],
+          },
+          ui: [],
+          api: ['files:manageFiles', 'files:defaultImage'],
+        },
+      },
+    },
+    {
+      id: 'filesSharedImage',
+      name: i18n.translate('xpack.features.filesSharedImagesFeatureName', {
+        defaultMessage: 'Shared images',
+      }),
+      order: 1600,
+      category: DEFAULT_APP_CATEGORIES.management,
+      app: ['kibana'],
+      catalogue: [],
+      privilegesTooltip: i18n.translate('xpack.features.filesSharedImagesPrivilegesTooltip', {
+        defaultMessage: 'Required to access images stored in Kibana.',
+      }),
+      privileges: {
+        all: {
+          app: ['kibana'],
+          savedObject: {
+            all: ['file'],
+            read: [],
+          },
+          ui: [],
+          api: ['files:defaultImage'],
+        },
+        read: {
+          app: ['kibana'],
+          savedObject: {
+            all: [],
+            read: ['file'],
+          },
+          ui: [],
+          api: ['files:defaultImage'],
+        },
+      },
+    },
+    {
       id: 'savedObjectsManagement',
       name: i18n.translate('xpack.features.savedObjectsManagementFeatureName', {
         defaultMessage: 'Saved Objects Management',

@@ -1,0 +1,17 @@
+[role="exclude",id="apis"]
+= APIs
+
+[partintro]
+--
+
+preview::[]
+
+These APIs are documented using the OpenAPI specification. The current supported
+version of the specification is 3.0. For more information, go to https://openapi-generator.tech/[OpenAPI Generator]
+
+--
+
+include::api-generated/cases/case-apis.asciidoc[]
+include::api-generated/connectors/connector-apis.asciidoc[]
+include::api-generated/machine-learning/ml-apis.asciidoc[]
+include::api-generated/rules/rule-apis.asciidoc[]

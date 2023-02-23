@@ -38,6 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('create jobs from lens', function () {
     this.tags(['ml']);
+    let jobId: string;
 
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -57,9 +58,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
     });
 
+    afterEach(async () => {
+      await ml.api.deleteAnomalyDetectionJobES(jobId);
+    });
+
     it('can create a single metric job from vis with single layer', async () => {
       const selectedPanelTitle = 'panel2';
-      const jobId = 'job_from_lens_1';
+      jobId = 'job_from_lens_1';
       const numberOfCompatibleLayers = 1;
       const layerIndex = 0;
 
@@ -67,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.lensVisualizations.clickCreateMLJobMenuAction();
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 
@@ -86,12 +91,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testExecution.logTestStep('pre-fills the job selection');
       await ml.jobSelection.assertJobSelection([jobId]);
 
-      await ml.api.deleteAnomalyDetectionJobES(jobId);
+      await ml.api.assertModelMemoryLimitForJob(jobId, '11mb');
     });
 
     it('can create multi metric job from vis with single layer', async () => {
       const selectedPanelTitle = 'panel1';
-      const jobId = 'job_from_lens_2';
+      jobId = 'job_from_lens_2';
       const numberOfCompatibleLayers = 1;
       const layerIndex = 0;
 
@@ -99,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.lensVisualizations.clickCreateMLJobMenuAction();
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 
@@ -118,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testExecution.logTestStep('pre-fills the job selection');
       await ml.jobSelection.assertJobSelection([jobId]);
 
-      await ml.api.deleteAnomalyDetectionJobES(jobId);
+      await ml.api.assertModelMemoryLimitForJob(jobId, '12mb');
     });
   });
 }

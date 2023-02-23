@@ -31,9 +31,7 @@ function PrecisionParamEditor({ agg, value, setValue }: AggParamEditorProps<numb
         min={1}
         max={services.uiSettings.get('visualization:tileMap:maxPrecision')}
         value={value || ''}
-        onChange={(ev: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) =>
-          setValue(Number(ev.currentTarget.value))
-        }
+        onChange={(ev) => setValue(Number(ev.currentTarget.value))}
         data-test-subj={`visEditorMapPrecision${agg.id}`}
         showValue
         compressed

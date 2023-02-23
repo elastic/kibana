@@ -11,17 +11,13 @@ import {
   RULE_SWITCH,
   SECOND_RULE,
   FOURTH_RULE,
-  RULES_TABLE,
-  pageSelector,
+  RULES_MANAGEMENT_TABLE,
   RULES_ROW,
 } from '../../screens/alerts_detection_rules';
 import {
   enableRule,
-  changeRowsPerPageTo,
-  goToPage,
-  sortByEnabledRules,
   waitForRulesTableToBeLoaded,
-  waitForRuleToChangeStatus,
+  waitForRuleToUpdate,
 } from '../../tasks/alerts_detection_rules';
 import { login, visit } from '../../tasks/login';
 
@@ -34,6 +30,8 @@ import {
   getNewRule,
   getNewThresholdRule,
 } from '../../objects/rule';
+import { goToTablePage, setRowsPerPageTo, sortByTableColumn } from '../../tasks/table_pagination';
+import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../screens/table_pagination';
 
 describe('Alerts detection rules', () => {
   before(() => {
@@ -50,14 +48,14 @@ describe('Alerts detection rules', () => {
     waitForRulesTableToBeLoaded();
 
     enableRule(SECOND_RULE);
-    waitForRuleToChangeStatus();
+    waitForRuleToUpdate();
     enableRule(FOURTH_RULE);
-    waitForRuleToChangeStatus();
+    waitForRuleToUpdate();
 
     cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
     cy.get(RULE_SWITCH).eq(FOURTH_RULE).should('have.attr', 'role', 'switch');
 
-    sortByEnabledRules();
+    sortByTableColumn('Enabled', 'desc');
 
     cy.get(RULE_SWITCH).eq(FIRST_RULE).should('have.attr', 'role', 'switch');
     cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
@@ -69,32 +67,23 @@ describe('Alerts detection rules', () => {
 
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
-    changeRowsPerPageTo(5);
+    setRowsPerPageTo(5);
 
-    const FIRST_PAGE_SELECTOR = pageSelector(1);
-    const SECOND_PAGE_SELECTOR = pageSelector(2);
+    cy.get(RULES_MANAGEMENT_TABLE).find(TABLE_FIRST_PAGE).should('have.attr', 'aria-current');
 
-    cy.get(RULES_TABLE)
-      .find(FIRST_PAGE_SELECTOR)
-      .should('have.class', 'euiPaginationButton-isActive');
-
-    cy.get(RULES_TABLE)
+    cy.get(RULES_MANAGEMENT_TABLE)
       .find(RULE_NAME)
       .first()
       .invoke('text')
       .then((ruleNameFirstPage) => {
-        goToPage(2);
+        goToTablePage(2);
         // Check that the rules table shows at least one row
-        cy.get(RULES_TABLE).find(RULES_ROW).should('have.length.gte', 1);
+        cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length.gte', 1);
         // Check that the rules table doesn't show the rule from the first page
-        cy.get(RULES_TABLE).should('not.contain', ruleNameFirstPage);
+        cy.get(RULES_MANAGEMENT_TABLE).should('not.contain', ruleNameFirstPage);
       });
 
-    cy.get(RULES_TABLE)
-      .find(FIRST_PAGE_SELECTOR)
-      .should('not.have.class', 'euiPaginationButton-isActive');
-    cy.get(RULES_TABLE)
-      .find(SECOND_PAGE_SELECTOR)
-      .should('have.class', 'euiPaginationButton-isActive');
+    cy.get(RULES_MANAGEMENT_TABLE).find(TABLE_FIRST_PAGE).should('not.have.attr', 'aria-current');
+    cy.get(RULES_MANAGEMENT_TABLE).find(TABLE_SECOND_PAGE).should('have.attr', 'aria-current');
   });
 });

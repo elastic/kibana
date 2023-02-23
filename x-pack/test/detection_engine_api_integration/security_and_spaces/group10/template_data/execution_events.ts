@@ -60,6 +60,7 @@ export const successfulExecution = [
       },
       alerting: {
         status: 'ok',
+        outcome: 'success',
       },
       server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
       version: '8.2.0',
@@ -445,6 +446,7 @@ export const failedGapExecution = [
       },
       alerting: {
         status: 'ok',
+        outcome: 'success',
       },
       server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
       version: '8.2.0',
@@ -508,6 +510,7 @@ export const partialWarningExecution = [
       },
       alerting: {
         status: 'ok',
+        outcome: 'success',
       },
       server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
       version: '8.2.0',
@@ -692,6 +695,7 @@ export const failedRanAfterDisabled = [
       },
       alerting: {
         status: 'error',
+        outcome: 'failure',
       },
       server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
       version: '8.3.0',

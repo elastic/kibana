@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,44 +19,74 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 
+import { useParams } from 'react-router-dom';
+import { getTestRunDetailLink } from '../../common/links/test_details_link';
+import { useSelectedLocation } from '../hooks/use_selected_location';
+import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 import {
   ConfigKey,
   DataStream,
   EncryptedSyntheticsSavedMonitor,
   Ping,
+  SyntheticsJourneyApiResponse,
 } from '../../../../../../common/runtime_types';
-import { checkIsStalePing } from '../../../utils/monitor_test_result/check_pings';
-import { formatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
+import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 
-import { useSyntheticsSettingsContext } from '../../../contexts';
-import { selectLatestPing, selectPingsLoading } from '../../../state';
+import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import { SinglePingResult } from '../../common/monitor_test_result/single_ping_result';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 
 import { useJourneySteps } from '../hooks/use_journey_steps';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 
 export const LastTestRun = () => {
-  const { euiTheme } = useEuiTheme();
-  const latestPing = useSelector(selectLatestPing);
-  const pingsLoading = useSelector(selectPingsLoading);
-  const { monitor } = useSelectedMonitor();
+  const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { data: stepsData, loading: stepsLoading } = useJourneySteps(
-    latestPing?.monitor?.check_group
+    latestPing?.monitor?.check_group,
+    lastRefresh
   );
 
-  const hasStalePings = checkIsStalePing(monitor, latestPing);
-  const loading = hasStalePings || stepsLoading || pingsLoading;
+  const loading = stepsLoading || pingsLoading;
 
   return (
-    <EuiPanel css={{ minHeight: 356 }}>
+    <LastTestRunComponent
+      stepsData={stepsData}
+      latestPing={latestPing}
+      loading={loading}
+      stepsLoading={stepsLoading}
+    />
+  );
+};
+
+export const LastTestRunComponent = ({
+  latestPing,
+  loading,
+  stepsData,
+  stepsLoading,
+  isErrorDetails = false,
+}: {
+  stepsLoading: boolean;
+  latestPing?: Ping;
+  loading: boolean;
+  stepsData: SyntheticsJourneyApiResponse;
+  isErrorDetails?: boolean;
+}) => {
+  const { monitor } = useSelectedMonitor();
+  const { euiTheme } = useEuiTheme();
+
+  const selectedLocation = useSelectedLocation();
+  const { basePath } = useSyntheticsSettingsContext();
+
+  return (
+    <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 356 }}>
       <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
-      {!loading && latestPing?.error ? (
+      {!(loading && !latestPing) && latestPing?.error ? (
         <EuiCallOut
           data-test-subj="monitorTestRunErrorCallout"
           style={{
@@ -69,11 +99,24 @@ export const LastTestRun = () => {
           color="danger"
           iconType="alert"
         >
-          <EuiButton data-test-subj="monitorTestRunViewErrorDetails" color="danger">
-            {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {
-              defaultMessage: 'View error details',
-            })}
-          </EuiButton>
+          {isErrorDetails ? (
+            <></>
+          ) : (
+            <EuiButton
+              data-test-subj="monitorTestRunViewErrorDetails"
+              color="danger"
+              href={getErrorDetailsUrl({
+                basePath,
+                configId: monitor?.id!,
+                locationId: selectedLocation!.id,
+                stateId: latestPing.state?.id!,
+              })}
+            >
+              {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {
+                defaultMessage: 'View error details',
+              })}
+            </EuiButton>
+          )}
         </EuiCallOut>
       ) : null}
 
@@ -84,6 +127,7 @@ export const LastTestRun = () => {
           steps={stepsData?.steps ?? []}
           loading={stepsLoading}
           showStepNumber={true}
+          showExpand={isErrorDetails}
         />
       ) : (
         <SinglePingResult ping={latestPing} loading={loading} />
@@ -98,17 +142,18 @@ const PanelHeader = ({
   loading,
 }: {
   monitor: EncryptedSyntheticsSavedMonitor | null;
-  latestPing: Ping;
+  latestPing?: Ping;
   loading: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
 
   const { basePath } = useSyntheticsSettingsContext();
 
-  const lastRunTimestamp = useMemo(
-    () => (latestPing?.timestamp ? formatTestRunAt(latestPing?.timestamp) : ''),
-    [latestPing?.timestamp]
-  );
+  const selectedLocation = useSelectedLocation();
+
+  const { monitorId } = useParams<{ monitorId: string }>();
+
+  const lastRunTimestamp = useFormatTestRunAt(latestPing?.timestamp);
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
 
@@ -118,7 +163,7 @@ const PanelHeader = ({
     </EuiTitle>
   );
 
-  if (loading) {
+  if (loading && !latestPing) {
     return (
       <>
         <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -161,9 +206,12 @@ const PanelHeader = ({
               size="xs"
               iconType="inspect"
               iconSide="left"
-              href={`${basePath}/app/uptime/journey/${
-                latestPing?.monitor?.check_group ?? ''
-              }/steps`}
+              href={getTestRunDetailLink({
+                basePath,
+                monitorId,
+                checkGroup: latestPing?.monitor.check_group,
+                locationId: selectedLocation?.id,
+              })}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewTestRun', {
                 defaultMessage: 'View test run',

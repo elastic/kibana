@@ -101,18 +101,18 @@ describe('Service overview: Time Comparison', () => {
     cy.visitKibana(serviceOverviewPath);
     cy.contains('opbeans-java');
     // opens the page with "Day before" selected
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
+    cy.getByTestSubj('comparisonSelect').should('have.value', '1d');
 
     // selects another comparison type
-    cy.get('[data-test-subj="comparisonSelect"]').select('1w');
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1w');
+    cy.getByTestSubj('comparisonSelect').select('1w');
+    cy.getByTestSubj('comparisonSelect').should('have.value', '1w');
   });
 
   it('changes comparison type when a new time range is selected', () => {
     cy.visitKibana(serviceOverviewHref);
     cy.contains('opbeans-java');
     // Time comparison default value
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
+    cy.getByTestSubj('comparisonSelect').should('have.value', '1d');
     cy.contains('Day before');
     cy.contains('Week before');
 
@@ -121,17 +121,14 @@ describe('Service overview: Time Comparison', () => {
       '2021-10-20T00:00:00.000Z'
     );
 
-    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+    cy.getByTestSubj('superDatePickerApplyTimeButton').click();
 
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'have.value',
-      '864000000ms'
-    );
-    cy.get('[data-test-subj="comparisonSelect"]').should(
+    cy.getByTestSubj('comparisonSelect').should('have.value', '864000000ms');
+    cy.getByTestSubj('comparisonSelect').should(
       'not.contain.text',
       'Day before'
     );
-    cy.get('[data-test-subj="comparisonSelect"]').should(
+    cy.getByTestSubj('comparisonSelect').should(
       'not.contain.text',
       'Week before'
     );
@@ -141,17 +138,14 @@ describe('Service overview: Time Comparison', () => {
     cy.contains('Week before');
 
     cy.changeTimeRange('Last 24 hours');
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
+    cy.getByTestSubj('comparisonSelect').should('have.value', '1d');
     cy.contains('Day before');
     cy.contains('Week before');
 
     cy.changeTimeRange('Last 7 days');
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1w');
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'contain.text',
-      'Week before'
-    );
-    cy.get('[data-test-subj="comparisonSelect"]').should(
+    cy.getByTestSubj('comparisonSelect').should('have.value', '1w');
+    cy.getByTestSubj('comparisonSelect').should('contain.text', 'Week before');
+    cy.getByTestSubj('comparisonSelect').should(
       'not.contain.text',
       'Day before'
     );
@@ -170,7 +164,7 @@ describe('Service overview: Time Comparison', () => {
     );
     cy.contains('opbeans-java');
     cy.wait('@throughputChartRequest');
-    cy.get('[data-test-subj="throughput"]')
+    cy.getByTestSubj('throughput')
       .get('#echHighlighterClipPath__throughput')
       .realHover({ position: 'center' });
     cy.contains('Week before');
@@ -186,17 +180,17 @@ describe('Service overview: Time Comparison', () => {
       cy.contains('opbeans-java');
 
       // Comparison is enabled by default
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
+      cy.getByTestSubj('comparisonSelect').should('be.enabled');
 
       // toggles off comparison
       cy.contains('Comparison').click();
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
+      cy.getByTestSubj('comparisonSelect').should('be.disabled');
     });
 
     it('calls APIs without comparison time range', () => {
       cy.visitKibana(serviceOverviewHref);
 
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
+      cy.getByTestSubj('comparisonSelect').should('be.enabled');
       const offset = `offset=1d`;
 
       // When the page loads it fetches all APIs with comparison time range
@@ -212,7 +206,7 @@ describe('Service overview: Time Comparison', () => {
 
       // toggles off comparison
       cy.contains('Comparison').click();
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
+      cy.getByTestSubj('comparisonSelect').should('be.disabled');
       // When comparison is disabled APIs are called withou comparison time range
       cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
         (interceptions) => {

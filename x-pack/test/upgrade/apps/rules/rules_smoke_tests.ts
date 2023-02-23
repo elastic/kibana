@@ -57,7 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(searchResults[0].name).to.contain(createdRuleName);
           expect(searchResults[0].interval).to.equal('1 min');
           expect(searchResults[0].status).to.equal('Enabled');
-          expect(searchResults[0].lastResponse).to.equal('Ok');
+          expect(searchResults[0].lastResponse).to.equal('Succeeded');
         });
       });
     });

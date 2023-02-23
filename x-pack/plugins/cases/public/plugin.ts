@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { CasesUiStart, CasesPluginSetup, CasesPluginStart, CasesUiSetup } from './types';
+import type { CasesUiStart, CasesPluginSetup, CasesPluginStart, CasesUiSetup } from './types';
 import { KibanaServices } from './common/lib/kibana';
-import { CasesUiConfigType } from '../common/ui/types';
+import type { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
@@ -67,7 +67,7 @@ export class CasesUiPlugin
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: APP_ID,
       title: APP_TITLE,
-      order: 0,
+      order: 1,
       async mount(params: ManagementAppMountParams) {
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,

@@ -24,3 +24,8 @@ export interface EuiBasicTableOnChange {
   };
   sort?: EuiBasicTableSortTypes;
 }
+export interface Solution {
+  id: string;
+  label: string;
+  iconType: string;
+}

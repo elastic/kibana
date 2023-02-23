@@ -8,18 +8,24 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingLogo,
   EuiPageHeaderProps,
+  EuiSpacer,
   EuiTitle,
+  EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { omit } from 'lodash';
 import React from 'react';
-import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
+import { useHistory } from 'react-router-dom';
 import {
-  isJavaAgentName,
-  isJRubyAgent,
   isMobileAgentName,
   isRumAgentName,
+  isAWSLambdaAgent,
+  isAzureFunctionsAgent,
   isServerlessAgent,
 } from '../../../../../common/agent_name';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -29,14 +35,17 @@ import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
-import { SearchBar } from '../../../shared/search_bar';
-import { ServiceIcons } from '../../../shared/service_icons';
+import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { BetaBadge } from '../../../shared/beta_badge';
+import { replace } from '../../../shared/links/url_helpers';
+import { SearchBar } from '../../../shared/search_bar/search_bar';
+import { ServiceIcons } from '../../../shared/service_icons';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
+import { ServerlessType } from '../../../../../common/serverless';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -79,12 +88,18 @@ function TemplateWithContext({
     query,
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/*');
+  const history = useHistory();
+  const location = useLocation();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const router = useApmRouter();
 
   const tabs = useTabs({ selectedTab });
+
+  const { agentName, serviceAgentStatus } = useApmServiceContext();
+
+  const isPendingServiceAgent = !agentName && isPending(serviceAgentStatus);
 
   useBreadcrumb(
     () => ({
@@ -96,6 +111,12 @@ function TemplateWithContext({
     }),
     [query, router, selectedTab, serviceName, title]
   );
+
+  if (isMobileAgentName(agentName)) {
+    replace(history, {
+      pathname: location.pathname.replace('/services/', '/mobile-services/'),
+    });
+  }
 
   return (
     <ApmMainTemplate
@@ -129,65 +150,58 @@ function TemplateWithContext({
         ),
       }}
     >
-      <SearchBar {...searchBarOptions} />
-      <ServiceAnomalyTimeseriesContextProvider>
-        {children}
-      </ServiceAnomalyTimeseriesContextProvider>
+      {isPendingServiceAgent ? (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="l" />
+            <EuiLoadingLogo logo="logoObservability" size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <>
+          <SearchBar {...searchBarOptions} />
+          <ServiceAnomalyTimeseriesContextProvider>
+            {children}
+          </ServiceAnomalyTimeseriesContextProvider>
+        </>
+      )}
     </ApmMainTemplate>
   );
 }
 
 export function isMetricsTabHidden({
   agentName,
-  runtimeName,
+  serverlessType,
   isAwsLambdaEnabled,
 }: {
   agentName?: string;
-  runtimeName?: string;
+  serverlessType?: ServerlessType;
   isAwsLambdaEnabled?: boolean;
 }) {
-  if (isServerlessAgent(runtimeName)) {
+  if (isAWSLambdaAgent(serverlessType)) {
     return !isAwsLambdaEnabled;
   }
   return (
     !agentName ||
     isRumAgentName(agentName) ||
-    isJavaAgentName(agentName) ||
-    isMobileAgentName(agentName) ||
-    isJRubyAgent(agentName, runtimeName)
-  );
-}
-
-export function isMetricsJVMsTabHidden({
-  agentName,
-  runtimeName,
-}: {
-  agentName?: string;
-  runtimeName?: string;
-}) {
-  return (
-    !(isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName)) ||
-    isServerlessAgent(runtimeName)
+    isAzureFunctionsAgent(serverlessType)
   );
 }
 
 export function isInfraTabHidden({
   agentName,
-  runtimeName,
+  serverlessType,
 }: {
   agentName?: string;
-  runtimeName?: string;
+  serverlessType?: ServerlessType;
 }) {
   return (
-    !agentName ||
-    isRumAgentName(agentName) ||
-    isMobileAgentName(agentName) ||
-    isServerlessAgent(runtimeName)
+    !agentName || isRumAgentName(agentName) || isServerlessAgent(serverlessType)
   );
 }
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
-  const { agentName, runtimeName } = useApmServiceContext();
+  const { agentName, serverlessType } = useApmServiceContext();
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
@@ -206,6 +220,30 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     path: { serviceName },
     query: queryFromUrl,
   } = useApmParams(`/services/{serviceName}/${selectedTab}` as const);
+
+  const { rangeFrom, rangeTo, environment } = queryFromUrl;
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { data: serviceAlertsCount = { alertsCount: 0 } } = useFetcher(
+    (callApmApi) => {
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/alerts_count',
+        {
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              start,
+              end,
+              environment,
+            },
+          },
+        }
+      );
+    },
+    [serviceName, start, end, environment]
+  );
 
   const query = omit(
     queryFromUrl,
@@ -245,8 +283,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
         defaultMessage: 'Dependencies',
       }),
-      hidden:
-        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
+      hidden: !agentName || isRumAgentName(agentName),
     },
     {
       key: 'errors',
@@ -267,25 +304,14 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      append: isServerlessAgent(runtimeName) ? (
+      append: isServerlessAgent(serverlessType) && (
         <TechnicalPreviewBadge icon="beaker" />
-      ) : undefined,
+      ),
       hidden: isMetricsTabHidden({
         agentName,
-        runtimeName,
+        serverlessType,
         isAwsLambdaEnabled,
       }),
-    },
-    {
-      key: 'nodes',
-      href: router.link('/services/{serviceName}/nodes', {
-        path: { serviceName },
-        query,
-      }),
-      label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
-        defaultMessage: 'Metrics',
-      }),
-      hidden: isMetricsJVMsTabHidden({ agentName, runtimeName }),
     },
     {
       key: 'infrastructure',
@@ -293,11 +319,11 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: <BetaBadge icon="editorBold" />,
+      append: <BetaBadge icon="beta" />,
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
-      hidden: isInfraTabHidden({ agentName, runtimeName }),
+      hidden: isInfraTabHidden({ agentName, serverlessType }),
     },
     {
       key: 'service-map',
@@ -318,8 +344,13 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
+      append: isServerlessAgent(serverlessType) && (
+        <TechnicalPreviewBadge icon="beaker" />
+      ),
       hidden:
-        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
+        !agentName ||
+        isRumAgentName(agentName) ||
+        isAzureFunctionsAgent(serverlessType),
     },
     {
       key: 'alerts',
@@ -327,7 +358,20 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      append:
+        serviceAlertsCount.alertsCount > 0 ? (
+          <EuiToolTip
+            position="bottom"
+            content={i18n.translate(
+              'xpack.apm.home.serviceAlertsTable.tooltip.activeAlertsExplanation',
+              {
+                defaultMessage: 'Active alerts',
+              }
+            )}
+          >
+            <EuiBadge color="danger">{serviceAlertsCount.alertsCount}</EuiBadge>
+          </EuiToolTip>
+        ) : null,
       label: i18n.translate('xpack.apm.home.alertsTabLabel', {
         defaultMessage: 'Alerts',
       }),
@@ -337,9 +381,10 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
 
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label, append }) => ({
+    .map(({ href, key, label, prepend, append }) => ({
       href,
       label,
+      prepend,
       append,
       isSelected: key === selectedTab,
     }));

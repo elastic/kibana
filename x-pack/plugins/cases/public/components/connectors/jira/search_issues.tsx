@@ -6,10 +6,11 @@
  */
 
 import React, { useMemo, useEffect, useCallback, useState, memo } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 
 import { useKibana } from '../../../common/lib/kibana';
-import { ActionConnector } from '../../../../common/api';
+import type { ActionConnector } from '../../../../common/api';
 import { useGetIssues } from './use_get_issues';
 import { useGetSingleIssue } from './use_get_single_issue';
 import * as i18n from './translations';

@@ -1,59 +1,52 @@
 summary: The add comment to case API returns a JSON object that contains details about the case and its comments.
 value: 
-  {
-    "comments":[{
-      "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
-      "version": "WzIwNjM3LDFd",
-      "comment": "An updated comment.",
-      "type": "user",
-      "owner": "cases",
-      "created_at": "2022-03-24T00:37:10.832Z",
-      "created_by": {
-          "username": "elastic",
-          "full_name": null,
-          "email": null
-      },
-      "pushed_at": null,
-      "pushed_by": null,
-      "updated_at": "2022-03-24T01:27:06.210Z",
-      "updated_by": {
-          "username": "elastic",
-          "full_name": null,
-          "email": null
-        }
-      }
-    ],
-    "totalAlerts": 0,
-    "id": "293f1bc0-74f6-11ea-b83a-553aecdb28b6",
-    "version": "WzIwNjM2LDFd",
-    "totalComment": 1,
-    "title": "Case title 1",
-    "tags": ["tag 1"],
-    "description": "A case description.",
-    "settings": {"syncAlerts":false},
-    "owner": "cases",
-    "duration": null,
-    "severity": "low",
-    "closed_at": null,
-    "closed_by": null,
-    "created_at": "2022-03-24T00:37:03.906Z",
-    "created_by": {
-      "username": "elastic",
-      "full_name": null,
-      "email": null
-    },
-    "status": "open",
-    "updated_at": "2022-03-24T01:27:06.210Z",
-    "updated_by": {
-      "username": "elastic",
-      "full_name": null,
-      "email": null
-    },
-    "connector": {
-      "id": "none",
-      "name": "none",
-      "type": ".none",
-      "fields": null
-    },
-    "external_service": null
-  }
+  comments:
+    - id: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+      version: WzIwNjM3LDFd
+      comment: An updated comment.
+      type: user
+      owner: cases
+      created_at: '2022-03-24T00:37:10.832Z'
+      created_by:
+        username: elastic
+        full_name: null
+        email: null
+      pushed_at: null
+      pushed_by: null
+      updated_at: '2022-03-24T01:27:06.210Z'
+      updated_by:
+        username: elastic
+        full_name: null
+        email: null
+  totalAlerts: 0
+  id: 293f1bc0-74f6-11ea-b83a-553aecdb28b6
+  version: WzIwNjM2LDFd
+  totalComment: 1
+  title: Case title 1
+  tags:
+    - tag 1
+  description: A case description.
+  settings:
+    syncAlerts: false
+  owner: cases
+  duration: null
+  severity: low
+  closed_at: null
+  closed_by: null
+  created_at: '2022-03-24T00:37:03.906Z'
+  created_by:
+    username: elastic
+    full_name: null
+    email: null
+  status: open
+  updated_at: '2022-03-24T01:27:06.210Z'
+  updated_by:
+    username: elastic
+    full_name: null
+    email: null
+  connector:
+    id: none
+    name: none
+    type: .none
+    fields: null
+  external_service: null

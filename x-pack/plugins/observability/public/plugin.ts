@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   AppDeepLink,
   AppMountParameters,
@@ -24,6 +25,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import {
@@ -37,6 +39,11 @@ import {
   RuleTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
@@ -51,34 +58,58 @@ import { getExploratoryViewEmbeddable } from './components/shared/exploratory_vi
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
+import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 
 export interface ConfigSchema {
   unsafe: {
-    alertDetails: { enabled: boolean };
+    slo: {
+      enabled: boolean;
+    };
+    alertDetails: {
+      apm: {
+        enabled: boolean;
+      };
+      metrics: {
+        enabled: boolean;
+      };
+      logs: {
+        enabled: boolean;
+      };
+      uptime: {
+        enabled: boolean;
+      };
+    };
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
+  share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
-  usageCollection: UsageCollectionSetup;
+  actionTypeRegistry: ActionTypeRegistryContract;
   cases: CasesUiStart;
-  embeddable: EmbeddableStart;
-  home?: HomePublicPluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  lens: LensPublicStart;
   discover: DiscoverStart;
+  embeddable: EmbeddableStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
+  lens: LensPublicStart;
+  licensing: LicensingPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
-  actionTypeRegistry: ActionTypeRegistryContract;
   security: SecurityPluginStart;
+  share: SharePluginStart;
+  spaces: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  usageCollection: UsageCollectionSetup;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  home?: HomePublicPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -119,11 +150,20 @@ export class Plugin
         },
       ],
     },
+    {
+      id: 'slos',
+      title: i18n.translate('xpack.observability.slosLinkTitle', {
+        defaultMessage: 'SLOs',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      order: 8002,
+      path: '/slos',
+    },
     getCasesDeepLinks({
       basePath: casesPath,
       extend: {
         [CasesDeepLinkId.cases]: {
-          order: 8002,
+          order: 8003,
           navLinkStatus: AppNavLinkStatus.hidden,
         },
         [CasesDeepLinkId.casesCreate]: {
@@ -147,12 +187,14 @@ export class Plugin
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
     const config = this.initContext.config.get();
+    const kibanaVersion = this.initContext.env.packageInfo.version;
 
     createCallObservabilityApi(coreSetup.http);
 
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
+    pluginsSetup.share.url.locators.create(new RuleDetailsLocatorDefinition());
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
@@ -161,6 +203,7 @@ export class Plugin
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
 
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
+
       return renderApp({
         core: coreStart,
         config,
@@ -170,6 +213,7 @@ export class Plugin
         ObservabilityPageTemplate: navigation.PageTemplate,
         usageCollection: pluginsSetup.usageCollection,
         isDev: this.initContext.env.mode.dev,
+        kibanaVersion,
       });
     };
 
@@ -192,6 +236,7 @@ export class Plugin
         'logs',
         'metrics',
         'apm',
+        'slo',
         'performance',
         'trace',
         'agent',
@@ -202,6 +247,8 @@ export class Plugin
     };
 
     coreSetup.application.register(app);
+
+    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
@@ -244,6 +291,7 @@ export class Plugin
           // See https://github.com/elastic/kibana/issues/103325.
           const otherLinks: NavigationEntry[] = deepLinks
             .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
+            .filter((link) => (link.id === 'slos' ? config.unsafe.slo.enabled : link)) // might not be useful anymore
             .map((link) => ({
               app: observabilityAppId,
               label: link.title,
@@ -275,10 +323,14 @@ export class Plugin
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
+    const config = this.initContext.config.get();
+
+    const filterSlo = (link: AppDeepLink) =>
+      link.id === 'slos' ? config.unsafe.slo.enabled : link;
 
     updateGlobalNavigation({
       capabilities: application.capabilities,
-      deepLinks: this.deepLinks,
+      deepLinks: this.deepLinks.filter(filterSlo),
       updater$: this.appUpdater$,
     });
 
@@ -287,6 +339,7 @@ export class Plugin
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
+      guidedOnboardingApi: pluginsStart.guidedOnboarding.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart }),
     });
 
@@ -294,15 +347,16 @@ export class Plugin
       const { getO11yAlertsTableConfiguration } = await import(
         './config/register_alerts_table_configuration'
       );
-      return getO11yAlertsTableConfiguration(this.observabilityRuleTypeRegistry);
+      return getO11yAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
-    getAsyncO11yAlertsTableConfiguration().then((config) => {
-      alertsTableConfigurationRegistry.register(config);
+    getAsyncO11yAlertsTableConfiguration().then((alertsTableConfig) => {
+      alertsTableConfigurationRegistry.register(alertsTableConfig);
     });
 
     return {
+      observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       navigation: {
         PageTemplate,
       },

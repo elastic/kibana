@@ -8,6 +8,9 @@
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
+
+type SidebarSectionName = 'meta' | 'empty' | 'available' | 'unmapped' | 'popular' | 'selected';
 
 export class DiscoverPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
@@ -25,11 +28,12 @@ export class DiscoverPageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
+  private readonly comboBox = this.ctx.getService('comboBox');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
   public async getChartTimespan() {
-    return await this.testSubjects.getAttribute('discoverChart', 'data-time-range');
+    return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
   }
 
   public async getDocTable() {
@@ -42,12 +46,12 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async findFieldByName(name: string) {
-    const fieldSearch = await this.testSubjects.find('fieldFilterSearchInput');
+    const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
     await fieldSearch.type(name);
   }
 
   public async clearFieldSearchInput() {
-    const fieldSearch = await this.testSubjects.find('fieldFilterSearchInput');
+    const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
     await fieldSearch.clearValue();
   }
 
@@ -202,45 +206,69 @@ export class DiscoverPageObject extends FtrService {
     );
   }
 
+  public async chooseBreakdownField(field: string) {
+    await this.comboBox.set('unifiedHistogramBreakdownFieldSelector', field);
+  }
+
+  public async getHistogramLegendList() {
+    const unifiedHistogram = await this.testSubjects.find('unifiedHistogramChart');
+    const list = await unifiedHistogram.findAllByClassName('echLegendItem__label');
+    return Promise.all(list.map((elem: WebElementWrapper) => elem.getVisibleText()));
+  }
+
+  public async clickLegendFilter(field: string, type: '+' | '-') {
+    const filterType = type === '+' ? 'filterIn' : 'filterOut';
+    await this.testSubjects.click(`legend-${field}`);
+    await this.testSubjects.click(`legend-${field}-${filterType}`);
+  }
+
   public async getCurrentQueryName() {
     return await this.globalNav.getLastBreadcrumb();
   }
 
   public async isChartVisible() {
-    return await this.testSubjects.exists('discoverChart');
+    return await this.testSubjects.exists('unifiedHistogramChart');
   }
 
   public async toggleChartVisibility() {
-    await this.testSubjects.moveMouseTo('discoverChartOptionsToggle');
-    await this.testSubjects.click('discoverChartOptionsToggle');
-    await this.testSubjects.exists('discoverChartToggle');
-    await this.testSubjects.click('discoverChartToggle');
+    await this.testSubjects.moveMouseTo('unifiedHistogramChartOptionsToggle');
+    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
+    await this.testSubjects.exists('unifiedHistogramChartToggle');
+    await this.testSubjects.click('unifiedHistogramChartToggle');
     await this.header.waitUntilLoadingHasFinished();
   }
 
   public async getChartInterval() {
-    await this.testSubjects.click('discoverChartOptionsToggle');
-    await this.testSubjects.click('discoverTimeIntervalPanel');
-    const selectedOption = await this.find.byCssSelector(`.discoverIntervalSelected`);
+    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
+    await this.testSubjects.click('unifiedHistogramTimeIntervalPanel');
+    const selectedOption = await this.find.byCssSelector(`.unifiedHistogramIntervalSelected`);
     return selectedOption.getVisibleText();
   }
 
   public async getChartIntervalWarningIcon() {
-    await this.testSubjects.click('discoverChartOptionsToggle');
+    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
     await this.header.waitUntilLoadingHasFinished();
     return await this.find.existsByCssSelector('.euiToolTipAnchor');
   }
 
   public async setChartInterval(interval: string) {
-    await this.testSubjects.click('discoverChartOptionsToggle');
-    await this.testSubjects.click('discoverTimeIntervalPanel');
-    await this.testSubjects.click(`discoverTimeInterval-${interval}`);
+    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
+    await this.testSubjects.click('unifiedHistogramTimeIntervalPanel');
+    await this.testSubjects.click(`unifiedHistogramTimeInterval-${interval}`);
     return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async getHitCount() {
     await this.header.waitUntilLoadingHasFinished();
-    return await this.testSubjects.getVisibleText('discoverQueryHits');
+    return await this.testSubjects.getVisibleText('unifiedHistogramQueryHits');
+  }
+
+  public async getHitCountInt() {
+    return parseInt(await this.getHitCount(), 10);
+  }
+
+  public async getSavedSearchDocumentCount() {
+    return await this.testSubjects.getVisibleText('savedSearchTotalDocuments');
   }
 
   public async getDocHeader() {
@@ -369,16 +397,18 @@ export class DiscoverPageObject extends FtrService {
 
   public async editField(field: string) {
     await this.retry.try(async () => {
-      await this.testSubjects.click(`field-${field}`);
+      await this.clickFieldListItem(field);
       await this.testSubjects.click(`discoverFieldListPanelEdit-${field}`);
       await this.find.byClassName('indexPatternFieldEditor__form');
     });
   }
 
   public async removeField(field: string) {
-    await this.testSubjects.click(`field-${field}`);
+    await this.clickFieldListItem(field);
     await this.testSubjects.click(`discoverFieldListPanelDelete-${field}`);
-    await this.testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
+    await this.retry.waitFor('modal to open', async () => {
+      return await this.testSubjects.exists('runtimeFieldDeleteConfirmModal');
+    });
     await this.fieldEditor.confirmDelete();
   }
 
@@ -413,6 +443,9 @@ export class DiscoverPageObject extends FtrService {
   async createAdHocDataView(name: string, hasTimeField = false) {
     await this.testSubjects.click('discover-dataView-switch-link');
     await this.unifiedSearch.createNewDataView(name, true, hasTimeField);
+    await this.retry.waitFor('flyout to get closed', async () => {
+      return !(await this.testSubjects.exists('indexPatternEditor__form'));
+    });
   }
 
   async clickAddField() {
@@ -429,8 +462,76 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
+  public async expandTimeRangeAsSuggestedInNoResultsMessage() {
+    await this.retry.waitFor('the button before pressing it', async () => {
+      return await this.testSubjects.exists('discoverNoResultsViewAllMatches');
+    });
+    return await this.testSubjects.click('discoverNoResultsViewAllMatches');
+  }
+
+  public async getSidebarAriaDescription(): Promise<string> {
+    return await (
+      await this.testSubjects.find('fieldListGrouped__ariaDescription')
+    ).getAttribute('innerText');
+  }
+
+  public async cleanSidebarLocalStorage(): Promise<void> {
+    await this.browser.setLocalStorageItem('discover.unifiedFieldList.initiallyOpenSections', '{}');
+  }
+
+  public async waitUntilSidebarHasLoaded() {
+    await this.retry.waitFor('sidebar is loaded', async () => {
+      return (await this.getSidebarAriaDescription()).length > 0;
+    });
+  }
+
+  public async doesSidebarShowFields() {
+    return await this.testSubjects.exists('fieldListGroupedFieldGroups');
+  }
+
+  public getSidebarSectionSelector(
+    sectionName: SidebarSectionName,
+    asCSSSelector: boolean = false
+  ) {
+    const testSubj = `fieldListGrouped${sectionName[0].toUpperCase()}${sectionName.substring(
+      1
+    )}Fields`;
+    if (!asCSSSelector) {
+      return testSubj;
+    }
+    return `[data-test-subj="${testSubj}"]`;
+  }
+
+  public async getSidebarSectionFieldNames(sectionName: SidebarSectionName): Promise<string[]> {
+    const elements = await this.find.allByCssSelector(
+      `${this.getSidebarSectionSelector(sectionName, true)} li`
+    );
+
+    if (!elements?.length) {
+      return [];
+    }
+
+    return Promise.all(
+      elements.map(async (element) => await element.getAttribute('data-attr-field'))
+    );
+  }
+
+  public async toggleSidebarSection(sectionName: SidebarSectionName) {
+    return await this.find.clickByCssSelector(
+      `${this.getSidebarSectionSelector(sectionName, true)} .euiAccordion__iconButton`
+    );
+  }
+
+  public async waitUntilFieldPopoverIsOpen() {
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.find.byCssSelector('[data-popover-open="true"]'));
+    });
+  }
+
   public async clickFieldListItem(field: string) {
-    return await this.testSubjects.click(`field-${field}`);
+    await this.testSubjects.click(`field-${field}`);
+
+    await this.waitUntilFieldPopoverIsOpen();
   }
 
   public async clickFieldSort(field: string, text = 'Sort New-Old') {
@@ -447,10 +548,15 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickFieldListItemAdd(field: string) {
+    await this.waitUntilSidebarHasLoaded();
+
     // a filter check may make sense here, but it should be properly handled to make
     // it work with the _score and _source fields as well
     if (await this.isFieldSelected(field)) {
       return;
+    }
+    if (['_score', '_id', '_index'].includes(field)) {
+      await this.toggleSidebarSection('meta'); // expand Meta section
     }
     await this.clickFieldListItemToggle(field);
     const isLegacyDefault = await this.useLegacyTable();
@@ -465,17 +571,25 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
+  public async isAdHocDataViewSelected() {
+    const dataView = await this.getCurrentlySelectedDataView();
+    await this.testSubjects.click('discover-dataView-switch-link');
+    return this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
+  }
+
   public async isFieldSelected(field: string) {
-    if (!(await this.testSubjects.exists('fieldList-selected'))) {
+    if (!(await this.testSubjects.exists('fieldListGroupedSelectedFields'))) {
       return false;
     }
-    const selectedList = await this.testSubjects.find('fieldList-selected');
+    const selectedList = await this.testSubjects.find('fieldListGroupedSelectedFields');
     return await this.testSubjects.descendantExists(`field-${field}`, selectedList);
   }
 
   public async clickFieldListItemRemove(field: string) {
+    await this.waitUntilSidebarHasLoaded();
+
     if (
-      !(await this.testSubjects.exists('fieldList-selected')) ||
+      !(await this.testSubjects.exists('fieldListGroupedSelectedFields')) ||
       !(await this.isFieldSelected(field))
     ) {
       return;
@@ -485,15 +599,25 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickFieldListItemVisualize(fieldName: string) {
+    await this.waitUntilSidebarHasLoaded();
+
     const field = await this.testSubjects.find(`field-${fieldName}-showDetails`);
-    const isActive = await field.elementHasClass('dscSidebarItem--active');
+    const isActive = await field.elementHasClass('kbnFieldButton-isActive');
 
     if (!isActive) {
       // expand the field to show the "Visualize" button
       await field.click();
     }
 
-    await this.testSubjects.click(`fieldVisualize-${fieldName}`);
+    await this.waitUntilFieldPopoverIsOpen();
+    const visualizeButtonTestSubject = `fieldVisualize-${fieldName}`;
+    // wrap visualize button click in retry to ensure button is clicked and retry if button click is not registered
+    await this.retry.try(async () => {
+      await this.testSubjects.click(visualizeButtonTestSubject);
+      await this.testSubjects.waitForDeleted(visualizeButtonTestSubject);
+      await this.testSubjects.missingOrFail(visualizeButtonTestSubject);
+    });
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async expectFieldListItemVisualize(field: string) {
@@ -559,20 +683,20 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async openSidebarFieldFilter() {
-    await this.testSubjects.click('toggleFieldFilterButton');
-    await this.testSubjects.existOrFail('filterSelectionPanel');
+    await this.testSubjects.click('fieldListFiltersFieldTypeFilterToggle');
+    await this.testSubjects.existOrFail('fieldListFiltersFieldTypeFilterOptions');
   }
 
   public async closeSidebarFieldFilter() {
-    await this.testSubjects.click('toggleFieldFilterButton');
+    await this.testSubjects.click('fieldListFiltersFieldTypeFilterToggle');
 
     await this.retry.waitFor('sidebar filter closed', async () => {
-      return !(await this.testSubjects.exists('filterSelectionPanel'));
+      return !(await this.testSubjects.exists('fieldListFiltersFieldTypeFilterOptions'));
     });
   }
 
   public async waitForChartLoadingComplete(renderCount: number) {
-    await this.elasticChart.waitForRenderingCount(renderCount, 'discoverChart');
+    await this.elasticChart.waitForRenderingCount(renderCount, 'unifiedHistogramChart');
   }
 
   public async waitForDocTableLoadingComplete() {
@@ -681,5 +805,51 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.existOrFail('discover-sidebar');
     const button = await this.testSubjects.find('discover-dataView-switch-link');
     return button.getAttribute('title');
+  }
+
+  /**
+   * Validates if data view references in the URL are equal.
+   */
+  public async validateDataViewReffsEquality() {
+    const currentUrl = await this.browser.getCurrentUrl();
+    const matches = currentUrl.matchAll(/index:[^,]*/g);
+    const indexes = [];
+    for (const matchEntry of matches) {
+      const [index] = matchEntry;
+      indexes.push(decodeURIComponent(index).replace('index:', '').replaceAll("'", ''));
+    }
+
+    const first = indexes[0];
+    if (first) {
+      const allEqual = indexes.every((val) => val === first);
+      if (allEqual) {
+        return { valid: true, result: first };
+      } else {
+        return {
+          valid: false,
+          message:
+            'Discover URL state contains different index references. They should be all the same.',
+        };
+      }
+    }
+    return { valid: false, message: "Discover URL state doesn't contain an index reference." };
+  }
+
+  public async getCurrentDataViewId() {
+    const validationResult = await this.validateDataViewReffsEquality();
+    if (validationResult.valid) {
+      return validationResult.result!;
+    } else {
+      throw new Error(validationResult.message);
+    }
+  }
+
+  public async addRuntimeField(name: string, script: string) {
+    await this.clickAddField();
+    await this.fieldEditor.setName(name);
+    await this.fieldEditor.enableValue();
+    await this.fieldEditor.typeScript(script);
+    await this.fieldEditor.save();
+    await this.header.waitUntilLoadingHasFinished();
   }
 }

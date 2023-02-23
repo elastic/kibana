@@ -66,6 +66,11 @@ export interface ExecutionContext<
   isSyncColorsEnabled?: () => boolean;
 
   /**
+   * Returns the state (true|false) of the sync cursor across panels switch.
+   */
+  isSyncCursorEnabled?: () => boolean;
+
+  /**
    * Returns the state (true|false) of the sync tooltips across panels switch.
    */
   isSyncTooltipsEnabled?: () => boolean;

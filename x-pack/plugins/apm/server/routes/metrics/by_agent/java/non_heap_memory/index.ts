@@ -12,11 +12,12 @@ import {
   METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED,
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
   AGENT_NAME,
-} from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../../lib/helpers/setup_request';
+} from '../../../../../../common/es_fields/apm';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
+import { APMConfig } from '../../../../..';
+import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const series = {
   nonHeapMemoryUsed: {
@@ -52,7 +53,8 @@ const chartBase: ChartBase = {
 export async function getNonHeapMemoryChart({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   serviceNodeName,
   start,
@@ -60,7 +62,8 @@ export async function getNonHeapMemoryChart({
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   serviceNodeName?: string;
   start: number;
@@ -69,7 +72,8 @@ export async function getNonHeapMemoryChart({
   return fetchAndTransformMetrics({
     environment,
     kuery,
-    setup,
+    config,
+    apmEventClient,
     serviceName,
     serviceNodeName,
     start,

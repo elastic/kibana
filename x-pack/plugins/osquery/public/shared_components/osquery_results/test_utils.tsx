@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { useKibana } from '../../common/lib/kibana';
 
 export const DETAILS_QUERY = 'select * from uptime';
 export const DETAILS_ID = 'test-id';
@@ -37,5 +38,43 @@ export const defaultLiveQueryDetails = {
     status: 'completed',
   },
 } as never;
+
+export const getMockedKibanaConfig = (permissionType: unknown) =>
+  ({
+    services: {
+      application: {
+        capabilities: permissionType,
+      },
+      cases: {
+        helpers: {
+          canUseCases: jest.fn().mockImplementation(() => ({
+            read: true,
+            update: true,
+            push: true,
+          })),
+          getRuleIdFromEvent: jest.fn(),
+        },
+        ui: {
+          getCasesContext: jest.fn().mockImplementation(() => mockCasesContext),
+        },
+        hooks: {
+          getUseCasesAddToExistingCaseModal: jest.fn(),
+        },
+      },
+      data: {
+        dataViews: {
+          getCanSaveSync: jest.fn(),
+          hasData: {
+            hasESData: jest.fn(),
+            hasUserDataView: jest.fn(),
+            hasDataView: jest.fn(),
+          },
+        },
+      },
+      notifications: {
+        toasts: jest.fn(),
+      },
+    },
+  } as unknown as ReturnType<typeof useKibana>);
 
 export const mockCasesContext: React.FC = (props) => <>{props?.children ?? null}</>;

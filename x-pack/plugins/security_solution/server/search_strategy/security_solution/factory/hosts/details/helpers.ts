@@ -12,7 +12,7 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
+import { hostFieldsMap } from '@kbn/securitysolution-ecs';
 import { Direction } from '../../../../../../common/search_strategy/common';
 import type {
   AggregationRequest,
@@ -206,6 +206,7 @@ export const getHostEndpoint = async (
       sensorVersion: endpointData.metadata.agent.version,
       elasticAgentStatus: endpointData.host_status,
       isolation: endpointData.metadata.Endpoint.state?.isolation ?? false,
+      fleetAgentId: endpointData.metadata.elastic.agent.id,
       pendingActions,
     };
   } catch (err) {

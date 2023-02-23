@@ -10,7 +10,7 @@ import Path from 'path';
 import Fsp from 'fs/promises';
 
 import * as Rx from 'rxjs';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrScreenshotFilename } from '@kbn/ftr-screenshot-filename';
 
 import type { AnyStep } from './journey';
@@ -19,6 +19,7 @@ interface StepShot {
   type: 'success' | 'failure';
   title: string;
   filename: string;
+  fullscreenFilename: string;
 }
 
 interface Manifest {
@@ -87,34 +88,44 @@ export class JourneyScreenshots {
     }
   }
 
-  async addError(step: AnyStep, screenshot: Buffer) {
+  async addError(step: AnyStep, screenshot: Buffer, fullscreenScreenshot: Buffer) {
     await this.lock(async () => {
       const filename = FtrScreenshotFilename.create(`${step.index}-${step.name}-failure`);
+      const fullscreenFilename = FtrScreenshotFilename.create(
+        `${step.index}-${step.name.replace(/\s/g, '-')}-failure-fullscreen`
+      );
       this.#manifest.steps.push({
         type: 'failure',
         title: `Step #${step.index + 1}: ${step.name} - FAILED`,
         filename,
+        fullscreenFilename,
       });
 
       await Promise.all([
         write(Path.resolve(this.#dir, 'manifest.json'), JSON.stringify(this.#manifest)),
         write(Path.resolve(this.#dir, filename), screenshot),
+        write(Path.resolve(this.#dir, fullscreenFilename), fullscreenScreenshot),
       ]);
     });
   }
 
-  async addSuccess(step: AnyStep, screenshot: Buffer) {
+  async addSuccess(step: AnyStep, screenshot: Buffer, fullscreenScreenshot: Buffer) {
     await this.lock(async () => {
       const filename = FtrScreenshotFilename.create(`${step.index}-${step.name}`);
+      const fullscreenFilename = FtrScreenshotFilename.create(
+        `${step.index}-${step.name.replace(/\s/g, '-')}-fullscreen`
+      );
       this.#manifest.steps.push({
         type: 'success',
         title: `Step #${step.index + 1}: ${step.name} - DONE`,
         filename,
+        fullscreenFilename,
       });
 
       await Promise.all([
         write(Path.resolve(this.#dir, 'manifest.json'), JSON.stringify(this.#manifest)),
         write(Path.resolve(this.#dir, filename), screenshot),
+        write(Path.resolve(this.#dir, fullscreenFilename), fullscreenScreenshot),
       ]);
     });
   }
@@ -123,6 +134,7 @@ export class JourneyScreenshots {
     return this.#manifest.steps.map((stepShot) => ({
       ...stepShot,
       path: Path.resolve(this.#dir, stepShot.filename),
+      fullscreenPath: Path.resolve(this.#dir, stepShot.fullscreenFilename),
     }));
   }
 }

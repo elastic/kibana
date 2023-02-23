@@ -6,27 +6,28 @@
  */
 
 import hash from 'object-hash';
-import { Setup } from '../../../lib/helpers/setup_request';
 import {
   AgentConfiguration,
   AgentConfigurationIntake,
 } from '../../../../common/agent_configuration/configuration_types';
-import { APMIndexDocumentParams } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import {
+  APMIndexDocumentParams,
+  APMInternalESClient,
+} from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/get_apm_indices';
 
 export function createOrUpdateConfiguration({
   configurationId,
   configurationIntake,
-  setup,
+  internalESClient,
 }: {
   configurationId?: string;
   configurationIntake: AgentConfigurationIntake;
-  setup: Setup;
+  internalESClient: APMInternalESClient;
 }) {
-  const { internalClient, indices } = setup;
-
   const params: APMIndexDocumentParams<AgentConfiguration> = {
     refresh: true,
-    index: indices.apmAgentConfigurationIndex,
+    index: APM_AGENT_CONFIGURATION_INDEX,
     body: {
       agent_name: configurationIntake.agent_name,
       service: {
@@ -45,5 +46,5 @@ export function createOrUpdateConfiguration({
     params.id = configurationId;
   }
 
-  return internalClient.index('create_or_update_agent_configuration', params);
+  return internalESClient.index('create_or_update_agent_configuration', params);
 }

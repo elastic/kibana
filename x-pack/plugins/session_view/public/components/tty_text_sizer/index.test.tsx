@@ -79,8 +79,14 @@ describe('TTYTextSizer component', () => {
 
   it('emits a font size to fit to full screen, when isFullscreen = true', async () => {
     renderResult = mockedContext.render(
-      <TTYTextSizer {...props} isFullscreen={true} containerHeight={400} />
+      <TTYTextSizer {...props} isFullscreen containerHeight={400} />
     );
+
+    const zoomFitBtn = renderResult.queryByTestId('sessionView:TTYZoomFit');
+
+    if (zoomFitBtn) {
+      userEvent.click(zoomFitBtn);
+    }
 
     expect(props.onFontSizeChanged).toHaveBeenCalledTimes(1);
     expect(props.onFontSizeChanged).toHaveBeenCalledWith(FULL_SCREEN_FONT_SIZE);

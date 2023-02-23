@@ -9,7 +9,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiDatePicker,
   EuiDatePickerRange,
@@ -224,7 +224,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
             count: 1,
           };
     onSaveSchedule({
-      id: initialSchedule?.id ?? uuid.v4(),
+      id: initialSchedule?.id ?? uuidv4(),
       rRule: {
         dtstart: startDT.toISOString(),
         tzid: selectedTimezone[0].label ?? defaultTz,
@@ -368,7 +368,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
               <EuiFlexItem grow>
                 <EuiButton isLoading={isLoading} color="danger" onClick={onCancelSchedule}>
                   {i18n.translate('xpack.triggersActionsUI.sections.rulesList.deleteSchedule', {
-                    defaultMessage: 'Delete schedules',
+                    defaultMessage: 'Delete schedule',
                   })}
                 </EuiButton>
               </EuiFlexItem>

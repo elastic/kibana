@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import { BehaviorSubject } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { setupServer } from '@kbn/core/server/test_utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';

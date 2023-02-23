@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { FunctionComponent } from 'react';
-import { Plugin, PluggableList } from 'unified';
+import type { FunctionComponent } from 'react';
+import type { Plugin, PluggableList } from 'unified';
 // Remove after this issue is resolved: https://github.com/elastic/eui/issues/4688
-import { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import rehype2react from 'rehype-react';
-import { EuiLinkAnchorProps } from '@elastic/eui';
+import type { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
+import type rehype2react from 'rehype-react';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
 export interface CursorPosition {
   start: number;
   end: number;

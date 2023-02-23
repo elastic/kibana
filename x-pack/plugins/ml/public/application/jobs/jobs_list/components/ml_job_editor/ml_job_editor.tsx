@@ -24,6 +24,7 @@ interface MlJobEditorProps {
   syntaxChecking?: boolean;
   theme?: string;
   onChange?: EuiCodeEditorProps['onChange'];
+  'data-test-subj'?: string;
 }
 export const MLJobEditor: FC<MlJobEditorProps> = ({
   value,
@@ -34,6 +35,7 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   syntaxChecking = true,
   theme = 'textmate',
   onChange = () => {},
+  'data-test-subj': dataTestSubj,
 }) => {
   if (mode === ML_EDITOR_MODE.XJSON) {
     try {
@@ -61,6 +63,7 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
         useSoftTabs: true,
       }}
       onChange={onChange}
+      data-test-subj={dataTestSubj}
     />
   );
 };

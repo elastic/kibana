@@ -6,5 +6,3 @@
  */
 
 export * from './alerts_page';
-export * from './alerts_table_t_grid';
-export * from './state_container';

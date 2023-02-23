@@ -63,6 +63,14 @@ const fields = [
     filterable: true,
     aggregatable: true,
   },
+  {
+    name: '@timestamp',
+    type: 'date',
+    displayName: '@timestamp',
+    scripted: false,
+    filterable: true,
+    aggregatable: true,
+  },
 ] as DataView['fields'];
 
 export const buildDataViewMock = ({
@@ -90,15 +98,20 @@ export const buildDataViewMock = ({
     name,
     metaFields: ['_index', '_score'],
     fields: dataViewFields,
+    type: 'default',
     getName: () => name,
     getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
     getSourceFiltering: () => ({}),
+    getIndexPattern: () => `${name}-title`,
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
     timeFieldName: timeFieldName || '',
     docvalueFields: [],
     getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
     isTimeNanosBased: () => false,
     isPersisted: () => true,
+    getTimeField: () => {
+      return dataViewFields.find((field) => field.name === timeFieldName);
+    },
   } as unknown as DataView;
 
   dataView.isTimeBased = () => !!timeFieldName;

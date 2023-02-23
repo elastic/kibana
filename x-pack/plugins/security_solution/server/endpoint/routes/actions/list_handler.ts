@@ -19,7 +19,7 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { errorHandler } from '../error_handler';
 import type {
-  ResponseActions,
+  ResponseActionsApiCommandNames,
   ResponseActionStatus,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import { doesLogsEndpointActionsIndexExist } from '../../utils';
@@ -28,8 +28,8 @@ const formatStringIds = (value: string | string[] | undefined): undefined | stri
   typeof value === 'string' ? [value] : value;
 
 const formatCommandValues = (
-  value: ResponseActions | ResponseActions[] | undefined
-): undefined | ResponseActions[] => (typeof value === 'string' ? [value] : value);
+  value: ResponseActionsApiCommandNames | ResponseActionsApiCommandNames[] | undefined
+): undefined | ResponseActionsApiCommandNames[] => (typeof value === 'string' ? [value] : value);
 
 const formatStatusValues = (
   value: ResponseActionStatus | ResponseActionStatus[]
@@ -56,6 +56,7 @@ export const actionListHandler = (
         userIds,
         commands,
         statuses,
+        withOutputs,
       },
     } = req;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
@@ -72,6 +73,7 @@ export const actionListHandler = (
       }
 
       const requestParams = {
+        withOutputs: formatStringIds(withOutputs),
         commands: formatCommandValues(commands),
         esClient,
         elasticAgentIds: formatStringIds(elasticAgentIds),

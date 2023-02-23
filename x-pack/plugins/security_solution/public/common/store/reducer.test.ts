@@ -38,7 +38,16 @@ describe('createInitialState', () => {
       kibanaDataViews: [mockSourcererState.defaultDataView],
       signalIndexName: 'siem-signals-default',
     };
-    const initState = createInitialState(mockPluginState, defaultState);
+    const initState = createInitialState(
+      mockPluginState,
+      defaultState,
+      {
+        dataTable: { tableById: {} },
+      },
+      {
+        groups: { groupById: {} },
+      }
+    );
     beforeEach(() => {
       (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(initState));
     });
@@ -52,19 +61,32 @@ describe('createInitialState', () => {
     });
 
     test('indicesExist should be FALSE if patternList is empty', () => {
-      const state = createInitialState(mockPluginState, {
-        ...defaultState,
-        defaultDataView: {
-          ...defaultState.defaultDataView,
-          patternList: [],
-        },
-        kibanaDataViews: [
-          {
+      const state = createInitialState(
+        mockPluginState,
+        {
+          ...defaultState,
+          defaultDataView: {
             ...defaultState.defaultDataView,
             patternList: [],
           },
-        ],
-      });
+          kibanaDataViews: [
+            {
+              ...defaultState.defaultDataView,
+              patternList: [],
+            },
+          ],
+        },
+        {
+          dataTable: {
+            tableById: {},
+          },
+        },
+        {
+          groups: {
+            groupById: {},
+          },
+        }
+      );
       (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(state));
       const { result } = renderHook(() => useSourcererDataView());
       expect(result.current.indicesExist).toEqual(false);

@@ -4,13 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { DatatableProps } from '../../../common/expressions';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
+import type { DatatableProps } from '../../../common/expressions';
 import type { FormatFactory } from '../../../common';
 import { getDatatable } from '../../../common/expressions';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { getColumnCellValueActions } from './expression';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import { LensCellValueAction } from '../../types';
 
+const cellValueAction: LensCellValueAction = {
+  displayName: 'Test',
+  id: 'test',
+  iconType: 'test-icon',
+  execute: () => {},
+};
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
   const data: Datatable = {
@@ -91,6 +98,28 @@ describe('datatable_expression', () => {
         as: 'lens_datatable_renderer',
         value: { data, args },
       });
+    });
+  });
+
+  describe('getColumnCellValueActions', () => {
+    it('should return column cell value actions', async () => {
+      const config = sampleArgs();
+      const result = await getColumnCellValueActions(config, async () => [cellValueAction]);
+      expect(result).toEqual([[cellValueAction], [cellValueAction], [cellValueAction]]);
+    });
+
+    it('should return empty actions if no data passed', async () => {
+      const result = await getColumnCellValueActions(
+        { data: null } as unknown as DatatableProps,
+        async () => [cellValueAction]
+      );
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty actions if no getCompatibleCellValueActions handler passed', async () => {
+      const config = sampleArgs();
+      const result = await getColumnCellValueActions(config, undefined);
+      expect(result).toEqual([]);
     });
   });
 });

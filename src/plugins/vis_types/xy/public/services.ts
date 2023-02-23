@@ -8,6 +8,7 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
@@ -16,3 +17,6 @@ export const [getUISettings, setUISettings] =
 
 export const [getPalettesService, setPalettesService] =
   createGetterSetter<ChartsPluginSetup['palettes']>('xy charts.palette');
+
+export const [getDataViewsStart, setDataViewsStart] =
+  createGetterSetter<DataViewsPublicPluginStart>('dataViews');

@@ -11,13 +11,10 @@ import { LocationDescriptorObject } from 'history';
 import { httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-// @ts-ignore
 import { uploadLicense } from '../public/application/store/actions/upload_license';
 
-// @ts-ignore
 import { licenseManagementStore } from '../public/application/store/store';
 
-// @ts-ignore
 import { UploadLicense } from '../public/application/sections/upload_license';
 import { AppContextProvider } from '../public/application/app_context';
 
@@ -27,7 +24,6 @@ import {
   UPLOAD_LICENSE_SUCCESS,
   UPLOAD_LICENSE_TLS_NOT_ENABLED,
   UPLOAD_LICENSE_INVALID,
-  // @ts-ignore
 } from './api_responses';
 
 let store: any = null;

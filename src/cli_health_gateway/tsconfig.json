@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "*.js",
+    "*.ts",
+  ],
+  "kbn_references": [
+    { "path": "../cli/tsconfig.json" },
+    "@kbn/repo-info",
+    "@kbn/health-gateway-server",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

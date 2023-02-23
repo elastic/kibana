@@ -9,7 +9,7 @@ import {
   externalReferenceAttachmentESAttributes,
   externalReferenceAttachmentSOAttributes,
   externalReferenceAttachmentSOAttributesWithoutRefs,
-  getPersistableStateAttachmentTypeRegistry,
+  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachmentAttributes,
   persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../attachment_framework/mocks';
@@ -21,7 +21,7 @@ import {
 } from './so_references';
 
 describe('so_references', () => {
-  const persistableStateAttachmentTypeRegistry = getPersistableStateAttachmentTypeRegistry();
+  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   const references = [
     {
       id: 'testRef',

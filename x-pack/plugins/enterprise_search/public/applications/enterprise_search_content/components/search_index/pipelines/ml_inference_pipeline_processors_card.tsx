@@ -31,7 +31,7 @@ export const MlInferencePipelineProcessorsCard: React.FC = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {inferencePipelines.map((item: InferencePipeline, index: number) => (
-        <EuiFlexItem key={index}>
+        <EuiFlexItem key={`${index}-${item.pipelineName}`}>
           <InferencePipelineCard {...item} />
         </EuiFlexItem>
       ))}

@@ -53,9 +53,7 @@ describe('FieldValueCell', () => {
     });
 
     test('it formats multiple values such that each value is displayed on a single line', () => {
-      expect(screen.getByTestId(`event-field-${hostIpData.field}`)).toHaveClass(
-        'euiFlexGroup--directionColumn'
-      );
+      expect(screen.getByTestId(`event-field-${hostIpData.field}`).className).toContain('column');
     });
   });
 
@@ -185,8 +183,8 @@ describe('FieldValueCell', () => {
     });
 
     test('it aligns items at the start of the group to prevent content from stretching (by default)', () => {
-      expect(screen.getByTestId(`event-field-${hostIpData.field}`)).toHaveClass(
-        'euiFlexGroup--alignItemsFlexStart'
+      expect(screen.getByTestId(`event-field-${hostIpData.field}`).className).toContain(
+        'flexStart'
       );
     });
 

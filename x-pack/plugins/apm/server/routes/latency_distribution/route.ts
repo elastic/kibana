@@ -10,19 +10,19 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getOverallLatencyDistribution } from './get_overall_latency_distribution';
-import { setupRequest } from '../../lib/helpers/setup_request';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import {
   latencyDistributionChartTypeRt,
   LatencyDistributionChartType,
 } from '../../../common/latency_distribution_chart_types';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const latencyOverallTransactionDistributionRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
@@ -54,7 +54,7 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<import('./types').OverallLatencyDistributionResponse> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       environment,
@@ -74,8 +74,9 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
     // only the transaction latency distribution chart can use metrics data
     const searchAggregatedTransactions =
       chartType === LatencyDistributionChartType.transactionLatency
-        ? await getSearchAggregatedTransactions({
-            ...setup,
+        ? await getSearchTransactionsEvents({
+            config: resources.config,
+            apmEventClient,
             kuery,
             start,
             end,
@@ -83,7 +84,7 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
         : false;
 
     return getOverallLatencyDistribution({
-      setup,
+      apmEventClient,
       chartType,
       environment,
       kuery,

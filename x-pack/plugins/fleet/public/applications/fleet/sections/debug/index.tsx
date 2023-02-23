@@ -14,6 +14,7 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -24,6 +25,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { RequestError } from '../../hooks';
 import { useLink, useStartServices } from '../../hooks';
 
 import {
@@ -33,6 +35,7 @@ import {
   FleetIndexDebugger,
   SavedObjectDebugger,
   OrphanedIntegrationPolicyDebugger,
+  HealthCheckPanel,
 } from './components';
 
 // TODO: Evaluate moving this react-query initialization up to the main Fleet app
@@ -40,6 +43,13 @@ import {
 export const queryClient = new QueryClient();
 
 const panels = [
+  {
+    title: i18n.translate('xpack.fleet.debug.HealthCheckStatus.title', {
+      defaultMessage: 'Health Check Status',
+    }),
+    id: 'healthCheckStatus',
+    component: <HealthCheckPanel />,
+  },
   {
     title: i18n.translate('xpack.fleet.debug.agentPolicyDebugger.title', {
       defaultMessage: 'Agent Policy Debugger',
@@ -84,7 +94,10 @@ const panels = [
   },
 ];
 
-export const DebugPage: React.FunctionComponent = () => {
+export const DebugPage: React.FunctionComponent<{
+  isInitialized: boolean;
+  setupError: RequestError | null;
+}> = ({ isInitialized, setupError }) => {
   const { chrome } = useStartServices();
   const { getHref } = useLink();
 
@@ -92,93 +105,113 @@ export const DebugPage: React.FunctionComponent = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <EuiPage>
+      <EuiPage paddingSize="xl">
         <EuiPageBody panelled>
-          <EuiPageHeader
-            pageTitle={i18n.translate('xpack.fleet.debug.pageTitle', {
-              defaultMessage: 'Fleet Debugging Dashboard',
-            })}
-            iconType="wrench"
-          />
-          <EuiCallOut color="danger" iconType="alert" title="Danger zone">
-            <EuiText grow={false}>
-              <FormattedMessage
-                id="xpack.fleet.debug.dangerZone.description"
-                defaultMessage="This page provides an interface for directly managing Fleet's underlying data and diagnosing issues. Be aware that these debugging tools can be {strongDestructive} in nature and can result in {strongLossOfData}. Please proceed with caution."
-                values={{
-                  strongDestructive: (
-                    <strong>
-                      <FormattedMessage
-                        id="xpack.fleet.debug.dangerZone.destructive"
-                        defaultMessage="destructive"
-                      />
-                    </strong>
-                  ),
-                  strongLossOfData: (
-                    <strong>
-                      <FormattedMessage
-                        id="xpack.fleet.debug.dangerZone.lossOfData"
-                        defaultMessage="loss of data"
-                      />
-                    </strong>
-                  ),
-                }}
-              />
-            </EuiText>
-          </EuiCallOut>
-
-          <EuiSpacer size="xl" />
-
-          {panels.map(({ title, id, component }) => (
-            <>
-              <EuiAccordion
-                id={id}
-                initialIsOpen
-                buttonContent={
-                  <EuiTitle size="l">
-                    <h2>{title}</h2>
-                  </EuiTitle>
-                }
-              >
-                <EuiSpacer size="m" />
-                {component}
-              </EuiAccordion>
-
-              <EuiHorizontalRule />
-            </>
-          ))}
-
-          <EuiTitle size="l">
-            <h2>
-              <FormattedMessage
-                id="xpack.fleet.debug.usefulLinks.title"
-                defaultMessage="Useful links"
-              />
-            </h2>
-          </EuiTitle>
+          <EuiPageSection>
+            <EuiPageHeader
+              pageTitle={i18n.translate('xpack.fleet.debug.pageTitle', {
+                defaultMessage: 'Fleet Debugging Dashboard',
+              })}
+              iconType="wrench"
+            />
+            <EuiSpacer size="m" />
+            <EuiCallOut color="danger" iconType="alert" title="Danger zone">
+              <EuiText grow={false}>
+                <FormattedMessage
+                  id="xpack.fleet.debug.dangerZone.description"
+                  defaultMessage="This page provides an interface for directly managing Fleet's underlying data and diagnosing issues. Be aware that these debugging tools can be {strongDestructive} in nature and can result in {strongLossOfData}. Please proceed with caution."
+                  values={{
+                    strongDestructive: (
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.fleet.debug.dangerZone.destructive"
+                          defaultMessage="destructive"
+                        />
+                      </strong>
+                    ),
+                    strongLossOfData: (
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.fleet.debug.dangerZone.lossOfData"
+                          defaultMessage="loss of data"
+                        />
+                      </strong>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </EuiCallOut>
+            {!isInitialized && setupError?.message && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut color="danger" iconType="alert" title="Setup error">
+                  <EuiText grow={false}>
+                    <FormattedMessage
+                      id="xpack.fleet.debug.initializationError.description"
+                      defaultMessage="{message}. You can use this page to debug the error."
+                      values={{
+                        message: setupError?.message,
+                      }}
+                    />
+                  </EuiText>
+                </EuiCallOut>
+              </>
+            )}
+          </EuiPageSection>
 
           <EuiSpacer size="m" />
+          <EuiPageSection>
+            {panels.map(({ title, id, component }) => (
+              <>
+                <EuiAccordion
+                  id={id}
+                  initialIsOpen
+                  buttonContent={
+                    <EuiTitle size="l">
+                      <h2>{title}</h2>
+                    </EuiTitle>
+                  }
+                >
+                  <EuiSpacer size="m" />
+                  {component}
+                </EuiAccordion>
 
-          <EuiListGroup
-            listItems={[
-              {
-                label: i18n.translate('xpack.fleet.debug.usefulLinks.viewAgents', {
-                  defaultMessage: 'View Agents in Fleet UI',
-                }),
-                href: getHref('agent_list'),
-                iconType: 'agentApp',
-                target: '_blank',
-              },
-              {
-                label: i18n.translate('xpack.fleet.debug.usefulLinks.troubleshootingGuide', {
-                  defaultMessage: 'Troubleshooting Guide',
-                }),
-                href: 'https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html',
-                iconType: 'popout',
-                target: '_blank',
-              },
-            ]}
-          />
+                <EuiHorizontalRule />
+              </>
+            ))}
+
+            <EuiTitle size="l">
+              <h2>
+                <FormattedMessage
+                  id="xpack.fleet.debug.usefulLinks.title"
+                  defaultMessage="Useful links"
+                />
+              </h2>
+            </EuiTitle>
+
+            <EuiSpacer size="m" />
+
+            <EuiListGroup
+              listItems={[
+                {
+                  label: i18n.translate('xpack.fleet.debug.usefulLinks.viewAgents', {
+                    defaultMessage: 'View Agents in Fleet UI',
+                  }),
+                  href: getHref('agent_list'),
+                  iconType: 'agentApp',
+                  target: '_blank',
+                },
+                {
+                  label: i18n.translate('xpack.fleet.debug.usefulLinks.troubleshootingGuide', {
+                    defaultMessage: 'Troubleshooting Guide',
+                  }),
+                  href: 'https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html',
+                  iconType: 'popout',
+                  target: '_blank',
+                },
+              ]}
+            />
+          </EuiPageSection>
         </EuiPageBody>
       </EuiPage>
       <ReactQueryDevtools initialIsOpen={false} />

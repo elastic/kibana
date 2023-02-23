@@ -1,0 +1,154 @@
+{
+  "id": "@kbn/shared-ux-file-upload",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-upload",
+        "id": "def-common.FileUpload",
+        "type": "Function",
+        "tags": [],
+        "label": "FileUpload",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/shared-ux-file-upload",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileUploadPluginApi",
+            "section": "def-common.FileUploadProps",
+            "text": "FileUploadProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/file/file_upload/impl/src/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-upload",
+            "id": "def-common.FileUpload.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-file-upload",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileUploadPluginApi",
+                "section": "def-common.FileUploadProps",
+                "text": "FileUploadProps"
+              }
+            ],
+            "path": "packages/shared-ux/file/file_upload/impl/src/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-upload",
+        "id": "def-common.DoneNotification",
+        "type": "Interface",
+        "tags": [],
+        "label": "DoneNotification",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-file-upload",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileUploadPluginApi",
+            "section": "def-common.DoneNotification",
+            "text": "DoneNotification"
+          },
+          "<Meta>"
+        ],
+        "path": "packages/shared-ux/file/file_upload/impl/src/upload_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-upload",
+            "id": "def-common.DoneNotification.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/shared-ux/file/file_upload/impl/src/upload_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-upload",
+            "id": "def-common.DoneNotification.kind",
+            "type": "string",
+            "tags": [],
+            "label": "kind",
+            "description": [],
+            "path": "packages/shared-ux/file/file_upload/impl/src/upload_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-upload",
+            "id": "def-common.DoneNotification.fileJSON",
+            "type": "Object",
+            "tags": [],
+            "label": "fileJSON",
+            "description": [],
+            "signature": [
+              "FileJSON",
+              "<Meta>"
+            ],
+            "path": "packages/shared-ux/file/file_upload/impl/src/upload_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-upload",
+        "id": "def-common.FileUploadProps",
+        "type": "Type",
+        "tags": [],
+        "label": "FileUploadProps",
+        "description": [],
+        "signature": [
+          "Props",
+          "<string> & { lazyLoadFallback?: React.ReactNode; }"
+        ],
+        "path": "packages/shared-ux/file/file_upload/impl/src/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -31,7 +31,7 @@ describe('Smoke test cloning an existing rollup job from job list', () => {
   let startMock;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     startMock = coreMock.createStart();
     setHttp(startMock.http);
   });

@@ -68,7 +68,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
       setIsValid(aggFieldPair !== null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [aggFieldPair]);
+  }, [jobCreator, aggFieldPair]);
 
   useEffect(() => {
     if (jobCreator.start !== start || jobCreator.end !== end) {
@@ -82,7 +82,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
       loadChart();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobCreatorUpdated]);
+  }, [jobCreator, jobCreatorUpdated]);
 
   async function loadChart() {
     if (aggFieldPair !== null) {

@@ -13,8 +13,8 @@ import {
   caseUserActions,
   getAlertUserAction,
 } from '../../containers/mock';
-import { Case } from '../../containers/types';
-import { CaseViewProps } from './types';
+import type { Case } from '../../containers/types';
+import type { CaseViewProps } from './types';
 
 export const alertsHit = [
   {
@@ -99,13 +99,8 @@ export const defaultUpdateCaseState = {
   updateCaseProperty: jest.fn(),
 };
 
-export const defaultUseGetCaseUserActions = {
-  data: {
-    caseUserActions: [...caseUserActions, getAlertUserAction()],
-    caseServices: {},
-    hasDataToPush: false,
-    participants: [caseData.createdBy],
-  },
+export const defaultUseFindCaseUserActions = {
+  data: { userActions: [...caseUserActions, getAlertUserAction()] },
   refetch: jest.fn(),
   isLoading: false,
   isFetching: false,

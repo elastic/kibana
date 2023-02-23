@@ -14,7 +14,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TimestampTableCell } from '../../components/timestamp_table_cell';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import type { RuleSavedObject } from './use_csp_rules';
@@ -55,7 +54,7 @@ export const RulesTable = ({
   };
 
   const rowProps = (row: RuleSavedObject) => ({
-    ['data-test-subj']: TEST_SUBJECTS.getCspRulesTableRowItemTestId(row.id),
+    ['data-test-subj']: TEST_SUBJECTS.getCspRuleTemplatesTableRowItemTestId(row.id),
     style: { background: row.id === selectedRuleId ? euiTheme.colors.highlight : undefined },
     onClick: (e: MouseEvent) => {
       const tag = (e.target as HTMLDivElement).tagName;
@@ -112,13 +111,5 @@ const getColumns = ({
       defaultMessage: 'CIS Section',
     }),
     width: '15%',
-  },
-  {
-    field: 'updatedAt',
-    name: i18n.translate('xpack.csp.rules.rulesTable.lastModifiedColumnLabel', {
-      defaultMessage: 'Last Modified',
-    }),
-    width: '15%',
-    render: (timestamp) => <TimestampTableCell timestamp={timestamp} />,
   },
 ];

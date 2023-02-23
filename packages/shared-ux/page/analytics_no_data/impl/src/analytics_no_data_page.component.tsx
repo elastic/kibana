@@ -17,6 +17,10 @@ export interface Props {
   kibanaGuideDocLink: string;
   /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
+  /** if set to true allows creation of an ad-hoc dataview from data view editor */
+  allowAdHocDataView?: boolean;
+  /** if the kibana instance is customly branded */
+  showPlainSpinner: boolean;
 }
 
 const solution = i18n.translate('sharedUXPackages.noDataConfig.analytics', {
@@ -41,7 +45,12 @@ const addIntegrationsDescription = i18n.translate(
 /**
  * A pure component of an entire page that can be displayed when Kibana "has no data", specifically for Analytics.
  */
-export const AnalyticsNoDataPage = ({ kibanaGuideDocLink, onDataViewCreated }: Props) => {
+export const AnalyticsNoDataPage = ({
+  kibanaGuideDocLink,
+  onDataViewCreated,
+  allowAdHocDataView,
+  showPlainSpinner,
+}: Props) => {
   const noDataConfig = {
     solution,
     pageTitle,
@@ -56,5 +65,9 @@ export const AnalyticsNoDataPage = ({ kibanaGuideDocLink, onDataViewCreated }: P
     docsLink: kibanaGuideDocLink,
   };
 
-  return <KibanaNoDataPage {...{ noDataConfig, onDataViewCreated }} />;
+  return (
+    <KibanaNoDataPage
+      {...{ noDataConfig, onDataViewCreated, allowAdHocDataView, showPlainSpinner }}
+    />
+  );
 };

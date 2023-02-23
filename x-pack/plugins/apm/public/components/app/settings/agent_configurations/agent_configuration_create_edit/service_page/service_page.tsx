@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiCallOut,
+} from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
@@ -14,12 +20,16 @@ import { AgentConfigurationIntake } from '../../../../../../../common/agent_conf
 import {
   omitAllOption,
   getOptionLabel,
+  ALL_OPTION_VALUE,
 } from '../../../../../../../common/agent_configuration/all_option';
 import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { FormRowSelect } from './form_row_select';
 import { LegacyAPMLink } from '../../../../../shared/links/apm/apm_link';
 import { FormRowSuggestionsSelect } from './form_row_suggestions_select';
-import { SERVICE_NAME } from '../../../../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../../../../../common/es_fields/apm';
+import { isOpenTelemetryAgentName } from '../../../../../../../common/agent_name';
+import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
+
 interface Props {
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
@@ -81,6 +91,26 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     })
   );
 
+  const isAgentConfigurationSupported =
+    !newConfig.agent_name ||
+    (newConfig.agent_name &&
+      !isOpenTelemetryAgentName(newConfig.agent_name as AgentName));
+
+  const INCORRECT_SERVICE_NAME_TRANSLATED = i18n.translate(
+    'xpack.apm.settings.agentConfiguration.service.otel.error',
+    {
+      defaultMessage:
+        'Selected service uses an OpenTelemetry agent, which is not supported',
+    }
+  );
+
+  const isAllOptionSelected = newConfig.service.name === ALL_OPTION_VALUE;
+  const isSaveButtonDisabled =
+    !newConfig.service.name ||
+    !newConfig.service.environment ||
+    agentNameStatus === FETCH_STATUS.LOADING ||
+    !isAgentConfigurationSupported;
+
   return (
     <>
       {/* Service name options */}
@@ -106,7 +136,22 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           }));
         }}
         dataTestSubj="serviceNameComboBox"
+        isInvalid={!isAgentConfigurationSupported}
+        error={INCORRECT_SERVICE_NAME_TRANSLATED}
       />
+      {isAllOptionSelected && (
+        <EuiCallOut
+          color="warning"
+          iconType="alert"
+          title={i18n.translate(
+            'xpack.apm.settings.agentConfiguration.all.option.calloutTitle',
+            {
+              defaultMessage:
+                'This configuration change will impact all services, except those that use an OpenTelemetry agent. ',
+            }
+          )}
+        />
+      )}
       {/* Environment options */}
       <FormRowSelect
         title={i18n.translate(
@@ -159,11 +204,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
             fill
             onClick={onClickNext}
             isLoading={agentNameStatus === FETCH_STATUS.LOADING}
-            isDisabled={
-              !newConfig.service.name ||
-              !newConfig.service.environment ||
-              agentNameStatus === FETCH_STATUS.LOADING
-            }
+            isDisabled={isSaveButtonDisabled}
           >
             {i18n.translate(
               'xpack.apm.agentConfig.saveConfigurationButtonLabel',

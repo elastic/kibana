@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { CommandResponseActionApiState } from './hooks/use_console_action_submitter';
 import type { ManagedConsoleExtensionComponentProps } from '../console';
-import type { ActionDetails, HostMetadata } from '../../../../common/endpoint/types';
+import type { HostMetadata } from '../../../../common/endpoint/types';
 import type { CommandExecutionComponentProps } from '../console/types';
 
 export interface EndpointCommandDefinitionMeta {
@@ -17,16 +18,9 @@ export type EndpointResponderExtensionComponentProps = ManagedConsoleExtensionCo
   endpoint: HostMetadata;
 }>;
 
-export interface ActionRequestState {
-  requestSent: boolean;
-  actionId?: string;
-}
-
-export type ActionRequestComponentProps = CommandExecutionComponentProps<
-  { comment?: string },
-  {
-    actionRequest?: ActionRequestState;
-    completedActionDetails?: ActionDetails;
-  },
-  EndpointCommandDefinitionMeta
->;
+export type ActionRequestComponentProps<TArgs extends object = object> =
+  CommandExecutionComponentProps<
+    { comment?: string } & TArgs,
+    CommandResponseActionApiState,
+    EndpointCommandDefinitionMeta
+  >;

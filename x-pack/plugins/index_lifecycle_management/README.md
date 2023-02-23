@@ -116,3 +116,7 @@ this by running:
 ```bash
 yarn es snapshot --license=trial
 ```
+
+## Integration tests
+
+See `./integration_tests/README.md`

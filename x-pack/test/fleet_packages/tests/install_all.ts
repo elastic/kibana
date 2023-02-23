@@ -22,11 +22,29 @@ export default function (providerContext: FtrProviderContext) {
   function installPackage(
     name: string,
     version: string
-  ): Promise<{ name: string; success: boolean; error?: any }> {
+  ): Promise<{ name: string; version: string; success: boolean; error?: any; took?: number }> {
+    const start = Date.now();
     return supertest
       .post(`/api/fleet/epm/packages/${name}/${version}`)
       .set('kbn-xsrf', 'xxx')
       .send({ force: true })
+      .expect(200)
+      .then(() => {
+        const end = Date.now();
+        return { name, version, success: true, took: (end - start) / 1000 };
+      })
+      .catch((error) => {
+        return { name, version, success: false, error };
+      });
+  }
+
+  async function deletePackage(
+    name: string,
+    version: string
+  ): Promise<{ name: string; success: boolean; error?: any }> {
+    return supertest
+      .delete(`/api/fleet/epm/packages/${name}/${version}`)
+      .set('kbn-xsrf', 'xxx')
       .expect(200)
       .then(() => {
         return { name, success: true };
@@ -41,22 +59,34 @@ export default function (providerContext: FtrProviderContext) {
     it('should work and install all packages', async () => {
       const {
         body: { items: packages },
-      } = await supertest.get('/api/fleet/epm/packages').expect(200);
+      } = await supertest.get('/api/fleet/epm/packages?prerelease=true').expect(200);
       const allResults = [];
       for (const pkg of packages) {
-        const pkgName = `${pkg.name}@${pkg.version}`;
+        // skip deprecated failing package https://github.com/elastic/integrations/issues/4947
+        if (pkg.name === 'zscaler') continue;
         const res = await installPackage(pkg.name, pkg.version);
         allResults.push(res);
+        if (res.success) {
+          await deletePackage(pkg.name, pkg.version);
+        }
+      }
+      const succeededInstall = allResults
+        .filter((res) => res.success === true)
+        .sort((a, b) => (b.took ?? 0) - (a.took ?? 0));
+      succeededInstall.forEach((res) => {
+        const pkgName = `${res.name}@${res.version}`;
         if (!res.success) {
           logger.info(`❌ ${pkgName} failed: ${res?.error?.message}`);
         } else {
-          logger.info(`✅ ${pkgName}`);
+          logger.info(`✅ ${pkgName} took ${res.took}s`);
         }
-      }
+      });
       const failedInstall = allResults.filter((res) => res.success === false);
       if (failedInstall.length) {
         throw new Error(
-          `Some package installe failed: ${failedInstall.map((res) => res.name).join(', ')}`
+          `Some package install failed: ${failedInstall
+            .map((res) => `${res.name}@${res.version}`)
+            .join(', ')}`
         );
       }
     });

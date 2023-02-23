@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';

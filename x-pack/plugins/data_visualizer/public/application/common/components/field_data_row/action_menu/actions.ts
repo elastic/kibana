@@ -10,14 +10,11 @@ import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { MutableRefObject } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { mlTimefilterRefresh$, Refresh } from '@kbn/ml-date-picker';
 import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
 import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { FieldVisConfig } from '../../stats_table/types';
 import { DataVisualizerKibanaReactContextValue } from '../../../../kibana_context';
-import {
-  dataVisualizerRefresh$,
-  Refresh,
-} from '../../../../index_data_visualizer/services/timefilter_refresh_service';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
 import { APP_ID } from '../../../../../../common/constants';
 
@@ -36,7 +33,7 @@ export function getActions(
     const refresh: Refresh = {
       lastRefresh: Date.now(),
     };
-    dataVisualizerRefresh$.next(refresh);
+    mlTimefilterRefresh$.next(refresh);
   };
   // Navigate to Lens with prefilled chart for data field
   if (services.application?.capabilities?.visualize?.show === true && lensPlugin !== undefined) {

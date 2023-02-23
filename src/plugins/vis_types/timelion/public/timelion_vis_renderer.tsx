@@ -43,7 +43,7 @@ export const getTimelionVisRenderer: (
   name: 'timelion_vis',
   displayName: 'Timelion visualization',
   reuseDomNode: true,
-  render: (domNode, { visData, visParams, syncTooltips }, handlers) => {
+  render: (domNode, { visData, visParams, syncTooltips, syncCursor }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
@@ -99,6 +99,7 @@ export const getTimelionVisRenderer: (
                 renderComplete={renderComplete}
                 onBrushEvent={onBrushEvent}
                 syncTooltips={syncTooltips}
+                syncCursor={syncCursor}
               />
             )}
           </KibanaContextProvider>

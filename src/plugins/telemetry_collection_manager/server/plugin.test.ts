@@ -136,6 +136,15 @@ describe('Telemetry Collection Manager', () => {
             ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
 
+          test('caches the promise calling `getStats` for concurrent requests', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
+            await Promise.all([setupApi.getStats(config), setupApi.getStats(config)]);
+            expect(collectionStrategy.statsGetter).toHaveBeenCalledTimes(1);
+          });
+
           it('calls getStats with passed refreshCache config', async () => {
             const getStatsCollectionConfig: jest.SpyInstance<
               TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
@@ -269,6 +278,15 @@ describe('Telemetry Collection Manager', () => {
             );
 
             getStatsCollectionConfig.mockRestore();
+          });
+
+          test('does not cache the promise calling `getStats` for concurrent requests', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
+            await Promise.all([setupApi.getStats(config), setupApi.getStats(config)]);
+            expect(collectionStrategy.statsGetter).toHaveBeenCalledTimes(2);
           });
         });
 

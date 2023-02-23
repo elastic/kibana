@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { RowRendererId } from '..';
-import { Ecs } from '../../../ecs';
 
 export interface RowRenderer {
   id: RowRendererId;
@@ -15,11 +15,11 @@ export interface RowRenderer {
     contextId,
     data,
     isDraggable,
-    timelineId,
+    scopeId,
   }: {
     contextId?: string;
     data: Ecs;
     isDraggable: boolean;
-    timelineId: string;
+    scopeId: string;
   }) => React.ReactNode;
 }

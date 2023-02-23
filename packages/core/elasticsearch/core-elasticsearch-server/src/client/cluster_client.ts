@@ -7,8 +7,8 @@
  */
 
 import type { ElasticsearchClient } from './client';
-import { ScopeableRequest } from './scopeable_request';
-import { IScopedClusterClient } from './scoped_cluster_client';
+import type { ScopeableRequest } from './scopeable_request';
+import type { IScopedClusterClient } from './scoped_cluster_client';
 
 /**
  * Represents an Elasticsearch cluster API client created by the platform.

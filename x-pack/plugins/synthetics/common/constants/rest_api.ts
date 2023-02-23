@@ -45,7 +45,11 @@ export enum API_URLS {
   TRIGGER_MONITOR = '/internal/uptime/service/monitors/trigger',
   SERVICE_ALLOWED = '/internal/uptime/service/allowed',
   SYNTHETICS_APIKEY = '/internal/uptime/service/api_key',
+  SYNTHETICS_HAS_INTEGRATION_MONITORS = '/internal/uptime/fleet/has_integration_monitors',
 
   // Project monitor public endpoint
-  SYNTHETICS_MONITORS_PROJECT = '/api/synthetics/service/project/monitors',
+  SYNTHETICS_MONITORS_PROJECT = '/api/synthetics/project/{projectName}/monitors',
+  SYNTHETICS_MONITORS_PROJECT_UPDATE = '/api/synthetics/project/{projectName}/monitors/_bulk_update',
+  SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
+  SYNTHETICS_MONITORS_PROJECT_LEGACY = '/api/synthetics/service/project/monitors',
 }

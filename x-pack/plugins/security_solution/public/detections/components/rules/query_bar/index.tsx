@@ -17,9 +17,6 @@ import type { BrowserFields } from '../../../../common/containers/source';
 import { OpenTimelineModal } from '../../../../timelines/components/open_timeline/open_timeline_modal';
 import type { ActionTimelineToShow } from '../../../../timelines/components/open_timeline/types';
 import { QueryBar } from '../../../../common/components/query_bar';
-import { buildGlobalQuery } from '../../../../timelines/components/timeline/helpers';
-import { getDataProviderFilter } from '../../../../timelines/components/timeline/query_bar';
-import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
@@ -53,6 +50,8 @@ export interface QueryBarDefineRuleProps {
    * called when fetching of saved query fails
    */
   onSavedQueryError?: () => void;
+  defaultSavedQuery?: SavedQuery | undefined;
+  onOpenTimeline?: (timeline: TimelineModel) => void;
 }
 
 const actionTimelineToHide: ActionTimelineToShow[] = ['duplicate', 'createFrom'];
@@ -70,9 +69,11 @@ const savedQueryToFieldValue = (savedQuery: SavedQuery): FieldValueQueryBar => (
   filters: savedQuery.attributes.filters ?? [],
   query: savedQuery.attributes.query,
   saved_id: savedQuery.id,
+  title: savedQuery.attributes.title,
 });
 
 export const QueryBarDefineRule = ({
+  defaultSavedQuery,
   browserFields,
   dataTestSubj,
   field,
@@ -85,12 +86,13 @@ export const QueryBarDefineRule = ({
   onValidityChange,
   isDisabled,
   resetToSavedQuery,
+  onOpenTimeline,
   onSavedQueryError,
 }: QueryBarDefineRuleProps) => {
   const { value: fieldValue, setValue: setFieldValue } = field as FieldHook<FieldValueQueryBar>;
   const [originalHeight, setOriginalHeight] = useState(-1);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
-  const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
+  const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(defaultSavedQuery);
   const [isSavedQueryFailedToLoad, setIsSavedQueryFailedToLoad] = useState(false);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
@@ -231,31 +233,12 @@ export const QueryBarDefineRule = ({
     onCloseTimelineSearch();
   }, [onCloseTimelineSearch]);
 
-  const onOpenTimeline = useCallback(
+  const onOpenTimelineCb = useCallback(
     (timeline: TimelineModel) => {
       setLoadingTimeline(false);
-      const newQuery = {
-        query: timeline.kqlQuery.filterQuery?.kuery?.expression ?? '',
-        language: timeline.kqlQuery.filterQuery?.kuery?.kind ?? 'kuery',
-      };
-      const dataProvidersDsl =
-        timeline.dataProviders != null && timeline.dataProviders.length > 0
-          ? convertKueryToElasticSearchQuery(
-              buildGlobalQuery(timeline.dataProviders, browserFields),
-              indexPattern
-            )
-          : '';
-      const newFilters = timeline.filters ?? [];
-      setFieldValue({
-        filters:
-          dataProvidersDsl !== ''
-            ? [...newFilters, getDataProviderFilter(dataProvidersDsl)]
-            : newFilters,
-        query: newQuery,
-        saved_id: null,
-      });
+      onOpenTimeline?.(timeline);
     },
-    [browserFields, indexPattern, setFieldValue]
+    [onOpenTimeline]
   );
 
   const onMutation = () => {
@@ -321,7 +304,7 @@ export const QueryBarDefineRule = ({
           hideActions={actionTimelineToHide}
           modalTitle={i18n.IMPORT_TIMELINE_MODAL}
           onClose={onCloseTimelineModal}
-          onOpen={onOpenTimeline}
+          onOpen={onOpenTimelineCb}
         />
       ) : null}
     </>

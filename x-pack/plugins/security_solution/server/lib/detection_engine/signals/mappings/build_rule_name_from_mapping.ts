@@ -7,22 +7,23 @@
 
 import * as t from 'io-ts';
 import { get } from 'lodash/fp';
+
 import type {
-  Meta,
-  Name,
-  RuleNameOverrideOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+  RuleMetadata,
+  RuleName,
+  RuleNameOverride,
+} from '../../../../../common/detection_engine/rule_schema';
 import type { SignalSource } from '../types';
 
 interface BuildRuleNameFromMappingProps {
   eventSource: SignalSource;
-  ruleName: Name;
-  ruleNameMapping: RuleNameOverrideOrUndefined;
+  ruleName: RuleName;
+  ruleNameMapping: RuleNameOverride | undefined;
 }
 
 interface BuildRuleNameFromMappingReturn {
-  ruleName: Name;
-  ruleNameMeta: Meta; // TODO: Stricter types
+  ruleName: RuleName;
+  ruleNameMeta: RuleMetadata; // TODO: Stricter types
 }
 
 export const buildRuleNameFromMapping = ({

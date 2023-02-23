@@ -6,12 +6,6 @@ that you've created in *Discover*.
 Saved searches are good for adding search results to a dashboard,
 and can also serve as a foundation for building visualizations.
 
-A saved search stores the query text, filters, and
-current view of *Discover*, including the columns selected in the document table,
-the sort order, and the {data-source}.
-Saved searches are different from <<save-load-delete-query,saved queries>>, which
-are for storing query text and are available in any app with a query bar.
-
 [role="xpack"]
 [[discover-read-only-access]]
 [float]
@@ -24,8 +18,13 @@ image::discover/images/read-only-badge.png[Example of Discover's read only acces
 [float]
 === Save a search
 
-. Once you've created a search worth saving in *Discover*, click *Save* in the toolbar.
-. Enter a name for the search and click *Save*.
+By default, a saved search stores the query text, filters, and
+current view of *Discover*, including the columns and sort order in the document table, and the {data-source}.
+
+. Once you've created a search worth saving, click *Save* in the toolbar.
+. Enter a name for the search.
+. Optionally store <<managing-tags,tags>> and the time range with the search.
+. Click *Save*.
 . To reload your search results in *Discover*, click *Open* in the toolbar, and select the saved search.
 +
 If the saved search is associated with a different {data-source} than is currently

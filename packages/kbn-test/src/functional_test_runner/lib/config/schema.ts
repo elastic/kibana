@@ -261,6 +261,13 @@ export const schema = Joi.object()
     apps: Joi.object().pattern(ID_PATTERN, appUrlPartsSchema()).default(),
 
     // settings for the saved objects svc
+    esArchiver: Joi.object()
+      .keys({
+        baseDirectory: Joi.string().optional(),
+      })
+      .default(),
+
+    // settings for the saved objects svc
     kbnArchiver: Joi.object()
       .keys({
         directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/kbn_archiver')),

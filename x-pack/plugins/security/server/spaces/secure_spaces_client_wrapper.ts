@@ -7,23 +7,21 @@
 
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import type { KibanaRequest, SavedObjectsClient } from '@kbn/core/server';
 import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
   ISpacesClient,
-  LegacyUrlAliasTarget,
   Space,
 } from '@kbn/spaces-plugin/server';
 
-import { ALL_SPACES_ID } from '../../common/constants';
 import type { AuditLogger } from '../audit';
-import { SavedObjectAction, savedObjectEvent, SpaceAuditAction, spaceAuditEvent } from '../audit';
+import { SpaceAuditAction, spaceAuditEvent } from '../audit';
 import type { AuthorizationServiceSetup } from '../authorization';
 import type { SecurityPluginSetup } from '../plugin';
-import type { EnsureAuthorizedDependencies, EnsureAuthorizedOptions } from '../saved_objects';
-import { ensureAuthorized, isAuthorizedForObjectInAllSpaces } from '../saved_objects';
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetAllSpacesPurpose,
@@ -52,7 +50,8 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     private readonly request: KibanaRequest,
     private readonly authorization: AuthorizationServiceSetup,
     private readonly auditLogger: AuditLogger,
-    private readonly errors: typeof SavedObjectsErrorHelpers
+    private readonly errors: SavedObjectsClient['errors'],
+    private readonly securityExtension: ISavedObjectsSecurityExtension | undefined
   ) {
     this.useRbac = this.authorization.mode.useRbacForRequest(this.request);
   }
@@ -271,28 +270,13 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     }
 
     // Fetch saved objects to be removed for audit logging
-    if (this.auditLogger.enabled) {
+    // If RBAC is enabled, the securityExtension should definitely be defined, but we check just in case
+    const securityExtension = this.securityExtension;
+    if (this.auditLogger.enabled && securityExtension !== undefined) {
       const finder = this.spacesClient.createSavedObjectFinder(id);
       try {
         for await (const response of finder.find()) {
-          response.saved_objects.forEach((savedObject) => {
-            const { namespaces = [] } = savedObject;
-            const isOnlySpace = namespaces.length === 1; // We can always rely on the `namespaces` field having >=1 element
-            if (namespaces.includes(ALL_SPACES_ID) && !namespaces.includes(id)) {
-              // This object exists in All Spaces and its `namespaces` field isn't going to change; there's nothing to audit
-              return;
-            }
-            this.auditLogger.log(
-              savedObjectEvent({
-                action: isOnlySpace
-                  ? SavedObjectAction.DELETE
-                  : SavedObjectAction.UPDATE_OBJECTS_SPACES,
-                outcome: 'unknown',
-                savedObject: { type: savedObject.type, id: savedObject.id },
-                deleteFromSpaces: [id],
-              })
-            );
-          });
+          this.securityExtension?.auditObjectsForSpaceDeletion(id, response.saved_objects);
         }
       } finally {
         await finder.close();
@@ -311,81 +295,14 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
   }
 
   public async disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {
-    if (this.useRbac) {
-      try {
-        const [uniqueSpaces, uniqueTypes, typesAndSpacesMap] = aliases.reduce(
-          ([spaces, types, typesAndSpaces], { targetSpace, targetType }) => {
-            const spacesForType = typesAndSpaces.get(targetType) ?? new Set();
-            return [
-              spaces.add(targetSpace),
-              types.add(targetType),
-              typesAndSpaces.set(targetType, spacesForType.add(targetSpace)),
-            ];
-          },
-          [new Set<string>(), new Set<string>(), new Map<string, Set<string>>()]
-        );
-
-        const action = 'bulk_update';
-        const { typeActionMap } = await this.ensureAuthorizedForSavedObjects(
-          Array.from(uniqueTypes),
-          [action],
-          Array.from(uniqueSpaces),
-          { requireFullAuthorization: false }
-        );
-        const unauthorizedTypes = new Set<string>();
-        for (const type of uniqueTypes) {
-          const spaces = Array.from(typesAndSpacesMap.get(type)!);
-          if (!isAuthorizedForObjectInAllSpaces(type, action, typeActionMap, spaces)) {
-            unauthorizedTypes.add(type);
-          }
-        }
-        if (unauthorizedTypes.size > 0) {
-          const targetTypes = Array.from(unauthorizedTypes).sort().join(',');
-          const msg = `Unable to disable aliases for ${targetTypes}`;
-          throw this.errors.decorateForbiddenError(new Error(msg));
-        }
-      } catch (error) {
-        aliases.forEach((alias) => {
-          const id = getAliasId(alias);
-          this.auditLogger.log(
-            savedObjectEvent({
-              action: SavedObjectAction.UPDATE,
-              savedObject: { type: LEGACY_URL_ALIAS_TYPE, id },
-              error,
-            })
-          );
-        });
-        throw error;
-      }
-    }
-
-    aliases.forEach((alias) => {
-      const id = getAliasId(alias);
-      this.auditLogger.log(
-        savedObjectEvent({
-          action: SavedObjectAction.UPDATE,
-          outcome: 'unknown',
-          savedObject: { type: LEGACY_URL_ALIAS_TYPE, id },
-        })
+    try {
+      await this.securityExtension?.authorizeDisableLegacyUrlAliases(aliases); // will throw if unauthorized
+    } catch (err) {
+      throw this.errors.decorateForbiddenError(
+        new Error(`Unable to disable aliases: ${err.message}`)
       );
-    });
-
+    }
     return this.spacesClient.disableLegacyUrlAliases(aliases);
-  }
-
-  private async ensureAuthorizedForSavedObjects<T extends string>(
-    types: string[],
-    actions: T[],
-    namespaces: string[],
-    options?: EnsureAuthorizedOptions
-  ) {
-    const ensureAuthorizedDependencies: EnsureAuthorizedDependencies = {
-      actions: this.authorization.actions,
-      errors: this.errors,
-      checkSavedObjectsPrivilegesAsCurrentUser:
-        this.authorization.checkSavedObjectsPrivilegesWithRequest(this.request),
-    };
-    return ensureAuthorized(ensureAuthorizedDependencies, types, actions, namespaces, options);
   }
 
   private async ensureAuthorizedGlobally(action: string, forbiddenMessage: string) {

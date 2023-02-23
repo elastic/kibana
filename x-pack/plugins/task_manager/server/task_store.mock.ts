@@ -20,11 +20,13 @@ export const taskStoreMock = {
       schedule: jest.fn(),
       bulkSchedule: jest.fn(),
       bulkUpdate: jest.fn(),
+      bulkRemove: jest.fn(),
       get: jest.fn(),
       getLifecycle: jest.fn(),
       fetch: jest.fn(),
       aggregate: jest.fn(),
       updateByQuery: jest.fn(),
+      bulkGet: jest.fn(),
       index,
       taskManagerId,
     } as unknown as jest.Mocked<TaskStore>;

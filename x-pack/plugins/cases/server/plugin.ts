@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IContextProvider,
   KibanaRequest,
   Logger,
@@ -14,25 +14,27 @@ import {
   CoreStart,
 } from '@kbn/core/server';
 
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import {
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
   PluginStartContract as FeaturesPluginStart,
   PluginSetupContract as FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
-import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import {
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { APP_ID } from '../common/constants';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 
+import { APP_ID } from '../common/constants';
 import {
   createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
@@ -42,7 +44,7 @@ import {
   casesTelemetrySavedObjectType,
 } from './saved_object_types';
 
-import { CasesClient } from './client';
+import type { CasesClient } from './client';
 import type { CasesRequestHandlerContext, PluginSetupContract, PluginStartContract } from './types';
 import { CasesClientFactory } from './client/factory';
 import { getCasesKibanaFeature } from './features';
@@ -71,7 +73,9 @@ export interface PluginsStart {
   licensing: LicensingPluginStart;
   taskManager?: TaskManagerStartContract;
   security: SecurityPluginStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
+  notifications: NotificationsPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
 }
 
 export class CasePlugin {
@@ -198,6 +202,9 @@ export class CasePlugin {
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+      publicBaseUrl: core.http.basePath.publicBaseUrl,
+      notifications: plugins.notifications,
+      ruleRegistry: plugins.ruleRegistry,
     });
 
     const client = core.elasticsearch.client;

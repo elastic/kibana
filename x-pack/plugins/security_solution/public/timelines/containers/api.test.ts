@@ -9,7 +9,7 @@ import * as api from './api';
 import { KibanaServices } from '../../common/lib/kibana';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '../../../common/constants';
-import type { ImportDataProps } from '../../detections/containers/detection_engine/rules/types';
+import type { ImportDataProps } from '../../detection_engine/rule_management/logic/types';
 
 jest.mock('../../common/lib/kibana', () => {
   return {

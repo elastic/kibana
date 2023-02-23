@@ -6,6 +6,12 @@
 
 Update the attributes for an existing rule.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification]. For a preview, check out <<rule-apis>>.
+====
+
 [[update-rule-api-request]]
 === {api-request-title}
 
@@ -20,7 +26,7 @@ the `consumer` and `rule_type_id` of the rule you're updating. For example, the
 *Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
 features, *{observability}*, or *Security* features. If the rule has
 `actions`, you must also have `read` privileges for the *Management* >
-*Actions and Connectors* feature. For more details, refer to
+*{connectors-feature}* feature. For more details, refer to
 <<kibana-feature-privileges>>.
 
 === {api-description-title}
@@ -132,7 +138,6 @@ PUT api/alerting/rule/ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
     "timeWindowUnit":"m",
     "thresholdComparator":">",
     "threshold":[1000],
-    "aggType":"avg",
     "aggField":"sheet.version",
     "termField":"name.keyword",
     "termSize":6
@@ -180,16 +185,28 @@ The API returns the following:
   "updated_by": "elastic",
   "rule_type_id": ".index-threshold",
   "scheduled_task_id": "4c5eda00-e74f-11ec-b72f-5b18752ff9ea",
-  "created_at": "2022-06-08T17:20:31.632Z",
-  "updated_at": "2022-06-09T23:36:36.090Z",
+  "created_at": "2022-12-12T22:43:20.578Z",
+  "updated_at": "2022-12-12T22:44:21.783Z",
   "notify_when": "onActionGroupChange",
   "mute_all": false,
   "muted_alert_ids": [],
   "execution_status": {
     "status": "ok",
-    "last_execution_date": "2022-06-09T23:36:17.332Z",
-    "last_duration": 577
+    "last_execution_date": "2022-12-12T22:43:21.723Z",
+    "last_duration": 125
   },
-  "actions":[]
+  "actions":[],
+  "last_run":{
+    "alerts_count": {
+      "new": 0,
+      "ignored": 0,
+      "recovered": 0,
+      "active": 0
+    },
+    "outcome_msg" :null,
+    "warning": null,
+    "outcome": "succeeded"
+  },
+  "next_run": "2022-12-12T22:44:21.653Z"
 }
 --------------------------------------------------

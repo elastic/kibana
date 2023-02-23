@@ -6,7 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/server';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { validateJobObject } from './validate_job_object';

@@ -31,7 +31,7 @@ import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { flashSuccessToast } from '../../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
-import { FetchIndexApiLogic } from '../../../../api/index/fetch_index_api_logic';
+import { CachedFetchIndexApiLogic } from '../../../../api/index/cached_fetch_index_api_logic';
 import { NEW_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../../../routes';
 import { isConnectorIndex } from '../../../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../../../layout';
@@ -44,7 +44,7 @@ import { ConnectorCheckable } from './connector_checkable';
 import { SelectConnectorLogic } from './select_connector_logic';
 
 export const SelectConnector: React.FC = () => {
-  const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
+  const { indexData, status: indexApiStatus } = useValues(CachedFetchIndexApiLogic);
   const { selectedNativeConnector } = useValues(SelectConnectorLogic);
   const { saveNativeConnector, setSelectedConnector } = useActions(SelectConnectorLogic);
 
@@ -125,9 +125,10 @@ export const SelectConnector: React.FC = () => {
           <EuiSpacer size="s" />
           <EuiFlexGroup direction="row">
             {NATIVE_CONNECTORS.map((nativeConnector) => (
-              <EuiFlexItem>
+              <EuiFlexItem key={nativeConnector.name}>
                 <ConnectorCheckable
-                  {...nativeConnector}
+                  name={nativeConnector.name}
+                  serviceType={nativeConnector.serviceType}
                   onChange={() => setSelectedConnector(nativeConnector)}
                   documentationUrl={nativeConnector.docsUrl}
                   checked={nativeConnector === selectedNativeConnector}
@@ -136,7 +137,13 @@ export const SelectConnector: React.FC = () => {
             ))}
           </EuiFlexGroup>
           <EuiSpacer />
-          <EuiButton fill color="primary" type="submit" disabled={selectedNativeConnector === null}>
+          <EuiButton
+            data-telemetry-id="entSearchContent-connector-selectConnector-selectAndConfigure"
+            fill
+            color="primary"
+            type="submit"
+            disabled={selectedNativeConnector === null}
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.selectConnector.selectAndConfigureButtonLabel',
               {

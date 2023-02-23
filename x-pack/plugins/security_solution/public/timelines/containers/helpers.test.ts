@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TableId } from '../../../common/types';
 import { TimelineId } from '../../../common/types/timeline';
 import { skipQueryForDetectionsPage } from './helpers';
 
@@ -13,35 +14,32 @@ describe('skipQueryForDetectionsPage', () => {
     expect(skipQueryForDetectionsPage(TimelineId.active, ['auditbeat-*', 'filebeat-*'])).toBe(
       false
     );
+    expect(skipQueryForDetectionsPage(TableId.hostsPageEvents, ['auditbeat-*', 'filebeat-*'])).toBe(
+      false
+    );
     expect(
-      skipQueryForDetectionsPage(TimelineId.hostsPageEvents, ['auditbeat-*', 'filebeat-*'])
-    ).toBe(false);
-    expect(
-      skipQueryForDetectionsPage(TimelineId.networkPageEvents, ['auditbeat-*', 'filebeat-*'])
+      skipQueryForDetectionsPage(TableId.networkPageEvents, ['auditbeat-*', 'filebeat-*'])
     ).toBe(false);
   });
 
   test('Make sure to SKIP the query when it is a timeline from a detection pages without the siem-signals', () => {
     expect(
-      skipQueryForDetectionsPage(TimelineId.detectionsPage, ['auditbeat-*', 'filebeat-*'])
+      skipQueryForDetectionsPage(TableId.alertsOnAlertsPage, ['auditbeat-*', 'filebeat-*'])
     ).toBe(true);
     expect(
-      skipQueryForDetectionsPage(TimelineId.detectionsRulesDetailsPage, [
-        'auditbeat-*',
-        'filebeat-*',
-      ])
+      skipQueryForDetectionsPage(TableId.alertsOnRuleDetailsPage, ['auditbeat-*', 'filebeat-*'])
     ).toBe(true);
   });
 
   test('Make sure to NOT skip the query when it is a timeline from a detection pages with the siem-signals', () => {
     expect(
-      skipQueryForDetectionsPage(TimelineId.detectionsPage, [
+      skipQueryForDetectionsPage(TableId.alertsOnAlertsPage, [
         'auditbeat-*',
         '.siem-signals-rainbow-butterfly',
       ])
     ).toBe(false);
     expect(
-      skipQueryForDetectionsPage(TimelineId.detectionsRulesDetailsPage, [
+      skipQueryForDetectionsPage(TableId.alertsOnRuleDetailsPage, [
         '.siem-signals-rainbow-butterfly',
       ])
     ).toBe(false);

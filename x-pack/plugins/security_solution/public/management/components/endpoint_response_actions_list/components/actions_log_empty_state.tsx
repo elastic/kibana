@@ -26,14 +26,14 @@ export const ActionsLogEmptyState = memo(
           iconType="editorUnorderedList"
           title={
             <h2>
-              {i18n.translate('xpack.securitySolution.actions_log.empty.title', {
-                defaultMessage: 'Actions history is empty',
+              {i18n.translate('xpack.securitySolution.responseActionsHistory.empty.title', {
+                defaultMessage: 'Response actions history is empty',
               })}
             </h2>
           }
           body={
             <div>
-              {i18n.translate('xpack.securitySolution.actions_log.empty.content', {
+              {i18n.translate('xpack.securitySolution.responseActionsHistory.empty.content', {
                 defaultMessage: 'No response actions performed',
               })}
             </div>
@@ -44,7 +44,7 @@ export const ActionsLogEmptyState = memo(
               href={docLinks?.links.securitySolution.responseActions}
               target="_blank"
             >
-              {i18n.translate('xpack.securitySolution.actions_log.empty.link', {
+              {i18n.translate('xpack.securitySolution.responseActionsHistory.empty.link', {
                 defaultMessage: 'Read more about response actions',
               })}
             </EuiLink>,

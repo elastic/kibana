@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -21,7 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi() {
     return await apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/services/{serviceName}/serviceNodes',
+      endpoint: 'GET /internal/apm/services/{serviceName}/metrics/nodes',
       params: {
         path: { serviceName },
         query: {

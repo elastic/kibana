@@ -10,7 +10,6 @@
 
 export * from './constants';
 export * from './types';
-export * from './visualizations';
 
 // Note: do not import the expression folder here or the page bundle will be bloated with all
 // the package

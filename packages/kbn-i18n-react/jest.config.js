@@ -10,5 +10,4 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-i18n-react'],
-  testRunner: 'jasmine2',
 };

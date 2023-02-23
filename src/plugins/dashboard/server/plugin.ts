@@ -14,12 +14,12 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { createDashboardSavedObjectType } from './saved_objects';
+import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { capabilitiesProvider } from './capabilities_provider';
 
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
 import { registerDashboardUsageCollector } from './usage/register_collector';
-import { dashboardPersistableStateServiceFactory } from './embeddable/dashboard_container_embeddable_factory';
+import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { getUISettings } from './ui_settings';
 
 import {

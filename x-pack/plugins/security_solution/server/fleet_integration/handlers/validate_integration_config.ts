@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import {
+  ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
   ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
   ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
   ENDPOINT_CONFIG_PRESET_NGAV,
@@ -39,6 +40,7 @@ const validateEndpointIntegrationConfig = (
       ENDPOINT_CONFIG_PRESET_NGAV,
       ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
       ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
+      ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
     ].includes(config.endpointConfig.preset)
   ) {
     logger.warn(`invalid endpointConfig preset: ${config.endpointConfig.preset}`);
@@ -46,18 +48,6 @@ const validateEndpointIntegrationConfig = (
   }
 };
 const validateCloudIntegrationConfig = (config: PolicyCreateCloudConfig, logger: Logger): void => {
-  if (!config?.cloudConfig?.preventions) {
-    logger.warn(
-      'missing cloudConfig preventions: {preventions : behavior_protection: true / false}'
-    );
-    throwError('invalid value for cloudConfig: missing preventions ');
-  }
-  if (typeof config.cloudConfig.preventions.behavior_protection !== 'boolean') {
-    logger.warn(
-      `invalid value for cloudConfig preventions behavior_protection: ${config.cloudConfig.preventions.behavior_protection}`
-    );
-    throwError('invalid value for cloudConfig preventions behavior_protection');
-  }
   if (!config?.eventFilters) {
     logger.warn(
       `eventFilters is required for cloud integration: {eventFilters : nonInteractiveSession: true / false}`

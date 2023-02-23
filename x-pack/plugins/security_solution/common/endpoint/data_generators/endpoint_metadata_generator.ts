@@ -8,6 +8,7 @@
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import { gte } from 'semver';
+import type { EndpointCapabilities } from '../service/response_actions/constants';
 import { BaseDataGenerator } from './base_data_generator';
 import type { HostMetadataInterface, OSFields } from '../types';
 import { EndpointStatus, HostPolicyResponseActionStatus } from '../types';
@@ -23,11 +24,20 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
     const agentVersion = overrides?.agent?.version ?? this.randomVersion();
     const agentId = this.seededUUIDv4();
     const isIsolated = this.randomBoolean(0.3);
-    const capabilities = ['isolation'];
+    const capabilities: EndpointCapabilities[] = ['isolation'];
 
     // v8.4 introduced additional endpoint capabilities
     if (gte(agentVersion, '8.4.0')) {
       capabilities.push('kill_process', 'suspend_process', 'running_processes');
+    }
+
+    if (gte(agentVersion, '8.6.0')) {
+      capabilities.push('get_file');
+    }
+
+    // v8.8 introduced execute capability
+    if (gte(agentVersion, '8.8.0')) {
+      capabilities.push('execute');
     }
 
     const hostMetadataDoc: HostMetadataInterface = {

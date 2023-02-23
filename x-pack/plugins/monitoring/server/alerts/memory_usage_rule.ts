@@ -26,7 +26,6 @@ import {
   CommonAlertFilter,
 } from '../../common/types/alerts';
 import { RULE_MEMORY_USAGE, RULE_DETAILS } from '../../common/constants';
-// @ts-ignore
 import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';

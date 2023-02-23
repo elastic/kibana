@@ -7,9 +7,8 @@
 
 import React, { FormEvent } from 'react';
 import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { DiscoverSetup } from '@kbn/discover-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
-import { getHref, isCompatible } from './open_in_discover_helpers';
+import { DiscoverAppLocator, getHref, isCompatible } from './open_in_discover_helpers';
 import { mount } from 'enzyme';
 import { Filter } from '@kbn/es-query';
 import {
@@ -26,14 +25,26 @@ jest.mock('./open_in_discover_helpers', () => ({
 
 describe('open in discover drilldown', () => {
   let drilldown: OpenInDiscoverDrilldown;
+  const originalOpen = window.open;
+
+  // Prevent the JSDOM error about missing "window.open"
+  beforeAll(() => {
+    window.open = jest.fn();
+  });
+
   beforeEach(() => {
     drilldown = new OpenInDiscoverDrilldown({
-      discover: {} as DiscoverSetup,
+      locator: () => ({} as DiscoverAppLocator),
       dataViews: () => ({} as DataViewsService),
       hasDiscoverAccess: () => true,
       application: () => ({} as ApplicationStart),
     });
   });
+
+  afterAll(() => {
+    window.open = originalOpen;
+  });
+
   it('provides UI to edit config', () => {
     const Component = (drilldown as unknown as { ReactCollectConfig: React.FC<CollectConfigProps> })
       .ReactCollectConfig;
@@ -48,14 +59,16 @@ describe('open in discover drilldown', () => {
     instance.find('EuiSwitch').prop('onChange')!({} as unknown as FormEvent<{}>);
     expect(setConfig).toHaveBeenCalledWith({ openInNewTab: true });
   });
-  it('calls through to isCompatible helper', () => {
+
+  it('calls through to isCompatible helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    drilldown.isCompatible(
+    await drilldown.isCompatible(
       { openInNewTab: true },
       { embeddable: { type: 'lens' } as IEmbeddable<EmbeddableInput>, filters }
     );
     expect(isCompatible).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
+
   it('calls through to getHref helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
     await drilldown.execute(

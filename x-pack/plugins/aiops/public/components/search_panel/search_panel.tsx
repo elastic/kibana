@@ -93,13 +93,8 @@ export const SearchPanel: FC<Props> = ({
   };
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      data-test-subj="aiopsSearchPanel"
-      className={'aiopsSearchPanel__container'}
-      responsive={false}
-    >
-      <EuiFlexItem grow={9} className={'aiopsSearchBar'}>
+    <EuiFlexGroup gutterSize="s" data-test-subj="aiopsSearchPanel" responsive={false}>
+      <EuiFlexItem grow={9}>
         <SearchBar
           dataTestSubj="aiopsQueryInput"
           appName={'aiops'}
@@ -116,8 +111,7 @@ export const SearchPanel: FC<Props> = ({
           })}
           displayStyle={'inPage'}
           isClearable={true}
-          customSubmitButton={<div />}
-          // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
+          showSubmitButton={false}
           onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
         />
       </EuiFlexItem>

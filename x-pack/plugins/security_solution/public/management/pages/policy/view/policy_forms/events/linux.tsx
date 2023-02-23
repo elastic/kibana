@@ -81,14 +81,14 @@ const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingS
       'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.tty_io.tooltip',
       {
         defaultMessage:
-          'Turn this on to collect terminal (tty) output. Terminal output appears in Session View, and you can view it separately to see what commands were executed and how they were typed, provided the terminal is in echo mode.',
+          'Turn this on to collect terminal (tty) output. Terminal output appears in Session View, and you can view it separately to see what commands were executed and how they were typed, provided the terminal is in echo mode. Only works on hosts that support ebpf.',
       }
     ),
     indented: true,
     isDisabled: (config: UIPolicyConfig) => {
       return !config.linux.events.session_data;
     },
-    beta: false,
+    beta: true,
   },
 ];
 

@@ -6,15 +6,15 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { getNewTermsRule, getIndexPatterns } from '../../objects/rule';
+import type { Mitre } from '../../objects/rule';
+import { getNewTermsRule } from '../../objects/rule';
 
 import { ALERT_DATA_GRID } from '../../screens/alerts';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
+  RULES_MANAGEMENT_TABLE,
   RULE_NAME,
-  RULES_ROW,
-  RULES_TABLE,
   RULE_SWITCH,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
@@ -45,7 +45,7 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { expectNumberOfRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
@@ -60,6 +60,7 @@ import {
 import { login, visit } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
+import type { CompleteTimeline } from '../../objects/timeline';
 
 describe('New Terms rules', () => {
   before(() => {
@@ -67,19 +68,21 @@ describe('New Terms rules', () => {
     login();
   });
   describe('Detection rules, New Terms', () => {
-    const expectedUrls = getNewTermsRule().referenceUrls.join('');
-    const expectedFalsePositives = getNewTermsRule().falsePositivesExamples.join('');
-    const expectedTags = getNewTermsRule().tags.join('');
-    const expectedMitre = formatMitreAttackDescription(getNewTermsRule().mitre);
+    const expectedUrls = getNewTermsRule().referenceUrls?.join('');
+    const expectedFalsePositives = getNewTermsRule().falsePositivesExamples?.join('');
+    const expectedTags = getNewTermsRule().tags?.join('');
+    const mitreAttack = getNewTermsRule().mitre as Mitre[];
+    const expectedMitre = formatMitreAttackDescription(mitreAttack);
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
+      const timeline = getNewTermsRule().timeline as CompleteTimeline;
       deleteAlertsAndRules();
-      createTimeline(getNewTermsRule().timeline).then((response) => {
+      createTimeline(timeline).then((response) => {
         cy.wrap({
           ...getNewTermsRule(),
           timeline: {
-            ...getNewTermsRule().timeline,
+            ...timeline,
             id: response.body.data.persistTimeline.timeline.savedObjectId,
           },
         }).as('rule');
@@ -96,9 +99,7 @@ describe('New Terms rules', () => {
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-      cy.get(RULES_TABLE).then(($table) => {
-        cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-      });
+      expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 
       cy.get(RULE_NAME).should('have.text', this.rule.name);
       cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
@@ -124,7 +125,7 @@ describe('New Terms rules', () => {
       cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
+        getDetails(INDEX_PATTERNS_DETAILS).should('have.text', 'auditbeat-*');
         getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'New Terms');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');

@@ -7,4 +7,3 @@
  */
 
 export { MountWrapper, mountReactNode } from './src/mount';
-export { KBN_LOAD_MARKS } from './src/consts';

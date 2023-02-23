@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { AlertType } from '@kbn/apm-plugin/common/alert_types';
+import { ANOMALY_SEVERITY } from '@kbn/apm-plugin/common/ml_constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
+import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
+import { createApmRule } from './alerting_api_helper';
 import { waitForRuleStatus } from './wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -18,7 +20,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const supertest = getService('supertest');
   const ml = getService('ml');
-  const log = getService('log');
+  const es = getService('es');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
 
@@ -72,7 +74,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with ml jobs', () => {
         before(async () => {
-          await createAndRunApmMlJob({ environment: 'production', ml });
+          await createAndRunApmMlJobs({ es, ml, environments: ['production'] });
         });
 
         after(async () => {
@@ -80,36 +82,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('checks if alert is active', async () => {
-          const { body: createdRule } = await supertest
-            .post(`/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                environment: 'production',
-                windowSize: 99,
-                windowUnit: 'y',
-                anomalySeverityType: 'warning',
-              },
-              consumer: 'apm',
-              schedule: {
-                interval: '1m',
-              },
-              tags: ['apm', 'service.name:service-a'],
-              name: 'Latency anomaly | service-a',
-              rule_type_id: AlertType.Anomaly,
-              notify_when: 'onActiveAlert',
-              actions: [],
-            });
+          const createdRule = await createApmRule({
+            supertest,
+            name: 'Latency anomaly | service-a',
+            params: {
+              environment: 'production',
+              windowSize: 99,
+              windowUnit: 'y',
+              anomalySeverityType: ANOMALY_SEVERITY.WARNING,
+            },
+            ruleTypeId: ApmRuleType.Anomaly,
+          });
 
           ruleId = createdRule.id;
-
-          const executionStatus = await waitForRuleStatus({
-            id: ruleId,
-            expectedStatus: 'active',
-            supertest,
-            log,
-          });
-          expect(executionStatus.status).to.be('active');
+          if (!ruleId) {
+            expect(ruleId).to.not.eql(undefined);
+          } else {
+            const executionStatus = await waitForRuleStatus({
+              id: ruleId,
+              expectedStatus: 'active',
+              supertest,
+            });
+            expect(executionStatus.status).to.be('active');
+          }
         });
       });
     }

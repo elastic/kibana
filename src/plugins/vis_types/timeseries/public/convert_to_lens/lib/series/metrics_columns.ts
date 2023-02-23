@@ -21,9 +21,11 @@ import {
   convertFilterRatioToFormulaColumn,
   convertToLastValueColumn,
   convertToStaticValueColumn,
+  convertStaticValueToFormulaColumn,
   convertMetricAggregationColumnWithoutSpecialParams,
   convertToCounterRateColumn,
   convertToStandartDeviationColumn,
+  convertVarianceToFormulaColumn,
 } from '../convert';
 import { getValidColumns } from './columns';
 
@@ -31,7 +33,10 @@ export const getMetricsColumns = (
   series: Series,
   dataView: DataView,
   visibleSeriesCount: number,
-  reducedTimeRange?: string
+  {
+    isStaticValueColumnSupported = false,
+    reducedTimeRange,
+  }: { reducedTimeRange?: string; isStaticValueColumnSupported?: boolean } = {}
 ): Column[] | null => {
   const { metrics: validMetrics, seriesAgg } = getSeriesAgg(
     series.metrics as [Metric, ...Metric[]]
@@ -116,11 +121,17 @@ export const getMetricsColumns = (
       const column = convertToLastValueColumn(columnsConverterArgs, reducedTimeRange);
       return getValidColumns(column);
     }
+    case 'variance': {
+      const column = convertVarianceToFormulaColumn(columnsConverterArgs, reducedTimeRange);
+      return getValidColumns(column);
+    }
     case 'static': {
-      const column = convertToStaticValueColumn(columnsConverterArgs, {
-        visibleSeriesCount,
-        reducedTimeRange,
-      });
+      const column = isStaticValueColumnSupported
+        ? convertToStaticValueColumn(columnsConverterArgs, {
+            visibleSeriesCount,
+            reducedTimeRange,
+          })
+        : convertStaticValueToFormulaColumn(columnsConverterArgs);
       return getValidColumns(column);
     }
     case 'std_deviation': {

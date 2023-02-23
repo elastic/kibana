@@ -4,7 +4,7 @@ exports[`Fleet preconfiguration reset Preconfigured cloud policy With a full pre
 Object {
   "agent": Object {
     "download": Object {
-      "source_uri": "https://artifacts.elastic.co/downloads/",
+      "sourceURI": "https://artifacts.elastic.co/downloads/",
     },
     "monitoring": Object {
       "enabled": false,
