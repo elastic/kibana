@@ -201,13 +201,13 @@ export const useDiscoverHistogram = ({
     // We only want to show the partial results on the first load,
     // or there will be a flickering effect as the loading spinner
     // is quickly shown and hidden again on fetches
-    if (!firstLoadComplete.current) {
+    if (!firstLoadComplete.current && !isPlainRecord) {
       unifiedHistogram?.setTotalHits({
         totalHitsStatus: totalHitsStatus.toString() as UnifiedHistogramFetchStatus,
         totalHitsResult,
       });
     }
-  }, [totalHitsResult, totalHitsStatus, unifiedHistogram]);
+  }, [isPlainRecord, totalHitsResult, totalHitsStatus, unifiedHistogram]);
 
   /**
    * Sync URL query params with Unified Histogram
@@ -252,6 +252,7 @@ export const useDiscoverHistogram = ({
         totalHitsResult: documentState.result?.length,
         totalHitsStatus: documentState.fetchStatus.toString() as UnifiedHistogramFetchStatus,
       });
+      firstLoadComplete.current = true;
     }
   }, [documentState.fetchStatus, documentState.result, isPlainRecord, unifiedHistogram]);
 
@@ -265,6 +266,10 @@ export const useDiscoverHistogram = ({
         if (result instanceof Error) {
           // Display the error and set totalHits$ to an error state
           sendErrorTo(services.data, savedSearchData$.totalHits$)(result);
+          return;
+        }
+
+        if (isPlainRecord) {
           return;
         }
 
@@ -293,7 +298,14 @@ export const useDiscoverHistogram = ({
     return () => {
       subscription?.unsubscribe();
     };
-  }, [savedSearchData$.main$, savedSearchData$.totalHits$, services.data, unifiedHistogram]);
+  }, [
+    isPlainRecord,
+    savedSearchData$.documents$,
+    savedSearchData$.main$,
+    savedSearchData$.totalHits$,
+    services.data,
+    unifiedHistogram,
+  ]);
 
   /**
    * Data fetching
