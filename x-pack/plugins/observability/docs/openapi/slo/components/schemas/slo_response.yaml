@@ -32,6 +32,8 @@ properties:
     description: The SLO revision
     type: number
     example: 2
+  summary:
+    $ref: 'summary.yaml'
   enabled:
     description: Indicate if the SLO is enabled
     type: boolean

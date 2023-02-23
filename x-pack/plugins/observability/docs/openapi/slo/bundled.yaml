@@ -15,7 +15,7 @@ servers:
   - url: http://localhost:5601
     description: local
 paths:
-  /s/{spaceId}/api/slos:
+  /s/{spaceId}/api/observability/slos:
     post:
       summary: Creates an SLO.
       operationId: createSlo
@@ -131,7 +131,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-  /s/{spaceId}/api/slos/{sloId}:
+  /s/{spaceId}/api/observability/slos/{sloId}:
     get:
       summary: Retrieves a SLO
       operationId: getSlo
@@ -224,7 +224,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-  /s/{spaceId}/api/slos/{sloId}/enable:
+  /s/{spaceId}/api/observability/slos/{sloId}/enable:
     post:
       summary: Enables an SLO
       operationId: enableSlo
@@ -251,7 +251,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-  /s/{spaceId}/api/slos/{sloId}/disable:
+  /s/{spaceId}/api/observability/slos/{sloId}/disable:
     post:
       summary: Disables an SLO
       operationId: disableSlo
@@ -264,8 +264,44 @@ paths:
         - $ref: '#/components/parameters/space_id'
         - $ref: '#/components/parameters/slo_id'
       responses:
-        '204':
+        '200':
           description: Succesful request
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+  /s/{spaceId}/internal/observability/slos/_historical_summary:
+    post:
+      summary: Retrieves the historical summary for a list of SLOs
+      operationId: historicalSummary
+      description: |
+        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      tags:
+        - slos
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/historical_summary_request'
+      responses:
+        '200':
+          description: Succesful request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/historical_summary_response'
         '400':
           description: Bad request
           content:
@@ -529,6 +565,43 @@ components:
           description: Configure how often the transform runs, default 1m
           type: string
           example: 5m
+    error_budget:
+      title: Error budget definition
+      type: object
+      properties:
+        initial:
+          type: number
+          description: The initial error budget, as 1 - objective
+          example: 0.02
+        consumed:
+          type: number
+          description: The error budget consummed, as a percentage of the initial value.
+          example: 0.8
+        remaining:
+          type: number
+          description: The error budget remaining, as a percentage of the initial value.
+          example: 0.2
+        isEstimated:
+          type: boolean
+          description: Only for SLO defined with occurrences budgeting method and calendar aligned time window.
+          example: true
+    summary:
+      title: Summary definition
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - NO_DATA
+            - HEALTHY
+            - DEGRADING
+            - VIOLATED
+          example: HEALTHY
+        sliValue:
+          type: number
+          example: 0.9836
+        errorBudget:
+          $ref: '#/components/schemas/error_budget'
     slo_response:
       title: SLO Response
       type: object
@@ -564,6 +637,8 @@ components:
           description: The SLO revision
           type: number
           example: 2
+        summary:
+          $ref: '#/components/schemas/summary'
         enabled:
           description: Indicate if the SLO is enabled
           type: boolean
@@ -682,6 +757,42 @@ components:
           $ref: '#/components/schemas/objective'
         settings:
           $ref: '#/components/schemas/settings'
+    historical_summary_request:
+      title: Historical summary request
+      type: object
+      required:
+        - sloIds
+      properties:
+        sloIds:
+          description: The list of SLO identifiers to get the historical summary for
+          type: array
+          items:
+            type: string
+            example: 8853df00-ae2e-11ed-90af-09bb6422b258
+    historical_summary_response:
+      title: Historical summary response
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          type: object
+          properties:
+            date:
+              type: string
+              example: '2022-01-01T00:00:00.000Z'
+            status:
+              type: string
+              enum:
+                - NO_DATA
+                - HEALTHY
+                - DEGRADING
+                - VIOLATED
+              example: HEALTHY
+            sliValue:
+              type: number
+              example: 0.9836
+            errorBudget:
+              $ref: '#/components/schemas/error_budget'
 security:
   - basicAuth: []
   - apiKeyAuth: []

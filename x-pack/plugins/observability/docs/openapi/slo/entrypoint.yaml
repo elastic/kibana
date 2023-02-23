@@ -15,14 +15,16 @@ servers:
   - url: 'http://localhost:5601'
     description: local
 paths:
-  '/s/{spaceId}/api/slos':
+  '/s/{spaceId}/api/observability/slos':
     $ref: 'paths/s@{spaceid}@api@slos.yaml'
-  '/s/{spaceId}/api/slos/{sloId}':
+  '/s/{spaceId}/api/observability/slos/{sloId}':
     $ref: 'paths/s@{spaceid}@api@slos@{sloId}.yaml'
-  '/s/{spaceId}/api/slos/{sloId}/enable':
+  '/s/{spaceId}/api/observability/slos/{sloId}/enable':
     $ref: 'paths/s@{spaceid}@api@slos@{sloId}@{enable}.yaml'
-  '/s/{spaceId}/api/slos/{sloId}/disable':
+  '/s/{spaceId}/api/observability/slos/{sloId}/disable':
     $ref: 'paths/s@{spaceid}@api@slos@{sloId}@{disable}.yaml'
+  '/s/{spaceId}/internal/observability/slos/_historical_summary':
+    $ref: 'paths/s@{spaceid}@api@slos@_historical_summary.yaml'
 components:
   securitySchemes:
     basicAuth:
