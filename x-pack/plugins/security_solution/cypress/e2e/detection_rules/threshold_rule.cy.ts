@@ -9,11 +9,12 @@ import { formatMitreAttackDescription } from '../../helpers/rules';
 import type { Mitre } from '../../objects/rule';
 import { getNewThresholdRule } from '../../objects/rule';
 
-import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
+import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
+  RULES_MANAGEMENT_TABLE,
   RULE_NAME,
   RULE_SWITCH,
   SEVERITY,
@@ -93,7 +94,7 @@ describe('Detection rules, threshold', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    expectNumberOfRules(1);
+    expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 
     cy.get(RULE_NAME).should('have.text', rule.name);
     cy.get(RISK_SCORE).should('have.text', rule.riskScore);
@@ -142,7 +143,7 @@ describe('Detection rules, threshold', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.lt(100));
+    cy.get(ALERTS_COUNT).should(($count) => expect(+$count.text().split(' ')[0]).to.be.lt(100));
     cy.get(ALERT_GRID_CELL).contains(rule.name);
   });
 });

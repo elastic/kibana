@@ -23,6 +23,11 @@ const DEFAULT_VALUES: EngineViewValues = {
   fetchEngineApiStatus: Status.IDLE,
   isDeleteModalVisible: false,
   isLoadingEngine: true,
+  engineSchemaData: undefined,
+  fetchEngineSchemaApiError: undefined,
+  fetchEngineSchemaApiStatus: Status.IDLE,
+  isLoadingEngineSchema: true,
+  schemaFields: [],
 };
 
 describe('EngineViewLogic', () => {

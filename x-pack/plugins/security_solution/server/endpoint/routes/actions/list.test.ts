@@ -23,7 +23,7 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
-import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';
+import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { LicenseService } from '../../../../common/license';
@@ -137,35 +137,35 @@ describe('Action List Route', () => {
 
   describe('User auth level', () => {
     it('allows user with `canReadActionsLogManagement` access for API requests', async () => {
-      await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
+      await callApiRoute(BASE_ENDPOINT_ACTION_ROUTE, {
         authz: { canReadActionsLogManagement: true },
       });
       expect(mockResponse.ok).toBeCalled();
     });
 
     it('allows user with `canAccessEndpointActionsLogManagement` access for API requests', async () => {
-      await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
+      await callApiRoute(BASE_ENDPOINT_ACTION_ROUTE, {
         authz: { canAccessEndpointActionsLogManagement: true },
       });
       expect(mockResponse.ok).toBeCalled();
     });
 
     it('does not allow user without `canReadActionsLogManagement` or `canAccessEndpointActionsLogManagement` access for API requests', async () => {
-      await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
+      await callApiRoute(BASE_ENDPOINT_ACTION_ROUTE, {
         authz: { canReadActionsLogManagement: false, canAccessEndpointActionsLogManagement: false },
       });
       expect(mockResponse.forbidden).toBeCalled();
     });
 
     it('does allow user access to API requests if license is at least platinum', async () => {
-      await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
+      await callApiRoute(BASE_ENDPOINT_ACTION_ROUTE, {
         license: Platinum,
       });
       expect(mockResponse.ok).toBeCalled();
     });
 
     it('does not allow user access to API requests if license is below platinum', async () => {
-      await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
+      await callApiRoute(BASE_ENDPOINT_ACTION_ROUTE, {
         license: Gold,
       });
       expect(mockResponse.forbidden).toBeCalled();

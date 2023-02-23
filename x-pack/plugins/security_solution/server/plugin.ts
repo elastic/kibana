@@ -166,6 +166,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins,
       endpointAppContextService: this.endpointAppContextService,
       ruleExecutionLogService,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      kibanaBranch: pluginContext.env.packageInfo.branch,
     });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
@@ -359,6 +361,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       appClientFactory.setup({
         getSpaceId: depsStart.spaces?.spacesService?.getSpaceId,
         config,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        kibanaBranch: pluginContext.env.packageInfo.branch,
       });
 
       const endpointFieldsStrategy = endpointFieldsProvider(
@@ -527,11 +531,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver
     );
 
-    if (plugins.taskManager) {
-      this.checkMetadataTransformsTask?.start({
-        taskManager: plugins.taskManager,
-      });
-    }
+    plugins.fleet?.fleetSetupCompleted().then(() => {
+      if (plugins.taskManager) {
+        this.checkMetadataTransformsTask?.start({
+          taskManager: plugins.taskManager,
+        });
+      }
+    });
 
     return {};
   }

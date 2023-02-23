@@ -168,6 +168,16 @@ describe('Guided setup', () => {
           expect(exists('guideButton')).toBe(false);
         });
 
+        test('shows redirect button when a guide has been viewed but not started', async () => {
+          const { exists } = await setupComponentWithPluginStateMock(httpClient, {
+            status: 'in_progress',
+            isActivePeriod: true,
+            activeGuide: { ...testGuideStep1InProgressState, status: 'not_started' },
+          });
+          expect(exists('guideButtonRedirect')).toBe(true);
+          expect(exists('guideButton')).toBe(false);
+        });
+
         test('shows redirect button when a user skipped on the landing page', async () => {
           const { exists } = await setupComponentWithPluginStateMock(httpClient, {
             status: 'skipped',

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
@@ -36,6 +36,10 @@ interface Props {
   sorting: TableProps['sorting'];
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
   onAddFilter: OnAddFilter;
+  onPaginateFlyout: (pageIndex: number) => void;
+  onCloseFlyout: () => void;
+  onOpenFlyout: (finding: CspFinding) => void;
+  flyoutFindingIndex: number;
 }
 
 const FindingsTableComponent = ({
@@ -45,9 +49,14 @@ const FindingsTableComponent = ({
   sorting,
   setTableOptions,
   onAddFilter,
+  onOpenFlyout,
+  flyoutFindingIndex,
+  onPaginateFlyout,
+  onCloseFlyout,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
+
+  const selectedFinding = items[flyoutFindingIndex];
 
   const getRowProps = (row: CspFinding) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsTableRowTestId(row.resource.id),
@@ -63,17 +72,17 @@ const FindingsTableComponent = ({
     ...Array<EuiTableFieldDataColumnType<CspFinding>>
   ] = useMemo(
     () => [
-      getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
+      getExpandColumn<CspFinding>({ onClick: onOpenFlyout }),
       createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['resource.id'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
       baseFindingsColumns['rule.benchmark.rule_number'],
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
-      baseFindingsColumns['rule.section'],
+      createColumnWithFilters(baseFindingsColumns['rule.section'], { onAddFilter }),
       baseFindingsColumns['@timestamp'],
     ],
-    [onAddFilter]
+    [onOpenFlyout, onAddFilter]
   );
 
   // Show "zero state"
@@ -98,7 +107,7 @@ const FindingsTableComponent = ({
     <>
       <EuiBasicTable
         loading={loading}
-        data-test-subj={TEST_SUBJECTS.FINDINGS_TABLE}
+        data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE}
         items={items}
         columns={columns}
         pagination={pagination}
@@ -111,7 +120,10 @@ const FindingsTableComponent = ({
       {selectedFinding && (
         <FindingsRuleFlyout
           findings={selectedFinding}
-          onClose={() => setSelectedFinding(undefined)}
+          onClose={onCloseFlyout}
+          findingsCount={pagination.totalItemCount}
+          flyoutIndex={flyoutFindingIndex + pagination.pageIndex * pagination.pageSize}
+          onPaginate={onPaginateFlyout}
         />
       )}
     </>

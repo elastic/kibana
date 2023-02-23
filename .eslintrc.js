@@ -121,7 +121,7 @@ const VENN_DIAGRAM_HEADER = `
 
 /** Packages which should not be included within production code. */
 const DEV_PACKAGE_DIRS = getPackages(REPO_ROOT).flatMap((pkg) =>
-  pkg.isDevOnly ? pkg.normalizedRepoRelativeDir : []
+  pkg.isDevOnly() ? pkg.normalizedRepoRelativeDir : []
 );
 
 /** Directories (at any depth) which include dev-only code. */
@@ -183,50 +183,49 @@ const DEV_PATTERNS = [
 const RESTRICTED_IMPORTS = [
   {
     name: 'lodash',
-    importNames: ['set', 'setWith'],
-    message: 'Please use @kbn/safer-lodash-set instead',
+    importNames: ['set', 'setWith', 'template'],
+    message:
+      'lodash.set/setWith: Please use @kbn/safer-lodash-set instead.\n' +
+      'lodash.template: Function is unsafe, and not compatible with our content security policy.',
   },
   {
     name: 'lodash.set',
-    message: 'Please use @kbn/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set/set instead',
   },
   {
     name: 'lodash.setwith',
-    message: 'Please use @kbn/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set/setWith instead',
   },
   {
     name: 'lodash/set',
-    message: 'Please use @kbn/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set/set instead',
   },
   {
     name: 'lodash/setWith',
-    message: 'Please use @kbn/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set/setWith instead',
   },
   {
     name: 'lodash/fp',
-    importNames: ['set', 'setWith', 'assoc', 'assocPath'],
-    message: 'Please use @kbn/safer-lodash-set instead',
+    importNames: ['set', 'setWith', 'assoc', 'assocPath', 'template'],
+    message:
+      'lodash.set/setWith/assoc/assocPath: Please use @kbn/safer-lodash-set/fp instead\n' +
+      'lodash.template: Function is unsafe, and not compatible with our content security policy.',
   },
   {
     name: 'lodash/fp/set',
-    message: 'Please use @kbn/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set/fp/set instead',
   },
   {
     name: 'lodash/fp/setWith',
-    message: 'Please use @kbn/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set/fp/setWith instead',
   },
   {
     name: 'lodash/fp/assoc',
-    message: 'Please use @kbn/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set/fp/assoc instead',
   },
   {
     name: 'lodash/fp/assocPath',
-    message: 'Please use @kbn/safer-lodash-set instead',
-  },
-  {
-    name: 'lodash',
-    importNames: ['template'],
-    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+    message: 'Please use @kbn/safer-lodash-set/fp/assocPath instead',
   },
   {
     name: 'lodash.template',
@@ -237,17 +236,22 @@ const RESTRICTED_IMPORTS = [
     message: 'lodash.template is unsafe, and not compatible with our content security policy.',
   },
   {
-    name: 'lodash/fp',
-    importNames: ['template'],
-    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
-  },
-  {
     name: 'lodash/fp/template',
     message: 'lodash.template is unsafe, and not compatible with our content security policy.',
   },
   {
     name: 'react-use',
     message: 'Please use react-use/lib/{method} instead.',
+  },
+  {
+    name: 'react-router-dom',
+    importNames: ['Route'],
+    message: 'Please use @kbn/shared-ux-router instead',
+  },
+  {
+    name: '@kbn/kibana-react-plugin/public',
+    importNames: ['Route'],
+    message: 'Please use @kbn/shared-ux-router instead',
   },
 ];
 
@@ -734,47 +738,54 @@ module.exports = {
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
-        'no-restricted-imports': [
-          2,
-          {
-            paths: RESTRICTED_IMPORTS,
-          },
-        ],
+        'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
         'no-restricted-modules': [
-          2,
+          'error',
           {
-            paths: [
-              {
-                name: 'lodash.set',
-                message: 'Please use @kbn/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash.setwith',
-                message: 'Please use @kbn/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash.template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/set',
-                message: 'Please use @kbn/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/setWith',
-                message: 'Please use @kbn/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-            ],
+            name: 'lodash.set',
+            message: 'Please use @kbn/safer-lodash-set instead',
+          },
+          {
+            name: 'lodash.setwith',
+            message: 'Please use @kbn/safer-lodash-set instead',
+          },
+          {
+            name: 'lodash.template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
+          },
+          {
+            name: 'lodash/set',
+            message: 'Please use @kbn/safer-lodash-set/set instead',
+          },
+          {
+            name: 'lodash/setWith',
+            message: 'Please use @kbn/safer-lodash-set/setWith instead',
+          },
+          {
+            name: 'lodash/fp/set',
+            message: 'Please use @kbn/safer-lodash-set/fp/set instead',
+          },
+          {
+            name: 'lodash/fp/setWith',
+            message: 'Please use @kbn/safer-lodash-set/fp/setWith instead',
+          },
+          {
+            name: 'lodash/fp/assoc',
+            message: 'Please use @kbn/safer-lodash-set/fp/assoc instead',
+          },
+          {
+            name: 'lodash/fp/assocPath',
+            message: 'Please use @kbn/safer-lodash-set/fp/assocPath instead',
+          },
+          {
+            name: 'lodash/template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
           },
         ],
         'no-restricted-properties': [
-          2,
+          'error',
           {
             object: 'lodash',
             property: 'set',
@@ -784,18 +795,6 @@ module.exports = {
             object: '_',
             property: 'set',
             message: 'Please use @kbn/safer-lodash-set instead',
-          },
-          {
-            object: 'lodash',
-            property: 'template',
-            message:
-              'lodash.template is unsafe, and not compatible with our content security policy.',
-          },
-          {
-            object: '_',
-            property: 'template',
-            message:
-              'lodash.template is unsafe, and not compatible with our content security policy.',
           },
           {
             object: 'lodash',
@@ -826,6 +825,18 @@ module.exports = {
             object: '_',
             property: 'assocPath',
             message: 'Please use @kbn/safer-lodash-set instead',
+          },
+          {
+            object: 'lodash',
+            property: 'template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
+          },
+          {
+            object: '_',
+            property: 'template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
           },
         ],
       },
@@ -834,15 +845,11 @@ module.exports = {
       files: ['**/common/**/*.{js,mjs,ts,tsx}', '**/public/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-imports': [
-          2,
+          'error',
+          ...RESTRICTED_IMPORTS,
           {
-            paths: [
-              ...RESTRICTED_IMPORTS,
-              {
-                name: 'semver',
-                message: 'Please use "semver/*/{function}" instead',
-              },
-            ],
+            name: 'semver',
+            message: 'Please use "semver/*/{function}" instead',
           },
         ],
       },
@@ -902,7 +909,10 @@ module.exports = {
       files: ['x-pack/plugins/profiling/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^(useAsync)$' }],
+        'react-hooks/exhaustive-deps': [
+          'error',
+          { additionalHooks: '^(useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$' },
+        ],
       },
     },
     {
@@ -946,6 +956,8 @@ module.exports = {
     {
       // front end and common typescript and javascript files only
       files: [
+        'x-pack/plugins/ecs_data_quality_dashboard/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
@@ -971,11 +983,15 @@ module.exports = {
       // We use this section to add rules in which we do not want to apply to test files.
       // This should be a very small set as most linter rules are useful for tests as well.
       files: [
+        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
       ],
       excludedFiles: [
+        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -987,6 +1003,8 @@ module.exports = {
     {
       // typescript only for front and back end
       files: [
+        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
@@ -1017,6 +1035,8 @@ module.exports = {
     {
       // typescript and javascript for front and back end
       files: [
+        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
@@ -1721,7 +1741,11 @@ module.exports = {
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
     {
-      files: 'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+      files: [
+        'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+        'packages/kbn-validate-next-docs-cli/**/*',
+        'packages/kbn-find-used-node-modules/**/*',
+      ],
       rules: {
         'max-classes-per-file': 'off',
       },

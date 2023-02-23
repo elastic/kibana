@@ -17,7 +17,7 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
-import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';
+import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -78,7 +78,7 @@ describe('Action List Handler', () => {
           SecuritySolutionRequestHandlerContext
         >
       ] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(ENDPOINTS_ACTION_LIST_ROUTE)
+        path.startsWith(BASE_ENDPOINT_ACTION_ROUTE)
       )!;
       await routeHandler(
         coreMock.createCustomRequestHandlerContext(
@@ -119,6 +119,7 @@ describe('Action List Handler', () => {
 
     it('should correctly format the request when calling `getActionListByStatus`', async () => {
       await actionListHandler({
+        withOutputs: 'actionX',
         agentIds: 'agentX',
         commands: 'running-processes',
         statuses: 'failed',
@@ -126,6 +127,7 @@ describe('Action List Handler', () => {
       });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({
+          withOutputs: ['actionX'],
           elasticAgentIds: ['agentX'],
           commands: ['running-processes'],
           statuses: ['failed'],

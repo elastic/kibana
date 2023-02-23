@@ -6,12 +6,18 @@ Object {
     "download": Object {
       "sourceURI": "http://default-registry.co",
     },
+    "features": Object {},
     "monitoring": Object {
       "enabled": true,
       "logs": false,
       "metrics": true,
       "namespace": "default",
       "use_output": "default",
+    },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
     },
   },
   "fleet": Object {
@@ -62,6 +68,10 @@ Object {
     },
   },
   "revision": 1,
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
 }
 `;
 
@@ -71,12 +81,18 @@ Object {
     "download": Object {
       "sourceURI": "http://default-registry.co",
     },
+    "features": Object {},
     "monitoring": Object {
       "enabled": true,
       "logs": false,
       "metrics": true,
       "namespace": "default",
       "use_output": "monitoring-output-id",
+    },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
     },
   },
   "fleet": Object {
@@ -127,6 +143,10 @@ Object {
     },
   },
   "revision": 1,
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
 }
 `;
 
@@ -136,12 +156,18 @@ Object {
     "download": Object {
       "sourceURI": "http://default-registry.co",
     },
+    "features": Object {},
     "monitoring": Object {
       "enabled": true,
       "logs": false,
       "metrics": true,
       "namespace": "default",
       "use_output": "monitoring-output-id",
+    },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
     },
   },
   "fleet": Object {
@@ -192,5 +218,9 @@ Object {
     },
   },
   "revision": 1,
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
 }
 `;

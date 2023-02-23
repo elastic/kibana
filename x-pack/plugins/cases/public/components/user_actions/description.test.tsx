@@ -15,7 +15,6 @@ import { TestProviders } from '../../common/mock';
 import { createDescriptionUserActionBuilder, getDescriptionUserAction } from './description';
 import { getMockBuilderArgs } from './mock';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -58,42 +57,10 @@ describe('createDescriptionUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(res.getByTestId('property-actions')).toBeInTheDocument();
-
-    userEvent.click(res.getByTestId('property-actions-ellipses'));
-    await waitForEuiPopoverOpen();
-
-    expect(res.queryByTestId('property-actions-pencil')).toBeInTheDocument();
-    userEvent.click(res.getByTestId('property-actions-pencil'));
+    userEvent.click(res.getByTestId('editable-description-edit-icon'));
 
     await waitFor(() => {
       expect(builderArgs.handleManageMarkdownEditId).toHaveBeenCalledWith('description');
-    });
-  });
-
-  it('quotes the description correctly', async () => {
-    const descriptionUserAction = getDescriptionUserAction({
-      ...builderArgs,
-      onUpdateField,
-      isLoadingDescription: false,
-    });
-
-    const res = render(
-      <TestProviders>
-        <EuiCommentList comments={[descriptionUserAction]} />
-      </TestProviders>
-    );
-
-    expect(res.getByTestId('property-actions')).toBeInTheDocument();
-
-    userEvent.click(res.getByTestId('property-actions-ellipses'));
-    await waitForEuiPopoverOpen();
-
-    expect(res.queryByTestId('property-actions-quote')).toBeInTheDocument();
-    userEvent.click(res.getByTestId('property-actions-quote'));
-
-    await waitFor(() => {
-      expect(builderArgs.handleManageQuote).toHaveBeenCalledWith('Security banana Issue');
     });
   });
 

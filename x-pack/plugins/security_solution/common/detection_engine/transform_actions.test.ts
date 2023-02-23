@@ -37,6 +37,7 @@ describe('transform_actions', () => {
       group: 'group',
       actionTypeId: 'actionTypeId',
       params: {},
+      uuid: '111',
     };
     const ruleAction = transformAlertToRuleAction(alertAction);
     expect(ruleAction).toEqual({
@@ -44,6 +45,7 @@ describe('transform_actions', () => {
       group: alertAction.group,
       action_type_id: alertAction.actionTypeId,
       params: alertAction.params,
+      uuid: '111',
     });
   });
   test('it should transform ResponseAction[] to RuleResponseAction[]', () => {

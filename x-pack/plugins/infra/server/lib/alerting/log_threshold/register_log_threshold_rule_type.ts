@@ -51,7 +51,8 @@ const conditionsActionVariableDescription = i18n.translate(
 const groupByActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.groupByActionVariableDescription',
   {
-    defaultMessage: 'The name of the group responsible for triggering the alert',
+    defaultMessage:
+      'The name of the group(s) responsible for triggering the alert. For accessing each group key, use context.groupByKeys.',
   }
 );
 
@@ -143,11 +144,18 @@ export async function registerLogThresholdRuleType(
           description: denominatorConditionsActionVariableDescription,
         },
         ...(getAlertDetailsPageEnabledForApp(config, 'logs')
-          ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
+          ? [
+              {
+                name: 'alertDetailsUrl',
+                description: alertDetailUrlActionVariableDescription,
+                usesPublicBaseUrl: true,
+              },
+            ]
           : []),
         {
           name: 'viewInAppUrl',
           description: viewInAppUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
         },
         { name: 'cloud', description: cloudActionVariableDescription },
         { name: 'host', description: hostActionVariableDescription },

@@ -38,6 +38,11 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
   };
 });
 
+jest.mock('uuid', () => {
+  let uuid = 100;
+  return { v4: () => `${uuid++}` };
+});
+
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -406,6 +411,7 @@ describe('create()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "102",
           },
         ],
         "alertTypeId": "123",
@@ -624,6 +630,7 @@ describe('create()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "104",
           },
         ],
         "alertTypeId": "123",
@@ -1053,6 +1060,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            uuid: '108',
           },
           {
             group: 'default',
@@ -1061,6 +1069,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            uuid: '109',
           },
           {
             group: 'default',
@@ -1069,6 +1078,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            uuid: '110',
           },
         ],
         alertTypeId: '123',
@@ -1272,7 +1282,13 @@ describe('create()', () => {
       'alert',
       {
         actions: [
-          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            group: 'default',
+            params: { foo: true },
+            uuid: '112',
+          },
         ],
         alertTypeId: '123',
         apiKey: null,
@@ -1445,7 +1461,13 @@ describe('create()', () => {
       'alert',
       {
         actions: [
-          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            group: 'default',
+            params: { foo: true },
+            uuid: '113',
+          },
         ],
         alertTypeId: '123',
         apiKey: null,
@@ -1612,6 +1634,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '115',
           },
         ],
         alertTypeId: '123',
@@ -1747,6 +1770,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '116',
           },
         ],
         legacyId: null,
@@ -1882,6 +1906,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '117',
           },
         ],
         legacyId: null,
@@ -2044,6 +2069,7 @@ describe('create()', () => {
             },
             actionRef: 'action_0',
             actionTypeId: 'test',
+            uuid: '118',
           },
         ],
         apiKeyOwner: null,
@@ -2409,6 +2435,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '126',
           },
         ],
         alertTypeId: '123',
@@ -2513,6 +2540,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '127',
           },
         ],
         legacyId: null,
@@ -3046,5 +3074,121 @@ describe('create()', () => {
     `);
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+  test('should create a rule even if action is missing secret when allowMissingConnectorSecrets is true', async () => {
+    const data = getMockData({
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: '.slack',
+        config: {},
+        isMissingSecrets: true,
+        name: 'Slack connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+      },
+    ]);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        notifyWhen: null,
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: '.slack',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_1',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_2',
+          type: 'action',
+          id: '2',
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [],
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+    });
+    const result = await rulesClient.create({ data, allowMissingConnectorSecrets: true });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": ".slack",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "id": "1",
+        "notifyWhen": null,
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
   });
 });

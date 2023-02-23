@@ -14,6 +14,7 @@ import {
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
   EndpointActionGetFileSchema,
+  ExecuteActionRequestSchema,
 } from '../../../../common/endpoint/schema/actions';
 import {
   ISOLATE_HOST_ROUTE_V2,
@@ -25,10 +26,12 @@ import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   GET_FILE_ROUTE,
+  EXECUTE_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointActionDataParameterTypes,
   ResponseActionParametersWithPidOrEntityId,
+  ResponseActionsExecuteParameters,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -157,6 +160,22 @@ export function registerResponseActionRoutes(
         { all: ['canWriteFileOperations'] },
         logger,
         responseActionRequestHandler(endpointContext, 'get-file')
+      )
+    );
+  }
+
+  // `execute` currently behind FF (planned for 8.8)
+  if (endpointContext.experimentalFeatures.responseActionExecuteEnabled) {
+    router.post(
+      {
+        path: EXECUTE_ROUTE,
+        validate: ExecuteActionRequestSchema,
+        options: { authRequired: true, tags: ['access:securitySolution'] },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteExecuteOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
       )
     );
   }

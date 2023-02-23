@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
@@ -59,16 +60,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.waitForLoading();
       });
-      after(
-        async () =>
-          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
-      );
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await browser.removeLocalStorageItem(KUBERNETES_TOUR_STORAGE_KEY);
+      });
 
       it('renders the correct page title', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         const documentTitle = await browser.getTitle();
         expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
+      });
+
+      it('renders the kubernetes tour component and allows user to dismiss it without seeing it again', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        const kubernetesTourText =
+          'Click here to see your infrastructure in different ways, including Kubernetes pods.';
+        const ensureKubernetesTourVisible =
+          await pageObjects.infraHome.ensureKubernetesTourIsVisible();
+
+        expect(ensureKubernetesTourVisible).to.contain(kubernetesTourText);
+
+        // Persist after refresh
+        await browser.refresh();
+        await pageObjects.infraHome.waitForLoading();
+
+        expect(ensureKubernetesTourVisible).to.contain(kubernetesTourText);
+
+        await pageObjects.infraHome.clickDismissKubernetesTourButton();
+
+        await pageObjects.infraHome.ensureKubernetesTourIsClosed();
       });
 
       it('renders an empty data prompt for dates with no data', async () => {

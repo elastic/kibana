@@ -32,7 +32,7 @@ import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
-  dataSourceRt,
+  serviceTransactionDataSourceRt,
   environmentRt,
   kueryRt,
   probabilityRt,
@@ -64,7 +64,7 @@ const servicesRoute = createApmServerRoute({
       t.partial({ serviceGroup: t.string }),
       t.intersection([
         probabilityRt,
-        dataSourceRt,
+        serviceTransactionDataSourceRt,
         environmentRt,
         kueryRt,
         rangeRt,
@@ -179,7 +179,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
-      t.intersection([offsetRt, probabilityRt, dataSourceRt]),
+      t.intersection([offsetRt, probabilityRt, serviceTransactionDataSourceRt]),
       t.type({
         bucketSizeInSeconds: toNumberRt,
       }),

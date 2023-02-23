@@ -13,13 +13,15 @@ import type { RuleAlertAction } from './types';
 export const transformRuleToAlertAction = ({
   group,
   id,
-  action_type_id, // eslint-disable-line @typescript-eslint/naming-convention
+  action_type_id: actionTypeId,
   params,
+  uuid,
 }: RuleAlertAction): RuleAction => ({
   group,
   id,
   params,
-  actionTypeId: action_type_id,
+  actionTypeId,
+  ...(uuid && { uuid }),
 });
 
 export const transformAlertToRuleAction = ({
@@ -27,11 +29,13 @@ export const transformAlertToRuleAction = ({
   id,
   actionTypeId,
   params,
+  uuid,
 }: RuleAction): RuleAlertAction => ({
   group,
   id,
   params,
   action_type_id: actionTypeId,
+  ...(uuid && { uuid }),
 });
 
 export const transformRuleToAlertResponseAction = ({
