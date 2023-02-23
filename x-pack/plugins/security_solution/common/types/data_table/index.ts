@@ -44,18 +44,17 @@ enum TableEntityType {
 }
 
 export const tableEntity: Record<TableId, TableEntityType> = {
-  [TableId.usersPageEvents]: TableEntityType.event,
+  [TableId.alertsOnAlertsPage]: TableEntityType.alert,
+  [TableId.alertsOnCasePage]: TableEntityType.alert,
   [TableId.alertsOnRuleDetailsPage]: TableEntityType.alert,
   [TableId.hostsPageEvents]: TableEntityType.event,
-  [TableId.usersPageEvents]: TableEntityType.event,
   [TableId.networkPageEvents]: TableEntityType.event,
-  [TableId.hostsPageSessions]: TableEntityType.session,
-  [TableId.alertsOnAlertsPage]: TableEntityType.alert,
+  [TableId.usersPageEvents]: TableEntityType.event,
   [TableId.test]: TableEntityType.event,
   [TableId.alternateTest]: TableEntityType.event,
   [TableId.rulePreview]: TableEntityType.event,
-  [TableId.kubernetesPageSessions]: TableEntityType.event,
-  [TableId.alertsOnCasePage]: TableEntityType.alert,
+  [TableId.hostsPageSessions]: TableEntityType.session,
+  [TableId.kubernetesPageSessions]: TableEntityType.session,
 } as const;
 
 const TableIdLiteralRt = runtimeTypes.union([
