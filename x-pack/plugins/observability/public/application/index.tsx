@@ -22,7 +22,6 @@ import {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
-import { HasDataContextProvider } from '../context/has_data_context';
 import { PluginContext } from '../context/plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
@@ -111,9 +110,8 @@ export const renderApp = ({
                 <i18nCore.Context>
                   <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
                     <QueryClientProvider client={queryClient}>
-                      <HasDataContextProvider>
-                        <App />
-                      </HasDataContextProvider>
+                      <App />
+
                       <ReactQueryDevtools />
                     </QueryClientProvider>
                   </RedirectAppLinks>
