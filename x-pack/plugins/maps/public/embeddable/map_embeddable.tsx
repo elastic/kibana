@@ -105,6 +105,10 @@ function getIsRestore(searchSessionId?: string) {
   return searchSessionOptions ? searchSessionOptions.isRestore : false;
 }
 
+export function getControlledBy(id: string) {
+  return `mapEmbeddablePanel${id}`;
+}
+
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>, FilterableEmbeddable
@@ -142,7 +146,7 @@ export class MapEmbeddable
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
     this._subscriptions.push(this.getUpdated$().subscribe(() => this.onUpdate()));
-    this._controlledBy = `mapEmbeddablePanel${this.id}`;
+    this._controlledBy = getControlledBy(this.id);
   }
 
   public reportsEmbeddableLoad() {
@@ -189,6 +193,7 @@ export class MapEmbeddable
     // Passing callback into redux store instead of regular pattern of getting redux state changes for performance reasons
     store.dispatch(setOnMapMove(this._propogateMapMovement));
 
+    this._dispatchSetQuery({ forceRefresh: false });
     this._subscriptions.push(
       shouldFetch$<MapEmbeddableInput>(this.getUpdated$(), () => {
         return {
