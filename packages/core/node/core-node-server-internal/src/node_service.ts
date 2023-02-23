@@ -68,8 +68,7 @@ export class NodeService {
     loggingSystem.setGlobalContext({ service: { node: { roles } } });
     this.log.info(`Kibana process configured with roles: [${roles.join(', ')}]`);
 
-    // We assume the combination of node roles have been validated and so map them
-    // directly onto an object.
+    // We assume the combination of node roles has been validated and avoid doing additional checks here.
     this.roles = NODE_ALL_ROLES.reduce((acc, curr) => {
       return { ...acc, [camelCase(curr)]: (roles as string[]).includes(curr) };
     }, {} as NodeRoles);
