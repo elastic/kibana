@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-  useQuery,
-} from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
@@ -22,9 +17,6 @@ export interface UseFetchHistoricalSummaryResponse {
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
-  refetch: <TPageData>(
-    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<FetchHistoricalSummaryResponse | undefined, unknown>>;
 }
 
 export interface Params {
@@ -36,33 +28,30 @@ export function useFetchHistoricalSummary({
 }: Params): UseFetchHistoricalSummaryResponse {
   const { http } = useKibana().services;
 
-  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
-    {
-      queryKey: ['fetchHistoricalSummary', sloIds],
-      queryFn: async ({ signal }) => {
-        try {
-          const response = await http.post<FetchHistoricalSummaryResponse>(
-            '/internal/observability/slos/_historical_summary',
-            {
-              body: JSON.stringify({ sloIds }),
-              signal,
-            }
-          );
+  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
+    queryKey: ['fetchHistoricalSummary', sloIds],
+    queryFn: async ({ signal }) => {
+      try {
+        const response = await http.post<FetchHistoricalSummaryResponse>(
+          '/internal/observability/slos/_historical_summary',
+          {
+            body: JSON.stringify({ sloIds }),
+            signal,
+          }
+        );
 
-          return response;
-        } catch (error) {
-          // ignore error
-        }
-      },
-      refetchOnWindowFocus: false,
-    }
-  );
+        return response;
+      } catch (error) {
+        // ignore error
+      }
+    },
+    refetchOnWindowFocus: false,
+  });
 
   return {
     sloHistoricalSummaryResponse: isInitialLoading ? EMPTY_RESPONSE : data ?? EMPTY_RESPONSE,
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,
-    refetch,
   };
 }
