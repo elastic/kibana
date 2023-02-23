@@ -14,7 +14,7 @@ import {
 
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { TransformGenerator } from '.';
+import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
@@ -35,6 +35,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
+      this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildCommonGroupBy(slo),
@@ -88,6 +89,10 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           'transaction.type': indicator.params.transactionType,
         },
       });
+    }
+
+    if (indicator.params.filter) {
+      queryFilter.push(getElastichsearchQueryOrThrow(indicator.params.filter));
     }
 
     return {

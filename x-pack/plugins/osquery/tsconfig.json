@@ -68,5 +68,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/logging",
+    "@kbn/safer-lodash-set",
+    "@kbn/shared-ux-router",
   ]
 }

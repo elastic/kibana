@@ -58,7 +58,7 @@ describe('loadActions hooks', () => {
       mockGetActions.mockResolvedValue([actionEnabled, actionDisabled]);
 
       const { result, waitForNextUpdate } = renderHook(() =>
-        useLoadActions(actionContext, { disabledActions: [actionDisabled.id] })
+        useLoadActions(actionContext, { disabledActionTypes: [actionDisabled.type] })
       );
 
       await waitForNextUpdate();
@@ -110,13 +110,13 @@ describe('loadActions hooks', () => {
       expect(result.error?.message).toEqual(message);
     });
 
-    it('filters out disabled actions', async () => {
+    it('filters out disabled actions types', async () => {
       const actionEnabled = makeAction('action-enabled');
       const actionDisabled = makeAction('action-disabled');
       mockGetActions.mockResolvedValue([actionEnabled, actionDisabled]);
 
       const { result, waitForNextUpdate } = renderHook(() =>
-        useLoadActionsFn({ disabledActions: [actionDisabled.id] })
+        useLoadActionsFn({ disabledActionTypes: [actionDisabled.type] })
       );
       const [_, loadActions] = result.current;
 
@@ -163,13 +163,13 @@ describe('loadActions hooks', () => {
       expect(result.error?.message).toEqual(message);
     });
 
-    it('filters out disabled actions', async () => {
+    it('filters out disabled actions types', async () => {
       const actionEnabled = makeAction('action-enabled');
       const actionDisabled = makeAction('action-disabled');
       mockGetActions.mockResolvedValue([actionEnabled, actionDisabled]);
 
       const { result, waitForNextUpdate } = renderHook(() =>
-        useBulkLoadActions(actionContexts, { disabledActions: [actionDisabled.id] })
+        useBulkLoadActions(actionContexts, { disabledActionTypes: [actionDisabled.type] })
       );
 
       await waitForNextUpdate();

@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type { IRouter, Logger, CustomRequestHandlerContext } from '@kbn/core/server';
+import type { CustomRequestHandlerContext, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { Writable } from 'stream';
+import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
-  PngScreenshotOptions as BasePngScreenshotOptions,
   PdfScreenshotOptions as BasePdfScreenshotOptions,
+  PngScreenshotOptions as BasePngScreenshotOptions,
   ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
 import type {
@@ -28,6 +27,8 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { Writable } from 'stream';
 import type { CancellationToken } from '../common/cancellation_token';
 import type { BaseParams, BasePayload, TaskRunResult, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
@@ -59,7 +60,8 @@ export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 // default fn type for CreateJobFnFactory
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,
-  context: ReportingRequestHandlerContext
+  context: ReportingRequestHandlerContext,
+  req: KibanaRequest
 ) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
 
 // default fn type for RunTaskFnFactory
@@ -105,6 +107,7 @@ export interface ReportingSetupDeps {
 
 export interface ReportingStartDeps {
   data: DataPluginStart;
+  discover: DiscoverServerPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   screenshotting: ScreenshottingStart;
