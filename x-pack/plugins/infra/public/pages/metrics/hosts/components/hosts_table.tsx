@@ -5,15 +5,36 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
+import {
+  timer,
+  from,
+  expand,
+  switchMap,
+  takeWhile,
+  takeUntil,
+  fromEvent,
+  map,
+  Subscription,
+} from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  IKibanaSearchResponse,
+  isPartialResponse,
+  ISearchOptionsSerializable,
+} from '@kbn/data-plugin/common';
 import useList from 'react-use/lib/useList';
-import { SnapshotNode, SnapshotNodeResponse } from '../../../../../common/http_api';
-import { InfraClientStartDeps } from '../../../../types';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import {
+  SnapshotNode,
+  SnapshotNodeResponse,
+  SnapshotRequest,
+} from '../../../../../common/http_api';
+import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../types';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { useHostsTable } from '../hooks/use_hosts_table';
@@ -22,6 +43,8 @@ import type { SnapshotMetricType } from '../../../../../common/inventory_models/
 import { useTableProperties } from '../hooks/use_table_properties_url_state';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
+
+const BATCH = true;
 
 const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
   { type: 'rx' },
@@ -34,20 +57,40 @@ const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
 
 export const HostsTable = () => {
   const {
-    services: { bfetch, data },
-  } = useKibana<InfraClientStartDeps>();
+    services: { bfetch, data, http },
+  } = useKibana<InfraClientStartDeps & InfraClientCoreStart>();
   const { baseRequest, setHostViewState, hostViewState } = useHostsViewContext();
   const { onSubmit, unifiedSearchDateRange } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
   const [nodes, { set: setResult, clear: clearList }] = useList<SnapshotNode>([]);
+  const abortController = useRef(new AbortController());
 
-  useEffect(() => {
-    clearList();
-    const payload = convertToSnapshotApiRequest({ ...baseRequest, metrics: HOST_TABLE_METRICS });
-    const { stream } = bfetch.fetchStreaming({
-      url: '/api/metrics/hosts',
-      body: JSON.stringify({
-        request: payload,
+  const batchedFunction = useMemo(() => {
+    return bfetch.batchedFunction<
+      {
+        request: {
+          id?: string;
+          params: SnapshotRequest;
+        };
+        options: ISearchOptionsSerializable;
+      },
+      IKibanaSearchResponse<SnapshotNodeResponse>
+    >({
+      url: '/api/metrics/hosts/batch',
+    });
+  }, [bfetch]);
+
+  const payload = useMemo(
+    () => convertToSnapshotApiRequest({ ...baseRequest, metrics: HOST_TABLE_METRICS }),
+    [baseRequest]
+  );
+  const getBatchSearch = useCallback(
+    (id?: string) => {
+      return batchedFunction({
+        request: {
+          id,
+          params: payload,
+        },
         options: {
           executionContext: {
             name: 'Hosts Table',
@@ -58,22 +101,55 @@ export const HostsTable = () => {
           strategy: ENHANCED_ES_SEARCH_STRATEGY,
           sessionId: data.search.session.getSessionId(),
         },
-      }),
-    });
+      });
+    },
+    [data.search.session, payload, batchedFunction]
+  );
 
-    const subscription = stream.subscribe({
-      next(test) {
-        const response = JSON.parse(test) as SnapshotNodeResponse;
-        if (response.nodes.length > 0) {
-          setResult(response.nodes);
-        }
-      },
-    });
+  const search = useCallback(
+    () =>
+      http.post<SnapshotNodeResponse>('/api/metrics/hosts', {
+        signal: abortController.current.signal,
+        body: JSON.stringify(payload),
+      }),
+
+    [http, payload]
+  );
+
+  const search$ = useCallback(
+    (abortSignal: AbortSignal) =>
+      from(getBatchSearch()).pipe(
+        expand((response) => {
+          return timer(2000).pipe(switchMap(() => getBatchSearch(response.id)));
+        }),
+        takeWhile<IKibanaSearchResponse<SnapshotNodeResponse>>(isPartialResponse, true),
+        takeUntil(fromEvent(abortSignal, 'abort').pipe(map(() => new AbortError())))
+      ),
+    [getBatchSearch]
+  );
+
+  useEffect(() => {
+    clearList();
+
+    abortController.current.abort();
+    abortController.current = new AbortController();
+
+    let sub: Subscription | undefined;
+    if (BATCH) {
+      sub = search$(abortController.current.signal).subscribe({
+        next: (response) => {
+          setResult(response.rawResponse.nodes);
+        },
+      });
+    } else {
+      search().then((response) => setResult(response.nodes));
+    }
 
     return () => {
-      subscription.unsubscribe();
+      abortController.current.abort();
+      sub?.unsubscribe();
     };
-  }, [baseRequest, bfetch, clearList, data.search.session, setResult]);
+  }, [search$, setResult, clearList, search]);
 
   const { columns, items } = useHostsTable(nodes, { time: unifiedSearchDateRange });
 
