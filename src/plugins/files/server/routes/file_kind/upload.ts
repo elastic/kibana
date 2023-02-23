@@ -12,6 +12,7 @@ import { Readable } from 'stream';
 import type { FilesClient } from '../../../common/files_client';
 import type { FileKind } from '../../../common/types';
 import type { CreateRouteDefinition } from '../../../common/api_routes';
+import { MaxByteSizeExceededError } from '../../file_client/stream_transforms/max_byte_size_transform/errors';
 import { FILES_API_ROUTES } from '../api_routes';
 import { fileErrors } from '../../file';
 import { getById } from './helpers';
@@ -57,6 +58,12 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
   try {
     await file.uploadContent(stream as Readable, abort$);
   } catch (e) {
+    if (e instanceof MaxByteSizeExceededError) {
+      return res.customError({
+        statusCode: 413,
+      });
+    }
+
     if (
       e instanceof fileErrors.ContentAlreadyUploadedError ||
       e instanceof fileErrors.UploadInProgressError
