@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
 import { useKibana } from '../../lib/kibana';
 
-export const useFetchPatternList = (dataViewId: string | null) => {
+export const useFetchPatternList = (dataViewId: string | null, defaultList: string[] = []) => {
   const {
     data: { dataViews: dataViewsService },
   } = useKibana().services;
@@ -18,21 +18,23 @@ export const useFetchPatternList = (dataViewId: string | null) => {
   useEffect(() => {
     const fetchAndSetPatternList = async (dvId: string) => {
       const dataViewData = await dataViewsService.get(dvId, true, true);
-      const defaultPatternsList = ensurePatternFormat(dataViewData.getIndexPattern().split(','));
-      const patList = defaultPatternsList.reduce((res: string[], pattern) => {
-        if (dataViewData.matchedIndices.find((q) => q.includes(pattern.replaceAll('*', '')))) {
-          res.push(pattern);
-        }
-        return res;
-      }, []);
-      setPatternList(patList);
+      if (dataViewData != null) {
+        const defaultPatternsList = ensurePatternFormat(dataViewData.getIndexPattern().split(','));
+        const patList = defaultPatternsList.reduce((res: string[], pattern) => {
+          if (dataViewData.matchedIndices.find((q) => q.includes(pattern.replaceAll('*', '')))) {
+            res.push(pattern);
+          }
+          return res;
+        }, []);
+        setPatternList(patList);
+      }
     };
     if (dataViewId != null) {
       fetchAndSetPatternList(dataViewId);
     } else {
-      setPatternList([]);
+      setPatternList(defaultList);
     }
-  }, [dataViewId, dataViewsService]);
+  }, [dataViewId, dataViewsService, defaultList]);
 
   return {
     patternList,

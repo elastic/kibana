@@ -417,17 +417,7 @@ export const useSourcererDataView = (
     [legacyDataView, missingPatterns.length, selectedDataView]
   );
 
-  const [patternList, setPatternList] = useState<string[]>([]);
-
-  const { patternList: pList } = useFetchPatternList(sourcererDataView.id);
-
-  useEffect(() => {
-    if (sourcererDataView.id != null) {
-      setPatternList(pList);
-    } else {
-      setPatternList(sourcererDataView.patternList);
-    }
-  }, [pList, sourcererDataView.id, sourcererDataView.patternList]);
+  const { patternList } = useFetchPatternList(sourcererDataView.id, sourcererDataView.patternList);
 
   const indicesExist = useMemo(
     () =>
