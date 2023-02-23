@@ -97,7 +97,7 @@ const renderUseSummaryChartData = (props: Partial<UseAlertsQueryProps> = {}) =>
     }
   );
 
-describe('get severity chart data', () => {
+describe('get summary charts data', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDateNow.mockReturnValue(dateNow);

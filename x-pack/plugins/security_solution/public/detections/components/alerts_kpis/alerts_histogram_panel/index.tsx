@@ -181,16 +181,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     }, [defaultStackByOption, onlyField]);
 
     const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_HISTOGRAM_ID);
-    const [querySkip, setQuerySkip] = useState(
-      isAlertsPageChartsEnabled ? !isExpanded : !toggleStatus
-    );
-    useEffect(() => {
-      if (isAlertsPageChartsEnabled && isExpanded !== undefined) {
-        setQuerySkip(!isExpanded);
-      } else {
-        setQuerySkip(!toggleStatus);
-      }
-    }, [toggleStatus, isAlertsPageChartsEnabled, isExpanded]);
 
     const toggleQuery = useCallback(
       (newToggleStatus: boolean) => {
@@ -199,10 +189,14 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         } else {
           setToggleStatus(newToggleStatus);
         }
-        // toggle on = skipQuery false
-        setQuerySkip(!newToggleStatus);
       },
-      [setQuerySkip, setToggleStatus, setIsExpanded, isAlertsPageChartsEnabled]
+      [setToggleStatus, setIsExpanded, isAlertsPageChartsEnabled]
+    );
+
+    const querySkip = useMemo(
+      () =>
+        isAlertsPageChartsEnabled && setIsExpanded !== undefined ? !isExpanded : !toggleStatus,
+      [isAlertsPageChartsEnabled, setIsExpanded, isExpanded, toggleStatus]
     );
 
     const timerange = useMemo(() => ({ from, to }), [from, to]);
