@@ -134,8 +134,8 @@ export const SharedLists = React.memo(() => {
   const { addError, addSuccess } = useAppToasts();
 
   // Loading states
-  const exceptionsLoaded = !loadingExceptions && !loadingTableInfo && !initLoading;
-  const hasNoExceptions = exceptionsLoaded && !exceptionListsWithRuleRefs.length;
+  const exceptionsLoaded = !loadingTableInfo && !initLoading;
+  const hasNoExceptions = !loadingExceptions && !exceptionListsWithRuleRefs.length;
   const isSearchingExceptions = viewerStatus === ViewerStatus.SEARCHING;
   const isLoadingExceptions = viewerStatus === ViewerStatus.LOADING;
 
