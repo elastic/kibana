@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
-import { useCallback } from 'react';
-import { useDataFetcher } from '../use_data_fetcher';
+import { useQuery } from '@tanstack/react-query';
+
+import { useKibana } from '../../utils/kibana_react';
 
 type ApmIndex = string;
 
 export interface UseFetchApmIndex {
   data: ApmIndex;
-  loading: boolean;
-  error: boolean;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
 }
 
 interface ApiResponse {
@@ -26,41 +27,36 @@ interface ApiResponse {
 }
 
 export function useFetchApmIndex(): UseFetchApmIndex {
-  const shouldExecuteApiCall = useCallback(() => true, []);
+  const { http } = useKibana().services;
 
-  const { data, loading, error } = useDataFetcher<null, ApmIndex>({
-    paramsForApiCall: null,
-    initialDataState: '',
-    executeApiCall: fetchApmIndices,
-    shouldExecuteApiCall,
+  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
+    queryKey: ['fetchApmIndices'],
+    queryFn: async ({ signal }) => {
+      try {
+        const response = await http.get<ApiResponse>('/internal/apm/settings/apm-index-settings', {
+          signal,
+        });
+
+        const metricSettings = response.apmIndexSettings.find(
+          (settings) => settings.configurationName === 'metric'
+        );
+
+        let index = '';
+        if (!!metricSettings) {
+          index = metricSettings.savedValue ?? metricSettings.defaultValue;
+        }
+
+        return index;
+      } catch (error) {
+        // ignore error
+      }
+    },
   });
 
-  return { data, loading, error };
+  return {
+    data: isInitialLoading ? '' : data ?? '',
+    isLoading: isInitialLoading || isLoading || isRefetching,
+    isSuccess,
+    isError,
+  };
 }
-
-const fetchApmIndices = async (
-  params: null,
-  abortController: AbortController,
-  http: HttpSetup
-): Promise<ApmIndex> => {
-  try {
-    const response = await http.get<ApiResponse>('/internal/apm/settings/apm-index-settings', {
-      signal: abortController.signal,
-    });
-
-    const metricSettings = response.apmIndexSettings.find(
-      (settings) => settings.configurationName === 'metric'
-    );
-
-    let index = '';
-    if (!!metricSettings) {
-      index = metricSettings.savedValue ?? metricSettings.defaultValue;
-    }
-
-    return index;
-  } catch (error) {
-    // ignore error
-  }
-
-  return '';
-};
