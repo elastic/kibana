@@ -106,6 +106,8 @@ function FlameGraphTooltip({
   countInclusive,
   countExclusive,
   totalSamples,
+  baselineScaleFactor,
+  comparisonScaleFactor,
   comparisonCountInclusive,
   comparisonCountExclusive,
   comparisonTotalSamples,
@@ -115,6 +117,8 @@ function FlameGraphTooltip({
   countInclusive: number;
   countExclusive: number;
   totalSamples: number;
+  baselineScaleFactor?: number;
+  comparisonScaleFactor?: number;
   comparisonCountInclusive?: number;
   comparisonCountExclusive?: number;
   comparisonTotalSamples?: number;
@@ -166,8 +170,16 @@ function FlameGraphTooltip({
                 label={i18n.translate('xpack.profiling.flameGraphTooltip.samplesLabel', {
                   defaultMessage: `Samples`,
                 })}
-                value={countInclusive}
-                comparison={comparisonCountInclusive}
+                value={
+                  isNumber(baselineScaleFactor)
+                    ? countInclusive * baselineScaleFactor
+                    : countInclusive
+                }
+                comparison={
+                  isNumber(comparisonCountInclusive) && isNumber(comparisonScaleFactor)
+                    ? comparisonCountInclusive * comparisonScaleFactor
+                    : undefined
+                }
                 formatAsPercentage={false}
                 showChange
               />
@@ -293,6 +305,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
                           comparisonCountExclusive={comparisonNode?.CountExclusive}
                           totalSamples={totalSamples}
                           comparisonTotalSamples={comparisonFlamegraph?.CountInclusive[0]}
+                          baselineScaleFactor={baseline}
+                          comparisonScaleFactor={comparison}
                         />
                       );
                     },
