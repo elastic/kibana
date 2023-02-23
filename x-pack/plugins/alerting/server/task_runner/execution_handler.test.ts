@@ -92,6 +92,7 @@ const rule = {
         stateVal: 'My {{state.value}} goes here',
         alertVal: 'My {{alertId}} {{alertName}} {{spaceId}} {{tags}} {{alertInstanceId}} goes here',
       },
+      uuid: '111-111',
     },
   ],
 } as unknown as SanitizedRule<RuleTypeParams>;
@@ -774,7 +775,7 @@ describe('Execution Handler', () => {
     await executionHandler.run(
       generateAlert({
         id: 1,
-        throttledActions: { 'test:default:1h': { date: new Date(DATE_1970) } },
+        throttledActions: { '111-111': { date: new Date(DATE_1970) } },
       })
     );
 
@@ -982,6 +983,7 @@ describe('Execution Handler', () => {
                 message:
                   'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
               },
+              uuid: '111-111',
             },
           ],
         },
@@ -999,7 +1001,7 @@ describe('Execution Handler', () => {
     });
     expect(result).toEqual({
       throttledActions: {
-        'testActionTypeId:summary:1d': {
+        '111-111': {
           date: new Date(),
         },
       },
@@ -1067,13 +1069,14 @@ describe('Execution Handler', () => {
                 message:
                   'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
               },
+              uuid: '111-111',
             },
           ],
         },
         taskInstance: {
           state: {
             ...defaultExecutionParams.taskInstance.state,
-            summaryActions: { 'testActionTypeId:summary:1d': { date: new Date() } },
+            summaryActions: { '111-111': { date: new Date() } },
           },
         } as unknown as ConcreteTaskInstance,
       })
@@ -1112,6 +1115,7 @@ describe('Execution Handler', () => {
               params: {
                 message: 'New: {{alerts.new.count}}',
               },
+              uuid: '111-111',
             },
             {
               id: '2',
@@ -1122,6 +1126,7 @@ describe('Execution Handler', () => {
                 notifyWhen: 'onThrottleInterval',
                 throttle: '10d',
               },
+              uuid: '222-222',
             },
           ],
         },
@@ -1129,9 +1134,9 @@ describe('Execution Handler', () => {
           state: {
             ...defaultExecutionParams.taskInstance.state,
             summaryActions: {
-              'testActionTypeId:summary:1d': { date: new Date() },
-              'testActionTypeId:summary:10d': { date: new Date() },
-              'testActionTypeId:summary:10m': { date: new Date() }, // does not exist in the actions list
+              '111-111': { date: new Date() },
+              '222-222': { date: new Date() },
+              '333-333': { date: new Date() }, // does not exist in the actions list
             },
           },
         } as unknown as ConcreteTaskInstance,
@@ -1141,10 +1146,10 @@ describe('Execution Handler', () => {
     const result = await executionHandler.run({});
     expect(result).toEqual({
       throttledActions: {
-        'testActionTypeId:summary:1d': {
+        '111-111': {
           date: new Date(),
         },
-        'testActionTypeId:summary:10d': {
+        '222-222': {
           date: new Date(),
         },
       },

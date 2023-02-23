@@ -52,8 +52,7 @@ export const isSummaryActionThrottled = ({
   if (!summaryActions) {
     return false;
   }
-  const hash = generateActionHash(action);
-  const triggeredSummaryAction = summaryActions[hash];
+  const triggeredSummaryAction = summaryActions[action.uuid!];
   if (!triggeredSummaryAction) {
     return false;
   }
@@ -82,9 +81,11 @@ export const getSummaryActionsFromTaskState = ({
   summaryActions?: ThrottledActions;
 }) => {
   return Object.entries(summaryActions).reduce((newObj, [key, val]) => {
-    const actionExists = actions.some((action) => generateActionHash(action) === key);
+    const actionExists = actions.find(
+      (action) => action.uuid === key || generateActionHash(action) === key
+    );
     if (actionExists) {
-      return { ...newObj, [key]: val };
+      return { ...newObj, [actionExists.uuid!]: val }; // replace hash with uuid
     } else {
       return newObj;
     }

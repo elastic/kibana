@@ -47,6 +47,7 @@ const mockSummaryAction: RuleAction = {
     notifyWhen: 'onThrottleInterval',
     throttle: '1d',
   },
+  uuid: '111-111',
 };
 
 describe('rule_action_helper', () => {
@@ -116,11 +117,21 @@ describe('rule_action_helper', () => {
       const result = getSummaryActionsFromTaskState({
         actions: [mockSummaryAction],
         summaryActions: {
-          'slack:summary:1d': { date: new Date('01.01.2020') },
-          'slack:summary:2d': { date: new Date('01.01.2020') },
+          '111-111': { date: new Date('01.01.2020') },
+          '222-222': { date: new Date('01.01.2020') },
         },
       });
-      expect(result).toEqual({ 'slack:summary:1d': { date: new Date('01.01.2020') } });
+      expect(result).toEqual({ '111-111': { date: new Date('01.01.2020') } });
+    });
+
+    test('should replace hash with uuid', () => {
+      const result = getSummaryActionsFromTaskState({
+        actions: [mockSummaryAction],
+        summaryActions: {
+          'slack:summary:1d': { date: new Date('01.01.2020') },
+        },
+      });
+      expect(result).toEqual({ '111-111': { date: new Date('01.01.2020') } });
     });
   });
 
@@ -137,7 +148,7 @@ describe('rule_action_helper', () => {
       jest.useRealTimers();
     });
     const logger = { debug: jest.fn } as unknown as Logger;
-    const summaryActions = { 'slack:summary:1d': { date: new Date('2020-01-01T00:00:00.000Z') } };
+    const summaryActions = { '111-111': { date: new Date('2020-01-01T00:00:00.000Z') } };
 
     test('should return false if the action does not have throttle filed', () => {
       const result = isSummaryActionThrottled({

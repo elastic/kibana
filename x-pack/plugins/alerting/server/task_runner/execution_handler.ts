@@ -233,7 +233,7 @@ export class ExecutionHandler<
           });
 
           if (isSummaryActionOnInterval(action)) {
-            throttledActions[generateActionHash(action)] = { date: new Date() };
+            throttledActions[action.uuid!] = { date: new Date() };
           }
 
           logActions.push({
@@ -292,7 +292,8 @@ export class ExecutionHandler<
             if (isSummaryActionOnInterval(action)) {
               executableAlert.updateLastScheduledActions(
                 action.group as ActionGroupIds,
-                generateActionHash(action)
+                generateActionHash(action),
+                action.uuid
               );
             } else {
               executableAlert.updateLastScheduledActions(action.group as ActionGroupIds);
@@ -379,7 +380,7 @@ export class ExecutionHandler<
       const throttled = action.frequency?.throttle
         ? alert.isThrottled({
             throttle: action.frequency.throttle ?? null,
-            actionHash: generateActionHash(action),
+            uuid: action.uuid || generateActionHash(action), // generateActionHash must be removed once all the hash identifiers removed from the task state
           })
         : alert.isThrottled({ throttle: rule.throttle ?? null });
 
