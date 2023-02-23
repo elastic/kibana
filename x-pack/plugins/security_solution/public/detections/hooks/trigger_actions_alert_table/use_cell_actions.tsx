@@ -8,12 +8,12 @@
 import type { BrowserField, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useCallback, useMemo } from 'react';
-import { VIEW_SELECTION } from '../../../../common/constants';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger } from '../../../actions/constants';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
+import { VIEW_SELECTION } from '../../../../common/constants';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import type { TableId } from '../../../../common/types';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -87,7 +87,7 @@ export const getUseCellActionsHook = (tableId: TableId) => {
         },
         dataGridRef,
       };
-    }, [browserFieldsByName, columns, finalData, dataGridRef, viewMode]);
+    }, [viewMode, browserFieldsByName, columns, finalData, dataGridRef]);
 
     const cellActions = useDataGridColumnsSecurityCellActions(cellActionProps);
 
