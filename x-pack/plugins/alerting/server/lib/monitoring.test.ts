@@ -111,18 +111,19 @@ describe('resetMonitoringLastRun', () => {
   });
 
   it('preserves last run timestamp', () => {
+    const expectedTimestamp = mockRuleMonitoring.run.last_run.timestamp;
     const result = resetMonitoringLastRun(mockRuleMonitoring);
-    expect(result.run.last_run.timestamp).toEqual(mockRuleMonitoring.run.last_run.timestamp);
+    expect(result.run.last_run.timestamp).toEqual(expectedTimestamp);
   });
 
   it('preserves other monitoring properties', () => {
+    const { run: originalRun, ...originalRestOfMonitoringObject } = mockRuleMonitoring;
+    const { last_run: originalLastRun, ...originalRestOfRunObject } = originalRun;
+
     const result = resetMonitoringLastRun(mockRuleMonitoring);
 
     const { run: actualRun, ...actualRestOfMonitoringObject } = result;
-    const { run: originalRun, ...originalRestOfMonitoringObject } = mockRuleMonitoring;
-
     const { last_run: actualLastRun, ...actualRestOfRunObject } = actualRun;
-    const { last_run: originalLastRun, ...originalRestOfRunObject } = originalRun;
 
     expect(actualRestOfMonitoringObject).toEqual(originalRestOfMonitoringObject);
     expect(actualRestOfRunObject).toEqual(originalRestOfRunObject);

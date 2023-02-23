@@ -27,7 +27,12 @@ export const createRuleExecutionSummary = (
     return null;
   }
 
+  // Data that we need to create rule execution summary is stored in two different "last run" objects within a rule.
+
+  // This last run object is internal to Kibana server and is not exposed via any public HTTP API.
+  // Alerting Framework keeps it for itself and provides via the RulesClient for solutions.
   const lastRunInternal = rule.monitoring.run.last_run;
+  // This last run object is public - it is exposed via the public Alerting HTTP API.
   const lastRunPublic = rule.lastRun;
 
   if (rule.running) {
