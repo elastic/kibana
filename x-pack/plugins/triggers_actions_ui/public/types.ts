@@ -618,7 +618,6 @@ export interface AlertsTableConfigurationRegistry {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
-  app_id?: string;
 }
 
 export enum BulkActionsVerbs {

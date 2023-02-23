@@ -19,7 +19,6 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useAddBulkToTimelineAction } from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useBulkAlertActionItems } from './use_alert_actions';
-import { useBulkAddToCaseActions } from '../../components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
 
 // check to see if the query is a known "empty" shape
 export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
@@ -89,7 +88,5 @@ export const getBulkActionHook =
       refetch: refetchGlobalQuery,
     });
 
-    const caseActions = useBulkAddToCaseActions();
-
-    return [...alertActions, ...caseActions, timelineAction];
+    return [...alertActions, timelineAction];
   };

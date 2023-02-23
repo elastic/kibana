@@ -153,10 +153,6 @@ jest.mock('../../components/alerts_table/timeline_actions/use_add_bulk_to_timeli
   useAddBulkToTimelineAction: jest.fn(() => {}),
 }));
 
-jest.mock('../../components/alerts_table/timeline_actions/use_bulk_add_to_case_actions', () => ({
-  useBulkAddToCaseActions: jest.fn(() => []),
-}));
-
 jest.mock('../../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../../common/components/page/use_refetch_by_session');
 

@@ -153,10 +153,6 @@ jest.mock('./timeline_actions/use_add_bulk_to_timeline', () => ({
   useAddBulkToTimelineAction: jest.fn(() => {}),
 }));
 
-jest.mock('./timeline_actions/use_bulk_add_to_case_actions', () => ({
-  useBulkAddToCaseActions: jest.fn(() => []),
-}));
-
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
