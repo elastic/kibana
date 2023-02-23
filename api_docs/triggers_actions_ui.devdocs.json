@@ -2739,411 +2739,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.AlertsTableProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "AlertsTableProps",
-        "description": [],
-        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.alertsTableConfiguration",
-            "type": "Object",
-            "tags": [],
-            "label": "alertsTableConfiguration",
-            "description": [],
-            "signature": [
-              "AlertsTableConfigurationRegistry"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.columns",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              "EuiDataGridColumn",
-              "[]"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.deletedEventIds",
-            "type": "Array",
-            "tags": [],
-            "label": "deletedEventIds",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.disabledCellActions",
-            "type": "Array",
-            "tags": [],
-            "label": "disabledCellActions",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.flyoutSize",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "flyoutSize",
-            "description": [],
-            "signature": [
-              "\"m\" | \"s\" | \"l\" | undefined"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.pageSize",
-            "type": "number",
-            "tags": [],
-            "label": "pageSize",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.pageSizeOptions",
-            "type": "Array",
-            "tags": [],
-            "label": "pageSizeOptions",
-            "description": [],
-            "signature": [
-              "number[]"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.leadingControlColumns",
-            "type": "Array",
-            "tags": [],
-            "label": "leadingControlColumns",
-            "description": [],
-            "signature": [
-              "EuiDataGridControlColumn",
-              "[]"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.showExpandToDetails",
-            "type": "boolean",
-            "tags": [],
-            "label": "showExpandToDetails",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.showAlertStatusWithFlapping",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "showAlertStatusWithFlapping",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.trailingControlColumns",
-            "type": "Array",
-            "tags": [],
-            "label": "trailingControlColumns",
-            "description": [],
-            "signature": [
-              "EuiDataGridControlColumn",
-              "[]"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.useFetchAlertsData",
-            "type": "Function",
-            "tags": [],
-            "label": "useFetchAlertsData",
-            "description": [],
-            "signature": [
-              "() => ",
-              "FetchAlertData"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.visibleColumns",
-            "type": "Array",
-            "tags": [],
-            "label": "visibleColumns",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.datatestsubj",
-            "type": "string",
-            "tags": [],
-            "label": "'data-test-subj'",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.updatedAt",
-            "type": "number",
-            "tags": [],
-            "label": "updatedAt",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.browserFields",
-            "type": "Any",
-            "tags": [],
-            "label": "browserFields",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.onToggleColumn",
-            "type": "Function",
-            "tags": [],
-            "label": "onToggleColumn",
-            "description": [],
-            "signature": [
-              "(columnId: string) => void"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.AlertsTableProps.onToggleColumn.$1",
-                "type": "string",
-                "tags": [],
-                "label": "columnId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.onResetColumns",
-            "type": "Function",
-            "tags": [],
-            "label": "onResetColumns",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.onColumnsChange",
-            "type": "Function",
-            "tags": [],
-            "label": "onColumnsChange",
-            "description": [],
-            "signature": [
-              "(columns: ",
-              "EuiDataGridColumn",
-              "[], visibleColumns: string[]) => void"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.AlertsTableProps.onColumnsChange.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "columns",
-                "description": [],
-                "signature": [
-                  "EuiDataGridColumn",
-                  "[]"
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.AlertsTableProps.onColumnsChange.$2",
-                "type": "Array",
-                "tags": [],
-                "label": "visibleColumns",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.onChangeVisibleColumns",
-            "type": "Function",
-            "tags": [],
-            "label": "onChangeVisibleColumns",
-            "description": [],
-            "signature": [
-              "(newColumns: string[]) => void"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.AlertsTableProps.onChangeVisibleColumns.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "newColumns",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.controls",
-            "type": "Object",
-            "tags": [],
-            "label": "controls",
-            "description": [],
-            "signature": [
-              "EuiDataGridToolBarAdditionalControlsOptions",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertsTableProps.showInspectButton",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "showInspectButton",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.AlertStatus",
         "type": "Interface",
         "tags": [],
@@ -3989,6 +3584,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleAction.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-public.RuleAction.group",
@@ -4975,7 +4584,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"id\" | \"params\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"monitoring\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"running\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"id\" | \"params\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"monitoring\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"running\" | \"viewInAppRelativeUrl\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
@@ -5957,6 +5566,43 @@
           "[]; has: (id: string) => boolean; register: (objectType: ",
           "AlertsTableConfigurationRegistry",
           ") => void; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.AlertsTableProps",
+        "type": "Type",
+        "tags": [],
+        "label": "AlertsTableProps",
+        "description": [],
+        "signature": [
+          "{ alertsTableConfiguration: ",
+          "AlertsTableConfigurationRegistry",
+          "; casesData: { cases: Map<string, ",
+          "Case",
+          ">; isLoading: boolean; }; columns: ",
+          "EuiDataGridColumn",
+          "[]; deletedEventIds: string[]; disabledCellActions: string[]; flyoutSize?: \"m\" | \"s\" | \"l\" | undefined; pageSize: number; pageSizeOptions: number[]; id?: string | undefined; leadingControlColumns: ",
+          "EuiDataGridControlColumn",
+          "[]; showExpandToDetails: boolean; showAlertStatusWithFlapping?: boolean | undefined; trailingControlColumns: ",
+          "EuiDataGridControlColumn",
+          "[]; useFetchAlertsData: () => ",
+          "FetchAlertData",
+          "; visibleColumns: string[]; 'data-test-subj': string; updatedAt: number; browserFields: any; onToggleColumn: (columnId: string) => void; onResetColumns: () => void; onColumnsChange: (columns: ",
+          "EuiDataGridColumn",
+          "[], visibleColumns: string[]) => void; onChangeVisibleColumns: (newColumns: string[]) => void; query: Pick<",
+          "QueryDslQueryContainer",
+          ", \"ids\" | \"bool\">; controls?: ",
+          "EuiDataGridToolBarAdditionalControlsOptions",
+          " | undefined; showInspectButton?: boolean | undefined; toolbarVisibility?: ",
+          "EuiDataGridToolBarVisibilityOptions",
+          " | undefined; } & Partial<Pick<",
+          "EuiDataGridProps",
+          ", \"gridStyle\" | \"rowHeightsOptions\">>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -7487,7 +7133,7 @@
             {
               "parentPluginId": "triggersActionsUi",
               "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAlertsTable.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "props",
               "description": [],
