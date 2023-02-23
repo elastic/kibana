@@ -132,7 +132,6 @@ test('executes the task by calling the executor with proper parameters, using gi
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
@@ -161,7 +160,6 @@ test('executes the task by calling the executor with proper parameters, using gi
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     },
-    sourceType: 'SAVED_OBJECT',
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
@@ -188,7 +186,6 @@ test('executes the task by calling the executor with proper parameters, using st
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -217,7 +214,6 @@ test('executes the task by calling the executor with proper parameters, using st
     params: { baz: true },
     executionId: '123abc',
     relatedSavedObjects: [],
-    sourceType: 'SAVED_OBJECT',
     request: {
       headers: {
         // base64 encoded "123:abc"
@@ -237,6 +233,62 @@ test('executes the task by calling the executor with proper parameters, using st
 });
 
 test('executes the task by calling the executor with proper parameters when consumer is provided', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      consumer: 'test-consumer',
+      params: { baz: true },
+      executionId: '123abc',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+
+  const runnerResult = await taskRunner.run();
+
+  expect(runnerResult).toBeUndefined();
+  expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
+  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'action_task_params',
+    '3',
+    { namespace: 'namespace-test' }
+  );
+
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, [...executeParamsFields, 'consumer'])).toEqual({
+    actionId: '2',
+    consumer: 'test-consumer',
+    isEphemeral: false,
+    params: { baz: true },
+    relatedSavedObjects: [],
+    executionId: '123abc',
+    request: {
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+    },
+    taskInfo: {
+      scheduled: new Date(),
+      attempts: 0,
+    },
+  });
+
+  expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+    executeParams.request,
+    '/s/test'
+  );
+});
+
+test('executes the task by calling the executor with proper parameters when source is provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
@@ -275,13 +327,13 @@ test('executes the task by calling the executor with proper parameters when cons
     params: { baz: true },
     relatedSavedObjects: [],
     executionId: '123abc',
-    sourceType: 'SAVED_OBJECT',
     request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     },
+    sourceType: 'SAVED_OBJECT',
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
@@ -308,7 +360,6 @@ test('cleans up action_task_params object', async () => {
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -335,7 +386,6 @@ test('task runner should implement CancellableTask cancel method with logging wa
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -374,7 +424,6 @@ test('runs successfully when cleanup fails and logs the error', async () => {
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -409,7 +458,6 @@ test('throws an error with suggested retry logic when return status is error', a
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -452,7 +500,6 @@ test('uses API key when provided', async () => {
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -473,7 +520,6 @@ test('uses API key when provided', async () => {
     params: { baz: true },
     executionId: '123abc',
     relatedSavedObjects: [],
-    sourceType: 'SAVED_OBJECT',
     request: {
       headers: {
         // base64 encoded "123:abc"
@@ -507,7 +553,6 @@ test('uses relatedSavedObjects merged with references when provided', async () =
       params: { baz: true },
       executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
-      source: 'SAVED_OBJECT',
       relatedSavedObjects: [{ id: 'related_some-type_0', type: 'some-type' }],
     },
     references: [
@@ -532,7 +577,6 @@ test('uses relatedSavedObjects merged with references when provided', async () =
     isEphemeral: false,
     params: { baz: true },
     executionId: '123abc',
-    sourceType: 'SAVED_OBJECT',
     relatedSavedObjects: [
       {
         id: 'some-id',
@@ -567,7 +611,6 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
       params: { baz: true },
       executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
-      source: 'SAVED_OBJECT',
       relatedSavedObjects: [{ id: 'abc', type: 'some-type', namespace: 'yo' }],
     },
     references: [
@@ -587,7 +630,6 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
     isEphemeral: false,
     params: { baz: true },
     executionId: '123abc',
-    sourceType: 'SAVED_OBJECT',
     relatedSavedObjects: [
       {
         id: 'abc',
@@ -623,7 +665,6 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
       params: { baz: true },
       executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
-      source: 'SAVED_OBJECT',
       relatedSavedObjects: [{ Xid: 'related_some-type_0', type: 'some-type' }],
     },
     references: [
@@ -655,7 +696,6 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
     },
     executionId: '123abc',
     relatedSavedObjects: [],
-    sourceType: 'SAVED_OBJECT',
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
@@ -676,7 +716,6 @@ test(`doesn't use API key when not provided`, async () => {
     attributes: {
       actionId: '2',
       params: { baz: true },
-      source: 'SAVED_OBJECT',
       executionId: '123abc',
     },
     references: [
@@ -700,7 +739,6 @@ test(`doesn't use API key when not provided`, async () => {
     request: {
       headers: {},
     },
-    sourceType: 'SAVED_OBJECT',
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
@@ -731,7 +769,6 @@ test(`throws an error when license doesn't support the action type`, async () =>
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -771,7 +808,6 @@ test(`treats errors as errors if the task is retryable`, async () => {
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -820,7 +856,6 @@ test(`treats errors as successes if the task is not retryable`, async () => {
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -866,7 +901,6 @@ test('treats errors as errors if the error is thrown instead of returned', async
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [
@@ -908,7 +942,6 @@ test('increments monitoring metrics after execution', async () => {
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
@@ -941,7 +974,6 @@ test('increments monitoring metrics after a failed execution', async () => {
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
@@ -974,7 +1006,6 @@ test('increments monitoring metrics after a timeout', async () => {
       actionId: '2',
       params: { baz: true },
       executionId: '123abc',
-      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],

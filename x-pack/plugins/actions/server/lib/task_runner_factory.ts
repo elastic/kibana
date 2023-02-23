@@ -122,12 +122,12 @@ export class TaskRunnerFactory {
             actionId: actionId as string,
             isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request,
-            sourceType: source as ActionExecutionSourceType,
             taskInfo,
             executionId,
             consumer,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
             actionExecutionId,
+            ...(source ? { sourceType: source as ActionExecutionSourceType } : {}),
           });
         } catch (e) {
           logger.error(
@@ -212,8 +212,8 @@ export class TaskRunnerFactory {
           consumer,
           executionId,
           relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
-          sourceType: source as ActionExecutionSourceType,
           actionExecutionId,
+          ...(source ? { sourceType: source as ActionExecutionSourceType } : {}),
         });
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_TIMEOUTS);

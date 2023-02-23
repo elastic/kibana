@@ -14,8 +14,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import { ActionType } from '../types';
-import { ActionExecutionSourceType } from './action_execution_source';
 import { actionsMock } from '../mocks';
+import { ActionExecutionSourceType } from './action_execution_source';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -32,7 +32,6 @@ const executeParams = {
   executionId: '123abc',
   request: {} as KibanaRequest,
   actionExecutionId: '2',
-  sourceType: ActionExecutionSourceType.HTTP_REQUEST,
 };
 
 const spacesMock = spacesServiceMock.createStartContract();
@@ -95,6 +94,142 @@ test('successfully executes', async () => {
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   await actionExecutor.execute(executeParams);
+
+  expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'action',
+    '1',
+    { namespace: 'some-namespace' }
+  );
+
+  expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
+  expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('1', 'test', {
+    notifyUsage: true,
+  });
+
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: '1',
+    services: expect.anything(),
+    config: {
+      bar: true,
+    },
+    secrets: {
+      baz: true,
+    },
+    params: { foo: true },
+    logger: loggerMock,
+  });
+
+  expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+            "kind": "action",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "1",
+              "name": "1",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action started: test:1: 1",
+        },
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "kind": "action",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "1",
+              "name": "1",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action executed: test:1: 1",
+        },
+      ],
+    ]
+  `);
+});
+
+test('successfully executes when sourceType is specified', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      name: '1',
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+    },
+    references: [],
+  };
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  await actionExecutor.execute({
+    ...executeParams,
+    sourceType: ActionExecutionSourceType.HTTP_REQUEST,
+  });
 
   expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
     'action',
@@ -248,7 +383,6 @@ test('successfully executes with preconfigured connector', async () => {
           "kibana": Object {
             "action": Object {
               "execution": Object {
-                "source": "HTTP_REQUEST",
                 "uuid": "2",
               },
               "id": "preconfigured",
@@ -288,7 +422,6 @@ test('successfully executes with preconfigured connector', async () => {
           "kibana": Object {
             "action": Object {
               "execution": Object {
-                "source": "HTTP_REQUEST",
                 "uuid": "2",
               },
               "id": "preconfigured",
@@ -668,7 +801,6 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
           "kibana": Object {
             "action": Object {
               "execution": Object {
-                "source": "HTTP_REQUEST",
                 "uuid": "2",
               },
               "id": "preconfigured",
@@ -708,7 +840,6 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
           "kibana": Object {
             "action": Object {
               "execution": Object {
-                "source": "HTTP_REQUEST",
                 "uuid": "2",
               },
               "id": "preconfigured",
@@ -808,7 +939,6 @@ test('writes to event log for execute timeout', async () => {
     relatedSavedObjects: [],
     request: {} as KibanaRequest,
     actionExecutionId: '2',
-    sourceType: ActionExecutionSourceType.HTTP_REQUEST,
   });
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
   expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
@@ -819,7 +949,6 @@ test('writes to event log for execute timeout', async () => {
     kibana: {
       action: {
         execution: {
-          source: 'HTTP_REQUEST',
           uuid: '2',
         },
         name: undefined,
@@ -865,7 +994,6 @@ test('writes to event log for execute and execute start', async () => {
     kibana: {
       action: {
         execution: {
-          source: 'HTTP_REQUEST',
           uuid: '2',
         },
         name: 'action-1',
@@ -919,7 +1047,6 @@ test('writes to event log for execute and execute start when consumer and relate
     kibana: {
       action: {
         execution: {
-          source: 'HTTP_REQUEST',
           uuid: '2',
         },
         name: 'action-1',

@@ -58,7 +58,7 @@ export interface ExecuteOptions {
   isEphemeral?: boolean;
   request: KibanaRequest;
   params: Record<string, unknown>;
-  sourceType: ActionExecutionSourceType;
+  sourceType?: ActionExecutionSourceType;
   taskInfo?: TaskInfo;
   executionId?: string;
   consumer?: string;
@@ -185,7 +185,7 @@ export class ActionExecutor {
           name,
           actionExecutionId,
           isPreconfigured: this.actionInfo.isPreconfigured,
-          source: sourceType,
+          ...(sourceType ? { source: sourceType } : {}),
         });
 
         eventLogger.startTiming(event);
@@ -302,7 +302,7 @@ export class ActionExecutor {
     taskInfo?: TaskInfo;
     executionId?: string;
     relatedSavedObjects: RelatedSavedObjects;
-    sourceType: ActionExecutionSourceType;
+    sourceType?: ActionExecutionSourceType;
     consumer?: string;
   }) {
     const { spaces, encryptedSavedObjectsClient, preconfiguredActions, eventLogger } =
@@ -350,7 +350,7 @@ export class ActionExecutor {
       relatedSavedObjects,
       actionExecutionId,
       isPreconfigured: this.actionInfo.isPreconfigured,
-      source: sourceType,
+      ...(sourceType ? { source: sourceType } : {}),
     });
 
     eventLogger.logEvent(event);
