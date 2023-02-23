@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsManagementServiceFactory } from './saved_objects_management_service';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { DashboardSavedObjectsManagementService } from './types';
+
+type SavedObjectsManagementServiceFactory =
+  PluginServiceFactory<DashboardSavedObjectsManagementService>;
 
 export const savedObjectsManagementServiceFactory: SavedObjectsManagementServiceFactory = () => {
   return {
