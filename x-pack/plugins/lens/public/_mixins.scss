@@ -12,23 +12,6 @@
   );
 }
 
-// TODO: how to share these styles and include the ones from unified_field_list now?
-// Static styles for a drop area
-@mixin lnsDroppable {
-  border: $euiBorderWidthThin dashed $euiBorderColor;
-}
-
-// Style for drop area when there's an item being dragged
-@mixin lnsDroppableActive {
-  background-color: transparentize($euiColorVis0, .9);
-}
-
-// Style for drop area while hovering with item
-@mixin lnsDroppableActiveHover {
-  background-color: transparentize($euiColorVis0, .75);
-  border: $euiBorderWidthThin dashed $euiColorVis0;
-}
-
 // Removes EUI focus ring
 @mixin removeEuiFocusRing {
   outline: none;

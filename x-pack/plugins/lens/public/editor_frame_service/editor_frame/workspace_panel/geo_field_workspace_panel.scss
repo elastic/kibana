@@ -1,4 +1,4 @@
-@import '../../../mixins';
+@import '../../../../../../../src/plugins/unified_field_list/public/drag_drop/drag_drop';
 
 .lnsVisualizeGeoFieldWorkspacePanel__dragDrop {
   padding: $euiSizeXXL ($euiSizeXL * 2);
@@ -8,11 +8,9 @@
   &.lnsDragDrop-isDropTarget {
     @include lnsDroppable;
     @include lnsDroppableActive;
-
   }
 
   &.lnsDragDrop-isActiveDropTarget {
     @include lnsDroppableActiveHover;
-
   }
 }
