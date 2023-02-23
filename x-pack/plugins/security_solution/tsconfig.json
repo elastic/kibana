@@ -140,5 +140,7 @@
     "@kbn/securitysolution-ecs",
     "@kbn/cell-actions",
     "@kbn/shared-ux-router",
+    "@kbn/ecs",
+    "@kbn/security-solution-plugin",
   ]
 }
