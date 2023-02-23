@@ -296,13 +296,7 @@ export class TaskClaiming {
       EnabledTask,
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
-      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
-    );
-
-    const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
-    const query = matchesClauses(
-      queryForScheduledTasks,
-      filterDownBy(InactiveTasks),
+      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
       {
         bool: { must: { terms: { 'task.partition': partitions } } },
       },
@@ -310,6 +304,9 @@ export class TaskClaiming {
         bool: { must: { terms: { 'task.taskType': [...taskTypesToClaim, ...this.unusedTypes] } } },
       }
     );
+
+    const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
+    const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
     const apmTrans = apm.startTransaction(
       TASK_MANAGER_MARK_AS_CLAIMED,
       TASK_MANAGER_TRANSACTION_TYPE
