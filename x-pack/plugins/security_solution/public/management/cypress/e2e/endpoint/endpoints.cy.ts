@@ -13,6 +13,7 @@ import {
   reassignAgentPolicy,
 } from '../../tasks/fleet';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { getEndpointListPath } from '../../../common/routing';
 import { login } from '../../tasks/login';
 import {
   AGENT_HOSTNAME_CELL,
@@ -32,10 +33,10 @@ describe('Endpoints page', () => {
     login();
   });
 
-  it('Loads the endpoints page', () => {
-    cy.visit('/app/security/administration/endpoints');
+  it('Shows endpoint on the list', () => {
+    cy.visit(getEndpointListPath({ name: 'endpointList' }));
     cy.contains('Hosts running Elastic Defend').should('exist');
-    cy.getByTestId(AGENT_HOSTNAME_CELL).should('have.text', endpointHostname);
+    cy.getByTestSubj(AGENT_HOSTNAME_CELL).should('have.text', endpointHostname);
   });
 
   describe('Endpoint reassignment', () => {
@@ -70,24 +71,24 @@ describe('Endpoints page', () => {
     });
 
     it('User can reassign a single endpoint to a different Agent Configuration', () => {
-      cy.visit('/app/security/administration/endpoints');
+      cy.visit(getEndpointListPath({ name: 'endpointList' }));
       const hostname = cy
-        .getByTestId(AGENT_HOSTNAME_CELL)
+        .getByTestSubj(AGENT_HOSTNAME_CELL)
         .filter(`:contains("${endpointHostname}")`);
       const tableRow = hostname.parents('tr');
-      tableRow.getByTestId(TABLE_ROW_ACTIONS).click();
-      cy.getByTestId(TABLE_ROW_ACTIONS_MENU).contains('Reassign agent policy').click();
-      cy.getByTestId(FLEET_REASSIGN_POLICY_MODAL)
+      tableRow.getByTestSubj(TABLE_ROW_ACTIONS).click();
+      cy.getByTestSubj(TABLE_ROW_ACTIONS_MENU).contains('Reassign agent policy').click();
+      cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL)
         .find('select')
         .select(response.agentPolicies[0].name);
-      cy.getByTestId(FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON).click();
-      cy.getByTestId(AGENT_HOSTNAME_CELL)
+      cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON).click();
+      cy.getByTestSubj(AGENT_HOSTNAME_CELL)
         .filter(`:contains("${endpointHostname}")`)
         .should('exist');
-      cy.getByTestId(AGENT_HOSTNAME_CELL)
+      cy.getByTestSubj(AGENT_HOSTNAME_CELL)
         .filter(`:contains("${endpointHostname}")`)
         .parents('tr')
-        .getByTestId(AGENT_POLICY_CELL)
+        .getByTestSubj(AGENT_POLICY_CELL)
         .should('have.text', response.agentPolicies[0].name);
     });
   });

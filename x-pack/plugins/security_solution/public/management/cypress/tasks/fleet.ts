@@ -5,27 +5,18 @@
  * 2.0.
  */
 
-import type {
-  AgentPolicy,
-  GetAgentsResponse,
-  GetInfoResponse,
-  UpdatePackagePolicy,
-} from '@kbn/fleet-plugin/common';
-import {
-  agentRouteService,
-  agentPolicyRouteService,
-  epmRouteService,
-  packagePolicyRouteService,
-} from '@kbn/fleet-plugin/common';
+import type { Agent, GetAgentsResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
+import { agentRouteService, epmRouteService } from '@kbn/fleet-plugin/common';
+import type { PutAgentReassignResponse } from '@kbn/fleet-plugin/common/types';
 import { request } from './common';
 
-export const getEndpointIntegrationVersion = () =>
+export const getEndpointIntegrationVersion = (): Cypress.Chainable<string> =>
   request<GetInfoResponse>({
     url: epmRouteService.getInfoPath('endpoint'),
     method: 'GET',
   }).then((response) => response.body.item.version);
 
-export const getAgentByHostName = (hostname: string) =>
+export const getAgentByHostName = (hostname: string): Cypress.Chainable<Agent> =>
   request<GetAgentsResponse>({
     url: agentRouteService.getListPath(),
     method: 'GET',
@@ -34,22 +25,11 @@ export const getAgentByHostName = (hostname: string) =>
     },
   }).then((response) => response.body.items[0]);
 
-export const updatePackagePolicy = (packagePolicyId: string, packagePolicy: UpdatePackagePolicy) =>
-  request({
-    url: packagePolicyRouteService.getUpdatePath(packagePolicyId),
-    method: 'PUT',
-    body: packagePolicy,
-  });
-
-export const updateAgentPolicy = (agentPolicyId: string, agentPolicy: AgentPolicy) =>
-  request({
-    url: agentPolicyRouteService.getUpdatePath(agentPolicyId),
-    method: 'PUT',
-    body: agentPolicy,
-  });
-
-export const reassignAgentPolicy = (agentId: string, agentPolicyId: string) =>
-  request({
+export const reassignAgentPolicy = (
+  agentId: string,
+  agentPolicyId: string
+): Cypress.Chainable<Cypress.Response<PutAgentReassignResponse>> =>
+  request<PutAgentReassignResponse>({
     url: agentRouteService.getReassignPath(agentId),
     method: 'PUT',
     body: {
