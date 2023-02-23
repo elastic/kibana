@@ -53,6 +53,8 @@ const getRenderValue = (mappedNonEcsValue: any) => {
   return '—';
 };
 
+const displayCss = { display: 'contents' };
+
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
@@ -94,15 +96,7 @@ export const getRenderCellValue = ({
         const alert = parseAlert(observabilityRuleTypeRegistry)(dataFieldEs);
 
         return (
-          // NOTE: EuiLink automatically renders links using a <button>
-          // instead of an <a> when an `onClick` prop is provided, but this
-          // breaks text-truncation in `EuiDataGrid`, because (per the HTML
-          // spec), buttons are *always* rendered as `inline-block`, even if
-          // `display` is overridden. Passing an empty `href` prop forces
-          // `EuiLink` to render the link as an (inline) <a>, which enables
-          // text truncation, but requires overriding the linter warning below:
-          // eslint-disable-next-line @elastic/eui/href-or-on-click
-          <EuiLink href="" onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}>
+          <EuiLink css={displayCss} onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}>
             {alert.reason}
           </EuiLink>
         );
