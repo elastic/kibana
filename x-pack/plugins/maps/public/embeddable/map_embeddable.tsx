@@ -198,7 +198,7 @@ export class MapEmbeddable
       shouldFetch$<MapEmbeddableInput>(this.getUpdated$(), () => {
         return {
           ...this.getInput(),
-          filters: this._getFilters(),
+          filters: this._getInputFilters(),
           searchSessionId: this._getSearchSessionId(),
         };
       }).subscribe(() => {
@@ -381,7 +381,7 @@ export class MapEmbeddable
     }
   };
 
-  _getFilters() {
+  _getInputFilters() {
     return this.input.filters
       ? this.input.filters.filter(
           (filter) => !filter.meta.disabled && filter.meta.controlledBy !== this._controlledBy
@@ -402,7 +402,7 @@ export class MapEmbeddable
   _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
     this._savedMap.getStore().dispatch<any>(
       setQuery({
-        filters: this._getFilters(),
+        filters: this._getInputFilters(),
         query: this.input.query,
         timeFilters: this.input.timeRange,
         timeslice: this.input.timeslice
