@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiPopover,
   EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
   EuiText,
   EuiButtonEmpty,
+  EuiSelectable,
+  EuiSpacer,
+  EuiHighlight,
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { templateActionVariable } from '../lib';
 
 interface Props {
   buttonTitle?: string;
@@ -27,6 +27,27 @@ interface Props {
   showButtonTitle?: boolean;
 }
 
+const LOADING_VARIABLES = i18n.translate(
+  'xpack.triggersActionsUI.components.addMessageVariables.loadingMessage',
+  {
+    defaultMessage: 'Loading variables',
+  }
+);
+
+const NO_VARIABLES_FOUND = i18n.translate(
+  'xpack.triggersActionsUI.components.addMessageVariables.noVariablesFound',
+  {
+    defaultMessage: 'No variables found',
+  }
+);
+
+const NO_VARIABLES_AVAILABLE = i18n.translate(
+  'xpack.triggersActionsUI.components.addMessageVariables.noVariablesAvailable',
+  {
+    defaultMessage: 'No variables available',
+  }
+);
+
 export const AddMessageVariables: React.FunctionComponent<Props> = ({
   buttonTitle,
   messageVariables,
@@ -34,30 +55,27 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
   onSelectEventHandler,
   showButtonTitle = false,
 }) => {
+  const messageVariablesObject: Record<string, ActionVariable> | undefined =
+    messageVariables?.reduce((acc, variable) => {
+      return {
+        ...acc,
+        [variable.name]: variable,
+      };
+    }, {});
+
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
 
-  const getMessageVariables = () =>
-    messageVariables?.map((variable: ActionVariable, i: number) => (
-      <EuiContextMenuItem
-        key={variable.name}
-        data-test-subj={`variableMenuButton-${variable.name}`}
-        icon="empty"
-        disabled={variable.deprecated}
-        onClick={() => {
-          onSelectEventHandler(variable);
-          setIsVariablesPopoverOpen(false);
-        }}
-      >
-        <>
-          <EuiText size="m" data-test-subj={`variableMenuButton-${i}-templated-name`}>
-            {templateActionVariable(variable)}
-          </EuiText>
-          <EuiText size="m" color="subdued">
-            <div>{variable.description}</div>
-          </EuiText>
-        </>
-      </EuiContextMenuItem>
-    ));
+  const options = useMemo(
+    () =>
+      messageVariables?.map((variable) => ({
+        label: variable.name,
+        data: {
+          secondaryContent: variable.description,
+        },
+        'data-test-subj': `${variable.name}-selectableOption`,
+      })),
+    [messageVariables]
+  );
 
   const addVariableButtonTitle = buttonTitle
     ? buttonTitle
@@ -107,6 +125,19 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     return <></>;
   }
 
+  const renderOption = (option: any, searchValue: string) => {
+    return (
+      <>
+        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+        <EuiText size="xs" color="subdued" className="eui-displayBlock">
+          <small>
+            <EuiHighlight search={searchValue}>{option.secondaryContent || ''}</EuiHighlight>
+          </small>
+        </EuiText>
+      </>
+    );
+  };
+
   return (
     <EuiPopover
       button={Button}
@@ -115,7 +146,37 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel className="messageVariablesPanel" items={getMessageVariables()} />
+      <EuiSelectable
+        searchable
+        height={300}
+        data-test-subj={'messageVariablesSelectableList'}
+        isLoading={false}
+        options={options}
+        listProps={{
+          rowHeight: 55,
+        }}
+        loadingMessage={LOADING_VARIABLES}
+        noMatchesMessage={NO_VARIABLES_FOUND}
+        emptyMessage={NO_VARIABLES_AVAILABLE}
+        renderOption={renderOption}
+        onChange={(variables) => {
+          variables.map((variable) => {
+            if (variable.checked === 'on' && messageVariablesObject) {
+              onSelectEventHandler(messageVariablesObject[variable.label]);
+            }
+          });
+          setIsVariablesPopoverOpen(false);
+        }}
+        singleSelection
+      >
+        {(list, search) => (
+          <>
+            {search}
+            <EuiSpacer size="xs" />
+            {list}
+          </>
+        )}
+      </EuiSelectable>
     </EuiPopover>
   );
 };
