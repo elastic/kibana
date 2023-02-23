@@ -176,5 +176,24 @@ describe('loadActions hooks', () => {
 
       expect(result.current.value).toEqual([[actionEnabled], [actionEnabled]]);
     });
+
+    it('should re-render when contexts is changed', async () => {
+      const { rerender, waitForNextUpdate } = renderHook(useBulkLoadActions, {
+        initialProps: [actionContext],
+      });
+
+      await waitForNextUpdate();
+      expect(mockGetActions).toHaveBeenCalledWith(actionContext);
+
+      rerender([actionContext2]);
+      await waitForNextUpdate();
+      expect(mockGetActions).toHaveBeenCalledWith(actionContext2);
+
+      mockGetActions.mockClear();
+
+      rerender([]);
+      await waitForNextUpdate();
+      expect(mockGetActions).toHaveBeenCalledTimes(0);
+    });
   });
 });
