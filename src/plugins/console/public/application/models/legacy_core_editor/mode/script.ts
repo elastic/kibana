@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import ace from 'brace';
+import ace from 'ace-builds/src-noconflict/ace';
 import { ScriptHighlightRules } from '@kbn/ace';
 
 const TextMode = ace.acequire('ace/mode/text').Mode;

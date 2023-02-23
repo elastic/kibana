@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import ace from 'brace';
+import ace from 'ace-builds/src-noconflict/ace';
 import { GrokHighlightRules } from './grok_highlight_rules';
 
 const TextMode = ace.acequire('ace/mode/text').Mode;

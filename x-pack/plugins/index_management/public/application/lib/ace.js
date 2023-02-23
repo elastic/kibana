@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import brace from 'brace';
-import 'brace/ext/language_tools';
+import ace from 'ace-builds/src-noconflict/ace';
+import 'ace-builds/src-noconflict/ext-language_tools';
 
 const splitTokens = (line) => {
   return line.split(/\s+/);
@@ -44,14 +44,14 @@ const wordCompleter = (words) => {
 };
 
 export const createAceEditor = (div, value, readOnly = true, autocompleteArray) => {
-  const editor = brace.edit(div);
+  const editor = ace.edit(div);
   editor.$blockScrolling = Infinity;
   editor.setValue(value, -1);
   const session = editor.getSession();
   session.setUseWrapMode(true);
   session.setMode('ace/mode/json');
   if (autocompleteArray) {
-    const languageTools = brace.acequire('ace/ext/language_tools');
+    const languageTools = ace.acequire('ace/ext/language_tools');
     const autocompleter = wordCompleter(autocompleteArray);
     languageTools.setCompleters([autocompleter]);
   }

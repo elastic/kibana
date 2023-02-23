@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import ace from 'brace';
-import 'brace/mode/json';
+import ace from 'ace-builds/src-noconflict/ace';
+import 'ace-builds/src-noconflict/mode-json';
 import { addXJsonToRules } from '@kbn/ace';
 
 const JsonHighlightRules = ace.acequire('ace/mode/json_highlight_rules').JsonHighlightRules;

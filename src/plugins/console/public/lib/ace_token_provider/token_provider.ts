@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IEditSession, TokenInfo as BraceTokenInfo } from 'brace';
+import { IEditSession, TokenInfo as BraceTokenInfo } from 'ace-builds/src-noconflict/ace';
 import { TokensProvider, Token, Position } from '../../types';
 
 // Brace's token information types are not accurate.

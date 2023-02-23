@@ -7,7 +7,7 @@
  */
 
 import './index.scss';
-import 'brace/mode/json';
+import 'ace-builds/src-noconflict/mode-json';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EventEmitter } from 'events';

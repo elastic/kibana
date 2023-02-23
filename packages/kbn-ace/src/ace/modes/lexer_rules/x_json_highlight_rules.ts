@@ -7,8 +7,8 @@
  */
 
 import { defaultsDeep } from 'lodash';
-import ace from 'brace';
-import 'brace/mode/json';
+import ace from 'ace-builds/src-noconflict/ace';
+import 'ace-builds/src-noconflict/mode-json';
 
 import { ElasticsearchSqlHighlightRules } from './elasticsearch_sql_highlight_rules';
 import { ScriptHighlightRules } from './script_highlight_rules';

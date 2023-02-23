@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 
-import 'brace/theme/textmate';
+import 'ace-builds/src-noconflict/theme-textmate';
 
 export class ShowJson extends React.PureComponent {
   UNSAFE_componentWillMount() {

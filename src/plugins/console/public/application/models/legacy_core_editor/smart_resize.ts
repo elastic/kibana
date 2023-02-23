@@ -7,7 +7,7 @@
  */
 
 import { get, throttle } from 'lodash';
-import type { Editor } from 'brace';
+import type { Editor } from 'ace-builds/src-noconflict/ace';
 
 // eslint-disable-next-line import/no-default-export
 export default function (editor: Editor) {

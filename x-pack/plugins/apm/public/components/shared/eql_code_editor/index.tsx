@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import 'brace/ext/language_tools';
+import 'ace-builds/src-noconflict/ext-language_tools';
 import { last } from 'lodash';
 import React, { useRef } from 'react';
 import { EuiCodeEditor } from '@kbn/es-ui-shared-plugin/public';

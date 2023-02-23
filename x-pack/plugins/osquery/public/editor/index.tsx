@@ -14,7 +14,7 @@ import type { EuiCodeEditorProps } from '../shared_imports';
 import { EuiCodeEditor } from '../shared_imports';
 
 import './osquery_mode';
-import 'brace/theme/tomorrow';
+import 'ace-builds/src-noconflict/theme-tomorrow';
 
 const EDITOR_SET_OPTIONS = {
   enableBasicAutocompletion: true,

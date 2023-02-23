@@ -14,9 +14,9 @@ import { convertMapboxVectorTileToJson } from './mapbox_vector_tile';
 import { Mode } from '../../../../models/legacy_core_editor/mode/output';
 
 // Ensure the modes we might switch to dynamically are available
-import 'brace/mode/text';
-import 'brace/mode/hjson';
-import 'brace/mode/yaml';
+import 'ace-builds/src-noconflict/mode-text';
+import 'ace-builds/src-noconflict/mode-hjson';
+import 'ace-builds/src-noconflict/mode-yaml';
 
 import { expandLiteralStrings } from '../../../../../shared_imports';
 import {

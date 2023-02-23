@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import 'brace/mode/json';
-import 'brace/mode/text';
-import 'brace/theme/textmate';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/mode-text';
+import 'ace-builds/src-noconflict/theme-textmate';

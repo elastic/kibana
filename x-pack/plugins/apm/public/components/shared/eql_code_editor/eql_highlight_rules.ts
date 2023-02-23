@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import 'brace/ext/language_tools';
-import { acequire } from 'brace';
+import ace from 'ace-builds/src-noconflict/ace';
+import 'ace-builds/src-noconflict/ext-language_tools';
 import { EQLToken } from './tokens';
 
-const TextHighlightRules = acequire(
+const TextHighlightRules = ace.acequire(
   'ace/mode/text_highlight_rules'
 ).TextHighlightRules;
 

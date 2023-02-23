@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import ace, { type Annotation } from 'brace';
-import { Editor as IAceEditor, IEditSession as IAceEditSession } from 'brace';
+import ace, { type Annotation } from 'ace-builds/src-noconflict/ace';
+import { Editor as IAceEditor, IEditSession as IAceEditSession } from 'ace-builds/src-noconflict/ace';
 import $ from 'jquery';
 import {
   CoreEditor,

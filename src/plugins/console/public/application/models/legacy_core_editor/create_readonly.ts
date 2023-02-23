@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import ace from 'brace';
+import ace from 'ace-builds/src-noconflict/ace';
 import { Mode } from './mode/output';
 import smartResize from './smart_resize';
 

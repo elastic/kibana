@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import ace from 'brace';
-import 'brace/ext/language_tools';
+import ace from 'ace-builds/src-noconflict/ace';
+import 'ace-builds/src-noconflict/ext-language_tools';
 import type { AceInterface } from './ace_types';
 import { getOsqueryTableNames } from './osquery_tables';
 

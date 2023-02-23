@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import ace from 'brace';
+import ace from 'ace-builds/src-noconflict/ace';
 
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 

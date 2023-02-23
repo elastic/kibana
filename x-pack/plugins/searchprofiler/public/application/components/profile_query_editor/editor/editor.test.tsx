@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import 'brace';
-import 'brace/mode/json';
+import 'ace-builds/src-noconflict/mode-json';
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { Editor, Props } from './editor';

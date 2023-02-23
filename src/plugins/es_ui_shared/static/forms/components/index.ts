@@ -20,7 +20,7 @@ Importing here is a way of preventing a more sophisticated solution to this prob
 migrate all code editors over to Monaco. Once that is done, we should remove this import.
  */
 import 'react-ace';
-import 'brace/mode/json';
+import 'ace-builds/src-noconflict/mode-json';
 
 export * from './field';
 export * from './form_row';

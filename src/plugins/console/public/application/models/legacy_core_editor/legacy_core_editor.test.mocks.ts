@@ -19,10 +19,9 @@ window.URL = {
   },
 };
 
-import 'brace';
-import 'brace/ext/language_tools';
-import 'brace/ext/searchbox';
-import 'brace/mode/json';
-import 'brace/mode/text';
+import 'ace-builds/src-noconflict/ext-language_tools';
+import 'ace-builds/src-noconflict/ext-searchbox';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/mode-text';
 
 document.queryCommandSupported = () => true;

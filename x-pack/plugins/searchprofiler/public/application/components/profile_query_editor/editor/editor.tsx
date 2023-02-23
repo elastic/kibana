@@ -8,7 +8,7 @@
 import React, { memo, useRef, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { Editor as AceEditor } from 'brace';
+import { Editor as AceEditor } from 'ace-builds/src-noconflict/ace';
 
 import { ace } from '../../../../shared_imports';
 import { initializeEditor } from './init_editor';

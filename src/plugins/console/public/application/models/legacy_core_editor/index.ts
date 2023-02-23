@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import 'brace';
-import 'brace/ext/language_tools';
-import 'brace/ext/searchbox';
-import 'brace/mode/json';
-import 'brace/mode/text';
+import 'ace-builds/src-noconflict/ext-language_tools';
+import 'ace-builds/src-noconflict/ext-searchbox';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/mode-text';
 
 export * from './legacy_core_editor';
 export * from './create_readonly';

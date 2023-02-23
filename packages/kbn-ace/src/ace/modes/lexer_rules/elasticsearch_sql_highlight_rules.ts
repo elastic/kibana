@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import ace from 'brace';
+import ace from 'ace-builds/src-noconflict/ace';
 
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 const oop = ace.acequire('ace/lib/oop');

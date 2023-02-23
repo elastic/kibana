@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import ace from 'brace';
+import ace from 'ace-builds/src-noconflict/ace';
 import { installXJsonMode } from '@kbn/ace';
 
 export function initializeEditor({

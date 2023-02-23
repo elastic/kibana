@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import 'brace';
 import { of, Subject } from 'rxjs';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';

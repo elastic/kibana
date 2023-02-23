@@ -31,7 +31,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import 'react-ace';
-import 'brace/theme/textmate';
+import 'ace-builds/src-noconflict/theme-textmate';
 
 import { getIndexListUri } from '@kbn/index-management-plugin/public';
 import { routing } from '../../../../../services/routing';

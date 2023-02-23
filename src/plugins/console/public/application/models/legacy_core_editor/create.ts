@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import ace from 'brace';
+import ace from 'ace-builds/src-noconflict/ace';
 import { LegacyCoreEditor } from './legacy_core_editor';
 
 export const create = (el: HTMLElement) => {

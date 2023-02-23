@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Editor, IEditSession, TokenInfo as AceTokenInfo } from 'brace';
+import { Editor, IEditSession, TokenInfo as AceTokenInfo } from 'react-ace';
 import { Maybe } from '../../../../typings/common';
 import { EQLCodeEditorSuggestionType } from './constants';
 import { EQLToken } from './tokens';

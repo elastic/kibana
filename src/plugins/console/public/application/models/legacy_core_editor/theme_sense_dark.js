@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import ace from 'brace';
+import ace from 'ace-builds/src-noconflict/ace';
 
 ace.define('ace/theme/sense-dark', ['require', 'exports', 'module'], function (require, exports) {
   exports.isDark = true;

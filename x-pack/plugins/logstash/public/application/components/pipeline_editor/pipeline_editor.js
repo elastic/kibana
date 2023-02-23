@@ -10,8 +10,8 @@ import { PropTypes } from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import 'brace/mode/plain_text';
-import 'brace/theme/github';
+import 'ace-builds/src-noconflict/mode-plain_text';
+import 'ace-builds/src-noconflict/theme-github';
 
 import { isEmpty } from 'lodash';
 import { TOOLTIPS } from '../../../../common/constants/tooltips';

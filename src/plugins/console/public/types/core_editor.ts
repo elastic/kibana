@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Editor } from 'brace';
+import type { Ace } from 'ace-builds';
 import { ResultTerm } from '../lib/autocomplete/types';
 import { TokensProvider } from './tokens_provider';
 import { Token } from './token';
@@ -259,7 +259,7 @@ export interface CoreEditor {
    */
   registerKeyboardShortcut(opts: {
     keys: string | { win?: string; mac?: string };
-    fn: (editor: Editor) => void;
+    fn: (editor: Ace.Editor) => void;
     name: string;
   }): void;
 
