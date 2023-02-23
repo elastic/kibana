@@ -1332,18 +1332,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
           },
           {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
           },

@@ -6,28 +6,23 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import {
-  InstallPrebuiltRulesAndTimelinesResponse,
-  PREBUILT_RULES_URL,
-} from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { InstallPrebuiltRulesAndTimelinesResponse } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
 import { createPrebuiltRuleAssetSavedObjects } from './create_prebuilt_rule_saved_objects';
+import { installPrebuiltRulesAndTimelines } from './install_prebuilt_rules_and_timelines';
 
-export const installPrePackagedRules = async (
+/**
+ * Creates prebuilt rule mocks and installs them
+ *
+ * @param supertest Supertest instance
+ * @param es Elasticsearch client
+ * @returns Install prebuilt rules response
+ */
+export const installMockPrebuiltRules = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
-  es: Client,
-  log: ToolingLog
+  es: Client
 ): Promise<InstallPrebuiltRulesAndTimelinesResponse> => {
   // Ensure there are prebuilt rule saved objects before installing rules
   await createPrebuiltRuleAssetSavedObjects(es);
-  const response = await supertest.put(PREBUILT_RULES_URL).set('kbn-xsrf', 'true').send();
-  if (response.status !== 200) {
-    log.error(
-      `Did not get an expected 200 "ok" when installing prebuilt rules. body: ${JSON.stringify(
-        response.body
-      )}, status: ${JSON.stringify(response.status)}`
-    );
-  }
-  return response.body;
+  return installPrebuiltRulesAndTimelines(supertest);
 };

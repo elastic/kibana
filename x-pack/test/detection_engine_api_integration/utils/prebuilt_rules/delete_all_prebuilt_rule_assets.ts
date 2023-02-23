@@ -8,11 +8,10 @@
 import type { Client } from '@elastic/elasticsearch';
 
 /**
- * Remove all prebuilt rules from the .kibana index
+ * Remove all prebuilt rule assets from the .kibana index
  * @param es The ElasticSearch handle
- * @param log The tooling logger
  */
-export const deleteAllPrebuiltRules = async (es: Client): Promise<void> => {
+export const deleteAllPrebuiltRuleAssets = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:security-rule',

@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_PREVIEW } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { deleteAllAlerts, getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../utils';
+import { deleteAllRules, getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // eslint-disable-next-line import/no-default-export
@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       describe('elastic admin preview', () => {
