@@ -106,9 +106,11 @@ export const configSchema = schema.object({
   }),
 
   /**
-   * Custom Highlighted Fields !!!!FINISH DOCSTRING!!!!
+   * A list of string values (comma delimited) that will be used select the fields that will appear
+   * in the highlighted fields section of the alert event details view.
    * 
    * @example
+   * xpack.securitySolution.customHighlightedFields: ['host.name', 'user.name']
    */
   customHighlightedFields: schema.arrayOf(schema.string(), { defaultValue: CUSTOM_HIGHLIGHTED_FIELD_SETTING_DEFAULT }),
 
