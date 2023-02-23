@@ -8,8 +8,7 @@
 
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { UserProfileGetCurrentParams } from '@kbn/security-plugin/server';
-import { UserProfileWithSecurity } from '@kbn/security-plugin/common';
+import type { UserProfileSettingsClientFactoryProvider } from '@kbn/security-plugin/server/user_profile/user_profile_settings_client';
 import type { IUiSettingsClient, IUserUiSettingsClient } from './ui_settings_client';
 
 /** @public */
@@ -50,22 +49,6 @@ export interface UiSettingsServiceSetup {
    * ```
    */
   registerGlobal(settings: Record<string, UiSettingsParams>): void;
-}
-
-/**
- * Provider to invoke to retrieve a UserProfilesClientFactory.
- * @public
- */
-export type UserProfilesClientFactoryProvider = () => UserProfilesClientFactory;
-
-// Describes the factory used to create instances of the UserProfilesClient
-export type UserProfilesClientFactory = () => UserProfilesClientContract;
-
-/**
- * Describes the functions that will be provided by a UserProfilesClient
- */
-export interface UserProfilesClientContract {
-  get(params: UserProfileGetCurrentParams): Promise<UserProfileWithSecurity | null>;
 }
 
 /** @public */
@@ -112,14 +95,14 @@ export interface UiSettingsServiceStart {
   userAsScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUserUiSettingsClient;
 
   /**
-   * This provides a way for downstream plugins to provide the UiSettingsService with a way to create UserProfileClients
+   * This provides a way for downstream plugins to provide the UiSettingsService with a way to create UserProfileSettingsClients
    *
    * @example The SecurityPlugin currently utilizes this on start to provide the necessary services
    *
-   * @param userProfilesClientFactoryProvider Provides a factory method that returns a UserProfileClient that satisfies
    * the UserProfilesClientContract
+   * @param userProfileSettingsClientFactoryProvider
    */
-  setUserProfilesClientFactoryProvider(
-    userProfilesClientFactoryProvider: UserProfilesClientFactoryProvider
+  setUserProfileSettingsClientFactoryProvider(
+    userProfileSettingsClientFactoryProvider: UserProfileSettingsClientFactoryProvider
   ): void;
 }

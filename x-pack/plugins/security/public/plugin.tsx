@@ -242,10 +242,7 @@ export interface SecurityPluginStart {
   /**
    * A set of methods to work with Kibana user profiles.
    */
-  userProfiles: Pick<
-    UserProfileAPIClient,
-    'getCurrent' | 'bulkGet' | 'suggest' | 'getDarkModeSetting'
-  >;
+  userProfiles: Pick<UserProfileAPIClient, 'getCurrent' | 'bulkGet' | 'suggest'>;
 
   /**
    * Exposes UI components that will be loaded asynchronously.

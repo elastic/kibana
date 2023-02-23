@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Cookies from 'js-cookie';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
@@ -133,10 +132,6 @@ export class UserProfileAPIClient {
       .then(() => {
         this.internalDataUpdates$.next(data);
       });
-  }
-
-  public getDarkModeSetting(): string {
-    return Cookies.get('userSettingsCookie') || 'light';
   }
 
   public setUserSettings(userSettings: UserSettingsData) {

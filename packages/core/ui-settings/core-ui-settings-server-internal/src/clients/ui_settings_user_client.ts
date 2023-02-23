@@ -7,16 +7,9 @@
  */
 
 import { KibanaRequest } from '@kbn/core-http-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
-import { CannotOverrideError } from '../ui_settings_errors';
-import { Cache } from '../cache';
+import { IUserUiSettingsClient } from '@kbn/core-ui-settings-server/src';
 import { UiSettingsServiceOptions } from '../types';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
-
-interface ReadOptions {
-  autoCreateOrUpgradeIfMissing?: boolean;
-}
 
 interface UserProvidedValue<T = unknown> {
   userValue?: T;
@@ -28,172 +21,38 @@ type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
 /**
  * Common logic for setting / removing keys in a {@link IUserUiSettingsClient} implementation
  */
-export class UiSettingsUserClient extends BaseUiSettingsClient {
-  private readonly type: UiSettingsServiceOptions['type'];
-  private readonly id: UiSettingsServiceOptions['id'];
-  private readonly buildNum: UiSettingsServiceOptions['buildNum'];
-  private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
-  private readonly userProfilesClient: UiSettingsServiceOptions['userProfilesClient'];
-  private readonly cache: Cache;
+export class UiSettingsUserClient extends BaseUiSettingsClient implements IUserUiSettingsClient {
+  private readonly userProfileSettingsClient: UiSettingsServiceOptions['userProfileSettingsClient'];
 
   constructor(options: UiSettingsServiceOptions) {
     super(options);
-    const { savedObjectsClient, userProfilesClient, type, id, buildNum } = options;
-    this.type = type;
-    this.id = id;
-    this.buildNum = buildNum;
-    this.savedObjectsClient = savedObjectsClient;
-    this.userProfilesClient = userProfilesClient;
-    this.cache = new Cache();
+    const { userProfileSettingsClient } = options;
+    this.userProfileSettingsClient = userProfileSettingsClient;
   }
 
   async getUserProfileSettings(request: KibanaRequest): Promise<Record<string, string>> {
-    const userProfile = await this.userProfilesClient?.get({ request, dataPath: '*' });
+    const userProfile = await this.userProfileSettingsClient?.get({ request, dataPath: '*' });
     return (userProfile?.data?.userSettings || {}) as Record<string, string>;
   }
 
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
-    const cachedValue = this.cache.get();
-    if (cachedValue) {
-      return cachedValue;
-    }
-
-    const userProvided: UserProvided<T> = this.onReadHook(await this.read());
-
-    // write all overridden keys, dropping the userValue is override is null and
-    // adding keys for overrides that are not in saved object
-    for (const [key, value] of Object.entries(this.overrides)) {
-      userProvided[key] =
-        value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
-    }
-
-    this.cache.set(userProvided);
-
-    return userProvided;
+    this.log.warn('`getUserProvided` operation is not supported for User Settings.');
+    return {};
   }
 
   async setMany(changes: Record<string, any>) {
-    this.cache.del();
-    this.onWriteHook(changes);
-    await this.write({ changes });
+    this.log.warn('`setMany` operation is not supported for User Settings.');
   }
 
   async set(key: string, value: any) {
-    await this.setMany({ [key]: value });
+    this.log.warn('`set` operation is not supported for User Settings.');
   }
 
   async remove(key: string) {
-    await this.set(key, null);
+    this.log.warn('`remove` operation is not supported for User Settings.');
   }
 
   async removeMany(keys: string[]) {
-    const changes: Record<string, null> = {};
-    keys.forEach((key) => {
-      changes[key] = null;
-    });
-    await this.setMany(changes);
-  }
-
-  private assertUpdateAllowed(key: string) {
-    if (this.overrides.hasOwnProperty(key)) {
-      throw new CannotOverrideError(`Unable to update "${key}" because it is overridden`);
-    }
-  }
-
-  private onWriteHook(changes: Record<string, unknown>) {
-    for (const key of Object.keys(changes)) {
-      this.assertUpdateAllowed(key);
-    }
-
-    for (const [key, value] of Object.entries(changes)) {
-      this.validateKey(key, value);
-    }
-  }
-
-  private onReadHook<T = unknown>(values: Record<string, unknown>) {
-    // write the userValue for each key stored in the saved object that is not overridden
-    // validate value read from saved objects as it can be changed via SO API
-    const filteredValues: UserProvided<T> = {};
-    for (const [key, userValue] of Object.entries(values)) {
-      if (userValue === null || this.overrides.hasOwnProperty(key)) continue;
-      try {
-        this.validateKey(key, userValue);
-        filteredValues[key] = {
-          userValue: userValue as T,
-        };
-      } catch (error) {
-        this.log.warn(`Ignore invalid UiSettings value. ${error}.`);
-      }
-    }
-
-    return filteredValues;
-  }
-
-  private async write({
-    changes,
-    autoCreateOrUpgradeIfMissing = true,
-  }: {
-    changes: Record<string, any>;
-    autoCreateOrUpgradeIfMissing?: boolean;
-  }) {
-    try {
-      await this.savedObjectsClient.update(this.type, this.id, changes);
-    } catch (error) {
-      if (!SavedObjectsErrorHelpers.isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
-        throw error;
-      }
-
-      await createOrUpgradeSavedConfig({
-        savedObjectsClient: this.savedObjectsClient,
-        version: this.id,
-        buildNum: this.buildNum,
-        log: this.log,
-        handleWriteErrors: false,
-        type: this.type,
-      });
-
-      await this.write({
-        changes,
-        autoCreateOrUpgradeIfMissing: false,
-      });
-    }
-  }
-
-  private async read({ autoCreateOrUpgradeIfMissing = true }: ReadOptions = {}): Promise<
-    Record<string, any>
-  > {
-    try {
-      // const userProfilesResponse = await this.userProfilesClient.get('darkMode');
-      const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, this.id);
-      return resp.attributes;
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
-        const failedUpgradeAttributes = await createOrUpgradeSavedConfig({
-          savedObjectsClient: this.savedObjectsClient,
-          version: this.id,
-          buildNum: this.buildNum,
-          log: this.log,
-          handleWriteErrors: true,
-          type: this.type,
-        });
-
-        if (!failedUpgradeAttributes) {
-          return await this.read({ autoCreateOrUpgradeIfMissing: false });
-        }
-
-        return failedUpgradeAttributes;
-      }
-
-      if (this.isIgnorableError(error)) {
-        return {};
-      }
-
-      throw error;
-    }
-  }
-
-  private isIgnorableError(error: Error) {
-    const { isForbiddenError, isEsUnavailableError } = SavedObjectsErrorHelpers;
-    return isForbiddenError(error) || isEsUnavailableError(error);
+    this.log.warn('`removeMany` operation is not supported for User Settings.');
   }
 }

@@ -321,7 +321,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       asScopedToClient: deps.uiSettings.asScopedToClient,
       globalAsScopedToClient: deps.uiSettings.globalAsScopedToClient,
       userAsScopedToClient: deps.uiSettings.userAsScopedToClient,
-      setUserProfilesClientFactoryProvider: deps.uiSettings.setUserProfilesClientFactoryProvider,
+      setUserProfileSettingsClientFactoryProvider:
+        deps.uiSettings.setUserProfileSettingsClientFactoryProvider,
     },
     coreUsageData: deps.coreUsageData,
   };

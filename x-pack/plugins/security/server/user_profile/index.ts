@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { UserProfilesClient } from '@kbn/core-ui-settings-server-internal/src/clients/user_profiles_client';
 import type { CoreStart } from '@kbn/core/server';
 
+import { UserProfileSettingsClient } from './user_profile_settings_client';
 import type { UserSettingServiceStart } from './user_setting_service';
 
 export { UserProfileService } from './user_profile_service';
+
 export type {
   UserProfileServiceStart,
   UserProfileServiceStartInternal,
@@ -30,14 +31,14 @@ interface SetupUiSettingsServiceParams {
  * Used to set the provider that contains the factory that creates UserProfileClients
  *
  * @param userSettingsServiceStart A service that provides functions to get the current user's profile, that will be
- * exposed by the {@link UserProfilesClient}
- * @param uiSettingServiceStart The service that will the input provider to create instances of {@link UserProfilesClient}
+ * exposed by the {@link UserProfileSettingsClient}
+ * @param uiSettingServiceStart The service that will the input provider to create instances of {@link UserProfileSettingsClient}
  */
 export function setupUserProfilesClientOnUiSettingsServiceStart({
   userSettingsServiceStart,
   uiSettingServiceStart,
 }: SetupUiSettingsServiceParams) {
-  uiSettingServiceStart.setUserProfilesClientFactoryProvider(() => () => {
-    return new UserProfilesClient(userSettingsServiceStart);
+  uiSettingServiceStart.setUserProfileSettingsClientFactoryProvider(() => () => {
+    return new UserProfileSettingsClient(userSettingsServiceStart);
   });
 }

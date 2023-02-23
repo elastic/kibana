@@ -15,10 +15,10 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import type { UiSettingsParams, UiSettingsScope } from '@kbn/core-ui-settings-common';
-import {
-  UserProfilesClientContract,
-  UserProfilesClientFactoryProvider,
-} from '@kbn/core-ui-settings-server/src/contracts';
+import type {
+  UserProfileSettingsClientContract,
+  UserProfileSettingsClientFactoryProvider,
+} from '@kbn/security-plugin/server/user_profile/user_profile_settings_client';
 import { UiSettingsUserClient } from './clients/ui_settings_user_client';
 import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient, UiSettingsClientFactory, UiSettingsGlobalClient } from './clients';
@@ -56,7 +56,7 @@ export class UiSettingsService
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private readonly uiSettingsGlobalDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
-  private userProfilesClientFactoryProvider?: UserProfilesClientFactoryProvider;
+  private userProfileSettingsClientFactoryProvider?: UserProfileSettingsClientFactoryProvider;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
@@ -106,17 +106,18 @@ export class UiSettingsService
       asScopedToClient: this.getScopedClientFactory('namespace'),
       globalAsScopedToClient: this.getScopedClientFactory('global'),
       userAsScopedToClient: this.getUserClientFactory<'user'>(),
-      setUserProfilesClientFactoryProvider: this.setUserProfilesClientFactoryProvider(),
+      setUserProfileSettingsClientFactoryProvider:
+        this.setUserProfileSettingsClientFactoryProvider(),
     };
   }
 
   public async stop() {}
 
-  private setUserProfilesClientFactoryProvider(): (
-    provider: UserProfilesClientFactoryProvider
+  private setUserProfileSettingsClientFactoryProvider(): (
+    provider: UserProfileSettingsClientFactoryProvider
   ) => void {
-    return (provider: UserProfilesClientFactoryProvider) => {
-      this.userProfilesClientFactoryProvider = provider;
+    return (provider: UserProfileSettingsClientFactoryProvider) => {
+      this.userProfileSettingsClientFactoryProvider = provider;
     };
   }
 
@@ -160,11 +161,11 @@ export class UiSettingsService
     const { version, buildNum } = this.coreContext.env.packageInfo;
 
     return (savedObjectsClient: SavedObjectsClientContract): ClientType<T> => {
-      let userProfilesClient: UserProfilesClientContract | undefined;
+      let userProfileSettingsClient: UserProfileSettingsClientContract | undefined;
 
-      if (this.userProfilesClientFactoryProvider) {
-        const userProfilesClientFactory = this.userProfilesClientFactoryProvider();
-        userProfilesClient = userProfilesClientFactory();
+      if (this.userProfileSettingsClientFactoryProvider) {
+        const userProfilesClientFactory = this.userProfileSettingsClientFactoryProvider();
+        userProfileSettingsClient = userProfilesClientFactory();
       }
 
       const options = {
@@ -174,7 +175,7 @@ export class UiSettingsService
         savedObjectsClient,
         type: 'config-user' as 'config' | 'config-global' | 'config-user',
         defaults: {},
-        ...(userProfilesClient && { userProfilesClient }),
+        ...(userProfileSettingsClient && { userProfileSettingsClient }),
         overrides: {},
       };
 
