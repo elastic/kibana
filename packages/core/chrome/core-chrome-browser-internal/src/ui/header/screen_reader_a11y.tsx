@@ -38,5 +38,5 @@ export const ScreenReaderRouteAnnouncements: FC<{
     }
   }, [breadcrumbs]);
 
-  return <EuiScreenReaderLive aria-live="assertive">{routeTitle}</EuiScreenReaderLive>;
+  return <EuiScreenReaderLive focusRegionOnTextChange>{routeTitle}</EuiScreenReaderLive>;
 };
