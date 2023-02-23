@@ -380,7 +380,8 @@ export class ExecutionHandler<
       const throttled = action.frequency?.throttle
         ? alert.isThrottled({
             throttle: action.frequency.throttle ?? null,
-            uuid: action.uuid || generateActionHash(action), // generateActionHash must be removed once all the hash identifiers removed from the task state
+            actionHash: generateActionHash(action), // generateActionHash must be removed once all the hash identifiers removed from the task state
+            uuid: action.uuid,
           })
         : alert.isThrottled({ throttle: rule.throttle ?? null });
 

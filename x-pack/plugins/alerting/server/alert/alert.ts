@@ -67,7 +67,15 @@ export class Alert<
     return this.scheduledExecutionOptions !== undefined;
   }
 
-  isThrottled({ throttle, uuid }: { throttle: string | null; uuid?: string }) {
+  isThrottled({
+    throttle,
+    actionHash,
+    uuid,
+  }: {
+    throttle: string | null;
+    actionHash?: string;
+    uuid?: string;
+  }) {
     if (this.scheduledExecutionOptions === undefined) {
       return false;
     }
@@ -79,9 +87,12 @@ export class Alert<
         this.scheduledExecutionOptions
       )
     ) {
-      if (uuid) {
+      if (uuid && actionHash) {
         if (this.meta.lastScheduledActions.actions) {
-          const lastTriggerDate = this.meta.lastScheduledActions.actions[uuid]?.date;
+          const actionInState =
+            this.meta.lastScheduledActions.actions[uuid] ||
+            this.meta.lastScheduledActions.actions[actionHash]; // actionHash must be removed once all the hash identifiers removed from the task state
+          const lastTriggerDate = actionInState?.date;
           return !!(lastTriggerDate && lastTriggerDate.getTime() + throttleMills > Date.now());
         }
         return false;

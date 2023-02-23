@@ -52,6 +52,25 @@ describe('isThrottled', () => {
     expect(alert.isThrottled({ throttle: '1m' })).toEqual(true);
   });
 
+  test(`should use actionHash if it was used in a legacy action`, () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          actions: {
+            'slack:alert:1h': { date: new Date() },
+          },
+        },
+      },
+    });
+    clock.tick(30000);
+    alert.scheduleActions('default');
+    expect(
+      alert.isThrottled({ throttle: '1m', actionHash: 'slack:alert:1h', uuid: '111-222' })
+    ).toEqual(true);
+  });
+
   test(`shouldn't throttle when group didn't change and throttle period expired`, () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
@@ -111,7 +130,9 @@ describe('isThrottled', () => {
     });
     clock.tick(30000);
     alert.scheduleActions('default');
-    expect(alert.isThrottled({ throttle: '15s', uuid: '111-111' })).toEqual(false);
+    expect(alert.isThrottled({ throttle: '15s', uuid: '111-111', actionHash: 'slack:1h' })).toEqual(
+      false
+    );
   });
 
   test(`shouldn't throttle a specific action when group changes`, () => {
