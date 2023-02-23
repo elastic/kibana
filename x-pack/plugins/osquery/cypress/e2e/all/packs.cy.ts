@@ -257,7 +257,7 @@ describe('ALL - Packs', () => {
     //     });
     // });
 
-    it('deactivate and active pack', () => {
+    it('deactivate and activate pack', () => {
       cy.contains('Packs').click();
       deactivatePack(PACK_NAME);
       activatePack(PACK_NAME);
