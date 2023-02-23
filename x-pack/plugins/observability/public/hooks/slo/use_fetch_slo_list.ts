@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { HttpSetup } from '@kbn/core/public';
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+  useQuery,
+} from '@tanstack/react-query';
 
 import { FindSLOResponse } from '@kbn/slo-schema';
-import { useDataFetcher } from '../use_data_fetcher';
-
-const EMPTY_LIST: FindSLOResponse = {
-  results: [],
-  total: 0,
-  page: 0,
-  perPage: 0,
-};
+import { useKibana } from '../../utils/kibana_react';
 
 interface SLOListParams {
   name?: string;
@@ -26,71 +23,59 @@ interface SLOListParams {
 }
 
 export interface UseFetchSloListResponse {
-  sloList: FindSLOResponse;
-  loading: boolean;
-  error: boolean;
+  isInitialLoading: boolean;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  sloList: FindSLOResponse | undefined;
+  refetch: <TPageData>(
+    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
+  ) => Promise<QueryObserverResult<FindSLOResponse | undefined, unknown>>;
 }
 
 export function useFetchSloList({
-  name,
-  page,
-  refetch,
-  sortBy,
-  indicatorTypes,
-}: SLOListParams & {
-  refetch: boolean;
-}): UseFetchSloListResponse {
-  const [sloList, setSloList] = useState(EMPTY_LIST);
+  name = '',
+  page = 1,
+  sortBy = 'name',
+  indicatorTypes = [],
+}: SLOListParams | undefined = {}): UseFetchSloListResponse {
+  const { http } = useKibana().services;
 
-  const params: SLOListParams = useMemo(
-    () => ({ name, page, sortBy, indicatorTypes }),
-    [name, page, sortBy, indicatorTypes]
-  );
-  const shouldExecuteApiCall = useCallback(
-    (apiCallParams: SLOListParams) =>
-      apiCallParams.name === params.name ||
-      apiCallParams.page === params.page ||
-      apiCallParams.sortBy === params.sortBy ||
-      apiCallParams.indicatorTypes === params.indicatorTypes ||
-      refetch,
-    [params, refetch]
-  );
+  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
+    {
+      queryKey: ['fetchSloList', { name, page, sortBy, indicatorTypes }],
+      queryFn: async ({ signal }) => {
+        try {
+          const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
+            query: {
+              ...(page && { page }),
+              ...(name && { name }),
+              ...(sortBy && { sortBy }),
+              ...(indicatorTypes &&
+                indicatorTypes.length > 0 && {
+                  indicatorTypes: indicatorTypes.join(','),
+                }),
+            },
+            signal,
+          });
 
-  const { data, loading, error } = useDataFetcher<SLOListParams, FindSLOResponse>({
-    paramsForApiCall: params,
-    initialDataState: sloList,
-    executeApiCall: fetchSloList,
-    shouldExecuteApiCall,
-  });
-
-  useEffect(() => {
-    setSloList(data);
-  }, [data]);
-
-  return { sloList, loading, error };
-}
-
-const fetchSloList = async (
-  params: SLOListParams,
-  abortController: AbortController,
-  http: HttpSetup
-): Promise<FindSLOResponse> => {
-  try {
-    const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
-      query: {
-        ...(params.page && { page: params.page }),
-        ...(params.name && { name: params.name }),
-        ...(params.sortBy && { sortBy: params.sortBy }),
-        ...(params.indicatorTypes &&
-          params.indicatorTypes.length > 0 && { indicatorTypes: params.indicatorTypes.join(',') }),
+          return response;
+        } catch (error) {
+          // ignore error for retrieving slos
+        }
       },
-      signal: abortController.signal,
-    });
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 1000,
+    }
+  );
 
-    return response;
-  } catch (error) {
-    // ignore error for retrieving slos
-  }
-
-  return EMPTY_LIST;
-};
+  return {
+    sloList: data,
+    isLoading: isLoading || isRefetching,
+    isInitialLoading,
+    isSuccess,
+    isError,
+    refetch,
+  };
+}
