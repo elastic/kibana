@@ -37,6 +37,27 @@ export enum TableId {
   alertsOnCasePage = 'alerts-case-page',
 }
 
+enum TableEntityType {
+  alert = 'alert',
+  event = 'event',
+  session = 'session',
+}
+
+export const tableEntity: Record<TableId, TableEntityType> = {
+  [TableId.usersPageEvents]: TableEntityType.event,
+  [TableId.alertsOnRuleDetailsPage]: TableEntityType.alert,
+  [TableId.hostsPageEvents]: TableEntityType.event,
+  [TableId.usersPageEvents]: TableEntityType.event,
+  [TableId.networkPageEvents]: TableEntityType.event,
+  [TableId.hostsPageSessions]: TableEntityType.session,
+  [TableId.alertsOnAlertsPage]: TableEntityType.alert,
+  [TableId.test]: TableEntityType.event,
+  [TableId.alternateTest]: TableEntityType.event,
+  [TableId.rulePreview]: TableEntityType.event,
+  [TableId.kubernetesPageSessions]: TableEntityType.event,
+  [TableId.alertsOnCasePage]: TableEntityType.alert,
+} as const;
+
 const TableIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TableId.usersPageEvents),
   runtimeTypes.literal(TableId.hostsPageEvents),

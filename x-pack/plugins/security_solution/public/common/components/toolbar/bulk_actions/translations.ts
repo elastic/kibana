@@ -7,18 +7,26 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SELECTED_ALERTS = (selectedAlertsFormatted: string, selectedAlerts: number) =>
+export const SELECTED_ENTITIES = (
+  entity: string,
+  selectedAlertsFormatted: string,
+  selectedAlerts: number
+) =>
   i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectedAlertsTitle', {
-    values: { selectedAlertsFormatted, selectedAlerts },
+    values: { entity, selectedAlertsFormatted, selectedAlerts },
     defaultMessage:
-      'Selected {selectedAlertsFormatted} {selectedAlerts, plural, =1 {alert} other {alerts}}',
+      'Selected {selectedAlertsFormatted} {entity}{selectedAlerts, plural, =1 {} other {s}}',
   });
 
-export const SELECT_ALL_ALERTS = (totalAlertsFormatted: string, totalAlerts: number) =>
+export const SELECT_ALL_ENTITIES = (
+  entity: string,
+  totalAlertsFormatted: string,
+  totalAlerts: number
+) =>
   i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectAllAlertsTitle', {
-    values: { totalAlertsFormatted, totalAlerts },
+    values: { entity, totalAlertsFormatted, totalAlerts },
     defaultMessage:
-      'Select all {totalAlertsFormatted} {totalAlerts, plural, =1 {alert} other {alerts}}',
+      'Select {totalAlerts, plural, =1 {{totalAlertsFormatted} {entity}} other {all {totalAlertsFormatted} {entity}s} }',
   });
 
 export const CLEAR_SELECTION = i18n.translate(
