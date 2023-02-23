@@ -43,6 +43,10 @@ jest.mock('../../../../../common/endpoint/service/host_isolation/utils', () => {
   };
 });
 
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+
 jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('testSpace'),
 }));
@@ -68,6 +72,12 @@ jest.mock('../../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => ({

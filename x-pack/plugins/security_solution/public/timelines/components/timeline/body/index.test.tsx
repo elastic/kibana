@@ -40,6 +40,9 @@ import { createStore } from '../../../../common/store';
 import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
 );
@@ -73,6 +76,12 @@ const useAddToTimeline = () => ({
 });
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 const mockSort: Sort[] = [
   {
     columnId: '@timestamp',

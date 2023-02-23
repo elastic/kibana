@@ -19,6 +19,9 @@ import { plainColumnRenderer } from './plain_column_renderer';
 import { getValues, deleteItemIdx, findItem } from './helpers';
 
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

@@ -15,6 +15,9 @@ import { useMountAppended } from '../../../../../../common/utils/use_mount_appen
 import { Bytes } from '.';
 
 jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../../../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 describe('Bytes', () => {
   const mount = useMountAppended();

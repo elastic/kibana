@@ -19,6 +19,9 @@ import { deleteItemIdx, findItem } from './helpers';
 import { emptyColumnRenderer } from './empty_column_renderer';
 
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 describe('empty_column_renderer', () => {
   let mockDatum: TimelineNonEcsData[];

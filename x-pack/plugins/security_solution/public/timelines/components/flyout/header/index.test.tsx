@@ -27,6 +27,15 @@ jest.mock('../../../containers/kpis', () => ({
 }));
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');

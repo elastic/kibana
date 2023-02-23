@@ -32,6 +32,10 @@ jest.mock('../../common/lib/apm/use_track_http_request');
 jest.mock('../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
+jest.mock('../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+
 jest.mock('../../common/lib/kibana', () => ({
   useToasts: jest.fn().mockReturnValue({
     addError: jest.fn(),

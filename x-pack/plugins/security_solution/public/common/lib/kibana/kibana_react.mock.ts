@@ -116,6 +116,15 @@ export const createStartServicesMock = (
     unifiedSearch,
     data: {
       ...data,
+      dataViews: {
+        ...data.dataViews,
+        get: jest.fn(() =>
+          Promise.resolve({
+            getIndexPattern: jest.fn(() => 'auditbeat-*,filebeat-*'),
+            matchedIndices: ['auditbeat-1', 'filebeat-1'],
+          })
+        ),
+      },
       query: {
         ...data.query,
         savedQueries: {

@@ -38,6 +38,10 @@ jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () 
   }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
 }));
 
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+
 describe('Expandable Host Component', () => {
   beforeAll(() => {
     (hasMlUserPermissions as jest.Mock).mockReturnValue(true);

@@ -13,6 +13,10 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { DataProviders } from '.';
 import { TimelineId } from '../../../../../common/types';
 
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+
 describe('DataProviders', () => {
   const mount = useMountAppended();
 

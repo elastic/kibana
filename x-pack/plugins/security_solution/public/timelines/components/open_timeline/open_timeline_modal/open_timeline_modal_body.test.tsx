@@ -21,6 +21,12 @@ import { TimelineType, TimelineStatus } from '../../../../../common/types/timeli
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 describe('OpenTimelineModal', () => {
   const mockTheme = getMockTheme({

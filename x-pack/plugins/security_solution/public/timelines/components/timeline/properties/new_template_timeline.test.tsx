@@ -27,6 +27,10 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+
 describe('NewTemplateTimeline', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();

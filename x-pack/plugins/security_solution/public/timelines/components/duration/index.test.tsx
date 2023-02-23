@@ -15,6 +15,9 @@ import { ONE_MILLISECOND_AS_NANOSECONDS } from '../formatted_duration/helpers';
 import { Duration } from '.';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 describe('Duration', () => {
   test('it renders the expected formatted duration', () => {

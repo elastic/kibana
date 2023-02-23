@@ -36,6 +36,12 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 const originalKibanaLib = jest.requireActual('../../../../common/lib/kibana');
 
 // Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
@@ -44,6 +50,10 @@ const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
 mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
 jest.mock('../../../../common/hooks/use_selector');
+
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 

@@ -21,6 +21,12 @@ import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 describe('#getActionsColumns', () => {
   let mockResults: OpenTimelineResult[];

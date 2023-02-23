@@ -14,6 +14,9 @@ import type { ThreatMatchRowProps } from './threat_match_row';
 import { ThreatMatchRowView } from './threat_match_row';
 
 jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../../../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 describe('ThreatMatchRowView', () => {
   const mount = useMountAppended();

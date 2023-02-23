@@ -23,6 +23,10 @@ jest.mock('react-redux', () => {
   };
 });
 
+jest.mock('../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+
 jest.mock('../../../common/lib/kibana/kibana_react', () => {
   return {
     useKibana: jest.fn().mockReturnValue({

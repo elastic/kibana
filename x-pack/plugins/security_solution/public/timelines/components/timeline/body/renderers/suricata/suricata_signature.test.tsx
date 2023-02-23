@@ -19,6 +19,9 @@ import {
 } from './suricata_signature';
 
 jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../../../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

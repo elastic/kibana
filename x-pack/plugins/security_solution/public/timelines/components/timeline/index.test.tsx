@@ -43,6 +43,9 @@ jest.mock('./tabs_content', () => ({
 }));
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 const originalKibanaLib = jest.requireActual('../../../common/lib/kibana');
 
 // Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object

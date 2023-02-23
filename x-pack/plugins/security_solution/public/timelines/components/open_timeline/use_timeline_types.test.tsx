@@ -28,6 +28,10 @@ jest.mock('../../../common/components/link_to', () => {
   };
 });
 
+jest.mock('../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/kibana-react-plugin/public');
   const useKibana = jest.fn().mockImplementation(() => ({

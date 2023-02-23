@@ -14,6 +14,9 @@ import { PrimarySecondaryUserInfo, nilOrUnSet } from './primary_secondary_user_i
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
 jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../../../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

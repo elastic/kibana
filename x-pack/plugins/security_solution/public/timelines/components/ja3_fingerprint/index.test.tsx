@@ -14,6 +14,9 @@ import '../../../common/mock/match_media';
 import { Ja3Fingerprint } from '.';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 describe('Ja3Fingerprint', () => {
   test('renders the expected label', () => {

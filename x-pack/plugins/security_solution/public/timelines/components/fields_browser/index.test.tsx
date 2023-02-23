@@ -25,6 +25,9 @@ import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/ty
 
 let mockIndexPatternFieldEditor: Start;
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const defaultDataviewState: {
@@ -49,6 +52,10 @@ jest.mock('../../../common/containers/source/use_data_view', () => ({
     indexFieldsSearch: mockIndexFieldsSearch,
   }),
 }));
+
+jest.mock('../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 const mockRemoveColumn = jest.fn();
 const mockUpsertColumn = jest.fn();

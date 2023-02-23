@@ -13,7 +13,7 @@ export const useFetchPatternList = (dataViewId: string | null, defaultList: stri
   const {
     data: { dataViews: dataViewsService },
   } = useKibana().services;
-  const [patternList, setPatternList] = useState<string[]>([]);
+  const [patternList, setPatternList] = useState<string[]>(defaultList);
 
   useEffect(() => {
     const fetchAndSetPatternList = async (dvId: string) => {

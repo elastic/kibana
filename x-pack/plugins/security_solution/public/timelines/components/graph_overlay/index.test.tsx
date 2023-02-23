@@ -42,6 +42,9 @@ jest.mock('../../../resolver/view/use_resolver_query_params_cleaner');
 jest.mock('../../../resolver/view/use_state_syncing_actions');
 const useStateSyncingActionsMock = useStateSyncingActions as jest.Mock;
 
+jest.mock('../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 jest.mock('../../../resolver/view/use_sync_selected_node');
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');

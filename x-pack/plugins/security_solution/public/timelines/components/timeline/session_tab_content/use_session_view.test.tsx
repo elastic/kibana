@@ -23,6 +23,10 @@ import { TableId } from '../../../../../common/types';
 const mockDispatch = jest.fn();
 jest.mock('../../../../common/hooks/use_selector');
 
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+
 jest.mock('../../../../common/containers/use_full_screen');
 
 jest.mock('react-redux', () => {

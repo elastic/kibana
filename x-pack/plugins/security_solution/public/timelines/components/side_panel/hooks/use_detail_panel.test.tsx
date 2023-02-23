@@ -15,6 +15,12 @@ import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 const mockDispatch = jest.fn();
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 jest.mock('../../../../common/hooks/use_selector');
 jest.mock('../../../store/timeline');
 jest.mock('react-redux', () => {

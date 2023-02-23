@@ -14,6 +14,12 @@ import { Pane } from '.';
 import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 const originalKibanaLib = jest.requireActual('../../../../common/lib/kibana');
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');
@@ -31,6 +37,10 @@ const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
 mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
 jest.mock('../../../../common/utils/normalize_time_range');
+
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 jest.mock('../../../../common/hooks/use_resolve_conflict', () => {
   return {

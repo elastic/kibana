@@ -43,6 +43,10 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+
 jest.mock('../../../containers/all', () => {
   const originalModule = jest.requireActual('../../../containers/all');
   return {

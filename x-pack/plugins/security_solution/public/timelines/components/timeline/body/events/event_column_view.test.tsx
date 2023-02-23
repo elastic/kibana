@@ -42,6 +42,10 @@ jest.mock('../../../../../common/components/user_privileges', () => {
   };
 });
 
+jest.mock('../../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+
 jest.mock('../../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../../common/lib/kibana');
 

@@ -20,6 +20,12 @@ import type { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 jest.mock('../body/renderers/get_column_renderer');
 const getColumnRendererMock = getColumnRenderer as jest.Mock;

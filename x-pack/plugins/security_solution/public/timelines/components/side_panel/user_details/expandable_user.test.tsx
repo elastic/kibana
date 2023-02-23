@@ -18,6 +18,9 @@ import { hasMlUserPermissions } from '../../../../../common/machine_learning/has
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 const mockDispatch = jest.fn();
 jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
@@ -37,6 +40,10 @@ jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () 
     }) => React.ReactNode;
   }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
 }));
+
+jest.mock('../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 describe('Expandable Host Component', () => {
   beforeAll(() => {

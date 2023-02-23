@@ -15,6 +15,9 @@ import { useMountAppended } from '../../../../../../common/utils/use_mount_appen
 import { DnsRequestEventDetails } from './dns_request_event_details';
 
 jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../../../../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

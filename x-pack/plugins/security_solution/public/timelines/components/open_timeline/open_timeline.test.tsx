@@ -23,6 +23,9 @@ import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/containers/sourcerer/use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
