@@ -451,7 +451,7 @@ describe('EPM template', () => {
     const dateWithFormatYml = `
 - name: dateWithFormat
   type: date
-  format: yyyy-MM-dd
+  date_format: yyyy-MM-dd
 `;
 
     const dateWithMapping = {

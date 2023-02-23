@@ -429,8 +429,8 @@ function generateWildcardMapping(field: Field): IndexTemplateMapping {
 
 function generateDateMapping(field: Field): IndexTemplateMapping {
   const mapping: IndexTemplateMapping = {};
-  if (field.format) {
-    mapping.format = field.format;
+  if (field.date_format) {
+    mapping.format = field.date_format;
   }
   return mapping;
 }
