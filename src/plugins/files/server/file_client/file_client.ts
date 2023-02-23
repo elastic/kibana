@@ -224,8 +224,8 @@ export class FileClientImpl implements FileClient {
       ? maxSizeBytes
       : fourMiB;
 
-    if (typeof maxFileSize === 'function') {
-      const sizeLimitPerFile = (maxFileSize as (f: typeof file) => number)(file);
+    if (typeof maxSizeBytes === 'function') {
+      const sizeLimitPerFile = maxSizeBytes(file);
       if (typeof sizeLimitPerFile === 'number') {
         maxFileSize = sizeLimitPerFile;
       }
