@@ -6,15 +6,15 @@
  */
 
 import { each } from 'lodash';
-import type { Ecs } from '@kbn/ecs';
 import type { EndpointAppContext } from '../../../endpoint/types';
 import { createResponseActionHandler } from '../../../endpoint/routes/actions/create_response_action_handler';
 import type { RuleResponseEndpointAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import type { Alerts } from './types';
 
 export const endpointResponseAction = (
   responseAction: RuleResponseEndpointAction,
   endpointAppContext: EndpointAppContext,
-  { alerts }: { alerts: Ecs[] }
+  { alerts }: { alerts: Alerts }
 ) => {
   each(alerts, (alert) => {
     return createResponseActionHandler(

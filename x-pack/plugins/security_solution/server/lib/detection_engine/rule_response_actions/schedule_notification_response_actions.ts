@@ -5,28 +5,18 @@
  * 2.0.
  */
 
-import { uniq, reduce, some, each } from 'lodash';
-import { containsDynamicQuery } from '@kbn/osquery-plugin/common/utils/replace_params_query';
-import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { reduce, each } from 'lodash';
+import type { EndpointAppContext } from '../../../endpoint/types';
 import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type { SetupPlugins } from '../../../plugin_contract';
 import { endpointResponseAction } from './endpoint_response_action';
 import { osqueryResponseAction } from './osquery_response_action';
-import type { AlertsWithAgentType } from './types';
-import { EndpointAppContext } from '@kbn/security-solution-plugin/server/endpoint/types';
-
-type Alerts = Array<ParsedTechnicalFields & { agent?: { id: string } }>;
+import type { Alerts, AlertsWithAgentType } from './types';
 
 interface ScheduleNotificationActions {
   signals: unknown[];
   responseActions: RuleResponseAction[];
-}
-
-interface AlertsWithAgentType {
-  alerts: Alerts;
-  agents: string[];
-  alertIds: string[];
 }
 
 export const scheduleNotificationResponseActions = (

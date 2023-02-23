@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { Ecs } from '@kbn/ecs';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+
+export type Alerts = Array<
+  ParsedTechnicalFields & { agent?: { id: string }; process?: { pid: string } }
+>;
 
 export interface AlertsWithAgentType {
-  alerts: Ecs[];
+  alerts: Alerts;
   agents: string[];
   alertIds: string[];
 }
