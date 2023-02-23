@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { Footer } from './footer';
+export { Footer, SubmittingType } from './footer';
