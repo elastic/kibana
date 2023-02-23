@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectReference,
+  SavedObjectsMigrationVersion,
+} from '@kbn/core-saved-objects-common';
 
 /**
  * Options for creating a saved object.
@@ -21,8 +24,8 @@ export interface SavedObjectsCreateOptions {
   id?: string;
   /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
   overwrite?: boolean;
-  /** A semver value that is used when migrating documents between Kibana versions. */
-  migrationVersion?: string;
+  /** {@inheritDoc SavedObjectsMigrationVersion} */
+  migrationVersion?: SavedObjectsMigrationVersion;
   /** A semver value that is used when upgrading objects between Kibana versions. */
   coreMigrationVersion?: string;
   /** Array of referenced saved objects. */

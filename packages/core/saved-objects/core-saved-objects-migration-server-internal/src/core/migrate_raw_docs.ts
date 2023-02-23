@@ -204,6 +204,6 @@ function convertToRawAddMigrationVersion(
   serializer: SavedObjectsSerializer
 ): SavedObjectSanitizedDoc<unknown> {
   const savedObject = serializer.rawToSavedObject(rawDoc, options);
-  savedObject.migrationVersion = savedObject.migrationVersion || undefined;
+  savedObject.migrationVersion = savedObject.migrationVersion || {};
   return savedObject;
 }

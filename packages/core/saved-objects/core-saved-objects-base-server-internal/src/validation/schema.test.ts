@@ -60,7 +60,9 @@ describe('Saved Objects type validation schema', () => {
         ],
         namespace: 'a',
         namespaces: ['a', 'b'],
-        migrationVersion: '1.0.0',
+        migrationVersion: {
+          dashboard: '1.0.0',
+        },
         coreMigrationVersion: '1.0.0',
         updated_at: '2022-01-05T03:17:07.183Z',
         version: '2',

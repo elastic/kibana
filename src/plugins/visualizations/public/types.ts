@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { SavedObjectsMigrationVersion, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import {
   IAggConfigs,
   SerializedSearchSourceFields,
@@ -50,7 +50,7 @@ export interface VisSavedObject extends ISavedVis {
   getEsType: () => string;
   getDisplayName: () => string;
   displayName: string;
-  migrationVersion?: string;
+  migrationVersion?: SavedObjectsMigrationVersion;
   searchSource?: ISearchSource;
   version?: string;
   tags?: string[];
@@ -66,7 +66,7 @@ export interface SaveVisOptions {
 export interface GetVisOptions {
   id?: string;
   searchSource?: boolean;
-  migrationVersion?: string;
+  migrationVersion?: SavedObjectsMigrationVersion;
   savedSearchId?: string;
   type?: string;
   indexPattern?: string;

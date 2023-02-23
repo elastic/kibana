@@ -41,12 +41,7 @@ export const registerBulkCreateRoute = (
             id: schema.maybe(schema.string()),
             attributes: schema.recordOf(schema.string(), schema.any()),
             version: schema.maybe(schema.string()),
-            migrationVersion: schema.maybe(
-              schema.oneOf([
-                schema.maybe(schema.recordOf(schema.string(), schema.string())),
-                schema.string(),
-              ])
-            ),
+            migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
             coreMigrationVersion: schema.maybe(schema.string()),
             references: schema.maybe(
               schema.arrayOf(

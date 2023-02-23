@@ -16,6 +16,7 @@ export type {
   SavedObjectAttributes,
   SavedObjectError,
   SavedObjectReference,
+  SavedObjectsMigrationVersion,
 } from '@kbn/core-saved-objects-common';
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type {

@@ -43,11 +43,11 @@
 
 import _ from 'lodash';
 import type { Logger } from '@kbn/logging';
+import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectUnsanitizedDoc,
   ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsMigrationVersion } from '../initial_state';
 import type { ActiveMigrations } from './types';
 import { maxVersion } from './utils';
 import { buildActiveMigrations } from './build_active_migrations';

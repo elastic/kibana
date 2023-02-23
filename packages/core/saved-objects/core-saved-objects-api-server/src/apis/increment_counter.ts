@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**
@@ -20,8 +21,8 @@ export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
    * already exist. Existing fields will be left as-is and won't be incremented.
    */
   initialize?: boolean;
-  /** A semver value that is used when migrating documents between Kibana versions. */
-  migrationVersion?: string;
+  /** {@link SavedObjectsMigrationVersion} */
+  migrationVersion?: SavedObjectsMigrationVersion;
   /**
    * (default='wait_for') The Elasticsearch refresh setting for this
    * operation. See {@link MutatingOperationRefreshSetting}

@@ -181,7 +181,7 @@ describe('SavedObjectsRepository', () => {
     mockGetSearchDsl.mockClear();
   });
 
-  const mockMigrationVersion = '2.3.4';
+  const mockMigrationVersion = { foo: '2.3.4' };
   const mockMigrateDocument = (doc: SavedObjectUnsanitizedDoc<any>) => ({
     ...doc,
     attributes: {
@@ -2948,7 +2948,7 @@ describe('SavedObjectsRepository', () => {
           attributes,
           references,
           namespaces: [namespace ?? 'default'],
-          migrationVersion: '1.1.1',
+          migrationVersion: { [MULTI_NAMESPACE_TYPE]: '1.1.1' },
           coreMigrationVersion: expect.any(String),
         });
       });

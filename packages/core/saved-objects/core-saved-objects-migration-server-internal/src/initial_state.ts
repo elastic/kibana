@@ -9,6 +9,7 @@
 import * as Option from 'fp-ts/Option';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { Logger } from '@kbn/logging';
+import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
@@ -16,26 +17,6 @@ import type {
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
-
-/**
- * Information about the migrations that have been applied to this SavedObject.
- * When Kibana starts up, KibanaMigrator detects outdated documents and
- * migrates them based on this value. For each migration that has been applied,
- * the plugin's name is used as a key and the latest migration version as the
- * value.
- *
- * @example
- * {
- *   dashboard: '7.1.1',
- *   space: '6.6.6',
- * }
- *
- * @public
- */
-export interface SavedObjectsMigrationVersion {
-  /** The plugin name and version string */
-  [pluginName: string]: string;
-}
 
 /**
  * Construct the initial state for the model
@@ -68,7 +49,7 @@ export const createInitialState = ({
       should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
         bool: {
           must: { term: { type } },
-          must_not: { term: { [`migrationVersion`]: latestVersion } },
+          must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
         },
       })),
     },
@@ -78,7 +59,11 @@ export const createInitialState = ({
     dynamic: false,
     properties: {
       type: { type: 'keyword' },
-      migrationVersion: { type: 'version' },
+      migrationVersion: {
+        // @ts-expect-error we don't allow plugins to set `dynamic`
+        dynamic: 'true',
+        type: 'object',
+      },
     },
   };
 

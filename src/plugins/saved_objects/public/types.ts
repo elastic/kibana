@@ -39,7 +39,7 @@ export interface SavedObject<T extends SavedObjectAttributes = SavedObjectAttrib
   isSaving: boolean;
   isTitleChanged: () => boolean;
   lastSavedTitle: string;
-  migrationVersion?: string;
+  migrationVersion?: Record<string, any>;
   save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
   searchSource?: ISearchSource;
   searchSourceFields?: SerializedSearchSourceFields;
@@ -83,7 +83,7 @@ export interface SavedObjectConfig {
   init?: () => void;
   indexPattern?: DataView;
   mapping?: Record<string, any>;
-  migrationVersion?: string;
+  migrationVersion?: Record<string, any>;
   path?: string;
   searchSource?: ISearchSource | boolean;
   type?: string;

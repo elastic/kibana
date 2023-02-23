@@ -14,6 +14,7 @@ export type {
   SavedObjectAttributes,
   SavedObjectError,
   SavedObjectReference,
+  SavedObjectsMigrationVersion,
 } from './src/saved_objects';
 
 export type {

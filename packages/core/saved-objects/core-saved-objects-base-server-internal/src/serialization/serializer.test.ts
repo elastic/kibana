@@ -92,10 +92,16 @@ describe('#rawToSavedObject', () => {
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        migrationVersion: '1.2.3',
+        migrationVersion: {
+          hello: '1.2.3',
+          acl: '33.3.5',
+        },
       },
     });
-    expect(actual).toHaveProperty('migrationVersion', '1.2.3');
+    expect(actual).toHaveProperty('migrationVersion', {
+      hello: '1.2.3',
+      acl: '33.3.5',
+    });
   });
 
   test(`if _source.migrationVersion is unspecified it doesn't set migrationVersion`, () => {
@@ -120,7 +126,10 @@ describe('#rawToSavedObject', () => {
           a: 'b',
           c: 'd',
         },
-        migrationVersion: '1.2.3',
+        migrationVersion: {
+          hello: '1.2.3',
+          acl: '33.3.5',
+        },
         updated_at: now,
       },
     });
@@ -132,7 +141,10 @@ describe('#rawToSavedObject', () => {
         a: 'b',
         c: 'd',
       },
-      migrationVersion: '1.2.3',
+      migrationVersion: {
+        hello: '1.2.3',
+        acl: '33.3.5',
+      },
       updated_at: now,
       references: [],
     };
@@ -331,7 +343,10 @@ describe('#rawToSavedObject', () => {
           meaning: 42,
           nested: { stuff: 'here' },
         },
-        migrationVersion: '1.2.3',
+        migrationVersion: {
+          foo: '1.2.3',
+          bar: '9.8.7',
+        },
         coreMigrationVersion: '4.5.6',
         namespace: 'foo-namespace',
         updated_at: String(new Date()),
@@ -655,10 +670,16 @@ describe('#savedObjectToRaw', () => {
     const actual = singleNamespaceSerializer.savedObjectToRaw({
       type: '',
       attributes: {},
-      migrationVersion: '1.2.3',
+      migrationVersion: {
+        foo: '1.2.3',
+        bar: '9.8.7',
+      },
     } as any);
 
-    expect(actual._source).toHaveProperty('migrationVersion', '1.2.3');
+    expect(actual._source).toHaveProperty('migrationVersion', {
+      foo: '1.2.3',
+      bar: '9.8.7',
+    });
   });
 
   test(`if unspecified it doesn't add migrationVersion property to _source`, () => {

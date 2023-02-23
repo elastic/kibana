@@ -28,7 +28,7 @@ import { getRootProperties } from './get_root_properties';
  *  @return {EsPropertyMappings}
  */
 
-const omittedRootProps = ['references'];
+const omittedRootProps = ['migrationVersion', 'references'];
 
 export function getRootPropertiesObjects(mappings: IndexMapping) {
   const rootProperties = getRootProperties(mappings);
