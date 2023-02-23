@@ -33,6 +33,7 @@ export const useTotalHits = ({
   getTimeRange,
   refetch$,
   onTotalHitsChange,
+  isPlainRecord,
 }: {
   services: UnifiedHistogramServices;
   dataView: DataView;
@@ -44,6 +45,7 @@ export const useTotalHits = ({
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
+  isPlainRecord?: boolean;
 }) => {
   const abortController = useRef<AbortController>();
   const fetch = useStableCallback(() => {
@@ -58,6 +60,7 @@ export const useTotalHits = ({
       query,
       timeRange: getTimeRange(),
       onTotalHitsChange,
+      isPlainRecord,
     });
   });
 
@@ -80,6 +83,7 @@ const fetchTotalHits = async ({
   query,
   timeRange,
   onTotalHitsChange,
+  isPlainRecord,
 }: {
   services: UnifiedHistogramServices;
   abortController: MutableRefObject<AbortController | undefined>;
@@ -91,13 +95,14 @@ const fetchTotalHits = async ({
   query: Query | AggregateQuery;
   timeRange: TimeRange;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
+  isPlainRecord?: boolean;
 }) => {
   abortController.current?.abort();
   abortController.current = undefined;
 
   // Either the chart is visible, in which case Lens will make the request,
   // or there is no hits context, which means the total hits should be hidden
-  if (chartVisible || !hits) {
+  if (chartVisible || !hits || isPlainRecord) {
     return;
   }
 

@@ -12,6 +12,7 @@ import {
   GaugeTicksPositions,
   GaugeLabelMajorModes,
 } from '@kbn/expression-gauge-plugin/common';
+import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { TableSuggestion, Visualization } from '../../types';
 import type { GaugeVisualizationState } from './constants';
@@ -64,7 +65,8 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     title: i18n.translate('xpack.lens.gauge.gaugeLabel', {
       defaultMessage: 'Gauge',
     }),
-    previewIcon: 'empty',
+    previewIcon:
+      shape === GaugeShapes.VERTICAL_BULLET ? IconChartVerticalBullet : IconChartHorizontalBullet,
     score: 0.5,
     hide: !isGauge || state?.metricAccessor === undefined, // only display for gauges for beta
   };
@@ -73,6 +75,10 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     ? [
         {
           ...baseSuggestion,
+          previewIcon:
+            state?.shape === GaugeShapes.VERTICAL_BULLET
+              ? IconChartHorizontalBullet
+              : IconChartVerticalBullet,
           state: {
             ...baseSuggestion.state,
             ...state,
@@ -93,6 +99,10 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
         },
         {
           ...baseSuggestion,
+          previewIcon:
+            state?.shape === GaugeShapes.VERTICAL_BULLET
+              ? IconChartHorizontalBullet
+              : IconChartVerticalBullet,
           state: {
             ...baseSuggestion.state,
             metricAccessor: table.columns[0].columnId,

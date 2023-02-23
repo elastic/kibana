@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFlexItem,
+  EuiToolTip,
+  useEuiTheme,
+  EuiFlexGroup,
+  EuiIcon,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -18,10 +25,6 @@ export interface SuggestionSelectorProps {
   onSuggestionChange?: (sug: Suggestion | undefined) => void;
 }
 
-interface VisualizationState extends Record<string, unknown> {
-  shape: string;
-}
-
 export const SuggestionSelector = ({
   suggestions,
   activeSuggestion,
@@ -31,7 +34,7 @@ export const SuggestionSelector = ({
     ?.map((sug) => {
       return {
         label: sug.title,
-        value: (sug as Suggestion<VisualizationState, unknown>).visualizationState.shape,
+        value: sug.title,
       };
     })
     .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
@@ -40,20 +43,15 @@ export const SuggestionSelector = ({
     ? [
         {
           label: activeSuggestion.title,
-          value: (activeSuggestion as Suggestion<VisualizationState, unknown>).visualizationState
-            .shape,
+          value: activeSuggestion.title,
         },
       ]
     : [];
 
   const onSelectionChange = useCallback(
-    (newOptions: EuiComboBoxOptionOption[]) => {
+    (newOptions) => {
       const suggestion = newOptions.length
-        ? suggestions?.find(
-            (current) =>
-              (current as Suggestion<VisualizationState, unknown>).visualizationState.shape ===
-              newOptions[0].value
-          )
+        ? suggestions?.find((current) => current.title === newOptions[0].value)
         : undefined;
 
       onSuggestionChange?.(suggestion);
@@ -96,6 +94,19 @@ export const SuggestionSelector = ({
         fullWidth={true}
         onFocus={disableFieldPopover}
         onBlur={enableFieldPopover}
+        renderOption={(option) => {
+          const suggestion = suggestions?.find((s) => {
+            return s.title === option.label;
+          });
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={null}>
+                <EuiIcon type={suggestion?.previewIcon ?? 'empty'} />
+              </EuiFlexItem>
+              <EuiFlexItem>{option.label}</EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }}
       />
     </EuiToolTip>
   );

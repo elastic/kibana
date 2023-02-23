@@ -178,6 +178,7 @@ export function Chart({
     getTimeRange,
     refetch$,
     onTotalHitsChange,
+    isPlainRecord,
   });
 
   const {
