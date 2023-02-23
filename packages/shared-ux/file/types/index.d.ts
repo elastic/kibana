@@ -251,6 +251,7 @@ export interface FileKind {
    * Unique file kind ID
    */
   id: string;
+
   /**
    * Maximum size, in bytes, a file of this kind can be.
    *

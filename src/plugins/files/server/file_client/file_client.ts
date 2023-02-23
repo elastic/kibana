@@ -215,12 +215,17 @@ export class FileClientImpl implements FileClient {
     rs: Readable,
     options?: UploadOptions
   ): ReturnType<BlobStorageClient['upload']> => {
+    const maxFileSize = this.fileKindDescriptor.maxSizeBytes;
+    const sizeTransform = typeof maxFileSize === 'number' ? enforceMaxByteSizeTransform(maxFileSize) : null;
+    const transforms = options?.transforms || [];
+
+    if (sizeTransform) {
+      transforms.push(sizeTransform);
+    }
+
     return this.blobStorageClient.upload(rs, {
       ...options,
-      transforms: [
-        ...(options?.transforms || []),
-        enforceMaxByteSizeTransform(this.fileKindDescriptor.maxSizeBytes ?? Infinity),
-      ],
+      transforms,
       id,
     });
   };
