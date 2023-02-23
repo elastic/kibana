@@ -535,7 +535,7 @@ Any modifications made to this file will be overwritten.
     <a class="up" href="#__Methods">Up</a>
     <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/comments</code></pre></div>
     <div class="method-summary">Retrieves all the comments from a case. (<span class="nickname">getAllCaseComments</span>)</div>
-    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.</div>
+    <div class="method-notes">Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; instead, use the get case comment API, which requires a comment identifier in the path. You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.</div>
 
     <h3 class="field-label">Path parameters</h3>
     <div class="field-items">
@@ -656,7 +656,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">includeComments (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines whether case comments are returned. default: true </div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned. default: true </div>
     </div>  <!-- field-items -->
 
 
@@ -747,7 +747,7 @@ Any modifications made to this file will be overwritten.
     <a class="up" href="#__Methods">Up</a>
     <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/{caseId}/user_actions</code></pre></div>
     <div class="method-summary">Returns all user activity for a case. (<span class="nickname">getCaseActivity</span>)</div>
-    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're seeking.</div>
+    <div class="method-notes">Deprecated in 8.1.0. Use the find user actions API instead. You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're seeking.</div>
 
     <h3 class="field-label">Path parameters</h3>
     <div class="field-items">
@@ -1119,7 +1119,7 @@ Any modifications made to this file will be overwritten.
     <a class="up" href="#__Methods">Up</a>
     <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/cases/status</code></pre></div>
     <div class="method-summary">Returns the number of cases that are open, closed, and in progress. (<span class="nickname">getCaseStatus</span>)</div>
-    <div class="method-notes">You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases you're seeking.</div>
+    <div class="method-notes">Deprecated in 8.1.0. This API is deprecated and will be removed in a future release. You must have <code>read</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the cases you're seeking.</div>
 
     <h3 class="field-label">Path parameters</h3>
     <div class="field-items">
