@@ -6,27 +6,21 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { FindCaseUserActions, CaseUserActionTypeWithAll } from '../../common/ui/types';
-import { findCaseUserActions } from './api';
+import { getCaseUserActionsStats } from './api';
+
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
 import { ERROR_TITLE } from './translations';
 import { casesQueriesKeys } from './constants';
 
-export const useFindCaseUserActions = (
-  caseId: string,
-  params: {
-    type: CaseUserActionTypeWithAll;
-    sortOrder: 'asc' | 'desc';
-  }
-) => {
+export const useGetCaseUserActionsStats = (caseId: string) => {
   const { showErrorToast } = useCasesToast();
   const abortCtrlRef = new AbortController();
 
-  return useQuery<FindCaseUserActions, ServerError>(
-    casesQueriesKeys.caseUserActions(caseId, params.type, params.sortOrder),
-    async () => {
-      return findCaseUserActions(caseId, params, abortCtrlRef.signal);
+  return useQuery(
+    casesQueriesKeys.caseUserActionsStats(caseId),
+    () => {
+      return getCaseUserActionsStats(caseId, abortCtrlRef.signal);
     },
     {
       onError: (error: ServerError) => {
@@ -36,4 +30,4 @@ export const useFindCaseUserActions = (
   );
 };
 
-export type UseFindCaseUserActions = ReturnType<typeof useFindCaseUserActions>;
+export type UseGetCaseUserActionsStats = ReturnType<typeof useGetCaseUserActionsStats>;
