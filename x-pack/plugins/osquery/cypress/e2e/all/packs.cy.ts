@@ -19,7 +19,7 @@ import {
 import { login } from '../../tasks/login';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { activatePack, deactivatePack, preparePack } from '../../tasks/packs';
-import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
+import { addIntegration, closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { DEFAULT_POLICY } from '../../screens/fleet';
 import {
   getIdFormField,
@@ -174,7 +174,7 @@ describe('ALL - Packs', () => {
       findAndClickButton('Save and deploy changes');
       cy.contains(PACK_NAME);
       cy.contains(`Successfully created "${PACK_NAME}" pack`);
-      cy.getBySel('toastCloseButton').click();
+      closeToastIfVisible();
     });
 
     it('to click the edit button and edit pack', () => {
@@ -195,7 +195,7 @@ describe('ALL - Packs', () => {
       cy.contains('Save and deploy changes');
       findAndClickButton('Save and deploy changes');
       cy.contains(`Successfully updated "${PACK_NAME}" pack`);
-      cy.getBySel('toastCloseButton').click();
+      closeToastIfVisible();
     });
 
     it('should trigger validation when saved query is being chosen', () => {
@@ -370,7 +370,7 @@ describe('ALL - Packs', () => {
       findFormFieldByRowsLabelAndType('Scheduled agent policies (optional)', AGENT_NAME);
       findAndClickButton('Save pack');
 
-      cy.getBySel('toastCloseButton').click();
+      closeToastIfVisible();
       cy.react('ScheduledQueryNameComponent', { props: { name: REMOVING_PACK } }).click();
       cy.contains(`${REMOVING_PACK} details`).should('exist');
       findAndClickButton('Edit');
@@ -489,7 +489,7 @@ describe('ALL - Packs', () => {
 
       cy.contains(globalPack);
       cy.contains(`Successfully created "${globalPack}" pack`);
-      cy.getBySel('toastCloseButton').click();
+      closeToastIfVisible();
 
       cy.visit(FLEET_AGENT_POLICIES);
       cy.contains('Create agent policy').click();
@@ -537,7 +537,7 @@ describe('ALL - Packs', () => {
       findAndClickButton('Save pack');
 
       cy.contains(`Successfully created "${shardPack}" pack`);
-      cy.getBySel('toastCloseButton').click();
+      closeToastIfVisible();
 
       cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
         const shardPolicy = response.body.items.find(

@@ -11,7 +11,7 @@ import {
   OLD_OSQUERY_MANAGER,
   OSQUERY,
 } from '../../tasks/navigation';
-import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
+import { addIntegration, closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 
 import { login } from '../../tasks/login';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
@@ -93,8 +93,9 @@ describe('ALL - Add Integration', () => {
     cy.contains(integration).click();
     addIntegration();
     cy.contains('osquery_manager-');
+    closeToastIfVisible();
     cy.getBySel('nav-search-input').type('Osquery');
-    cy.get('[title="Osquery • Management"]').click();
+    cy.get('[title="Osquery • Management"]').should('exist').click();
     cy.contains('Live queries history');
   });
 

@@ -28,7 +28,7 @@ import {
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { preparePack } from '../../tasks/packs';
-import { closeModalIfVisible } from '../../tasks/integrations';
+import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
 import { LIVE_QUERY_EDITOR, RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { ROLES } from '../../test';
@@ -69,7 +69,7 @@ describe('Alert Event Details', () => {
     findAndClickButton('Update pack');
     closeModalIfVisible();
     cy.contains(`Successfully updated "${PACK_NAME}" pack`);
-    cy.getBySel('toastCloseButton').click();
+    closeToastIfVisible();
 
     toggleRuleOffAndOn(RULE_NAME);
   });
@@ -118,7 +118,7 @@ describe('Alert Event Details', () => {
     // getSavedQueriesDropdown().type(`users{downArrow}{enter}`);
     cy.contains('Save changes').click();
     cy.contains(`${RULE_NAME} was saved`).should('exist');
-    cy.getBySel('toastCloseButton').click();
+    closeToastIfVisible();
     cy.contains('Edit rule settings').click({ force: true });
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
     cy.contains('select * from uptime');
@@ -162,7 +162,7 @@ describe('Alert Event Details', () => {
     });
 
     cy.contains(`${RULE_NAME} was saved`).should('exist');
-    cy.getBySel('toastCloseButton').click();
+    closeToastIfVisible();
     cy.contains('Edit rule settings').click({ force: true });
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
@@ -240,7 +240,7 @@ describe('Alert Event Details', () => {
     });
     cy.contains('Save changes').click();
     cy.contains(`${RULE_NAME} was saved`).should('exist');
-    cy.getBySel('toastCloseButton').click({ multiple: true });
+    closeToastIfVisible();
   });
 
   it('should be able to run live query and add to timeline (-depending on the previous test)', () => {
@@ -261,7 +261,7 @@ describe('Alert Event Details', () => {
     cy.get('.euiButtonEmpty--flushLeft').contains('Cancel').click();
     cy.getBySel('add-to-timeline').first().click();
     cy.getBySel('globalToastList').contains('Added');
-    cy.getBySel('toastCloseButton').click();
+    closeToastIfVisible();
     cy.getBySel(RESULTS_TABLE).within(() => {
       cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
     });
