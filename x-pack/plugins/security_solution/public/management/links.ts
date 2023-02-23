@@ -49,10 +49,7 @@ import {
   manageCategories as cloudSecurityPostureCategories,
   manageLinks as cloudSecurityPostureLinks,
 } from '../cloud_security_posture/links';
-import {
-  //  manageCategories as cloudDefendCategories,
-  manageLinks as cloudDefendLinks,
-} from '../cloud_defend/links';
+import { manageLinks as cloudDefendLinks } from '../cloud_defend/links';
 import { IconActionHistory } from './icons/action_history';
 import { IconBlocklist } from './icons/blocklist';
 import { IconEndpoints } from './icons/endpoints';

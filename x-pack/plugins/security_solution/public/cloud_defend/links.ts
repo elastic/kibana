@@ -30,14 +30,3 @@ export const manageLinks: LinkItem = {
   landingIcon: IconCloudDefend,
   ...commonLinkProperties,
 };
-
-// currently using the CSP category, as it's weird to have two categories each with one item..
-// saving this for when we add other pages
-/* export const manageCategories: LinkCategories = [
-  {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.cloudDefend', {
-      defaultMessage: 'DEFEND FOR CONTAINERS (D4C)',
-    }),
-    linkIds: [SecurityPageName.cloudDefendPolicies],
-  },
-]; */
