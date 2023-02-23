@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { createFiltersFromValueClickAction } from '@kbn/data-plugin/public';
 import type { RangeFilterParams } from '@kbn/es-query';
 import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
@@ -77,7 +76,12 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     }),
     [wrapperHeight, wrapperWidth]
   );
-  const { lens } = useKibana().services;
+  const {
+    lens,
+    data: {
+      actions: { createFiltersFromValueClickAction },
+    },
+  } = useKibana().services;
   const dispatch = useDispatch();
   const [isShowingModal, setIsShowingModal] = useState(false);
   const [visualizationData, setVisualizationData] = useState(initVisualizationData);
@@ -178,7 +182,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
         });
       }
     },
-    [updateDateRange]
+    [createFiltersFromValueClickAction, updateDateRange]
   );
 
   const adHocDataViews = useMemo(
