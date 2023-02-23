@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
-import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -330,6 +330,85 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           }
         });
 
+        it('should generate expected events for summary actions', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'Test conn',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.always-firing-alert-as-data',
+                schedule: { interval: '10m' },
+                throttle: undefined,
+                notify_when: undefined,
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference: 'test',
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {
+                      index: ES_TEST_INDEX_NAME,
+                      reference: 'test',
+                      message: '',
+                    },
+                    frequency: {
+                      summary: true,
+                      throttle: null,
+                      notify_when: 'onActiveAlert',
+                    },
+                  },
+                ],
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // get the events we're expecting
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                // make sure the counts of the # of events per type are as expected
+                ['execute-start', { equal: 1 }],
+                ['execute', { equal: 1 }],
+                ['active-instance', { equal: 2 }],
+                ['execute-action', { equal: 1 }],
+              ]),
+            });
+          });
+
+          const executeActions = events.filter(
+            (event) => event?.event?.action === 'execute-action'
+          );
+
+          expect(executeActions.length).to.be(1);
+
+          const summary = executeActions[0]?.kibana?.alerting?.summary;
+          expect(summary?.new?.count).to.be(2);
+          expect(summary?.ongoing?.count).to.be(0);
+          expect(summary?.recovered?.count).to.be(0);
+        });
+
         it('should generate expected events for rules with multiple searches', async () => {
           const numSearches = 4;
           const delaySeconds = 2;
@@ -552,8 +631,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .auth('superuser', 'superuser')
             .send({
               enabled: true,
-              lookBackWindow: 3,
-              statusChangeThreshold: 2,
+              look_back_window: 3,
+              status_change_threshold: 2,
             })
             .expect(200);
           const { body: createdAction } = await supertest
@@ -636,8 +715,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .auth('superuser', 'superuser')
             .send({
               enabled: true,
-              lookBackWindow: 3,
-              statusChangeThreshold: 2,
+              look_back_window: 3,
+              status_change_threshold: 2,
             })
             .expect(200);
           const { body: createdAction } = await supertest

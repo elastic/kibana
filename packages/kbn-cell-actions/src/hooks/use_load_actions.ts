@@ -29,7 +29,7 @@ export const useLoadActions = (
 ): AsyncActions => {
   const { getActions } = useCellActionsContext();
   const { error, value, loading } = useAsync(() => getActions(context), []);
-  const filteredActions = useFilteredActions(value, options.disabledActions);
+  const filteredActions = useFilteredActions(value, options.disabledActionTypes);
   useThrowError(error);
   return { value: filteredActions, loading };
 };
@@ -40,13 +40,13 @@ export const useLoadActions = (
 export const useLoadActionsFn = (options: LoadActionsOptions = {}): [AsyncActions, GetActions] => {
   const { getActions } = useCellActionsContext();
   const [{ error, value, loading }, loadActions] = useAsyncFn(getActions, []);
-  const filteredActions = useFilteredActions(value, options.disabledActions);
+  const filteredActions = useFilteredActions(value, options.disabledActionTypes);
   useThrowError(error);
   return [{ value: filteredActions, loading }, loadActions];
 };
 
 interface LoadActionsOptions {
-  disabledActions?: string[];
+  disabledActionTypes?: string[];
 }
 
 /**
@@ -62,7 +62,7 @@ export const useBulkLoadActions = (
       Promise.all(
         contexts.map((context) =>
           getActions(context).then(
-            (actions) => filteredActions(actions, options.disabledActions) ?? []
+            (actions) => filteredActions(actions, options.disabledActionTypes) ?? []
           )
         )
       ),
@@ -72,8 +72,8 @@ export const useBulkLoadActions = (
   return actionsState;
 };
 
-const useFilteredActions = (actions: CellAction[] | undefined, disabledActions?: string[]) =>
-  useMemo(() => filteredActions(actions, disabledActions), [actions, disabledActions]);
+const useFilteredActions = (actions: CellAction[] | undefined, disabledActionTypes?: string[]) =>
+  useMemo(() => filteredActions(actions, disabledActionTypes), [actions, disabledActionTypes]);
 
-const filteredActions = (actions: CellAction[] | undefined, disabledActions: string[] = []) =>
-  actions ? actions.filter(({ id }) => !disabledActions?.includes(id)) : undefined;
+const filteredActions = (actions: CellAction[] | undefined, disabledActionTypes: string[] = []) =>
+  actions ? actions.filter(({ type }) => !disabledActionTypes?.includes(type)) : undefined;

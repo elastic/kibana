@@ -50,6 +50,7 @@ export const RULE_ACTIONS = [
     params: {
       foo: true,
     },
+    uuid: '111-111',
   },
   {
     actionTypeId: 'action',
@@ -58,6 +59,7 @@ export const RULE_ACTIONS = [
     params: {
       isResolved: true,
     },
+    uuid: '222-222',
   },
 ];
 
@@ -190,6 +192,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
       params: {
         foo: true,
       },
+      uuid: '111-111',
     },
     {
       group: RecoveredActionGroup.id,
@@ -198,6 +201,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
       params: {
         isResolved: true,
       },
+      uuid: '222-222',
     },
   ],
   executionStatus: {
