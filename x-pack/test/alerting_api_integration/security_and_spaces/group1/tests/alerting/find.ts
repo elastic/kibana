@@ -321,6 +321,7 @@ const findTestUtils = (
                     group: 'default',
                     connector_type_id: 'test.noop',
                     params: {},
+                    uuid: createdAlert.actions[0].uuid,
                   },
                 ],
                 params: {},
