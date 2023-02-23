@@ -13,8 +13,9 @@ export const useFetchActiveAlerts = ({
   sloIds: string[];
 }): UseFetchActiveAlerts => {
   return {
-    loading: false,
-    error: false,
+    isLoading: false,
+    isSuccess: false,
+    isError: false,
     data: sloIds.reduce(
       (acc, sloId, index) => ({
         ...acc,
