@@ -10,7 +10,7 @@ import type { Role } from '@kbn/security-plugin/common';
 import { getT1Analyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/t1_analyst';
 import { getT2Analyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/t2_analyst';
 import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/hunter';
-import { getThreadIntelligenceAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/thread_intelligence_analyst';
+import { getThreadIntelligenceAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/threat_intelligence_analyst';
 import { getDetectionsEngineer } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/detections_engineer';
 import { getSocManager } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/soc_manager';
 import { getPlatformEngineer } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/platform_engineer';

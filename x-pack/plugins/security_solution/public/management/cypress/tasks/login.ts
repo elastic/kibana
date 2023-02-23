@@ -14,7 +14,7 @@ import type { Role } from '@kbn/security-plugin/common';
 import { getT1Analyst } from '../../../../scripts/endpoint/common/roles_users/t1_analyst';
 import { getT2Analyst } from '../../../../scripts/endpoint/common/roles_users/t2_analyst';
 import { getHunter } from '../../../../scripts/endpoint/common/roles_users/hunter';
-import { getThreadIntelligenceAnalyst } from '../../../../scripts/endpoint/common/roles_users/thread_intelligence_analyst';
+import { getThreadIntelligenceAnalyst } from '../../../../scripts/endpoint/common/roles_users/threat_intelligence_analyst';
 import { getSocManager } from '../../../../scripts/endpoint/common/roles_users/soc_manager';
 import { getPlatformEngineer } from '../../../../scripts/endpoint/common/roles_users/platform_engineer';
 import { getEndpointOperationsAnalyst } from '../../../../scripts/endpoint/common/roles_users/endpoint_operations_analyst';
