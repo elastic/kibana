@@ -8,17 +8,15 @@ Array [
   >
     <div
       aria-atomic="true"
-      aria-hidden="true"
       aria-live="off"
       role="status"
     />
     <div
       aria-atomic="true"
+      aria-hidden="true"
       aria-live="off"
       role="status"
-    >
-      test - Elastic
-    </div>
+    />
   </div>,
   <header
     class="hide-for-sharing headerGlobalNav"
