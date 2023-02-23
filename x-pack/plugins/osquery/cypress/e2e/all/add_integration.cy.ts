@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { FLEET_AGENT_POLICIES, navigateTo, OLD_OSQUERY_MANAGER } from '../../tasks/navigation';
-import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
+import {
+  FLEET_AGENT_POLICIES,
+  navigateTo,
+  OLD_OSQUERY_MANAGER,
+  OSQUERY,
+} from '../../tasks/navigation';
+import { addIntegration, closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 
 import { login } from '../../tasks/login';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
@@ -28,7 +33,17 @@ describe('ALL - Add Integration', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
   });
 
-  it.skip('should add the old integration and be able to upgrade it', () => {
+  it('validate osquery is not available and nav search links to integration', () => {
+    cy.visit(OSQUERY);
+    cy.contains('Add this integration to run and schedule queries for Elastic Agent.');
+    cy.contains('Add Osquery Manager');
+    cy.getBySel('nav-search-input').type('Osquery');
+    cy.get('[title="Osquery • Management"]').should('exist');
+    cy.get('[title="Osquery Logs • Integration"]').should('exist');
+    cy.get('[title="Osquery Manager • Integration"]').should('exist').click();
+  });
+
+  it('should add the old integration and be able to upgrade it', () => {
     const oldVersion = '0.7.4';
 
     cy.visit(OLD_OSQUERY_MANAGER);
@@ -41,7 +56,9 @@ describe('ALL - Add Integration', () => {
     cy.contains('View policy').click();
     cy.contains('name: osquery_manager-1');
     cy.contains(`version: ${oldVersion}`);
-    cy.contains('Close').click();
+    cy.get('.euiFlyoutFooter').within(() => {
+      cy.contains('Close').click();
+    });
     cy.contains(/^Osquery Manager$/).click();
     cy.contains(/^Settings$/).click();
     cy.contains(/^Upgrade to latest version$/).click();
@@ -76,9 +93,13 @@ describe('ALL - Add Integration', () => {
     cy.contains(integration).click();
     addIntegration();
     cy.contains('osquery_manager-');
+    closeToastIfVisible();
+    cy.getBySel('nav-search-input').type('Osquery');
+    cy.get('[title="Osquery • Management"]').should('exist').click();
+    cy.contains('Live queries history');
   });
 
-  it.skip('should have integration and packs copied when upgrading integration', () => {
+  it('should have integration and packs copied when upgrading integration', () => {
     const packageName = 'osquery_manager';
     const oldVersion = '1.2.0';
 
@@ -96,7 +117,9 @@ describe('ALL - Add Integration', () => {
     cy.contains('View policy').click();
     cy.contains('name: osquery_manager-2');
     cy.contains(`version: ${oldVersion}`);
-    cy.contains('Close').click();
+    cy.get('.euiFlyoutFooter').within(() => {
+      cy.contains('Close').click();
+    });
     navigateTo('app/osquery/packs');
     findAndClickButton('Add pack');
     findFormFieldByRowsLabelAndType('Name', 'Integration');

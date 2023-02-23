@@ -19,6 +19,8 @@ get:
                 $ref: ../components/schemas/agent_policy.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: agent-policy-info
   description: Get one agent policy
   parameters: []
@@ -37,6 +39,8 @@ put:
                 $ref: ../components/schemas/agent_policy.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: update-agent-policy
   requestBody:
     content:
