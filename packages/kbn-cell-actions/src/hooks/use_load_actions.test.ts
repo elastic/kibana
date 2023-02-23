@@ -178,7 +178,7 @@ describe('loadActions hooks', () => {
     });
 
     it('should re-render when contexts is changed', async () => {
-      const { rerender, waitForNextUpdate } = renderHook(useBulkLoadActions, {
+      const { result, rerender, waitForNextUpdate } = renderHook(useBulkLoadActions, {
         initialProps: [actionContext],
       });
 
@@ -194,6 +194,9 @@ describe('loadActions hooks', () => {
       rerender([]);
       await waitForNextUpdate();
       expect(mockGetActions).toHaveBeenCalledTimes(0);
+
+      expect(result.current.value).toHaveLength(0);
+      expect(result.current.loading).toBe(false);
     });
   });
 });
