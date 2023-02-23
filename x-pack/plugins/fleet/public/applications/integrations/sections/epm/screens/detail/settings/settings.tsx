@@ -125,8 +125,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
   }, [isChangelogModalOpen]);
   const getPackageInstallStatus = useGetPackageInstallStatus();
 
-  const changelogPath = packageInfo?.licensePath?.replace('LICENSE.txt', 'changelog.yml');
-
   const { data: packagePoliciesData } = useGetPackagePoliciesQuery({
     perPage: SO_SEARCH_LIMIT,
     page: 1,
@@ -488,8 +486,13 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiPortal>
-        {isChangelogModalOpen && changelogPath && (
-          <ChangelogModal changelogPath={changelogPath} onClose={toggleChangelogModal} />
+        {isChangelogModalOpen && (
+          <ChangelogModal
+            currentVersion={version}
+            latestVersion={latestVersion}
+            packageName={name}
+            onClose={toggleChangelogModal}
+          />
         )}
       </EuiPortal>
     </>

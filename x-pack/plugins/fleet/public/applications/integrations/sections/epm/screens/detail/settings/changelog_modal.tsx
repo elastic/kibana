@@ -19,17 +19,39 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { safeLoad } from 'js-yaml';
+
 import { useGetFileByPathQuery, useStartServices } from '../../../../../hooks';
+
+interface ChangeLogParams {
+  version: string;
+  changes: Array<{
+    description: string;
+    link: string;
+    type: string;
+  }>;
+}
 
 interface Props {
   title?: string;
-  changelogPath: string;
+  latestVersion: string;
+  currentVersion: string;
+  packageName: string;
   onClose: () => void;
 }
 
+const formatChangelog = (parsedChangelog: ChangeLogParams[]) => {
+  return parsedChangelog.reduce((acc, val) => {
+    acc += `Version: ${val.version}\nChanges:\n  Type: ${val.changes[0].type}\n  Description: ${val.changes[0].description}\n  Link: ${val.changes[0].link}\n\n`;
+    return acc;
+  }, '');
+};
+
 export const ChangelogModal: React.FunctionComponent<Props> = ({
   title = 'Changelog',
-  changelogPath,
+  latestVersion,
+  currentVersion,
+  packageName,
   onClose,
 }) => {
   const { notifications } = useStartServices();
@@ -38,8 +60,15 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
     data: changelogResponse,
     error: changelogError,
     isLoading,
-  } = useGetFileByPathQuery(changelogPath);
+  } = useGetFileByPathQuery(`/package/${packageName}/${latestVersion}/changelog.yml`);
   const changelogText = changelogResponse?.data;
+
+  const parsedChangelog: ChangeLogParams[] = changelogText ? safeLoad(changelogText) : [];
+
+  const filtered = parsedChangelog.filter(
+    (e) => e.version === latestVersion || e.version === currentVersion
+  );
+  const finalChangelog = formatChangelog(filtered);
 
   if (changelogError) {
     notifications.toasts.addError(changelogError, {
@@ -61,7 +90,7 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
           isLoading={isLoading}
           contentAriaLabel="changelog text"
         >
-          <EuiCodeBlock overflowHeight={360}>{changelogText}</EuiCodeBlock>
+          <EuiCodeBlock overflowHeight={360}>{finalChangelog}</EuiCodeBlock>
         </EuiSkeletonText>
       </EuiModalBody>
       <EuiModalFooter>
