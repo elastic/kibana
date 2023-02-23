@@ -371,6 +371,7 @@ export class SavedObjectFinderUi extends React.Component<
         itemId="id"
         items={this.state.items}
         columns={columns}
+        data-test-subj="savedObjectsFinder-table"
         message={this.props.noItemsMessage}
         search={search}
         pagination={pagination}

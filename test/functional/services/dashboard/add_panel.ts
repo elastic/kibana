@@ -12,6 +12,7 @@ export class DashboardAddPanelService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly find = this.ctx.getService('find');
   private readonly flyout = this.ctx.getService('flyout');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
@@ -79,32 +80,47 @@ export class DashboardAddPanelService extends FtrService {
 
   async toggleFilterPopover() {
     this.log.debug('DashboardAddPanel.toggleFilter');
-    await this.testSubjects.click('savedObjectFinderFilterButton');
+    const filtersHolder = await this.find.byClassName('euiSearchBar__filtersHolder');
+    const filtersButton = await filtersHolder.findByCssSelector('button');
+    await filtersButton.click();
   }
 
   async toggleFilter(type: string) {
     this.log.debug(`DashboardAddPanel.addToFilter(${type})`);
     await this.waitForListLoading();
     await this.toggleFilterPopover();
-    await this.testSubjects.click(`savedObjectFinderFilter-${type}`);
-    await this.toggleFilterPopover();
+    const list = await this.testSubjects.find('euiSelectableList');
+    const listItems = await list.findAllByCssSelector('li');
+    for (let i = 0; i < listItems.length; i++) {
+      const listItem = await listItems[i].findByClassName('euiSelectableListItem__text');
+      const text = await listItem.getVisibleText();
+      this.log.debug('**** ' + text + ' ****');
+      if (text.includes(type)) {
+        await listItem.click();
+        await this.toggleFilterPopover();
+        break;
+      }
+    }
   }
 
   async addEveryEmbeddableOnCurrentPage() {
     this.log.debug('addEveryEmbeddableOnCurrentPage');
-    const itemList = await this.testSubjects.find('savedObjectFinderItemList');
+    const itemList = await this.testSubjects.find('savedObjectsFinder-table');
     const embeddableList: string[] = [];
     await this.retry.try(async () => {
-      const embeddableRows = await itemList.findAllByCssSelector('li');
+      const embeddableListBody = await itemList.findByTagName('tbody');
+      const embeddableRows = await embeddableListBody.findAllByCssSelector('tr');
       for (let i = 0; i < embeddableRows.length; i++) {
-        const name = await embeddableRows[i].getVisibleText();
-
+        const cell = await embeddableRows[i].findByTestSubject('savedObjectFinderTitle');
+        const button = await cell.findByTagName('button');
+        const name = await button.getVisibleText();
+        this.log.debug(embeddableList);
         if (embeddableList.includes(name)) {
           // already added this one
           continue;
         }
 
-        await embeddableRows[i].click();
+        await button.click();
         await this.common.closeToast();
         embeddableList.push(name);
       }
@@ -170,10 +186,10 @@ export class DashboardAddPanelService extends FtrService {
   async addEveryVisualization(filter: string) {
     this.log.debug('DashboardAddPanel.addEveryVisualization');
     await this.ensureAddPanelIsShowing();
-    await this.toggleFilter('visualization');
     if (filter) {
       await this.filterEmbeddableNames(filter.replace('-', ' '));
     }
+    await this.toggleFilter('Visualization');
     let morePages = true;
     const vizList: string[][] = [];
     while (morePages) {
@@ -187,11 +203,11 @@ export class DashboardAddPanelService extends FtrService {
   async addEverySavedSearch(filter: string) {
     this.log.debug('DashboardAddPanel.addEverySavedSearch');
     await this.ensureAddPanelIsShowing();
-    await this.toggleFilter('search');
     const searchList = [];
     if (filter) {
       await this.filterEmbeddableNames(filter.replace('-', ' '));
     }
+    await this.toggleFilter('Saved search');
     let morePages = true;
     while (morePages) {
       searchList.push(await this.addEveryEmbeddableOnCurrentPage());
@@ -222,7 +238,8 @@ export class DashboardAddPanelService extends FtrService {
   }
 
   async addVisualization(vizName: string) {
-    return this.addEmbeddable(vizName, 'visualization');
+    this.log.debug(`DashboardAddPanel.addVisualization, ${vizName}`);
+    return this.addEmbeddable(vizName, 'Visualization');
   }
 
   async addEmbeddable(embeddableName: string, embeddableType: string) {
@@ -233,6 +250,7 @@ export class DashboardAddPanelService extends FtrService {
     await this.toggleFilter(embeddableType);
     await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
+    this.log.debug('*****' + 'Clicked' + '******');
     await this.testSubjects.exists('addObjectToDashboardSuccess');
     await this.closeAddPanel();
     return embeddableName;
