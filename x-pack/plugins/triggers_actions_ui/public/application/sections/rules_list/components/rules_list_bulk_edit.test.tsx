@@ -175,11 +175,34 @@ describe('Rules list Bulk Edit', () => {
       fireEvent.click(screen.getByTestId('showBulkActionButton'));
     });
 
+    it('can bulk remove snooze schedule', async () => {
+      fireEvent.click(screen.getByTestId('bulkRemoveSnoozeSchedule'));
+      expect(screen.queryByTestId('bulkRemoveScheduleConfirmationModal')).toBeInTheDocument();
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      });
+
+      const filter = bulkUnsnoozeRules.mock.calls[0][0].filter;
+
+      expect(filter.function).toEqual('and');
+      expect(filter.arguments[0].function).toEqual('or');
+      expect(filter.arguments[1].function).toEqual('not');
+      expect(filter.arguments[1].arguments[0].arguments[0].value).toEqual('alert.id');
+      expect(filter.arguments[1].arguments[0].arguments[1].value).toEqual('alert:2');
+
+      expect(bulkUnsnoozeRules).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ids: [],
+          scheduleIds: [],
+        })
+      );
+    });
+
     it('can bulk snooze', async () => {
       fireEvent.click(screen.getByTestId('bulkSnooze'));
       expect(screen.queryByTestId('snoozePanel')).toBeInTheDocument();
       await act(async () => {
-        fireEvent.click(screen.getByTestId('linkSnooze1h')); // CHECK error!
+        fireEvent.click(screen.getByTestId('linkSnooze1h'));
       });
 
       const filter = bulkSnoozeRules.mock.calls[0][0].filter;
@@ -237,29 +260,6 @@ describe('Rules list Bulk Edit', () => {
       expect(bulkSnoozeRules).toHaveBeenCalledWith(
         expect.objectContaining({
           ids: [],
-        })
-      );
-    });
-
-    it('can bulk remove snooze schedule', async () => {
-      fireEvent.click(screen.getByTestId('bulkRemoveSnoozeSchedule'));
-      expect(screen.queryByTestId('bulkRemoveScheduleConfirmationModal')).toBeInTheDocument();
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      });
-
-      const filter = bulkUnsnoozeRules.mock.calls[0][0].filter;
-
-      expect(filter.function).toEqual('and');
-      expect(filter.arguments[0].function).toEqual('or');
-      expect(filter.arguments[1].function).toEqual('not');
-      expect(filter.arguments[1].arguments[0].arguments[0].value).toEqual('alert.id');
-      expect(filter.arguments[1].arguments[0].arguments[1].value).toEqual('alert:2');
-
-      expect(bulkUnsnoozeRules).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ids: [],
-          scheduleIds: [],
         })
       );
     });
