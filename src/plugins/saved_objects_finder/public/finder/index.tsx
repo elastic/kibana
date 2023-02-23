@@ -31,7 +31,7 @@ const SavedObjectFinder = (props: SavedObjectFinderProps) => (
 export const getSavedObjectFinder = (
   uiSettings: IUiSettingsClient,
   http: HttpStart,
-  savedObjectsManagement?: SavedObjectsManagementPluginStart,
+  savedObjectsManagement: SavedObjectsManagementPluginStart,
   savedObjectsTagging?: SavedObjectsTaggingApi
 ) => {
   return (props: SavedObjectFinderProps) => (
