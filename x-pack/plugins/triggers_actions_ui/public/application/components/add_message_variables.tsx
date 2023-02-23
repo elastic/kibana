@@ -15,6 +15,7 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiHighlight,
+  useEuiTheme,
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
@@ -55,6 +56,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
   onSelectEventHandler,
   showButtonTitle = false,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const messageVariablesObject: Record<string, ActionVariable> | undefined =
     messageVariables?.reduce((acc, variable) => {
       return {
@@ -128,11 +130,18 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
   const renderOption = (option: any, searchValue: string) => {
     return (
       <>
-        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+        <EuiText
+          size="s"
+          style={{
+            fontWeight: euiTheme.font.weight.bold,
+          }}
+          className="eui-displayBlock"
+        >
+          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+        </EuiText>
+        <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued" className="eui-displayBlock">
-          <small>
-            <EuiHighlight search={searchValue}>{option.secondaryContent || ''}</EuiHighlight>
-          </small>
+          <EuiHighlight search={searchValue}>{option.secondaryContent || ''}</EuiHighlight>
         </EuiText>
       </>
     );
@@ -144,7 +153,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       isOpen={isVariablesPopoverOpen}
       closePopover={() => setIsVariablesPopoverOpen(false)}
       panelPaddingSize="none"
-      anchorPosition="downLeft"
+      anchorPosition="upLeft"
     >
       <EuiSelectable
         searchable
@@ -152,6 +161,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         data-test-subj={'messageVariablesSelectableList'}
         isLoading={false}
         options={options}
+        style={{ width: 400 }}
         listProps={{
           rowHeight: 55,
         }}
