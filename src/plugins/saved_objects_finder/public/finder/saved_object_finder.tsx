@@ -159,7 +159,7 @@ export class SavedObjectFinderUi extends React.Component<
           attributes: { name, title },
         } = savedObject;
         const titleToUse = typeof title === 'string' ? title : '';
-        const nameToUse = name && typeof name === 'string' ? name : titleToUse;
+        const nameToUse = name ? name : titleToUse;
         return {
           ...savedObject,
           version: savedObject.version,

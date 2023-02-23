@@ -94,7 +94,6 @@ export class DashboardAddPanelService extends FtrService {
     for (let i = 0; i < listItems.length; i++) {
       const listItem = await listItems[i].findByClassName('euiSelectableListItem__text');
       const text = await listItem.getVisibleText();
-      this.log.debug('**** ' + text + ' ****');
       if (text.includes(type)) {
         await listItem.click();
         await this.toggleFilterPopover();
@@ -250,7 +249,6 @@ export class DashboardAddPanelService extends FtrService {
     await this.toggleFilter(embeddableType);
     await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
-    this.log.debug('*****' + 'Clicked' + '******');
     await this.testSubjects.exists('addObjectToDashboardSuccess');
     await this.closeAddPanel();
     return embeddableName;
