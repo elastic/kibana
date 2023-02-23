@@ -207,7 +207,7 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
 /**
  * Returns a list of fields based on user-defined custom fields
  */
-function getFieldsByCustom(customs: EventSummaryField[]): EventSummaryField[] {
+function getFieldsByCustoms(customs: EventSummaryField[]): EventSummaryField[] {
   return customs;
 }
 
@@ -230,7 +230,7 @@ function getEventFieldsToDisplay({
     ...getFieldsByCategory(eventCategories),
     ...getFieldsByEventCode(eventCode, eventCategories),
     ...getFieldsByRuleType(eventRuleType),
-    ...getFieldsByCustom(eventSummaryCustoms),
+    ...getFieldsByCustoms(eventSummaryCustoms),
   ];
 
   // Filter all fields by their id to make sure there are no duplicates
