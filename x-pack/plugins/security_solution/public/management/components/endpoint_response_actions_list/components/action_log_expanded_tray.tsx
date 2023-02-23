@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -70,66 +70,15 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
   }
 `;
 
-export const ActionsLogExpandedTray = memo<{
-  action: MaybeImmutable<ActionDetails>;
-}>(({ action }) => {
-  const getTestId = useTestIdGenerator('response-actions-list');
-  const { canWriteFileOperations, canWriteExecuteOperations } =
-    useUserPrivileges().endpointPrivileges;
+const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-subj'?: string }>(
+  ({ action, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
-  const {
-    startedAt,
-    completedAt,
-    isCompleted,
-    wasSuccessful,
-    isExpired,
-    command: _command,
-    comment,
-    parameters,
-  } = action;
+    const { canWriteFileOperations, canWriteExecuteOperations } =
+      useUserPrivileges().endpointPrivileges;
 
-  const parametersList = parameters
-    ? Object.entries(parameters).map(([key, value]) => {
-        return `${key}:${value}`;
-      })
-    : undefined;
+    const { command, isCompleted, isExpired, wasSuccessful } = action;
 
-  const command = getUiCommand(_command);
-  const isGetFileCommand = command === 'get-file';
-  const isExecuteCommand = command === 'execute';
-  const dataList = [
-    {
-      title: OUTPUT_MESSAGES.expandSection.placedAt,
-      description: `${startedAt}`,
-    },
-    {
-      title: OUTPUT_MESSAGES.expandSection.startedAt,
-      description: `${startedAt}`,
-    },
-    {
-      title: OUTPUT_MESSAGES.expandSection.completedAt,
-      description: `${completedAt ?? emptyValue}`,
-    },
-    {
-      title: OUTPUT_MESSAGES.expandSection.input,
-      description: `${command}`,
-    },
-    {
-      title: OUTPUT_MESSAGES.expandSection.parameters,
-      description: parametersList ? parametersList : emptyValue,
-    },
-    {
-      title: OUTPUT_MESSAGES.expandSection.comment,
-      description: comment ? comment : emptyValue,
-    },
-  ].map(({ title, description }) => {
-    return {
-      title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
-      description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
-    };
-  });
-
-  const getOutputContent = () => {
     if (isExpired) {
       return OUTPUT_MESSAGES.hasExpired(command);
     }
@@ -142,7 +91,7 @@ export const ActionsLogExpandedTray = memo<{
       return OUTPUT_MESSAGES.hasFailed(command);
     }
 
-    if (isGetFileCommand) {
+    if (command === 'get-file') {
       return (
         <>
           {OUTPUT_MESSAGES.wasSuccessful(command)}
@@ -156,7 +105,7 @@ export const ActionsLogExpandedTray = memo<{
       );
     }
 
-    if (isExecuteCommand) {
+    if (command === 'execute') {
       return (
         <EuiFlexGroup direction="column" data-test-subj={getTestId('executeDetails')}>
           {action.agents.map((agentId) => (
@@ -184,19 +133,83 @@ export const ActionsLogExpandedTray = memo<{
     }
 
     return OUTPUT_MESSAGES.wasSuccessful(command);
-  };
+  }
+);
 
-  const outputList = [
-    {
-      title: <StyledEuiCodeBlock>{`${OUTPUT_MESSAGES.expandSection.output}:`}</StyledEuiCodeBlock>,
-      description: (
-        // codeblock for output
-        <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
-          {getOutputContent()}
-        </StyledEuiCodeBlock>
-      ),
-    },
-  ];
+OutputContent.displayName = 'OutputContent';
+
+export const ActionsLogExpandedTray = memo<{
+  action: MaybeImmutable<ActionDetails>;
+  'data-test-subj'?: string;
+}>(({ action, 'data-test-subj': dataTestSubj }) => {
+  const getTestId = useTestIdGenerator(dataTestSubj);
+
+  const { startedAt, completedAt, command: _command, comment, parameters } = action;
+
+  const parametersList = useMemo(
+    () =>
+      parameters
+        ? Object.entries(parameters).map(([key, value]) => {
+            return `${key}:${value}`;
+          })
+        : undefined,
+    [parameters]
+  );
+
+  const command = getUiCommand(_command);
+
+  const dataList = useMemo(
+    () =>
+      [
+        {
+          title: OUTPUT_MESSAGES.expandSection.placedAt,
+          description: `${startedAt}`,
+        },
+        {
+          title: OUTPUT_MESSAGES.expandSection.startedAt,
+          description: `${startedAt}`,
+        },
+        {
+          title: OUTPUT_MESSAGES.expandSection.completedAt,
+          description: `${completedAt ?? emptyValue}`,
+        },
+        {
+          title: OUTPUT_MESSAGES.expandSection.input,
+          description: `${command}`,
+        },
+        {
+          title: OUTPUT_MESSAGES.expandSection.parameters,
+          description: parametersList ? parametersList : emptyValue,
+        },
+        {
+          title: OUTPUT_MESSAGES.expandSection.comment,
+          description: comment ? comment : emptyValue,
+        },
+      ].map(({ title, description }) => {
+        return {
+          title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
+          description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
+        };
+      }),
+    [command, comment, completedAt, parametersList, startedAt]
+  );
+
+  const outputList = useMemo(
+    () => [
+      {
+        title: (
+          <StyledEuiCodeBlock>{`${OUTPUT_MESSAGES.expandSection.output}:`}</StyledEuiCodeBlock>
+        ),
+        description: (
+          // codeblock for output
+          <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
+            <OutputContent action={action} data-test-subj={dataTestSubj} />
+          </StyledEuiCodeBlock>
+        ),
+      },
+    ],
+    [action, dataTestSubj, getTestId]
+  );
 
   return (
     <>

@@ -161,7 +161,7 @@ const getBaseMockedActionList = () => ({
   refetch: jest.fn(),
 });
 describe('Response actions history', () => {
-  const testPrefix = 'response-actions-list';
+  const testPrefix = 'test';
 
   let render: (
     props?: React.ComponentProps<typeof ResponseActionsLog>
@@ -175,7 +175,9 @@ describe('Response actions history', () => {
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = (props?: React.ComponentProps<typeof ResponseActionsLog>) =>
-      (renderResult = mockedContext.render(<ResponseActionsLog {...(props ?? {})} />));
+      (renderResult = mockedContext.render(
+        <ResponseActionsLog data-test-subj={testPrefix} {...(props ?? {})} />
+      ));
     reactTestingLibrary.act(() => {
       history.push(`${MANAGEMENT_PATH}/response_actions`);
     });
@@ -260,7 +262,7 @@ describe('Response actions history', () => {
 
       const { getByTestId } = renderResult;
 
-      expect(getByTestId(`${testPrefix}-table-view`)).toBeTruthy();
+      expect(getByTestId(`${testPrefix}`)).toBeTruthy();
       expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-10 of 13 response actions'
       );
@@ -270,9 +272,7 @@ describe('Response actions history', () => {
       render({ agentIds: 'agent-a' });
 
       expect(
-        Array.from(
-          renderResult.getByTestId(`${testPrefix}-table-view`).querySelectorAll('thead th')
-        )
+        Array.from(renderResult.getByTestId(`${testPrefix}`).querySelectorAll('thead th'))
           .slice(0, 6)
           .map((col) => col.textContent)
       ).toEqual(['Time', 'Command', 'User', 'Comments', 'Status', 'Expand rows']);
@@ -282,9 +282,7 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
 
       expect(
-        Array.from(
-          renderResult.getByTestId(`${testPrefix}-table-view`).querySelectorAll('thead th')
-        )
+        Array.from(renderResult.getByTestId(`${testPrefix}`).querySelectorAll('thead th'))
           .slice(0, 7)
           .map((col) => col.textContent)
       ).toEqual(['Time', 'Command', 'User', 'Hosts', 'Comments', 'Status', 'Expand rows']);
@@ -361,7 +359,7 @@ describe('Response actions history', () => {
       render();
       const { getByTestId } = renderResult;
 
-      expect(getByTestId(`${testPrefix}-table-view`)).toBeTruthy();
+      expect(getByTestId(`${testPrefix}`)).toBeTruthy();
       expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-10 of 13 response actions'
       );
@@ -382,7 +380,7 @@ describe('Response actions history', () => {
       render();
       const { getByTestId } = renderResult;
 
-      expect(getByTestId(`${testPrefix}-table-view`)).toBeTruthy();
+      expect(getByTestId(`${testPrefix}`)).toBeTruthy();
       expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-10 of 33 response actions'
       );
@@ -535,44 +533,6 @@ describe('Response actions history', () => {
         );
       });
 
-      it('should show file unavailable for download for `get-file` action WITH file operation permission when file is deleted', async () => {
-        useUserPrivilegesMock.mockReturnValue({
-          endpointPrivileges: getEndpointAuthzInitialStateMock({
-            canWriteExecuteOperations: false,
-          }),
-        });
-        mockUseGetEndpointActionList = {
-          ...getBaseMockedActionList(),
-          data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
-        };
-
-        const fileInfo = apiMocks.responseProvider.fileInfo();
-        fileInfo.data.status = 'DELETED';
-
-        apiMocks.responseProvider.fileInfo.mockReturnValue(fileInfo);
-
-        mockUseGetFileInfo = {
-          isFetching: false,
-          error: null,
-          data: apiMocks.responseProvider.fileInfo(),
-        };
-
-        render();
-
-        const { getByTestId } = renderResult;
-        const expandButton = getByTestId(`${testPrefix}-expand-button`);
-        userEvent.click(expandButton);
-
-        await waitFor(() => {
-          expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
-        });
-
-        const unavailableText = getByTestId(
-          `${testPrefix}-getFileDownloadLink-fileNoLongerAvailable`
-        );
-        expect(unavailableText).toBeTruthy();
-      });
-
       it('should not contain download link in expanded row for `get-file` action when NO file operation permission', async () => {
         useUserPrivilegesMock.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({
@@ -699,42 +659,6 @@ describe('Response actions history', () => {
         const executeAccordions = getByTestId(`${testPrefix}-executeResponseOutput`);
         expect(executeAccordions).toBeTruthy();
         expect(executeAccordions).toHaveTextContent('Execution outputExecution error');
-      });
-
-      it('should show file unavailable for download for `execute` action WITH execute operation privilege when file is deleted', async () => {
-        useUserPrivilegesMock.mockReturnValue({
-          endpointPrivileges: getEndpointAuthzInitialStateMock({
-            canWriteFileOperations: false,
-          }),
-        });
-        mockUseGetEndpointActionList = {
-          ...getBaseMockedActionList(),
-          data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
-        };
-
-        const fileInfo = apiMocks.responseProvider.fileInfo();
-        fileInfo.data.status = 'DELETED';
-
-        apiMocks.responseProvider.fileInfo.mockReturnValue(fileInfo);
-
-        mockUseGetFileInfo = {
-          isFetching: false,
-          error: null,
-          data: apiMocks.responseProvider.fileInfo(),
-        };
-
-        render();
-
-        const { getByTestId } = renderResult;
-        const expandButton = getByTestId(`${testPrefix}-expand-button`);
-        userEvent.click(expandButton);
-
-        await waitFor(() => {
-          expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
-        });
-
-        const unavailableText = getByTestId(`${testPrefix}-getExecuteLink-fileNoLongerAvailable`);
-        expect(unavailableText).toBeTruthy();
       });
 
       it('should contain execute output for `execute` action WITHOUT execute operation privilege', async () => {

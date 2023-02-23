@@ -76,7 +76,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
     showHostNames,
     totalItemCount,
   }) => {
-    const getTestId = useTestIdGenerator('response-actions-list');
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     const { pagination: paginationFromUrlParams } = useUrlPagination();
     const { withOutputs, setUrlWithOutputs } = useActionHistoryUrlParams();
@@ -86,7 +86,10 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
         ? withOutputs.reduce<ExpandedRowMapType>((idToRowMap, actionId) => {
             if (actionId.length) {
               idToRowMap[actionId] = (
-                <ActionsLogExpandedTray action={items.filter((item) => item.id === actionId)[0]} />
+                <ActionsLogExpandedTray
+                  action={items.filter((item) => item.id === actionId)[0]}
+                  data-test-subj={dataTestSubj}
+                />
               );
             }
             return idToRowMap;
@@ -102,7 +105,9 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           delete itemIdToExpandedRowMapValues[item.id];
         } else {
           // expanded tray contents
-          itemIdToExpandedRowMapValues[item.id] = <ActionsLogExpandedTray action={item} />;
+          itemIdToExpandedRowMapValues[item.id] = (
+            <ActionsLogExpandedTray action={item} data-test-subj={dataTestSubj} />
+          );
         }
         const expandedActionIds = Object.keys(itemIdToExpandedRowMapValues);
         if (!isFlyout) {
@@ -111,7 +116,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
         }
         setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
       },
-      [isFlyout, itemIdToExpandedRowMap, setUrlWithOutputs]
+      [dataTestSubj, isFlyout, itemIdToExpandedRowMap, setUrlWithOutputs]
     );
     // memoized callback for toggleDetails
     const onClickCallback = useCallback(
@@ -265,6 +270,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
                       ? 'success'
                       : 'warning'
                   }
+                  data-test-subj={getTestId('column-status')}
                   status={status}
                 />
               </EuiToolTip>
