@@ -6,47 +6,54 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
-
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { FieldTypeIcon } from './field_type_icon';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 
 describe('FieldTypeIcon', () => {
+  it('renders label and icon but not tooltip content on mouseover if tooltipEnabled=false', async () => {
+    const { getByText } = render(
+      <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={false} />
+    );
+
+    fireEvent.mouseOver(getByText('Keyword'));
+
+    await waitFor(
+      () => {
+        const tooltip = document.querySelector('.euiToolTipPopover');
+        expect(tooltip).toBeNull();
+      },
+      { timeout: 1500 } // Account for long delay on tooltips
+    );
+  });
+
   test(`render component when type matches a field type`, () => {
-    const typeIconComponent = shallow(
+    const typeIconComponent = render(
       <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
     );
     expect(typeIconComponent).toMatchSnapshot();
   });
 
-  // TODO: Broken with Jest 27
-  test.skip(`render with tooltip and test hovering`, () => {
-    // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers({ legacyFakeTimers: true });
-
-    const typeIconComponent = mount(
+  it('shows tooltip content on mouseover', async () => {
+    const { getByText } = render(
       <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
     );
 
-    expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);
+    fireEvent.mouseOver(getByText('keyword'));
 
-    typeIconComponent.simulate('mouseover');
+    await waitFor(
+      () => {
+        const tooltip = document.querySelector('.euiToolTipPopover');
+        expect(tooltip).toBeVisible();
+        expect(tooltip?.textContent).toEqual('Keyword');
+      },
+      { timeout: 1500 } // Account for long delay on tooltips
+    );
+    fireEvent.mouseOut(getByText('keyword'));
 
-    // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
-
-    typeIconComponent.update();
-    expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(2);
-
-    typeIconComponent.simulate('mouseout');
-
-    // Run the timers so the EuiTooltip will be hidden again
-    jest.runAllTimers();
-
-    typeIconComponent.update();
-    expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(2);
-
-    // Clearing all mocks will also reset fake timers.
-    jest.clearAllMocks();
+    await waitFor(() => {
+      const tooltip = document.querySelector('.euiToolTipPopover');
+      expect(tooltip).toBeNull();
+    });
   });
 });
