@@ -28,7 +28,7 @@ import { observabilityAlertFeatureIds } from '../../../../config';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { observabilityFeatureId } from '../../../../../common';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useHasData } from '../../../../hooks/use_has_data';
+import { useFetchObservabilityAlerts } from '../../../../hooks/use_fetch_observability_alerts';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../../../hooks/use_time_buckets';
 import { getNoDataConfig } from '../../../../utils/no_data_config';
@@ -65,6 +65,9 @@ function InternalAlertsPage() {
       getAlertSummaryWidget: AlertSummaryWidget,
     },
   } = useKibana<ObservabilityAppServices>().services;
+
+  const { isLoading, alerts = [] } = useFetchObservabilityAlerts();
+
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY);
 
   const chartThemes = {
@@ -79,7 +82,7 @@ function InternalAlertsPage() {
     error: 0,
     snoozed: 0,
   });
-  const { hasAnyData, isAllRequestsComplete } = useHasData();
+
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
   const timeBuckets = useTimeBuckets();
   const bucketSize = useMemo(
@@ -156,18 +159,15 @@ function InternalAlertsPage() {
 
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
-  // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
-  const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
-
   const CasesContext = cases.ui.getCasesContext();
   const userCasesPermissions = useGetUserCasesPermissions();
 
-  if (!hasAnyData && !isAllRequestsComplete) {
+  if (isLoading) {
     return <LoadingObservability />;
   }
 
   const noDataConfig = getNoDataConfig({
-    hasData,
+    hasData: alerts.length > 0,
     basePath: http.basePath,
     docsLink: docLinks.links.observability.guide,
   });
@@ -175,7 +175,7 @@ function InternalAlertsPage() {
   return (
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
-      isPageDataLoaded={isAllRequestsComplete}
+      isPageDataLoaded={!isLoading}
       data-test-subj={noDataConfig ? 'noDataPage' : 'alertsPageWithData'}
       pageHeader={{
         pageTitle: (
