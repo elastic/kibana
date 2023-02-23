@@ -56,7 +56,14 @@ export const FieldPicker = ({
           presFieldPickerFieldButtonActive: field.name === selectedFieldName,
         }),
         'data-test-subj': `field-picker-select-${field.name}`,
-        prepend: <FieldIcon type={field.type} label={field.name} scripted={field.scripted} />,
+        prepend: (
+          <FieldIcon
+            type={field.type}
+            label={field.name}
+            scripted={field.scripted}
+            className="eui-alignMiddle"
+          />
+        ),
       };
     });
     setFieldSelectableOptions(options);
