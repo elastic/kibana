@@ -6,6 +6,7 @@
  */
 
 import { APP_ID } from './application';
+import type { Owner } from './types';
 
 /**
  * Owner
@@ -14,7 +15,17 @@ export const SECURITY_SOLUTION_OWNER = 'securitySolution' as const;
 export const OBSERVABILITY_OWNER = 'observability' as const;
 export const GENERAL_CASES_OWNER = APP_ID;
 
-export const OWNER_INFO = {
+export const OWNERS = [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER] as const;
+
+interface RouteInfo {
+  id: Owner;
+  appId: string;
+  label: string;
+  iconType: string;
+  appRoute: string;
+}
+
+export const OWNER_INFO: Record<Owner, RouteInfo> = {
   [SECURITY_SOLUTION_OWNER]: {
     id: SECURITY_SOLUTION_OWNER,
     appId: 'securitySolutionUI',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OWNER_INFO } from './owners';
+import type { OWNERS } from './owners';
 
 export enum Operation {
   Read = 'Read',
@@ -14,4 +14,4 @@ export enum Operation {
   Delete = 'Delete',
 }
 
-export type Owner = keyof typeof OWNER_INFO;
+export type Owner = typeof OWNERS[number];
