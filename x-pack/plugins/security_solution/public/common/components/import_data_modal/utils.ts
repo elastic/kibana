@@ -33,8 +33,10 @@ export const formatError = (
 const mapErrorMessageToUserMessage = (
   actionConnectorsErrors: Array<ImportRulesResponseError | ImportResponseError>
 ) => {
-  return actionConnectorsErrors.map((connectorError) => {
-    const { error } = connectorError;
+  let actionIds: string[] | '' = [];
+  const mappedErrors = actionConnectorsErrors.map((connectorError) => {
+    const { id, error } = connectorError as ImportResponseError;
+    actionIds = id && [...id.split(',')];
     const { status_code: statusCode, message: originalMessage } = error || {};
     let message;
     switch (statusCode) {
@@ -50,6 +52,8 @@ const mapErrorMessageToUserMessage = (
 
     return { ...connectorError, error: { ...error, message } };
   });
+  const numberOfAction = Array.isArray(actionIds) ? actionIds.length : actionIds;
+  return { mappedErrors, numberOfAction };
 };
 
 export const showToasterMessage = ({
@@ -100,13 +104,13 @@ export const showToasterMessage = ({
       importResponse.action_connectors_errors != null &&
       importResponse.action_connectors_errors.length > 0
     ) {
-      const userErrorMessages = mapErrorMessageToUserMessage(
+      const { mappedErrors: userErrorMessages, numberOfAction } = mapErrorMessageToUserMessage(
         importResponse.action_connectors_errors
       );
       const connectorError = formatError(errorMessageDetailed, importResponse, userErrorMessages);
 
       return addError(connectorError, {
-        title: i18n.IMPORT_CONNECTORS_FAILED(userErrorMessages.length),
+        title: i18n.IMPORT_CONNECTORS_FAILED(numberOfAction || userErrorMessages.length),
       });
     }
     const ruleError = formatError(errorMessageDetailed, importResponse, importResponse.errors);
