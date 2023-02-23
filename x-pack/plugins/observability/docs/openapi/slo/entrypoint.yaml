@@ -19,6 +19,10 @@ paths:
     $ref: 'paths/s@{spaceid}@api@slos.yaml'
   '/s/{spaceId}/api/slos/{sloId}':
     $ref: 'paths/s@{spaceid}@api@slos@{sloId}.yaml'
+  '/s/{spaceId}/api/slos/{sloId}/enable':
+    $ref: 'paths/s@{spaceid}@api@slos@{sloId}@{enable}.yaml'
+  '/s/{spaceId}/api/slos/{sloId}/disable':
+    $ref: 'paths/s@{spaceid}@api@slos@{sloId}@{disable}.yaml'
 components:
   securitySchemes:
     basicAuth:
