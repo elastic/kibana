@@ -41,6 +41,7 @@ import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   GET_FILE_ROUTE,
+  EXECUTE_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   ActionDetails,
@@ -49,6 +50,7 @@ import type {
   HostMetadata,
   LogsEndpointAction,
   ResponseActionRequestBody,
+  ResponseActionsExecuteParameters,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
