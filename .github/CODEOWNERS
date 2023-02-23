@@ -1003,6 +1003,8 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/public/common/components/grouping @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/public/detections/components/alerts_table/grouping_settings @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_section @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/inspect @elastic/security-threat-hunting-explore
@@ -1191,6 +1193,8 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 # Changes to translation files should not ping code reviewers
 x-pack/plugins/translations/translations
+
+x-pack/performance @elastic/appex-qa
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
