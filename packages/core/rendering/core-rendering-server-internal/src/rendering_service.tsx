@@ -15,10 +15,9 @@ import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { IUiSettingsClient, IUserUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
-import { IUserUiSettingsClient } from '@kbn/core-ui-settings-server/src/ui_settings_client';
 import { Template } from './views';
 import {
   IRenderOptions,

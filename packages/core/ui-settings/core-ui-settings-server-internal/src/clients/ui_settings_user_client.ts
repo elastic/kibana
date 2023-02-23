@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
-import { IUserUiSettingsClient } from '@kbn/core-ui-settings-server/src';
-import { UiSettingsServiceOptions } from '../types';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { IUserUiSettingsClient } from '@kbn/core-ui-settings-server/src';
+import type { UiSettingsServiceOptions } from '../types';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
 
 interface UserProvidedValue<T = unknown> {

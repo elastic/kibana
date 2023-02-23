@@ -62,7 +62,6 @@ import {
   UserProfileService,
 } from './user_profile';
 import type { UserProfileServiceStart, UserProfileServiceStartInternal } from './user_profile';
-import type { UserProfilesServiceSetup } from './user_profile/user_profile_service';
 import type { UserSettingServiceStart } from './user_profile/user_setting_service';
 import { UserSettingService } from './user_profile/user_setting_service';
 
@@ -70,10 +69,6 @@ export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
   'getSpaceId' | 'namespaceToSpaceId'
 >;
-
-// export interface SecurityPluginPreboot {
-//   userProfiles: UserProfilesPreboot;
-// }
 
 /**
  * Describes public Security plugin contract returned at the `setup` stage.
@@ -99,8 +94,6 @@ export interface SecurityPluginSetup {
    * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
    */
   privilegeDeprecationsService: PrivilegeDeprecationsService;
-
-  userProfiles: UserProfilesServiceSetup;
 }
 
 /**
@@ -317,10 +310,7 @@ export class SecurityPlugin
       customBranding: core.customBranding,
     });
 
-    const userProfilesSetup = this.userProfileService.setup({
-      authz: this.authorizationSetup,
-      license,
-    });
+    this.userProfileService.setup({ authz: this.authorizationSetup, license });
 
     setupSpacesClient({
       spaces,
@@ -375,7 +365,6 @@ export class SecurityPlugin
         license,
         logger: this.logger.get('deprecations'),
       }),
-      userProfiles: userProfilesSetup,
     });
   }
 
