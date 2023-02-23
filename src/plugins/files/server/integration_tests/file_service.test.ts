@@ -63,8 +63,7 @@ describe('FileService', () => {
     });
     fileKindsRegistry.register({
       id: fileKindTinyFiles,
-      maxSizeBytes: 10,
-      maxUploadSize: (file) => {
+      maxSizeBytes: (file) => {
         return file.mimeType === 'text/json' ? 3 : 10;
       },
       http: {},

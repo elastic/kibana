@@ -81,8 +81,6 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
   return res.ok({ body });
 };
 
-const fourMiB = 4 * 1024 * 1024;
-
 export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
   if (fileKind.http.create) {
     fileKindRouter[method](
@@ -97,7 +95,12 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
             output: 'stream',
             parse: false,
             accepts: fileKind.allowedMimeTypes ?? 'application/octet-stream',
-            maxBytes: fileKind.maxSizeBytes ?? fourMiB,
+
+            // This is set to 10 GiB because the actual file size limit is
+            // enforced by the file service. This is just a limit on the
+            // size of the HTTP request body, but the file service will throw
+            // 413 errors if the file size is larger than expected.
+            maxBytes: 10 * 1024 * 1024 * 1024,
           },
         },
       },

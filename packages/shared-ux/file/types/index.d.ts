@@ -253,19 +253,12 @@ export interface FileKind {
   id: string;
 
   /**
-   * Maximum size, in bytes, used to enforce HTTP payload size limits as well as
-   * used for the `maxUploadSize` value, if `maxUploadSize` is not specified.
+   * Max file contents size, in bytes. Can be customized per file using the
+   * {@link FileJSON} object. This is enforced on the server side.
    *
    * @default 4MiB
    */
-  maxSizeBytes?: number;
-
-  /**
-   * Max file contents size, in bytes. Can be customized per file using the
-   * {@link FileJSON} object. If not specified, the `maxSizeBytes` value will
-   * still be used to enforce the max file size limit.
-   */
-  maxUploadSize?: (file: FileJSON) => number;
+  maxSizeBytes?: number | ((file: FileJSON) => number);
 
   /**
    * The MIME type of the file content.
