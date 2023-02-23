@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
@@ -29,7 +29,7 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
   return (
     <EuiText size="s">
       <p>
-        {canReadAgentPolicies && (
+        {canReadAgentPolicies ? (
           <EuiTextColor color="subdued">
             {policy ? (
               <EuiLink href={`${basePath}/app/fleet/policies/${agentPolicyId}`}>
@@ -41,7 +41,14 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
               </EuiText>
             )}
           </EuiTextColor>
+        ) : (
+          agentPolicyId
         )}
+        &nbsp; &nbsp;
+        <EuiBadge color={policy?.agents === 0 ? 'warning' : 'hollow'}>
+          {AGENTS_LABEL}
+          {policy?.agents}
+        </EuiBadge>
       </p>
     </EuiText>
   );
@@ -49,4 +56,8 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
 
 const POLICY_IS_DELETED = i18n.translate('xpack.synthetics.monitorManagement.deletedPolicy', {
   defaultMessage: 'Policy is deleted',
+});
+
+const AGENTS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agents', {
+  defaultMessage: 'Agents: ',
 });
