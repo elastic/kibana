@@ -77,19 +77,27 @@ export const EngineOverview: React.FC = () => {
               </EuiLinkTo>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
-                <EuiIcon size="xxl" type="documents" color={colors.mediumShade} />
-                <EuiStat
-                  titleSize="l"
-                  isLoading={isLoadingEngine}
-                  title={documentsCount.toLocaleString()}
-                  description={i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.overview.documentsDescription',
-                    { defaultMessage: 'Documents' }
-                  )}
-                  titleColor="primary"
-                />
-              </EuiFlexGroup>
+              <EuiLinkTo
+                to={generateEncodedPath(ENGINE_TAB_PATH, {
+                  engineName,
+                  tabId: EngineViewTabs.PREVIEW,
+                })}
+                color="text"
+              >
+                <EuiFlexGroup alignItems="center">
+                  <EuiIcon size="xxl" type="documents" color={colors.mediumShade} />
+                  <EuiStat
+                    titleSize="l"
+                    isLoading={isLoadingEngine}
+                    title={documentsCount.toLocaleString()}
+                    description={i18n.translate(
+                      'xpack.enterpriseSearch.content.engine.overview.documentsDescription',
+                      { defaultMessage: 'Documents' }
+                    )}
+                    titleColor="primary"
+                  />
+                </EuiFlexGroup>
+              </EuiLinkTo>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiLinkTo

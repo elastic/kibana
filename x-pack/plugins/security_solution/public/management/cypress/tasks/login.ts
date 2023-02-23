@@ -14,7 +14,7 @@ import type { Role } from '@kbn/security-plugin/common';
 import { getT1Analyst } from '../../../../scripts/endpoint/common/roles_users/t1_analyst';
 import { getT2Analyst } from '../../../../scripts/endpoint/common/roles_users/t2_analyst';
 import { getHunter } from '../../../../scripts/endpoint/common/roles_users/hunter';
-import { getThreadIntelligenceAnalyst } from '../../../../scripts/endpoint/common/roles_users/thread_intelligence_analyst';
+import { getThreatIntelligenceAnalyst } from '../../../../scripts/endpoint/common/roles_users/threat_intelligence_analyst';
 import { getSocManager } from '../../../../scripts/endpoint/common/roles_users/soc_manager';
 import { getPlatformEngineer } from '../../../../scripts/endpoint/common/roles_users/platform_engineer';
 import { getEndpointOperationsAnalyst } from '../../../../scripts/endpoint/common/roles_users/endpoint_operations_analyst';
@@ -25,7 +25,7 @@ export enum ROLE {
   t1_analyst = 't1Analyst',
   t2_analyst = 't2Analyst',
   analyst_hunter = 'hunter',
-  thread_intelligence_analyst = 'threadIntelligenceAnalyst',
+  threat_intelligence_analyst = 'threatIntelligenceAnalyst',
   detections_engineer = 'detectionsEngineer',
   soc_manager = 'socManager',
   platform_engineer = 'platformEngineer',
@@ -37,7 +37,7 @@ export const rolesMapping: { [key in ROLE]: Omit<Role, 'name'> } = {
   t1Analyst: getT1Analyst(),
   t2Analyst: getT2Analyst(),
   hunter: getHunter(),
-  threadIntelligenceAnalyst: getThreadIntelligenceAnalyst(),
+  threatIntelligenceAnalyst: getThreatIntelligenceAnalyst(),
   socManager: getSocManager(),
   platformEngineer: getPlatformEngineer(),
   endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
@@ -359,4 +359,26 @@ export const getEnvAuth = (): User => {
 export const loginAndWaitForPage = (url: string) => {
   login();
   cy.visit(url);
+};
+
+export const getRoleWithArtifactReadPrivilege = (privilegePrefix: string) => {
+  const endpointSecurityPolicyManagerRole = getEndpointSecurityPolicyManager();
+
+  return {
+    ...endpointSecurityPolicyManagerRole,
+    kibana: [
+      {
+        ...endpointSecurityPolicyManagerRole.kibana[0],
+        feature: {
+          ...endpointSecurityPolicyManagerRole.kibana[0].feature,
+          siem: [
+            ...endpointSecurityPolicyManagerRole.kibana[0].feature.siem.filter(
+              (privilege) => privilege !== `${privilegePrefix}all`
+            ),
+            `${privilegePrefix}read`,
+          ],
+        },
+      },
+    ],
+  };
 };

@@ -15,7 +15,26 @@ export type ControlGroupOutput = ContainerOutput &
   Omit<CommonControlOutput, 'dataViewId'> & { dataViewIds: string[] };
 
 // public only - redux embeddable state type
-export type ControlGroupReduxState = ReduxEmbeddableState<ControlGroupInput, ControlGroupOutput>;
+export type ControlGroupReduxState = ReduxEmbeddableState<
+  ControlGroupInput,
+  ControlGroupOutput,
+  ControlGroupSettings
+>;
+
+export interface ControlGroupCreationOptions {
+  initialInput?: Partial<ControlGroupInput>;
+  settings?: ControlGroupSettings;
+}
+
+export interface ControlGroupSettings {
+  showAddButton?: boolean;
+  staticDataViewId?: string;
+  editorConfig?: {
+    hideDataViewSelector?: boolean;
+    hideWidthSettings?: boolean;
+    hideAdditionalSettings?: boolean;
+  };
+}
 
 export {
   type ControlsPanels,

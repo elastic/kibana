@@ -185,6 +185,7 @@ export interface GetAgentStatusRequest {
 export interface GetAgentStatusResponse {
   results: {
     events: number;
+    // deprecated
     total: number;
     online: number;
     error: number;
@@ -193,6 +194,8 @@ export interface GetAgentStatusResponse {
     updating: number;
     inactive: number;
     unenrolled: number;
+    all: number;
+    active: number;
   };
 }
 

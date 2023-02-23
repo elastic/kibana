@@ -78,6 +78,7 @@ export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
 export interface RuleAction {
+  uuid?: string;
   group: string;
   id: string;
   actionTypeId: string;
@@ -166,6 +167,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   lastRun?: RuleLastRun | null;
   nextRun?: Date | null;
   running?: boolean | null;
+  viewInAppRelativeUrl?: string;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
@@ -221,6 +223,7 @@ export interface ActionVariable {
   description: string;
   deprecated?: boolean;
   useWithTripleBracesInTemplates?: boolean;
+  usesPublicBaseUrl?: boolean;
 }
 
 export interface RuleMonitoringHistory extends SavedObjectAttributes {
