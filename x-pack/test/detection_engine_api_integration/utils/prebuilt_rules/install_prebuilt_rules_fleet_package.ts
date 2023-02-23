@@ -6,37 +6,46 @@
  */
 
 import { epmRouteService } from '@kbn/fleet-plugin/common';
-import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
-import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
 /**
- * Installed the security_detection_engine package via fleet API. Will
+ * Installs the `security_detection_engine` package via fleet API. This will
+ * create real `security-rule` asset saved objects from the package.
+ *
  * @param supertest The supertest deps
- * @param log The tooling logger
  * @param version The version to install, e.g. '8.4.1'
  * @param overrideExistingPackage Whether or not to force the install
  */
-export const installDetectionRulesPackageFromFleet = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  log: ToolingLog,
-  version: string,
-  overrideExistingPackage: true
-): Promise<InstallPackageResponse> => {
-  const response = await supertest
-    .post(epmRouteService.getInstallPath('security_detection_engine', version))
-    .set('kbn-xsrf', 'true')
-    .send({
-      force: overrideExistingPackage,
-    });
-  if (response.status !== 200) {
-    log.error(
-      `Did not get an expected 200 "ok" when installing 'security_detection_engine' fleet package'. body: ${JSON.stringify(
-        response.body
-      )}, status: ${JSON.stringify(response.status)}`
-    );
+export const installPrebuiltRulesFleetPackage = async ({
+  supertest,
+  version,
+  overrideExistingPackage,
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  version?: string;
+  overrideExistingPackage: boolean;
+}): Promise<void> => {
+  if (version) {
+    // Install a specific version
+    await supertest
+      .post(epmRouteService.getInstallPath('security_detection_engine', version))
+      .set('kbn-xsrf', 'true')
+      .send({
+        force: overrideExistingPackage,
+      })
+      .expect(200);
+  } else {
+    // Install the latest version
+    await supertest
+      .post(epmRouteService.getBulkInstallPath())
+      .query({ prerelease: true })
+      .set('kbn-xsrf', 'true')
+      .send({
+        packages: ['security_detection_engine'],
+        force: overrideExistingPackage,
+      })
+      .expect(200);
   }
-  return response.body;
 };
 
 /**
