@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState, useCallback } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiScreenReaderLive } from '@elastic/eui';
 
@@ -21,7 +21,7 @@ export const ScreenReaderRouteAnnouncements: FC<{
   const [routeTitle, setRouteTitle] = useState('');
   const breadcrumbs = useObservable(breadcrumbs$, []);
 
-  useCallback(() => {
+  useEffect(() => {
     if (breadcrumbs.length) {
       const breadcrumbText: string[] = [];
 
