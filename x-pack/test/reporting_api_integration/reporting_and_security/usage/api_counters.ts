@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { BasicStatsPayload } from '@kbn/telemetry-collection-manager-plugin/server/types';
 import { createPdfV2Params, createPngV2Params } from '..';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { UsageStatsPayloadTestFriendly } from '../../../api_integration/services/usage_api';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -54,8 +54,8 @@ export default function ({ getService }: FtrProviderContext) {
         DIAG_SCREENSHOT = '/api/reporting/diagnose/screenshot',
       }
 
-      let initialStats: BasicStatsPayload;
-      let stats: BasicStatsPayload;
+      let initialStats: UsageStatsPayloadTestFriendly;
+      let stats: UsageStatsPayloadTestFriendly;
       const CALL_COUNT = 3;
 
       before('call APIs', async () => {
@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('downloading and deleting', () => {
-      let initialStats: BasicStatsPayload;
+      let initialStats: UsageStatsPayloadTestFriendly;
       before('gather initial stats', async () => {
         [{ stats: initialStats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
       });
@@ -167,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('API counters: job generation', () => {
-      let stats: BasicStatsPayload;
+      let stats: UsageStatsPayloadTestFriendly;
 
       before(async () => {
         // call generation APIs
@@ -213,7 +213,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
     };
 
-    const getUsageCount = (checkUsage: BasicStatsPayload, counterName: string): number => {
+    const getUsageCount = (
+      checkUsage: UsageStatsPayloadTestFriendly,
+      counterName: string
+    ): number => {
       return (
         checkUsage.stack_stats.kibana.plugins.usage_counters.dailyEvents.find(
           (item: any) => item.counterName === counterName

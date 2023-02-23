@@ -82,9 +82,7 @@ export interface BasicStatsPayload {
   version: string;
   cluster_stats: object;
   collection?: string;
-  // Needed for testing to make fields easier to access
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  stack_stats: Record<string, any>;
+  stack_stats: object;
 }
 
 export interface UsageStatsPayload extends BasicStatsPayload {

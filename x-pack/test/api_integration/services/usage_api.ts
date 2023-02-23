@@ -8,13 +8,18 @@
 import { UsageStatsPayload } from '@kbn/telemetry-collection-manager-plugin/server';
 import { FtrProviderContext } from '../ftr_provider_context';
 
+export interface UsageStatsPayloadTestFriendly extends UsageStatsPayload {
+  // Overwriting the `object` type to a more test-friendly type
+  stack_stats: Record<string, any>;
+}
+
 export function UsageAPIProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   async function getTelemetryStats(payload: {
     unencrypted: true;
     refreshCache?: boolean;
-  }): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayload }>>;
+  }): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly }>>;
   async function getTelemetryStats(payload: {
     unencrypted: false;
     refreshCache?: boolean;
@@ -22,7 +27,7 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
   async function getTelemetryStats(payload: {
     unencrypted?: boolean;
     refreshCache?: boolean;
-  }): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayload | string }>> {
+  }): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly | string }>> {
     const { body } = await supertest
       .post('/api/telemetry/v2/clusters/_stats')
       .set('kbn-xsrf', 'xxx')
