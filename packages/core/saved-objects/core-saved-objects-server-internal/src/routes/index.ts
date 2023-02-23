@@ -53,17 +53,17 @@ export function registerRoutes({
   const router =
     http.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
 
-  registerGetRoute(router, { coreUsageData, logger });
-  registerResolveRoute(router, { coreUsageData, logger });
-  registerCreateRoute(router, { coreUsageData, logger });
-  registerDeleteRoute(router, { coreUsageData, logger });
-  registerFindRoute(router, { coreUsageData, logger });
-  registerUpdateRoute(router, { coreUsageData, logger });
-  registerBulkGetRoute(router, { coreUsageData, logger });
-  registerBulkCreateRoute(router, { coreUsageData, logger });
-  registerBulkResolveRoute(router, { coreUsageData, logger });
-  registerBulkUpdateRoute(router, { coreUsageData, logger });
-  registerBulkDeleteRoute(router, { coreUsageData, logger });
+  registerGetRoute(router, { config, coreUsageData, logger });
+  registerResolveRoute(router, { config, coreUsageData, logger });
+  registerCreateRoute(router, { config, coreUsageData, logger });
+  registerDeleteRoute(router, { config, coreUsageData, logger });
+  registerFindRoute(router, { config, coreUsageData, logger });
+  registerUpdateRoute(router, { config, coreUsageData, logger });
+  registerBulkGetRoute(router, { config, coreUsageData, logger });
+  registerBulkCreateRoute(router, { config, coreUsageData, logger });
+  registerBulkResolveRoute(router, { config, coreUsageData, logger });
+  registerBulkUpdateRoute(router, { config, coreUsageData, logger });
+  registerBulkDeleteRoute(router, { config, coreUsageData, logger });
   registerExportRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });
