@@ -303,6 +303,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const {
       migrationVersion,
       coreMigrationVersion,
+      typeMigrationVersion,
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
@@ -381,6 +382,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       ),
       migrationVersion,
       coreMigrationVersion,
+      typeMigrationVersion,
       created_at: time,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
@@ -591,6 +593,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           ),
           migrationVersion: object.migrationVersion,
           coreMigrationVersion: object.coreMigrationVersion,
+          typeMigrationVersion: object.typeMigrationVersion,
           ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
           ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
           updated_at: time,
@@ -2311,6 +2314,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   ): Promise<SavedObject<T>> {
     const {
       migrationVersion,
+      typeMigrationVersion,
       refresh = DEFAULT_REFRESH_SETTING,
       initialize = false,
       upsertAttributes,
@@ -2384,6 +2388,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         }, {} as Record<string, number>),
       },
       migrationVersion,
+      typeMigrationVersion,
       updated_at: time,
     });
 

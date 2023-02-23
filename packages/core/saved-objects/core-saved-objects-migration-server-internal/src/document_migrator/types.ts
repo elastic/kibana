@@ -40,9 +40,9 @@ export interface Transform {
 /**
  * There are two "migrationVersion" transform types:
  *   * `migrate` - These transforms are defined and added by consumers using the type registry; each is applied to a single object type
- *     based on an object's `migrationVersion[type]` field. These are applied during index migrations and document migrations.
+ *     based on an object's `typeMigrationVersion` field. These are applied during index migrations and document migrations.
  *   * `convert` - These transforms are defined by core and added by consumers using the type registry; each is applied to a single object
- *     type based on an object's `migrationVersion[type]` field. These are applied during index migrations, NOT document migrations.
+ *     type based on an object's `typeMigrationVersion` field. These are applied during index migrations, NOT document migrations.
  *
  * There is one "coreMigrationVersion" transform type:
  *   * `reference` - These transforms are defined by core and added by consumers using the type registry; they are applied to all object
