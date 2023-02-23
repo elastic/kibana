@@ -18,7 +18,7 @@ import { countDownTest } from './count_down_test';
  * Removes all rules by looping over any found and removing them from REST.
  * @param supertest The supertest agent.
  */
-export const deleteAllAlerts = async (
+export const deleteAllRules = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog
 ): Promise<void> => {
@@ -37,7 +37,7 @@ export const deleteAllAlerts = async (
         passed: finalCheck.data.length === 0,
       };
     },
-    'deleteAllAlerts',
+    'deleteAllRules',
     log,
     50,
     1000
