@@ -79,5 +79,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('embeddablePanelContextMenuOpen');
       return testSubjects.existOrFail('embeddablePanelAction-openInLens');
     },
+
+    // Alerts Tab
+    getAlertsTab() {
+      return testSubjects.find('hostsView-tabs-alerts');
+    },
   };
 }
