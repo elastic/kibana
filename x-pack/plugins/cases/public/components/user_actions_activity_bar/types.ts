@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export { NodeAvailableWarning } from './node_available_warning';
-export { MlNodeAvailableWarningShared } from './node_available_warning_shared';
-export { useMlNodeAvailableCheck } from './hooks';
+export type UserActivityFilter = 'all' | 'user' | 'action';
+
+export type UserActivitySortOrder = 'asc' | 'desc';
+
+export interface UserActivityParams {
+  type: UserActivityFilter;
+  sortOrder: UserActivitySortOrder;
+}
