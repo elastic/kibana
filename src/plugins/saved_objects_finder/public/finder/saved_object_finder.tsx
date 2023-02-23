@@ -109,7 +109,7 @@ export class SavedObjectFinderUi extends React.Component<
 
   private debouncedFetch = debounce(async (query: Query) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
-    const { savedObjectsManagement, uiSettings } = this.props.services;
+    const { savedObjectsManagement, uiSettings, http } = this.props.services;
 
     const fields = Object.values(metaDataMap)
       .map((metaData) => metaData.includeFields || [])
@@ -149,7 +149,7 @@ export class SavedObjectFinderUi extends React.Component<
     params.search = queryText ? `${queryText}*` : undefined;
     params.hasReference = hasReference ? JSON.stringify(hasReference) : undefined;
 
-    const response = (await this.props.services.http.get('/internal/saved-objects-finder/find', {
+    const response = (await http.get('/internal/saved-objects-finder/find', {
       query: params as Record<string, any>,
     })) as FindResponseHTTP<FinderAttributes>;
 
