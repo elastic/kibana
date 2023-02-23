@@ -70,6 +70,15 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
   }
 `;
 
+const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
+  direction: 'column',
+  className: 'eui-yScrollWithShadows',
+  gutterSize: 's',
+})`
+  max-height: 270px;
+  overflow-y: auto;
+`;
+
 const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-subj'?: string }>(
   ({ action, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -80,15 +89,15 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
     const { command, isCompleted, isExpired, wasSuccessful } = action;
 
     if (isExpired) {
-      return OUTPUT_MESSAGES.hasExpired(command);
+      return <>{OUTPUT_MESSAGES.hasExpired(command)}</>;
     }
 
     if (!isCompleted) {
-      return OUTPUT_MESSAGES.isPending(command);
+      return <>{OUTPUT_MESSAGES.isPending(command)}</>;
     }
 
     if (!wasSuccessful) {
-      return OUTPUT_MESSAGES.hasFailed(command);
+      return <>{OUTPUT_MESSAGES.hasFailed(command)}</>;
     }
 
     if (command === 'get-file') {
@@ -132,7 +141,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       );
     }
 
-    return OUTPUT_MESSAGES.wasSuccessful(command);
+    return <>{OUTPUT_MESSAGES.wasSuccessful(command)}</>;
   }
 );
 
@@ -213,20 +222,14 @@ export const ActionsLogExpandedTray = memo<{
 
   return (
     <>
-      <EuiFlexGroup
-        data-test-subj={getTestId('details-tray')}
-        direction="column"
-        style={{ maxHeight: 270, overflowY: 'auto' }}
-        className="eui-yScrollWithShadows"
-        gutterSize="s"
-      >
+      <StyledEuiFlexGroup data-test-subj={getTestId('details-tray')}>
         <EuiFlexItem grow={false}>
           <StyledDescriptionList listItems={dataList} />
         </EuiFlexItem>
         <EuiFlexItem>
           <StyledDescriptionListOutput listItems={outputList} />
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </StyledEuiFlexGroup>
     </>
   );
 });
