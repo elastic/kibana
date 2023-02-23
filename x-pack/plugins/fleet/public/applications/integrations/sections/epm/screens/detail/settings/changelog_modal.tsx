@@ -19,11 +19,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { safeLoad } from 'js-yaml';
-
 import { useGetFileByPathQuery, useStartServices } from '../../../../../hooks';
 
-interface ChangeLogParams {
+import { parseYamlChangelog } from '../utils';
+
+export interface ChangeLogParams {
   version: string;
   changes: Array<{
     description: string;
@@ -39,13 +39,6 @@ interface Props {
   packageName: string;
   onClose: () => void;
 }
-
-const formatChangelog = (parsedChangelog: ChangeLogParams[]) => {
-  return parsedChangelog.reduce((acc, val) => {
-    acc += `Version: ${val.version}\nChanges:\n  Type: ${val.changes[0].type}\n  Description: ${val.changes[0].description}\n  Link: ${val.changes[0].link}\n\n`;
-    return acc;
-  }, '');
-};
 
 export const ChangelogModal: React.FunctionComponent<Props> = ({
   title = 'Changelog',
@@ -63,12 +56,7 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
   } = useGetFileByPathQuery(`/package/${packageName}/${latestVersion}/changelog.yml`);
   const changelogText = changelogResponse?.data;
 
-  const parsedChangelog: ChangeLogParams[] = changelogText ? safeLoad(changelogText) : [];
-
-  const filtered = parsedChangelog.filter(
-    (e) => e.version === latestVersion || e.version === currentVersion
-  );
-  const finalChangelog = formatChangelog(filtered);
+  const finalChangelog = parseYamlChangelog(changelogText, currentVersion, latestVersion);
 
   if (changelogError) {
     notifications.toasts.addError(changelogError, {
