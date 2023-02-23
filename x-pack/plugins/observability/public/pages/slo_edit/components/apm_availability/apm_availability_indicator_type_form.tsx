@@ -13,20 +13,15 @@ import {
   EuiFlexItem,
   EuiFormLabel,
 } from '@elastic/eui';
-import { Control, Controller, UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
 import { FieldSelector } from '../common/field_selector';
 
-export interface Props {
-  control: Control<CreateSLOInput>;
-  setValue: UseFormSetValue<CreateSLOInput>;
-  watch: UseFormWatch<CreateSLOInput>;
-}
-
-export function ApmAvailabilityIndicatorTypeForm({ control, setValue, watch }: Props) {
+export function ApmAvailabilityIndicatorTypeForm() {
+  const { control, setValue } = useFormContext<CreateSLOInput>();
   const { data: apmIndex } = useFetchApmIndex();
   useEffect(() => {
     setValue('indicator.params.index', apmIndex);
@@ -48,7 +43,6 @@ export function ApmAvailabilityIndicatorTypeForm({ control, setValue, watch }: P
           )}
           fieldName="service.name"
           name="indicator.params.service"
-          control={control}
           dataTestSubj="apmAvailabilityServiceSelector"
         />
         <FieldSelector
@@ -66,9 +60,7 @@ export function ApmAvailabilityIndicatorTypeForm({ control, setValue, watch }: P
           )}
           fieldName="service.environment"
           name="indicator.params.environment"
-          control={control}
           dataTestSubj="apmAvailabilityEnvironmentSelector"
-          selectedServiceName={watch('indicator.params.service')}
         />
       </EuiFlexGroup>
 
@@ -88,9 +80,7 @@ export function ApmAvailabilityIndicatorTypeForm({ control, setValue, watch }: P
           )}
           fieldName="transaction.type"
           name="indicator.params.transactionType"
-          control={control}
           dataTestSubj="apmAvailabilityTransactionTypeSelector"
-          selectedServiceName={watch('indicator.params.service')}
         />
         <FieldSelector
           label={i18n.translate(
@@ -107,9 +97,7 @@ export function ApmAvailabilityIndicatorTypeForm({ control, setValue, watch }: P
           )}
           fieldName="transaction.name"
           name="indicator.params.transactionName"
-          control={control}
           dataTestSubj="apmAvailabilityTransactionNameSelector"
-          selectedServiceName={watch('indicator.params.service')}
         />
       </EuiFlexGroup>
 
