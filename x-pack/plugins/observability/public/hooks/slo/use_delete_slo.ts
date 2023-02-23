@@ -5,42 +5,65 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { FindSLOResponse } from '@kbn/slo-schema';
+
 import { useKibana } from '../../utils/kibana_react';
 
-interface UseDeleteSlo {
-  loading: boolean;
-  success: boolean;
-  error: string | undefined;
-  deleteSlo: (id: string) => void;
-}
-
-export function useDeleteSlo(): UseDeleteSlo {
+export function useDeleteSlo(sloId: string) {
   const { http } = useKibana().services;
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
+  const queryClient = useQueryClient();
 
-  const deleteSlo = useCallback(
-    async (id: string) => {
-      setLoading(true);
-      setError('');
-      setSuccess(false);
-
+  const deleteSlo = useMutation<
+    string,
+    string,
+    { id: string },
+    { previousSloList: FindSLOResponse | undefined }
+  >(
+    ['deleteSlo', sloId],
+    ({ id }) => {
       try {
-        await http.delete<string>(`/api/observability/slos/${id}`);
-        setSuccess(true);
-      } catch (e) {
-        setError(e);
+        return http.delete<string>(`/api/observability/slos/${id}`);
+      } catch (error) {
+        return Promise.reject(`Something went wrong: ${String(error)}`);
       }
     },
-    [http]
+    {
+      onMutate: async (slo) => {
+        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+        await queryClient.cancelQueries(['fetchSloList']);
+
+        const latestFetchSloListRequest = (
+          queryClient.getQueriesData<FindSLOResponse>(['fetchSloList']) || []
+        ).at(0);
+
+        const [queryKey, data] = latestFetchSloListRequest || [];
+
+        const optimisticUpdate = {
+          ...data,
+          results: data?.results.filter((result) => result.id !== slo.id),
+          total: data?.total && data.total - 1,
+        };
+
+        // Optimistically update to the new value
+        if (queryKey) {
+          queryClient.setQueryData(queryKey, optimisticUpdate);
+        }
+
+        // Return a context object with the snapshotted value
+        return { previousSloList: data };
+      },
+      // If the mutation fails, use the context returned from onMutate to roll back
+      onError: (_err, _slo, context) => {
+        if (context?.previousSloList) {
+          queryClient.setQueryData(['fetchSloList'], context.previousSloList);
+        }
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries(['fetchSloList']);
+      },
+    }
   );
 
-  return {
-    loading,
-    error,
-    success,
-    deleteSlo,
-  };
+  return deleteSlo;
 }

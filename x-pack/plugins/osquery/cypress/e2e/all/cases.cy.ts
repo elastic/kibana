@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { addLastLiveQueryToCase, checkResults } from '../../tasks/live_query';
+import {
+  addLastLiveQueryToCase,
+  checkActionItemsInResults,
+  viewRecentCaseAndCheckResults,
+} from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
@@ -25,15 +29,15 @@ describe('Add to Cases', () => {
     it('should add result a case and not have add to timeline in result', () => {
       addLastLiveQueryToCase();
       cy.contains('Test Obs case has been updated');
-      cy.visit('/app/observability/cases');
-      cy.contains('Test Obs case').click();
-      checkResults();
-      cy.contains('attached Osquery results');
+      viewRecentCaseAndCheckResults();
+
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");
-      cy.contains('View in Discover').should('exist');
-      cy.contains('View in Lens').should('exist');
-      cy.contains('Add to Case').should('not.exist');
-      cy.contains('Add to timeline investigation').should('not.exist');
+      checkActionItemsInResults({
+        lens: true,
+        discover: true,
+        cases: false,
+        timeline: false,
+      });
     });
   });
   describe('security', () => {
@@ -50,15 +54,15 @@ describe('Add to Cases', () => {
     it('should add result a case and have add to timeline in result', () => {
       addLastLiveQueryToCase();
       cy.contains('Test Security Case has been updated');
-      cy.visit('/app/security/cases');
-      cy.contains('Test Security Case').click();
-      checkResults();
-      cy.contains('attached Osquery results');
+      viewRecentCaseAndCheckResults();
+
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");
-      cy.contains('View in Discover').should('exist');
-      cy.contains('View in Lens').should('exist');
-      cy.contains('Add to Case').should('not.exist');
-      cy.contains('Add to timeline investigation').should('exist');
+      checkActionItemsInResults({
+        lens: true,
+        discover: true,
+        cases: false,
+        timeline: true,
+      });
     });
   });
 });
