@@ -51,6 +51,7 @@ export function useFetchApmIndex(): UseFetchApmIndex {
         // ignore error
       }
     },
+    refetchOnWindowFocus: false,
   });
 
   return {

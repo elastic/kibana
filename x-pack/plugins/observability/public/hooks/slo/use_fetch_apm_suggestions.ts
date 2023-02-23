@@ -57,6 +57,7 @@ export function useFetchApmSuggestions({
         // ignore error
       }
     },
+    refetchOnWindowFocus: false,
   });
 
   return {
