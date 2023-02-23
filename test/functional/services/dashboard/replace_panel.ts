@@ -10,20 +10,32 @@ import { FtrService } from '../../ftr_provider_context';
 
 export class DashboardReplacePanelService extends FtrService {
   private readonly log = this.ctx.getService('log');
+  private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly flyout = this.ctx.getService('flyout');
 
   async toggleFilterPopover() {
     this.log.debug('DashboardReplacePanel.toggleFilter');
-    await this.testSubjects.click('savedObjectFinderFilterButton');
+    const filtersHolder = await this.find.byClassName('euiSearchBar__filtersHolder');
+    const filtersButton = await filtersHolder.findByCssSelector('button');
+    await filtersButton.click();
   }
 
   async toggleFilter(type: string) {
     this.log.debug(`DashboardReplacePanel.replaceToFilter(${type})`);
     await this.waitForListLoading();
     await this.toggleFilterPopover();
-    await this.testSubjects.click(`savedObjectFinderFilter-${type}`);
-    await this.toggleFilterPopover();
+    const list = await this.testSubjects.find('euiSelectableList');
+    const listItems = await list.findAllByCssSelector('li');
+    for (let i = 0; i < listItems.length; i++) {
+      const listItem = await listItems[i].findByClassName('euiSelectableListItem__text');
+      const text = await listItem.getVisibleText();
+      if (text.includes(type)) {
+        await listItem.click();
+        await this.toggleFilterPopover();
+        break;
+      }
+    }
   }
 
   async isReplacePanelOpen() {
@@ -66,10 +78,10 @@ export class DashboardReplacePanelService extends FtrService {
       `DashboardReplacePanel.replaceEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
     );
     await this.ensureReplacePanelIsShowing();
+    await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
     if (embeddableType) {
       await this.toggleFilter(embeddableType);
     }
-    await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
     await this.testSubjects.exists('addObjectToDashboardSuccess');
     await this.closeReplacePanel();
