@@ -16,6 +16,7 @@ import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spac
 import { ActionType } from '../types';
 import { actionsMock, actionsClientMock } from '../mocks';
 import { pick } from 'lodash';
+import { ActionExecutionSourceType } from './action_execution_source';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -33,6 +34,7 @@ const executeParams = {
   executionId: '123abc',
   request: {} as KibanaRequest,
   actionExecutionId: '2',
+  sourceType: ActionExecutionSourceType.HTTP_REQUEST,
 };
 
 const spacesMock = spacesServiceMock.createStartContract();
@@ -863,6 +865,7 @@ test('writes to event log for execute timeout', async () => {
     relatedSavedObjects: [],
     request: {} as KibanaRequest,
     actionExecutionId: '2',
+    sourceType: ActionExecutionSourceType.HTTP_REQUEST,
   });
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
   expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {

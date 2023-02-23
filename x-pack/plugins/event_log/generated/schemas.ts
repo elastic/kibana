@@ -201,6 +201,7 @@ export const EventSchema = schema.maybe(
             id: ecsString(),
             execution: schema.maybe(
               schema.object({
+                source: ecsString(),
                 uuid: ecsString(),
               })
             ),

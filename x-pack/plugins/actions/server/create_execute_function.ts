@@ -15,7 +15,11 @@ import {
 } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
-import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
+import {
+  ActionExecutionSource,
+  extractSavedObjectReferences,
+  isSavedObjectExecutionSource,
+} from './lib';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
@@ -25,11 +29,12 @@ interface CreateExecuteFunctionOptions {
 }
 
 export interface ExecuteOptions
-  extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects' | 'consumer'> {
+  extends Pick<ActionExecutorOptions, 'params' | 'relatedSavedObjects' | 'consumer'> {
   id: string;
   spaceId: string;
   apiKey: string | null;
   executionId: string;
+  source: ActionExecutionSource<unknown>;
 }
 
 interface ActionTaskParams
@@ -273,7 +278,7 @@ function validateCanActionBeUsed(action: PreConfiguredAction | RawAction) {
   }
 }
 
-function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorOptions['source']) {
+function executionSourceAsSavedObjectReferences(executionSource: ActionExecutionSource<unknown>) {
   return isSavedObjectExecutionSource(executionSource)
     ? {
         references: [

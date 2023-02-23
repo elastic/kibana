@@ -667,9 +667,9 @@ export class ActionsClient {
     params,
     source,
     relatedSavedObjects,
-  }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
-    ActionTypeExecutorResult<unknown>
-  > {
+  }: Omit<ExecuteOptions, 'request' | 'actionExecutionId' | 'sourceType'> & {
+    source: ActionExecutionSource<unknown>;
+  }): Promise<ActionTypeExecutorResult<unknown>> {
     if (
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
@@ -682,7 +682,7 @@ export class ActionsClient {
     return this.actionExecutor.execute({
       actionId,
       params,
-      source,
+      sourceType: source.type,
       request: this.request,
       relatedSavedObjects,
       actionExecutionId: uuidv4(),

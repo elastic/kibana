@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { asNotificationExecutionSource } from '@kbn/actions-plugin/server';
 import { schema } from '@kbn/config-schema';
 import {
   CoreSetup,
@@ -39,7 +40,16 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
       try {
         const unsecuredActionsClient = actions.getUnsecuredActionsClient();
         const { requesterId, id, params } = body;
-        await unsecuredActionsClient.bulkEnqueueExecution(requesterId, [{ id, params }]);
+        await unsecuredActionsClient.bulkEnqueueExecution(requesterId, [
+          {
+            id,
+            params,
+            source: asNotificationExecutionSource({
+              requesterId,
+              connectorId: id,
+            }),
+          },
+        ]);
 
         return res.ok({ body: { status: 'success' } });
       } catch (err) {

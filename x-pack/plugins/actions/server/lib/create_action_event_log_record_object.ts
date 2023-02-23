@@ -9,6 +9,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { isEmpty } from 'lodash';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { RelatedSavedObjects } from './related_saved_objects';
+import { ActionExecutionSourceType } from './action_execution_source';
 
 export type Event = Exclude<IEvent, undefined>;
 
@@ -35,6 +36,7 @@ interface CreateActionEventLogRecordParams {
   }>;
   relatedSavedObjects?: RelatedSavedObjects;
   isPreconfigured?: boolean;
+  source?: ActionExecutionSourceType;
 }
 
 export function createActionEventLogRecordObject(params: CreateActionEventLogRecordParams): Event {
@@ -51,6 +53,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
     actionExecutionId,
     isPreconfigured,
     actionId,
+    source,
   } = params;
 
   const kibanaAlertRule = {
@@ -88,6 +91,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
         id: actionId,
         execution: {
           uuid: actionExecutionId,
+          ...(source ? { source } : {}),
         },
       },
     },
