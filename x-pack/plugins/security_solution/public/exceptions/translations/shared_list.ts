@@ -92,6 +92,19 @@ export const ALL_EXCEPTIONS = i18n.translate(
   }
 );
 
+export const ALL_EXCEPTIONS_SUBTITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allExceptions.tableSubtitle',
+  {
+    defaultMessage: "To view rule specific exceptions navigate to that rule's details page.",
+  }
+);
+
+export const allExceptionsRowPerPage = (rowSize: number) =>
+  i18n.translate('xpack.securitySolution.exceptions.allExceptionsRowPerPage', {
+    defaultMessage: 'Rows per page: {rowSize}',
+    values: { rowSize },
+  });
+
 export const NO_LISTS_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allExceptions.filters.noListsBody',
   {

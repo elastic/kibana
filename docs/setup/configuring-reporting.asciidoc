@@ -200,7 +200,7 @@ To automatically generate reports with {watcher}, you must configure {watcher} t
 
 . Enable {stack-security-features} on your {es} cluster. For more information, see {ref}/security-getting-started.html[Getting started with security].
 
-. Configure TLS/SSL encryption for the {kib} server. For more information, see <<configuring-tls>>.
+. Configure TLS/SSL encryption for the {kib} server. For more information, check {ref}/security-basic-setup-https.html#encrypt-kibana-http[Encrypt HTTP client communications for {kib}].
 
 . Specify the {kib} server CA certificate chain in `elasticsearch.yml`:
 +
