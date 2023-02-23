@@ -66,6 +66,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   usageCollection: new PluginServiceProvider(usageCollectionServiceFactory),
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
   customBranding: new PluginServiceProvider(customBrandingServiceFactory),
+  savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementService),
 };
 
 export const registry = new PluginServiceRegistry<DashboardServices>(providers);

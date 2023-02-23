@@ -33,13 +33,13 @@ export const buildAllDashboardActions = async ({
   allowByValueEmbeddables,
 }: BuildAllDashboardActionsProps) => {
   const { uiSettings } = core;
-  const { uiActions, share, presentationUtil } = plugins;
+  const { uiActions, share, presentationUtil, savedObjectsManagement } = plugins;
 
   const clonePanelAction = new ClonePanelAction(core.savedObjects);
   uiActions.registerAction(clonePanelAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
-  const SavedObjectFinder = getSavedObjectFinder(uiSettings, core.http);
+  const SavedObjectFinder = getSavedObjectFinder(uiSettings, core.http, savedObjectsManagement);
   const changeViewAction = new ReplacePanelAction(SavedObjectFinder);
   uiActions.registerAction(changeViewAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
