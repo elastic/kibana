@@ -6,7 +6,8 @@
  */
 
 import React, { ReactNode } from 'react';
-import { EuiCallOut, EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut, EuiToolTip, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const FleetPermissionsCallout = () => {
@@ -69,19 +70,25 @@ export const NEED_PERMISSIONS = i18n.translate(
   }
 );
 
-export const NEED_FLEET_READ_AGENT_POLICIES_PERMISSION = i18n.translate(
-  'xpack.synthetics.monitorManagement.needFleetReadAgentPoliciesPermission',
-  {
-    defaultMessage:
-      'You are not authorized to access Fleet. Fleet permissions are required to create new private locations.',
-  }
+export const ALL = i18n.translate('xpack.synthetics.monitorManagement.priviledges.all', {
+  defaultMessage: 'All',
+});
+
+export const NEED_FLEET_READ_AGENT_POLICIES_PERMISSION = (
+  <FormattedMessage
+    id="xpack.synthetics.monitorManagement.needFleetReadAgentPoliciesPermission"
+    defaultMessage="You are not authorized to manage private locations. It requires the {all} Kibana privilege for Fleet, and the {all} privilege for Integrations."
+    values={{
+      all: <EuiCode>{`"${ALL}"`}</EuiCode>,
+    }}
+  />
 );
 
 export const CANNOT_SAVE_INTEGRATION_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.cannotSaveIntegration',
   {
     defaultMessage:
-      'You are not authorized to update integrations. Integrations write permissions are required.',
+      'You are not authorized to manage private locations. It requires the "All" Kibana privilege for Fleet, and the "All" Kibana for Integrations.',
   }
 );
 
@@ -89,7 +96,7 @@ const CANNOT_PERFORM_ACTION_FLEET = i18n.translate(
   'xpack.synthetics.monitorManagement.noFleetPermission',
   {
     defaultMessage:
-      'You are not authorized to perform this action. Integrations write permissions are required.',
+      'You are not authorized to perform this action. It requires the "All" Kibana privilege for Integrations.',
   }
 );
 
