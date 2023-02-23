@@ -239,8 +239,10 @@ export function initializeVisualization({
 }) {
   if (visualizationState?.activeId) {
     return (
-      visualizationMap[visualizationState.activeId]?.fromPersistableState?.(
+      visualizationMap[visualizationState.activeId]?.initialize(
+        () => '',
         visualizationState.state,
+        undefined,
         references,
         initialContext
       ) ?? visualizationState.state

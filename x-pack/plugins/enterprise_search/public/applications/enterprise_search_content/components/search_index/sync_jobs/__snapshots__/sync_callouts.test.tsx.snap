@@ -8,7 +8,17 @@ exports[`SyncCalloutsPanel renders 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      Completed at Mon Sep 05 2022 15:59:39 GMT+0000
+      <FormattedMessage
+        defaultMessage="Completed at {date}"
+        id="xpack.enterpriseSearch.content.syncJobs.flyout.completedDescription"
+        values={
+          Object {
+            "date": <FormattedDateTime
+              date={2022-09-05T15:59:39.816Z}
+            />,
+          }
+        }
+      />
     </EuiCallOut>
   </EuiFlexItem>
   <EuiFlexItem>
@@ -17,7 +27,17 @@ exports[`SyncCalloutsPanel renders 1`] = `
       iconType="iInCircle"
       title="Sync started manually"
     >
-      Started at Mon Sep 05 2022 14:59:39 GMT+0000.
+      <FormattedMessage
+        defaultMessage="Started at {date}"
+        id="xpack.enterpriseSearch.content.syncJobs.flyout.startedAtDescription"
+        values={
+          Object {
+            "date": <FormattedDateTime
+              date={2022-09-05T14:59:39.816Z}
+            />,
+          }
+        }
+      />
     </EuiCallOut>
   </EuiFlexItem>
 </Fragment>
@@ -31,7 +51,17 @@ exports[`SyncCalloutsPanel renders canceled job 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      Completed at Mon Sep 05 2022 15:59:39 GMT+0000
+      <FormattedMessage
+        defaultMessage="Completed at {date}"
+        id="xpack.enterpriseSearch.content.syncJobs.flyout.completedDescription"
+        values={
+          Object {
+            "date": <FormattedDateTime
+              date={2022-09-05T15:59:39.816Z}
+            />,
+          }
+        }
+      />
     </EuiCallOut>
   </EuiFlexItem>
   <EuiFlexItem>
@@ -39,9 +69,7 @@ exports[`SyncCalloutsPanel renders canceled job 1`] = `
       color="danger"
       iconType="cross"
       title="Sync canceled"
-    >
-      Sync canceled at .
-    </EuiCallOut>
+    />
   </EuiFlexItem>
   <EuiFlexItem>
     <EuiCallOut
@@ -49,7 +77,17 @@ exports[`SyncCalloutsPanel renders canceled job 1`] = `
       iconType="iInCircle"
       title="Sync started manually"
     >
-      Started at Mon Sep 05 2022 14:59:39 GMT+0000.
+      <FormattedMessage
+        defaultMessage="Started at {date}"
+        id="xpack.enterpriseSearch.content.syncJobs.flyout.startedAtDescription"
+        values={
+          Object {
+            "date": <FormattedDateTime
+              date={2022-09-05T14:59:39.816Z}
+            />,
+          }
+        }
+      />
     </EuiCallOut>
   </EuiFlexItem>
 </Fragment>
@@ -63,7 +101,17 @@ exports[`SyncCalloutsPanel renders different trigger method 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      Completed at Mon Sep 05 2022 15:59:39 GMT+0000
+      <FormattedMessage
+        defaultMessage="Completed at {date}"
+        id="xpack.enterpriseSearch.content.syncJobs.flyout.completedDescription"
+        values={
+          Object {
+            "date": <FormattedDateTime
+              date={2022-09-05T15:59:39.816Z}
+            />,
+          }
+        }
+      />
     </EuiCallOut>
   </EuiFlexItem>
   <EuiFlexItem>
@@ -81,7 +129,17 @@ exports[`SyncCalloutsPanel renders different trigger method 1`] = `
       iconType="iInCircle"
       title="Sync started by schedule"
     >
-      Started at Mon Sep 05 2022 14:59:39 GMT+0000.
+      <FormattedMessage
+        defaultMessage="Started at {date}"
+        id="xpack.enterpriseSearch.content.syncJobs.flyout.startedAtDescription"
+        values={
+          Object {
+            "date": <FormattedDateTime
+              date={2022-09-05T14:59:39.816Z}
+            />,
+          }
+        }
+      />
     </EuiCallOut>
   </EuiFlexItem>
 </Fragment>
@@ -95,7 +153,17 @@ exports[`SyncCalloutsPanel renders error job 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      Completed at Mon Sep 05 2022 15:59:39 GMT+0000
+      <FormattedMessage
+        defaultMessage="Completed at {date}"
+        id="xpack.enterpriseSearch.content.syncJobs.flyout.completedDescription"
+        values={
+          Object {
+            "date": <FormattedDateTime
+              date={2022-09-05T15:59:39.816Z}
+            />,
+          }
+        }
+      />
     </EuiCallOut>
   </EuiFlexItem>
   <EuiFlexItem>
@@ -113,7 +181,17 @@ exports[`SyncCalloutsPanel renders error job 1`] = `
       iconType="iInCircle"
       title="Sync started manually"
     >
-      Started at Mon Sep 05 2022 14:59:39 GMT+0000.
+      <FormattedMessage
+        defaultMessage="Started at {date}"
+        id="xpack.enterpriseSearch.content.syncJobs.flyout.startedAtDescription"
+        values={
+          Object {
+            "date": <FormattedDateTime
+              date={2022-09-05T14:59:39.816Z}
+            />,
+          }
+        }
+      />
     </EuiCallOut>
   </EuiFlexItem>
 </Fragment>
@@ -127,7 +205,17 @@ exports[`SyncCalloutsPanel renders in progress job 1`] = `
       iconType="check"
       title="Sync complete"
     >
-      Completed at Mon Sep 05 2022 15:59:39 GMT+0000
+      <FormattedMessage
+        defaultMessage="Completed at {date}"
+        id="xpack.enterpriseSearch.content.syncJobs.flyout.completedDescription"
+        values={
+          Object {
+            "date": <FormattedDateTime
+              date={2022-09-05T15:59:39.816Z}
+            />,
+          }
+        }
+      />
     </EuiCallOut>
   </EuiFlexItem>
   <EuiFlexItem>
@@ -145,7 +233,17 @@ exports[`SyncCalloutsPanel renders in progress job 1`] = `
       iconType="iInCircle"
       title="Sync started manually"
     >
-      Started at Mon Sep 05 2022 14:59:39 GMT+0000.
+      <FormattedMessage
+        defaultMessage="Started at {date}"
+        id="xpack.enterpriseSearch.content.syncJobs.flyout.startedAtDescription"
+        values={
+          Object {
+            "date": <FormattedDateTime
+              date={2022-09-05T14:59:39.816Z}
+            />,
+          }
+        }
+      />
     </EuiCallOut>
   </EuiFlexItem>
 </Fragment>
