@@ -20,12 +20,13 @@ import {
   filterForAlertProperty,
   showTopNAlertProperty,
   clickExpandActions,
+  filterOutAlertProperty,
 } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login, visit } from '../../tasks/login';
-import { fillAddFilterForm, openAddFilterPopover } from '../../tasks/search_bar';
+import { fillAddFilterForm, fillKqlQueryBar, openAddFilterPopover } from '../../tasks/search_bar';
 import { openActiveTimeline } from '../../tasks/timeline';
 
 import { ALERTS_URL } from '../../urls/navigation';
@@ -51,7 +52,7 @@ describe('Alerts cell actions', () => {
           .first()
           .invoke('text')
           .then((severityVal) => {
-            scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+            scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
             filterForAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
             cy.get(FILTER_BADGE)
               .first()
@@ -60,12 +61,35 @@ describe('Alerts cell actions', () => {
       });
 
       it('should filter for an empty property', () => {
-        // add condition to make sure the field is empty
-        openAddFilterPopover();
-        fillAddFilterForm({ key: 'file.name', operator: 'does not exist' });
+        // add query condition to make sure the field is empty
+        fillKqlQueryBar('not file.name: *{enter}');
         scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
         filterForAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
+
         cy.get(FILTER_BADGE).first().should('have.text', 'NOT file.name: exists');
+      });
+
+      it('should filter out a non-empty property', () => {
+        cy.get(ALERT_TABLE_SEVERITY_VALUES)
+          .first()
+          .invoke('text')
+          .then((severityVal) => {
+            scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+            filterOutAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
+            cy.get(FILTER_BADGE)
+              .first()
+              .should('have.text', `NOT kibana.alert.severity: ${severityVal}`);
+          });
+      });
+
+      it('should filter out an empty property', () => {
+        // add query condition to make sure the field is empty
+        fillKqlQueryBar('not file.name: *{enter}');
+
+        scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+        filterOutAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
+
+        cy.get(FILTER_BADGE).first().should('have.text', 'file.name: exists');
       });
     });
 
@@ -75,7 +99,7 @@ describe('Alerts cell actions', () => {
           .first()
           .invoke('text')
           .then((severityVal) => {
-            scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+            scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
             addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 0);
             openActiveTimeline();
             cy.get(PROVIDER_BADGE)
@@ -101,7 +125,7 @@ describe('Alerts cell actions', () => {
           .first()
           .invoke('text')
           .then(() => {
-            scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+            scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
             showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
             cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
           });
@@ -114,7 +138,7 @@ describe('Alerts cell actions', () => {
           .first()
           .invoke('text')
           .then(() => {
-            scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+            scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
             cy.window().then((win) => {
               cy.stub(win, 'prompt').returns('DISABLED WINDOW PROMPT');
             });
