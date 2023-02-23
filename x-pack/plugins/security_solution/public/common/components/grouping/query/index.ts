@@ -7,11 +7,10 @@
 
 import { isEmpty } from 'lodash/fp';
 import type {
-  CardinalitySubAggregation,
   GroupingQueryArgs,
   GroupingQuery,
-  OptionalSubAggregation,
-  TermsSubAggregation,
+  SubAggregation,
+  TermsOrCardinalityAggregation,
 } from './types';
 /** The maximum number of items to render */
 export const DEFAULT_STACK_BY_FIELD0_SIZE = 10;
@@ -28,8 +27,8 @@ const getOptionalSubAggregation = ({
   stackByMultipleFields1Size: number;
   stackByMultipleFields1From?: number;
   stackByMultipleFields1Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
-  additionalStatsAggregationsFields1: Array<CardinalitySubAggregation | TermsSubAggregation>;
-}): OptionalSubAggregation | {} =>
+  additionalStatsAggregationsFields1: TermsOrCardinalityAggregation[];
+}): SubAggregation | {} =>
   stackByMultipleFields1 != null && !isEmpty(stackByMultipleFields1)
     ? {
         stackByMultipleFields1: {
@@ -93,7 +92,6 @@ export const getGroupingQuery = ({
               size: MAX_QUERY_SIZE,
             },
           }),
-      // TODO: Fix this type error!
       aggs: {
         ...getOptionalSubAggregation({
           stackByMultipleFields1,
