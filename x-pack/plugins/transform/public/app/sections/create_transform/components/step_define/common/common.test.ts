@@ -31,25 +31,6 @@ describe('Transform: Define Pivot Common', () => {
     const options = getPivotDropdownOptions(dataView);
     expect(options).toMatchObject({
       fields: [{ name: ' the-f[i]e>ld ', type: 'number' }],
-      groupByOptions: [
-        { label: 'histogram( the-f[i]e>ld )', field: { id: ' the-f[i]e>ld ', type: 'number' } },
-        { label: 'terms( the-f[i]e>ld )', field: { id: ' the-f[i]e>ld ', type: 'number' } },
-      ],
-      groupByOptionsData: {
-        'histogram( the-f[i]e>ld )': {
-          agg: 'histogram',
-          aggName: 'the-field',
-          dropDownName: 'histogram( the-f[i]e>ld )',
-          field: ' the-f[i]e>ld ',
-          interval: '10',
-        },
-        'terms( the-f[i]e>ld )': {
-          agg: 'terms',
-          aggName: 'the-field',
-          dropDownName: 'terms( the-f[i]e>ld )',
-          field: ' the-f[i]e>ld ',
-        },
-      },
       aggOptions: [
         {
           label: ' the-f[i]e>ld ',
@@ -141,6 +122,25 @@ describe('Transform: Define Pivot Common', () => {
           aggConfig: {},
         },
       },
+      groupByOptions: [
+        { label: 'histogram( the-f[i]e>ld )', field: { id: ' the-f[i]e>ld ', type: 'number' } },
+        { label: 'terms( the-f[i]e>ld )', field: { id: ' the-f[i]e>ld ', type: 'number' } },
+      ],
+      groupByOptionsData: {
+        'histogram( the-f[i]e>ld )': {
+          agg: 'histogram',
+          aggName: 'the-field',
+          dropDownName: 'histogram( the-f[i]e>ld )',
+          field: ' the-f[i]e>ld ',
+          interval: '10',
+        },
+        'terms( the-f[i]e>ld )': {
+          agg: 'terms',
+          aggName: 'the-field',
+          dropDownName: 'terms( the-f[i]e>ld )',
+          field: ' the-f[i]e>ld ',
+        },
+      },
     });
 
     const runtimeMappings = {
@@ -157,40 +157,6 @@ describe('Transform: Define Pivot Common', () => {
         { name: ' the-f[i]e>ld ', type: 'number' },
         { name: 'rt_bytes_bigger', type: 'number' },
       ],
-      groupByOptions: [
-        { label: 'histogram( the-f[i]e>ld )', field: { id: ' the-f[i]e>ld ', type: 'number' } },
-        { label: 'terms( the-f[i]e>ld )', field: { id: ' the-f[i]e>ld ', type: 'number' } },
-        { label: 'histogram(rt_bytes_bigger)', field: { id: 'rt_bytes_bigger', type: 'number' } },
-        { label: 'terms(rt_bytes_bigger)', field: { id: 'rt_bytes_bigger', type: 'number' } },
-      ],
-      groupByOptionsData: {
-        'histogram( the-f[i]e>ld )': {
-          agg: 'histogram',
-          field: ' the-f[i]e>ld ',
-          aggName: 'the-field',
-          dropDownName: 'histogram( the-f[i]e>ld )',
-          interval: '10',
-        },
-        'terms( the-f[i]e>ld )': {
-          agg: 'terms',
-          field: ' the-f[i]e>ld ',
-          aggName: 'the-field',
-          dropDownName: 'terms( the-f[i]e>ld )',
-        },
-        'histogram(rt_bytes_bigger)': {
-          agg: 'histogram',
-          field: 'rt_bytes_bigger',
-          aggName: 'rt_bytes_bigger',
-          dropDownName: 'histogram(rt_bytes_bigger)',
-          interval: '10',
-        },
-        'terms(rt_bytes_bigger)': {
-          agg: 'terms',
-          field: 'rt_bytes_bigger',
-          aggName: 'rt_bytes_bigger',
-          dropDownName: 'terms(rt_bytes_bigger)',
-        },
-      },
       aggOptions: [
         {
           label: ' the-f[i]e>ld ',
@@ -367,6 +333,40 @@ describe('Transform: Define Pivot Common', () => {
           isSubAggsSupported: false,
           isMultiField: true,
           aggConfig: {},
+        },
+      },
+      groupByOptions: [
+        { label: 'histogram( the-f[i]e>ld )', field: { id: ' the-f[i]e>ld ', type: 'number' } },
+        { label: 'terms( the-f[i]e>ld )', field: { id: ' the-f[i]e>ld ', type: 'number' } },
+        { label: 'histogram(rt_bytes_bigger)', field: { id: 'rt_bytes_bigger', type: 'number' } },
+        { label: 'terms(rt_bytes_bigger)', field: { id: 'rt_bytes_bigger', type: 'number' } },
+      ],
+      groupByOptionsData: {
+        'histogram( the-f[i]e>ld )': {
+          agg: 'histogram',
+          field: ' the-f[i]e>ld ',
+          aggName: 'the-field',
+          dropDownName: 'histogram( the-f[i]e>ld )',
+          interval: '10',
+        },
+        'terms( the-f[i]e>ld )': {
+          agg: 'terms',
+          field: ' the-f[i]e>ld ',
+          aggName: 'the-field',
+          dropDownName: 'terms( the-f[i]e>ld )',
+        },
+        'histogram(rt_bytes_bigger)': {
+          agg: 'histogram',
+          field: 'rt_bytes_bigger',
+          aggName: 'rt_bytes_bigger',
+          dropDownName: 'histogram(rt_bytes_bigger)',
+          interval: '10',
+        },
+        'terms(rt_bytes_bigger)': {
+          agg: 'terms',
+          field: 'rt_bytes_bigger',
+          aggName: 'rt_bytes_bigger',
+          dropDownName: 'terms(rt_bytes_bigger)',
         },
       },
     });
