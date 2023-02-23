@@ -10,7 +10,7 @@ import { CASES_FILE_KINDS } from '../constants';
 
 type RegisterFileKind = (fileKind: FileKind) => void;
 
-export const registerCasesFileKinds = (registerFunction: RegisterFileKind) => {
+export const registerCaseFileKinds = (registerFunction: RegisterFileKind) => {
   for (const fileKind of Object.values(CASES_FILE_KINDS)) {
     registerFunction(fileKind);
   }

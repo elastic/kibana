@@ -10,13 +10,14 @@ import { APP_ID } from './application';
 import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from './owners';
 import { Operation } from './types';
 import type { Owner } from './types';
+import { ALLOWED_MIME_TYPES } from './mime_types';
 
 const buildFileKind = (owner: Owner): FileKind => {
   return {
     id: owner,
     http: fileKindHttpTags(owner),
     maxSizeBytes: maxFileSize,
-    allowedMimeTypes,
+    allowedMimeTypes: ALLOWED_MIME_TYPES,
   };
 };
 
@@ -40,17 +41,6 @@ const buildTag = (owner: Owner, operation: Operation) => {
 const access = 'access:';
 
 const maxFileSize = 100 * 1024 * 1024; // 100 MiB
-const allowedMimeTypes = [
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'image/avif',
-  'image/jpg',
-  'image/gif',
-  'text/plain',
-  'text/js',
-  'text/json',
-];
 
 export const constructHttpOperationTag = (owner: Owner, operation: Operation) => {
   return `${owner}FilesCases${operation}`;

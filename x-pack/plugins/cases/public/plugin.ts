@@ -28,7 +28,7 @@ import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
-import { registerCasesFileKinds } from '../common/utils/files';
+import { registerCaseFileKinds } from '../common/utils/files';
 
 /**
  * @public
@@ -166,5 +166,5 @@ export class CasesUiPlugin
 }
 
 const registerFileKinds = (filesSetupPlugin: FilesSetup) => {
-  registerCasesFileKinds(filesSetupPlugin.registerFileKind);
+  registerCaseFileKinds(filesSetupPlugin.registerFileKind);
 };
