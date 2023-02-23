@@ -7,10 +7,7 @@
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { BoolQuery } from '@kbn/es-query';
-import type {
-  CardinalitySubAggregation,
-  TermsSubAggregation,
-} from '../../../../common/components/grouping';
+import type { TermsOrCardinalityAggregation } from '../../../../common/components/grouping';
 import { getGroupingQuery } from '../../../../common/components/grouping';
 
 const getGroupFields = (groupValue: string) => {
@@ -77,10 +74,8 @@ export const getAlertsGroupingQuery = ({
     stackByMultipleFields1: [],
   });
 
-const getAggregationsByGroupField = (
-  field: string
-): Array<CardinalitySubAggregation | TermsSubAggregation> => {
-  const aggMetrics: Array<CardinalitySubAggregation | TermsSubAggregation> = [
+const getAggregationsByGroupField = (field: string): TermsOrCardinalityAggregation[] => {
+  const aggMetrics: TermsOrCardinalityAggregation[] = [
     {
       alertsCount: {
         cardinality: {
