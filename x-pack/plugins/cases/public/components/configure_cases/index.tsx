@@ -17,7 +17,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 
-import type { CaseConnector, ClosureType } from '../../containers/configure/types';
+import type { ClosureType } from '../../containers/configure/types';
 
 import { SectionWrapper, ContentWrapper, WhitePageWrapper } from '../wrappers';
 import { Connectors } from './connectors';
@@ -58,9 +58,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
-    null
-  );
-  const [newlyCreatedConnectorItem, setNewlyCreatedConnectorItem] = useState<CaseConnector | null>(
     null
   );
 
@@ -108,7 +105,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         closureType,
       });
     },
-    [onConnectorUpdated, setConnector, persistCaseConfigure]
+    [onConnectorUpdated, closureType, setConnector, persistCaseConfigure]
   );
 
   const isLoadingAny =
