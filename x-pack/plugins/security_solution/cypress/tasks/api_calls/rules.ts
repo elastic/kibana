@@ -63,7 +63,7 @@ export const createCustomRule = (
       data_view_id: rule.dataSource.type === 'dataView' ? rule.dataSource.dataView : undefined,
       query: rule.customQuery,
       language: 'kuery',
-      enabled: false,
+      enabled: rule.enabled ?? false,
       exceptions_list: rule.exceptionLists ?? [],
       tags: rule.tags,
       ...(timeline?.id ?? timeline?.templateTimelineId
