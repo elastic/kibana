@@ -129,9 +129,9 @@ describe('Transform: Define Pivot Common', () => {
       groupByOptionsData: {
         'histogram( the-f[i]e>ld )': {
           agg: 'histogram',
+          field: ' the-f[i]e>ld ',
           aggName: 'the-field',
           dropDownName: 'histogram( the-f[i]e>ld )',
-          field: ' the-f[i]e>ld ',
           interval: '10',
         },
         'terms( the-f[i]e>ld )': {
