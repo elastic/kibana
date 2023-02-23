@@ -140,5 +140,6 @@
     "@kbn/securitysolution-ecs",
     "@kbn/cell-actions",
     "@kbn/shared-ux-router",
+    "@kbn/charts-plugin",
   ]
 }
