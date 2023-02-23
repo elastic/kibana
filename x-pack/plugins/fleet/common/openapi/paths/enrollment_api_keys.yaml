@@ -29,6 +29,8 @@ get:
               - page
               - perPage
               - total
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-enrollment-api-keys
   parameters: []
 post:
@@ -48,6 +50,8 @@ post:
                 type: string
                 enum:
                   - created
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: create-enrollment-api-keys
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
