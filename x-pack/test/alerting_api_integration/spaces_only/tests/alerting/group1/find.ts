@@ -102,6 +102,7 @@ const findTestUtils = (
               notify_when: 'onThrottleInterval',
               throttle: '1m',
             },
+            uuid: match.actions[0].uuid,
           },
         ],
         params: {},
