@@ -252,7 +252,6 @@ export const useDiscoverHistogram = ({
         totalHitsResult: documentState.result?.length,
         totalHitsStatus: documentState.fetchStatus.toString() as UnifiedHistogramFetchStatus,
       });
-      firstLoadComplete.current = true;
     }
   }, [documentState.fetchStatus, documentState.result, isPlainRecord, unifiedHistogram]);
 
@@ -270,6 +269,7 @@ export const useDiscoverHistogram = ({
         }
 
         if (isPlainRecord) {
+          firstLoadComplete.current = true;
           return;
         }
 
