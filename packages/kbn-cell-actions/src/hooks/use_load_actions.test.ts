@@ -195,6 +195,7 @@ describe('loadActions hooks', () => {
       await waitForNextUpdate();
       expect(mockGetActions).toHaveBeenCalledTimes(0);
 
+      expect(result.current.value).toBeInstanceOf(Array);
       expect(result.current.value).toHaveLength(0);
       expect(result.current.loading).toBe(false);
     });
