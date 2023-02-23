@@ -34,7 +34,6 @@ describe('UnifiedHistogramContainer', () => {
     columns: [],
     allSuggestions: undefined,
     currentSuggestion: undefined,
-    textBasedResults: undefined,
   };
 
   it('should set ref', () => {

@@ -25,7 +25,6 @@ export const createMockUnifiedHistogramApi = (
     setTopPanelHeight: jest.fn(),
     setBreakdownField: jest.fn(),
     setColumns: jest.fn(),
-    setTextBasedResults: jest.fn(),
     setTimeInterval: jest.fn(),
     setRequestParams: jest.fn(),
     setTotalHits: jest.fn(),

@@ -25,7 +25,6 @@ import {
   totalHitsStatusSelector,
   currentSuggestionSelector,
   allSuggestionsSelector,
-  textBasedResultsSelector,
 } from '../utils/state_selectors';
 import { useStateSelector } from '../utils/use_state_selector';
 
@@ -45,7 +44,6 @@ export const useStateProps = (
   const totalHitsStatus = useStateSelector(stateService?.state$, totalHitsStatusSelector);
   const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
   const allSuggestions = useStateSelector(stateService?.state$, allSuggestionsSelector);
-  const textBasedResults = useStateSelector(stateService?.state$, textBasedResultsSelector);
 
   const columnsRef = useRef(columns);
 
@@ -66,7 +64,7 @@ export const useStateProps = (
   }, [dataView]);
 
   const hits = useMemo(() => {
-    if (isPlainRecord || totalHitsResult instanceof Error) {
+    if (totalHitsResult instanceof Error) {
       return undefined;
     }
 
@@ -74,7 +72,7 @@ export const useStateProps = (
       status: totalHitsStatus,
       total: totalHitsResult,
     };
-  }, [isPlainRecord, totalHitsResult, totalHitsStatus]);
+  }, [totalHitsResult, totalHitsStatus]);
 
   const chart = useMemo(() => {
     if (!isTimeBased && !isPlainRecord) {
@@ -230,7 +228,6 @@ export const useStateProps = (
     columns,
     currentSuggestion,
     allSuggestions,
-    textBasedResults,
     isPlainRecord,
     onTopPanelHeightChange,
     onTimeIntervalChange,

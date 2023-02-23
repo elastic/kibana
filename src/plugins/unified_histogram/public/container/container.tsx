@@ -82,7 +82,6 @@ export type UnifiedHistogramInitializedApi = {
   | 'setTopPanelHeight'
   | 'setBreakdownField'
   | 'setColumns'
-  | 'setTextBasedResults'
   | 'setTimeInterval'
   | 'setRequestParams'
   | 'setTotalHits'
@@ -133,7 +132,6 @@ export const UnifiedHistogramContainer = forwardRef<
         'setTopPanelHeight',
         'setBreakdownField',
         'setColumns',
-        'setTextBasedResults',
         'setTimeInterval',
         'setRequestParams',
         'setTotalHits'

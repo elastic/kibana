@@ -247,14 +247,13 @@ export const useDiscoverHistogram = ({
   }, [columns, query, unifiedHistogram]);
 
   useEffect(() => {
-    if (
-      isPlainRecord &&
-      documentState.fetchStatus === FetchStatus.COMPLETE &&
-      documentState.result
-    ) {
-      unifiedHistogram?.setTextBasedResults(documentState.result?.length);
+    if (isPlainRecord) {
+      unifiedHistogram?.setTotalHits({
+        totalHitsResult: documentState.result?.length,
+        totalHitsStatus: documentState.fetchStatus.toString() as UnifiedHistogramFetchStatus,
+      });
     }
-  }, [columns, documentState.fetchStatus, documentState.result, isPlainRecord, unifiedHistogram]);
+  }, [documentState.fetchStatus, documentState.result, isPlainRecord, unifiedHistogram]);
 
   /**
    * Total hits

@@ -54,7 +54,6 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   columns?: string[];
   currentSuggestion?: Suggestion;
   allSuggestions?: Suggestion[];
-  textBasedResults?: number;
   isPlainRecord?: boolean;
   /**
    * The current time range
@@ -156,7 +155,6 @@ export const UnifiedHistogramLayout = ({
   columns,
   currentSuggestion,
   allSuggestions,
-  textBasedResults,
   isPlainRecord,
   timeRange,
   request,
@@ -193,7 +191,7 @@ export const UnifiedHistogramLayout = ({
   );
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-  const showFixedPanels = isMobile || !chart || chart.hidden || (chart.hidden && textBasedResults);
+  const showFixedPanels = isMobile || !chart || chart.hidden;
   const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;
   const minMainPanelHeight = euiTheme.base * 10;
@@ -206,7 +204,7 @@ export const UnifiedHistogramLayout = ({
       : 'eui-fullHeight';
 
   const panelsMode =
-    chart || hits || textBasedResults
+    chart || hits
       ? showFixedPanels
         ? PANELS_MODE.FIXED
         : PANELS_MODE.RESIZABLE
@@ -235,7 +233,6 @@ export const UnifiedHistogramLayout = ({
           columns={columns}
           currentSuggestion={currentSuggestion}
           allSuggestions={allSuggestions}
-          textBasedResults={textBasedResults}
           isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}

@@ -23,4 +23,3 @@ export const totalHitsResultSelector = (state: UnifiedHistogramState) => state.t
 export const totalHitsStatusSelector = (state: UnifiedHistogramState) => state.totalHitsStatus;
 export const currentSuggestionSelector = (state: UnifiedHistogramState) => state.currentSuggestion;
 export const allSuggestionsSelector = (state: UnifiedHistogramState) => state.allSuggestions;
-export const textBasedResultsSelector = (state: UnifiedHistogramState) => state.textBasedResults;
