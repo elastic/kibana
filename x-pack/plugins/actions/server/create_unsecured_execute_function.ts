@@ -13,7 +13,11 @@ import {
 } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
-import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
+import {
+  extractSavedObjectReferences,
+  isSavedObjectExecutionSource,
+  ActionExecutionSource,
+} from './lib';
 
 // This allowlist should only contain connector types that don't require API keys for
 // execution.
@@ -25,8 +29,9 @@ interface CreateBulkUnsecuredExecuteFunctionOptions {
 }
 
 export interface ExecuteOptions
-  extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects'> {
+  extends Pick<ActionExecutorOptions, 'params' | 'relatedSavedObjects'> {
   id: string;
+  source: ActionExecutionSource<unknown>;
 }
 
 interface ActionTaskParams
@@ -110,6 +115,7 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
           actionId: actionToExecute.id,
           params: actionToExecute.params,
           apiKey: null,
+          source: actionToExecute.source.type,
           relatedSavedObjects: relatedSavedObjectWithRefs,
         },
         references: taskReferences,
@@ -134,7 +140,7 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
   };
 }
 
-function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorOptions['source']) {
+function executionSourceAsSavedObjectReferences(executionSource: ActionExecutionSource<unknown>) {
   return isSavedObjectExecutionSource(executionSource)
     ? {
         references: [

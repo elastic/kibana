@@ -7,6 +7,7 @@
 
 import { UnsecuredActionsClient } from './unsecured_actions_client';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { asNotificationExecutionSource } from '../lib';
 
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const executionEnqueuer = jest.fn();
@@ -28,11 +29,13 @@ describe('bulkEnqueueExecution()', () => {
         id: 'preconfigured1',
         params: {},
         executionId: '123abc',
+        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
       },
       {
         id: 'preconfigured2',
         params: {},
         executionId: '456def',
+        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
       },
     ];
     await expect(
@@ -48,11 +51,13 @@ describe('bulkEnqueueExecution()', () => {
         id: 'preconfigured1',
         params: {},
         executionId: '123abc',
+        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
       },
       {
         id: 'preconfigured2',
         params: {},
         executionId: '456def',
+        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
       },
     ];
     await expect(
