@@ -12,10 +12,9 @@ import { CoreStart } from '@kbn/core/public';
 import { UX_APP } from '../../../../context/constants';
 import { ObservabilityPublicPluginsStart } from '../../../..';
 import { SectionContainer } from '..';
-import { getDataHandler } from '../../../../data_handler';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useHasData } from '../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
+import { useFetchUx } from '../../../../hooks/overview/use_fetch_ux';
+import { useFetchUxHasData } from '../../../../hooks/overview/use_fetch_ux_has_data';
 import CoreVitals from '../../../shared/core_web_vitals';
 import { BucketSize } from '../../../../pages/overview';
 import { getExploratoryViewEmbeddable } from '../../../shared/exploratory_view/embeddable';
@@ -30,12 +29,26 @@ interface Props {
 }
 
 export function UXSection({ bucketSize }: Props) {
-  const { forceUpdate, hasDataMap } = useHasData();
   const { services } = useKibana<ObservabilityPublicPluginsStart>();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
-  const uxHasDataResponse = hasDataMap.ux;
-  const serviceName = uxHasDataResponse?.serviceName as string;
+
+  const { data } = useFetchUxHasData();
+
+  const serviceName = data?.serviceName as string;
+
+  const { isLoading, isError, ux } = useFetchUx({
+    absoluteStart,
+    absoluteEnd,
+    hasData: Boolean(data?.hasData),
+    lastUpdated,
+    relativeStart,
+    relativeEnd,
+    serviceName,
+    bucketSize,
+  });
+
+  const { appLink, coreWebVitals } = ux || {};
 
   const ExploratoryViewEmbeddable = getExploratoryViewEmbeddable(
     services as ObservabilityPublicPluginsStart & CoreStart
@@ -58,38 +71,9 @@ export function UXSection({ bucketSize }: Props) {
     },
   ];
 
-  const { data, status } = useFetcher(
-    () => {
-      if (serviceName && bucketSize && absoluteStart && absoluteEnd) {
-        return getDataHandler('ux')?.fetchData({
-          absoluteTime: { start: absoluteStart, end: absoluteEnd },
-          relativeTime: { start: relativeStart, end: relativeEnd },
-          serviceName,
-          ...bucketSize,
-        });
-      }
-    },
-    // `forceUpdate` and `lastUpdated` should trigger a reload
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      bucketSize,
-      relativeStart,
-      relativeEnd,
-      absoluteStart,
-      absoluteEnd,
-      forceUpdate,
-      serviceName,
-      lastUpdated,
-    ]
-  );
-
-  if (!uxHasDataResponse?.hasData) {
+  if (!data?.hasData) {
     return null;
   }
-
-  const isLoading = status === FETCH_STATUS.LOADING;
-
-  const { appLink, coreWebVitals } = data || {};
 
   return (
     <SectionContainer
@@ -102,7 +86,7 @@ export function UXSection({ bucketSize }: Props) {
           defaultMessage: 'Show dashboard',
         }),
       }}
-      hasError={status === FETCH_STATUS.FAILURE}
+      hasError={isError}
     >
       <div style={{ height: 320 }}>
         <ExploratoryViewEmbeddable

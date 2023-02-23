@@ -23,10 +23,10 @@ import moment from 'moment';
 import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
 import { SectionContainer } from '..';
-import { getDataHandler } from '../../../../data_handler';
+
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useHasData } from '../../../../hooks/use_has_data';
+import { useFetchInfraLogs } from '../../../../hooks/overview/use_fetch_infra_logs';
+import { useFetchInfraLogsHasData } from '../../../../hooks/overview/use_fetch_infra_logs_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { LogsFetchDataResponse } from '../../../../typings';
 import { formatStatValue } from '../../../../utils/format_stat_value';
@@ -39,45 +39,27 @@ interface Props {
   bucketSize: BucketSize;
 }
 
-function getColorPerItem(series?: LogsFetchDataResponse['series']) {
-  if (!series) {
-    return {};
-  }
-  const availableColors = euiPaletteColorBlind({
-    rotations: Math.ceil(Object.keys(series).length / 10),
-  });
-  const colorsPerItem = Object.keys(series).reduce((acc: Record<string, string>, key, index) => {
-    acc[key] = availableColors[index];
-    return acc;
-  }, {});
-
-  return colorsPerItem;
-}
-
 export function LogsSection({ bucketSize }: Props) {
   const history = useHistory();
   const chartTheme = useChartTheme();
-  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
 
-  const { data, status } = useFetcher(
-    () => {
-      if (bucketSize && absoluteStart && absoluteEnd) {
-        return getDataHandler('infra_logs')?.fetchData({
-          absoluteTime: { start: absoluteStart, end: absoluteEnd },
-          relativeTime: { start: relativeStart, end: relativeEnd },
-          ...bucketSize,
-        });
-      }
-    },
+  const { data } = useFetchInfraLogsHasData();
 
-    // `forceUpdate` and `lastUpdated` trigger a reload
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate, lastUpdated]
-  );
+  const { logs, isLoading, isError } = useFetchInfraLogs({
+    absoluteStart,
+    absoluteEnd,
+    hasData: Boolean(data?.hasData),
+    relativeStart,
+    relativeEnd,
+    bucketSize,
+    lastUpdated,
+  });
 
-  if (!hasDataMap.infra_logs?.hasData) {
+  const { appLink, stats, series } = logs || {};
+
+  if (!data?.hasData) {
     return null;
   }
 
@@ -88,11 +70,7 @@ export function LogsSection({ bucketSize }: Props) {
     ? timeFormatter(bucketSize?.dateFormat)
     : niceTimeFormatter([min, max]);
 
-  const { appLink, stats, series } = data || {};
-
   const colorsPerItem = getColorPerItem(series);
-
-  const isLoading = status === FETCH_STATUS.LOADING;
 
   return (
     <SectionContainer
@@ -105,7 +83,7 @@ export function LogsSection({ bucketSize }: Props) {
           defaultMessage: 'Show log stream',
         }),
       }}
-      hasError={status === FETCH_STATUS.FAILURE}
+      hasError={isError}
     >
       <EuiTitle size="xxs">
         <h4>
@@ -184,4 +162,19 @@ export function LogsSection({ bucketSize }: Props) {
       </ChartContainer>
     </SectionContainer>
   );
+}
+
+function getColorPerItem(series?: LogsFetchDataResponse['series']) {
+  if (!series) {
+    return {};
+  }
+  const availableColors = euiPaletteColorBlind({
+    rotations: Math.ceil(Object.keys(series).length / 10),
+  });
+  const colorsPerItem = Object.keys(series).reduce((acc: Record<string, string>, key, index) => {
+    acc[key] = availableColors[index];
+    return acc;
+  }, {});
+
+  return colorsPerItem;
 }

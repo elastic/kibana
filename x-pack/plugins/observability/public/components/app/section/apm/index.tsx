@@ -23,11 +23,10 @@ import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
+import { useFetchApmServices } from '../../../../hooks/overview/use_fetch_apm_services';
+import { useFetchApmServicesHasData } from '../../../../hooks/overview/use_fetch_apm_services_has_data';
 import { SectionContainer } from '..';
-import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useHasData } from '../../../../hooks/use_has_data';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
@@ -37,51 +36,30 @@ interface Props {
   bucketSize: BucketSize;
 }
 
-function formatTpm(value?: number) {
-  return numeral(value).format('0.00a');
-}
-
-function formatTpmStat(value?: number) {
-  if (!value || value === 0) {
-    return '0';
-  }
-  if (value <= 0.1) {
-    return '< 0.1';
-  }
-  if (value > 1000) {
-    return numeral(value).format('0.00a');
-  }
-  return numeral(value).format('0,0.0');
-}
-
 export function APMSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
   const chartTheme = useChartTheme();
   const history = useHistory();
-  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
 
-  const { data, status } = useFetcher(
-    () => {
-      if (bucketSize && absoluteStart && absoluteEnd) {
-        return getDataHandler('apm')?.fetchData({
-          absoluteTime: { start: absoluteStart, end: absoluteEnd },
-          relativeTime: { start: relativeStart, end: relativeEnd },
-          ...bucketSize,
-        });
-      }
-    },
-    // `forceUpdate` and `lastUpdated` should trigger a reload
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate, lastUpdated]
-  );
+  const { data } = useFetchApmServicesHasData();
 
-  if (!hasDataMap.apm?.hasData) {
+  const { services, isLoading, isError } = useFetchApmServices({
+    absoluteStart,
+    absoluteEnd,
+    hasData: Boolean(data?.hasData),
+    relativeStart,
+    relativeEnd,
+    bucketSize,
+    lastUpdated,
+  });
+
+  if (!data?.hasData) {
     return null;
   }
 
-  const { appLink, stats, series } = data || {};
+  const { appLink, stats, series } = services || {};
 
   const min = moment.utc(absoluteStart).valueOf();
   const max = moment.utc(absoluteEnd).valueOf();
@@ -89,8 +67,6 @@ export function APMSection({ bucketSize }: Props) {
   const formatter = bucketSize?.dateFormat
     ? timeFormatter(bucketSize?.dateFormat)
     : niceTimeFormatter([min, max]);
-
-  const isLoading = status === FETCH_STATUS.LOADING;
 
   const transactionsColor = theme.eui.euiColorVis1;
 
@@ -105,7 +81,7 @@ export function APMSection({ bucketSize }: Props) {
           defaultMessage: 'Show service inventory',
         }),
       }}
-      hasError={status === FETCH_STATUS.FAILURE}
+      hasError={isError}
     >
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
@@ -176,4 +152,21 @@ export function APMSection({ bucketSize }: Props) {
       </ChartContainer>
     </SectionContainer>
   );
+}
+
+function formatTpm(value?: number) {
+  return numeral(value).format('0.00a');
+}
+
+function formatTpmStat(value?: number) {
+  if (!value || value === 0) {
+    return '0';
+  }
+  if (value <= 0.1) {
+    return '< 0.1';
+  }
+  if (value > 1000) {
+    return numeral(value).format('0.00a');
+  }
+  return numeral(value).format('0,0.0');
 }

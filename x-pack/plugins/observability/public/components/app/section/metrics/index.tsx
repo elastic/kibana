@@ -16,6 +16,8 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
+import { useFetchInfraMetrics } from '../../../../hooks/overview/use_fetch_infra_metrics';
+import { useFetchInfraMetricsHasData } from '../../../../hooks/overview/use_fetch_infra_metrics_has_data';
 import {
   MetricsFetchDataResponse,
   MetricsFetchDataSeries,
@@ -23,9 +25,6 @@ import {
   StringOrNull,
 } from '../../../..';
 import { SectionContainer } from '..';
-import { getDataHandler } from '../../../../data_handler';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useHasData } from '../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { HostLink } from './host_link';
 import { formatDuration } from './lib/format_duration';
@@ -41,42 +40,26 @@ interface Props {
   bucketSize: BucketSize;
 }
 
-const percentFormatter = (value: NumberOrNull) =>
-  value === null ? '' : numeral(value).format('0[.0]%');
-
-const numberFormatter = (value: NumberOrNull) =>
-  value === null ? '' : numeral(value).format('0[.0]');
-
-const bytesPerSecondFormatter = (value: NumberOrNull) =>
-  value === null ? '' : numeral(value).format('0b') + '/s';
-
 export function MetricsSection({ bucketSize }: Props) {
-  const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
   const [sortField, setSortField] = useState<keyof MetricsFetchDataSeries>('uptime');
   const [sortedData, setSortedData] = useState<MetricsFetchDataResponse | null>(null);
 
-  const { data, status } = useFetcher(() => {
-    if (bucketSize && absoluteStart && absoluteEnd) {
-      return getDataHandler('infra_metrics')?.fetchData({
-        absoluteTime: { start: absoluteStart, end: absoluteEnd },
-        relativeTime: { start: relativeStart, end: relativeEnd },
-        ...bucketSize,
-      });
-    }
-    // `forceUpdate` and `lastUpdated` should trigger a reload
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    bucketSize,
-    relativeStart,
-    relativeEnd,
+  const { data } = useFetchInfraMetricsHasData();
+
+  const { metrics, isLoading, isError } = useFetchInfraMetrics({
     absoluteStart,
     absoluteEnd,
-    forceUpdate,
+    hasData: Boolean(data?.hasData),
+    relativeStart,
+    relativeEnd,
+    bucketSize,
     lastUpdated,
-  ]);
+  });
+
+  const { appLink } = metrics || {};
 
   const handleTableChange = useCallback(
     ({ sort }: Criteria<MetricsFetchDataSeries>) => {
@@ -84,22 +67,21 @@ export function MetricsSection({ bucketSize }: Props) {
         const { field, direction } = sort;
         setSortField(field);
         setSortDirection(direction);
-        if (data) {
+        if (metrics) {
           (async () => {
-            const response = await data.sort(field, direction);
+            const response = await metrics.sort(field, direction);
             setSortedData(response || null);
           })();
         }
       }
     },
-    [data, setSortField, setSortDirection]
+    [metrics, setSortField, setSortDirection]
   );
 
-  if (!hasDataMap.infra_metrics?.hasData) {
+  if (!data?.hasData) {
     return null;
   }
 
-  const isLoading = status === FETCH_STATUS.LOADING;
   const isInitialLoad = isLoading && !data;
 
   const columns: Array<EuiBasicTableColumn<MetricsFetchDataSeries>> = [
@@ -195,9 +177,7 @@ export function MetricsSection({ bucketSize }: Props) {
     sort: { field: sortField, direction: sortDirection },
   };
 
-  const viewData = sortedData || data;
-
-  const { appLink } = data || {};
+  const viewData = sortedData || metrics;
 
   return (
     <SectionContainer
@@ -210,7 +190,7 @@ export function MetricsSection({ bucketSize }: Props) {
           defaultMessage: 'Show inventory',
         }),
       }}
-      hasError={status === FETCH_STATUS.FAILURE}
+      hasError={isError}
     >
       {isInitialLoad ? (
         <div
@@ -236,3 +216,12 @@ export function MetricsSection({ bucketSize }: Props) {
     </SectionContainer>
   );
 }
+
+const percentFormatter = (value: NumberOrNull) =>
+  value === null ? '' : numeral(value).format('0[.0]%');
+
+const numberFormatter = (value: NumberOrNull) =>
+  value === null ? '' : numeral(value).format('0[.0]');
+
+const bytesPerSecondFormatter = (value: NumberOrNull) =>
+  value === null ? '' : numeral(value).format('0b') + '/s';
