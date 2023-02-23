@@ -94,7 +94,11 @@ get:
       example: asc
   responses:
     '200':
-      description: List of SLOs
+      description: Paginated list of SLOs.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/find_slo_response.yaml'
     '400':
       description: Bad request
       content: 

@@ -1,4 +1,4 @@
-title: Custom KQL indicator type
+title: Custom KQL indicator type definition
 required:
   - type
   - params
