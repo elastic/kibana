@@ -9,21 +9,13 @@
 import fastIsEqual from 'fast-deep-equal';
 import { Observable } from 'rxjs';
 import { map, distinctUntilChanged, skip, startWith } from 'rxjs/operators';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
-import { EmbeddableInput } from '../embeddables';
+import type { FilterableEmbeddableInput } from './types';
 
 export const shouldRefreshFilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,
   // do not compare $state to avoid refreshing when filter is pinned/unpinned (which does not impact results)
   state: false,
-};
-
-type FilterableEmbeddableInput = EmbeddableInput & {
-  filters?: Filter[];
-  query?: Query;
-  timeRange?: TimeRange;
-  timeslice?: [number, number];
 };
 
 export function shouldFetch$<
