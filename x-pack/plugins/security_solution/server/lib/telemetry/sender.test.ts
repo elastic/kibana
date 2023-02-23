@@ -190,7 +190,7 @@ describe('TelemetryEventsSender', () => {
                 name: 'file.exe',
                 pid: 6792,
                 entity_id: 'some_entity_id',
-                executable: 'DeviceHarddiskVolume3WindowsSystem32file.exe'
+                executable: 'DeviceHarddiskVolume3WindowsSystem32file.exe',
               },
               session_info: {
                 logon_type: 'Interactive',
