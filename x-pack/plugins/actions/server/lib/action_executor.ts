@@ -29,8 +29,7 @@ import {
   ValidatorServices,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { ActionsClient } from '../actions_client';
-import { ActionExecutionSource, ActionExecutionSourceType } from './action_execution_source';
+import { ActionExecutionSourceType } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
@@ -42,10 +41,6 @@ export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceStart;
   getServices: GetServicesFunction;
-  getActionsClientWithRequest: (
-    request: KibanaRequest,
-    authorizationContext?: ActionExecutionSource<unknown>
-  ) => Promise<PublicMethodsOf<ActionsClient>>;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
