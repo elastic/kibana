@@ -9,6 +9,7 @@ import type { ActorRef } from 'xstate';
 import type {
   LogView,
   LogViewAttributes,
+  LogViewReference,
   LogViewStatus,
   ResolvedLogView,
 } from '../../../../common/log_views';
@@ -88,6 +89,10 @@ export type LogViewEvent =
   | {
       type: 'LOG_VIEW_ID_CHANGED';
       logViewId: string;
+    }
+  | {
+      type: 'INITIALIZED_FROM_URL';
+      logView: LogViewReference | null;
     }
   | {
       type: 'LOADING_SUCCEEDED';

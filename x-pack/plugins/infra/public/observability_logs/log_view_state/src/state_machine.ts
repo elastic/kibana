@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { IToasts } from '@kbn/core/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { catchError, from, map, of, throwError } from 'rxjs';
 import { createMachine, actions, assign } from 'xstate';
 import { ILogViewsClient } from '../../../services/log_views';
@@ -20,6 +22,7 @@ import {
   LogViewEvent,
   LogViewTypestate,
 } from './types';
+import { initializeFromUrl } from './url_state_storage_service';
 
 export const createPureLogViewStateMachine = (initialContext: LogViewContextWithId) =>
   /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UBqBLMB3AxMgPIDiA+hgJICiA6mZQCJkDCAEgIIByJ1jA2gAYAuolAAHVLCwAXLKgB2YkAA9EAFkEBmAHQAmAGwB2dQYAcAVkGmAjGYMAaEAE9EAWi3qjO9WcGCLIzMbLWMLAE4AX0inNEwcAgBVAAVGDgAVaiFRJBBJaTlFZTUEG20DfUEDLUtwg3CbdXUtJ1cEDz11HSMLTzMagwtjAOjY9Gw8HQBXBSxZuQBDABssAC9IfGzlfNl5JVySz3CdGwMwrRsbCK0a1sQyiqNDCMEjcK09QT8LUZA4idwOiWqAWEDmUEIRA4jEoPDIAGVEiwWNQ+HwtrkdoV9qASkZPDoLnpwmZniTgmY7ghSTorP5fFo6lorHobL9-gkgSCwQoIcRobDyAAxDiUZDokTbKS7IoHRBWMzdT4vCxDPQ3PRUvTqnThcL+OoWVmdU7qdnjTkAJzgqCWADdwfgAErUeFEZCJdKUIhcMgisUSnISaXY4qIcm0y6XJ5mdR6Iw2IxanV6g2DY3qRPm+KTa2wW0O3nO13uz3e32I5GoxiBqUFPZh0ra7z9S6CBo9G4tFyIGl06z9JlWOzZgE6ADGAAswOOANbg+EyBYyKawfDsagsADSgoR6QyiXhftF4oEksxIYbctKFhCOksxjsF3CQSTPYQ2t0qfb6ZsJqMo6clOM7zryi7Lqu65sJuO5wvC+7pIeCJIiiaJnkGeSXrKuL3K+3RnJ8eqGPGgRUm8PjEvq5jBKE6oATEfwWrmNr2hsLr8swxDkFQdAYsG9bYao9x6BYXSkjcBrqp8RiOO+Hg6NUAzhEM6gkvUNRmgxHKTMCoLgkKCxYEsbHUOkToAJp8ZhAk4kJCCMl0MlPKqoS+O2b5tJ0jynGc+KCHowR1HogHMfmSxTNiBlGSZZmWee-EyrZJT6jYCkfARVxaDJsZaqY3Q+cYWj+YFBghYCwFzguS4rrAUXGRAxaxVZWJXjhpSZt4ng2O84Qie2njdp5eUJmchXFd1BjBVpTGAlM4gQMujopGkXpwv6p7NVhSXCV43SqfU2qqYYWVUm42rHAOcb1L12gsmV0zzYtRbLRku6VqhNboXWiWNi+3j6spfSDB84TqKdZjHAY-kRE05hfMSbLTTms2PXIvJ1SZHFkFxFA0LQm02Y2xiKsyJJNPqNxQ5Scl-hYOgBEVt6fsYqn0QxCioBAcDKNpuDfaG14hIq9T2FcjSWEEgync0XQkv4k1ZQYjQRD8SNjjMcy7MsayQPzrV2XYFQi0rt6+IE9gWFSZR09qZzNN1fRDFEaucrpPJQHrgklF4ej0yJInKRDpIeYg5hKoMZhvGUbxFfRYzIzoeYFuCnvbQgcs+Gb+oib4x1UsE4e9PYZzWLe90VaBUDgTVqeNmLF1GlU9S+FDRpkcLKkhO8Vwkqr8djknrEQLX16spcCl0poRoGE0NztxP1QvmLARPM7-eu9y+mGfVI9tV4RuXOqgSJsSIlUrRJyr8fdT+FUfeMQng8RXsGPDxehPXkvlTVAmQy9Le59JqX2JPiF8gxMyR3LtOSqYFqqrlfrvA2jcfAWH6IYGePtwjnwiCcYqHxbCqk0Jpdekw5oLTRh7d+P1P5nAUp8Dq6hRJeFVKdTovtSR2CaD+TMTQzD3TIU9KACCqECzauLOmYtiZZRqAOVhxJ7ysljCEGSTQ4xs0iEAA */
@@ -33,7 +36,18 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
       states: {
         uninitialized: {
           always: {
-            target: 'loading',
+            target: 'initializingFromUrl',
+          },
+        },
+        initializingFromUrl: {
+          on: {
+            INITIALIZED_FROM_URL: {
+              target: 'loading',
+              actions: ['storeLogViewReference'],
+            },
+          },
+          invoke: {
+            src: 'initializeFromUrl',
           },
         },
         loading: {
@@ -202,12 +216,16 @@ export interface LogViewStateMachineDependencies {
   initialContext: LogViewContextWithId;
   logViews: ILogViewsClient;
   notificationChannel?: NotificationChannel<LogViewContext, LogViewEvent, LogViewNotificationEvent>;
+  toastsService: IToasts;
+  urlStateStorage: IKbnUrlStateStorage;
 }
 
 export const createLogViewStateMachine = ({
   initialContext,
   logViews,
   notificationChannel,
+  toastsService,
+  urlStateStorage,
 }: LogViewStateMachineDependencies) =>
   createPureLogViewStateMachine(initialContext).withConfig({
     actions:
@@ -225,6 +243,7 @@ export const createLogViewStateMachine = ({
           }
         : {},
     services: {
+      initializeFromUrl: initializeFromUrl({ toastsService, urlStateStorage }),
       loadLogView: (context) =>
         from(
           'logViewId' in context
