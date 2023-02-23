@@ -14,12 +14,7 @@ import React, { useEffect, useMemo, useCallback, useState } from 'react';
 
 import { observabilityFeatureId } from '../../../../../common';
 import type { ObservabilityAppServices } from '../../../../application/types';
-import {
-  DataSections,
-  LoadingObservability,
-  HeaderActions,
-  DataAssistantFlyout,
-} from '../../components';
+import { DataSections, HeaderActions, DataAssistantFlyout } from '../../components';
 import { EmptySections } from '../../../../components/app/empty_sections';
 import { ObservabilityHeaderMenu } from '../../../../components/app/header';
 import { Resources } from '../../../../components/app/resources';
@@ -29,13 +24,17 @@ import { ObservabilityStatusProgress } from '../../../../components/app/observab
 import { observabilityAlertFeatureIds, paths } from '../../../../config';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useFetchSyntheticsUptimeHasData } from '../../../../hooks/overview/use_fetch_synthetics_uptime_has_data';
+import { useFetchInfraMetricsHasData } from '../../../../hooks/overview/use_fetch_infra_metrics_has_data';
+import { useFetchInfraLogsHasData } from '../../../../hooks/overview/use_fetch_infra_logs_has_data';
+import { useFetchApmServicesHasData } from '../../../../hooks/overview/use_fetch_apm_services_has_data';
+import { useFetchUxHasData } from '../../../../hooks/overview/use_fetch_ux_has_data';
+import { useFetchObservabilityAlerts } from '../../../../hooks/use_fetch_observability_alerts';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
+import { useFetchNewsFeed } from '../../../../hooks/overview/use_fetch_news_feed';
 import { useGuidedSetupProgress } from '../../../../hooks/use_guided_setup_progress';
-import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../../../hooks/use_time_buckets';
-import { getNewsFeed } from '../../../../services/get_news_feed';
 import { buildEsQuery } from '../../../../utils/build_es_query';
 import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
 
@@ -53,7 +52,6 @@ export function OverviewPage() {
       ui: { getCasesContext },
     },
     charts,
-    http,
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
       getAlertsStateTable: AlertsStateTable,
@@ -64,6 +62,37 @@ export function OverviewPage() {
 
   const { ObservabilityPageTemplate } = usePluginContext();
 
+  const chartThemes = {
+    theme: charts.theme.useChartsTheme(),
+    baseTheme: charts.theme.useChartsBaseTheme(),
+  };
+
+  const { alerts, isLoading: alertsIsLoading } = useFetchObservabilityAlerts();
+  const { data: apmServices, isLoading: apmServicesIsLoading } = useFetchApmServicesHasData();
+  const { data: infraLogs, isLoading: infraLogsIsLoading } = useFetchInfraLogsHasData();
+  const { data: infraMetrics, isLoading: infraMetricsIsLoading } = useFetchInfraMetricsHasData();
+  const { data: syntheticsUptime, isLoading: syntheticsUptimeIsLoading } =
+    useFetchSyntheticsUptimeHasData();
+  const { data: ux, isLoading: uxIsLoading } = useFetchUxHasData();
+
+  const isAnyDataFetching =
+    alertsIsLoading ||
+    apmServicesIsLoading ||
+    infraLogsIsLoading ||
+    infraMetricsIsLoading ||
+    syntheticsUptimeIsLoading ||
+    uxIsLoading;
+
+  const hasAnyData =
+    (alerts && alerts.length > 0) ||
+    apmServices?.hasData ||
+    infraLogs?.hasData ||
+    infraMetrics?.hasData ||
+    syntheticsUptime?.hasData ||
+    ux?.hasData;
+
+  const { newsFeed } = useFetchNewsFeed({ kibanaVersion });
+
   useBreadcrumbs([
     {
       text: i18n.translate('xpack.observability.breadcrumbs.overviewLinkText', {
@@ -71,12 +100,6 @@ export function OverviewPage() {
       }),
     },
   ]);
-
-  const { data: newsFeed } = useFetcher(
-    () => getNewsFeed({ http, kibanaVersion }),
-    [http, kibanaVersion]
-  );
-  const { hasAnyData, isAllRequestsComplete } = useHasData();
 
   const { trackMetric } = useOverviewMetrics({ hasAnyData });
 
@@ -107,6 +130,7 @@ export function OverviewPage() {
       }),
     [absoluteStart, absoluteEnd, timeBuckets]
   );
+
   const alertSummaryTimeRange = useMemo(
     () =>
       getAlertSummaryTimeRange(
@@ -119,11 +143,6 @@ export function OverviewPage() {
       ),
     [bucketSize, relativeEnd, relativeStart]
   );
-
-  const chartThemes = {
-    theme: charts.theme.useChartsTheme(),
-    baseTheme: charts.theme.useChartsBaseTheme(),
-  };
 
   useEffect(() => {
     setEsQuery(
@@ -155,15 +174,11 @@ export function OverviewPage() {
     handleCloseGuidedSetupTour();
 
     setIsDataAssistantFlyoutVisible(true);
-  }, [trackMetric, isGuidedSetupProgressDismissed]);
-
-  if (hasAnyData === undefined) {
-    return <LoadingObservability />;
-  }
+  }, [isGuidedSetupProgressDismissed, trackMetric]);
 
   return (
     <ObservabilityPageTemplate
-      isPageDataLoaded={isAllRequestsComplete}
+      isPageDataLoaded={!isAnyDataFetching}
       pageHeader={{
         pageTitle: i18n.translate('xpack.observability.overview.pageTitle', {
           defaultMessage: 'Overview',
@@ -200,7 +215,7 @@ export function OverviewPage() {
                 defaultMessage: 'Show alerts',
               }),
             }}
-            initialIsOpen={hasAnyData}
+            initialIsOpen={alerts && alerts?.length > 0}
             hasError={false}
           >
             <CasesContext
@@ -209,23 +224,23 @@ export function OverviewPage() {
               features={{ alerts: { sync: false } }}
             >
               <AlertSummaryWidget
+                chartThemes={chartThemes}
                 featureIds={observabilityAlertFeatureIds}
                 filter={esQuery}
                 fullSize
                 timeRange={alertSummaryTimeRange}
-                chartThemes={chartThemes}
               />
               <AlertsStateTable
                 alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                 configurationId={AlertConsumers.OBSERVABILITY}
-                flyoutSize="s"
                 featureIds={observabilityAlertFeatureIds}
+                flyoutSize="s"
                 hideLazyLoader
                 id={ALERTS_TABLE_ID}
                 pageSize={ALERTS_PER_PAGE}
                 query={esQuery}
-                showExpandToDetails={false}
                 showAlertStatusWithFlapping
+                showExpandToDetails={false}
               />
             </CasesContext>
           </SectionContainer>
