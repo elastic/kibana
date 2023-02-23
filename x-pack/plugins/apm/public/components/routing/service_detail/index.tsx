@@ -340,16 +340,23 @@ export const serviceDetail = {
           }),
         }),
       },
-      '/services/{serviceName}/alerts': page({
-        tab: 'alerts',
-        title: i18n.translate('xpack.apm.views.alerts.title', {
-          defaultMessage: 'Alerts',
+      '/services/{serviceName}/alerts': {
+        ...page({
+          tab: 'alerts',
+          title: i18n.translate('xpack.apm.views.alerts.title', {
+            defaultMessage: 'Alerts',
+          }),
+          element: <AlertsOverview />,
+          searchBarOptions: {
+            hidden: true,
+          },
         }),
-        element: <AlertsOverview />,
-        searchBarOptions: {
-          hidden: true,
-        },
-      }),
+        params: t.partial({
+          query: t.partial({
+            alertStatus: t.string,
+          }),
+        }),
+      },
       '/services/{serviceName}/': {
         element: <RedirectToDefaultServiceRouteView />,
       },
