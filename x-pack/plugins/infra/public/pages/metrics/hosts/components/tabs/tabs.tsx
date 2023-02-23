@@ -13,7 +13,7 @@ import { MetricsGrid } from './metrics/metrics_grid';
 import { AlertsTabContent } from './alerts';
 
 import { AlertsTabBadge } from './alerts_tab_badge';
-import { TabIds, useTabId } from '../../hooks/useTabId';
+import { TabIds, useTabId } from '../../hooks/use_tab_id';
 
 const tabs = [
   {
