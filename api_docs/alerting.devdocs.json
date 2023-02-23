@@ -5990,6 +5990,20 @@
         "children": [
           {
             "parentPluginId": "alerting",
+            "id": "def-common.RuleAction.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-common.RuleAction.group",
             "type": "string",
             "tags": [],
