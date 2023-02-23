@@ -9,6 +9,7 @@
 import type { ProcedureName } from './constants';
 import type { ProcedureSchemas } from './types';
 import { getSchemas } from './get';
+import { bulkGetSchemas } from './bulk_get';
 import { createSchemas } from './create';
 import { updateSchemas } from './update';
 import { deleteSchemas } from './delete';
@@ -18,6 +19,7 @@ export const schemas: {
   [key in ProcedureName]: ProcedureSchemas;
 } = {
   get: getSchemas,
+  bulkGet: bulkGetSchemas,
   create: createSchemas,
   update: updateSchemas,
   delete: deleteSchemas,
