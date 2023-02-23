@@ -59,7 +59,7 @@ const orderSettings = (settings: SettingsConfig): SettingsConfig => {
 export const initUiSettings = (
   uiSettings: CoreSetup['uiSettings'],
   experimentalFeatures: ExperimentalFeatures,
-  customHighLightedFields: CustomHighlightedFields,
+  customHighlightedFields: CustomHighlightedFields,
 ) => {
   const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
     [DEFAULT_APP_REFRESH_INTERVAL]: {
@@ -372,7 +372,7 @@ export const initUiSettings = (
         name: i18n.translate('xpack.securitySolution.uiSettings.customHighlightedFields', {
           defaultMessage: 'Custom Highlighted Fields',
         }),
-        value: CUSTOM_HIGHLIGHTED_FIELD_SETTING_DEFAULT,
+        value: customHighlightedFields ? customHighlightedFields : CUSTOM_HIGHLIGHTED_FIELD_SETTING_DEFAULT,
         description: i18n.translate(
           'xpack.securitySolution.uiSettings.customHighlightedFieldsDescription',
           {
