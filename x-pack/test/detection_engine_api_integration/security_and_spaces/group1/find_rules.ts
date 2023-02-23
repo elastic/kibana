@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...getSimpleRuleOutput(),
-        actions: [action],
+        actions: [{ ...action, uuid: body.data[0].actions[0].uuid }],
         throttle: 'rule',
       };
 
@@ -171,7 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...getSimpleRuleOutput(),
-        actions: [action],
+        actions: [{ ...action, uuid: body.data[0].actions[0].uuid }],
         throttle: '1h', // <-- throttle makes this a scheduled action
       };
 

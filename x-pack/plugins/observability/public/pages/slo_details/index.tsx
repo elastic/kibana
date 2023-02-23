@@ -37,11 +37,11 @@ export function SloDetailsPage() {
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
 
-  const { loading, slo } = useFetchSloDetails(sloId);
+  const { isLoading, slo } = useFetchSloDetails(sloId);
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
-  const isSloNotFound = !loading && slo === undefined;
+  const isSloNotFound = !isLoading && slo === undefined;
 
   if (!isSloFeatureEnabled(config) || isSloNotFound) {
     return <PageNotFound />;
@@ -54,14 +54,14 @@ export function SloDetailsPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <PageTitle isLoading={loading} slo={slo} />,
+        pageTitle: <PageTitle isLoading={isLoading} slo={slo} />,
         rightSideItems: [],
         bottomBorder: true,
       }}
       data-test-subj="sloDetailsPage"
     >
-      {loading && <EuiLoadingSpinner data-test-subj="loadingDetails" />}
-      {!loading && <SloDetails slo={slo!} />}
+      {isLoading && <EuiLoadingSpinner data-test-subj="loadingDetails" />}
+      {!isLoading && <SloDetails slo={slo!} />}
     </ObservabilityPageTemplate>
   );
 }
