@@ -12,6 +12,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { createFiltersFromValueClickAction } from '@kbn/data-plugin/public';
+import type { RangeFilterParams } from '@kbn/es-query';
+import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -136,7 +139,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     return { response, additionalResponses };
   }, [visualizationData.responses]);
 
-  const callback = useCallback(
+  const onLoadCallback = useCallback(
     (isLoading, adapters) => {
       if (!adapters) {
         return;
@@ -157,6 +160,25 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
       }
     },
     [onLoad]
+  );
+
+  const onFilterCallback = useCallback(
+    async (e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => {
+      if (!Array.isArray(e.data)) {
+        return;
+      }
+      const [{ query }] = await createFiltersFromValueClickAction({
+        data: e.data,
+        negate: e.negate,
+      });
+      const rangeFilter: RangeFilterParams = query?.range['@timestamp'];
+      if (rangeFilter?.gte && rangeFilter?.lt) {
+        updateDateRange({
+          range: [rangeFilter.gte, rangeFilter.lt],
+        });
+      }
+    },
+    [updateDateRange]
   );
 
   const adHocDataViews = useMemo(
@@ -219,8 +241,9 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             style={style}
             timeRange={timerange}
             attributes={attributes}
-            onLoad={callback}
+            onLoad={onLoadCallback}
             onBrushEnd={updateDateRange}
+            onFilter={onFilterCallback}
             viewMode={ViewMode.VIEW}
             withDefaultActions={false}
             extraActions={actions}

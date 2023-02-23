@@ -300,5 +300,7 @@ export type {
   DataPublicPluginStartActions,
 } from './types';
 
+export { createFiltersFromValueClickAction } from './actions';
+
 // Export plugin after all other imports
 export type { DataPublicPlugin as DataPlugin };
