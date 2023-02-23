@@ -220,9 +220,7 @@ export class FileClientImpl implements FileClient {
     const { maxSizeBytes } = this.fileKindDescriptor;
     const { transforms = [], ...blobOptions } = options || {};
 
-    let maxFileSize: number = typeof maxSizeBytes === 'number'
-      ? maxSizeBytes
-      : fourMiB;
+    let maxFileSize: number = typeof maxSizeBytes === 'number' ? maxSizeBytes : fourMiB;
 
     if (typeof maxSizeBytes === 'function') {
       const sizeLimitPerFile = maxSizeBytes(file);
@@ -231,7 +229,7 @@ export class FileClientImpl implements FileClient {
       }
     }
 
-    transforms.push(enforceMaxByteSizeTransform(maxFileSize))
+    transforms.push(enforceMaxByteSizeTransform(maxFileSize));
 
     return this.blobStorageClient.upload(rs, {
       ...blobOptions,
