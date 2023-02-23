@@ -201,7 +201,7 @@ export const ControlEditor = ({
           {fieldRegistry && (
             <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
               <FieldPicker
-                filterPredicate={(field: DataViewField) => Boolean(fieldRegistry?.[field.name])}
+                filterPredicate={(field: DataViewField) => Boolean(fieldRegistry[field.name])}
                 selectedFieldName={selectedField}
                 dataView={dataView}
                 onSelectField={(field) => {

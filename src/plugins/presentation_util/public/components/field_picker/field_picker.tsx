@@ -114,6 +114,7 @@ export const FieldPicker = ({
       listProps={{
         isVirtualized: true,
         showIcons: false,
+        bordered: true,
       }}
       height={300}
     >
