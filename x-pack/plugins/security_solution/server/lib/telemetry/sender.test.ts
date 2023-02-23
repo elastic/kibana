@@ -102,7 +102,6 @@ describe('TelemetryEventsSender', () => {
                 vendor_id: 'Msft',
                 volume_device_type: 'CD-ROM File System',
               },
-              load_index: 1,
               relative_file_creation_time: 35588490.2737149,
               relative_file_name_modify_time: 35588490.2424634,
             },
