@@ -7,7 +7,10 @@
  */
 
 import ace, { type Annotation } from 'ace-builds/src-noconflict/ace';
-import { Editor as IAceEditor, IEditSession as IAceEditSession } from 'ace-builds/src-noconflict/ace';
+import {
+  Editor as IAceEditor,
+  IEditSession as IAceEditSession,
+} from 'ace-builds/src-noconflict/ace';
 import $ from 'jquery';
 import {
   CoreEditor,

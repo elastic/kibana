@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { TextMode as TextModeInterface, acequire } from 'ace-builds/src-noconflict/ace';
+import {
+  TextMode as TextModeInterface,
+  acequire,
+} from 'ace-builds/src-noconflict/ace';
 import { EQL_MODE_NAME } from './constants';
 import { EQLHighlightRules } from './eql_highlight_rules';
 
