@@ -47,6 +47,8 @@ import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
+import type { GroupState } from './grouping/types';
+import { groupSelectors } from './grouping';
 
 type ComposeType = typeof compose;
 declare global {
@@ -127,6 +129,15 @@ export const createStoreFactory = async (
     },
   };
 
+  const groupsInitialState: GroupState = {
+    groups: {
+      groupById: {
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
+        ...subPlugins.alerts.groups!.groupById,
+      },
+    },
+  };
+
   const timelineReducer = reduceReducers(
     timelineInitialState.timeline,
     startPlugins.timelines?.getTimelineReducer() ?? {},
@@ -145,7 +156,8 @@ export const createStoreFactory = async (
       signalIndexName: signal.name,
       enableExperimental,
     },
-    dataTableInitialState
+    dataTableInitialState,
+    groupsInitialState
   );
 
   const rootReducer = {
@@ -178,6 +190,7 @@ export const createStore = (
     timelineByIdSelector: timelineSelectors.timelineByIdSelector,
     timelineTimeRangeSelector: inputsSelectors.timelineTimeRangeSelector,
     tableByIdSelector: dataTableSelectors.tableByIdSelector,
+    groupByIdSelector: groupSelectors.groupByIdSelector,
     storage,
   };
 
