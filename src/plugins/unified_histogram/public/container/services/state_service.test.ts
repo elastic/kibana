@@ -62,6 +62,7 @@ describe('UnifiedHistogramStateService', () => {
     columns: [],
     currentSuggestion: undefined,
     allSuggestions: undefined,
+    textBasedResults: undefined,
   };
 
   it('should initialize state with default values', () => {
@@ -90,6 +91,7 @@ describe('UnifiedHistogramStateService', () => {
       columns: [],
       currentSuggestion: undefined,
       allSuggestions: undefined,
+      textBasedResults: undefined,
     });
   });
 

@@ -56,6 +56,7 @@ export interface ChartProps {
   isPlainRecord?: boolean;
   currentSuggestion?: Suggestion;
   allSuggestions?: Suggestion[];
+  textBasedResults?: number;
   timeRange?: TimeRange;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
@@ -94,6 +95,7 @@ export function Chart({
   breakdown,
   currentSuggestion,
   allSuggestions,
+  textBasedResults,
   isPlainRecord,
   appendHitsCounter,
   appendHistogram,
@@ -246,6 +248,7 @@ export function Chart({
             css={resultCountTitleCss}
           >
             {hits && <HitsCounter hits={hits} append={appendHitsCounter} />}
+            {textBasedResults && <HitsCounter hits={{ total: textBasedResults }} />}
           </EuiFlexItem>
           {chart && (
             <EuiFlexItem css={resultCountToggleCss}>

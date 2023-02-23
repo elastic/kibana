@@ -39,6 +39,7 @@ describe('useStateProps', () => {
     columns: [],
     currentSuggestion: undefined,
     allSuggestions: undefined,
+    textBasedResults: undefined,
   };
 
   const getStateService = (options: Omit<UnifiedHistogramStateOptions, 'services'>) => {
@@ -100,6 +101,7 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
+        "textBasedResults": undefined,
       }
     `);
   });
@@ -135,6 +137,7 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
+        "textBasedResults": undefined,
       }
     `);
   });
@@ -179,6 +182,7 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
+        "textBasedResults": undefined,
       }
     `);
   });
@@ -217,6 +221,7 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
+        "textBasedResults": undefined,
       }
     `);
   });

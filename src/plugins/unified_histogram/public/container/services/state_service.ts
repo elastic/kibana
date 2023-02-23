@@ -194,6 +194,7 @@ export const createStateService = (
     filters: [],
     currentSuggestion: undefined,
     allSuggestions: undefined,
+    textBasedResults: undefined,
     lensRequestAdapter: undefined,
     query: services.data.query.queryString.getDefaultQuery(),
     requestAdapter: undefined,
