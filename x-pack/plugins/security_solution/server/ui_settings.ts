@@ -11,6 +11,8 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
   APP_ID,
+  CUSTOM_HIGHLIGHTED_FIELD_SETTING,
+  CUSTOM_HIGHLIGHTED_FIELD_SETTING_DEFAULT,
   DEFAULT_ANOMALY_SCORE,
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
@@ -37,6 +39,7 @@ import {
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
+import type { CustomHighlightedFields } from '../common/custom_highlighted_fields';
 import { LogLevelSetting } from '../common/detection_engine/rule_monitoring';
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
@@ -55,7 +58,8 @@ const orderSettings = (settings: SettingsConfig): SettingsConfig => {
 
 export const initUiSettings = (
   uiSettings: CoreSetup['uiSettings'],
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  customHighLightedFields: CustomHighlightedFields,
 ) => {
   const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
     [DEFAULT_APP_REFRESH_INTERVAL]: {
@@ -364,6 +368,21 @@ export const initUiSettings = (
           },
         }
       : {}),
+      [CUSTOM_HIGHLIGHTED_FIELD_SETTING]: {
+        name: i18n.translate('xpack.securitySolution.uiSettings.customHighlightedFields', {
+          defaultMessage: 'Custom Highlighted Fields',
+        }),
+        value: CUSTOM_HIGHLIGHTED_FIELD_SETTING_DEFAULT,
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.customHighlightedFieldsDescription',
+          {
+            defaultMessage: '<p>Shows custom highlighted fields on the event details pane.</p>',
+          }
+        ),
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.arrayOf(schema.string()),
+      }
   };
 
   uiSettings.register(orderSettings(securityUiSettings));

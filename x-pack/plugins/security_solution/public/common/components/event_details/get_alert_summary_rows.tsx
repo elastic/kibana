@@ -35,7 +35,7 @@ import type { TimelineEventsDetailsItem } from '../../../../common/search_strate
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 
-import highlightedFieldOverrides from './highlighted_fields.json';
+import { useCustomHighlightedFields } from './custom_highlighted_fields';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
@@ -205,10 +205,10 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
 }
 
 /**
- * Returns a list of fields based on user-defined overrides
+ * Returns a list of fields based on user-defined custom fields
  */
-function getFieldsByOverrides(overrides: EventSummaryField[]): EventSummaryField[] {
-  return overrides;
+function getFieldsByCustom(customs: EventSummaryField[]): EventSummaryField[] {
+  return customs;
 }
 
 /**
@@ -218,19 +218,19 @@ function getEventFieldsToDisplay({
   eventCategories,
   eventCode,
   eventRuleType,
-  eventSummaryOverrides,
+  eventSummaryCustoms,
 }: {
   eventCategories: EventCategories;
   eventCode?: string;
   eventRuleType?: string;
-  eventSummaryOverrides: EventSummaryField[];
+  eventSummaryCustoms: EventSummaryField[];
 }): EventSummaryField[] {
   const fields = [
     ...alwaysDisplayedFields,
     ...getFieldsByCategory(eventCategories),
     ...getFieldsByEventCode(eventCode, eventCategories),
     ...getFieldsByRuleType(eventRuleType),
-    ...getFieldsByOverrides(eventSummaryOverrides),
+    ...getFieldsByCustom(eventSummaryCustoms),
   ];
 
   // Filter all fields by their id to make sure there are no duplicates
@@ -294,15 +294,16 @@ export const getSummaryRows = ({
     ? eventRuleTypeField?.originalValue?.[0]
     : eventRuleTypeField?.originalValue;
 
-  const eventSummaryOverrides: EventSummaryField[] = highlightedFieldOverrides.fields.map(
-    (override: string) => ({'id': override})
+  const customHighlightedFields = useCustomHighlightedFields();
+  const eventSummaryCustoms: EventSummaryField[] = customHighlightedFields.map(
+    (custom: string) => ({'id': custom})
   );
 
   const tableFields = getEventFieldsToDisplay({
     eventCategories,
     eventCode,
     eventRuleType,
-    eventSummaryOverrides,
+    eventSummaryCustoms,
   });
 
   return data != null
