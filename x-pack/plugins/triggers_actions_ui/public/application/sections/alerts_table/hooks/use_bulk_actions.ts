@@ -20,7 +20,6 @@ import {
 } from '../bulk_actions/get_leading_control_column';
 import { CasesService } from '../types';
 import { ADD_TO_CASE_DISABLED, ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
-import { useGetUserCasesPermissions } from './use_get_user_cases_permissions';
 
 interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
@@ -45,7 +44,7 @@ export const useBulkAddToCaseActions = ({
   casesService,
   casesFeatureId,
 }: UseBulkAddToCaseActionsProps): BulkActionsConfig[] => {
-  const userCasesPermissions = useGetUserCasesPermissions(casesFeatureId);
+  const userCasesPermissions = casesService?.helpers.canUseCases();
 
   const createCaseFlyout = casesService?.hooks.getUseCasesAddToNewCaseFlyout();
   const selectCaseModal = casesService?.hooks.getUseCasesAddToExistingCaseModal();
@@ -54,8 +53,8 @@ export const useBulkAddToCaseActions = ({
     return casesService &&
       createCaseFlyout &&
       selectCaseModal &&
-      userCasesPermissions.create &&
-      userCasesPermissions.read
+      userCasesPermissions?.create &&
+      userCasesPermissions?.read
       ? [
           {
             label: ADD_TO_NEW_CASE,
@@ -85,8 +84,8 @@ export const useBulkAddToCaseActions = ({
     casesService,
     createCaseFlyout,
     selectCaseModal,
-    userCasesPermissions.create,
-    userCasesPermissions.read,
+    userCasesPermissions?.create,
+    userCasesPermissions?.read,
   ]);
 };
 
