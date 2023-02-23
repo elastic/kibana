@@ -279,11 +279,19 @@ describe('FileService', () => {
   });
 
   it('enforces per file max size settings, using mime type', async () => {
-    const file = await createDisposableFile({ fileKind: fileKindTinyFiles, name: 'test', mime: 'text/mime' });
+    const file = await createDisposableFile({
+      fileKind: fileKindTinyFiles,
+      name: 'test',
+      mime: 'text/mime',
+    });
     const tinyContent = Readable.from(['ok ok ok']);
     await file.uploadContent(tinyContent);
 
-    const file2 = await createDisposableFile({ fileKind: fileKindTinyFiles, name: 'test', mime: 'text/json' });
+    const file2 = await createDisposableFile({
+      fileKind: fileKindTinyFiles,
+      name: 'test',
+      mime: 'text/json',
+    });
     const notSoTinyContent = Readable.from(['[123]']);
     await expect(() => file2.uploadContent(notSoTinyContent)).rejects.toThrow(
       new Error('Maximum of 3 bytes exceeded')
