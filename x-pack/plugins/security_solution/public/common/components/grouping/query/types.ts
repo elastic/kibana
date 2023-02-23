@@ -46,7 +46,7 @@ export interface GroupingQueryArgs {
 }
 
 export interface SubAggregation extends Record<string, estypes.AggregationsAggregationContainer> {
-  bucket_truncate: estypes.AggregationsAggregationContainer;
+  bucket_truncate: { bucket_sort: estypes.AggregationsAggregationContainer['bucket_sort'] };
 }
 
 export interface MainAggregation extends Record<string, estypes.AggregationsAggregationContainer> {
