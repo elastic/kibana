@@ -32,7 +32,7 @@ import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
-import { UiSettingsServiceOptions } from './types';
+import type { UiSettingsServiceOptions } from './types';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;

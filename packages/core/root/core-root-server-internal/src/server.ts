@@ -265,7 +265,6 @@ export class Server {
     await ensureValidConfiguration(this.configService);
 
     const { uiPlugins, pluginPaths, pluginTree } = this.discoveredPlugins!.standard;
-
     const contextServiceSetup = this.context.setup({
       pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
     });
@@ -367,7 +366,6 @@ export class Server {
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
-
     this.#pluginsInitialized = pluginsSetup.initialized;
 
     this.registerCoreContext(coreSetup);

@@ -35,11 +35,11 @@ export class UserProfileSettingsClient implements UserProfileSettingsClientContr
  */
 export type UserProfileSettingsClientFactoryProvider = () => UserProfileSettingsClientFactory;
 
-// Describes the factory used to create instances of the UserProfilesClient
+// Describes the factory used to create instances of the UserProfileSettingsClient
 export type UserProfileSettingsClientFactory = () => UserProfileSettingsClientContract;
 
 /**
- * Describes the functions that will be provided by a UserProfilesClient
+ * Describes the functions that will be provided by a UserProfileSettingsClient
  */
 export interface UserProfileSettingsClientContract {
   get(params: UserProfileGetCurrentParams): Promise<UserProfileWithSecurity | null>;
