@@ -10,20 +10,19 @@ export const runEndpointLoaderScript = () => {
     ELASTICSEARCH_USERNAME,
     ELASTICSEARCH_PASSWORD,
     ELASTICSEARCH_URL,
-    baseUrl: BASE_URL,
+    hostname,
+    configport,
   } = Cypress.env();
 
   const ES_URL = new URL(ELASTICSEARCH_URL);
   ES_URL.username = ELASTICSEARCH_USERNAME;
   ES_URL.password = ELASTICSEARCH_PASSWORD;
 
-  const KBN_URL = new URL(BASE_URL);
-  KBN_URL.pathname = ''; // just in case we have a path
-  KBN_URL.username = ELASTICSEARCH_USERNAME;
-  KBN_URL.password = ELASTICSEARCH_PASSWORD;
+  const KBN_URL = new URL(
+    `${ES_URL.protocol}//${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD}@${hostname}:${configport}`
+  );
 
   // FIXME: remove use of cli script and use instead data loaders
-
   const script = `node scripts/endpoint/resolver_generator.js --node="${ES_URL.toString()}" --kibana="${KBN_URL.toString()}" --delete --numHosts=1 --numDocs=1 --fleet --withNewUser=santaEndpoint:changeme --anc=1 --gen=1 --ch=1 --related=1 --relAlerts=1`;
 
   cy.exec(script, { env: { NODE_TLS_REJECT_UNAUTHORIZED: 1 } });
