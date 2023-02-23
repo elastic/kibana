@@ -10,8 +10,12 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import { useParams } from 'react-router-dom';
-import type { PostureInput, PosturePolicyTemplate } from '../../../common/types';
-import { CLOUDBEAT_AWS, CLOUDBEAT_VANILLA } from '../../../common/constants';
+import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import {
+  CLOUDBEAT_AWS,
+  CLOUDBEAT_VANILLA,
+  CLOUDBEAT_VULN_MGMT_AWS,
+} from '../../../common/constants';
 import { getPosturePolicy, getEnabledPostureInput, getPostureInputHiddenVars } from './utils';
 import {
   PolicyTemplateInfo,
@@ -23,6 +27,7 @@ import {
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
   cspm: CLOUDBEAT_AWS,
+  vuln_mgmt: CLOUDBEAT_VULN_MGMT_AWS,
 } as const;
 
 const EditScreenStepTitle = () => (
@@ -61,7 +66,7 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({ newPolicy, onChange, validationResults, isEditPage }) => {
-    const { integration } = useParams<{ integration: PosturePolicyTemplate }>();
+    const { integration } = useParams<{ integration: CloudSecurityPolicyTemplate }>();
     const input = getEnabledPostureInput(newPolicy);
 
     const updatePolicy = (updatedPolicy: NewPackagePolicy) =>
