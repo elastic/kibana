@@ -11,7 +11,9 @@ import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { useBreadcrumbs } from '../../hooks';
+import { useBreadcrumbs, useLocations } from '../../hooks';
+import { EmptyLocations } from '../settings/private_locations/empty_locations';
+import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { getServiceLocations } from '../../state';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
 import { SimpleMonitorForm } from './simple_monitor_form';
@@ -26,7 +28,13 @@ export const GettingStartedPage = () => {
 
   useBreadcrumbs([{ text: MONITORING_OVERVIEW_LABEL }]); // No extra breadcrumbs on overview
 
-  return (
+  const { locations, loading } = useLocations();
+
+  if (!loading && locations.length === 0) {
+    return <EmptyLocations inFlyout={false} redirectToSettings={true} />;
+  }
+
+  return !loading ? (
     <Wrapper>
       <EuiEmptyPrompt
         title={<h2>{CREATE_SINGLE_PAGE_LABEL}</h2>}
@@ -53,6 +61,8 @@ export const GettingStartedPage = () => {
         }
       />
     </Wrapper>
+  ) : (
+    <LoadingState />
   );
 };
 
