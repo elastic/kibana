@@ -40,8 +40,6 @@ const baseAllowlistFields: AllowlistFields = {
     },
     effective_parent: true,
     device: true,
-    relative_file_creation_time: true,
-    relative_file_name_modify_time: true,
   },
   thread: true,
   working_directory: true,
@@ -116,6 +114,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     id: true,
   },
   Persistence: true,
+  /* eslint-disable @typescript-eslint/naming-convention */
   Effective_process: true,
 };
 
