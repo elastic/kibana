@@ -36,7 +36,7 @@ import {
 } from './lib/annotations/bootstrap_annotations';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
-import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
+import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { slo, SO_SLO_TYPE } from './saved_objects';
 import { SLO_RULE_REGISTRATION_CONTEXT } from './common/constants';
@@ -47,11 +47,11 @@ import { registerSloUsageCollector } from './lib/collectors/register';
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
+  alerting: PluginSetupContract;
   features: FeaturesSetup;
+  guidedOnboarding: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   spaces?: SpacesPluginSetup;
-  alerting: PluginSetupContract;
-  guidedOnboarding: GuidedOnboardingPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -232,16 +232,13 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       registerSloUsageCollector(plugins.usageCollection);
     }
 
-    const start = () => core.getStartServices().then(([coreStart]) => coreStart);
-
     registerRoutes({
-      core: {
-        setup: core,
-        start,
+      core,
+      dependencies: {
+        ruleDataService,
       },
       logger: this.logger,
-      repository: getGlobalObservabilityServerRouteRepository(config),
-      ruleDataService,
+      repository: getObservabilityServerRouteRepository(config),
     });
 
     /**

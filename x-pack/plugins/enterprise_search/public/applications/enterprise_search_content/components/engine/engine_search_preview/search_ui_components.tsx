@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiBadge,
   EuiBasicTable,
@@ -28,6 +30,10 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { indexHealthToHealthColor } from '../../../../shared/constants/health_colors';
+
+import { EngineViewLogic } from '../engine_view_logic';
+
 import { useSelectedDocument } from './document_context';
 
 export const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
@@ -37,6 +43,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
 const RESULT_FIELDS_TRUNCATE_AT = 4;
 
 export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
+  const { engineData } = useValues(EngineViewLogic);
   const { setSelectedDocument } = useSelectedDocument();
 
   const fields = Object.entries(result)
@@ -59,6 +66,10 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
   } = result;
 
   const [, id] = JSON.parse(atob(encodedId));
+
+  const indexHealth = engineData?.indices.find((i) => i.name === index)?.health;
+  const badgeColor =
+    !indexHealth || indexHealth === 'unknown' ? 'hollow' : indexHealthToHealthColor(indexHealth);
 
   const columns: Array<EuiBasicTableColumn<{ name: string; value: string }>> = [
     {
@@ -113,7 +124,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
                     defaultMessage="from"
                   />
                 </code>
-                <EuiBadge color="hollow">{index}</EuiBadge>
+                <EuiBadge color={badgeColor}>{index}</EuiBadge>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
