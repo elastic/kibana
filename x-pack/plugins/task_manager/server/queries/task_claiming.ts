@@ -127,7 +127,7 @@ export class TaskClaiming {
     this.maxAttempts = opts.maxAttempts;
     this.taskStore = opts.taskStore;
     this.getCapacity = opts.getCapacity;
-    this.logger = opts.logger;
+    this.logger = opts.logger.get('taskClaiming');
     this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;
@@ -285,9 +285,9 @@ export class TaskClaiming {
   }: OwnershipClaimingOpts): Promise<ClaimAvailableTasksResult> {
     const partitions = await this.taskPartitioner.getPartitions();
 
-    this.logger.debug(
-      `Claiming tasks for ${partitions.length} partitions: ${partitions.join(',')}`
-    );
+    this.logger
+      .get('partitions')
+      .debug(`Claiming tasks for ${partitions.length} partitions: ${partitions.join(',')}`);
     const { taskTypesToClaim = [] } = groupBy(this.definitions.getAllTypes(), (type) =>
       taskTypes.has(type) && !this.isTaskTypeExcluded(type) ? 'taskTypesToClaim' : 'taskTypesToSkip'
     );
@@ -300,9 +300,16 @@ export class TaskClaiming {
     );
 
     const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
-    const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks), {
-      bool: { must: { terms: { 'task.partition': partitions } } },
-    });
+    const query = matchesClauses(
+      queryForScheduledTasks,
+      filterDownBy(InactiveTasks),
+      {
+        bool: { must: { terms: { 'task.partition': partitions } } },
+      },
+      {
+        bool: { must: { terms: { 'task.taskType': [...taskTypesToClaim, ...this.unusedTypes] } } },
+      }
+    );
     const apmTrans = apm.startTransaction(
       TASK_MANAGER_MARK_AS_CLAIMED,
       TASK_MANAGER_TRANSACTION_TYPE
@@ -311,18 +318,22 @@ export class TaskClaiming {
     // ugly constant... this accommodates for 2 Kibana nodes trying to claim the same tasks
     // and Elasticsearch's refresh rate being twice the poll interval
     const searchSize = claimSize * 4;
+
+    // counters just used for logging
     let searchesCount = 0;
+    let bulkUpdatesCount = 0;
 
     try {
       let hasMore = true;
       let searchAfter: SortResults | undefined;
-      const claimedDocs: ConcreteTaskInstance[] = [];
+      const updatedDocs: ConcreteTaskInstance[] = [];
       let tasksConflicted = 0;
 
       do {
         // we're going to search for more docs than we need
         // so if we hit a version conflict claiming one, we can proceed with
         // claiming more docs without having to do another search
+        ++searchesCount;
         const searchResult = await this.taskStore.search({
           query,
           sort,
@@ -330,10 +341,9 @@ export class TaskClaiming {
           seq_no_primary_term: true,
           search_after: searchAfter,
         });
-        ++searchesCount;
 
-        const claimableDocs = searchResult.docs;
-        if (claimableDocs.length < searchSize) {
+        const updateableDocs = searchResult.docs;
+        if (updateableDocs.length < searchSize) {
           hasMore = false;
         } else {
           searchAfter = searchResult.searchAfter;
@@ -341,8 +351,8 @@ export class TaskClaiming {
 
         do {
           const docsToUpdate: ConcreteTaskInstance[] = [];
-          for (let i = 0; i < claimSize - claimedDocs.length && claimableDocs.length > 0; ++i) {
-            const doc = claimableDocs.shift()!;
+          for (let i = 0; i < claimSize - updatedDocs.length && updateableDocs.length > 0; ++i) {
+            const doc = updateableDocs.shift()!;
             if (taskTypesToClaim.includes(doc.taskType)) {
               docsToUpdate.push(doc);
               if (doc.schedule != null || doc.attempts < this.taskMaxAttempts[doc.taskType]) {
@@ -367,27 +377,33 @@ export class TaskClaiming {
 
           let bulkUpdateResults: BulkUpdateResult[] = [];
           if (docsToUpdate.length > 0) {
+            ++bulkUpdatesCount;
             bulkUpdateResults = await this.taskStore.bulkUpdate(docsToUpdate);
           }
 
           for (const bulkUpdateResult of bulkUpdateResults) {
             if (isOk(bulkUpdateResult)) {
-              claimedDocs.push(bulkUpdateResult.value);
+              updatedDocs.push(bulkUpdateResult.value);
             } else {
               tasksConflicted++;
             }
           }
-        } while (claimedDocs.length < claimSize && claimableDocs.length > 0);
-      } while (claimedDocs.length < claimSize && hasMore && searchAfter);
+        } while (updatedDocs.length < claimSize && updateableDocs.length > 0);
+      } while (updatedDocs.length < claimSize && hasMore && searchAfter);
 
       apmTrans?.end('success');
 
-      if (tasksConflicted > 0) {
-        this.logger.warn(
-          `Version conflict claiming ${tasksConflicted} tasks, took ${searchesCount} searches.`
+      this.logger
+        .get('claim')
+        .debug(
+          `task types: ${taskTypesToClaim.join(',')}\nclaimed tasks: ${
+            updatedDocs.length
+          }\t# searches: ${searchesCount}\t# bulk updates: ${bulkUpdatesCount}\t# version conflicts: ${tasksConflicted}}`
         );
-      }
 
+      // Not all of the updated docs are "claimed" and ready to be ran
+      // we also update some tasks to be failed and unrecognized
+      const claimedDocs = updatedDocs.filter((doc) => doc.status === TaskStatus.Claiming);
       return {
         docs: claimedDocs,
         tasksConflicted,
