@@ -9,10 +9,7 @@ import { useCallback, useState } from 'react';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useSpaceId } from '../../../hooks/use_space_id';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
-import {
-  installedJobPrefix,
-  uninstalledJobIdToInstalledJobId,
-} from '../../ml/anomaly/use_anomalies_search';
+import { installedJobPrefix, uninstalledJobIdToInstalledJobId } from '../../ml/anomaly/helpers';
 import { setupMlJob, startDatafeeds, stopDatafeeds } from '../api';
 import type { SecurityJob } from '../types';
 import * as i18n from './translations';

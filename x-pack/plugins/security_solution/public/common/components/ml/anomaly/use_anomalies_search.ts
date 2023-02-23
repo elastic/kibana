@@ -20,6 +20,7 @@ import type { inputsModel } from '../../../store';
 import { useSecurityJobs } from '../../ml_popover/hooks/use_security_jobs';
 import type { SecurityJob } from '../../ml_popover/types';
 import { useSpaceId } from '../../../hooks/use_space_id';
+import { matchJobId } from './helpers';
 
 export enum AnomalyEntity {
   User,
@@ -151,19 +152,3 @@ function formatResultData(
   });
   return sortBy(['name'], unsortedAnomalies);
 }
-
-export const installedJobPrefix = (spaceId: string | undefined) => `${spaceId ?? 'default'}_`;
-
-export const uninstalledJobIdToInstalledJobId = (
-  moduleJobId: string,
-  spaceId: string | undefined
-) => `${installedJobPrefix(spaceId)}${moduleJobId}`;
-
-/**
- * From version 8.8, jobs installed using security solution have the spaceId in their name.
- */
-const matchJobId = (
-  jobId: string,
-  notableJobId: NotableAnomaliesJobId,
-  spaceId: string | undefined
-) => jobId === uninstalledJobIdToInstalledJobId(notableJobId, spaceId) || jobId === notableJobId;

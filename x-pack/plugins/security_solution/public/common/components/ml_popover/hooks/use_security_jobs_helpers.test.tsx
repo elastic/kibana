@@ -79,11 +79,31 @@ describe('useSecurityJobsHelpers', () => {
     });
 
     describe('getAugmentedFields', () => {
-      test('return correct augmented fields for given matching compatible modules', () => {
+      test('return correct augmented fields for global ml jobs', () => {
         const moduleJobs = getModuleJobs(mockGetModuleResponse, ['security_linux_v3']);
-        const augmentedFields = getAugmentedFields('rare_process_by_host_linux', moduleJobs, [
-          'security_linux_v3',
-        ]);
+        const augmentedFields = getAugmentedFields(
+          'rare_process_by_host_linux',
+          moduleJobs,
+          ['security_linux_v3'],
+          'space-id'
+        );
+        expect(augmentedFields).toEqual({
+          defaultIndexPattern: 'auditbeat-*',
+          isCompatible: true,
+          isElasticJob: true,
+          moduleId: 'security_linux_v3',
+        });
+      });
+
+      test('return correct augmented fields for space aware jobs', () => {
+        const spaceId = 'test-space-id';
+        const moduleJobs = getModuleJobs(mockGetModuleResponse, ['security_linux_v3']);
+        const augmentedFields = getAugmentedFields(
+          `${spaceId}_rare_process_by_host_linux`,
+          moduleJobs,
+          ['security_linux_v3'],
+          spaceId
+        );
         expect(augmentedFields).toEqual({
           defaultIndexPattern: 'auditbeat-*',
           isCompatible: true,
@@ -103,9 +123,12 @@ describe('useSecurityJobsHelpers', () => {
     describe('getInstalledJobs', () => {
       test('returns all jobs from jobSummary for a compatible moduleId', () => {
         const moduleJobs = getModuleJobs(mockGetModuleResponse, ['security_linux_v3']);
-        const installedJobs = getInstalledJobs(mockJobsSummaryResponse, moduleJobs, [
-          'security_linux_v3',
-        ]);
+        const installedJobs = getInstalledJobs(
+          mockJobsSummaryResponse,
+          moduleJobs,
+          ['security_linux_v3'],
+          'spaceId'
+        );
         expect(installedJobs.length).toEqual(3);
       });
     });
@@ -113,9 +136,12 @@ describe('useSecurityJobsHelpers', () => {
     describe('composeModuleAndInstalledJobs', () => {
       test('returns correct number of jobs when composing separate module and installed jobs', () => {
         const moduleJobs = getModuleJobs(mockGetModuleResponse, ['security_linux_v3']);
-        const installedJobs = getInstalledJobs(mockJobsSummaryResponse, moduleJobs, [
-          'security_linux_v3',
-        ]);
+        const installedJobs = getInstalledJobs(
+          mockJobsSummaryResponse,
+          moduleJobs,
+          ['security_linux_v3'],
+          'spaceId'
+        );
         const securityJobs = composeModuleAndInstalledJobs(
           installedJobs,
           moduleJobs,

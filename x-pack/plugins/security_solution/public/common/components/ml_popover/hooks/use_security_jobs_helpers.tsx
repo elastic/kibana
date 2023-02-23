@@ -14,7 +14,7 @@ import type {
   SecurityJob,
 } from '../types';
 import { mlModules } from '../ml_modules';
-import { uninstalledJobIdToInstalledJobId } from '../../ml/anomaly/use_anomalies_search';
+import { matchJobId } from '../../ml/anomaly/helpers';
 
 /**
  * Helper function for converting from ModuleJob -> SecurityJob
@@ -61,9 +61,10 @@ export const moduleToSecurityJob = (
 export const getAugmentedFields = (
   jobId: string,
   moduleJobs: SecurityJob[],
-  compatibleModuleIds: string[]
+  compatibleModuleIds: string[],
+  spaceId: string | undefined
 ): AugmentedSecurityJobFields => {
-  const moduleJob = moduleJobs.find((mj) => mj.id === jobId);
+  const moduleJob = moduleJobs.find((mj) => matchJobId(jobId, mj.id, spaceId));
   return moduleJob !== undefined
     ? {
         moduleId: moduleJob.moduleId,
@@ -110,13 +111,14 @@ export const getModuleJobs = (
 export const getInstalledJobs = (
   jobSummaryData: MlSummaryJob[],
   moduleJobs: SecurityJob[],
-  compatibleModuleIds: string[]
+  compatibleModuleIds: string[],
+  spaceId: string | undefined
 ): SecurityJob[] =>
   jobSummaryData
     .filter(({ groups }) => groups.includes('siem') || groups.includes('security'))
     .map<SecurityJob>((jobSummary) => ({
       ...jobSummary,
-      ...getAugmentedFields(jobSummary.id, moduleJobs, compatibleModuleIds),
+      ...getAugmentedFields(jobSummary.id, moduleJobs, compatibleModuleIds, spaceId),
       isInstalled: true,
     }));
 
@@ -136,9 +138,7 @@ export const composeModuleAndInstalledJobs = (
   return [
     ...installedJobs,
     ...moduleSecurityJobs.filter(
-      (mj) =>
-        !installedJobsIds.includes(mj.id) && // Jobs installed using security solutions on versions older than 8.8 don't have the spaceId in their name.
-        !installedJobsIds.includes(uninstalledJobIdToInstalledJobId(mj.id, spaceId))
+      (mj) => !installedJobsIds.some((installedJobId) => matchJobId(installedJobId, mj.id, spaceId))
     ),
   ].sort((a, b) => a.id.localeCompare(b.id));
 };
@@ -163,7 +163,12 @@ export const createSecurityJobs = (
   const moduleSecurityJobs = getModuleJobs(modulesData, compatibleModuleIds);
 
   // Process jobSummaryData: Filter to Security jobs, and augment with moduleId/defaultIndexPattern/isCompatible
-  const installedJobs = getInstalledJobs(jobSummaryData, moduleSecurityJobs, compatibleModuleIds);
+  const installedJobs = getInstalledJobs(
+    jobSummaryData,
+    moduleSecurityJobs,
+    compatibleModuleIds,
+    spaceId
+  );
 
   // Combine installed jobs + moduleSecurityJobs that don't overlap, and sort by name asc
   return composeModuleAndInstalledJobs(installedJobs, moduleSecurityJobs, spaceId);
