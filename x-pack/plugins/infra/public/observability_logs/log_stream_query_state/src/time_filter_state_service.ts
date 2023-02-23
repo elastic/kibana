@@ -78,7 +78,10 @@ export const updateTimeContextFromTimeFilterService = actions.assign(
     ) {
       return {
         ...getTimeFromEvent(context, event),
-        refreshInterval: event.refreshInterval,
+        refreshInterval:
+          event.type === 'TIME_FROM_TIME_FILTER_SERVICE_CHANGED'
+            ? event.refreshInterval
+            : { ...context.refreshInterval, pause: event.refreshInterval.pause },
       };
     } else {
       return {};
