@@ -443,6 +443,14 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             defaultMessage: 'Count',
                           })}
                           position={Position.Left}
+                          domain={
+                            bucketData.length && bucketData[bucketData.length - 1][1] === 0
+                              ? {
+                                  min: 0,
+                                  max: 10,
+                                }
+                              : undefined
+                          }
                           tickFormat={(d) => (d === null ? notAvailableMessage : String(d))}
                         />
                         {showAnnotations ? (
