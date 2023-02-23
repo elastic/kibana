@@ -247,7 +247,11 @@ export const useDiscoverHistogram = ({
   }, [columns, query, unifiedHistogram]);
 
   useEffect(() => {
-    if (isPlainRecord && documentState.fetchStatus === 'complete' && documentState.result) {
+    if (
+      isPlainRecord &&
+      documentState.fetchStatus === FetchStatus.COMPLETE &&
+      documentState.result
+    ) {
       unifiedHistogram?.setTextBasedResults(documentState.result?.length);
     }
   }, [columns, documentState.fetchStatus, documentState.result, isPlainRecord, unifiedHistogram]);
