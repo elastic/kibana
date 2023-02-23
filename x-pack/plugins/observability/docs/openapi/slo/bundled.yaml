@@ -34,7 +34,7 @@ paths:
               $ref: '#/components/schemas/create_slo_request'
       responses:
         '200':
-          description: SLO created with success
+          description: Succesfull request
           content:
             application/json:
               schema:
@@ -80,14 +80,14 @@ paths:
             - sli.kql.custom
         - name: page
           in: query
-          description: The page number to return.
+          description: The page number to return
           schema:
             type: integer
             default: 1
           example: 1
         - name: perPage
           in: query
-          description: The number of SLOs to return per page.
+          description: The number of SLOs to return per page
           schema:
             type: integer
             default: 25
@@ -114,11 +114,84 @@ paths:
           example: asc
       responses:
         '200':
-          description: Paginated list of SLOs.
+          description: Succesfull request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/find_slo_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/slos/{sloId}:
+    get:
+      summary: Retrieves a SLO
+      operationId: getSlo
+      description: |
+        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      tags:
+        - slos
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/slo_id'
+      responses:
+        '200':
+          description: Get the SLO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/slo_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+      servers:
+        - url: https://localhost:5601
+    put:
+      summary: Updates an SLO
+      operationId: updateSlo
+      description: |
+        You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      tags:
+        - slos
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/slo_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/update_slo_request'
+      responses:
+        '200':
+          description: Succesfull request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/slo_response'
         '400':
           description: Bad request
           content:
@@ -160,6 +233,14 @@ components:
       schema:
         type: string
         example: default
+    slo_id:
+      in: path
+      name: sloId
+      description: An identifier for the slo.
+      required: true
+      schema:
+        type: string
+        example: 9c235211-6834-11ea-a78c-6feb38a34414
   schemas:
     indicator_properties_custom_kql:
       title: Custom KQL indicator type definition
@@ -345,19 +426,19 @@ components:
       title: Objective definition
       required:
         - target
-      description: Defines properties for objective.
+      description: Defines properties for objective
       type: object
       properties:
         target:
-          description: the target objective between 0 and 1 excluded.
+          description: the target objective between 0 and 1 excluded
           type: number
           example: 0.99
         timeslicesTarget:
-          description: the target objective for each slice when using a timeslices budgeting method.
+          description: the target objective for each slice when using a timeslices budgeting method
           type: number
           example: 0.995
         timeslicesWindow:
-          description: the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}.
+          description: the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}
           type: string
           example: 5m
     settings:
@@ -367,15 +448,15 @@ components:
       properties:
         timestampField:
           description: |
-            The timestamp field used in the source indice. Particularly useful for custom kql indicator type, when the index does not use the default '@timestamp' field.
+            The timestamp field used in the source indice. Particularly useful for custom kql indicator type, when the index does not use the default '@timestamp' field
           type: string
           example: timestamp
         syncDelay:
-          description: The synch delay to apply to the transform. Default 1m.
+          description: The synch delay to apply to the transform. Default 1m
           type: string
           example: 5m
         frequency:
-          description: Configure how often the transform runs, default 1m.
+          description: Configure how often the transform runs, default 1m
           type: string
           example: 5m
     slo_response:
@@ -504,6 +585,33 @@ components:
         id:
           type: string
           example: 8853df00-ae2e-11ed-90af-09bb6422b258
+    update_slo_request:
+      title: Update SLO request
+      description: |
+        The update SLO API request body varies depending on the type of indicator, time window and budgeting method.  Partial update is handled.
+      type: object
+      properties:
+        name:
+          description: A name for the SLO.
+          type: string
+        description:
+          description: A description for the SLO.
+          type: string
+        indicator:
+          oneOf:
+            - $ref: '#/components/schemas/indicator_properties_custom_kql'
+            - $ref: '#/components/schemas/indicator_properties_apm_availability'
+            - $ref: '#/components/schemas/indicator_properties_apm_latency'
+        timeWindow:
+          oneOf:
+            - $ref: '#/components/schemas/time_window_rolling'
+            - $ref: '#/components/schemas/time_window_calendar_aligned'
+        budgetingMethod:
+          $ref: '#/components/schemas/budgeting_method'
+        objective:
+          $ref: '#/components/schemas/objective'
+        settings:
+          $ref: '#/components/schemas/settings'
 security:
   - basicAuth: []
   - apiKeyAuth: []

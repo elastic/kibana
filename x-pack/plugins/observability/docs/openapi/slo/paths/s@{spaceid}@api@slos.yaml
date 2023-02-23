@@ -17,7 +17,7 @@ post:
           $ref: '../components/schemas/create_slo_request.yaml'
   responses:
     '200':
-      description: SLO created with success
+      description: Succesfull request
       content:
         application/json:
           schema:
@@ -64,14 +64,14 @@ get:
       example: ["sli.kql.custom"]
     - name: page
       in: query
-      description: The page number to return.
+      description: The page number to return
       schema:
         type: integer
         default: 1
       example: 1
     - name: perPage
       in: query
-      description: The number of SLOs to return per page.
+      description: The number of SLOs to return per page
       schema:
         type: integer
         default: 25
@@ -94,7 +94,7 @@ get:
       example: asc
   responses:
     '200':
-      description: Paginated list of SLOs.
+      description: Succesfull request
       content:
         application/json:
           schema:

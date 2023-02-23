@@ -17,6 +17,8 @@ servers:
 paths:
   '/s/{spaceId}/api/slos':
     $ref: 'paths/s@{spaceid}@api@slos.yaml'
+  '/s/{spaceId}/api/slos/{sloId}':
+    $ref: 'paths/s@{spaceid}@api@slos@{sloId}.yaml'
 components:
   securitySchemes:
     basicAuth:
