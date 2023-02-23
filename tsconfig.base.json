@@ -556,6 +556,8 @@
       "@kbn/core-usage-data-server-internal/*": ["packages/core/usage-data/core-usage-data-server-internal/*"],
       "@kbn/core-usage-data-server-mocks": ["packages/core/usage-data/core-usage-data-server-mocks"],
       "@kbn/core-usage-data-server-mocks/*": ["packages/core/usage-data/core-usage-data-server-mocks/*"],
+      "@kbn/core-version-http-server": ["packages/core/versioning/core-version-http-server"],
+      "@kbn/core-version-http-server/*": ["packages/core/versioning/core-version-http-server/*"],
       "@kbn/cross-cluster-replication-plugin": ["x-pack/plugins/cross_cluster_replication"],
       "@kbn/cross-cluster-replication-plugin/*": ["x-pack/plugins/cross_cluster_replication/*"],
       "@kbn/crypto": ["packages/kbn-crypto"],

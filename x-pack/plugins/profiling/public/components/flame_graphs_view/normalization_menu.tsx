@@ -156,7 +156,7 @@ export function NormalizationMenu(props: Props) {
                       'xpack.profiling.flameGraphNormalizationMenu.normalizeByTimeTooltip',
                       {
                         defaultMessage:
-                          'To compare a set of machines over time periods of different lengths (for example: Compare the last hour against the last 24h), choose Normalize by Time. The number of samples on the shorter timeframe will be multiplied to match the longer timeframe (in this example, by 24).',
+                          'Select Normalize by Scale factor and set your Baseline and Comparison scale factors to compare a set of machines of different sizes. For example, you can compare a deployment of 10% of machines to a deployment of 90% of machines.',
                       }
                     )}
                   </span>
@@ -167,7 +167,7 @@ export function NormalizationMenu(props: Props) {
                       'xpack.profiling.flameGraphNormalizationMenu.normalizeByScaleTooltip',
                       {
                         defaultMessage:
-                          'To compare differently-sized sets of machines (e.g. a deployment on 10% of machines against a deployment on 90% of machines), choose Scale Factor and provide an appropriate factor to multiply the right-hand side with.',
+                          'Select Normalize by Time to compare a set of machines across different time periods. For example, if you compare the last hour to the last 24 hours, the shorter timeframe (1 hour) is multiplied to match the longer timeframe (24 hours).',
                       }
                     )}
                   </span>

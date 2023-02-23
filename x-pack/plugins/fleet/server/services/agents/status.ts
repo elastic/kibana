@@ -126,16 +126,18 @@ export async function getAgentStatusForAgentPolicy(
 
   const { healthy: online, unhealthy: error, ...otherStatuses } = agentStatusesToSummary(statuses);
   const combinedStatuses = { online, error, ...otherStatuses };
+  const allStatuses = Object.values(statuses).reduce((acc, val) => acc + val, 0);
+  const allActive = allStatuses - combinedStatuses.unenrolled - combinedStatuses.inactive;
   return {
     ...combinedStatuses,
     /* @deprecated no agents will have other status */
     other: 0,
     /* @deprecated Agent events do not exists anymore */
     events: 0,
-    total:
-      Object.values(statuses).reduce((acc, val) => acc + val, 0) -
-      combinedStatuses.unenrolled -
-      combinedStatuses.inactive,
+    /* @deprecated use active instead */
+    total: allActive,
+    all: allStatuses,
+    active: allActive,
   };
 }
 export async function getIncomingDataByAgentsId(
