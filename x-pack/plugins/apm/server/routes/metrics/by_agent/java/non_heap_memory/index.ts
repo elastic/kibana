@@ -25,15 +25,6 @@ import { APMConfig } from '../../../../..';
 import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const series = {
-  nonHeapMemoryCommitted: {
-    title: i18n.translate(
-      'xpack.apm.agentMetrics.java.nonHeapMemorySeriesCommitted',
-      {
-        defaultMessage: 'Avg. committed',
-      }
-    ),
-    color: theme.euiColorVis1,
-  },
   nonHeapMemoryUsed: {
     title: i18n.translate(
       'xpack.apm.agentMetrics.java.nonHeapMemorySeriesUsed',
@@ -42,6 +33,15 @@ const series = {
       }
     ),
     color: theme.euiColorVis0,
+  },
+  nonHeapMemoryCommitted: {
+    title: i18n.translate(
+      'xpack.apm.agentMetrics.java.nonHeapMemorySeriesCommitted',
+      {
+        defaultMessage: 'Avg. committed',
+      }
+    ),
+    color: theme.euiColorVis1,
   },
 };
 

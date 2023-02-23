@@ -11,9 +11,8 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { FetchAndTransformMetrics } from './fetch_and_transform_metrics';
 import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
-import { getServiceNodes, getOTelServiceNodes } from './get_service_nodes';
+import { getServiceNodes } from './get_service_nodes';
 import { metricsServerlessRouteRepository } from './serverless/route';
-import { isOpenTelemetryAgentName } from '../../../common/agent_name';
 
 const metricsChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
@@ -67,14 +66,7 @@ const serviceMetricsJvm = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      kueryRt,
-      rangeRt,
-      environmentRt,
-      t.partial({
-        agentName: t.string,
-      }),
-    ]),
+    query: t.intersection([kueryRt, rangeRt, environmentRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -92,14 +84,9 @@ const serviceMetricsJvm = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end, agentName } = params.query;
+    const { kuery, environment, start, end } = params.query;
 
-    const getServiceNodesFunc =
-      agentName && isOpenTelemetryAgentName(agentName)
-        ? getOTelServiceNodes
-        : getServiceNodes;
-
-    const serviceNodes = await getServiceNodesFunc({
+    const serviceNodes = await getServiceNodes({
       kuery,
       apmEventClient,
       serviceName,

@@ -25,8 +25,47 @@ import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { hasOTelMetrics } from './has_otel_metrics';
 
 const getServiceNodes = async ({
+  kuery,
+  apmEventClient,
+  serviceName,
+  environment,
+  start,
+  end,
+}: {
+  kuery: string;
+  apmEventClient: APMEventClient;
+  serviceName: string;
+  environment: string;
+  start: number;
+  end: number;
+}) => {
+  const useOTelMetrics = await hasOTelMetrics({
+    kuery,
+    apmEventClient,
+    serviceName,
+    environment,
+    start,
+    end,
+  });
+
+  const serviceNodeFunc = useOTelMetrics
+    ? getOTelServiceNodes
+    : getElasticServiceNodes;
+
+  return serviceNodeFunc({
+    kuery,
+    apmEventClient,
+    serviceName,
+    environment,
+    start,
+    end,
+  });
+};
+
+const getElasticServiceNodes = async ({
   kuery,
   apmEventClient,
   serviceName,
@@ -245,4 +284,4 @@ const getOTelServiceNodes = async ({
     );
 };
 
-export { getServiceNodes, getOTelServiceNodes };
+export { getServiceNodes };

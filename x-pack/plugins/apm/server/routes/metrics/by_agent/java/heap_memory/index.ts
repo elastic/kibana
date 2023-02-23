@@ -25,11 +25,11 @@ import { APMConfig } from '../../../../..';
 import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const series = {
-  heapMemoryMax: {
-    title: i18n.translate('xpack.apm.agentMetrics.java.heapMemorySeriesMax', {
-      defaultMessage: 'Avg. limit',
+  heapMemoryUsed: {
+    title: i18n.translate('xpack.apm.agentMetrics.java.heapMemorySeriesUsed', {
+      defaultMessage: 'Avg. used',
     }),
-    color: theme.euiColorVis2,
+    color: theme.euiColorVis0,
   },
   heapMemoryCommitted: {
     title: i18n.translate(
@@ -40,11 +40,11 @@ const series = {
     ),
     color: theme.euiColorVis1,
   },
-  heapMemoryUsed: {
-    title: i18n.translate('xpack.apm.agentMetrics.java.heapMemorySeriesUsed', {
-      defaultMessage: 'Avg. used',
+  heapMemoryMax: {
+    title: i18n.translate('xpack.apm.agentMetrics.java.heapMemorySeriesMax', {
+      defaultMessage: 'Avg. limit',
     }),
-    color: theme.euiColorVis0,
+    color: theme.euiColorVis2,
   },
 };
 

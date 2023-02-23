@@ -39,7 +39,7 @@ export function JvmMetricsOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { serviceName, agentName } = useApmServiceContext();
+  const { serviceName } = useApmServiceContext();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -58,13 +58,12 @@ export function JvmMetricsOverview() {
               environment,
               start,
               end,
-              agentName,
             },
           },
         }
       );
     },
-    [kuery, environment, serviceName, start, end, agentName]
+    [kuery, environment, serviceName, start, end]
   );
 
   const items = data?.serviceNodes ?? [];
