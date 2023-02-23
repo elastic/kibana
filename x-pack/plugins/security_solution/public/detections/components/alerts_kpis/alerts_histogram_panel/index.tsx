@@ -455,7 +455,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                   filters,
                 }}
                 getLensAttributes={getLensAttributes}
-                height={ChartHeight}
+                height="100%"
                 id={`alerts-trend-embeddable-${uniqueQueryId}`}
                 inspectTitle={inspectTitle}
                 scopeId={SourcererScopeName.detections}

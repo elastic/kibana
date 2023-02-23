@@ -18,6 +18,7 @@ import { TestProviders } from '../../../../common/mock';
 import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
 import { TABLE } from '../../../pages/detection_engine/chart_panels/chart_select/translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
@@ -249,8 +250,10 @@ describe('when isChartEmbeddablesEnabled = true', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
-    mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(true); // for chartEmbeddablesEnabled flag
-    mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for alertsPageChartsEnabled flag
+    mockUseIsExperimentalFeatureEnabled.mockImplementation(
+      (flagName: 'chartEmbeddablesEnabled' | 'alertsPageChartsEnabled') =>
+        flagName === 'chartEmbeddablesEnabled'
+    );
   });
 
   it('renders LensEmbeddable', async () => {
@@ -261,6 +264,17 @@ describe('when isChartEmbeddablesEnabled = true', () => {
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="embeddable-count-table"]').exists()).toBeTruthy();
+    });
+  });
+
+  it('renders LensEmbeddable with 100% height', async () => {
+    await act(async () => {
+      mount(
+        <TestProviders>
+          <AlertsCountPanel {...defaultProps} />
+        </TestProviders>
+      );
+      expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual('100%');
     });
   });
 
