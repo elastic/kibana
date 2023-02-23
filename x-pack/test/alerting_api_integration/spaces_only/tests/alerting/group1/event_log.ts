@@ -540,7 +540,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           });
         });
 
-        it('should generate expected events for flapping alerts that are mainly active', async () => {
+        it('should generate expected events for flapping alerts that settle on active', async () => {
           await supertest
             .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
             .set('kbn-xsrf', 'foo')
@@ -638,7 +638,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           expect(flapping).to.eql(result);
         });
 
-        it('should generate expected events for flapping alerts that are mainly recovered', async () => {
+        it('should generate expected events for flapping alerts settle on recovered', async () => {
           await supertest
             .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
             .set('kbn-xsrf', 'foo')
@@ -729,6 +729,105 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           expect(flapping).to.eql(
             [false, false, false, false, false].concat(new Array(8).fill(true))
           );
+        });
+
+        it('should generate expected events for flapping alerts over a period of time longer than the look back', async () => {
+          await supertest
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
+            .set('kbn-xsrf', 'foo')
+            .auth('superuser', 'superuser')
+            .send({
+              enabled: true,
+              look_back_window: 5,
+              status_change_threshold: 5,
+            })
+            .expect(200);
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
+          // pattern of when the alert should fire
+          const instance = [true, false, false, true, false, true, false, true, false].concat(
+            ...new Array(8).fill(true),
+            false
+          );
+          const pattern = {
+            instance,
+          };
+
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: {
+                  pattern,
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                  {
+                    id: createdAction.id,
+                    group: 'recovered',
+                    params: {},
+                  },
+                ],
+                notify_when: RuleNotifyWhen.CHANGE,
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // get the events we're expecting
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                // make sure the counts of the # of events per type are as expected
+                ['execute-start', { gte: 8 }],
+                ['execute', { gte: 8 }],
+                ['execute-action', { equal: 8 }],
+                ['new-instance', { equal: 4 }],
+                ['active-instance', { gte: 4 }],
+                ['recovered-instance', { equal: 4 }],
+              ]),
+            });
+          });
+
+          const flapping = events
+            .filter(
+              (event) =>
+                event?.event?.action === 'active-instance' ||
+                event?.event?.action === 'recovered-instance'
+            )
+            .map((event) => event?.kibana?.alert?.flapping);
+          const result = [false, false, false, false, false, false, false].concat(
+            new Array(6).fill(true),
+            false,
+            false,
+            false,
+            false
+          );
+          expect(flapping).to.eql(result);
         });
       });
     }

@@ -204,12 +204,4 @@ export class LegacyAlertsClient<
   public getExecutorServices() {
     return getPublicAlertFactory(this.alertFactory!);
   }
-
-  public setFlapping(flappingSettings: RulesSettingsFlappingProperties) {
-    setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-      flappingSettings,
-      this.processedAlerts.active,
-      this.processedAlerts.recovered
-    );
-  }
 }
