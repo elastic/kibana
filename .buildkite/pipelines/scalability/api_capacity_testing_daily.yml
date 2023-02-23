@@ -9,9 +9,14 @@ steps:
   - label: 'Build Kibana Distribution and Plugins'
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
-      queue: c2-16
+      queue: n2-16-spot
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - label: ':kibana: APIs Capacity Tests'
     command: .buildkite/scripts/steps/scalability/api_capacity_testing.sh
