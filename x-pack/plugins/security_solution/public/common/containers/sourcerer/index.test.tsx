@@ -104,6 +104,10 @@ jest.mock('../../lib/kibana', () => ({
   useUiSetting$: jest.fn().mockImplementation(() => [mockPatterns]),
 }));
 
+jest.mock('./use_fetch_pattern_list', () => {
+  return { useFetchPatternList: () => ({ patternList: [] }) };
+});
+
 describe('Sourcerer Hooks', () => {
   const { storage } = createSecuritySolutionStorageMock();
   let store: ReturnType<typeof createStore>;
