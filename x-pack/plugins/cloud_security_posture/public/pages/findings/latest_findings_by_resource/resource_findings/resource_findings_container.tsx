@@ -67,6 +67,7 @@ const getResourceFindingSharedValues = (sharedValues: {
   resourceSubType: string;
   resourceName: string;
   clusterId: string;
+  cloudAccountName: string;
 }): EuiDescriptionListProps['listItems'] => [
   {
     title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.resourceTypeTitle', {
@@ -85,6 +86,12 @@ const getResourceFindingSharedValues = (sharedValues: {
       defaultMessage: 'Cluster ID',
     }),
     description: sharedValues.clusterId,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.cloudAccountName', {
+      defaultMessage: 'Cloud Account Name',
+    }),
+    description: sharedValues.cloudAccountName,
   },
 ];
 
@@ -174,6 +181,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
                 resourceName: resourceFindings.data?.resourceName || '',
                 resourceSubType: resourceFindings.data?.resourceSubType || '',
                 clusterId: resourceFindings.data?.clusterId || '',
+                cloudAccountName: resourceFindings.data?.cloudAccountName || '',
               })}
             />
           )
