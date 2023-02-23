@@ -80,7 +80,10 @@ export const Todos = () => {
       <ul>
         {data.hits.map((todo: Todo) => (
           <React.Fragment key={todo.id}>
-            <li style={{ display: 'flex', alignItems: 'center' }}>
+            <li
+              style={{ display: 'flex', alignItems: 'center' }}
+              data-test-subj={`todoItem todoItem-${todo.id}`}
+            >
               <EuiCheckbox
                 id={todo.id + ''}
                 key={todo.id}
@@ -95,7 +98,7 @@ export const Todos = () => {
                   });
                 }}
                 label={todo.title}
-                data-test-subj={`todoCheckbox-${todo.id}`}
+                data-test-subj={`todoCheckbox todoCheckbox-${todo.id}`}
               />
 
               <EuiButtonIcon
