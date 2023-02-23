@@ -58,7 +58,6 @@
     "@kbn/ecs",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
-    "@kbn/core-ui-settings-server-internal",
   ],
   "exclude": [
     "target/**/*",
