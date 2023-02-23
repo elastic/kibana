@@ -18,12 +18,14 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { ResponseActionBodySchema } from '../../../../common/endpoint/schema/actions';
 import type { EndpointAppContext } from '../../types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   EndpointAction,
   EndpointActionData,
   HostMetadata,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  ResponseActionsExecuteParameters,
 } from '../../../../common/endpoint/types';
 import {
   ENDPOINT_ACTION_RESPONSES_DS,
@@ -86,6 +88,20 @@ export const createResponseActionHandler = async (
   const endpointIds: string[] = [...new Set(params.endpoint_ids)]; // dedupe
   const endpointData = await getMetadataForEndpoints(endpointIds, esClient);
 
+  const getActionParameters = () => {
+    // set timeout to 4h (if not specified or when timeout is specified as 0) when command is `execute`
+    if (command === 'execute') {
+      const actionRequestParams = params.parameters as ResponseActionsExecuteParameters;
+      if (typeof actionRequestParams?.timeout === 'undefined') {
+        return { ...actionRequestParams, timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT };
+      }
+      return actionRequestParams;
+    }
+
+    // for all other commands return the parameters as is
+    return params.parameters ?? undefined;
+  };
+
   const agents = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
   const doc = {
     '@timestamp': moment().toISOString(),
@@ -101,7 +117,7 @@ export const createResponseActionHandler = async (
       data: {
         command,
         comment: params.comment ?? undefined,
-        parameters: params.parameters ?? undefined,
+        parameters: getActionParameters(),
       } as EndpointActionData,
     } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,
     user: {

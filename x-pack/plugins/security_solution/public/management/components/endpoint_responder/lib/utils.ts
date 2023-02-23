@@ -56,6 +56,7 @@ export const commandToCapabilitiesMap = new Map<
   ['suspend-process', 'suspend_process'],
   ['processes', 'running_processes'],
   ['get-file', 'get_file'],
+  ['execute', 'execute'],
 ]);
 
 export const getRbacControl = ({
@@ -72,6 +73,7 @@ export const getRbacControl = ({
     ['suspend-process', privileges.canSuspendProcess],
     ['processes', privileges.canGetRunningProcesses],
     ['get-file', privileges.canWriteFileOperations],
+    ['execute', privileges.canWriteExecuteOperations],
   ]);
   return commandToPrivilegeMap.get(commandName as ConsoleResponseActionCommands) ?? false;
 };
