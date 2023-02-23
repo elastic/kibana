@@ -41,7 +41,9 @@ import {
   FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
 } from '../performance';
 
-export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
+export interface UploadOptions extends Omit<BlobUploadOptions, 'id'> {
+  maxFileSize?: number;
+}
 
 export function createFileClient({
   fileKindDescriptor,
@@ -215,16 +217,19 @@ export class FileClientImpl implements FileClient {
     rs: Readable,
     options?: UploadOptions
   ): ReturnType<BlobStorageClient['upload']> => {
-    const maxFileSize = this.fileKindDescriptor.maxSizeBytes;
-    const sizeTransform = typeof maxFileSize === 'number' ? enforceMaxByteSizeTransform(maxFileSize) : null;
-    const transforms = options?.transforms || [];
+    const {
+      maxFileSize = this.fileKindDescriptor.maxSizeBytes,
+      transforms = [],
+      ...blobOptions
+    } = options || {};
 
-    if (sizeTransform) {
+    if (typeof maxFileSize === 'number') {
+      const sizeTransform = enforceMaxByteSizeTransform(maxFileSize);
       transforms.push(sizeTransform);
     }
 
     return this.blobStorageClient.upload(rs, {
-      ...options,
+      ...blobOptions,
       transforms,
       id,
     });
