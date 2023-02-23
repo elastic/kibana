@@ -223,7 +223,7 @@ export class FileClientImpl implements FileClient {
     if (typeof maxUploadSize === 'function') {
       const sizeLimitPerFile = maxUploadSize(file);
       if (typeof sizeLimitPerFile === 'number') {
-        maxFileSize = sizeLimitPerFile;
+        maxFileSize = Math.min(sizeLimitPerFile, maxFileSize || Infinity);
       }
     }
 

@@ -64,6 +64,9 @@ describe('FileService', () => {
     fileKindsRegistry.register({
       id: fileKindTinyFiles,
       maxSizeBytes: 10,
+      maxUploadSize: (file) => {
+        return file.mimeType === 'text/json' ? 3 : 10;
+      },
       http: {},
     });
     esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -263,7 +266,7 @@ describe('FileService', () => {
     expect(updatedFile2.data.alt).toBe(updatableFields.alt);
   });
 
-  it('enforces max size settings', async () => {
+  it('enforces file kind max size settings', async () => {
     const file = await createDisposableFile({ fileKind: fileKindTinyFiles, name: 'test' });
     const tinyContent = Readable.from(['ok']);
     await file.uploadContent(tinyContent);
@@ -272,6 +275,18 @@ describe('FileService', () => {
     const notSoTinyContent = Readable.from(['nok'.repeat(10)]);
     await expect(() => file2.uploadContent(notSoTinyContent)).rejects.toThrow(
       new Error('Maximum of 10 bytes exceeded')
+    );
+  });
+
+  it('enforces per file max size settings, using mime type', async () => {
+    const file = await createDisposableFile({ fileKind: fileKindTinyFiles, name: 'test', mime: 'text/mime' });
+    const tinyContent = Readable.from(['ok ok ok']);
+    await file.uploadContent(tinyContent);
+
+    const file2 = await createDisposableFile({ fileKind: fileKindTinyFiles, name: 'test', mime: 'text/json' });
+    const notSoTinyContent = Readable.from(['[123]']);
+    await expect(() => file2.uploadContent(notSoTinyContent)).rejects.toThrow(
+      new Error('Maximum of 3 bytes exceeded')
     );
   });
 
