@@ -12,7 +12,7 @@ import {
   RequestAdapter,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { DiscoverStateContainer } from '../services/discover_state';
 import { DataTableRecord } from '../../../types';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 
@@ -25,10 +25,10 @@ export function useInspector({
   setExpandedDoc,
   inspector,
   inspectorAdapters,
-  savedSearch,
+  stateContainer,
 }: {
   inspectorAdapters: InspectorAdapters;
-  savedSearch: SavedSearch;
+  stateContainer: DiscoverStateContainer;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   inspector: InspectorPublicPluginStart;
 }) {
@@ -44,7 +44,7 @@ export function useInspector({
 
     const session = inspector.open(
       { requests: new AggregateRequestAdapter(requestAdapters) },
-      { title: savedSearch.title }
+      { title: stateContainer.savedSearchState.get().title }
     );
 
     setInspectorSession(session);
@@ -53,7 +53,7 @@ export function useInspector({
     inspectorAdapters.lensRequests,
     inspectorAdapters.requests,
     inspector,
-    savedSearch.title,
+    stateContainer.savedSearchState,
   ]);
 
   useEffect(() => {

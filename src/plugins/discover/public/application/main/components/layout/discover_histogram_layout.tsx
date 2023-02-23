@@ -29,7 +29,6 @@ const histogramLayoutCss = css`
 export const DiscoverHistogramLayout = ({
   isPlainRecord,
   dataView,
-  savedSearch,
   stateContainer,
   resizeRef,
   inspectorAdapters,
@@ -41,6 +40,7 @@ export const DiscoverHistogramLayout = ({
     stateContainer,
     savedSearchData$: stateContainer.dataState.data$,
   };
+  const savedSearch = stateContainer.savedSearchState.get();
 
   const searchSessionId = useObservable(searchSessionManager.searchSessionId$);
 
@@ -55,9 +55,6 @@ export const DiscoverHistogramLayout = ({
   }, [savedSearch?.id, stateContainer.savedSearchState]);
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported
-  if (!searchSessionId && !isPlainRecord) {
-    return null;
-  }
 
   return (
     <UnifiedHistogramContainer
@@ -71,7 +68,6 @@ export const DiscoverHistogramLayout = ({
       <DiscoverMainContent
         {...commonProps}
         {...mainContentProps}
-        savedSearch={savedSearch}
         isPlainRecord={isPlainRecord}
         // The documents grid doesn't rerender when the chart visibility changes
         // which causes it to render blank space, so we need to force a rerender

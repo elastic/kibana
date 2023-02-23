@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
@@ -62,7 +62,6 @@ function DiscoverDocumentsComponent({
   expandedDoc,
   dataView,
   onAddFilter,
-  savedSearch,
   setExpandedDoc,
   stateContainer,
   onFieldEdited,
@@ -71,13 +70,13 @@ function DiscoverDocumentsComponent({
   dataView: DataView;
   navigateTo: (url: string) => void;
   onAddFilter?: DocViewFilterFn;
-  savedSearch: SavedSearch;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
+  const savedSearch = stateContainer.savedSearchState.get();
   const { dataViews, capabilities, uiSettings } = services;
   const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
     (state) => {

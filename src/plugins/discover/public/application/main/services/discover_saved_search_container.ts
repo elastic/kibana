@@ -61,6 +61,7 @@ export interface SavedSearchContainer {
   set: (savedSearch: SavedSearch) => SavedSearch;
   load: LoadFunction;
   get: () => SavedSearch;
+  getTitle: () => string;
   update: UpdateFunction;
   reset: (id?: string) => Promise<SavedSearch | undefined>;
   resetUrl: (id: SavedSearch) => Promise<SavedSearch | undefined>;
@@ -95,6 +96,10 @@ export function getSavedSearchContainer({
   };
   const get = () => {
     return savedSearchVolatile$.getValue();
+  };
+
+  const getTitle = () => {
+    return savedSearchVolatile$.getValue().title ?? '';
   };
 
   const reset = async (id: string | undefined) => {
@@ -255,6 +260,7 @@ export function getSavedSearchContainer({
     persist,
     isPersisted,
     get,
+    getTitle,
     update,
     undo,
     new: newSavedSearch,

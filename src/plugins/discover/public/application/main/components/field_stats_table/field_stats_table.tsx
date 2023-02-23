@@ -111,7 +111,6 @@ export interface FieldStatisticsTableProps {
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
     dataView,
-    savedSearch,
     query,
     columns,
     filters,
@@ -166,7 +165,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
         dataView,
-        savedSearch,
+        savedSearch: stateContainer?.savedSearchState.get(),
         query,
         filters,
         visibleFieldNames: columns,
@@ -185,7 +184,6 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   }, [
     embeddable,
     dataView,
-    savedSearch,
     query,
     columns,
     filters,
@@ -219,7 +217,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
           const initializedEmbeddable = await factory.create({
             id: 'discover_data_visualizer_grid',
             dataView,
-            savedSearch,
+            savedSearch: stateContainer?.savedSearchState.get(),
             query,
             showPreviewByDefault,
             onAddFilter,

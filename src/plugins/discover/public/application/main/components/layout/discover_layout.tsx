@@ -78,7 +78,6 @@ export function DiscoverLayout({
     inspector,
   } = useDiscoverServices();
   const { main$ } = stateContainer.dataState.data$;
-  const savedSearch = stateContainer.savedSearchState.get();
   const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
@@ -122,7 +121,7 @@ export function DiscoverLayout({
     setExpandedDoc,
     inspector,
     inspectorAdapters,
-    savedSearch,
+    stateContainer,
   });
 
   const {
@@ -233,7 +232,6 @@ export function DiscoverLayout({
           navigateTo={navigateTo}
           expandedDoc={expandedDoc}
           setExpandedDoc={setExpandedDoc}
-          savedSearch={savedSearch}
           stateContainer={stateContainer}
           columns={currentColumns}
           viewMode={viewMode}
@@ -260,7 +258,6 @@ export function DiscoverLayout({
     onDisableFilters,
     onFieldEdited,
     resultState,
-    savedSearch,
     searchSessionManager,
     setExpandedDoc,
     stateContainer,
@@ -276,11 +273,11 @@ export function DiscoverLayout({
         tabIndex={-1}
         ref={savedSearchTitle}
       >
-        {savedSearch.title
+        {stateContainer.savedSearchState.getTitle()
           ? i18n.translate('discover.pageTitleWithSavedSearch', {
               defaultMessage: 'Discover - {savedSearchTitle}',
               values: {
-                savedSearchTitle: savedSearch.title,
+                savedSearchTitle: stateContainer.savedSearchState.getTitle(),
               },
             })
           : i18n.translate('discover.pageTitleWithoutSavedSearch', {
@@ -304,7 +301,7 @@ export function DiscoverLayout({
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
-          savedSearch={savedSearch}
+          savedSearch={stateContainer.savedSearchState.get()}
           spaces={spaces}
           history={history}
         />
