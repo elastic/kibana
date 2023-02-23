@@ -17,45 +17,47 @@ interface RangeAgg {
   range: { '@timestamp': { gte: string; lte: string } };
 }
 
-export interface BucketTruncateAgg {
-  bucket_truncate: { bucket_sort: estypes.AggregationsAggregationContainer['bucket_sort'] };
-}
-export interface OptionalSubAggregation {
-  stackByMultipleFields1: {
-    multi_terms: estypes.AggregationsAggregationContainer['multi_terms'];
-    aggs: NonNullable<BucketTruncateAgg> | CardinalitySubAggregation | TermsSubAggregation;
-  };
-}
-
-export interface CardinalitySubAggregation {
-  [category: string]: { cardinality: estypes.AggregationsAggregationContainer['cardinality'] };
-}
-
-export interface TermsSubAggregation {
-  [category: string]: { terms: estypes.AggregationsAggregationContainer['terms'] };
+export interface TermsOrCardinalityAggregation {
+  [category: string]:
+    | {
+        cardinality: estypes.AggregationsAggregationContainer['cardinality'];
+      }
+    | {
+        terms: estypes.AggregationsAggregationContainer['terms'];
+      };
 }
 
 export interface GroupingQueryArgs {
   additionalFilters: BoolAgg[];
   from: string;
   runtimeMappings?: MappingRuntimeFields;
-  additionalAggregationsRoot?: Array<CardinalitySubAggregation | TermsSubAggregation>;
+  additionalAggregationsRoot?: TermsOrCardinalityAggregation[];
   stackByMultipleFields0: string[];
   stackByMultipleFields0Size?: number;
   stackByMultipleFields0From?: number;
   stackByMultipleFields0Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
-  additionalStatsAggregationsFields0: Array<CardinalitySubAggregation | TermsSubAggregation>;
+  additionalStatsAggregationsFields0: TermsOrCardinalityAggregation[];
   stackByMultipleFields1: string[] | undefined;
   stackByMultipleFields1Size?: number;
   stackByMultipleFields1From?: number;
   stackByMultipleFields1Sort?: Array<{ [category: string]: { order: estypes.SortOrder } }>;
-  additionalStatsAggregationsFields1: Array<CardinalitySubAggregation | TermsSubAggregation>;
+  additionalStatsAggregationsFields1: TermsOrCardinalityAggregation[];
   to: string;
 }
 
-/** Defines the shape of query sent to Elasticsearch */
-// TODO: Fix this type, having trouble with aggs.stackByMultipleFields0.aggs
-export interface GroupingQuery {
+export interface SubAggregation extends Record<string, estypes.AggregationsAggregationContainer> {
+  bucket_truncate: estypes.AggregationsAggregationContainer;
+}
+
+export interface MainAggregation extends Record<string, estypes.AggregationsAggregationContainer> {
+  stackByMultipleFields0: {
+    terms?: estypes.AggregationsAggregationContainer['terms'];
+    multi_terms?: estypes.AggregationsAggregationContainer['multi_terms'];
+    aggs: SubAggregation;
+  };
+}
+
+export interface GroupingQuery extends estypes.QueryDslQueryContainer {
   size: number;
   runtime_mappings: MappingRuntimeFields | undefined;
   query: {
@@ -64,14 +66,5 @@ export interface GroupingQuery {
     };
   };
   _source: boolean;
-  aggs: NonNullable<{
-    stackByMultipleFields0: {
-      terms?: estypes.AggregationsAggregationContainer['terms'];
-      multi_terms?: estypes.AggregationsAggregationContainer['multi_terms'];
-      // TODO: this is the troublesome param
-      aggs: BucketTruncateAgg &
-        (OptionalSubAggregation | CardinalitySubAggregation | TermsSubAggregation);
-    };
-  }> &
-    (CardinalitySubAggregation | TermsSubAggregation);
+  aggs: MainAggregation;
 }
