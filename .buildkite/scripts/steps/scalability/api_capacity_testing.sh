@@ -6,9 +6,9 @@ source .buildkite/scripts/common/util.sh
 
 source .buildkite/scripts/steps/scalability/util.sh
 
-#.buildkite/scripts/bootstrap.sh
-echo "--- yarn kbn reset && yarn kbn bootstrap"
-yarn kbn reset && yarn kbn bootstrap
+.buildkite/scripts/bootstrap.sh
+#echo "--- yarn kbn reset && yarn kbn bootstrap"
+#yarn kbn reset && yarn kbn bootstrap
 
 KIBANA_LOAD_TESTING_DIR="${KIBANA_DIR}/kibana-load-testing"
 # These tests are running on static workers so we must delete previous build, load runner and scalability artifacts
