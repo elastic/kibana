@@ -8,9 +8,11 @@
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { AgentPolicy, Output, DownloadSource } from '../../types';
+import { createAppContextStartContractMock } from '../../mocks';
 
 import { agentPolicyService } from '../agent_policy';
 import { agentPolicyUpdateEventHandler } from '../agent_policy_update';
+import { appContextService } from '../app_context';
 
 import {
   generateFleetConfig,
@@ -431,6 +433,35 @@ describe('getFullAgentPolicy', () => {
           },
         },
       },
+    });
+  });
+
+  it('should populate agent.protection and signed properties if encryption is available', async () => {
+    const mockContext = createAppContextStartContractMock();
+    mockContext.messageSigningService.sign = jest
+      .fn()
+      .mockImplementation((message: Record<string, unknown>) =>
+        Promise.resolve({
+          data: Buffer.from(JSON.stringify(message), 'utf8'),
+          signature: 'thisisasignature',
+        })
+      );
+    mockContext.messageSigningService.getPublicKey = jest
+      .fn()
+      .mockResolvedValue('thisisapublickey');
+    appContextService.start(mockContext);
+
+    mockAgentPolicy({});
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy!.agent!.protection).toMatchObject({
+      enabled: true,
+      uninstall_token_hash: '',
+      signing_key: 'thisisapublickey',
+    });
+    expect(agentPolicy!.signed).toMatchObject({
+      data: 'eyJpZCI6ImFnZW50LXBvbGljeSIsImFnZW50Ijp7InByb3RlY3Rpb24iOnsiZW5hYmxlZCI6dHJ1ZSwidW5pbnN0YWxsX3Rva2VuX2hhc2giOiIiLCJzaWduaW5nX2tleSI6InRoaXNpc2FwdWJsaWNrZXkifX19',
+      signature: 'thisisasignature',
     });
   });
 });
