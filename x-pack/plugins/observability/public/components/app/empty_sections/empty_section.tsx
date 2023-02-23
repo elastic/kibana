@@ -7,31 +7,35 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React from 'react';
-import { ISection } from '../../../typings/section';
 
 interface Props {
-  section: ISection;
+  description: string;
+  id: string;
+  title: string;
+  href?: string;
+  linkTitle?: string;
+  target?: '_blank';
 }
 
-export function EmptySection({ section }: Props) {
+export function EmptySection({ description, id, title, href, linkTitle, target }: Props) {
   return (
     <EuiEmptyPrompt
       style={{ maxWidth: 'none' }}
-      title={<h2>{section.title}</h2>}
+      title={<h2>{title}</h2>}
       titleSize="xs"
-      body={<EuiText color="default">{section.description}</EuiText>}
+      body={<EuiText color="default">{description}</EuiText>}
       actions={
         <>
-          {section.linkTitle && (
+          {linkTitle && (
             <EuiButton
               size="s"
               color="primary"
               fill
-              href={section.href}
-              target={section.target}
-              data-test-subj={`empty-${section.id}`}
+              href={href}
+              target={target}
+              data-test-subj={`empty-${id}`}
             >
-              {section.linkTitle}
+              {linkTitle}
             </EuiButton>
           )}
         </>
