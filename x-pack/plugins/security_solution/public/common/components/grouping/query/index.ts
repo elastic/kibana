@@ -56,7 +56,7 @@ const getOptionalSubAggregation = ({
 
 // our pagination will be broken if the stackBy field cardinality exceeds 10,000
 // https://github.com/elastic/kibana/issues/151913
-const MAX_QUERY_SIZE = 10000;
+export const MAX_QUERY_SIZE = 10000;
 export const getGroupingQuery = ({
   additionalFilters = [],
   additionalAggregationsRoot,

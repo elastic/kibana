@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_QUERY_SIZE } from '../../../../common/components/grouping';
 import { getAlertsGroupingQuery } from '.';
 
 describe('getAlertsGroupingQuery', () => {
@@ -95,7 +96,7 @@ describe('getAlertsGroupingQuery', () => {
             },
           },
           multi_terms: {
-            size: 10000,
+            size: MAX_QUERY_SIZE,
             terms: [
               {
                 field: 'kibana.alert.rule.name',

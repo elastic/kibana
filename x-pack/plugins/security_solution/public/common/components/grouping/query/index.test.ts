@@ -6,7 +6,7 @@
  */
 
 import type { GroupingQueryArgs } from '..';
-import { getGroupingQuery } from '..';
+import { getGroupingQuery, MAX_QUERY_SIZE } from '..';
 
 const testProps: GroupingQueryArgs = {
   additionalFilters: [],
@@ -65,7 +65,10 @@ describe('group selector', () => {
   it('Sets terms query when single stackBy field requested', () => {
     const result = getGroupingQuery(testProps);
     expect(result.aggs.stackByMultipleFields0.multi_terms).toBeUndefined();
-    expect(result.aggs.stackByMultipleFields0.terms).toEqual({ field: 'host.name', size: 10000 });
+    expect(result.aggs.stackByMultipleFields0.terms).toEqual({
+      field: 'host.name',
+      size: MAX_QUERY_SIZE,
+    });
     expect(result.aggs.stackByMultipleFields0.aggs).toEqual({
       bucket_truncate: { bucket_sort: { from: 0, size: 25 } },
       alertsCount: { cardinality: { field: 'kibana.alert.uuid' } },
@@ -112,7 +115,7 @@ describe('group selector', () => {
     expect(result.aggs.stackByMultipleFields0.terms).toBeUndefined();
     expect(result.aggs.stackByMultipleFields0.multi_terms).toEqual({
       terms: [{ field: 'kibana.alert.rule.name' }, { field: 'kibana.alert.rule.description' }],
-      size: 10000,
+      size: MAX_QUERY_SIZE,
     });
   });
   it('Additional filters get added to the query', () => {
