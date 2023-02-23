@@ -50,17 +50,20 @@ export function useMonitorList() {
   }, [lastRefresh]);
 
   // On initial mount, load the page
-  useEffect(() => {
-    if (isInitialMount.current) {
-      if (loaded) {
-        dispatch(quietFetchMonitorListAction(pageState));
-      } else {
-        dispatch(fetchMonitorListAction.get(pageState));
+  useDebounce(
+    () => {
+      if (isInitialMount.current) {
+        if (loaded) {
+          dispatch(quietFetchMonitorListAction(pageState));
+        } else {
+          dispatch(fetchMonitorListAction.get(pageState));
+        }
       }
-    }
+    },
+    100,
     // we don't use pageState here, for pageState, useDebounce will handle it
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+    [dispatch]
+  );
 
   useDebounce(
     () => {

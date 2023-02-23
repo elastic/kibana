@@ -6,11 +6,12 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
-import { SyntheticsService } from '../synthetics_service/synthetics_service';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
+import { getAllLocations } from '../synthetics_service/get_all_locations';
 import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../common/runtime_types';
 import { monitorAttributes } from '../../common/types/saved_objects';
 import { syntheticsMonitorType } from '../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { RouteContext } from '../legacy_uptime/routes';
 
 export const QuerySchema = schema.object({
   page: schema.maybe(schema.number()),
@@ -54,10 +55,8 @@ export const SEARCH_FIELDS = [
   'project_id.text',
 ];
 
-export const getMonitors = (
-  request: MonitorsQuery,
-  syntheticsService: SyntheticsService,
-  savedObjectsClient: SavedObjectsClientContract
+export const getMonitors = async (
+  context: RouteContext
 ): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitor>> => {
   const {
     perPage = 50,
@@ -73,19 +72,19 @@ export const getMonitors = (
     searchAfter,
     projects,
     schedules,
-  } = request as MonitorsQuery;
+  } = context.request.query as MonitorsQuery;
 
-  const filterStr = getMonitorFilters({
+  const filterStr = await getMonitorFilters({
     filter,
     monitorTypes,
     tags,
     locations,
-    serviceLocations: syntheticsService.locations,
     projects,
     schedules,
+    context,
   });
 
-  return savedObjectsClient.find({
+  return context.savedObjectsClient.find({
     type: syntheticsMonitorType,
     perPage,
     page,
@@ -99,15 +98,14 @@ export const getMonitors = (
   });
 };
 
-export const getMonitorFilters = ({
+export const getMonitorFilters = async ({
   tags,
-  ports,
   filter,
   locations,
   projects,
   monitorTypes,
   schedules,
-  serviceLocations,
+  context,
 }: {
   filter?: string;
   tags?: string | string[];
@@ -115,10 +113,9 @@ export const getMonitorFilters = ({
   locations?: string | string[];
   projects?: string | string[];
   schedules?: string | string[];
-  ports?: string | string[];
-  serviceLocations: ServiceLocations;
+  context: RouteContext;
 }) => {
-  const locationFilter = parseLocationFilter(serviceLocations, locations);
+  const locationFilter = await parseLocationFilter(context, locations);
 
   return [
     filter,
@@ -160,18 +157,20 @@ export const getKqlFilter = ({
   return `${fieldKey}:"${values}"`;
 };
 
-const parseLocationFilter = (serviceLocations: ServiceLocations, locations?: string | string[]) => {
-  if (!locations) {
+const parseLocationFilter = async (context: RouteContext, locations?: string | string[]) => {
+  if (!locations || locations?.length === 0) {
     return '';
   }
 
+  const { allLocations } = await getAllLocations(context);
+
   if (Array.isArray(locations)) {
     return locations
-      .map((loc) => findLocationItem(loc, serviceLocations)?.id ?? '')
+      .map((loc) => findLocationItem(loc, allLocations)?.id ?? '')
       .filter((val) => !!val);
   }
 
-  return findLocationItem(locations, serviceLocations)?.id ?? '';
+  return findLocationItem(locations, allLocations)?.id ?? '';
 };
 
 export const findLocationItem = (query: string, locations: ServiceLocations) => {
