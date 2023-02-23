@@ -94,11 +94,17 @@ describe('TelemetryEventsSender', () => {
           dll: {
             Ext: {
               device: {
-                volume_device_type: 'Disk File System',
+                bus_type: 'FileBackedVirtual',
+                dos_name: 'D:',
+                file_system_type: 'CDFS',
+                nt_name: 'CdRom0',
+                product_id: 'Virtual DVD-ROM',
+                vendor_id: 'Msft',
+                volume_device_type: 'CD-ROM File System',
               },
               load_index: 1,
-              relative_file_creation_time: 48628704.4029488,
-              relative_file_name_modify_time: 48628704.4029488,
+              relative_file_creation_time: 35588490.2737149,
+              relative_file_name_modify_time: 35588490.2424634,
             },
           },
           file: {
@@ -352,8 +358,8 @@ describe('TelemetryEventsSender', () => {
             entity_id: 'some_entity_id',
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
-              relative_file_creation_time: 35588490.2737149,
-              relative_file_name_modify_time: 35588490.2424634,
+              relative_file_creation_time: 48628704.4029488,
+              relative_file_name_modify_time: 48628704.4029488,
               device: {
                 bus_type: 'FileBackedVirtual',
                 volume_device_type: 'CD-ROM File System',
