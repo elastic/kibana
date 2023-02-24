@@ -198,7 +198,7 @@ export class DashboardAddPanelService extends FtrService {
       const embeddableListBody = await itemList.findByTagName('tbody');
       const embeddableRows = await embeddableListBody.findAllByCssSelector('tr');
       const { name } = await this.getRowAtIndex(embeddableRows, 0);
-      expect(name.includes('saved search')).to.be(false);
+      expect(name.includes('search')).to.be(false);
     });
     let morePages = true;
     const vizList: string[][] = [];
