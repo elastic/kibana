@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { FileShareJSON, FileShareJSONWithToken } from '@kbn/files-plugin/common';
 import type { FileJSON, FileKind } from '.';
 
 export interface Pagination {

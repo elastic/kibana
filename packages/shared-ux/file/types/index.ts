@@ -240,25 +240,11 @@ export interface FileJSON<Meta = unknown> {
   user?: FileMetadata['user'];
 }
 
-/*
- * A descriptor of meta values associated with a set or "kind" of files.
- *
- * @note In order to use the file service consumers must register a {@link FileKind}
- * in the {@link FileKindsRegistry}.
- */
-export interface FileKind {
+export interface FileKindBase {
   /**
    * Unique file kind ID
    */
   id: string;
-
-  /**
-   * Max file contents size, in bytes. Can be customized per file using the
-   * {@link FileJSON} object. This is enforced on the server side.
-   *
-   * @default 4MiB
-   */
-  maxSizeBytes?: number | ((file: FileJSON) => number);
 
   /**
    * The MIME type of the file content.
@@ -266,6 +252,23 @@ export interface FileKind {
    * @default accept all mime types
    */
   allowedMimeTypes?: string[];
+}
+
+/*
+ * A descriptor of meta values associated with a set or "kind" of files.
+ *
+ * @note In order to use the file service consumers must register a {@link FileKind}
+ * in the {@link FileKindsRegistry}.
+ */
+export interface FileKind extends FileKindBase {
+  /**
+   * Max file contents size, in bytes. Can be customized per file using the
+   * {@link FileJSON} object. This is enforced on the server-side as well as
+   * in the upload React component.
+   *
+   * @default 4MiB
+   */
+  maxSizeBytes?: number | ((file: FileJSON) => number);
 
   /**
    * Blob store specific settings that enable configuration of storage
