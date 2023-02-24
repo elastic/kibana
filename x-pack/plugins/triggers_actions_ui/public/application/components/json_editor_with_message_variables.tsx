@@ -37,7 +37,7 @@ interface Props {
   buttonTitle?: string;
   messageVariables?: ActionVariable[];
   paramsProperty: string;
-  inputTargetValue?: string;
+  inputTargetValue?: string | null;
   label: string;
   errors?: string[];
   areaLabel?: string;
