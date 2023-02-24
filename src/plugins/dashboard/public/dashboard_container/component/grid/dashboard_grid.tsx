@@ -167,22 +167,24 @@ export const DashboardGrid = () => {
 
   const onLayoutChange = useCallback(
     (newLayout: PanelLayout[]) => {
-      const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
-        (updatedPanelsAcc, panelLayout) => {
-          updatedPanelsAcc[panelLayout.i] = {
-            ...panels[panelLayout.i],
-            gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
-          };
-          return updatedPanelsAcc;
-        },
-        {} as { [key: string]: DashboardPanelState }
-      );
-      // onLayoutChange gets called by react grid layout a lot more than it should, so only dispatch the updated panels if the layout has actually changed
-      if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
-        dispatch(setPanels(updatedPanels));
+      if (!expandedPanelId) {
+        const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
+          (updatedPanelsAcc, panelLayout) => {
+            updatedPanelsAcc[panelLayout.i] = {
+              ...panels[panelLayout.i],
+              gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
+            };
+            return updatedPanelsAcc;
+          },
+          {} as { [key: string]: DashboardPanelState }
+        );
+        // onLayoutChange gets called by react grid layout a lot more than it should, so only dispatch the updated panels if the layout has actually changed
+        if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
+          dispatch(setPanels(updatedPanels));
+        }
       }
     },
-    [dispatch, panels, setPanels]
+    [dispatch, panels, setPanels, expandedPanelId]
   );
 
   const dashboardPanels = useMemo(() => {
