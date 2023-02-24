@@ -12,8 +12,10 @@ export const useFetchApmSuggestions = ({
   search = '',
 }: Params): UseFetchApmSuggestions => {
   return {
-    loading: false,
-    error: false,
-    data: ['apm-suggestion-1', 'apm-suggestion-2', 'apm-suggestion-3'],
+    isLoading: false,
+    isError: false,
+    isSuccess: true,
+    suggestions: ['apm-suggestion-1', 'apm-suggestion-2', 'apm-suggestion-3'],
+    refetch: function () {} as UseFetchApmSuggestions['refetch'],
   };
 };
