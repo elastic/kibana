@@ -56,7 +56,7 @@ describe('dashboard renderer', () => {
       mountWithIntl(
         <DashboardRenderer
           savedObjectId="saved_object_kibanana"
-          getCreationOptions={() => options}
+          getCreationOptions={() => Promise.resolve(options)}
         />
       );
     });
