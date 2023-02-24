@@ -24,7 +24,7 @@ import type {
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
   UpdatePackageResponse,
-  PackageVerificationKeyIdResponse,
+  GetVerificationKeyIdResponse,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -424,7 +424,7 @@ export const getVerificationKeyIdHandler: FleetRequestHandler = async (
 ) => {
   try {
     const packageVerificationKeyId = await getGpgKeyIdOrUndefined();
-    const body: PackageVerificationKeyIdResponse = {
+    const body: GetVerificationKeyIdResponse = {
       id: packageVerificationKeyId || null,
     };
     return response.ok({ body });

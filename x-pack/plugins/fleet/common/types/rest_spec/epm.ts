@@ -171,6 +171,6 @@ export interface DeletePackageResponse {
   response?: AssetReference[];
   items: AssetReference[];
 }
-export interface PackageVerificationKeyIdResponse {
+export interface GetVerificationKeyIdResponse {
   id: string | null;
 }
