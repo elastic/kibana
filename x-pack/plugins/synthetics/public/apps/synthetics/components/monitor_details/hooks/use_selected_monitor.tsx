@@ -49,11 +49,15 @@ export const useSelectedMonitor = (monId?: string) => {
     ? monitorFromList
     : null;
 
+  const isMonitorMissing =
+    error?.body.statusCode === 404 &&
+    (error.getPayload as { monitorId: string })?.monitorId === monitorId;
+
   useEffect(() => {
-    if (monitorId && !availableMonitor && !syntheticsMonitorLoading) {
+    if (monitorId && !availableMonitor && !syntheticsMonitorLoading && !isMonitorMissing) {
       dispatch(getMonitorAction.get({ monitorId }));
     }
-  }, [dispatch, monitorId, availableMonitor, syntheticsMonitorLoading]);
+  }, [dispatch, monitorId, availableMonitor, syntheticsMonitorLoading, isMonitorMissing]);
 
   useEffect(() => {
     // Only perform periodic refresh if the last dispatch was earlier enough
@@ -80,5 +84,6 @@ export const useSelectedMonitor = (monId?: string) => {
     monitor: availableMonitor,
     loading: syntheticsMonitorLoading || monitorListLoading,
     error,
+    isMonitorMissing,
   };
 };
