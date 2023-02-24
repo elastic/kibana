@@ -39,12 +39,10 @@ import { act } from 'react-dom/test-utils';
 function getStateContainer() {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
-  stateContainer.setAppState({
+  stateContainer.appState.update({
     interval: 'auto',
     hideChart: false,
   });
-
-  stateContainer.setAppState = jest.fn();
 
   return stateContainer;
 }
