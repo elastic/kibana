@@ -332,7 +332,7 @@ describe('build_threat_mapping_filter', () => {
       const threatMapping = getThreatMappingMock();
       const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
       const innerClause = createAndOrClauses({ threatMapping, threatListItem, entryKey: 'value' });
-      expect(innerClause).toEqual(getThreatMappingFilterShouldMock());
+      expect(innerClause).toEqual(getThreatMappingFilterShouldMock().bool.should);
     });
 
     test('it should filter out data from entries that do not have mappings', () => {
@@ -343,7 +343,7 @@ describe('build_threat_mapping_filter', () => {
         foo: 'bar',
       };
       const innerClause = createAndOrClauses({ threatMapping, threatListItem, entryKey: 'value' });
-      expect(innerClause).toEqual(getThreatMappingFilterShouldMock());
+      expect(innerClause).toEqual(getThreatMappingFilterShouldMock().bool.should);
     });
 
     test('it should return an empty boolean given an empty array', () => {
@@ -353,7 +353,7 @@ describe('build_threat_mapping_filter', () => {
         threatListItem,
         entryKey: 'value',
       });
-      expect(innerClause).toEqual({ bool: { minimum_should_match: 1, should: [] } });
+      expect(innerClause).toEqual([]);
     });
 
     test('it should return an empty boolean clause given an empty object for a threat list item', () => {
@@ -363,7 +363,7 @@ describe('build_threat_mapping_filter', () => {
         threatListItem: getThreatListItemMock({ _source: {}, fields: {} }),
         entryKey: 'value',
       });
-      expect(innerClause).toEqual({ bool: { minimum_should_match: 1, should: [] } });
+      expect(innerClause).toEqual([]);
     });
   });
 
@@ -443,6 +443,62 @@ describe('build_threat_mapping_filter', () => {
       });
       const expected: BooleanFilter = {
         bool: { should: [getThreatMappingFilterShouldMock()], minimum_should_match: 1 },
+      };
+      expect(mapping).toEqual(expected);
+    });
+
+    test('it should use terms query if allowedFieldsForTermsQuery provided', () => {
+      const threatMapping = getThreatMappingMock();
+      const threatList = getThreatListSearchResponseMock().hits.hits;
+      const mapping = buildEntriesMappingFilter({
+        threatMapping,
+        threatList,
+        chunkSize: 1024,
+        entryKey: 'value',
+        allowedFieldsForTermsQuery: {
+          source: { 'source.ip': true },
+          threat: { 'source.ip': true },
+        },
+      });
+      const mock = { ...getThreatMappingFilterShouldMock() };
+      mock.bool.should.pop();
+
+      const expected: BooleanFilter = {
+        bool: {
+          should: [
+            mock,
+            {
+              terms: {
+                _name: '__SEP____SEP__source.ip__SEP__source.ip__SEP__tq',
+                'source.ip': ['127.0.0.1'],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      };
+      expect(mapping).toEqual(expected);
+    });
+
+    test('it should use match query if allowedFieldsForTermsQuery provided, but it is AND', () => {
+      const threatMapping = getThreatMappingMock();
+      const threatList = getThreatListSearchResponseMock().hits.hits;
+      const mapping = buildEntriesMappingFilter({
+        threatMapping,
+        threatList,
+        chunkSize: 1024,
+        entryKey: 'value',
+        allowedFieldsForTermsQuery: {
+          source: { 'host.name': true, 'host.ip': true },
+          threat: { 'host.name': true, 'host.ip': true },
+        },
+      });
+
+      const expected: BooleanFilter = {
+        bool: {
+          should: [getThreatMappingFilterShouldMock()],
+          minimum_should_match: 1,
+        },
       };
       expect(mapping).toEqual(expected);
     });

@@ -28,7 +28,6 @@ import {
   alertStateActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
-  groupActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
   metricActionVariableDescription,
@@ -75,6 +74,13 @@ const condition = schema.object({
   ),
 });
 
+const groupActionVariableDescription = i18n.translate(
+  'xpack.infra.inventory.alerting.groupActionVariableDescription',
+  {
+    defaultMessage: 'Name of the group reporting data',
+  }
+);
+
 export async function registerMetricInventoryThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
@@ -112,14 +118,24 @@ export async function registerMetricInventoryThresholdRuleType(
         { name: 'group', description: groupActionVariableDescription },
         { name: 'alertState', description: alertStateActionVariableDescription },
         ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
-          ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
+          ? [
+              {
+                name: 'alertDetailsUrl',
+                description: alertDetailUrlActionVariableDescription,
+                usesPublicBaseUrl: true,
+              },
+            ]
           : []),
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'value', description: valueActionVariableDescription },
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
-        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
+        {
+          name: 'viewInAppUrl',
+          description: viewInAppUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
+        },
         { name: 'cloud', description: cloudActionVariableDescription },
         { name: 'host', description: hostActionVariableDescription },
         { name: 'container', description: containerActionVariableDescription },

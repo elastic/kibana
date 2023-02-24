@@ -49,7 +49,10 @@ const DataContext = createContext<ResultEdges>([]);
 
 const StyledEuiDataGrid = styled(EuiDataGrid)`
   :not(.euiDataGrid--fullScreen) {
-    max-height: 500px;
+    .euiDataGrid__virtualized {
+      height: 100% !important;
+      max-height: 500px;
+    }
   }
 `;
 

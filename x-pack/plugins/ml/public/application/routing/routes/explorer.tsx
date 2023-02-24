@@ -75,6 +75,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
     undefined,
     deps.config,
     deps.dataViewsContract,
+    deps.getSavedSearchDeps,
     {
       ...basicResolvers(deps),
       jobs: mlJobService.loadJobsWrapper,

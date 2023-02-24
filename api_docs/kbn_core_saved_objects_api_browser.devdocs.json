@@ -62,7 +62,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -343,7 +343,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -423,7 +423,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           }
         ],
@@ -484,7 +484,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           }
         ],
@@ -701,7 +701,7 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           }
         ],
@@ -766,7 +766,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           }
         ],
@@ -871,7 +871,7 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           }
         ],
@@ -935,7 +935,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -1180,11 +1180,31 @@
           },
           {
             "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/use_resolver.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/use_resolver.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/use_resolver.ts"
+          },
+          {
+            "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
           },
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/router.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/router.tsx"
           },
           {
             "plugin": "canvas",
@@ -2188,10 +2208,6 @@
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
               },
               {
-                "plugin": "savedObjects",
-                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-              },
-              {
                 "plugin": "presentationUtil",
                 "path": "src/plugins/presentation_util/public/services/dashboards/dashboards_service.ts"
               },
@@ -2226,10 +2242,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.ts"
-              },
-              {
-                "plugin": "savedObjectsFinder",
-                "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
               },
               {
                 "plugin": "cases",
@@ -2297,15 +2309,15 @@
               },
               {
                 "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.ts"
+              },
+              {
+                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/monitor_management/monitor_config/use_monitor_name.ts"
               },
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/monitor_management/manage_locations/hooks/use_location_monitors.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/list_filters/use_filters.ts"
               },
               {
                 "plugin": "synthetics",
@@ -2333,11 +2345,11 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/list_filters/use_filters.test.ts"
+                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.test.ts"
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/list_filters/use_filters.test.ts"
+                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -2492,10 +2504,6 @@
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
               },
               {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
               },
@@ -2514,6 +2522,10 @@
               {
                 "plugin": "dashboardEnhanced",
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+              },
+              {
+                "plugin": "monitoring",
+                "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
               },
               {
                 "plugin": "synthetics",
@@ -2735,7 +2747,7 @@
             ],
             "label": "resolve",
             "description": [
-              "\nResolves a single object\n"
+              "\nResolves a single object.\n\nAfter 8.0.0, saved objects are provided a unique ID _across_ spaces.\nA subset of existing saved objects may have IDs regenerated while upgrading to 8+.\n`.resolve` provides a way for clients with legacy IDs to still retrieve the correct\nsaved object.\n\nAn example of a client with a \"legacy ID\" is a bookmarked dashboard in a\nnon-default space.\n"
             ],
             "signature": [
               "<T = unknown>(type: string, id: string) => Promise<",
@@ -2931,7 +2943,7 @@
             ],
             "label": "bulkResolve",
             "description": [
-              "\nResolves an array of objects by id, using any legacy URL aliases if they exist\n"
+              "\nResolves an array of objects by id.\n\nSee documentation for `.resolve`.\n"
             ],
             "signature": [
               "<T = unknown>(objects: ",
@@ -3305,7 +3317,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -3503,7 +3515,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           }
         ],
@@ -3619,7 +3631,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -3732,7 +3744,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -3873,7 +3885,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -3897,50 +3909,6 @@
             "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
           },
           {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
             "plugin": "embeddable",
             "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
           },
@@ -4015,42 +3983,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.ts"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
           },
           {
             "plugin": "aiops",
@@ -4131,22 +4063,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
           },
           {
             "plugin": "infra",
@@ -4746,9 +4662,9 @@
           "\nBrowser options for finding saved objects\n"
         ],
         "signature": [
-          "{ type: string | string[]; filter?: any; search?: string | undefined; fields?: string[] | undefined; aggs?: Record<string, ",
+          "{ type: string | string[]; page?: number | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; searchFields?: string[] | undefined; hasReference?: ",
+          "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; sortField?: string | undefined; fields?: string[] | undefined; preference?: string | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",
@@ -4780,7 +4696,7 @@
             "section": "def-common.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
-          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; preference?: string | undefined; }"
+          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; }"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
         "deprecated": true,
@@ -4799,16 +4715,8 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/find_objects.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/find_objects.ts"
           },
           {
             "plugin": "visualizations",

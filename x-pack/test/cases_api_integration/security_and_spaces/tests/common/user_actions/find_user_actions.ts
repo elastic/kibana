@@ -24,7 +24,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { findCaseUserActions, getCaseUserActions } from '../../../../common/lib/user_actions';
 import {
   getPostCaseRequest,
   persistableStateAttachment,
@@ -39,7 +38,9 @@ import {
   updateCase,
   createComment,
   bulkCreateAttachments,
-} from '../../../../common/lib/utils';
+  findCaseUserActions,
+  getCaseUserActions,
+} from '../../../../common/lib/api';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 

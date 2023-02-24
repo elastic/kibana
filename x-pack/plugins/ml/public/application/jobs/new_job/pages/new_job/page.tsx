@@ -64,7 +64,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     () =>
       jobCreatorFactory(jobType)(
         mlContext.currentDataView,
-        mlContext.currentSavedSearch,
+        mlContext.deprecatedSavedSearchObj,
         mlContext.combinedQuery
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -148,7 +148,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       jobCreator.modelChangeAnnotations = true;
     }
 
-    if (mlContext.currentSavedSearch !== null) {
+    if (mlContext.selectedSavedSearch !== null) {
       // Jobs created from saved searches cannot be cloned in the wizard as the
       // ML job config holds no reference to the saved search ID.
       jobCreator.createdBy = null;

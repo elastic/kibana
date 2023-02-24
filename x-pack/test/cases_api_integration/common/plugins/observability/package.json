@@ -1,5 +1,5 @@
 {
-  "name": "observability-fixtures",
+  "name": "@kbn/observability-fixtures-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",

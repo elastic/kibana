@@ -117,9 +117,11 @@ type ErrorTypes = keyof ValidationErrors;
 type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
 
 export interface ErrorWrapper {
+  type?: ErrorTypes; // TODO - make this required?
   message: string;
   locations: TinymathLocation[];
   severity?: 'error' | 'warning';
+  extraInfo?: { missingFields: string[] };
 }
 
 const DEFAULT_RETURN_TYPE = getTypeI18n('number');
@@ -408,7 +410,7 @@ function getMessageFromId<K extends ErrorTypes>({
       break;
   }
 
-  return { message, locations };
+  return { type: messageId, message, locations };
 }
 
 export function tryToParse(
@@ -501,16 +503,17 @@ function checkMissingVariableOrFunctions(
 
   // need to check the arguments here: check only strings for now
   if (missingVariables.length) {
-    missingErrors.push(
-      getMessageFromId({
+    missingErrors.push({
+      ...getMessageFromId({
         messageId: 'missingField',
         values: {
           variablesLength: missingVariables.length,
           variablesList: missingVariables.map(({ value }) => value).join(', '),
         },
         locations: missingVariables.map(({ location }) => location),
-      })
-    );
+      }),
+      extraInfo: { missingFields: missingVariables.map(({ value }) => value) },
+    });
   }
   const invalidVariableErrors = checkVariableEdgeCases(
     ast,

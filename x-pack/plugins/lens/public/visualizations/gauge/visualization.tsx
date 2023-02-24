@@ -98,8 +98,8 @@ const getErrorMessages = (row?: DatatableRow, state?: GaugeVisualizationState): 
       errors.push({
         severity: 'error',
         displayLocations: [
-          { id: 'dimensionTrigger', dimensionId: minAccessor! },
-          { id: 'dimensionTrigger', dimensionId: maxAccessor! },
+          { id: 'dimensionButton', dimensionId: minAccessor! },
+          { id: 'dimensionButton', dimensionId: maxAccessor! },
         ],
         fixableInEditor: true,
         shortMessage: i18n.translate(
@@ -115,8 +115,8 @@ const getErrorMessages = (row?: DatatableRow, state?: GaugeVisualizationState): 
       errors.push({
         severity: 'error',
         displayLocations: [
-          { id: 'dimensionTrigger', dimensionId: minAccessor! },
-          { id: 'dimensionTrigger', dimensionId: maxAccessor! },
+          { id: 'dimensionButton', dimensionId: minAccessor! },
+          { id: 'dimensionButton', dimensionId: maxAccessor! },
         ],
         fixableInEditor: true,
         shortMessage: i18n.translate('xpack.lens.guageVisualization.chartCannotRenderEqual', {

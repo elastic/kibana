@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { frequentItems } from '../../../common/__mocks__/artificial_logs/frequent_items';
+import { frequentItemSets } from '../../../common/__mocks__/artificial_logs/frequent_item_sets';
 import { getValueCounts } from './get_value_counts';
 
 describe('getValueCounts', () => {
   it('get value counts for field response_code', () => {
-    expect(getValueCounts(frequentItems, 'response_code')).toEqual({
+    expect(getValueCounts(frequentItemSets, 'response_code')).toEqual({
       '200': 1,
       '404': 1,
       '500': 3,
@@ -18,11 +18,11 @@ describe('getValueCounts', () => {
   });
 
   it('get value counts for field url', () => {
-    expect(getValueCounts(frequentItems, 'url')).toEqual({ 'home.php': 6 });
+    expect(getValueCounts(frequentItemSets, 'url')).toEqual({ 'home.php': 6 });
   });
 
   it('get value counts for field user', () => {
-    expect(getValueCounts(frequentItems, 'user')).toEqual({
+    expect(getValueCounts(frequentItemSets, 'user')).toEqual({
       Mary: 1,
       Paul: 1,
       Peter: 3,

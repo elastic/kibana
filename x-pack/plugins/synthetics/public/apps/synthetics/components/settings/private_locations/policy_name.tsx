@@ -10,11 +10,11 @@ import { EuiLink, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui'
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { usePrivateLocationPermissions } from './hooks/use_private_location_permission';
+import { useFleetPermissions } from '../../../hooks';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
-  const { canReadAgentPolicies } = usePrivateLocationPermissions();
+  const { canReadAgentPolicies } = useFleetPermissions();
 
   const { basePath } = useSyntheticsSettingsContext();
 

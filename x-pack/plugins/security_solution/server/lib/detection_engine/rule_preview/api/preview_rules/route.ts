@@ -15,7 +15,7 @@ import type {
   AlertInstanceState,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { parseDuration } from '@kbn/alerting-plugin/common';
+import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
 
@@ -37,6 +37,7 @@ import { parseInterval } from '../../../signals/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
@@ -61,6 +62,7 @@ import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
+const MAX_ROUTE_CONCURRENCY = 10;
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -80,7 +82,7 @@ export const previewRulesRoute = async (
         body: buildRouteValidation(previewRulesSchema),
       },
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
       },
     },
     async (context, request, response) => {
@@ -225,6 +227,8 @@ export const previewRulesRoute = async (
             ruleTypeName,
             updatedAt: new Date(),
             updatedBy: username ?? 'preview-updated-by',
+            muteAll: false,
+            snoozeSchedule: [],
           };
 
           let invocationStartTime;
@@ -263,6 +267,7 @@ export const previewRulesRoute = async (
               startedAt: startedAt.toDate(),
               state: statePreview,
               logger,
+              flappingSettings: DISABLE_FLAPPING_SETTINGS,
             })) as { state: TState });
 
             const errors = loggedStatusChanges

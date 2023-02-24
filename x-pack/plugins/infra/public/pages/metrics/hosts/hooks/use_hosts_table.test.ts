@@ -27,8 +27,8 @@ describe('useHostTable hook', () => {
             avg: 0.94525,
           },
           {
-            name: 'cpuCores',
-            value: 10,
+            name: 'cpu',
+            value: 0.6353277777777777,
           },
           {
             name: 'memoryTotal',
@@ -53,8 +53,8 @@ describe('useHostTable hook', () => {
             avg: 0.5400000214576721,
           },
           {
-            name: 'cpuCores',
-            value: 8,
+            name: 'cpu',
+            value: 0.8647805555555556,
           },
           {
             name: 'memoryTotal',
@@ -89,9 +89,9 @@ describe('useHostTable hook', () => {
           name: 'memory',
           avg: 0.94525,
         },
-        cpuCores: {
-          name: 'cpuCores',
-          value: 10,
+        cpu: {
+          name: 'cpu',
+          value: 0.6353277777777777,
         },
         memoryTotal: {
           name: 'memoryTotal',
@@ -118,9 +118,9 @@ describe('useHostTable hook', () => {
           name: 'memory',
           avg: 0.5400000214576721,
         },
-        cpuCores: {
-          name: 'cpuCores',
-          value: 8,
+        cpu: {
+          name: 'cpu',
+          value: 0.8647805555555556,
         },
         memoryTotal: {
           name: 'memoryTotal',
@@ -128,8 +128,10 @@ describe('useHostTable hook', () => {
         },
       },
     ];
-    const result = renderHook(() => useHostsTable(nodes));
+    const time = { from: 'now-15m', to: 'now', interval: '>=1m' };
 
-    expect(result.result.current).toStrictEqual(items);
+    const { result } = renderHook(() => useHostsTable(nodes, { time }));
+
+    expect(result.current.items).toStrictEqual(items);
   });
 });

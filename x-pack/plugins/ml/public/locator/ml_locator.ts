@@ -29,7 +29,7 @@ import {
 } from './formatters';
 import {
   formatTrainedModelsManagementUrl,
-  formatTrainedModelsNodesManagementUrl,
+  formatMemoryUsageUrl,
 } from './formatters/trained_models';
 
 export type { MlLocatorParams, MlLocator };
@@ -74,8 +74,8 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.TRAINED_MODELS_MANAGE:
         path = formatTrainedModelsManagementUrl('', params.pageState);
         break;
-      case ML_PAGES.TRAINED_MODELS_NODES:
-        path = formatTrainedModelsNodesManagementUrl('', params.pageState);
+      case ML_PAGES.MEMORY_USAGE:
+        path = formatMemoryUsageUrl('', params.pageState);
         break;
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB:
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER:

@@ -15,6 +15,7 @@ export const policyFactory = (): PolicyConfig => {
   return {
     windows: {
       events: {
+        credential_access: true,
         dll_and_driver_load: true,
         dns: true,
         file: true,
@@ -104,6 +105,9 @@ export const policyFactory = (): PolicyConfig => {
       logging: {
         file: 'info',
       },
+      advanced: {
+        capture_env_vars: 'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
+      },
     },
     linux: {
       events: {
@@ -141,6 +145,9 @@ export const policyFactory = (): PolicyConfig => {
       },
       logging: {
         file: 'info',
+      },
+      advanced: {
+        capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
       },
     },
   };

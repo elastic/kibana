@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useQuery } from '@tanstack/react-query';
 
 import type {
   GetActionStatusResponse,
@@ -70,6 +71,13 @@ export function useGetAgents(query: GetAgentsRequest['query'], options?: Request
     query,
     ...options,
   });
+}
+
+export function useGetAgentsQuery(
+  query: GetAgentsRequest['query'],
+  options: Partial<{ enabled: boolean }> = {}
+) {
+  return useQuery(['agents', query], () => sendGetAgents(query), { enabled: options.enabled });
 }
 
 export function sendGetAgents(query: GetAgentsRequest['query'], options?: RequestOptions) {

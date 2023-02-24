@@ -113,6 +113,13 @@ jest.mock('../../../common/lib/kibana', () => {
           get: jest.fn(),
           set: jest.fn(),
         },
+        triggersActionsUi: {
+          alertsTableConfigurationRegistry: {},
+          getAlertsStateTable: () => <></>,
+        },
+        sessionView: {
+          getSessionView: jest.fn().mockReturnValue(<div />),
+        },
       },
     }),
     useToasts: jest.fn().mockReturnValue({
@@ -120,6 +127,17 @@ jest.mock('../../../common/lib/kibana', () => {
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
       remove: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../../../timelines/components/side_panel/hooks/use_detail_panel', () => {
+  return {
+    useDetailPanel: () => ({
+      openEventDetailsPanel: jest.fn(),
+      handleOnDetailsPanelClosed: () => {},
+      DetailsPanel: () => <div />,
+      shouldShowDetailsPanel: false,
     }),
   };
 });
@@ -138,6 +156,9 @@ jest.mock('../../components/alerts_table/timeline_actions/use_add_bulk_to_timeli
 jest.mock('../../components/alerts_table/timeline_actions/use_bulk_add_to_case_actions', () => ({
   useBulkAddToCaseActions: jest.fn(() => []),
 }));
+
+jest.mock('../../../common/components/visualization_actions/lens_embeddable');
+jest.mock('../../../common/components/page/use_refetch_by_session');
 
 describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {

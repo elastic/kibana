@@ -12,8 +12,9 @@ import {
   EXCEPTIONS_TABLE_SEARCH_CLEAR,
   EXCEPTIONS_TABLE_MODAL,
   EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN,
-  EXCEPTIONS_TABLE_EXPORT_BTN,
+  EXCEPTIONS_TABLE_EXPORT_MODAL_BTN,
   EXCEPTIONS_OVERFLOW_ACTIONS_BTN,
+  EXCEPTIONS_TABLE_EXPORT_CONFIRM_BTN,
 } from '../screens/exceptions';
 
 export const clearSearchSelection = () => {
@@ -26,7 +27,8 @@ export const expandExceptionActions = () => {
 
 export const exportExceptionList = () => {
   cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
-  cy.get(EXCEPTIONS_TABLE_EXPORT_BTN).first().click();
+  cy.get(EXCEPTIONS_TABLE_EXPORT_MODAL_BTN).first().click();
+  cy.get(EXCEPTIONS_TABLE_EXPORT_CONFIRM_BTN).first().click();
 };
 
 export const deleteExceptionListWithoutRuleReference = () => {

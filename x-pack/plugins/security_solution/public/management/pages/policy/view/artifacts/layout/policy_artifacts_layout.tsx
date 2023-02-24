@@ -59,6 +59,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
       () => getExceptionsListApiClient(),
       [getExceptionsListApiClient]
     );
+
     const { getAppUrl } = useAppUrl();
     const navigateCallback = usePolicyDetailsArtifactsNavigateCallback(
       exceptionsListApiClient.listId

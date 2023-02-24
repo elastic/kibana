@@ -12,7 +12,7 @@ import { TestProvider } from '../../../../test/test_provider';
 
 import { capitalize } from 'lodash';
 import moment from 'moment';
-import { getResourceFindingsTableFixture } from '../../../../test/fixtures/resource_findings_fixture';
+import { getFindingsFixture } from '../../../../test/fixtures/findings_fixture';
 
 describe('<ResourceFindingsTable />', () => {
   it('should render no findings empty state when status success and data has a length of zero ', async () => {
@@ -25,6 +25,10 @@ describe('<ResourceFindingsTable />', () => {
       },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
+      flyoutFindingIndex: -1,
+      onOpenFlyout: jest.fn(),
+      onCloseFlyout: jest.fn(),
+      onPaginateFlyout: jest.fn(),
     };
 
     render(
@@ -38,8 +42,8 @@ describe('<ResourceFindingsTable />', () => {
     ).toBeInTheDocument();
   });
 
-  it('should render resource finding table content when data items exists', () => {
-    const data = Array.from({ length: 10 }, getResourceFindingsTableFixture);
+  it('should render resource finding table content when data has a non zero length', () => {
+    const data = Array.from({ length: 10 }, getFindingsFixture);
 
     const props: ResourceFindingsTableProps = {
       loading: false,
@@ -50,6 +54,10 @@ describe('<ResourceFindingsTable />', () => {
       },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
+      flyoutFindingIndex: -1,
+      onOpenFlyout: jest.fn(),
+      onCloseFlyout: jest.fn(),
+      onPaginateFlyout: jest.fn(),
     };
 
     render(

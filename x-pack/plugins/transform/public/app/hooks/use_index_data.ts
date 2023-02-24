@@ -12,7 +12,7 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 
-import type { TimeRangeMs } from '../../../common/types/date_picker';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import {
   isEsSearchResponse,
   isFieldHistogramsResponseSchema,

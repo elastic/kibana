@@ -20,6 +20,7 @@ export interface RequestBodyFieldProps {
     type: Mode;
     value: string;
   };
+  readOnly?: boolean;
 }
 
 enum ResponseBodyType {
@@ -32,6 +33,7 @@ export const RequestBodyField = ({
   onChange,
   onBlur,
   value: { type, value },
+  readOnly,
 }: RequestBodyFieldProps) => {
   const [values, setValues] = useState<Record<ResponseBodyType, string>>({
     [ResponseBodyType.FORM]: type === Mode.FORM ? value : '',
@@ -105,6 +107,7 @@ export const RequestBodyField = ({
             onBlur?.();
           }}
           value={values[ResponseBodyType.CODE]}
+          readOnly
         />
       ),
     },
@@ -127,6 +130,7 @@ export const RequestBodyField = ({
             onBlur?.();
           }}
           value={values[ResponseBodyType.CODE]}
+          readOnly
         />
       ),
     },
@@ -149,6 +153,7 @@ export const RequestBodyField = ({
             onBlur?.();
           }}
           value={values[ResponseBodyType.CODE]}
+          readOnly
         />
       ),
     },
@@ -167,20 +172,24 @@ export const RequestBodyField = ({
           defaultPairs={defaultFormPairs}
           onChange={onChangeFormFields}
           onBlur={() => onBlur?.()}
+          readOnly
         />
       ),
     },
   ];
 
   return (
-    <EuiTabbedContent
-      tabs={tabs}
-      initialSelectedTab={tabs.find((tab) => tab.id === type)}
-      autoFocus="selected"
-      onTabClick={(tab) => {
-        handleSetMode(tab.id as Mode);
-      }}
-    />
+    <div css={readOnly ? { cursor: 'not-allowed' } : undefined}>
+      <EuiTabbedContent
+        tabs={tabs}
+        css={readOnly ? { pointerEvents: 'none' } : undefined}
+        initialSelectedTab={tabs.find((tab) => tab.id === type)}
+        autoFocus="selected"
+        onTabClick={(tab) => {
+          handleSetMode(tab.id as Mode);
+        }}
+      />
+    </div>
   );
 };
 

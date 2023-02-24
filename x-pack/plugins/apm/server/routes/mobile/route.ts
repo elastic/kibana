@@ -17,6 +17,10 @@ import {
 import { getMobileFilters } from './get_mobile_filters';
 import { getMobileSessions, SessionsTimeseries } from './get_mobile_sessions';
 import { getMobileStatsPeriods, MobilePeriodStats } from './get_mobile_stats';
+import {
+  getMobileLocationStatsPeriods,
+  MobileLocationStats,
+} from './get_mobile_location_stats';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -91,6 +95,45 @@ const mobileStatsRoute = createApmServerRoute({
     });
 
     return stats;
+  },
+});
+
+const mobileLocationStatsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/location/stats',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      environmentRt,
+      offsetRt,
+      t.partial({
+        locationField: t.string,
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<MobileLocationStats> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end, locationField, offset } =
+      params.query;
+
+    const locationStats = await getMobileLocationStatsPeriods({
+      kuery,
+      environment,
+      start,
+      end,
+      serviceName,
+      apmEventClient,
+      locationField,
+      offset,
+    });
+
+    return locationStats;
   },
 });
 
@@ -181,4 +224,5 @@ export const mobileRouteRepository = {
   ...sessionsChartRoute,
   ...httpRequestsChartRoute,
   ...mobileStatsRoute,
+  ...mobileLocationStatsRoute,
 };

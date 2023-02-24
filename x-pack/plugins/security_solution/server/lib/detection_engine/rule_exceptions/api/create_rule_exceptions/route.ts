@@ -190,6 +190,7 @@ export const createExceptionListItems = async ({
         comments: item.comments,
         description: item.description,
         entries: item.entries,
+        expireTime: item.expire_time,
         itemId: item.item_id,
         listId: defaultList.list_id,
         meta: item.meta,
