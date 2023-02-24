@@ -39,7 +39,7 @@ import {
   getOpenSignals,
   getPreviewAlerts,
   deleteSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   createRule,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -154,7 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     // First 2 test creates a real rule - remaining tests use preview API

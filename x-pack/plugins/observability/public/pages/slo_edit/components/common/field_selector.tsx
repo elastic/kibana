@@ -40,7 +40,7 @@ export function FieldSelector({
   placeholder,
 }: Props) {
   const [search, setSearch] = useState<string>('');
-  const { data: suggestions, loading } = useFetchApmSuggestions({
+  const { suggestions, isLoading } = useFetchApmSuggestions({
     fieldName,
     search,
   });
@@ -82,7 +82,7 @@ export function FieldSelector({
             data-test-subj={dataTestSubj}
             isClearable={true}
             isInvalid={!!fieldState.error}
-            isLoading={loading}
+            isLoading={isLoading}
             onChange={(selected: EuiComboBoxOptionOption[]) => {
               if (selected.length) {
                 return field.onChange(selected[0].value);

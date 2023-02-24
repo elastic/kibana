@@ -22,17 +22,28 @@ export interface ContentStorage {
   bulkGet(ctx: StorageContext, ids: string[], options: unknown): Promise<any>;
 
   /** Create an item */
-  create(ctx: StorageContext, fields: object, options: unknown): Promise<any>;
+  create(ctx: StorageContext, data: object, options: unknown): Promise<any>;
 
   /** Update an item */
-  update(ctx: StorageContext, id: string, fields: object, options: unknown): Promise<any>;
+  update(ctx: StorageContext, id: string, data: object, options: unknown): Promise<any>;
 
   /** Delete an item */
   delete(ctx: StorageContext, id: string, options: unknown): Promise<any>;
+
+  /** Search items */
+  search(ctx: StorageContext, query: object, options: unknown): Promise<any>;
 }
 
 export interface RpcSchemas {
   get?: {
+    in?: {
+      options?: Type<any>;
+    };
+    out?: {
+      result: Type<any>;
+    };
+  };
+  bulkGet?: {
     in?: {
       options?: Type<any>;
     };
