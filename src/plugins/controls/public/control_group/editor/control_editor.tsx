@@ -87,7 +87,7 @@ export const ControlEditor = ({
     controls: { getControlFactory },
   } = pluginServices.getServices();
   const [defaultTitle, setDefaultTitle] = useState<string>();
-  const [currentTitle, setCurrentTitle] = useState(title);
+  const [currentTitle, setCurrentTitle] = useState(title ?? '');
   const [currentWidth, setCurrentWidth] = useState(width);
   const [currentGrow, setCurrentGrow] = useState(grow);
   const [controlEditorValid, setControlEditorValid] = useState(false);
@@ -161,42 +161,46 @@ export const ControlEditor = ({
         <EuiForm>
           <EuiFormRow label={ControlGroupStrings.manageControl.getDataViewTitle()}>
             <DataViewPicker
-              dataViews={dataViewListItems}
-              selectedDataViewId={selectedDataViewId}
+              dataViews={state.dataViewListItems}
+              selectedDataViewId={dataView?.id}
               onChangeDataViewId={(dataViewId) => {
                 setLastUsedDataViewId?.(dataViewId);
-                if (dataViewId === selectedDataViewId) return;
+                if (dataViewId === dataView?.id) return;
+
                 onTypeEditorChange({ dataViewId });
                 setSelectedField(undefined);
-                setSelectedDataViewId(dataViewId);
+                get(dataViewId).then((newDataView) => {
+                  setState((s) => ({ ...s, selectedDataView: newDataView }));
+                });
               }}
               trigger={{
                 label:
-                  selectedDataView?.getName() ??
+                  state.selectedDataView?.getName() ??
                   ControlGroupStrings.manageControl.getSelectDataViewMessage(),
               }}
-              selectableProps={{ isLoading: dataViewListLoading }}
             />
           </EuiFormRow>
-          <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
-            <FieldPicker
-              filterPredicate={(field: DataViewField) => Boolean(fieldRegistry?.[field.name])}
-              selectedFieldName={selectedField}
-              dataView={selectedDataView}
-              onSelectField={(field) => {
-                onTypeEditorChange({
-                  fieldName: field.name,
-                });
-                const newDefaultTitle = field.displayName ?? field.name;
-                setDefaultTitle(newDefaultTitle);
-                setSelectedField(field.name);
-                if (!currentTitle || currentTitle === defaultTitle) {
-                  setCurrentTitle(newDefaultTitle);
-                  updateTitle(newDefaultTitle);
-                }
-              }}
-            />
-          </EuiFormRow>
+          {fieldRegistry && (
+            <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
+              <FieldPicker
+                filterPredicate={(field: DataViewField) => Boolean(fieldRegistry[field.name])}
+                selectedFieldName={selectedField}
+                dataView={dataView}
+                onSelectField={(field) => {
+                  onTypeEditorChange({
+                    fieldName: field.name,
+                  });
+                  const newDefaultTitle = field.displayName ?? field.name;
+                  setDefaultTitle(newDefaultTitle);
+                  setSelectedField(field.name);
+                  if (!currentTitle || currentTitle === defaultTitle) {
+                    setCurrentTitle(newDefaultTitle);
+                    updateTitle(newDefaultTitle);
+                  }
+                }}
+              />
+            </EuiFormRow>
+          )}
           <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
             {factory ? (
               <EuiFlexGroup alignItems="center" gutterSize="xs">
