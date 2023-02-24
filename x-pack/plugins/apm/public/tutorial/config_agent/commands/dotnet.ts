@@ -30,7 +30,7 @@ export const dotnetLineNumbers = {
       serviceNameHint +
       ' ' +
       i18n.translate(
-        'xpack.apm.tutorial.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
+        'xpack.apm.tutorial.dotnetClient.createConfig.commands.defaultServiceName',
         {
           defaultMessage: 'Default is the entry assembly of the application.',
         }

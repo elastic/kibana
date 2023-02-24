@@ -30,7 +30,7 @@ export const railsLineNumbers = {
       serviceNameHint +
       ' ' +
       i18n.translate(
-        'xpack.apm.tutorial.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
+        'xpack.apm.tutorial.railsClient.createConfig.commands.defaultServiceName',
         {
           defaultMessage: 'Defaults to the name of your Rails app.',
         }
