@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { TestRunErrorInfo } from '../test_run_details/components/test_run_error_info';
 import { StepDurationPanel } from '../monitor_details/monitor_summary/step_duration_panel';
 import { useFormatTestRunAt } from '../../utils/monitor_test_result/test_time_formats';
 import { LastTestRunComponent } from '../monitor_details/monitor_summary/last_test_run';
@@ -64,6 +65,10 @@ export function ErrorDetailsPage() {
             stepsLoading={stepsLoading}
             isErrorDetails={true}
           />
+          <EuiSpacer size="m" />
+          <EuiPanel hasShadow={false} hasBorder>
+            <TestRunErrorInfo journeyDetails={data?.details} showErrorTitle={false} />
+          </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1} style={{ height: 'fit-content' }}>
           <PanelWithTitle>

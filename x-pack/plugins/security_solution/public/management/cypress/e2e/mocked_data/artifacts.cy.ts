@@ -19,7 +19,7 @@ import { performUserActions } from '../../tasks/perform_user_actions';
 import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
 
 const loginWithWriteAccess = (url: string) => {
-  loginWithRole(ROLE.analyst_hunter);
+  loginWithRole(ROLE.endpoint_security_policy_manager);
   cy.visit(url);
 };
 
