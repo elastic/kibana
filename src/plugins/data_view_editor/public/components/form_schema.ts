@@ -28,9 +28,9 @@ export const schema = {
       defaultMessage: 'Index pattern',
     }),
     defaultValue: '',
-    helpText: i18n.translate('indexPatternEditor.validations.titleHelpText', {
+    helpText: i18n.translate('indexPatternEditor.validations.titleInputHelpText', {
       defaultMessage:
-        'Enter an index pattern that matches one or more data sources. Use an asterisk (*) to match multiple characters. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
+        'Enter an index pattern that matches one or more data sources. Use an asterisk (*) to match multiple characters. Separate with a comma (,) to include several sources. Spaces and the characters /?"<>| are not allowed.',
     }),
     validations: [
       {
