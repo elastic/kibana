@@ -6,14 +6,13 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { UseFindCaseUserActions } from './use_find_case_user_actions';
 import { useFindCaseUserActions } from './use_find_case_user_actions';
+import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { basicCase, findCaseUserActionsResponse } from './mock';
-import React from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { testQueryClient } from '../common/mock';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -24,20 +23,26 @@ const initialData = {
   isLoading: true,
 };
 
-const wrapper: React.FC<string> = ({ children }) => (
-  <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
-);
-
 describe('UseFindCaseUserActions', () => {
+  const filterActionType: CaseUserActionTypeWithAll = 'all';
+  const sortOrder: 'asc' | 'desc' = 'asc';
+  const params = {
+    type: filterActionType,
+    sortOrder,
+  };
+
+  let appMockRender: AppMockRenderer;
+
   beforeEach(() => {
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 
   it('returns proper state on findCaseUserActions', async () => {
-    const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-      () => useFindCaseUserActions(basicCase.id),
-      { wrapper }
+    const { result, waitForNextUpdate } = renderHook(
+      () => useFindCaseUserActions(basicCase.id, params),
+      { wrapper: appMockRender.AppWrapper }
     );
 
     await waitForNextUpdate();
@@ -58,20 +63,40 @@ describe('UseFindCaseUserActions', () => {
     );
   });
 
+  it('calls the API with correct parameters', async () => {
+    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+
+    const { waitForNextUpdate } = renderHook(
+      () => useFindCaseUserActions(basicCase.id, { type: 'user', sortOrder: 'desc' }),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    await waitForNextUpdate();
+
+    expect(spy).toHaveBeenCalledWith(
+      basicCase.id,
+      { type: 'user', sortOrder: 'desc' },
+      expect.any(AbortSignal)
+    );
+  });
+
   it('shows a toast error when the API returns an error', async () => {
     const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(new Error("C'est la vie"));
 
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const { waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-      () => useFindCaseUserActions(basicCase.id),
-      { wrapper }
-    );
+    const { waitForNextUpdate } = renderHook(() => useFindCaseUserActions(basicCase.id, params), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
+    expect(spy).toHaveBeenCalledWith(
+      basicCase.id,
+      { type: filterActionType, sortOrder },
+      expect.any(AbortSignal)
+    );
     expect(addError).toHaveBeenCalled();
   });
 });
