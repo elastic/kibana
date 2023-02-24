@@ -65,20 +65,27 @@ export function isDataViewFieldSubtypeNested(field: Partial<BrowserField>) {
   return !!subTypeNested?.nested?.path;
 }
 
-export function isKeyword(field: Partial<BrowserField>) {
-  return field.esTypes && field.esTypes?.indexOf('keyword') >= 0;
+export function isLensSupportedType(fieldType: string | undefined) {
+  const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
+  return fieldType ? supportedTypes.has(fieldType) : false;
+}
+
+export interface GetAggregatableFields {
+  [fieldName: string]: Partial<BrowserField>;
 }
 
 export function getAggregatableFields(
-  fields: {
-    [fieldName: string]: Partial<BrowserField>;
-  },
+  fields: GetAggregatableFields,
   useLensCompatibleFields?: boolean
 ): EuiComboBoxOptionOption[] {
   const result = [];
   for (const [key, field] of Object.entries(fields)) {
     if (useLensCompatibleFields) {
-      if (field.aggregatable === true && isKeyword(field) && !isDataViewFieldSubtypeNested(field)) {
+      if (
+        !!field.aggregatable &&
+        isLensSupportedType(field.type) &&
+        !isDataViewFieldSubtypeNested(field)
+      ) {
         result.push({ label: key, value: key });
       }
     } else {

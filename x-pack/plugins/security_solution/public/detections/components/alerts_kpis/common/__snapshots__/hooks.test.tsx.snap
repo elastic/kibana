@@ -1,3 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getAggregatableFields 1`] = `Array []`;
+exports[`getAggregatableFields getAggregatableFields when useLensCompatibleFields = false 1`] = `
+Array [
+  Object {
+    "label": "@timestamp",
+    "value": "@timestamp",
+  },
+]
+`;
