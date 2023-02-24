@@ -189,7 +189,7 @@ describe('waitForDeleteByQueryTask', () => {
 
       const res = await task();
 
-      expect(res).toEqual(Either.right('cleanup_successful' as const));
+      expect(res).toEqual(Either.right({ type: 'cleanup_successful' as const }));
     });
   });
 });

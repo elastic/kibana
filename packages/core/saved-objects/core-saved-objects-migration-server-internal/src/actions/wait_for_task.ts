@@ -22,6 +22,7 @@ export interface WaitForTaskResponse {
   completed: boolean;
   failures: Option.Option<any[]>;
   description?: string;
+  response?: estypes.TasksTaskStatus;
 }
 
 /**
@@ -90,6 +91,7 @@ export const waitForTask =
           error: Option.fromNullable(body.error as estypes.ErrorCauseKeys),
           failures: failures.length > 0 ? Option.some(failures) : Option.none,
           description: body.task.description,
+          response: body.response,
         });
       })
       .catch(catchWaitForTaskCompletionTimeout)

@@ -15,23 +15,36 @@ import { waitForTask } from './wait_for_task';
 export interface CleanupErrorResponse {
   type: 'cleanup_failed';
   failures: string[];
+  versionConflicts?: number;
+}
+
+/** @internal */
+export interface CleanupSuccessfulResponse {
+  type: 'cleanup_successful';
+  deleted?: number;
 }
 
 export const waitForDeleteByQueryTask = flow(
   waitForTask,
-  TaskEither.chainW((res): TaskEither.TaskEither<CleanupErrorResponse, 'cleanup_successful'> => {
-    if (Option.isSome(res.failures)) {
-      return TaskEither.left({
-        type: 'cleanup_failed' as const,
-        failures: res.failures.value,
-      });
-    } else if (Option.isSome(res.error)) {
-      throw new Error(
-        'waitForDeleteByQueryTask task failed with the following error:\n' +
-          JSON.stringify(res.error.value)
-      );
-    } else {
-      return TaskEither.right('cleanup_successful' as const);
+  TaskEither.chainW(
+    (res): TaskEither.TaskEither<CleanupErrorResponse, CleanupSuccessfulResponse> => {
+      if (Option.isSome(res.failures) || res.response?.version_conflicts) {
+        return TaskEither.left({
+          type: 'cleanup_failed' as const,
+          failures: Option.isSome(res.failures) ? res.failures.value : [],
+          versionConflicts: res.response?.version_conflicts,
+        });
+      } else if (Option.isSome(res.error)) {
+        throw new Error(
+          'waitForDeleteByQueryTask task failed with the following error:\n' +
+            JSON.stringify(res.error.value)
+        );
+      } else {
+        return TaskEither.right({
+          type: 'cleanup_successful' as const,
+          deleted: res.response?.deleted,
+        });
+      }
     }
-  })
+  )
 );

@@ -38,6 +38,7 @@ import { registerServiceConfig } from '@kbn/core-root-server-internal';
 import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
@@ -45,6 +46,12 @@ const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 // Extract current stack version from Env, to use as a default
 const currentVersion = env.packageInfo.version;
 const currentBranch = env.packageInfo.branch;
+
+export interface GetEsClientParams {
+  settings?: Record<string, any>;
+  kibanaVersion?: string;
+  logFilePath?: string;
+}
 
 export interface KibanaMigratorTestKitParams {
   kibanaIndex?: string;
@@ -62,6 +69,43 @@ export interface KibanaMigratorTestKit {
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsRepository: ISavedObjectsRepository;
 }
+
+export const startElasticsearch = async ({
+  basePath,
+  dataArchive,
+}: {
+  basePath?: string;
+  dataArchive?: string;
+}) => {
+  const { startES } = createTestServers({
+    adjustTimeout: (t: number) => jest.setTimeout(t),
+    settings: {
+      es: {
+        license: 'basic',
+        basePath,
+        dataArchive,
+      },
+    },
+  });
+  return await startES();
+};
+
+export const getEsClient = async ({
+  settings = {},
+  kibanaVersion = currentVersion,
+  logFilePath = defaultLogFilePath,
+}: GetEsClientParams = {}) => {
+  const loggingSystem = new LoggingSystem();
+  const loggerFactory = loggingSystem.asLoggerFactory();
+
+  const configService = getConfigService(settings, loggerFactory, logFilePath);
+
+  // configure logging system
+  const loggingConf = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
+  loggingSystem.upgrade(loggingConf);
+
+  return await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
+};
 
 export const getKibanaMigratorTestKit = async ({
   settings = {},

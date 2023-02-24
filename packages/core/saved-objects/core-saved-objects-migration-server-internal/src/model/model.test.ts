@@ -1429,9 +1429,9 @@ describe('migrations v2 model', () => {
       });
 
       test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION if action succeeds', () => {
-        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.right(
-          'cleanup_successful' as const
-        );
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.right({
+          type: 'cleanup_successful' as const,
+        });
         const newState = model(
           cleanupUnknownAndExcludedWaitForTask,
           res
@@ -1462,6 +1462,7 @@ describe('migrations v2 model', () => {
         const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.left({
           type: 'cleanup_failed' as const,
           failures: ['Failed to delete dashboard:12345', 'Failed to delete dashboard:67890'],
+          versionConflicts: 12,
         });
 
         const newState = model(cleanupUnknownAndExcludedWaitForTask, res);
@@ -2157,12 +2158,37 @@ describe('migrations v2 model', () => {
         preTransformDocsActions: [someAliasAction],
       };
 
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_TARGET if action succeeds  and we must refresh the index', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.right(
+          'update_aliases_succeeded'
+        );
+        const newState = model(
+          { ...state, mustRefresh: true },
+          res
+        ) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('REFRESH_TARGET');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
       it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action succeeds', () => {
         const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.right(
           'update_aliases_succeeded'
         );
         const newState = model(state, res) as OutdatedDocumentsSearchOpenPit;
         expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_TARGET if action fails because the alias is not found', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.left({
+          type: 'alias_not_found_exception',
+        });
+
+        const newState = model(
+          { ...state, mustRefresh: true },
+          res
+        ) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('REFRESH_TARGET');
         expect(newState.versionIndexReadyActions).toEqual(Option.none);
       });
 

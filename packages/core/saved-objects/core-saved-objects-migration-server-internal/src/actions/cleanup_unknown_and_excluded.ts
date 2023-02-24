@@ -113,12 +113,10 @@ export const cleanupUnknownAndExcluded = ({
         query: deleteQuery,
         // we want to delete as many docs as we can in the current attempt
         conflicts: 'proceed',
-        // we must refresh to ensure that the subsequent steps of the flow
-        // don't see the unwanted documents anymore:
-        // - another delete attempt (if the current one fails)
-        // - outdated documents read + transform
-        // - ^tests that perform assertions on the contents of the index
-        refresh: true,
+        // instead of forcing refresh after each delete attempt,
+        // we opt for a delayRetry mechanism when conflicts appear,
+        // letting the periodic refresh kick in
+        refresh: false,
       });
     }),
 

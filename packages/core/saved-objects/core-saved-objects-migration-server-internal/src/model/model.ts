@@ -434,7 +434,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           stateP.sourceIndexMappings,
           /* expected */
           stateP.targetIndexMappings
-        )
+        ) &&
+        Math.random() < 10
       ) {
         return {
           ...stateP,
@@ -443,7 +444,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           versionIndexReadyActions: Option.none,
         };
       } else {
-        // the mappings have changed, but changes might still be compatible
         return {
           ...stateP,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
@@ -507,6 +507,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         logs,
         controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+        mustRefresh:
+          stateP.mustRefresh || typeof res.right.deleted === 'undefined' || res.right.deleted > 0,
         targetIndexRawMappings: stateP.sourceIndexMappings,
         targetIndexMappings: mergeMigrationMappingPropertyHashes(
           stateP.targetIndexMappings,
@@ -533,10 +535,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         if (stateP.retryCount < stateP.retryAttempts) {
           const retryCount = stateP.retryCount + 1;
-          const retryDelay = 1000 * Math.random();
+          const retryDelay = 1500 + 1000 * Math.random();
           return {
             ...stateP,
             controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+            mustRefresh: true,
             retryCount,
             retryDelay,
             logs: [
@@ -548,12 +551,17 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ],
           };
         } else {
+          const failures = res.left.failures.length;
+          const versionConflicts = res.left.versionConflicts ?? 0;
+
+          let reason = `Migration failed because it was unable to delete unwanted documents from the ${stateP.sourceIndex.value} system index (${failures} failures and ${versionConflicts} conflicts)`;
+          if (failures) {
+            reason += `:\n` + res.left.failures.map((failure: string) => `- ${failure}\n`).join('');
+          }
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason:
-              `Migration failed because it was unable to delete unwanted documents from the ${stateP.sourceIndex.value} system index:\n` +
-              res.left.failures.map((failure: string) => `- ${failure}\n`).join(''),
+            reason,
           };
         }
       }
@@ -563,7 +571,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+        controlState: stateP.mustRefresh ? 'REFRESH_TARGET' : 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
       };
     } else if (Either.isLeft(res)) {
       // Note: if multiple newer Kibana versions are competing with each other to perform a migration,
@@ -574,7 +582,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // We assume that the alias was already deleted by another Kibana instance
         return {
           ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+          controlState: stateP.mustRefresh
+            ? 'REFRESH_TARGET'
+            : 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
         };
       } else {
         throwBadResponse(stateP, res.left as never);

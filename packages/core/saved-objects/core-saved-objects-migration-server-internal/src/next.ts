@@ -200,6 +200,13 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         client,
         index: state.targetIndex,
         operations: state.bulkOperationBatches[state.currentBatch],
+        /**
+         * Since we don't run a search against the target index, we disable "refresh" to speed up
+         * the migration process.
+         * Although any further step must run "refresh" for the target index
+         * Right now, it's performed during OUTDATED_DOCUMENTS_REFRESH step.
+         */
+        refresh: false,
       }),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),

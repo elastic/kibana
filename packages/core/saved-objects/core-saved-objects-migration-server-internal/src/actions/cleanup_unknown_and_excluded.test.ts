@@ -262,7 +262,7 @@ describe('cleanupUnknownAndExcluded', () => {
         },
       },
       conflicts: 'proceed',
-      refresh: true,
+      refresh: false,
     });
 
     expect(Either.isRight(result)).toBe(true);
