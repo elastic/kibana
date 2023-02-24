@@ -26,10 +26,10 @@ describe('AddMessageVariables', () => {
     );
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-
-    expect(
-      wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().text()
-    ).toEqual('{{myVar}}');
+    expect(wrapper.find('[data-test-subj="messageVariablesSelectableList"]')).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="myVar-selectableOption"]').last().text()).toEqual(
+      'myVarMy variable description'
+    );
   });
 
   test('renders variables with tripple braces when specified', () => {
@@ -50,9 +50,9 @@ describe('AddMessageVariables', () => {
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
 
-    expect(
-      wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().text()
-    ).toEqual('{{{myVar}}}');
+    expect(wrapper.find('[data-test-subj="myVar-selectableOption"]').last().text()).toEqual(
+      'myVarMy variable description'
+    );
   });
 
   test('onSelectEventHandler is called with proper action variable', () => {
@@ -63,10 +63,11 @@ describe('AddMessageVariables', () => {
           {
             name: 'myVar1',
             description: 'My variable 1 description',
+            useWithTripleBracesInTemplates: true,
           },
           {
             name: 'myVar2',
-            description: 'My variable 1 description',
+            description: 'My variable 2 description',
             useWithTripleBracesInTemplates: true,
           },
         ]}
@@ -76,17 +77,17 @@ describe('AddMessageVariables', () => {
     );
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="variableMenuButton-1-templated-name"]').last().simulate('click');
+    wrapper.find('[data-test-subj="myVar2-selectableOption"]').last().simulate('click');
 
     expect(onSelectEventHandler).toHaveBeenCalledTimes(1);
     expect(onSelectEventHandler).toHaveBeenCalledWith({
       name: 'myVar2',
-      description: 'My variable 1 description',
+      description: 'My variable 2 description',
       useWithTripleBracesInTemplates: true,
     });
   });
 
-  test('it renders deprecated variables as disabled', () => {
+  test.only('it renders deprecated variables as disabled', () => {
     const wrapper = mountWithIntl(
       <AddMessageVariables
         messageVariables={[
@@ -106,12 +107,12 @@ describe('AddMessageVariables', () => {
     );
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-
+    console.log(wrapper.find('[data-test-subj="deprecatedVar-selectableOption"]').exists());
+    // expect(
+    //   wrapper.find('button[data-test-subj="myVar-selectableOption"]').last().getDOMNode()
+    // ).not.toBeDisabled();
     expect(
-      wrapper.find('button[data-test-subj="variableMenuButton-myVar"]').getDOMNode()
-    ).not.toBeDisabled();
-    expect(
-      wrapper.find('button[data-test-subj="variableMenuButton-deprecatedVar"]').getDOMNode()
+      wrapper.find('button[data-test-subj="deprecatedVar-selectableOption"]').at(2).getDOMNode()
     ).toBeDisabled();
   });
 

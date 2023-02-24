@@ -16,6 +16,9 @@ import {
   EuiSpacer,
   EuiHighlight,
   useEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopoverFooter,
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
@@ -71,6 +74,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     () =>
       messageVariables?.map((variable) => ({
         label: variable.name,
+        ...(variable.deprecated ? { disabled: true } : {}),
         data: {
           secondaryContent: variable.description,
         },
@@ -84,7 +88,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     : i18n.translate(
         'xpack.triggersActionsUI.components.addMessageVariables.addRuleVariableTitle',
         {
-          defaultMessage: 'Add rule variable',
+          defaultMessage: 'Add variable',
         }
       );
 
@@ -96,7 +100,6 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           data-test-subj={`${paramsProperty}AddVariableButton-Title`}
           size="xs"
           onClick={() => setIsVariablesPopoverOpen(true)}
-          iconType="indexOpen"
           aria-label={i18n.translate(
             'xpack.triggersActionsUI.components.addMessageVariables.addVariablePopoverButton',
             {
@@ -129,21 +132,22 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
 
   const renderOption = (option: any, searchValue: string) => {
     return (
-      <>
-        <EuiText
-          size="s"
-          style={{
-            fontWeight: euiTheme.font.weight.bold,
-          }}
-          className="eui-displayBlock"
-        >
-          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-        </EuiText>
-        <EuiSpacer size="xs" />
-        <EuiText size="xs" color="subdued" className="eui-displayBlock">
-          <EuiHighlight search={searchValue}>{option.secondaryContent || ''}</EuiHighlight>
-        </EuiText>
-      </>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiText
+            size="s"
+            style={{
+              fontWeight: euiTheme.font.weight.bold,
+            }}
+          >
+            <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            <EuiHighlight search={searchValue}>{option.secondaryContent || ''}</EuiHighlight>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 
@@ -152,7 +156,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       button={Button}
       isOpen={isVariablesPopoverOpen}
       closePopover={() => setIsVariablesPopoverOpen(false)}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       anchorPosition="upLeft"
     >
       <EuiSelectable
@@ -161,9 +165,12 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         data-test-subj={'messageVariablesSelectableList'}
         isLoading={false}
         options={options}
-        style={{ width: 400 }}
+        style={{ width: 350 }}
         listProps={{
-          rowHeight: 55,
+          rowHeight: 60,
+          showIcons: false,
+          paddingSize: 'none',
+          textWrap: 'wrap',
         }}
         loadingMessage={LOADING_VARIABLES}
         noMatchesMessage={NO_VARIABLES_FOUND}
@@ -184,6 +191,30 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
             {search}
             <EuiSpacer size="xs" />
             {list}
+            <EuiPopoverFooter style={{ paddingTop: 0, paddingBottom: 0 }}>
+              <EuiFlexGroup
+                gutterSize="s"
+                alignItems="center"
+                justifyContent="spaceBetween"
+                responsive={false}
+                wrap={true}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiText color="grey" size="s">
+                    Depricated variables were hidden
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj={'showDepricatedVariablesButton'}
+                    size="s"
+                    onClick={() => {}}
+                  >
+                    Show all
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopoverFooter>
           </>
         )}
       </EuiSelectable>
