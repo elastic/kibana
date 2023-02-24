@@ -1080,6 +1080,8 @@
       "@kbn/server-http-tools/*": ["packages/kbn-server-http-tools/*"],
       "@kbn/server-route-repository": ["packages/kbn-server-route-repository"],
       "@kbn/server-route-repository/*": ["packages/kbn-server-route-repository/*"],
+      "@kbn/serverless-observability": ["x-pack/plugins/serverless_observability"],
+      "@kbn/serverless-observability/*": ["x-pack/plugins/serverless_observability/*"],
       "@kbn/session-notifications-plugin": ["test/plugin_functional/plugins/session_notifications"],
       "@kbn/session-notifications-plugin/*": ["test/plugin_functional/plugins/session_notifications/*"],
       "@kbn/session-view-plugin": ["x-pack/plugins/session_view"],

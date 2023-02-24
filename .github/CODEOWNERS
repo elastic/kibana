@@ -543,6 +543,7 @@ packages/kbn-securitysolution-t-grid @elastic/security-solution-platform
 packages/kbn-securitysolution-utils @elastic/security-solution-platform
 packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/apm-ui
+x-pack/plugins/serverless_observability @elastic/appex-sharedux
 test/plugin_functional/plugins/session_notifications @elastic/kibana-core
 x-pack/plugins/session_view @elastic/awp-viz
 packages/kbn-set-map @elastic/kibana-operations
