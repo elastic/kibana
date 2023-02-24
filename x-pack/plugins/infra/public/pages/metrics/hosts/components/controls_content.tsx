@@ -64,18 +64,20 @@ export const ControlsContent: React.FC<Props> = ({
     <ControlGroupRenderer
       filters={filters}
       ref={setControlGroup}
-      getInitialInput={async () => ({
-        id: dataView.id ?? '',
-        type: CONTROL_GROUP_TYPE,
-        timeRange,
-        refreshConfig: REFRESH_CONFIG,
-        viewMode: ViewMode.VIEW,
-        filters: [...filters],
-        query,
-        chainingSystem: 'HIERARCHICAL',
-        controlStyle: 'oneLine',
-        defaultControlWidth: 'small',
-        panels: controlPanel,
+      getCreationOptions={async () => ({
+        initialInput: {
+          id: dataView.id ?? '',
+          type: CONTROL_GROUP_TYPE,
+          timeRange,
+          refreshConfig: REFRESH_CONFIG,
+          viewMode: ViewMode.VIEW,
+          filters: [...filters],
+          query,
+          chainingSystem: 'HIERARCHICAL',
+          controlStyle: 'oneLine',
+          defaultControlWidth: 'small',
+          panels: controlPanel,
+        },
       })}
       query={query}
       timeRange={timeRange}

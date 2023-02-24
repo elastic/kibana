@@ -14,7 +14,7 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "exclude": ["target/**/*", "**/cypress/**"],
+  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress_endpoint.config.ts"],
   "kbn_references": [
     "@kbn/core",
     { "path": "../../../src/setup_node_env/tsconfig.json" },

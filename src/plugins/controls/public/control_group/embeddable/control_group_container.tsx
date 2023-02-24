@@ -22,6 +22,7 @@ import {
   ControlGroupInput,
   ControlGroupOutput,
   ControlGroupReduxState,
+  ControlGroupSettings,
   ControlPanelState,
   ControlsPanels,
   CONTROL_GROUP_TYPE,
@@ -100,7 +101,8 @@ export class ControlGroupContainer extends Container<
   constructor(
     reduxEmbeddablePackage: ReduxEmbeddablePackage,
     initialInput: ControlGroupInput,
-    parent?: Container
+    parent?: Container,
+    settings?: ControlGroupSettings
   ) {
     super(
       initialInput,
@@ -121,6 +123,7 @@ export class ControlGroupContainer extends Container<
     >({
       embeddable: this,
       reducers: controlGroupReducers,
+      initialComponentState: settings,
     });
 
     this.select = reduxEmbeddableTools.select;

@@ -16,10 +16,10 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
 
 import {
-  IEditableControlFactory,
   ControlInput,
   DataControlInput,
   ControlEmbeddable,
+  IEditableControlFactory,
 } from '../../types';
 import {
   controlGroupSelector,

@@ -102,12 +102,14 @@ export const EditExample = () => {
         ) : null}
         <ControlGroupRenderer
           ref={setControlGroup}
-          getInitialInput={async (initialInput, builder) => {
+          getCreationOptions={async (initialInput, builder) => {
             const persistedInput = await onLoad();
             return {
-              ...initialInput,
-              ...persistedInput,
-              viewMode: ViewMode.EDIT,
+              initialInput: {
+                ...initialInput,
+                ...persistedInput,
+                viewMode: ViewMode.EDIT,
+              },
             };
           }}
         />

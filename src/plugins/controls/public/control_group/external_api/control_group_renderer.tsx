@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import React, {
   forwardRef,
   useEffect,
@@ -16,33 +14,41 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { isEqual } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 
 import { compareFilters } from '@kbn/es-query';
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 
-import { getDefaultControlGroupInput } from '../../../common';
-import { ControlGroupContainer } from '../embeddable/control_group_container';
-import { ControlGroupInput, ControlGroupOutput, CONTROL_GROUP_TYPE } from '../types';
 import {
+  ControlGroupInput,
+  CONTROL_GROUP_TYPE,
+  ControlGroupOutput,
+  ControlGroupCreationOptions,
+} from '../types';
+import {
+  ControlGroupAPI,
   AwaitingControlGroupAPI,
   buildApiFromControlGroupContainer,
-  ControlGroupAPI,
 } from './control_group_api';
-import { ControlGroupInputBuilder, controlGroupInputBuilder } from './control_group_input_builder';
+import { getDefaultControlGroupInput } from '../../../common';
+import { controlGroupInputBuilder, ControlGroupInputBuilder } from './control_group_input_builder';
+import { ControlGroupContainer } from '../embeddable/control_group_container';
+import { ControlGroupContainerFactory } from '../embeddable/control_group_container_factory';
 
 export interface ControlGroupRendererProps {
   filters?: Filter[];
-  getInitialInput?: (
+  getCreationOptions: (
     initialInput: Partial<ControlGroupInput>,
     builder: ControlGroupInputBuilder
-  ) => Promise<Partial<ControlGroupInput>>;
+  ) => Promise<ControlGroupCreationOptions>;
   timeRange?: TimeRange;
   query?: Query;
 }
 
 export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlGroupRendererProps>(
-  ({ getInitialInput, filters, timeRange, query }, ref) => {
+  ({ getCreationOptions, filters, timeRange, query }, ref) => {
     const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
     useImperativeHandle(
@@ -64,16 +70,26 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
         const { pluginServices } = await import('../../services/plugin_services');
         const { embeddable } = pluginServices.getServices();
 
-        const factory = embeddable.getEmbeddableFactory<
+        const factory = embeddable.getEmbeddableFactory(CONTROL_GROUP_TYPE) as EmbeddableFactory<
           ControlGroupInput,
           ControlGroupOutput,
-          IEmbeddable<ControlGroupInput, ControlGroupOutput>
-        >(CONTROL_GROUP_TYPE);
-        const newControlGroup = (await factory?.create({
-          id,
-          ...getDefaultControlGroupInput(),
-          ...(await getInitialInput?.(getDefaultControlGroupInput(), controlGroupInputBuilder)),
-        })) as ControlGroupContainer;
+          ControlGroupContainer
+        > & {
+          create: ControlGroupContainerFactory['create'];
+        };
+        const { initialInput, settings } = await getCreationOptions(
+          getDefaultControlGroupInput(),
+          controlGroupInputBuilder
+        );
+        const newControlGroup = (await factory?.create(
+          {
+            id,
+            ...getDefaultControlGroupInput(),
+            ...initialInput,
+          },
+          undefined,
+          settings
+        )) as ControlGroupContainer;
 
         if (canceled) {
           newControlGroup.destroy();

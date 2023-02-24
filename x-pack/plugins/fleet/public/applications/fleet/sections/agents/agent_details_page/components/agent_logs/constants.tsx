@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DATASET_VAR_NAME } from '../../../../../../../../common/constants';
+
 import type { AgentLogsState } from './agent_logs';
 
 export const AGENT_LOG_INDEX_PATTERN = 'logs-elastic_agent-*,logs-elastic_agent.*-*';
@@ -21,7 +23,7 @@ export const AGENT_ID_FIELD = {
   type: 'string',
 };
 export const DATASET_FIELD = {
-  name: 'data_stream.dataset',
+  name: DATASET_VAR_NAME,
   type: 'string',
   aggregatable: true,
   searchable: true,

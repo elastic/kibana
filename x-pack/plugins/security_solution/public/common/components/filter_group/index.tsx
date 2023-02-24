@@ -272,7 +272,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
         });
       });
 
-      return initialInput;
+      return { initialInput };
     },
     [dataViewId, timeRange, filters, chainingSystem, query, selectControlsWithPriority]
   );
@@ -329,7 +329,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     <FilterWrapper className="filter-group__wrapper">
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
         <EuiFlexItem grow={true} data-test-subj="filter_group__items">
-          <ControlGroupRenderer ref={onControlGroupLoadHandler} getInitialInput={setOptions} />
+          <ControlGroupRenderer ref={onControlGroupLoadHandler} getCreationOptions={setOptions} />
           {!controlGroup ? <FilterGroupLoading /> : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

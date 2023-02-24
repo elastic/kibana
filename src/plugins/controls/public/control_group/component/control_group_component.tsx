@@ -28,11 +28,12 @@ import {
 import classNames from 'classnames';
 import React, { useMemo, useState } from 'react';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { ControlGroupReduxState } from '../types';
+import { ControlGroupStrings } from '../control_group_strings';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useControlGroupContainer } from '../embeddable/control_group_container';
 
@@ -45,6 +46,7 @@ export const ControlGroup = () => {
   const panels = contextSelect((state) => state.explicitInput.panels);
   const viewMode = contextSelect((state) => state.explicitInput.viewMode);
   const controlStyle = contextSelect((state) => state.explicitInput.controlStyle);
+  const showAddButton = contextSelect((state) => state.componentState.showAddButton);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -95,7 +97,7 @@ export const ControlGroup = () => {
 
   return (
     <>
-      {idsInOrder.length > 0 ? (
+      {idsInOrder.length > 0 || showAddButton ? (
         <EuiPanel
           borderRadius="m"
           color={panelBg}
@@ -153,6 +155,18 @@ export const ControlGroup = () => {
                 </DragOverlay>
               </DndContext>
             </EuiFlexItem>
+            {showAddButton && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  size="s"
+                  iconSize="m"
+                  display="base"
+                  iconType={'plusInCircle'}
+                  aria-label={ControlGroupStrings.management.getAddControlTitle()}
+                  onClick={() => controlGroup.openAddDataControlFlyout()}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPanel>
       ) : (

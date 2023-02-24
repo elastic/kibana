@@ -23,7 +23,7 @@ interface Option {
 }
 
 export function IndexSelection({ control }: Props) {
-  const { loading, indices = [] } = useFetchIndices();
+  const { isLoading, indices = [] } = useFetchIndices();
   const [indexOptions, setIndexOptions] = useState<Option[]>([]);
 
   useEffect(() => {
@@ -89,7 +89,7 @@ export function IndexSelection({ control }: Props) {
             data-test-subj="indexSelection"
             isClearable={true}
             isInvalid={!!fieldState.error}
-            isLoading={loading}
+            isLoading={isLoading}
             onChange={(selected: EuiComboBoxOptionOption[]) => {
               if (selected.length) {
                 return field.onChange(selected[0].value);

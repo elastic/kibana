@@ -130,7 +130,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
         />
         <ControlGroupRenderer
           filters={filters}
-          getInitialInput={async (initialInput, builder) => {
+          getCreationOptions={async (initialInput, builder) => {
             await builder.addDataControlFromField(initialInput, {
               dataViewId: dataView.id!,
               title: 'Destintion country',
@@ -146,8 +146,10 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
               title: 'Bytes',
             });
             return {
-              ...initialInput,
-              viewMode: ViewMode.VIEW,
+              initialInput: {
+                ...initialInput,
+                viewMode: ViewMode.VIEW,
+              },
             };
           }}
           query={query}

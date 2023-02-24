@@ -54,7 +54,7 @@ export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
 
         <ControlGroupRenderer
           ref={setControlGroupApi}
-          getInitialInput={async (initialInput, builder) => {
+          getCreationOptions={async (initialInput, builder) => {
             await builder.addDataControlFromField(initialInput, {
               dataViewId,
               title: 'Destintion country',
@@ -70,8 +70,10 @@ export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
               title: 'Bytes',
             });
             return {
-              ...initialInput,
-              viewMode: ViewMode.VIEW,
+              initialInput: {
+                ...initialInput,
+                viewMode: ViewMode.VIEW,
+              },
             };
           }}
         />
