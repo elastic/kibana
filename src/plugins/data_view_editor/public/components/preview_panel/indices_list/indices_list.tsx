@@ -22,6 +22,8 @@ import {
   EuiContextMenuPanel,
   EuiPagination,
   EuiPopover,
+  EuiCheckbox,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { Pager } from '@elastic/eui';
@@ -32,6 +34,7 @@ import { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
 interface IndicesListProps {
   indices: MatchedItem[];
   query: string;
+  hasWarnings: boolean;
   onUpdateTitle: (title: string) => void;
 }
 
@@ -150,11 +153,23 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
   }
 
   highlightIndexName(indexName: string, query: string) {
+    const emptyCheckbox = (
+      <EuiCheckbox
+        id={indexName}
+        label={indexName}
+        checked={false}
+        onChange={() => this.onClick(indexName, query)}
+      />
+    );
+
     if (!query) {
-      return indexName;
+      return emptyCheckbox;
     }
 
-    const queryAsArray = query.split(',').map((q) => q.trim());
+    const queryAsArray = query
+      .split(',')
+      .map((q) => q.trim())
+      .filter(Boolean);
     let queryIdx = -1;
     let queryWithoutWildcard = '';
     for (let i = 0; i < queryAsArray.length; i++) {
@@ -169,18 +184,25 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
       }
     }
     if (queryIdx === -1) {
-      return indexName;
+      return emptyCheckbox;
     }
 
     const preStr = indexName.substring(0, queryIdx);
     const postStr = indexName.substr(queryIdx + queryWithoutWildcard.length);
 
     return (
-      <span>
-        {preStr}
-        <strong>{queryWithoutWildcard}</strong>
-        {postStr}
-      </span>
+      <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={this.props.hasWarnings ? 'magnifyWithExclamation' : 'check'} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <span>
+            {preStr}
+            <strong>{queryWithoutWildcard}</strong>
+            {postStr}
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -191,11 +213,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     const rows = paginatedIndices.map((index, key) => {
       return (
         <EuiTableRow key={key}>
-          <EuiTableRowCell>
-            <button onClick={() => this.onClick(index.name, query)}>
-              {this.highlightIndexName(index.name, query)}
-            </button>
-          </EuiTableRowCell>
+          <EuiTableRowCell>{this.highlightIndexName(index.name, query)}</EuiTableRowCell>
           <EuiTableRowCell>
             {index.tags.map((tag: Tag) => {
               return (

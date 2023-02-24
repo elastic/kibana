@@ -87,6 +87,11 @@ export const PreviewPanel = ({
           query={title}
           indices={visibleIndices}
           onUpdateTitle={onUpdateTitleAndViewMode}
+          hasWarnings={
+            title.length > 0 &&
+            matched.exactMatchedIndices.length === 0 &&
+            matched.partialMatchedIndices.length > 0
+          }
         />
       </>
     ) : (
