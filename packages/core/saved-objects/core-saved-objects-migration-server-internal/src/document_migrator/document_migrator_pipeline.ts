@@ -6,41 +6,6 @@
  * Side Public License, v 1.
  */
 
-/*
- * This file contains logic for transforming / migrating a saved object document.
- *
- * At first, it may seem as if this could be a simple filter + reduce operation,
- * running the document through a linear set of transform functions until it is
- * up to date, but there are some edge cases that make it more complicated.
- *
- * A transform can add a new property, rename an existing property, remove a property, etc.
- * This means that we aren't able to do a reduce over a fixed list of properties, as
- * each transform operation could essentially change what transforms should be applied
- * next.
- *
- * The basic algorithm, then, is this:
- *
- * While there are any unmigrated properties in the doc, find the next unmigrated property,
- * and run the doc through the transforms that target that property.
- *
- * This way, we keep looping until there are no transforms left to apply, and we properly
- * handle property addition / deletion / renaming.
- *
- * A caveat is that this means we must restrict what a migration can do to the doc's
- * migrationVersion itself. Migrations should *not* make any changes to the migrationVersion property.
- *
- * One last gotcha is that any docs which have no migrationVersion are assumed to be up-to-date.
- * This is because Kibana UI and other clients really can't be expected build the migrationVersion
- * in a reliable way. Instead, callers of our APIs are expected to send us up-to-date documents,
- * and those documents are simply given a stamp of approval by this transformer. This is why it is
- * important for migration authors to *also* write a saved object validation that will prevent this
- * assumption from inserting out-of-date documents into the index.
- *
- * If the client(s) send us documents with migrationVersion specified, we will migrate them as
- * appropriate. This means for data import scenarios, any documetns being imported should be explicitly
- * given an empty migrationVersion property {} if no such property exists.
- */
-
 import Boom from '@hapi/boom';
 import Semver from 'semver';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
@@ -48,7 +13,7 @@ import { ActiveMigrations, Transform, TransformType } from './types';
 import { maxVersion } from './utils';
 
 function isGreater(a?: string, b?: string) {
-  return !!a && Semver.valid(a) && (!b || (Semver.valid(b) && Semver.gt(a, b)));
+  return !!a && (!b || Semver.gt(a, b));
 }
 
 export class DocumentMigratorPipeline {
@@ -70,9 +35,9 @@ export class DocumentMigratorPipeline {
 
         if (type !== this.document.type) {
           // In the initial implementation, all the transforms for the new type should be applied.
-          // And at the same time, documents with `undefined` in `migrationVersion` are treated as the most recent ones.
+          // And at the same time, documents with `undefined` in `typeMigrationVersion` are treated as the most recent ones.
           // This is a workaround to get into the loop again and apply all the migrations for the new type.
-          this.document.migrationVersion = '';
+          this.document.typeMigrationVersion = '';
           break;
         }
       }
@@ -80,20 +45,20 @@ export class DocumentMigratorPipeline {
   }
 
   private hasPendingTransforms() {
-    const { coreMigrationVersion, migrationVersion, type } = this.document;
+    const { coreMigrationVersion, typeMigrationVersion, type } = this.document;
     const latestVersion = this.migrations[type]?.latestVersion;
 
     if (isGreater(latestVersion?.core, coreMigrationVersion)) {
       return true;
     }
 
-    if (migrationVersion == null) {
+    if (typeMigrationVersion == null) {
       return false;
     }
 
     return (
-      isGreater(latestVersion?.migrate, migrationVersion) ||
-      (this.convertNamespaceTypes && isGreater(latestVersion?.convert, migrationVersion)) ||
+      isGreater(latestVersion?.migrate, typeMigrationVersion) ||
+      (this.convertNamespaceTypes && isGreater(latestVersion?.convert, typeMigrationVersion)) ||
       (this.convertNamespaceTypes && isGreater(latestVersion?.reference, coreMigrationVersion))
     );
   }
@@ -105,7 +70,7 @@ export class DocumentMigratorPipeline {
   }
 
   private isPendingTransform({ transformType, version }: Transform) {
-    const { coreMigrationVersion, migrationVersion, type } = this.document;
+    const { coreMigrationVersion, typeMigrationVersion, type } = this.document;
     const latestVersion = this.migrations[type]?.latestVersion;
 
     switch (transformType) {
@@ -118,12 +83,12 @@ export class DocumentMigratorPipeline {
         );
       case TransformType.Convert:
         return (
-          migrationVersion != null &&
+          typeMigrationVersion != null &&
           this.convertNamespaceTypes &&
-          isGreater(version, migrationVersion)
+          isGreater(version, typeMigrationVersion)
         );
       case TransformType.Migrate:
-        return migrationVersion != null && isGreater(version, migrationVersion);
+        return typeMigrationVersion != null && isGreater(version, typeMigrationVersion);
     }
   }
 
@@ -159,7 +124,7 @@ export class DocumentMigratorPipeline {
    * the document belongs to a future version.
    */
   private assertCompatibility() {
-    const { id, type, migrationVersion: currentVersion } = this.document;
+    const { id, type, typeMigrationVersion: currentVersion } = this.document;
     const latestVersion = maxVersion(
       this.migrations[type]?.latestVersion.migrate,
       this.migrations[type]?.latestVersion.convert
@@ -174,7 +139,7 @@ export class DocumentMigratorPipeline {
   }
 
   /**
-   * Transforms that remove or downgrade migrationVersion properties are not allowed,
+   * Transforms that remove or downgrade `typeMigrationVersion` properties are not allowed,
    * as this could get us into an infinite loop. So, we explicitly check for that here.
    */
   private assertUpgrade({ transformType, version }: Transform, previousVersion?: string) {
@@ -182,41 +147,40 @@ export class DocumentMigratorPipeline {
       return;
     }
 
-    const { migrationVersion: currentVersion, type } = this.document;
+    const { typeMigrationVersion: currentVersion, type } = this.document;
 
     if (isGreater(previousVersion, currentVersion)) {
       throw new Error(
-        `Migration "${type} v${version}" attempted to downgrade "migrationVersion" from ${previousVersion} to ${currentVersion}.`
+        `Migration "${type} v${version}" attempted to downgrade "typeMigrationVersion" from ${previousVersion} to ${currentVersion}.`
       );
     }
   }
 
   private bumpVersion({ transformType, version }: Transform) {
-    if ([TransformType.Core, TransformType.Reference].includes(transformType)) {
-      this.document.coreMigrationVersion = maxVersion(this.document.coreMigrationVersion, version);
-
-      return;
-    }
-
-    this.document.migrationVersion = maxVersion(this.document.migrationVersion, version);
+    this.document = {
+      ...this.document,
+      ...([TransformType.Core, TransformType.Reference].includes(transformType)
+        ? { coreMigrationVersion: maxVersion(this.document.coreMigrationVersion, version) }
+        : { typeMigrationVersion: maxVersion(this.document.typeMigrationVersion, version) }),
+    };
   }
 
   private ensureVersion({
     coreMigrationVersion: currentCoreMigrationVersion,
-    migrationVersion: currentMigrationVersion,
+    typeMigrationVersion: currentTypeMigrationVersion,
     ...document
   }: SavedObjectUnsanitizedDoc) {
     const { type } = document;
     const latestVersion = this.migrations[type]?.latestVersion;
     const coreMigrationVersion =
       currentCoreMigrationVersion || maxVersion(latestVersion?.core, latestVersion?.reference);
-    const migrationVersion =
-      currentMigrationVersion || maxVersion(latestVersion?.migrate, latestVersion?.convert);
+    const typeMigrationVersion =
+      currentTypeMigrationVersion || maxVersion(latestVersion?.migrate, latestVersion?.convert);
 
     return {
       ...document,
-      ...(migrationVersion ? { migrationVersion } : {}),
       ...(coreMigrationVersion ? { coreMigrationVersion } : {}),
+      ...(typeMigrationVersion ? { typeMigrationVersion } : {}),
     };
   }
 
@@ -224,7 +188,7 @@ export class DocumentMigratorPipeline {
     this.assertValidity();
 
     for (const transform of this.getPipeline()) {
-      const { migrationVersion: previousVersion } = this.document;
+      const { typeMigrationVersion: previousVersion } = this.document;
       const { additionalDocs, transformedDoc } = transform.transform(this.document);
       this.document = transformedDoc;
       this.additionalDocs.push(...additionalDocs.map((document) => this.ensureVersion(document)));

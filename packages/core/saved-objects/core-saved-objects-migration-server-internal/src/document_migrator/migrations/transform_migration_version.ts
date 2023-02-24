@@ -8,16 +8,9 @@
 
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 
-export function transformMigrationVersion(doc: SavedObjectUnsanitizedDoc) {
-  if (doc.migrationVersion == null) {
-    return doc;
-  }
-
-  const { migrationVersion, ...rest } = doc;
-
+export function transformMigrationVersion({ migrationVersion, ...doc }: SavedObjectUnsanitizedDoc) {
   return {
-    ...rest,
-    migrationVersion:
-      typeof migrationVersion === 'object' ? migrationVersion[rest.type] : migrationVersion,
+    ...doc,
+    ...(migrationVersion ? { typeMigrationVersion: migrationVersion[doc.type] ?? '' } : {}),
   };
 }

@@ -116,7 +116,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       references: references || [],
       ...(migrationVersion && { migrationVersion }),
       ...(coreMigrationVersion && { coreMigrationVersion }),
-      ...(typeMigrationVersion && { typeMigrationVersion }),
+      ...(typeMigrationVersion != null ? { typeMigrationVersion } : {}),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
       ...(_source.created_at && { created_at: _source.created_at }),
       ...(version && { version }),
@@ -154,7 +154,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(originId && { originId }),
       ...(migrationVersion && { migrationVersion }),
       ...(coreMigrationVersion && { coreMigrationVersion }),
-      ...(typeMigrationVersion && { typeMigrationVersion }),
+      ...(typeMigrationVersion != null ? { typeMigrationVersion } : {}),
       ...(updated_at && { updated_at }),
       ...(createdAt && { created_at: createdAt }),
     };
