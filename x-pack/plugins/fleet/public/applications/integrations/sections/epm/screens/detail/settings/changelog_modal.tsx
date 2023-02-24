@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useGetFileByPathQuery, useStartServices } from '../../../../../hooks';
 
-import { parseYamlChangelog } from '../utils';
+import { getFormattedChangelog } from '../utils';
 
 export interface ChangeLogParams {
   version: string;
@@ -56,7 +56,7 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
   } = useGetFileByPathQuery(`/package/${packageName}/${latestVersion}/changelog.yml`);
   const changelogText = changelogResponse?.data;
 
-  const finalChangelog = parseYamlChangelog(changelogText, currentVersion, latestVersion);
+  const finalChangelog = getFormattedChangelog(changelogText, currentVersion, latestVersion);
 
   if (changelogError) {
     notifications.toasts.addError(changelogError, {

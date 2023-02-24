@@ -6,6 +6,9 @@
  */
 import { safeLoad } from 'js-yaml';
 
+import semverGte from 'semver/functions/gte';
+import semverLte from 'semver/functions/lte';
+
 import type { ChangeLogParams } from '../settings/changelog_modal';
 
 export const formatChangelog = (parsedChangelog: ChangeLogParams[]) => {
@@ -17,15 +20,24 @@ export const formatChangelog = (parsedChangelog: ChangeLogParams[]) => {
   }, '');
 };
 
-export const parseYamlChangelog = (
+// Exported for testing
+export const filterYamlChangelog = (
   changelogText: string | null | undefined,
   currentVersion: string,
   latestVersion: string
 ) => {
   const parsedChangelog: ChangeLogParams[] = changelogText ? safeLoad(changelogText) : [];
 
-  const filtered = parsedChangelog.filter(
-    (e) => e.version === latestVersion || e.version === currentVersion //TO DO: all the entries between the two versions
+  return parsedChangelog.filter(
+    (e) => semverLte(e.version, latestVersion) && semverGte(e.version, currentVersion)
   );
-  return formatChangelog(filtered);
+};
+
+export const getFormattedChangelog = (
+  changelogText: string | null | undefined,
+  currentVersion: string,
+  latestVersion: string
+) => {
+  const parsed = filterYamlChangelog(changelogText, currentVersion, latestVersion);
+  return formatChangelog(parsed);
 };

@@ -6,4 +6,4 @@
  */
 
 export { getInstallPkgRouteOptions } from './get_install_route_options';
-export { parseYamlChangelog } from './changelog_utils';
+export { getFormattedChangelog, filterYamlChangelog } from './changelog_utils';
