@@ -39,7 +39,7 @@ import { ControlGroupContainerFactory } from '../embeddable/control_group_contai
 
 export interface ControlGroupRendererProps {
   filters?: Filter[];
-  getCreationOptions: (
+  getCreationOptions?: (
     initialInput: Partial<ControlGroupInput>,
     builder: ControlGroupInputBuilder
   ) => Promise<ControlGroupCreationOptions>;
@@ -77,10 +77,9 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
         > & {
           create: ControlGroupContainerFactory['create'];
         };
-        const { initialInput, settings } = await getCreationOptions(
-          getDefaultControlGroupInput(),
-          controlGroupInputBuilder
-        );
+        const { initialInput, settings } =
+          (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupInputBuilder)) ??
+          {};
         const newControlGroup = (await factory?.create(
           {
             id,

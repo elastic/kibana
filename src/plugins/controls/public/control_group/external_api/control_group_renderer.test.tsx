@@ -43,7 +43,7 @@ describe('control group renderer', () => {
     await act(async () => {
       mountWithIntl(
         <ControlGroupRenderer
-          getInitialInput={() => Promise.resolve({ controlStyle: 'twoLine' })}
+          getCreationOptions={() => Promise.resolve({ initialInput: { controlStyle: 'twoLine' } })}
         />
       );
     });
@@ -51,7 +51,9 @@ describe('control group renderer', () => {
       CONTROL_GROUP_TYPE
     );
     expect(mockControlGroupFactory.create).toHaveBeenCalledWith(
-      expect.objectContaining({ controlStyle: 'twoLine' })
+      expect.objectContaining({ controlStyle: 'twoLine' }),
+      undefined,
+      undefined
     );
   });
 
@@ -75,7 +77,7 @@ describe('control group renderer', () => {
     await act(async () => {
       wrapper = mountWithIntl(
         <ControlGroupRenderer
-          getInitialInput={() => Promise.resolve({ filters: initialFilters })}
+          getCreationOptions={() => Promise.resolve({ initialInput: { filters: initialFilters } })}
         />
       );
     });
@@ -93,7 +95,9 @@ describe('control group renderer', () => {
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = mountWithIntl(
-        <ControlGroupRenderer getInitialInput={() => Promise.resolve({ query: initialQuery })} />
+        <ControlGroupRenderer
+          getCreationOptions={() => Promise.resolve({ initialInput: { query: initialQuery } })}
+        />
       );
     });
     await act(async () => {
@@ -110,7 +114,9 @@ describe('control group renderer', () => {
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = mountWithIntl(
-        <ControlGroupRenderer getInitialInput={() => Promise.resolve({ timeRange: initialTime })} />
+        <ControlGroupRenderer
+          getCreationOptions={() => Promise.resolve({ initialInput: { timeRange: initialTime } })}
+        />
       );
     });
     await act(async () => {
