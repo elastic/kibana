@@ -19,13 +19,11 @@ export const loadSavedSearch = async (
     services,
     appStateContainer,
     dataViewList,
-    setError,
     dataViewSpec,
   }: {
     services: DiscoverServices;
     appStateContainer: DiscoverAppStateContainer;
     dataViewList: DataViewListItem[];
-    setError: (e: Error) => void;
     dataViewSpec?: DataViewSpec;
   }
 ) => {
@@ -41,7 +39,6 @@ export const loadSavedSearch = async (
     appStateContainer,
     dataViewList,
     services,
-    setError,
     dataViewSpec
   );
 

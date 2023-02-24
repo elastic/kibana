@@ -7,8 +7,8 @@
  */
 import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { DataViewSavedObjectConflictError, type DataView } from '@kbn/data-views-plugin/public';
-import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { redirectWhenMissing, SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   AnalyticsNoDataPageKibanaProvider,
@@ -128,14 +128,14 @@ export function DiscoverMainRoute(props: Props) {
       const isNewSavedSearch = !Boolean(id);
       await stateContainer.actions.loadDataViewList();
       let currentSavedSearch: SavedSearch | undefined;
+
       if (isNewSavedSearch) {
         addLog('[Main route] load new saved search');
-        currentSavedSearch = await stateContainer.actions.loadNewSavedSearch(setError);
+        currentSavedSearch = await stateContainer.actions.loadNewSavedSearch();
       } else {
         addLog('[Main route] load saved search', id);
-        currentSavedSearch = await stateContainer.actions.loadSavedSearch(id, setError);
+        currentSavedSearch = await stateContainer.actions.loadSavedSearch(id);
       }
-
       if (currentSavedSearch?.id) {
         chrome.recentlyAccessed.add(
           getSavedSearchFullPathUrl(currentSavedSearch.id),
@@ -149,11 +149,10 @@ export function DiscoverMainRoute(props: Props) {
           ? getSavedSearchBreadcrumbs(currentSavedSearch.title)
           : getRootBreadcrumbs()
       );
+
       setLoading(false);
     } catch (e) {
-      if (e instanceof DataViewSavedObjectConflictError) {
-        setError(e);
-      } else {
+      if (e instanceof SavedObjectNotFound) {
         redirectWhenMissing({
           history,
           navigateToApp: core.application.navigateToApp,
@@ -171,6 +170,8 @@ export function DiscoverMainRoute(props: Props) {
           },
           theme: core.theme,
         })(e);
+      } else {
+        setError(e);
       }
     }
   }, [

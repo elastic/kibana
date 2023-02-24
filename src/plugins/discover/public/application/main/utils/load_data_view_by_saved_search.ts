@@ -16,21 +16,15 @@ export const loadDataViewBySavedSearch = async (
   appStateContainer: DiscoverAppStateContainer,
   dataViewList: DataViewListItem[],
   services: DiscoverServices,
-  onError: (e: Error) => void,
   dataViewSpec?: DataViewSpec
 ) => {
-  try {
-    const { index } = appStateContainer.getState();
-    const ip = await loadDataView(services.dataViews, services.uiSettings, index, dataViewSpec);
-    const dataViewData = resolveDataView(
-      ip,
-      nextSavedSearch.searchSource,
-      services.toastNotifications
-    );
-    await services.data.dataViews.refreshFields(dataViewData);
-
-    return dataViewData;
-  } catch (e) {
-    onError(e);
-  }
+  const { index } = appStateContainer.getState();
+  const ip = await loadDataView(services.dataViews, services.uiSettings, index, dataViewSpec);
+  const dataViewData = resolveDataView(
+    ip,
+    nextSavedSearch.searchSource,
+    services.toastNotifications
+  );
+  await services.data.dataViews.refreshFields(dataViewData);
+  return dataViewData;
 };

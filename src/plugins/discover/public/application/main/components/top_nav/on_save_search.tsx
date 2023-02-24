@@ -75,15 +75,21 @@ async function saveDataSource({
       text: error.message,
     });
   }
-  return state.savedSearchState.persist(
-    savedSearch,
-    {
-      onError,
-      onSuccess,
+
+  try {
+    const nextSavedSearch = await state.savedSearchState.persist(
+      savedSearch,
       saveOptions,
-    },
-    state.internalState.getState().dataView
-  );
+      state.internalState.getState().dataView
+    );
+    if (nextSavedSearch) {
+      onSuccess(nextSavedSearch.id!);
+    }
+    return nextSavedSearch;
+  } catch (e) {
+    onError(e);
+    return savedSearch;
+  }
 }
 
 export async function onSaveSearch({

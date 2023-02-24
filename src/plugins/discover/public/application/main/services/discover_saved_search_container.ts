@@ -22,24 +22,12 @@ import { restoreStateFromSavedSearch } from '../../../services/saved_searches/re
 import { persistSavedSearch } from '../utils/persist_saved_search';
 import { getStateDefaults } from '../utils/get_state_defaults';
 
-export interface PersistParams {
-  onError: (error: Error, savedSearch: SavedSearch) => void;
-  onSuccess: (id: string) => void;
-  saveOptions: SavedObjectSaveOpts;
+export interface LoadParams {
+  dataViewSpec?: DataViewSpec;
+  dataViewList: DataViewListItem[];
 }
 
-export type LoadFunction = (
-  id: string,
-  {
-    setError,
-    dataViewSpec,
-    dataViewList,
-  }: {
-    setError: (e: Error) => void;
-    dataViewSpec?: DataViewSpec;
-    dataViewList: DataViewListItem[];
-  }
-) => Promise<SavedSearch | undefined>;
+export type LoadFunction = (id: string, params: LoadParams) => Promise<SavedSearch | undefined>;
 
 export type UpdateFunction = (
   nextDataView: DataView | undefined,
@@ -50,13 +38,11 @@ export type UpdateFunction = (
 
 export type PersistFunction = (
   nextSavedSearch: SavedSearch,
-  params: PersistParams,
+  params: SavedObjectSaveOpts,
   dataView?: DataView
 ) => Promise<{ id: string | undefined } | undefined>;
 
 export interface SavedSearchContainer {
-  savedSearch$: BehaviorSubject<SavedSearch>;
-  savedSearchPersisted$: BehaviorSubject<SavedSearch>;
   hasChanged$: BehaviorSubject<boolean>;
   set: (savedSearch: SavedSearch) => SavedSearch;
   load: LoadFunction;
@@ -167,21 +153,17 @@ export function getSavedSearchContainer({
 
   const persist: PersistFunction = async (nextSavedSearch, params, dataView?) => {
     addLog('🔎 [savedSearch] persist', nextSavedSearch);
-    try {
-      const id = await persistSavedSearch(nextSavedSearch, {
-        dataView: dataView ?? nextSavedSearch.searchSource.getField('index')!,
-        state: appStateContainer.getState(),
-        services,
-        saveOptions: params.saveOptions,
-      });
-      if (id) {
-        savedSearchPersisted$.next(nextSavedSearch);
-        params.onSuccess(id);
-      }
-      return { id };
-    } catch (e) {
-      params.onError(e, nextSavedSearch);
+
+    const id = await persistSavedSearch(nextSavedSearch, {
+      dataView: dataView ?? nextSavedSearch.searchSource.getField('index')!,
+      state: appStateContainer.getState(),
+      services,
+      saveOptions: params,
+    });
+    if (id) {
+      savedSearchPersisted$.next(nextSavedSearch);
     }
+    return { id };
   };
 
   const isPersisted = () => Boolean(savedSearchVolatile$.getValue().id);
@@ -239,19 +221,16 @@ export function getSavedSearchContainer({
     return resetUrl(savedSearchPersisted$.getValue());
   };
 
-  const load: LoadFunction = (id, { setError, dataViewSpec, dataViewList }) => {
+  const load: LoadFunction = (id, { dataViewSpec, dataViewList }) => {
     return loadSavedSearch(id, {
       services,
       appStateContainer,
       dataViewList,
       dataViewSpec,
-      setError,
     });
   };
 
   return {
-    savedSearch$: savedSearchVolatile$,
-    savedSearchPersisted$,
     hasChanged$,
     load,
     set,
