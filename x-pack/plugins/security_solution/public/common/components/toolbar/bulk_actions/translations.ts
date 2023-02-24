@@ -12,7 +12,7 @@ export const SELECTED_ENTITIES = (
   selectedAlertsFormatted: string,
   selectedAlerts: number
 ) =>
-  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectedAlertsTitle', {
+  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectedEntitiesTitle', {
     values: { entity, selectedAlertsFormatted, selectedAlerts },
     defaultMessage:
       'Selected {selectedAlertsFormatted} {entity}{selectedAlerts, plural, =1 {} other {s}}',
@@ -23,7 +23,7 @@ export const SELECT_ALL_ENTITIES = (
   totalAlertsFormatted: string,
   totalAlerts: number
 ) =>
-  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectAllAlertsTitle', {
+  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectAllEntitiesTitle', {
     values: { entity, totalAlertsFormatted, totalAlerts },
     defaultMessage:
       'Select {totalAlerts, plural, =1 {{totalAlertsFormatted} {entity}} other {all {totalAlertsFormatted} {entity}s} }',
