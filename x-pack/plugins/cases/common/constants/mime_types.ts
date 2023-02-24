@@ -87,9 +87,9 @@ const imageMimeTypes = [
   'image/emf',
 ];
 
-const text = ['text/plain', 'text/csv', 'text/json', 'application/json'];
+const textMimeTypes = ['text/plain', 'text/csv', 'text/json', 'application/json'];
 
-const compression = [
+const compressionMimeTypes = [
   'application/zip',
   'application/gzip',
   'application/x-bzip',
@@ -98,6 +98,11 @@ const compression = [
   'application/x-tar',
 ];
 
-const pdf = ['application/pdf'];
+const pdfMimeTypes = ['application/pdf'];
 
-export const ALLOWED_MIME_TYPES = [...imageMimeTypes, ...text, ...compression, ...pdf];
+export const ALLOWED_MIME_TYPES = [
+  ...imageMimeTypes,
+  ...textMimeTypes,
+  ...compressionMimeTypes,
+  ...pdfMimeTypes,
+];

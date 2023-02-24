@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
@@ -46,8 +47,8 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
           push: [APP_ID],
         },
         savedObject: {
-          all: [],
-          read: [],
+          all: [...filesSavedObjectTypes],
+          read: [...filesSavedObjectTypes],
         },
         ui: casesCapabilities.all,
       },
@@ -60,7 +61,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
         },
         savedObject: {
           all: [],
-          read: [],
+          read: [...filesSavedObjectTypes],
         },
         ui: casesCapabilities.read,
       },

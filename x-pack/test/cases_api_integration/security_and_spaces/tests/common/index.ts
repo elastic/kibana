@@ -58,12 +58,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./attachments_framework/external_references.ts'));
     loadTestFile(require.resolve('./attachments_framework/persistable_state.ts'));
 
-    /**
-     * File APIs
-     */
-
-    loadTestFile(require.resolve('./files/apis.ts'));
-
     // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
     // which causes errors in any tests after them that relies on those
   });

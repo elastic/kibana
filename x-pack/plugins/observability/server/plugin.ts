@@ -13,6 +13,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   Logger,
 } from '@kbn/core/server';
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
@@ -92,8 +93,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             push: [observabilityFeatureId],
           },
           savedObject: {
-            all: [],
-            read: [],
+            all: [...filesSavedObjectTypes],
+            read: [...filesSavedObjectTypes],
           },
           ui: casesCapabilities.all,
         },
@@ -106,7 +107,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           savedObject: {
             all: [],
-            read: [],
+            read: [...filesSavedObjectTypes],
           },
           ui: casesCapabilities.read,
         },

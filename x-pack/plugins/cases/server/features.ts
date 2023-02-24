@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 import { APP_ID, FEATURE_ID } from '../common/constants';
@@ -50,8 +51,8 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
           insightsAndAlerting: [APP_ID],
         },
         savedObject: {
-          all: [],
-          read: [],
+          all: [...filesSavedObjectTypes],
+          read: [...filesSavedObjectTypes],
         },
         ui: capabilities.all,
       },
@@ -65,7 +66,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
         },
         savedObject: {
           all: [],
-          read: [],
+          read: [...filesSavedObjectTypes],
         },
         ui: capabilities.read,
       },

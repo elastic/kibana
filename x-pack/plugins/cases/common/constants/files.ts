@@ -32,13 +32,13 @@ const fileKindHttpTags = (owner: Owner) => {
   };
 };
 
+const access = 'access:';
+
 const buildTag = (owner: Owner, operation: Operation) => {
   return {
     tags: [`${access}${constructHttpOperationTag(owner, operation)}`],
   };
 };
-
-const access = 'access:';
 
 const maxFileSize = 100 * 1024 * 1024; // 100 MiB
 
