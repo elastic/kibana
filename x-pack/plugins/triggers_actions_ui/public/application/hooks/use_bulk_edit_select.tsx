@@ -42,15 +42,14 @@ const reducer = (state: BulkEditSelectionState, action: Action) => {
       };
     case ActionTypes.TOGGLE_ROW: {
       const id = payload as string;
-      const selectedIds = new Set(Array.from(state.selectedIds));
       if (state.selectedIds.has(id)) {
-        selectedIds.delete(id);
+        state.selectedIds.delete(id);
       } else {
-        selectedIds.add(id);
+        state.selectedIds.add(id);
       }
       return {
         ...state,
-        selectedIds,
+        selectedIds: new Set<string>(state.selectedIds),
       };
     }
     case ActionTypes.SET_SELECTION: {
@@ -96,7 +95,10 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
     searchText,
   } = props;
 
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    selectedIds: new Set<string>(),
+  });
 
   const itemIds = useMemo(() => {
     return items.map((item) => item.id);
