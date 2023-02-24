@@ -462,8 +462,7 @@ describe('getCommands', () => {
 
         elastic_apm.server_url=\\"\\"
 
-        elastic_apm.environment=\\"my-environment\\"
-        "
+        elastic_apm.environment=\\"my-environment\\""
       `);
     });
     it('renders with secret token and url', () => {
@@ -483,8 +482,7 @@ describe('getCommands', () => {
 
         elastic_apm.server_url=\\"localhost:8220\\"
 
-        elastic_apm.environment=\\"my-environment\\"
-        "
+        elastic_apm.environment=\\"my-environment\\""
       `);
     });
   });
