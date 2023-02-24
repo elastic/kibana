@@ -116,5 +116,6 @@
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/security-api-integration-helpers",
     "@kbn/discover-plugin",
+    "@kbn/files-plugin",
   ]
 }
