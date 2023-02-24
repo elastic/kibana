@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 
 export const ErrorStateCodec = t.type({
-  duration_ms: t.number,
+  duration_ms: t.string,
   checks: t.number,
   ends: t.union([t.string, t.null]),
   started_at: t.string,
