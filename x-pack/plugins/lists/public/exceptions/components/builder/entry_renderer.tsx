@@ -60,6 +60,7 @@ import { HttpStart } from '@kbn/core/public';
 import { getEmptyValue } from '../../../common/empty_value';
 
 import * as i18n from './translations';
+import { EntryFieldError } from './reducer';
 
 const FieldFlexItem = styled(EuiFlexItem)`
   overflow: hidden;
@@ -81,7 +82,7 @@ export interface EntryItemProps {
   ) => DataViewBase;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
-  setErrorsExist: (arg: boolean) => void;
+  setErrorsExist: (arg: EntryFieldError) => void;
   setWarningsExist: (arg: boolean) => void;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
@@ -110,9 +111,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
   const handleError = useCallback(
     (err: boolean): void => {
-      setErrorsExist(err);
+      setErrorsExist({ [entry.id]: err });
     },
-    [setErrorsExist]
+    [setErrorsExist, entry.id]
   );
   const handleWarning = useCallback(
     (warn: boolean): void => {
@@ -403,7 +404,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       case OperatorTypeEnum.WILDCARD:
         const wildcardValue = typeof entry.value === 'string' ? entry.value : undefined;
         let actualWarning: React.ReactNode | string | undefined;
-        if (listType !== 'detection') {
+        if (listType !== 'detection' && listType !== 'rule_default') {
           let os: OperatingSystem = OperatingSystem.WINDOWS;
           if (osTypes) {
             [os] = osTypes as OperatingSystem[];
