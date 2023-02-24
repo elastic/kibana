@@ -332,6 +332,7 @@ export interface MultiAggBucket {
 export interface ThresholdAlertState extends RuleTypeState {
   initialized: boolean;
   signalHistory: ThresholdSignalHistory;
+  ruleEssentialsHash?: string;
 }
 
 export type EventGroupingMultiBucketAggregationResult = ESSearchResponse<

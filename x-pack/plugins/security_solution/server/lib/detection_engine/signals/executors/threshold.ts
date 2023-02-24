@@ -39,6 +39,7 @@ import {
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { getRuleEssentialsHash } from '../threshold/utils';
 
 export const thresholdExecutor = async ({
   inputIndex,
@@ -86,8 +87,14 @@ export const thresholdExecutor = async ({
       result.warningMessages.push(exceptionsWarning);
     }
 
+    // Invalidate state history if rule's essantial properties were changed
+    const ruleEssentialsHash = getRuleEssentialsHash(completeRule);
+    const useSignalHistory =
+      state.initialized &&
+      (state.ruleEssentialsHash == null || state.ruleEssentialsHash === ruleEssentialsHash);
+
     // Get state or build initial state (on upgrade)
-    const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
+    const { signalHistory, searchErrors: previousSearchErrors } = useSignalHistory
       ? { signalHistory: state.signalHistory, searchErrors: [] }
       : await getThresholdSignalHistory({
           from: tuple.from.toISOString(),
@@ -191,6 +198,7 @@ export const thresholdExecutor = async ({
           ...signalHistory,
           ...newSignalHistory,
         },
+        ruleEssentialsHash,
       },
     };
   });
