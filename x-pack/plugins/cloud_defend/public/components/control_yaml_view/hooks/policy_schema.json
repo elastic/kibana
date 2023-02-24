@@ -70,7 +70,13 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "enum": ["createExecutable", "modifyExecutable"]
+            "enum": [
+              "createExecutable",
+              "modifyExecutable",
+              "createFile",
+              "modifyFile",
+              "deleteFile"
+            ]
           }
         },
         "containerImageName": {
@@ -137,23 +143,16 @@
           }
         },
         "ignoreVolumeMounts": {
-          "const": true
+          "type": "boolean"
         },
         "ignoreVolumeFiles": {
-          "const": true
+          "type": "boolean"
         }
       },
-      "dependentSchemas": {
+      "dependencies": {
         "ignoreVolumeMounts": {
-          "required": ["targetFilePath"],
           "not": {
             "required": ["ignoreVolumeFiles"]
-          }
-        },
-        "ignoreVolumeFiles": {
-          "required": ["targetFilePath"],
-          "not": {
-            "required": ["ignoreVolumeMounts"]
           }
         }
       }
