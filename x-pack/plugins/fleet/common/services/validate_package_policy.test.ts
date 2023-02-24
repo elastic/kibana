@@ -400,7 +400,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           },
           bar: {
             vars: {
-              'bar-input-var-name': ['Invalid format'],
+              'bar-input-var-name': ['Invalid format for bar-input-var-name: expected array'],
               'bar-input2-var-name': ['bar-input2-var-name is required'],
             },
             streams: {
@@ -470,7 +470,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           },
           bar: {
             vars: {
-              'bar-input-var-name': ['Invalid format'],
+              'bar-input-var-name': ['Invalid format for bar-input-var-name: expected array'],
               'bar-input2-var-name': ['bar-input2-var-name is required'],
             },
             streams: {
