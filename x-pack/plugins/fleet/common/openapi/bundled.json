@@ -2689,7 +2689,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/new_agent_policy"
+                "$ref": "#/components/schemas/agent_policy_create_request"
               }
             }
           }
@@ -2774,7 +2774,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/new_agent_policy"
+                "$ref": "#/components/schemas/agent_policy_update_request"
               }
             }
           }
@@ -5956,60 +5956,6 @@
           }
         }
       },
-      "new_agent_policy": {
-        "title": "New agent policy",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "namespace": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "monitoring_enabled": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "metrics",
-                "logs"
-              ]
-            }
-          },
-          "data_output_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "monitoring_output_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "fleet_server_host_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "download_source_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "unenroll_timeout": {
-            "type": "number"
-          },
-          "inactivity_timeout": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "name",
-          "namespace"
-        ]
-      },
       "new_package_policy": {
         "title": "New package policy",
         "type": "object",
@@ -6120,83 +6066,238 @@
         ]
       },
       "agent_policy": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/new_agent_policy"
+        "title": "Agent Policy",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
           },
-          {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "status": {
-                "type": "string",
-                "enum": [
-                  "active",
-                  "inactive"
-                ]
-              },
-              "package_policies": {
-                "description": "This field is present only when retrieving a single agent policy, or when retrieving a list of agent policy with the ?full=true parameter",
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/package_policy"
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "monitoring_enabled": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "metrics",
+                "logs"
+              ]
+            }
+          },
+          "data_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoring_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fleet_server_host_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "download_source_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "unenroll_timeout": {
+            "type": "number"
+          },
+          "inactivity_timeout": {
+            "type": "number"
+          },
+          "package_policies": {
+            "description": "This field is present only when retrieving a single agent policy, or when retrieving a list of agent policy with the ?full=true parameter",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/package_policy"
+            }
+          },
+          "updated_on": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_by": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "number"
+          },
+          "agents": {
+            "type": "number"
+          },
+          "agent_features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
                 }
               },
-              "updated_on": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "updated_by": {
-                "type": "string"
-              },
-              "data_output_id": {
-                "type": "string",
-                "nullable": true
-              },
-              "monitoring_output_id": {
-                "type": "string",
-                "nullable": true
-              },
-              "fleet_server_host_id": {
-                "type": "string",
-                "nullable": true
-              },
-              "download_source_id": {
-                "type": "string",
-                "nullable": true
-              },
-              "revision": {
-                "type": "number"
-              },
-              "agents": {
-                "type": "number"
-              },
-              "agent_features": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    },
-                    "enabled": {
-                      "type": "boolean"
-                    }
-                  },
-                  "required": [
-                    "name",
-                    "enabled"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "id",
-              "status"
-            ]
+              "required": [
+                "name",
+                "enabled"
+              ]
+            }
           }
+        },
+        "required": [
+          "id",
+          "status",
+          "name",
+          "namespace"
+        ]
+      },
+      "agent_policy_create_request": {
+        "title": "Create agent policy request",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "monitoring_enabled": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "metrics",
+                "logs"
+              ]
+            }
+          },
+          "data_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoring_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fleet_server_host_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "download_source_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "unenroll_timeout": {
+            "type": "number"
+          },
+          "inactivity_timeout": {
+            "type": "number"
+          },
+          "agent_features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "name",
+                "enabled"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "namespace"
+        ]
+      },
+      "agent_policy_update_request": {
+        "title": "Update agent policy request",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "monitoring_enabled": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "metrics",
+                "logs"
+              ]
+            }
+          },
+          "data_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoring_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fleet_server_host_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "download_source_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "unenroll_timeout": {
+            "type": "number"
+          },
+          "inactivity_timeout": {
+            "type": "number"
+          },
+          "agent_features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "name",
+                "enabled"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "namespace"
         ]
       },
       "full_agent_policy_output": {
