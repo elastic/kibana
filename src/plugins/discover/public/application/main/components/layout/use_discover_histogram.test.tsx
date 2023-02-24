@@ -427,6 +427,19 @@ describe('useDiscoverHistogram', () => {
 
     it('should not update total hits when the total hits state changes to an error', async () => {
       mockCheckHitCount.mockClear();
+      mockQueryState = {
+        query: {
+          query: 'query',
+          language: 'kuery',
+        } as Query | AggregateQuery,
+        filters: [],
+        time: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      };
+
+      mockData.query.getState = () => mockQueryState;
       const totalHits$ = new BehaviorSubject({
         fetchStatus: FetchStatus.UNINITIALIZED,
         result: undefined,

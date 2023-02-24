@@ -49,18 +49,19 @@ export const suggestionsApi = ({
     indexPatternRefs: [],
   } as unknown as DataViewsState;
 
-  const initialVisualizations = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
+  const initialVisualization = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
 
   // find the active visualizations from the context
   const suggestions = getSuggestions({
     datasourceMap,
     datasourceStates,
     visualizationMap,
-    activeVisualization: initialVisualizations,
+    activeVisualization: initialVisualization,
     visualizationState: undefined,
     visualizeTriggerFieldContext: context,
     dataViews,
   });
+  if (!suggestions.length) return [];
   const activeVisualization = suggestions[0];
   // compute the rest suggestions depending on the active one
   const newSuggestions = getSuggestions({
