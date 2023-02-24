@@ -14,6 +14,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
+import useObservable from 'react-use/lib/useObservable';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -37,7 +38,6 @@ import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
-import useObservable from 'react-use/lib/useObservable';
 import { AwaitingDashboardAPI } from '../dashboard_container';
 
 export interface DashboardAppProps {

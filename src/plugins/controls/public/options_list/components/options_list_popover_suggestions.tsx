@@ -9,7 +9,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EuiLoadingSpinner, EuiSelectable, EuiSpacer } from '@elastic/eui';
+import { EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
