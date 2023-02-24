@@ -94,7 +94,7 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
       {
         integration_name: installedPackage.name,
         integration_title: installedPackage.title,
-        is_enabled: false,
+        is_enabled: false, // There might not be an integration policy, so default false and later update in addPackagePolicy()
       },
     ];
     const packageKey = `${packageInfo.package_name}`;
@@ -110,11 +110,6 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
         ...packageInfo,
         integrations: integrationsMap,
       });
-    } else {
-      // TODO: Any additional augmentation to existing `integrationsInfo` from extra data in `installedPackage`
-      // integrationsInfo.forEach((integration) => {
-      //   addIntegrationToMap(existingPackageInfo.integrations, integration);
-      // });
     }
   };
 
