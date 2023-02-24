@@ -3294,6 +3294,14 @@
           },
           {
             "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/memory_available.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/memory_available.ts"
+          },
+          {
+            "plugin": "infra",
             "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/rx.ts"
           },
           {

@@ -17,7 +17,6 @@ import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { createUICapabilities } from '@kbn/cases-plugin/common';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
@@ -36,7 +35,7 @@ import {
 } from './lib/annotations/bootstrap_annotations';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
-import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
+import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { slo, SO_SLO_TYPE } from './saved_objects';
 import { SLO_RULE_REGISTRATION_CONTEXT } from './common/constants';
@@ -47,11 +46,10 @@ import { registerSloUsageCollector } from './lib/collectors/register';
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
-  features: FeaturesSetup;
-  ruleRegistry: RuleRegistryPluginSetupContract;
-  spaces: SpacesPluginStart;
   alerting: PluginSetupContract;
+  features: FeaturesSetup;
   guidedOnboarding: GuidedOnboardingPluginSetup;
+  ruleRegistry: RuleRegistryPluginSetupContract;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -232,16 +230,13 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       registerSloUsageCollector(plugins.usageCollection);
     }
 
-    const start = () => core.getStartServices().then(([coreStart]) => coreStart);
-
     registerRoutes({
-      core: {
-        setup: core,
-        start,
+      core,
+      dependencies: {
+        ruleDataService,
       },
       logger: this.logger,
-      repository: getGlobalObservabilityServerRouteRepository(config),
-      ruleDataService,
+      repository: getObservabilityServerRouteRepository(config),
     });
 
     /**
