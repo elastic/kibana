@@ -64,7 +64,7 @@ describe('Export rules', () => {
     });
   });
 
-  it('imports an exported custom rule', () => {
+  it('creates an importable file', () => {
     exportFirstRule();
 
     cy.get(TOASTER).should('have.text', 'Rules exported');
