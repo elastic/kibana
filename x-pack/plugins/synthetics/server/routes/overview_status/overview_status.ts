@@ -39,7 +39,7 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
 export async function getStatus(context: RouteContext, params: OverviewStatusQuery) {
   const { uptimeEsClient, syntheticsMonitorClient, savedObjectsClient, server } = context;
 
-  const { query, locations: queryLocations, scopeStatusByLocation = false } = params;
+  const { query, locations: queryLocations, scopeStatusByLocation = true } = params;
   /**
    * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
    *
