@@ -20,7 +20,7 @@ import {
   SUPPORTED_CLOUDBEAT_INPUTS,
 } from '../../../common/constants';
 import { DEFAULT_AWS_VARS_GROUP } from './aws_credentials_form';
-import type { PostureInput, PosturePolicyTemplate } from '../../../common/types';
+import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
 import { assert } from '../../../common/utils/helpers';
 import { cloudPostureIntegrations } from '../../common/constants';
 
@@ -37,7 +37,7 @@ export type NewPackagePolicyPostureInput = NewPackagePolicyInput & PosturePolicy
 export const isPostureInput = (
   input: NewPackagePolicyInput
 ): input is NewPackagePolicyPostureInput =>
-  SUPPORTED_POLICY_TEMPLATES.includes(input.policy_template as PosturePolicyTemplate) &&
+  SUPPORTED_POLICY_TEMPLATES.includes(input.policy_template as CloudSecurityPolicyTemplate) &&
   SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as PostureInput);
 
 const getInputPolicyTemplate = (inputs: NewPackagePolicyInput[], inputType: PostureInput) =>
@@ -97,7 +97,7 @@ export const getPostureInputHiddenVars = (inputType: PostureInput) => {
   }
 };
 
-export const getPolicyTemplateInputOptions = (policyTemplate: PosturePolicyTemplate) =>
+export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolicyTemplate) =>
   cloudPostureIntegrations[policyTemplate].options.map((o) => ({
     tooltip: o.tooltip,
     value: o.type,
