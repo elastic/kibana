@@ -53,7 +53,8 @@ import {
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 import { pluginServices } from '../../services';
 import { getDataControlFieldRegistry } from './data_control_editor_tools';
-import { useControlGroupContainerContext } from '../control_group_renderer';
+import { useControlGroupContainer } from '../embeddable/control_group_container';
+
 interface EditControlProps {
   embeddable?: ControlEmbeddable<DataControlInput>;
   isCreate: boolean;
@@ -101,8 +102,8 @@ export const ControlEditor = ({
     controls: { getControlFactory },
   } = pluginServices.getServices();
 
-  const { useEmbeddableSelector: select } = useControlGroupContainerContext();
-  const editorConfig = select((state) => state.componentState.editorConfig);
+  const controlGroup = useControlGroupContainer();
+  const editorConfig = controlGroup.select((state) => state.componentState.editorConfig);
 
   const [state, setState] = useState<ControlEditorState>({
     dataViewListItems: [],
