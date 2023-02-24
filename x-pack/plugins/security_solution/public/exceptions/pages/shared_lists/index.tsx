@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import type { EuiSearchBarProps } from '@elastic/eui';
 
 import {
@@ -18,8 +18,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
-  EuiProgress,
   EuiSpacer,
   EuiPageHeader,
   EuiHorizontalRule,
@@ -29,9 +27,9 @@ import {
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
+import { ViewerStatus, EmptyViewerState } from '@kbn/securitysolution-exception-list-components';
 
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
-import { Loader } from '../../../common/components/loader';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
@@ -103,6 +101,8 @@ export const SharedLists = React.memo(() => {
   );
   const [filters, setFilters] = useState<ExceptionListFilter | undefined>();
 
+  const [viewerStatus, setViewStatus] = useState<ViewerStatus | null>(ViewerStatus.LOADING);
+
   const [
     loadingExceptions,
     exceptions,
@@ -132,6 +132,12 @@ export const SharedLists = React.memo(() => {
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const [displayImportListFlyout, setDisplayImportListFlyout] = useState(false);
   const { addError, addSuccess } = useAppToasts();
+
+  // Loading states
+  const exceptionsLoaded = !loadingTableInfo && !initLoading;
+  const hasNoExceptions = !loadingExceptions && !exceptionListsWithRuleRefs.length;
+  const isSearchingExceptions = viewerStatus === ViewerStatus.SEARCHING;
+  const isLoadingExceptions = viewerStatus === ViewerStatus.LOADING;
 
   const handleDeleteSuccess = useCallback(
     (listId?: string) => () => {
@@ -235,6 +241,7 @@ export const SharedLists = React.memo(() => {
       query,
       queryText,
     }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]): Promise<void> => {
+      setViewStatus(ViewerStatus.SEARCHING);
       const filterOptions = {
         name: null,
         list_id: null,
@@ -378,6 +385,23 @@ export const SharedLists = React.memo(() => {
     setDisplayAddExceptionItemFlyout(false);
     setIsCreatePopoverOpen(false);
   };
+  const onCreateExceptionListOpenClick = () => setDisplayCreateSharedListFlyout(true);
+
+  const isReadOnly = useMemo(() => {
+    return (canUserREAD && !canUserCRUD) ?? true;
+  }, [canUserREAD, canUserCRUD]);
+
+  useEffect(() => {
+    if (isSearchingExceptions && hasNoExceptions) {
+      setViewStatus(ViewerStatus.EMPTY_SEARCH);
+    } else if (!exceptionsLoaded) {
+      setViewStatus(ViewerStatus.LOADING);
+    } else if (isLoadingExceptions && hasNoExceptions) {
+      setViewStatus(ViewerStatus.EMPTY);
+    } else if (isLoadingExceptions && exceptionsLoaded) {
+      setViewStatus(null);
+    }
+  }, [isSearchingExceptions, hasNoExceptions, exceptionsLoaded, isLoadingExceptions]);
 
   return (
     <>
@@ -428,7 +452,7 @@ export const SharedLists = React.memo(() => {
                   key={'createList'}
                   onClick={() => {
                     onCloseCreatePopover();
-                    setDisplayCreateSharedListFlyout(true);
+                    onCreateExceptionListOpenClick();
                   }}
                 >
                   {i18n.CREATE_SHARED_LIST_BUTTON}
@@ -468,7 +492,7 @@ export const SharedLists = React.memo(() => {
           isEndpointItem={false}
           isBulkAction={false}
           showAlertCloseOptions
-          onCancel={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
+          onCancel={() => setDisplayAddExceptionItemFlyout(false)}
           onConfirm={(didRuleChange: boolean) => {
             setDisplayAddExceptionItemFlyout(false);
             if (didRuleChange) handleRefresh();
@@ -489,23 +513,17 @@ export const SharedLists = React.memo(() => {
 
       <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
-        {loadingTableInfo && (
-          <EuiProgress
-            data-test-subj="loadingRulesInfoProgress"
-            size="xs"
-            position="absolute"
-            color="accent"
-          />
-        )}
         {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
         <EuiSpacer size="m" />
-
-        {loadingTableInfo && !initLoading && !showReferenceErrorModal && (
-          <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-        )}
-
-        {initLoading || loadingTableInfo ? (
-          <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
+        {viewerStatus != null ? (
+          <EmptyViewerState
+            isReadOnly={isReadOnly}
+            title={i18n.NO_EXCEPTION_LISTS}
+            viewerStatus={viewerStatus}
+            buttonText={i18n.CREATE_SHARED_LIST_BUTTON}
+            body={i18n.NO_LISTS_BODY}
+            onEmptyButtonStateClick={onCreateExceptionListOpenClick}
+          />
         ) : (
           <>
             <ExceptionsTableUtilityBar
@@ -515,13 +533,13 @@ export const SharedLists = React.memo(() => {
               sort={sort}
               sortFields={SORT_FIELDS}
             />
-            {exceptionListsWithRuleRefs.length > 0 && canUserCRUD !== null && canUserREAD !== null && (
+            {exceptionListsWithRuleRefs.length > 0 && (
               <div data-test-subj="exceptionsTable">
                 {exceptionListsWithRuleRefs.map((excList) => (
                   <ExceptionsListCard
                     key={excList.list_id}
                     data-test-subj="exceptionsListCard"
-                    readOnly={canUserREAD && !canUserCRUD}
+                    readOnly={isReadOnly}
                     exceptionsList={excList}
                     handleDelete={handleDelete}
                     handleExport={handleExport}
