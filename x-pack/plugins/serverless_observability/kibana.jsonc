@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/serverless-observability",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Serverless customizations for observability.",
+  "plugin": {
+    "id": "serverlessObservability",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "serverless",
+      "observability"
+    ],
+    "requiredPlugins": [
+      "observability"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

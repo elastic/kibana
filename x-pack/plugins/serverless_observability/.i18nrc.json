@@ -1,0 +1,7 @@
+{
+  "prefix": "serverlessObservability",
+  "paths": {
+    "serverlessObservability": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
