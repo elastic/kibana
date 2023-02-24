@@ -21,7 +21,7 @@ export const selectors = i18n.translate('xpack.cloudDefend.controlSelectors', {
 });
 
 export const selectorsHelp = i18n.translate('xpack.cloudDefend.controlSelectorsHelp', {
-  defaultMessage: 'Create selectors to match on activities that should be blocked or alerted.',
+  defaultMessage: 'Create selectors to match on operations that should be blocked or alerted.',
 });
 
 export const responses = i18n.translate('xpack.cloudDefend.controlResponses', {
@@ -103,11 +103,12 @@ export const getConditionHelpLabel = (prop: string) => {
   switch (prop) {
     case ControlSelectorCondition.ignoreVolumeMounts:
       return i18n.translate('xpack.cloudDefend.ignoreVolumeMountsHelp', {
-        defaultMessage: 'The selector will avoid matching on k8s volume mounts',
+        defaultMessage: 'Ignore operations on all volume mounts.',
       });
     case ControlSelectorCondition.ignoreVolumeFiles:
       return i18n.translate('xpack.cloudDefend.ignoreVolumeFilesHelp', {
-        defaultMessage: 'The selector will avoid matching on k8s volume files',
+        defaultMessage:
+          'Ignore operations on file mounts only. e.g mounted files, configMaps, secrets etc...',
       });
     default:
       return '';

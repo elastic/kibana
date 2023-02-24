@@ -56,7 +56,7 @@ const BooleanCondition = ({ label, prop, onRemoveCondition }: ConditionProps) =>
     <EuiFormRow label={label} fullWidth={true} key={prop}>
       <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem>
-          <EuiText>
+          <EuiText size="s">
             <p>
               <small>{i18n.getConditionHelpLabel(prop)}</small>
             </p>
