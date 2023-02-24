@@ -11,7 +11,7 @@ import { Subject } from 'rxjs';
 import { pick } from 'lodash';
 import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
-import type { UnifiedHistogramInputMessage } from '../types';
+import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../types';
 import {
   createStateService,
   UnifiedHistogramStateOptions,
@@ -20,13 +20,9 @@ import {
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
 import {
+  topPanelHeightSelector,
   columnsSelector,
   currentSuggestionSelector,
-  dataViewSelector,
-  filtersSelector,
-  querySelector,
-  timeRangeSelector,
-  topPanelHeightSelector,
 } from './utils/state_selectors';
 
 type LayoutProps = Pick<
@@ -43,8 +39,18 @@ type LayoutProps = Pick<
  */
 export type UnifiedHistogramContainerProps = Pick<
   UnifiedHistogramLayoutProps,
-  'className' | 'resizeRef' | 'appendHitsCounter' | 'children'
->;
+  | 'className'
+  | 'dataView'
+  | 'query'
+  | 'filters'
+  | 'timeRange'
+  | 'resizeRef'
+  | 'appendHitsCounter'
+  | 'children'
+> & {
+  searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
+  requestAdapter?: UnifiedHistogramRequestContext['adapter'];
+};
 
 /**
  * The options used to initialize the container
@@ -86,7 +92,6 @@ export type UnifiedHistogramInitializedApi = {
   | 'setBreakdownField'
   | 'setColumns'
   | 'setTimeInterval'
-  | 'setRequestParams'
   | 'setTotalHits'
 >;
 
@@ -143,7 +148,6 @@ export const UnifiedHistogramContainer = forwardRef<
         'setBreakdownField',
         'setColumns',
         'setTimeInterval',
-        'setRequestParams',
         'setTotalHits'
       ),
     }),
@@ -153,17 +157,20 @@ export const UnifiedHistogramContainer = forwardRef<
   // Expose the API to the parent component
   useImperativeHandle(ref, () => api, [api]);
 
-  const stateProps = useStateProps(stateService);
-  const dataView = useStateSelector(stateService?.state$, dataViewSelector);
-  const query = useStateSelector(stateService?.state$, querySelector);
-  const filters = useStateSelector(stateService?.state$, filtersSelector);
-  const timeRange = useStateSelector(stateService?.state$, timeRangeSelector);
   const columns = useStateSelector(stateService?.state$, columnsSelector);
   const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
+  const { dataView, query, searchSessionId, requestAdapter } = containerProps;
+  const stateProps = useStateProps({
+    stateService,
+    dataView,
+    query,
+    searchSessionId,
+    requestAdapter,
+  });
 
   // Don't render anything until the container is initialized
-  if (!layoutProps || !dataView || !lensSuggestionsApi) {
+  if (!layoutProps || !lensSuggestionsApi) {
     return null;
   }
 
@@ -172,10 +179,6 @@ export const UnifiedHistogramContainer = forwardRef<
       {...containerProps}
       {...layoutProps}
       {...stateProps}
-      dataView={dataView}
-      query={query}
-      filters={filters}
-      timeRange={timeRange}
       columns={columns}
       currentSuggestion={currentSuggestion}
       topPanelHeight={topPanelHeight}

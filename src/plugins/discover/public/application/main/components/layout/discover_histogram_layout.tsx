@@ -35,19 +35,11 @@ export const DiscoverHistogramLayout = ({
   inspectorAdapters,
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
-  const commonProps = {
-    dataView,
-    stateContainer,
-    savedSearchData$: stateContainer.dataState.data$,
-  };
   const searchSessionId = useObservable(stateContainer.searchSessionManager.searchSessionId$);
-
-  const { hideChart, setUnifiedHistogramApi } = useDiscoverHistogram({
+  const { hideChart, query, filters, timeRange, setUnifiedHistogramApi } = useDiscoverHistogram({
+    stateContainer,
     inspectorAdapters,
-    savedSearchFetch$: stateContainer.dataState.fetch$,
-    searchSessionId,
     isPlainRecord,
-    ...commonProps,
   });
 
   // Initialized when the first search has been requested or
@@ -59,15 +51,22 @@ export const DiscoverHistogramLayout = ({
   return (
     <UnifiedHistogramContainer
       ref={setUnifiedHistogramApi}
+      dataView={dataView}
+      query={query}
+      filters={filters}
+      timeRange={timeRange}
       resizeRef={resizeRef}
+      searchSessionId={searchSessionId}
+      requestAdapter={inspectorAdapters.requests}
       appendHitsCounter={
         savedSearch?.id ? <ResetSearchButton resetSavedSearch={resetSavedSearch} /> : undefined
       }
       css={histogramLayoutCss}
     >
       <DiscoverMainContent
-        {...commonProps}
         {...mainContentProps}
+        stateContainer={stateContainer}
+        dataView={dataView}
         savedSearch={savedSearch}
         isPlainRecord={isPlainRecord}
         // The documents grid doesn't rerender when the chart visibility changes

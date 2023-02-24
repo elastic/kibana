@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -43,37 +41,13 @@ export interface UnifiedHistogramState {
    */
   chartHidden: boolean;
   /**
-   * The current data view
-   */
-  dataView: DataView;
-  /**
-   * The current filters
-   */
-  filters: Filter[];
-  /**
    * The current Lens request adapter
    */
   lensRequestAdapter: RequestAdapter | undefined;
   /**
-   * The current query
-   */
-  query: Query | AggregateQuery;
-  /**
-   * The current request adapter used for non-Lens requests
-   */
-  requestAdapter: RequestAdapter | undefined;
-  /**
-   * The current search session ID
-   */
-  searchSessionId: string | undefined;
-  /**
    * The current time interval of the chart
    */
   timeInterval: string;
-  /**
-   * The current time range
-   */
-  timeRange: TimeRange;
   /**
    * The current top panel height
    */
@@ -103,7 +77,7 @@ export interface UnifiedHistogramStateOptions {
   /**
    * The initial state of the container
    */
-  initialState: Partial<UnifiedHistogramState> & Pick<UnifiedHistogramState, 'dataView'>;
+  initialState: Partial<UnifiedHistogramState>;
 }
 
 /**
@@ -139,17 +113,6 @@ export interface UnifiedHistogramStateService {
    */
   setTimeInterval: (timeInterval: string) => void;
   /**
-   * Sets the current request parameters
-   */
-  setRequestParams: (requestParams: {
-    dataView?: DataView;
-    filters?: Filter[];
-    query?: Query | AggregateQuery;
-    requestAdapter?: RequestAdapter | undefined;
-    searchSessionId?: string | undefined;
-    timeRange?: TimeRange;
-  }) => void;
-  /**
    * Sets the current Lens request adapter
    */
   setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => void;
@@ -177,18 +140,13 @@ export const createStateService = (
     initialBreakdownField = getBreakdownField(services.storage, localStorageKeyPrefix);
   }
 
-  const state$ = new BehaviorSubject({
+  const state$ = new BehaviorSubject<UnifiedHistogramState>({
     breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
     columns: [],
-    filters: [],
     currentSuggestion: undefined,
     lensRequestAdapter: undefined,
-    query: services.data.query.queryString.getDefaultQuery(),
-    requestAdapter: undefined,
-    searchSessionId: undefined,
     timeInterval: 'auto',
-    timeRange: services.data.query.timefilter.timefilter.getTimeDefaults(),
     topPanelHeight: initialTopPanelHeight,
     totalHitsResult: undefined,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
@@ -239,17 +197,6 @@ export const createStateService = (
 
     setTimeInterval: (timeInterval: string) => {
       updateState({ timeInterval });
-    },
-
-    setRequestParams: (requestParams: {
-      dataView?: DataView;
-      filters?: Filter[];
-      query?: Query | AggregateQuery;
-      requestAdapter?: RequestAdapter | undefined;
-      searchSessionId?: string | undefined;
-      timeRange?: TimeRange;
-    }) => {
-      updateState(requestParams);
     },
 
     setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => {
