@@ -17,7 +17,7 @@ post:
           $ref: '../components/schemas/historical_summary_request.yaml'
   responses:
     '200':
-      description: Succesful request
+      description: Successful request
       content: 
         application/json:
           schema:

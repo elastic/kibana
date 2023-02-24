@@ -34,7 +34,7 @@ paths:
               $ref: '#/components/schemas/create_slo_request'
       responses:
         '200':
-          description: Succesful request
+          description: Successful request
           content:
             application/json:
               schema:
@@ -114,7 +114,7 @@ paths:
           example: asc
       responses:
         '200':
-          description: Succesful request
+          description: Successful request
           content:
             application/json:
               schema:
@@ -297,7 +297,7 @@ paths:
               $ref: '#/components/schemas/historical_summary_request'
       responses:
         '200':
-          description: Succesful request
+          description: Successful request
           content:
             application/json:
               schema:

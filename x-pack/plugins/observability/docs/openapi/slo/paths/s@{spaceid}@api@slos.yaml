@@ -17,7 +17,7 @@ post:
           $ref: '../components/schemas/create_slo_request.yaml'
   responses:
     '200':
-      description: Succesful request
+      description: Successful request
       content:
         application/json:
           schema:
@@ -94,7 +94,7 @@ get:
       example: asc
   responses:
     '200':
-      description: Succesful request
+      description: Successful request
       content:
         application/json:
           schema:
