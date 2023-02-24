@@ -417,6 +417,7 @@ export interface ElasticsearchMetricbeatNode {
   name?: string;
   stats?: ElasticsearchNodeStats;
   master: boolean;
+  roles?: string[];
 }
 
 export interface ElasticsearchMetricbeatSource {

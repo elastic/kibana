@@ -66,7 +66,10 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`;
     if (services.http?.fetch && clusterUuid) {
       setIsLoading(true);
-      const response = await services.http?.fetch<{ totalNodeCount: number }>(url, {
+      const response = await services.http?.fetch<{
+        totalNodeCount: number;
+        nodes: Array<{ roles: string[] }>;
+      }>(url, {
         method: 'POST',
         body: JSON.stringify({
           ccs,
@@ -79,7 +82,20 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
       });
 
       setIsLoading(false);
-      setData(response);
+
+      const { nodes } = response;
+      const nodesWithSortedRoles = nodes.map((node) => {
+        const sortedRoles = sortNodeRoles(node.roles);
+        return {
+          ...node,
+          roles: sortedRoles,
+        };
+      });
+
+      setData({
+        ...response,
+        nodes: nodesWithSortedRoles,
+      });
       updateTotalItemCount(response.totalNodeCount);
       const alertsResponse = await fetchAlerts({
         fetch: services.http.fetch,
@@ -140,3 +156,35 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     </ElasticsearchTemplate>
   );
 };
+
+function sortNodeRoles(roles: string[]): string[] | undefined {
+  if (!roles) {
+    return undefined;
+  }
+
+  if (roles.length === 0) {
+    return roles;
+  }
+
+  const roleMap: { [key: string]: string } = {};
+  roles.forEach((role) => {
+    roleMap[role] = role;
+  });
+
+  const sortedRoles = [
+    roleMap.master,
+    roleMap.voting_only,
+    roleMap.data,
+    roleMap.data_content,
+    roleMap.data_hot,
+    roleMap.data_warm,
+    roleMap.data_cold,
+    roleMap.data_frozen,
+    roleMap.ingest,
+    roleMap.transform,
+    roleMap.ml,
+    roleMap.remote_cluster_client,
+  ];
+
+  return sortedRoles.filter((role) => role);
+}
