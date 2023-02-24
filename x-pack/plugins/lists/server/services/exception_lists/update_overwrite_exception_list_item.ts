@@ -5,23 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import type {
-  DescriptionOrUndefined,
-  EntriesArray,
-  ExceptionListItemSchema,
-  ExceptionListItemTypeOrUndefined,
-  ExpireTimeOrUndefined,
-  IdOrUndefined,
-  ItemIdOrUndefined,
-  MetaOrUndefined,
-  NameOrUndefined,
-  NamespaceType,
-  OsTypeArray,
-  TagsOrUndefined,
-  UpdateCommentsArrayOrUndefined,
-  _VersionOrUndefined,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
@@ -31,27 +15,9 @@ import {
   transformUpdateCommentsToComments,
 } from './utils';
 import { getExceptionListItem } from './get_exception_list_item';
+import { UpdateExceptionListItemOptions } from './update_exception_list_item';
 
-interface UpdateExceptionListItemOptions {
-  id: IdOrUndefined;
-  comments: UpdateCommentsArrayOrUndefined;
-  _version: _VersionOrUndefined;
-  name: NameOrUndefined;
-  description: DescriptionOrUndefined;
-  entries: EntriesArray;
-  expireTime: ExpireTimeOrUndefined;
-  savedObjectsClient: SavedObjectsClientContract;
-  namespaceType: NamespaceType;
-  osTypes: OsTypeArray;
-  itemId: ItemIdOrUndefined;
-  meta: MetaOrUndefined;
-  user: string;
-  tags: TagsOrUndefined;
-  tieBreaker?: string;
-  type: ExceptionListItemTypeOrUndefined;
-}
-
-export const putUpdateExceptionListItem = async ({
+export const updateOverwriteExceptionListItem = async ({
   _version,
   comments,
   entries,

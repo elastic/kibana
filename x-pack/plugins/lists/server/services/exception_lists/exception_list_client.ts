@@ -97,7 +97,7 @@ import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_i
 import { findValueListExceptionListItemsPointInTimeFinder } from './find_value_list_exception_list_items_point_in_time_finder';
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { duplicateExceptionListAndItems } from './duplicate_exception_list';
-import { putUpdateExceptionListItem } from './put_update_exception_list_item';
+import { updateOverwriteExceptionListItem } from './update_overwrite_exception_list_item';
 
 /**
  * Class for use for exceptions that are with trusted applications or
@@ -578,6 +578,11 @@ export class ExceptionListClient {
 
   /**
    * Update an existing exception list item
+   *
+   * NOTE: This method will PATCH the targeted exception list item, not fully overwrite it.
+   * Any undefined fields passed in will not be changed in the existing record. To unset any
+   * fields use the `updateOverwriteExceptionListItem` method
+   *
    * @param options
    * @param options._version document version
    * @param options.comments user comments attached to item
@@ -647,7 +652,12 @@ export class ExceptionListClient {
   };
 
   /**
-   * Update an existing exception list item via PUT instead of PATCH
+   * Update an existing exception list item using the overwrite method in order to behave
+   * more like a PUT request rather than a PUT request.
+   *
+   * This was done in order to correctly unset types via update which cannot be accomplished
+   * using the regular `updateExceptionItem` method. All other results of the methods are identical
+   *
    * @param options
    * @param options._version document version
    * @param options.comments user comments attached to item
@@ -663,7 +673,7 @@ export class ExceptionListClient {
    * @param options.type container type
    * @returns the updated exception list item or null if none exists
    */
-  public putUpdateExceptionListItem = async ({
+  public updateOverwriteExceptionListItem = async ({
     _version,
     comments,
     description,
@@ -709,7 +719,7 @@ export class ExceptionListClient {
       );
     }
 
-    return putUpdateExceptionListItem({
+    return updateOverwriteExceptionListItem({
       ...updatedItem,
       savedObjectsClient,
       user,
