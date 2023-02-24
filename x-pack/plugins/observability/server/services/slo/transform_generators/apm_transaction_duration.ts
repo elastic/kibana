@@ -96,11 +96,9 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       query: {
         bool: {
           filter: [
-            {
-              match: {
-                'transaction.root': true,
-              },
-            },
+            { terms: { 'processor.event': ['metric'] } },
+            { term: { 'metricset.name': 'transaction' } },
+            { exists: { field: 'transaction.duration.histogram' } },
             ...queryFilter,
           ],
         },

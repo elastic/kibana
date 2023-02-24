@@ -663,10 +663,6 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/open_search_panel.tsx"
-              },
-              {
-                "plugin": "discover",
                 "path": "src/plugins/discover/public/application/main/utils/persist_saved_search.ts"
               },
               {

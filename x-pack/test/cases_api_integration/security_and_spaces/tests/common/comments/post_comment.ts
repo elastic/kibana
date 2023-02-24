@@ -39,7 +39,7 @@ import {
 import {
   createSignalsIndex,
   deleteSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
 } from '../../../../../detection_engine_api_integration/utils';
 import {
   globalRead,
@@ -363,7 +363,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         afterEach(async () => {
           await deleteSignalsIndex(supertest, log);
-          await deleteAllAlerts(supertest, log);
+          await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
