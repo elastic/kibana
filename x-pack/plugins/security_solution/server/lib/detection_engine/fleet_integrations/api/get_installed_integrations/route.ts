@@ -6,8 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ListResult, PackageList, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { EndpointInternalFleetServicesInterface } from '../../../../../endpoint/services/fleet';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -38,20 +38,18 @@ export const getInstalledIntegrationsRoute = (
 
       try {
         const ctx = await context.resolve(['core', 'securitySolution']);
-        const fleet = ctx.securitySolution.getInternalFleetServices();
+        const fleet: EndpointInternalFleetServicesInterface =
+          ctx.securitySolution.getInternalFleetServices();
         const set = createInstalledIntegrationSet();
 
         // Pulls all packages into memory just like the main fleet landing page as no `installed:true` option available
         // No pagination support currently, so cannot batch this call
-        const allThePackages: PackageList = await fleet.packages.getPackages();
+        const allThePackages = await fleet.packages.getPackages();
         allThePackages
           .filter(({ status }) => status === 'installed')
           .forEach((installedPackage) => set.addInstalledPackage(installedPackage));
 
-        const packagePolicies: ListResult<PackagePolicy> = await fleet.packagePolicy.list(
-          fleet.internalReadonlySoClient,
-          {}
-        );
+        const packagePolicies = await fleet.packagePolicy.list(fleet.internalReadonlySoClient, {});
         packagePolicies.items.forEach((policy) => {
           set.addPackagePolicy(policy);
         });
