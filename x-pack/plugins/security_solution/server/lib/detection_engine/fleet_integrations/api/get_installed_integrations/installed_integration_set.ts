@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ArchivePackage,
-  Installable,
-  PackageListItem,
-  PackagePolicy,
-  RegistrySearchResult,
-} from '@kbn/fleet-plugin/common';
+import type { ArchivePackage, PackageListItem, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { capitalize, flatten } from 'lodash';
 import type {
   InstalledIntegration,
@@ -24,9 +18,7 @@ import type {
 
 export interface IInstalledIntegrationSet {
   addPackagePolicy(policy: PackagePolicy): void;
-  addInstalledPackage(
-    installedPackage: Installable<RegistrySearchResult & { title: string } & { id: string }>
-  ): void;
+  addInstalledPackage(installedPackage: PackageListItem): void;
   addRegistryPackage(registryPackage: ArchivePackage): void;
 
   getPackages(): InstalledPackageArray;
