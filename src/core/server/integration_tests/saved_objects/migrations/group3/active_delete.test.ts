@@ -117,7 +117,10 @@ describe('when upgrading to a new stack version', () => {
           '[.kibana_migrator_tests] CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION'
         );
         expect(logs).toMatch(
-          '[.kibana_migrator_tests] PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT'
+          '[.kibana_migrator_tests] PREPARE_COMPATIBLE_MIGRATION -> REFRESH_TARGET'
+        );
+        expect(logs).toMatch(
+          '[.kibana_migrator_tests] REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT'
         );
         expect(logs).toMatch(
           '[.kibana_migrator_tests] CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS'
@@ -242,7 +245,10 @@ describe('when upgrading to a new stack version', () => {
           '[.kibana_migrator_tests] CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION'
         );
         expect(logs).toMatch(
-          '[.kibana_migrator_tests] PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT'
+          '[.kibana_migrator_tests] PREPARE_COMPATIBLE_MIGRATION -> REFRESH_TARGET'
+        );
+        expect(logs).toMatch(
+          '[.kibana_migrator_tests] REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT'
         );
         expect(logs).toMatch(
           '[.kibana_migrator_tests] CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS'

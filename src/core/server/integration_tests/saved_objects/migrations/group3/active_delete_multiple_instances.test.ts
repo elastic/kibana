@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-/* eslint-disable no-console */
 
 import Path from 'path';
 import fs from 'fs/promises';
@@ -33,12 +32,11 @@ const kibanaIndex = '.kibana_migrator_tests';
 const currentVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const nextMinor = new SemVer(currentVersion).inc('minor').format();
 
-const dataArchive = Path.join(__dirname, '..', 'archives', '1M_dummy_SOs.zip');
+const dataArchive = Path.join(__dirname, '..', 'archives', '1m_dummy_so.zip');
 
 jest.setTimeout(24 * 3600 * 100);
 
 describe('multiple migrator instances running in parallel', () => {
-  // eslint-disable-next-line jest/no-focused-tests
   it.skip('enable and focus this test (it.skip => fit), and run it, in order to create a baseline archive', async () => {
     // generate DOCUMENTS_PER_TYPE documents of each type
     const documents: SavedObjectsBulkCreateObject[] = ['server', 'basic', 'deprecated', 'complex']
@@ -132,6 +130,7 @@ describe('multiple migrator instances running in parallel', () => {
       }
 
       const endTime = Date.now();
+      // eslint-disable-next-line no-console
       console.debug(`Migration took: ${(endTime - startTime) / 1000} seconds`);
 
       // After cleanup
