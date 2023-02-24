@@ -75,7 +75,7 @@ export const DeleteLocation = ({
           onClick={() => {
             setIsModalOpen(true);
           }}
-          isDisabled={!canManagePrivateLocation || !canSave}
+          isDisabled={!canDelete || !canManagePrivateLocation || !canSave}
         />
       </EuiToolTip>
     </>
