@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { login } from '../../tasks/login';
 
 describe('Endpoints page', () => {
@@ -13,14 +14,14 @@ describe('Endpoints page', () => {
   });
 
   it('Loads the endpoints page', () => {
-    cy.visit('/app/security/administration/endpoints');
+    cy.visit(APP_ENDPOINTS_PATH);
     cy.contains('Hosts running Elastic Defend').should('exist');
   });
 
   it('should update endpoint policy on Endpoint', () => {
     const parseRevNumber = (revString: string) => Number(revString.match(/\d+/)?.[0]);
 
-    cy.visit('/app/security/administration/endpoints');
+    cy.visit(APP_ENDPOINTS_PATH);
 
     cy.getBySel('policyListRevNo')
       .eq(0)

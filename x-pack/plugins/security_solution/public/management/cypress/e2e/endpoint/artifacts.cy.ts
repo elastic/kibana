@@ -6,6 +6,7 @@
  */
 
 import { recurse } from 'cypress-recurse';
+import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { API_HEADER, removeAllArtifacts } from '../../tasks/artifacts';
 import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
@@ -63,7 +64,7 @@ describe('Artifact pages', () => {
   for (const testData of getArtifactsListTestsData()) {
     describe(`${testData.title}`, () => {
       it(`should update Endpoint Policy on Endpoint when adding ${testData.artifactName}`, () => {
-        cy.visit('/app/security/administration/endpoints');
+        cy.visit(APP_ENDPOINTS_PATH);
 
         cy.getBySel('policyListRevNo')
           .eq(0)
@@ -81,7 +82,7 @@ describe('Artifact pages', () => {
               cy.getBySel(checkResult.selector).should('have.text', checkResult.value);
             }
 
-            cy.visit('/app/security/administration/endpoints');
+            cy.visit(APP_ENDPOINTS_PATH);
 
             // depends on the 10s auto refresh
             cy.getBySel('policyListRevNo')
