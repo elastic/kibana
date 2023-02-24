@@ -8,8 +8,8 @@
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React from 'react';
 
-import { useHasData } from '../../../../../hooks/use_has_data';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
+import { useFetchObservabilityAlerts } from '../../../../../hooks/use_fetch_observability_alerts';
 import { useQuickTimeRanges } from '../../../../../hooks/use_quick_time_ranges';
 import { SeriesUrl } from '../../types';
 import { ReportTypes } from '../../configurations/constants';
@@ -29,14 +29,13 @@ interface Props {
 }
 
 export function SeriesDatePicker({ series, seriesId }: Props) {
-  const { onRefreshTimeRange } = useHasData();
-
+  const { refetch } = useFetchObservabilityAlerts();
   const commonlyUsedRanges = useQuickTimeRanges();
 
   const { setSeries, reportType, allSeries } = useSeriesStorage();
 
   function onTimeChange({ start, end }: { start: string; end: string }) {
-    onRefreshTimeRange?.();
+    refetch();
     if (reportType === ReportTypes.KPI) {
       allSeries.forEach((currSeries, seriesIndex) => {
         setSeries(seriesIndex, { ...currSeries, time: { from: start, to: end } });
