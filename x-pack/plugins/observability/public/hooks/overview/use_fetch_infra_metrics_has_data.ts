@@ -36,7 +36,7 @@ export function useFetchInfraMetricsHasData(): UseFetchInfraMetricsHasDataRespon
         console.log('Something went wrong with fetching infra metrics');
       }
     },
-    staleTime: 5000,
+    staleTime: 1000,
   });
 
   return { isLoading, isSuccess, isError, data, refetch };

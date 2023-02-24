@@ -36,7 +36,7 @@ export function useFetchApmServicesHasData(): UseFetchApmServicesHasDataResponse
         console.log('Something went wrong with fetching apm services');
       }
     },
-    staleTime: 5000,
+    staleTime: 1000,
   });
 
   return { isLoading, isSuccess, isError, data, refetch };

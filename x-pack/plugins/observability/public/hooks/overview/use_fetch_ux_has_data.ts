@@ -36,7 +36,7 @@ export function useFetchUxHasData(): UseFetchUxHasDataResponse {
         console.log('Something went wrong with fetching synthetics uptime has data');
       }
     },
-    staleTime: 5000,
+    staleTime: 1000,
   });
 
   return { isLoading, isSuccess, isError, data, refetch };

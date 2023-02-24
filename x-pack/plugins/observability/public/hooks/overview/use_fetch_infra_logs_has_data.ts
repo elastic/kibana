@@ -36,7 +36,7 @@ export function useFetchInfraLogsHasData(): UseFetchInfraLogsHasDataResponse {
         console.log('Something went wrong with fetching infra logs');
       }
     },
-    staleTime: 5000,
+    staleTime: 1000,
   });
 
   return { isLoading, isSuccess, isError, data, refetch };
