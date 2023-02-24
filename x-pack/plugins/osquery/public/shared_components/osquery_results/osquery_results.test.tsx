@@ -32,7 +32,6 @@ const enablePrivileges = () => {
 };
 
 const defaultProps: OsqueryActionResultsProps = {
-  agentIds: ['agent1'],
   ruleName: ['Test-rule'],
   actionItems: [
     {
