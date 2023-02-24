@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { estypes } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -25,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const geoPointFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
-        (fieldStat) => {
+        (fieldStat: estypes.ClusterStatsFieldTypes) => {
           return fieldStat.name === 'geo_point';
         }
       );
@@ -33,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(geoPointFieldStats.index_count).to.be(6);
 
       const geoShapeFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
-        (fieldStat) => {
+        (fieldStat: estypes.ClusterStatsFieldTypes) => {
           return fieldStat.name === 'geo_shape';
         }
       );
