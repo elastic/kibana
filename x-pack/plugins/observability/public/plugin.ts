@@ -315,6 +315,7 @@ export class Plugin
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
+        setIsSidebarEnabled: this.navigationRegistry.setIsSidebarEnabled,
       },
       useRulesLink: createUseRulesLink(),
     };
@@ -340,6 +341,7 @@ export class Plugin
       navigationSections$: this.navigationRegistry.sections$,
       guidedOnboardingApi: pluginsStart.guidedOnboarding.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart }),
+      isSidebarEnabled$: this.navigationRegistry.isSidebarEnabled$,
     });
 
     const getAsyncO11yAlertsTableConfiguration = async () => {
