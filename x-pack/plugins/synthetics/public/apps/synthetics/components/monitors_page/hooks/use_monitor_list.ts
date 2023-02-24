@@ -8,7 +8,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useDebounce } from 'react-use';
-import { useOverviewStatus } from './use_overview_status';
 import {
   fetchMonitorListAction,
   quietFetchMonitorListAction,
@@ -26,8 +25,6 @@ export function useMonitorList() {
 
   const { pageState, loading, loaded, error, data } = useSelector(selectMonitorListState);
   const syntheticsMonitors = useSelector(selectEncryptedSyntheticsSavedMonitors);
-
-  const { status: overviewStatus } = useOverviewStatus();
 
   const { handleFilterChange } = useMonitorFiltersState();
   const { lastRefresh } = useSyntheticsRefreshContext();
@@ -89,7 +86,6 @@ export function useMonitorList() {
     loadPage,
     reloadPage,
     absoluteTotal: data.absoluteTotal ?? 0,
-    overviewStatus,
     handleFilterChange,
   };
 }

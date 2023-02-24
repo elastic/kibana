@@ -39,7 +39,7 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
 export async function getStatus(context: RouteContext, params: OverviewStatusQuery) {
   const { uptimeEsClient, syntheticsMonitorClient, savedObjectsClient, server } = context;
 
-  const { query, locations: queryLocations } = params;
+  const { query, locations: queryLocations, scopeStatusByLocation = false } = params;
   /**
    * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
    *
@@ -81,9 +81,10 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
   // Account for locations filter
   const queryLocationsArray =
     queryLocations && !Array.isArray(queryLocations) ? [queryLocations] : queryLocations;
-  const listOfLocationAfterFilter = queryLocationsArray
-    ? intersection(listOfLocations, queryLocationsArray)
-    : listOfLocations;
+  const listOfLocationAfterFilter =
+    queryLocationsArray && scopeStatusByLocation
+      ? intersection(listOfLocations, queryLocationsArray)
+      : listOfLocations;
 
   const range = {
     from: moment().subtract(maxPeriod, 'milliseconds').subtract(20, 'minutes').toISOString(),

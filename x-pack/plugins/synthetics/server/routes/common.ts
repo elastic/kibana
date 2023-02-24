@@ -41,6 +41,7 @@ export const OverviewStatusSchema = schema.object({
   projects: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   schedules: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  scopeStatusByLocation: schema.maybe(schema.boolean()),
 });
 
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;
