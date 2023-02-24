@@ -61,4 +61,6 @@ get:
                     - creationTime
             required:
               - items
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: agents-action-status

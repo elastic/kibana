@@ -35,9 +35,7 @@ export const getCustomMarkdownComment = ({
       version: EcsVersion,
     })}
 
-${i18n.PRE_BUILT_DETECTION_ENGINE_RULES_WONT_WORK}
-${i18n.PAGES_MAY_NOT_DISPLAY_FIELDS}
-${i18n.CUSTOM_DETECTION_ENGINE_RULES_WORK}
+${i18n.ECS_IS_A_PERMISSIVE_SCHEMA}
 `,
     title: i18n.CUSTOM_CALLOUT_TITLE(enrichedFieldMetadata.length),
   });

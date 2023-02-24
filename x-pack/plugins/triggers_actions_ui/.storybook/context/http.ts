@@ -108,7 +108,8 @@ const mockHealth = {
 };
 
 const mockAggregation = {
-  rule_execution_status: { ok: 0, active: 0, error: 0, pending: 0, unknown: 0, warning: 0 },
+  rule_execution_status: { ok: 5, active: 0, error: 0, pending: 0, unknown: 0, warning: 0 },
+  rule_last_run_outcome: { succeeded: 5, failed: 0, warning: 0 },
   rule_enabled_status: { enabled: 0, disabled: 0 },
   rule_muted_status: { muted: 0, unmuted: 0 },
   rule_snoozed_status: { snoozed: 0 },
@@ -174,7 +175,7 @@ const baseRulesListGetResponse = (path: string) => {
   }
 };
 
-const emptyRulesListGetResponse = (path: string) => {
+const emptyRulesListResponse = (path: string) => {
   if (path === '/internal/alerting/rules/_find') {
     return {
       data: [],
@@ -183,10 +184,12 @@ const emptyRulesListGetResponse = (path: string) => {
       total: 0,
     };
   }
-  return baseRulesListGetResponse(path);
+  if (path === '/internal/alerting/rules/_aggregate') {
+    return mockAggregation;
+  }
 };
 
-const rulesListGetResponse = (path: string) => {
+const rulesListResponse = (path: string) => {
   if (path === '/internal/alerting/rules/_find') {
     return {
       data: [getMockRule(), getMockRule(), getMockRule(), getMockRule()],
@@ -195,10 +198,12 @@ const rulesListGetResponse = (path: string) => {
       total: 4,
     };
   }
-  return baseRulesListGetResponse(path);
+  if (path === '/internal/alerting/rules/_aggregate') {
+    return mockAggregation;
+  }
 };
 
-const rulesListGetPaginatedResponse = (path: string) => {
+const rulesListPaginatedResponse = (path: string) => {
   if (path === '/internal/alerting/rules/_find') {
     return {
       data: Array.from(Array(10), () => getMockRule()),
@@ -207,7 +212,9 @@ const rulesListGetPaginatedResponse = (path: string) => {
       total: 50,
     };
   }
-  return baseRulesListGetResponse(path);
+  if (path === '/internal/alerting/rules/_aggregate') {
+    return mockAggregation;
+  }
 };
 
 const baseEventLogListGetResponse = (path: string) => {
@@ -291,19 +298,16 @@ const rulesSettingsIds = [
   'app-rulessettingslink--with-no-permission',
 ];
 
+const rulesListIds = [
+  'app-ruleslist--empty',
+  'app-ruleslist--with-rules',
+  'app-ruleslist--with-paginated-rules',
+];
+
 export const getHttp = (context: Parameters<DecoratorFn>[1]) => {
   return {
     get: (async (path: string, options: HttpFetchOptions) => {
       const { id } = context;
-      if (id === 'app-ruleslist--empty') {
-        return emptyRulesListGetResponse(path);
-      }
-      if (id === 'app-ruleslist--with-rules') {
-        return rulesListGetResponse(path);
-      }
-      if (id === 'app-ruleslist--with-paginated-rules') {
-        return rulesListGetPaginatedResponse(path);
-      }
       if (id === 'app-ruleeventloglist--empty') {
         return emptyEventLogListGetResponse(path);
       }
@@ -313,11 +317,24 @@ export const getHttp = (context: Parameters<DecoratorFn>[1]) => {
       if (id === 'app-ruleeventloglist--with-paginated-events') {
         return paginatedEventLogListGetResponse(path);
       }
+      if (rulesListIds.includes(id)) {
+        return baseRulesListGetResponse(path);
+      }
       if (rulesSettingsIds.includes(id)) {
         return rulesSettingsGetResponse(path);
       }
     }) as HttpHandler,
     post: (async (path: string, options: HttpFetchOptions) => {
+      const { id } = context;
+      if (id === 'app-ruleslist--empty') {
+        return emptyRulesListResponse(path);
+      }
+      if (id === 'app-ruleslist--with-rules') {
+        return rulesListResponse(path);
+      }
+      if (id === 'app-ruleslist--with-paginated-rules') {
+        return rulesListPaginatedResponse(path);
+      }
       action('POST')(path, options);
       return Promise.resolve();
     }) as HttpHandler,

@@ -50,6 +50,7 @@ export const RULE_ACTIONS = [
     params: {
       foo: true,
     },
+    uuid: '111-111',
   },
   {
     actionTypeId: 'action',
@@ -58,6 +59,7 @@ export const RULE_ACTIONS = [
     params: {
       isResolved: true,
     },
+    uuid: '222-222',
   },
 ];
 
@@ -99,6 +101,7 @@ export const generateSavedObjectParams = ({
         last_run: {
           timestamp: '1970-01-01T00:00:00.000Z',
           metrics: {
+            duration: 0,
             gap_duration_s: null,
             total_alerts_created: null,
             total_alerts_detected: null,
@@ -190,6 +193,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
       params: {
         foo: true,
       },
+      uuid: '111-111',
     },
     {
       group: RecoveredActionGroup.id,
@@ -198,6 +202,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
       params: {
         isResolved: true,
       },
+      uuid: '222-222',
     },
   ],
   executionStatus: {
@@ -277,6 +282,7 @@ export const generateRunnerResult = ({
         history: history.map((success) => ({ success, timestamp: 0 })),
         last_run: {
           metrics: {
+            duration: 0,
             gap_duration_s: null,
             total_alerts_created: null,
             total_alerts_detected: null,
