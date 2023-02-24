@@ -22,12 +22,6 @@ describe('<IconButtonGroup />', () => {
             onClick: jest.fn(),
             iconType: 'visText',
           },
-          {
-            label: 'Vis',
-            onClick: jest.fn(),
-            iconType: 'visArea',
-            'data-test-subj': 'test-icon-group',
-          },
         ]}
       />
     );
