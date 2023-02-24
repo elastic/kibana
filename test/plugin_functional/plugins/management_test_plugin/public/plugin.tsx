@@ -8,7 +8,9 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route, Link } from 'react-router-dom';
+import { Router, Switch, Link } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { CoreSetup, Plugin } from '@kbn/core/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 

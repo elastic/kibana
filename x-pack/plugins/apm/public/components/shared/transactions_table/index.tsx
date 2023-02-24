@@ -350,7 +350,7 @@ export function TransactionsTable({
                     })
               }
               error={
-                status === FETCH_STATUS.FAILURE
+                FETCH_STATUS.FAILURE
                   ? i18n.translate('xpack.apm.transactionsTable.errorMessage', {
                       defaultMessage: 'Failed to fetch',
                     })

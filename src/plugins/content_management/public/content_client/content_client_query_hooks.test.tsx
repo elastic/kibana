@@ -10,28 +10,46 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { ContentClientProvider } from './content_client_context';
 import { ContentClient } from './content_client';
-import { RpcClient } from '../rpc_client';
-import { createRpcClientMock } from '../rpc_client/rpc_client.mock';
-import { useGetContentQuery } from './content_client_query_hooks';
-import type { GetIn } from '../../common';
+import { createCrudClientMock } from '../crud_client/crud_client.mock';
+import { useGetContentQuery, useSearchContentQuery } from './content_client_query_hooks';
+import type { GetIn, SearchIn } from '../../common';
 
-let contentClient: ContentClient;
-let rpcClient: jest.Mocked<RpcClient>;
-beforeEach(() => {
-  rpcClient = createRpcClientMock();
-  contentClient = new ContentClient(rpcClient);
-});
+const setup = () => {
+  const crudClient = createCrudClientMock();
+  const contentClient = new ContentClient(() => crudClient);
 
-const Wrapper: React.FC = ({ children }) => (
-  <ContentClientProvider contentClient={contentClient}>{children}</ContentClientProvider>
-);
+  const Wrapper: React.FC = ({ children }) => (
+    <ContentClientProvider contentClient={contentClient}>{children}</ContentClientProvider>
+  );
+
+  return {
+    Wrapper,
+    contentClient,
+    crudClient,
+  };
+};
 
 describe('useGetContentQuery', () => {
   test('should call rpcClient.get with input and resolve with output', async () => {
-    const input: GetIn = { id: 'test', contentType: 'testType' };
+    const { crudClient, Wrapper } = setup();
+    const input: GetIn = { id: 'test', contentTypeId: 'testType' };
     const output = { test: 'test' };
-    rpcClient.get.mockImplementation(() => Promise.resolve(output));
+    crudClient.get.mockResolvedValueOnce(output);
     const { result, waitFor } = renderHook(() => useGetContentQuery(input), { wrapper: Wrapper });
+    await waitFor(() => result.current.isSuccess);
+    expect(result.current.data).toEqual(output);
+  });
+});
+
+describe('useSearchContentQuery', () => {
+  test('should call rpcClient.search with input and resolve with output', async () => {
+    const { crudClient, Wrapper } = setup();
+    const input: SearchIn = { contentTypeId: 'testType', query: {} };
+    const output = { hits: [{ id: 'test' }] };
+    crudClient.search.mockResolvedValueOnce(output);
+    const { result, waitFor } = renderHook(() => useSearchContentQuery(input), {
+      wrapper: Wrapper,
+    });
     await waitFor(() => result.current.isSuccess);
     expect(result.current.data).toEqual(output);
   });

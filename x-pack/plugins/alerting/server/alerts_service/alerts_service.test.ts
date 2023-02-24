@@ -72,7 +72,7 @@ const IlmPutBody = {
       },
     },
   },
-  name: 'alerts-default-ilm-policy',
+  name: '.alerts-ilm-policy',
 };
 
 const getIndexTemplatePutBody = (context?: string) => ({
@@ -88,7 +88,7 @@ const getIndexTemplatePutBody = (context?: string) => ({
         auto_expand_replicas: '0-1',
         hidden: true,
         'index.lifecycle': {
-          name: 'alerts-default-ilm-policy',
+          name: '.alerts-ilm-policy',
           rollover_alias: `.alerts-${context ? context : 'test'}-default`,
         },
         'index.mapping.total_fields.limit': 2500,
@@ -165,7 +165,7 @@ describe('Alerts Service', () => {
       expect(alertsService.isInitialized()).toEqual(false);
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Error installing ILM policy alerts-default-ilm-policy - fail`
+        `Error installing ILM policy .alerts-ilm-policy - fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -342,7 +342,7 @@ describe('Alerts Service', () => {
               auto_expand_replicas: '0-1',
               hidden: true,
               'index.lifecycle': {
-                name: 'alerts-default-ilm-policy',
+                name: '.alerts-ilm-policy',
                 rollover_alias: `.alerts-empty-default`,
               },
               'index.mapping.total_fields.limit': 2500,

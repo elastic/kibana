@@ -24,6 +24,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/fleet_setup_response'
+        '400':
+          $ref: '#/components/responses/error'
         '500':
           description: Internal Server Error
           content:
@@ -47,6 +49,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/fleet_settings_response'
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-settings
     put:
       summary: Settings - Update
@@ -73,6 +77,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/fleet_settings_response'
+        '400':
+          $ref: '#/components/responses/error'
       operationId: update-settings
   /health_check:
     post:
@@ -92,6 +98,8 @@ paths:
                     type: string
                   host:
                     type: string
+        '400':
+          $ref: '#/components/responses/error'
       operationId: fleet-server-health-check
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -120,6 +128,8 @@ paths:
                     type: string
                   value:
                     type: string
+        '400':
+          $ref: '#/components/responses/error'
       operationId: generate-service-token-deprecated
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -140,6 +150,8 @@ paths:
                     type: string
                   value:
                     type: string
+        '400':
+          $ref: '#/components/responses/error'
       operationId: generate-service-token
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -154,6 +166,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/get_categories_response'
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-package-categories
     parameters:
       - in: query
@@ -191,6 +205,8 @@ paths:
                     type: array
                     items:
                       type: string
+        '400':
+          $ref: '#/components/responses/error'
       operationId: list-limited-packages
     parameters: []
   /epm/packages:
@@ -204,37 +220,91 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/get_packages_response'
+        '400':
+          $ref: '#/components/responses/error'
       operationId: list-all-packages
-    parameters:
-      - in: query
-        name: excludeInstallStatus
-        schema:
-          type: boolean
-          default: false
-        description: >-
-          Whether to exclude the install status of each package. Enabling this
-          option will opt in to caching for the response via `cache-control`
-          headers. If you don't need up-to-date installation info for a package,
-          and are querying for a list of available packages, providing this flag
-          can improve performance substantially.
-      - in: query
-        name: prerelease
-        schema:
-          type: boolean
-          default: false
-        description: >-
-          Whether to return prerelease versions of packages (e.g. beta, rc,
-          preview) 
-      - in: query
-        name: experimental
-        deprecated: true
-        schema:
-          type: boolean
-          default: false
-      - in: query
-        name: category
-        schema:
-          type: string
+      parameters:
+        - in: query
+          name: excludeInstallStatus
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to exclude the install status of each package. Enabling this
+            option will opt in to caching for the response via `cache-control`
+            headers. If you don't need up-to-date installation info for a
+            package, and are querying for a list of available packages,
+            providing this flag can improve performance substantially.
+        - in: query
+          name: prerelease
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to return prerelease versions of packages (e.g. beta, rc,
+            preview) 
+        - in: query
+          name: experimental
+          deprecated: true
+          schema:
+            type: boolean
+            default: false
+        - in: query
+          name: category
+          schema:
+            type: string
+    post:
+      summary: Packages - Install by upload
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          oneOf:
+                            - $ref: '#/components/schemas/kibana_saved_object_type'
+                            - $ref: '#/components/schemas/elasticsearch_asset_type'
+                      required:
+                        - id
+                        - type
+                  _meta:
+                    type: object
+                    properties:
+                      install_source:
+                        type: string
+                        enum:
+                          - upload
+                          - registry
+                          - bundled
+                required:
+                  - items
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: install-package-by-upload
+      description: ''
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        content:
+          application/zip:
+            schema:
+              type: string
+              format: binary
+          application/gzip:
+            schema:
+              type: string
+              format: binary
   /epm/packages/_bulk:
     post:
       summary: Packages - Bulk install
@@ -246,6 +316,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/bulk_install_packages_response'
+        '400':
+          $ref: '#/components/responses/error'
       operationId: bulk-install-packages
       parameters:
         - in: query
@@ -300,6 +372,8 @@ paths:
                     required:
                       - status
                       - savedObject
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-package-deprecated
       security:
         - basicAuth: []
@@ -345,6 +419,8 @@ paths:
                         - type
                 required:
                   - response
+        '400':
+          $ref: '#/components/responses/error'
       operationId: install-package-deprecated
       description: ''
       parameters:
@@ -390,6 +466,8 @@ paths:
                         - type
                 required:
                   - response
+        '400':
+          $ref: '#/components/responses/error'
       operationId: delete-package-deprecated
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -443,6 +521,8 @@ paths:
                     required:
                       - status
                       - savedObject
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-package
       security:
         - basicAuth: []
@@ -513,6 +593,8 @@ paths:
                           - bundled
                 required:
                   - items
+        '400':
+          $ref: '#/components/responses/error'
       operationId: install-package
       description: ''
       parameters:
@@ -554,6 +636,8 @@ paths:
                         - type
                 required:
                   - items
+        '400':
+          $ref: '#/components/responses/error'
       operationId: update-package
       description: ''
       requestBody:
@@ -591,6 +675,8 @@ paths:
                         - type
                 required:
                   - items
+        '400':
+          $ref: '#/components/responses/error'
       operationId: delete-package
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -620,6 +706,8 @@ paths:
                     type: number
                   headers:
                     type: object
+        '400':
+          $ref: '#/components/responses/error'
       operationId: packages-get-file
     parameters:
       - schema:
@@ -653,6 +741,8 @@ paths:
                     $ref: '#/components/schemas/package_usage_stats'
                 required:
                   - response
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-package-stats
       security:
         - basicAuth: []
@@ -673,6 +763,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/fleet_status_response'
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-agents-setup-status
       security:
         - basicAuth: []
@@ -686,6 +778,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/fleet_setup_response'
+        '400':
+          $ref: '#/components/responses/error'
       requestBody:
         content:
           application/json:
@@ -738,6 +832,8 @@ paths:
                   - other
                   - total
                   - updating
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-agent-status-deprecated
       parameters:
         - schema:
@@ -774,9 +870,16 @@ paths:
                     type: integer
                   total:
                     type: integer
+                    deprecated: true
                   updating:
                     type: integer
+                  all:
+                    type: integer
+                  active:
+                    type: integer
                 required:
+                  - active
+                  - all
                   - error
                   - events
                   - inactive
@@ -785,6 +888,8 @@ paths:
                   - other
                   - total
                   - updating
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-agent-status
       parameters:
         - schema:
@@ -818,10 +923,14 @@ paths:
                         properties:
                           data:
                             type: boolean
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-agent-data
       parameters:
         - schema:
             type: array
+            items:
+              type: string
           name: agentsIds
           in: query
           required: true
@@ -836,6 +945,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/get_agents_response'
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-agents
       parameters:
         - $ref: '#/components/parameters/page_size'
@@ -868,11 +979,7 @@ paths:
                   actionId:
                     type: string
         '400':
-          description: BAD REQUEST
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/upgrade_agent'
+          $ref: '#/components/responses/error'
       operationId: bulk-upgrade-agents
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -954,6 +1061,8 @@ paths:
                         - creationTime
                 required:
                   - items
+        '400':
+          $ref: '#/components/responses/error'
       operationId: agents-action-status
   /agents/{agentId}:
     parameters:
@@ -977,6 +1086,8 @@ paths:
                     $ref: '#/components/schemas/agent'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-agent
       parameters:
         - $ref: '#/components/parameters/with_metrics'
@@ -995,6 +1106,8 @@ paths:
                     $ref: '#/components/schemas/agent'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       operationId: update-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1028,6 +1141,8 @@ paths:
                       - deleted
                 required:
                   - action
+        '400':
+          $ref: '#/components/responses/error'
       operationId: delete-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1057,6 +1172,8 @@ paths:
                     type: number
                   headers:
                     type: string
+        '400':
+          $ref: '#/components/responses/error'
       operationId: new-agent-action
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1071,6 +1188,11 @@ paths:
                   $ref: '#/components/schemas/agent_action'
   /agents/{agentId}/actions/{actionId}/cancel:
     parameters:
+      - schema:
+          type: string
+        name: agentId
+        in: path
+        required: true
       - schema:
           type: string
         name: actionId
@@ -1089,6 +1211,8 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/agent_action'
+        '400':
+          $ref: '#/components/responses/error'
       operationId: agent-action-cancel
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1123,6 +1247,8 @@ paths:
                         properties:
                           body: {}
                           headers: {}
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-agent-upload-file
   /agents/{agentId}/reassign:
     parameters:
@@ -1141,6 +1267,8 @@ paths:
             application/json:
               schema:
                 type: object
+        '400':
+          $ref: '#/components/responses/error'
       operationId: reassign-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1218,11 +1346,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/upgrade_agent'
         '400':
-          description: BAD REQUEST
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/upgrade_agent'
+          $ref: '#/components/responses/error'
       operationId: upgrade-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1232,7 +1356,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/upgrade_agent'
-  /agents/{agentId}/upload:
+  /agents/{agentId}/uploads:
     parameters:
       - schema:
           type: string
@@ -1257,6 +1381,8 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/agent_diagnostics'
+        '400':
+          $ref: '#/components/responses/error'
       operationId: list-agent-uploads
   /agents/bulk_reassign:
     post:
@@ -1272,6 +1398,8 @@ paths:
                 properties:
                   actionId:
                     type: string
+        '400':
+          $ref: '#/components/responses/error'
       operationId: bulk-reassign-agents
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1312,6 +1440,8 @@ paths:
                 properties:
                   actionId:
                     type: string
+        '400':
+          $ref: '#/components/responses/error'
       operationId: bulk-unenroll-agents
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1357,6 +1487,8 @@ paths:
                 properties:
                   actionId:
                     type: string
+        '400':
+          $ref: '#/components/responses/error'
       operationId: bulk-update-agent-tags
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1405,6 +1537,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/get_agent_tags_response'
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-agent-tags
   /agents/{agentId}/request_diagnostics:
     parameters:
@@ -1426,6 +1560,8 @@ paths:
                 properties:
                   actionId:
                     type: string
+        '400':
+          $ref: '#/components/responses/error'
       operationId: request-diagnostics-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1443,6 +1579,8 @@ paths:
                 properties:
                   actionId:
                     type: string
+        '400':
+          $ref: '#/components/responses/error'
       operationId: bulk-request-diagnostics
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1493,6 +1631,8 @@ paths:
                   - total
                   - page
                   - perPage
+        '400':
+          $ref: '#/components/responses/error'
       operationId: agent-policy-list
       parameters:
         - $ref: '#/components/parameters/page_size'
@@ -1505,6 +1645,15 @@ paths:
           description: >-
             When set to true, retrieve the related package policies for each
             agent policy.
+        - schema:
+            type: boolean
+          in: query
+          name: noAgentCount
+          description: >-
+            When set to true, do not count how many agents are in the agent
+            policy, this can improve performance if you are searching over a
+            large number of agent policies. The "agents" property will always be
+            0 if set to true.
       description: ''
     post:
       summary: Agent policy - Create
@@ -1519,6 +1668,8 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/agent_policy'
+        '400':
+          $ref: '#/components/responses/error'
       operationId: create-agent-policy
       requestBody:
         content:
@@ -1550,6 +1701,8 @@ paths:
                     $ref: '#/components/schemas/agent_policy'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       operationId: agent-policy-info
       description: Get one agent policy
       parameters: []
@@ -1568,6 +1721,8 @@ paths:
                     $ref: '#/components/schemas/agent_policy'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       operationId: update-agent-policy
       requestBody:
         content:
@@ -1600,6 +1755,8 @@ paths:
                     $ref: '#/components/schemas/agent_policy'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       requestBody:
         content:
           application/json:
@@ -1629,6 +1786,8 @@ paths:
                     oneOf:
                       - type: string
                       - $ref: '#/components/schemas/agent_policy_full'
+        '400':
+          $ref: '#/components/responses/error'
     parameters:
       - schema:
           type: string
@@ -1664,6 +1823,8 @@ paths:
                 properties:
                   item:
                     type: string
+        '400':
+          $ref: '#/components/responses/error'
     parameters:
       - schema:
           type: string
@@ -1721,6 +1882,8 @@ paths:
                       $ref: '#/components/schemas/agent_policy'
                 required:
                   - items
+        '400':
+          $ref: '#/components/responses/error'
       operationId: bulk-get-agent-policies
       security: []
       parameters: []
@@ -1743,6 +1906,8 @@ paths:
                 required:
                   - id
                   - success
+        '400':
+          $ref: '#/components/responses/error'
       requestBody:
         content:
           application/json:
@@ -1772,6 +1937,8 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/data_stream'
+        '400':
+          $ref: '#/components/responses/error'
       operationId: data-streams-list
     parameters: []
   /enrollment-api-keys:
@@ -1806,6 +1973,8 @@ paths:
                   - page
                   - perPage
                   - total
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-enrollment-api-keys-deprecated
       parameters: []
       deprecated: true
@@ -1826,6 +1995,8 @@ paths:
                     type: string
                     enum:
                       - created
+        '400':
+          $ref: '#/components/responses/error'
       operationId: create-enrollment-api-keys-deprecated
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1852,6 +2023,8 @@ paths:
                     $ref: '#/components/schemas/enrollment_api_key'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-enrollment-api-key-deprecated
       deprecated: true
     delete:
@@ -1871,6 +2044,8 @@ paths:
                       - deleted
                 required:
                   - action
+        '400':
+          $ref: '#/components/responses/error'
       operationId: delete-enrollment-api-key-deprecated
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1907,6 +2082,8 @@ paths:
                   - page
                   - perPage
                   - total
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-enrollment-api-keys
       parameters: []
     post:
@@ -1926,6 +2103,8 @@ paths:
                     type: string
                     enum:
                       - created
+        '400':
+          $ref: '#/components/responses/error'
       operationId: create-enrollment-api-keys
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1951,6 +2130,8 @@ paths:
                     $ref: '#/components/schemas/enrollment_api_key'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-enrollment-api-key
     delete:
       summary: Enrollment API Key - Delete
@@ -1969,6 +2150,8 @@ paths:
                       - deleted
                 required:
                   - action
+        '400':
+          $ref: '#/components/responses/error'
       operationId: delete-enrollment-api-key
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1996,6 +2179,8 @@ paths:
                     type: number
                 required:
                   - items
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-package-policies
       security: []
       parameters: []
@@ -2015,6 +2200,8 @@ paths:
                     $ref: '#/components/schemas/package_policy'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       requestBody:
         description: >-
           You should use inputs as an object and not use the deprecated inputs
@@ -2058,6 +2245,8 @@ paths:
                       $ref: '#/components/schemas/package_policy'
                 required:
                   - items
+        '400':
+          $ref: '#/components/responses/error'
       operationId: bulk-get-package-policies
       security: []
       parameters: []
@@ -2098,6 +2287,8 @@ paths:
                   required:
                     - id
                     - success
+        '400':
+          $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /package_policies/upgrade:
@@ -2135,6 +2326,8 @@ paths:
                   required:
                     - id
                     - success
+        '400':
+          $ref: '#/components/responses/error'
   /package_policies/upgrade/dryrun:
     post:
       summary: Package policy - Upgrade Dry run
@@ -2171,6 +2364,8 @@ paths:
                       $ref: '#/components/schemas/upgrade_agent_diff'
                   required:
                     - hasErrors
+        '400':
+          $ref: '#/components/responses/error'
   /package_policies/{packagePolicyId}:
     get:
       summary: Package policy - Info
@@ -2187,6 +2382,8 @@ paths:
                     $ref: '#/components/schemas/package_policy'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-package-policy
     parameters:
       - schema:
@@ -2217,6 +2414,8 @@ paths:
                 required:
                   - item
                   - sucess
+        '400':
+          $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
     delete:
@@ -2235,6 +2434,8 @@ paths:
                     type: string
                 required:
                   - id
+        '400':
+          $ref: '#/components/responses/error'
       parameters:
         - schema:
             type: boolean
@@ -2262,6 +2463,8 @@ paths:
                     type: integer
                   perPage:
                     type: integer
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-outputs
     post:
       summary: Outputs
@@ -2277,6 +2480,8 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/output'
+        '400':
+          $ref: '#/components/responses/error'
       requestBody:
         content:
           application/json:
@@ -2323,6 +2528,8 @@ paths:
                     $ref: '#/components/schemas/output'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-output
     parameters:
       - schema:
@@ -2345,6 +2552,8 @@ paths:
                     type: string
                 required:
                   - id
+        '400':
+          $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
@@ -2391,6 +2600,8 @@ paths:
                     $ref: '#/components/schemas/output'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /agent_download_sources:
@@ -2415,6 +2626,8 @@ paths:
                     type: integer
                   perPage:
                     type: integer
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-download-sources
     post:
       summary: Agent Download Sources
@@ -2430,6 +2643,8 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/download_sources'
+        '400':
+          $ref: '#/components/responses/error'
       requestBody:
         content:
           application/json:
@@ -2465,6 +2680,8 @@ paths:
                     $ref: '#/components/schemas/download_sources'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-one-download-source
     parameters:
       - schema:
@@ -2487,6 +2704,8 @@ paths:
                     type: string
                 required:
                   - id
+        '400':
+          $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
@@ -2520,6 +2739,8 @@ paths:
                     $ref: '#/components/schemas/download_sources'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /logstash_api_keys:
@@ -2536,6 +2757,8 @@ paths:
                 properties:
                   api_key:
                     type: string
+        '400':
+          $ref: '#/components/responses/error'
       operationId: generate-logstash-api-key
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -2562,6 +2785,8 @@ paths:
                     type: integer
                   perPage:
                     type: integer
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-fleet-server-hosts
     post:
       summary: Fleet Server Hosts - Create
@@ -2577,6 +2802,8 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/fleet_server_host'
+        '400':
+          $ref: '#/components/responses/error'
       requestBody:
         content:
           application/json:
@@ -2613,6 +2840,8 @@ paths:
                     $ref: '#/components/schemas/fleet_server_host'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-one-fleet-server-hosts
     parameters:
       - schema:
@@ -2635,6 +2864,8 @@ paths:
                     type: string
                 required:
                   - id
+        '400':
+          $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
@@ -2666,6 +2897,8 @@ paths:
                     $ref: '#/components/schemas/fleet_server_host'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /proxies:
@@ -2691,6 +2924,8 @@ paths:
                     type: integer
                   perPage:
                     type: integer
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-fleet-proxies
     post:
       summary: Fleet Proxies - Create
@@ -2706,6 +2941,8 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/proxies'
+        '400':
+          $ref: '#/components/responses/error'
       requestBody:
         content:
           application/json:
@@ -2746,6 +2983,8 @@ paths:
                     $ref: '#/components/schemas/proxies'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-one-fleet-proxies
     parameters:
       - schema:
@@ -2768,6 +3007,8 @@ paths:
                     type: string
                 required:
                   - id
+        '400':
+          $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
@@ -2803,6 +3044,8 @@ paths:
                     $ref: '#/components/schemas/proxies'
                 required:
                   - item
+        '400':
+          $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /kubernetes:
@@ -2819,6 +3062,8 @@ paths:
                 properties:
                   item:
                     type: string
+        '400':
+          $ref: '#/components/responses/error'
       operationId: get-full-k8s-manifest
       parameters:
         - schema:
@@ -2858,6 +3103,7 @@ components:
       in: header
       name: kbn-xsrf
       required: true
+      description: Kibana's anti Cross-Site Request Forgery token. Can be any string value.
     page_size:
       name: perPage
       in: query
@@ -3047,6 +3293,29 @@ components:
             $ref: '#/components/schemas/search_result'
       required:
         - items
+    kibana_saved_object_type:
+      title: Kibana saved object asset type
+      type: string
+      enum:
+        - dashboard
+        - visualization
+        - search
+        - index-pattern
+        - map
+        - lens
+        - ml-module
+        - security-rule
+        - csp_rule_template
+    elasticsearch_asset_type:
+      title: Elasticsearch asset type
+      type: string
+      enum:
+        - component_template
+        - ingest_pipeline
+        - index_template
+        - ilm_policy
+        - transform
+        - data_stream_ilm_policy
     bulk_install_packages_response:
       title: Bulk install packages response
       type: object
@@ -3220,29 +3489,6 @@ components:
         - format_version
         - download
         - path
-    kibana_saved_object_type:
-      title: Kibana saved object asset type
-      type: string
-      enum:
-        - dashboard
-        - visualization
-        - search
-        - index-pattern
-        - map
-        - lens
-        - ml-module
-        - security-rule
-        - csp_rule_template
-    elasticsearch_asset_type:
-      title: Elasticsearch asset type
-      type: string
-      enum:
-        - component_template
-        - ingest_pipeline
-        - index_template
-        - ilm_policy
-        - transform
-        - data_stream_ilm_policy
     package_usage_stats:
       title: Package usage stats
       type: object
@@ -3476,19 +3722,6 @@ components:
       required:
         - agents
         - version
-    upgrade_agent:
-      title: Upgrade agent
-      type: object
-      properties:
-        version:
-          type: string
-        source_uri:
-          type: string
-        force:
-          type: boolean
-          description: Force upgrade, skipping validation (should be used with caution)
-      required:
-        - version
     agent_action:
       title: Agent action
       oneOf:
@@ -3516,6 +3749,19 @@ components:
                     - info
                     - warning
                     - error
+    upgrade_agent:
+      title: Upgrade agent
+      type: object
+      properties:
+        version:
+          type: string
+        source_uri:
+          type: string
+        force:
+          type: boolean
+          description: Force upgrade, skipping validation (should be used with caution)
+      required:
+        - version
     agent_diagnostics:
       title: Agent diagnostics
       type: object
@@ -3584,10 +3830,8 @@ components:
           nullable: true
         unenroll_timeout:
           type: number
-          nullable: true
         inactivity_timeout:
           type: number
-          nullable: true
       required:
         - name
         - namespace
@@ -4221,5 +4465,19 @@ components:
       required:
         - name
         - url
+  responses:
+    error:
+      description: Generic Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: number
+              error:
+                type: string
+              message:
+                type: string
 security:
   - basicAuth: []

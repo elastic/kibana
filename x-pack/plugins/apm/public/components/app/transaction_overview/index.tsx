@@ -39,6 +39,7 @@ export function TransactionOverview() {
     transactionType,
     fallbackToTransactions,
     serverlessType,
+    serviceName,
   } = useApmServiceContext();
 
   const history = useHistory();
@@ -67,6 +68,7 @@ export function TransactionOverview() {
         </>
       )}
       <TransactionCharts
+        serviceName={serviceName}
         kuery={kuery}
         environment={environment}
         start={start}

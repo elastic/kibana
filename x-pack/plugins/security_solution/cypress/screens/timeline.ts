@@ -60,9 +60,11 @@ export const HOST_KPI = '[data-test-subj="siem-timeline-host-kpi"]';
 
 export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
 
-export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
+export const ID_TOGGLE_FIELD =
+  '[data-test-subj="actionItem-security-detailsFlyout-cellActions-toggleColumn"]';
 
-export const ID_HOVER_ACTION_OVERFLOW_BTN = '[data-test-subj="more-actions-_id"]';
+export const ID_HOVER_ACTION_OVERFLOW_BTN =
+  '[data-test-subj="event-fields-table-row-_id"] [data-test-subj="showExtraActionsButton"]';
 
 export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]';
 
@@ -126,6 +128,8 @@ export const QUERY_EVENT_TABLE_CELL =
 export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
+
+export const ALERTS_TABLE_COUNT = `[data-test-subj="toolbar-alerts-count"]`;
 
 export const SOURCE_IP_KPI = '[data-test-subj="siem-timeline-source-ip-kpi"]';
 
@@ -237,7 +241,8 @@ export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-title"]';
 
 export const TIMESTAMP_HEADER_FIELD = '[data-test-subj="header-text-@timestamp"]';
 
-export const TIMESTAMP_TOGGLE_FIELD = '[data-test-subj="toggle-field-@timestamp"]';
+export const TIMESTAMP_TOGGLE_FIELD =
+  '[data-test-subj="actionItem-security-detailsFlyout-cellActions-toggleColumn"]';
 
 export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
 
@@ -278,7 +283,8 @@ export const TIMELINE_TAB_CONTENT_EQL = '[data-test-subj="timeline-tab-content-e
 export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
   '[data-test-subj="timeline-tab-content-graph-notes"]';
 
-export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN = '[data-test-subj="more-actions-@timestamp"]';
+export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
+  '[data-test-subj="event-fields-table-row-@timestamp"] [data-test-subj="showExtraActionsButton"]';
 
 export const USER_KPI = '[data-test-subj="siem-timeline-user-kpi"]';
 
@@ -293,8 +299,6 @@ export const ALERT_TABLE_FILE_NAME_HEADER = '[data-gridcell-column-id="file.name
 
 export const ALERT_TABLE_FILE_NAME_VALUES =
   '[data-gridcell-column-id="file.name"][data-test-subj="dataGridRowCell"]'; // empty column for the test data
-
-export const ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE = '[data-test-subj="add-to-timeline"]';
 
 export const ACTIVE_TIMELINE_BOTTOM_BAR =
   '[data-test-subj="flyoutBottomBar"]  .active-timeline-button';
@@ -314,4 +318,8 @@ export const HOVER_ACTIONS = {
   FILTER_OUT: '[data-test-subj="filter-out-value"]',
   COPY: '[data-test-subj="clipboard"]',
   SHOW_TOP: 'show-top-field',
+};
+
+export const GET_TIMELINE_HEADER = (fieldName: string) => {
+  return `[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`;
 };

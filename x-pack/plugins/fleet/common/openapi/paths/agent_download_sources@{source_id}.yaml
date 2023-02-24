@@ -13,6 +13,8 @@ get:
                 $ref: ../components/schemas/download_sources.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-one-download-source
 parameters:
   - schema:
@@ -35,6 +37,8 @@ delete:
                 type: string
             required:
               - id
+    '400':
+      $ref: ../components/responses/error.yaml
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
 put:
@@ -68,5 +72,7 @@ put:
                 $ref: ../components/schemas/download_sources.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

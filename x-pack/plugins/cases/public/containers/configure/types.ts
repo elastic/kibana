@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticUser } from '../types';
+import type { CaseUser } from '../types';
 import type {
   ActionConnector,
   ActionTypeConnector,
@@ -38,11 +38,11 @@ export interface CaseConfigure {
   closureType: ClosureType;
   connector: CasesConfigure['connector'];
   createdAt: string;
-  createdBy: ElasticUser;
+  createdBy: CaseUser;
   error: string | null;
   mappings: CaseConnectorMapping[];
   updatedAt: string;
-  updatedBy: ElasticUser;
+  updatedBy: CaseUser;
   version: string;
   owner: string;
 }

@@ -556,6 +556,8 @@
       "@kbn/core-usage-data-server-internal/*": ["packages/core/usage-data/core-usage-data-server-internal/*"],
       "@kbn/core-usage-data-server-mocks": ["packages/core/usage-data/core-usage-data-server-mocks"],
       "@kbn/core-usage-data-server-mocks/*": ["packages/core/usage-data/core-usage-data-server-mocks/*"],
+      "@kbn/core-version-http-server": ["packages/core/versioning/core-version-http-server"],
+      "@kbn/core-version-http-server/*": ["packages/core/versioning/core-version-http-server/*"],
       "@kbn/cross-cluster-replication-plugin": ["x-pack/plugins/cross_cluster_replication"],
       "@kbn/cross-cluster-replication-plugin/*": ["x-pack/plugins/cross_cluster_replication/*"],
       "@kbn/crypto": ["packages/kbn-crypto"],
@@ -568,8 +570,6 @@
       "@kbn/custom-integrations-plugin/*": ["src/plugins/custom_integrations/*"],
       "@kbn/cypress-config": ["packages/kbn-cypress-config"],
       "@kbn/cypress-config/*": ["packages/kbn-cypress-config/*"],
-      "@kbn/dashboard-embeddable-examples-plugin": ["examples/dashboard_embeddable_examples"],
-      "@kbn/dashboard-embeddable-examples-plugin/*": ["examples/dashboard_embeddable_examples/*"],
       "@kbn/dashboard-enhanced-plugin": ["x-pack/plugins/dashboard_enhanced"],
       "@kbn/dashboard-enhanced-plugin/*": ["x-pack/plugins/dashboard_enhanced/*"],
       "@kbn/dashboard-plugin": ["src/plugins/dashboard"],
@@ -948,6 +948,8 @@
       "@kbn/plugin-generator/*": ["packages/kbn-plugin-generator/*"],
       "@kbn/plugin-helpers": ["packages/kbn-plugin-helpers"],
       "@kbn/plugin-helpers/*": ["packages/kbn-plugin-helpers/*"],
+      "@kbn/portable-dashboards-example": ["examples/portable_dashboards_example"],
+      "@kbn/portable-dashboards-example/*": ["examples/portable_dashboards_example/*"],
       "@kbn/preboot-example-plugin": ["examples/preboot_example"],
       "@kbn/preboot-example-plugin/*": ["examples/preboot_example/*"],
       "@kbn/presentation-util-plugin": ["src/plugins/presentation_util"],
@@ -1332,6 +1334,8 @@
       "@kbn/utils/*": ["packages/kbn-utils/*"],
       "@kbn/ux-plugin": ["x-pack/plugins/ux"],
       "@kbn/ux-plugin/*": ["x-pack/plugins/ux/*"],
+      "@kbn/validate-next-docs-cli": ["packages/kbn-validate-next-docs-cli"],
+      "@kbn/validate-next-docs-cli/*": ["packages/kbn-validate-next-docs-cli/*"],
       "@kbn/vis-default-editor-plugin": ["src/plugins/vis_default_editor"],
       "@kbn/vis-default-editor-plugin/*": ["src/plugins/vis_default_editor/*"],
       "@kbn/vis-type-gauge-plugin": ["src/plugins/vis_types/gauge"],
@@ -1443,5 +1447,5 @@
       "@kbn/ambient-common-types",
       "@kbn/ambient-storybook-types"
     ]
-  },
+  }
 }
