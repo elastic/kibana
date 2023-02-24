@@ -12,7 +12,7 @@ post:
     - $ref: ../components/parameters/slo_id.yaml
   responses:
     '200':
-      description: Succesful request
+      description: Successful request
     '400':
       description: Bad request
       content: 

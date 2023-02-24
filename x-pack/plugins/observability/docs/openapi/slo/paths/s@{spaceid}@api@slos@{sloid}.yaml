@@ -12,7 +12,7 @@ get:
     - $ref: ../components/parameters/slo_id.yaml
   responses:
     '200':
-      description: Succesful request
+      description: Successful request
       content:
         application/json:
           schema:
@@ -50,7 +50,7 @@ put:
           $ref: '../components/schemas/update_slo_request.yaml'
   responses:
     '200':
-      description: Succesful request
+      description: Successful request
       content:
         application/json:
           schema:
@@ -82,7 +82,7 @@ delete:
     - $ref: ../components/parameters/slo_id.yaml
   responses:
     '204':
-      description: Succesful request
+      description: Successful request
     '400':
       description: Bad request
       content: 
