@@ -23,10 +23,12 @@ export const formatChangelog = (parsedChangelog: ChangeLogParams[]) => {
 // Exported for testing
 export const filterYamlChangelog = (
   changelogText: string | null | undefined,
-  currentVersion: string,
-  latestVersion: string
+  latestVersion: string,
+  currentVersion?: string
 ) => {
   const parsedChangelog: ChangeLogParams[] = changelogText ? safeLoad(changelogText) : [];
+
+  if (!currentVersion) return parsedChangelog.filter((e) => semverLte(e.version, latestVersion));
 
   return parsedChangelog.filter(
     (e) => semverLte(e.version, latestVersion) && semverGte(e.version, currentVersion)
@@ -35,9 +37,9 @@ export const filterYamlChangelog = (
 
 export const getFormattedChangelog = (
   changelogText: string | null | undefined,
-  currentVersion: string,
-  latestVersion: string
+  latestVersion: string,
+  currentVersion?: string
 ) => {
-  const parsed = filterYamlChangelog(changelogText, currentVersion, latestVersion);
+  const parsed = filterYamlChangelog(changelogText, latestVersion, currentVersion);
   return formatChangelog(parsed);
 };
