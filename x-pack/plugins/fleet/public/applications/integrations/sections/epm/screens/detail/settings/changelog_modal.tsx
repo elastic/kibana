@@ -33,7 +33,6 @@ export interface ChangeLogParams {
 }
 
 interface Props {
-  title?: string;
   latestVersion: string;
   currentVersion: string;
   packageName: string;
@@ -41,7 +40,6 @@ interface Props {
 }
 
 export const ChangelogModal: React.FunctionComponent<Props> = ({
-  title = 'Changelog',
   latestVersion,
   currentVersion,
   packageName,
@@ -67,9 +65,9 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
   }
 
   return (
-    <EuiModal maxWidth={true} onClose={onClose}>
+    <EuiModal maxWidth={true} onClose={onClose} data-test-subj="integrations.changelogModal">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{'Changelog'}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiSkeletonText
