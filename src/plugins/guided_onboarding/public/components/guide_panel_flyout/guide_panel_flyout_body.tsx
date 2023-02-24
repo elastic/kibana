@@ -66,7 +66,6 @@ export const GuidePanelFlyoutBody = ({
       </>
     );
   };
-  const { flyoutBody, flyoutBodyWrapper, flyoutBodyError } = styles.flyoutOverrides;
 
   if (!guideConfig || !pluginState || (pluginState && pluginState.status === 'error')) {
     return (
@@ -107,82 +106,78 @@ export const GuidePanelFlyoutBody = ({
 
   if (isGuideReadyToComplete) {
     return (
-      <div css={flyoutBodyWrapper}>
-        <div css={flyoutBodyError}>
-          <EuiImage
-            size="fullWidth"
-            src={isDarkTheme ? wellDoneAnimatedDarkGif : wellDoneAnimatedGif}
-            alt={i18n.translate('guidedOnboarding.dropdownPanel.wellDoneAnimatedGif', {
-              defaultMessage: `Guide completed animated gif`,
+      <>
+        <EuiImage
+          size="fullWidth"
+          src={isDarkTheme ? wellDoneAnimatedDarkGif : wellDoneAnimatedGif}
+          alt={i18n.translate('guidedOnboarding.dropdownPanel.wellDoneAnimatedGif', {
+            defaultMessage: `Guide completed animated gif`,
+          })}
+        />
+
+        <EuiSpacer />
+
+        <EuiText size="m">
+          <p data-test-subj="guideDescription">
+            {i18n.translate('guidedOnboarding.dropdownPanel.completeGuideFlyoutDescription', {
+              defaultMessage: `You've completed the Elastic {guideName} guide. Feel free to come back to the Guides for more onboarding help or a refresher.`,
+              values: {
+                guideName: guideConfig.guideName,
+              },
             })}
-          />
+          </p>
+        </EuiText>
 
-          <EuiSpacer />
+        {docsLink()}
 
-          <EuiText size="m">
-            <p data-test-subj="guideDescription">
-              {i18n.translate('guidedOnboarding.dropdownPanel.completeGuideFlyoutDescription', {
-                defaultMessage: `You've completed the Elastic {guideName} guide. Feel free to come back to the Guides for more onboarding help or a refresher.`,
-                values: {
-                  guideName: guideConfig.guideName,
-                },
+        <GuideProgress
+          guideConfig={guideConfig}
+          styles={styles}
+          pluginState={pluginState}
+          isLoading={isLoading}
+          handleStepButtonClick={handleStepButtonClick}
+          isGuideReadyToComplete={isGuideReadyToComplete}
+          stepsCompleted={stepsCompleted}
+        />
+
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              isLoading={isLoading}
+              onClick={() => completeGuide(guideConfig.completedGuideRedirectLocation)}
+              fill
+              // data-test-subj used for FS tracking and testing
+              data-test-subj={`onboarding--completeGuideButton--${guideConfig!.telemetryId}`}
+            >
+              {i18n.translate('guidedOnboarding.dropdownPanel.elasticButtonLabel', {
+                defaultMessage: 'Continue using Elastic',
               })}
-            </p>
-          </EuiText>
-
-          {docsLink()}
-
-          <GuideProgress
-            guideConfig={guideConfig}
-            styles={styles}
-            pluginState={pluginState}
-            isLoading={isLoading}
-            handleStepButtonClick={handleStepButtonClick}
-            isGuideReadyToComplete={isGuideReadyToComplete}
-            stepsCompleted={stepsCompleted}
-          />
-
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                isLoading={isLoading}
-                onClick={() => completeGuide(guideConfig.completedGuideRedirectLocation)}
-                fill
-                // data-test-subj used for FS tracking and testing
-                data-test-subj={`onboarding--completeGuideButton--${guideConfig!.telemetryId}`}
-              >
-                {i18n.translate('guidedOnboarding.dropdownPanel.elasticButtonLabel', {
-                  defaultMessage: 'Continue using Elastic',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      </div>
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
     );
   }
 
   return (
-    <div css={flyoutBodyWrapper}>
-      <div css={flyoutBody}>
-        <div>
-          <EuiText size="m">
-            <p data-test-subj="guideDescription">{guideConfig.description}</p>
-          </EuiText>
+    <>
+      <div>
+        <EuiText size="m">
+          <p data-test-subj="guideDescription">{guideConfig.description}</p>
+        </EuiText>
 
-          {docsLink()}
+        {docsLink()}
 
-          <GuideProgress
-            guideConfig={guideConfig}
-            styles={styles}
-            pluginState={pluginState}
-            isLoading={isLoading}
-            handleStepButtonClick={handleStepButtonClick}
-            isGuideReadyToComplete={isGuideReadyToComplete}
-            stepsCompleted={stepsCompleted}
-          />
-        </div>
+        <GuideProgress
+          guideConfig={guideConfig}
+          styles={styles}
+          pluginState={pluginState}
+          isLoading={isLoading}
+          handleStepButtonClick={handleStepButtonClick}
+          isGuideReadyToComplete={isGuideReadyToComplete}
+          stepsCompleted={stepsCompleted}
+        />
       </div>
-    </div>
+    </>
   );
 };
