@@ -13,34 +13,31 @@ import { Cases } from './cases';
 import { CaseFeatureNoPermissions } from './feature_no_permissions';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useHasData } from '../../hooks/use_has_data';
 import { LoadingObservability } from '../overview';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { ObservabilityAppServices } from '../../application/types';
+import { useFetchObservabilityAlerts } from '../../hooks/use_fetch_observability_alerts';
 
 export const CasesPage = React.memo(() => {
   const userCasesPermissions = useGetUserCasesPermissions();
   const { docLinks, http } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
-  const { hasAnyData, isAllRequestsComplete } = useHasData();
+  const { alerts, isLoading, isSuccess, isError } = useFetchObservabilityAlerts();
 
-  if (!hasAnyData && !isAllRequestsComplete) {
+  if (isLoading) {
     return <LoadingObservability />;
   }
 
-  // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
-  const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
-
   const noDataConfig = getNoDataConfig({
-    hasData,
+    hasData: alerts && alerts.length > 0,
     basePath: http.basePath,
     docsLink: docLinks.links.observability.guide,
   });
 
   return userCasesPermissions.read ? (
     <ObservabilityPageTemplate
-      isPageDataLoaded={isAllRequestsComplete}
+      isPageDataLoaded={isSuccess || isError}
       data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       noDataConfig={noDataConfig}
     >

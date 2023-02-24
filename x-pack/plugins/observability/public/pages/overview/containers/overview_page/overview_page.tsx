@@ -67,13 +67,13 @@ export function OverviewPage() {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
 
-  const { alerts, isLoading: alertsIsLoading } = useFetchObservabilityAlerts();
   const { data: apmServices, isLoading: apmServicesIsLoading } = useFetchApmServicesHasData();
   const { data: infraLogs, isLoading: infraLogsIsLoading } = useFetchInfraLogsHasData();
   const { data: infraMetrics, isLoading: infraMetricsIsLoading } = useFetchInfraMetricsHasData();
   const { data: syntheticsUptime, isLoading: syntheticsUptimeIsLoading } =
     useFetchSyntheticsUptimeHasData();
   const { data: ux, isLoading: uxIsLoading } = useFetchUxHasData();
+  const { alerts, isLoading: alertsIsLoading } = useFetchObservabilityAlerts();
 
   const isAnyDataFetching =
     alertsIsLoading ||
