@@ -143,10 +143,12 @@
           }
         },
         "ignoreVolumeMounts": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Ignore all volume mounts. e.g directories, files, configMaps, secrets etc...\nNote: should not be used with ignoreVolumeFiles"
         },
         "ignoreVolumeFiles": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Ignore file mounts. e.g files, configMaps, secrets\nNote: should not be used with ignoreVolumeMounts"
         }
       },
       "dependencies": {
