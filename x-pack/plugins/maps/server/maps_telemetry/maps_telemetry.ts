@@ -13,7 +13,7 @@ export type MapsUsage = MapStats;
 
 export async function getMapsTelemetry(): Promise<MapsUsage> {
   const mapStatsCollector = new MapStatsCollector();
-  await findMaps(getSavedObjectClient(), (savedObject) => {
+  await findMaps(getSavedObjectClient(), async (savedObject) => {
     mapStatsCollector.push(savedObject.attributes);
   });
 
