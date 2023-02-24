@@ -313,10 +313,10 @@ export const TIMELINE_DATA_PROVIDERS_CONTAINER = '[data-test-subj="dataProviders
 export const EMPTY_DATA_PROVIDER_AREA = `.timeline-drop-area-empty`;
 
 export const HOVER_ACTIONS = {
-  ADD_TO_TIMELINE: '[data-test-subj="legend-New Rule Test-embeddable_addToTimeline"]',
-  FILTER_FOR: '[data-test-subj="legend-New Rule Test-filterIn"]',
-  FILTER_OUT: '[data-test-subj="legend-New Rule Test-filterOut"]',
-  COPY: '[data-test-subj="legend-New Rule Test-embeddable_copyToClipboard"]',
+  ADD_TO_TIMELINE: '[data-test-subj="hover-actions-add-timeline"]',
+  FILTER_FOR: '[data-test-subj="hover-actions-filter-for"]',
+  FILTER_OUT: '[data-test-subj="hovhover-actions-filter-out"]',
+  COPY: '[data-test-subj="hover-actions-copy-button"]',
 };
 
 export const GET_TIMELINE_HEADER = (fieldName: string) => {

@@ -156,3 +156,10 @@ export const ALERTS_HISTOGRAM_LEGEND =
   '[data-test-subj="alerts-histogram-panel"] .echLegendItem__action';
 
 export const SELECT_HISTOGRAM = '[data-test-subj="chart-select-trend"]';
+
+export const LEGEND_ACTIONS = {
+  ADD_TO_TIMELINE: '[data-test-subj="legend-New Rule Test-embeddable_addToTimeline"]',
+  FILTER_FOR: '[data-test-subj="legend-New Rule Test-filterIn"]',
+  FILTER_OUT: '[data-test-subj="legend-New Rule Test-filterOut"]',
+  COPY: '[data-test-subj="legend-New Rule Test-embeddable_copyToClipboard"]',
+};
