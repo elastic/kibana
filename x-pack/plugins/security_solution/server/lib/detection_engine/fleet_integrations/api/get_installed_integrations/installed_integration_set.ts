@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import type {
+  ArchivePackage,
+  Installable,
+  PackagePolicy,
+  RegistrySearchResult,
+} from '@kbn/fleet-plugin/common';
 import { capitalize, flatten } from 'lodash';
-import type { PackagePolicy, ArchivePackage } from '@kbn/fleet-plugin/common';
 import type {
   InstalledIntegration,
   InstalledIntegrationArray,
@@ -18,6 +23,9 @@ import type {
 
 export interface IInstalledIntegrationSet {
   addPackagePolicy(policy: PackagePolicy): void;
+  addInstalledPackage(
+    installedPackage: Installable<RegistrySearchResult & { title: string } & { id: string }>
+  ): void;
   addRegistryPackage(registryPackage: ArchivePackage): void;
 
   getPackages(): InstalledPackageArray;
@@ -71,6 +79,42 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
     }
   };
 
+  const addInstalledPackage = (
+    installedPackage: Installable<RegistrySearchResult & { title: string } & { id: string }>
+  ): void => {
+    const packageInfo = {
+      package_name: installedPackage.name,
+      package_title: installedPackage.title,
+      package_version: installedPackage.version,
+    };
+    const integrationsInfo = [
+      {
+        integration_name: installedPackage.name,
+        integration_title: installedPackage.title,
+        is_enabled: false,
+      },
+    ];
+    const packageKey = `${packageInfo.package_name}:${packageInfo.package_version}`;
+    const existingPackageInfo = packageMap.get(packageKey);
+
+    if (existingPackageInfo == null) {
+      const integrationsMap = new Map<string, InstalledIntegrationBasicInfo>();
+      integrationsInfo.forEach((integration) => {
+        addIntegrationToMap(integrationsMap, integration);
+      });
+
+      packageMap.set(packageKey, {
+        ...packageInfo,
+        integrations: integrationsMap,
+      });
+    } else {
+      // TODO: Any additional augmentation to existing `integrationsInfo` from extra data in `installedPackage`
+      // integrationsInfo.forEach((integration) => {
+      //   addIntegrationToMap(existingPackageInfo.integrations, integration);
+      // });
+    }
+  };
+
   const getPackages = (): InstalledPackageArray => {
     const packages = Array.from(packageMap.values());
     return packages.map((packageInfo): InstalledPackage => {
@@ -107,6 +151,7 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
 
   return {
     addPackagePolicy,
+    addInstalledPackage,
     addRegistryPackage,
     getPackages,
     getIntegrations,
