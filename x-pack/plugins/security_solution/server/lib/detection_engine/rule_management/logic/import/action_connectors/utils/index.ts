@@ -157,7 +157,7 @@ export const swapNonDefaultSpaceIdWithDestinationId = (
 // new destination id and id will have the old  origin id, so in order to be able to use the newly generated Connectors id, this util is used to swap the old id with the
 // new destination Id
 */
-export const generateNewRulesActionsAfterMigration = (
+export const updateRuleActionsWithMigratedResults = (
   rules: Array<RuleToImport | Error>,
   connectorsImportResult: SavedObjectsImportSuccess[]
 ): Array<RuleToImport | Error> => {

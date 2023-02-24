@@ -144,6 +144,8 @@ export const importRulesRoute = (
           overwrite: request.query.overwrite_action_connectors,
         });
 
+        // rulesWithMigratedActions: Is returened only in case connectors were exorted from different namesapce and the
+        // original rules actions' ids were replaced with new destinationIds
         const parsedRules = actionConnectorErrors.length
           ? []
           : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;

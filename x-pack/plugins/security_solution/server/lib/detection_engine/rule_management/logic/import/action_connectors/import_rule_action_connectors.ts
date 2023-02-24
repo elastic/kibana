@@ -18,7 +18,7 @@ import {
   handleActionsHaveNoConnectors,
   mapSOErrorToRuleError,
   returnErroredImportResult,
-  generateNewRulesActionsAfterMigration,
+  updateRuleActionsWithMigratedResults,
 } from './utils';
 import type { ImportRuleActionConnectorsParams, ImportRuleActionConnectorsResult } from './types';
 
@@ -73,14 +73,18 @@ export const importRuleActionConnectors = async ({
         overwrite,
         createNewCopies: false,
       });
+    /*
+      // When a connector is exported from one namespace and imported to another, it does not result in an error, but instead a new object is created with
+      // new destination id and id will have the old  origin id, so in order to be able to use the newly generated Connectors id, this util is used to swap the old id with the
+      // new destination Id
+      */
     let rulesWithMigratedActions: Array<RuleToImport | Error> | undefined;
     if (successResults?.some((res) => res.destinationId))
-      rulesWithMigratedActions = generateNewRulesActionsAfterMigration(rules, successResults);
+      rulesWithMigratedActions = updateRuleActionsWithMigratedResults(rules, successResults);
 
     return {
       success,
       successCount,
-      successResults,
       errors: errors ? mapSOErrorToRuleError(errors) : [],
       warnings: (warnings as WarningSchema[]) || [],
       rulesWithMigratedActions,
