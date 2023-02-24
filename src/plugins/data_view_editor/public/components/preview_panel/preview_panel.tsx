@@ -33,7 +33,11 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
         <IndicesList
           data-test-subj="createIndexPatternStep1IndicesList"
           query={title}
-          indices={title.length ? matched.visibleIndices : matched.allIndices}
+          indices={
+            title.length && !isAboutToAddMoreIndices(title)
+              ? matched.visibleIndices
+              : matched.allIndices
+          }
         />
       </>
     ) : (
@@ -52,3 +56,7 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
     </>
   );
 };
+
+function isAboutToAddMoreIndices(query: string) {
+  return query.trimEnd().endsWith(',');
+}
