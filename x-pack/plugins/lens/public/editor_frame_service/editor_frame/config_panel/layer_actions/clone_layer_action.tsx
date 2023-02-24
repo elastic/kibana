@@ -22,7 +22,6 @@ export const getCloneLayerAction = (props: CloneLayerAction): LayerAction => {
   });
 
   return {
-    id: 'cloneLayerAction',
     execute: props.execute,
     displayName,
     isCompatible: Boolean(props.activeVisualization.cloneLayer && !props.isTextBasedLanguage),

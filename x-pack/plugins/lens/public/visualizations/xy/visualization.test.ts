@@ -37,7 +37,6 @@ import { DataViewsState } from '../../state_management';
 import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { KEEP_GLOBAL_FILTERS_ACTION_ID } from './annotations/actions';
 import { layerTypes, Visualization } from '../..';
 
 const exampleAnnotation: EventAnnotationConfig = {
@@ -2963,29 +2962,33 @@ describe('xy_visualization', () => {
     });
   });
 
-  describe('layer actions', () => {
+  describe('getSupportedActionsForLayer', () => {
     it('should return no actions for a data layer', () => {
-      expect(xyVisualization.getSupportedActionsForLayer?.('first', exampleState())).toHaveLength(
-        0
-      );
+      expect(
+        xyVisualization.getSupportedActionsForLayer?.('first', exampleState(), jest.fn())
+      ).toHaveLength(0);
     });
 
     it('should return one action for an annotation layer', () => {
       const baseState = exampleState();
       expect(
-        xyVisualization.getSupportedActionsForLayer?.('annotation', {
-          ...baseState,
-          layers: [
-            ...baseState.layers,
-            {
-              layerId: 'annotation',
-              layerType: layerTypes.ANNOTATIONS,
-              annotations: [exampleAnnotation2],
-              ignoreGlobalFilters: true,
-              indexPatternId: 'myIndexPattern',
-            },
-          ],
-        })
+        xyVisualization.getSupportedActionsForLayer?.(
+          'annotation',
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
+                indexPatternId: 'myIndexPattern',
+              },
+            ],
+          },
+          jest.fn()
+        )
       ).toEqual([
         expect.objectContaining({
           displayName: 'Keep global filters',
@@ -2998,29 +3001,29 @@ describe('xy_visualization', () => {
       ]);
     });
 
-    it('should handle an annotation action', () => {
+    it('should return an action that performs a state update on click', () => {
       const baseState = exampleState();
-      const state = {
-        ...baseState,
-        layers: [
-          ...baseState.layers,
-          {
-            layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
-            annotations: [exampleAnnotation2],
-            ignoreGlobalFilters: true,
-            indexPatternId: 'myIndexPattern',
-          },
-        ],
-      };
-
-      const newState = xyVisualization.onLayerAction!(
+      const setState = jest.fn();
+      const [action] = xyVisualization.getSupportedActionsForLayer?.(
         'annotation',
-        KEEP_GLOBAL_FILTERS_ACTION_ID,
-        state
-      );
+        {
+          ...baseState,
+          layers: [
+            ...baseState.layers,
+            {
+              layerId: 'annotation',
+              layerType: layerTypes.ANNOTATIONS,
+              annotations: [exampleAnnotation2],
+              ignoreGlobalFilters: true,
+              indexPatternId: 'myIndexPattern',
+            },
+          ],
+        },
+        setState
+      )!;
+      action.execute();
 
-      expect(newState).toEqual(
+      expect(setState).toHaveBeenCalledWith(
         expect.objectContaining({
           layers: expect.arrayContaining([
             {

@@ -17,7 +17,6 @@ export const getOpenLayerSettingsAction = (props: {
   });
 
   return {
-    id: 'openLayerSettings',
     displayName,
     execute: props.openLayerSettings,
     icon: 'gear',

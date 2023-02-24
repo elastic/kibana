@@ -325,16 +325,11 @@ export function LayerPanel(
   const compatibleActions = useMemo<LayerAction[]>(
     () =>
       [
-        ...(activeVisualization
-          .getSupportedActionsForLayer?.(layerId, visualizationState)
-          .map((action) => ({
-            ...action,
-            execute: () => {
-              updateVisualization(
-                activeVisualization.onLayerAction?.(layerId, action.id, visualizationState)
-              );
-            },
-          })) || []),
+        ...(activeVisualization.getSupportedActionsForLayer?.(
+          layerId,
+          visualizationState,
+          updateVisualization
+        ) || []),
         ...getSharedActions({
           layerId,
           activeVisualization,

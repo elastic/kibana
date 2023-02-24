@@ -612,7 +612,6 @@ export interface DatasourceDataPanelProps<T = unknown> {
 
 /** @internal **/
 export interface LayerAction {
-  id: string;
   displayName: string;
   description?: string;
   execute: () => void | Promise<void>;
@@ -621,8 +620,6 @@ export interface LayerAction {
   isCompatible: boolean;
   'data-test-subj'?: string;
 }
-
-export type LayerActionFromVisualization = Omit<LayerAction, 'execute'>;
 
 interface SharedDimensionProps {
   /** Visualizations can restrict operations based on their own rules.
@@ -1106,12 +1103,11 @@ export interface Visualization<T = unknown, P = unknown> {
    * returns a list of custom actions supported by the visualization layer.
    * Default actions like delete/clear are not included in this list and are managed by the editor frame
    * */
-  getSupportedActionsForLayer?: (layerId: string, state: T) => LayerActionFromVisualization[];
-
-  /**
-   * Perform state mutations in response to a layer action
-   */
-  onLayerAction?: (layerId: string, actionId: string, state: T) => T;
+  getSupportedActionsForLayer?: (
+    layerId: string,
+    state: T,
+    setState: StateSetter<T>
+  ) => LayerAction[];
 
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
