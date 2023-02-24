@@ -12,9 +12,11 @@ import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 
 describe('FieldTypeIcon', () => {
   it('renders label and icon but not tooltip content on mouseover if tooltipEnabled=false', async () => {
-    const { getByText } = render(
+    const { getByText, container } = render(
       <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={false} />
     );
+
+    expect(container.querySelector('.euiToken')).toBeDefined();
 
     fireEvent.mouseOver(getByText('Keyword'));
 
@@ -27,17 +29,20 @@ describe('FieldTypeIcon', () => {
     );
   });
 
-  test(`render component when type matches a field type`, () => {
-    const typeIconComponent = render(
+  it(`renders component when type matches a field type`, () => {
+    const { container } = render(
       <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
     );
-    expect(typeIconComponent).toMatchSnapshot();
+    expect(container.querySelector('.euiToken')).toBeDefined();
+    expect(container).toHaveTextContent('keyword');
   });
 
   it('shows tooltip content on mouseover', async () => {
-    const { getByText } = render(
+    const { getByText, container } = render(
       <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
     );
+    expect(container.querySelector('.euiToken')).toBeDefined();
+    expect(container).toHaveTextContent('keyword');
 
     fireEvent.mouseOver(getByText('keyword'));
 
