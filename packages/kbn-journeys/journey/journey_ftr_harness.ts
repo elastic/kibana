@@ -99,10 +99,13 @@ export class JourneyFtrHarness {
 
   private async setupBrowserAndPage() {
     const browser = await this.getBrowserInstance();
-    this.context = await browser.newContext({ bypassCSP: true });
+    this.context = await browser.newContext();
 
     if (this.journeyConfig.shouldAutoLogin()) {
-      const cookie = await this.auth.login({ username: 'elastic', password: 'changeme' });
+      const cookie = await this.auth.login({
+        username: this.config.get('servers.kibana.username'),
+        password: this.config.get('servers.kibana.password'),
+      });
       await this.context.addCookies([cookie]);
     }
 

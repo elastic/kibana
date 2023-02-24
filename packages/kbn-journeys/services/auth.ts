@@ -20,6 +20,9 @@ export interface Credentials {
 }
 
 function extractCookieValue(authResponse: AxiosResponse) {
+  if (authResponse.status !== 200) {
+    throw new Error('Kibana auth failed');
+  }
   return authResponse.headers['set-cookie']?.[0].toString().split(';')[0].split('sid=')[1] ?? '';
 }
 export class Auth {
@@ -37,9 +40,10 @@ export class Auth {
         port: this.config.get('servers.kibana.port'),
       })
     );
-
     const loginUrl = new URL('/internal/security/login', baseUrl);
     const provider = baseUrl.hostname === 'localhost' ? 'basic' : 'cloud-basic';
+
+    const version = await this.kibanaServer.version.get();
 
     this.log.info('fetching auth cookie from', loginUrl.href);
     const authResponse = await axios.request({
@@ -53,7 +57,7 @@ export class Auth {
       },
       headers: {
         'content-type': 'application/json',
-        'kbn-version': await this.kibanaServer.version.get(),
+        'kbn-version': version,
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
       },
