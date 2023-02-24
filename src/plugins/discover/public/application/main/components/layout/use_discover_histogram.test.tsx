@@ -7,6 +7,7 @@
  */
 
 import React, { ReactElement } from 'react';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
@@ -38,11 +39,11 @@ import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_message
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 
 const mockData = dataPluginMock.createStartContract();
-const mockQueryState = {
+let mockQueryState = {
   query: {
     query: 'query',
     language: 'kuery',
-  },
+  } as Query | AggregateQuery,
   filters: [],
   time: {
     from: 'now-15m',
@@ -110,6 +111,10 @@ describe('useDiscoverHistogram', () => {
       foundDocuments: true,
     }) as DataMain$,
     savedSearchFetch$ = new Subject() as DataFetch$,
+    documents$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: esHits.map((esHit) => buildDataTableRecord(esHit, dataViewWithTimefieldMock)),
+    }) as DataDocuments$,
   }: {
     stateContainer?: DiscoverStateContainer;
     searchSessionId?: string;
@@ -117,12 +122,8 @@ describe('useDiscoverHistogram', () => {
     totalHits$?: DataTotalHits$;
     main$?: DataMain$;
     savedSearchFetch$?: DataFetch$;
+    documents$?: DataDocuments$;
   } = {}) => {
-    const documents$ = new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      result: esHits.map((esHit) => buildDataTableRecord(esHit, dataViewWithTimefieldMock)),
-    }) as DataDocuments$;
-
     const availableFields$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       fields: [] as string[],
@@ -380,6 +381,48 @@ describe('useDiscoverHistogram', () => {
         result: 100,
       });
       expect(mockCheckHitCount).toHaveBeenCalledWith(main$, 100);
+    });
+
+    it('should fetch total hits for text based', async () => {
+      mockCheckHitCount.mockClear();
+      mockQueryState = {
+        query: { sql: 'select * from index' },
+        filters: [],
+        time: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      };
+
+      mockData.query.getState = () => mockQueryState;
+      const documents$ = new BehaviorSubject({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: [{ raw: {}, flattened: {}, id: '1' }],
+      }) as unknown as DataDocuments$;
+      const main$ = new BehaviorSubject({
+        fetchStatus: FetchStatus.COMPLETE,
+        recordRawType: RecordRawType.DOCUMENT,
+        foundDocuments: true,
+      }) as DataMain$;
+      const stateContainer = getStateContainer();
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer, documents$, main$ });
+      const api = createMockUnifiedHistogramApi({ initialized: true });
+      let params: Partial<UnifiedHistogramState> = {};
+      api.setTotalHits = jest.fn((p) => {
+        params = { ...params, ...p };
+      });
+      act(() => {
+        hook.result.current.setUnifiedHistogramApi(api);
+      });
+      expect(api.setTotalHits).toHaveBeenCalledWith({
+        totalHitsResult: 1,
+        totalHitsStatus: FetchStatus.COMPLETE,
+      });
+      expect(documents$.value).toEqual({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: [{ raw: {}, flattened: {}, id: '1' }],
+      });
+      expect(mockCheckHitCount).not.toHaveBeenCalled();
     });
 
     it('should not update total hits when the total hits state changes to an error', async () => {

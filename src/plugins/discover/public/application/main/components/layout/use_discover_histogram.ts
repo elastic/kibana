@@ -161,7 +161,7 @@ export const useDiscoverHistogram = ({
 
   const isPlainRecord = query && isOfAggregateQueryType(query);
   if (isPlainRecord) {
-    const dateRange = getResolvedDateRange(services.data.query.timefilter.timefilter);
+    const dateRange = getResolvedDateRange(timefilter);
     timeRange = {
       from: dateRange.fromDate,
       to: dateRange.toDate,

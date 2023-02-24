@@ -20,10 +20,11 @@ export function hasActiveFilter(filters: Filter[] | undefined) {
  * @param timefilter
  */
 export const getResolvedDateRange = (timefilter: TimefilterContract) => {
-  const { from, to } = timefilter.getTime();
-  const { min, max } = timefilter.calculateBounds({
-    from,
-    to,
-  });
+  const { from, to } = timefilter.getTime() || timefilter.getTimeDefaults();
+  const { min, max } =
+    timefilter.calculateBounds({
+      from,
+      to,
+    }) || {};
   return { fromDate: min?.toISOString() || from, toDate: max?.toISOString() || to };
 };
