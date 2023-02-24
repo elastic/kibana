@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { BlobStorageSettings } from '@kbn/files-plugin/common';
+
 export type { BaseFilesClient, Abortable, Pagination } from './base_file_client';
 
 /* Status of a file.
