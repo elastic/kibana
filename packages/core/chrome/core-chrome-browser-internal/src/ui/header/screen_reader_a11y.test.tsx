@@ -8,17 +8,11 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ScreenReaderRouteAnnouncements } from './screen_reader_a11y';
 import { mount } from 'enzyme';
 
 describe('ScreenReaderRouteAnnouncements', () => {
-  beforeAll(() => {
-    Object.defineProperty(window, 'localStorage', {
-      value: new StubBrowserStorage(),
-    });
-  });
-
   it('renders', () => {
     const component = mountWithIntl(
       <ScreenReaderRouteAnnouncements
@@ -30,16 +24,46 @@ describe('ScreenReaderRouteAnnouncements', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('does not take focus for Canvas', () => {
-    const noFocusComponent = mount(
+  it('does not set the focusOnRegionOnTextChange for canvas or discover', () => {
+    const noFocusComponentCanvas = mount(
       <ScreenReaderRouteAnnouncements
         appId$={new BehaviorSubject('canvas')}
         customBranding$={new BehaviorSubject({})}
         breadcrumbs$={new BehaviorSubject([])}
       />
     );
+    const noFocusComponentDiscover = mount(
+      <ScreenReaderRouteAnnouncements
+        appId$={new BehaviorSubject('discover')}
+        customBranding$={new BehaviorSubject({})}
+        breadcrumbs$={new BehaviorSubject([])}
+      />
+    );
+
     expect(
-      noFocusComponent.debug().includes('<EuiScreenReaderLive focusRegionOnTextChange={false}>')
+      noFocusComponentCanvas
+        .debug()
+        .includes('<EuiScreenReaderLive focusRegionOnTextChange={false}>')
+    ).toBeTruthy();
+
+    expect(
+      noFocusComponentDiscover
+        .debug()
+        .includes('<EuiScreenReaderLive focusRegionOnTextChange={false}>')
+    ).toBeTruthy();
+  });
+
+  it('sets the focusOnRegionOnTextChange to true for other apps', () => {
+    const noFocusComponent = mount(
+      <ScreenReaderRouteAnnouncements
+        appId$={new BehaviorSubject('visualize')}
+        customBranding$={new BehaviorSubject({})}
+        breadcrumbs$={new BehaviorSubject([])}
+      />
+    );
+
+    expect(
+      noFocusComponent.debug().includes('<EuiScreenReaderLive focusRegionOnTextChange={true}>')
     ).toBeTruthy();
   });
 });
