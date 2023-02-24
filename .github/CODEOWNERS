@@ -1041,7 +1041,6 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/plugins/security_solution/server/lib/detection_engine/migrations @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_types @elastic/security-detections-response-alerts
-/x-pack/plugins/security_solution/server/lib/detection_engine/signals @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detections-response-alerts
 

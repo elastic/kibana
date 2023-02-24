@@ -26,7 +26,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
-import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
+import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,

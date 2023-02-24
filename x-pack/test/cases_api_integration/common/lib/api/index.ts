@@ -38,7 +38,7 @@ import {
   CasesMetricsResponse,
   CasesBulkGetResponse,
 } from '@kbn/cases-plugin/common/api';
-import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
+import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import { ActionResult } from '@kbn/actions-plugin/server/types';
 import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
 import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';

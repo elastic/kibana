@@ -32,8 +32,8 @@ import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
 import { convertCreateAPIToInternalSchema } from '../../../rule_management';
 import type { RuleParams } from '../../../rule_schema';
-import { createPreviewRuleExecutionLogger } from '../../../signals/preview/preview_rule_execution_logger';
-import { parseInterval } from '../../../signals/utils';
+import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logger';
+import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
@@ -43,7 +43,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
 
 import type { ConfigType } from '../../../../../config';
-import { alertInstanceFactoryStub } from '../../../signals/preview/alert_instance_factory_stub';
+import { alertInstanceFactoryStub } from './alert_instance_factory_stub';
 import type {
   CreateRuleOptions,
   CreateSecurityRuleTypeWrapperProps,
