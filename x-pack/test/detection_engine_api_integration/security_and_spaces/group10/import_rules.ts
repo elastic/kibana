@@ -1193,177 +1193,179 @@ export default ({ getService }: FtrProviderContext): void => {
           );
         });
 
-        it('importing a non-default-space 7.16 rule with a connector made in the non-default space should result in a 200', async () => {
-          const spaceId = '714-space';
-          // connectorId is from the 7.x connector here
-          // x-pack/test/functional/es_archives/security_solution/import_rule_connector
-          const buffer = getImportRuleBuffer(space714ActionConnectorId);
+        describe('should be imported into the non-default space', () => {
+          it('importing a non-default-space 7.16 rule with a connector made in the non-default space should result in a 200', async () => {
+            const spaceId = '714-space';
+            // connectorId is from the 7.x connector here
+            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            const buffer = getImportRuleBuffer(space714ActionConnectorId);
 
-          const { body } = await supertest
-            .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_import`)
-            .set('kbn-xsrf', 'true')
-            .attach('file', buffer, 'rules.ndjson')
-            .expect(200);
-          expect(body.success).to.eql(true);
-          expect(body.success_count).to.eql(1);
-          expect(body.errors.length).to.eql(0);
-        });
+            const { body } = await supertest
+              .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .attach('file', buffer, 'rules.ndjson')
+              .expect(200);
+            expect(body.success).to.eql(true);
+            expect(body.success_count).to.eql(1);
+            expect(body.errors.length).to.eql(0);
+          });
 
-        it('should import a non-default-space 7.16 rule with a connector made in the non-default space', async () => {
-          const spaceId = '714-space';
-          const differentSpaceConnectorId = '5272d090-b111-11ed-b56a-a7991a8d8b32';
+          it('should import a non-default-space 7.16 rule with a connector made in the non-default space', async () => {
+            const spaceId = '714-space';
+            const differentSpaceConnectorId = '5272d090-b111-11ed-b56a-a7991a8d8b32';
 
-          const buffer = getImportRuleWithConnectorsBuffer(differentSpaceConnectorId);
-          const { body } = await supertest
-            .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_import`)
-            .set('kbn-xsrf', 'true')
-            .attach('file', buffer, 'rules.ndjson')
-            .expect(200);
+            const buffer = getImportRuleWithConnectorsBuffer(differentSpaceConnectorId);
+            const { body } = await supertest
+              .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .attach('file', buffer, 'rules.ndjson')
+              .expect(200);
 
-          expect(body).to.eql({
-            success: true,
-            success_count: 1,
-            rules_count: 1,
-            errors: [],
-            exceptions_errors: [],
-            exceptions_success: true,
-            exceptions_success_count: 0,
-            action_connectors_success: true,
-            action_connectors_success_count: 1,
-            action_connectors_warnings: [],
-            action_connectors_errors: [],
+            expect(body).to.eql({
+              success: true,
+              success_count: 1,
+              rules_count: 1,
+              errors: [],
+              exceptions_errors: [],
+              exceptions_success: true,
+              exceptions_success_count: 0,
+              action_connectors_success: true,
+              action_connectors_success_count: 1,
+              action_connectors_warnings: [],
+              action_connectors_errors: [],
+            });
+          });
+          it('should import a non-default-space 7.16 rule with a connector made in the non-default space into the default space successfully', async () => {
+            // connectorId is from the 7.x connector here
+            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            const differentSpaceConnectorId = '963ec960-a21a-11ed-84a4-a33e4c2558c9';
+            const buffer = getImportRuleWithConnectorsBuffer(differentSpaceConnectorId);
+
+            const { body } = await supertest
+              .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .attach('file', buffer, 'rules.ndjson')
+              .expect(200);
+            expect(body).to.eql({
+              success: true,
+              success_count: 1,
+              rules_count: 1,
+              errors: [],
+              exceptions_errors: [],
+              exceptions_success: true,
+              exceptions_success_count: 0,
+              action_connectors_success: true,
+              action_connectors_success_count: 1,
+              action_connectors_warnings: [],
+              action_connectors_errors: [],
+            });
+          });
+          it('importing a non-default-space 7.16 rule with a connector made in the non-default space into the default space should result in a 404 if the file does not contain connectors', async () => {
+            // connectorId is from the 7.x connector here
+            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            const buffer = getImportRuleBuffer(space714ActionConnectorId);
+
+            const { body } = await supertest
+              .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .attach('file', buffer, 'rules.ndjson')
+              .expect(200);
+            expect(body.success).to.equal(false);
+            expect(body.errors[0].error.status_code).to.equal(404);
+            expect(body.errors[0].error.message).to.equal(
+              `1 connector is missing. Connector id missing is: ${space714ActionConnectorId}`
+            );
+          });
+          // When objects become share-capable we will either add / update this test
+          it('importing a non-default-space 7.16 rule with a connector made in the non-default space into a different non-default space should result in a 404', async () => {
+            const spaceId = '4567-space';
+            // connectorId is from the 7.x connector here
+            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            // it
+            const buffer = getImportRuleBuffer(space714ActionConnectorId);
+
+            const { body } = await supertest
+              .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .attach('file', buffer, 'rules.ndjson')
+              .expect(200);
+            expect(body.success).to.equal(false);
+            expect(body.errors[0].error.status_code).to.equal(404);
+            expect(body.errors[0].error.message).to.equal(
+              `1 connector is missing. Connector id missing is: ${space714ActionConnectorId}`
+            );
           });
         });
-        it('should import a non-default-space 7.16 rule with a connector made in the non-default space into the default space successfully', async () => {
-          // connectorId is from the 7.x connector here
-          // x-pack/test/functional/es_archives/security_solution/import_rule_connector
-          const differentSpaceConnectorId = '963ec960-a21a-11ed-84a4-a33e4c2558c9';
-          const buffer = getImportRuleWithConnectorsBuffer(differentSpaceConnectorId);
+        describe('should be imported into the default space', () => {
+          it('should import a default-space 7.16 rule with a connector made in the default space into a non-default space successfully', async () => {
+            await esArchiver.load(
+              'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
+            );
+            const defaultSpaceConnectorId = '8fbf6d10-a21a-11ed-84a4-a33e4c2558c9';
 
-          const { body } = await supertest
-            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-            .set('kbn-xsrf', 'true')
-            .attach('file', buffer, 'rules.ndjson')
-            .expect(200);
-          expect(body).to.eql({
-            success: true,
-            success_count: 1,
-            rules_count: 1,
-            errors: [],
-            exceptions_errors: [],
-            exceptions_success: true,
-            exceptions_success_count: 0,
-            action_connectors_success: true,
-            action_connectors_success_count: 1,
-            action_connectors_warnings: [],
-            action_connectors_errors: [],
+            const spaceId = '4567-space';
+            // connectorId is from the 7.x connector here
+            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            // it
+            const buffer = getImportRuleWithConnectorsBuffer(defaultSpaceConnectorId);
+
+            const { body } = await supertest
+              .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .attach('file', buffer, 'rules.ndjson')
+              .expect(200);
+            expect(body).to.eql({
+              success: true,
+              success_count: 1,
+              rules_count: 1,
+              errors: [],
+              exceptions_errors: [],
+              exceptions_success: true,
+              exceptions_success_count: 0,
+              action_connectors_success: true,
+              action_connectors_success_count: 1,
+              action_connectors_warnings: [],
+              action_connectors_errors: [],
+            });
           });
-        });
+          // When objects become share-capable we will either add / update this test
 
-        it('should import a default-space 7.16 rule with a connector made in the default space into a non-default space successfully', async () => {
-          await esArchiver.load(
-            'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
-          );
-          const defaultSpaceConnectorId = '8fbf6d10-a21a-11ed-84a4-a33e4c2558c9';
+          it('importing a default-space 7.16 rule with a connector made in the default space into the default space should result in a 200', async () => {
+            // connectorId is from the 7.x connector here
+            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            // it
+            const buffer = getImportRuleBuffer(defaultSpaceActionConnectorId);
 
-          const spaceId = '4567-space';
-          // connectorId is from the 7.x connector here
-          // x-pack/test/functional/es_archives/security_solution/import_rule_connector
-          // it
-          const buffer = getImportRuleWithConnectorsBuffer(defaultSpaceConnectorId);
-
-          const { body } = await supertest
-            .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_import`)
-            .set('kbn-xsrf', 'true')
-            .attach('file', buffer, 'rules.ndjson')
-            .expect(200);
-          expect(body).to.eql({
-            success: true,
-            success_count: 1,
-            rules_count: 1,
-            errors: [],
-            exceptions_errors: [],
-            exceptions_success: true,
-            exceptions_success_count: 0,
-            action_connectors_success: true,
-            action_connectors_success_count: 1,
-            action_connectors_warnings: [],
-            action_connectors_errors: [],
+            const { body } = await supertest
+              .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .attach('file', buffer, 'rules.ndjson')
+              .expect(200);
+            expect(body.success).to.equal(true);
+            expect(body.success_count).to.eql(1);
+            expect(body.errors.length).to.eql(0);
           });
-        });
-        // When objects become share-capable we will either add / update this test
-        it('importing a non-default-space 7.16 rule with a connector made in the non-default space into the default space should result in a 404 if the file does not contain connectors', async () => {
-          // connectorId is from the 7.x connector here
-          // x-pack/test/functional/es_archives/security_solution/import_rule_connector
-          const buffer = getImportRuleBuffer(space714ActionConnectorId);
+          it('importing a default-space 7.16 rule with a connector made in the default space into a non-default space should result in a 404', async () => {
+            await esArchiver.load(
+              'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
+            );
+            const spaceId = '4567-space';
+            // connectorId is from the 7.x connector here
+            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            // it
+            const buffer = getImportRuleBuffer(defaultSpaceActionConnectorId);
 
-          const { body } = await supertest
-            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-            .set('kbn-xsrf', 'true')
-            .attach('file', buffer, 'rules.ndjson')
-            .expect(200);
-          expect(body.success).to.equal(false);
-          expect(body.errors[0].error.status_code).to.equal(404);
-          expect(body.errors[0].error.message).to.equal(
-            `1 connector is missing. Connector id missing is: ${space714ActionConnectorId}`
-          );
-        });
-
-        // When objects become share-capable we will either add / update this test
-        it('importing a non-default-space 7.16 rule with a connector made in the non-default space into a different non-default space should result in a 404', async () => {
-          const spaceId = '4567-space';
-          // connectorId is from the 7.x connector here
-          // x-pack/test/functional/es_archives/security_solution/import_rule_connector
-          // it
-          const buffer = getImportRuleBuffer(space714ActionConnectorId);
-
-          const { body } = await supertest
-            .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_import`)
-            .set('kbn-xsrf', 'true')
-            .attach('file', buffer, 'rules.ndjson')
-            .expect(200);
-          expect(body.success).to.equal(false);
-          expect(body.errors[0].error.status_code).to.equal(404);
-          expect(body.errors[0].error.message).to.equal(
-            `1 connector is missing. Connector id missing is: ${space714ActionConnectorId}`
-          );
-        });
-
-        it('importing a default-space 7.16 rule with a connector made in the default space into the default space should result in a 200', async () => {
-          // connectorId is from the 7.x connector here
-          // x-pack/test/functional/es_archives/security_solution/import_rule_connector
-          // it
-          const buffer = getImportRuleBuffer(defaultSpaceActionConnectorId);
-
-          const { body } = await supertest
-            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-            .set('kbn-xsrf', 'true')
-            .attach('file', buffer, 'rules.ndjson')
-            .expect(200);
-          expect(body.success).to.equal(true);
-          expect(body.success_count).to.eql(1);
-          expect(body.errors.length).to.eql(0);
-        });
-        it('importing a default-space 7.16 rule with a connector made in the default space into a non-default space should result in a 404', async () => {
-          await esArchiver.load(
-            'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
-          );
-          const spaceId = '4567-space';
-          // connectorId is from the 7.x connector here
-          // x-pack/test/functional/es_archives/security_solution/import_rule_connector
-          // it
-          const buffer = getImportRuleBuffer(defaultSpaceActionConnectorId);
-
-          const { body } = await supertest
-            .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_import`)
-            .set('kbn-xsrf', 'true')
-            .attach('file', buffer, 'rules.ndjson')
-            .expect(200);
-          expect(body.success).to.equal(false);
-          expect(body.errors[0].error.status_code).to.equal(404);
-          expect(body.errors[0].error.message).to.equal(
-            `1 connector is missing. Connector id missing is: ${defaultSpaceActionConnectorId}`
-          );
+            const { body } = await supertest
+              .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .attach('file', buffer, 'rules.ndjson')
+              .expect(200);
+            expect(body.success).to.equal(false);
+            expect(body.errors[0].error.status_code).to.equal(404);
+            expect(body.errors[0].error.message).to.equal(
+              `1 connector is missing. Connector id missing is: ${defaultSpaceActionConnectorId}`
+            );
+          });
         });
       });
 

@@ -130,18 +130,26 @@ export const checkIfActionsHaveMissingConnectors = (
   }
   return null;
 };
-export const getDestinationId = (
-  actionId: string,
-  importResult: SavedObjectsImportSuccess[]
-): string | undefined => importResult.find((res) => res.id === actionId)?.destinationId;
 
-export const swapNonDefaultSpaceDestinationIdWithId = (
+export const mapActionIdToNewDestinationId = (
+  connectorsImportResult: SavedObjectsImportSuccess[]
+) => {
+  return connectorsImportResult.reduce(
+    (acc: { [actionId: string]: string }, { destinationId, id }) => {
+      acc[id] = destinationId || id;
+      return acc;
+    },
+    {}
+  );
+};
+
+export const swapNonDefaultSpaceIdWithDestinationId = (
   rule: RuleToImport,
-  importResult: SavedObjectsImportSuccess[]
+  actionIdDestinationIdLookup: { [actionId: string]: string }
 ) => {
   return rule.actions?.map((action) => {
-    const destinationId = getDestinationId(action.id, importResult);
-    return { ...action, id: destinationId || action.id };
+    const destinationId = actionIdDestinationIdLookup[action.id];
+    return { ...action, id: destinationId };
   });
 };
 /*
@@ -151,10 +159,14 @@ export const swapNonDefaultSpaceDestinationIdWithId = (
 */
 export const generateNewRulesActionsAfterMigration = (
   rules: Array<RuleToImport | Error>,
-  importResult: SavedObjectsImportSuccess[]
+  connectorsImportResult: SavedObjectsImportSuccess[]
 ): Array<RuleToImport | Error> => {
+  const actionIdDestinationIdLookup = mapActionIdToNewDestinationId(connectorsImportResult);
   return rules.map((rule) => {
     if (rule instanceof Error) return rule;
-    return { ...rule, actions: swapNonDefaultSpaceDestinationIdWithId(rule, importResult) };
+    return {
+      ...rule,
+      actions: swapNonDefaultSpaceIdWithDestinationId(rule, actionIdDestinationIdLookup),
+    };
   });
 };

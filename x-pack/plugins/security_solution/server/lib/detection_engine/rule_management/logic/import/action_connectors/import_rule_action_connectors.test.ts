@@ -499,7 +499,7 @@ describe('importRuleActionConnectors', () => {
       rulesWithMigratedActions,
     });
   });
-  it('should generate new destinationIds if the connectors are exported from a different namespace for multiple rules', async () => {
+  it('should generate multiple destinationIds if the connectors are exported from a different namespace for multiple rules', async () => {
     const multipleRules = [
       {
         ...getImportRulesSchemaMock(),
@@ -535,7 +535,7 @@ describe('importRuleActionConnectors', () => {
       },
       {
         destinationId: '892cab9bb-535f-45dd-b9c2-5bc1bc0db96',
-        id: '0abc78e0-7031-11ed-b076-53cc4d57aaf1',
+        id: '11abc78e0-9031-11ed-b076-53cc4d57aaw',
         meta: { title: 'Connector: [anotherSpaceSlack]', icon: undefined },
         type: 'action',
       },
@@ -603,7 +603,7 @@ describe('importRuleActionConnectors', () => {
           {
             action_type_id: '.index',
             group: 'default',
-            id: '11abc78e0-9031-11ed-b076-53cc4d57aaw',
+            id: '892cab9bb-535f-45dd-b9c2-5bc1bc0db96',
             params: {},
           },
         ],
