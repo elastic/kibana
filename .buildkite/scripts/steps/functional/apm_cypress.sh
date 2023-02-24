@@ -13,7 +13,7 @@ export JOB=kibana-apm-cypress
 IS_FLAKY_TEST_RUNNER=${CLI_COUNT:-0}
 
 #Enabling cypress dashboard recording when PR is labeled with `apm:cypress-record` and we are not using the flaky test runner
-if [[ "$IS_FLAKY_TEST_RUNNER" -ne 1 && is_pr_with_label "apm:cypress-record"]]; then
+if [[ "$IS_FLAKY_TEST_RUNNER" -ne 1 ]] && is_pr_with_label "apm:cypress-record"; then
   CYPRESS_ARGS="--record --key "$APM_CYPRESS_RECORD_KEY" --parallel --ci-build-id "${BUILDKITE_BUILD_ID}""
 else
   CYPRESS_ARGS=""
