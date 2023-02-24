@@ -402,7 +402,7 @@ export class TaskStore {
     }
   }
 
-  public async search(opts: SearchOpts = {}): Promise<FetchResult> {
+  public async search(opts: SearchOpts = {}, partitions?: number[]): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
@@ -416,6 +416,14 @@ export class TaskStore {
           query,
         },
       });
+
+      if (partitions) {
+        for (const task of tasks) {
+          if (!partitions.includes(task._source!.task!.partition!)) {
+            throw new Error(`Retrieved task from the wrong partition`);
+          }
+        }
+      }
 
       return {
         searchAfter: tasks.length === 0 ? undefined : tasks[tasks.length - 1].sort,

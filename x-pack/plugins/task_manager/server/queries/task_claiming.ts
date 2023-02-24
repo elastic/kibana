@@ -348,7 +348,10 @@ export class TaskClaiming {
 
         do {
           const docsToUpdate: ConcreteTaskInstance[] = [];
-          for (let i = 0; i < claimSize - updatedDocs.length && updateableDocs.length > 0; ++i) {
+          while (
+            docsToUpdate.length < claimSize - updatedDocs.length &&
+            updateableDocs.length > 0
+          ) {
             const doc = updateableDocs.shift()!;
             if (taskTypesToClaim.includes(doc.taskType)) {
               docsToUpdate.push(doc);
@@ -393,9 +396,7 @@ export class TaskClaiming {
       this.logger
         .get('claim')
         .debug(
-          `task types: ${taskTypesToClaim.join(',')}\nclaimed tasks: ${
-            updatedDocs.length
-          }\t# searches: ${searchesCount}\t# bulk updates: ${bulkUpdatesCount}\t# version conflicts: ${tasksConflicted}}`
+          `# task types: ${taskTypesToClaim.length}\t#claimed tasks: ${updatedDocs.length}\t# searches: ${searchesCount}\t# bulk updates: ${bulkUpdatesCount}\t# version conflicts: ${tasksConflicted}}`
         );
 
       // Not all of the updated docs are "claimed" and ready to be ran
