@@ -48,6 +48,7 @@ describe('cloneRuleRoute', () => {
         params: {
           foo: true,
         },
+        uuid: '123-456',
       },
     ],
     enabled: true,
@@ -97,6 +98,7 @@ describe('cloneRuleRoute', () => {
       {
         ...ruleToClone.actions[0],
         connector_type_id: 'test',
+        uuid: '123-456',
       },
     ],
   };
