@@ -10,6 +10,7 @@ import React, { FC, useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiScreenReaderLive } from '@elastic/eui';
 
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { HeaderProps } from './header';
 
 const DEFAULT_TITLE = 'Elastic'; // This may need to be DRYed out with https://github.com/elastic/kibana/blob/main/packages/core/rendering/core-rendering-server-internal/src/views/template.tsx#L34
@@ -17,7 +18,8 @@ const SEPARATOR = ' - ';
 
 export const ScreenReaderRouteAnnouncements: FC<{
   breadcrumbs$: HeaderProps['breadcrumbs$'];
-}> = ({ breadcrumbs$ }) => {
+  appId$: InternalApplicationStart['currentAppId$'];
+}> = ({ breadcrumbs$, appId$ }) => {
   const [routeTitle, setRouteTitle] = useState('');
   const breadcrumbs = useObservable(breadcrumbs$, []);
 
@@ -38,5 +40,17 @@ export const ScreenReaderRouteAnnouncements: FC<{
     }
   }, [breadcrumbs]);
 
-  return <EuiScreenReaderLive focusRegionOnTextChange>{routeTitle}</EuiScreenReaderLive>;
+  // 1. Canvas dynamically updates breadcrumbs *and* page title/history on every name onChange,
+  // which leads to focus fighting if this is enabled
+  // 2. Discover has custom h1 focus behavior on route change, which should probably
+  // be removed in favor of this for a more consistent SR experience
+  const appId = useObservable(appId$);
+  const disableFocusForApps = ['canvas', 'discover'];
+  const focusRegionOnTextChange = !disableFocusForApps.includes(appId || '');
+
+  return (
+    <EuiScreenReaderLive focusRegionOnTextChange={focusRegionOnTextChange}>
+      {routeTitle}
+    </EuiScreenReaderLive>
+  );
 };

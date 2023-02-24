@@ -109,7 +109,10 @@ export function Header({
 
   return (
     <>
-      <ScreenReaderRouteAnnouncements breadcrumbs$={observables.breadcrumbs$} />
+      <ScreenReaderRouteAnnouncements
+        breadcrumbs$={observables.breadcrumbs$}
+        appId$={application.currentAppId$}
+      />
 
       <HeaderTopBanner headerBanner$={observables.headerBanner$} />
       <header className={className} data-test-subj="headerGlobalNav">
