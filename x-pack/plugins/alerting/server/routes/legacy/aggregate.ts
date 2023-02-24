@@ -12,7 +12,7 @@ import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import {
   LEGACY_BASE_ALERT_API_PATH,
-  RuleAggregationResult,
+  DefaultRuleAggregationResult,
   getDefaultRuleAggregation,
   formatDefaultAggregationResult,
 } from '../../../common';
@@ -82,7 +82,7 @@ export const aggregateAlertRoute = (
           : [query.search_fields];
       }
 
-      const aggregateResult = await rulesClient.aggregate<RuleAggregationResult>({
+      const aggregateResult = await rulesClient.aggregate<DefaultRuleAggregationResult>({
         options,
         aggs: getDefaultRuleAggregation(),
       });

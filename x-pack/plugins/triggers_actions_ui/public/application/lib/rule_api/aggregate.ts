@@ -10,7 +10,7 @@ import {
   getRuleTagsAggregation,
   formatDefaultAggregationResult,
   formatRuleTagsAggregationResult,
-  RuleAggregationResult,
+  DefaultRuleAggregationResult,
   RuleTagsAggregationResult,
   RuleTagsAggregationFormattedResult,
 } from '@kbn/alerting-plugin/common';
@@ -58,7 +58,7 @@ export async function loadRuleAggregations({
     ruleStatusesFilter,
     tagsFilter,
   });
-  const res = await http.post<RuleAggregationResult>(
+  const res = await http.post<DefaultRuleAggregationResult>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
       body: JSON.stringify({

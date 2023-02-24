@@ -31,10 +31,8 @@ export const validateRuleAggregationFields = (
     }
 
     // Found terms, check terms field against blocklist
-    if (aggContainer.terms?.field) {
-      if (INVALID_RULE_AGG_TERMS.includes(aggContainer.terms.field)) {
-        throw Boom.badRequest(`Invalid aggregation term: ${aggContainer.terms.field}`);
-      }
+    if (aggContainer.terms?.field && INVALID_RULE_AGG_TERMS.includes(aggContainer.terms.field)) {
+      throw Boom.badRequest(`Invalid aggregation term: ${aggContainer.terms.field}`);
     }
   });
 };
@@ -42,10 +40,8 @@ export const validateRuleAggregationFields = (
 const validateRootLevelRuleAggregationFields = (container: AggregationsAggregationContainer) => {
   Object.entries(container).forEach(([aggName, aggContainer]) => {
     // Found field, check field against blocklist
-    if (aggName === 'field') {
-      if (INVALID_RULE_AGG_TERMS.includes(aggContainer)) {
-        throw Boom.badRequest(`Invalid aggregation term: ${aggContainer}`);
-      }
+    if (aggName === 'field' && INVALID_RULE_AGG_TERMS.includes(aggContainer)) {
+      throw Boom.badRequest(`Invalid aggregation term: ${aggContainer}`);
     }
 
     // Do not try to validate aggs/aggregations, as the above function is already doing that

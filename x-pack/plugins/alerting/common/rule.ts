@@ -90,9 +90,7 @@ export interface RuleAction {
   };
 }
 
-interface IndexType {
-  [key: string]: unknown;
-}
+type IndexType = Record<string, unknown>;
 
 export interface AggregateOptions extends IndexType {
   search?: string;
@@ -103,7 +101,6 @@ export interface AggregateOptions extends IndexType {
     id: string;
   };
   filter?: string | KueryNode;
-  maxTags?: number;
   page?: number;
   perPage?: number;
 }

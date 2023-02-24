@@ -77,9 +77,8 @@ export class RulesClient {
     };
   }
 
-  public aggregate = <T extends Record<string, unknown>>(
-    params: AggregateParams
-  ): Promise<T | undefined> => aggregate<T>(this.context, params);
+  public aggregate = <T extends Record<string, unknown>>(params: AggregateParams): Promise<T> =>
+    aggregate<T>(this.context, params);
   public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
     clone<Params>(this.context, ...args);
   public create = <Params extends RuleTypeParams = never>(params: CreateOptions<Params>) =>

@@ -8,7 +8,7 @@ import {
   RuleAggregationFormattedResult,
   getDefaultRuleAggregation,
   formatDefaultAggregationResult,
-  RuleAggregationResult,
+  DefaultRuleAggregationResult,
 } from '@kbn/alerting-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { LoadRuleAggregationsProps } from './aggregate_helpers';
@@ -32,7 +32,7 @@ export async function loadRuleAggregationsWithKueryFilter({
     searchText,
   });
 
-  const res = await http.post<RuleAggregationResult>(
+  const res = await http.post<DefaultRuleAggregationResult>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
       body: JSON.stringify({

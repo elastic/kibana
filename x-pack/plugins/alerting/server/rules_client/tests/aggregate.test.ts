@@ -19,7 +19,7 @@ import { getBeforeSetup, setGlobalDate } from './lib';
 import {
   RecoveredActionGroup,
   getDefaultRuleAggregation,
-  RuleAggregationResult,
+  DefaultRuleAggregationResult,
 } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
 import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
@@ -161,7 +161,7 @@ describe('aggregate()', () => {
 
   test('calls saved objects client with given params to perform aggregation', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
-    const result = await rulesClient.aggregate<RuleAggregationResult>({
+    const result = await rulesClient.aggregate<DefaultRuleAggregationResult>({
       options: {},
       aggs: getDefaultRuleAggregation(),
     });

@@ -23,9 +23,9 @@ export interface AggregateParams {
 export async function aggregate<T extends Record<string, unknown>>(
   context: RulesClientContext,
   params: AggregateParams
-): Promise<T | undefined> {
+): Promise<T> {
   const { options = {}, aggs } = params;
-  const { filter, maxTags, page = 1, perPage = 0, ...restOptions } = options;
+  const { filter, page = 1, perPage = 0, ...restOptions } = options;
 
   let authorizationTuple;
   try {
@@ -59,5 +59,6 @@ export async function aggregate<T extends Record<string, unknown>>(
     aggs,
   });
 
-  return result.aggregations;
+  // params.
+  return result.aggregations!;
 }

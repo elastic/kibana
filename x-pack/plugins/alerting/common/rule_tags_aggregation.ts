@@ -14,7 +14,7 @@ import type { AggregateOptions } from './rule';
 
 export type RuleTagsAggregationOptions = Pick<
   AggregateOptions,
-  'filter' | 'maxTags' | 'search' | 'searchFields' | 'defaultSearchOperator'
+  'filter' | 'search' | 'searchFields' | 'defaultSearchOperator'
 > & {
   after?: AggregationsCompositeAggregation['after'];
 };
@@ -64,7 +64,7 @@ export const getRuleTagsAggregation = (
 };
 
 export const formatRuleTagsAggregationResult = (
-  aggregations?: RuleTagsAggregationResult
+  aggregations: RuleTagsAggregationResult
 ): RuleTagsAggregationFormattedResult => {
   if (!aggregations) {
     return {

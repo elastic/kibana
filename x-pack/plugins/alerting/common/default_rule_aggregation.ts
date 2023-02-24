@@ -11,7 +11,7 @@ import {
   RuleAggregationFormattedResult,
 } from './rule';
 
-export interface RuleAggregationResult extends Record<string, unknown> {
+export interface DefaultRuleAggregationResult extends Record<string, unknown> {
   status: {
     buckets: Array<{
       key: string;
@@ -93,7 +93,7 @@ export const getDefaultRuleAggregation = (
 };
 
 export const formatDefaultAggregationResult = (
-  aggregations?: RuleAggregationResult
+  aggregations: DefaultRuleAggregationResult
 ): RuleAggregationFormattedResult => {
   if (!aggregations) {
     // Return a placeholder with all zeroes
@@ -127,7 +127,10 @@ export const formatDefaultAggregationResult = (
     [key]: docCount,
   }));
 
-  const ret: RuleAggregationFormattedResult = {
+  const enabledBuckets = aggregations.enabled.buckets;
+  const mutedBuckets = aggregations.muted.buckets;
+
+  const result: RuleAggregationFormattedResult = {
     ruleExecutionStatus: ruleExecutionStatus.reduce(
       (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
       {}
@@ -137,47 +140,33 @@ export const formatDefaultAggregationResult = (
       {}
     ),
     ruleEnabledStatus: {
-      enabled: 0,
-      disabled: 0,
+      enabled: enabledBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0,
+      disabled: enabledBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
     },
     ruleMutedStatus: {
-      muted: 0,
-      unmuted: 0,
+      muted: mutedBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0,
+      unmuted: mutedBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
     },
-    ruleSnoozedStatus: { snoozed: 0 },
+    ruleSnoozedStatus: {
+      snoozed: aggregations.snoozed?.count?.doc_count ?? 0,
+    },
     ruleTags: [],
   };
 
   // Fill missing keys with zeroes
   for (const key of RuleExecutionStatusValues) {
-    if (!ret.ruleExecutionStatus.hasOwnProperty(key)) {
-      ret.ruleExecutionStatus[key] = 0;
+    if (!result.ruleExecutionStatus.hasOwnProperty(key)) {
+      result.ruleExecutionStatus[key] = 0;
     }
   }
   for (const key of RuleLastRunOutcomeValues) {
-    if (!ret.ruleLastRunOutcome.hasOwnProperty(key)) {
-      ret.ruleLastRunOutcome[key] = 0;
+    if (!result.ruleLastRunOutcome.hasOwnProperty(key)) {
+      result.ruleLastRunOutcome[key] = 0;
     }
   }
 
-  const enabledBuckets = aggregations.enabled.buckets;
-  ret.ruleEnabledStatus = {
-    enabled: enabledBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0,
-    disabled: enabledBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
-  };
-
-  const mutedBuckets = aggregations.muted.buckets;
-  ret.ruleMutedStatus = {
-    muted: mutedBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0,
-    unmuted: mutedBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
-  };
-
-  ret.ruleSnoozedStatus = {
-    snoozed: aggregations.snoozed?.count?.doc_count ?? 0,
-  };
-
   const tagsBuckets = aggregations.tags?.buckets || [];
-  ret.ruleTags = tagsBuckets.map((bucket) => bucket.key);
+  result.ruleTags = tagsBuckets.map((bucket) => bucket.key);
 
-  return ret;
+  return result;
 };
