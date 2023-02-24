@@ -79,6 +79,7 @@ import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
 import { validateOutputForPolicy } from './agent_policies';
+import { recordAuditLog } from './audit_logging';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -133,6 +134,13 @@ class AgentPolicyService {
     if (options.bumpRevision) {
       await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id);
     }
+
+    await recordAuditLog({
+      esClient,
+      username: user?.username ?? 'system',
+      resourceType: 'AGENT_POLICY',
+      operation: 'UPDATE',
+    });
 
     return (await this.get(soClient, id)) as AgentPolicy;
   }
@@ -215,6 +223,13 @@ class AgentPolicyService {
       } as AgentPolicy,
       options
     );
+
+    await recordAuditLog({
+      esClient,
+      resourceType: 'AGENT_POLICY',
+      operation: 'CREATE',
+      username: options?.user?.username ?? 'system',
+    });
 
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
 
@@ -654,7 +669,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    options?: { force?: boolean; removeFleetServerDocuments?: boolean }
+    options?: { force?: boolean; removeFleetServerDocuments?: boolean; user?: AuthenticatedUser }
   ): Promise<DeleteAgentPolicyResponse> {
     const agentPolicy = await this.get(soClient, id, false);
     if (!agentPolicy) {
@@ -711,6 +726,13 @@ class AgentPolicyService {
     if (options?.removeFleetServerDocuments) {
       await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
     }
+
+    await recordAuditLog({
+      esClient,
+      resourceType: 'AGENT_POLICY',
+      operation: 'DELETE',
+      username: options?.user?.username ?? 'system',
+    });
 
     return {
       id,
