@@ -73,18 +73,18 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
 
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
   const toggleNoticeModal = useCallback(() => {
-    setIsNoticeModalOpen(!isNoticeModalOpen);
-  }, [isNoticeModalOpen]);
+    setIsNoticeModalOpen((currentState) => !currentState);
+  }, []);
 
   const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
   const toggleLicenseModal = useCallback(() => {
-    setIsLicenseModalOpen(!isLicenseModalOpen);
-  }, [isLicenseModalOpen]);
+    setIsLicenseModalOpen((currentState) => !currentState);
+  }, []);
 
   const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
   const toggleChangelogModal = useCallback(() => {
-    setIsChangelogModalOpen(!isChangelogModalOpen);
-  }, [isChangelogModalOpen]);
+    setIsChangelogModalOpen((currentState) => !currentState);
+  }, []);
 
   const listItems = useMemo(() => {
     // Base details: version and categories
