@@ -356,7 +356,7 @@ export class SyntheticsPrivateLocation {
       }
     );
 
-    return agentPolicies.items;
+    return agentPolicies.items || [];
   }
 }
 
