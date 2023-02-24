@@ -90,7 +90,6 @@ export class DashboardAddPanelService extends FtrService {
     this.log.debug(`DashboardAddPanel.addToFilter(${type})`);
     await this.waitForListLoading();
     await this.toggleFilterPopover();
-    await this.common.sleep(1000);
     const list = await this.testSubjects.find('euiSelectableList');
     const listItems = await list.findAllByCssSelector('li');
     for (let i = 0; i < listItems.length; i++) {
