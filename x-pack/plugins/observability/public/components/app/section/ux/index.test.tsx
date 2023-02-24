@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { HasDataContextValue } from '../../../../context/has_data_context';
-import * as fetcherHook from '../../../../hooks/use_fetcher';
-import * as hasDataHook from '../../../../hooks/use_has_data';
+import { useFetchUx } from '../../../../hooks/overview/use_fetch_ux';
+import { useFetchUxHasData } from '../../../../hooks/overview/use_fetch_ux_has_data';
 import { render, data as dataMock } from '../../../../utils/test_helper';
 import { UXSection } from '.';
 import { response } from './mock_data/ux.mock';
@@ -20,19 +19,20 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+jest.mock('../../../../hooks/overview/use_fetch_ux');
+jest.mock('../../../../hooks/overview/use_fetch_ux_has_data');
+
+const useFetchUxHasDataMock = useFetchUxHasData as jest.Mock;
+const useFetchUxMock = useFetchUx as jest.Mock;
+
 describe('UXSection', () => {
   const bucketSize = { intervalString: '60s', bucketSize: 60, dateFormat: 'YYYY-MM-DD HH:mm' };
 
   beforeAll(() => {
-    jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
-      hasDataMap: {
-        ux: {
-          status: fetcherHook.FETCH_STATUS.SUCCESS,
-          hasData: true,
-          serviceName: 'elastic-co-frontend',
-        },
-      },
-    } as HasDataContextValue);
+    useFetchUxHasDataMock.mockReturnValue({
+      isLoading: false,
+      data: { hasData: true, serviceName: 'elastic-co-frontend' },
+    });
 
     // @ts-expect-error `dataMock` is not properly propagating the mock types
     dataMock.query.timefilter.timefilter.getTime.mockReturnValue({
@@ -41,11 +41,12 @@ describe('UXSection', () => {
     });
   });
   it('renders with core web vitals', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-      data: response,
-      status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+    useFetchUxMock.mockReturnValue({
+      isLoading: false,
+      isSuccess: true,
+      ux: response,
     });
+
     const { getByText, getAllByText } = render(<UXSection bucketSize={bucketSize} />);
 
     expect(getByText('User Experience')).toBeInTheDocument();
@@ -73,11 +74,12 @@ describe('UXSection', () => {
     expect(getByText('Poor (6%)')).toBeInTheDocument();
   });
   it('shows loading state', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-      data: undefined,
-      status: fetcherHook.FETCH_STATUS.LOADING,
-      refetch: jest.fn(),
+    useFetchUxMock.mockReturnValue({
+      isLoading: true,
+      isSuccess: false,
+      ux: undefined,
     });
+
     const { getByText, queryAllByText, getAllByText } = render(
       <UXSection bucketSize={bucketSize} />
     );
@@ -87,12 +89,14 @@ describe('UXSection', () => {
     expect(queryAllByText('Show dashboard')).toEqual([]);
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
   });
+
   it('shows empty state', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-      data: undefined,
-      status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+    useFetchUxMock.mockReturnValue({
+      isLoading: false,
+      isSuccess: true,
+      ux: undefined,
     });
+
     const { getByText, queryAllByText, getAllByText } = render(
       <UXSection bucketSize={bucketSize} />
     );

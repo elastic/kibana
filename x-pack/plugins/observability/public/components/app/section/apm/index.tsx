@@ -55,10 +55,6 @@ export function APMSection({ bucketSize }: Props) {
     lastUpdated,
   });
 
-  if (!data?.hasData) {
-    return null;
-  }
-
   const { appLink, stats, series } = services || {};
 
   const min = moment.utc(absoluteStart).valueOf();
@@ -69,6 +65,10 @@ export function APMSection({ bucketSize }: Props) {
     : niceTimeFormatter([min, max]);
 
   const transactionsColor = theme.eui.euiColorVis1;
+
+  if (!data?.hasData) {
+    return null;
+  }
 
   return (
     <SectionContainer
