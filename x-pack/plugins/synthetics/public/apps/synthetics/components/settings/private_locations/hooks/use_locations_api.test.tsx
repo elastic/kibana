@@ -6,11 +6,16 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { defaultCore, WrappedHelper } from '../../../../utils/testing';
+import { WrappedHelper } from '../../../../utils/testing';
 
 import { useLocationsAPI } from './use_locations_api';
+import * as locationAPI from '../../../../state/private_locations/api';
 
 describe('useLocationsAPI', () => {
+  const addAPI = jest.spyOn(locationAPI, 'addSyntheticsPrivateLocations');
+  const deletedAPI = jest.spyOn(locationAPI, 'deleteSyntheticsPrivateLocations');
+  const getAPI = jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations');
+
   it('returns expected results', () => {
     const { result } = renderHook(() => useLocationsAPI(), {
       wrapper: WrappedHelper,
@@ -22,20 +27,15 @@ describe('useLocationsAPI', () => {
         privateLocations: [],
       })
     );
-    expect(defaultCore.savedObjects.client.get).toHaveBeenCalledWith(
-      'synthetics-privates-locations',
-      'synthetics-privates-locations-singleton'
-    );
+    expect(getAPI).toHaveBeenCalledTimes(1);
   });
-  defaultCore.savedObjects.client.get = jest.fn().mockReturnValue({
-    attributes: {
-      locations: [
-        {
-          id: 'Test',
-          agentPolicyId: 'testPolicy',
-        },
-      ],
-    },
+  jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations').mockResolvedValue({
+    locations: [
+      {
+        id: 'Test',
+        agentPolicyId: 'testPolicy',
+      } as any,
+    ],
   });
   it('returns expected results after data', async () => {
     const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI(), {
@@ -84,43 +84,19 @@ describe('useLocationsAPI', () => {
 
     await waitForNextUpdate();
 
-    expect(defaultCore.savedObjects.client.create).toHaveBeenCalledWith(
-      'synthetics-privates-locations',
-      {
-        locations: [
-          { id: 'Test', agentPolicyId: 'testPolicy' },
-          {
-            concurrentMonitors: 1,
-            id: 'newPolicy',
-            geo: {
-              lat: 0,
-              lon: 0,
-            },
-            label: 'new',
-            agentPolicyId: 'newPolicy',
-          },
-        ],
+    expect(addAPI).toHaveBeenCalledWith({
+      concurrentMonitors: 1,
+      id: 'newPolicy',
+      geo: {
+        lat: 0,
+        lon: 0,
       },
-      { id: 'synthetics-privates-locations-singleton', overwrite: true }
-    );
+      label: 'new',
+      agentPolicyId: 'newPolicy',
+    });
   });
 
   it('deletes location on delete', async () => {
-    defaultCore.savedObjects.client.get = jest.fn().mockReturnValue({
-      attributes: {
-        locations: [
-          {
-            id: 'Test',
-            agentPolicyId: 'testPolicy',
-          },
-          {
-            id: 'Test1',
-            agentPolicyId: 'testPolicy1',
-          },
-        ],
-      },
-    });
-
     const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI(), {
       wrapper: WrappedHelper,
     });
@@ -131,17 +107,6 @@ describe('useLocationsAPI', () => {
 
     await waitForNextUpdate();
 
-    expect(defaultCore.savedObjects.client.create).toHaveBeenLastCalledWith(
-      'synthetics-privates-locations',
-      {
-        locations: [
-          {
-            id: 'Test1',
-            agentPolicyId: 'testPolicy1',
-          },
-        ],
-      },
-      { id: 'synthetics-privates-locations-singleton', overwrite: true }
-    );
+    expect(deletedAPI).toHaveBeenLastCalledWith('Test');
   });
 });
