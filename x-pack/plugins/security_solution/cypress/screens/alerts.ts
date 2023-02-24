@@ -137,6 +137,8 @@ export const EVENT_CONTAINER_TABLE_NOT_LOADING =
 
 export const FILTER_BADGE = '[data-test-subj^="filter-badge"]';
 
+export const FILTER_BADGE_DELETE = '[data-test-subj="deleteFilter"]';
+
 export const CELL_FILTER_IN_BUTTON =
   '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-filterIn"]';
 export const CELL_FILTER_OUT_BUTTON =
@@ -152,6 +154,8 @@ export const ACTIONS_EXPAND_BUTTON = '[data-test-subj="euiDataGridCellExpandButt
 
 export const SHOW_TOP_N_HEADER =
   '[data-test-subj="topN-container"] [data-test-subj="header-section-title"]';
+
+export const SHOW_TOP_N_CLOSE_BUTTON = '[data-test-subj="close"]';
 
 export const ALERTS_HISTOGRAM_LEGEND =
   '[data-test-subj="alerts-histogram-panel"] [data-test-subj="withHoverActionsButton"]';

@@ -4048,6 +4048,10 @@ components:
                   properties:
                     verification_mode:
                       type: string
+                    certificate:
+                      type: string
+                    key:
+                      type: string
                     certificate_authorities:
                       type: array
                       items:
