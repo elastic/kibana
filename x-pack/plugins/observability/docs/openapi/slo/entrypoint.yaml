@@ -18,11 +18,11 @@ paths:
   '/s/{spaceId}/api/observability/slos':
     $ref: 'paths/s@{spaceid}@api@slos.yaml'
   '/s/{spaceId}/api/observability/slos/{sloId}':
-    $ref: 'paths/s@{spaceid}@api@slos@{sloId}.yaml'
+    $ref: 'paths/s@{spaceid}@api@slos@{sloid}.yaml'
   '/s/{spaceId}/api/observability/slos/{sloId}/enable':
-    $ref: 'paths/s@{spaceid}@api@slos@{sloId}@{enable}.yaml'
+    $ref: 'paths/s@{spaceid}@api@slos@{sloid}@{enable}.yaml'
   '/s/{spaceId}/api/observability/slos/{sloId}/disable':
-    $ref: 'paths/s@{spaceid}@api@slos@{sloId}@{disable}.yaml'
+    $ref: 'paths/s@{spaceid}@api@slos@{sloid}@{disable}.yaml'
   '/s/{spaceId}/internal/observability/slos/_historical_summary':
     $ref: 'paths/s@{spaceid}@api@slos@_historical_summary.yaml'
 components:
