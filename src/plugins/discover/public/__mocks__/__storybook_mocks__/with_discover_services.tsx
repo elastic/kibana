@@ -61,7 +61,7 @@ export const uiSettingsMock = {
 const filterManager = {
   getGlobalFilters: () => [],
   getAppFilters: () => [],
-  getFetches$: () => ({}),
+  getFetches$: () => new Observable(),
 };
 
 export const services = {
@@ -86,7 +86,7 @@ export const services = {
             to: 'now',
           }),
           getRefreshInterval: () => ({}),
-          getFetch$: () => ({}),
+          getFetch$: () => new Observable(),
           getAutoRefreshFetch$: () => new Observable(),
           calculateBounds: () => ({ min: undefined, max: undefined }),
           getTimeDefaults: () => ({}),
@@ -184,7 +184,13 @@ export const services = {
     addInfo: action('add toast'),
   },
   lens: {
-    EmbeddableComponent: <>Histogram</>,
+    EmbeddableComponent: <div>Histogram</div>,
+  },
+  unifiedSearch: {
+    autocomplete: {
+      hasQuerySuggestions: () => Promise.resolve([]),
+      getQuerySuggestions: () => Promise.resolve([]),
+    },
   },
 } as unknown as DiscoverServices;
 
