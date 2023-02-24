@@ -94,7 +94,7 @@ interface MemoAlertSummaryWidgetProps {
 
 const MemoAlertSummaryWidget = React.memo(
   ({ alertsQuery, dateRange }: MemoAlertSummaryWidgetProps) => {
-    const { services } = useKibana<InfraClientCoreStart & InfraClientStartDeps>();
+    const { services } = useKibana<InfraClientStartDeps>();
 
     const summaryTimeRange = useSummaryTimeRange(dateRange);
 
