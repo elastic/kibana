@@ -111,6 +111,7 @@ export function Header({
     <>
       <ScreenReaderRouteAnnouncements
         breadcrumbs$={observables.breadcrumbs$}
+        customBranding$={customBranding$}
         appId$={application.currentAppId$}
       />
 

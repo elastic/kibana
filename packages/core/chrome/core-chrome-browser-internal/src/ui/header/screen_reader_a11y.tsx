@@ -13,14 +13,16 @@ import { EuiScreenReaderLive } from '@elastic/eui';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { HeaderProps } from './header';
 
-const DEFAULT_TITLE = 'Elastic'; // This may need to be DRYed out with https://github.com/elastic/kibana/blob/main/packages/core/rendering/core-rendering-server-internal/src/views/template.tsx#L34
+const DEFAULT_BRAND = 'Elastic'; // This may need to be DRYed out with https://github.com/elastic/kibana/blob/main/packages/core/rendering/core-rendering-server-internal/src/views/template.tsx#L34
 const SEPARATOR = ' - ';
 
 export const ScreenReaderRouteAnnouncements: FC<{
   breadcrumbs$: HeaderProps['breadcrumbs$'];
+  customBranding$: HeaderProps['customBranding$'];
   appId$: InternalApplicationStart['currentAppId$'];
-}> = ({ breadcrumbs$, appId$ }) => {
+}> = ({ breadcrumbs$, customBranding$, appId$ }) => {
   const [routeTitle, setRouteTitle] = useState('');
+  const branding = useObservable(customBranding$)?.pageTitle || DEFAULT_BRAND;
   const breadcrumbs = useObservable(breadcrumbs$, []);
 
   useEffect(() => {
@@ -31,14 +33,14 @@ export const ScreenReaderRouteAnnouncements: FC<{
       [...breadcrumbs].reverse().forEach((breadcrumb) => {
         if (typeof breadcrumb.text === 'string') breadcrumbText.push(breadcrumb.text);
       });
-      breadcrumbText.push(DEFAULT_TITLE);
+      breadcrumbText.push(branding);
 
       setRouteTitle(breadcrumbText.join(SEPARATOR));
     } else {
       // Don't announce anything during loading states
       setRouteTitle('');
     }
-  }, [breadcrumbs]);
+  }, [breadcrumbs, branding]);
 
   // 1. Canvas dynamically updates breadcrumbs *and* page title/history on every name onChange,
   // which leads to focus fighting if this is enabled
