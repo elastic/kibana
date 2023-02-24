@@ -34,7 +34,7 @@
   },
   {
     "name": "endpoint",
-    "version": "8.7.0-next"
+    "version": "8.7.0"
   },
   {
     "name": "fleet_server",
