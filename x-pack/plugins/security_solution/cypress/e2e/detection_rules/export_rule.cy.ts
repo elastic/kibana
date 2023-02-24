@@ -53,9 +53,7 @@ describe('Export rules', () => {
     // Rules get exported via _bulk_action endpoint
     cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createCustomRule({ ...getNewRule(), name: 'Rule to export' }, { enabled: true }).as(
-      'ruleResponse'
-    );
+    createCustomRule(getNewRule({ name: 'Rule to export', enabled: true })).as('ruleResponse');
   });
 
   it('exports a custom rule', function () {
@@ -128,8 +126,8 @@ describe('Export rules', () => {
       // create rule with exceptions
       createExceptionList(exceptionList, exceptionList.list_id).then((response) =>
         createCustomRule(
-          {
-            ...getNewRule(),
+          getNewRule({
+            id: '2',
             name: 'rule with exceptions',
             exceptionLists: [
               {
@@ -139,8 +137,7 @@ describe('Export rules', () => {
                 namespace_type: exceptionList.namespace_type,
               },
             ],
-          },
-          { ruleId: '2' }
+          })
         )
       );
     });

@@ -46,6 +46,7 @@ export type RuleDataSource =
 
 export interface CustomRule {
   customQuery?: string;
+  id?: string;
   name: string;
   description: string;
   dataSource: RuleDataSource;
@@ -65,6 +66,7 @@ export interface CustomRule {
   buildingBlockType?: string;
   exceptionLists?: Array<{ id: string; list_id: string; type: string; namespace_type: string }>;
   actions?: Actions;
+  enabled?: boolean;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -103,6 +105,7 @@ export interface NewTermsRule extends CustomRule {
 export interface MachineLearningRule {
   machineLearningJobs: string[];
   anomalyScoreThreshold: number;
+  id?: string;
   name: string;
   description: string;
   severity: string;
@@ -210,7 +213,7 @@ export const getDataViewRule = (): CustomRule => ({
   maxSignals: 100,
 });
 
-export const getNewRule = (): CustomRule => ({
+export const getNewRule = (rewrites?: Partial<CustomRule>): CustomRule => ({
   customQuery: 'host.name: *',
   dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'New Rule Test',
@@ -226,6 +229,7 @@ export const getNewRule = (): CustomRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
+  ...rewrites,
 });
 
 export const getSimpleCustomQueryRule = (): CustomRule => ({
@@ -292,7 +296,7 @@ export const getUnmappedCCSRule = (): CustomRule => ({
   maxSignals: 100,
 });
 
-export const getExistingRule = (): CustomRule => ({
+export const getExistingRule = (rewrites?: Partial<CustomRule>): CustomRule => ({
   customQuery: 'host.name: *',
   name: 'Rule 1',
   description: 'Description for Rule 1',
@@ -311,9 +315,10 @@ export const getExistingRule = (): CustomRule => ({
   // Please do not change, or if you do, needs
   // to be any number other than default value
   maxSignals: 500,
+  ...rewrites,
 });
 
-export const getNewOverrideRule = (): OverrideRule => ({
+export const getNewOverrideRule = (rewrites?: Partial<OverrideRule>): OverrideRule => ({
   customQuery: 'host.name: *',
   dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'Override Rule',
@@ -338,9 +343,10 @@ export const getNewOverrideRule = (): OverrideRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
+  ...rewrites,
 });
 
-export const getNewThresholdRule = (): ThresholdRule => ({
+export const getNewThresholdRule = (rewrites?: Partial<ThresholdRule>): ThresholdRule => ({
   customQuery: 'host.name: *',
   dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'Threshold Rule',
@@ -358,9 +364,10 @@ export const getNewThresholdRule = (): ThresholdRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
+  ...rewrites,
 });
 
-export const getNewTermsRule = (): NewTermsRule => ({
+export const getNewTermsRule = (rewrites?: Partial<NewTermsRule>): NewTermsRule => ({
   customQuery: 'host.name: *',
   dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'New Terms Rule',
@@ -383,9 +390,12 @@ export const getNewTermsRule = (): NewTermsRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
+  ...rewrites,
 });
 
-export const getMachineLearningRule = (): MachineLearningRule => ({
+export const getMachineLearningRule = (
+  rewrites?: Partial<MachineLearningRule>
+): MachineLearningRule => ({
   machineLearningJobs: [
     'Unusual Linux Network Activity',
     'Anomalous Process for a Linux Population',
@@ -402,9 +412,10 @@ export const getMachineLearningRule = (): MachineLearningRule => ({
   note: '# test markdown',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
+  ...rewrites,
 });
 
-export const getEqlRule = (): CustomRule => ({
+export const getEqlRule = (rewrites?: Partial<CustomRule>): CustomRule => ({
   customQuery: 'any where process.name == "zsh"',
   name: 'New EQL Rule',
   dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
@@ -420,6 +431,7 @@ export const getEqlRule = (): CustomRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
+  ...rewrites,
 });
 
 export const getCCSEqlRule = (): CustomRule => ({
@@ -461,7 +473,9 @@ export const getEqlSequenceRule = (): CustomRule => ({
   maxSignals: 100,
 });
 
-export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
+export const getNewThreatIndicatorRule = (
+  rewrites?: Partial<ThreatIndicatorRule>
+): ThreatIndicatorRule => ({
   name: 'Threat Indicator Rule Test',
   description: 'The threat indicator rule description.',
   dataSource: { index: ['suspicious-*'], type: 'indexPatterns' },
@@ -485,6 +499,7 @@ export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
   matchedType: 'indicator_match_rule',
   matchedId: '84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f',
   matchedIndex: 'logs-ti_abusech.malware',
+  ...rewrites,
 });
 
 export const duplicatedRuleName = `${getNewThreatIndicatorRule().name} [Duplicate]`;

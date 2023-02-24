@@ -36,8 +36,8 @@ describe('Exceptions viewer read only', () => {
     // create rule with exceptions
     createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
       createCustomRule(
-        {
-          ...getNewRule(),
+        getNewRule({
+          id: '2',
           customQuery: 'agent.name:*',
           dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
           exceptionLists: [
@@ -48,8 +48,7 @@ describe('Exceptions viewer read only', () => {
               namespace_type: exceptionList.namespace_type,
             },
           ],
-        },
-        { ruleId: '2' }
+        })
       );
     });
 

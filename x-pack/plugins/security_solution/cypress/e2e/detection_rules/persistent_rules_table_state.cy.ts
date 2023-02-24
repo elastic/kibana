@@ -45,24 +45,15 @@ import {
   sortByTableColumn,
 } from '../../tasks/table_pagination';
 
-function createRule(id: string, name: string, tags?: string[], enabled = false): void {
-  const rule = getNewRule();
-
-  rule.name = name;
-  rule.tags = tags;
-
-  createCustomRule(rule, { ruleId: id, enabled });
-}
-
 function createTestRules(): void {
-  createRule('1', 'test 1', ['tag-a']);
-  createRule('2', 'rule 1', ['tag-b']);
-  createRule('3', 'rule 2', ['tag-b']);
-  createRule('4', 'rule 3', ['tag-b', 'tag-c']);
-  createRule('5', 'rule 4', ['tag-b']);
-  createRule('6', 'rule 5', ['tag-b', 'tag-c']);
-  createRule('7', 'rule 6', ['tag-b']);
-  createRule('8', 'rule 7', ['tag-b'], true);
+  createCustomRule(getNewRule({ id: '1', name: 'test 1', tags: ['tag-a'] }));
+  createCustomRule(getNewRule({ id: '2', name: 'rule 1', tags: ['tag-b'] }));
+  createCustomRule(getNewRule({ id: '3', name: 'rule 2', tags: ['tag-b'] }));
+  createCustomRule(getNewRule({ id: '4', name: 'rule 3', tags: ['tag-b', 'tag-c'] }));
+  createCustomRule(getNewRule({ id: '5', name: 'rule 4', tags: ['tag-b'] }));
+  createCustomRule(getNewRule({ id: '6', name: 'rule 5', tags: ['tag-b', 'tag-c'] }));
+  createCustomRule(getNewRule({ id: '7', name: 'rule 6', tags: ['tag-b'] }));
+  createCustomRule(getNewRule({ id: '8', name: 'rule 7', tags: ['tag-b'], enabled: true }));
 }
 
 function visitRulesTableWithState(urlTableState: Record<string, unknown>): void {

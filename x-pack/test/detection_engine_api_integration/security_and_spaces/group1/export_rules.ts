@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
@@ -26,20 +27,11 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
 
   describe('export_rules', () => {
     describe('exporting rules', () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-      });
-
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-      });
-
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);
       });
@@ -82,7 +74,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const rule = await createRule(supertest, log, getSimpleRule(ruleId, true));
 
-        await waitForRuleSuccessOrStatus(supertest, log, rule.id);
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          rule.id,
+          RuleExecutionStatus['partial failure'] // we just need to run the rule, successful result isn't important here
+        );
         await waitForEventLogExecuteComplete(es, log, rule.id);
 
         const { body } = await supertest
@@ -107,7 +104,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const rule = await createRule(supertest, log, getSimpleRule(ruleId, true));
 
-        await waitForRuleSuccessOrStatus(supertest, log, rule.id);
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          rule.id,
+          RuleExecutionStatus['partial failure'] // we just need to run the rule, successful result isn't important here
+        );
         await waitForEventLogExecuteComplete(es, log, rule.id);
 
         const { body } = await supertest

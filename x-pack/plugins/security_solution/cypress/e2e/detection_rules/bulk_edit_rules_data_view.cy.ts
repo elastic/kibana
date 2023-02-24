@@ -75,7 +75,7 @@ describe('Bulk editing index patterns of rules with a data view only', () => {
 
     postDataView(DATA_VIEW_ID);
 
-    createCustomRule({ ...getNewRule(), ...dataViewRuleData }, { ruleId: '1' });
+    createCustomRule(getNewRule({ id: '1', ...dataViewRuleData }));
     createEventCorrelationRule({ ...getEqlRule(), ...dataViewRuleData }, '2');
     createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...dataViewRuleData }, '3');
     createThresholdRule({ ...getNewThresholdRule(), ...dataViewRuleData }, '4');
@@ -197,16 +197,15 @@ describe('Bulk editing index patterns of rules with index patterns and rules wit
 
     postDataView(DATA_VIEW_ID);
 
-    createCustomRule({ ...getNewRule(), ...dataViewRuleData }, { ruleId: '1' });
+    createCustomRule(getNewRule({ id: '1', ...dataViewRuleData }));
     createCustomRule(
-      {
-        ...getNewRule(),
+      getNewRule({
+        id: '2',
         dataSource: {
           type: 'indexPatterns',
           index: ['test-index-1-*'],
         },
-      },
-      { ruleId: '2' }
+      })
     );
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);

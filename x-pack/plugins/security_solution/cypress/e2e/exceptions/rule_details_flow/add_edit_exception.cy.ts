@@ -87,8 +87,8 @@ describe('Add/edit exception from rule details', () => {
       // create rule with exceptions
       createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
         createCustomRule(
-          {
-            ...getNewRule(),
+          getNewRule({
+            id: '2',
             customQuery: 'agent.name:*',
             dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
             exceptionLists: [
@@ -99,8 +99,7 @@ describe('Add/edit exception from rule details', () => {
                 namespace_type: exceptionList.namespace_type,
               },
             ],
-          },
-          { ruleId: '2' }
+          })
         );
         createExceptionListItem(exceptionList.list_id, {
           list_id: exceptionList.list_id,

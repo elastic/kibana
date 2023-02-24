@@ -16,12 +16,12 @@ import type {
   SavedQueryRule,
 } from '../../objects/rule';
 
-export const createMachineLearningRule = (rule: MachineLearningRule, ruleId = 'ml_rule_testing') =>
+export const createMachineLearningRule = (rule: MachineLearningRule) =>
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
-      rule_id: ruleId,
+      rule_id: rule.id ?? 'ml_rule_testing',
       risk_score: parseInt(rule.riskScore, 10),
       description: rule.description,
       interval: rule.interval,
@@ -38,14 +38,8 @@ export const createMachineLearningRule = (rule: MachineLearningRule, ruleId = 'm
     failOnStatusCode: false,
   });
 
-interface CustomRuleOptions {
-  ruleId?: string;
-  enabled?: boolean;
-}
-
 export const createCustomRule = (
-  rule: CustomRule,
-  options?: CustomRuleOptions
+  rule: CustomRule
 ): Cypress.Chainable<Cypress.Response<unknown>> => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
@@ -56,7 +50,7 @@ export const createCustomRule = (
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
-      rule_id: options?.ruleId ?? 'rule_testing',
+      rule_id: rule.id ?? 'rule_testing',
       risk_score: riskScore,
       description: rule.description,
       interval,
@@ -68,7 +62,7 @@ export const createCustomRule = (
       data_view_id: rule.dataSource.type === 'dataView' ? rule.dataSource.dataView : undefined,
       query: rule.customQuery,
       language: 'kuery',
-      enabled: options?.enabled ?? false,
+      enabled: !!rule.enabled,
       exceptions_list: rule.exceptionLists ?? [],
       tags: rule.tags,
       ...(timeline?.id ?? timeline?.templateTimelineId
@@ -84,7 +78,7 @@ export const createCustomRule = (
   });
 };
 
-export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_testing') => {
+export const createEventCorrelationRule = (rule: CustomRule) => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLowerCase() : undefined;
   const interval = rule.runsEvery ? `${rule.runsEvery.interval}${rule.runsEvery.type}` : '100m';
@@ -93,7 +87,7 @@ export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_test
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
-      rule_id: ruleId,
+      rule_id: rule.id ?? 'rule_testing',
       risk_score: riskScore,
       description: rule.description,
       interval,
@@ -213,7 +207,7 @@ export const createSavedQueryRule = (
   });
 };
 
-export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'rule_testing') => {
+export const createCustomIndicatorRule = (rule: ThreatIndicatorRule) => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
   const timeline = rule.timeline != null ? rule.timeline : undefined;
@@ -223,7 +217,7 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
-      rule_id: ruleId,
+      rule_id: rule.id ?? 'rule_testing',
       risk_score: riskScore,
       description: rule.description,
       interval,

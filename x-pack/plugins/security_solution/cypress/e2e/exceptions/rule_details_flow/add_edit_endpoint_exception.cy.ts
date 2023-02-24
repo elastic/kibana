@@ -60,8 +60,8 @@ describe('Add endpoint exception from rule details', () => {
     // create rule with exception
     createEndpointExceptionList().then((response) => {
       createCustomRule(
-        {
-          ...getNewRule(),
+        getNewRule({
+          id: '2',
           customQuery: 'event.code:*',
           dataSource: { index: ['auditbeat*'], type: 'indexPatterns' },
           exceptionLists: [
@@ -72,8 +72,7 @@ describe('Add endpoint exception from rule details', () => {
               namespace_type: response.body.namespace_type,
             },
           ],
-        },
-        { ruleId: '2' }
+        })
       );
     });
   });

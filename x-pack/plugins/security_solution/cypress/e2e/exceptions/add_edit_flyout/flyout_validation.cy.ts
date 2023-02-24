@@ -73,18 +73,19 @@ describe('Exceptions flyout', () => {
     esArchiverLoad('exceptions');
     login();
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
-      createCustomRule({
-        ...getNewRule(),
-        dataSource: { index: ['auditbeat-*', 'exceptions-*'], type: 'indexPatterns' },
-        exceptionLists: [
-          {
-            id: response.body.id,
-            list_id: getExceptionList().list_id,
-            type: getExceptionList().type,
-            namespace_type: getExceptionList().namespace_type,
-          },
-        ],
-      })
+      createCustomRule(
+        getNewRule({
+          dataSource: { index: ['auditbeat-*', 'exceptions-*'], type: 'indexPatterns' },
+          exceptionLists: [
+            {
+              id: response.body.id,
+              list_id: getExceptionList().list_id,
+              type: getExceptionList().type,
+              namespace_type: getExceptionList().namespace_type,
+            },
+          ],
+        })
+      )
     );
   });
 
