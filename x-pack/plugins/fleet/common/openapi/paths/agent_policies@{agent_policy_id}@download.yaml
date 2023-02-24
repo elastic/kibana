@@ -12,6 +12,8 @@ get:
             properties:
               item:
                 type: string
+    '400':
+      $ref: ../components/responses/error.yaml
 parameters:
   - schema:
       type: string

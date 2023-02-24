@@ -26,7 +26,7 @@ import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferre
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
-import { SearchBar } from '../../shared/search_bar';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ServiceList } from './service_list';
 import { orderServiceItems } from './service_list/order_service_items';
