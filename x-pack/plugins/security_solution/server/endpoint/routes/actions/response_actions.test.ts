@@ -14,6 +14,7 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { License } from '@kbn/licensing-plugin/common/license';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type {
+  IClusterClient,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
@@ -67,6 +68,7 @@ import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { coreLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 
 interface CallRouteInterface {
   body?: ResponseActionRequestBody;
@@ -126,7 +128,14 @@ describe('Response actions', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
-        getStartServices: jest.fn(),
+        getStartServices: async () => {
+          const services = await coreLifecycleMock.createCoreSetup().getStartServices();
+          services[0].elasticsearch = {
+            ...services[0].elasticsearch,
+            client: mockScopedClient as unknown as IClusterClient,
+          };
+          return Promise.resolve(services);
+        },
         experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
