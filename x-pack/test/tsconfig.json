@@ -117,5 +117,6 @@
     "@kbn/security-api-integration-helpers",
     "@kbn/discover-plugin",
     "@kbn/files-plugin",
+    "@kbn/shared-ux-file-types",
   ]
 }
