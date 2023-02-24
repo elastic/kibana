@@ -6,6 +6,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, DocLinksStart } from '@kbn/core/public';
+import {
+  ALERT_APP,
+  APM_APP,
+  INFRA_LOGS_APP,
+  INFRA_METRICS_APP,
+  SYNTHETICS_APP,
+  UX_APP,
+} from '../../../context/constants';
 import { ObservabilityFetchDataPlugins } from '../../../typings/fetch_overview_data';
 import { paths } from '../../../config/paths';
 
@@ -27,7 +35,7 @@ export const getContent = (
 ): ObservabilityStatusContent[] => {
   return [
     {
-      id: 'infra_logs',
+      id: INFRA_LOGS_APP,
       title: i18n.translate('xpack.observability.statusVisualization.logs.title', {
         defaultMessage: 'Logs',
       }),
@@ -47,7 +55,7 @@ export const getContent = (
       weight: 1,
     },
     {
-      id: 'apm',
+      id: APM_APP,
       title: i18n.translate('xpack.observability.statusVisualization.apm.title', {
         defaultMessage: 'APM',
       }),
@@ -67,7 +75,7 @@ export const getContent = (
       weight: 3,
     },
     {
-      id: 'infra_metrics',
+      id: INFRA_METRICS_APP,
       title: i18n.translate('xpack.observability.statusVisualization.metrics.title', {
         defaultMessage: 'Infrastructure',
       }),
@@ -86,7 +94,7 @@ export const getContent = (
       weight: 2,
     },
     {
-      id: 'synthetics',
+      id: SYNTHETICS_APP,
       title: i18n.translate('xpack.observability.statusVisualization.uptime.title', {
         defaultMessage: 'Uptime',
       }),
@@ -105,7 +113,7 @@ export const getContent = (
       weight: 4,
     },
     {
-      id: 'ux',
+      id: UX_APP,
       title: i18n.translate('xpack.observability.statusVisualization.ux.title', {
         defaultMessage: 'User Experience',
       }),
@@ -125,7 +133,7 @@ export const getContent = (
       weight: 5,
     },
     {
-      id: 'alert',
+      id: ALERT_APP,
       title: i18n.translate('xpack.observability.statusVisualization.alert.title', {
         defaultMessage: 'Alerting',
       }),
