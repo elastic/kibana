@@ -10,8 +10,9 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
 import { ScreenReaderRouteAnnouncements } from './screen_reader_a11y';
+import { mount } from 'enzyme';
 
-describe('Header', () => {
+describe('ScreenReaderRouteAnnouncements', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'localStorage', {
       value: new StubBrowserStorage(),
@@ -27,5 +28,18 @@ describe('Header', () => {
       />
     );
     expect(component).toMatchSnapshot();
+  });
+
+  it('does not take focus for Canvas', () => {
+    const noFocusComponent = mount(
+      <ScreenReaderRouteAnnouncements
+        appId$={new BehaviorSubject('canvas')}
+        customBranding$={new BehaviorSubject({})}
+        breadcrumbs$={new BehaviorSubject([])}
+      />
+    );
+    expect(
+      noFocusComponent.debug().includes('<EuiScreenReaderLive focusRegionOnTextChange={false}>')
+    ).toBeTruthy();
   });
 });
