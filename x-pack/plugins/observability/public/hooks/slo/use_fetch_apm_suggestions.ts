@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-  useQuery,
-} from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import moment from 'moment';
+
 import { useKibana } from '../../utils/kibana_react';
 
 export type Suggestion = string;
@@ -21,14 +17,12 @@ export interface UseFetchApmSuggestions {
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
-  refetch: <TPageData>(
-    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<string[] | undefined, unknown>>;
 }
 
 export interface Params {
   fieldName: string;
   search?: string;
+  serviceName?: string;
 }
 
 interface ApiResponse {
@@ -37,37 +31,40 @@ interface ApiResponse {
 
 const NO_SUGGESTIONS: Suggestion[] = [];
 
-export function useFetchApmSuggestions({ fieldName, search = '' }: Params): UseFetchApmSuggestions {
+export function useFetchApmSuggestions({
+  fieldName,
+  search = '',
+  serviceName = '',
+}: Params): UseFetchApmSuggestions {
   const { http } = useKibana().services;
 
-  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
-    {
-      queryKey: ['fetchApmSuggestions', fieldName, search],
-      queryFn: async ({ signal }) => {
-        try {
-          const { terms = [] } = await http.get<ApiResponse>('/internal/apm/suggestions', {
-            query: {
-              fieldName,
-              start: moment().subtract(2, 'days').toISOString(),
-              end: moment().toISOString(),
-              fieldValue: search,
-            },
-            signal,
-          });
+  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
+    queryKey: ['fetchApmSuggestions', fieldName, search, serviceName],
+    queryFn: async ({ signal }) => {
+      try {
+        const { terms = [] } = await http.get<ApiResponse>('/internal/apm/suggestions', {
+          query: {
+            fieldName,
+            start: moment().subtract(2, 'days').toISOString(),
+            end: moment().toISOString(),
+            fieldValue: search,
+            ...(!!serviceName && { serviceName }),
+          },
+          signal,
+        });
 
-          return terms;
-        } catch (error) {
-          // ignore error
-        }
-      },
-    }
-  );
+        return terms;
+      } catch (error) {
+        // ignore error
+      }
+    },
+    refetchOnWindowFocus: false,
+  });
 
   return {
     suggestions: isInitialLoading ? NO_SUGGESTIONS : data ?? NO_SUGGESTIONS,
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,
-    refetch,
   };
 }

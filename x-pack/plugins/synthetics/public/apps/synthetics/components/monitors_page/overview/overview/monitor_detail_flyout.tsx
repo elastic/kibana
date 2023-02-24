@@ -306,6 +306,7 @@ export function MonitorDetailFlyout(props: Props) {
                       position="default"
                       iconHasPanel={false}
                       iconSize="xs"
+                      locationId={locationId}
                     />
                   )}
                 </EuiFlexItem>
