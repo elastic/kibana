@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import expect from '@kbn/expect';
 import { FtrService } from '../../ftr_provider_context';
+import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 export class DashboardAddPanelService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -89,6 +90,7 @@ export class DashboardAddPanelService extends FtrService {
     this.log.debug(`DashboardAddPanel.addToFilter(${type})`);
     await this.waitForListLoading();
     await this.toggleFilterPopover();
+    await this.common.sleep(1000);
     const list = await this.testSubjects.find('euiSelectableList');
     const listItems = await list.findAllByCssSelector('li');
     for (let i = 0; i < listItems.length; i++) {
@@ -110,15 +112,11 @@ export class DashboardAddPanelService extends FtrService {
       const embeddableListBody = await itemList.findByTagName('tbody');
       const embeddableRows = await embeddableListBody.findAllByCssSelector('tr');
       for (let i = 0; i < embeddableRows.length; i++) {
-        const cell = await embeddableRows[i].findByTestSubject('savedObjectFinderTitle');
-        const button = await cell.findByTagName('button');
-        const name = await button.getVisibleText();
-        this.log.debug(embeddableList);
+        const { name, button } = await this.getRowAtIndex(embeddableRows, i);
         if (embeddableList.includes(name)) {
           // already added this one
           continue;
         }
-
         await button.click();
         await this.common.closeToast();
         embeddableList.push(name);
@@ -182,6 +180,13 @@ export class DashboardAddPanelService extends FtrService {
     await this.flyout.ensureClosed('dashboardAddPanel');
   }
 
+  async getRowAtIndex(rows: WebElementWrapper[], rowIndex: number) {
+    const cell = await rows[rowIndex].findByTestSubject('savedObjectFinderTitle');
+    const button = await cell.findByTagName('button');
+    const name = await button.getVisibleText();
+    return { button, name };
+  }
+
   async addEveryVisualization(filter: string) {
     this.log.debug('DashboardAddPanel.addEveryVisualization');
     await this.ensureAddPanelIsShowing();
@@ -189,6 +194,13 @@ export class DashboardAddPanelService extends FtrService {
       await this.filterEmbeddableNames(filter.replace('-', ' '));
     }
     await this.toggleFilter('Visualization');
+    const itemList = await this.testSubjects.find('savedObjectsFinder-table');
+    await this.retry.try(async () => {
+      const embeddableListBody = await itemList.findByTagName('tbody');
+      const embeddableRows = await embeddableListBody.findAllByCssSelector('tr');
+      const { name } = await this.getRowAtIndex(embeddableRows, 0);
+      expect(name.includes('saved search')).to.be(false);
+    });
     let morePages = true;
     const vizList: string[][] = [];
     while (morePages) {
