@@ -14,7 +14,7 @@ import {
   findFormFieldByRowsLabelAndType,
   submitQuery,
 } from '../../tasks/live_query';
-import { closeModalIfVisible } from '../../tasks/integrations';
+import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
 
 describe('Alert_Test', () => {
@@ -47,7 +47,7 @@ describe('Alert_Test', () => {
       findAndClickButton('Update pack');
       closeModalIfVisible();
       cy.contains(`Successfully updated "${PACK_NAME}" pack`);
-      cy.getBySel('toastCloseButton').click();
+      closeToastIfVisible();
 
       cy.visit('/app/security/rules');
       cy.contains(RULE_NAME).click();
