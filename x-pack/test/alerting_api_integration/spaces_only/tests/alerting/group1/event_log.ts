@@ -909,7 +909,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           expect(flapping).to.eql(result);
         });
 
-        it.only('should generate expected events for flapping alerts that settle on active where notifyWhen is not set to "on status change"', async () => {
+        it('should generate expected events for flapping alerts that settle on active where notifyWhen is not set to "on status change"', async () => {
           await supertest
             .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
             .set('kbn-xsrf', 'foo')
