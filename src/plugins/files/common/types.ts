@@ -132,7 +132,7 @@ export type FileSavedObject<Meta = unknown> = SavedObject<FileMetadata<Meta>>;
  */
 export type UpdatableFileMetadata<Meta = unknown> = Pick<FileJSON<Meta>, 'meta' | 'alt' | 'name'>;
 
-export { FileShare, FileShareJSON, FileShareJSONWithToken };
+export type { FileShare, FileShareJSON, FileShareJSONWithToken };
 
 /**
  * Set of attributes that can be updated in a file share.
