@@ -55,7 +55,7 @@ describe('discover sidebar field details', function () {
     expect(onAddFilter).toHaveBeenCalledWith('_exists_', visualizableField.name, '+');
   });
 
-  it('should state in sync with documents$ state', async function () {
+  it('should stay in sync with documents$ state', async function () {
     const testDocuments$ = new BehaviorSubject({
       fetchStatus: FetchStatus.LOADING,
     }) as DataDocuments$;
