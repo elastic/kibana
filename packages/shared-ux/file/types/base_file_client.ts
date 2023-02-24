@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { FileShareJSON, FileShareJSONWithToken } from '@kbn/files-plugin/common';
-import type { FileJSON, FileKind } from '.';
+import type { FileShareJSON, FileShareJSONWithToken } from './sharing';
+import type { FileJSON, FileKindBase } from '.';
 
 export interface Pagination {
   page?: number;
@@ -155,5 +155,5 @@ export interface BaseFilesClient<M = unknown> {
    * Get a file kind
    * @param id The id of the file kind
    */
-  getFileKind: (id: string) => FileKind;
+  getFileKind: (id: string) => FileKindBase;
 }

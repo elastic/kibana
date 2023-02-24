@@ -12,6 +12,7 @@ export { defaultImageFileKind } from './default_image_file_kind';
 export type {
   File,
   FileKind,
+  FileKindBrowser,
   FileJSON,
   FileShare,
   FileStatus,
