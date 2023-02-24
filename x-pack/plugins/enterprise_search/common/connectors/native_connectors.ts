@@ -142,11 +142,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.tablesLabel',
           {
-            defaultMessage: 'Tables'
+            defaultMessage: 'Tables',
           }
         ),
         order: 5,
-        value: ''
+        value: '',
       },
       ssl_disabled: {
         label: i18n.translate(
