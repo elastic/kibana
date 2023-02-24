@@ -3882,7 +3882,6 @@
     "indexPatternEditor.typeSelect.standardDescription": "对任何数据执行完全聚合",
     "indexPatternEditor.typeSelect.standardTitle": "标准数据视图",
     "indexPatternEditor.validations.noSingleAstriskPattern": "不允许以单个“*”作为索引模式",
-    "indexPatternEditor.validations.titleHelpText": "输入与一个或多个数据源匹配的索引模式。使用星号 (*) 匹配多个字符。不允许使用空格和字符 /、?、\"、&lt;、>、|。",
     "indexPatternEditor.validations.titleIsRequiredErrorMessage": "“索引模式”必填。",
     "indexPatternFieldEditor.date.momentLabel": "Moment.js 格式模式（默认值：{defaultPattern}）",
     "indexPatternFieldEditor.defaultErrorMessage": "尝试使用此格式配置时发生错误：{message}",
