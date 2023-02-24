@@ -63,7 +63,7 @@ export interface BaseFilesClient<M = unknown> {
    */
   getById: (args: { id: string; kind: string } & Abortable) => Promise<{ file: FileJSON<M> }>;
   /**
-   * List all file objects, of a given {@link FileKind}.
+   * List all file objects, of a given {@link FileKindBrowser}.
    *
    * @param args - list files args
    */
