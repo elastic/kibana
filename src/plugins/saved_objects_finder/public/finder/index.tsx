@@ -43,4 +43,4 @@ export const getSavedObjectFinder = (
 };
 
 export type { SavedObjectMetaData, SavedObjectFinderProps } from './saved_object_finder';
-export { SavedObjectFinder };
+export { SavedObjectFinder, SavedObjectFinderUi };
