@@ -6,7 +6,7 @@
  */
 import React, { useMemo, useReducer } from 'react';
 
-import { render, screen, within, fireEvent } from '@testing-library/react';
+import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { BulkActionsContext } from './context';
@@ -15,7 +15,10 @@ import {
   Alerts,
   AlertsField,
   AlertsTableProps,
+  BulkActionsConfig,
   BulkActionsState,
+  FetchAlertData,
+  InspectQuery,
   RowSelectionState,
 } from '../../../../types';
 import { bulkActionsReducer } from './reducer';
@@ -27,6 +30,8 @@ jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting$: jest.fn((value: string) => ['0,0']),
 }));
+
+const refreshMockFn = jest.fn();
 
 const columns = [
   {
@@ -57,17 +62,18 @@ describe('AlertsTable.BulkActions', () => {
     },
   ] as unknown as Alerts;
 
-  const alertsData = {
+  const alertsData: FetchAlertData = {
     activePage: 0,
     alerts,
+    ecsAlertsData: [],
+    oldAlertsData: [],
     alertsCount: alerts.length,
     isInitializing: false,
     isLoading: false,
-    getInspectQuery: () => ({ request: [], response: [] }),
-    onColumnsChange: () => {},
+    getInspectQuery: () => ({ request: {}, response: {} } as InspectQuery),
     onPageChange: () => {},
     onSortChange: () => {},
-    refresh: () => {},
+    refresh: refreshMockFn,
     sort: [],
   };
 
@@ -89,7 +95,7 @@ describe('AlertsTable.BulkActions', () => {
 
   const casesMap = getCasesMockMap();
 
-  const tableProps = {
+  const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
     casesData: { cases: casesMap, isLoading: false },
     columns,
@@ -100,7 +106,6 @@ describe('AlertsTable.BulkActions', () => {
     leadingControlColumns: [],
     showExpandToDetails: true,
     trailingControlColumns: [],
-    alerts,
     useFetchAlertsData: () => alertsData,
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
@@ -110,6 +115,7 @@ describe('AlertsTable.BulkActions', () => {
     onColumnsChange: () => {},
     onChangeVisibleColumns: () => {},
     browserFields: {},
+    query: {},
   };
 
   const tablePropsWithBulkActions = {
@@ -117,15 +123,43 @@ describe('AlertsTable.BulkActions', () => {
     alertsTableConfiguration: {
       ...alertsTableConfiguration,
 
-      useBulkActions: () => [
-        {
-          label: 'Fake Bulk Action',
-          key: 'fakeBulkAction',
-          'data-test-subj': 'fake-bulk-action',
-          disableOnQuery: false,
-          onClick: () => {},
-        },
-      ],
+      useBulkActions: () =>
+        [
+          {
+            label: 'Fake Bulk Action',
+            key: 'fakeBulkAction',
+            'data-test-subj': 'fake-bulk-action',
+            disableOnQuery: false,
+            onClick: () => {},
+          },
+          {
+            label: 'Fake Bulk Action with clear selection',
+            key: 'fakeBulkActionClear',
+            'data-test-subj': 'fake-bulk-action-clear',
+            disableOnQuery: false,
+            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+              clearSelection();
+            },
+          },
+          {
+            label: 'Fake Bulk Action with loading and clear selection',
+            key: 'fakeBulkActionLoadingClear',
+            'data-test-subj': 'fake-bulk-action-loading',
+            disableOnQuery: false,
+            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+              setIsBulkActionLoading(true);
+            },
+          },
+          {
+            label: 'Fake Bulk Action with refresh Action',
+            key: 'fakeBulkActionRefresh',
+            'data-test-subj': 'fake-bulk-action-refresh',
+            disableOnQuery: false,
+            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+              refresh();
+            },
+          },
+        ] as BulkActionsConfig[],
     },
   };
 
@@ -434,6 +468,7 @@ describe('AlertsTable.BulkActions', () => {
                 initialBulkActionsState={initialBulkActionsState}
               />
             );
+
             fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
@@ -625,6 +660,114 @@ describe('AlertsTable.BulkActions', () => {
             ]);
             expect(mockedFn.mock.calls[0][1]).toEqual(true);
             expect(mockedFn.mock.calls[0][2]).toBeDefined();
+          });
+
+          it('should first set all to loading, then clears the selection', async () => {
+            const props = {
+              ...tablePropsWithBulkActions,
+
+              initialBulkActionsState: {
+                ...defaultBulkActionsState,
+                areAllVisibleRowsSelected: true,
+                rowSelection: new Map(),
+              },
+            };
+            render(<AlertsTableWithBulkActionsContext {...props} />);
+
+            let bulkActionsCells = screen.getAllByTestId(
+              'bulk-actions-row-cell'
+            ) as HTMLInputElement[];
+
+            fireEvent.click(screen.getByTestId('bulk-actions-header'));
+
+            await waitFor(async () => {
+              bulkActionsCells = screen.getAllByTestId(
+                'bulk-actions-row-cell'
+              ) as HTMLInputElement[];
+              expect(bulkActionsCells[0].checked).toBeTruthy();
+              expect(bulkActionsCells[1].checked).toBeTruthy();
+              expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeDefined();
+            });
+
+            fireEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+            await waitForEuiPopoverOpen();
+
+            fireEvent.click(screen.getByTestId('fake-bulk-action-loading'));
+
+            await waitFor(() => {
+              expect(screen.queryAllByTestId('row-loader')).toHaveLength(2);
+            });
+          });
+
+          it('should call refresh function of use fetch alerts when bulk action 3 is clicked', async () => {
+            const props = {
+              ...tablePropsWithBulkActions,
+
+              initialBulkActionsState: {
+                ...defaultBulkActionsState,
+                areAllVisibleRowsSelected: false,
+                rowSelection: new Map(),
+              },
+            };
+            render(<AlertsTableWithBulkActionsContext {...props} />);
+
+            let bulkActionsCells = screen.getAllByTestId(
+              'bulk-actions-row-cell'
+            ) as HTMLInputElement[];
+
+            fireEvent.click(screen.getByTestId('bulk-actions-header'));
+
+            await waitFor(async () => {
+              bulkActionsCells = screen.getAllByTestId(
+                'bulk-actions-row-cell'
+              ) as HTMLInputElement[];
+              expect(bulkActionsCells[0].checked).toBeTruthy();
+              expect(bulkActionsCells[1].checked).toBeTruthy();
+              expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeDefined();
+            });
+
+            fireEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+            await waitForEuiPopoverOpen();
+
+            refreshMockFn.mockClear();
+            expect(refreshMockFn.mock.calls.length).toBe(0);
+            fireEvent.click(screen.getByTestId('fake-bulk-action-refresh'));
+            expect(refreshMockFn.mock.calls.length).toBeGreaterThan(0);
+          });
+
+          it('should clear all selection on bulk action click', async () => {
+            const props = {
+              ...tablePropsWithBulkActions,
+
+              initialBulkActionsState: {
+                ...defaultBulkActionsState,
+                areAllVisibleRowsSelected: true,
+                rowSelection: new Map([[0, { isLoading: true }]]),
+              },
+            };
+            render(<AlertsTableWithBulkActionsContext {...props} />);
+
+            let bulkActionsCells = screen.getAllByTestId(
+              'bulk-actions-row-cell'
+            ) as HTMLInputElement[];
+
+            fireEvent.click(screen.getByTestId('bulk-actions-header'));
+
+            expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeVisible();
+
+            fireEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+            await waitForEuiPopoverOpen();
+
+            fireEvent.click(screen.getByTestId('fake-bulk-action-clear'));
+
+            // clear Selection happens after 150ms
+            await waitFor(() => {
+              bulkActionsCells = screen.getAllByTestId(
+                'bulk-actions-row-cell'
+              ) as HTMLInputElement[];
+              expect(bulkActionsCells[0].checked).toBeFalsy();
+              expect(bulkActionsCells[1].checked).toBeFalsy();
+            });
           });
         });
       });
