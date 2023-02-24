@@ -209,7 +209,7 @@
     "/s/{spaceId}/api/cases/_find": {
       "get": {
         "summary": "Retrieves a paginated subset of cases.",
-        "operationId": "getCases",
+        "operationId": "findCases",
         "description": "You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
         "tags": [
           "cases"
@@ -1201,7 +1201,7 @@
     "/s/{spaceId}/api/cases/configure/connectors/_find": {
       "get": {
         "summary": "Retrieves information about connectors.",
-        "operationId": "getCaseConnectors",
+        "operationId": "findCaseConnectors",
         "description": "In particular, only the connectors that are supported for use in cases are returned. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
         "tags": [
           "cases"
@@ -1371,7 +1371,7 @@
       "get": {
         "summary": "Returns the number of cases that are open, closed, and in progress.",
         "operationId": "getCaseStatus",
-        "description": "Deprecated in 8.1.0. This API is deprecated and will be removed in a future release. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "description": "Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find cases API instead. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
         "deprecated": true,
         "tags": [
           "cases"
@@ -2034,7 +2034,7 @@
     "/s/{spaceId}/api/cases/{caseId}/user_actions": {
       "get": {
         "summary": "Returns all user activity for a case.",
-        "description": "Deprecated in 8.1.0. Use the find user actions API instead. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.\n",
+        "description": "Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find user actions API instead. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.\n",
         "deprecated": true,
         "operationId": "getCaseActivity",
         "tags": [
