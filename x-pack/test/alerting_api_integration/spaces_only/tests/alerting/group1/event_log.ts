@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../../scenarios';
 import {
   getUrlPrefix,
