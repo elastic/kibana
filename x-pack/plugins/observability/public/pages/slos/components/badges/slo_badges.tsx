@@ -28,6 +28,14 @@ export function SloBadges({ slo, activeAlerts }: Props) {
     http: { basePath },
   } = useKibana().services;
 
+  const handleClick = () => {
+    if (activeAlerts) {
+      navigateToUrl(
+        `${basePath.prepend(paths.observability.alerts)}?_a=${toAlertsPageQuery(activeAlerts)}`
+      );
+    }
+  };
+
   return (
     <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
       <SloStatusBadge slo={slo} />
@@ -42,18 +50,12 @@ export function SloBadges({ slo, activeAlerts }: Props) {
           <EuiBadge
             iconType="alert"
             color="danger"
-            onClick={() =>
-              navigateToUrl(
-                `${basePath.prepend(paths.observability.alerts)}?_a=${toAlertsPageQuery(
-                  activeAlerts
-                )}`
-              )
-            }
+            onClick={handleClick}
             onClickAriaLabel={i18n.translate(
               'xpack.observability.slos.slo.activeAlertsBadge.ariaLabel',
               { defaultMessage: 'active alerts badge' }
             )}
-            data-test-subj="o11ySlosPageSloActiveAlertsBage"
+            data-test-subj="o11ySlosPageSloActiveAlertsBadge"
           >
             {i18n.translate('xpack.observability.slos.slo.activeAlertsBadge.label', {
               defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
