@@ -11,6 +11,7 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { EmbeddablePublicPlugin, EmbeddableSetup, EmbeddableStart } from '../plugin';
 
 export interface TestPluginReturn {
@@ -32,6 +33,16 @@ export const testPlugin = (
   const setup = plugin.setup(coreSetup, {
     uiActions: uiActions.setup,
   });
+  const savedObjectsManagementMock = {
+    parseQuery: (query, types) => {
+      return {
+        queryText: 'some search',
+      };
+    },
+    getTagFindReferences: ({ selectedTags, taggingApi }) => {
+      return undefined;
+    },
+  };
 
   return {
     plugin,
@@ -42,6 +53,7 @@ export const testPlugin = (
       const start = plugin.start(anotherCoreStart, {
         inspector: inspectorPluginMock.createStartContract(),
         uiActions: uiActionsPluginMock.createStartContract(),
+        savedObjectsManagement: savedObjectsManagementMock as SavedObjectsManagementPluginStart,
       });
       return start;
     },
