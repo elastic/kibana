@@ -32,6 +32,7 @@ import { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
 interface IndicesListProps {
   indices: MatchedItem[];
   query: string;
+  onUpdateTitle: (title: string) => void;
 }
 
 interface IndicesListState {
@@ -75,6 +76,11 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     this.setState({ perPage });
     this.resetPageTo0();
     this.closePerPageControl();
+  };
+
+  onClick = (indexName: string, query: string) => {
+    const prefix = query.length && !query.trimEnd().endsWith(',') ? `${query},` : query;
+    this.props.onUpdateTitle(`${prefix}${indexName}`);
   };
 
   openPerPageControl = () => {
@@ -179,13 +185,17 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
   }
 
   render() {
-    const { indices, query, ...rest } = this.props;
+    const { indices, query, onUpdateTitle, ...rest } = this.props;
 
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {
       return (
         <EuiTableRow key={key}>
-          <EuiTableRowCell>{this.highlightIndexName(index.name, query)}</EuiTableRowCell>
+          <EuiTableRowCell>
+            <button onClick={() => this.onClick(index.name, query)}>
+              {this.highlightIndexName(index.name, query)}
+            </button>
+          </EuiTableRowCell>
           <EuiTableRowCell>
             {index.tags.map((tag: Tag) => {
               return (

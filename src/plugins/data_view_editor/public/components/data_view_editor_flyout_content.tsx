@@ -198,6 +198,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
     [form]
   );
 
+  const onUpdateTitle = useCallback(
+    (updatedTitle) => {
+      form.setFieldValue('title', updatedTitle);
+    },
+    [form]
+  );
+
   if (isLoadingSources || !existingDataViewNames) {
     return <EuiLoadingSpinner size="xl" />;
   }
@@ -325,6 +332,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             allowHidden={allowHidden}
             title={title}
             matchedIndices$={dataViewEditorService.matchedIndices$}
+            onUpdateTitle={onUpdateTitle}
           />
         )}
       </FlyoutPanels.Item>
