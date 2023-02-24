@@ -6,16 +6,7 @@ source .buildkite/scripts/common/util.sh
 
 source .buildkite/scripts/steps/scalability/util.sh
 
-echo "--- yarn kbn bootstrap  --force-install"
-if ! yarn kbn bootstrap  --force-install; then
-  echo "bootstrap failed, trying again in 15 seconds"
-  sleep 15
-
-  rm -rf node_modules
-
-  echo "--- yarn kbn reset && yarn kbn bootstrap, attempt 2"
-  yarn kbn reset && yarn kbn bootstrap
-fi
+bootstrap_kibana
 
 KIBANA_LOAD_TESTING_DIR="${KIBANA_DIR}/kibana-load-testing"
 # These tests are running on static workers so we must delete previous build, load runner and scalability artifacts

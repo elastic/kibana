@@ -6,9 +6,7 @@ source .buildkite/scripts/common/util.sh
 
 source .buildkite/scripts/steps/scalability/util.sh
 
-#.buildkite/scripts/bootstrap.sh
-echo "--- yarn kbn reset && yarn kbn bootstrap"
-yarn kbn reset && yarn kbn bootstrap
+bootstrap_kibana
 
 GCS_BUCKET="gs://kibana-performance/scalability-tests"
 GCS_ARTIFACTS_REL="gcs_artifacts"

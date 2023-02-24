@@ -24,3 +24,16 @@ upload_test_results() {
   tar -czf "scalability_test_report.tar.gz" --exclude=simulation.log -C kibana-load-testing/target gatling
   buildkite-agent artifact upload "scalability_test_report.tar.gz"
 }
+
+bootstrap_kibana() {
+  echo "--- yarn kbn bootstrap  --force-install"
+  if ! yarn kbn bootstrap  --force-install; then
+    echo "bootstrap failed, trying again in 15 seconds"
+    sleep 15
+
+    rm -rf node_modules
+
+    echo "--- yarn kbn reset && yarn kbn bootstrap, attempt 2"
+    yarn kbn reset && yarn kbn bootstrap
+  fi
+}
