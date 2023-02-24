@@ -14,7 +14,7 @@ import {
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 
-const API_HEADER = { 'kbn-xsrf': 'kibana' };
+export const API_HEADER = { 'kbn-xsrf': 'kibana' };
 
 export const removeAllArtifacts = () => {
   for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
