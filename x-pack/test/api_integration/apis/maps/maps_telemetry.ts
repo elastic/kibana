@@ -24,18 +24,21 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const geoPointFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(fieldStat => {
-        return fieldStat.name === 'geo_point';
-      });
+      const geoPointFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
+        (fieldStat) => {
+          return fieldStat.name === 'geo_point';
+        }
+      );
       expect(geoPointFieldStats.count).to.be(7);
       expect(geoPointFieldStats.index_count).to.be(6);
 
-      const geoShapeFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(fieldStat => {
-        return fieldStat.name === 'geo_shape';
-      });
+      const geoShapeFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
+        (fieldStat) => {
+          return fieldStat.name === 'geo_shape';
+        }
+      );
       expect(geoShapeFieldStats.count).to.be(3);
       expect(geoShapeFieldStats.index_count).to.be(3);
-
 
       const mapUsage = apiResponse.stack_stats.kibana.plugins.maps;
       delete mapUsage.timeCaptured;
