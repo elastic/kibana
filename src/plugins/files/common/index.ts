@@ -30,5 +30,5 @@ export type {
   UpdatableFileShareMetadata,
 } from './types';
 
-import  * as DefaultFileKind from './default_image_file_kind';
+import * as DefaultFileKind from './default_image_file_kind';
 export { DefaultFileKind };

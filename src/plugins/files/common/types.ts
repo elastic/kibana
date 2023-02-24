@@ -9,7 +9,15 @@
 import type { SavedObject } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import type { Readable } from 'stream';
-import type { FileJSON, FileStatus, FileMetadata, FileShare, FileShareJSON, FileKindBase, FileShareJSONWithToken } from '@kbn/shared-ux-file-types';
+import type {
+  FileJSON,
+  FileStatus,
+  FileMetadata,
+  FileShare,
+  FileShareJSON,
+  FileKindBase,
+  FileShareJSONWithToken,
+} from '@kbn/shared-ux-file-types';
 import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
 
 export type {

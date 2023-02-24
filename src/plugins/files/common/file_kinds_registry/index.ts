@@ -31,7 +31,9 @@ export interface FileKindsRegistry<FK extends FileKindBase = FileKind> {
 /**
  * @internal
  */
-export class FileKindsRegistryImpl<FK extends FileKindBase = FileKind> implements FileKindsRegistry<FK> {
+export class FileKindsRegistryImpl<FK extends FileKindBase = FileKind>
+  implements FileKindsRegistry<FK>
+{
   constructor(private readonly onRegister?: (fileKind: FK) => void) {}
 
   private readonly fileKinds = new Map<string, FK>();
