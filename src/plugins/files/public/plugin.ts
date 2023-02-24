@@ -11,8 +11,8 @@ import type { FilesClient, FilesClientFactory } from './types';
 import { FileKindsRegistryImpl } from '../common/file_kinds_registry';
 import { createFilesClient } from './files_client';
 import { FileKindBrowser } from '../common';
-import { registerDefaultFileKinds } from '../common/register_default_file_kinds';
 import { ScopedFilesClient } from '.';
+import * as DefaultImageFileKind from '../common/default_image_file_kind';
 
 /**
  * Public setup-phase contract
@@ -45,6 +45,11 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
   private filesClientFactory?: FilesClientFactory;
 
   setup(core: CoreSetup): FilesSetup {
+    this.registry.register({
+      ...DefaultImageFileKind.kind,
+      maxSizeBytes: DefaultImageFileKind.maxSize,
+    });
+
     this.filesClientFactory = {
       asScoped: <M = unknown>(fileKind: string) => {
         return createFilesClient({
@@ -60,8 +65,7 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
         }) as FilesClient<M>;
       },
     };
-    registerDefaultFileKinds();
-    
+
     return {
       filesClientFactory: this.filesClientFactory,
       registerFileKind: (fileKind: FileKindBrowser) => {
