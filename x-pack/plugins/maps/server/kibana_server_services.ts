@@ -18,7 +18,3 @@ export function setStartServices(core: CoreStart, plugins: StartDeps) {
 export const getSavedObjectClient = (extraTypes?: string[]) => {
   return coreStart.savedObjects.createInternalRepository(extraTypes);
 };
-
-export const getIndexPatternsServiceFactory = () =>
-  pluginsStart.data.indexPatterns.dataViewsServiceFactory;
-export const getElasticsearch = () => coreStart.elasticsearch;
