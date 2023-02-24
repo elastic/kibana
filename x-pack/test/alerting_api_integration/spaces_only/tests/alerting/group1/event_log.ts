@@ -916,8 +916,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .auth('superuser', 'superuser')
             .send({
               enabled: true,
-              look_back_window: 3,
-              status_change_threshold: 2,
+              look_back_window: 6,
+              status_change_threshold: 4,
             })
             .expect(200);
           const { body: createdAction } = await supertest
@@ -932,7 +932,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           // pattern of when the alert should fire
-          const instance = [true, false, true, true, true, true, true];
+          const instance = [true, false, false, true, false, true, false, true, false].concat(
+            ...new Array(8).fill(true),
+            false
+          );
           const pattern = {
             instance,
           };
@@ -954,6 +957,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     group: 'default',
                     params: {},
                   },
+                  {
+                    id: createdAction.id,
+                    group: 'recovered',
+                    params: {},
+                  },
                 ],
               })
             );
@@ -972,12 +980,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 6 }],
-                ['execute', { gte: 6 }],
-                ['execute-action', { equal: 6 }],
-                ['new-instance', { equal: 1 }],
+                ['execute-start', { gte: 15 }],
+                ['execute', { gte: 15 }],
+                ['execute-action', { equal: 15 }],
+                ['new-instance', { equal: 3 }],
                 ['active-instance', { gte: 6 }],
-                ['recovered-instance', { equal: 1 }],
+                ['recovered-instance', { equal: 3 }],
               ]),
             });
           });
@@ -989,7 +997,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          const result = [false, true, true, false, false, false, false];
+          const result = [false, false, false, false, false].concat(
+            new Array(7).fill(true),
+            false,
+            false,
+            false
+          );
           expect(flapping).to.eql(result);
         });
 
@@ -1000,8 +1013,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .auth('superuser', 'superuser')
             .send({
               enabled: true,
-              look_back_window: 3,
-              status_change_threshold: 2,
+              look_back_window: 6,
+              status_change_threshold: 4,
             })
             .expect(200);
           const { body: createdAction } = await supertest
@@ -1016,7 +1029,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           // pattern of when the alert should fire
-          const instance = [true, false, true, false, false, false, true];
+          const instance = [true, false, false, true, false, true, false, true, false, true].concat(
+            new Array(11).fill(false)
+          );
           const pattern = {
             instance,
           };
@@ -1038,6 +1053,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     group: 'default',
                     params: {},
                   },
+                  {
+                    id: createdAction.id,
+                    group: 'recovered',
+                    params: {},
+                  },
                 ],
               })
             );
@@ -1056,12 +1076,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               provider: 'alerting',
               actions: new Map([
                 // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 5 }],
-                ['execute', { gte: 5 }],
-                ['execute-action', { equal: 3 }],
-                ['new-instance', { equal: 2 }],
+                ['execute-start', { gte: 8 }],
+                ['execute', { gte: 8 }],
+                ['execute-action', { equal: 8 }],
+                ['new-instance', { equal: 3 }],
                 ['active-instance', { gte: 3 }],
-                ['recovered-instance', { equal: 2 }],
+                ['recovered-instance', { equal: 3 }],
               ]),
             });
           });
@@ -1073,7 +1093,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          expect(flapping).to.eql([false, true, true, true, true]);
+          expect(flapping).to.eql([false, false, false, false, false, true, true, true]);
         });
       });
     }
