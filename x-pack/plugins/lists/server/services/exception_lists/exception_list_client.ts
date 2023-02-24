@@ -653,7 +653,7 @@ export class ExceptionListClient {
 
   /**
    * Update an existing exception list item using the overwrite method in order to behave
-   * more like a PUT request rather than a PUT request.
+   * more like a PUT request rather than a PATCH request.
    *
    * This was done in order to correctly unset types via update which cannot be accomplished
    * using the regular `updateExceptionItem` method. All other results of the methods are identical
