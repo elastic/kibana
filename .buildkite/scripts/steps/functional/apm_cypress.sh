@@ -12,8 +12,11 @@ APM_CYPRESS_RECORD_KEY="$(retry 5 5 vault read -field=CYPRESS_RECORD_KEY secret/
 export JOB=kibana-apm-cypress
 IS_FLAKY_TEST_RUNNER=${CLI_COUNT:-0}
 
-# Disable parallel tests and dashboard recording when running them in the flaky test runner
-if [[ "$IS_FLAKY_TEST_RUNNER" -ne 1 ]]; then
+# Disable parallel tests and dashboard recording when
+# running them in the flaky test runner
+# PR is not labeled with apm:cypress-record
+
+if [[ "$IS_FLAKY_TEST_RUNNER" -ne 1 && is_pr_with_label "apm:cypress-record"]]; then
   CYPRESS_ARGS="--record --key "$APM_CYPRESS_RECORD_KEY" --parallel --ci-build-id "${BUILDKITE_BUILD_ID}""
 else
   CYPRESS_ARGS=""
