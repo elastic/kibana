@@ -124,9 +124,9 @@ async function mountComponent(
     setExpandedDoc: jest.fn(),
     persistDataView: jest.fn(),
     updateAdHocDataViewId: jest.fn(),
-    searchSessionManager: createSearchSessionMock(session).searchSessionManager,
     updateDataViewList: jest.fn(),
   };
+  stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>

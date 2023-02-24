@@ -226,7 +226,6 @@ export function useDiscoverState({
     stateContainer,
     persistDataView,
     updateAdHocDataViewId,
-    searchSessionManager,
     updateDataViewList,
   };
 }
