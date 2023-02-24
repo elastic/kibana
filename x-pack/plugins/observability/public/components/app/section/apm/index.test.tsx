@@ -6,18 +6,11 @@
  */
 
 import React from 'react';
-import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { render, data as dataMock } from '../../../../utils/test_helper';
-import { CoreStart } from '@kbn/core/public';
-import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { APMSection } from '.';
 import { response } from './mock_data/apm.mock';
-import * as hasDataHook from '../../../../hooks/use_has_data';
-import * as pluginContext from '../../../../hooks/use_plugin_context';
-import { HasDataContextValue } from '../../../../context/has_data_context';
-import { AppMountParameters } from '@kbn/core/public';
-import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { useFetchApmServicesHasData } from '../../../../hooks/overview/use_fetch_apm_services_has_data';
+import { useFetchApmServices } from '../../../../hooks/overview/use_fetch_apm_services';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -27,61 +20,41 @@ jest.mock('react-router-dom', () => ({
   useHistory: jest.fn(),
 }));
 
-describe('APMSection', () => {
-  const bucketSize = { intervalString: '60s', bucketSize: 60, dateFormat: 'YYYY-MM-DD HH:mm' };
+jest.mock('../../../../hooks/overview/use_fetch_apm_services');
+jest.mock('../../../../hooks/overview/use_fetch_apm_services_has_data');
 
+const useFetchApmServicesHasDataMock = useFetchApmServicesHasData as jest.Mock;
+const useFetchApmServicesMock = useFetchApmServices as jest.Mock;
+
+const bucketSize = { intervalString: '60s', bucketSize: 60, dateFormat: 'YYYY-MM-DD HH:mm' };
+
+describe('APMSection', () => {
   beforeAll(() => {
-    jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
-      hasDataMap: {
-        apm: {
-          status: fetcherHook.FETCH_STATUS.SUCCESS,
-          hasData: true,
-        },
-      },
-    } as HasDataContextValue);
+    useFetchApmServicesHasDataMock.mockReturnValue({ isLoading: false, data: { hasData: true } });
 
     // @ts-expect-error `dataMock` is not properly propagating the mock types
     dataMock.query.timefilter.timefilter.getTime.mockReturnValue({
       from: '2020-10-08T06:00:00.000Z',
       to: '2020-10-08T07:00:00.000Z',
     });
-    const config = {
-      unsafe: {
-        alertDetails: {
-          apm: { enabled: false },
-          logs: { enabled: false },
-          metrics: { enabled: false },
-          uptime: { enabled: false },
-        },
-      },
-    } as ConfigSchema;
-
-    jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-      appMountParameters: {} as AppMountParameters,
-      core: {} as CoreStart,
-      config,
-      plugins: {} as ObservabilityPublicPluginsStart,
-      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      ObservabilityPageTemplate: KibanaPageTemplate,
-    }));
   });
 
   it('renders transaction stat less than 1k', () => {
-    const resp = {
-      appLink: '/app/apm',
-      stats: {
-        services: { value: 11, type: 'number' },
-        transactions: { value: 900, type: 'number' },
+    useFetchApmServicesMock.mockReturnValue({
+      isLoading: false,
+      isSuccess: true,
+      services: {
+        appLink: '/app/apm',
+        stats: {
+          services: { value: 11, type: 'number' },
+          transactions: { value: 900, type: 'number' },
+        },
+        series: {
+          transactions: { coordinates: [] },
+        },
       },
-      series: {
-        transactions: { coordinates: [] },
-      },
-    };
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-      data: resp,
-      status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
     });
+
     const { getByRole, getByText, queryAllByTestId } = render(
       <APMSection bucketSize={bucketSize} />
     );
@@ -94,11 +67,12 @@ describe('APMSection', () => {
   });
 
   it('renders with transaction series and stats', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-      data: response,
-      status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+    useFetchApmServicesMock.mockReturnValue({
+      isLoading: false,
+      isSuccess: true,
+      services: response,
     });
+
     const { getByRole, getByText, queryAllByTestId } = render(
       <APMSection bucketSize={bucketSize} />
     );
@@ -109,12 +83,14 @@ describe('APMSection', () => {
     expect(getByText('312.00k tpm')).toBeInTheDocument();
     expect(queryAllByTestId('loading')).toEqual([]);
   });
+
   it('shows loading state', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-      data: undefined,
-      status: fetcherHook.FETCH_STATUS.LOADING,
-      refetch: jest.fn(),
+    useFetchApmServicesMock.mockReturnValue({
+      isLoading: true,
+      isSuccess: false,
+      services: undefined,
     });
+
     const { getByRole, queryAllByText, getByTestId } = render(
       <APMSection bucketSize={bucketSize} />
     );

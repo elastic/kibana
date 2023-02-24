@@ -121,7 +121,7 @@ export function APMSection({ bucketSize }: Props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <ChartContainer isInitialLoad={isLoading && !data}>
+      <ChartContainer isInitialLoad={isLoading && !services}>
         <Settings
           onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
           theme={chartTheme}
