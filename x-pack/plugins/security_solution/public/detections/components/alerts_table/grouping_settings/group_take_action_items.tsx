@@ -7,6 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
+import type { Status } from '../../../../../common/detection_engine/schemas/common';
 import type { inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
@@ -28,7 +29,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import * as i18n from '../translations';
 
 export interface TakeActionsProps {
-  currentStatus?: AlertWorkflowStatus;
+  currentStatus?: Status;
   indexName: string;
   showAlertStatusActions?: boolean;
 }
