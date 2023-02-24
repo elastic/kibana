@@ -33,12 +33,14 @@ export const parseAlertsGroupingData = (
     };
   });
 
-  topAlerts.push({
-    key: 'Other',
-    value: other,
-    percentage: Math.round((other / total) * 1000) / 10,
-    label: i18n.OTHER,
-  });
+  if (other > 0) {
+    topAlerts.push({
+      key: 'Other',
+      value: other,
+      percentage: Math.round((other / total) * 1000) / 10,
+      label: i18n.OTHER,
+    });
+  }
 
   return topAlerts;
 };

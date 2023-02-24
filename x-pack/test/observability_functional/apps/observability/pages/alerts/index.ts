@@ -170,8 +170,8 @@ export default ({ getService }: FtrProviderContext) => {
               'Oct 19, 2021 @ 15:00:41.555',
               'Oct 19, 2021 @ 15:20:38.749',
               '20 minutes',
-              '5',
-              '30.73',
+              '5.0%',
+              '31%',
               'Failed transaction rate threshold',
             ];
 

@@ -29,10 +29,10 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { Store } from 'redux';
+import { stringifyUrlParams } from './url_params/stringify_url_params';
 import { mockState } from '../__mocks__/uptime_store.mock';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
-import { stringifyUrlParams } from '../../../apps/synthetics/utils/url_params/stringify_url_params';
 import { ClientPluginsStart } from '../../../plugin';
 import { UptimeRefreshContextProvider, UptimeStartupPluginsContextProvider } from '../../contexts';
 import { kibanaService } from '../../state/kibana_service';
