@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import {
-  ENDPOINT_ARTIFACT_LIST_IDS,
-  EXCEPTION_LIST_ITEM_URL,
-} from '@kbn/securitysolution-list-constants';
 import { recurse } from 'cypress-recurse';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { API_HEADER, removeAllArtifacts } from '../../tasks/artifacts';
 import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
 import { login } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
+
+const yieldEndpointPolicyRevision = (): Cypress.Chainable<number> =>
+  cy
+    .request({
+      method: 'GET',
+      url: '/api/fleet/package_policies?kuery=ingest-package-policies.package.name%3A%20endpoint',
+      headers: API_HEADER,
+    })
+    .then(({ body }) => {
+      return body.items?.[0]?.revision ?? -1;
+    });
 
 const yieldInstalledEndpointRevision = (): Cypress.Chainable<number> =>
   cy
@@ -24,48 +31,25 @@ const yieldInstalledEndpointRevision = (): Cypress.Chainable<number> =>
       return body.data?.[0]?.policy_info?.endpoint?.revision ?? -1;
     });
 
-const yieldIsThereAnyArtifact = (listIds: readonly string[]): Cypress.Chainable<boolean> =>
-  cy
-    .request({
-      method: 'GET',
-      url: `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${listIds[0]}&namespace_type=agnostic`,
-      failOnStatusCode: false,
-    })
-    .then(({ status, body }) => {
-      if (status === 200 && body.total > 0) {
-        return true;
-      } else if (listIds.length > 1) {
-        return yieldIsThereAnyArtifact(listIds.slice(1));
-      } else {
-        return false;
-      }
-    });
-
 const parseRevNumber = (revString: string) => Number(revString.match(/\d+/)?.[0]);
 
 describe('Artifact pages', () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();
+    removeAllArtifacts();
 
-    let initialRevisionNumber: number;
-    const hasRevisionBumpedOnEndpoint = (revision: number) =>
-      revision === initialRevisionNumber + 1;
+    // wait for ManifestManager to pick up artifact changes that happened either here
+    // or in a previous test suite `after`
+    cy.wait(6000); //  packagerTaskInterval + 1s
 
-    yieldInstalledEndpointRevision()
-      .then((revisionNumber) => {
-        initialRevisionNumber = revisionNumber;
+    yieldEndpointPolicyRevision().then((actualEndpointPolicyRevision) => {
+      const hasReachedActualRevision = (revision: number) =>
+        revision === actualEndpointPolicyRevision;
 
-        return yieldIsThereAnyArtifact(ENDPOINT_ARTIFACT_LIST_IDS);
-      })
-      .then((isThereAnyArtifact) => {
-        if (isThereAnyArtifact) {
-          removeAllArtifacts();
-
-          // need to wait until revision is bumped to ensure test success
-          recurse(yieldInstalledEndpointRevision, hasRevisionBumpedOnEndpoint, { delay: 1500 });
-        }
-      });
+      // need to wait until revision is bumped to ensure test success
+      recurse(yieldInstalledEndpointRevision, hasReachedActualRevision, { delay: 1500 });
+    });
   });
 
   beforeEach(() => {
