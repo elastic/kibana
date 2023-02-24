@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { getPackages } from '@kbn/fleet-plugin/server/services/epm/packages';
+import type { ListResult, PackageList, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -40,11 +40,18 @@ export const getInstalledIntegrationsRoute = (
         const ctx = await context.resolve(['core', 'securitySolution']);
         const fleet = ctx.securitySolution.getInternalFleetServices();
         const set = createInstalledIntegrationSet();
-        const coreContext = await context.core;
-        const savedObjectsClient = coreContext.savedObjects.client;
 
-        const packagePolicies = await fleet.packagePolicy.list(fleet.internalReadonlySoClient, {});
+        // Pulls all packages into memory just like the main fleet landing page as no `installed:true` option available
+        // No pagination support currently, so cannot batch this call
+        const allThePackages: PackageList = await fleet.packages.getPackages();
+        allThePackages
+          .filter(({ status }) => status === 'installed')
+          .forEach((installedPackage) => set.addInstalledPackage(installedPackage));
 
+        const packagePolicies: ListResult<PackagePolicy> = await fleet.packagePolicy.list(
+          fleet.internalReadonlySoClient,
+          {}
+        );
         packagePolicies.items.forEach((policy) => {
           set.addPackagePolicy(policy);
         });
@@ -60,16 +67,6 @@ export const getInstalledIntegrationsRoute = (
             return registryPackage;
           },
         });
-
-        // TODO: Pulls all packages into memory just like the main fleet landing page 😬
-        // TODO: Batch/paginate this call, and preferably find a way to only query installed packages
-        // TODO: Also, why isn't this method available on the `PackageService`??
-        const allThePackages = await getPackages({
-          savedObjectsClient,
-        });
-        allThePackages
-          .filter(({ status }) => status === 'installed')
-          .forEach((installedPackage) => set.addInstalledPackage(installedPackage));
 
         if (registryPackages.errors.length > 0) {
           const errors = registryPackages.errors.map(({ error, item }) => {
