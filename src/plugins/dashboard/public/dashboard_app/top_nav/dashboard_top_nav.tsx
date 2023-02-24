@@ -17,7 +17,7 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule, useEuiBackgroundColor } from '@elastic/eui';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -32,6 +32,7 @@ import { DashboardEditingToolbar } from './dashboard_editing_toolbar';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
+import { css } from '@emotion/react';
 
 export interface DashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
@@ -214,7 +215,14 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   });
 
   return (
-    <>
+    <div
+      css={css`
+        position: fixed;
+        z-index: 99;
+        background: ${useEuiBackgroundColor('subdued')};
+        width: 100%;
+      `}
+    >
       <h1
         id="dashboardTitle"
         className="euiScreenReaderOnly"
@@ -267,6 +275,6 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       ) : null}
       {viewMode === ViewMode.EDIT ? <DashboardEditingToolbar /> : null}
       <EuiHorizontalRule margin="none" />
-    </>
+    </div>
   );
 }

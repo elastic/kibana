@@ -44,6 +44,8 @@ export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_pic
 
 export { FloatingActions } from './floating_actions/floating_actions';
 
+export { FloatingActionsV2 } from './floating_actions/floating_actions_v2';
+
 /**
  * A lazily-loaded ExpressionInput component.
  */

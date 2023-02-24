@@ -21,7 +21,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { useReduxEmbeddableContext, FloatingActions } from '@kbn/presentation-util-plugin/public';
+import { useReduxEmbeddableContext, FloatingActionsV2 } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupReduxState } from '../types';
 import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
@@ -214,28 +214,25 @@ export const ControlFrame = ({
   );
 
   return (
-    <>
-      <FloatingActions
-        className={classNames('controlFrameFloatingActions', {
-          'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
-          'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
-        })}
-        usingTwoLineLayout={usingTwoLineLayout}
-        actions={floatingActions}
-        isEnabled={embeddable && enableActions}
+    <FloatingActionsV2
+      className={classNames({
+        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
+        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
+      })}
+      actions={floatingActions}
+      isEnabled={embeddable && enableActions}
+    >
+      <EuiFormRow
+        data-test-subj="control-frame-title"
+        fullWidth
+        label={
+          usingTwoLineLayout
+            ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
+            : undefined
+        }
       >
-        <EuiFormRow
-          data-test-subj="control-frame-title"
-          fullWidth
-          label={
-            usingTwoLineLayout
-              ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
-              : undefined
-          }
-        >
-          {form}
-        </EuiFormRow>
-      </FloatingActions>
-    </>
+        {form}
+      </EuiFormRow>
+    </FloatingActionsV2>
   );
 };

@@ -51,7 +51,17 @@ export const DashboardViewportComponent = () => {
   const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
 
   return (
-    <>
+    <div
+      css={
+        viewMode === ViewMode.EDIT
+          ? css`
+              padding-top: 105px; // THIS SHOULDN'T BE STATIC - NEED TO KNOW THE HEIGHT OF THE HEADER
+            `
+          : css`
+              padding-top: 55px;
+            `
+      }
+    >
       {controlsEnabled && controlGroup && viewMode !== ViewMode.PRINT ? (
         <div
           className={controlCount > 0 ? 'dshDashboardViewport-controls' : ''}
@@ -73,7 +83,7 @@ export const DashboardViewportComponent = () => {
         )}
         <DashboardGrid />
       </div>
-    </>
+    </div>
   );
 };
 
