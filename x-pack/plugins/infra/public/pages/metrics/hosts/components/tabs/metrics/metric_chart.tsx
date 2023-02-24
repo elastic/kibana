@@ -119,6 +119,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
               name: `Hosts View ${type} Chart`,
             }}
             onBrushEnd={handleBrushEnd}
+            syncTooltips={true}
           />
         )
       )}
