@@ -1276,14 +1276,6 @@
             "path": "src/plugins/data_views/server/utils.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
             "plugin": "dataViews",
             "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
           },
