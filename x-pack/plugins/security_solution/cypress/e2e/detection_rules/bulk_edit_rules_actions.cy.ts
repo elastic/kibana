@@ -104,12 +104,12 @@ describe('Detection rules, bulk edit of rule actions', () => {
       );
     });
 
-    createEventCorrelationRule(getEqlRule(), '2');
-    createMachineLearningRule(getMachineLearningRule(), '3');
-    createCustomIndicatorRule(getNewThreatIndicatorRule(), '4');
-    createThresholdRule(getNewThresholdRule(), '5');
-    createNewTermsRule(getNewTermsRule(), '6');
-    createSavedQueryRule({ ...getNewRule(), savedId: 'mocked' }, '7');
+    createEventCorrelationRule(getEqlRule({ id: '2' }));
+    createMachineLearningRule(getMachineLearningRule({ id: '3' }));
+    createCustomIndicatorRule(getNewThreatIndicatorRule({ id: '4' }));
+    createThresholdRule(getNewThresholdRule({ id: '5' }));
+    createNewTermsRule(getNewTermsRule({ id: '6' }));
+    createSavedQueryRule({ ...getNewRule({ id: '7' }), savedId: 'mocked' });
 
     createSlackConnector();
   });

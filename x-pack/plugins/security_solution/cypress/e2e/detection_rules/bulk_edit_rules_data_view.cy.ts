@@ -76,11 +76,11 @@ describe('Bulk editing index patterns of rules with a data view only', () => {
     postDataView(DATA_VIEW_ID);
 
     createCustomRule(getNewRule({ id: '1', ...dataViewRuleData }));
-    createEventCorrelationRule({ ...getEqlRule(), ...dataViewRuleData }, '2');
-    createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...dataViewRuleData }, '3');
-    createThresholdRule({ ...getNewThresholdRule(), ...dataViewRuleData }, '4');
-    createNewTermsRule({ ...getNewTermsRule(), ...dataViewRuleData }, '5');
-    createSavedQueryRule({ ...getNewRule(), ...dataViewRuleData, savedId: 'mocked' }, '6');
+    createEventCorrelationRule(getEqlRule({ id: '2', ...dataViewRuleData }));
+    createCustomIndicatorRule(getNewThreatIndicatorRule({ id: '3', ...dataViewRuleData }));
+    createThresholdRule(getNewThresholdRule({ id: '4', ...dataViewRuleData }));
+    createNewTermsRule(getNewTermsRule({ id: '5', ...dataViewRuleData }));
+    createSavedQueryRule({ ...getNewRule({ id: '6' }), ...dataViewRuleData, savedId: 'mocked' });
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
