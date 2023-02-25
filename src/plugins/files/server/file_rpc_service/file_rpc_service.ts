@@ -13,10 +13,12 @@ import { normalizeErrors } from './util';
 export class FileRpcService implements FileRpcMethods {
   constructor (
     private readonly service: FileServiceStart,
-    private readonly hooks: FileRpcServiceHooks
+    private readonly hooks: Partial<FileRpcServiceHooks>
   ) {}
 
   public readonly create: FileRpcMethods['create'] = normalizeErrors(async (req) => {
+    this.executeHook('onCreateStart', req);
+
     const { ctx, data } = req;
     const { fileKind, name, alt, meta, mime } = data;
     const user = ctx.user ? { id: ctx.user.profile_uid, name: ctx.user.username } : undefined;
@@ -35,4 +37,18 @@ export class FileRpcService implements FileRpcMethods {
       httpCode: 200,
     };
   });
+
+  private async executeHook<K extends keyof FileRpcServiceHooks>(hookName: K, ...args: Parameters<FileRpcServiceHooks[K]>) {
+    const hook = this.hooks[hookName];
+    if (!hook) return;
+
+    try {
+      const result = await this.hooks[hookName]!.apply(this.hooks, args);
+      if (result !== true) {
+        throw new Error(`File RPC hook "${hookName}" returned a value other than "true".`);
+      }
+    } catch (error) {
+      
+    }
+  }
 }

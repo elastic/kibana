@@ -91,7 +91,7 @@ export interface FileRpcError {
 }
 
 export interface FileRpcServiceHooks {
-  onCreateStart?(req: FileRpcRequest<CreateFileArgs>): boolean;
+  onCreateStart(req: FileRpcRequest<CreateFileArgs>): boolean;
 }
 
 /**
