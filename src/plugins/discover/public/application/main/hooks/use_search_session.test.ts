@@ -29,7 +29,6 @@ describe('test useSearchSession', () => {
       return useSearchSession({
         services: discoverServiceMock,
         stateContainer,
-        savedSearch: savedSearchMock,
       });
     });
     expect(stateContainer.searchSessionManager.getNextSearchSessionId()).toBe('id');

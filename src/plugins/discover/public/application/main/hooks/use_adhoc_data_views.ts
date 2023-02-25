@@ -12,6 +12,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
 import { DiscoverStateContainer } from '../services/discover_state';
@@ -24,7 +25,6 @@ export const useAdHocDataViews = ({
   filterManager,
   toastNotifications,
   trackUiMetric,
-  isTextBasedMode,
 }: {
   dataView: DataView;
   savedSearch: SavedSearch;
@@ -32,8 +32,10 @@ export const useAdHocDataViews = ({
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
   trackUiMetric?: (metricType: string, eventName: string | string[], count?: number) => void;
-  isTextBasedMode?: boolean;
 }) => {
+  const query = stateContainer.appState.getState().query;
+  const isTextBasedMode = query && isOfAggregateQueryType(query);
+
   useEffect(() => {
     if (!dataView.isPersisted()) {
       trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);

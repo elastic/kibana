@@ -28,107 +28,73 @@ describe('buildStateSubscribe', () => {
     Promise.resolve({ fallback: false, dataView: dataViewComplexMock })
   );
 
-  const setState = jest.fn();
+  const getSubscribeFn = () => {
+    return buildStateSubscribe({
+      appState: stateContainer.appState,
+      savedSearchState: stateContainer.savedSearchState,
+      dataState: stateContainer.dataState,
+      loadAndResolveDataView: stateContainer.actions.loadAndResolveDataView,
+      setDataView: stateContainer.actions.setDataView,
+    });
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should set the data view if the index has changed, but no refetch should be triggered', async () => {
-    await buildStateSubscribe({
-      stateContainer,
-      savedSearch,
-      setState,
-    })({ index: dataViewComplexMock.id });
+    await getSubscribeFn()({ index: dataViewComplexMock.id });
 
     expect(stateContainer.actions.setDataView).toHaveBeenCalledWith(dataViewComplexMock);
     expect(stateContainer.dataState.reset).toHaveBeenCalled();
     expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
-    expect(setState).toHaveBeenCalled();
   });
 
   it('should not call refetch$ if nothing changes', async () => {
-    await buildStateSubscribe({
-      stateContainer,
-      savedSearch,
-      setState,
-    })(stateContainer.appState.getState());
+    await getSubscribeFn()(stateContainer.appState.getState());
 
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
-    expect(setState).toHaveBeenCalled();
   });
 
   it('should call refetch$ if the chart is hidden', async () => {
-    await buildStateSubscribe({
-      stateContainer,
-      savedSearch,
-      setState,
-    })({ hideChart: true });
+    await getSubscribeFn()({ hideChart: true });
 
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
-    expect(setState).toHaveBeenCalled();
   });
 
   it('should call refetch$ if the chart interval has changed', async () => {
-    await buildStateSubscribe({
-      stateContainer,
-      savedSearch,
-      setState,
-    })({ interval: 's' });
+    await getSubscribeFn()({ interval: 's' });
 
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
-    expect(setState).toHaveBeenCalled();
   });
 
   it('should call refetch$ if breakdownField has changed', async () => {
-    await buildStateSubscribe({
-      stateContainer,
-      savedSearch,
-      setState,
-    })({ breakdownField: '💣' });
+    await getSubscribeFn()({ breakdownField: '💣' });
 
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
-    expect(setState).toHaveBeenCalled();
   });
 
   it('should call refetch$ if sort has changed', async () => {
-    await buildStateSubscribe({
-      stateContainer,
-      savedSearch,
-      setState,
-    })({ sort: [['field', 'test']] });
+    await getSubscribeFn()({ sort: [['field', 'test']] });
 
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
-    expect(setState).toHaveBeenCalled();
   });
 
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
-    const stateSubscribeFn = await buildStateSubscribe({
-      stateContainer,
-      savedSearch,
-      setState,
-    });
+    const stateSubscribeFn = getSubscribeFn();
     stateContainer.dataState.initialFetchStatus = FetchStatus.UNINITIALIZED;
     await stateSubscribeFn({ index: dataViewComplexMock.id });
 
     expect(stateContainer.dataState.reset).toHaveBeenCalled();
-    expect(setState).not.toHaveBeenCalled();
   });
   it('should not execute setState twice if the identical data view change is propagated twice', async () => {
-    const stateSubscribeFn = await buildStateSubscribe({
-      stateContainer,
-      savedSearch,
-      setState,
-    });
-    await stateSubscribeFn({ index: dataViewComplexMock.id });
+    await getSubscribeFn()({ index: dataViewComplexMock.id });
 
-    expect(setState).toBeCalledTimes(0);
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
 
     stateContainer.appState.getPrevious = jest.fn(() => ({ index: dataViewComplexMock.id }));
 
-    await stateSubscribeFn({ index: dataViewComplexMock.id });
-    expect(setState).toBeCalledTimes(0);
+    await getSubscribeFn()({ index: dataViewComplexMock.id });
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
   });
 });

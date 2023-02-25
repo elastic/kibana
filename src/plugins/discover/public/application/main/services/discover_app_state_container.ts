@@ -193,24 +193,29 @@ export const getDiscoverAppStateContainer = ({
   };
 
   const initializeAndSync = (currentSavedSearch: SavedSearch) => {
-    addLog('[appState] initializeAndSync', currentSavedSearch);
-    const dataView = currentSavedSearch.searchSource.getField('index')!;
-    if (appStateContainer.getState().index !== dataView.id) {
+    addLog('🔗 [appState] initializeAndSync', currentSavedSearch);
+    const { filterManager, data } = services;
+
+    // searchsource is the source of truth
+    const dataView = currentSavedSearch.searchSource.getField('index');
+    const filters = currentSavedSearch.searchSource.getField('filter');
+    const query = currentSavedSearch.searchSource.getField('query');
+    if (appStateContainer.getState().index !== dataView?.id) {
       // used data view is different from the given by url/state which is invalid
-      setState(appStateContainer, { index: dataView.id });
+      setState(appStateContainer, { index: dataView?.id });
     }
     // sync initial app filters from state to filterManager
-    const filters = appStateContainer.getState().filters || [];
-    if (filters) {
-      services.filterManager.setAppFilters(cloneDeep(filters));
+    if (Array.isArray(filters) && filters.length) {
+      filterManager.setAppFilters(cloneDeep(filters));
+    } else {
+      filterManager.setAppFilters([]);
     }
-    const query = appStateContainer.getState().query;
     if (query) {
-      services.data.query.queryString.setQuery(query);
+      data.query.queryString.setQuery(query);
     }
 
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
-      services.data.query,
+      data.query,
       appStateContainer,
       {
         filters: FilterStateStore.APP_STATE,
@@ -220,23 +225,21 @@ export const getDiscoverAppStateContainer = ({
 
     // syncs `_g` portion of url with query services
     const { stop: stopSyncingGlobalStateWithUrl } = syncGlobalQueryStateWithUrl(
-      services.data.query,
+      data.query,
       stateStorage
     );
 
     // some filters may not be valid for this context, so update
     // the filter manager with a modified list of valid filters
-    const currentFilters = services.filterManager.getFilters();
-    const validFilters = getValidFilters(dataView, currentFilters);
+    const currentFilters = filterManager.getFilters();
+    const validFilters = getValidFilters(dataView!, currentFilters);
     if (!isEqual(currentFilters, validFilters)) {
-      services.filterManager.setFilters(validFilters);
+      filterManager.setFilters(validFilters);
     }
 
     const { start, stop } = startAppStateUrlSync();
-
-    replaceUrlState({}).then(() => {
-      start();
-    });
+    // current state need to be pushed to url
+    replaceUrlState({}).then(() => start());
 
     return () => {
       stopSyncingQueryAppStateWithStateContainer();

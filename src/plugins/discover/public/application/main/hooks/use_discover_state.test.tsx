@@ -24,7 +24,6 @@ describe('test useDiscoverState', () => {
         return useDiscoverState({
           services: discoverServiceMock,
           stateContainer,
-          setExpandedDoc: jest.fn(),
         });
       },
       {

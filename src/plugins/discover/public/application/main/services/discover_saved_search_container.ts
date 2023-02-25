@@ -25,9 +25,8 @@ import { getStateDefaults } from '../utils/get_state_defaults';
 export interface LoadParams {
   dataViewSpec?: DataViewSpec;
   dataViewList: DataViewListItem[];
+  appState?: AppState;
 }
-
-export type LoadFunction = (id: string, params: LoadParams) => Promise<SavedSearch | undefined>;
 
 export type UpdateFunction = (
   nextDataView: DataView | undefined,
@@ -45,16 +44,17 @@ export type PersistFunction = (
 export interface SavedSearchContainer {
   hasChanged$: BehaviorSubject<boolean>;
   set: (savedSearch: SavedSearch) => SavedSearch;
-  load: LoadFunction;
+  load: (id: string, params: LoadParams) => Promise<SavedSearch>;
   get: () => SavedSearch;
   getTitle: () => string;
+  getId: () => string | undefined;
   update: UpdateFunction;
   reset: (id?: string) => Promise<SavedSearch | undefined>;
   resetUrl: (id: SavedSearch) => Promise<SavedSearch | undefined>;
   undo: () => void;
   isPersisted: () => boolean;
   persist: PersistFunction;
-  new: (initialDataView: DataView) => Promise<SavedSearch>;
+  new: (initialDataView: DataView, appState?: AppState) => Promise<SavedSearch>;
 }
 
 export function getSavedSearchContainer({
@@ -87,6 +87,9 @@ export function getSavedSearchContainer({
   const getTitle = () => {
     return savedSearchVolatile$.getValue().title ?? '';
   };
+  const getId = () => {
+    return savedSearchVolatile$.getValue().id;
+  };
 
   const reset = async (id: string | undefined) => {
     // any undefined if means it's a new saved search generated
@@ -109,6 +112,8 @@ export function getSavedSearchContainer({
   };
 
   const resetUrl = async (nextSavedSearch: SavedSearch) => {
+    addLog('🔎 [resetUrl] ' + nextSavedSearch);
+
     await set(nextSavedSearch);
     const newAppState = handleSourceColumnState(
       getStateDefaults({
@@ -121,7 +126,7 @@ export function getSavedSearchContainer({
     return nextSavedSearch;
   };
 
-  const newSavedSearch = async (nextDataView: DataView | undefined) => {
+  const newSavedSearch = async (nextDataView: DataView | undefined, appState?: AppState) => {
     addLog('🔎 [savedSearch] new');
     const dataView = nextDataView ?? get().searchSource.getField('index');
     const nextSavedSearch = await getSavedSearch('', {
@@ -148,6 +153,9 @@ export function getSavedSearchContainer({
       true
     );
     set(nextSavedSearchToSet);
+    if (appState) {
+      await update(nextSavedSearch.searchSource.getField('index'), appState);
+    }
     return nextSavedSearchToSet;
   };
 
@@ -221,13 +229,18 @@ export function getSavedSearchContainer({
     return resetUrl(savedSearchPersisted$.getValue());
   };
 
-  const load: LoadFunction = (id, { dataViewSpec, dataViewList }) => {
-    return loadSavedSearch(id, {
+  const load = async (id: string, params: LoadParams): Promise<SavedSearch> => {
+    const loadedSavedSearch = await loadSavedSearch(id, {
       services,
       appStateContainer,
-      dataViewList,
-      dataViewSpec,
+      dataViewList: params.dataViewList,
+      dataViewSpec: params.dataViewSpec,
     });
+    set(loadedSavedSearch);
+    if (params.appState) {
+      await update(get().searchSource.getField('index'), params.appState);
+    }
+    return loadedSavedSearch;
   };
 
   return {
@@ -240,6 +253,7 @@ export function getSavedSearchContainer({
     isPersisted,
     get,
     getTitle,
+    getId,
     update,
     undo,
     new: newSavedSearch,

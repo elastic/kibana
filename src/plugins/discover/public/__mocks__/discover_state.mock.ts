@@ -9,12 +9,23 @@ import { createBrowserHistory } from 'history';
 import { getDiscoverStateContainer } from '../application/main/services/discover_state';
 import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
 import { discoverServiceMock } from './services';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
-export function getDiscoverStateMock({ isTimeBased = true }) {
+export function getDiscoverStateMock({
+  isTimeBased = true,
+  savedSearch,
+}: {
+  isTimeBased?: boolean;
+  savedSearch?: SavedSearch;
+}) {
   const history = createBrowserHistory();
   history.push('/');
   return getDiscoverStateContainer({
-    savedSearch: isTimeBased ? savedSearchMockWithTimeField : savedSearchMock,
+    savedSearch: savedSearch
+      ? savedSearch
+      : isTimeBased
+      ? savedSearchMockWithTimeField
+      : savedSearchMock,
     services: discoverServiceMock,
     history,
   });

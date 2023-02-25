@@ -42,9 +42,6 @@ export const loadSavedSearch = async (
     dataViewSpec
   );
 
-  if (!currentDataView) {
-    return;
-  }
   if (!currentSavedSearch.searchSource.getField('index')) {
     currentSavedSearch.searchSource.setField('index', currentDataView);
   }

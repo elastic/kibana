@@ -35,33 +35,38 @@ export const DiscoverHistogramLayout = ({
   searchSessionManager,
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
+  const { dataState, savedSearchState } = stateContainer;
   const commonProps = {
     dataView,
     stateContainer,
-    savedSearchData$: stateContainer.dataState.data$,
+    savedSearchData$: dataState.data$,
   };
-  const savedSearch = stateContainer.savedSearchState.get();
 
   const searchSessionId = useObservable(searchSessionManager.searchSessionId$);
 
   const { hideChart, setUnifiedHistogramApi } = useDiscoverHistogram({
     inspectorAdapters,
-    savedSearchFetch$: stateContainer.dataState.fetch$,
+    savedSearchFetch$: dataState.fetch$,
     searchSessionId,
     ...commonProps,
   });
   const resetSavedSearch = useCallback(() => {
-    stateContainer.savedSearchState.reset(savedSearch?.id);
-  }, [savedSearch?.id, stateContainer.savedSearchState]);
+    savedSearchState.reset(savedSearchState.getId());
+  }, [savedSearchState]);
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported
+  if (!searchSessionId && !isPlainRecord) {
+    return null;
+  }
 
   return (
     <UnifiedHistogramContainer
       ref={setUnifiedHistogramApi}
       resizeRef={resizeRef}
       appendHitsCounter={
-        savedSearch?.id ? <ResetSearchButton resetSavedSearch={resetSavedSearch} /> : undefined
+        savedSearchState.getId() ? (
+          <ResetSearchButton resetSavedSearch={resetSavedSearch} />
+        ) : undefined
       }
       css={histogramLayoutCss}
     >

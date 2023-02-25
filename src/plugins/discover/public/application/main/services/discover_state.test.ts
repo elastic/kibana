@@ -109,7 +109,7 @@ describe('Test discover initial state sort handling', () => {
       history,
     });
     state.savedSearchState.load = jest.fn(() => Promise.resolve(savedSearch));
-    await state.actions.loadSavedSearch(savedSearch.id!, jest.fn());
+    await state.actions.loadSavedSearch(savedSearch.id!);
     const stopSync = state.appState.syncState().stop;
     expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
     stopSync();

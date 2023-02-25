@@ -22,17 +22,21 @@ export interface InspectorAdapters {
 }
 
 export function useInspector({
-  setExpandedDoc,
   inspector,
   inspectorAdapters,
   stateContainer,
 }: {
   inspectorAdapters: InspectorAdapters;
   stateContainer: DiscoverStateContainer;
-  setExpandedDoc: (doc?: DataTableRecord) => void;
   inspector: InspectorPublicPluginStart;
 }) {
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
+  const setExpandedDoc = useCallback(
+    (doc: DataTableRecord | undefined) => {
+      stateContainer.internalState.transitions.setExpandedDoc(doc);
+    },
+    [stateContainer]
+  );
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
@@ -44,7 +48,7 @@ export function useInspector({
 
     const session = inspector.open(
       { requests: new AggregateRequestAdapter(requestAdapters) },
-      { title: stateContainer.savedSearchState.get().title }
+      { title: stateContainer.savedSearchState.getTitle() }
     );
 
     setInspectorSession(session);

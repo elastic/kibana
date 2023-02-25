@@ -5,10 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useEffect, useState, useCallback } from 'react';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { useEffect, useCallback } from 'react';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
-import { buildStateSubscribe } from './utils/build_state_subscribe';
 import { changeDataView } from './utils/change_data_view';
 import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
@@ -16,38 +14,32 @@ import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { useUrlTracking } from './use_url_tracking';
 import { DiscoverStateContainer } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
-import { DataTableRecord } from '../../../types';
 import { useAdHocDataViews } from './use_adhoc_data_views';
 
 export function useDiscoverState({
   services,
   stateContainer,
-  setExpandedDoc,
 }: {
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
-  setExpandedDoc: (doc?: DataTableRecord) => void;
 }) {
-  const { data, filterManager, dataViews, toastNotifications, trackUiMetric } = services;
+  const { filterManager, dataViews, toastNotifications, trackUiMetric } = services;
   const savedSearch = stateContainer.savedSearchState.get();
 
-  const dataView = stateContainer.savedSearchState.get().searchSource.getField('index')!;
+  const dataView = savedSearch.searchSource.getField('index')!;
 
   const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
 
-  const { appState, searchSessionManager } = stateContainer;
-
-  const [state, setState] = useState(appState.getState());
+  const { searchSessionManager } = stateContainer;
 
   /**
    * Search session logic
    */
-  useSearchSession({ services, stateContainer, savedSearch });
+  useSearchSession({ services, stateContainer });
 
   /**
    * Adhoc data views functionality
    */
-  const isTextBasedMode = state?.query && isOfAggregateQueryType(state?.query);
   const { persistDataView } = useAdHocDataViews({
     dataView,
     stateContainer,
@@ -55,7 +47,6 @@ export function useDiscoverState({
     filterManager,
     toastNotifications,
     trackUiMetric,
-    isTextBasedMode,
   });
 
   /**
@@ -72,8 +63,7 @@ export function useDiscoverState({
   /**
    * Data fetching logic
    */
-  const { data$, refetch$, reset, inspectorAdapters, initialFetchStatus } =
-    stateContainer.dataState;
+  const { data$, refetch$, inspectorAdapters, initialFetchStatus } = stateContainer.dataState;
   /**
    * State changes (data view, columns), when a text base query result is returned
    */
@@ -85,48 +75,16 @@ export function useDiscoverState({
   });
 
   /**
-   * Reset to display loading spinner when savedSearch is changing
-   */
-  useEffect(() => reset(), [savedSearch.id, reset]);
-
-  /**
-   * Sync URL state with local app state on saved search load
-   * or dataView / savedSearch switch
-   */
-  useEffect(() => {
-    const stopSync = stateContainer.initializeAndSync();
-    setState(stateContainer.appState.getState());
-
-    return () => stopSync();
-  }, [stateContainer, filterManager, data, dataView]);
-
-  /**
-   * Data store subscribing to trigger fetching
-   */
-  useEffect(() => {
-    const stopSync = stateContainer.dataState.subscribe();
-    return () => stopSync();
-  }, [stateContainer]);
-
-  /**
-   * Track state changes that should trigger a fetch
-   */
-  useEffect(() => {
-    const unsubscribe = appState.subscribe(
-      buildStateSubscribe({ stateContainer, savedSearch, setState })
-    );
-    return () => unsubscribe();
-  }, [appState, savedSearch, services, stateContainer]);
-
-  /**
    * Function triggered when user changes data view in the sidebar
    */
   const onChangeDataView = useCallback(
     async (id: string) => {
       await changeDataView(id, { services, discoverState: stateContainer, setUrlTracking });
-      setExpandedDoc(undefined);
+      if (stateContainer.internalState.getState().expandedDoc) {
+        stateContainer.internalState.transitions.setExpandedDoc(undefined);
+      }
     },
-    [services, setExpandedDoc, setUrlTracking, stateContainer]
+    [services, setUrlTracking, stateContainer]
   );
 
   /**
@@ -141,6 +99,11 @@ export function useDiscoverState({
     },
     [refetch$, searchSessionManager]
   );
+
+  useEffect(() => {
+    const unsubscribe = stateContainer.initializeAndSync();
+    return () => unsubscribe();
+  }, [stateContainer]);
 
   /**
    * Trigger data fetching on dataView or savedSearch changes

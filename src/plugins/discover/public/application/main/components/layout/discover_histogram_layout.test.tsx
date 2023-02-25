@@ -36,8 +36,8 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { act } from 'react-dom/test-utils';
 
-function getStateContainer() {
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+function getStateContainer(savedSearch?: SavedSearch) {
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
 
   stateContainer.setAppState({
     interval: 'auto',
@@ -112,7 +112,7 @@ const mountComponent = async ({
 
   session.getSession$.mockReturnValue(new BehaviorSubject(searchSessionId ?? undefined));
 
-  const stateContainer = getStateContainer();
+  const stateContainer = getStateContainer(savedSearch);
   stateContainer.dataState.data$ = savedSearchData$;
   stateContainer.savedSearchState.reset = jest.fn();
 
@@ -120,8 +120,6 @@ const mountComponent = async ({
     isPlainRecord,
     dataView: dataViewMock,
     navigateTo: jest.fn(),
-    setExpandedDoc: jest.fn(),
-    savedSearch,
     stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],

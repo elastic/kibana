@@ -22,6 +22,8 @@ import {
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
+import { merge } from 'rxjs';
+import { buildStateSubscribe } from '../hooks/utils/build_state_subscribe';
 import { loadDataViewBySavedSearch } from '../utils/load_data_view_by_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { getUrlTracker } from '../../../kibana_services';
@@ -274,21 +276,16 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const loadSavedSearch = async (id: string): Promise<SavedSearch | undefined> => {
-    if (appStateContainer.isEmptyURL()) {
+  const loadSavedSearch = async (id: string): Promise<SavedSearch> => {
+    const isEmptyURL = appStateContainer.isEmptyURL();
+    if (isEmptyURL) {
       appStateContainer.set({});
     }
     const currentSavedSearch = await savedSearchContainer.load(id, {
       dataViewList: internalStateContainer.getState().savedDataViews,
+      appState: !isEmptyURL ? appStateContainer.getState() : undefined,
     });
     if (currentSavedSearch) {
-      await savedSearchContainer.set(currentSavedSearch);
-      if (!appStateContainer.isEmptyURL()) {
-        await savedSearchContainer.update(
-          currentSavedSearch.searchSource.getField('index'),
-          appStateContainer.getState()
-        );
-      }
       await appStateContainer.resetWithSavedSearch(currentSavedSearch);
       setDataView(currentSavedSearch.searchSource.getField('index')!);
     }
@@ -297,29 +294,29 @@ export function getDiscoverStateContainer({
 
   const loadNewSavedSearch = async () => {
     addLog('🧭 [discoverState] loadNewSavedSearch');
-    const initialDataViewResult = await loadAndResolveDataView();
-    const nextSavedSearch = await savedSearchContainer.new(initialDataViewResult.dataView);
-    if (!appStateContainer.isEmptyURL()) {
-      await savedSearchContainer.update(
-        nextSavedSearch.searchSource.getField('index'),
-        appStateContainer.getState()
+    const isEmptyURL = appStateContainer.isEmptyURL();
+    let { dataView } = await loadAndResolveDataView();
+    const nextSavedSearch = await savedSearchContainer.new(
+      dataView,
+      !isEmptyURL ? appStateContainer.getState() : undefined
+    );
+
+    if (!dataView) {
+      dataView = await loadDataViewBySavedSearch(
+        nextSavedSearch,
+        appStateContainer,
+        internalStateContainer.getState().savedDataViews,
+        services
       );
     }
 
-    const nextDataView = await loadDataViewBySavedSearch(
-      nextSavedSearch,
-      appStateContainer,
-      internalStateContainer.getState().savedDataViews,
-      services
-    );
-
-    if (nextDataView) {
-      nextSavedSearch.searchSource.setField('index', nextDataView);
-      setDataView(nextDataView);
+    if (dataView) {
+      nextSavedSearch.searchSource.setField('index', dataView);
+      setDataView(dataView);
     }
 
     appStateContainer.resetWithSavedSearch(nextSavedSearch);
-    await savedSearchContainer.update(nextDataView, appStateContainer.getState(), true);
+    await savedSearchContainer.update(dataView, appStateContainer.getState(), true);
     return nextSavedSearch;
   };
 
@@ -332,7 +329,42 @@ export function getDiscoverStateContainer({
     searchSessionManager,
     setAppState: (newPartial: AppState) => appStateContainer.update(newPartial),
     pauseAutoRefreshInterval,
-    initializeAndSync: () => appStateContainer.initAndSync(savedSearchContainer.get()),
+    initializeAndSync: () => {
+      const unsubscribeData = dataStateContainer.subscribe();
+      const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
+        savedSearchContainer.get()
+      );
+
+      const appStateUnsubscribe = appStateContainer.subscribe(
+        buildStateSubscribe({
+          appState: appStateContainer,
+          savedSearchState: savedSearchContainer,
+          dataState: dataStateContainer,
+          loadAndResolveDataView,
+          setDataView,
+        })
+      );
+
+      const filterUnsubscribe = merge(
+        services.data.query.queryString.getUpdates$(),
+        services.filterManager.getFetches$()
+      ).subscribe(async () => {
+        await savedSearchContainer.update(
+          internalStateContainer.getState().dataView,
+          appStateContainer.getState(),
+          false,
+          true
+        );
+        dataStateContainer.fetch();
+      });
+
+      return () => {
+        unsubscribeData();
+        appStateUnsubscribe();
+        appStateInitAndSyncUnsubscribe();
+        filterUnsubscribe.unsubscribe();
+      };
+    },
     actions: {
       onOpenSavedSearch,
       setDataView,
