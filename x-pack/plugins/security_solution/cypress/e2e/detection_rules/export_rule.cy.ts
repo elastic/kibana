@@ -68,10 +68,10 @@ describe('Export rules', () => {
   });
 
   it('creates an importable file from executed rule', () => {
+    // Rule needs to be enabled to make sure it has been executed so rule's SO contains runtime fields like `execution_summary`
     createCustomRule(
       getNewRule({ id: 'enabled-rule-1', name: 'Enabled rule to export', enabled: true })
     );
-
     waitForRuleExecution('Enabled rule to export');
 
     exportRule('Enabled rule to export');
