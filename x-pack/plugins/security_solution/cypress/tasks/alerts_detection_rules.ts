@@ -182,7 +182,6 @@ export const waitForRuleExecution = (name: string) => {
   cy.log(`Wait for rule "${name}" to be executed`);
   cy.waitUntil(() => {
     cy.get(REFRESH_RULES_TABLE_BUTTON).click();
-    cy.wait(200); // Wait for rules to be fetched from the endpoint and rendered in the table
 
     return cy
       .contains(RULE_NAME, name)
