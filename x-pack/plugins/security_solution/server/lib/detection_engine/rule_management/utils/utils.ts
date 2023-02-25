@@ -98,6 +98,10 @@ export const transformAlertsToRules = (
   return rules.map((rule) => internalRuleToAPIResponse(rule, legacyRuleActions[rule.id]));
 };
 
+/**
+ * Transforms a rule object to exportable format. Exportable format shouldn't contain runtime fields like
+ * `execution_summary`
+ */
 export const transformRuleToExportableFormat = (
   rule: RuleResponse
 ): Omit<RuleResponse, 'execution_summary'> => {
