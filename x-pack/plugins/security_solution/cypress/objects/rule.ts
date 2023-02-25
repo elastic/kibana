@@ -9,7 +9,6 @@ import type { RuleActionThrottle } from '@kbn/securitysolution-io-ts-alerting-ty
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import type { CompleteTimeline } from './timeline';
 import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
-import type { RuleResponse } from '../../common/detection_engine/rule_schema';
 import type { Connectors } from './connector';
 
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
@@ -512,88 +511,3 @@ export const getEditedRule = (): CustomRule => ({
   description: 'Edited Rule description',
   tags: [...(getExistingRule().tags || []), 'edited'],
 });
-
-export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse>): string => {
-  const {
-    id,
-    updated_at: updatedAt,
-    updated_by: updatedBy,
-    created_at: createdAt,
-    description,
-    name,
-    risk_score: riskScore,
-    severity,
-    tags,
-    timeline_id: timelineId,
-    timeline_title: timelineTitle,
-  } = ruleResponse.body;
-
-  let query: string | undefined;
-  if (ruleResponse.body.type === 'query') {
-    query = ruleResponse.body.query;
-  }
-
-  // NOTE: Order of the properties in this object matters for the tests to work.
-  // TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
-  // without using Partial
-  const rule: Partial<RuleResponse> = {
-    id,
-    updated_at: updatedAt,
-    updated_by: updatedBy,
-    created_at: createdAt,
-    created_by: 'elastic',
-    name,
-    tags,
-    interval: '100m',
-    enabled: true,
-    description,
-    risk_score: riskScore,
-    severity,
-    output_index: '',
-    author: [],
-    false_positives: [],
-    from: 'now-50000h',
-    rule_id: 'rule_testing',
-    max_signals: 100,
-    risk_score_mapping: [],
-    severity_mapping: [],
-    threat: [],
-    to: 'now',
-    references: [],
-    version: 1,
-    exceptions_list: [],
-    immutable: false,
-    related_integrations: [],
-    required_fields: [],
-    setup: '',
-    type: 'query',
-    language: 'kuery',
-    index: getIndexPatterns(),
-    query,
-    throttle: 'no_actions',
-    actions: [],
-    timeline_id: timelineId,
-    timeline_title: timelineTitle,
-  };
-
-  // NOTE: Order of the properties in this object matters for the tests to work.
-  const details = {
-    exported_count: 1,
-    exported_rules_count: 1,
-    missing_rules: [],
-    missing_rules_count: 0,
-    exported_exception_list_count: 0,
-    exported_exception_list_item_count: 0,
-    missing_exception_list_item_count: 0,
-    missing_exception_list_items: [],
-    missing_exception_lists: [],
-    missing_exception_lists_count: 0,
-    exported_action_connector_count: 0,
-    missing_action_connection_count: 0,
-    missing_action_connections: [],
-    excluded_action_connection_count: 0,
-    excluded_action_connections: [],
-  };
-
-  return `${JSON.stringify(rule)}\n${JSON.stringify(details)}\n`;
-};
