@@ -26,6 +26,8 @@ import {
   selectAllRules,
   importRules,
   expectManagementTableRules,
+  exportRule,
+  waitForRuleExecution,
 } from '../../tasks/alerts_detection_rules';
 import { createExceptionList, deleteExceptionList } from '../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../objects/exception';
@@ -53,7 +55,7 @@ describe('Export rules', () => {
     // Rules get exported via _bulk_action endpoint
     cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createCustomRule(getNewRule({ name: 'Rule to export', enabled: true })).as('ruleResponse');
+    createCustomRule(getNewRule({ name: 'Rule to export' })).as('ruleResponse');
   });
 
   it('exports a custom rule', function () {
@@ -64,8 +66,14 @@ describe('Export rules', () => {
     });
   });
 
-  it('creates an importable file', () => {
-    exportFirstRule();
+  it('creates an importable file from executed rule', () => {
+    createCustomRule(
+      getNewRule({ id: 'enabled-rule-1', name: 'Enabled rule to export', enabled: true })
+    );
+
+    waitForRuleExecution('Enabled rule to export');
+
+    exportRule('Enabled rule to export');
 
     cy.get(TOASTER).should('have.text', 'Rules exported');
     cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
@@ -74,7 +82,7 @@ describe('Export rules', () => {
     importRules(path.join(downloadsFolder, EXPORTED_RULES_FILENAME));
 
     cy.get(TOASTER).should('have.text', 'Successfully imported 1 rule');
-    expectManagementTableRules(['Rule to export']);
+    expectManagementTableRules(['Enabled rule to export']);
   });
 
   it('shows a modal saying that no rules can be exported if all the selected rules are prebuilt', () => {

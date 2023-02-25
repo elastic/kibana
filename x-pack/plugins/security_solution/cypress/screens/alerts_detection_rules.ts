@@ -71,6 +71,8 @@ export const RULE_CHECKBOX = '.euiTableRow .euiCheckbox__input';
 
 export const RULE_NAME = '[data-test-subj="ruleName"]';
 
+export const RULE_LAST_RUN = '[data-test-subj="ruleLastRun"]';
+
 export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
 
 export const RULE_SWITCH_LOADER = '[data-test-subj="ruleSwitchLoader"]';
@@ -140,6 +142,8 @@ export const RULES_TAGS_FILTER_POPOVER = '[data-test-subj="tags-filter-popover"]
 export const RULES_SELECTED_TAG = '.euiSelectableListItem[data-test-selected="true"]';
 
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
+
+export const REFRESH_RULES_TABLE_BUTTON = '[data-test-subj="refreshRulesAction-linkIcon"]';
 
 export const REFRESH_SETTINGS_POPOVER = '[data-test-subj="refreshSettings-popover"]';
 

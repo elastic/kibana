@@ -60,6 +60,8 @@ import {
   RULES_MONITORING_TAB,
   ENABLED_RULES_BTN,
   DISABLED_RULES_BTN,
+  RULE_LAST_RUN,
+  REFRESH_RULES_TABLE_BUTTON,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -162,10 +164,32 @@ export const disableSelectedRules = () => {
   cy.get(DISABLE_RULE_BULK_BTN).click();
 };
 
+export const exportRule = (name: string) => {
+  cy.log(`Export rule "${name}"`);
+
+  cy.contains(RULE_NAME, name).parents(RULES_ROW).find(COLLAPSED_ACTION_BTN).click();
+  cy.get(EXPORT_ACTION_BTN).click();
+  cy.get(EXPORT_ACTION_BTN).should('not.exist');
+};
+
 export const exportFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(EXPORT_ACTION_BTN).click();
   cy.get(EXPORT_ACTION_BTN).should('not.exist');
+};
+
+export const waitForRuleExecution = (name: string) => {
+  cy.log(`Wait for rule "${name}" to be executed`);
+  cy.waitUntil(() => {
+    cy.get(REFRESH_RULES_TABLE_BUTTON).click();
+    cy.wait(200); // Wait for rules to be fetched from the endpoint and rendered in the table
+
+    return cy
+      .contains(RULE_NAME, name)
+      .parents(RULES_ROW)
+      .find(RULE_LAST_RUN)
+      .then(($el) => $el.text().endsWith('ago'));
+  });
 };
 
 export const filterBySearchTerm = (term: string) => {
