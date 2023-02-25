@@ -14,6 +14,7 @@ import type { FileKindRouter } from './types';
 import * as commonSchemas from '../common_schemas';
 import { CreateHandler } from './types';
 import { type FileRpcError, FileRpcService } from '../../file_rpc_service';
+import { getFileKindsRegistry } from '../../../common/file_kinds_registry';
 
 export const method = 'post' as const;
 
@@ -39,7 +40,7 @@ export const handler: CreateHandler<Endpoint> = async ({ fileKind, files }, req,
   } = req;
   const user = security?.authc.getCurrentUser(req);
   const service = await fileService.asCurrentUser();
-  const rpc = new FileRpcService(service, {});
+  const rpc = new FileRpcService(service, getFileKindsRegistry());
 
   try {
     const file = await rpc.create({

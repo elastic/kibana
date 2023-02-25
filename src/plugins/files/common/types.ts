@@ -19,6 +19,7 @@ import type {
   FileShareJSONWithToken,
 } from '@kbn/shared-ux-file-types';
 import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
+import {FileRpcServiceHooks} from '../server/file_rpc_service';
 
 export type {
   FileKindBase,
@@ -53,6 +54,8 @@ export interface FileKind extends FileKindBase {
    * details.
    */
   blobStoreSettings?: BlobStorageSettings;
+
+  hooks?: Partial<FileRpcServiceHooks>;
 
   /**
    * Specify which HTTP routes to create for the file kind.

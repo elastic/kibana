@@ -102,8 +102,8 @@ export interface FileRpcError {
  * as {@link FileRpcErrorHookFailed}.
  */
 export interface FileRpcServiceHooks {
-  onCreateStart: (req: FileRpcRequest<Omit<CreateFileArgs, 'user'>>) => boolean;
-  onBeforeCreate: (req: CreateFileArgs) => boolean;
+  onCreateStart: (req: FileRpcRequest<Omit<CreateFileArgs, 'user'>>) => Promise<boolean>;
+  onBeforeCreate: (req: CreateFileArgs) => Promise<boolean>;
 }
 
 /**

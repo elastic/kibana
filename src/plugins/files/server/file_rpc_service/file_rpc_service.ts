@@ -9,6 +9,7 @@
 import type { FileServiceStart } from '../file_service/file_service';
 import type { FileRpcServiceHooks, FileRpcMethods } from './types';
 import type { CreateFileArgs } from '../file_service/file_action_types';
+import type { FileKindsRegistry } from '../../common/file_kinds_registry';
 import { normalizeErrors } from './util';
 import { FileRpcErrorGeneral, FileRpcErrorHookFailed } from './errors';
 
@@ -20,11 +21,11 @@ import { FileRpcErrorGeneral, FileRpcErrorHookFailed } from './errors';
 export class FileRpcService implements FileRpcMethods {
   constructor (
     private readonly service: FileServiceStart,
-    private readonly hooks: Partial<FileRpcServiceHooks>
+    private readonly fileKindRegistry: FileKindsRegistry,
   ) {}
 
   public readonly create: FileRpcMethods['create'] = normalizeErrors(async (req) => {
-    await this.executeHook('onCreateStart', req);
+    await this.executeHook(req.data.fileKind, 'onCreateStart', req);
 
     const { ctx, data } = req;
     const { fileKind, name, alt, meta, mime } = data;
@@ -38,7 +39,7 @@ export class FileRpcService implements FileRpcMethods {
       mime,
     };
 
-    await this.executeHook('onBeforeCreate', args);
+    await this.executeHook(req.data.fileKind, 'onBeforeCreate', args);
 
     const file = await this.service.create(args);
 
@@ -50,8 +51,15 @@ export class FileRpcService implements FileRpcMethods {
     };
   });
 
-  private async executeHook<K extends keyof FileRpcServiceHooks>(hookName: K, ...args: Parameters<FileRpcServiceHooks[K]>) {
-    const hook = this.hooks[hookName];
+  private hooks(fileKind: string): Partial<FileRpcServiceHooks> {
+    const kind = this.fileKindRegistry.get(fileKind);
+    if (!kind) return {};
+
+    return kind.hooks ?? {};
+  }
+
+  private async executeHook<K extends keyof FileRpcServiceHooks>(fileKind: string, hookName: K, ...args: Parameters<FileRpcServiceHooks[K]>) {
+    const hook = this.hooks(fileKind)[hookName];
     if (!hook) return;
 
     try {
