@@ -77,7 +77,7 @@ export interface UnifiedHistogramStateOptions {
   /**
    * The initial state of the container
    */
-  initialState: Partial<UnifiedHistogramState>;
+  initialState?: Partial<UnifiedHistogramState>;
 }
 
 /**

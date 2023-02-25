@@ -94,18 +94,13 @@ export const UnifiedHistogramContainer = forwardRef<
 
   // Call for creation options once the container is mounted
   useMount(async () => {
-    const options = await containerProps.getCreationOptions!();
-    const { disableAutoFetching, disableTriggers, disabledActions } = options;
+    const options = await containerProps?.getCreationOptions?.();
+
+    setLayoutProps(pick(options, 'disableAutoFetching', 'disableTriggers', 'disabledActions'));
 
     // API helpers are loaded async from Lens
     const apiHelper = await containerProps.services.lens.stateHelperApi();
     setLensSuggestionsApi(() => apiHelper.suggestions);
-
-    setLayoutProps({
-      disableAutoFetching,
-      disableTriggers,
-      disabledActions,
-    });
 
     setStateService(
       createStateService({
