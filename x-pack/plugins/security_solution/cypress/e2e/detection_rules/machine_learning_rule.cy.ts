@@ -7,7 +7,7 @@
 
 import { isArray } from 'lodash';
 
-import { formatMitreAttackDescription } from '../../helpers/rules';
+import { formatMitreAttackDescription, getHumanizedDuration } from '../../helpers/rules';
 import { getMachineLearningRule } from '../../objects/rule';
 
 import {
@@ -53,8 +53,6 @@ import {
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
-
-import { getHumanizedDuration } from '../../../public/detections/pages/detection_engine/rules/helpers';
 
 describe('Detection rules, machine learning', () => {
   const expectedUrls = (getMachineLearningRule().references ?? []).join('');

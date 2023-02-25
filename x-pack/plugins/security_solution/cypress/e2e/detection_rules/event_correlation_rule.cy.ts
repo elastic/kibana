@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatMitreAttackDescription } from '../../helpers/rules';
+import { formatMitreAttackDescription, getHumanizedDuration } from '../../helpers/rules';
 import { getEqlRule, getEqlSequenceRule, getIndexPatterns } from '../../objects/rule';
 
 import { ALERTS_COUNT, ALERT_DATA_GRID } from '../../screens/alerts';
@@ -61,7 +61,6 @@ import { login, visit } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { getHumanizedDuration } from '../../../public/detections/pages/detection_engine/rules/helpers';
 
 describe('EQL rules', () => {
   before(() => {

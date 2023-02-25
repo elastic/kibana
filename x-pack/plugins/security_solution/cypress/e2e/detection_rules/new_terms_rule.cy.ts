@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatMitreAttackDescription } from '../../helpers/rules';
+import { formatMitreAttackDescription, getHumanizedDuration } from '../../helpers/rules';
 import { getNewTermsRule } from '../../objects/rule';
 
 import { ALERT_DATA_GRID } from '../../screens/alerts';
@@ -58,7 +58,7 @@ import {
 import { login, visit } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
-import { getHumanizedDuration } from '../../../public/detections/pages/detection_engine/rules/helpers';
+
 describe('New Terms rules', () => {
   before(() => {
     cleanKibana();

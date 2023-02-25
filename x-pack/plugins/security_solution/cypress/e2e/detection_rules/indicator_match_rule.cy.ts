@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatMitreAttackDescription } from '../../helpers/rules';
+import { formatMitreAttackDescription, getHumanizedDuration } from '../../helpers/rules';
 import {
   getIndexPatterns,
   getNewThreatIndicatorRule,
@@ -106,7 +106,7 @@ import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { goBackToRulesTable, getDetails } from '../../tasks/rule_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL, RULE_CREATION } from '../../urls/navigation';
-import { getHumanizedDuration } from '../../../public/detections/pages/detection_engine/rules/helpers';
+
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
 describe('indicator match', () => {

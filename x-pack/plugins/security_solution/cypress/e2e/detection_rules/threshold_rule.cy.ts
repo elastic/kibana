@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatMitreAttackDescription } from '../../helpers/rules';
+import { formatMitreAttackDescription, getHumanizedDuration } from '../../helpers/rules';
 import { getNewThresholdRule } from '../../objects/rule';
 
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../screens/alerts';
@@ -56,7 +56,6 @@ import {
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
 import { login, visitWithoutDateRange } from '../../tasks/login';
-import { getHumanizedDuration } from '../../../public/detections/pages/detection_engine/rules/helpers';
 
 import { RULE_CREATION } from '../../urls/navigation';
 

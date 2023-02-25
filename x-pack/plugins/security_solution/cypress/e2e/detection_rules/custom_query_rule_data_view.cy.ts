@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { getHumanizedDuration } from '../../../public/detections/pages/detection_engine/rules/helpers';
-import { formatMitreAttackDescription } from '../../helpers/rules';
+import { formatMitreAttackDescription, getHumanizedDuration } from '../../helpers/rules';
 import { getDataViewRule } from '../../objects/rule';
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../screens/alerts';
 
