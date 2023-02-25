@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { File } from '../../common/types';
-import type { CreateFileArgs } from '../file_service/file_action_types';
 import type { KibanaRequest } from '@kbn/core-http-server'
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
+import type { CreateFileArgs } from '../file_service/file_action_types';
 
 /**
  * Represents a single RPC method. The `In` and `Out` types are the input and
@@ -39,7 +40,15 @@ export interface FileRpcRequest<Data = unknown> {
  * it can be changed to something else.
  */
 export interface FileRpcRequestContext {
+  /**
+   * Kibana HTTP request object.
+   */
   req: KibanaRequest;
+
+  /**
+   * The authenticated user, if any, on whose behalf the request is being made.
+   */
+  user?: AuthenticatedUser | null;
 }
 
 /**
@@ -81,14 +90,17 @@ export interface FileRpcError {
   httpCode?: number;
 }
 
+export interface FileRpcServiceHooks {
+  onCreateStart?(req: FileRpcRequest<CreateFileArgs>): boolean;
+}
+
 /**
- * The {@link FileRpcService} is a wrapper around {@link FileService}. It allows
- * to expose the service to the outside world via HTTP or other network layers.
+ * List of methods that File RPC service supports.
  */
-export interface IFileRpcService {
+export interface FileRpcMethods {
   /**
    * See {@link FileMetadataClient.create}. Creates a file and returns the
    * {@link File} object.
    * */
-  create: FileRpcMethod<CreateFileArgs, File>;
+  create: FileRpcMethod<Omit<CreateFileArgs, 'user'>, FileJSON>;
 }
