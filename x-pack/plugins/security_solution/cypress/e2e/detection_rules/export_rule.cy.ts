@@ -14,7 +14,6 @@ import {
   MODAL_CONFIRMATION_BODY,
   MODAL_CONFIRMATION_BTN,
   TOASTER,
-  EXPORTED_RULES_FILENAME,
 } from '../../screens/alerts_detection_rules';
 
 import {
@@ -38,6 +37,7 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
 
+const EXPORTED_RULES_FILENAME = 'rules_export.ndjson';
 const exceptionList = getExceptionList();
 
 describe('Export rules', () => {

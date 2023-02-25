@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RULES_TO_IMPORT_FILENAME, TOASTER } from '../../screens/alerts_detection_rules';
+import { TOASTER } from '../../screens/alerts_detection_rules';
 import {
   expectManagementTableRules,
   importRules,
@@ -15,6 +15,8 @@ import { cleanKibana, deleteAlertsAndRules, reload } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
+
+const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
 describe('Import rules', () => {
   before(() => {

@@ -152,7 +152,3 @@ export const REFRESH_SETTINGS_SWITCH = '[data-test-subj="refreshSettingsSwitch"]
 export const REFRESH_SETTINGS_SELECTION_NOTE = '[data-test-subj="refreshSettingsSelectionNote"]';
 
 export const REFRESH_RULES_STATUS = '[data-test-subj="refreshRulesStatus"]';
-
-export const EXPORTED_RULES_FILENAME = 'rules_export.ndjson';
-
-export const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
