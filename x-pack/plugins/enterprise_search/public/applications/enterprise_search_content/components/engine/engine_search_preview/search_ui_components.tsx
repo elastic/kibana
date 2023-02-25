@@ -19,16 +19,20 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiSelect,
   EuiText,
   EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
 import type {
   InputViewProps,
+  PagingInfoViewProps,
   ResultViewProps,
+  ResultsPerPageViewProps,
   ResultsViewProps,
 } from '@elastic/react-search-ui-views';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
 import { indexHealthToHealthColor } from '../../../../shared/constants/health_colors';
 
@@ -171,3 +175,45 @@ export const InputView: React.FC<InputViewProps> = ({ getInputProps }) => {
     </EuiFlexGroup>
   );
 };
+
+export const PagingInfoView: React.FC<PagingInfoViewProps> = ({ start, end, totalResults }) => (
+  <EuiText size="s">
+    <FormattedHTMLMessage
+      tagName="p"
+      id="xpack.enterpriseSearch.content.engine.searchPreview.pagingInfo.text"
+      defaultMessage="Showing <strong>{start}-{end}</strong> of {totalResults}"
+      values={{ end, start, totalResults }}
+    />
+  </EuiText>
+);
+
+export const RESULTS_PER_PAGE_OPTIONS = [10, 20, 50];
+
+export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
+  onChange,
+  options,
+  value,
+}) => (
+  <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiTitle size="xxxs">
+      <label htmlFor="results-per-page">Show</label>
+    </EuiTitle>
+    <EuiSelect
+      id="results-per-page"
+      options={
+        options?.map((option) => ({
+          text: i18n.translate(
+            'xpack.enterpriseSearch.content.engine.searchPreview.resultsPerPage.label',
+            {
+              defaultMessage: '{value} {value, plural, one {Result} other {Results}}',
+              values: { value: option },
+            }
+          ),
+          value: option,
+        })) ?? []
+      }
+      value={value}
+      onChange={(evt) => onChange(parseInt(evt.target.value, 10))}
+    />
+  </EuiFlexGroup>
+);

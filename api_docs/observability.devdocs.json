@@ -9807,97 +9807,6 @@
         "children": [
           {
             "parentPluginId": "observability",
-            "id": "def-server.ObservabilityRouteHandlerResources.core",
-            "type": "Object",
-            "tags": [],
-            "label": "core",
-            "description": [],
-            "signature": [
-              "{ start: () => Promise<",
-              {
-                "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
-                "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreStart",
-                "text": "CoreStart"
-              },
-              ">; setup: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
-                "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>; }"
-            ],
-            "path": "x-pack/plugins/observability/server/routes/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.ObservabilityRouteHandlerResources.ruleDataService",
-            "type": "Object",
-            "tags": [],
-            "label": "ruleDataService",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.IRuleDataService",
-                "text": "IRuleDataService"
-              }
-            ],
-            "path": "x-pack/plugins/observability/server/routes/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.ObservabilityRouteHandlerResources.spacesService",
-            "type": "Object",
-            "tags": [],
-            "label": "spacesService",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "spaces",
-                "scope": "server",
-                "docId": "kibSpacesPluginApi",
-                "section": "def-server.SpacesServiceStart",
-                "text": "SpacesServiceStart"
-              }
-            ],
-            "path": "x-pack/plugins/observability/server/routes/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.ObservabilityRouteHandlerResources.request",
-            "type": "Object",
-            "tags": [],
-            "label": "request",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>"
-            ],
-            "path": "x-pack/plugins/observability/server/routes/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
             "id": "def-server.ObservabilityRouteHandlerResources.context",
             "type": "CompoundType",
             "tags": [],
@@ -9943,6 +9852,20 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-server.ObservabilityRouteHandlerResources.dependencies",
+            "type": "Object",
+            "tags": [],
+            "label": "dependencies",
+            "description": [],
+            "signature": [
+              "RegisterRoutesDependencies"
+            ],
+            "path": "x-pack/plugins/observability/server/routes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-server.ObservabilityRouteHandlerResources.logger",
             "type": "Object",
             "tags": [],
@@ -9956,6 +9879,27 @@
                 "section": "def-common.Logger",
                 "text": "Logger"
               }
+            ],
+            "path": "x-pack/plugins/observability/server/routes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.ObservabilityRouteHandlerResources.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
             "deprecated": false,

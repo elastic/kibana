@@ -439,6 +439,7 @@ describe('create()', () => {
             "history": Array [],
             "last_run": Object {
               "metrics": Object {
+                "duration": 0,
                 "gap_duration_s": null,
                 "total_alerts_created": null,
                 "total_alerts_detected": null,
@@ -659,6 +660,7 @@ describe('create()', () => {
             "history": Array [],
             "last_run": Object {
               "metrics": Object {
+                "duration": 0,
                 "gap_duration_s": null,
                 "total_alerts_created": null,
                 "total_alerts_detected": null,
@@ -2105,6 +2107,7 @@ describe('create()', () => {
             last_run: {
               timestamp: '2019-02-12T21:01:22.479Z',
               metrics: {
+                duration: 0,
                 gap_duration_s: null,
                 total_alerts_created: null,
                 total_alerts_detected: null,
