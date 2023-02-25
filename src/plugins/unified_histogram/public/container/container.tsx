@@ -28,7 +28,7 @@ import {
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,
-  'disableAutoFetching' | 'disableTriggers' | 'disabledActions' | 'getRelativeTimeRange'
+  'disableAutoFetching' | 'disableTriggers' | 'disabledActions'
 >;
 
 /**
@@ -54,6 +54,7 @@ export type UnifiedHistogramContainerProps = {
   | 'query'
   | 'filters'
   | 'timeRange'
+  | 'relativeTimeRange'
   | 'resizeRef'
   | 'appendHitsCounter'
   | 'children'
@@ -94,7 +95,7 @@ export const UnifiedHistogramContainer = forwardRef<
   // Call for creation options once the container is mounted
   useMount(async () => {
     const options = await containerProps.getCreationOptions!();
-    const { disableAutoFetching, disableTriggers, disabledActions, getRelativeTimeRange } = options;
+    const { disableAutoFetching, disableTriggers, disabledActions } = options;
 
     // API helpers are loaded async from Lens
     const apiHelper = await containerProps.services.lens.stateHelperApi();
@@ -104,7 +105,6 @@ export const UnifiedHistogramContainer = forwardRef<
       disableAutoFetching,
       disableTriggers,
       disabledActions,
-      getRelativeTimeRange,
     });
 
     setStateService(

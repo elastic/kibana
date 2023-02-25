@@ -15,6 +15,7 @@ import {
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { distinctUntilChanged, filter, map, Observable, skip } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -42,7 +43,6 @@ export const useDiscoverHistogram = ({
   isPlainRecord,
 }: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
-  const timefilter = services.data.query.timefilter.timefilter;
   const savedSearchData$ = stateContainer.dataState.data$;
 
   /**
@@ -65,7 +65,6 @@ export const useDiscoverHistogram = ({
     return {
       localStorageKeyPrefix: 'discover',
       disableAutoFetching: true,
-      getRelativeTimeRange: timefilter.getTime,
       initialState: {
         chartHidden,
         timeInterval,
@@ -75,7 +74,7 @@ export const useDiscoverHistogram = ({
         totalHitsResult,
       },
     };
-  }, [savedSearchData$.totalHits$, stateContainer.appState, timefilter.getTime]);
+  }, [savedSearchData$.totalHits$, stateContainer.appState]);
 
   /**
    * Sync Unified Histogram state with Discover state
@@ -299,7 +298,12 @@ export const useDiscoverHistogram = ({
    * Request params
    */
   const { query, filters } = useQuerySubscriber({ data: services.data });
+  const timefilter = services.data.query.timefilter.timefilter;
   const timeRange = timefilter.getAbsoluteTime();
+  const relativeTimeRange = useObservable(
+    timefilter.getTimeUpdate$().pipe(map(() => timefilter.getTime())),
+    timefilter.getTime()
+  );
 
   return {
     ref,
@@ -308,6 +312,7 @@ export const useDiscoverHistogram = ({
     query,
     filters,
     timeRange,
+    relativeTimeRange,
   };
 };
 
