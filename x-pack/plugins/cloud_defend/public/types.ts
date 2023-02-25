@@ -30,6 +30,8 @@ export enum ControlSelectorCondition {
   containerImageName = 'containerImageName',
   containerImageTag = 'containerImageTag',
   targetFilePath = 'targetFilePath',
+  ignoreVolumeFiles = 'ignoreVolumeFiles',
+  ignoreVolumeMounts = 'ignoreVolumeMounts',
   orchestratorClusterId = 'orchestratorClusterId',
   orchestratorClusterName = 'orchestratorClusterName',
   orchestratorNamespace = 'orchestratorNamespace',
@@ -37,6 +39,11 @@ export enum ControlSelectorCondition {
   orchestratorResourceName = 'orchestratorResourceName',
   orchestratorResourceType = 'orchestratorResourceType',
   orchestratorType = 'orchestratorType',
+}
+
+export enum ControlSelectorBooleanConditions {
+  ignoreVolumeFiles = 'ignoreVolumeFiles',
+  ignoreVolumeMounts = 'ignoreVolumeMounts',
 }
 
 export enum ControlSelectorOperation {
@@ -66,6 +73,8 @@ export interface ControlSelector {
   containerImageName?: string[];
   containerImageTag?: string[];
   targetFilePath?: string[];
+  ignoreVolumeFiles?: boolean;
+  ignoreVolumeMounts?: boolean;
   orchestratorClusterId?: string[];
   orchestratorClusterName?: string[];
   orchestratorNamespace?: string[];

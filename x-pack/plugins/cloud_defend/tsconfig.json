@@ -1,12 +1,14 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
     "public/**/*",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
+    "server/**/*.json",
+    "public/**/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -21,6 +23,6 @@
     "@kbn/shared-ux-router"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }
