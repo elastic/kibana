@@ -19,9 +19,9 @@ import { FileRpcErrorGeneral, FileRpcErrorHookFailed } from './errors';
  * service calls.
  */
 export class FileRpcService implements FileRpcMethods {
-  constructor (
+  constructor(
     private readonly service: FileServiceStart,
-    private readonly fileKindRegistry: FileKindsRegistry,
+    private readonly fileKindRegistry: FileKindsRegistry
   ) {}
 
   public readonly create: FileRpcMethods['create'] = normalizeErrors(async (req) => {
@@ -58,7 +58,11 @@ export class FileRpcService implements FileRpcMethods {
     return kind.hooks ?? {};
   }
 
-  private async executeHook<K extends keyof FileRpcServiceHooks>(fileKind: string, hookName: K, ...args: Parameters<FileRpcServiceHooks[K]>) {
+  private async executeHook<K extends keyof FileRpcServiceHooks>(
+    fileKind: string,
+    hookName: K,
+    ...args: Parameters<FileRpcServiceHooks[K]>
+  ) {
     const hook = this.hooks(fileKind)[hookName];
     if (!hook) return;
 

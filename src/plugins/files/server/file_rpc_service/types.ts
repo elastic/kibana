@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server'
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import type { CreateFileArgs } from '../file_service/file_action_types';
@@ -94,7 +94,7 @@ export interface FileRpcError {
  * Represents a set of hooks that can be used to modify the behavior of the
  * {@link FileRpcService}. If a hook is defined, it will be called in a specific
  * place in the RPC method execution.
- * 
+ *
  * The hook succeeds only when it returns `true`. If the hook does not return
  * `true`, the execution of the method will be aborted with
  * {@link FileRpcErrorHookFailed} error. If the hook throws and error, which is
@@ -114,5 +114,5 @@ export interface FileRpcMethods {
    * See {@link FileMetadataClient.create}. Creates a file and returns the
    * {@link File} object.
    * */
-  create: FileRpcMethod<Omit<CreateFileArgs, 'user'>, {file: FileJSON}>;
+  create: FileRpcMethod<Omit<CreateFileArgs, 'user'>, { file: FileJSON }>;
 }

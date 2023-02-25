@@ -11,10 +11,12 @@ import type { FileRpcMethod } from './types';
 
 /**
  * Normalizes all errors thrown by the method to a {@link FileRpcError}.
- * 
+ *
  * @param method Method to normalize.
  */
-export const normalizeErrors = <In, Out>(method: FileRpcMethod<In, Out>): FileRpcMethod<In, Out> => {
+export const normalizeErrors = <In, Out>(
+  method: FileRpcMethod<In, Out>
+): FileRpcMethod<In, Out> => {
   const normalizedMethod: FileRpcMethod<In, Out> = async (req) => {
     try {
       return await method(req);
