@@ -13,6 +13,7 @@ import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 import type { FileKindRouter } from './types';
 import * as commonSchemas from '../common_schemas';
 import { CreateHandler } from './types';
+import { type FileRpcError, FileRpcService } from '../../file_rpc_service';
 
 export const method = 'post' as const;
 
@@ -37,18 +38,35 @@ export const handler: CreateHandler<Endpoint> = async ({ fileKind, files }, req,
     body: { name, alt, meta, mimeType },
   } = req;
   const user = security?.authc.getCurrentUser(req);
-  const file = await fileService.asCurrentUser().create({
-    fileKind,
-    name,
-    alt,
-    meta,
-    user: user ? { name: user.username, id: user.profile_uid } : undefined,
-    mime: mimeType,
-  });
-  const body: Endpoint['output'] = {
-    file: file.toJSON(),
-  };
-  return res.ok({ body });
+  const service = await fileService.asCurrentUser();
+  const rpc = new FileRpcService(service, {});
+
+  try {
+    const file = await rpc.create({
+      ctx: {
+        req,
+        user,
+      },
+      data: {
+        fileKind,
+        name,
+        alt,
+        meta,
+        mime: mimeType,
+      },
+    });
+
+    return res.ok({
+      body: file.data,
+    });
+  } catch (e) {
+    const body = e as FileRpcError;
+
+    return res.customError({
+      statusCode: body.httpCode || 400,
+      body,
+    });
+  }
 };
 
 export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {

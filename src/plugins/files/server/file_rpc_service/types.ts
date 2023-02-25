@@ -114,5 +114,5 @@ export interface FileRpcMethods {
    * See {@link FileMetadataClient.create}. Creates a file and returns the
    * {@link File} object.
    * */
-  create: FileRpcMethod<Omit<CreateFileArgs, 'user'>, FileJSON>;
+  create: FileRpcMethod<Omit<CreateFileArgs, 'user'>, {file: FileJSON}>;
 }

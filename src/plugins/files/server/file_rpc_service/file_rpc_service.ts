@@ -43,7 +43,9 @@ export class FileRpcService implements FileRpcMethods {
     const file = await this.service.create(args);
 
     return {
-      data: file.toJSON(),
+      data: {
+        file: file.toJSON(),
+      },
       httpCode: 200,
     };
   });
