@@ -9,6 +9,7 @@
 import type { FileServiceStart } from '../file_service/file_service';
 import type { FileRpcServiceHooks, FileRpcMethods } from './types';
 import { normalizeErrors } from './util';
+import { FileRpcErrorGeneral, FileRpcErrorHookFailed } from './errors';
 
 export class FileRpcService implements FileRpcMethods {
   constructor (
@@ -40,15 +41,21 @@ export class FileRpcService implements FileRpcMethods {
 
   private async executeHook<K extends keyof FileRpcServiceHooks>(hookName: K, ...args: Parameters<FileRpcServiceHooks[K]>) {
     const hook = this.hooks[hookName];
+    
     if (!hook) return;
 
     try {
       const result = await this.hooks[hookName]!.apply(this.hooks, args);
+
       if (result !== true) {
-        throw new Error(`File RPC hook "${hookName}" returned a value other than "true".`);
+        throw new FileRpcErrorHookFailed(hookName);
       }
     } catch (error) {
-      
+      if (error instanceof FileRpcErrorGeneral) {
+        throw error;
+      }
+
+      throw new FileRpcErrorHookFailed(hookName);
     }
   }
 }

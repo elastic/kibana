@@ -90,6 +90,17 @@ export interface FileRpcError {
   httpCode?: number;
 }
 
+/**
+ * Represents a set of hooks that can be used to modify the behavior of the
+ * {@link FileRpcService}. If a hook is defined, it will be called in a specific
+ * place in the RPC method execution.
+ * 
+ * The hook succeeds only when it returns `true`. If the hook does not return
+ * `true`, the execution of the method will be aborted with
+ * {@link FileRpcErrorHookFailed} error. If the hook throws and error, which is
+ * not an instance of {@link FileRpcErrorGeneral}, the error will be re-thrown
+ * as {@link FileRpcErrorHookFailed}.
+ */
 export interface FileRpcServiceHooks {
   onCreateStart(req: FileRpcRequest<CreateFileArgs>): boolean;
 }
