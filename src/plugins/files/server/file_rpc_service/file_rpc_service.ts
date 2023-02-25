@@ -8,6 +8,7 @@
 
 import type { FileServiceStart } from '../file_service/file_service';
 import type { FileRpcServiceHooks, FileRpcMethods } from './types';
+import { normalizeErrors } from './util';
 
 export class FileRpcService implements FileRpcMethods {
   constructor (
@@ -15,7 +16,7 @@ export class FileRpcService implements FileRpcMethods {
     private readonly hooks: FileRpcServiceHooks
   ) {}
 
-  public readonly create: FileRpcMethods['create'] = async (req) => {
+  public readonly create: FileRpcMethods['create'] = normalizeErrors(async (req) => {
     const { ctx, data } = req;
     const { fileKind, name, alt, meta, mime } = data;
     const user = ctx.user ? { id: ctx.user.profile_uid, name: ctx.user.username } : undefined;
@@ -33,5 +34,5 @@ export class FileRpcService implements FileRpcMethods {
       data: file.toJSON(),
       httpCode: 200,
     };
-  };
+  });
 }

@@ -81,7 +81,7 @@ export interface FileRpcError {
    * Error code, technical identifier of the error. Does not have to be human
    * readable.
    */
-  code: string;
+  code?: string;
 
   /**
    * Custom HTTP status code, used for compatibility with HTTP network layers.
