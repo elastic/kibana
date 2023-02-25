@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { FileRpcMethod, FileRpcError } from './types';
+import { FileRpcErrorGeneral } from './errors';
+import type { FileRpcMethod } from './types';
 
 /**
  * Normalizes all errors thrown by the method to a {@link FileRpcError}.
@@ -18,24 +19,21 @@ export const normalizeErrors = <In, Out>(method: FileRpcMethod<In, Out>): FileRp
     try {
       return await method(req);
     } catch (e) {
+      if (e instanceof FileRpcErrorGeneral) {
+        throw e.toDto();
+      }
+
       if (!e || typeof e !== 'object') {
-        const error: FileRpcError = {
-          message: 'Unknown error',
-          httpCode: 500,
-        };
-        throw error;  
+        const error = new FileRpcErrorGeneral();
+        throw error.toDto();
       }
 
-      const error: FileRpcError = {
-        message: e.message ?? 'Unknown error',
-        httpCode: 400,
-      };
-
-      if (e.code) {
-        error.code = e.code;
-      }
-
-      throw error;
+      const error = new FileRpcErrorGeneral(
+        e.message || undefined,
+        e.code || undefined,
+        e.httpCode || undefined
+      );
+      throw error.toDto();
     }
   };
 
