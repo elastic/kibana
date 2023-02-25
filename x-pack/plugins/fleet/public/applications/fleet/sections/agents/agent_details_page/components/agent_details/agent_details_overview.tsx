@@ -56,14 +56,14 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                         <EuiToolTip
                           content={
                             <FormattedMessage
-                              id="xpack.fleet.agentList.cpuTooltip"
+                              id="xpack.fleet.agentDetails.cpuTooltip"
                               defaultMessage="Average CPU usage in the last 5 minutes"
                             />
                           }
                         >
                           <span>
                             <FormattedMessage
-                              id="xpack.fleet.agentList.cpuTitle"
+                              id="xpack.fleet.agentDetails.cpuTitle"
                               defaultMessage="CPU"
                             />
                             &nbsp;
@@ -78,14 +78,14 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                         <EuiToolTip
                           content={
                             <FormattedMessage
-                              id="xpack.fleet.agentList.memoryTooltip"
+                              id="xpack.fleet.agentDetails.memoryTooltip"
                               defaultMessage="Average memory usage in the last 5 minutes"
                             />
                           }
                         >
                           <span>
                             <FormattedMessage
-                              id="xpack.fleet.agentList.memoryTitle"
+                              id="xpack.fleet.agentDetails.memoryTitle"
                               defaultMessage="Memory"
                             />
                             &nbsp;
