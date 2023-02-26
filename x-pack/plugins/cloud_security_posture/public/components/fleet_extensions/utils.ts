@@ -75,6 +75,7 @@ export const getPosturePolicy = (
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => ({
   ...newPolicy,
+  namespace: 'default',
   // Enable new policy input and disable all others
   inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
   // Set hidden policy vars

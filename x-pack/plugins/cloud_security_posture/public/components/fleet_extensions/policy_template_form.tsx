@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useEffect } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -69,8 +69,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const { integration } = useParams<{ integration: CloudSecurityPolicyTemplate }>();
     const input = getEnabledPostureInput(newPolicy);
 
-    const updatePolicy = (updatedPolicy: NewPackagePolicy) =>
-      onChange({ isValid: true, updatedPolicy });
+    const updatePolicy = useCallback(
+      (updatedPolicy: NewPackagePolicy) => onChange({ isValid: true, updatedPolicy }),
+      [onChange]
+    );
 
     /**
      * - Updates policy inputs by user selection
@@ -118,6 +120,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEditPage]);
 
+    useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
+
     return (
       <div>
         {isEditPage && <EditScreenStepTitle />}
@@ -164,3 +168,14 @@ CspPolicyTemplateForm.displayName = 'CspPolicyTemplateForm';
 
 // eslint-disable-next-line import/no-default-export
 export { CspPolicyTemplateForm as default };
+
+const useEnsureDefaultNamespace = ({ newPolicy, input, updatePolicy }) => {
+  useEffect(() => {
+    if (newPolicy.namespace === 'default') return;
+
+    updatePolicy({
+      ...getPosturePolicy(newPolicy, input.type),
+      namespace: 'default',
+    });
+  }, [newPolicy, input, updatePolicy]);
+};
