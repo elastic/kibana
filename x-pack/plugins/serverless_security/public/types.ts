@@ -10,6 +10,7 @@ import {
   PluginSetup as SecuritySolutionPluginSetup,
   PluginStart as SecuritySolutionPluginStart,
 } from '@kbn/security-solution-plugin/public';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSecurityPluginSetup {}
@@ -20,9 +21,11 @@ export interface ServerlessSecurityPluginStart {}
 export interface ServerlessSecurityPluginSetupDependencies {
   security: SecurityPluginSetup;
   securitySolution: SecuritySolutionPluginSetup;
+  serverless: ServerlessPluginSetup;
 }
 
 export interface ServerlessSecurityPluginStartDependencies {
   security: SecurityPluginStart;
   securitySolution: SecuritySolutionPluginStart;
+  serverless: ServerlessPluginStart;
 }

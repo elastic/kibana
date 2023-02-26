@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
   ServerlessObservabilityPluginSetup,
   ServerlessObservabilityPluginStart,
-  AppPluginSetupDependencies,
+  ServerlessObservabilityPluginSetupDependencies,
+  ServerlessObservabilityPluginStartDependencies,
 } from './types';
 
 export class ServerlessObservabilityPlugin
@@ -17,7 +19,7 @@ export class ServerlessObservabilityPlugin
 {
   public setup(
     _core: CoreSetup,
-    setupDeps: AppPluginSetupDependencies
+    setupDeps: ServerlessObservabilityPluginSetupDependencies
   ): ServerlessObservabilityPluginSetup {
     setupDeps.observability.navigation.setIsSidebarEnabled(false);
 
@@ -25,7 +27,11 @@ export class ServerlessObservabilityPlugin
     return {};
   }
 
-  public start(_core: CoreStart): ServerlessObservabilityPluginStart {
+  public start(
+    _core: CoreStart,
+    { serverless }: ServerlessObservabilityPluginStartDependencies
+  ): ServerlessObservabilityPluginStart {
+    serverless.setServerlessNavigation(<h1 style={{ color: '#fff' }}>Observability</h1>);
     return {};
   }
 
