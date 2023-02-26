@@ -43,6 +43,7 @@ import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plu
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { BehaviorSubject } from 'rxjs';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -116,13 +117,17 @@ export type StartServices = CoreStart &
     securityLayout: {
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
+    isSidebarEnabled$: BehaviorSubject<boolean>;
   };
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginStart {}
+
+export interface PluginStart {
+  isSidebarEnabled$: BehaviorSubject<boolean>;
+  setIsSidebarEnabled: (enabled: boolean) => void;
+}
 
 export interface AppObservableLibs {
   kibana: CoreStart;

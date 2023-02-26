@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Subscription } from 'rxjs';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { combineLatestWith } from 'rxjs/operators';
 import type * as H from 'history';
 import type {
@@ -84,6 +84,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   readonly prebuiltRulesPackageVersion?: string;
   private config: SecuritySolutionUiConfigType;
   readonly experimentalFeatures: ExperimentalFeatures;
+  private isSidebarEnabled$: BehaviorSubject<boolean>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -91,6 +92,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
+    this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
   }
   private appUpdater$ = new Subject<AppUpdater>();
 
@@ -159,6 +161,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         securityLayout: {
           getPluginWrapper: () => SecuritySolutionTemplateWrapper,
         },
+        isSidebarEnabled$: this.isSidebarEnabled$,
       };
       return services;
     };
@@ -296,7 +299,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Not using await to prevent blocking start execution
     this.registerAppLinks(core, plugins);
 
-    return {};
+    return {
+      isSidebarEnabled$: this.isSidebarEnabled$,
+      setIsSidebarEnabled: (enabled: boolean) => {
+        this.isSidebarEnabled$.next(enabled);
+      },
+    };
   }
 
   public stop() {
