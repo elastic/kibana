@@ -122,12 +122,11 @@ export type StartServices = CoreStart &
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
-}
-
-export interface PluginStart {
-  isSidebarEnabled$: BehaviorSubject<boolean>;
   setIsSidebarEnabled: (enabled: boolean) => void;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginStart {}
 
 export interface AppObservableLibs {
   kibana: CoreStart;
