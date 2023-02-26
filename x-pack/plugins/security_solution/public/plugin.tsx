@@ -235,6 +235,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         );
         return resolverPluginSetup();
       },
+      setIsSidebarEnabled: (enabled: boolean) => {
+        this.isSidebarEnabled$.next(enabled);
+      },
     };
   }
 
@@ -299,12 +302,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Not using await to prevent blocking start execution
     this.registerAppLinks(core, plugins);
 
-    return {
-      isSidebarEnabled$: this.isSidebarEnabled$,
-      setIsSidebarEnabled: (enabled: boolean) => {
-        this.isSidebarEnabled$.next(enabled);
-      },
-    };
+    return {};
   }
 
   public stop() {

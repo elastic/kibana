@@ -1,0 +1,10 @@
+xpack.apm.enabled: false
+xpack.canvas.enabled: false
+xpack.observability.enabled: false
+xpack.reporting.enabled: false
+xpack.uptime.enabled: false
+xpack.watcher.enabled: false
+
+xpack.serverless.security.enabled: true
+
+uiSettings.overrides.defaultRoute: /app/security/get_started

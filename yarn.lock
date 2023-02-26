@@ -4889,6 +4889,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-security@link:x-pack/plugins/serverless_security":
+  version "0.0.0"
+  uid ""
+
 "@kbn/session-notifications-plugin@link:test/plugin_functional/plugins/session_notifications":
   version "0.0.0"
   uid ""
