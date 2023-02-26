@@ -24,6 +24,9 @@ import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/
 import { assert } from '../../../common/utils/helpers';
 import { cloudPostureIntegrations } from '../../common/constants';
 
+// Posture policies only support the default namespace
+export const POSTURE_NAMESPACE = 'default';
+
 type PosturePolicyInput =
   | { type: typeof CLOUDBEAT_AZURE; policy_template: 'cspm' }
   | { type: typeof CLOUDBEAT_GCP; policy_template: 'cspm' }

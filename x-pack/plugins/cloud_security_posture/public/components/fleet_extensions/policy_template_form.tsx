@@ -16,7 +16,13 @@ import {
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
 } from '../../../common/constants';
-import { getPosturePolicy, getEnabledPostureInput, getPostureInputHiddenVars } from './utils';
+import {
+  getPosturePolicy,
+  getEnabledPostureInput,
+  getPostureInputHiddenVars,
+  POSTURE_NAMESPACE,
+  NewPackagePolicyPostureInput,
+} from './utils';
 import {
   PolicyTemplateInfo,
   PolicyTemplateInputSelector,
@@ -169,13 +175,19 @@ CspPolicyTemplateForm.displayName = 'CspPolicyTemplateForm';
 // eslint-disable-next-line import/no-default-export
 export { CspPolicyTemplateForm as default };
 
-const useEnsureDefaultNamespace = ({ newPolicy, input, updatePolicy }) => {
+const useEnsureDefaultNamespace = ({
+  newPolicy,
+  input,
+  updatePolicy,
+}: {
+  newPolicy: NewPackagePolicy;
+  input: NewPackagePolicyPostureInput;
+  updatePolicy: (policy: NewPackagePolicy) => void;
+}) => {
   useEffect(() => {
-    if (newPolicy.namespace === 'default') return;
+    if (newPolicy.namespace === POSTURE_NAMESPACE) return;
 
-    updatePolicy({
-      ...getPosturePolicy(newPolicy, input.type),
-      namespace: 'default',
-    });
+    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
+    updatePolicy(policy);
   }, [newPolicy, input, updatePolicy]);
 };
