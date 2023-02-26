@@ -1080,6 +1080,8 @@
       "@kbn/server-http-tools/*": ["packages/kbn-server-http-tools/*"],
       "@kbn/server-route-repository": ["packages/kbn-server-route-repository"],
       "@kbn/server-route-repository/*": ["packages/kbn-server-route-repository/*"],
+      "@kbn/serverless": ["x-pack/plugins/serverless"],
+      "@kbn/serverless/*": ["x-pack/plugins/serverless/*"],
       "@kbn/serverless-observability": ["x-pack/plugins/serverless_observability"],
       "@kbn/serverless-observability/*": ["x-pack/plugins/serverless_observability/*"],
       "@kbn/serverless-security": ["x-pack/plugins/serverless_security"],

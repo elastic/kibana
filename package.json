@@ -545,6 +545,7 @@
     "@kbn/securitysolution-utils": "link:packages/kbn-securitysolution-utils",
     "@kbn/server-http-tools": "link:packages/kbn-server-http-tools",
     "@kbn/server-route-repository": "link:packages/kbn-server-route-repository",
+    "@kbn/serverless": "link:x-pack/plugins/serverless",
     "@kbn/serverless-observability": "link:x-pack/plugins/serverless_observability",
     "@kbn/serverless-security": "link:x-pack/plugins/serverless_security",
     "@kbn/session-notifications-plugin": "link:test/plugin_functional/plugins/session_notifications",
