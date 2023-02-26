@@ -689,6 +689,10 @@ Kibana.
 |Welcome to the Kibana Security Solution plugin! This README will go over getting started with development and testing.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/serverless/README.md[serverless]
+|A Kibana plugin
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/serverless_observability/README.md[serverlessObservability]
 |A witty, fitting description to come.
 
