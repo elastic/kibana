@@ -12,7 +12,8 @@ import {
   stringToObjectFormatter,
   arrayFormatter,
 } from './common';
-import { BrowserFields, ConfigKey } from '../../../common/runtime_types/monitor_management';
+import { arrayToJsonFormatter } from '../../../common/formatters/common/formatters';
+import { BrowserFields, ConfigKey } from '../../../common/runtime_types';
 import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../../../common/constants/monitor_defaults';
 import { tlsFormatters } from './tls';
 
@@ -69,6 +70,8 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: (fields) =>
     stringToObjectFormatter(fields[ConfigKey.PLAYWRIGHT_OPTIONS] || ''),
+  [ConfigKey.APM_TRACE_URL_PATTERNS]: (fields) =>
+    arrayToJsonFormatter(fields[ConfigKey.APM_TRACE_URL_PATTERNS]),
   [ConfigKey.TEXT_ASSERTION]: null,
   ...commonFormatters,
   ...tlsFormatters,

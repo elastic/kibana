@@ -62,8 +62,8 @@ export const OverviewAlerts = () => {
                   reportDefinitions: {
                     'kibana.alert.rule.category': ['Synthetics monitor status'],
                     'monitor.id':
-                      status?.enabledMonitorQueryIds.length > 0
-                        ? status?.enabledMonitorQueryIds
+                      status?.enabledMonitorQueryIds?.length ?? 0 > 0
+                        ? status?.enabledMonitorQueryIds ?? ['false-id']
                         : ['false-id'],
                   },
                   filters: [{ field: 'kibana.alert.status', values: ['active', 'recovered'] }],
@@ -87,8 +87,8 @@ export const OverviewAlerts = () => {
                   reportDefinitions: {
                     'kibana.alert.rule.category': ['Synthetics monitor status'],
                     'monitor.id':
-                      status?.enabledMonitorQueryIds.length > 0
-                        ? status?.enabledMonitorQueryIds
+                      status?.enabledMonitorQueryIds?.length ?? 0 > 0
+                        ? status?.enabledMonitorQueryIds ?? ['false-id']
                         : ['false-id'],
                   },
                   dataType: 'alerts',
