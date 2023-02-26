@@ -30,14 +30,14 @@ type NonNullableTypeProperties<T> = {
  * create a value for (almost) all properties
  */
 type CreateExceptionListItemSchemaWithNonNullProps = NonNullableTypeProperties<
-  Omit<CreateExceptionListItemSchema, 'meta'>
+  Omit<CreateExceptionListItemSchema, 'meta' | 'expire_time'>
 > &
-  Pick<CreateExceptionListItemSchema, 'meta'>;
+  Pick<CreateExceptionListItemSchema, 'meta' | 'expire_time'>;
 
 type UpdateExceptionListItemSchemaWithNonNullProps = NonNullableTypeProperties<
-  Omit<UpdateExceptionListItemSchema, 'meta'>
+  Omit<UpdateExceptionListItemSchema, 'meta' | 'expire_time'>
 > &
-  Pick<UpdateExceptionListItemSchema, 'meta'>;
+  Pick<UpdateExceptionListItemSchema, 'meta' | 'expire_time'>;
 
 const exceptionItemToCreateExceptionItem = (
   exceptionItem: ExceptionListItemSchema
@@ -46,6 +46,7 @@ const exceptionItemToCreateExceptionItem = (
     /* eslint-disable @typescript-eslint/naming-convention */
     description,
     entries,
+    expire_time,
     list_id,
     name,
     type,
@@ -61,6 +62,7 @@ const exceptionItemToCreateExceptionItem = (
   return {
     description,
     entries,
+    expire_time,
     list_id,
     name,
     type,
@@ -109,6 +111,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
           value: '741462ab431a22233C787BAAB9B653C7',
         },
       ],
+      expire_time: undefined,
       id: this.seededUUIDv4(),
       item_id: this.seededUUIDv4(),
       list_id: 'endpoint_list_id',

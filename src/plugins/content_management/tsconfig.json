@@ -3,9 +3,11 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "demo/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/core-http-request-handler-context-server",
   ],
   "exclude": [
     "target/**/*",

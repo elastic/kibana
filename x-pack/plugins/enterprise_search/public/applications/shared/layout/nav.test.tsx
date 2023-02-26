@@ -258,6 +258,11 @@ describe('useEnterpriseSearchContentNav Engines feature flag', () => {
             name: 'Engines',
             href: '/app/enterprise_search/content/engines',
           },
+          {
+            id: 'searchExperiences',
+            name: 'Search Experiences',
+            href: '/app/enterprise_search/search_experiences',
+          },
         ],
       },
       {
@@ -399,6 +404,11 @@ describe('useEnterpriseSearchEngineNav', () => {
             name: 'Engines',
             href: '/app/enterprise_search/content/engines',
           },
+          {
+            id: 'searchExperiences',
+            name: 'Search Experiences',
+            href: '/app/enterprise_search/search_experiences',
+          },
         ],
       },
       {
@@ -467,11 +477,6 @@ describe('useEnterpriseSearchEngineNav', () => {
           href: `/app/enterprise_search/content/engines/${engineName}/indices`,
           id: 'enterpriseSearchEngineIndices',
           name: 'Indices',
-        },
-        {
-          href: `/app/enterprise_search/content/engines/${engineName}/documents`,
-          id: 'enterpriseSearchEngineDocuments',
-          name: 'Documents',
         },
         {
           href: `/app/enterprise_search/content/engines/${engineName}/schema`,

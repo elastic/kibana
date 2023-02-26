@@ -47,6 +47,7 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
+import { LazyLoadProps } from './types';
 
 import type {
   ActionTypeModel,
@@ -62,7 +63,7 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
   RulesListProps,
-  RulesListNotifyBadgeProps,
+  RulesListNotifyBadgePropsWithApi,
   AlertsTableConfigurationRegistry,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
@@ -111,7 +112,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
-  getAlertsStateTable: (props: AlertsTableStateProps) => ReactElement<AlertsTableStateProps>;
+  getAlertsStateTable: (
+    props: AlertsTableStateProps & LazyLoadProps
+  ) => ReactElement<AlertsTableStateProps>;
   getAlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
   getFieldBrowser: (props: FieldBrowserProps) => ReactElement<FieldBrowserProps>;
   getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
@@ -125,8 +128,8 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ) => ReactElement<RuleEventLogListProps<T>>;
   getRulesList: (props: RulesListProps) => ReactElement;
   getRulesListNotifyBadge: (
-    props: RulesListNotifyBadgeProps
-  ) => ReactElement<RulesListNotifyBadgeProps>;
+    props: RulesListNotifyBadgePropsWithApi
+  ) => ReactElement<RulesListNotifyBadgePropsWithApi>;
   getRuleDefinition: (props: RuleDefinitionProps) => ReactElement<RuleDefinitionProps>;
   getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
   getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
@@ -381,7 +384,7 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getAlertsStateTable: (props: AlertsTableStateProps) => {
+      getAlertsStateTable: (props: AlertsTableStateProps & LazyLoadProps) => {
         return getAlertsTableStateLazy(props);
       },
       getAlertsSearchBar: (props: AlertsSearchBarProps) => {
@@ -408,7 +411,7 @@ export class Plugin
       getRuleEventLogList: <T extends RuleEventLogListOptions>(props: RuleEventLogListProps<T>) => {
         return getRuleEventLogListLazy(props);
       },
-      getRulesListNotifyBadge: (props: RulesListNotifyBadgeProps) => {
+      getRulesListNotifyBadge: (props: RulesListNotifyBadgePropsWithApi) => {
         return getRulesListNotifyBadgeLazy(props);
       },
       getRulesList: (props: RulesListProps) => {

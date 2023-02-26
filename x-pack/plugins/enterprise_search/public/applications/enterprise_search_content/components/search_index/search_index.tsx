@@ -36,6 +36,7 @@ import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
 import { ConnectorSyncRules } from './connector/sync_rules/connector_rules';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
+import { CrawlerConfiguration } from './crawler/crawler_configuration/crawler_configuration';
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
@@ -56,6 +57,7 @@ export enum SearchIndexTabId {
   SCHEDULING = 'scheduling',
   // crawler indices
   DOMAIN_MANAGEMENT = 'domain_management',
+  CRAWLER_CONFIGURATION = 'crawler_configuration',
 }
 
 export const SearchIndex: React.FC = () => {
@@ -95,6 +97,7 @@ export const SearchIndex: React.FC = () => {
   useEffect(() => {
     if (
       isConnectorIndex(index) &&
+      index.name === indexName &&
       index.connector.is_native &&
       index.connector.service_type === null
     ) {
@@ -163,6 +166,16 @@ export const SearchIndex: React.FC = () => {
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.domainManagementTabLabel', {
         defaultMessage: 'Manage Domains',
       }),
+    },
+    {
+      content: <CrawlerConfiguration />,
+      id: SearchIndexTabId.CRAWLER_CONFIGURATION,
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndex.crawlerConfigurationTabLabel',
+        {
+          defaultMessage: 'Configuration',
+        }
+      ),
     },
     {
       content: <AutomaticCrawlScheduler />,

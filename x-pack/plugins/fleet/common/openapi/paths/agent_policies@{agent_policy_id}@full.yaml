@@ -14,6 +14,8 @@ get:
                 oneOf:
                   - type: string
                   - $ref: ../components/schemas/agent_policy_full.yaml
+    '400':
+      $ref: ../components/responses/error.yaml
 parameters:
   - schema:
       type: string

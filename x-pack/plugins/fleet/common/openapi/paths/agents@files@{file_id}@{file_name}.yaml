@@ -28,4 +28,6 @@ get:
                     properties:
                       body: {}
                       headers: {}
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-agent-upload-file

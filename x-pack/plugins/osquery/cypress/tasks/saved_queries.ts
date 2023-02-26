@@ -105,6 +105,14 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
       submitQuery();
       checkResults();
 
+      // Disabled submit button in test configuration
+      cy.contains('Submit').should('not.be.disabled');
+      // this clears the input
+      inputQuery('{selectall}{backspace}{selectall}{backspace}');
+      cy.contains('Submit').should('be.disabled');
+      inputQuery(BIG_QUERY);
+      cy.contains('Submit').should('not.be.disabled');
+
       // Save edited
       cy.react('EuiButton').contains('Update query').click();
       cy.contains(`${savedQueryDescription} Edited`);

@@ -21,6 +21,8 @@ post:
                 $ref: ../components/schemas/agent_policy.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   requestBody:
     content:
       application/json:

@@ -22,9 +22,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('creating and deleting default index', function describeIndexTests() {
     before(async function () {
       await esArchiver.emptyKibanaIndex();
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
+      );
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
+    });
+
+    after(async function () {
+      await esArchiver.unload(
+        'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
+      );
     });
 
     describe('can open and close editor', function () {
@@ -154,6 +163,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(`Index Star`);
         });
+      });
+    });
+
+    describe('index pattern edit', function () {
+      it('should update field list', async function () {
+        await PageObjects.settings.editIndexPattern(
+          'kibana_sample_data_flights',
+          'timestamp',
+          undefined,
+          true
+        );
+
+        await retry.try(async () => {
+          // verify initial field list
+          expect(await testSubjects.exists('field-name-AvgTicketPrice')).to.be(true);
+        });
+
+        await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', undefined, true);
+        await retry.try(async () => {
+          // verify updated field list
+          expect(await testSubjects.exists('field-name-agent')).to.be(true);
+        });
+      });
+
+      it('should disable Save button after pressing', async function () {
+        await PageObjects.settings.clickEditIndexButton();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          await PageObjects.settings.setIndexPatternField('logs*');
+        });
+        await PageObjects.settings.selectTimeFieldOption('@timestamp');
+
+        expect(await testSubjects.isEnabled('saveIndexPatternButton')).to.be(true);
+        await (await PageObjects.settings.getSaveDataViewButtonActive()).click();
+
+        // wait for the confirmation modal to open
+        await retry.waitFor('confirmation modal', async () => {
+          return await testSubjects.exists('confirmModalConfirmButton');
+        });
+
+        // while the confirmation modal is open, we can check that the form button has actually become disabled
+        expect(await testSubjects.isEnabled('saveIndexPatternButton')).to.be(false);
+
+        await testSubjects.click('confirmModalConfirmButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
     });
 

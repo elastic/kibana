@@ -26,6 +26,7 @@ import {
   OVERVIEW_PATH,
   RULES_PATH,
   CASES_PATH,
+  DATA_QUALITY_PATH,
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -445,6 +446,7 @@ export const useSourcererDataView = (
       selectedPatterns,
       // if we have to do an update to data view, tell us which patterns are active
       ...(legacyPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
+      sourcererDataView,
     }),
     [sourcererDataView, selectedPatterns, indicesExist, loading, legacyPatterns.length]
   );
@@ -464,6 +466,7 @@ export const getScopeFromPath = (
 
 export const sourcererPaths = [
   ALERTS_PATH,
+  DATA_QUALITY_PATH,
   `${RULES_PATH}/id/:id`,
   HOSTS_PATH,
   USERS_PATH,
