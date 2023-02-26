@@ -7,8 +7,8 @@
     "index.ts",
     "common/**/*.ts",
     "public/**/*.ts",
+    "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../typings/**/*"
   ],
   "exclude": [
     "target/**/*"
@@ -16,7 +16,5 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
-    "@kbn/security-plugin",
-    "@kbn/security-solution-plugin",
   ]
 }
