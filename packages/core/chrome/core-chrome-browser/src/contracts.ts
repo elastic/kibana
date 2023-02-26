@@ -13,7 +13,7 @@ import type { ChromeDocTitle } from './doc_title';
 import type { ChromeNavControls } from './nav_controls';
 import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
-import type { ChromeBadge, ChromeUserBanner } from './types';
+import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 
 /**
@@ -150,4 +150,8 @@ export interface ChromeStart {
    * Get an observable of the current header banner presence state.
    */
   hasHeaderBanner$(): Observable<boolean>;
+
+  setChromeStyle(style: ChromeStyle): void;
+  getChromeStyle$(): Observable<ChromeStyle>;
+  setSolutionNavigation(solutionNavigation: JSX.Element): void;
 }
