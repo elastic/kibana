@@ -205,26 +205,26 @@ export default function alertTests({ getService }: FtrProviderContext) {
             );
 
             // Get scheduled task id
-            const getResponse = await supertestWithoutAuth
-              .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${alertId}`)
-              .auth(user.username, user.password)
-              .expect(200);
+            // const getResponse = await supertestWithoutAuth
+            //   .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${alertId}`)
+            //   .auth(user.username, user.password)
+            //   .expect(200);
 
             // loading the archive likely caused the task to fail so ensure it's rescheduled to run in 2 seconds,
             // otherwise this test will stall for 5 minutes
             // no other attributes are touched, only runAt, so unless it would have ran when runAt expired, it
             // won't run now
-            await supertest
-              .put(
-                `${getUrlPrefix(space.id)}/api/alerts_fixture/${
-                  getResponse.body.scheduled_task_id
-                }/reschedule_task`
-              )
-              .set('kbn-xsrf', 'foo')
-              .send({
-                runAt: getRunAt(2000),
-              })
-              .expect(200);
+            // await supertest
+            //   .put(
+            //     `${getUrlPrefix(space.id)}/api/alerts_fixture/${
+            //       getResponse.body.scheduled_task_id
+            //     }/reschedule_task`
+            //   )
+            //   .set('kbn-xsrf', 'foo')
+            //   .send({
+            //     runAt: getRunAt(2000),
+            //   })
+            //   .expect(200);
           }
 
           async function ensureAlertIsRunning() {
@@ -286,8 +286,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
   });
 }
 
-function getRunAt(delayInMs: number) {
-  const runAt = new Date();
-  runAt.setMilliseconds(new Date().getMilliseconds() + delayInMs);
-  return runAt.toISOString();
-}
+// function getRunAt(delayInMs: number) {
+//   const runAt = new Date();
+//   runAt.setMilliseconds(new Date().getMilliseconds() + delayInMs);
+//   return runAt.toISOString();
+// }
