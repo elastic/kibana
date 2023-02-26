@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
   ServerlessSecurityPluginSetup,
@@ -32,8 +33,9 @@ export class ServerlessSecurityPlugin
 
   public start(
     _core: CoreStart,
-    _startDeps: ServerlessSecurityPluginStartDependencies
+    startDeps: ServerlessSecurityPluginStartDependencies
   ): ServerlessSecurityPluginStart {
+    startDeps.serverless.setServerlessNavigation(<h1 style={{ color: '#fff' }}>Security</h1>);
     return {};
   }
 

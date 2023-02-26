@@ -13,6 +13,7 @@
       "observability"
     ],
     "requiredPlugins": [
+      "serverless",
       "observability"
     ],
     "optionalPlugins": [],

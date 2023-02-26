@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ObservabilityPublicSetup } from '@kbn/observability-plugin/public';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import {
+  ObservabilityPublicSetup,
+  ObservabilityPublicStart,
+} from '@kbn/observability-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessObservabilityPluginSetup {}
@@ -13,9 +17,12 @@ export interface ServerlessObservabilityPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessObservabilityPluginStart {}
 
-export interface AppPluginSetupDependencies {
+export interface ServerlessObservabilityPluginSetupDependencies {
   observability: ObservabilityPublicSetup;
+  serverless: ServerlessPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AppPluginStartDependencies {}
+export interface ServerlessObservabilityPluginStartDependencies {
+  observability: ObservabilityPublicStart;
+  serverless: ServerlessPluginStart;
+}
