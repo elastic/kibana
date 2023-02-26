@@ -14,6 +14,8 @@ put:
         application/json:
           schema:
             type: object
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: reassign-agent
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

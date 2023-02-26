@@ -13,6 +13,7 @@ import { SecuritySideNav } from './security_side_nav';
 import type { SolutionGroupedNavProps } from '../solution_grouped_nav/solution_grouped_nav';
 import type { NavLinkItem } from '../types';
 import { bottomNavOffset } from '../../../lib/helpers';
+import { track } from '../../../lib/telemetry';
 
 const manageNavLink: NavLinkItem = {
   id: SecurityPageName.administration,
@@ -91,6 +92,7 @@ describe('SecuritySideNav', () => {
         },
       ],
       footerItems: [],
+      tracker: track,
     });
   });
 

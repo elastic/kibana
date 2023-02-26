@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { GetIn, CreateIn } from '../../common';
+import type { GetIn, CreateIn, UpdateIn, DeleteIn, SearchIn } from '../../common';
 
 export interface CrudClient {
-  get<I extends GetIn = GetIn, O = unknown>(input: I): Promise<O>;
-  create<I extends CreateIn = CreateIn, O = unknown>(input: I): Promise<O>;
+  get(input: GetIn): Promise<unknown>;
+  create(input: CreateIn): Promise<unknown>;
+  update(input: UpdateIn): Promise<unknown>;
+  delete(input: DeleteIn): Promise<unknown>;
+  search(input: SearchIn): Promise<unknown>;
 }

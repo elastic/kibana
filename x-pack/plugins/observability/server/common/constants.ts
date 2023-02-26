@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const OBSERVABILITY_FEATURE_ID = 'observability';
-export const RULE_REGISTRATION_CONTEXT = 'observability.slo';
+export const SLO_RULE_REGISTRATION_CONTEXT = 'observability.slo';

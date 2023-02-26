@@ -130,6 +130,9 @@ export const getLegendActions = (
         data-test-subj={`legend-${title}`}
         onKeyPress={() => setPopoverOpen(!popoverOpen)}
         onClick={() => setPopoverOpen(!popoverOpen)}
+        aria-label={i18n.translate('expressionPartitionVis.legend.legendActionsAria', {
+          defaultMessage: 'Legend actions',
+        })}
       >
         <EuiIcon size="s" type="boxesVertical" />
       </div>
