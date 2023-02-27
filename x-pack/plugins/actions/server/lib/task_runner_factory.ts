@@ -21,8 +21,9 @@ import {
   Headers,
   FakeRawRequest,
 } from '@kbn/core/server';
-import { RunContext } from '@kbn/task-manager-plugin/server';
+import { RunContext, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { throwRetryError } from '@kbn/task-manager-plugin/server/task_running';
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
 import {
@@ -154,9 +155,8 @@ export class TaskRunnerFactory {
           );
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
-          throw new ExecutorError(
-            executorResult.message,
-            executorResult.data,
+          throw throwRetryError(
+            new ExecutorError(executorResult.message, executorResult.data),
             executorResult.retry as boolean | Date
           );
         } else if (executorResult && executorResult?.status === 'error') {
@@ -164,6 +164,7 @@ export class TaskRunnerFactory {
           logger.error(
             `Action '${actionId}' failed ${willNotRetryMessage}: ${executorResult.message}`
           );
+          throw throwUnrecoverableError(new ExecutorError(executorResult.message));
         }
 
         // Cleanup action_task_params object now that we're done with it

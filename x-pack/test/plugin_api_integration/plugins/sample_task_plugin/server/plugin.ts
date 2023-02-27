@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -148,7 +147,6 @@ export class SampleTaskManagerFixturePlugin
         description: 'A sample task that times out each run.',
         maxAttempts: 3,
         timeout: '1s',
-        getRetry: (attempts: number, error: object) => new Date(Date.now() + _.random(2, 5) * 1000),
         createTaskRunner: () => ({
           async run() {
             return await new Promise((resolve) => {});

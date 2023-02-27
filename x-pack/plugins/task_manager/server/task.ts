@@ -153,15 +153,6 @@ export const taskDefinitionSchema = schema.object(
  */
 export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
   /**
-   * Function that customizes how the task should behave when the task fails. This
-   * function can return `true`, `false` or a Date. True will tell task manager
-   * to retry using default delay logic. False will tell task manager to stop retrying
-   * this task. Date will suggest when to the task manager the task should retry.
-   * This function isn't used for recurring tasks, those retry as per their configured recurring schedule.
-   */
-  getRetry?: (attempts: number, error: object) => boolean | Date;
-
-  /**
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
    */
