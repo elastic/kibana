@@ -46,8 +46,6 @@ export class AgentManager extends Manager {
       this.requestOptions
     );
 
-    console.log(response, JSON.stringify(response.data, null, 2));
-
     await axios.post(
       `${this.params.kibanaUrl}/api/fleet/package_policies`,
       {
