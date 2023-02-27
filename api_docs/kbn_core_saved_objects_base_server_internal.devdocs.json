@@ -53,6 +53,17 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.SavedObjectConfig.allowHttpApiAccess",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowHttpApiAccess",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
             "id": "def-common.SavedObjectConfig.migration",
             "type": "Object",
             "tags": [],
@@ -103,7 +114,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; maxImportExportSize: number; }>"
+                  "; maxImportExportSize: number; allowHttpApiAccess: boolean; }>"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
                 "deprecated": false,
@@ -729,7 +740,7 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; readonly maxImportExportSize: number; }"
+          "; readonly maxImportExportSize: number; readonly allowHttpApiAccess: boolean; }"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
         "deprecated": false,
@@ -822,7 +833,15 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<number>; }>"
+              "<number>; allowHttpApiAccess: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ConditionalType",
+                "text": "ConditionalType"
+              },
+              "<true, boolean, boolean>; }>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,
