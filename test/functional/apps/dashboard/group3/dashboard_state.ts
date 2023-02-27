@@ -336,25 +336,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             (appState: Partial<SharedDashboardState>) => {
               return {
                 panels:
-                  appState.panels ??
-                  [].map((panel) => {
+                  (appState.panels ??
+                  []).map((panel) => {
                     return {
                       ...panel,
-                      embeddableConfig:
-                        panel.embeddableConfig?.vis?.colors !== undefined
-                          ? {
-                              ...panel.embeddableConfig,
-                              vis: {
-                                ...panel.embeddableConfig.vis,
-                                colors: {
-                                  ...panel.embeddableConfig.vis.colors,
-                                  ['80000']: 'FFFFFF',
-                                },
-                              },
-                            }
-                          : {
-                              ...panel.embeddableConfig,
-                            },
+                      embeddableConfig: {
+                        ...(panel.embeddableConfig ?? {}),
+                        vis: {
+                          ...(panel.embeddableConfig.vis ?? {}),
+                          colors: {
+                            ...(panel.embeddableConfig.vis.colors ?? {}),
+                            ['80000']: 'FFFFFF',
+                          },
+                        },
+                      },
                     };
                   }),
               };
@@ -389,22 +384,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             (appState: Partial<SharedDashboardState>) => {
               return {
                 panels:
-                  appState.panels ??
-                  [].map((panel) => {
+                  (appState.panels ??
+                  []).map((panel) => {
                     return {
                       ...panel,
-                      embeddableConfig:
-                        panel.embeddableConfig?.vis?.colors !== undefined
-                          ? {
-                              ...panel.embeddableConfig,
-                              vis: {
-                                ...panel.embeddableConfig.vis,
-                                colors: {},
-                              },
-                            }
-                          : {
-                              ...panel.embeddableConfig,
-                            },
+                      embeddableConfig: {
+                        ...(panel.embeddableConfig ?? {}),
+                        vis: {
+                          ...(panel.embeddableConfig.vis ?? {}),
+                          colors: {},
+                        },
+                      },
                     };
                   }),
               };
