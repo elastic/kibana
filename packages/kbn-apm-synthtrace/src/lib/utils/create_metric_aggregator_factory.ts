@@ -9,9 +9,12 @@
 import { appendHash, Fields, parseInterval } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
 import { Duplex, PassThrough } from 'stream';
-import { ScenarioOptions } from '@kbn/apm-synthtrace/src/cli/scenario';
+import { ScenarioOptions } from '../../cli/scenario';
 
-type ServiceMapValue = { transactionCount: number; overflowKey: string | null };
+interface ServiceMapValue {
+  transactionCount: number;
+  overflowKey: string | null;
+}
 
 export function createMetricAggregatorFactory<TFields extends Fields>() {
   return function <TMetric extends Record<string, any>, TOutput extends Record<string, any>>(

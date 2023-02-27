@@ -17,6 +17,7 @@ import { castArray } from 'lodash';
 import { PassThrough, pipeline, Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import { ValuesType } from 'utility-types';
+import { ScenarioOptions } from '../../../../cli/scenario';
 import { Logger } from '../../../utils/create_logger';
 import { fork, sequential } from '../../../utils/stream_utils';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
@@ -29,7 +30,6 @@ import { getDedotTransform } from './get_dedot_transform';
 import { getIntakeDefaultsTransform } from './get_intake_defaults_transform';
 import { getRoutingTransform } from './get_routing_transform';
 import { getSerializeTransform } from './get_serialize_transform';
-import { ScenarioOptions } from '@kbn/apm-synthtrace/src/cli/scenario';
 
 export interface ApmSynthtraceEsClientOptions {
   version: string;

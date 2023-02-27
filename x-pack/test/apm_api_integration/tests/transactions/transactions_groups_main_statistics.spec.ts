@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import { pick, range as lodashRange, sum } from 'lodash';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 type TransactionsGroupsPrimaryStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;

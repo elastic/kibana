@@ -7,9 +7,9 @@
  */
 import { pick } from 'lodash';
 import { hashKeysOf, ApmFields } from '@kbn/apm-synthtrace-client';
+import { ScenarioOptions } from '../../../cli/scenario';
 import { createLosslessHistogram } from '../../utils/create_lossless_histogram';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
-import { ScenarioOptions } from '@kbn/apm-synthtrace/src/cli/scenario';
 
 const KEY_FIELDS: Array<keyof ApmFields> = [
   'agent.name',
