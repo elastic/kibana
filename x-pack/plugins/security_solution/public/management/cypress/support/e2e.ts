@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-namespace */
+
 // / <reference types="cypress" />
 
 // ***********************************************************
@@ -23,25 +25,51 @@
 // ***********************************************************
 
 // force ESM in this module
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
+
 export {};
 
 import 'cypress-react-selector';
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
-      getByTestSubj(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
+      /**
+       * Get Elements by `data-test-subj`
+       * @param args
+       */
+      getByTestSubj<E extends Node = HTMLElement>(
+        ...args: Parameters<Cypress.Chainable<E>['get']>
+      ): Chainable<JQuery<E>>;
+
+      /** Finds elements by `data-test-subj` */
+      findByTestSubj<E extends Node = HTMLElement>(
+        ...args: Parameters<Cypress.Chainable<E>['find']>
+      ): Chainable<JQuery<E>>;
     }
   }
 }
 
-Cypress.Commands.addQuery('getByTestSubj', function getByTestSubj(selector, options) {
-  const getFn = cy.now('get', `[data-test-subj="${selector}"]`, options) as (
-    subject: Cypress.Chainable<JQuery<HTMLElement>>
-  ) => Cypress.Chainable<JQuery<HTMLElement>>;
+Cypress.Commands.addQuery<'getByTestSubj'>(
+  'getByTestSubj',
+  function getByTestSubj(selector, options) {
+    const getFn = cy.now('get', testSubjSelector(selector), options) as (
+      subject: Cypress.Chainable<JQuery<HTMLElement>>
+    ) => Cypress.Chainable<JQuery<HTMLElement>>;
 
-  return (subject) => getFn(subject);
-});
+    return (subject) => getFn(subject);
+  }
+);
+
+Cypress.Commands.addQuery<'findByTestSubj'>(
+  'findByTestSubj',
+  function findByTestSubj(selector, options) {
+    const findFn = cy.now('get', testSubjSelector(selector), options) as (
+      subject: Cypress.Chainable<JQuery<HTMLElement>>
+    ) => Cypress.Chainable<JQuery<HTMLElement>>;
+
+    return (subject) => findFn(subject);
+  }
+);
 
 Cypress.on('uncaught:exception', () => false);
