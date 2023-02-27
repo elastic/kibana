@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RangeFilterParams } from '@kbn/es-query';
 import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
@@ -211,10 +211,12 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
         <EuiFlexItem grow={1}>
           <EuiEmptyPrompt
             body={
-              <FormattedMessage
-                id="xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title"
-                defaultMessage="No data to display"
-              />
+              <EuiText size="xs">
+                <FormattedMessage
+                  id="xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title"
+                  defaultMessage="No data to display"
+                />
+              </EuiText>
             }
           />
         </EuiFlexItem>

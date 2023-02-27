@@ -21,7 +21,8 @@ export const allowedExperimentalValues = Object.freeze({
   policyListEnabled: true,
   policyResponseInFleetEnabled: true,
   chartEmbeddablesEnabled: true,
-
+  donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
+  alertsPreviewChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 9
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and

@@ -35,7 +35,9 @@ const ChartContentComponent = ({
   };
   selectedSeverity: RiskSeverity[];
 }) => {
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const isDonutChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled(
+    'donutChartEmbeddablesEnabled'
+  );
   const spaceId = useSpaceId();
   const extraOptions = useMemo(
     () => ({ spaceId, filters: generateSeverityFilter(selectedSeverity, riskEntity) }),
@@ -44,7 +46,7 @@ const ChartContentComponent = ({
 
   return (
     <>
-      {isChartEmbeddablesEnabled && spaceId && dataExists && (
+      {isDonutChartEmbeddablesEnabled && spaceId && dataExists && (
         <VisualizationEmbeddable
           applyGlobalQueriesAndFilters={false}
           donutTextWrapperClassName="risk-score"
@@ -59,7 +61,7 @@ const ChartContentComponent = ({
           width="270px"
         />
       )}
-      {!isChartEmbeddablesEnabled && (
+      {!isDonutChartEmbeddablesEnabled && (
         <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
       )}
     </>
