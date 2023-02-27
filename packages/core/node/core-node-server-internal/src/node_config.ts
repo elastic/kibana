@@ -32,19 +32,26 @@ export const NODE_ALL_ROLES = [
 ] as const;
 
 /** @internal */
-export const rolesConfig = schema.oneOf(
-  [
-    schema.arrayOf(
-      schema.oneOf([schema.literal(NODE_BACKGROUND_TASKS_ROLE), schema.literal(NODE_UI_ROLE)])
-    ),
-    schema.arrayOf(schema.literal(NODE_WILDCARD_CHAR), {
-      minSize: 1,
-      maxSize: 1,
-    }),
-    schema.arrayOf(schema.literal(NODE_MIGRATOR_ROLE), { minSize: 1, maxSize: 1 }),
-  ],
+export const rolesConfig = schema.arrayOf(
+  schema.oneOf([
+    schema.literal(NODE_BACKGROUND_TASKS_ROLE),
+    schema.literal(NODE_MIGRATOR_ROLE),
+    schema.literal(NODE_WILDCARD_CHAR),
+    schema.literal(NODE_UI_ROLE),
+  ]),
   {
     defaultValue: [NODE_WILDCARD_CHAR],
+    validate: (value) => {
+      if (value.length > 1) {
+        if (value.includes(NODE_WILDCARD_CHAR)) {
+          return `wildcard ("*") cannot be used with other roles or specified more than once`;
+        }
+        if (value.includes(NODE_MIGRATOR_ROLE)) {
+          return `"migrator" cannot be used with other roles or specified more than once`;
+        }
+      }
+    },
+    minSize: 1,
   }
 );
 
