@@ -106,7 +106,7 @@ export const createEventCorrelationRule = (rule: CustomRule) => {
   });
 };
 
-export const createThresholdRule = (rule: ThresholdRule, ruleId = 'rule_testing') => {
+export const createThresholdRule = (rule: ThresholdRule) => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
   const interval = rule.runsEvery ? `${rule.runsEvery.interval}${rule.runsEvery.type}` : '100m';
@@ -115,7 +115,7 @@ export const createThresholdRule = (rule: ThresholdRule, ruleId = 'rule_testing'
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
-      rule_id: ruleId,
+      rule_id: rule.id ?? 'rule_testing',
       risk_score: riskScore,
       description: rule.description,
       interval,
@@ -138,7 +138,7 @@ export const createThresholdRule = (rule: ThresholdRule, ruleId = 'rule_testing'
   });
 };
 
-export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') => {
+export const createNewTermsRule = (rule: NewTermsRule) => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
   const interval = rule.runsEvery ? `${rule.runsEvery.interval}${rule.runsEvery.type}` : '100m';
@@ -147,7 +147,7 @@ export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') 
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
-      rule_id: ruleId,
+      rule_id: rule.id ?? 'rule_testing',
       risk_score: riskScore,
       description: rule.description,
       interval,
@@ -168,8 +168,7 @@ export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') 
 };
 
 export const createSavedQueryRule = (
-  rule: SavedQueryRule,
-  ruleId = 'saved_query_rule_testing'
+  rule: SavedQueryRule
 ): Cypress.Chainable<Cypress.Response<unknown>> => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
@@ -180,7 +179,7 @@ export const createSavedQueryRule = (
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
-      rule_id: ruleId,
+      rule_id: rule.id ?? 'saved_query_rule_testing',
       risk_score: riskScore,
       description: rule.description,
       interval,
