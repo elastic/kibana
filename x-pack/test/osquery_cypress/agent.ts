@@ -33,20 +33,48 @@ export class AgentManager extends Manager {
 
   public async setup() {
     this.log.info('Running agent preconfig');
-    return await axios.post(
-      `${this.params.kibanaUrl}/api/fleet/agents/setup`,
-      {},
+
+    const response = await axios.post(
+      `${this.params.kibanaUrl}/api/fleet/agent_policies?sys_monitoring=true`,
+      {
+        name: 'Osquery policy',
+        description: '',
+        namespace: 'default',
+        monitoring_enabled: ['logs', 'metrics'],
+        inactivity_timeout: 1209600,
+      },
       this.requestOptions
     );
-  }
 
-  public async startAgent() {
+    console.log(response, JSON.stringify(response.data, null, 2));
+
+    await axios.post(
+      `${this.params.kibanaUrl}/api/fleet/package_policies`,
+      {
+        policy_id: response.data.item.id,
+        package: {
+          name: 'osquery_manager',
+          version: '1.7.0',
+        },
+        name: `Policy for ${response.data.item.name}`,
+        description: '',
+        namespace: 'default',
+        inputs: {
+          'osquery_manager-osquery': {
+            enabled: true,
+            streams: {},
+          },
+        },
+      },
+      this.requestOptions
+    );
+
     this.log.info('Getting agent enrollment key');
     const { data: apiKeys } = await axios.get(
       this.params.kibanaUrl + '/api/fleet/enrollment_api_keys',
       this.requestOptions
     );
-    const policy = apiKeys.items[1];
+    const policy = apiKeys.items[0];
 
     this.log.info('Running the agent');
 
@@ -60,7 +88,7 @@ export class AgentManager extends Manager {
       '--env',
       'FLEET_ENROLL=1',
       '--env',
-      `FLEET_URL=http://host.docker.internal:8220`,
+      `FLEET_URL=https://host.docker.internal:8220`,
       '--env',
       `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
       '--env',
