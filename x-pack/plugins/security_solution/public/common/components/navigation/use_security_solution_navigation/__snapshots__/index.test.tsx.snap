@@ -51,7 +51,7 @@ Object {
           "href": "securitySolutionUI/cloud_security_posture-dashboard",
           "id": "cloud_security_posture-dashboard",
           "isSelected": false,
-          "name": "Cloud Posture",
+          "name": "Cloud Security Posture",
           "onClick": [Function],
         },
         Object {

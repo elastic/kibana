@@ -29,6 +29,7 @@ import type {
   GetAvailableVersionsResponse,
   GetActionStatusResponse,
   GetAgentUploadsResponse,
+  PostAgentReassignResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -38,7 +39,8 @@ import type {
   DeleteAgentRequestSchema,
   GetAgentStatusRequestSchema,
   GetAgentDataRequestSchema,
-  PutAgentReassignRequestSchema,
+  PutAgentReassignRequestSchemaDeprecated,
+  PostAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
   GetActionStatusRequestSchema,
@@ -234,10 +236,10 @@ export const getAgentTagsHandler: RequestHandler<
   }
 };
 
-export const putAgentsReassignHandler: RequestHandler<
-  TypeOf<typeof PutAgentReassignRequestSchema.params>,
+export const putAgentsReassignHandlerDeprecated: RequestHandler<
+  TypeOf<typeof PutAgentReassignRequestSchemaDeprecated.params>,
   undefined,
-  TypeOf<typeof PutAgentReassignRequestSchema.body>
+  TypeOf<typeof PutAgentReassignRequestSchemaDeprecated.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
@@ -251,6 +253,29 @@ export const putAgentsReassignHandler: RequestHandler<
     );
 
     const body: PutAgentReassignResponse = {};
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const postAgentsReassignHandler: RequestHandler<
+  TypeOf<typeof PostAgentReassignRequestSchema.params>,
+  undefined,
+  TypeOf<typeof PostAgentReassignRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  try {
+    await AgentService.reassignAgent(
+      soClient,
+      esClient,
+      request.params.agentId,
+      request.body.policy_id
+    );
+
+    const body: PostAgentReassignResponse = {};
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });

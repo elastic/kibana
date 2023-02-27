@@ -69,6 +69,7 @@ export type {
   RequestHandlerContextBase,
   ResponseError,
   CustomHttpResponseOptions,
+  FileHttpResponseOptions,
   HttpResponseOptions,
   HttpResponsePayload,
   IKibanaResponse,
