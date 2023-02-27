@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-namespace */
-
 // / <reference types="cypress" />
 
 // ***********************************************************
@@ -32,6 +30,7 @@ export {};
 import 'cypress-react-selector';
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
       /**
