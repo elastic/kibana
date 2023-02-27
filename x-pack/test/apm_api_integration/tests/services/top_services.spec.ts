@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { sortBy } from 'lodash';
+import { range as lodashRange, sortBy } from 'lodash';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
@@ -30,8 +30,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const archiveStart = archiveRange.start;
   const archiveEnd = archiveRange.end;
 
-  const start = '2021-10-01T00:00:00.000Z';
-  const end = '2021-10-01T01:00:00.000Z';
+  const start = '2023-02-24T00:00:00.000Z';
+  const end = '2023-02-24T01:00:00.000Z';
 
   registry.when(
     'APM Services Overview with a basic license when data is not generated',
@@ -410,7 +410,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           it('some items have a health status set', () => {
             // Under the assumption that the loaded archive has
             // at least one APM ML job, and the time range is longer
-            // than 15m, at least one items should have a health status
+            // than 15m, at least an item should have a health status
             // set. Note that we currently have a bug where healthy
             // services report as unknown (so without any health status):
             // https://github.com/elastic/kibana/issues/77083
@@ -498,6 +498,104 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.body.items.length).to.be(1);
 
           expect(response.body.items[0].serviceName).to.be('opbeans-java');
+        });
+      });
+    }
+  );
+
+  registry.when(
+    'APM Service Overview with overflow bucket',
+    { config: 'basic', archives: [] },
+    () => {
+      const range = timerange(new Date(start).getTime(), new Date(end).getTime());
+      const interval = range.interval('1m');
+      const TRANSACTION_TYPES = ['request'];
+      const ENVIRONMENTS = ['production', 'development'];
+
+      const OVERFLOW_BUCKET_NAME = '_other';
+
+      const NUMBER_OF_SERVICES = 10;
+      const NUMBER_OF_TRANSACTIONS = 10;
+
+      const instances = lodashRange(0, NUMBER_OF_SERVICES)
+        .map((groupId) => `service-${groupId}`)
+        .flatMap((serviceName) => {
+          const services = ENVIRONMENTS.map((env) =>
+            apm.service({
+              name: serviceName,
+              environment: env,
+              agentName: 'go',
+            })
+          );
+
+          return lodashRange(0, 2).flatMap((serviceNodeId) =>
+            services.map((service) => service.instance(`${serviceName}-${serviceNodeId}`))
+          );
+        });
+
+      const transactionGroupRange = lodashRange(0, NUMBER_OF_TRANSACTIONS).map(
+        (groupId) => `transaction-${groupId}`
+      );
+
+      before(async () => {
+        return synthtrace.index(
+          [
+            interval.rate(1).generator((timestamp, timestampIndex) =>
+              instances.flatMap((instance) =>
+                transactionGroupRange.flatMap((groupId, groupIndex) => {
+                  return instance
+                    .transaction(groupId, TRANSACTION_TYPES[groupIndex % TRANSACTION_TYPES.length])
+                    .timestamp(timestamp)
+                    .duration(1000)
+                    .success();
+                })
+              )
+            ),
+          ],
+          {
+            max_services: 2,
+          }
+        );
+      });
+
+      after(() => {
+        return synthtrace.clean();
+      });
+
+      describe('when overflow bucket is present', () => {
+        let response: {
+          status: number;
+          body: APIReturnType<'GET /internal/apm/services'>;
+        };
+
+        before(async () => {
+          response = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/services',
+            params: {
+              query: {
+                start,
+                end,
+                environment: ENVIRONMENT_ALL.value,
+                kuery: '',
+                probability: 1,
+                documentType: ApmDocumentType.ServiceTransactionMetric,
+                rollupInterval: RollupInterval.OneMinute,
+              },
+            },
+          });
+        });
+
+        it('returns a successful response', () => {
+          expect(response.status).to.be(200);
+        });
+
+        it('should have service named _other', () => {
+          const serviceNamesList = response.body.items.map((item) => item.serviceName);
+          expect(serviceNamesList.includes(OVERFLOW_BUCKET_NAME)).to.be(true);
+        });
+
+        it('should have the correct value for serviceOverflowCount', function () {
+          expect(response.body.serviceOverflowCount).to.be(19200);
         });
       });
     }

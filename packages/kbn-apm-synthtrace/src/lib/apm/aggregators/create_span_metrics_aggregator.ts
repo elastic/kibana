@@ -8,6 +8,7 @@
 import { pick } from 'lodash';
 import { ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
+import { ScenarioOptions } from '@kbn/apm-synthtrace/src/cli/scenario';
 
 const KEY_FIELDS: Array<keyof ApmFields> = [
   'agent.name',
@@ -20,7 +21,7 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
   'service.target.type',
 ];
 
-export function createSpanMetricsAggregator(flushInterval: string) {
+export function createSpanMetricsAggregator(flushInterval: string, options?: ScenarioOptions) {
   return createApmMetricAggregator(
     {
       filter: (event) =>
@@ -44,6 +45,7 @@ export function createSpanMetricsAggregator(flushInterval: string) {
           'span.destination.service.response_time.sum.us': 0,
         };
       },
+      metricName: 'span',
     },
     (metric, event) => {
       metric['span.destination.service.response_time.count'] += 1;
@@ -53,6 +55,7 @@ export function createSpanMetricsAggregator(flushInterval: string) {
       // @ts-expect-error
       metric._doc_count = metric['span.destination.service.response_time.count'];
       return metric;
-    }
+    },
+    options
   );
 }

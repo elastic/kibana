@@ -16,7 +16,15 @@ type Generate<TFields> = (options: {
   range: Timerange;
 }) => SynthtraceGenerator<TFields> | Array<SynthtraceGenerator<TFields>> | Readable;
 
+export type ScenarioOptions = {
+  // Equivalent of APM Server Setting - Transactions.MaxTransactionGroups
+  max_transactions?: number;
+  // Equivalent of APM Server Setting - Transactions.MaxServices
+  max_services?: number;
+};
+
 export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{
   bootstrap?: (options: { apmEsClient: ApmSynthtraceEsClient }) => Promise<void>;
   generate: Generate<TFields>;
+  options?: ScenarioOptions;
 }>;

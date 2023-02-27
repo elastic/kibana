@@ -9,11 +9,12 @@ import { ApmFields } from '@kbn/apm-synthtrace-client';
 import { identity, negate } from 'lodash';
 import { createFilterTransform, fork } from '../../utils/stream_utils';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
+import { ScenarioOptions } from '@kbn/apm-synthtrace/src/cli/scenario';
 
 const filter = (event: ApmFields) =>
   event['processor.event'] === 'metric' && event['metricset.name'] === 'span_breakdown';
 
-export function createBreakdownMetricsAggregator(flushInterval: string) {
+export function createBreakdownMetricsAggregator(flushInterval: string, options?: ScenarioOptions) {
   const dropProcessedEventsStream = createFilterTransform(negate(filter));
 
   const aggregatorStream = createApmMetricAggregator(
@@ -31,12 +32,14 @@ export function createBreakdownMetricsAggregator(flushInterval: string) {
           'span.self_time.sum.us': 0,
         };
       },
+      metricName: 'breakdown',
     },
     (metric, event) => {
       metric['span.self_time.count'] += event['span.self_time.count']!;
       metric['span.self_time.sum.us'] += event['span.self_time.sum.us']!;
     },
-    identity
+    identity,
+    options
   );
 
   const mergedStreams = fork(dropProcessedEventsStream, aggregatorStream);

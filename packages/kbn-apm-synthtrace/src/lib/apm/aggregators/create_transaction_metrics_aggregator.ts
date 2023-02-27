@@ -9,6 +9,7 @@ import { ApmFields, appendHash, hashKeysOf } from '@kbn/apm-synthtrace-client';
 import { pick } from 'lodash';
 import { createLosslessHistogram } from '../../utils/create_lossless_histogram';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
+import { ScenarioOptions } from '@kbn/apm-synthtrace/src/cli/scenario';
 
 const KEY_FIELDS: Array<keyof ApmFields> = [
   'transaction.name',
@@ -51,7 +52,10 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
   'faas.version',
 ];
 
-export function createTransactionMetricsAggregator(flushInterval: string) {
+export function createTransactionMetricsAggregator(
+  flushInterval: string,
+  options?: ScenarioOptions
+) {
   return createApmMetricAggregator(
     {
       filter: (event) => event['processor.event'] === 'transaction',
@@ -81,8 +85,10 @@ export function createTransactionMetricsAggregator(flushInterval: string) {
             sum: 0,
             value_count: 0,
           },
+          'transaction.aggregation.overflow_count': 0,
         };
       },
+      metricName: 'transaction',
     },
     (metric, event) => {
       const duration = event['transaction.duration.us']!;
@@ -112,6 +118,7 @@ export function createTransactionMetricsAggregator(flushInterval: string) {
       metric._doc_count = serialized.total;
 
       return metric;
-    }
+    },
+    options
   );
 }

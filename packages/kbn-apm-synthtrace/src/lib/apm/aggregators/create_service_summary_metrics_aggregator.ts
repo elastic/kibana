@@ -8,6 +8,7 @@
 import { ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
 import { identity, noop, pick } from 'lodash';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
+import { ScenarioOptions } from '@kbn/apm-synthtrace/src/cli/scenario';
 
 const KEY_FIELDS: Array<keyof ApmFields> = [
   'agent.name',
@@ -16,7 +17,10 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
   'service.language.name',
 ];
 
-export function createServiceSummaryMetricsAggregator(flushInterval: string) {
+export function createServiceSummaryMetricsAggregator(
+  flushInterval: string,
+  options?: ScenarioOptions
+) {
   return createApmMetricAggregator(
     {
       filter: () => true,
@@ -36,8 +40,10 @@ export function createServiceSummaryMetricsAggregator(flushInterval: string) {
           'processor.name': 'metric',
         };
       },
+      metricName: 'service_summary',
     },
     noop,
-    identity
+    identity,
+    options
   );
 }

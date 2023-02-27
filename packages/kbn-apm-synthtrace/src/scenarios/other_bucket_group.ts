@@ -13,11 +13,13 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
   const { services: numServices = 10, txGroups: numTxGroups = 10 } = scenarioOpts ?? {};
 
   return {
+    options: {
+      max_transactions: 2,
+      max_services: 2,
+    },
     generate: ({ range }) => {
       const TRANSACTION_TYPES = ['request'];
       const ENVIRONMENTS = ['production', 'development'];
-
-      const OVERFLOW_BUCKET_NAME = '_other';
 
       const MIN_DURATION = 10;
       const MAX_DURATION = 1000;
@@ -26,14 +28,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
 
       const BUCKET_SIZE = (MAX_DURATION - MIN_DURATION) / MAX_BUCKETS;
 
-      const serviceRange = [
-        ...lodashRange(0, numServices).map((groupId) => `service-${groupId}`),
-        OVERFLOW_BUCKET_NAME,
-      ];
-
-      const overflowCountConfig: Record<string, number> = {
-        [OVERFLOW_BUCKET_NAME]: 20,
-      };
+      const serviceRange = lodashRange(0, numServices).map((groupId) => `service-${groupId}`);
 
       const instances = serviceRange.flatMap((serviceName) => {
         const services = ENVIRONMENTS.map((env) =>
@@ -41,7 +36,6 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
             name: serviceName,
             environment: env,
             agentName: 'go',
-            'service_transaction.aggregation.overflow_count': overflowCountConfig[serviceName] ?? 0,
           })
         );
 
@@ -50,10 +44,9 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
         );
       });
 
-      const transactionGroupRange = [
-        ...lodashRange(0, numTxGroups).map((groupId) => `transaction-${groupId}`),
-        OVERFLOW_BUCKET_NAME,
-      ];
+      const transactionGroupRange = lodashRange(0, numTxGroups).map(
+        (groupId) => `transaction-${groupId}`
+      );
 
       return range
         .interval('1m')
@@ -67,16 +60,6 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
                   const duration = Math.round(
                     (timestampIndex % MAX_BUCKETS) * BUCKET_SIZE + MIN_DURATION
                   );
-
-                  if (groupId === OVERFLOW_BUCKET_NAME) {
-                    return instance
-                      .transaction(groupId)
-                      .timestamp(timestamp)
-                      .duration(duration)
-                      .defaults({
-                        'transaction.aggregation.overflow_count': 10,
-                      });
-                  }
 
                   return instance
                     .transaction(groupId, TRANSACTION_TYPES[groupIndex % TRANSACTION_TYPES.length])

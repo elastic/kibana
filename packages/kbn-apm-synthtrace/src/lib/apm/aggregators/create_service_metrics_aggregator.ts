@@ -9,6 +9,7 @@ import { pick } from 'lodash';
 import { hashKeysOf, ApmFields } from '@kbn/apm-synthtrace-client';
 import { createLosslessHistogram } from '../../utils/create_lossless_histogram';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
+import { ScenarioOptions } from '@kbn/apm-synthtrace/src/cli/scenario';
 
 const KEY_FIELDS: Array<keyof ApmFields> = [
   'agent.name',
@@ -16,10 +17,9 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
   'service.name',
   'transaction.type',
   'service.language.name',
-  'service_transaction.aggregation.overflow_count',
 ];
 
-export function createServiceMetricsAggregator(flushInterval: string) {
+export function createServiceMetricsAggregator(flushInterval: string, options?: ScenarioOptions) {
   return createApmMetricAggregator(
     {
       filter: (event) => event['processor.event'] === 'transaction',
@@ -46,8 +46,10 @@ export function createServiceMetricsAggregator(flushInterval: string) {
             sum: 0,
             value_count: 0,
           },
+          'service_transaction.aggregation.overflow_count': 0,
         };
       },
+      metricName: 'service_transaction',
     },
     (metric, event) => {
       const duration = event['transaction.duration.us']!;
@@ -78,6 +80,7 @@ export function createServiceMetricsAggregator(flushInterval: string) {
       metric._doc_count = serialized.total;
 
       return metric;
-    }
+    },
+    options
   );
 }

@@ -29,6 +29,7 @@ import { getDedotTransform } from './get_dedot_transform';
 import { getIntakeDefaultsTransform } from './get_intake_defaults_transform';
 import { getRoutingTransform } from './get_routing_transform';
 import { getSerializeTransform } from './get_serialize_transform';
+import { ScenarioOptions } from '@kbn/apm-synthtrace/src/cli/scenario';
 
 export interface ApmSynthtraceEsClientOptions {
   version: string;
@@ -39,7 +40,6 @@ export interface ApmSynthtraceEsClientOptions {
 type MaybeArray<T> = T | T[];
 
 const DATA_STREAMS = ['traces-apm*', 'metrics-apm*', 'logs-apm*'];
-
 export enum ComponentTemplateName {
   LogsApp = 'logs-apm.app@custom',
   LogsError = 'logs-apm.error@custom',
@@ -60,7 +60,8 @@ export class ApmSynthtraceEsClient {
 
   private readonly version: string;
 
-  private pipelineCallback: (base: Readable) => NodeJS.WritableStream = this.getDefaultPipeline();
+  private pipelineCallback: (base: Readable, options?: ScenarioOptions) => NodeJS.WritableStream =
+    this.getDefaultPipeline();
 
   constructor(options: { client: Client; logger: Logger } & ApmSynthtraceEsClientOptions) {
     this.client = options.client;
@@ -117,20 +118,20 @@ export class ApmSynthtraceEsClient {
   }
 
   getDefaultPipeline(includeSerialization: boolean = true) {
-    return (base: Readable) => {
+    return (base: Readable, options?: ScenarioOptions) => {
       const aggregators = [
-        createTransactionMetricsAggregator('1m'),
-        createTransactionMetricsAggregator('10m'),
-        createTransactionMetricsAggregator('60m'),
-        createServiceMetricsAggregator('1m'),
-        createServiceMetricsAggregator('10m'),
-        createServiceMetricsAggregator('60m'),
-        createServiceSummaryMetricsAggregator('1m'),
-        createServiceSummaryMetricsAggregator('10m'),
-        createServiceSummaryMetricsAggregator('60m'),
-        createSpanMetricsAggregator('1m'),
-        createSpanMetricsAggregator('10m'),
-        createSpanMetricsAggregator('60m'),
+        createTransactionMetricsAggregator('1m', options),
+        createTransactionMetricsAggregator('10m', options),
+        createTransactionMetricsAggregator('60m', options),
+        createServiceMetricsAggregator('1m', options),
+        createServiceMetricsAggregator('10m', options),
+        createServiceMetricsAggregator('60m', options),
+        createServiceSummaryMetricsAggregator('1m', options),
+        createServiceSummaryMetricsAggregator('10m', options),
+        createServiceSummaryMetricsAggregator('60m', options),
+        createSpanMetricsAggregator('1m', options),
+        createSpanMetricsAggregator('10m', options),
+        createSpanMetricsAggregator('60m', options),
       ];
 
       const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
@@ -141,7 +142,7 @@ export class ApmSynthtraceEsClient {
         ...serializationTransform,
         getIntakeDefaultsTransform(),
         fork(new PassThrough({ objectMode: true }), ...aggregators),
-        createBreakdownMetricsAggregator('30s'),
+        createBreakdownMetricsAggregator('30s', options),
         getApmServerMetadataTransform(this.version),
         getRoutingTransform(),
         getDedotTransform(),
@@ -161,14 +162,16 @@ export class ApmSynthtraceEsClient {
   getVersion() {
     return this.version;
   }
-
-  async index(streamOrGenerator: MaybeArray<Readable | SynthtraceGenerator<ApmFields>>) {
+  async index(
+    streamOrGenerator: MaybeArray<Readable | SynthtraceGenerator<ApmFields>>,
+    options?: ScenarioOptions
+  ) {
     this.logger.debug(`Bulk indexing ${castArray(streamOrGenerator).length} stream(s)`);
 
     const allStreams = castArray(streamOrGenerator).map((obj) => {
       const base = isGeneratorObject(obj) ? Readable.from(obj) : obj;
 
-      return this.pipelineCallback(base);
+      return this.pipelineCallback(base, options);
     }) as Transform[];
 
     let count: number = 0;

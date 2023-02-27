@@ -40,7 +40,7 @@ async function start() {
 
   logger.info(`Running scenario from ${bucketFrom.toISOString()} to ${bucketTo.toISOString()}`);
 
-  const { generate, bootstrap } = await scenario({ ...runOptions, logger });
+  const { generate, bootstrap, options } = await scenario({ ...runOptions, logger });
 
   if (bootstrap) {
     await bootstrap({ apmEsClient });
@@ -65,7 +65,7 @@ async function start() {
   }, 5000);
 
   await logger.perf('index_scenario', async () => {
-    await apmEsClient.index(generators);
+    await apmEsClient.index(generators, options);
     await apmEsClient.refresh();
   });
 }
