@@ -27,15 +27,15 @@ export interface CreateEsFileClientArgs {
    */
   blobStorageIndex: string;
   /**
-   * An elasticsearch client that will be used to interact with the cluster
+   * An elasticsearch client that will be used to interact with the cluster.
    */
   elasticsearchClient: ElasticsearchClient;
   /**
-   * The maximum file size to be write
+   * The maximum file size to be written.
    */
   maxSizeBytes?: number;
   /**
-   * A logger for debuggin purposes
+   * A logger for debugging purposes.
    */
   logger: Logger;
 }
