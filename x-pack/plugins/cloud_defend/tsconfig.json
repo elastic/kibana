@@ -7,7 +7,6 @@
     "common/**/*",
     "public/**/*",
     "../../../typings/**/*",
-    "server/**/*.json",
     "public/**/*.json"
   ],
   "kbn_references": [
@@ -30,7 +29,5 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/es-types"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }
