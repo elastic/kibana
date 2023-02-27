@@ -19,7 +19,7 @@ import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
 import { FieldSelector } from '../apm_common/field_selector';
-import { QueryBuilder } from '../custom_kql/query_builder';
+import { QueryBuilder } from '../common/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
   const { control, setValue, watch } = useFormContext<CreateSLOInput>();
