@@ -5,52 +5,41 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { useRef } from 'react';
-import { useDataFetcher } from './use_data_fetcher';
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+  useQuery,
+} from '@tanstack/react-query';
+import { useKibana } from '../utils/kibana_react';
 
 export interface UseFetchIndicesResponse {
-  indices: Index[];
-  loading: boolean;
-  error: boolean;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  indices: Index[] | undefined;
+  refetch: <TPageData>(
+    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
+  ) => Promise<QueryObserverResult<Index[], unknown>>;
 }
-
 export interface Index {
   name: string;
 }
 
 export function useFetchIndices(): UseFetchIndicesResponse {
-  const hasFetched = useRef<boolean>(false);
+  const { http } = useKibana().services;
 
-  const {
-    data: indices,
-    loading,
-    error,
-  } = useDataFetcher({
-    paramsForApiCall: {},
-    initialDataState: undefined,
-    executeApiCall: async (
-      _: any,
-      abortController: AbortController,
-      http: HttpSetup
-    ): Promise<any> => {
+  const { isLoading, isError, isSuccess, data, refetch } = useQuery({
+    queryKey: ['fetchIndices'],
+    queryFn: async ({ signal }) => {
       try {
-        const response = await http.get<Index[]>(`/api/index_management/indices`, {
-          signal: abortController.signal,
-        });
-
-        if (response !== undefined) {
-          hasFetched.current = true;
-          return response;
-        }
-      } catch (e) {
-        // ignore error for retrieving slos
+        const response = await http.get<Index[]>(`/api/index_management/indices`, { signal });
+        return response;
+      } catch (error) {
+        throw new Error(`Something went wrong. Error: ${error}`);
       }
-
-      return;
     },
-    shouldExecuteApiCall: () => (hasFetched.current === false ? true : false),
   });
 
-  return { indices, loading, error };
+  return { isLoading, isError, isSuccess, indices: data, refetch };
 }

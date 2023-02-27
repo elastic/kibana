@@ -130,6 +130,72 @@
     "interfaces": [
       {
         "parentPluginId": "contentManagement",
+        "id": "def-common.BulkGetIn",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkGetIn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.BulkGetIn",
+            "text": "BulkGetIn"
+          },
+          "<T, Options>"
+        ],
+        "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.BulkGetIn.contentTypeId",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "contentTypeId",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.BulkGetIn.ids",
+            "type": "Array",
+            "tags": [],
+            "label": "ids",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.BulkGetIn.options",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Options | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
         "id": "def-common.CreateIn",
         "type": "Interface",
         "tags": [],
@@ -562,7 +628,7 @@
         "label": "ProcedureName",
         "description": [],
         "signature": [
-          "\"create\" | \"update\" | \"get\" | \"delete\" | \"search\""
+          "\"create\" | \"update\" | \"get\" | \"delete\" | \"search\" | \"bulkGet\""
         ],
         "path": "src/plugins/content_management/common/rpc/constants.ts",
         "deprecated": false,
@@ -579,7 +645,7 @@
         "label": "procedureNames",
         "description": [],
         "signature": [
-          "readonly [\"get\", \"create\", \"update\", \"delete\", \"search\"]"
+          "readonly [\"get\", \"bulkGet\", \"create\", \"update\", \"delete\", \"search\"]"
         ],
         "path": "src/plugins/content_management/common/rpc/constants.ts",
         "deprecated": false,
@@ -603,6 +669,26 @@
             "type": "Object",
             "tags": [],
             "label": "get",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.ProcedureSchemas",
+                "text": "ProcedureSchemas"
+              }
+            ],
+            "path": "src/plugins/content_management/common/rpc/rpc.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.schemas.bulkGet",
+            "type": "Object",
+            "tags": [],
+            "label": "bulkGet",
             "description": [],
             "signature": [
               {
