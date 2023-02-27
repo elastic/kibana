@@ -48,7 +48,6 @@ export const OverlayRange: FC<Props> = ({ overlayKey, start, end, color, showMar
         style={{
           line: {
             strokeWidth: 1,
-            stroke: '#343741',
             opacity: 0,
           },
         }}
