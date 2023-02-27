@@ -501,10 +501,8 @@ export const getNewThreatIndicatorRule = (
   ...rewrites,
 });
 
-export const getNewSavedQueryRule = (
-  rewrites: { savedId: string } & Partial<SavedQueryRule>
-): SavedQueryRule => ({
-  savedId: rewrites.savedId,
+export const getNewSavedQueryRule = (rewrites: Partial<SavedQueryRule>): SavedQueryRule => ({
+  savedId: rewrites.savedId ?? 'mocked',
   ...getNewRule(rewrites),
 });
 
