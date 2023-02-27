@@ -20,6 +20,7 @@ import {
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { getDeferred } from '../../mocks/utils';
 import { waitFor } from '@testing-library/react';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 describe('When using the `ExecuteActionHostResponseOutput` component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -37,7 +38,7 @@ describe('When using the `ExecuteActionHostResponseOutput` component', () => {
         ResponseActionExecuteOutputContent,
         ResponseActionsExecuteParameters
       >({ command: 'execute' }),
-      'data-test-subj': 'executeOutputTest',
+      'data-test-subj': 'test',
     };
 
     render = () => {
@@ -48,7 +49,7 @@ describe('When using the `ExecuteActionHostResponseOutput` component', () => {
 
   it('should show execute output and execute errors', async () => {
     render();
-    expect(renderResult.getByTestId('executeOutputTest')).toBeTruthy();
+    expect(renderResult.getByTestId('test')).toBeTruthy();
   });
 
   it('should show loading when details are fetching', async () => {
@@ -60,7 +61,7 @@ describe('When using the `ExecuteActionHostResponseOutput` component', () => {
     (renderProps.action as ActionDetails).completedAt = '2021-04-15T16:08:47.449Z';
 
     render();
-    expect(renderResult.getByTestId('executeOutputTest-loading')).toBeTruthy();
+    expect(renderResult.getByTestId('test-loading')).toBeTruthy();
 
     // Release the `action details` api
     deferred.resolve();
@@ -70,12 +71,29 @@ describe('When using the `ExecuteActionHostResponseOutput` component', () => {
         path: '/api/endpoint/action/123',
       });
     });
-    expect(renderResult.queryByTestId('executeOutputTest-loading')).toBeNull();
+    expect(renderResult.queryByTestId('test-loading')).toBeNull();
+    expect(renderResult.getByTestId('test')).toBeTruthy();
   });
 
   it('should show nothing when no output in action details', () => {
     (renderProps.action as ActionDetails).outputs = {};
     render();
-    expect(renderResult.queryByTestId('executeOutputTest')).toBeNull();
+    expect(renderResult.queryByTestId('test')).toBeNull();
+  });
+
+  it('should handle API error', async () => {
+    (renderProps.action as ActionDetails).outputs = {};
+    const error = { message: 'server error', response: { status: 500 } } as IHttpFetchError;
+
+    (renderProps.action as ActionDetails).completedAt = '2021-04-15T16:08:47.449Z';
+    apiMocks.responseProvider.actionDetails.mockImplementation(() => {
+      throw error;
+    });
+
+    render();
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-apiError')).toHaveTextContent('server error');
+    });
   });
 });
