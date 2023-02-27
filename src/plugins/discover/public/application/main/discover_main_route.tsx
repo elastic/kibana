@@ -84,9 +84,6 @@ export function DiscoverMainRoute(props: Props) {
   });
 
   const checkData = useCallback(async () => {
-    if (hasESData && hasUserDataView) {
-      return true;
-    }
     try {
       const hasUserDataViewValue = await data.dataViews.hasData
         .hasUserDataView()
@@ -116,7 +113,7 @@ export function DiscoverMainRoute(props: Props) {
       setError(e);
       return false;
     }
-  }, [data.dataViews, hasESData, hasUserDataView, isDev]);
+  }, [data.dataViews, isDev]);
 
   const loadSavedSearch = useCallback(async () => {
     setLoading(true);
