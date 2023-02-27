@@ -16,6 +16,7 @@ import {
   ResultsPerPage,
   SearchBox,
   SearchProvider,
+  Sorting,
 } from '@elastic/react-search-ui';
 import { SearchDriverOptions } from '@elastic/search-ui';
 import EnginesAPIConnector, {
@@ -47,6 +48,7 @@ import {
   ResultView,
   ResultsPerPageView,
   ResultsView,
+  SortingView,
 } from './search_ui_components';
 
 class InternalEngineTransporter implements Transporter {
@@ -140,6 +142,32 @@ export const EngineSearchPreview: React.FC = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
               <ResultsPerPage view={ResultsPerPageView} options={RESULTS_PER_PAGE_OPTIONS} />
+              <EuiSpacer size="m" />
+              <Sorting
+                view={SortingView}
+                sortOptions={[
+                  {
+                    name: 'Relevance',
+                    value: [],
+                  },
+                  {
+                    name: 'Color (Asc)',
+                    value: [{ field: 'color', direction: 'asc' }],
+                  },
+                  {
+                    name: 'Color (Desc)',
+                    value: [{ field: 'color', direction: 'desc' }],
+                  },
+                  {
+                    name: 'Age (Asc)',
+                    value: [{ field: 'age', direction: 'asc' }],
+                  },
+                  {
+                    name: 'Age (Desc)',
+                    value: [{ field: 'age', direction: 'desc' }],
+                  },
+                ]}
+              />
               <EuiSpacer size="m" />
               <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
                 <FormattedMessage

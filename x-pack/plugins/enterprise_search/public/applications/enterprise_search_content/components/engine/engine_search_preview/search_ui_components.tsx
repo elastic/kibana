@@ -224,3 +224,21 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
     </EuiFlexGroup>
   </EuiFlexItem>
 );
+
+export const SortingView: React.FC<SortingViewProps> = ({ onChange, options, value }) => {
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiTitle size="xxxs">
+          <label htmlFor="sorting">Sort By</label>
+        </EuiTitle>
+        <EuiSelect
+          id="sorting"
+          options={options?.map((o) => ({ text: o.label, value: o.value }))}
+          value={value}
+          onChange={(evt) => onChange(evt.target.value)}
+        />
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+};
