@@ -96,7 +96,7 @@ export function ServiceOverviewInstancesChartAndTable({
   } = useFetcher(
     (callApmApi) => {
       if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
-        return Promise.resolve(undefined);
+        return Promise.resolve(INITIAL_STATE_MAIN_STATS);
       }
 
       if (!start || !end || !transactionType || !latencyAggregationType) {
@@ -129,9 +129,9 @@ export function ServiceOverviewInstancesChartAndTable({
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
           requestId: uuidv4(),
-          currentPeriodItems: response.currentPeriod,
-          currentPeriodItemsCount: response.currentPeriod.length,
-          previousPeriodItems: response.previousPeriod,
+          currentPeriodItems: response?.currentPeriod ?? [],
+          currentPeriodItemsCount: response?.currentPeriod.length,
+          previousPeriodItems: response?.previousPeriod,
         };
       });
     },
