@@ -7,7 +7,7 @@
  */
 
 import UseUnmount from 'react-use/lib/useUnmount';
-import React, { createRef, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   withSuspense,
@@ -18,6 +18,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { EuiHorizontalRule, useEuiBackgroundColor, useResizeObserver } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -32,7 +33,6 @@ import { DashboardEditingToolbar } from './dashboard_editing_toolbar';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
-import { css } from '@emotion/react';
 
 export interface DashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;

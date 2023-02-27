@@ -37,7 +37,6 @@ export {
   LazyDataViewPicker,
   LazyFieldPicker,
   FloatingActions,
-  FloatingActionsV2,
 } from './components';
 
 export {

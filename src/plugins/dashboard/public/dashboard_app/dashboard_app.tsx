@@ -8,12 +8,13 @@
 
 import { History } from 'history';
 import useMount from 'react-use/lib/useMount';
-import React, { createRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
+import { css } from '@emotion/react';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -38,8 +39,6 @@ import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_val
 import DashboardContainerRenderer from '../dashboard_container/dashboard_container_renderer';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
-import { css } from '@emotion/react';
-import { useResizeObserver } from '@elastic/eui';
 
 export interface DashboardAppProps {
   history: History;

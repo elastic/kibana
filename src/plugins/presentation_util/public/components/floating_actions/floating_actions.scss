@@ -13,7 +13,7 @@
     z-index: 1002;
   }
 
-  &:hover {
+  &:hover, &:focus-within {
     .presentationUtil__floatingActions {
       opacity: 1;
       visibility: visible;

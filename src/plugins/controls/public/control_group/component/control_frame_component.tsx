@@ -21,7 +21,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { useReduxEmbeddableContext, FloatingActionsV2 } from '@kbn/presentation-util-plugin/public';
+import { useReduxEmbeddableContext, FloatingActions } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupReduxState } from '../types';
 import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
@@ -214,7 +214,7 @@ export const ControlFrame = ({
   );
 
   return (
-    <FloatingActionsV2
+    <FloatingActions
       className={classNames({
         'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
@@ -233,6 +233,6 @@ export const ControlFrame = ({
       >
         {form}
       </EuiFormRow>
-    </FloatingActionsV2>
+    </FloatingActions>
   );
 };
