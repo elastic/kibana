@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LOADING_INDICATOR } from '../screens/security_header';
 import {
   TIMELINE_CHECKBOX,
   BULK_ACTIONS,
@@ -47,7 +46,5 @@ export const openTimeline = (id?: string) => {
 };
 
 export const waitForTimelinesPanelToBeLoaded = () => {
-  cy.get(LOADING_INDICATOR).should('exist');
-  cy.get(LOADING_INDICATOR).should('not.exist');
   cy.get(TIMELINES_TABLE).should('exist');
 };

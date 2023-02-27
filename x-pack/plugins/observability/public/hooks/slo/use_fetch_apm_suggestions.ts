@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
+import { useQuery } from '@tanstack/react-query';
 import moment from 'moment';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDataFetcher } from '../use_data_fetcher';
+
+import { useKibana } from '../../utils/kibana_react';
 
 export type Suggestion = string;
 export interface UseFetchApmSuggestions {
-  data: Suggestion[];
-  loading: boolean;
-  error: boolean;
+  suggestions: Suggestion[];
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
 }
 
 export interface Params {
   fieldName: string;
-  search: string;
+  search?: string;
+  serviceName?: string;
 }
 
 interface ApiResponse {
@@ -28,49 +30,40 @@ interface ApiResponse {
 
 const EMPTY_RESPONSE: ApiResponse = { terms: [] };
 
-export function useFetchApmSuggestions({ fieldName, search = '' }: Params): UseFetchApmSuggestions {
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+export function useFetchApmSuggestions({
+  fieldName,
+  search = '',
+  serviceName = '',
+}: Params): UseFetchApmSuggestions {
+  const { http } = useKibana().services;
 
-  const params: Params = useMemo(() => ({ fieldName, search }), [fieldName, search]);
-  const shouldExecuteApiCall = useCallback(
-    (apiCallParams: Params) => !apiCallParams.search || apiCallParams.search.length > 0,
-    []
-  );
+  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
+    queryKey: ['fetchApmSuggestions', fieldName, search, serviceName],
+    queryFn: async ({ signal }) => {
+      try {
+        const { terms = [] } = await http.get<ApiResponse>('/internal/apm/suggestions', {
+          query: {
+            fieldName,
+            start: moment().subtract(2, 'days').toISOString(),
+            end: moment().toISOString(),
+            fieldValue: search,
+            ...(!!serviceName && { serviceName }),
+          },
+          signal,
+        });
 
-  const { data, loading, error } = useDataFetcher<Params, ApiResponse>({
-    paramsForApiCall: params,
-    initialDataState: EMPTY_RESPONSE,
-    executeApiCall: fetchHistoricalSummary,
-    shouldExecuteApiCall,
+        return terms;
+      } catch (error) {
+        // ignore error
+      }
+    },
+    refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    setSuggestions(data.terms);
-  }, [data]);
-
-  return { data: suggestions, loading, error };
+  return {
+    suggestions: isInitialLoading ? EMPTY_RESPONSE.terms : data ?? EMPTY_RESPONSE.terms,
+    isLoading: isInitialLoading || isLoading || isRefetching,
+    isSuccess,
+    isError,
+  };
 }
-
-const fetchHistoricalSummary = async (
-  params: Params,
-  abortController: AbortController,
-  http: HttpSetup
-): Promise<ApiResponse> => {
-  try {
-    const response = await http.get<ApiResponse>('/internal/apm/suggestions', {
-      query: {
-        fieldName: params.fieldName,
-        start: moment().subtract(2, 'days').toISOString(),
-        end: moment().toISOString(),
-        fieldValue: params.search,
-      },
-      signal: abortController.signal,
-    });
-
-    return response;
-  } catch (error) {
-    // ignore error for retrieving slos
-  }
-
-  return { terms: [] };
-};

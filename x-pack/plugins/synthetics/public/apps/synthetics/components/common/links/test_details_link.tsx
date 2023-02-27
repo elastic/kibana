@@ -10,8 +10,10 @@ import { EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { Ping } from '../../../../../../common/runtime_types';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
-import { formatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
+import {
+  formatTestRunAt,
+  useDateFormatForTest,
+} from '../../../utils/monitor_test_result/test_time_formats';
 
 export const TestDetailsLink = ({
   isBrowserMonitor,
@@ -26,7 +28,7 @@ export const TestDetailsLink = ({
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation();
 
-  const format = useKibanaDateFormat();
+  const format = useDateFormatForTest();
   const timestampText = (
     <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.medium }}>
       {formatTestRunAt(timestamp, format)}

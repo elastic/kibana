@@ -12,7 +12,7 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { useWithShowEndpointResponder } from '../../../../hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { APP_UI_ID } from '../../../../../../common/constants';
-import { getEndpointDetailsPath } from '../../../../common/routing';
+import { getEndpointDetailsPath, getEndpointListPath } from '../../../../common/routing';
 import type { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from './hooks';
 import { agentPolicies, uiQueryParams } from '../../store/selectors';
@@ -236,6 +236,12 @@ export const useEndpointActionItems = (
                       agentId: fleetAgentId,
                     })[1]
                   }?openReassignFlyout=true`,
+                  state: {
+                    onDoneNavigateTo: [
+                      APP_UI_ID,
+                      { path: getEndpointListPath({ name: 'endpointList' }) },
+                    ],
+                  },
                 },
                 href: `${getAppUrl({ appId: 'fleet' })}${
                   pagePathGetters.agent_details({
