@@ -7,15 +7,8 @@
 
 import Fs from 'fs';
 import Path from 'path';
-
-export interface PropertyDefinition {
-  properties?: Record<string, PropertyDefinition>;
-  type: string;
-  description: string;
-  $ref?: string;
-  items?: PropertyDefinition;
-  anyOf?: PropertyDefinition[];
-}
+import { jsonSchemaOverrides } from './schema_overrides';
+import { type PropertyDefinition } from './types';
 
 export class JsonSchemaService {
   /**
@@ -35,12 +28,12 @@ export class JsonSchemaService {
           const comp = propertyDef[key].split('/');
           const refKey = comp[comp.length - 1];
 
+          delete propertyDef.$ref;
+
           // FIXME there is an issue with the maximum call stack size exceeded
           if (!refKey.startsWith('Ml_Types_')) return;
 
           const schemaComponent = this._schemaComponents[refKey];
-
-          delete propertyDef.$ref;
 
           for (const k in schemaComponent) {
             if (schemaComponent.hasOwnProperty(k)) {
@@ -62,6 +55,18 @@ export class JsonSchemaService {
         }
       }
     }
+  }
+
+  private applyOverrides(path: string, schema: PropertyDefinition): PropertyDefinition {
+    const overrides = jsonSchemaOverrides[path];
+    return {
+      ...schema,
+      ...overrides,
+      properties: {
+        ...schema.properties,
+        ...overrides.properties,
+      },
+    };
   }
 
   /**
@@ -86,6 +91,6 @@ export class JsonSchemaService {
 
     this.extractProperties(bodySchema);
 
-    return bodySchema;
+    return this.applyOverrides(path, bodySchema);
   }
 }

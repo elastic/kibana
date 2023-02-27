@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const getJsonSchemaQuerySchema = schema.object({
   /**
@@ -20,3 +20,5 @@ export const getJsonSchemaQuerySchema = schema.object({
    */
   method: schema.string(),
 });
+
+export type SupportedPath = TypeOf<typeof getJsonSchemaQuerySchema>['path'];
