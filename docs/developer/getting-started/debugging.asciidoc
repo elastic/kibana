@@ -68,7 +68,7 @@ UI in {kib}.
 [discrete]
 === Running Kibana with the APM Agent Locally
 
-The easiest and recommended way of running Kibana with the APM agent locally is to use the solution provided by the https://github.com/elastic/apm-integration-testing[apm-integration-testing] repo. You’ll need https://www.docker.com/community-edition[Docker] and https://docs.docker.com/compose/install/[Docker Compose] to use the tool.
+The easiest and recommended way of running Kibana with the APM agent locally is to use the solution provided by the https://github.com/elastic/apm-integration-testing[apm-integration-testing] repo. You’ll need https://www.docker.com/community-edition[Docker], https://docs.docker.com/compose/install/[Docker Compose] and https://www.python.org/downloads[Python (version 3 preferred)] to use the tool.
 
 [discrete]
 ==== Quick start guide
