@@ -28,12 +28,12 @@ export interface LoadParams {
   appState?: AppState;
 }
 
-export type UpdateFunction = (
-  nextDataView: DataView | undefined,
-  nextState: AppState,
-  resetSavedSearch?: boolean,
-  filterAndQuery?: boolean
-) => SavedSearch;
+export interface UpdateParams {
+  nextDataView: DataView | undefined;
+  nextState: AppState;
+  resetSavedSearch?: boolean;
+  filterAndQuery?: boolean;
+}
 
 export type PersistFunction = (
   nextSavedSearch: SavedSearch,
@@ -42,19 +42,19 @@ export type PersistFunction = (
 ) => Promise<{ id: string | undefined } | undefined>;
 
 export interface SavedSearchContainer {
-  hasChanged$: BehaviorSubject<boolean>;
-  set: (savedSearch: SavedSearch) => SavedSearch;
-  load: (id: string, params: LoadParams) => Promise<SavedSearch>;
   get: () => SavedSearch;
-  getTitle: () => string;
   getId: () => string | undefined;
-  update: UpdateFunction;
+  getTitle: () => string;
+  hasChanged$: BehaviorSubject<boolean>;
+  isPersisted: () => boolean;
+  load: (id: string, params: LoadParams) => Promise<SavedSearch>;
+  new: (initialDataView: DataView, appState?: AppState) => Promise<SavedSearch>;
+  persist: PersistFunction;
   reset: (id?: string) => Promise<SavedSearch | undefined>;
   resetUrl: (id: SavedSearch) => Promise<SavedSearch | undefined>;
+  set: (savedSearch: SavedSearch) => SavedSearch;
   undo: () => void;
-  isPersisted: () => boolean;
-  persist: PersistFunction;
-  new: (initialDataView: DataView, appState?: AppState) => Promise<SavedSearch>;
+  update: (params: UpdateParams) => SavedSearch;
 }
 
 export function getSavedSearchContainer({
@@ -83,7 +83,6 @@ export function getSavedSearchContainer({
   const get = () => {
     return savedSearchVolatile$.getValue();
   };
-
   const getTitle = () => {
     return savedSearchVolatile$.getValue().title ?? '';
   };
@@ -115,13 +114,7 @@ export function getSavedSearchContainer({
     addLog('🔎 [resetUrl] ' + nextSavedSearch);
 
     await set(nextSavedSearch);
-    const newAppState = handleSourceColumnState(
-      getStateDefaults({
-        savedSearch: nextSavedSearch,
-        services,
-      }),
-      services.uiSettings
-    );
+    const newAppState = getDefaultAppState(savedSearch, services);
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };
@@ -136,13 +129,7 @@ export function getSavedSearchContainer({
       savedObjectsTagging: services.savedObjectsTagging,
     });
     nextSavedSearch.searchSource.setField('index', dataView);
-    const newAppState = handleSourceColumnState(
-      getStateDefaults({
-        savedSearch: nextSavedSearch,
-        services,
-      }),
-      services.uiSettings
-    );
+    const newAppState = getDefaultAppState(savedSearch, services);
     const nextSavedSearchToSet = updateSavedSearch(
       {
         savedSearch: { ...nextSavedSearch },
@@ -154,7 +141,10 @@ export function getSavedSearchContainer({
     );
     set(nextSavedSearchToSet);
     if (appState) {
-      await update(nextSavedSearch.searchSource.getField('index'), appState);
+      await update({
+        nextDataView: nextSavedSearch.searchSource.getField('index'),
+        nextState: appState,
+      });
     }
     return nextSavedSearchToSet;
   };
@@ -175,13 +165,8 @@ export function getSavedSearchContainer({
   };
 
   const isPersisted = () => Boolean(savedSearchVolatile$.getValue().id);
-  const update: UpdateFunction = (
-    nextDataView,
-    nextState,
-    resetPersisted = false,
-    filterAndQuery = false
-  ) => {
-    addLog('🔎 [savedSearch] update', { nextDataView, nextState, resetPersisted });
+  const update = ({ nextDataView, nextState, resetSavedSearch, filterAndQuery }: UpdateParams) => {
+    addLog('🔎 [savedSearch] update', { nextDataView, nextState, resetSavedSearch });
 
     const previousSavedSearch = get();
 
@@ -195,7 +180,7 @@ export function getSavedSearchContainer({
       !filterAndQuery
     );
 
-    if (resetPersisted) {
+    if (resetSavedSearch) {
       set(nextSavedSearch);
     } else {
       // detect changes to persisted version
@@ -238,24 +223,37 @@ export function getSavedSearchContainer({
     });
     set(loadedSavedSearch);
     if (params.appState) {
-      await update(get().searchSource.getField('index'), params.appState);
+      await update({
+        nextDataView: get().searchSource.getField('index'),
+        nextState: params.appState,
+      });
     }
     return loadedSavedSearch;
   };
 
   return {
+    get,
+    getId,
+    getTitle,
     hasChanged$,
+    isPersisted,
     load,
-    set,
+    new: newSavedSearch,
+    persist,
     reset,
     resetUrl,
-    persist,
-    isPersisted,
-    get,
-    getTitle,
-    getId,
-    update,
+    set,
     undo,
-    new: newSavedSearch,
+    update,
   };
+}
+
+function getDefaultAppState(savedSearch: SavedSearch, services: DiscoverServices) {
+  return handleSourceColumnState(
+    getStateDefaults({
+      savedSearch,
+      services,
+    }),
+    services.uiSettings
+  );
 }

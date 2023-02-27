@@ -277,6 +277,7 @@ export function getDiscoverStateContainer({
   };
 
   const loadSavedSearch = async (id: string): Promise<SavedSearch> => {
+    addLog('🧭 [discoverState] loadSavedSearch');
     const isEmptyURL = appStateContainer.isEmptyURL();
     if (isEmptyURL) {
       appStateContainer.set({});
@@ -316,7 +317,11 @@ export function getDiscoverStateContainer({
     }
 
     appStateContainer.resetWithSavedSearch(nextSavedSearch);
-    await savedSearchContainer.update(dataView, appStateContainer.getState(), true);
+    await savedSearchContainer.update({
+      nextDataView: dataView,
+      nextState: appStateContainer.getState(),
+      resetSavedSearch: true,
+    });
     return nextSavedSearch;
   };
 
@@ -349,12 +354,12 @@ export function getDiscoverStateContainer({
         services.data.query.queryString.getUpdates$(),
         services.filterManager.getFetches$()
       ).subscribe(async () => {
-        await savedSearchContainer.update(
-          internalStateContainer.getState().dataView,
-          appStateContainer.getState(),
-          false,
-          true
-        );
+        await savedSearchContainer.update({
+          nextDataView: internalStateContainer.getState().dataView,
+          nextState: appStateContainer.getState(),
+          resetSavedSearch: false,
+          filterAndQuery: true,
+        });
         dataStateContainer.fetch();
       });
 
