@@ -131,16 +131,22 @@ export type RuleParamsModifier<Params extends RuleTypeParams> = (
   params: Params
 ) => Promise<RuleParamsModifierResult<Params>>;
 
+export type ShouldIncrementRevision<Params extends RuleTypeParams> = (
+  params?: RuleTypeParams
+) => boolean;
+
 export interface BulkEditOptionsFilter<Params extends RuleTypeParams> {
   filter?: string | KueryNode;
   operations: BulkEditOperation[];
   paramsModifier?: RuleParamsModifier<Params>;
+  shouldIncrementRevision?: ShouldIncrementRevision<Params>;
 }
 
 export interface BulkEditOptionsIds<Params extends RuleTypeParams> {
   ids: string[];
   operations: BulkEditOperation[];
   paramsModifier?: RuleParamsModifier<Params>;
+  shouldIncrementRevision?: ShouldIncrementRevision<Params>;
 }
 
 export type BulkEditOptions<Params extends RuleTypeParams> =
@@ -249,12 +255,13 @@ export async function bulkEdit<Params extends RuleTypeParams>(
     context.logger,
     `rulesClient.update('operations=${JSON.stringify(options.operations)}, paramsModifier=${
       options.paramsModifier ? '[Function]' : undefined
-    }')`,
+    }', shouldIncrementRevision=${options.shouldIncrementRevision ? '[Function]' : undefined}')`,
     (filterKueryNode: KueryNode | null) =>
       bulkEditOcc(context, {
         filter: filterKueryNode,
         operations: options.operations,
         paramsModifier: options.paramsModifier,
+        shouldIncrementRevision: options.shouldIncrementRevision,
       }),
     qNodeFilterWithAuth
   );
@@ -289,10 +296,12 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
     filter,
     operations,
     paramsModifier,
+    shouldIncrementRevision,
   }: {
     filter: KueryNode | null;
     operations: BulkEditOptions<Params>['operations'];
     paramsModifier: BulkEditOptions<Params>['paramsModifier'];
+    shouldIncrementRevision?: BulkEditOptions<Params>['shouldIncrementRevision'];
   }
 ): Promise<{
   apiKeysToInvalidate: string[];
@@ -331,6 +340,7 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
           skipped,
           errors,
           username,
+          shouldIncrementRevision,
         }),
       { concurrency: API_KEY_GENERATE_CONCURRENCY }
     );
@@ -400,6 +410,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
   skipped,
   errors,
   username,
+  shouldIncrementRevision = () => true,
 }: {
   context: RulesClientContext;
   rule: SavedObjectsFindResult<RawRule>;
@@ -410,6 +421,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
   skipped: BulkActionSkipResult[];
   errors: BulkOperationError[];
   username: string | null;
+  shouldIncrementRevision: BulkEditOptions<Params>['shouldIncrementRevision'];
 }): Promise<void> {
   try {
     if (rule.attributes.apiKey) {
@@ -433,7 +445,11 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
         };
 
     // Increment revision if params ended up being modified AND it wasn't already incremented as part of attribute update
-    if (!isParamsUpdateSkipped && rule.attributes.revision === attributes.revision) {
+    if (
+      shouldIncrementRevision(ruleParams) &&
+      !isParamsUpdateSkipped &&
+      rule.attributes.revision === attributes.revision
+    ) {
       attributes.revision += 1;
     }
 

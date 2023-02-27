@@ -637,7 +637,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
         ruleOutput.name = 'some other name';
         ruleOutput.version = 2;
-        ruleOutput.revision = 1; // TODO: Should we match `version` logic or reset to `0` as it's technically a new rule?
+        ruleOutput.revision = 0;
         expect(bodyToCompare).to.eql(ruleOutput);
       });
 

@@ -117,7 +117,7 @@ export async function clone<Params extends RuleTypeParams = never>(
     mutedInstanceIds: [],
     executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
     monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
-    revision: 0, // TODO: Clarify if we're resetting revision since it's a new rule, or carrying over from previous rule (existing security solution behavior)
+    revision: 0,
     scheduledTaskId: null,
     running: false,
   };

@@ -91,7 +91,7 @@ describe('cloneRuleRoute', () => {
     created_at: mockedRule.createdAt,
     updated_at: mockedRule.updatedAt,
     id: mockedRule.id,
-    revision: 0, // TODO: Finalize clone rule behavior. Clone or reset revision?
+    revision: 0,
     execution_status: {
       status: mockedRule.executionStatus.status,
       last_execution_date: mockedRule.executionStatus.lastExecutionDate,

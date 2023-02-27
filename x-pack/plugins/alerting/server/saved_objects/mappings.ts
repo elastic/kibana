@@ -199,6 +199,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
       },
     },
     revision: {
+      index: true, // Explicitly setting to `true` as there is need to query for a rule by a specific revision
       type: 'long',
     },
     snoozeSchedule: {
