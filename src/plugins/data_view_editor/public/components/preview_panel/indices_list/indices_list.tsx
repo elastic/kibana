@@ -31,7 +31,7 @@ import { Pager } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
 
-interface IndicesListProps {
+export interface IndicesListProps {
   indices: MatchedItem[];
   query: string;
   hasWarnings: boolean;
@@ -207,7 +207,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
   }
 
   render() {
-    const { indices, query, onUpdateTitle, ...rest } = this.props;
+    const { indices, query, hasWarnings, onUpdateTitle, ...rest } = this.props;
 
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {

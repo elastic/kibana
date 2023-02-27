@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { IndicesList } from '.';
+import { IndicesList, IndicesListProps } from '.';
 import { shallow } from 'enzyme';
 import { MatchedItem } from '@kbn/data-views-plugin/public';
 
@@ -17,14 +17,20 @@ const indices = [
 ] as unknown as MatchedItem[];
 
 describe('IndicesList', () => {
+  const commonProps: Omit<IndicesListProps, 'query'> = {
+    indices,
+    hasWarnings: false,
+    onUpdateTitle: jest.fn(),
+  };
+
   it('should render normally', () => {
-    const component = shallow(<IndicesList indices={indices} query="" />);
+    const component = shallow(<IndicesList {...commonProps} query="" />);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should change pages', () => {
-    const component = shallow(<IndicesList indices={indices} query="" />);
+    const component = shallow(<IndicesList {...commonProps} query="" />);
 
     const instance = component.instance() as IndicesList;
 
@@ -36,7 +42,7 @@ describe('IndicesList', () => {
   });
 
   it('should change per page', () => {
-    const component = shallow(<IndicesList indices={indices} query="" />);
+    const component = shallow(<IndicesList {...commonProps} query="" />);
 
     const instance = component.instance() as IndicesList;
     instance.onChangePerPage(1);
@@ -46,14 +52,20 @@ describe('IndicesList', () => {
   });
 
   it('should highlight the query in the matches', () => {
-    const component = shallow(<IndicesList indices={indices} query="ki" />);
+    const component = shallow(<IndicesList {...commonProps} query="ki" />);
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should show a warning for the matches', () => {
+    const component = shallow(<IndicesList {...commonProps} hasWarnings={true} query="ki" />);
 
     expect(component).toMatchSnapshot();
   });
 
   describe('updating props', () => {
     it('should render all new indices', () => {
-      const component = shallow(<IndicesList indices={indices} query="" />);
+      const component = shallow(<IndicesList {...commonProps} query="" />);
 
       const moreIndices = [
         ...indices,

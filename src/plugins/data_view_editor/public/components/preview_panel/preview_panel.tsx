@@ -64,36 +64,33 @@ export const PreviewPanel = ({
     [onUpdateTitle, setViewMode]
   );
 
-  let visibleIndices;
+  let currentlyVisibleIndices;
   let currentViewMode;
 
   if (
     (title.length && !isAboutToIncludeMoreIndices(title) && viewMode !== ViewMode.allIndices) ||
     viewMode === ViewMode.onlyMatchingIndices
   ) {
-    visibleIndices = matched.visibleIndices;
+    currentlyVisibleIndices = matched.visibleIndices;
     currentViewMode = ViewMode.onlyMatchingIndices;
   } else {
-    visibleIndices = matched.allIndices;
+    currentlyVisibleIndices = matched.allIndices;
     currentViewMode = ViewMode.allIndices;
   }
 
   const indicesListContent =
     matched.visibleIndices.length || matched.allIndices.length ? (
-      <>
-        <EuiSpacer />
-        <IndicesList
-          data-test-subj="createIndexPatternStep1IndicesList"
-          query={title}
-          indices={visibleIndices}
-          onUpdateTitle={onUpdateTitleAndViewMode}
-          hasWarnings={
-            title.length > 0 &&
-            matched.exactMatchedIndices.length === 0 &&
-            matched.partialMatchedIndices.length > 0
-          }
-        />
-      </>
+      <IndicesList
+        data-test-subj="createIndexPatternStep1IndicesList"
+        query={title}
+        indices={currentlyVisibleIndices}
+        onUpdateTitle={onUpdateTitleAndViewMode}
+        hasWarnings={
+          title.length > 0 &&
+          matched.exactMatchedIndices.length === 0 &&
+          matched.partialMatchedIndices.length > 0
+        }
+      />
     ) : (
       <></>
     );
@@ -106,19 +103,17 @@ export const PreviewPanel = ({
         isIncludingSystemIndices={allowHidden}
         query={title}
       />
+      <EuiSpacer size="m" />
       {Boolean(title) && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('indexPatternEditor.previewPanel.viewModeGroup.legend', {
-              defaultMessage: 'Visible sources',
-            })}
-            options={viewModeButtons}
-            idSelected={currentViewMode}
-            onChange={(id: string) => setViewMode(id as ViewMode)}
-          />
-        </>
+        <EuiButtonGroup
+          isFullWidth
+          legend={i18n.translate('indexPatternEditor.previewPanel.viewModeGroup.legend', {
+            defaultMessage: 'Visible sources',
+          })}
+          options={viewModeButtons}
+          idSelected={currentViewMode}
+          onChange={(id: string) => setViewMode(id as ViewMode)}
+        />
       )}
       {indicesListContent}
     </>

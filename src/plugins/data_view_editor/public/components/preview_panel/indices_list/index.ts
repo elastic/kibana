@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { IndicesList } from './indices_list';
+export { IndicesList, type IndicesListProps } from './indices_list';
