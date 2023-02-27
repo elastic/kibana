@@ -112,6 +112,8 @@ export const PROCESS_KPI = '[data-test-subj="siem-timeline-process-kpi"';
 
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 
+export const PROVIDER_BADGE_DELETE = '.delete-data-provider';
+
 export const RESET_FIELDS =
   '[data-test-subj="fields-browser-container"] [data-test-subj="reset-fields"]';
 
@@ -295,7 +297,11 @@ export const EDIT_TIMELINE_TOOLTIP = '[data-test-subj="save-timeline-btn-tooltip
 export const ALERT_TABLE_SEVERITY_VALUES =
   '[data-test-subj="formatted-field-kibana.alert.severity"]';
 
+export const ALERT_TABLE_ACTIONS_HEADER = '[data-gridcell-column-id="expandColumn"]';
+
 export const ALERT_TABLE_FILE_NAME_HEADER = '[data-gridcell-column-id="file.name"]';
+
+export const ALERT_TABLE_SEVERITY_HEADER = '[data-gridcell-column-id="kibana.alert.severity"]';
 
 export const ALERT_TABLE_FILE_NAME_VALUES =
   '[data-gridcell-column-id="file.name"][data-test-subj="dataGridRowCell"]'; // empty column for the test data
