@@ -106,3 +106,5 @@ export const ALLOWED_MIME_TYPES = [
   ...compressionMimeTypes,
   ...pdfMimeTypes,
 ];
+
+export const IMAGE_MIME_TYPES = new Set(imageMimeTypes);

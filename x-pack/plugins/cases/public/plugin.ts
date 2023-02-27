@@ -8,7 +8,6 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { FilesSetup } from '@kbn/files-plugin/public';
 import type { CasesUiStart, CasesPluginSetup, CasesPluginStart, CasesUiSetup } from './types';
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
@@ -28,7 +27,7 @@ import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
-import { registerCaseFileKinds } from '../common/utils/files';
+import { registerCaseFileKinds } from './files';
 
 /**
  * @public
@@ -54,7 +53,7 @@ export class CasesUiPlugin
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
 
-    registerFileKinds(plugins.files);
+    registerCaseFileKinds(plugins.files);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
@@ -164,7 +163,3 @@ export class CasesUiPlugin
 
   public stop() {}
 }
-
-const registerFileKinds = (filesSetupPlugin: FilesSetup) => {
-  registerCaseFileKinds(filesSetupPlugin.registerFileKind);
-};

@@ -57,7 +57,7 @@ import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/p
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UserProfileService } from './services';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
-import { registerCaseFileKinds } from '../common/utils/files';
+import { registerCaseFileKinds } from './files';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
@@ -107,7 +107,7 @@ export class CasePlugin {
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    registerFileKinds(plugins.files);
+    registerCaseFileKinds(plugins.files);
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -252,7 +252,3 @@ export class CasePlugin {
     };
   };
 }
-
-const registerFileKinds = (filesSetupPlugin: FilesSetup) => {
-  registerCaseFileKinds(filesSetupPlugin.registerFileKind);
-};
