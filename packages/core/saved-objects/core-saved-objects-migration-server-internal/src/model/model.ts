@@ -433,8 +433,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           stateP.sourceIndexMappings,
           /* expected */
           stateP.targetIndexMappings
-        ) &&
-        Math.random() < 10
+        )
       ) {
         // the existing mappings match, we can avoid reindexing
         return {
