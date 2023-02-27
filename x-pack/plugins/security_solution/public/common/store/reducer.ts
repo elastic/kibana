@@ -29,6 +29,8 @@ import { getScopePatternListSelection } from './sourcerer/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
 import type { DataTableState } from './data_table/types';
 import { dataTableReducer } from './data_table/reducer';
+import { groupsReducer } from './grouping/reducer';
+import type { GroupState } from './grouping/types';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   UsersPluginReducer &
@@ -54,7 +56,8 @@ export const createInitialState = (
     signalIndexName: SourcererModel['signalIndexName'];
     enableExperimental: ExperimentalFeatures;
   },
-  dataTableState: DataTableState
+  dataTableState: DataTableState,
+  groupsState: GroupState
 ): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
@@ -108,6 +111,7 @@ export const createInitialState = (
     },
     globalUrlParam: initialGlobalUrlParam,
     dataTable: dataTableState.dataTable,
+    groups: groupsState.groups,
   };
 
   return preloadedState;
@@ -126,5 +130,6 @@ export const createReducer: (
     sourcerer: sourcererReducer,
     globalUrlParam: globalUrlParamReducer,
     dataTable: dataTableReducer,
+    groups: groupsReducer,
     ...pluginsReducer,
   });
