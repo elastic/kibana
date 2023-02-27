@@ -439,6 +439,27 @@ describe('Alert Event Details', () => {
       });
   });
 
+  it('should be able to run take action query against all enrolled agents', () => {
+    loadAlertsEvents();
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.getBySel('take-action-dropdown-btn').click();
+    cy.getBySel('osquery-action-item').click();
+    cy.getBySel('agentSelection').within(() => {
+      cy.getBySel('comboBoxClearButton').click();
+      cy.getBySel('comboBoxInput').type('All{downArrow}{enter}{esc}');
+      cy.contains('All agents');
+    });
+    inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
+      parseSpecialCharSequences: false,
+    });
+    cy.wait(1000);
+    submitQuery();
+    cy.getBySel('flyout-body-osquery').within(() => {
+      // at least 2 agents should have responded
+      cy.get('[data-grid-row-index]').should('have.length.at.least', 2);
+    });
+  });
+
   it('should substitute params in osquery ran from timelines alerts', () => {
     loadAlertsEvents();
     cy.getBySel('send-alert-to-timeline-button').first().click({ force: true });
