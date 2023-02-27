@@ -11,7 +11,6 @@ import { debug } from '../common/debug_log';
 import { AssetFilters } from '../common/types_api';
 import { ASSET_MANAGER_API_BASE } from './constants';
 import { getAssets } from './lib/get_assets';
-import { getAssetByEan } from './lib/get_asset_by_ean';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
 
@@ -52,30 +51,6 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
           return res.ok({ body: { assets } });
         } catch (error: unknown) {
           debug('error looking up asset records', error);
-          return res.customError({ statusCode: 500 });
-        }
-      }
-    );
-
-    router.get<{ ean: string }, AssetFilters | undefined, unknown>(
-      {
-        path: `${ASSET_MANAGER_API_BASE}/assets/{ean}`,
-        validate: {
-          params: schema.object({
-            ean: schema.string(),
-          }),
-        },
-      },
-      async (context, req, res) => {
-        const { ean } = req.params;
-        const esClient = await getEsClientFromContext(context);
-
-        try {
-          const asset = await getAssetByEan({ esClient, ean });
-
-          return res.ok({ body: { asset } });
-        } catch (error: unknown) {
-          debug('error looking up asset by ean', error);
           return res.customError({ statusCode: 500 });
         }
       }
