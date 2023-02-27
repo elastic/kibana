@@ -16,6 +16,7 @@ import {
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
+  CLOUDBEAT_VULN_MGMT_AWS,
   SUPPORTED_POLICY_TEMPLATES,
   SUPPORTED_CLOUDBEAT_INPUTS,
 } from '../../../common/constants';
@@ -52,6 +53,8 @@ const getPostureType = (policyTemplateInput: PostureInput) => {
     case CLOUDBEAT_VANILLA:
     case CLOUDBEAT_EKS:
       return 'kspm';
+    case CLOUDBEAT_VULN_MGMT_AWS:
+      return 'vuln_mgmt';
     default:
       return 'n/a';
   }
@@ -60,6 +63,7 @@ const getPostureType = (policyTemplateInput: PostureInput) => {
 const getDeploymentType = (policyTemplateInput: PostureInput) => {
   switch (policyTemplateInput) {
     case CLOUDBEAT_AWS:
+    case CLOUDBEAT_VULN_MGMT_AWS:
       return 'aws';
     case CLOUDBEAT_AZURE:
       return 'azure';
