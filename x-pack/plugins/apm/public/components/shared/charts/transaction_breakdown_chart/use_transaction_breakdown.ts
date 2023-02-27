@@ -41,7 +41,7 @@ export function useTransactionBreakdown({
   } = useFetcher(
     (callApmApi) => {
       if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
-        return Promise.resolve(undefined);
+        return Promise.resolve({ timeseries: undefined });
       }
 
       if (serviceName && start && end && transactionType) {

@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ServiceOverview } from '.';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
@@ -20,6 +21,7 @@ const stories: Meta<{}> = {
     (StoryComponent) => {
       const serviceName = 'testServiceName';
       const transactionType = 'type';
+      const transactionTypeStatus = FETCH_STATUS.SUCCESS;
       const mockCore = {
         http: {
           get: (endpoint: string) => {
@@ -39,6 +41,7 @@ const stories: Meta<{}> = {
       const serviceContextValue = {
         serviceName,
         transactionType,
+        transactionTypeStatus,
       } as unknown as APMServiceContextValue;
 
       return (

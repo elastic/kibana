@@ -68,7 +68,7 @@ export function ServiceOverviewThroughputChart({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
-        return Promise.resolve(undefined);
+        return Promise.resolve(INITIAL_STATE);
       }
 
       if (serviceName && transactionType && start && end) {
@@ -117,7 +117,7 @@ export function ServiceOverviewThroughputChart({
   const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
     {
-      data: data?.currentPeriod,
+      data: data?.currentPeriod ?? [],
       type: 'linemark',
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
@@ -127,7 +127,7 @@ export function ServiceOverviewThroughputChart({
     ...(comparisonEnabled
       ? [
           {
-            data: data?.previousPeriod,
+            data: data?.previousPeriod ?? [],
             type: 'area',
             color: previousPeriodColor,
             title: previousPeriodLabel,

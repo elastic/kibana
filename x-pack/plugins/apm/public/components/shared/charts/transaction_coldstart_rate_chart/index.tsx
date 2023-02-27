@@ -82,7 +82,7 @@ export function TransactionColdstartRateChart({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
-        return Promise.resolve(undefined);
+        return Promise.resolve(INITIAL_STATE);
       }
 
       if (transactionType && serviceName && start && end) {
@@ -125,7 +125,7 @@ export function TransactionColdstartRateChart({
 
   const timeseries = [
     {
-      data: data?.currentPeriod.transactionColdstartRate,
+      data: data?.currentPeriod?.transactionColdstartRate ?? [],
       type: 'linemark',
       color: theme.eui.euiColorVis5,
       title: i18n.translate('xpack.apm.coldstartRate.chart.coldstartRate', {
@@ -135,7 +135,7 @@ export function TransactionColdstartRateChart({
     ...(comparisonEnabled
       ? [
           {
-            data: data?.previousPeriod.transactionColdstartRate,
+            data: data?.previousPeriod?.transactionColdstartRate ?? [],
             type: 'area',
             color: theme.eui.euiColorMediumShade,
             title: previousPeriodLabel,
