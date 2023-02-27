@@ -6,7 +6,7 @@
  */
 
 import { EuiComment, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import type { OsqueryActionResultsProps } from './types';
@@ -23,9 +23,15 @@ interface OsqueryResultProps extends OsqueryActionResultsProps {
 
 export const OsqueryResult = React.memo<OsqueryResultProps>(
   ({ actionId, ruleName, startDate, ecsData }) => {
+    const [isLive, setIsLive] = useState(false);
     const { data } = useLiveQueryDetails({
       actionId,
+      isLive,
     });
+
+    useLayoutEffect(() => {
+      setIsLive(() => !(data?.status === 'completed'));
+    }, [data?.status]);
 
     return (
       <AlertAttachmentContext.Provider value={ecsData}>

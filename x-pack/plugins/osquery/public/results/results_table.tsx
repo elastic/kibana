@@ -57,10 +57,6 @@ const StyledEuiDataGrid = styled(EuiDataGrid)`
   }
 `;
 
-const euiProgressStyle = css`
-  margin-top: -2px;
-`;
-
 export interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
@@ -429,7 +425,15 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   return (
     <>
-      {isLive && <EuiProgress color="primary" size="xs" css={euiProgressStyle} />}
+      {isLive && (
+        <EuiProgress
+          color="primary"
+          size="xs"
+          css={css`
+            margin-top: -2px;
+          `}
+        />
+      )}
 
       {!allResultsData?.edges.length ? (
         <EuiPanel hasShadow={false}>
