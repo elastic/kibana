@@ -97,6 +97,15 @@ describe('ALL - Add Integration', () => {
     cy.contains('Live queries history');
   });
 
+  it(`add integration to ${OSQUERY_POLICY}`, () => {
+    cy.visit(FLEET_AGENT_POLICIES);
+    cy.contains(OSQUERY_POLICY).click();
+    cy.contains('Add integration').click();
+    cy.contains(integration).click();
+    addIntegration(OSQUERY_POLICY);
+    cy.contains('osquery_manager-');
+  });
+
   it('should have integration and packs copied when upgrading integration', () => {
     const packageName = 'osquery_manager';
     const oldVersion = '1.2.0';
@@ -108,12 +117,12 @@ describe('ALL - Add Integration', () => {
     cy.contains('Upgrade');
     cy.contains('Agent policy 1').click();
     cy.get('tr')
-      .should('contain', 'osquery_manager-2')
+      .should('contain', 'osquery_manager-3')
       .and('contain', 'Osquery Manager')
       .and('contain', `v${oldVersion}`);
     cy.contains('Actions').click();
     cy.contains('View policy').click();
-    cy.contains('name: osquery_manager-2');
+    cy.contains('name: osquery_manager-3');
     cy.contains(`version: ${oldVersion}`);
     cy.get('.euiFlyoutFooter').within(() => {
       cy.contains('Close').click();
@@ -140,32 +149,23 @@ describe('ALL - Add Integration', () => {
     cy.contains(/^Advanced$/).click();
     cy.contains('"Integration":');
     cy.contains(/^Upgrade integration$/).click();
-    cy.contains(/^osquery_manager-2$/).click();
+    cy.contains(/^osquery_manager-3$/).click();
     cy.contains(/^Advanced$/).click();
     cy.contains('"Integration":');
     cy.contains('Cancel').click();
     closeModalIfVisible();
     cy.get('tr')
-      .should('contain', 'osquery_manager-2')
+      .should('contain', 'osquery_manager-3')
       .and('contain', 'Osquery Manager')
       .and('contain', 'v')
       .and('not.contain', `v${oldVersion}`);
     cy.contains('Actions').click();
     cy.contains('View policy').click();
-    cy.contains('name: osquery_manager-2');
+    cy.contains('name: osquery_manager-3');
 
     // test list of prebuilt queries
     navigateTo('/app/osquery/saved_queries');
     cy.waitForReact();
     cy.react('EuiTableRow').should('have.length.above', 5);
-  });
-
-  it(`add integration to ${OSQUERY_POLICY}`, () => {
-    cy.visit(FLEET_AGENT_POLICIES);
-    cy.contains(OSQUERY_POLICY).click();
-    cy.contains('Add integration').click();
-    cy.contains(integration).click();
-    addIntegration(OSQUERY_POLICY);
-    cy.contains('osquery_manager-');
   });
 });

@@ -21,6 +21,7 @@ import {
   findFormFieldByRowsLabelAndType,
   inputQuery,
   loadAlertsEvents,
+  selectAllAgents,
   submitQuery,
   takeOsqueryActionWithParams,
   toggleRuleOffAndOn,
@@ -444,11 +445,7 @@ describe('Alert Event Details', () => {
     cy.getBySel('expand-event').first().click({ force: true });
     cy.getBySel('take-action-dropdown-btn').click();
     cy.getBySel('osquery-action-item').click();
-    cy.getBySel('agentSelection').within(() => {
-      cy.getBySel('comboBoxClearButton').click();
-      cy.getBySel('comboBoxInput').type('All{downArrow}{enter}{esc}');
-      cy.contains('All agents');
-    });
+    selectAllAgents(2);
     inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
       parseSpecialCharSequences: false,
     });
