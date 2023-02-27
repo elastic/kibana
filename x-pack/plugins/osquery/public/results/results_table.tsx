@@ -396,6 +396,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     ]
   );
 
+  if (isLoading) {
+    return <EuiLoadingContent lines={5} />;
+  }
+
   if (!hasActionResultsPrivileges) {
     return (
       <EuiCallOut
@@ -421,10 +425,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         </p>
       </EuiCallOut>
     );
-  }
-
-  if (isLoading) {
-    return <EuiLoadingContent lines={5} />;
   }
 
   return (

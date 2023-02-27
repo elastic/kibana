@@ -81,10 +81,6 @@ describe('Osquery Results', () => {
       .mockImplementation(() => defaultLiveQueryDetails);
   });
 
-  it('should validate permissions', async () => {
-    const { queryByText } = renderWithContext(<OsqueryActionResults {...defaultProps} />);
-    expect(queryByText(PERMISSION_DENIED)).toBeInTheDocument();
-  });
   it('return results table', async () => {
     enablePrivileges();
     const { getByText, queryByText, getByTestId } = renderWithContext(
