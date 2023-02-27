@@ -572,6 +572,32 @@ describe('<SnapshotRestoreHome />', () => {
         );
       });
 
+      test('should only show warning callout if there are errors but nothing to be shown on the snapshots list', async () => {
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({
+          snapshots: [],
+          total: 0,
+          repositories: [REPOSITORY_NAME],
+          errors: {
+            repository_with_errors: {
+              type: 'snapshot_exception',
+              reason: '[snapshot_missing_error] Snapshot missing.',
+            },
+          },
+        });
+
+        testBed = await setup(httpSetup);
+
+        await act(async () => {
+          testBed.actions.selectTab('snapshots');
+        });
+
+        testBed.component.update();
+
+        const { exists } = testBed;
+        expect(exists('snapshotFailedToLoad')).toBe(true);
+        expect(exists('snapshotList')).toBe(false);
+      });
+
       test('should show a prompt if a repository contains errors and there are no other repositories', async () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots,
