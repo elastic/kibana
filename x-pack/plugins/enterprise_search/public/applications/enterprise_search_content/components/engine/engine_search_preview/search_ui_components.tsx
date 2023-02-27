@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useValues } from 'kea';
 
@@ -14,6 +14,7 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButton,
+  EuiComboBox,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -225,18 +226,36 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
   </EuiFlexItem>
 );
 
-export const SortingView: React.FC<SortingViewProps> = ({ onChange, options, value }) => {
+export const SortingView: React.FC<SortingViewProps> = (
+  {
+    // onChange,
+    // options,
+    // value,
+  }
+) => {
+  const [value, setValue] = useState(null);
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiTitle size="xxxs">
           <label htmlFor="sorting">Sort By</label>
         </EuiTitle>
-        <EuiSelect
+        <EuiComboBox
           id="sorting"
-          options={options?.map((o) => ({ text: o.label, value: o.value }))}
-          value={value}
-          onChange={(evt) => onChange(evt.target.value)}
+          isClearable={false}
+          singleSelection={{ asPlainText: true }}
+          options={[
+            { value: 'foo', label: 'Foo' },
+            { value: 'bar', label: 'Bar' },
+          ]}
+          selectedOptions={value === null ? [] : [{ value, label: value }]}
+          onChange={(options) => {
+            if (options.length === 0) return;
+
+            const [{ value: newValue }] = options;
+
+            setValue(newValue);
+          }}
         />
       </EuiFlexGroup>
     </EuiFlexItem>
