@@ -97,7 +97,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -8305,7 +8305,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -15608,7 +15608,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -25934,14 +25934,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/server/query/route_handler_context.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
           },
           {
             "plugin": "data",
