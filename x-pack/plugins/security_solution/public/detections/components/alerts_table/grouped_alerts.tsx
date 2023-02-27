@@ -14,7 +14,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { ReactNode } from 'react-markdown';
 import { useGetGroupingSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { defaultGroup } from '../../../common/store/grouping/defaults';
@@ -68,12 +67,12 @@ interface OwnProps {
   runtimeMappings: MappingRuntimeFields;
   signalIndexName: string | null;
   currentAlertStatusFilterValue?: Status;
-  renderChildComponent: (groupingFilters: Filter[]) => ReactNode;
+  renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
-export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
+const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   defaultFilters = [],
   from,
   globalFilters,
@@ -237,41 +236,45 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     [defaultFilters, getGlobalQuery, takeActionItems]
   );
 
-  if (loading || isLoadingGroups || isEmpty(selectedPatterns)) {
+  const groupedAlerts = useMemo(() => {
+    return isNoneGroup(selectedGroup) ? (
+      renderChildComponent([])
+    ) : (
+      <GroupingContainer
+        selectedGroup={selectedGroup}
+        groupsSelector={groupsSelector}
+        inspectButton={inspect}
+        takeActionItems={getTakeActionItems}
+        data={alertsGroupsData?.aggregations ?? {}}
+        renderChildComponent={renderChildComponent}
+        unit={defaultUnit}
+        pagination={pagination}
+        groupPanelRenderer={(fieldBucket: RawBucket) =>
+          getSelectedGroupButtonContent(selectedGroup, fieldBucket)
+        }
+        badgeMetricStats={(fieldBucket: RawBucket) =>
+          getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket)
+        }
+        customMetricStats={(fieldBucket: RawBucket) =>
+          getSelectedGroupCustomMetrics(selectedGroup, fieldBucket)
+        }
+      />
+    );
+  }, [
+    alertsGroupsData?.aggregations,
+    getTakeActionItems,
+    groupsSelector,
+    inspect,
+    pagination,
+    renderChildComponent,
+    selectedGroup,
+  ]);
+
+  if (isEmpty(selectedPatterns)) {
     return null;
   }
 
-  const dataTable = renderChildComponent([]);
-
-  return (
-    <>
-      {isNoneGroup(selectedGroup) ? (
-        dataTable
-      ) : (
-        <>
-          <GroupingContainer
-            selectedGroup={selectedGroup}
-            groupsSelector={groupsSelector}
-            inspectButton={inspect}
-            takeActionItems={getTakeActionItems}
-            data={alertsGroupsData?.aggregations ?? {}}
-            renderChildComponent={renderChildComponent}
-            unit={defaultUnit}
-            pagination={pagination}
-            groupPanelRenderer={(fieldBucket: RawBucket) =>
-              getSelectedGroupButtonContent(selectedGroup, fieldBucket)
-            }
-            badgeMetricStats={(fieldBucket: RawBucket) =>
-              getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket)
-            }
-            customMetricStats={(fieldBucket: RawBucket) =>
-              getSelectedGroupCustomMetrics(selectedGroup, fieldBucket)
-            }
-          />
-        </>
-      )}
-    </>
-  );
+  return groupedAlerts;
 };
 
 const makeMapStateToProps = () => {
