@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingChart, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+
+import { useSelectedMonitor } from '../../../monitor_details/hooks/use_selected_monitor';
 import { networkEventsSelector } from '../../../../state/network_events/selectors';
-import { JourneyStep } from '../../../../../../../common/runtime_types';
-import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
+import { ConfigKey, JourneyStep, BrowserFields } from '../../../../../../../common/runtime_types';
 import { extractItems } from '../../common/network_data/data_formatting';
 import { useStepWaterfallMetrics } from '../use_step_waterfall_metrics';
+import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
 
 export const NO_DATA_TEXT = i18n.translate(
   'xpack.synthetics.synthetics.stepDetail.waterfallNoData',
@@ -36,6 +38,10 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
 
   const waterfallLoaded = networkEvents && !networkEvents.loading;
   const isWaterfallSupported = networkEvents?.isWaterfallSupported;
+
+  const { monitor } = useSelectedMonitor();
+  const traceUrlPatterns =
+    (monitor as unknown as BrowserFields)?.[ConfigKey.APM_TRACE_URL_PATTERNS] ?? [];
 
   const { metrics } = useStepWaterfallMetrics({
     checkGroup,
@@ -77,6 +83,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
           markerItems={metrics}
           total={networkEvents.total}
           activeStep={activeStep}
+          traceUrlPatterns={traceUrlPatterns}
         />
       )}
       {waterfallLoaded && hasEvents && !isWaterfallSupported && (

@@ -25,7 +25,7 @@ import {
 } from '../../../common/network_data/types';
 import { colourPalette } from '../../../common/network_data/data_formatting';
 
-import { ViewApmLink } from './view_apm_link';
+import { ViewApmLink } from '../../apm_components/view_apm_link';
 
 interface Props {
   activeFilters: string[];

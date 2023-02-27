@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiHealth } from '@elastic/eui';
+import { shouldTraceUrl } from '../../common/network_data/url_matcher';
 import { JourneyStep, NetworkEvent } from '../../../../../../../common/runtime_types';
 import { getSeriesAndDomain, getSidebarItems } from '../../common/network_data/data_formatting';
 import { SidebarItem, LegendItem } from '../../common/network_data/types';
@@ -30,6 +31,7 @@ interface Props {
   activeStep?: JourneyStep;
   data: NetworkEvent[];
   markerItems?: MarkerItems;
+  traceUrlPatterns?: string[];
 }
 
 export const WaterfallChartWrapper: React.FC<Props> = ({
@@ -37,6 +39,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
   total,
   markerItems,
   activeStep,
+  traceUrlPatterns = [],
 }) => {
   const [query, setQuery] = useState<string>('');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
@@ -80,13 +83,14 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
       return (
         <WaterfallSidebarItem
           item={item}
+          isUrlTraced={shouldTraceUrl(item.url, traceUrlPatterns)}
           renderFilterScreenReaderText={hasFilters && !onlyHighlighted}
-          onClick={onSidebarClick}
           highestIndex={highestSideBarIndex}
+          onClick={onSidebarClick}
         />
       );
     },
-    [hasFilters, onlyHighlighted, onSidebarClick, highestSideBarIndex]
+    [hasFilters, onlyHighlighted, onSidebarClick, highestSideBarIndex, traceUrlPatterns]
   );
 
   return (

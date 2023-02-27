@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { ApmTransactions } from './step_waterfall_chart/apm_components/apm_transactions';
 import { ErrorCallOut } from './error_callout';
 import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
 import { WaterfallChartContainer } from './step_waterfall_chart/waterfall/waterfall_chart_container';
@@ -98,6 +99,10 @@ export const StepDetailPage = () => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer size="l" />
+
+      <ApmTransactions />
 
       <EuiSpacer size="l" />
 

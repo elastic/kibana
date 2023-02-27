@@ -19,6 +19,7 @@ import { WaterfallMetadata, WaterfallMetadataEntry } from '../../../common/netwo
 interface OnSidebarClickParams {
   buttonRef?: ButtonRef;
   networkItemIndex: number;
+  isUrlTraced?: boolean;
 }
 
 export type ButtonRef = RefObject<HTMLButtonElement | null>;
@@ -69,13 +70,13 @@ export const useFlyout = (metadata: WaterfallMetadata) => {
   );
 
   const onSidebarClick: OnSidebarClick = useCallback(
-    ({ buttonRef, networkItemIndex }) => {
+    ({ buttonRef, networkItemIndex, isUrlTraced }) => {
       if (isFlyoutVisible && buttonRef === currentSidebarItemRef) {
         setIsFlyoutVisible(false);
       } else {
         const metadataEntry = metadata[networkItemIndex];
         setCurrentSidebarItemRef(buttonRef);
-        handleFlyout(metadataEntry);
+        handleFlyout({ ...metadataEntry, isUrlTraced });
       }
     },
     [currentSidebarItemRef, handleFlyout, isFlyoutVisible, metadata, setIsFlyoutVisible]

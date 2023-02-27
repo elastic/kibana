@@ -9,6 +9,7 @@ import {
   AppMountParameters,
   ChromeBadge,
   ChromeBreadcrumb,
+  CoreSetup,
   CoreStart,
   I18nStart,
 } from '@kbn/core/public';
@@ -25,9 +26,10 @@ export interface CommonlyUsedDateRange {
 }
 
 export interface SyntheticsAppProps {
+  core: CoreSetup<ClientPluginsStart, unknown>;
   basePath: string;
   canSave: boolean;
-  core: CoreStart;
+  coreStart: CoreStart;
   darkMode: boolean;
   i18n: I18nStart;
   isApmAvailable: boolean;
@@ -44,6 +46,9 @@ export interface SyntheticsAppProps {
 }
 
 export interface SyntheticsSettingsContextValues {
+  core: CoreSetup<ClientPluginsStart, unknown> | null;
+  plugins: ClientPluginsSetup | null;
+  appMountParameters: AppMountParameters | null;
   canSave: boolean;
   basePath: string;
   dateRangeStart: string;
@@ -64,6 +69,9 @@ const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS;
  * overwritten by the Synthetics App upon its invocation.
  */
 const defaultContext: SyntheticsSettingsContextValues = {
+  core: null,
+  plugins: null,
+  appMountParameters: null,
   basePath: BASE_PATH,
   dateRangeStart: DATE_RANGE_START,
   dateRangeEnd: DATE_RANGE_END,
@@ -79,8 +87,17 @@ export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = (
   children,
   ...props
 }) => {
-  const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable, commonlyUsedRanges, isDev } =
-    props;
+  const {
+    core,
+    plugins,
+    basePath,
+    isApmAvailable,
+    isInfraAvailable,
+    isLogsAvailable,
+    commonlyUsedRanges,
+    isDev,
+    appMountParameters,
+  } = props;
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
@@ -90,6 +107,8 @@ export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = (
 
   const value = useMemo(() => {
     return {
+      core,
+      plugins,
       canSave,
       isDev,
       basePath,
@@ -99,8 +118,11 @@ export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = (
       commonlyUsedRanges,
       dateRangeStart: dateRangeStart ?? DATE_RANGE_START,
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
+      appMountParameters,
     };
   }, [
+    core,
+    plugins,
     canSave,
     isDev,
     basePath,
@@ -110,6 +132,7 @@ export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = (
     dateRangeStart,
     dateRangeEnd,
     commonlyUsedRanges,
+    appMountParameters,
   ]);
 
   return <SyntheticsSettingsContext.Provider value={value} children={children} />;

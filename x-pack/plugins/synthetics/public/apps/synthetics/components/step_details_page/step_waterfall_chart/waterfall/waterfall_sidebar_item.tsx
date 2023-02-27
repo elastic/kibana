@@ -16,14 +16,16 @@ import { OnSidebarClick } from './waterfall_flyout/use_flyout';
 interface SidebarItemProps {
   item: SidebarItem;
   renderFilterScreenReaderText?: boolean;
-  onClick?: OnSidebarClick;
   highestIndex: number;
+  isUrlTraced?: boolean;
+  onClick?: OnSidebarClick;
 }
 
 export const WaterfallSidebarItem = React.memo(function WaterfallSidebarItem({
   item,
   highestIndex,
   renderFilterScreenReaderText,
+  isUrlTraced = false,
   onClick,
 }: SidebarItemProps) {
   const [buttonRef, setButtonRef] = useState<RefObject<HTMLButtonElement | null>>();
@@ -31,9 +33,9 @@ export const WaterfallSidebarItem = React.memo(function WaterfallSidebarItem({
 
   const handleSidebarClick = useMemo(() => {
     if (onClick) {
-      return () => onClick({ buttonRef, networkItemIndex: index });
+      return () => onClick({ buttonRef, networkItemIndex: index, isUrlTraced });
     }
-  }, [buttonRef, index, onClick]);
+  }, [buttonRef, index, onClick, isUrlTraced]);
 
   const setRef = useCallback((ref) => setButtonRef(ref), [setButtonRef]);
 
@@ -64,6 +66,7 @@ export const WaterfallSidebarItem = React.memo(function WaterfallSidebarItem({
               index={offsetIndex}
               text={text}
               url={url}
+              isUrlTraced={isUrlTraced}
               ariaLabel={ariaLabel}
               onClick={handleSidebarClick}
               setButtonRef={setRef}
@@ -78,6 +81,7 @@ export const WaterfallSidebarItem = React.memo(function WaterfallSidebarItem({
               index={offsetIndex}
               text={text}
               url={url}
+              isUrlTraced={isUrlTraced}
               ariaLabel={ariaLabel}
               onClick={handleSidebarClick}
               setButtonRef={setRef}

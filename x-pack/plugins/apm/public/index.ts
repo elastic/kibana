@@ -20,3 +20,5 @@ export const plugin: PluginInitializer<ApmPluginSetup, ApmPluginStart> = (
 ) => new ApmPlugin(pluginInitializerContext);
 
 export type { ApmPluginSetup, ApmPluginStart };
+
+export { APMTransactionOverviewEmbeddable } from './shared';

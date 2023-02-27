@@ -63,6 +63,12 @@ export interface TransactionRaw extends APMBaseDoc {
         check_group: string;
       };
     };
+    synthetic?: {
+      monitor?: {
+        id: string;
+        check_group: string;
+      };
+    };
   };
 
   // Shared by errors and transactions

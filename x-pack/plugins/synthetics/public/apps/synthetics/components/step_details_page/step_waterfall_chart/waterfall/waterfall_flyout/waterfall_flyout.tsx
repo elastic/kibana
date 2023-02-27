@@ -19,9 +19,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-plugin/public';
-import { Table } from './waterfall_flyout_table';
+
+import { ApmTransactions } from '../../apm_components/apm_transactions';
 import { MiddleTruncatedText } from '../middle_truncated_text';
 import { WaterfallMetadataEntry } from '../../../common/network_data/types';
+import { Table } from './waterfall_flyout_table';
 import { OnFlyoutClose } from './use_flyout';
 
 export const DETAILS = i18n.translate('xpack.synthetics.synthetics.waterfall.flyout.details', {
@@ -77,7 +79,8 @@ export const WaterfallFlyout = ({
     return null;
   }
 
-  const { x, url, details, certificates, requestHeaders, responseHeaders } = flyoutData;
+  const { x, url, details, certificates, requestHeaders, responseHeaders, isUrlTraced } =
+    flyoutData;
 
   trackMetric({ metric: 'waterfall_flyout', metricType: METRIC_TYPE.CLICK });
 
@@ -122,6 +125,12 @@ export const WaterfallFlyout = ({
             <>
               <EuiSpacer size="m" />
               <Table rows={certificates} title={CERTIFICATES} />
+            </>
+          )}
+          {!!isUrlTraced && (
+            <>
+              <EuiSpacer size="m" />
+              <ApmTransactions url={url} />
             </>
           )}
         </EuiFlyoutBody>

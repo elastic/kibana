@@ -327,6 +327,7 @@ export interface WaterfallMetadataEntry {
   responseHeaders?: WaterfallMetadataItem[];
   certificates?: WaterfallMetadataItem[];
   details: WaterfallMetadataItem[];
+  isUrlTraced?: boolean;
 }
 
 export type WaterfallDataEntry = PlotProperties & {

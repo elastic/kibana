@@ -30,6 +30,7 @@ interface Props {
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   setButtonRef?: (ref: HTMLButtonElement | HTMLAnchorElement | null) => void;
   url: string;
+  isUrlTraced?: boolean;
 }
 
 const OuterContainer = euiStyled.span`
@@ -107,6 +108,7 @@ export const MiddleTruncatedText = ({
   setButtonRef,
   url,
   highestIndex,
+  isUrlTraced = false,
 }: Props) => {
   const secureHttps = fullText.startsWith('https://');
   const text = fullText.replace(/https:\/\/www.|http:\/\/www.|http:\/\/|https:\/\//, '');
@@ -145,6 +147,7 @@ export const MiddleTruncatedText = ({
                 >
                   {index}
                 </IndexNumber>
+
                 {secureHttps && (
                   <SecureIcon
                     type="lock"
@@ -158,6 +161,20 @@ export const MiddleTruncatedText = ({
                     )}
                   />
                 )}
+
+                <SecureIcon
+                  css={{ transform: 'rotate(-90deg)' }}
+                  type={isUrlTraced ? 'inputOutput' : ''}
+                  size="s"
+                  color="success"
+                  aria-label={i18n.translate(
+                    'xpack.synthetics.waterfallChart.sidebar.url.isTraced',
+                    {
+                      defaultMessage: 'This URL is traced with APM',
+                    }
+                  )}
+                />
+
                 <FirstChunk>{chunks.first}</FirstChunk>
                 <LastChunk>{chunks.last}</LastChunk>
               </InnerContainer>

@@ -69,7 +69,10 @@ export const getSections = ({
     )}`,
   });
 
-  const tracedSyntheticsMonitor = transaction.transaction.synthetics?.monitor;
+  const tracedSyntheticsMonitor =
+    transaction.transaction.synthetics?.monitor ??
+    transaction.transaction.synthetic?.monitor; // Due to mismatched mapping in APM Data repo
+
   const syntheticsLink = url.format({
     pathname: `${basePath.get()}/app/synthetics/monitor/${
       tracedSyntheticsMonitor?.id
@@ -195,7 +198,7 @@ export const getSections = ({
         { defaultMessage: 'View test run in Synthetics' }
       ),
       href: syntheticsLink,
-      condition: true,
+      condition: !!tracedSyntheticsMonitor,
     },
   ];
 
