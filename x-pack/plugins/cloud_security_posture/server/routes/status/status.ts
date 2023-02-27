@@ -85,8 +85,8 @@ export const calculateCspStatusCode = (
   if (indicesStatus.findingsLatest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
   if (!installedPolicyTemplates.includes(postureTypeCheck)) return 'not-installed';
-  if (healthyAgents === 0  && installedCspPackagePolicies > 0) return 'not-deployed';
   if (indicesStatus.findings === 'not-empty') return 'indexed';
+  if (healthyAgents === 0) return 'not-deployed';
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
   if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
 
@@ -116,6 +116,12 @@ const getCspStatus = async ({
     findingsLatestIndexStatus,
     findingsIndexStatus,
     scoreIndexStatus,
+    findingsLatestIndexStatusCspm,
+    findingsIndexStatusCspm,
+    scoreIndexStatusCspm,
+    findingsLatestIndexStatusKspm,
+    findingsIndexStatusKspm,
+    scoreIndexStatusKspm,
     installation,
     latestCspPackage,
     installedPackagePoliciesKspm,
@@ -125,6 +131,15 @@ const getCspStatus = async ({
     checkIndexStatus(esClient.asCurrentUser, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
     checkIndexStatus(esClient.asCurrentUser, FINDINGS_INDEX_PATTERN, logger),
     checkIndexStatus(esClient.asCurrentUser, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
+
+    checkIndexStatus(esClient.asCurrentUser, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'cspm'),
+    checkIndexStatus(esClient.asCurrentUser, FINDINGS_INDEX_PATTERN, logger, 'cspm'),
+    checkIndexStatus(esClient.asCurrentUser, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'cspm'),
+
+    checkIndexStatus(esClient.asCurrentUser, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'kspm'),
+    checkIndexStatus(esClient.asCurrentUser, FINDINGS_INDEX_PATTERN, logger, 'kspm'),
+    checkIndexStatus(esClient.asCurrentUser, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'kspm'),
+
     packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
     packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
     getCspPackagePolicies(
@@ -147,7 +162,7 @@ const getCspStatus = async ({
     ),
     getInstalledPolicyTemplates(packagePolicyService, soClient),
   ]);
-  console.log(findingsIndexStatus);
+//console.log(installation)
   const healthyAgentsKspm = await getHealthyAgents(
     soClient,
     installedPackagePoliciesKspm.items,
@@ -187,9 +202,9 @@ const getCspStatus = async ({
   const statusCspm = calculateCspStatusCode(
     POSTURE_TYPE_CSPM,
     {
-      findingsLatest: findingsLatestIndexStatus,
-      findings: findingsIndexStatus,
-      score: scoreIndexStatus,
+      findingsLatest: findingsLatestIndexStatusCspm,
+      findings: findingsIndexStatusCspm,
+      score: scoreIndexStatusCspm,
     },
     installedPackagePoliciesTotalCspm,
     healthyAgentsCspm,
@@ -200,9 +215,9 @@ const getCspStatus = async ({
   const statusKspm = calculateCspStatusCode(
     POSTURE_TYPE_KSPM,
     {
-      findingsLatest: findingsLatestIndexStatus,
-      findings: findingsIndexStatus,
-      score: scoreIndexStatus,
+      findingsLatest: findingsLatestIndexStatusKspm,
+      findings: findingsIndexStatusKspm,
+      score: scoreIndexStatusKspm,
     },
     installedPackagePoliciesTotalKspm,
     healthyAgentsKspm,
