@@ -197,7 +197,12 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
   <EuiFlexItem grow={false}>
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiTitle size="xxxs">
-        <label htmlFor="results-per-page">Show</label>
+        <label htmlFor="results-per-page">
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.engine.searchPreview.resultsPerPage.label"
+            defaultMessage="Show"
+          />
+        </label>
       </EuiTitle>
       <EuiSelect
         id="results-per-page"
