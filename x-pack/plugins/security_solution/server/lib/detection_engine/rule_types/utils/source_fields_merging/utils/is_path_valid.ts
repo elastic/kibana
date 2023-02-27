@@ -6,7 +6,7 @@
  */
 
 import { get, isPlainObject } from 'lodash/fp';
-import type { SignalSource } from '../../types';
+import type { SignalSource } from '../../../types';
 
 /**
  * Returns true if path in SignalSource object is valid
