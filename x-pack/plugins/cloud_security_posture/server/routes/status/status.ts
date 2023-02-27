@@ -178,7 +178,6 @@ const getCspStatus = async ({
     agentService,
     logger
   );
-
   const installedPackagePoliciesTotalKspm = installedPackagePoliciesKspm.total;
   const installedPackagePoliciesTotalCspm = installedPackagePoliciesCspm.total;
   const latestCspPackageVersion = latestCspPackage.version;
