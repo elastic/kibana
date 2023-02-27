@@ -54,6 +54,10 @@ export function initKibanaService({
   }
 }
 
+export function isKibanaServiceInitialized() {
+  return kibanaService.core !== undefined;
+}
+
 const Application = (props: SyntheticsAppProps) => {
   const {
     basePath,

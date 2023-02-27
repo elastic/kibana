@@ -10,7 +10,7 @@ import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Provider as ReduxProvider, useDispatch, useSelector } from 'react-redux';
 
-import { initKibanaService } from '../../../../../synthetics_app';
+import { initKibanaService, isKibanaServiceInitialized } from '../../../../../synthetics_app';
 
 import { SyntheticsRefreshContextProvider } from '../../../../../contexts';
 import { useEnablement } from '../../../../../hooks';
@@ -115,6 +115,8 @@ export default function Embeddable({
   useEffect(() => {
     initKibanaService({ coreStart });
   }, [coreStart]);
+
+  if (!isKibanaServiceInitialized()) return null;
 
   return (
     <ReduxProvider store={store}>
