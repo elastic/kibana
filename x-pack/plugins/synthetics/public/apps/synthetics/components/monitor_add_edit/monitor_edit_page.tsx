@@ -22,6 +22,7 @@ import { MonitorDetailsLinkPortal } from './monitor_details_portal';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 import { getMonitorAPI } from '../../state/monitor_management/api';
 import { EDIT_MONITOR_STEPS } from './steps/step_config';
+import { useMonitorNotFound } from './hooks/use_monitor_not_found';
 
 export const MonitorEditPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor' });
@@ -40,6 +41,12 @@ export const MonitorEditPage: React.FC = () => {
   const { data, loading, error } = useFetcher(() => {
     return getMonitorAPI({ id: monitorId });
   }, []);
+
+  const notFoundContent = useMonitorNotFound(error);
+
+  if (notFoundContent) {
+    return notFoundContent;
+  }
 
   const isReadOnly = data?.attributes[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
   const projectId = data?.attributes[ConfigKey.PROJECT_ID];

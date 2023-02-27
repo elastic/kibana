@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyRoute } from './pings/journeys';
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
 import { syncParamsSyntheticsParamsRoute } from './settings/sync_global_params';
@@ -77,6 +78,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getDefaultAlertingRoute,
   updateDefaultAlertingRoute,
   createJourneyRoute,
+  deletePackagePolicyRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
