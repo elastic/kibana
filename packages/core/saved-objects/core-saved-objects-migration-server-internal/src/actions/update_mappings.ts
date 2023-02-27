@@ -41,6 +41,7 @@ export const updateMappings = ({
       })
       .then(() => Either.right('update_mappings_succeeded' as const))
       .catch((res) => {
+        // ES throws this exact error when attempting to make incompatible updates to the mappigns
         if (res?.statusCode === 400 && res?.body?.error?.type === 'illegal_argument_exception') {
           return Either.left('incompatible_mapping_exception');
         }

@@ -45,8 +45,7 @@ describe('migration v2', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
-  // eslint-disable-next-line jest/no-focused-tests
-  fit('migrates the documents to the highest version', async () => {
+  it('migrates the documents to the highest version', async () => {
     const migratedIndexAlias = `.kibana_${pkg.version}`;
     const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),

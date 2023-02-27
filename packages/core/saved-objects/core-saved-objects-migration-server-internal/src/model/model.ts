@@ -473,12 +473,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         targetIndex: stateP.sourceIndex.value!, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
         versionIndexReadyActions: Option.none,
       };
+    } else if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isTypeof(left, 'incompatible_mapping_exception')) {
+        return {
+          ...stateP,
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+        };
+      } else {
+        return throwBadResponse(stateP, left as never);
+      }
     } else {
-      // the mappings could not be updated, and thus we can assume they are NOT compatible
-      return {
-        ...stateP,
-        controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-      };
+      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
