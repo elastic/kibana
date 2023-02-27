@@ -28,5 +28,6 @@
     "@kbn/fleet-plugin",
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/cypress-config",
+    "@kbn/test-subj-selector",
   ]
 }
