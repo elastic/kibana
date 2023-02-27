@@ -86,6 +86,7 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
 
       // play saved query
       cy.contains('Saved queries').click();
+      cy.visit('/app/osquery/saved_queries');
       cy.contains(savedQueryId);
       cy.react('PlayButtonComponent', {
         props: { savedQuery: { attributes: { id: savedQueryId } } },
