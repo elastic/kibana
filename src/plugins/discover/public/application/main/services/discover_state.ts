@@ -147,7 +147,7 @@ export interface DiscoverStateContainer {
     /**
      * Load new saved search
      */
-    loadNewSavedSearch: () => Promise<SavedSearch | undefined>;
+    loadNewSavedSearch: (dataView: DataView | undefined) => Promise<SavedSearch | undefined>;
   };
 }
 
@@ -293,10 +293,10 @@ export function getDiscoverStateContainer({
     return currentSavedSearch;
   };
 
-  const loadNewSavedSearch = async () => {
-    addLog('🧭 [discoverState] loadNewSavedSearch');
+  const loadNewSavedSearch = async (nextDataView: DataView | undefined) => {
+    addLog('🧭 [discoverState] loadNewSavedSearch', { nextDataView });
     const isEmptyURL = appStateContainer.isEmptyURL();
-    let { dataView } = await loadAndResolveDataView();
+    let { dataView } = nextDataView ? { dataView: nextDataView } : await loadAndResolveDataView();
     const nextSavedSearch = await savedSearchContainer.new(
       dataView,
       !isEmptyURL ? appStateContainer.getState() : undefined

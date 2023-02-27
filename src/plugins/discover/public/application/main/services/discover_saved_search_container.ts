@@ -120,7 +120,7 @@ export function getSavedSearchContainer({
   };
 
   const newSavedSearch = async (nextDataView: DataView | undefined, appState?: AppState) => {
-    addLog('🔎 [savedSearch] new');
+    addLog('🔎 [savedSearch] new', { nextDataView, appState });
     const dataView = nextDataView ?? get().searchSource.getField('index');
     const nextSavedSearch = await getSavedSearch('', {
       search: services.data.search,
@@ -149,11 +149,11 @@ export function getSavedSearchContainer({
     return nextSavedSearchToSet;
   };
 
-  const persist: PersistFunction = async (nextSavedSearch, params, dataView?) => {
+  const persist: PersistFunction = async (nextSavedSearch, params) => {
     addLog('🔎 [savedSearch] persist', nextSavedSearch);
 
     const id = await persistSavedSearch(nextSavedSearch, {
-      dataView: dataView ?? nextSavedSearch.searchSource.getField('index')!,
+      dataView: nextSavedSearch.searchSource.getField('index')!,
       state: appStateContainer.getState(),
       services,
       saveOptions: params,

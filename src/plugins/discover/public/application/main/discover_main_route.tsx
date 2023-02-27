@@ -115,80 +115,84 @@ export function DiscoverMainRoute(props: Props) {
     }
   }, [data.dataViews, isDev]);
 
-  const loadSavedSearch = useCallback(async () => {
-    setLoading(true);
-    if (!(await checkData())) {
-      setLoading(false);
-      return;
-    }
-    try {
-      const isNewSavedSearch = !Boolean(id);
-      await stateContainer.actions.loadDataViewList();
-      let currentSavedSearch: SavedSearch | undefined;
-
-      if (isNewSavedSearch) {
-        addLog('[Main route] load new saved search');
-        currentSavedSearch = await stateContainer.actions.loadNewSavedSearch();
-      } else {
-        addLog('[Main route] load saved search', id);
-        currentSavedSearch = await stateContainer.actions.loadSavedSearch(id);
+  const loadSavedSearch = useCallback(
+    async (nextDataView?: DataView) => {
+      setLoading(true);
+      if (!nextDataView && !(await checkData())) {
+        setLoading(false);
+        return;
       }
-      if (currentSavedSearch?.id) {
-        chrome.recentlyAccessed.add(
-          getSavedSearchFullPathUrl(currentSavedSearch.id),
-          currentSavedSearch.title ?? '',
-          currentSavedSearch.id
+      try {
+        const isNewSavedSearch = !Boolean(id);
+        await stateContainer.actions.loadDataViewList();
+        let currentSavedSearch: SavedSearch | undefined;
+
+        if (isNewSavedSearch) {
+          addLog('[Main route] load new saved search');
+          currentSavedSearch = await stateContainer.actions.loadNewSavedSearch(nextDataView);
+        } else {
+          addLog('[Main route] load saved search', id);
+          currentSavedSearch = await stateContainer.actions.loadSavedSearch(id);
+        }
+        if (currentSavedSearch?.id) {
+          chrome.recentlyAccessed.add(
+            getSavedSearchFullPathUrl(currentSavedSearch.id),
+            currentSavedSearch.title ?? '',
+            currentSavedSearch.id
+          );
+        }
+
+        chrome.setBreadcrumbs(
+          currentSavedSearch && currentSavedSearch.title
+            ? getSavedSearchBreadcrumbs(currentSavedSearch.title)
+            : getRootBreadcrumbs()
         );
-      }
 
-      chrome.setBreadcrumbs(
-        currentSavedSearch && currentSavedSearch.title
-          ? getSavedSearchBreadcrumbs(currentSavedSearch.title)
-          : getRootBreadcrumbs()
-      );
-
-      setLoading(false);
-    } catch (e) {
-      if (e instanceof SavedObjectNotFound) {
-        redirectWhenMissing({
-          history,
-          navigateToApp: core.application.navigateToApp,
-          basePath,
-          mapping: {
-            search: '/',
-            'index-pattern': {
-              app: 'management',
-              path: `kibana/objects/savedSearches/${id}`,
+        setLoading(false);
+      } catch (e) {
+        if (e instanceof SavedObjectNotFound) {
+          redirectWhenMissing({
+            history,
+            navigateToApp: core.application.navigateToApp,
+            basePath,
+            mapping: {
+              search: '/',
+              'index-pattern': {
+                app: 'management',
+                path: `kibana/objects/savedSearches/${id}`,
+              },
             },
-          },
-          toastNotifications,
-          onBeforeRedirect() {
-            getUrlTracker().setTrackedUrl('/');
-          },
-          theme: core.theme,
-        })(e);
-      } else {
-        setError(e);
+            toastNotifications,
+            onBeforeRedirect() {
+              getUrlTracker().setTrackedUrl('/');
+            },
+            theme: core.theme,
+          })(e);
+        } else {
+          setError(e);
+        }
       }
-    }
-  }, [
-    checkData,
-    id,
-    stateContainer.actions,
-    chrome,
-    history,
-    core.application.navigateToApp,
-    core.theme,
-    basePath,
-    toastNotifications,
-  ]);
+    },
+    [
+      checkData,
+      id,
+      stateContainer.actions,
+      chrome,
+      history,
+      core.application.navigateToApp,
+      core.theme,
+      basePath,
+      toastNotifications,
+    ]
+  );
 
   const onDataViewCreated = useCallback(
     async (nextDataView: unknown) => {
       if (nextDataView) {
+        setLoading(true);
         setShowNoDataPage(false);
         setError(undefined);
-        await loadSavedSearch();
+        await loadSavedSearch(nextDataView as DataView);
       }
     },
     [loadSavedSearch]

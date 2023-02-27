@@ -67,11 +67,7 @@ async function saveDataSource({
   }
 
   try {
-    const nextSavedSearch = await state.savedSearchState.persist(
-      savedSearch,
-      saveOptions,
-      state.internalState.getState().dataView
-    );
+    const nextSavedSearch = await state.savedSearchState.persist(savedSearch, saveOptions);
     if (nextSavedSearch) {
       onSuccess(nextSavedSearch.id!);
     }
