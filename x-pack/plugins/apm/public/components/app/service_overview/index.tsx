@@ -25,14 +25,12 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { LatencyChart } from '../../shared/charts/latency_chart';
 import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
 import { TransactionColdstartRateChart } from '../../shared/charts/transaction_coldstart_rate_chart';
-import { NoTransactionsPrompt } from '../../shared/transactions_prompt/no_transactions_prompt';
 import { TransactionsTable } from '../../shared/transactions_table';
 import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
@@ -46,14 +44,8 @@ export const chartHeight = 288;
 
 export function ServiceOverview() {
   const router = useApmRouter();
-  const {
-    serviceName,
-    fallbackToTransactions,
-    agentName,
-    serverlessType,
-    transactionType,
-    transactionTypeStatus,
-  } = useApmServiceContext();
+  const { serviceName, fallbackToTransactions, agentName, serverlessType } =
+    useApmServiceContext();
 
   const {
     query,
@@ -83,10 +75,6 @@ export function ServiceOverview() {
   const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn
     ? 'column'
     : 'row';
-
-  if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
-    return <NoTransactionsPrompt />;
-  }
 
   return (
     <AnnotationsContextProvider

@@ -67,7 +67,7 @@ export function ServiceOverviewInstancesChartAndTable({
   chartHeight,
   serviceName,
 }: ServiceOverviewInstancesChartAndTableProps) {
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, transactionTypeStatus } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<TableOptions>({
     pageIndex: 0,
     sort: DEFAULT_SORT,
@@ -95,6 +95,10 @@ export function ServiceOverviewInstancesChartAndTable({
     status: mainStatsStatus,
   } = useFetcher(
     (callApmApi) => {
+      if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
+        return Promise.resolve(undefined);
+      }
+
       if (!start || !end || !transactionType || !latencyAggregationType) {
         return;
       }
@@ -140,6 +144,7 @@ export function ServiceOverviewInstancesChartAndTable({
       end,
       serviceName,
       transactionType,
+      transactionTypeStatus,
       pageIndex,
       field,
       direction,

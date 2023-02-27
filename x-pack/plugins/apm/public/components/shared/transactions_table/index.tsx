@@ -132,7 +132,7 @@ export function TransactionsTable({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !latencyAggregationType || !transactionType) {
-        return;
+        return Promise.resolve(undefined);
       }
       return callApmApi(
         'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
