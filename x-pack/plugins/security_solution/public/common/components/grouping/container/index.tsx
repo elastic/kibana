@@ -144,6 +144,7 @@ const GroupingContainerComponent = ({
   return (
     <>
       <EuiFlexGroup
+        data-test-subj="grouping-table"
         justifyContent="spaceBetween"
         alignItems="center"
         style={{ paddingBottom: 20, paddingTop: 20 }}
@@ -187,7 +188,9 @@ const GroupingContainerComponent = ({
           </>
         ) : (
           <>
-            {isLoading && <EuiProgress size="xs" color="accent" />}
+            {isLoading && (
+              <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
+            )}
             <EmptyGroupingComponent />
           </>
         )}

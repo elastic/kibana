@@ -70,7 +70,7 @@ interface OwnProps {
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
 }
 
-type AlertsTableComponentProps = OwnProps & PropsFromRedux;
+export type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
 export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   defaultFilters = [],
@@ -90,10 +90,10 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   const dispatch = useDispatch();
   const groupingId = tableId;
 
-  const getGroupbyIdSelector = groupSelectors.getGroupByIdSelector();
+  const getGroupByIdSelector = groupSelectors.getGroupByIdSelector();
 
   const { activeGroup: selectedGroup } =
-    useSelector((state: State) => getGroupbyIdSelector(state, groupingId)) ?? defaultGroup;
+    useSelector((state: State) => getGroupByIdSelector(state, groupingId)) ?? defaultGroup;
 
   const {
     browserFields,
