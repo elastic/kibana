@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.6.2",
+  "version": "8.6.3",
   "branch": "8.6",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -68,7 +68,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "16.18.1",
+    "node": "16.19.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -557,7 +557,7 @@
     "md5": "^2.1.0",
     "mdast-util-to-hast": "10.0.1",
     "memoize-one": "^6.0.0",
-    "mime": "^2.4.4",
+    "mime": "^3.0.0",
     "mime-types": "^2.1.27",
     "minimatch": "^3.1.2",
     "moment": "^2.29.4",
@@ -875,7 +875,7 @@
     "@types/markdown-it": "^12.2.3",
     "@types/md5": "^2.2.0",
     "@types/micromatch": "^4.0.2",
-    "@types/mime": "^2.0.1",
+    "@types/mime": "^3.0.1",
     "@types/mime-types": "^2.1.0",
     "@types/minimatch": "^2.0.29",
     "@types/minimist": "^1.2.2",
@@ -975,7 +975,7 @@
     "callsites": "^3.1.0",
     "chance": "1.0.18",
     "chokidar": "^3.5.3",
-    "chromedriver": "^109.0.0",
+    "chromedriver": "^110.0.0",
     "clean-webpack-plugin": "^3.0.0",
     "compression-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^6.0.2",

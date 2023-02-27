@@ -36,6 +36,9 @@ export interface FleetConfigType {
   packageVerification?: {
     gpgKeyPath?: string;
   };
+  setup?: {
+    agentPolicySchemaUpgradeBatchSize?: number;
+  };
   developer?: {
     disableRegistryVersionCheck?: boolean;
     bundledPackageLocation?: string;

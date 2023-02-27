@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 function createTestJobAndDatafeed() {
   const timestamp = Date.now();

@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Cases', function () {
-    loadTestFile(require.resolve('./create_case_form'));
-    loadTestFile(require.resolve('./view_case'));
     loadTestFile(require.resolve('./list_view'));
     loadTestFile(require.resolve('./configure'));
     loadTestFile(require.resolve('./attachment_framework'));
-    loadTestFile(require.resolve('./deletion'));
     loadTestFile(require.resolve('./upgrade'));
   });
 };

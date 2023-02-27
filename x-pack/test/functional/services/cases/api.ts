@@ -36,8 +36,8 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
         ...generateRandomCaseWithoutConnector(),
         ...overwrites,
       } as CasePostRequest;
-      const res = await createCaseAPI(kbnSupertest, caseData);
-      return res;
+
+      return createCaseAPI(kbnSupertest, caseData);
     },
 
     async createNthRandomCases(amount: number = 3) {
@@ -45,17 +45,14 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
         { length: amount },
         () => generateRandomCaseWithoutConnector() as CasePostRequest
       );
-      await pMap(
-        cases,
-        (caseData) => {
-          return createCaseAPI(kbnSupertest, caseData);
-        },
-        { concurrency: 4 }
-      );
+
+      await pMap(cases, async (caseData) => createCaseAPI(kbnSupertest, caseData), {
+        concurrency: 4,
+      });
     },
 
     async deleteAllCases() {
-      deleteAllCaseItems(es);
+      await deleteAllCaseItems(es);
     },
 
     async createAttachment({

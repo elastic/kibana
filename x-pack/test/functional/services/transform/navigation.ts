@@ -7,12 +7,19 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function TransformNavigationProvider({ getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+export function TransformNavigationProvider({ getPageObjects, getService }: FtrProviderContext) {
+  const pageObjects = getPageObjects(['common']);
+  const testSubjects = getService('testSubjects');
 
   return {
     async navigateTo() {
-      return await PageObjects.common.navigateToApp('transform');
+      return await pageObjects.common.navigateToApp('transform');
+    },
+
+    async navigateToRules() {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await testSubjects.click('rulesTab');
+      await testSubjects.existOrFail('rulesList');
     },
   };
 }
