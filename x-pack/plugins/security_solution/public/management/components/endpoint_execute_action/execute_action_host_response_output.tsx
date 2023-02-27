@@ -21,6 +21,7 @@ import type {
   MaybeImmutable,
   ResponseActionExecuteOutputContent,
 } from '../../../../common/endpoint/types';
+import { FormattedError } from '../formatted_error';
 
 const ACCORDION_BUTTON_TEXT = Object.freeze({
   output: {
@@ -106,7 +107,11 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
       [action.outputs, agentId]
     );
 
-    const { data: actionDetails, isFetching } = useGetActionDetails(action.id, {
+    const {
+      error,
+      data: actionDetails,
+      isFetching,
+    } = useGetActionDetails(action.id, {
       enabled: !outputContent,
     });
 
@@ -141,6 +146,10 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
 
     if (!executeOutputContent) {
       return null;
+    }
+
+    if (error) {
+      return <FormattedError error={error} data-test-subj={`${dataTestSubj}-apiError`} />;
     }
 
     return (
