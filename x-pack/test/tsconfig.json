@@ -117,6 +117,7 @@
     "@kbn/security-api-integration-helpers",
     "@kbn/alerts-as-data-utils",
     "@kbn/discover-plugin",
+    "@kbn/aiops-utils",
     "@kbn/files-plugin",
     "@kbn/shared-ux-file-types",
     "@kbn/securitysolution-io-ts-alerting-types",
