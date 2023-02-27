@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/lib/action_execution_source';
 import { Spaces } from '../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
@@ -107,6 +108,10 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         // @ts-expect-error _source: unknown
         expect(hit?._source?.message).to.eql(
           `action executed: .email:my-test-email: TestEmail#xyz`
+        );
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.kibana?.actions?.execution?.source).to.eql(
+          ActionExecutionSourceType.NOTIFICATION
         );
       });
     });
