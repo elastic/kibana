@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/lib/action_execution_source';
 import { Spaces } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -319,6 +320,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   ruleTypeId: response.body.rule_type_id,
                   rule: undefined,
                   consumer: 'alertsFixture',
+                  source: ActionExecutionSourceType.SAVED_OBJECT,
                 });
                 break;
             }
@@ -997,6 +999,7 @@ interface ValidateEventLogParams {
     namespace?: string;
   };
   flapping?: boolean;
+  source?: string;
 }
 
 export function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {
@@ -1016,6 +1019,7 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
     consumer,
     ruleTypeId,
     flapping,
+    source,
   } = params;
   const { status, actionGroupId, instanceId, reason, shouldHaveEventEnd } = params;
 
@@ -1067,6 +1071,10 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
 
   if (flapping !== undefined) {
     expect(event?.kibana?.alert?.flapping).to.be(flapping);
+  }
+
+  if (source) {
+    expect(event?.kibana?.action?.execution?.source).to.be(source);
   }
 
   expect(event?.kibana?.alert?.rule?.rule_type_id).to.be(ruleTypeId);

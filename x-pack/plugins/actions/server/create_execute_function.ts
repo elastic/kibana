@@ -34,7 +34,7 @@ export interface ExecuteOptions
   spaceId: string;
   apiKey: string | null;
   executionId: string;
-  source: ActionExecutionSource<unknown>;
+  source?: ActionExecutionSource<unknown>;
 }
 
 interface ActionTaskParams
@@ -120,8 +120,8 @@ export function createExecutionEnqueuerFunction({
         apiKey,
         executionId,
         consumer,
-        source: source.type,
         relatedSavedObjects: relatedSavedObjectWithRefs,
+        ...(source ? { source: source.type } : {}),
       },
       {
         references: taskReferences,
@@ -207,8 +207,8 @@ export function createBulkExecutionEnqueuerFunction({
           apiKey: actionToExecute.apiKey,
           executionId: actionToExecute.executionId,
           consumer: actionToExecute.consumer,
-          source: actionToExecute.source.type,
           relatedSavedObjects: relatedSavedObjectWithRefs,
+          ...(actionToExecute.source ? { source: actionToExecute.source.type } : {}),
         },
         references: taskReferences,
       };
@@ -280,7 +280,7 @@ function validateCanActionBeUsed(action: PreConfiguredAction | RawAction) {
   }
 }
 
-function executionSourceAsSavedObjectReferences(executionSource: ActionExecutionSource<unknown>) {
+function executionSourceAsSavedObjectReferences(executionSource?: ActionExecutionSource<unknown>) {
   return isSavedObjectExecutionSource(executionSource)
     ? {
         references: [

@@ -50,7 +50,7 @@ import {
   ConnectorTokenClientContract,
 } from './types';
 import { PreconfiguredActionDisabledModificationError } from './lib/errors/preconfigured_action_disabled_modification';
-import { ExecuteOptions } from './lib/action_executor';
+import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import {
   ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
@@ -126,6 +126,13 @@ interface ConstructorOptions {
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
 }
+
+type ExecuteOptions = Omit<
+  ActionExecutorOptions,
+  'request' | 'actionExecutionId' | 'sourceType'
+> & {
+  source: ActionExecutionSource<unknown>;
+};
 
 export interface UpdateOptions {
   id: string;
@@ -667,9 +674,7 @@ export class ActionsClient {
     params,
     source,
     relatedSavedObjects,
-  }: Omit<ExecuteOptions, 'request' | 'actionExecutionId' | 'sourceType'> & {
-    source: ActionExecutionSource<unknown>;
-  }): Promise<ActionTypeExecutorResult<unknown>> {
+  }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC

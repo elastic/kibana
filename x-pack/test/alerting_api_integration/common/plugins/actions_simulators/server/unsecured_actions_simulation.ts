@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { asNotificationExecutionSource } from '@kbn/actions-plugin/server';
 import { schema } from '@kbn/config-schema';
 import {
   CoreSetup,
@@ -44,10 +43,6 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
           {
             id,
             params,
-            source: asNotificationExecutionSource({
-              requesterId,
-              connectorId: id,
-            }),
           },
         ]);
 
