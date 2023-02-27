@@ -87,7 +87,7 @@ export const EngineSearchPreview: React.FC = () => {
   const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
   const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null);
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
-  const { resultFields, searchableFields } = useValues(EngineSearchPreviewLogic);
+  const { resultFields, searchableFields, sortOptions } = useValues(EngineSearchPreviewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
@@ -147,25 +147,13 @@ export const EngineSearchPreview: React.FC = () => {
                 view={SortingView}
                 sortOptions={[
                   {
-                    name: 'Relevance',
+                    name: i18n.translate(
+                      'xpack.enterpriseSearch.content.engine.searchPreview.relevanceLabel',
+                      { defaultMessage: 'Relevance' }
+                    ),
                     value: [],
                   },
-                  {
-                    name: 'Color (Asc)',
-                    value: [{ field: 'color', direction: 'asc' }],
-                  },
-                  {
-                    name: 'Color (Desc)',
-                    value: [{ field: 'color', direction: 'desc' }],
-                  },
-                  {
-                    name: 'Age (Asc)',
-                    value: [{ field: 'age', direction: 'asc' }],
-                  },
-                  {
-                    name: 'Age (Desc)',
-                    value: [{ field: 'age', direction: 'desc' }],
-                  },
+                  ...sortOptions,
                 ]}
               />
               <EuiSpacer size="m" />

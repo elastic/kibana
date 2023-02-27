@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { FieldConfiguration, SearchFieldConfiguration } from '@elastic/search-ui';
+import { SortOption, FieldConfiguration, SearchFieldConfiguration } from '@elastic/search-ui';
 
 import { FetchEngineFieldCapabilitiesApiLogic } from '../../../api/engines/fetch_engine_field_capabilities_api_logic';
 import { EngineNameLogic } from '../engine_name_logic';
@@ -21,6 +21,10 @@ export interface EngineSearchPreviewValues {
   engineName: typeof EngineNameLogic.values.engineName;
   resultFields: Record<string, FieldConfiguration>;
   searchableFields: Record<string, SearchFieldConfiguration>;
+  sortOptions: Array<{
+    name: string;
+    value: SortOption[];
+  }>;
 }
 
 export const EngineSearchPreviewLogic = kea<
@@ -84,6 +88,25 @@ export const EngineSearchPreviewLogic = kea<
         );
 
         return searchableFields;
+      },
+    ],
+    sortOptions: [
+      () => [selectors.engineFieldCapabilitiesData],
+      (data: EngineSearchPreviewValues['engineFieldCapabilitiesData']) => {
+        if (!data) return [];
+
+        return Object.entries(data.field_capabilities.fields)
+          .filter(([, mappings]) =>
+            Object.entries(mappings).some(
+              ([, { metadata_field: isMeta, aggregatable }]) =>
+                // Aggregatable are also _sortable_
+                aggregatable && !isMeta
+            )
+          )
+          .flatMap(([field]) => [
+            { name: `${field} (asc)`, value: [{ direction: 'asc', field }] },
+            { name: `${field} (desc)`, value: [{ direction: 'desc', field }] },
+          ]);
       },
     ],
   }),
