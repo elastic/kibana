@@ -34,9 +34,9 @@ export const getAllIndicesToCheck = (
     return a.localeCompare(b);
   });
 
-  // return all `IndexToCheck` sorted first by pattern A-Z, and then by `docsCount` within the pattern
+  // return all `IndexToCheck` sorted first by pattern A-Z:
   return sortedPatterns.reduce<IndexToCheck[]>((acc, pattern) => {
-    const indexNames = patternIndexNames[pattern] ?? [];
+    const indexNames = patternIndexNames[pattern];
     const indicesToCheck = indexNames.map<IndexToCheck>((indexName) =>
       getIndexToCheck({ indexName, pattern })
     );
