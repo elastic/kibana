@@ -8,9 +8,9 @@
     transition: visibility .3s, opacity .3s;
 
     position: absolute;
-    right: 0px;
+    right: $euiSizeXS;
     top: (-$euiSizeL);
-    z-index: 1000;
+    z-index: 1002;
   }
 
   &:hover {

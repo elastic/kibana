@@ -218,7 +218,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
     <div
       css={css`
         position: fixed;
-        z-index: 99;
+        z-index: 1001;
         background: ${useEuiBackgroundColor('subdued')};
         width: 100%;
       `}

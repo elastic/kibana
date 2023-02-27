@@ -55,9 +55,15 @@ export const DashboardViewportComponent = () => {
       css={
         viewMode === ViewMode.EDIT
           ? css`
+              display: flex;
+              flex: 1;
+              flex-direction: column;
               padding-top: 105px; // THIS SHOULDN'T BE STATIC - NEED TO KNOW THE HEIGHT OF THE HEADER
             `
           : css`
+              display: flex;
+              flex: 1;
+              flex-direction: column;
               padding-top: 55px;
             `
       }
