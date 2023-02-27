@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-export const StageMocks = {
-  init: jest.fn().mockImplementation((state: unknown) => state),
-};
+const realStages = jest.requireActual('./stages');
+
+export const StageMocks = Object.keys(realStages).reduce((mocks, key) => {
+  mocks[key] = jest.fn().mockImplementation((state: unknown) => state);
+  return mocks;
+}, {} as Record<string, unknown>);
 
 jest.doMock('./stages', () => {
   return StageMocks;

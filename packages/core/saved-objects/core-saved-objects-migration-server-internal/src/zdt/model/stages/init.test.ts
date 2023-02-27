@@ -27,13 +27,13 @@ describe('Action: init', () => {
     context = createContextMock();
   });
 
-  test('INIT -> DONE because its not done yet', () => {
+  test('INIT -> DONE because its not implemented yet', () => {
     const state = createState();
     const res: StateActionResponse<'INIT'> = Either.right({
-      '.kibana_7.11.0_001': {
+      '.kibana_8.7.0_001': {
         aliases: {
           '.kibana': {},
-          '.kibana_7.11.0': {},
+          '.kibana_8.7.0': {},
         },
         mappings: { properties: {} },
         settings: {},

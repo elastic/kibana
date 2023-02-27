@@ -19,7 +19,7 @@ import type { AliasAction, FetchIndexResponse } from '../actions';
  * A helper function/type for ensuring that all control state's are handled.
  */
 export function throwBadControlState(p: never): never;
-export function throwBadControlState(controlState: any) {
+export function throwBadControlState(controlState: unknown) {
   throw new Error('Unexpected control state: ' + controlState);
 }
 
@@ -27,7 +27,7 @@ export function throwBadControlState(controlState: any) {
  * A helper function/type for ensuring that all response types are handled.
  */
 export function throwBadResponse(state: { controlState: string }, p: never): never;
-export function throwBadResponse(state: { controlState: string }, res: any): never {
+export function throwBadResponse(state: { controlState: string }, res: unknown): never {
   throw new Error(
     `${state.controlState} received unexpected action response: ` + JSON.stringify(res)
   );
