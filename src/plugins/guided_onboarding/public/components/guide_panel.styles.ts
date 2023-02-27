@@ -41,11 +41,13 @@ export const getGuidePanelStyles = ({
     max-block-size: auto;
     inset-inline-end: 0;
     inset-block-start: ${euiTheme.size.xxxl};
-    right: calc(${euiTheme.size.s} + 128px); // Accounting for margin on button
     ${euiCanAnimate} {
       animation: ${euiFlyoutSlideInRight} ${euiTheme.animation.normal}
         ${euiTheme.animation.resistance};
     }
+    @media (min-width: ${euiTheme.breakpoint.m}px) {
+      right: calc(${euiTheme.size.s} + 128px); // Accounting for margin on button
+    })
   `;
 
   return {
@@ -60,7 +62,6 @@ export const getGuidePanelStyles = ({
         ${flyoutContainerBase};
         background: #ffffff url(${isDarkTheme ? panelBgTopDark : panelBgTop}) top right no-repeat;
         padding: 0;
-        // block-size: calc(100% - (${euiTheme.size.l} * 2));
       `,
       flyoutContainerError: css`
         ${flyoutContainerBase};
