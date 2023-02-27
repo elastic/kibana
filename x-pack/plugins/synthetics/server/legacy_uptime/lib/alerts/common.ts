@@ -107,8 +107,10 @@ export const setRecoveredAlertsContext = ({
   }
 };
 
+export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
+
 export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
-  mappings: { fieldMap: { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap } },
+  mappings: { fieldMap: uptimeRuleTypeFieldMap },
   useLegacyAlerts: true,
 };

@@ -31,7 +31,7 @@ describe('createResourceInstallationHelper', () => {
   });
 
   test(`should not call init function if readyToInitialize is false`, async () => {
-    const helper = createResourceInstallationHelper(initFn);
+    const helper = createResourceInstallationHelper(logger, initFn);
 
     // Add two contexts that need to be initialized but don't call helper.setReadyToInitialize()
     helper.add({
@@ -49,7 +49,7 @@ describe('createResourceInstallationHelper', () => {
   });
 
   test(`should call init function if readyToInitialize is set to true`, async () => {
-    const helper = createResourceInstallationHelper(initFn);
+    const helper = createResourceInstallationHelper(logger, initFn);
 
     // Add two contexts that need to be initialized and then call helper.setReadyToInitialize()
     helper.add({
@@ -72,7 +72,7 @@ describe('createResourceInstallationHelper', () => {
   });
 
   test(`should install resources for contexts added after readyToInitialize is called`, async () => {
-    const helper = createResourceInstallationHelper(initFnWithDelay);
+    const helper = createResourceInstallationHelper(logger, initFnWithDelay);
 
     // Add two contexts that need to be initialized
     helper.add({
@@ -106,7 +106,7 @@ describe('createResourceInstallationHelper', () => {
   });
 
   test(`should install resources for contexts added after initial processing loop has run`, async () => {
-    const helper = createResourceInstallationHelper(initFn);
+    const helper = createResourceInstallationHelper(logger, initFn);
 
     // No contexts queued so this should finish quickly
     helper.setReadyToInitialize();
@@ -130,7 +130,7 @@ describe('createResourceInstallationHelper', () => {
   });
 
   test(`should gracefully handle errors during initialization and set initialized flag to false`, async () => {
-    const helper = createResourceInstallationHelper(initFnWithError);
+    const helper = createResourceInstallationHelper(logger, initFnWithError);
 
     helper.setReadyToInitialize();
 
@@ -146,6 +146,7 @@ describe('createResourceInstallationHelper', () => {
     // for the setImmediate
     await new Promise((r) => setTimeout(r, 10));
 
+    expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - fail`);
     expect(await helper.getInitializedContext('test1')).toBe(false);
   });
 });

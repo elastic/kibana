@@ -14,13 +14,11 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { initSyntheticsServer } from './server';
 import { initUptimeServer } from './legacy_uptime/uptime_server';
 import { uptimeFeature } from './feature';
-import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
 import {
   KibanaTelemetryAdapter,
   UptimeCorePluginsSetup,
@@ -36,6 +34,7 @@ import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
+import { uptimeRuleTypeFieldMap } from './legacy_uptime/lib/alerts/common';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -70,10 +69,7 @@ export class Plugin implements PluginType {
       componentTemplates: [
         {
           name: 'mappings',
-          mappings: mappingFromFieldMap(
-            { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap },
-            'strict'
-          ),
+          mappings: mappingFromFieldMap(uptimeRuleTypeFieldMap, 'strict'),
         },
       ],
     });

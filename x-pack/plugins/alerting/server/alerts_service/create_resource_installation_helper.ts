@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { IRuleTypeAlerts } from '../types';
 
 export interface ResourceInstallationHelper {
@@ -25,6 +26,7 @@ export interface ResourceInstallationHelper {
  * running, kick off the processing loop
  */
 export function createResourceInstallationHelper(
+  logger: Logger,
   initFn: (context: IRuleTypeAlerts, timeoutMs?: number) => Promise<void>
 ): ResourceInstallationHelper {
   let readyToInitialize = false;
@@ -40,6 +42,7 @@ export function createResourceInstallationHelper(
       await initFn(context, timeoutMs);
       return true;
     } catch (err) {
+      logger.error(`Error initializing context ${context.context} - ${err.message}`);
       return false;
     }
   };

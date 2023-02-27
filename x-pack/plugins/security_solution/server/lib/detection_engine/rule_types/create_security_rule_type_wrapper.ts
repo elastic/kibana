@@ -15,6 +15,7 @@ import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -34,7 +35,7 @@ import {
   scheduleThrottledNotificationActions,
   getNotificationResultsLink,
 } from '../rule_actions_legacy';
-import { createResultObject, getAliasesFieldMap } from './utils';
+import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
@@ -45,6 +46,22 @@ import { getInputIndex, DataViewError } from './utils/get_input_output_index';
 import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
+
+const aliasesFieldMap: FieldMap = {};
+Object.entries(aadFieldConversion).forEach(([key, value]) => {
+  aliasesFieldMap[key] = {
+    type: 'alias',
+    required: false,
+    path: value,
+  };
+});
+
+export const securityRuleTypeFieldMap = {
+  ...technicalRuleFieldMap,
+  ...alertsFieldMap,
+  ...rulesFieldMap,
+  ...aliasesFieldMap,
+};
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
@@ -515,12 +532,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         context: 'security',
         mappings: {
           dynamic: false,
-          fieldMap: {
-            ...technicalRuleFieldMap,
-            ...alertsFieldMap,
-            ...rulesFieldMap,
-            ...getAliasesFieldMap(),
-          },
+          fieldMap: securityRuleTypeFieldMap,
         },
         useEcs: true,
         useLegacyAlerts: true,

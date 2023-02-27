@@ -97,6 +97,7 @@ export class AlertsService implements IAlertsService {
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
     this.resourceInitializationHelper = createResourceInstallationHelper(
+      this.options.logger,
       this.initializeContext.bind(this)
     );
   }
@@ -187,64 +188,59 @@ export class AlertsService implements IAlertsService {
     { context, mappings, useEcs, useLegacyAlerts, secondaryAlias }: IRuleTypeAlerts,
     timeoutMs?: number
   ) {
-    try {
-      const esClient = await this.options.elasticsearchClientPromise;
+    const esClient = await this.options.elasticsearchClientPromise;
 
-      const indexTemplateAndPattern = getIndexTemplateAndPattern({ context, secondaryAlias });
+    const indexTemplateAndPattern = getIndexTemplateAndPattern({ context, secondaryAlias });
 
-      let initFns: Array<() => Promise<void>> = [];
+    let initFns: Array<() => Promise<void>> = [];
 
-      // List of component templates to reference
-      // Order matters
-      // 1. ECS component template, if using
-      // 2. Context specific component template, if defined during registration
-      // 3. Legacy alert component template, if using
-      // 4. Framework common component template, always included
-      const componentTemplateRefs: string[] = [];
+    // List of component templates to reference
+    // Order matters in this list - templates specified last take precedence over those specified first
+    // 1. ECS component template, if using
+    // 2. Context specific component template, if defined during registration
+    // 3. Legacy alert component template, if using
+    // 4. Framework common component template, always included
+    const componentTemplateRefs: string[] = [];
 
-      // If useEcs is set to true, add the ECS component template to the references
-      if (useEcs) {
-        componentTemplateRefs.push(getComponentTemplateName({ name: ECS_CONTEXT }));
-      }
+    // If useEcs is set to true, add the ECS component template to the references
+    if (useEcs) {
+      componentTemplateRefs.push(getComponentTemplateName({ name: ECS_CONTEXT }));
+    }
 
-      // If fieldMap is not empty, create a context specific component template and add to the references
-      if (!isEmpty(mappings.fieldMap)) {
-        const componentTemplate = getComponentTemplate({
-          fieldMap: mappings.fieldMap,
-          dynamic: mappings.dynamic,
-          context,
-        });
-        initFns.push(
-          async () => await this.createOrUpdateComponentTemplate(esClient, componentTemplate)
-        );
-        componentTemplateRefs.push(componentTemplate.name);
-      }
+    // If fieldMap is not empty, create a context specific component template and add to the references
+    if (!isEmpty(mappings.fieldMap)) {
+      const componentTemplate = getComponentTemplate({
+        fieldMap: mappings.fieldMap,
+        dynamic: mappings.dynamic,
+        context,
+      });
+      initFns.push(
+        async () => await this.createOrUpdateComponentTemplate(esClient, componentTemplate)
+      );
+      componentTemplateRefs.push(componentTemplate.name);
+    }
 
-      // If useLegacy is set to true, add the legacy alert component template to the references
-      if (useLegacyAlerts) {
-        componentTemplateRefs.push(getComponentTemplateName({ name: LEGACY_ALERT_CONTEXT }));
-      }
+    // If useLegacy is set to true, add the legacy alert component template to the references
+    if (useLegacyAlerts) {
+      componentTemplateRefs.push(getComponentTemplateName({ name: LEGACY_ALERT_CONTEXT }));
+    }
 
-      // Add framework component template to the references
-      componentTemplateRefs.push(getComponentTemplateName());
+    // Add framework component template to the references
+    componentTemplateRefs.push(getComponentTemplateName());
 
-      // Context specific initialization installs index template and write index
-      initFns = initFns.concat([
-        async () =>
-          await this.createOrUpdateIndexTemplate(
-            esClient,
-            indexTemplateAndPattern,
-            componentTemplateRefs
-          ),
-        async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
-      ]);
+    // Context specific initialization installs index template and write index
+    initFns = initFns.concat([
+      async () =>
+        await this.createOrUpdateIndexTemplate(
+          esClient,
+          indexTemplateAndPattern,
+          componentTemplateRefs
+        ),
+      async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
+    ]);
 
-      for (const fn of initFns) {
-        await this.installWithTimeout(async () => await fn(), timeoutMs);
-      }
-    } catch (err) {
-      this.options.logger.error(`Error initializing context ${context} - ${err.message}`);
-      throw err;
+    for (const fn of initFns) {
+      await this.installWithTimeout(async () => await fn(), timeoutMs);
     }
   }
 

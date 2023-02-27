@@ -169,11 +169,9 @@ export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
   opts: GetViewInAppRelativeUrlFnOpts<Params>
 ) => string;
 
-export interface FieldMapSpec {
+interface ComponentTemplateSpec {
   dynamic?: 'strict' | boolean; // defaults to 'strict'
   fieldMap: FieldMap;
-  useEcs?: boolean;
-  useLegacyAlerts?: boolean;
 }
 
 export interface IRuleTypeAlerts {
@@ -191,7 +189,7 @@ export interface IRuleTypeAlerts {
    * index. These mappings will be translated into a component template
    * and used in the index template for the index.
    */
-  mappings: FieldMapSpec;
+  mappings: ComponentTemplateSpec;
 
   /**
    * Optional flag to include a reference to the ECS component template.
