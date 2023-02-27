@@ -44,7 +44,6 @@ export default ({ getService }: FtrProviderContext) => {
     timeFieldName: '@timestamp',
   };
 
-
   const expected = {
     chunksLength: 179,
     actionsLength: 178,
@@ -121,7 +120,6 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('POST /internal/aiops/explain_log_rate_spikes EXTENDED EXAMPLES', () => {
     async function requestWithoutStreaming(body: ApiExplainLogRateSpikes['body']) {
-
       const resp = await supertest
         .post(`/internal/aiops/explain_log_rate_spikes`)
         .set('kbn-xsrf', 'kibana')
@@ -153,7 +151,6 @@ export default ({ getService }: FtrProviderContext) => {
       expect(() => {
         data = chunks.map((c) => JSON.parse(c));
       }).not.to.throwError();
-
 
       expect(data.length).to.eql(
         expected.actionsLength,
