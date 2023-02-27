@@ -209,7 +209,7 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
         options={
           options?.map((option) => ({
             text: i18n.translate(
-              'xpack.enterpriseSearch.content.engine.searchPreview.resultsPerPage.label',
+              'xpack.enterpriseSearch.content.engine.searchPreview.resultsPerPage.option.label',
               {
                 defaultMessage: '{value} {value, plural, one {Result} other {Results}}',
                 values: { value: option },
