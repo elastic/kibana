@@ -8,7 +8,6 @@
 
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { UserProfileSettingsClientFactoryProvider } from '@kbn/security-plugin/server/user_profile/user_profile_settings_client';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient, IUserUiSettingsClient } from './ui_settings_client';
 
@@ -110,4 +109,19 @@ export interface UiSettingsServiceStart {
   setUserProfileSettingsClientFactoryProvider(
     userProfileSettingsClientFactoryProvider: UserProfileSettingsClientFactoryProvider
   ): void;
+}
+
+/**
+ * Provider to invoke to retrieve a UserProfilesClientFactory.
+ */
+export type UserProfileSettingsClientFactoryProvider = () => UserProfileSettingsClientFactory;
+
+// Describes the factory used to create instances of the UserProfileSettingsClient
+export type UserProfileSettingsClientFactory = () => UserProfileSettingsClientContract;
+
+/**
+ * Describes the functions that will be provided by a UserProfileSettingsClient
+ */
+export interface UserProfileSettingsClientContract {
+  get(request: KibanaRequest): Promise<Record<string, string>>;
 }

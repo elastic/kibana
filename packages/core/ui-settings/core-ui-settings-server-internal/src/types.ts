@@ -14,7 +14,7 @@ import type {
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import type { Logger } from '@kbn/logging';
-import type { UserProfileSettingsClientContract } from '@kbn/security-plugin/server/user_profile/user_profile_settings_client';
+import { UserProfileSettingsClientContract } from '@kbn/core-ui-settings-server/src/contracts';
 
 /** @internal */
 export interface InternalUiSettingsServicePreboot {

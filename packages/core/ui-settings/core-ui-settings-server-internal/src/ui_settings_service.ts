@@ -15,11 +15,11 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import type { UiSettingsParams, UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   UserProfileSettingsClientContract,
   UserProfileSettingsClientFactoryProvider,
-} from '@kbn/security-plugin/server/user_profile/user_profile_settings_client';
-import type { KibanaRequest } from '@kbn/core-http-server';
+} from '@kbn/core-ui-settings-server/src/contracts';
 import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
 import {
   UiSettingsClient,

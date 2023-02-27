@@ -32,7 +32,6 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-saved-objects-common",
-    "@kbn/security-plugin",
   ],
   "exclude": [
     "target/**/*",

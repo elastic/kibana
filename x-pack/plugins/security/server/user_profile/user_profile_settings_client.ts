@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { UserProfileSettingsClientContract } from '@kbn/core-ui-settings-server/src/contracts';
 
 import type { UserSettingServiceStart } from './user_setting_service';
 
@@ -27,19 +28,4 @@ export class UserProfileSettingsClient implements UserProfileSettingsClientContr
   async get(request: KibanaRequest): Promise<Record<string, string>> {
     return await this.userSettingsServiceStart.getCurrentUserProfileSettings(request);
   }
-}
-
-/**
- * Provider to invoke to retrieve a UserProfilesClientFactory.
- */
-export type UserProfileSettingsClientFactoryProvider = () => UserProfileSettingsClientFactory;
-
-// Describes the factory used to create instances of the UserProfileSettingsClient
-export type UserProfileSettingsClientFactory = () => UserProfileSettingsClientContract;
-
-/**
- * Describes the functions that will be provided by a UserProfileSettingsClient
- */
-export interface UserProfileSettingsClientContract {
-  get(request: KibanaRequest): Promise<Record<string, string>>;
 }
