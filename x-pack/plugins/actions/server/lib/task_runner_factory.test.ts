@@ -20,6 +20,7 @@ import { actionsClientMock } from '../mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { pick } from 'lodash';
+import { isRetryError } from '@kbn/task-manager-plugin/server/task_running';
 
 const executeParamsFields = [
   'actionId',
@@ -734,7 +735,7 @@ test(`throws an error when license doesn't support the action type`, async () =>
   }
 });
 
-test(`treats errors as errors if the task is retryable`, async () => {
+test(`will throw a retry error if the task is retryable`, async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: {
       ...mockedTaskInstance,
@@ -777,6 +778,7 @@ test(`treats errors as errors if the task is retryable`, async () => {
   expect(err instanceof ExecutorError).toEqual(true);
   expect(err.data).toEqual({ foo: true });
   expect(err.retry).toEqual(false);
+  expect(isRetryError(err)).toEqual(false);
   expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
     `Action '2' failed and will not retry: Error message`
   );
@@ -827,7 +829,7 @@ test(`treats errors as successes if the task is not retryable`, async () => {
   );
 });
 
-test('treats errors as errors if the error is thrown instead of returned', async () => {
+test('will throw a retry error if the error is thrown instead of returned', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: {
       ...mockedTaskInstance,
@@ -864,6 +866,7 @@ test('treats errors as errors if the error is thrown instead of returned', async
   expect(err instanceof ExecutorError).toEqual(true);
   expect(err.data).toEqual({});
   expect(err.retry).toEqual(true);
+  expect(isRetryError(err)).toEqual(true);
   expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
     `Action '2' failed and will retry: undefined`
   );

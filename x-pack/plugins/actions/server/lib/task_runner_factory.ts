@@ -21,7 +21,7 @@ import {
   Headers,
   FakeRawRequest,
 } from '@kbn/core/server';
-import { RunContext, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import { RunContext } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { throwRetryError } from '@kbn/task-manager-plugin/server/task_running';
 import { ActionExecutorContract } from './action_executor';
@@ -136,7 +136,7 @@ export class TaskRunnerFactory {
           if (isRetryableBasedOnAttempts) {
             // In order for retry to work, we need to indicate to task manager this task
             // failed
-            throw new ExecutorError(e.message, {}, true);
+            throw throwRetryError(new ExecutorError(e.message, {}, true), true);
           }
         }
 
@@ -155,16 +155,16 @@ export class TaskRunnerFactory {
           );
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
+          const retry = executorResult.retry as boolean | Date;
           throw throwRetryError(
-            new ExecutorError(executorResult.message, executorResult.data),
-            executorResult.retry as boolean | Date
+            new ExecutorError(executorResult.message, executorResult.data, retry),
+            retry
           );
         } else if (executorResult && executorResult?.status === 'error') {
           inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_FAILURES);
           logger.error(
             `Action '${actionId}' failed ${willNotRetryMessage}: ${executorResult.message}`
           );
-          throw throwUnrecoverableError(new ExecutorError(executorResult.message));
         }
 
         // Cleanup action_task_params object now that we're done with it
