@@ -35,7 +35,7 @@ describe('getPosturePolicy', () => {
 
     const policy = getPosturePolicy(mockCisAws, 'cloudbeat/cis_k8s');
     expect(policy.vars?.posture.value).toBe('kspm');
-    expect(policy.vars?.deployment.value).toBe('cloudbeat/cis_k8s');
+    expect(policy.vars?.deployment.value).toBe('self_managed');
 
     // Does not change extra vars
     expect(policy.vars?.extra.value).toBe('value');
