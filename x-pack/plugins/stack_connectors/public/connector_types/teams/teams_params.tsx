@@ -18,14 +18,15 @@ const TeamsParamsFields: React.FunctionComponent<ActionParamsProps<TeamsActionPa
   errors,
   messageVariables,
   defaultMessage,
+  useDefaultMessage,
 }) => {
   const { message } = actionParams;
   useEffect(() => {
-    if (!message && defaultMessage && defaultMessage.length > 0) {
+    if (useDefaultMessage || (!message && defaultMessage && defaultMessage.length > 0)) {
       editAction('message', defaultMessage, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [defaultMessage]);
 
   return (
     <TextAreaWithMessageVariables

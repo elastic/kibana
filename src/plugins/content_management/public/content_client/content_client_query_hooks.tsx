@@ -8,7 +8,7 @@
 
 import { useQuery, QueryObserverOptions } from '@tanstack/react-query';
 import { useContentClient } from './content_client_context';
-import type { GetIn } from '../../common';
+import type { GetIn, SearchIn } from '../../common';
 
 /**
  * Exposed `useQuery` options
@@ -18,7 +18,7 @@ export type QueryOptions = Pick<QueryObserverOptions, 'enabled'>;
 /**
  *
  * @param input - get content identifier like "id" and "contentType"
- * @param queryOptions -
+ * @param queryOptions - query options
  */
 export const useGetContentQuery = <I extends GetIn = GetIn, O = unknown>(
   input: I,
@@ -27,6 +27,22 @@ export const useGetContentQuery = <I extends GetIn = GetIn, O = unknown>(
   const contentClient = useContentClient();
   return useQuery({
     ...contentClient.queryOptionBuilder.get<I, O>(input),
+    ...queryOptions,
+  });
+};
+
+/**
+ *
+ * @param input - get content identifier like "id" and "contentType"
+ * @param queryOptions - query options
+ */
+export const useSearchContentQuery = <I extends SearchIn = SearchIn, O = unknown>(
+  input: I,
+  queryOptions?: QueryOptions
+) => {
+  const contentClient = useContentClient();
+  return useQuery({
+    ...contentClient.queryOptionBuilder.search<I, O>(input),
     ...queryOptions,
   });
 };

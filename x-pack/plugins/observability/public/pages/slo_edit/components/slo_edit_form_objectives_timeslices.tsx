@@ -8,14 +8,11 @@
 import React from 'react';
 import { EuiFieldNumber, EuiFlexGrid, EuiFlexItem, EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Control, Controller } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-export interface Props {
-  control: Control<CreateSLOInput>;
-}
-
-export function SloEditFormObjectivesTimeslices({ control }: Props) {
+export function SloEditFormObjectivesTimeslices() {
+  const { control } = useFormContext<CreateSLOInput>();
   return (
     <EuiFlexGrid columns={3}>
       <EuiFlexItem>
@@ -25,6 +22,7 @@ export function SloEditFormObjectivesTimeslices({ control }: Props) {
           })}
         </EuiFormLabel>
         <Controller
+          shouldUnregister={true}
           name="objective.timesliceTarget"
           control={control}
           defaultValue={95}
@@ -33,7 +31,7 @@ export function SloEditFormObjectivesTimeslices({ control }: Props) {
             min: 0.001,
             max: 99.999,
           }}
-          render={({ field }) => (
+          render={({ field: { ref, ...field } }) => (
             <EuiFieldNumber
               {...field}
               value={String(field.value)}
@@ -55,11 +53,12 @@ export function SloEditFormObjectivesTimeslices({ control }: Props) {
         </EuiFormLabel>
 
         <Controller
+          shouldUnregister={true}
           name="objective.timesliceWindow"
           defaultValue="1"
           control={control}
           rules={{ required: true, min: 1, max: 120 }}
-          render={({ field }) => (
+          render={({ field: { ref, ...field } }) => (
             <EuiFieldNumber
               {...field}
               data-test-subj="sloFormObjectiveTimesliceWindowInput"

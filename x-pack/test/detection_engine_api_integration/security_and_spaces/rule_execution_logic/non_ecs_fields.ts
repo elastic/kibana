@@ -9,7 +9,7 @@ import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getPreviewAlerts,
   getRuleForSignalTesting,
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
         'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
       );
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     // source agent.name is object, ECS mapping for agent.name is keyword

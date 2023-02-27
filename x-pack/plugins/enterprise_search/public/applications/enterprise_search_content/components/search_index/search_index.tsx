@@ -97,6 +97,7 @@ export const SearchIndex: React.FC = () => {
   useEffect(() => {
     if (
       isConnectorIndex(index) &&
+      index.name === indexName &&
       index.connector.is_native &&
       index.connector.service_type === null
     ) {
