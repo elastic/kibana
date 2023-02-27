@@ -84,7 +84,6 @@ const imageMimeTypes = [
   'image/vnd.zbrush.pcx',
   'image/webp',
   'image/wmf',
-  'image/emf',
 ];
 
 const textMimeTypes = ['text/plain', 'text/csv', 'text/json', 'application/json'];
