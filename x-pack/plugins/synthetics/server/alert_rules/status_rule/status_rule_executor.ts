@@ -67,11 +67,11 @@ export class StatusRuleExecutor {
   }
 
   async getAllLocationNames() {
-    const { publicLocations, privateLocations } = await getAllLocations(
-      this.server,
-      this.syntheticsMonitorClient,
-      this.soClient
-    );
+    const { publicLocations, privateLocations } = await getAllLocations({
+      server: this.server,
+      syntheticsMonitorClient: this.syntheticsMonitorClient,
+      savedObjectsClient: this.soClient,
+    });
 
     publicLocations.forEach((loc) => {
       this.locationIdNameMap[loc.label] = loc.id;
