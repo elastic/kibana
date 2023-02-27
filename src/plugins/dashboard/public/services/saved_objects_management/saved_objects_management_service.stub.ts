@@ -7,20 +7,11 @@
  */
 
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { DashboardSavedObjectsManagementService } from './types';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
 
-type SavedObjectsManagementServiceFactory =
-  PluginServiceFactory<DashboardSavedObjectsManagementService>;
+type SavedObjectsManagementServiceFactory = PluginServiceFactory<SavedObjectsManagementPluginStart>;
 
 export const savedObjectsManagementServiceFactory: SavedObjectsManagementServiceFactory = () => {
-  return {
-    parseQuery: (query, types) => {
-      return {
-        queryText: 'some search',
-      };
-    },
-    getTagFindReferences: ({ selectedTags, taggingApi }) => {
-      return undefined;
-    },
-  };
+  return savedObjectsManagementPluginMock.createStartContract();
 };

@@ -7,11 +7,11 @@
  */
 
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DashboardStartDependencies } from '../../plugin';
-import { DashboardSavedObjectsManagementService } from './types';
 
 export type SavedObjectsManagementServiceFactory = KibanaPluginServiceFactory<
-  DashboardSavedObjectsManagementService,
+  SavedObjectsManagementPluginStart,
   DashboardStartDependencies
 >;
 
@@ -20,10 +20,5 @@ export const savedObjectsManagementServiceFactory: SavedObjectsManagementService
 }) => {
   const { savedObjectsManagement } = startPlugins;
 
-  const { parseQuery, getTagFindReferences } = savedObjectsManagement;
-
-  return {
-    parseQuery,
-    getTagFindReferences,
-  };
+  return savedObjectsManagement;
 };
