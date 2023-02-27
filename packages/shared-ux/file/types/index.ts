@@ -7,6 +7,7 @@
  */
 
 export type { BaseFilesClient, Abortable, Pagination } from './base_file_client';
+export type { FileShare, FileShareJSON, FileShareJSONWithToken } from './sharing';
 
 /* Status of a file.
  *
@@ -22,19 +23,6 @@ export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'UPLOAD_ERR
  * Supported file compression algorithms
  */
 export type FileCompression = 'br' | 'gzip' | 'deflate' | 'none';
-
-/** Definition for an endpoint that the File's service will generate */
-interface HttpEndpointDefinition {
-  /**
-   * Specify the tags for this endpoint.
-   *
-   * @example
-   * // This will enable access control to this endpoint for users that can access "myApp" only.
-   * { tags: ['access:myApp'] }
-   *
-   */
-  tags: string[];
-}
 
 /**
  * File metadata fields are defined per the ECS specification:
@@ -240,23 +228,11 @@ export interface FileJSON<Meta = unknown> {
   user?: FileMetadata['user'];
 }
 
-/*
- * A descriptor of meta values associated with a set or "kind" of files.
- *
- * @note In order to use the file service consumers must register a {@link FileKind}
- * in the {@link FileKindsRegistry}.
- */
-export interface FileKind {
+export interface FileKindBase {
   /**
    * Unique file kind ID
    */
   id: string;
-  /**
-   * Maximum size, in bytes, a file of this kind can be.
-   *
-   * @default 4MiB
-   */
-  maxSizeBytes?: number;
 
   /**
    * The MIME type of the file content.
@@ -264,52 +240,16 @@ export interface FileKind {
    * @default accept all mime types
    */
   allowedMimeTypes?: string[];
+}
 
+export interface FileKindBrowser extends FileKindBase {
   /**
-   * Blob store specific settings that enable configuration of storage
-   * details.
-   */
-  blobStoreSettings?: BlobStorageSettings;
-
-  /**
-   * Specify which HTTP routes to create for the file kind.
+   * Max file contents size, in bytes, enforced for this file kind in the upload
+   * component.
    *
-   * You can always create your own HTTP routes for working with files but
-   * this interface allows you to expose basic CRUD operations, upload, download
-   * and sharing of files over a RESTful-like interface.
-   *
-   * @note The public {@link FileClient} uses these endpoints.
+   * @default 4MiB
    */
-  http: {
-    /**
-     * Expose file creation (and upload) over HTTP.
-     */
-    create?: HttpEndpointDefinition;
-    /**
-     * Expose file updates over HTTP.
-     */
-    update?: HttpEndpointDefinition;
-    /**
-     * Expose file deletion over HTTP.
-     */
-    delete?: HttpEndpointDefinition;
-    /**
-     * Expose "get by ID" functionality over HTTP.
-     */
-    getById?: HttpEndpointDefinition;
-    /**
-     * Expose the ability to list all files of this kind over HTTP.
-     */
-    list?: HttpEndpointDefinition;
-    /**
-     * Expose the ability to download a file's contents over HTTP.
-     */
-    download?: HttpEndpointDefinition;
-    /**
-     * Expose file share functionality over HTTP.
-     */
-    share?: HttpEndpointDefinition;
-  };
+  maxSizeBytes?: number;
 }
 
 /**
