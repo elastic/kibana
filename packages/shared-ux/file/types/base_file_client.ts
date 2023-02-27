@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { FileJSON, FileKind } from '.';
+import type { FileShareJSON, FileShareJSONWithToken } from './sharing';
+import type { FileJSON, FileKindBase } from '.';
 
 export interface Pagination {
   page?: number;
@@ -62,7 +63,7 @@ export interface BaseFilesClient<M = unknown> {
    */
   getById: (args: { id: string; kind: string } & Abortable) => Promise<{ file: FileJSON<M> }>;
   /**
-   * List all file objects, of a given {@link FileKind}.
+   * List all file objects, of a given {@link FileKindBrowser}.
    *
    * @param args - list files args
    */
@@ -154,5 +155,5 @@ export interface BaseFilesClient<M = unknown> {
    * Get a file kind
    * @param id The id of the file kind
    */
-  getFileKind: (id: string) => FileKind;
+  getFileKind: (id: string) => FileKindBase;
 }
