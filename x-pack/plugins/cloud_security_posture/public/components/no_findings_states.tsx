@@ -27,6 +27,10 @@ import type { IndexDetails } from '../../common/types';
 
 const REFETCH_INTERVAL_MS = 20000;
 
+interface postureTypes {
+  posturetype : 'cspm' | 'kspm';
+}
+
 const NotDeployed = () => {
   // using an existing hook to get agent id and package policy id
   const benchmarks = useCspBenchmarkIntegrations({
@@ -177,15 +181,15 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
  * This component will return the render states based on cloud posture setup status API
  * since 'not-installed' is being checked globally by CloudPosturePage and 'indexed' is the pass condition, those states won't be handled here
  * */
-export const NoFindingsStates = () => {
+export const NoFindingsStates = (posturetype : postureTypes) => {
   const getSetupStatus = useCspSetupStatusApi({
     options: { refetchInterval: REFETCH_INTERVAL_MS },
   });
   const statusKspm = getSetupStatus.data?.kspm?.status;
   const statusCspm = getSetupStatus.data?.cspm?.status;
   const indicesStatus = getSetupStatus.data?.indicesDetails;
-  // const status = postureType === 'cspm' ? statusCspm : statusKspm;
-  const status = getSetupStatus.data?.kspm?.status;
+  const status = posturetype.posturetype === 'cspm' ? statusCspm : statusKspm;
+  // const status = getSetupStatus.data?.kspm?.status;
   const unprivilegedIndices =
     indicesStatus &&
     indicesStatus

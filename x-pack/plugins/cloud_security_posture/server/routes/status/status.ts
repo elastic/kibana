@@ -67,7 +67,7 @@ const getHealthyAgents = async (
   );
 };
 
-const calculateCspStatusCode = (
+export const calculateCspStatusCode = (
   postureType: PostureTypes,
   indicesStatus: {
     findingsLatest: IndexStatus;
@@ -85,13 +85,8 @@ const calculateCspStatusCode = (
   if (indicesStatus.findingsLatest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
   if (!installedPolicyTemplates.includes(postureTypeCheck)) return 'not-installed';
-  if (
-    indicesStatus.findingsLatest === 'not-empty' &&
-    installedCspPackagePolicies !== 0 &&
-    healthyAgents !== 0
-  )
-    return 'indexed';
-  if (healthyAgents === 0) return 'not-deployed';
+  if (healthyAgents === 0  && installedCspPackagePolicies > 0) return 'not-deployed';
+  if (indicesStatus.findings === 'not-empty') return 'indexed';
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
   if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
 
@@ -152,7 +147,7 @@ const getCspStatus = async ({
     ),
     getInstalledPolicyTemplates(packagePolicyService, soClient),
   ]);
-
+  console.log(findingsIndexStatus);
   const healthyAgentsKspm = await getHealthyAgents(
     soClient,
     installedPackagePoliciesKspm.items,
@@ -168,8 +163,7 @@ const getCspStatus = async ({
     agentService,
     logger
   );
-console.log(installedPackagePoliciesKspm.items[0])
-console.log(installedPackagePoliciesCspm.items[0])
+
   const installedPackagePoliciesTotalKspm = installedPackagePoliciesKspm.total;
   const installedPackagePoliciesTotalCspm = installedPackagePoliciesCspm.total;
   const latestCspPackageVersion = latestCspPackage.version;
@@ -288,7 +282,7 @@ export const defineGetCspStatusRoute = (router: CspRouter): void =>
       } catch (err) {
         cspContext.logger.error(`Error getting csp status`);
         cspContext.logger.error(err);
-       console.log(err);
+        console.log(err);
 
         const error = transformError(err);
         return response.customError({
