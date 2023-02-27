@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 
-import { Overview as Overview } from './overview';
-
 export interface Props {
-  slo: SLOWithSummaryResponse;
+  title: string;
+  subtitle: string;
 }
 
-export function SloDetails(props: Props) {
-  const { slo } = props;
+export function OverviewItem({ title, subtitle }: Props) {
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <Overview slo={slo} />
+        <EuiText size="xs">
+          <strong>{title}</strong>
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        <pre data-test-subj="sloDetails">{JSON.stringify(slo, null, 2)}</pre>;
+        <EuiText size="s">{subtitle}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
