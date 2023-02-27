@@ -48,6 +48,7 @@ import {
   getNewRule,
   getNewThresholdRule,
   getNewTermsRule,
+  getNewSavedQueryRule,
 } from '../../objects/rule';
 
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
@@ -80,7 +81,7 @@ describe('Bulk editing index patterns of rules with a data view only', () => {
     createCustomIndicatorRule(getNewThreatIndicatorRule({ id: '3', ...dataViewRuleData }));
     createThresholdRule(getNewThresholdRule({ id: '4', ...dataViewRuleData }));
     createNewTermsRule(getNewTermsRule({ id: '5', ...dataViewRuleData }));
-    createSavedQueryRule({ ...getNewRule({ id: '6' }), ...dataViewRuleData, savedId: 'mocked' });
+    createSavedQueryRule(getNewSavedQueryRule({ savedId: 'mocked', id: '6', ...dataViewRuleData }));
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 

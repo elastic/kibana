@@ -501,6 +501,13 @@ export const getNewThreatIndicatorRule = (
   ...rewrites,
 });
 
+export const getNewSavedQueryRule = (
+  rewrites: { savedId: string } & Partial<SavedQueryRule>
+): SavedQueryRule => ({
+  savedId: rewrites.savedId,
+  ...getNewRule(rewrites),
+});
+
 export const duplicatedRuleName = `${getNewThreatIndicatorRule().name} [Duplicate]`;
 
 export const getSeveritiesOverride = (): string[] => ['Low', 'Medium', 'High', 'Critical'];
