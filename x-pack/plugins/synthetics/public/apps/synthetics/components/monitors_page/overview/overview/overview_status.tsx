@@ -21,7 +21,7 @@ function title(t?: number) {
 export function OverviewStatus() {
   const { statusFilter } = useGetUrlParams();
 
-  const { status, error: statusError } = useOverviewStatus();
+  const { status, error: statusError } = useOverviewStatus({ scopeStatusByLocation: true });
   const dispatch = useDispatch();
   const [statusConfig, setStatusConfig] = useState({
     up: status?.up,

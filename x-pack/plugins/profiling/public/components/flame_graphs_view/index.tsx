@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { pick } from 'lodash';
+import { get } from 'lodash';
 import React, { useState } from 'react';
 import { FlameGraphComparisonMode, FlameGraphNormalizationMode } from '../../../common/flamegraph';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
@@ -85,9 +85,31 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   const comparisonMode =
     'comparisonMode' in query ? query.comparisonMode : FlameGraphComparisonMode.Absolute;
 
-  const normalizationMode = 'normalizationMode' in query ? query.normalizationMode : undefined;
-  const baseline = 'baseline' in query ? query.baseline : 1;
-  const comparison = 'comparison' in query ? query.comparison : 1;
+  const normalizationMode: FlameGraphNormalizationMode = get(
+    query,
+    'normalizationMode',
+    FlameGraphNormalizationMode.Time
+  );
+
+  const baselineScale: number = get(query, 'baseline', 1);
+  const comparisonScale: number = get(query, 'comparison', 1);
+
+  const totalSeconds =
+    (new Date(timeRange.end).getTime() - new Date(timeRange.start).getTime()) / 1000;
+  const totalComparisonSeconds =
+    (new Date(comparisonTimeRange.end!).getTime() -
+      new Date(comparisonTimeRange.start!).getTime()) /
+    1000;
+
+  const baselineTime = 1;
+  const comparisonTime = totalSeconds / totalComparisonSeconds;
+
+  const normalizationOptions: FlameGraphNormalizationOptions = {
+    baselineScale,
+    baselineTime,
+    comparisonScale,
+    comparisonTime,
+  };
 
   const {
     services: { fetchElasticFlamechart },
@@ -247,33 +269,25 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
       <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
           <NormalizationMenu
-            onChange={(options) => {
+            onChange={(mode, options) => {
               profilingRouter.push(routePath, {
                 path: routePath,
-                query: {
-                  ...query,
-                  ...pick(options, 'baseline', 'comparison'),
-                  normalizationMode: options.mode,
-                },
+                query:
+                  mode === FlameGraphNormalizationMode.Scale
+                    ? {
+                        ...query,
+                        baseline: options.baselineScale,
+                        comparison: options.comparisonScale,
+                        normalizationMode: mode,
+                      }
+                    : {
+                        ...query,
+                        normalizationMode: mode,
+                      },
               });
             }}
-            totalSeconds={
-              (new Date(timeRange.end).getTime() - new Date(timeRange.start).getTime()) / 1000
-            }
-            comparisonTotalSeconds={
-              (new Date(comparisonTimeRange.end!).getTime() -
-                new Date(comparisonTimeRange.start!).getTime()) /
-              1000
-            }
-            options={
-              (normalizationMode === FlameGraphNormalizationMode.Time
-                ? { mode: FlameGraphNormalizationMode.Time }
-                : {
-                    mode: FlameGraphNormalizationMode.Scale,
-                    baseline,
-                    comparison,
-                  }) as FlameGraphNormalizationOptions
-            }
+            mode={normalizationMode}
+            options={normalizationOptions}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -308,8 +322,16 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
               primaryFlamegraph={data?.primaryFlamegraph}
               comparisonFlamegraph={data?.comparisonFlamegraph}
               comparisonMode={comparisonMode}
-              baseline={baseline}
-              comparison={comparison}
+              baseline={
+                normalizationMode === FlameGraphNormalizationMode.Time
+                  ? baselineTime
+                  : baselineScale
+              }
+              comparison={
+                normalizationMode === FlameGraphNormalizationMode.Time
+                  ? comparisonTime
+                  : comparisonScale
+              }
               showInformationWindow={showInformationWindow}
               onInformationWindowClose={() => {
                 setShowInformationWindow(false);
