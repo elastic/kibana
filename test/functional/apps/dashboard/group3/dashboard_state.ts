@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const urlBeforeClientQueryParams = url.substring(0, clientQueryParamsStartIndex);
     const urlParams = new URLSearchParams(url.substring(clientQueryParamsStartIndex + 1));
     const appState: Partial<SharedDashboardState> = urlParams.has('_a')
-      ? rison.decode(urlParams.get('_a'))
+      ? rison.decode(urlParams.get('_a')!) as Partial<SharedDashboardState>
       : {};
     const newAppState = {
       ...appState,
@@ -219,7 +219,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const changeQuery = async (useHardRefresh: boolean, newQuery: string) => {
         await queryBar.clickQuerySubmitButton();
-        const oldQuery = await queryBar.getQueryString();
         const currentUrl = await getUrlFromShare();
         const newUrl = updateAppStateQueryParam(
           currentUrl,
@@ -343,9 +342,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                       embeddableConfig: {
                         ...(panel.embeddableConfig ?? {}),
                         vis: {
-                          ...(panel.embeddableConfig.vis ?? {}),
+                          ...(panel.embeddableConfig.vis as object ?? {}),
                           colors: {
-                            ...(panel.embeddableConfig.vis.colors ?? {}),
+                            ...((panel.embeddableConfig.vis as { colors: object }).colors ?? {}),
                             ['80000']: 'FFFFFF',
                           },
                         },
@@ -391,7 +390,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                       embeddableConfig: {
                         ...(panel.embeddableConfig ?? {}),
                         vis: {
-                          ...(panel.embeddableConfig.vis ?? {}),
+                          ...(panel.embeddableConfig.vis as object ?? {}),
                           colors: {},
                         },
                       },
