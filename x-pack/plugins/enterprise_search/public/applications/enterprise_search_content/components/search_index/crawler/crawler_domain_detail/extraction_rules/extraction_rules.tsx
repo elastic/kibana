@@ -14,8 +14,6 @@ import {
   EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -26,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CANCEL_BUTTON_LABEL } from '../../../../../../shared/constants';
 import { docLinks } from '../../../../../../shared/doc_links';
+import { PageIntroduction } from '../../../../../../shared/page_introduction/page_introduction';
 
 import { EditExtractionRule } from './edit_extraction_rule';
 import { ExtractionRulesLogic } from './extraction_rules_logic';
@@ -81,56 +80,57 @@ export const ExtractionRules: React.FC = () => {
         </EuiConfirmModal>
       )}
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.enterpriseSearch.content.crawler.extractionRules.title', {
-                defaultMessage: 'Extraction rules',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        {extractionRules.length === 0 ? (
-          <></>
-        ) : (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-addContentExtractionRule"
-              iconType="plusInCircle"
-              onClick={editNewExtractionRule}
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.crawler.extractionRulesTable.addRuleLabel',
+        <PageIntroduction
+          title={
+            <EuiTitle size="s">
+              <h2>
+                {i18n.translate('xpack.enterpriseSearch.content.crawler.extractionRules.title', {
+                  defaultMessage: 'Extraction rules',
+                })}
+              </h2>
+            </EuiTitle>
+          }
+          description={
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.crawler.extractionRules.description"
+                defaultMessage="Create a content extraction rule to change where the documents get their data during a sync."
+              />
+            </p>
+          }
+          links={[
+            {
+              href: docLinks.crawlerExtractionRules,
+              text: i18n.translate(
+                'xpack.enterpriseSearch.content.crawler.extractionRules.learnMoreLink',
                 {
-                  defaultMessage: 'Add extraction rule',
+                  defaultMessage: 'Learn more about content extraction rules.',
                 }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiText size="s" color="subdued">
-        <p>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.content.crawler.extractionRules.description"
-            defaultMessage="Create a content extraction rule to change where the documents get their data during a sync. {learnMoreLink}"
-            values={{
-              learnMoreLink: (
-                <EuiLink href={`${docLinks.crawlerExtractionRules}`} external>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.crawler.extractionRules.learnMoreLink',
-                    {
-                      defaultMessage: 'Learn more about content extraction rules.',
-                    }
-                  )}
-                </EuiLink>
               ),
-            }}
-          />
-        </p>
-      </EuiText>
-      <EuiSpacer />
+            },
+          ]}
+          actions={
+            extractionRules.length === 0
+              ? []
+              : [
+                  <EuiButton
+                    size="s"
+                    data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-addContentExtractionRule"
+                    iconType="plusInCircle"
+                    onClick={editNewExtractionRule}
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.crawler.extractionRulesTable.addRuleLabel',
+                      {
+                        defaultMessage: 'Add extraction rule',
+                      }
+                    )}
+                  </EuiButton>,
+                ]
+          }
+        />
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
       {editingExtractionRule ? (
         <EditExtractionRule
           cancelEditing={cancelEditExtractionRule}

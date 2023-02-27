@@ -82,7 +82,8 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
           {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.description', {
             defaultMessage:
               'Include the most important URLs for your website here. Entry point URLs will be the first pages to be indexed and processed for links to other pages.',
-          })}{' '}
+          })}
+          <EuiSpacer size="s" />
           <EuiLink href={docLinks.crawlerManaging} target="_blank" external>
             {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.learnMoreLinkText', {
               defaultMessage: 'Learn more about entry points.',
@@ -136,7 +137,7 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
       onAdd={onAdd}
       onDelete={onDelete}
       onUpdate={onUpdate}
-      title={title || ''}
+      title={title}
       disableReordering
     />
   );
