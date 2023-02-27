@@ -162,6 +162,6 @@ query parameter for each value:
 
 [source,sh]
 --------------------------------------------------
-GET api/alerting/rules/_find?fields=id&fields=name
+GET api/alerting/rules/_find?fields=["name","id"]
 --------------------------------------------------
 // KIBANA
