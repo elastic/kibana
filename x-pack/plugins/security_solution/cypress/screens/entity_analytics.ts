@@ -26,7 +26,8 @@ export const RISK_SCORE_DASHBOARDS_INSTALLATION_SUCCESS_TOAST = (
 export const RISK_SCORE_INSTALLATION_SUCCESS_TOAST = (riskScoreEntity: RiskScoreEntity) =>
   `[data-test-subj="${riskScoreEntity}EnableSuccessToast"]`;
 
-export const HOSTS_DONUT_CHART = '.risk-score';
+export const HOSTS_DONUT_CHART =
+  '[data-test-subj="entity_analytics_hosts"] [data-test-subj="donut-chart"]';
 
 export const HOSTS_TABLE = '[data-test-subj="entity_analytics_hosts"] #hostRiskDashboardTable';
 
