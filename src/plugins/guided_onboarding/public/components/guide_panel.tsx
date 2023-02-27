@@ -192,7 +192,6 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
         stepsCompleted={stepsCompleted}
         isGuideReadyToComplete={isGuideReadyToComplete}
         guideConfig={guideConfig}
-        data-test-subj="guidePanel"
         navigateToLandingPage={navigateToLandingPage}
         pluginState={pluginState}
         handleStepButtonClick={handleStepButtonClick}

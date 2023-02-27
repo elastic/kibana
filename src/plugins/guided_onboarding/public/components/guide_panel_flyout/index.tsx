@@ -91,6 +91,7 @@ export const GuidePanelFlyout = ({
       <EuiOverlayMask>
         <EuiFocusTrap onClickOutside={toggleGuide}>
           <EuiPanel
+            data-test-subj="guidePanel"
             aria-labelledby={guidePanelFlyoutTitleId}
             role="dialog"
             css={hasError ? flyoutContainerError : flyoutContainer}
