@@ -41,10 +41,24 @@ export interface EnterpriseSearchEngineIndex {
 export interface EnterpriseSearchEngineFieldCapabilities {
   created: string;
   field_capabilities: FieldCapsResponse;
+  fields?: SchemaField[];
   name: string;
   updated: string;
 }
 export interface EnterpriseSearchSchemaField {
   field_name: string;
   field_type: string[];
+}
+
+export interface SchemaFieldIndex {
+  name: string;
+  type: string;
+}
+
+// TODO: This should replace EnterpriseSearchSchemaField once parseFieldsCapabilities is ready
+export interface SchemaField {
+  fields?: SchemaField[];
+  indices: SchemaFieldIndex[];
+  name: string;
+  type: string;
 }
