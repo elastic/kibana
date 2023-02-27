@@ -8,19 +8,19 @@
 
 import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-import { IconButtonGroup, PrimaryButton } from '../buttons';
+
 import { ToolbarPopover } from '../popover';
+import { IconButtonGroup, ToolbarButton } from '../buttons';
 
 /** type for cases with both button or a popover could be used */
-export type ToolbarButton = typeof PrimaryButton | typeof ToolbarPopover;
+export type ToolbarButtonType = typeof ToolbarButton | typeof ToolbarPopover;
 
 /** Specific type for the toolbar children in its props */
 interface NamedSlots {
-  primaryButton: ReactElement<ToolbarButton>;
+  primaryButton: ReactElement<ToolbarButtonType>;
   iconButtonGroup?: ReactElement<typeof IconButtonGroup>;
-  extraButtons?: Array<ReactElement<ToolbarButton>> | undefined;
+  extraButtons?: Array<ReactElement<ToolbarButtonType>> | undefined;
 }
 
 /**

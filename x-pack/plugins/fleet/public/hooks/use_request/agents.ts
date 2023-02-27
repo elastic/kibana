@@ -26,8 +26,8 @@ import type {
   PostBulkAgentUnenrollRequest,
   PostBulkAgentUnenrollResponse,
   PostAgentUnenrollResponse,
-  PutAgentReassignRequest,
-  PutAgentReassignResponse,
+  PostAgentReassignRequest,
+  PostAgentReassignResponse,
   PostBulkAgentReassignRequest,
   PostBulkAgentReassignResponse,
   GetAgentsRequest,
@@ -126,13 +126,13 @@ export function sendGetAgentTags(query: GetAgentsRequest['query'], options?: Req
   });
 }
 
-export function sendPutAgentReassign(
+export function sendPostAgentReassign(
   agentId: string,
-  body: PutAgentReassignRequest['body'],
+  body: PostAgentReassignRequest['body'],
   options?: RequestOptions
 ) {
-  return sendRequest<PutAgentReassignResponse>({
-    method: 'put',
+  return sendRequest<PostAgentReassignResponse>({
+    method: 'post',
     path: agentRouteService.getReassignPath(agentId),
     body,
     ...options,

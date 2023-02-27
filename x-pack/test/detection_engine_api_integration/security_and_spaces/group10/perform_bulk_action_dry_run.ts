@@ -17,11 +17,11 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getSimpleMlRule,
   getSimpleRule,
-  installPrePackagedRules,
+  installMockPrebuiltRules,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     it('should not support export action', async () => {
@@ -188,7 +188,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should validate immutable rule edit', async () => {
-        await installPrePackagedRules(supertest, es, log);
+        await installMockPrebuiltRules(supertest, es);
         const { body: findBody } = await findRules()
           .query({ per_page: 1, filter: 'alert.attributes.params.immutable: true' })
           .send()
