@@ -40,11 +40,11 @@ export const bulkCreate = async (
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  attachments.forEach((attachment) => {
-    decodeCommentRequest(attachment);
-  });
+  const { logger, authorization, externalReferenceAttachmentTypeRegistry } = clientArgs;
 
-  const { logger, authorization } = clientArgs;
+  attachments.forEach((attachment) => {
+    decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);
+  });
 
   try {
     const [attachmentsWithIds, entities]: [Array<{ id: string } & CommentRequest>, OwnerEntity[]] =

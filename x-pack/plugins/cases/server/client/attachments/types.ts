@@ -118,3 +118,10 @@ export interface UpdateArgs {
    */
   updateRequest: CommentPatchRequest;
 }
+
+export interface GetFileExtensionsArgs {
+  /**
+   * The ID of the case to retrieve the extensions from
+   */
+  caseId: string;
+}

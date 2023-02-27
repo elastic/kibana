@@ -13,7 +13,12 @@ import type {
   CommentResponse,
   CommentsResponse,
 } from '../../../common/api';
-import { AllCommentsResponseRt, CommentResponseRt, CommentsResponseRt } from '../../../common/api';
+import {
+  AllCommentsResponseRt,
+  CommentResponseRt,
+  CommentsResponseRt,
+  FileExtensionsResponseRt,
+} from '../../../common/api';
 import {
   defaultSortField,
   transformComments,
@@ -28,7 +33,13 @@ import { combineFilters, stringToKueryNode } from '../utils';
 import { Operations } from '../../authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import type { CasesClient } from '../client';
-import type { FindArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
+import type {
+  FindArgs,
+  GetAllAlertsAttachToCase,
+  GetAllArgs,
+  GetArgs,
+  GetFileExtensionsArgs,
+} from './types';
 
 const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
   alerts.reduce((acc: AlertResponse, alert) => {
@@ -241,3 +252,28 @@ export async function getAll(
     });
   }
 }
+
+export const getFileExtensions = async (
+  { caseId }: GetFileExtensionsArgs,
+  casesClient: CasesClient,
+  clientArgs: CasesClientArgs
+) => {
+  const {
+    services: { attachmentService },
+    logger,
+  } = clientArgs;
+
+  try {
+    await casesClient.cases.resolve({ id: caseId, includeComments: false });
+
+    const extensions = await attachmentService.getter.getCaseFileExtensions(caseId);
+
+    return FileExtensionsResponseRt.encode(extensions);
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to retrieve file extensions for case id: ${caseId}: ${error}`,
+      error,
+      logger,
+    });
+  }
+};

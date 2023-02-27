@@ -12,6 +12,7 @@ import type {
   CaseResponse,
   CommentResponse,
   CommentsResponse,
+  FileExtensionsResponse,
 } from '../../../common/api';
 import type { CasesClient } from '../client';
 
@@ -29,10 +30,11 @@ import type {
   GetArgs,
   UpdateArgs,
   BulkGetArgs,
+  GetFileExtensionsArgs,
 } from './types';
 import { bulkCreate } from './bulk_create';
 import { deleteAll, deleteComment } from './delete';
-import { find, get, getAll, getAllAlertsAttachToCase } from './get';
+import { find, get, getAll, getAllAlertsAttachToCase, getFileExtensions } from './get';
 import { bulkGet } from './bulk_get';
 import { update } from './update';
 
@@ -76,6 +78,7 @@ export interface AttachmentsSubClient {
    * The request must include all fields for the attachment. Even the fields that are not changing.
    */
   update(updateArgs: UpdateArgs): Promise<CaseResponse>;
+  getFileExtensions(getFileExtensionsArgs: GetFileExtensionsArgs): Promise<FileExtensionsResponse>;
 }
 
 /**
@@ -100,6 +103,7 @@ export const createAttachmentsSubClient = (
     getAll: (getAllArgs: GetAllArgs) => getAll(getAllArgs, clientArgs),
     get: (getArgs: GetArgs) => get(getArgs, clientArgs),
     update: (updateArgs: UpdateArgs) => update(updateArgs, clientArgs),
+    getFileExtensions: (params) => getFileExtensions(params, casesClient, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);

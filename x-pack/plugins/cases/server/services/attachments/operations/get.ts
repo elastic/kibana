@@ -7,6 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { defaultSortField } from '../../../common/utils';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -19,8 +20,9 @@ import type {
   CommentAttributes as AttachmentAttributes,
   CommentAttributesWithoutRefs as AttachmentAttributesWithoutRefs,
   CommentAttributes,
+  FileExtensionsResponse,
 } from '../../../../common/api';
-import { CommentType } from '../../../../common/api';
+import { CommentType, FILE_ATTACHMENT_TYPE } from '../../../../common/api';
 import type {
   AttachedToCaseArgs,
   BulkOptionalAttributes,
@@ -33,6 +35,18 @@ import {
 } from '../../so_references';
 
 type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
+
+interface FileTypesAggsResult {
+  extensions: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+  total: {
+    value: number;
+  };
+}
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
@@ -160,6 +174,66 @@ export class AttachmentGetter {
       this.context.log.error(`Error on GET attachment ${attachmentId}: ${error}`);
       throw error;
     }
+  }
+
+  public async getCaseFileExtensions(caseId: string): Promise<FileExtensionsResponse> {
+    try {
+      this.context.log.debug(`Attempting to file extensions for case id ${caseId}`);
+      const fileAttachmentType = buildFilter({
+        filters: FILE_ATTACHMENT_TYPE,
+        field: 'externalReferenceAttachmentTypeId',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      const res = await this.context.unsecuredSavedObjectsClient.find<unknown, FileTypesAggsResult>(
+        {
+          type: CASE_COMMENT_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          page: 1,
+          perPage: 1,
+          sortField: defaultSortField,
+          aggs: AttachmentGetter.buildFileExtensionAggs(),
+          filter: fileAttachmentType,
+        }
+      );
+
+      const extensions =
+        res.aggregations?.extensions.buckets.map((extension) => ({
+          value: extension.key,
+          total: extension.doc_count,
+        })) ?? [];
+
+      return {
+        extensions,
+        total: res.aggregations?.total.value ?? 0,
+      };
+    } catch (error) {
+      this.context.log.error(
+        `Error while retrieving file extensions for case id: ${caseId}: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  private static buildFileExtensionAggs(): Record<
+    string,
+    estypes.AggregationsAggregationContainer
+  > {
+    return {
+      extensions: {
+        terms: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.externalReferenceMetadata.file.extension`,
+          order: { _key: 'asc' },
+          size: 500,
+        },
+      },
+      total: {
+        cardinality: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.externalReferenceMetadata.file.extension`,
+        },
+      },
+    };
   }
 
   public async getCaseCommentStats({
