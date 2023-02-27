@@ -2893,6 +2893,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/assetManager-plugin@link:x-pack/plugins/asset_manager":
+  version "0.0.0"
+  uid ""
+
 "@kbn/audit-log-plugin@link:x-pack/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""
