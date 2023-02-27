@@ -8,7 +8,7 @@
 import { JsonSchemaService } from './json_schema_service';
 
 describe('JsonSchemaService', function () {
-  test('extract schema definition', async () => {
+  test('extract schema definition and applies overrides', async () => {
     const service = new JsonSchemaService();
 
     const result = await service.extractSchema('/_ml/anomaly_detectors/{job_id}', 'put');
@@ -48,23 +48,7 @@ describe('JsonSchemaService', function () {
                             type: 'string',
                           },
                           {
-                            anyOf: [
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_HtmlStripCharFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_MappingCharFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_PatternReplaceCharFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_IcuNormalizationCharFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_KuromojiIterationMarkCharFilter',
-                              },
-                            ],
+                            anyOf: [{}, {}, {}, {}, {}],
                           },
                         ],
                       },
@@ -80,150 +64,54 @@ describe('JsonSchemaService', function () {
                           },
                           {
                             anyOf: [
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_AsciiFoldingTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_CommonGramsTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_ConditionTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_DelimitedPayloadTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_EdgeNGramTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_ElisionTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_FingerprintTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_HunspellTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_HyphenationDecompounderTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_KeepTypesTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_KeepWordsTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_KeywordMarkerTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_KStemTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_LengthTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_LimitTokenCountTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_LowercaseTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_MultiplexerTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_NGramTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_NoriPartOfSpeechTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_PatternCaptureTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_PatternReplaceTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_PorterStemTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_PredicateTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_RemoveDuplicatesTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_ReverseTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_ShingleTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_SnowballTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_StemmerOverrideTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_StemmerTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_StopTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_SynonymGraphTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_SynonymTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_TrimTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_TruncateTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_UniqueTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_UppercaseTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_WordDelimiterGraphTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_WordDelimiterTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_KuromojiStemmerTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_KuromojiReadingFormTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_KuromojiPartOfSpeechTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_IcuTokenizer',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_IcuCollationTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_IcuFoldingTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_IcuNormalizationTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_IcuTransformTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_PhoneticTokenFilter',
-                              },
-                              {
-                                $ref: '#/components/schemas/Types_Analysis_DictionaryDecompounderTokenFilter',
-                              },
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
+                              {},
                             ],
                           },
                         ],
@@ -236,50 +124,7 @@ describe('JsonSchemaService', function () {
                           type: 'string',
                         },
                         {
-                          anyOf: [
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_CharGroupTokenizer',
-                            },
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_EdgeNGramTokenizer',
-                            },
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_KeywordTokenizer',
-                            },
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_LetterTokenizer',
-                            },
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_LowercaseTokenizer',
-                            },
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_NGramTokenizer',
-                            },
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_NoriTokenizer',
-                            },
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_PathHierarchyTokenizer',
-                            },
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_StandardTokenizer',
-                            },
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_UaxEmailUrlTokenizer',
-                            },
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_WhitespaceTokenizer',
-                            },
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_KuromojiTokenizer',
-                            },
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_PatternTokenizer',
-                            },
-                            {
-                              $ref: '#/components/schemas/Types_Analysis_IcuTokenizer',
-                            },
-                          ],
+                          anyOf: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
                         },
                       ],
                       description:
@@ -362,7 +207,21 @@ describe('JsonSchemaService', function () {
                         },
                         scope: {
                           additionalProperties: {
-                            $ref: '#/components/schemas/Ml_Types_FilterRef',
+                            additionalProperties: false,
+                            properties: {
+                              filter_id: {
+                                description: 'The identifier for the filter.',
+                                type: 'string',
+                              },
+                              filter_type: {
+                                description:
+                                  'If set to `include`, the rule applies for values in the filter. If set to `exclude`, the rule applies for values not in the filter.',
+                                enum: ['include', 'exclude'],
+                                type: 'string',
+                              },
+                            },
+                            required: ['filter_id'],
+                            type: 'object',
                           },
                           description:
                             'A scope of series where the rule applies. A rule must either have a non-empty scope or at least one condition. By default, the scope includes all series. Scoping is allowed for any of the fields that are also specified in `by_field_name`, `over_field_name`, or `partition_field_name`.',
@@ -551,17 +410,13 @@ describe('JsonSchemaService', function () {
             'Defines a datafeed for the anomaly detection job. If Elasticsearch security features are enabled, your datafeed remembers which roles the user who created it had at the time of creation and runs the query using those same roles. If you provide secondary authorization headers, those credentials are used instead.',
           properties: {
             aggregations: {
-              additionalProperties: {
-                $ref: '#/components/schemas/Types_Aggregations_AggregationContainer',
-              },
+              additionalProperties: {},
               description:
                 'If set, the datafeed performs aggregation searches. Support for aggregations is limited and should be used only with low cardinality data.',
               type: 'object',
             },
             aggs: {
-              additionalProperties: {
-                $ref: '#/components/schemas/Types_Aggregations_AggregationContainer',
-              },
+              additionalProperties: {},
               description:
                 'If set, the datafeed performs aggregation searches. Support for aggregations is limited and should be used only with low cardinality data.',
               type: 'object',
@@ -644,7 +499,6 @@ describe('JsonSchemaService', function () {
               type: 'array',
             },
             indices_options: {
-              $ref: '#/components/schemas/Types_IndicesOptions',
               description: 'Specifies index expansion options that are used during search.',
             },
             job_id: {
@@ -656,7 +510,6 @@ describe('JsonSchemaService', function () {
               type: 'number',
             },
             query: {
-              $ref: '#/components/schemas/Types_QueryDsl_QueryContainer',
               description:
                 'The Elasticsearch query domain-specific language (DSL). This value corresponds to the query object in an Elasticsearch search POST body. All the options that are supported by Elasticsearch can be used, as this object is passed verbatim to Elasticsearch.',
             },
@@ -668,13 +521,9 @@ describe('JsonSchemaService', function () {
             runtime_mappings: {
               additionalProperties: {
                 anyOf: [
+                  {},
                   {
-                    $ref: '#/components/schemas/Types_Mapping_RuntimeField',
-                  },
-                  {
-                    items: {
-                      $ref: '#/components/schemas/Types_Mapping_RuntimeField',
-                    },
+                    items: {},
                     type: 'array',
                   },
                 ],
@@ -683,9 +532,7 @@ describe('JsonSchemaService', function () {
               type: 'object',
             },
             script_fields: {
-              additionalProperties: {
-                $ref: '#/components/schemas/Types_ScriptField',
-              },
+              additionalProperties: {},
               description:
                 'Specifies scripts that evaluate custom expressions and returns script fields to the datafeed. The detector configuration objects in a job can contain functions that use these script fields.',
               type: 'object',
@@ -709,6 +556,10 @@ describe('JsonSchemaService', function () {
             type: 'string',
           },
           type: 'array',
+        },
+        job_id: {
+          description: 'Identifier for the anomaly detection job.',
+          type: 'string',
         },
         model_plot_config: {
           additionalProperties: false,
@@ -754,7 +605,7 @@ describe('JsonSchemaService', function () {
           type: 'number',
         },
       },
-      required: ['analysis_config', 'background_persist_interval', 'data_description'],
+      required: ['analysis_config', 'data_description'],
       type: 'object',
     });
   });
