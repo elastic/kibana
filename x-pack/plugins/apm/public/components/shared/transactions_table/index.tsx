@@ -132,7 +132,7 @@ export function TransactionsTable({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !latencyAggregationType || !transactionType) {
-        return;
+        return Promise.resolve(undefined);
       }
       return callApmApi(
         'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
@@ -350,7 +350,7 @@ export function TransactionsTable({
                     })
               }
               error={
-                FETCH_STATUS.FAILURE
+                status === FETCH_STATUS.FAILURE
                   ? i18n.translate('xpack.apm.transactionsTable.errorMessage', {
                       defaultMessage: 'Failed to fetch',
                     })

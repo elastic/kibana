@@ -11,12 +11,10 @@ import { useHistory } from 'react-router-dom';
 import { isServerlessAgent } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
-import { NoTransactionsPrompt } from '../../shared/transactions_prompt/no_transactions_prompt';
 import { TransactionsTable } from '../../shared/transactions_table';
 
 export function TransactionOverview() {
@@ -35,7 +33,6 @@ export function TransactionOverview() {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const {
-    transactionTypeStatus,
     transactionType,
     fallbackToTransactions,
     serverlessType,
@@ -50,10 +47,6 @@ export function TransactionOverview() {
   }
 
   const isServerless = isServerlessAgent(serverlessType);
-
-  if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
-    return <NoTransactionsPrompt />;
-  }
 
   return (
     <>
