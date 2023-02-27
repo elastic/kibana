@@ -10,12 +10,12 @@ import { Params, UseFetchApmSuggestions } from '../use_fetch_apm_suggestions';
 export const useFetchApmSuggestions = ({
   fieldName,
   search = '',
+  serviceName = '',
 }: Params): UseFetchApmSuggestions => {
   return {
     isLoading: false,
     isError: false,
     isSuccess: true,
     suggestions: ['apm-suggestion-1', 'apm-suggestion-2', 'apm-suggestion-3'],
-    refetch: function () {} as UseFetchApmSuggestions['refetch'],
   };
 };
