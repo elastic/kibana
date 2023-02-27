@@ -11,6 +11,7 @@ import moment from 'moment';
 import { useKibana } from '../../utils/kibana_react';
 
 export type Suggestion = string;
+
 export interface UseFetchApmSuggestions {
   suggestions: Suggestion[];
   isLoading: boolean;
@@ -28,7 +29,7 @@ interface ApiResponse {
   terms: string[];
 }
 
-const EMPTY_RESPONSE: ApiResponse = { terms: [] };
+const NO_SUGGESTIONS: Suggestion[] = [];
 
 export function useFetchApmSuggestions({
   fieldName,
@@ -61,7 +62,7 @@ export function useFetchApmSuggestions({
   });
 
   return {
-    suggestions: isInitialLoading ? EMPTY_RESPONSE.terms : data ?? EMPTY_RESPONSE.terms,
+    suggestions: isInitialLoading ? NO_SUGGESTIONS : data ?? NO_SUGGESTIONS,
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,
