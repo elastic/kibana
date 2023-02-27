@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
-import { FieldSelector } from '../common/field_selector';
+import { FieldSelector } from '../apm_common/field_selector';
 import { QueryBuilder } from '../custom_kql/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
