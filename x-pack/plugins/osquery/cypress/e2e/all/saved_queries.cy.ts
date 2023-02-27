@@ -69,7 +69,7 @@ describe('ALL - Saved queries', () => {
       runKbnArchiverScript(ArchiverMethod.LOAD, 'pack_with_prebuilt_saved_queries');
     });
     beforeEach(() => {
-      navigateTo('/app/osquery');
+      navigateTo('/app/osquery/saved_queries');
     });
 
     after(() => {
@@ -77,7 +77,6 @@ describe('ALL - Saved queries', () => {
     });
 
     it('checks result type on prebuilt saved query', () => {
-      cy.contains('Saved queries').click();
       cy.react('CustomItemAction', {
         props: { index: 1, item: { attributes: { id: 'users_elastic' } } },
       }).click();
@@ -98,7 +97,6 @@ describe('ALL - Saved queries', () => {
     });
 
     it('user cant delete prebuilt saved query', () => {
-      cy.contains('Saved queries').click();
       cy.react('CustomItemAction', {
         props: { index: 1, item: { attributes: { id: 'users_elastic' } } },
       }).click();
