@@ -23,6 +23,5 @@ export const useFetchHistoricalSummary = ({
     isSuccess: false,
     isError: false,
     sloHistoricalSummaryResponse: data,
-    refetch: function () {} as UseFetchHistoricalSummaryResponse['refetch'],
   };
 };

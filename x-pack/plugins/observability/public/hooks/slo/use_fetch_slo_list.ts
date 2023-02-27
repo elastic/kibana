@@ -11,8 +11,8 @@ import {
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-
 import { FindSLOResponse } from '@kbn/slo-schema';
+
 import { useKibana } from '../../utils/kibana_react';
 
 interface SLOListParams {
@@ -61,7 +61,7 @@ export function useFetchSloList({
 
           return response;
         } catch (error) {
-          // ignore error for retrieving slos
+          // ignore error
         }
       },
       refetchOnWindowFocus: false,
