@@ -14,7 +14,6 @@ import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-obj
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
 
 async function saveDataSource({
@@ -49,16 +48,7 @@ async function saveDataSource({
           navigateTo(`/view/${encodeURIComponent(id)}`);
         } else {
           // Update defaults so that "reload saved query" functions correctly
-          state.appState.resetWithSavedSearch(savedSearch);
-          services.chrome.docTitle.change(savedSearch.title!);
-
-          setBreadcrumbsTitle(
-            {
-              ...savedSearch,
-              id: prevSavedSearchId ?? id,
-            },
-            services.chrome
-          );
+          state.savedSearchState.resetUrl(savedSearch);
         }
       }
     }
