@@ -48,4 +48,9 @@ export {
   buildVersionMap,
   getLatestModelVersion,
   type ModelVersionMap,
+  compareModelVersions,
+  type CompareModelVersionMapParams,
+  type CompareModelVersionStatus,
+  type CompareModelVersionDetails,
+  type CompareModelVersionResult,
 } from './src/model_version';
