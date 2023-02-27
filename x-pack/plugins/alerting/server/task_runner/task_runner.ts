@@ -427,6 +427,7 @@ export class TaskRunner<
         ruleRunMetricsStore,
         shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
         flappingSettings,
+        notifyWhen,
       });
     });
 
@@ -459,7 +460,7 @@ export class TaskRunner<
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
         executionHandlerRunResult = await executionHandler.run({
-          ...this.legacyAlertsClient.getProcessedAlerts('active'),
+          ...this.legacyAlertsClient.getProcessedAlerts('activeCurrent'),
           ...this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent'),
         });
       }

@@ -1276,14 +1276,6 @@
             "path": "src/plugins/data_views/server/utils.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
             "plugin": "dataViews",
             "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
           },
@@ -3291,6 +3283,14 @@
           {
             "plugin": "infra",
             "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/memory.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/memory_available.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/memory_available.ts"
           },
           {
             "plugin": "infra",
