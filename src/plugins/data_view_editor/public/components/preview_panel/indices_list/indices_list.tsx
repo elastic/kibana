@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { Pager } from '@elastic/eui';
-
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
 
@@ -45,15 +45,20 @@ interface IndicesListState {
 }
 
 const PER_PAGE_INCREMENTS = [5, 10, 20, 50];
+export const PER_PAGE_STORAGE_KEY = 'dataViews.previewPanel.indicesPerPage';
 
 export class IndicesList extends React.Component<IndicesListProps, IndicesListState> {
   pager: Pager;
+  storage: Storage;
+
   constructor(props: IndicesListProps) {
     super(props);
 
+    this.storage = new Storage(localStorage);
+
     this.state = {
       page: 0,
-      perPage: PER_PAGE_INCREMENTS[1],
+      perPage: this.storage.get(PER_PAGE_STORAGE_KEY) || PER_PAGE_INCREMENTS[1],
       isPerPageControlOpen: false,
     };
 
@@ -79,6 +84,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     this.setState({ perPage });
     this.resetPageTo0();
     this.closePerPageControl();
+    this.storage.set(PER_PAGE_STORAGE_KEY, perPage);
   };
 
   onClick = (indexName: string, query: string) => {
