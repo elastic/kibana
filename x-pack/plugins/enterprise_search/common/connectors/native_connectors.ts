@@ -130,9 +130,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
       database: {
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.databasesLabel',
+          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.databaseLabel',
           {
-            defaultMessage: 'Databases',
+            defaultMessage: 'Database',
           }
         ),
         order: 4,
