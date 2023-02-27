@@ -19,9 +19,10 @@ import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
 import { FieldSelector } from '../common/field_selector';
+import { QueryBuilder } from '../custom_kql/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
-  const { control, setValue } = useFormContext<CreateSLOInput>();
+  const { control, setValue, watch } = useFormContext<CreateSLOInput>();
   const { data: apmIndex } = useFetchApmIndex();
   useEffect(() => {
     setValue('indicator.params.index', apmIndex);
@@ -145,7 +146,23 @@ export function ApmAvailabilityIndicatorTypeForm() {
             )}
           />
         </EuiFlexItem>
-        <EuiFlexItem />
+        <EuiFlexItem>
+          <QueryBuilder
+            control={control}
+            dataTestSubj="apmLatencyFilterInput"
+            indexPatternString={watch('indicator.params.index')}
+            label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.filter', {
+              defaultMessage: 'Query filter',
+            })}
+            name="indicator.params.filter"
+            placeholder={i18n.translate(
+              'xpack.observability.slos.sloEdit.apmLatency.filter.placeholder',
+              {
+                defaultMessage: 'Custom filter to apply on the index',
+              }
+            )}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
