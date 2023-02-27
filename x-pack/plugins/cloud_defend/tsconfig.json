@@ -1,12 +1,14 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
     "public/**/*",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
+    "server/**/*.json",
+    "public/**/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -17,9 +19,10 @@
     "@kbn/data-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/monaco",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/shared-ux-router"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

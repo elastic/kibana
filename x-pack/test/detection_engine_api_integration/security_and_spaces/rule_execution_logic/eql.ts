@@ -17,7 +17,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { get } from 'lodash';
 
 import { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
-import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
+import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -28,7 +28,7 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import {
   createRule,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getEqlRuleForSignalTesting,
   getOpenSignals,
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
       );
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     // First test creates a real rule - remaining tests use preview API

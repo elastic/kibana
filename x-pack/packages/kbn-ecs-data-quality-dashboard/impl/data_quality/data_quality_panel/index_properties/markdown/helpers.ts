@@ -14,7 +14,6 @@ import {
   MONITOR,
   OR,
   READ,
-  READ_CROSS_CLUSTER,
   THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED,
   VIEW_INDEX_METADATA,
 } from '../../data_quality_summary/errors_popover/translations';
@@ -23,6 +22,7 @@ import {
   getTotalPatternIncompatible,
   getTotalPatternIndicesChecked,
 } from '../../../helpers';
+import { SAME_FAMILY } from '../../same_family/translations';
 import { HOT, WARM, COLD, FROZEN, UNMANAGED } from '../../../ilm_phases_empty_prompt/translations';
 import * as i18n from '../translations';
 import type {
@@ -112,6 +112,9 @@ export const getCustomMarkdownTableRows = (
     )
     .join('\n');
 
+export const getSameFamilyBadge = (enrichedFieldMetadata: EnrichedFieldMetadata): string =>
+  enrichedFieldMetadata.isInSameFamily ? getCodeFormattedValue(SAME_FAMILY) : '';
+
 export const getIncompatibleMappingsMarkdownTableRows = (
   incompatibleMappings: EnrichedFieldMetadata[]
 ): string =>
@@ -120,7 +123,7 @@ export const getIncompatibleMappingsMarkdownTableRows = (
       (x) =>
         `| ${escape(x.indexFieldName)} | ${getCodeFormattedValue(x.type)} | ${getCodeFormattedValue(
           x.indexFieldType
-        )} |`
+        )} ${getSameFamilyBadge(x)} |`
     )
     .join('\n');
 
@@ -178,7 +181,7 @@ ${ERRORS_MAY_OCCUR}
 ${THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED}
 - \`${MONITOR}\` ${OR} \`${MANAGE}\`
 - \`${VIEW_INDEX_METADATA}\`
-- \`${READ}\` ${OR} \`${READ_CROSS_CLUSTER}\`
+- \`${READ}\`
 
 ${getMarkdownTableHeader(headerNames)}
 ${getMarkdownTableRows(errorSummary)}

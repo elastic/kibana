@@ -2781,6 +2781,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -2861,6 +2867,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -2949,6 +2961,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3029,6 +3047,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3117,6 +3141,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3197,6 +3227,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3285,6 +3321,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3365,6 +3407,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3453,6 +3501,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3537,6 +3591,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3617,6 +3677,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -4222,6 +4288,9 @@
                     "type": "keyword"
                   },
                   "version": {
+                    "type": "keyword"
+                  },
+                  "activation_method": {
                     "type": "keyword"
                   }
                 }
@@ -6816,6 +6885,109 @@
             }
           }
         },
+        "csv_v2": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "output_size": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "metrics": {
+              "properties": {
+                "csv_rows": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "error_codes": {
+              "properties": {
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
         "PNG": {
           "properties": {
             "available": {
@@ -7474,6 +7646,22 @@
                     }
                   }
                 },
+                "csv_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "PNG": {
                   "properties": {
                     "search": {
@@ -7559,6 +7747,22 @@
                   }
                 },
                 "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_v2": {
                   "properties": {
                     "search": {
                       "type": "long"
@@ -7674,6 +7878,22 @@
                     }
                   }
                 },
+                "csv_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "PNG": {
                   "properties": {
                     "search": {
@@ -7774,6 +7994,22 @@
                     }
                   }
                 },
+                "csv_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "PNG": {
                   "properties": {
                     "search": {
@@ -7859,6 +8095,22 @@
                   }
                 },
                 "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_v2": {
                   "properties": {
                     "search": {
                       "type": "long"
@@ -8092,6 +8344,109 @@
               }
             },
             "csv_searchsource_immediate": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "output_size": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "metrics": {
+                  "properties": {
+                    "csv_rows": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "error_codes": {
+                  "properties": {
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "csv_v2": {
               "properties": {
                 "available": {
                   "type": "boolean"
@@ -8852,6 +9207,22 @@
                         }
                       }
                     },
+                    "csv_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "PNG": {
                       "properties": {
                         "search": {
@@ -8937,6 +9308,22 @@
                       }
                     },
                     "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_v2": {
                       "properties": {
                         "search": {
                           "type": "long"
@@ -9052,6 +9439,22 @@
                         }
                       }
                     },
+                    "csv_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "PNG": {
                       "properties": {
                         "search": {
@@ -9152,6 +9555,22 @@
                         }
                       }
                     },
+                    "csv_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "PNG": {
                       "properties": {
                         "search": {
@@ -9237,6 +9656,22 @@
                       }
                     },
                     "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_v2": {
                       "properties": {
                         "search": {
                           "type": "long"
@@ -13198,6 +13633,133 @@
               "type": "long",
               "_meta": {
                 "description": "Number of active unique endpoints in last 24 hours"
+              }
+            }
+          }
+        },
+        "dashboardMetrics": {
+          "properties": {
+            "dashboard_tag": {
+              "properties": {
+                "created_at": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "The time the tab was created"
+                  }
+                },
+                "linked_dashboards_count": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of associated dashboards"
+                  }
+                }
+              }
+            },
+            "dashboards": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "created_at": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The time the dashboard was created"
+                    }
+                  },
+                  "dashboard_id": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The dashboard saved object id"
+                    }
+                  },
+                  "error_message": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The relevant error message"
+                    }
+                  },
+                  "error_status_code": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The relevant error status code"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "slo": {
+      "properties": {
+        "slo": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of slos in the cluster"
+              }
+            },
+            "by_status": {
+              "properties": {
+                "enabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of enabled slos in the cluster"
+                  }
+                },
+                "disabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of disabled slos in the cluster"
+                  }
+                }
+              }
+            },
+            "by_sli_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by sli type in the cluster"
+                  }
+                }
+              }
+            },
+            "by_rolling_duration": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by rolling duration in the cluster"
+                  }
+                }
+              }
+            },
+            "by_calendar_aligned_duration": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by calendar aligned duration in the cluster"
+                  }
+                }
+              }
+            },
+            "by_budgeting_method": {
+              "properties": {
+                "occurrences": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by timeslices budgeting method in the cluster"
+                  }
+                },
+                "timeslices": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by occurrences budgeting method in the cluster"
+                  }
+                }
               }
             }
           }

@@ -63,6 +63,7 @@ export const ErrorsList = ({
             configId={monitorId}
             stateId={item.state?.id!}
             label={formatTestRunAt(item.state!.started_at, format)}
+            locationId={selectedLocation?.id}
           />
         );
         const isActive = isActiveState(item);
@@ -115,7 +116,7 @@ export const ErrorsList = ({
       name: ERROR_DURATION_LABEL,
       align: 'right' as const,
       sortable: true,
-      render: (value: number, item: PingState) => {
+      render: (value: string, item: PingState) => {
         const isActive = isActiveState(item);
         let activeDuration = 0;
         if (item.monitor.timespan) {
@@ -131,7 +132,9 @@ export const ErrorsList = ({
             activeDuration = diff;
           }
         }
-        return <EuiText>{formatTestDuration(value + activeDuration, true)}</EuiText>;
+        return (
+          <EuiText size="s">{formatTestDuration(Number(value) + activeDuration, true)}</EuiText>
+        );
       },
     },
   ];

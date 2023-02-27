@@ -56,7 +56,7 @@ export const CustomizeIngestPipelineItem: React.FC = () => {
           onClick={() => createCustomPipeline({ indexName })}
         >
           {i18n.translate(
-            'xpack.enterpriseSearch.content.index.pipelines.ingestModal.copyButtonLabel',
+            'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.copyButtonLabel',
             { defaultMessage: 'Copy and customize' }
           )}
         </EuiButtonEmpty>

@@ -55,7 +55,7 @@ export const onResize = (
     width: Math.round(colSettings.width),
   };
   const newGrid = { ...grid, columns: newColumns };
-  stateContainer.setAppState({ grid: newGrid });
+  stateContainer.appState.update({ grid: newGrid });
 };
 
 function DiscoverDocumentsComponent({
@@ -123,7 +123,7 @@ function DiscoverDocumentsComponent({
     config: uiSettings,
     dataView,
     dataViews,
-    setAppState: stateContainer.setAppState,
+    setAppState: stateContainer.appState.update,
     useNewFieldsApi,
     columns,
     sort,
@@ -136,21 +136,21 @@ function DiscoverDocumentsComponent({
 
   const onUpdateRowsPerPage = useCallback(
     (nextRowsPerPage: number) => {
-      stateContainer.setAppState({ rowsPerPage: nextRowsPerPage });
+      stateContainer.appState.update({ rowsPerPage: nextRowsPerPage });
     },
     [stateContainer]
   );
 
   const onSort = useCallback(
     (nextSort: string[][]) => {
-      stateContainer.setAppState({ sort: nextSort });
+      stateContainer.appState.update({ sort: nextSort });
     },
     [stateContainer]
   );
 
   const onUpdateRowHeight = useCallback(
     (newRowHeight: number) => {
-      stateContainer.setAppState({ rowHeight: newRowHeight });
+      stateContainer.appState.update({ rowHeight: newRowHeight });
     },
     [stateContainer]
   );
