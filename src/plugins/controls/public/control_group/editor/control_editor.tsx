@@ -109,7 +109,7 @@ export const ControlEditor = ({
   });
 
   const [defaultTitle, setDefaultTitle] = useState<string>();
-  const [currentTitle, setCurrentTitle] = useState(title);
+  const [currentTitle, setCurrentTitle] = useState(title ?? '');
   const [currentWidth, setCurrentWidth] = useState(width);
   const [currentGrow, setCurrentGrow] = useState(grow);
   const [controlEditorValid, setControlEditorValid] = useState(false);
@@ -198,27 +198,27 @@ export const ControlEditor = ({
               />
             </EuiFormRow>
           )}
-          <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
-            <FieldPicker
-              filterPredicate={(field: DataViewField) => {
-                return Boolean(fieldRegistry?.[field.name]);
-              }}
-              selectedFieldName={selectedField}
-              dataView={dataView}
-              onSelectField={(field) => {
-                onTypeEditorChange({
-                  fieldName: field.name,
-                });
-                const newDefaultTitle = field.displayName ?? field.name;
-                setDefaultTitle(newDefaultTitle);
-                setSelectedField(field.name);
-                if (!currentTitle || currentTitle === defaultTitle) {
-                  setCurrentTitle(newDefaultTitle);
-                  updateTitle(newDefaultTitle);
-                }
-              }}
-            />
-          </EuiFormRow>
+          {fieldRegistry && (
+            <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
+              <FieldPicker
+                filterPredicate={(field: DataViewField) => Boolean(fieldRegistry[field.name])}
+                selectedFieldName={selectedField}
+                dataView={dataView}
+                onSelectField={(field) => {
+                  onTypeEditorChange({
+                    fieldName: field.name,
+                  });
+                  const newDefaultTitle = field.displayName ?? field.name;
+                  setDefaultTitle(newDefaultTitle);
+                  setSelectedField(field.name);
+                  if (!currentTitle || currentTitle === defaultTitle) {
+                    setCurrentTitle(newDefaultTitle);
+                    updateTitle(newDefaultTitle);
+                  }
+                }}
+              />
+            </EuiFormRow>
+          )}
           <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
             {factory ? (
               <EuiFlexGroup alignItems="center" gutterSize="xs">

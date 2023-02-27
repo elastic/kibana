@@ -20,7 +20,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
 import { selectOverviewStatus } from '../../../../state/overview_status';
 import { AlertsLink } from '../../../common/links/view_alerts';
-import { useRefreshedRange } from '../../../../hooks';
+import { useRefreshedRange, useGetUrlParams } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
 
 export const OverviewAlerts = () => {
@@ -32,6 +32,8 @@ export const OverviewAlerts = () => {
   const theme = useTheme();
 
   const { status } = useSelector(selectOverviewStatus);
+
+  const { locations } = useGetUrlParams();
 
   const loading = !status?.allIds || status?.allIds.length === 0;
 
@@ -66,6 +68,7 @@ export const OverviewAlerts = () => {
                       status?.enabledMonitorQueryIds.length > 0
                         ? status?.enabledMonitorQueryIds
                         : ['false-id'],
+                    ...(locations?.length ? { 'observer.geo.name': locations } : {}),
                   },
                   filters: [{ field: 'kibana.alert.status', values: ['active', 'recovered'] }],
                   color: theme.eui.euiColorVis1,
@@ -92,6 +95,7 @@ export const OverviewAlerts = () => {
                       status?.enabledMonitorQueryIds.length > 0
                         ? status?.enabledMonitorQueryIds
                         : ['false-id'],
+                    ...(locations?.length ? { 'observer.geo.name': locations } : {}),
                   },
                   dataType: 'alerts',
                   selectedMetricField: RECORDS_FIELD,

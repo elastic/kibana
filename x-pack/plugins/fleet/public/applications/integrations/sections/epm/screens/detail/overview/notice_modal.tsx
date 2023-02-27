@@ -8,13 +8,13 @@
 import React, { useEffect, useState } from 'react';
 import {
   EuiCodeBlock,
-  EuiLoadingContent,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
   EuiModalFooter,
   EuiModalHeaderTitle,
   EuiButton,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -58,10 +58,10 @@ export const NoticeModal: React.FunctionComponent<Props> = ({ noticePath, onClos
             // Simulate a long notice while loading
             <>
               <p>
-                <EuiLoadingContent lines={5} />
+                <EuiSkeletonText lines={5} />
               </p>
               <p>
-                <EuiLoadingContent lines={6} />
+                <EuiSkeletonText lines={6} />
               </p>
             </>
           )}
