@@ -272,10 +272,10 @@ export const getFileExtensions = async ({
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<FileExtensionsResponse> => {
-  const { body: comments } = await supertest
+  const { body: extensions } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${getCaseFileExtensionsUrl(caseId)}`)
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 
-  return comments;
+  return extensions;
 };

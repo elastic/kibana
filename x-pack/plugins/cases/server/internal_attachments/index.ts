@@ -9,13 +9,18 @@ import { badRequest } from '@hapi/boom';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { excess, FileAttachmentMetadataRt, throwErrors } from '../../common/api';
+import {
+  excess,
+  FileAttachmentMetadataRt,
+  FILE_ATTACHMENT_TYPE,
+  throwErrors,
+} from '../../common/api';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 
 export const registerInternalAttachments = (
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
-  externalRefRegistry.register({ id: '.files', schemaValidator });
+  externalRefRegistry.register({ id: FILE_ATTACHMENT_TYPE, schemaValidator });
 };
 
 const schemaValidator = (data: unknown): void => {
