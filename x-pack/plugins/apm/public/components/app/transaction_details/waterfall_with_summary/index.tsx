@@ -21,7 +21,11 @@ import { TransactionActionMenu } from '../../../shared/transaction_action_menu/t
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
 import { TransactionTab, TransactionTabs } from './transaction_tabs';
 import { Environment } from '../../../../../common/environment_rt';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../../hooks/use_fetcher';
 import { WaterfallFetchResult } from '../use_waterfall_fetcher';
 
 interface Props<TSample extends {}> {
@@ -86,6 +90,29 @@ export function WaterfallWithSummary<TSample extends {}>({
 
   const { entryTransaction } = waterfallFetchResult.waterfall;
 
+  const { data: transaction, status: transactionStatus } = useFetcher(
+    (callApmApi) => {
+      if (!entryTransaction) {
+        return;
+      }
+
+      return callApmApi(
+        'GET /internal/apm/traces/{traceId}/transactions/{transactionId}',
+        {
+          params: {
+            path: {
+              traceId: entryTransaction.trace.id,
+              transactionId: entryTransaction.transaction.id,
+            },
+          },
+        }
+      );
+    },
+    [entryTransaction]
+  );
+
+  const isTransactionLoading = isPending(transactionStatus);
+
   if (!entryTransaction && traceSamples?.length === 0 && isSucceded) {
     return (
       <EuiEmptyPrompt
@@ -131,8 +158,8 @@ export function WaterfallWithSummary<TSample extends {}>({
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <TransactionActionMenu
-                  isLoading={isLoading}
-                  transaction={entryTransaction}
+                  isLoading={isTransactionLoading}
+                  transaction={transaction}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -147,7 +174,6 @@ export function WaterfallWithSummary<TSample extends {}>({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-
       {isLoading || !entryTransaction ? (
         <EuiFlexItem grow={false}>
           <EuiSpacer size="s" />
@@ -164,7 +190,6 @@ export function WaterfallWithSummary<TSample extends {}>({
           />
         </EuiFlexItem>
       )}
-
       <EuiFlexItem grow={false}>
         <TransactionTabs
           transaction={entryTransaction}
