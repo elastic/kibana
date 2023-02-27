@@ -33,7 +33,7 @@ export const SnapshotError: React.FunctionComponent<SnapshotErrorType> = ({ erro
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.snapshotRestore.repositoryWarningTitle"
+            id="xpack.snapshotRestore.repositoryErrorTitle"
             defaultMessage="There were a few errors retrieving snapshots"
           />
         }
