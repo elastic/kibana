@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { KibanaMigrator } from './kibana_migrator';
-export type { KibanaMigratorOptions } from './kibana_migrator';
-export { buildActiveMappings, buildTypesMappings } from './core';
-export { DocumentMigrator } from './document_migrator';
+import type { InitState, State } from './types';
+import type { MigratorContext } from '../context';
+
+export const createInitialState = (context: MigratorContext): State => {
+  const initialState: InitState = {
+    controlState: 'INIT',
+    logs: [],
+    retryCount: 0,
+    retryDelay: 0,
+  };
+  return initialState;
+};

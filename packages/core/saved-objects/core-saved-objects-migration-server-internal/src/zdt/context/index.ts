@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { KibanaMigrator } from './kibana_migrator';
-export type { KibanaMigratorOptions } from './kibana_migrator';
-export { buildActiveMappings, buildTypesMappings } from './core';
-export { DocumentMigrator } from './document_migrator';
+export type { MigratorContext } from './types';
+export { createContext, type CreateContextOps } from './create_context';

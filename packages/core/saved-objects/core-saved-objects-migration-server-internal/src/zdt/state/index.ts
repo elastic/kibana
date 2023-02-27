@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { KibanaMigrator } from './kibana_migrator';
-export type { KibanaMigratorOptions } from './kibana_migrator';
-export { buildActiveMappings, buildTypesMappings } from './core';
-export { DocumentMigrator } from './document_migrator';
+export type {
+  BaseState,
+  InitState,
+  DoneState,
+  FatalState,
+  State,
+  AllActionStates,
+  AllControlStates,
+  StateFromActionState,
+  StateFromControlState,
+} from './types';
+export { createInitialState } from './create_initial_state';

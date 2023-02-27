@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { KibanaMigrator } from './kibana_migrator';
-export type { KibanaMigratorOptions } from './kibana_migrator';
-export { buildActiveMappings, buildTypesMappings } from './core';
-export { DocumentMigrator } from './document_migrator';
+const realStages = jest.requireActual('./stages');
+
+export const StageMocks = Object.keys(realStages).reduce((mocks, key) => {
+  mocks[key] = jest.fn().mockImplementation((state: unknown) => state);
+  return mocks;
+}, {} as Record<string, unknown>);
+
+jest.doMock('./stages', () => {
+  return StageMocks;
+});
