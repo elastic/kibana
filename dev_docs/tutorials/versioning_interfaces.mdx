@@ -32,7 +32,7 @@ Consider a fictional Kibana plugin called "Weather insights". It allows users to
 We have the following `common` interfaces:
 
 ```ts
-interface DataSource {
+export interface DataSource {
   /** Some URL that provides weather data in an expected format for scraping */
   url: string;
   /** The data view data is stored in */
@@ -46,7 +46,7 @@ interface DataSource {
 /** Fictional type, only used for this example as an external type */
 import type { PortableDashboard } from '@kbn/dashboard/common';
 
-interface WeatherDashboard {
+export interface WeatherDashboard {
   /** A unqiue ID for this weather dashboard */
   id: string;
   /** Definition of a dashboard imported from the `dashboard` plugin */
@@ -59,15 +59,15 @@ type UnsavedWeatherDashboard = Omit<WeatherDashboard, 'id'>;
 
 /** Below are the HTTP APIs based on the domain types */
 
-interface GetWeatherDashboardHTTPResponse {
+export interface GetWeatherDashboardHTTPResponse {
   weatherDashboard: WeatherDashboard;
 }
 
-interface CreateWeatherDashboardHTTPBody {
+export interface CreateWeatherDashboardHTTPBody {
   weatherDashboard: UnsavedWeatherDashboard;
 }
 
-interface CreateWeatherDashboardHTTPResponse {
+export interface CreateWeatherDashboardHTTPResponse {
   weatherDashboard: WeatherDashboard;
 }
 
@@ -180,7 +180,7 @@ common
 The `v2.ts` file will contain:
 
 ```ts
-interface DataSource {
+export interface DataSource {
   /** Some URL that provides weather data in an expected format for scraping */
   url: string;
   /** A user-friendly name */
@@ -222,7 +222,7 @@ import type { DataSource } from '../data_source/v2';
 // Optionally, re-export the entire set of types.
 export * from './v1';
 
-interface WeatherDashboard {
+export interface WeatherDashboard {
   /** A unqiue ID for this weather dashboard */
   id: string;
   /** Definition of a dashboard imported from the `dashboard` plugin */
@@ -235,15 +235,15 @@ type UnsavedWeatherDashboard = Omit<WeatherDashboard, 'id'>;
 
 /** Below are the HTTP APIs based on the domain types */
 
-interface GetWeatherDashboardHTTPResponse {
+export interface GetWeatherDashboardHTTPResponse {
   weatherDashboard: WeatherDashboard;
 }
 
-interface CreateWeatherDashboardHTTPBody {
+export interface CreateWeatherDashboardHTTPBody {
   weatherDashboard: UnsavedWeatherDashboard;
 }
 
-interface CreateWeatherDashboardHTTPResponse {
+export interface CreateWeatherDashboardHTTPResponse {
   weatherDashboard: WeatherDashboard;
 }
 
@@ -302,7 +302,7 @@ type Model = 'GFS' | 'ECMWF' | 'GEM';
 /** Limited set of options rather than "string" so we can more easily version */
 type TimeFrame = '1d' | '2d' | '3d' | '4d' | '5d' | '6d' | '1w' | '2w';
 
-interface PredictionInput {
+export interface PredictionInput {
   /** How far back we should look in our data */
   start_date: string; // !! Introduction of inconsistent snake case naming convention, will need a new version to fix
   /** How far out to predict. Note, longer time frames result in lower accuracy */
@@ -313,15 +313,15 @@ interface PredictionInput {
   dataSource: DataSource;
 }
 
-interface PredictionOutput { ... }
+export interface PredictionOutput { ... }
 
 // Below are HTTP APIs for predictions
 
-interface CreatePredictionHTTPBody {
+export interface CreatePredictionHTTPBody {
   input: PredictionInput;
 }
 
-interface CreatePredictionHTTPResponse {
+export interface CreatePredictionHTTPResponse {
   result: PredictionOutput;
 }
 
@@ -363,7 +363,7 @@ Normalize our domain objects by only holding a reference to `DataSource` in `Wea
 
   ```ts
   // common/data_source/v3.ts
-  interface DataSource {
+  export interface DataSource {
     /** A string that uniquely identifies a DataSource */
     id: string;
     /** Some URL that provides weather data in an expected format for scraping */
@@ -382,7 +382,7 @@ Normalize our domain objects by only holding a reference to `DataSource` in `Wea
   // ...followed by all other HTTP related interfaces
 
   // common/weather_dashboard/v3.ts
-  interface WeatherDashboard {
+  export interface WeatherDashboard {
     /** A unqiue ID for this weather dashboard */
     id: string;
     /** Definition of a dashboard imported from the `dashboard` plugin */
@@ -393,7 +393,7 @@ Normalize our domain objects by only holding a reference to `DataSource` in `Wea
   // ...followed by all other HTTP related interfaces
 
   // common/prediction/v3.ts
-  interface PredictionInput {
+  export interface PredictionInput {
     /** How far back we should look in our data */
     startDate: string; // Fixed inconsistent naming
     /** How far out to predict. Note, longer time frames result in lower accuracy */
