@@ -118,10 +118,15 @@ const deletePreviousTransformsVersions = async (esClient: ElasticsearchClient, l
   }
 };
 
-const deleteTransformSafe = async (esClient: ElasticsearchClient, logger: Logger, name: string) => {
+const deleteTransformSafe = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  name: string
+): Promise<boolean> => {
   try {
     await esClient.transform.deleteTransform({ transform_id: name, force: true });
     logger.info(`Deleted transform successfully [Name: ${name}]`);
+    return true;
   } catch (e) {
     if (e instanceof errors.ResponseError && e.statusCode === 404) {
       logger.trace(`Transform not exists [Name: ${name}]`);
