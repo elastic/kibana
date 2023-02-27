@@ -57,6 +57,7 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/shared-ux-router",
     "@kbn/files-plugin",
+    "@kbn/shared-ux-file-types",
   ],
   "exclude": [
     "target/**/*",
