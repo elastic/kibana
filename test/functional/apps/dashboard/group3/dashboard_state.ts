@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   };
 
-  describe.only('dashboard state', function describeIndexTests() {
+  describe('dashboard state', function describeIndexTests() {
     // Used to track flag before and after reset
 
     before(async function () {
@@ -210,7 +210,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
     };
 
-    describe.only('Directly modifying url updates dashboard state', () => {
+    describe('Directly modifying url updates dashboard state', () => {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
