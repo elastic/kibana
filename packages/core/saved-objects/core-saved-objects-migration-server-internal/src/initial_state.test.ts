@@ -163,6 +163,11 @@ describe('createInitialState', () => {
                   "type": "ui-counter",
                 },
               },
+              Object {
+                "term": Object {
+                  "type": "upgrade-assistant-telemetry",
+                },
+              },
             ],
           },
         },
