@@ -908,6 +908,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 # Kibana Platform Security
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
+/src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/plugins/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
 /test/interactive_setup_api_integration/ @elastic/kibana-security
 /test/interactive_setup_functional/ @elastic/kibana-security
@@ -1040,7 +1041,6 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/plugins/security_solution/server/lib/detection_engine/migrations @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_types @elastic/security-detections-response-alerts
-/x-pack/plugins/security_solution/server/lib/detection_engine/signals @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detections-response-alerts
 
