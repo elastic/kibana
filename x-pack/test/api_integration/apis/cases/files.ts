@@ -26,9 +26,12 @@ import {
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   casesAllUser,
+  casesNoDeleteUser,
   casesReadUser,
   obsCasesAllUser,
+  obsCasesNoDeleteUser,
   obsCasesReadUser,
+  secAllCasesNoDeleteUser,
   secAllUser,
   secReadCasesReadUser,
 } from './common/users';
@@ -110,6 +113,20 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 403,
         });
       };
+
+      describe('user not authorized for a delete operation', () => {
+        const testScenarios: TestScenario[] = [
+          { user: secAllCasesNoDeleteUser, owner: SECURITY_SOLUTION_APP_ID },
+          { user: casesNoDeleteUser, owner: CASES_APP_ID },
+          { user: obsCasesNoDeleteUser, owner: OBSERVABILITY_APP_ID },
+        ];
+
+        for (const scenario of testScenarios) {
+          it('should fail to delete a case', async () => {
+            await deleteFileFailure(scenario);
+          });
+        }
+      });
 
       describe('user not authorized for write operations', () => {
         const testScenarios: TestScenario[] = [
