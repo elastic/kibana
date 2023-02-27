@@ -162,7 +162,7 @@ const getCspStatus = async ({
     ),
     getInstalledPolicyTemplates(packagePolicyService, soClient),
   ]);
-//console.log(installation)
+  // console.log(installation)
   const healthyAgentsKspm = await getHealthyAgents(
     soClient,
     installedPackagePoliciesKspm.items,

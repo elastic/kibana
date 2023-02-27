@@ -24,7 +24,7 @@ export const Findings = () => {
   const hasFindings =
     getSetupStatus.data?.cspm?.status === 'indexed' ||
     getSetupStatus.data?.kspm?.status === 'indexed';
-  if (!hasFindings) return <NoFindingsStates posturetype={'cspm'}/>;
+  if (!hasFindings) return <NoFindingsStates posturetype={'cspm'} />;
 
   return (
     <CloudPosturePage query={dataViewQuery}>
