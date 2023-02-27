@@ -12,9 +12,13 @@ import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
-import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import {
+  ParsedTechnicalFields,
+  parseTechnicalFields,
+} from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
+import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
 import {
@@ -237,18 +241,17 @@ export const flattenAdditionalContext = (
 };
 
 export const getContextForRecoveredAlerts = (
-  alertHits: AdditionalContext[] | undefined | null
+  alertHitSource: Partial<ParsedTechnicalFields & ParsedExperimentalFields> | undefined | null
 ): AdditionalContext => {
-  const alertHitsSource =
-    alertHits && alertHits.length > 0 ? unflattenObject(alertHits[0]._source) : undefined;
+  const alert = alertHitSource ? unflattenObject(alertHitSource) : undefined;
 
   return {
-    cloud: alertHitsSource?.[ALERT_CONTEXT_CLOUD],
-    host: alertHitsSource?.[ALERT_CONTEXT_HOST],
-    orchestrator: alertHitsSource?.[ALERT_CONTEXT_ORCHESTRATOR],
-    container: alertHitsSource?.[ALERT_CONTEXT_CONTAINER],
-    labels: alertHitsSource?.[ALERT_CONTEXT_LABELS],
-    tags: alertHitsSource?.[ALERT_CONTEXT_TAGS],
+    cloud: alert?.[ALERT_CONTEXT_CLOUD],
+    host: alert?.[ALERT_CONTEXT_HOST],
+    orchestrator: alert?.[ALERT_CONTEXT_ORCHESTRATOR],
+    container: alert?.[ALERT_CONTEXT_CONTAINER],
+    labels: alert?.[ALERT_CONTEXT_LABELS],
+    tags: alert?.[ALERT_CONTEXT_TAGS],
   };
 };
 

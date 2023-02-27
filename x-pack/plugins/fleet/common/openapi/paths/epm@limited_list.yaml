@@ -13,5 +13,7 @@ get:
                 type: array
                 items:
                   type: string
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: list-limited-packages
 parameters: []

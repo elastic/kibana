@@ -19,6 +19,7 @@ import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import { MonitorListPageState } from './models';
 import {
+  cleanMonitorListState,
   clearMonitorUpsertStatus,
   enableMonitorAlertAction,
   fetchMonitorListAction,
@@ -116,6 +117,9 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
       if (state.monitorUpsertStatuses[action.payload]) {
         delete state.monitorUpsertStatuses[action.payload];
       }
+    })
+    .addCase(cleanMonitorListState, () => {
+      return initialState;
     });
 });
 

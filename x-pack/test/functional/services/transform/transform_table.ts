@@ -57,6 +57,11 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
             .findTestSubject('transformListColumnProgress')
             .findTestSubject('transformListProgress')
             .attr('value'),
+          health: $tr
+            .findTestSubject('transformListColumnHealth')
+            .findTestSubject('transformListHealth')
+            .text()
+            .trim(),
         });
       }
 
@@ -140,6 +145,18 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       });
     }
 
+    public async assertTransformRowHealth(transformId: string, health: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.refreshTransformList();
+        const rows = await this.parseTransformTable();
+        const transformRow = rows.filter((row) => row.id === transformId)[0];
+        expect(transformRow.health).to.eql(
+          health,
+          `Expected transform row status to not be '${health}' (got '${transformRow.health}')`
+        );
+      });
+    }
+
     public async assertTransformRowStatusNotEql(transformId: string, status: string) {
       await retry.tryForTime(30 * 1000, async () => {
         await this.refreshTransformList();
@@ -187,6 +204,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
       // Walk through the rest of the tabs and check if the corresponding content shows up
       await this.switchToExpandedRowTab('transformJsonTab', '~transformJsonTabContent');
+      await this.switchToExpandedRowTab('transformHealthTab', '~transformHealthTabContent');
       await this.switchToExpandedRowTab('transformMessagesTab', '~transformMessagesTabContent');
       await this.switchToExpandedRowTab('transformPreviewTab', '~transformPivotPreview');
     }
@@ -235,6 +253,36 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
           `Expected transform messages text to include '${expectedText}'`
         );
       });
+
+      // Switch back to details tab
+      await this.switchToExpandedRowTab('transformDetailsTab', '~transformDetailsTabContent');
+    }
+
+    public async assertTransformExpandedRowHealth(
+      expectedText: string,
+      expectIssueTableToExist: boolean
+    ) {
+      await this.ensureDetailsOpen();
+
+      // The expanded row should show the details tab content by default
+      await testSubjects.existOrFail('transformDetailsTab');
+      await testSubjects.existOrFail('~transformDetailsTabContent');
+
+      // Click on the messages tab and assert the messages
+      await this.switchToExpandedRowTab('transformHealthTab', '~transformHealthTabContent');
+      await retry.tryForTime(30 * 1000, async () => {
+        const actualText = await testSubjects.getVisibleText('~transformHealthTabContent');
+        expect(actualText.toLowerCase()).to.contain(
+          expectedText.toLowerCase(),
+          `Expected transform messages text to include '${expectedText}'`
+        );
+      });
+
+      if (expectIssueTableToExist) {
+        await testSubjects.existOrFail('transformHealthTabContentIssueTable');
+      } else {
+        await testSubjects.missingOrFail('transformHealthTabContentIssueTable');
+      }
 
       // Switch back to details tab
       await this.switchToExpandedRowTab('transformDetailsTab', '~transformDetailsTabContent');

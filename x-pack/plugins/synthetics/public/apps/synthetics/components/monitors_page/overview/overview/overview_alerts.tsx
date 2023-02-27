@@ -18,13 +18,13 @@ import { i18n } from '@kbn/i18n';
 import { RECORDS_FIELD, useTheme } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
+import { selectOverviewStatus } from '../../../../state/overview_status';
 import { AlertsLink } from '../../../common/links/view_alerts';
-import { useAbsoluteDate } from '../../../../hooks';
+import { useRefreshedRange, useGetUrlParams } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
-import { selectOverviewStatus } from '../../../../state';
 
 export const OverviewAlerts = () => {
-  const { from, to } = useAbsoluteDate({ from: 'now-12h', to: 'now' });
+  const { from, to } = useRefreshedRange(12, 'hours');
 
   const { observability } = useKibana<ClientPluginsStart>().services;
   const { ExploratoryViewEmbeddable } = observability;
@@ -32,6 +32,8 @@ export const OverviewAlerts = () => {
   const theme = useTheme();
 
   const { status } = useSelector(selectOverviewStatus);
+
+  const { locations } = useGetUrlParams();
 
   const loading = !status?.allIds || status?.allIds.length === 0;
 
@@ -47,6 +49,7 @@ export const OverviewAlerts = () => {
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
             <ExploratoryViewEmbeddable
+              id="monitorActiveAlertsCount"
               dataTestSubj="monitorActiveAlertsCount"
               reportType="single-metric"
               customHeight="70px"
@@ -61,7 +64,11 @@ export const OverviewAlerts = () => {
                   selectedMetricField: RECORDS_FIELD,
                   reportDefinitions: {
                     'kibana.alert.rule.category': ['Synthetics monitor status'],
-                    'monitor.id': status?.enabledIds,
+                    'monitor.id':
+                      status?.enabledMonitorQueryIds.length > 0
+                        ? status?.enabledMonitorQueryIds
+                        : ['false-id'],
+                    ...(locations?.length ? { 'observer.geo.name': locations } : {}),
                   },
                   filters: [{ field: 'kibana.alert.status', values: ['active', 'recovered'] }],
                   color: theme.eui.euiColorVis1,
@@ -71,6 +78,7 @@ export const OverviewAlerts = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <ExploratoryViewEmbeddable
+              id="monitorActiveAlertsOverTime"
               sparklineMode
               customHeight="70px"
               reportType="kpi-over-time"
@@ -83,7 +91,11 @@ export const OverviewAlerts = () => {
                   },
                   reportDefinitions: {
                     'kibana.alert.rule.category': ['Synthetics monitor status'],
-                    'monitor.id': status?.enabledIds,
+                    'monitor.id':
+                      status?.enabledMonitorQueryIds.length > 0
+                        ? status?.enabledMonitorQueryIds
+                        : ['false-id'],
+                    ...(locations?.length ? { 'observer.geo.name': locations } : {}),
                   },
                   dataType: 'alerts',
                   selectedMetricField: RECORDS_FIELD,

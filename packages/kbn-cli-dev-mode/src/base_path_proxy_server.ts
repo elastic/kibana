@@ -22,7 +22,10 @@ import { Log } from './log';
 
 const ONE_GIGABYTE = 1024 * 1024 * 1024;
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
-const getRandomBasePath = () => sampleSize(alphabet, 3).join('');
+
+// Thank you, Spencer! :elasticheart:
+const getRandomBasePath = () =>
+  Math.random() * 100 < 1 ? 'spalger' : sampleSize(alphabet, 3).join('');
 
 export interface BasePathProxyServerOptions {
   shouldRedirectFromOldBasePath: (path: string) => boolean;

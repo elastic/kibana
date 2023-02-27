@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "index": {
+      "lifecycle": {
+        "name": "profiling"
+      }
+    }
+  }
+}

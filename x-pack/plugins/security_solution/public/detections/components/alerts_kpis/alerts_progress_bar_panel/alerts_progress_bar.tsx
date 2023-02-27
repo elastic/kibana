@@ -7,7 +7,7 @@
 import { EuiProgress, EuiSpacer, EuiText, EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import type { AlertsProgressBarData } from './types';
+import type { AlertsProgressBarData, GroupBySelection } from './types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import * as i18n from './translations';
 
@@ -18,25 +18,32 @@ const ProgressWrapper = styled.div`
 const StyledEuiText = styled(EuiText)`
   margin-top: -${({ theme }) => theme.eui.euiSizeM};
 `;
-
+const StyledEuiProgress = styled(EuiProgress)`
+  margin-top: ${({ theme }) => theme.eui.euiSizeS};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+`;
 export interface AlertsProcessBarProps {
   data: AlertsProgressBarData[];
   isLoading: boolean;
-  stackByField: string;
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
+  groupBySelection: GroupBySelection;
 }
 
 export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
   data,
   isLoading,
-  stackByField,
+  groupBySelection,
 }) => {
   return (
     <>
       <StyledEuiText size="s" data-test-subj="alerts-progress-bar-title">
-        <h5>{stackByField}</h5>
+        <h5>{groupBySelection}</h5>
       </StyledEuiText>
-      <EuiHorizontalRule margin="xs" />
+      {isLoading ? (
+        <StyledEuiProgress size="xs" color="primary" />
+      ) : (
+        <EuiHorizontalRule margin="xs" />
+      )}
       {!isLoading && data.length === 0 ? (
         <>
           <EuiText size="s" textAlign="center" data-test-subj="empty-proress-bar">
@@ -64,7 +71,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
                   ) : (
                     <DefaultDraggable
                       isDraggable={false}
-                      field={stackByField}
+                      field={groupBySelection}
                       hideTopN={true}
                       id={`top-alerts-${item.key}`}
                       value={item.key}

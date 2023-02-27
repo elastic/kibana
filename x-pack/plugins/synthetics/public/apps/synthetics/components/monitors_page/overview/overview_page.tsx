@@ -16,7 +16,7 @@ import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refres
 import {
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,
-  selectOverviewPageState,
+  selectOverviewState,
   selectServiceLocationsState,
 } from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
@@ -42,7 +42,6 @@ export const OverviewPage: React.FC = () => {
   const { lastRefresh } = useSyntheticsRefreshContext();
   const { search } = useLocation();
 
-  const pageState = useSelector(selectOverviewPageState);
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
 
   useEffect(() => {
@@ -51,48 +50,52 @@ export const OverviewPage: React.FC = () => {
     }
   }, [dispatch, locationsLoaded, locationsLoading]);
 
-  // fetch overview for all other page state changes
-  useEffect(() => {
-    dispatch(fetchMonitorOverviewAction.get(pageState));
-  }, [dispatch, pageState]);
-
-  // fetch overview for refresh
-  useEffect(() => {
-    dispatch(quietFetchOverviewAction.get(pageState));
-  }, [dispatch, pageState, lastRefresh]);
-
   const {
     enablement: { isEnabled },
     loading: enablementLoading,
   } = useEnablement();
 
   const {
-    syntheticsMonitors,
+    loaded: overviewLoaded,
+    data: { monitors },
+    pageState,
+  } = useSelector(selectOverviewState);
+
+  const {
     loading: monitorsLoading,
     loaded: monitorsLoaded,
     handleFilterChange,
+    absoluteTotal,
   } = useMonitorList();
 
-  if (
-    !search &&
-    !enablementLoading &&
-    isEnabled &&
-    !monitorsLoading &&
-    monitorsLoaded &&
-    syntheticsMonitors.length === 0
-  ) {
+  // fetch overview for all other page state changes
+  useEffect(() => {
+    if (!monitorsLoaded) {
+      dispatch(fetchMonitorOverviewAction.get(pageState));
+    }
+    // change only needs to be triggered on pageState change
+  }, [dispatch, pageState, monitorsLoaded]);
+
+  // fetch overview for refresh
+  useEffect(() => {
+    if (monitorsLoaded) {
+      dispatch(quietFetchOverviewAction.get(pageState));
+    }
+    // for page state change we don't want quite fetch, see above fetch ^^
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, lastRefresh]);
+
+  const hasNoMonitors = !search && !enablementLoading && monitorsLoaded && absoluteTotal === 0;
+
+  if (hasNoMonitors && !monitorsLoading && isEnabled) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 
-  if (
-    !search &&
-    !enablementLoading &&
-    !isEnabled &&
-    monitorsLoaded &&
-    syntheticsMonitors.length === 0
-  ) {
+  if (!isEnabled && hasNoMonitors) {
     return <Redirect to={MONITORS_ROUTE} />;
   }
+
+  const noMonitorFound = monitorsLoaded && overviewLoaded && monitors?.length === 0;
 
   return (
     <>
@@ -108,7 +111,7 @@ export const OverviewPage: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {Boolean(!monitorsLoaded || syntheticsMonitors?.length > 0) && (
+      {!noMonitorFound ? (
         <>
           <EuiFlexGroup gutterSize="m" wrap>
             <EuiFlexItem grow={2}>
@@ -124,8 +127,9 @@ export const OverviewPage: React.FC = () => {
           <EuiSpacer />
           <OverviewGrid />
         </>
+      ) : (
+        <NoMonitorsFound />
       )}
-      {monitorsLoaded && syntheticsMonitors?.length === 0 && <NoMonitorsFound />}
     </>
   );
 };

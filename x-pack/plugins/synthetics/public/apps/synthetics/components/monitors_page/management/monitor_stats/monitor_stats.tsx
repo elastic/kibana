@@ -14,7 +14,6 @@ import {
   useEuiTheme,
   EuiText,
   EuiFlexItem,
-  EuiLoadingContent,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
@@ -102,13 +101,8 @@ const MonitorStat = ({
   return (
     <EuiStatStyled
       description={description}
-      title={
-        !isNaN(statValue) ? (
-          <EuiI18nNumber css={{ fontSize: euiTheme.size.m }} value={statValue} />
-        ) : (
-          <EuiLoadingContent lines={2} />
-        )
-      }
+      isLoading={isNaN(statValue)}
+      title={<EuiI18nNumber css={{ fontSize: euiTheme.size.m }} value={statValue} />}
       reverse={true}
     />
   );

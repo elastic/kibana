@@ -154,6 +154,7 @@ export interface ActionStatus {
   cancellationTime?: string;
   newPolicyId?: string;
   creationTime: string;
+  hasRolloutPeriod?: boolean;
 }
 
 export interface AgentDiagnostics {

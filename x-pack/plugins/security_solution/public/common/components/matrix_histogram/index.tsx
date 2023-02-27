@@ -29,7 +29,7 @@ import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
-import { VisualizationActions } from '../visualization_actions';
+import { VisualizationActions } from '../visualization_actions/actions';
 import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';

@@ -29,6 +29,8 @@ export const mockState: SyntheticsAppState = {
     integrationsPopoverOpen: null,
     searchText: '',
     monitorId: '',
+    refreshInterval: 60,
+    refreshPaused: true,
   },
   serviceLocations: {
     throttling: DEFAULT_THROTTLING,
@@ -99,8 +101,10 @@ export const mockState: SyntheticsAppState = {
     loaded: false,
     loading: false,
     flyoutConfig: null,
-    status: null,
-    statusError: null,
+    groupBy: {
+      field: 'none',
+      order: 'asc',
+    },
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
@@ -131,6 +135,12 @@ export const mockState: SyntheticsAppState = {
     error: {},
   },
   manualTestRuns: {},
+  overviewStatus: {
+    loaded: false,
+    loading: false,
+    status: null,
+    error: null,
+  },
 };
 
 function getBrowserJourneyMockSlice() {

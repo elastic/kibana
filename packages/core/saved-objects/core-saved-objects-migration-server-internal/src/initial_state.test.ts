@@ -120,6 +120,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "maps-telemetry",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "ml-telemetry",
                 },
               },
@@ -156,22 +161,6 @@ describe('createInitialState', () => {
               Object {
                 "term": Object {
                   "type": "ui-counter",
-                },
-              },
-              Object {
-                "bool": Object {
-                  "must": Array [
-                    Object {
-                      "match": Object {
-                        "type": "search-session",
-                      },
-                    },
-                    Object {
-                      "match": Object {
-                        "search-session.persisted": false,
-                      },
-                    },
-                  ],
                 },
               },
             ],

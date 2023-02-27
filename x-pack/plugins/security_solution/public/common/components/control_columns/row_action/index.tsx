@@ -23,7 +23,7 @@ import { dataTableActions } from '../../../store/data_table';
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
   controlColumn: ControlColumnProps;
-  data: TimelineItem[];
+  data: TimelineItem;
   disabled: boolean;
   index: number;
   isEventViewer: boolean;
@@ -38,6 +38,7 @@ type Props = EuiDataGridCellValueElementProps & {
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
   pageRowIndex: number;
+  refetch?: () => void;
 };
 
 const RowActionComponent = ({
@@ -59,16 +60,9 @@ const RowActionComponent = ({
   setEventsLoading,
   setEventsDeleted,
   width,
+  refetch,
 }: Props) => {
-  const {
-    data: timelineNonEcsData,
-    ecs: ecsData,
-    _id: eventId,
-    _index: indexName,
-  } = useMemo(() => {
-    const rowData: Partial<TimelineItem> = data[pageRowIndex];
-    return rowData ?? {};
-  }, [data, pageRowIndex]);
+  const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
 
   const dispatch = useDispatch();
 
@@ -137,6 +131,7 @@ const RowActionComponent = ({
           width={width}
           setEventsLoading={setEventsLoading}
           setEventsDeleted={setEventsDeleted}
+          refetch={refetch}
         />
       )}
     </>

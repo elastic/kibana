@@ -8,7 +8,7 @@
 import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { ActionsCompletion, RuleLastRunOutcomes } from '../../common';
+import { ActionsCompletion, RuleLastRunOutcomeOrderMap, RuleLastRunOutcomes } from '../../common';
 import {
   RuleLastRunOutcomeValues,
   RuleExecutionStatusWarningReasons,
@@ -65,6 +65,7 @@ export const lastRunFromState = (
   return {
     lastRun: {
       outcome,
+      outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
       outcomeMsg: outcomeMsg.length > 0 ? outcomeMsg : null,
       warning: warning || null,
       alertsCount: {
@@ -80,9 +81,11 @@ export const lastRunFromState = (
 
 export const lastRunFromError = (error: Error): ILastRun => {
   const esErrorMessage = getEsErrorMessage(error);
+  const outcome = RuleLastRunOutcomeValues[2];
   return {
     lastRun: {
-      outcome: RuleLastRunOutcomeValues[2],
+      outcome,
+      outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
       warning: getReasonFromError(error),
       outcomeMsg: esErrorMessage ? [esErrorMessage] : null,
       alertsCount: {},
@@ -104,5 +107,6 @@ export const lastRunToRaw = (lastRun: ILastRun['lastRun']): RawRuleLastRun => {
     },
     warning: warning ?? null,
     outcomeMsg: outcomeMsg && !Array.isArray(outcomeMsg) ? [outcomeMsg] : outcomeMsg,
+    outcomeOrder: RuleLastRunOutcomeOrderMap[lastRun.outcome],
   };
 };

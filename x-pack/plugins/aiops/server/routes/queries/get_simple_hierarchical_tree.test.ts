@@ -6,7 +6,7 @@
  */
 
 import { fields } from '../../../common/__mocks__/artificial_logs/fields';
-import { filteredFrequentItems } from '../../../common/__mocks__/artificial_logs/filtered_frequent_items';
+import { filteredFrequentItemSets } from '../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
 
 import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 
@@ -16,7 +16,7 @@ describe('getSimpleHierarchicalTree', () => {
     // and make it comparable against a static representation.
     expect(
       JSON.parse(
-        JSON.stringify(getSimpleHierarchicalTree(filteredFrequentItems, true, false, fields))
+        JSON.stringify(getSimpleHierarchicalTree(filteredFrequentItemSets, true, false, fields))
       )
     ).toEqual({
       root: {

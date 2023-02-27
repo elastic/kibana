@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
+import { selectOverviewPageState } from '../../../state';
 import {
   fetchOverviewStatusAction,
   quietFetchOverviewStatusAction,
-  MonitorOverviewPageState,
   selectOverviewStatus,
-} from '../../../state';
+} from '../../../state/overview_status';
 
-export function useOverviewStatus({ pageState }: { pageState: MonitorOverviewPageState }) {
-  const { status, statusError } = useSelector(selectOverviewStatus);
+export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLocation: boolean }) {
+  const pageState = useSelector(selectOverviewPageState);
+
+  const { status, error, loaded } = useSelector(selectOverviewStatus);
 
   const { lastRefresh } = useSyntheticsRefreshContext();
-  const lastRefreshRef = useRef(lastRefresh);
 
   const dispatch = useDispatch();
   const reload = useCallback(() => {
-    dispatch(fetchOverviewStatusAction.get(pageState));
-  }, [dispatch, pageState]);
+    dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
+  }, [dispatch, pageState, scopeStatusByLocation]);
 
   useEffect(() => {
-    if (lastRefresh !== lastRefreshRef.current) {
-      dispatch(quietFetchOverviewStatusAction.get(pageState));
-      lastRefreshRef.current = lastRefresh;
+    if (loaded) {
+      dispatch(quietFetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
     } else {
       reload();
     }
-  }, [dispatch, reload, lastRefresh, pageState]);
+  }, [dispatch, reload, lastRefresh, pageState, loaded, scopeStatusByLocation]);
 
   return {
     status,
-    statusError,
+    error,
     reload,
   };
 }

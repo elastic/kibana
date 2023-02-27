@@ -6,21 +6,27 @@
  */
 
 import { useEffect, useState } from 'react';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { getSavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   getDataViewById,
   getDataViewAndSavedSearch,
-  DataViewAndSavedSearch,
+  type DataViewAndSavedSearch,
 } from '../util/index_utils';
 import { createSearchItems } from '../jobs/new_job/utils/new_job_utils';
-import { ResolverResults, Resolvers } from './resolvers';
-import { MlContextValue } from '../contexts/ml';
+import type { ResolverResults, Resolvers } from './resolvers';
+import type { MlContextValue } from '../contexts/ml';
 import { useNotifications } from '../contexts/kibana';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../common/constants/locator';
 
+export interface GetSavedSearchPageDeps {
+  search: DataPublicPluginStart['search'];
+  savedObjectsClient: SavedObjectsClientContract;
+}
 /**
  * Hook to resolve route specific requirements
  * @param dataViewId optional Kibana data view id, used for wizards
@@ -34,6 +40,10 @@ export const useResolver = (
   savedSearchId: string | undefined,
   config: IUiSettingsClient,
   dataViewsContract: DataViewsContract,
+  getSavedSearchDeps: {
+    search: DataPublicPluginStart['search'];
+    savedObjectsClient: SavedObjectsClientContract;
+  },
   resolvers: Resolvers
 ): { context: MlContextValue; results: ResolverResults } => {
   const notifications = useNotifications();
@@ -76,25 +86,28 @@ export const useResolver = (
           savedSearch: null,
           dataView: null,
         };
+        let savedSearch = null;
 
         if (savedSearchId !== undefined) {
+          savedSearch = await getSavedSearch(savedSearchId, getSavedSearchDeps);
           dataViewAndSavedSearch = await getDataViewAndSavedSearch(savedSearchId);
         } else if (dataViewId !== undefined) {
           dataViewAndSavedSearch.dataView = await getDataViewById(dataViewId);
         }
 
-        const { savedSearch, dataView } = dataViewAndSavedSearch;
+        const { savedSearch: deprecatedSavedSearchObj, dataView } = dataViewAndSavedSearch;
 
         const { combinedQuery } = createSearchItems(
           config,
           dataView !== null ? dataView : undefined,
-          savedSearch
+          deprecatedSavedSearchObj
         );
 
         setContext({
           combinedQuery,
           currentDataView: dataView,
-          currentSavedSearch: savedSearch,
+          deprecatedSavedSearchObj,
+          selectedSavedSearch: savedSearch,
           dataViewsContract,
           kibanaConfig: config,
         });

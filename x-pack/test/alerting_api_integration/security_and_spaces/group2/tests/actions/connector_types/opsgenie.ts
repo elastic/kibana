@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   OpsgenieSimulator,
   opsgenieSuccessResponse,
-} from '../../../../../common/plugins/actions_simulators/server/opsgenie_simulation';
+} from '@kbn/actions-simulators-plugin/server/opsgenie_simulation';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function opsgenieTest({ getService }: FtrProviderContext) {

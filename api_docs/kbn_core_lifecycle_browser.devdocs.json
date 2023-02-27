@@ -578,14 +578,6 @@
                 "path": "src/plugins/saved_objects/public/plugin.ts"
               },
               {
-                "plugin": "savedObjects",
-                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/plugin.tsx"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/types.ts"
               },
@@ -634,10 +626,6 @@
                 "path": "src/plugins/dashboard/public/dashboard_actions/index.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/lens_attribute_service.ts"
               },
@@ -675,10 +663,6 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/open_search_panel.tsx"
-              },
-              {
-                "plugin": "discover",
                 "path": "src/plugins/discover/public/application/main/utils/persist_saved_search.ts"
               },
               {
@@ -704,6 +688,10 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/public/kibana_services.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/app.tsx"
               },
               {
                 "plugin": "ml",
@@ -775,15 +763,15 @@
               },
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/components/source_picker.tsx"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/source_modal.tsx"
-              },
-              {
-                "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/plugin.ts"
+              },
+              {
+                "plugin": "monitoring",
+                "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.ts"
               },
               {
                 "plugin": "synthetics",
@@ -800,10 +788,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/monitor_management/hooks/use_invalid_monitors.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.ts"
               },
               {
                 "plugin": "synthetics",
@@ -859,31 +843,11 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/index_or_search/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/components/datafeed_step/components/data_view/change_data_view.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
               },
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_csp_rules.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/components/guidance_panel/guidance_panel.tsx"
               },
               {
                 "plugin": "securitySolution",
