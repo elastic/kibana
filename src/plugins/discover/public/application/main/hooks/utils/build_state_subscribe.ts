@@ -83,7 +83,8 @@ export const buildStateSubscribe =
       chartDisplayChanged ||
       chartIntervalChanged ||
       breakdownFieldChanged ||
-      docTableSortChanged
+      docTableSortChanged ||
+      dataViewChanged
     ) {
       addLog('[appstate] subscribe triggers data fetching');
       dataState.fetch();
