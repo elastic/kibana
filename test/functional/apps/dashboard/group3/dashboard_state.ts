@@ -71,9 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   };
 
-  describe('dashboard state', function describeIndexTests() {
-    // Used to track flag before and after reset
-
+  describe('dashboard state', function () {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
