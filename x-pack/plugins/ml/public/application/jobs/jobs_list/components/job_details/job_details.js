@@ -267,7 +267,11 @@ export class JobDetailsUI extends Component {
       });
 
       return (
-        <div className="tab-contents" data-test-subj={`mlJobListRowDetails details-${job.job_id}`}>
+        <div
+          className="tab-contents"
+          css={{ backgroundColor: '#fff', margin: '-8px', padding: '8px' }}
+          data-test-subj={`mlJobListRowDetails details-${job.job_id}`}
+        >
           <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />
         </div>
       );

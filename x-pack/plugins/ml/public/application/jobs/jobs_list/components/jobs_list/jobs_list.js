@@ -385,6 +385,11 @@ export class JobsList extends Component {
         }
         itemId="id"
         className={`jobs-list-table ${selectedJobsClass}`}
+        css={{
+          '.euiTableRow-isExpandedRow': {
+            backgroundColor: '#fff',
+          },
+        }}
         items={pageOfItems}
         columns={columns}
         pagination={pagination}
