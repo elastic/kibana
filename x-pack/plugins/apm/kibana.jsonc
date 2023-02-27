@@ -27,7 +27,8 @@
       "advancedSettings",
       "unifiedFieldList",
       "lens",
-      "maps"
+      "maps",
+      "synthetics"
     ],
     "optionalPlugins": [
       "actions",

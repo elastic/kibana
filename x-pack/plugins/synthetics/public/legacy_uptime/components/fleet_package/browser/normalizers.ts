@@ -110,6 +110,7 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKey.IGNORE_HTTPS_ERRORS]: getBrowserNormalizer(ConfigKey.IGNORE_HTTPS_ERRORS),
   [ConfigKey.PLAYWRIGHT_OPTIONS]: getBrowserNormalizer(ConfigKey.PLAYWRIGHT_OPTIONS),
   [ConfigKey.TEXT_ASSERTION]: getBrowserNormalizer(ConfigKey.TEXT_ASSERTION),
+  [ConfigKey.APM_TRACE_URL_PATTERNS]: getBrowserNormalizer(ConfigKey.APM_TRACE_URL_PATTERNS),
   ...commonNormalizers,
   ...tlsNormalizers,
 };

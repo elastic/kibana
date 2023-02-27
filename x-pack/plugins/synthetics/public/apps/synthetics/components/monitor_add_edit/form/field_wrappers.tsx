@@ -51,6 +51,11 @@ import {
   ResponseBodyIndexField as DefaultResponseBodyIndexField,
   ResponseBodyIndexFieldProps as DefaultResponseBodyIndexFieldProps,
 } from '../fields/index_response_body_field';
+import {
+  UrlPatternsField as DefaultUrlPatternsField,
+  UrlPatternsFieldProps as DefaultUrlPatternsFieldProps,
+  urlPatternsFieldHelpText,
+} from '../fields/url_patterns_field';
 
 // these props are automatically passed through to our controlled components
 // they do not have to be defined specifically on the 'props' field in the
@@ -66,6 +71,7 @@ export type RequestBodyFieldProps = Omit<DefaultRequestBodyFieldProps, Controlle
 export type CodeEditorProps = Omit<DefaultCodeEditorProps, ControlledFieldProp>;
 export type JSONCodeEditorProps = Omit<DefaultCodeEditorProps, ControlledFieldProp | 'languageId'>;
 export type FormattedComboBoxProps = Omit<DefaultFormattedComboBoxProps, ControlledFieldProp>;
+export type UrlPatternsFieldProps = Omit<DefaultUrlPatternsFieldProps, ControlledFieldProp>;
 
 export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>(
   (props, ref: Ref<HTMLInputElement>) => (
@@ -123,6 +129,11 @@ export const MonitorTypeRadioGroup = React.forwardRef<unknown, MonitorTypeRadioG
 export const HeaderField = React.forwardRef<unknown, DefaultHeaderFieldProps>((props, _ref) => (
   <DefaultHeaderField {...props} />
 ));
+
+export const UrlPatternsField = React.forwardRef<unknown, DefaultUrlPatternsFieldProps>(
+  (props, _ref) => <DefaultUrlPatternsField {...props} />
+);
+export { urlPatternsFieldHelpText };
 
 export const RequestBodyField = React.forwardRef<unknown, DefaultRequestBodyFieldProps>(
   (props, _ref) => <DefaultRequestBodyField {...props} />

@@ -59,6 +59,12 @@ const aggs = {
       size: 10000,
     },
   },
+  serviceNames: {
+    terms: {
+      field: `${syntheticsMonitorType}.attributes.${ConfigKey.APM_SERVICE_NAME}`,
+      size: 10000,
+    },
+  },
 };
 
 type Buckets = Array<{
@@ -80,6 +86,9 @@ interface AggsResponse {
     buckets: Buckets;
   };
   schedules: {
+    buckets: Buckets;
+  };
+  serviceNames: {
     buckets: Buckets;
   };
 }
@@ -105,7 +114,7 @@ export const useFilters = (): FiltersList => {
   const dispatch = useDispatch();
 
   const newFiltersData = useMemo(() => {
-    const { monitorTypes, tags, locations, projects, schedules } =
+    const { monitorTypes, tags, locations, projects, schedules, serviceNames } =
       (data?.aggregations as AggsResponse) ?? {};
     return {
       monitorTypes:
@@ -132,6 +141,11 @@ export const useFilters = (): FiltersList => {
           })) ?? [],
       schedules:
         schedules?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
+          count,
+        })) ?? [],
+      serviceNames:
+        serviceNames?.buckets?.map(({ key, doc_count: count }) => ({
           label: key,
           count,
         })) ?? [],

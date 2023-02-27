@@ -8,8 +8,8 @@
 import { SyntheticsAppState } from '../root_reducer';
 
 export const selectOverviewStatus = ({
-  overviewStatus: { status, error, loaded },
-}: SyntheticsAppState) => ({ status, error, loaded });
+  overviewStatus: { status, error, loaded, loading },
+}: SyntheticsAppState) => ({ status, error, loaded, loading });
 
 export const selectFiltersData = ({ overviewStatus: { filtersData } }: SyntheticsAppState) =>
   filtersData;

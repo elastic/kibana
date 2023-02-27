@@ -25,6 +25,7 @@ export interface MonitorFilterState {
   projects?: string[];
   schedules?: string[];
   locations?: string[];
+  serviceNames?: string[];
 }
 
 export interface MonitorListPageState extends MonitorFilterState {

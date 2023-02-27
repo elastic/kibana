@@ -75,6 +75,8 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
   [ConfigKey.TEXT_ASSERTION]: null,
+  [ConfigKey.APM_TRACE_URL_PATTERNS]: (fields) =>
+    arrayToJsonFormatter(fields[ConfigKey.APM_TRACE_URL_PATTERNS]),
   ...commonFormatters,
   ...tlsFormatters,
 };

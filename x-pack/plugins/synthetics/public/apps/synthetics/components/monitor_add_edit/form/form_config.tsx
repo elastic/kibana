@@ -17,10 +17,19 @@ const DEFAULT_DATA_OPTIONS = (readOnly: boolean) => ({
   description: i18n.translate('xpack.synthetics.monitorConfig.section.dataOptions.description', {
     defaultMessage: 'Configure data options to add context to the data coming from your monitors.',
   }),
+  components: [FIELD(readOnly)[ConfigKey.TAGS], FIELD(readOnly)[ConfigKey.NAMESPACE]],
+});
+
+const DEFAULT_APM_OPTIONS = (readOnly: boolean) => ({
+  title: i18n.translate('xpack.synthetics.monitorConfig.section.apm.title', {
+    defaultMessage: 'APM',
+  }),
+  description: i18n.translate('xpack.synthetics.monitorConfig.section.apm.description', {
+    defaultMessage: 'Configure APM options to add tracing to monitor network requests.',
+  }),
   components: [
-    FIELD(readOnly)[ConfigKey.TAGS],
     FIELD(readOnly)[ConfigKey.APM_SERVICE_NAME],
-    FIELD(readOnly)[ConfigKey.NAMESPACE],
+    FIELD(readOnly)[ConfigKey.APM_TRACE_URL_PATTERNS],
   ],
 });
 
@@ -220,11 +229,11 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
         ...DEFAULT_DATA_OPTIONS(readOnly),
         components: [
           FIELD(readOnly)[ConfigKey.TAGS],
-          FIELD(readOnly)[ConfigKey.APM_SERVICE_NAME],
           FIELD(readOnly)[ConfigKey.SCREENSHOTS],
           FIELD(readOnly)[ConfigKey.NAMESPACE],
         ],
       },
+      DEFAULT_APM_OPTIONS(readOnly),
       ...BROWSER_ADVANCED(readOnly),
     ],
   },

@@ -14,6 +14,7 @@ export enum AlertConfigKey {
 export enum ConfigKey {
   ALERT_CONFIG = 'alert',
   APM_SERVICE_NAME = 'service.name',
+  APM_TRACE_URL_PATTERNS = 'apm.trace_url_patterns',
   CUSTOM_HEARTBEAT_ID = 'custom_heartbeat_id',
   CONFIG_ID = 'config_id',
   CONFIG_HASH = 'hash',

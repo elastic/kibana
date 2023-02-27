@@ -8,7 +8,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -22,9 +22,9 @@ import { useRefreshedRange } from '../../../../../hooks';
 import { OverviewErrorsCount } from './overview_errors_count';
 
 export function OverviewErrors() {
-  const { status } = useSelector(selectOverviewStatus);
+  const { status, loaded, loading } = useSelector(selectOverviewStatus);
 
-  const loading = !status?.allIds || status?.allIds.length === 0;
+  const statusLoading = loading || (!loaded && (!status?.allIds || status?.allIds.length === 0));
 
   const { from, to } = useRefreshedRange(6, 'hours');
 
@@ -34,8 +34,8 @@ export function OverviewErrors() {
         <h3>{headingText}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {loading ? (
-        <EuiLoadingContent lines={3} />
+      {statusLoading ? (
+        <EuiSkeletonText lines={3} />
       ) : (
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>

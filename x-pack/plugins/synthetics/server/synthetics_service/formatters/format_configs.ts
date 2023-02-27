@@ -100,6 +100,12 @@ export const formatHeartbeatRequest = ({
       params = { ...params, ...monitorParams };
     }
 
+    // Inject trace url patterns as param (only for ON week demo)
+    const traceUrlPatterns = (monitor as BrowserFields)[ConfigKey.APM_TRACE_URL_PATTERNS];
+    if (traceUrlPatterns && traceUrlPatterns.length > 0) {
+      params = { ...params, traceUrlPatterns: traceUrlPatterns.join(',') };
+    }
+
     paramsString = isEmpty(params) ? '' : JSON.stringify(params);
   } catch (e) {
     // ignore
