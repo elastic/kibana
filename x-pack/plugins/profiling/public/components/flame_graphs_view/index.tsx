@@ -86,8 +86,8 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
     'comparisonMode' in query ? query.comparisonMode : FlameGraphComparisonMode.Absolute;
 
   const normalizationMode = 'normalizationMode' in query ? query.normalizationMode : undefined;
-  const baseline = 'baseline' in query ? query.baseline : undefined;
-  const comparison = 'comparison' in query ? query.comparison : undefined;
+  const baseline = 'baseline' in query ? query.baseline : 1;
+  const comparison = 'comparison' in query ? query.comparison : 1;
 
   const {
     services: { fetchElasticFlamechart },
