@@ -152,6 +152,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
     getAllAlertsAttachToCase: jest.fn(),
     getCaseCommentStats: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),
+    getCaseFileExtensions: jest.fn(),
   };
 
   return service as unknown as AttachmentGetterServiceMock;
