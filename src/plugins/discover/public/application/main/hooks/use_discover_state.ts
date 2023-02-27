@@ -120,7 +120,7 @@ export function useDiscoverState({
    * or dataView / savedSearch switch
    */
   useEffect(() => {
-    const stopSync = stateContainer.initializeAndSync(dataView, filterManager, data);
+    const stopSync = stateContainer.actions.initializeAndSync(dataView, filterManager, data);
     setState(stateContainer.appState.getState());
 
     return () => stopSync();
@@ -213,7 +213,7 @@ export function useDiscoverState({
    */
   useEffect(() => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
-      stateContainer.pauseAutoRefreshInterval();
+      stateContainer.actions.pauseAutoRefreshInterval();
     }
   }, [dataView, stateContainer]);
 
@@ -226,7 +226,6 @@ export function useDiscoverState({
     stateContainer,
     persistDataView,
     updateAdHocDataViewId,
-    searchSessionManager,
     updateDataViewList,
   };
 }
