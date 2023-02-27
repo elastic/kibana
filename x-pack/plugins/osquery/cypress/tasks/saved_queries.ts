@@ -16,6 +16,7 @@ import {
   selectAllAgents,
   submitQuery,
 } from './live_query';
+import { navigateTo } from './navigation';
 
 export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescription: string) =>
   it(
@@ -85,8 +86,7 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
       closeToastIfVisible();
 
       // play saved query
-      cy.contains('Saved queries').click();
-      cy.visit('/app/osquery/saved_queries');
+      navigateTo('/app/osquery/saved_queries');
       cy.contains(savedQueryId);
       cy.react('PlayButtonComponent', {
         props: { savedQuery: { attributes: { id: savedQueryId } } },
