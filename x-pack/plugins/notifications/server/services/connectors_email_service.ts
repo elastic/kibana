@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  asNotificationExecutionSource,
-  type IUnsecuredActionsClient,
-} from '@kbn/actions-plugin/server';
+import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { EmailService, PlainTextEmail } from './types';
 
 export class ConnectorsEmailService implements EmailService {
@@ -26,10 +23,6 @@ export class ConnectorsEmailService implements EmailService {
         subject: params.subject,
         message: params.message,
       },
-      source: asNotificationExecutionSource({
-        requesterId: this.requesterId,
-        connectorId: this.connectorId,
-      }),
       relatedSavedObjects: params.context?.relatedObjects,
     }));
     return await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);

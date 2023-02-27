@@ -29,13 +29,11 @@ describe('bulkEnqueueExecution()', () => {
         id: 'preconfigured1',
         params: {},
         executionId: '123abc',
-        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
       },
       {
         id: 'preconfigured2',
         params: {},
         executionId: '456def',
-        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
       },
     ];
     await expect(
@@ -51,19 +49,41 @@ describe('bulkEnqueueExecution()', () => {
         id: 'preconfigured1',
         params: {},
         executionId: '123abc',
-        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
       },
       {
         id: 'preconfigured2',
         params: {},
         executionId: '456def',
-        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
+      },
+    ];
+    await expect(
+      unsecuredActionsClient.bulkEnqueueExecution('functional_tester', opts)
+    ).resolves.toMatchInlineSnapshot(`undefined`);
+
+    expect(executionEnqueuer).toHaveBeenCalledWith(internalSavedObjectsRepository, opts);
+  });
+
+  test('injects source and calls the executionEnqueuer with the appropriate parameters when requester is "notifications"', async () => {
+    const opts = [
+      {
+        id: 'preconfigured1',
+        params: {},
+        executionId: '123abc',
+      },
+      {
+        id: 'preconfigured2',
+        params: {},
+        executionId: '456def',
       },
     ];
     await expect(
       unsecuredActionsClient.bulkEnqueueExecution('notifications', opts)
     ).resolves.toMatchInlineSnapshot(`undefined`);
 
-    expect(executionEnqueuer).toHaveBeenCalledWith(internalSavedObjectsRepository, opts);
+    const optsWithSource = opts.map((opt) => ({
+      ...opt,
+      source: asNotificationExecutionSource({ connectorId: opt.id, requesterId: 'notifications' }),
+    }));
+    expect(executionEnqueuer).toHaveBeenCalledWith(internalSavedObjectsRepository, optsWithSource);
   });
 });

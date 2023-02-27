@@ -31,7 +31,7 @@ interface CreateBulkUnsecuredExecuteFunctionOptions {
 export interface ExecuteOptions
   extends Pick<ActionExecutorOptions, 'params' | 'relatedSavedObjects'> {
   id: string;
-  source: ActionExecutionSource<unknown>;
+  source?: ActionExecutionSource<unknown>;
 }
 
 interface ActionTaskParams
@@ -115,8 +115,8 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
           actionId: actionToExecute.id,
           params: actionToExecute.params,
           apiKey: null,
-          source: actionToExecute.source.type,
           relatedSavedObjects: relatedSavedObjectWithRefs,
+          ...(actionToExecute.source ? { source: actionToExecute.source.type } : {}),
         },
         references: taskReferences,
       };
@@ -140,7 +140,7 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
   };
 }
 
-function executionSourceAsSavedObjectReferences(executionSource: ActionExecutionSource<unknown>) {
+function executionSourceAsSavedObjectReferences(executionSource?: ActionExecutionSource<unknown>) {
   return isSavedObjectExecutionSource(executionSource)
     ? {
         references: [

@@ -12,7 +12,6 @@ import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/lib/action_execution_source';
 import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -231,7 +230,6 @@ instanceStateValue: true
                 outcome: 'success',
                 message: `rule executed: test.always-firing:${alertId}: 'abc'`,
                 ruleObject: alertSearchResultWithoutDates,
-                source: ActionExecutionSourceType.SAVED_OBJECT,
               });
               break;
             default:
@@ -1367,11 +1365,10 @@ instanceStateValue: true
     message: string;
     errorMessage?: string;
     ruleObject: any;
-    source?: string;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, alertId, outcome, message, errorMessage, ruleObject, source } = params;
+    const { spaceId, alertId, outcome, message, errorMessage, ruleObject } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
@@ -1457,10 +1454,6 @@ instanceStateValue: true
     });
 
     expect(event?.message).to.eql(message);
-
-    if (source) {
-      expect(event?.kibana?.action?.execution?.source).to.eql(source);
-    }
 
     if (errorMessage) {
       expect(event?.error?.message).to.eql(errorMessage);

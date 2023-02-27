@@ -34,13 +34,6 @@ describe('sendPlainTextEmail()', () => {
             subject: 'This is a notification email',
             message: 'With some contents inside.',
           },
-          source: {
-            source: {
-              connectorId: CONNECTOR_ID,
-              requesterId: REQUESTER_ID,
-            },
-            type: 'NOTIFICATION',
-          },
         },
       ]);
     });
@@ -74,13 +67,6 @@ describe('sendPlainTextEmail()', () => {
             subject: 'This is a notification email',
             message: 'With some contents inside.',
           },
-          source: {
-            source: {
-              connectorId: CONNECTOR_ID,
-              requesterId: REQUESTER_ID,
-            },
-            type: 'NOTIFICATION',
-          },
           relatedSavedObjects: [
             {
               id: '9c9456a4-c160-46f5-96f7-e9ac734d0d9b',
@@ -96,13 +82,6 @@ describe('sendPlainTextEmail()', () => {
             subject: 'This is a notification email',
             message: 'With some contents inside.',
           },
-          source: {
-            source: {
-              connectorId: CONNECTOR_ID,
-              requesterId: REQUESTER_ID,
-            },
-            type: 'NOTIFICATION',
-          },
           relatedSavedObjects: [
             {
               id: '9c9456a4-c160-46f5-96f7-e9ac734d0d9b',
@@ -117,13 +96,6 @@ describe('sendPlainTextEmail()', () => {
             to: ['user3@email.com'],
             subject: 'This is a notification email',
             message: 'With some contents inside.',
-          },
-          source: {
-            source: {
-              connectorId: CONNECTOR_ID,
-              requesterId: REQUESTER_ID,
-            },
-            type: 'NOTIFICATION',
           },
           relatedSavedObjects: [
             {
