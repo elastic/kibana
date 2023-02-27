@@ -17,14 +17,7 @@ import {
   ruleType,
 } from './test_helpers';
 import { IToasts } from '@kbn/core/public';
-import {
-  act,
-  render,
-  screen,
-  cleanup,
-  waitForElementToBeRemoved,
-  fireEvent,
-} from '@testing-library/react';
+import { act, render, screen, waitForElementToBeRemoved, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
