@@ -63,6 +63,13 @@
   // Altered panel styles can be found in ../panel
 }
 
+// Remove padding in fullscreen mode
+.kbnAppWrapper--hiddenChrome {
+  .dshDashboardGrid__item--expanded {
+    padding: 0;
+  }
+}
+
 // REACT-GRID
 
 .react-grid-item {
