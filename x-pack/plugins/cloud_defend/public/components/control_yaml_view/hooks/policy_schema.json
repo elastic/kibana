@@ -3,6 +3,7 @@
   "type": "object",
   "required": ["selectors", "responses"],
   "additionalProperties": false,
+  "testChange": true,
   "properties": {
     "selectors": {
       "type": "array",
