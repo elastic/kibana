@@ -509,6 +509,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
+      messageSigningService: plugins.fleet?.messageSigningService,
     });
 
     this.telemetryReceiver.start(
