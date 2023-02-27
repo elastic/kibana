@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const urlBeforeClientQueryParams = url.substring(0, clientQueryParamsStartIndex);
     const urlParams = new URLSearchParams(url.substring(clientQueryParamsStartIndex + 1));
     const appState: Partial<SharedDashboardState> = urlParams.has('_a')
-      ? rison.decode(urlParams.get('_a')!) as Partial<SharedDashboardState>
+      ? (rison.decode(urlParams.get('_a')!) as Partial<SharedDashboardState>)
       : {};
     const newAppState = {
       ...appState,
@@ -332,23 +332,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             currentUrl,
             (appState: Partial<SharedDashboardState>) => {
               return {
-                panels:
-                  (appState.panels ??
-                  []).map((panel) => {
-                    return {
-                      ...panel,
-                      embeddableConfig: {
-                        ...(panel.embeddableConfig ?? {}),
-                        vis: {
-                          ...(panel.embeddableConfig.vis as object ?? {}),
-                          colors: {
-                            ...((panel.embeddableConfig.vis as { colors: object }).colors ?? {}),
-                            ['80000']: 'FFFFFF',
-                          },
+                panels: (appState.panels ?? []).map((panel) => {
+                  return {
+                    ...panel,
+                    embeddableConfig: {
+                      ...(panel.embeddableConfig ?? {}),
+                      vis: {
+                        ...((panel.embeddableConfig.vis as object) ?? {}),
+                        colors: {
+                          ...((panel.embeddableConfig.vis as { colors: object }).colors ?? {}),
+                          ['80000']: 'FFFFFF',
                         },
                       },
-                    };
-                  }),
+                    },
+                  };
+                }),
               };
             }
           );
@@ -380,20 +378,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             currentUrl,
             (appState: Partial<SharedDashboardState>) => {
               return {
-                panels:
-                  (appState.panels ??
-                  []).map((panel) => {
-                    return {
-                      ...panel,
-                      embeddableConfig: {
-                        ...(panel.embeddableConfig ?? {}),
-                        vis: {
-                          ...(panel.embeddableConfig.vis as object ?? {}),
-                          colors: {},
-                        },
+                panels: (appState.panels ?? []).map((panel) => {
+                  return {
+                    ...panel,
+                    embeddableConfig: {
+                      ...(panel.embeddableConfig ?? {}),
+                      vis: {
+                        ...((panel.embeddableConfig.vis as object) ?? {}),
+                        colors: {},
                       },
-                    };
-                  }),
+                    },
+                  };
+                }),
               };
             }
           );
