@@ -116,6 +116,7 @@ export class SpecDefinitionsService {
   }
 
   private loadJSONSpecInDir(dirname: string) {
+    // we need to normalize paths otherwise they don't work on windows, see https://github.com/elastic/kibana/issues/151032
     const generatedFiles = globby.sync(normalizePath(join(dirname, 'generated', '*.json')));
     const overrideFiles = globby.sync(normalizePath(join(dirname, 'overrides', '*.json')));
 
