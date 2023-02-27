@@ -94,7 +94,11 @@ describe('ALL - Add Integration', () => {
     cy.contains('osquery_manager-');
     closeToastIfVisible();
     cy.getBySel('nav-search-input').type('Osquery');
-    cy.get('[title="Osquery • Management"]').should('exist').click();
+    cy.get('[title="Osquery • Management"]')
+      .should('exist')
+      .then((el) => {
+        el.click();
+      });
     cy.contains('Live queries history');
   });
 
