@@ -8,7 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { SloStatusBadge } from '../../slos/components/badges/slo_status_badge';
+
+import { SloStatusBadge } from '../../../components/slo/slo_status_badge';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
