@@ -210,7 +210,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
     };
 
-    describe('Directly modifying url updates dashboard state', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/134967
+    describe.skip('Directly modifying url updates dashboard state', () => {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();

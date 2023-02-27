@@ -93,6 +93,15 @@ const fields = [
     searchable: true,
     exists: true,
   },
+  // Added to test issue#148062 about the use of Object method names as fields name
+  {
+    name: 'toString',
+    displayName: 'toString',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
   documentField,
 ];
 
@@ -307,6 +316,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       'bytes',
       'memory',
       'source',
+      'toString',
     ]);
   });
 
@@ -330,7 +340,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(options![1].options!.map(({ label }) => label)).toEqual(['timestampLabel', 'source']);
+    expect(options![1].options!.map(({ label }) => label)).toEqual([
+      'timestampLabel',
+      'source',
+      'toString',
+    ]);
   });
 
   it('should indicate fields which are incompatible for the operation of the current column', () => {

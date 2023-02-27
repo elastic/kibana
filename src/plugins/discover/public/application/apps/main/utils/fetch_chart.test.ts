@@ -61,7 +61,7 @@ describe('test fetchCharts', () => {
     `);
   });
 
-  test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async (done) => {
+  test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', (done) => {
     const subjects = getDataSubjects();
     const deps = {
       appStateContainer: {
@@ -131,7 +131,7 @@ describe('test fetchCharts', () => {
       },
     });
   });
-  test('change of fetchStatus on fetch error', async (done) => {
+  test('change of fetchStatus on fetch error', (done) => {
     const subjects = getDataSubjects();
 
     const deps = {

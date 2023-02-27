@@ -97,9 +97,6 @@ module.exports = {
     `integration_tests/`,
   ],
 
-  // This option allows use of a custom test runner
-  testRunner: 'jest-circus/runner',
-
   // A map from regular expressions to paths to transformers
   transform: {
     '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform.js',
