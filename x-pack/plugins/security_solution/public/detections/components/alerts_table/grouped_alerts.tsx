@@ -72,7 +72,7 @@ interface OwnProps {
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
-const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
+export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   defaultFilters = [],
   from,
   globalFilters,
