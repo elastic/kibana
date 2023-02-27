@@ -43,8 +43,36 @@ export const isPostureInput = (
   SUPPORTED_POLICY_TEMPLATES.includes(input.policy_template as CloudSecurityPolicyTemplate) &&
   SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as PostureInput);
 
-const getInputPolicyTemplate = (inputs: NewPackagePolicyInput[], inputType: PostureInput) =>
-  inputs.filter(isPostureInput).find((i) => i.type === inputType)!.policy_template;
+const getPostureType = (policyTemplateInput: PostureInput) => {
+  switch (policyTemplateInput) {
+    case CLOUDBEAT_AWS:
+    case CLOUDBEAT_AZURE:
+    case CLOUDBEAT_GCP:
+      return 'cspm';
+    case CLOUDBEAT_VANILLA:
+    case CLOUDBEAT_EKS:
+      return 'kspm';
+    default:
+      return 'n/a';
+  }
+};
+
+const getDeploymentType = (policyTemplateInput: PostureInput) => {
+  switch (policyTemplateInput) {
+    case CLOUDBEAT_AWS:
+      return 'aws';
+    case CLOUDBEAT_AZURE:
+      return 'azure';
+    case CLOUDBEAT_GCP:
+      return 'gcp';
+    case CLOUDBEAT_VANILLA:
+      return 'self_managed';
+    case CLOUDBEAT_EKS:
+      return 'eks';
+    default:
+      return 'n/a';
+  }
+};
 
 const getPostureInput = (
   input: NewPackagePolicyInput,
@@ -83,8 +111,8 @@ export const getPosturePolicy = (
   inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
   // Set hidden policy vars
   vars: merge({}, newPolicy.vars, {
-    deployment: { value: inputType },
-    posture: { value: getInputPolicyTemplate(newPolicy.inputs, inputType) },
+    deployment: { value: getDeploymentType(inputType) },
+    posture: { value: getPostureType(inputType) },
   }),
 });
 
