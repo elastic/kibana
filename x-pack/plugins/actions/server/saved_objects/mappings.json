@@ -47,6 +47,7 @@
         "type": "object"
       },
       "source": {
+        "index": false,
         "type": "keyword"
       }
     }
