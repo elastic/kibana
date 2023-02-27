@@ -15,8 +15,8 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiIcon,
+  EuiSkeletonText,
   EuiToolTip,
-  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
@@ -128,7 +128,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               description: agentPolicy ? (
                 <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
               ) : (
-                <EuiLoadingContent lines={1} />
+                <EuiSkeletonText lines={1} />
               ),
             },
             {
@@ -213,7 +213,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   />
                 )
               ) : (
-                <EuiLoadingContent lines={1} />
+                <EuiSkeletonText lines={1} />
               ),
             },
             {
@@ -233,7 +233,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   />
                 )
               ) : (
-                <EuiLoadingContent lines={1} />
+                <EuiSkeletonText lines={1} />
               ),
             },
             {
