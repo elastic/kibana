@@ -13,7 +13,14 @@ export const LoadingIndicator: FC<{ height?: number; label?: string }> = ({ heig
   height = height ? +height : 100;
   return (
     <div
-      className="ml-loading-indicator"
+      css={{
+        textAlign: 'center',
+        fontSize: '17px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
       style={{ height: `${height}px` }}
       data-test-subj="mlLoadingIndicator"
     >

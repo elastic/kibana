@@ -48,7 +48,7 @@ const SectionItem: FC<{ item: Item }> = ({ item }) => {
 };
 
 const Section: FC<{ section: Section }> = ({ section }) => {
-  const theme = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
   if (section.items.length === 0) {
     return <div />;
   }
@@ -56,10 +56,10 @@ const Section: FC<{ section: Section }> = ({ section }) => {
   const cssOverride = css({
     overflow: 'auto',
     padding: '5px 15px',
-    backgroundColor: theme.euiTheme.colors.lightestShade,
-    border: `1px solid ${theme.euiTheme.colors.lightShade}`,
-    borderRadius: theme.euiTheme.border.radius.medium,
-    margin: `${theme.euiTheme.size.s} 0`,
+    backgroundColor: euiTheme.colors.lightestShade,
+    border: `1px solid ${euiTheme.colors.lightShade}`,
+    borderRadius: euiTheme.border.radius.medium,
+    margin: `${euiTheme.size.s} 0`,
 
     '.euiTable': {
       backgroundColor: 'transparent',
