@@ -244,6 +244,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         selectedGroup={selectedGroup}
         groupsSelector={groupsSelector}
         inspectButton={inspect}
+        isLoading={loading || isLoadingGroups}
         takeActionItems={getTakeActionItems}
         data={alertsGroupsData?.aggregations ?? {}}
         renderChildComponent={renderChildComponent}
@@ -265,6 +266,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     getTakeActionItems,
     groupsSelector,
     inspect,
+    isLoadingGroups,
+    loading,
     pagination,
     renderChildComponent,
     selectedGroup,

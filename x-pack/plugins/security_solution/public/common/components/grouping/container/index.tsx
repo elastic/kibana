@@ -36,6 +36,7 @@ export interface GroupingContainerProps {
   groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element | undefined;
   groupsSelector?: JSX.Element;
   inspectButton?: JSX.Element;
+  isLoading: boolean;
   pagination: {
     pageIndex: number;
     pageSize: number;
@@ -55,6 +56,7 @@ const GroupingContainerComponent = ({
   groupPanelRenderer,
   groupsSelector,
   inspectButton,
+  isLoading,
   pagination,
   renderChildComponent,
   selectedGroup,
@@ -96,6 +98,7 @@ const GroupingContainerComponent = ({
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
               groupBucket={groupBucket}
               groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
+              isLoading={isLoading}
               onToggleGroup={(isOpen) => {
                 setTrigger({
                   // ...trigger, -> this change will keep only one group at a time expanded and one table displayed
@@ -121,6 +124,7 @@ const GroupingContainerComponent = ({
       customMetricStats,
       data.stackByMultipleFields0?.buckets,
       groupPanelRenderer,
+      isLoading,
       renderChildComponent,
       selectedGroup,
       takeActionItems,
