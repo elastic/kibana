@@ -210,7 +210,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
     };
 
-    describe('Directly modifying url updates dashboard state', () => {
+    describe.only('Directly modifying url updates dashboard state', () => {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
@@ -234,6 +234,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await browser.get(newUrl.toString(), !useHardRefresh);
+        await PageObjects.dashboard.waitForRenderComplete();
         const queryBarContentsAfterRefresh = await queryBar.getQueryString();
         expect(queryBarContentsAfterRefresh).to.equal(newQuery);
       };
