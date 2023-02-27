@@ -1,7 +1,10 @@
 {
   "$id": "https://elastic.co/cloud-defend/policy-schema.json",
   "type": "object",
-  "required": ["selectors", "responses"],
+  "required": [
+    "selectors",
+    "responses"
+  ],
   "additionalProperties": false,
   "properties": {
     "selectors": {
@@ -22,44 +25,70 @@
   "$defs": {
     "selector": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "additionalProperties": false,
       "anyOf": [
         {
-          "required": ["operation"]
+          "required": [
+            "operation"
+          ]
         },
         {
-          "required": ["containerImageName"]
+          "required": [
+            "containerImageName"
+          ]
         },
         {
-          "required": ["containerImageTag"]
+          "required": [
+            "containerImageTag"
+          ]
         },
         {
-          "required": ["targetFilePath"]
+          "required": [
+            "targetFilePath"
+          ]
         },
         {
-          "required": ["orchestratorClusterId"]
+          "required": [
+            "orchestratorClusterId"
+          ]
         },
         {
-          "required": ["orchestratorClusterName"]
+          "required": [
+            "orchestratorClusterName"
+          ]
         },
         {
-          "required": ["orchestratorNamespace"]
+          "required": [
+            "orchestratorNamespace"
+          ]
         },
         {
-          "required": ["orchestratorResourceLabel"]
+          "required": [
+            "orchestratorResourceLabel"
+          ]
         },
         {
-          "required": ["orchestratorResourceName"]
+          "required": [
+            "orchestratorResourceName"
+          ]
         },
         {
-          "required": ["orchestratorType"]
+          "required": [
+            "orchestratorType"
+          ]
         },
         {
-          "required": ["ignoreVolumeMounts"]
+          "required": [
+            "ignoreVolumeMounts"
+          ]
         },
         {
-          "required": ["ignoreVolumeFiles"]
+          "required": [
+            "ignoreVolumeFiles"
+          ]
         }
       ],
       "properties": {
@@ -72,10 +101,7 @@
           "items": {
             "enum": [
               "createExecutable",
-              "modifyExecutable",
-              "createFile",
-              "modifyFile",
-              "deleteFile"
+              "modifyExecutable"
             ]
           }
         },
@@ -139,29 +165,39 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "enum": ["kubernetes"]
+            "enum": [
+              "kubernetes"
+            ]
           }
         },
         "ignoreVolumeMounts": {
-          "type": "boolean",
-          "description": "Ignore all volume mounts. e.g directories, files, configMaps, secrets etc...\nNote: should not be used with ignoreVolumeFiles"
+          "type": "boolean"
         },
         "ignoreVolumeFiles": {
-          "type": "boolean",
-          "description": "Ignore file mounts. e.g files, configMaps, secrets\nNote: should not be used with ignoreVolumeMounts"
+          "type": "boolean"
         }
       },
-      "dependencies": {
+      "dependentSchemas": {
         "ignoreVolumeMounts": {
+          "required": ["targetFilePath"],
           "not": {
             "required": ["ignoreVolumeFiles"]
+          }
+        },
+        "ignoreVolumeFiles": {
+          "required": ["targetFilePath"],
+          "not": {
+            "required": ["ignoreVolumeMounts"]
           }
         }
       }
     },
     "response": {
       "type": "object",
-      "required": ["match", "actions"],
+      "required": [
+        "match",
+        "actions"
+      ],
       "additionalProperties": false,
       "properties": {
         "match": {
@@ -181,7 +217,10 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "enum": ["alert", "block"]
+            "enum": [
+              "alert",
+              "block"
+            ]
           }
         }
       }
