@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
+import { dvFieldCountItemCss } from './styles';
 
 export interface TotalFieldsStats {
   visibleFieldsCount: number;
@@ -28,10 +29,10 @@ export const TotalFieldsCount: FC<TotalFieldsCountProps> = ({ fieldsCountStats }
 
   return (
     <EuiFlexGroup
-      gutterSize="s"
       alignItems="center"
-      className="dvFieldCount__item"
+      css={dvFieldCountItemCss}
       data-test-subj="dataVisualizerFieldsSummary"
+      gutterSize="s"
       responsive={false}
     >
       <EuiFlexItem grow={false}>

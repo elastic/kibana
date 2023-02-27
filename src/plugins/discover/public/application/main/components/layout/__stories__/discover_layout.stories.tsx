@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import { storiesOf } from '@storybook/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { DiscoverMainProvider } from '../../../services/discover_state_provider';
 import { AppState } from '../../../services/discover_app_state_container';
 import { getDataViewMock } from '../../../../../__mocks__/__storybook_mocks__/get_data_view_mock';
 import { withDiscoverServices } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
@@ -22,7 +23,7 @@ setHeaderActionMenuMounter(() => void 0);
 const DiscoverLayoutStory = (layoutProps: DiscoverLayoutProps) => {
   const [state, setState] = useState({});
 
-  const setAppState = (newState: Partial<AppState>) => {
+  const update = (newState: Partial<AppState>) => {
     setState((prevState) => ({ ...prevState, ...newState }));
   };
 
@@ -33,8 +34,7 @@ const DiscoverLayoutStory = (layoutProps: DiscoverLayoutProps) => {
       {...layoutProps}
       stateContainer={{
         ...layoutProps.stateContainer,
-        appState: { ...layoutProps.stateContainer.appState, getState },
-        setAppState,
+        appState: { ...layoutProps.stateContainer.appState, getState, update },
       }}
     />
   );
@@ -42,27 +42,42 @@ const DiscoverLayoutStory = (layoutProps: DiscoverLayoutProps) => {
 
 storiesOf('components/layout/DiscoverLayout', module).add(
   'Data view with timestamp',
-  withDiscoverServices(() => (
-    <IntlProvider locale="en">
-      <DiscoverLayoutStory {...getDocumentsLayoutProps(getDataViewMock(true))} />
-    </IntlProvider>
-  ))
+  withDiscoverServices(() => {
+    const props = getDocumentsLayoutProps(getDataViewMock(true));
+    return (
+      <IntlProvider locale="en">
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverLayoutStory {...props} />
+        </DiscoverMainProvider>
+      </IntlProvider>
+    );
+  })
 );
 
 storiesOf('components/layout/DiscoverLayout', module).add(
   'Data view without timestamp',
-  withDiscoverServices(() => (
-    <IntlProvider locale="en">
-      <DiscoverLayoutStory {...getDocumentsLayoutProps(getDataViewMock(false))} />
-    </IntlProvider>
-  ))
+  withDiscoverServices(() => {
+    const props = getDocumentsLayoutProps(getDataViewMock(false));
+    return (
+      <IntlProvider locale="en">
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverLayoutStory {...props} />
+        </DiscoverMainProvider>
+      </IntlProvider>
+    );
+  })
 );
 
 storiesOf('components/layout/DiscoverLayout', module).add(
   'SQL view',
-  withDiscoverServices(() => (
-    <IntlProvider locale="en">
-      <DiscoverLayoutStory {...getPlainRecordLayoutProps(getDataViewMock(false))} />
-    </IntlProvider>
-  ))
+  withDiscoverServices(() => {
+    const props = getPlainRecordLayoutProps(getDataViewMock(false));
+    return (
+      <IntlProvider locale="en">
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverLayoutStory {...props} />
+        </DiscoverMainProvider>
+      </IntlProvider>
+    );
+  })
 );

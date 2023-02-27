@@ -38,6 +38,11 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
   };
 });
 
+jest.mock('uuid', () => {
+  let uuid = 100;
+  return { v4: () => `${uuid++}` };
+});
+
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -406,6 +411,7 @@ describe('create()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "102",
           },
         ],
         "alertTypeId": "123",
@@ -433,6 +439,7 @@ describe('create()', () => {
             "history": Array [],
             "last_run": Object {
               "metrics": Object {
+                "duration": 0,
                 "gap_duration_s": null,
                 "total_alerts_created": null,
                 "total_alerts_detected": null,
@@ -624,6 +631,7 @@ describe('create()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "104",
           },
         ],
         "alertTypeId": "123",
@@ -651,6 +659,7 @@ describe('create()', () => {
             "history": Array [],
             "last_run": Object {
               "metrics": Object {
+                "duration": 0,
                 "gap_duration_s": null,
                 "total_alerts_created": null,
                 "total_alerts_detected": null,
@@ -1053,6 +1062,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            uuid: '108',
           },
           {
             group: 'default',
@@ -1061,6 +1071,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            uuid: '109',
           },
           {
             group: 'default',
@@ -1069,6 +1080,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            uuid: '110',
           },
         ],
         alertTypeId: '123',
@@ -1272,7 +1284,13 @@ describe('create()', () => {
       'alert',
       {
         actions: [
-          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            group: 'default',
+            params: { foo: true },
+            uuid: '112',
+          },
         ],
         alertTypeId: '123',
         apiKey: null,
@@ -1445,7 +1463,13 @@ describe('create()', () => {
       'alert',
       {
         actions: [
-          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            group: 'default',
+            params: { foo: true },
+            uuid: '113',
+          },
         ],
         alertTypeId: '123',
         apiKey: null,
@@ -1612,6 +1636,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '115',
           },
         ],
         alertTypeId: '123',
@@ -1747,6 +1772,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '116',
           },
         ],
         legacyId: null,
@@ -1882,6 +1908,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '117',
           },
         ],
         legacyId: null,
@@ -2044,6 +2071,7 @@ describe('create()', () => {
             },
             actionRef: 'action_0',
             actionTypeId: 'test',
+            uuid: '118',
           },
         ],
         apiKeyOwner: null,
@@ -2071,6 +2099,7 @@ describe('create()', () => {
             last_run: {
               timestamp: '2019-02-12T21:01:22.479Z',
               metrics: {
+                duration: 0,
                 gap_duration_s: null,
                 total_alerts_created: null,
                 total_alerts_detected: null,
@@ -2409,6 +2438,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '126',
           },
         ],
         alertTypeId: '123',
@@ -2513,6 +2543,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '127',
           },
         ],
         legacyId: null,

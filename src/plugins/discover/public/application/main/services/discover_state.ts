@@ -74,25 +74,13 @@ export interface DiscoverStateContainer {
    **/
   dataState: DataStateContainer;
   /**
-   * Initialize state with filters and query,  start state syncing
-   */
-  initializeAndSync: (
-    dataView: DataView,
-    filterManager: FilterManager,
-    data: DataPublicPluginStart
-  ) => () => void;
-  /**
-   * Set app state to with a partial new app state
-   */
-  setAppState: (newState: Partial<AppState>) => void;
-  /**
-   * Pause the auto refresh interval without pushing an entry to history
-   */
-  pauseAutoRefreshInterval: () => Promise<void>;
-  /**
    * functions executed by UI
    */
   actions: {
+    /**
+     * Pause the auto refresh interval without pushing an entry to history
+     */
+    pauseAutoRefreshInterval: () => Promise<void>;
     /**
      * Set the currently selected data view
      */
@@ -132,6 +120,14 @@ export interface DiscoverStateContainer {
      * @param dataView
      */
     replaceAdHocDataViewWithId: (id: string, dataView: DataView) => void;
+    /**
+     * Initialize state with filters and query,  start state syncing
+     */
+    initializeAndSync: (
+      dataView: DataView,
+      filterManager: FilterManager,
+      data: DataPublicPluginStart
+    ) => () => void;
   };
 }
 
@@ -214,6 +210,7 @@ export function getDiscoverStateContainer({
     );
     return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
   };
+  const initializeAndSync = () => appStateContainer.initAndSync(savedSearch);
 
   return {
     kbnUrlStateStorage: stateStorage,
@@ -221,10 +218,8 @@ export function getDiscoverStateContainer({
     internalState: internalStateContainer,
     dataState: dataStateContainer,
     searchSessionManager,
-    setAppState: (newPartial: AppState) => appStateContainer.update(newPartial),
-    pauseAutoRefreshInterval,
-    initializeAndSync: () => appStateContainer.initAndSync(savedSearch),
     actions: {
+      pauseAutoRefreshInterval,
       setDataView,
       loadAndResolveDataView,
       loadDataViewList,
@@ -232,6 +227,7 @@ export function getDiscoverStateContainer({
       appendAdHocDataViews,
       replaceAdHocDataViewWithId,
       removeAdHocDataViewById,
+      initializeAndSync,
     },
   };
 }
