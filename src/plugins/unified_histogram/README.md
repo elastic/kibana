@@ -41,6 +41,8 @@ return (
     query={query}
     filters={filters}
     timeRange={timeRange}
+    // If the provided timeRange is an absolute range,
+    // a relativeTimeRange should also be provided
     relativeTimeRange={relativeTimeRange}
     searchSessionId={searchSessionId}
     requestAdapter={requestAdapter}
