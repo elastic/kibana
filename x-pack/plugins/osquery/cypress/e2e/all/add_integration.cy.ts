@@ -47,7 +47,6 @@ describe('ALL - Add Integration', () => {
     const oldVersion = '0.7.4';
 
     cy.visit(OLD_OSQUERY_MANAGER);
-    cy.contains(integration).click();
     addIntegration();
     cy.contains('osquery_manager-1');
     cy.visit('app/fleet/policies');

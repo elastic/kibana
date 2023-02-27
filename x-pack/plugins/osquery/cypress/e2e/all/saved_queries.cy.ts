@@ -69,7 +69,7 @@ describe('ALL - Saved queries', () => {
       runKbnArchiverScript(ArchiverMethod.LOAD, 'pack_with_prebuilt_saved_queries');
     });
     beforeEach(() => {
-      navigateTo('/app/osquery/saved_queries');
+      navigateTo('/app/osquery');
     });
 
     after(() => {

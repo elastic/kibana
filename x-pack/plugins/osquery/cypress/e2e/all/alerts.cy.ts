@@ -58,7 +58,7 @@ describe('Alert Event Details', () => {
 
   it('should prepare packs and alert rules', () => {
     const PACK_NAME = 'testpack';
-    navigateTo('/app/osquery/live_queries');
+    navigateTo('/app/osquery');
     preparePack(PACK_NAME);
     findAndClickButton('Edit');
     cy.contains(`Edit ${PACK_NAME}`);

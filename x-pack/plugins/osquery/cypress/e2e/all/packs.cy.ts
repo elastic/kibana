@@ -473,7 +473,7 @@ describe('ALL - Packs', () => {
   describe('Global packs', () => {
     beforeEach(() => {
       login();
-      navigateTo('/app/osquery/live_queries');
+      navigateTo('/app/osquery');
     });
 
     it('add global packs to polciies', () => {
