@@ -253,12 +253,9 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <span>
-                <strong>
-                  ki
-                </strong>
-                bana
-              </span>
+              <strong>
+                kibana
+              </strong>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiTableRowCell>
@@ -497,16 +494,13 @@ exports[`IndicesList should show a warning for the matches 1`] = `
               grow={false}
             >
               <EuiIcon
-                type="magnifyWithExclamation"
+                type="check"
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <span>
-                <strong>
-                  ki
-                </strong>
-                bana
-              </span>
+              <strong>
+                kibana
+              </strong>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiTableRowCell>
@@ -516,16 +510,23 @@ exports[`IndicesList should show a warning for the matches 1`] = `
         key="1"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-es"
-            disabled={false}
-            id="es"
-            indeterminate={false}
-            label="es"
-            onChange={[Function]}
-          />
+          <EuiFlexGroup
+            alignItems="center"
+            direction="row"
+            gutterSize="s"
+            responsive={false}
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiIcon
+                type="magnifyWithExclamation"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              es
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -631,12 +632,9 @@ exports[`IndicesList should show checkbox when not an exact match 1`] = `
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <span>
-                <strong>
-                  logs
-                </strong>
-                tash
-              </span>
+              <strong>
+                logstash
+              </strong>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiTableRowCell>

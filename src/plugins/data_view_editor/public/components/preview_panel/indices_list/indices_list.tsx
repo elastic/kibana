@@ -24,6 +24,7 @@ import {
   EuiPopover,
   EuiCheckbox,
   EuiIcon,
+  EuiIconProps,
 } from '@elastic/eui';
 
 import { Pager } from '@elastic/eui';
@@ -159,19 +160,38 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     );
   }
 
-  highlightIndexName(indexName: string, query: string) {
-    const emptyCheckbox = (
+  renderIndexItemWithIcon = (label: React.ReactNode, iconType: EuiIconProps['type']) => {
+    return (
+      <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={iconType} />
+        </EuiFlexItem>
+        <EuiFlexItem>{label}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  renderIndexItemWithCheckbox = (label: React.ReactNode, indexName: string, query: string) => {
+    return (
       <EuiCheckbox
         id={indexName}
-        label={indexName}
+        label={label}
         checked={false}
         data-test-subj={`indexCheckbox-${indexName}`}
         onChange={() => this.onClick(indexName, query)}
       />
     );
+  };
+
+  highlightIndexName(indexName: string, query: string) {
+    const { hasWarnings, isExactMatch } = this.props;
 
     if (!query) {
-      return emptyCheckbox;
+      return this.renderIndexItemWithCheckbox(indexName, indexName, query);
+    }
+
+    if (isExactMatch(indexName)) {
+      return this.renderIndexItemWithIcon(<strong>{indexName}</strong>, 'check');
     }
 
     const queryAsArray = query
@@ -191,43 +211,23 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
         break;
       }
     }
-    if (queryIdx === -1) {
-      return emptyCheckbox;
-    }
 
-    const preStr = indexName.substring(0, queryIdx);
-    const postStr = indexName.substr(queryIdx + queryWithoutWildcard.length);
-
-    const label = (
-      <span>
-        {preStr}
-        <strong>{queryWithoutWildcard}</strong>
-        {postStr}
-      </span>
-    );
-
-    const { hasWarnings, isExactMatch } = this.props;
-
-    if (hasWarnings || isExactMatch(indexName)) {
-      return (
-        <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={hasWarnings ? 'magnifyWithExclamation' : 'check'} />
-          </EuiFlexItem>
-          <EuiFlexItem>{label}</EuiFlexItem>
-        </EuiFlexGroup>
+    const label =
+      queryIdx === -1 ? (
+        indexName
+      ) : (
+        <span>
+          {indexName.substring(0, queryIdx)}
+          <strong>{queryWithoutWildcard}</strong>
+          {indexName.substr(queryIdx + queryWithoutWildcard.length)}
+        </span>
       );
+
+    if (hasWarnings) {
+      return this.renderIndexItemWithIcon(label, 'magnifyWithExclamation');
     }
 
-    return (
-      <EuiCheckbox
-        id={indexName}
-        label={label}
-        checked={false}
-        data-test-subj={`indexCheckbox-${indexName}`}
-        onChange={() => this.onClick(indexName, query)}
-      />
-    );
+    return this.renderIndexItemWithCheckbox(label, indexName, query);
   }
 
   render() {
