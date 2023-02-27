@@ -49,4 +49,9 @@ export interface ControlStateMap {
 /**
  * Utility type to reverse lookup an `AllControlStates` to it's corresponding State subtype.
  */
-export type StateFromActionState<T extends AllActionStates> = ControlStateMap[T];
+export type StateFromControlState<T extends AllControlStates> = ControlStateMap[T];
+
+/**
+ * Utility type to reverse lookup an `AllActionStates` to it's corresponding State subtype.
+ */
+export type StateFromActionState<T extends AllActionStates> = StateFromControlState<T>;

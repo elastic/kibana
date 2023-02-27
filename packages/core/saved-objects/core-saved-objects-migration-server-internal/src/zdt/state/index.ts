@@ -15,5 +15,6 @@ export type {
   AllActionStates,
   AllControlStates,
   StateFromActionState,
+  StateFromControlState,
 } from './types';
 export { createInitialState } from './create_initial_state';

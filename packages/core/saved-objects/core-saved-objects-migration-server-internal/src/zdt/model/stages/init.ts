@@ -13,7 +13,7 @@ import { isTypeof } from '../../actions';
 import type { State } from '../../state';
 import type { ModelStage } from '../types';
 
-export const init: ModelStage<'INIT'> = (state, res, context): State => {
+export const init: ModelStage<'INIT', 'DONE' | 'FATAL'> = (state, res, context): State => {
   if (Either.isLeft(res)) {
     const left = res.left;
     if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {

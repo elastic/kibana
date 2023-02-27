@@ -8,7 +8,12 @@
 
 import { ExcludeRetryableEsError } from '../../model/types';
 import type { MigratorContext } from '../context';
-import type { State, AllActionStates, StateFromActionState } from '../state';
+import type {
+  AllActionStates,
+  AllControlStates,
+  StateFromActionState,
+  StateFromControlState,
+} from '../state';
 import type { ResponseType } from '../next';
 
 /**
@@ -21,8 +26,8 @@ export type StateActionResponse<T extends AllActionStates> = ExcludeRetryableEsE
 /**
  * Defines a stage delegation function for the model
  */
-export type ModelStage<T extends AllActionStates> = (
+export type ModelStage<T extends AllActionStates, R extends AllControlStates> = (
   state: StateFromActionState<T>,
   res: StateActionResponse<T>,
   context: MigratorContext
-) => State;
+) => StateFromControlState<T | R>;
