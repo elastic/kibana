@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { EuiText, EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 export interface PageIntroductionProps {
   actions?: React.ReactNode[];
   description: React.ReactNode | string;
   links?: Array<{ href: string; text: string }>;
-  title: React.ReactNode;
+  title: string | React.ReactNode;
 }
 
 export const PageIntroduction: React.FC<PageIntroductionProps> = ({
@@ -26,7 +26,15 @@ export const PageIntroduction: React.FC<PageIntroductionProps> = ({
     <EuiFlexGroup direction="row" gutterSize="m">
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>{title}</EuiFlexItem>
+          <EuiFlexItem>
+            {typeof title === 'string' ? (
+              <EuiTitle size="xs" data-test-subj="inlineEditableTableTitle">
+                <h3>{title}</h3>
+              </EuiTitle>
+            ) : (
+              title
+            )}
+          </EuiFlexItem>
           <EuiSpacer size="s" />
           <EuiFlexItem>
             <EuiText data-test-subj="pageIntroductionDescriptionText" color="subdued" size="s">

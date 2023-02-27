@@ -11,7 +11,7 @@ import classNames from 'classnames';
 
 import { useActions, useValues, BindLogic } from 'kea';
 
-import { EuiButton, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { PageIntroduction } from '../../page_introduction/page_introduction';
@@ -150,46 +150,6 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
           </EuiButton>,
         ]}
       />
-      <EuiFlexGroup alignItems="flexStart">
-        {
-          // <EuiFlexItem>
-          //   {!!title && (
-          //     <EuiTitle size="xs" data-test-subj="inlineEditableTableTitle">
-          //       <h3>{title}</h3>
-          //     </EuiTitle>
-          //   )}
-          //   {!!description && (
-          //     <>
-          //       <EuiSpacer size="s" />
-          //       <EuiText
-          //         data-test-subj="inlineEditableTableDescription"
-          //         color="subdued"
-          //         size="s"
-          //         className="inlineEditableTable__descriptionText"
-          //       >
-          //         {description}
-          //       </EuiText>
-          //     </>
-          //   )}
-          // </EuiFlexItem>
-          //
-          // <EuiFlexItem grow={false}>
-          //   <EuiButton
-          //     size="s"
-          //     iconType="plusInCircle"
-          //     disabled={isEditing}
-          //     onClick={editNewItem}
-          //     color="success"
-          //     data-test-subj="inlineEditableTableActionButton"
-          //   >
-          //     {addButtonText ||
-          //       i18n.translate('xpack.enterpriseSearch.inlineEditableTable.newRowButtonLabel', {
-          //         defaultMessage: 'New row',
-          //       })}
-          //   </EuiButton>
-          // </EuiFlexItem>
-        }
-      </EuiFlexGroup>
       <EuiSpacer size="l" />
       <ReorderableTable
         className={classNames(className, 'editableTable')}
