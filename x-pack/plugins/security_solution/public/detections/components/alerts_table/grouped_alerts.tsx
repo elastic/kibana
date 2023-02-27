@@ -236,42 +236,44 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [defaultFilters, getGlobalQuery, takeActionItems]
   );
 
-  const groupedAlerts = useMemo(() => {
-    return isNoneGroup(selectedGroup) ? (
-      renderChildComponent([])
-    ) : (
-      <GroupingContainer
-        selectedGroup={selectedGroup}
-        groupsSelector={groupsSelector}
-        inspectButton={inspect}
-        isLoading={loading || isLoadingGroups}
-        takeActionItems={getTakeActionItems}
-        data={alertsGroupsData?.aggregations ?? {}}
-        renderChildComponent={renderChildComponent}
-        unit={defaultUnit}
-        pagination={pagination}
-        groupPanelRenderer={(fieldBucket: RawBucket) =>
-          getSelectedGroupButtonContent(selectedGroup, fieldBucket)
-        }
-        badgeMetricStats={(fieldBucket: RawBucket) =>
-          getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket)
-        }
-        customMetricStats={(fieldBucket: RawBucket) =>
-          getSelectedGroupCustomMetrics(selectedGroup, fieldBucket)
-        }
-      />
-    );
-  }, [
-    alertsGroupsData?.aggregations,
-    getTakeActionItems,
-    groupsSelector,
-    inspect,
-    isLoadingGroups,
-    loading,
-    pagination,
-    renderChildComponent,
-    selectedGroup,
-  ]);
+  const groupedAlerts = useMemo(
+    () =>
+      isNoneGroup(selectedGroup) ? (
+        renderChildComponent([])
+      ) : (
+        <GroupingContainer
+          badgeMetricStats={(fieldBucket: RawBucket) =>
+            getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket)
+          }
+          customMetricStats={(fieldBucket: RawBucket) =>
+            getSelectedGroupCustomMetrics(selectedGroup, fieldBucket)
+          }
+          data={alertsGroupsData?.aggregations ?? {}}
+          groupPanelRenderer={(fieldBucket: RawBucket) =>
+            getSelectedGroupButtonContent(selectedGroup, fieldBucket)
+          }
+          groupsSelector={groupsSelector}
+          inspectButton={inspect}
+          isLoading={loading || isLoadingGroups}
+          pagination={pagination}
+          renderChildComponent={renderChildComponent}
+          selectedGroup={selectedGroup}
+          takeActionItems={getTakeActionItems}
+          unit={defaultUnit}
+        />
+      ),
+    [
+      alertsGroupsData?.aggregations,
+      getTakeActionItems,
+      groupsSelector,
+      inspect,
+      isLoadingGroups,
+      loading,
+      pagination,
+      renderChildComponent,
+      selectedGroup,
+    ]
+  );
 
   if (isEmpty(selectedPatterns)) {
     return null;

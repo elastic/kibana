@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiSpacer,
+  EuiTablePagination,
+} from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
@@ -180,7 +186,10 @@ const GroupingContainerComponent = ({
             />
           </>
         ) : (
-          <EmptyGroupingComponent />
+          <>
+            {isLoading && <EuiProgress size="xs" color="accent" />}
+            <EmptyGroupingComponent />
+          </>
         )}
       </GroupingStyledContainer>
     </>
