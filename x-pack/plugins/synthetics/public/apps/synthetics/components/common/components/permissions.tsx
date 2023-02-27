@@ -76,7 +76,7 @@ export const ALL = i18n.translate('xpack.synthetics.monitorManagement.priviledge
 
 export const NEED_FLEET_READ_AGENT_POLICIES_PERMISSION = (
   <FormattedMessage
-    id="xpack.synthetics.monitorManagement.needFleetReadAgentPoliciesPermission"
+    id="xpack.synthetics.monitorManagement.needFleetPermission"
     defaultMessage="You are not authorized to manage private locations. It requires the {all} Kibana privilege for Fleet, and the {all} privilege for Integrations."
     values={{
       all: <EuiCode>{`"${ALL}"`}</EuiCode>,
