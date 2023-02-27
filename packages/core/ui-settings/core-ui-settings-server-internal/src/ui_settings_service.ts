@@ -19,9 +19,14 @@ import type {
   UserProfileSettingsClientContract,
   UserProfileSettingsClientFactoryProvider,
 } from '@kbn/security-plugin/server/user_profile/user_profile_settings_client';
-import { UiSettingsUserClient } from './clients/ui_settings_user_client';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
-import { UiSettingsClient, UiSettingsClientFactory, UiSettingsGlobalClient } from './clients';
+import {
+  UiSettingsClient,
+  UiSettingsClientFactory,
+  UiSettingsGlobalClient,
+  UiSettingsUserClient,
+} from './clients';
 import type {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
@@ -156,11 +161,15 @@ export class UiSettingsService
   }
 
   private getUserClientFactory<T extends UiSettingsScope>(): (
-    savedObjectsClient: SavedObjectsClientContract
+    savedObjectsClient: SavedObjectsClientContract,
+    request: KibanaRequest
   ) => ClientType<T> {
     const { version, buildNum } = this.coreContext.env.packageInfo;
 
-    return (savedObjectsClient: SavedObjectsClientContract): ClientType<T> => {
+    return (
+      savedObjectsClient: SavedObjectsClientContract,
+      request: KibanaRequest
+    ): ClientType<T> => {
       let userProfileSettingsClient: UserProfileSettingsClientContract | undefined;
 
       if (this.userProfileSettingsClientFactoryProvider) {
@@ -179,7 +188,7 @@ export class UiSettingsService
         overrides: {},
       };
 
-      return UiSettingsClientFactory.create(options) as ClientType<T>;
+      return UiSettingsClientFactory.create(options, request) as ClientType<T>;
     };
   }
 

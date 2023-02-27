@@ -77,6 +77,9 @@ export interface UserProfileFormValues {
       color: string;
       imageUrl: string;
     };
+    userSettings: {
+      darkMode: string;
+    };
   };
   avatarType: 'initials' | 'image';
 }
@@ -578,6 +581,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
               <EuiSwitch
                 label="Dark mode"
                 checked={isDarkMode}
+                data-test-subj={'userProfileDarkModeSwitch'}
                 onChange={(e) => {
                   const mode = e.target.checked ? 'dark' : 'light';
                   setIsDarkMode(e.target.checked);
@@ -607,6 +611,9 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
             initials: data.avatar?.initials || getUserAvatarInitials(user),
             color: data.avatar?.color || getUserAvatarColor(user),
             imageUrl: data.avatar?.imageUrl || '',
+          },
+          userSettings: {
+            darkMode: data.userSettings?.darkMode || '',
           },
         }
       : undefined,

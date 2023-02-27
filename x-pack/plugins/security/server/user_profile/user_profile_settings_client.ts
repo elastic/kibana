@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UserProfileGetCurrentParams } from '..';
-import type { UserProfileWithSecurity } from '../../common';
+import type { KibanaRequest } from '@kbn/core-http-server';
+
 import type { UserSettingServiceStart } from './user_setting_service';
 
 /**
@@ -20,13 +20,12 @@ export class UserProfileSettingsClient implements UserProfileSettingsClientContr
   }
 
   /**
-   * Returns the current user's profile
+   * Returns the current user's user profile settings
    *
-   * @param params the Kibana Request and the 'data path' of the desired values that are stored with in the user's
-   * profile 'data' object
+   * @param request
    */
-  async get(params: UserProfileGetCurrentParams): Promise<UserProfileWithSecurity | null> {
-    return await this.userSettingsServiceStart.getCurrent(params);
+  async get(request: KibanaRequest): Promise<Record<string, string>> {
+    return await this.userSettingsServiceStart.getCurrentUserProfileSettings(request);
   }
 }
 
@@ -42,5 +41,5 @@ export type UserProfileSettingsClientFactory = () => UserProfileSettingsClientCo
  * Describes the functions that will be provided by a UserProfileSettingsClient
  */
 export interface UserProfileSettingsClientContract {
-  get(params: UserProfileGetCurrentParams): Promise<UserProfileWithSecurity | null>;
+  get(request: KibanaRequest): Promise<Record<string, string>>;
 }

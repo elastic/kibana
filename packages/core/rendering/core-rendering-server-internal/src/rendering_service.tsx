@@ -113,7 +113,7 @@ export class RenderingService {
     };
     const userSettings = {
       defaults: {},
-      user: isAnonymousPage ? {} : await uiSettings.userClient?.getUserProfileSettings(request),
+      user: isAnonymousPage ? {} : await uiSettings.userClient?.getUserProfileSettings(),
     };
 
     let clusterInfo = {};

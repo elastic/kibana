@@ -5,24 +5,44 @@
  * 2.0.
  */
 
-import type { UserProfileData, UserProfileLabels, UserProfileWithSecurity } from '../../common';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
+
 import type { UserProfileGetCurrentParams, UserProfileServiceStart } from './user_profile_service';
 
 export interface UserSettingServiceStart {
-  getCurrent<D extends UserProfileData, L extends UserProfileLabels>(
-    params: UserProfileGetCurrentParams
-  ): Promise<UserProfileWithSecurity<D, L> | null>;
+  getCurrentUserProfileSettings(request: KibanaRequest): Promise<Record<string, string>>;
 }
 
 /**
  * A service that wraps the {@link UserProfileServiceStart} so that only the 'getCurrent' method is made available
  */
 export class UserSettingService {
-  constructor() {}
+  private readonly logger: Logger;
+
+  constructor(logger: Logger) {
+    this.logger = logger;
+  }
 
   start(userProfileServiceStart: UserProfileServiceStart): UserSettingServiceStart {
     return {
-      getCurrent: (params) => userProfileServiceStart.getCurrent(params),
+      getCurrentUserProfileSettings: async (request) => {
+        const params: UserProfileGetCurrentParams = {
+          request,
+          dataPath: '*',
+        };
+
+        const currentUserProfile = await userProfileServiceStart.getCurrent(params);
+
+        let result = {} as Record<string, string>;
+
+        if (currentUserProfile?.data?.userSettings) {
+          result = currentUserProfile?.data?.userSettings as Record<string, string>;
+        } else {
+          this.logger.warn('User Settings not found.');
+        }
+        return result;
+      },
     };
   }
 }

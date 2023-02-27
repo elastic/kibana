@@ -9,6 +9,7 @@
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { UserProfileSettingsClientFactoryProvider } from '@kbn/security-plugin/server/user_profile/user_profile_settings_client';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient, IUserUiSettingsClient } from './ui_settings_client';
 
 /** @public */
@@ -91,8 +92,12 @@ export interface UiSettingsServiceStart {
    *
    * @param savedObjectsClient This client is not currently used by the underlying UserClient, but is included so that
    * future user specific settings/migrations will be able to be created in SO, if necessary, rather than UserProfiles
+   * @param request A KibanaRequest that is used to get the UserProfileSettings
    */
-  userAsScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUserUiSettingsClient;
+  userAsScopedToClient(
+    savedObjectsClient: SavedObjectsClientContract,
+    request: KibanaRequest
+  ): IUserUiSettingsClient;
 
   /**
    * This provides a way for downstream plugins to provide the UiSettingsService with a way to create UserProfileSettingsClients

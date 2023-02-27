@@ -7,6 +7,7 @@
  */
 
 export { UiSettingsClient } from './ui_settings_client';
+export { UiSettingsUserClient } from './ui_settings_user_client';
 export { UiSettingsGlobalClient } from './ui_settings_global_client';
 export { UiSettingsClientFactory } from './ui_settings_client_factory';
 export { UiSettingsDefaultsClient } from './ui_settings_defaults_client';

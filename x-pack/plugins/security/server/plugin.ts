@@ -230,7 +230,10 @@ export class SecurityPlugin
     this.userProfileService = new UserProfileService(
       this.initializerContext.logger.get('user-profile')
     );
-    this.userSettingService = new UserSettingService();
+    this.userSettingService = new UserSettingService(
+      this.initializerContext.logger.get('user-settings')
+    );
+
     this.analyticsService = new AnalyticsService(this.initializerContext.logger.get('analytics'));
   }
 
