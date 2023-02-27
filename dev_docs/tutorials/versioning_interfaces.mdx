@@ -219,7 +219,7 @@ common
 import type { PortableDashboard } from '@kbn/dashboard/common';
 import type { DataSource } from '../data_source/v2';
 
-// Optionally, re-export the entire set of types.
+// Optionally, re-export the entire set of types. Interfaces and types declared after this will override v1 declarations.
 export * from './v1';
 
 export interface WeatherDashboard {
