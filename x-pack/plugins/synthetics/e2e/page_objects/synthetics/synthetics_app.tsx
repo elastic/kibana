@@ -43,8 +43,14 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       await this.waitForMonitorManagementLoadingToFinish();
     },
 
-    async navigateToOverview(doLogin = false) {
-      await page.goto(overview, { waitUntil: 'networkidle' });
+    async navigateToOverview(doLogin = false, refreshInterval?: number) {
+      if (refreshInterval) {
+        await page.goto(`${overview}?refreshInterval=${refreshInterval}`, {
+          waitUntil: 'networkidle',
+        });
+      } else {
+        await page.goto(overview, { waitUntil: 'networkidle' });
+      }
       if (doLogin) {
         await this.loginToKibana();
       }
@@ -86,6 +92,7 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       if (doLogin) {
         await this.loginToKibana();
       }
+      await page.waitForSelector('h1:has-text("Settings")');
     },
 
     async navigateToAddMonitor() {

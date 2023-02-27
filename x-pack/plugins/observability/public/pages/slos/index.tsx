@@ -13,6 +13,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useLicense } from '../../hooks/use_license';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
 import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
@@ -27,13 +28,12 @@ export function SlosPage() {
     http: { basePath },
   } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
-
+  const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();
 
-  const {
-    loading,
-    sloList: { total },
-  } = useFetchSloList({ refetch: false });
+  const { isInitialLoading, isLoading, sloList } = useFetchSloList();
+
+  const { total } = sloList || {};
 
   useBreadcrumbs([
     {
@@ -52,11 +52,11 @@ export function SlosPage() {
     return <PageNotFound />;
   }
 
-  if (loading) {
+  if (isInitialLoading) {
     return null;
   }
 
-  if (total === 0 || !hasAtLeast('platinum')) {
+  if ((!isLoading && total === 0) || !hasAtLeast('platinum')) {
     return <SloListWelcomePrompt />;
   }
 
@@ -69,9 +69,10 @@ export function SlosPage() {
         rightSideItems: [
           <EuiButton
             color="primary"
+            data-test-subj="slosPage-createNewSloButton"
+            disabled={!hasWriteCapabilities}
             fill
             onClick={handleClickCreateSlo}
-            data-test-subj="slosPage-createNewSloButton"
           >
             {i18n.translate('xpack.observability.slos.sloList.pageHeader.createNewButtonLabel', {
               defaultMessage: 'Create new SLO',

@@ -26,6 +26,8 @@ paths:
   /service_tokens:
     $ref: paths/service_tokens.yaml
   # EPM / integrations endpoints
+  /epm/verification_key_id:
+    $ref: paths/epm@verification_key_id.yaml
   /epm/categories:
     $ref: paths/epm@categories.yaml
   /epm/packages/limited:
@@ -71,7 +73,7 @@ paths:
     $ref: 'paths/agents@{agent_id}@unenroll.yaml'
   '/agents/{agentId}/upgrade':
     $ref: 'paths/agents@{agent_id}@upgrade.yaml'
-  '/agents/{agentId}/upload':
+  '/agents/{agentId}/uploads':
     $ref: 'paths/agents@{agent_id}@uploads.yaml'
   '/agents/bulk_reassign':
     $ref: 'paths/agents@bulk_reassign.yaml'

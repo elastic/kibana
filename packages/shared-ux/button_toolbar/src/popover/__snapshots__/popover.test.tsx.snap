@@ -9,7 +9,7 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
     class="euiPopover__anchor css-16vtueo-render"
   >
     <button
-      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-EuiButton"
       type="button"
     >
       <span
@@ -20,6 +20,10 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
         >
           test
         </span>
+        <span
+          color="inherit"
+          data-euiicon-type="arrowDown"
+        />
       </span>
     </button>
   </div>

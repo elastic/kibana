@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { isBoolean, last, omit } from 'lodash/fp';
+import { last, omit } from 'lodash/fp';
 
 import { useDispatch } from 'react-redux';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import type { StartServices } from '../../../../types';
 import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../explore/hosts/pages/details/utils';
 import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../explore/network/pages/details';
@@ -27,7 +28,7 @@ import { getLeadingBreadcrumbsForSecurityPage } from './get_breadcrumbs_for_page
 import type { GetSecuritySolutionUrl } from '../../link_to';
 import { useGetSecuritySolutionUrl } from '../../link_to';
 import { useIsGroupedNavigationEnabled } from '../helpers';
-import * as i18n from '../../../../detection_engine/rule_details_ui/pages/rule_details/translations';
+import { TELEMETRY_EVENT, track } from '../../../lib/telemetry';
 
 export interface ObjectWithNavTabs {
   navTabs: GenericNavRecord;
@@ -41,14 +42,12 @@ export const useSetBreadcrumbs = () => {
   return (
     spyState: RouteSpyState & ObjectWithNavTabs,
     chrome: StartServices['chrome'],
-    navigateToUrl: NavigateToUrl,
-    isExistingRule?: boolean
+    navigateToUrl: NavigateToUrl
   ) => {
     const breadcrumbs = getBreadcrumbsForRoute(
       spyState,
       getSecuritySolutionUrl,
-      isGroupedNavigationEnabled,
-      isExistingRule
+      isGroupedNavigationEnabled
     );
 
     if (!breadcrumbs) {
@@ -62,7 +61,8 @@ export const useSetBreadcrumbs = () => {
           ? {
               onClick: (ev) => {
                 ev.preventDefault();
-
+                const trakedPath = breadcrumb.href?.split('?')[0] ?? 'unknown';
+                track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.BREADCRUMB}${trakedPath}`);
                 dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
 
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -78,8 +78,7 @@ export const useSetBreadcrumbs = () => {
 export const getBreadcrumbsForRoute = (
   object: RouteSpyState & ObjectWithNavTabs,
   getSecuritySolutionUrl: GetSecuritySolutionUrl,
-  isGroupedNavigationEnabled: boolean,
-  isExistingRule?: boolean
+  isGroupedNavigationEnabled: boolean
 ): ChromeBreadcrumb[] | null => {
   const spyState = omit('navTabs', object) as RouteSpyState;
 
@@ -107,10 +106,10 @@ export const getBreadcrumbsForRoute = (
     ? newMenuLeadingBreadcrumbs
     : [siemRootBreadcrumb, pageBreadcrumb];
 
-  return emptyLastBreadcrumbUrl(
-    [...leadingBreadcrumbs, ...getTrailingBreadcrumbsForRoutes(spyState, getSecuritySolutionUrl)],
-    isExistingRule
-  );
+  return emptyLastBreadcrumbUrl([
+    ...leadingBreadcrumbs,
+    ...getTrailingBreadcrumbsForRoutes(spyState, getSecuritySolutionUrl),
+  ]);
 };
 
 const getTrailingBreadcrumbsForRoutes = (
@@ -140,11 +139,7 @@ const getTrailingBreadcrumbsForRoutes = (
   return [];
 };
 
-const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[], isExistingRule?: boolean) => {
-  if (!isExistingRule && isBoolean(isExistingRule)) {
-    breadcrumbs.push({ text: i18n.DELETED_RULE, href: '/' });
-  }
-
+const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[]) => {
   const leadingBreadCrumbs = breadcrumbs.slice(0, -1);
   const lastBreadcrumb = last(breadcrumbs);
 

@@ -16,7 +16,6 @@ import type { SecuritySolutionTabNavigationProps } from './types';
 export function TabNavigationWithBreadcrumbs({
   navTabs,
   display,
-  isExistingRule,
 }: SecuritySolutionTabNavigationProps): JSX.Element {
   const [routeState] = useRouteSpy();
   const {
@@ -30,8 +29,8 @@ export function TabNavigationWithBreadcrumbs({
       return;
     }
 
-    setBreadcrumbs({ ...routeState, navTabs }, chrome, navigateToUrl, isExistingRule);
-  }, [chrome, routeState, navTabs, getUrlForApp, navigateToUrl, setBreadcrumbs, isExistingRule]);
+    setBreadcrumbs({ ...routeState, navTabs }, chrome, navigateToUrl);
+  }, [chrome, routeState, navTabs, getUrlForApp, navigateToUrl, setBreadcrumbs]);
 
   return (
     <TabNavigation
