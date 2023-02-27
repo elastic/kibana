@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormLabel } from '@elastic/eui';
-import { Control, Controller, FieldPath } from 'react-hook-form';
+import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import {
@@ -22,7 +22,6 @@ interface Option {
 
 export interface Props {
   allowAllOption?: boolean;
-  control: Control<CreateSLOInput>;
   dataTestSubj: string;
   fieldName: string;
   label: string;
@@ -32,37 +31,33 @@ export interface Props {
 
 export function FieldSelector({
   allowAllOption = true,
-  control,
   dataTestSubj,
   fieldName,
   label,
   name,
   placeholder,
 }: Props) {
+  const { control, watch } = useFormContext<CreateSLOInput>();
+  const serviceName = watch('indicator.params.service');
   const [search, setSearch] = useState<string>('');
   const { suggestions, isLoading } = useFetchApmSuggestions({
     fieldName,
     search,
+    serviceName,
   });
-  const [options, setOptions] = useState<Option[]>([]);
 
-  useEffect(() => {
-    const opts = (
-      allowAllOption
-        ? [
-            {
-              value: '*',
-              label: i18n.translate('xpack.observability.slos.sloEdit.fieldSelector.all', {
-                defaultMessage: 'All',
-              }),
-            },
-          ]
-        : []
-    ).concat(createOptions(suggestions));
-
-    setOptions(opts);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [suggestions.length]);
+  const options = (
+    allowAllOption
+      ? [
+          {
+            value: '*',
+            label: i18n.translate('xpack.observability.slos.sloEdit.fieldSelector.all', {
+              defaultMessage: 'All',
+            }),
+          },
+        ]
+      : []
+  ).concat(createOptions(suggestions));
 
   return (
     <EuiFlexItem>
@@ -81,6 +76,7 @@ export function FieldSelector({
             async
             data-test-subj={dataTestSubj}
             isClearable={true}
+            isDisabled={name !== 'indicator.params.service' && !serviceName}
             isInvalid={!!fieldState.error}
             isLoading={isLoading}
             onChange={(selected: EuiComboBoxOptionOption[]) => {
