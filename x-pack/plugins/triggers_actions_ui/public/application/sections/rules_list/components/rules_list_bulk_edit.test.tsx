@@ -156,7 +156,9 @@ describe('Rules list Bulk Edit', () => {
     queryClient.clear();
   });
 
-  describe('bulk actions', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/152268
+  // FLAKY: https://github.com/elastic/kibana/issues/152267
+  describe.skip('bulk actions', () => {
     beforeEach(async () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
