@@ -7,7 +7,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosRequestConfig } from 'axios';
-import { ChildProcess, spawn } from 'child_process';
+import execa from 'execa';
 import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
 
@@ -22,7 +22,7 @@ export interface AgentManagerParams {
 export class AgentManager extends Manager {
   private params: AgentManagerParams;
   private log: ToolingLog;
-  private agentProcess?: ChildProcess;
+  private agentContainerId?: string;
   private requestOptions: AxiosRequestConfig;
   constructor(params: AgentManagerParams, log: ToolingLog, requestOptions: AxiosRequestConfig) {
     super();
@@ -34,7 +34,7 @@ export class AgentManager extends Manager {
   public async setup() {
     this.log.info('Running agent preconfig');
 
-    const response = await axios.post(
+    await axios.post(
       `${this.params.kibanaUrl}/api/fleet/agent_policies?sys_monitoring=true`,
       {
         name: 'Osquery policy',
@@ -42,27 +42,6 @@ export class AgentManager extends Manager {
         namespace: 'default',
         monitoring_enabled: ['logs', 'metrics'],
         inactivity_timeout: 1209600,
-      },
-      this.requestOptions
-    );
-
-    await axios.post(
-      `${this.params.kibanaUrl}/api/fleet/package_policies`,
-      {
-        policy_id: response.data.item.id,
-        package: {
-          name: 'osquery_manager',
-          version: '1.7.0',
-        },
-        name: `Policy for ${response.data.item.name}`,
-        description: '',
-        namespace: 'default',
-        inputs: {
-          'osquery_manager-osquery': {
-            enabled: true,
-            streams: {},
-          },
-        },
       },
       this.requestOptions
     );
@@ -79,8 +58,9 @@ export class AgentManager extends Manager {
     const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
     this.log.info(artifact);
 
-    const args = [
+    const dockerArgs = [
       'run',
+      '--detach',
       '--add-host',
       'host.docker.internal:host-gateway',
       '--env',
@@ -95,7 +75,7 @@ export class AgentManager extends Manager {
       artifact,
     ];
 
-    this.agentProcess = spawn('docker', args, { stdio: 'inherit' });
+    this.agentContainerId = (await execa('docker', dockerArgs)).stdout;
 
     // Wait til we see the agent is online
     let done = false;
@@ -118,15 +98,11 @@ export class AgentManager extends Manager {
 
   protected _cleanup() {
     this.log.info('Cleaning up the agent process');
-    if (this.agentProcess) {
-      if (!this.agentProcess.kill(9)) {
-        this.log.warning('Unable to kill agent process');
-      }
+    if (this.agentContainerId) {
+      this.log.info('Closing agent process');
 
-      this.agentProcess.on('close', () => {
-        this.log.info('Agent process closed');
-      });
-      delete this.agentProcess;
+      execa.sync('docker', ['kill', this.agentContainerId]);
+      this.log.info('Agent process closed');
     }
     return;
   }

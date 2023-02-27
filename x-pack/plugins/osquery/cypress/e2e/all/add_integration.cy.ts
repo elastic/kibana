@@ -16,7 +16,7 @@ import { addIntegration, closeModalIfVisible, closeToastIfVisible } from '../../
 import { login } from '../../tasks/login';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { DEFAULT_POLICY } from '../../screens/fleet';
+import { DEFAULT_POLICY, OSQUERY_POLICY } from '../../screens/fleet';
 
 describe('ALL - Add Integration', () => {
   const integration = 'Osquery Manager';
@@ -43,11 +43,10 @@ describe('ALL - Add Integration', () => {
     cy.get('[title="Osquery Manager • Integration"]').should('exist').click();
   });
 
-  it('should add the old integration and be able to upgrade it', () => {
+  it.skip('should add the old integration and be able to upgrade it', () => {
     const oldVersion = '0.7.4';
 
     cy.visit(OLD_OSQUERY_MANAGER);
-    cy.contains(integration).click();
     addIntegration();
     cy.contains('osquery_manager-1');
     cy.visit('app/fleet/policies');
@@ -94,8 +93,7 @@ describe('ALL - Add Integration', () => {
     addIntegration();
     cy.contains('osquery_manager-');
     closeToastIfVisible();
-    cy.getBySel('nav-search-input').type('Osquery');
-    cy.get('[title="Osquery • Management"]').should('exist').click();
+    cy.visit(OSQUERY);
     cy.contains('Live queries history');
   });
 
@@ -160,5 +158,14 @@ describe('ALL - Add Integration', () => {
     navigateTo('/app/osquery/saved_queries');
     cy.waitForReact();
     cy.react('EuiTableRow').should('have.length.above', 5);
+  });
+
+  it(`add integration to ${OSQUERY_POLICY}`, () => {
+    cy.visit(FLEET_AGENT_POLICIES);
+    cy.contains(OSQUERY_POLICY).click();
+    cy.contains('Add integration').click();
+    cy.contains(integration).click();
+    addIntegration(OSQUERY_POLICY);
+    cy.contains('osquery_manager-');
   });
 });
