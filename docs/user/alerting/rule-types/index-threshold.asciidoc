@@ -1,16 +1,15 @@
-[role="xpack"]
 [[rule-type-index-threshold]]
-=== Index threshold
+== Index threshold
 
 The index threshold rule type runs an {es} query. It aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.
 
 [float]
-==== Create the rule
+=== Create the rule
 
 Fill in the name and optional tags, then select *Index Threshold*.
 
 [float]
-==== Define the conditions
+=== Define the conditions
 
 Define properties to detect the condition.
 
@@ -29,7 +28,7 @@ If data is available and all clauses have been defined, a preview chart will ren
 image::user/alerting/images/rule-types-index-threshold-preview.png[Five clauses define the condition to detect]
 
 [float]
-==== Add action variables
+=== Add action variables
 
 <<defining-rules-actions-details, Add an action>> to run when the rule condition is met. The following variables are specific to the index threshold rule. You can also specify <<defining-rules-actions-variables, variables common to all rules>>.
 
