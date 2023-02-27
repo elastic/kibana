@@ -5,9 +5,17 @@
  * 2.0.
  */
 import * as React from 'react';
-import { ReactWrapper } from 'enzyme';
-import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { IToasts } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import {
+  render,
+  screen,
+  waitForElementToBeRemoved,
+  fireEvent,
+  act,
+  cleanup,
+} from '@testing-library/react';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList } from './rules_list';
@@ -19,7 +27,6 @@ import {
   getDisabledByLicenseRuleTypeFromApi,
   ruleType,
 } from './test_helpers';
-import { IToasts } from '@kbn/core/public';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -85,7 +92,9 @@ jest.mock('../../../lib/capabilities', () => ({
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
-
+const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
+  '../../../lib/rule_api/aggregate_kuery_filter'
+);
 const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
 const { bulkDeleteRules } = jest.requireMock('../../../lib/rule_api/bulk_delete');
 
@@ -99,58 +108,40 @@ ruleTypeRegistry.list.mockReturnValue([ruleType]);
 actionTypeRegistry.list.mockReturnValue([]);
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-
-beforeEach(() => {
-  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
 });
 
-// Test are too slow. It's breaking the build. So we skipp it now and waiting for improvment according this ticket:
-// https://github.com/elastic/kibana/issues/145122
-describe.skip('Rules list bulk delete', () => {
-  let wrapper: ReactWrapper<any>;
+const AllTheProviders = ({ children }: { children: any }) => (
+  <IntlProvider locale="en">
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </IntlProvider>
+);
 
-  async function setup(authorized: boolean = true) {
+const renderWithProviders = (ui: any) => {
+  return render(ui, { wrapper: AllTheProviders });
+};
+
+describe('Rules list Bulk Delete', () => {
+  beforeEach(async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
     loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
       total: 6,
       data: mockedRulesData,
     });
-
-    loadActionTypes.mockResolvedValue([
-      {
-        id: 'test',
-        name: 'Test',
-      },
-      {
-        id: 'test2',
-        name: 'Test2',
-      },
-    ]);
-    loadRuleTypes.mockResolvedValue([
-      ruleTypeFromApi,
-      getDisabledByLicenseRuleTypeFromApi(authorized),
-    ]);
+    loadActionTypes.mockResolvedValue([]);
+    loadRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi()]);
     loadAllActions.mockResolvedValue([]);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+    loadRuleAggregationsWithKueryFilter.mockResolvedValue({});
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-    wrapper = mountWithIntl(<RulesList />);
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-  }
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  beforeAll(async () => {
-    await setup();
     useKibanaMock().services.notifications.toasts = {
       addSuccess: jest.fn(),
       addError: jest.fn(),
@@ -159,22 +150,27 @@ describe.skip('Rules list bulk delete', () => {
     } as unknown as IToasts;
   });
 
-  beforeEach(() => {
-    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
-    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
-    // Unselect something to test filtering
-    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
-    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
+  afterEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    cleanup();
   });
 
-  it('can bulk delete', async () => {
-    wrapper.find('button[data-test-subj="bulkDelete"]').first().simulate('click');
-    expect(wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').exists()).toBeTruthy();
-    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+  beforeEach(async () => {
+    renderWithProviders(<RulesList />);
+    await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
+    fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
+    fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+    fireEvent.click(screen.getByTestId('checkboxSelectRow-2'));
+    fireEvent.click(screen.getByTestId('showBulkActionButton'));
+  });
+
+  it('should Bulk Delete', async () => {
+    fireEvent.click(screen.getByTestId('bulkDelete'));
+    expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
     await act(async () => {
-      await nextTick();
-      wrapper.update();
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
     });
 
     const filter = bulkDeleteRules.mock.calls[0][0].filter;
@@ -192,96 +188,68 @@ describe.skip('Rules list bulk delete', () => {
     );
   });
 
-  it('can cancel bulk delete', async () => {
-    wrapper.find('[data-test-subj="bulkDelete"]').first().simulate('click');
-    expect(wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').exists()).toBeTruthy();
-    wrapper.find('[data-test-subj="confirmModalCancelButton"]').first().simulate('click');
-
+  it('should cancel Bulk Delete', async () => {
+    fireEvent.click(screen.getByTestId('bulkDelete'));
+    expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
     await act(async () => {
-      await nextTick();
-      wrapper.update();
+      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
     });
-
     expect(bulkDeleteRules).not.toBeCalled();
   });
 
-  describe('Toast', () => {
-    it('should have success toast message', async () => {
-      wrapper.find('button[data-test-subj="bulkDelete"]').first().simulate('click');
-      expect(wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').exists()).toBeTruthy();
-      wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
-
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
-      expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-        'Deleted 10 rules'
-      );
-    });
-
-    it('should have warning toast message', async () => {
-      bulkDeleteRules.mockResolvedValue({
-        errors: [
-          {
-            message: 'string',
-            rule: {
-              id: 'string',
-              name: 'string',
-            },
+  it('should have warning toast message after Bulk Delete', async () => {
+    bulkDeleteRules.mockResolvedValue({
+      errors: [
+        {
+          message: 'string',
+          rule: {
+            id: 'string',
+            name: 'string',
           },
-        ],
-        total: 10,
-      });
-
-      wrapper.find('button[data-test-subj="bulkDelete"]').first().simulate('click');
-      expect(wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').exists()).toBeTruthy();
-      wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
-
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
-      expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'Deleted 9 rules, 1 rule encountered errors',
-        })
-      );
+        },
+      ],
+      total: 10,
     });
 
-    it('should have danger toast message', async () => {
-      bulkDeleteRules.mockResolvedValue({
-        errors: [
-          {
-            message: 'string',
-            rule: {
-              id: 'string',
-              name: 'string',
-            },
+    fireEvent.click(screen.getByTestId('bulkDelete'));
+    expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    });
+
+    expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+    expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Deleted 9 rules, 1 rule encountered errors',
+      })
+    );
+  });
+
+  it('should have danger toast message after Bulk Delete', async () => {
+    bulkDeleteRules.mockResolvedValue({
+      errors: [
+        {
+          message: 'string',
+          rule: {
+            id: 'string',
+            name: 'string',
           },
-        ],
-        total: 1,
-      });
-
-      wrapper.find('button[data-test-subj="bulkDelete"]').first().simulate('click');
-      expect(wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').exists()).toBeTruthy();
-      wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
-
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
-      expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'Failed to delete 1 rule',
-        })
-      );
+        },
+      ],
+      total: 1,
     });
+
+    fireEvent.click(screen.getByTestId('bulkDelete'));
+    expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    });
+
+    expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+    expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Failed to delete 1 rule',
+      })
+    );
   });
 });
