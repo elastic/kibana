@@ -492,6 +492,8 @@ packages/kbn-repo-path @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 x-pack/examples/reporting_example @elastic/appex-sharedux
+packages/kbn-reporting/generate_csv/impl @elastic/appex-sharedux
+packages/kbn-reporting/generate_csv/types @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 examples/response_stream @elastic/ml-ui
@@ -593,8 +595,6 @@ packages/shared-ux/prompt/no_data_views/impl @elastic/appex-sharedux
 packages/shared-ux/prompt/no_data_views/mocks @elastic/appex-sharedux
 packages/shared-ux/prompt/no_data_views/types @elastic/appex-sharedux
 packages/shared-ux/prompt/not_found @elastic/appex-sharedux
-packages/shared-ux/reporting/generate_csv/impl @elastic/appex-sharedux
-packages/shared-ux/reporting/generate_csv/types @elastic/appex-sharedux
 packages/shared-ux/router/impl @elastic/appex-sharedux
 packages/shared-ux/router/mocks @elastic/appex-sharedux
 packages/shared-ux/router/types @elastic/appex-sharedux
