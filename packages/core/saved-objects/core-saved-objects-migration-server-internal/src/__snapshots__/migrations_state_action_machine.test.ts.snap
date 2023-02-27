@@ -18,6 +18,9 @@ Object {
             "duration": 0,
             "state": Object {
               "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [],
+              ],
               "controlState": "LEGACY_REINDEX",
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
@@ -126,27 +129,6 @@ Object {
                         "type": "ui-counter",
                       },
                     },
-                    Object {
-                      "term": Object {
-                        "type": "upgrade-assistant-telemetry",
-                      },
-                    },
-                    Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
-                          },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
-                          },
-                        ],
-                      },
-                    },
                   ],
                 },
               },
@@ -195,7 +177,6 @@ Object {
                   },
                 },
               },
-              "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
               "waitForMigrationCompletion": false,
@@ -219,6 +200,9 @@ Object {
             "duration": 0,
             "state": Object {
               "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [],
+              ],
               "controlState": "LEGACY_DELETE",
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
@@ -327,27 +311,6 @@ Object {
                         "type": "ui-counter",
                       },
                     },
-                    Object {
-                      "term": Object {
-                        "type": "upgrade-assistant-telemetry",
-                      },
-                    },
-                    Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
-                          },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
-                          },
-                        ],
-                      },
-                    },
                   ],
                 },
               },
@@ -400,7 +363,6 @@ Object {
                   },
                 },
               },
-              "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
               "waitForMigrationCompletion": false,
@@ -424,6 +386,9 @@ Object {
             "duration": 0,
             "state": Object {
               "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [],
+              ],
               "controlState": "LEGACY_DELETE",
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
@@ -532,27 +497,6 @@ Object {
                         "type": "ui-counter",
                       },
                     },
-                    Object {
-                      "term": Object {
-                        "type": "upgrade-assistant-telemetry",
-                      },
-                    },
-                    Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
-                          },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
-                          },
-                        ],
-                      },
-                    },
                   ],
                 },
               },
@@ -609,7 +553,6 @@ Object {
                   },
                 },
               },
-              "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
               "waitForMigrationCompletion": false,
@@ -633,6 +576,9 @@ Object {
             "duration": 0,
             "state": Object {
               "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [],
+              ],
               "controlState": "DONE",
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
@@ -741,27 +687,6 @@ Object {
                         "type": "ui-counter",
                       },
                     },
-                    Object {
-                      "term": Object {
-                        "type": "upgrade-assistant-telemetry",
-                      },
-                    },
-                    Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
-                          },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
-                          },
-                        ],
-                      },
-                    },
                   ],
                 },
               },
@@ -822,7 +747,6 @@ Object {
                   },
                 },
               },
-              "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
               "waitForMigrationCompletion": false,
@@ -884,6 +808,15 @@ Object {
             "duration": 0,
             "state": Object {
               "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [
+                  Object {
+                    "index": Object {
+                      "_id": "1234",
+                    },
+                  },
+                ],
+              ],
               "controlState": "LEGACY_DELETE",
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
@@ -992,27 +925,6 @@ Object {
                         "type": "ui-counter",
                       },
                     },
-                    Object {
-                      "term": Object {
-                        "type": "upgrade-assistant-telemetry",
-                      },
-                    },
-                    Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
-                          },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
-                          },
-                        ],
-                      },
-                    },
                   ],
                 },
               },
@@ -1066,13 +978,6 @@ Object {
                   },
                 },
               },
-              "transformedDocBatches": Array [
-                Array [
-                  Object {
-                    "_id": "1234",
-                  },
-                ],
-              ],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
               "waitForMigrationCompletion": false,
@@ -1096,6 +1001,15 @@ Object {
             "duration": 0,
             "state": Object {
               "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [
+                  Object {
+                    "index": Object {
+                      "_id": "1234",
+                    },
+                  },
+                ],
+              ],
               "controlState": "FATAL",
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
@@ -1204,27 +1118,6 @@ Object {
                         "type": "ui-counter",
                       },
                     },
-                    Object {
-                      "term": Object {
-                        "type": "upgrade-assistant-telemetry",
-                      },
-                    },
-                    Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
-                          },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
-                          },
-                        ],
-                      },
-                    },
                   ],
                 },
               },
@@ -1282,13 +1175,6 @@ Object {
                   },
                 },
               },
-              "transformedDocBatches": Array [
-                Array [
-                  Object {
-                    "_id": "1234",
-                  },
-                ],
-              ],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
               "waitForMigrationCompletion": false,
