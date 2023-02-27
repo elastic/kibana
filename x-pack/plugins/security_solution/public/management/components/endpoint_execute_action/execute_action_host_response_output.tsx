@@ -14,6 +14,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useGetActionDetails } from '../../hooks/response_actions/use_get_action_details';
 import type {
   ActionDetails,
@@ -96,6 +97,7 @@ export interface ExecuteActionHostResponseOutputProps {
 
 export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
   ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize = 'xs' }) => {
+    const isMounted = useIsMounted();
     const outputContent = useMemo(
       () =>
         action.outputs &&
@@ -114,6 +116,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
 
     useEffect(() => {
       if (
+        isMounted() &&
         !isFetching &&
         actionDetails &&
         actionDetails.data &&
@@ -128,7 +131,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
       return () => {
         setExecuteOutputContent(undefined);
       };
-    }, [actionDetails, agentId, isFetching]);
+    }, [actionDetails, agentId, isFetching, isMounted]);
 
     if (isFetching) {
       return (
