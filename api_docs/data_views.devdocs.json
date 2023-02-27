@@ -85,7 +85,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/grouped_alerts.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -97,7 +97,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -498,14 +498,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_dataset.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_log_level.tsx"
               },
               {
                 "plugin": "fleet",
@@ -8301,7 +8293,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/grouped_alerts.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8313,7 +8305,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -8714,14 +8706,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_dataset.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_log_level.tsx"
               },
               {
                 "plugin": "fleet",
@@ -15612,7 +15596,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/grouped_alerts.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -15624,7 +15608,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -16025,14 +16009,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_dataset.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_log_level.tsx"
               },
               {
                 "plugin": "fleet",
@@ -25821,38 +25797,6 @@
           },
           {
             "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
           },
           {
@@ -25866,18 +25810,6 @@
           {
             "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -26004,14 +25936,6 @@
             "path": "src/plugins/data/server/query/route_handler_context.test.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
             "plugin": "data",
             "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/api.ts"
           },
@@ -26034,18 +25958,6 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
           },
           {
             "plugin": "fleet",
@@ -26158,18 +26070,6 @@
           {
             "plugin": "@kbn/core-saved-objects-browser-mocks",
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
