@@ -17,6 +17,7 @@
   "exclude": [
     "target/**/*",
     "**/cypress/**",
+    "public/management/cypress_endpoint.config.ts",
   ],
   "kbn_references": [
     "@kbn/core",
