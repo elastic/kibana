@@ -10,10 +10,11 @@
   "include": [
     "**/*.ts"
   ],
-  "kbn_references": [
-    "@kbn/es-query",
-  ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/ecs",
+    "@kbn/rule-data-utils",
   ]
 }

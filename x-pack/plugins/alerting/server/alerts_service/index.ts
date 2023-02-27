@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-export interface FieldMap {
-  [key: string]: {
-    type: string;
-    required?: boolean;
-    array?: boolean;
-    path?: string;
-    scaling_factor?: number;
-    dynamic?: 'strict' | boolean;
-  };
-}
+export {
+  DEFAULT_ALERTS_ILM_POLICY,
+  DEFAULT_ALERTS_ILM_POLICY_NAME,
+} from './default_lifecycle_policy';
+export { ECS_COMPONENT_TEMPLATE_NAME, ECS_CONTEXT } from './alerts_service';
+export { getComponentTemplate } from './types';
