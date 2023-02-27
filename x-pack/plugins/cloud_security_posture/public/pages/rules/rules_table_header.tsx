@@ -36,7 +36,7 @@ const SearchField = ({
       <EuiFieldSearch
         isLoading={isSearching}
         placeholder={i18n.translate('xpack.csp.rules.rulesTable.searchPlaceholder', {
-          defaultMessage: 'Search for a specific rule name',
+          defaultMessage: 'Search by Rule Name',
         })}
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}

@@ -11,7 +11,6 @@ import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { deleteByQuery } from './delete_by_query';
-import { createDeleteByQueryResponse } from './delete_by_query.mocks';
 
 jest.mock('./catch_retryable_es_client_errors');
 
@@ -46,6 +45,8 @@ describe('deleteByQuery', () => {
       client,
       indexName: '.kibana_8.0.0',
       query: deleteQuery,
+      conflicts: 'proceed',
+      refresh: true,
     });
     try {
       await task();
@@ -64,6 +65,8 @@ describe('deleteByQuery', () => {
       client,
       indexName: '.kibana_8.0.0',
       query: deleteQuery,
+      conflicts: 'proceed',
+      refresh: true,
     });
 
     await task();
@@ -73,76 +76,31 @@ describe('deleteByQuery', () => {
       index: '.kibana_8.0.0',
       query: deleteQuery,
       refresh: true,
-      wait_for_completion: true,
+      wait_for_completion: false,
       conflicts: 'proceed',
     });
   });
 
-  it('resolves with `Either.right` if the delete is successful', async () => {
+  it('resolves with `Either.right` if the delete task is successfully created', async () => {
     const client = elasticsearchClientMock.createInternalClient(
-      Promise.resolve(createDeleteByQueryResponse())
+      Promise.resolve({
+        took: 147,
+        timed_out: false,
+        task: 1234,
+      })
     );
 
     const task = deleteByQuery({
       client,
       indexName: '.kibana_8.0.0',
       query: deleteQuery,
+      conflicts: 'proceed',
+      refresh: true,
     });
 
     const result = await task();
 
     expect(Either.isRight(result)).toBe(true);
-    expect((result as Either.Right<any>).right).toEqual('delete_successful' as const);
-  });
-
-  it('resolves with `Either.left`, if the delete query fails', async () => {
-    const versionConflicts = [
-      {
-        index: '.kibana_8.0.0',
-        id: 'dashboard:12345',
-        status: 409,
-        type: 'version_conflict_engine_exception',
-        cause: {
-          type: 'version_conflict_engine_exception',
-          reason:
-            '[dashboard:12345]: version conflict, required seqNo [609], primary term [1]. current document has seqNo [610] and primary term [1]',
-          index_uuid: 'b8kXIJI4TnGpcPO3ThlFWg',
-          shard: '0',
-          index: '.kibana_8.0.0',
-        },
-      },
-      {
-        index: '.kibana_8.0.0',
-        id: 'dashboard:678900',
-        status: 409,
-        type: 'version_conflict_engine_exception',
-        cause: {
-          type: 'version_conflict_engine_exception',
-          reason:
-            '[dashboard:678900]: version conflict, required seqNo [609], primary term [1]. current document has seqNo [610] and primary term [1]',
-          index_uuid: 'b8kXIJI4TnGpcPO3ThlFWg',
-          shard: '0',
-          index: '.kibana_8.0.0',
-        },
-      },
-    ];
-
-    const client = elasticsearchClientMock.createInternalClient(
-      Promise.resolve(createDeleteByQueryResponse(versionConflicts))
-    );
-
-    const task = deleteByQuery({
-      client,
-      indexName: '.kibana_8.0.0',
-      query: deleteQuery,
-    });
-
-    const result = await task();
-
-    expect(Either.isLeft(result)).toBe(true);
-    expect((result as Either.Left<any>).left).toEqual({
-      type: 'delete_failed',
-      conflictingDocuments: versionConflicts,
-    });
+    expect((result as Either.Right<any>).right).toEqual({ taskId: '1234' });
   });
 });

@@ -76,6 +76,8 @@ export { updateAliases } from './update_aliases';
 
 export { cleanupUnknownAndExcluded } from './cleanup_unknown_and_excluded';
 
+export { waitForDeleteByQueryTask } from './wait_for_delete_by_query_task';
+
 export type { CreateIndexParams } from './create_index';
 export { createIndex } from './create_index';
 

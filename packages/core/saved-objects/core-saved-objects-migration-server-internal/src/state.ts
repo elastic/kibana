@@ -194,6 +194,24 @@ export interface DoneState extends PostInitState {
   readonly controlState: 'DONE';
 }
 
+export interface CleanupUnknownAndExcluded extends PostInitWithSource {
+  /** Clean the source index, removing SOs with unknown and excluded types */
+  readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED';
+  readonly sourceIndexMappings: IndexMapping;
+  readonly aliases: Record<string, string | undefined>;
+  /** The cleanup operation has deleted one or more documents, we gotta refresh the index */
+  readonly mustRefresh?: boolean;
+}
+
+export interface CleanupUnknownAndExcludedWaitForTaskState extends PostInitWithSource {
+  readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK';
+  readonly deleteByQueryTaskId: string;
+  readonly sourceIndexMappings: IndexMapping;
+  readonly aliases: Record<string, string | undefined>;
+  /** The cleanup operation has deleted one or more documents, we gotta refresh the index */
+  readonly mustRefresh?: boolean;
+}
+
 /**
  * Compatibe migrations do not require migrating to a new index because all
  * schema changes are compatible with current index mappings.
@@ -207,13 +225,8 @@ export interface PrepareCompatibleMigration extends PostInitWithSource {
   readonly controlState: 'PREPARE_COMPATIBLE_MIGRATION';
   /** Alias-level actions that prepare for this migration */
   readonly preTransformDocsActions: AliasAction[];
-}
-
-export interface CleanupUnknownAndExcluded extends PostInitWithSource {
-  /** Clean the source index, removing SOs with unknown and excluded types */
-  readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED';
-  readonly sourceIndexMappings: IndexMapping;
-  readonly aliases: Record<string, string | undefined>;
+  /** Indicates whether we must refresh the index */
+  readonly mustRefresh?: boolean;
 }
 
 export interface FatalState extends BaseState {
@@ -483,6 +496,7 @@ export type State = Readonly<
   | InitState
   | PrepareCompatibleMigration
   | CleanupUnknownAndExcluded
+  | CleanupUnknownAndExcludedWaitForTaskState
   | WaitForMigrationCompletionState
   | DoneState
   | WaitForYellowSourceState

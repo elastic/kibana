@@ -18,6 +18,7 @@ import type {
   CheckUnknownDocumentsState,
   CheckVersionIndexReadyActions,
   CleanupUnknownAndExcluded,
+  CleanupUnknownAndExcludedWaitForTaskState,
   CloneTempToSource,
   CreateNewTargetState,
   CreateReindexTempState,
@@ -1390,45 +1391,34 @@ describe('migrations v2 model', () => {
       };
 
       describe('if action succeeds', () => {
-        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.right({
-          type: 'cleanup_successful' as const,
-          unknownDocs: [],
-          errorsByType: {},
-        });
-
-        test('it resets retry count and delay', () => {
-          const testState = {
-            ...cleanupUnknownAndExcluded,
-            retryCount: 1,
-            retryDelay: 2000,
-          };
-          const newState = model(testState, res);
-          expect(newState.retryCount).toEqual(0);
-          expect(newState.retryDelay).toEqual(0);
-        });
-
-        test('CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION', () => {
+        test('CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK', () => {
+          const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.right({
+            type: 'cleanup_started' as const,
+            taskId: '1234',
+            unknownDocs: [],
+            errorsByType: {},
+          });
           const newState = model(cleanupUnknownAndExcluded, res) as PrepareCompatibleMigration;
 
-          expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
-          expect(newState.targetIndexRawMappings).toEqual(indexMapping);
-          expect(newState.targetIndexMappings).toEqual(indexMapping);
-          expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
-          expect(newState.preTransformDocsActions).toEqual([
-            {
-              add: {
-                alias: '.kibana_7.12.0',
-                index: '.kibana_7.11.0_001',
-              },
-            },
-            {
-              remove: {
-                alias: '.kibana_7.11.0',
-                index: '.kibana_7.11.0_001',
-                must_exist: true,
-              },
-            },
-          ]);
+          expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK');
+          // expect(newState.targetIndexRawMappings).toEqual(indexMapping);
+          // expect(newState.targetIndexMappings).toEqual(indexMapping);
+          // expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
+          // expect(newState.preTransformDocsActions).toEqual([
+          //   {
+          //     add: {
+          //       alias: '.kibana_7.12.0',
+          //       index: '.kibana_7.11.0_001',
+          //     },
+          //   },
+          //   {
+          //     remove: {
+          //       alias: '.kibana_7.11.0',
+          //       index: '.kibana_7.11.0_001',
+          //       must_exist: true,
+          //     },
+          //   },
+          // ]);
         });
       });
 
@@ -1450,78 +1440,102 @@ describe('migrations v2 model', () => {
           ),
         });
       });
+    });
 
-      test('CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED if the deleteQuery fails (and there are retries left)', () => {
-        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.left({
-          type: 'delete_failed' as const,
-          conflictingDocuments: [
-            {
-              index: 'kibana_7.11.0_001',
-              id: 'dashboard:12',
-              type: 'dashboard',
-              cause: {
-                type: 'DocumentVersionChanged',
-              },
-              status: 5,
-            },
-            {
-              index: 'kibana_7.11.0_001',
-              id: 'foo:17',
-              type: 'foo',
-              cause: {
-                type: 'DocumentVersionChanged',
-              },
-              status: 5,
-            },
-          ],
+    describe('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK', () => {
+      const cleanupUnknownAndExcludedWaitForTask: CleanupUnknownAndExcludedWaitForTaskState = {
+        ...baseState,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
+        deleteByQueryTaskId: '1234',
+        sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+        sourceIndexMappings: baseState.targetIndexMappings,
+        targetIndex: baseState.versionIndex,
+        kibanaVersion: '7.12.0', // new version!
+        currentAlias: '.kibana',
+        versionAlias: '.kibana_7.12.0',
+        aliases: {
+          '.kibana': '.kibana_7.11.0_001',
+          '.kibana_7.11.0': '.kibana_7.11.0_001',
+        },
+        versionIndexReadyActions: Option.none,
+      };
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK when response is left wait_for_task_completion_timeout', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
+          message: '[timeout_exception] Timeout waiting for ...',
+          type: 'wait_for_task_completion_timeout',
         });
-
-        const newState = model(
-          {
-            ...cleanupUnknownAndExcluded,
-            retryCount: 1,
-            retryAttempts: 5,
-          },
-          res
-        );
-
-        expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED');
-        expect(newState.retryCount).toEqual(2);
+        const newState = model(cleanupUnknownAndExcludedWaitForTask, res);
+        expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
       });
 
-      test('CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL if the deleteQuery fails after N attempts', () => {
-        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.left({
-          type: 'delete_failed' as const,
-          conflictingDocuments: [
-            {
-              index: 'kibana_7.11.0_001',
-              id: 'dashboard:12',
-              type: 'dashboard',
-              cause: {
-                type: 'DocumentVersionChanged',
-              },
-              status: 5,
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION if action succeeds', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.right({
+          type: 'cleanup_successful' as const,
+        });
+        const newState = model(
+          cleanupUnknownAndExcludedWaitForTask,
+          res
+        ) as PrepareCompatibleMigration;
+
+        expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
+        expect(newState.targetIndexRawMappings).toEqual(indexMapping);
+        expect(newState.targetIndexMappings).toEqual(indexMapping);
+        expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
+        expect(newState.preTransformDocsActions).toEqual([
+          {
+            add: {
+              alias: '.kibana_7.12.0',
+              index: '.kibana_7.11.0_001',
             },
+          },
+          {
+            remove: {
+              alias: '.kibana_7.11.0',
+              index: '.kibana_7.11.0_001',
+              must_exist: true,
+            },
+          },
+        ]);
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> CLEANUP_UNKNOWN_AND_EXCLUDED if the deleteQuery fails and we have some attempts left', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.left({
+          type: 'cleanup_failed' as const,
+          failures: ['Failed to delete dashboard:12345', 'Failed to delete dashboard:67890'],
+          versionConflicts: 12,
+        });
+
+        const newState = model(cleanupUnknownAndExcludedWaitForTask, res);
+
+        expect(newState).toMatchObject({
+          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+          logs: [
             {
-              index: 'kibana_7.11.0_001',
-              id: 'foo:17',
-              type: 'foo',
-              cause: {
-                type: 'DocumentVersionChanged',
-              },
-              status: 5,
+              level: 'warning',
+              message:
+                'Errors occurred whilst deleting unwanted documents. Another instance is probably updating or deleting documents in the same index. Retrying attempt 1.',
             },
           ],
+        });
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> FAIL if the deleteQuery fails after N retries', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.left({
+          type: 'cleanup_failed' as const,
+          failures: ['Failed to delete dashboard:12345', 'Failed to delete dashboard:67890'],
         });
 
         const newState = model(
           {
-            ...cleanupUnknownAndExcluded,
-            retryCount: 5,
-            retryAttempts: 5,
+            ...cleanupUnknownAndExcludedWaitForTask,
+            retryCount: cleanupUnknownAndExcludedWaitForTask.retryAttempts,
           },
           res
         );
+
         expect(newState).toMatchObject({
           controlState: 'FATAL',
           reason: expect.stringContaining(
@@ -2187,12 +2201,37 @@ describe('migrations v2 model', () => {
         preTransformDocsActions: [someAliasAction],
       };
 
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_TARGET if action succeeds  and we must refresh the index', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.right(
+          'update_aliases_succeeded'
+        );
+        const newState = model(
+          { ...state, mustRefresh: true },
+          res
+        ) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('REFRESH_TARGET');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
       it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action succeeds', () => {
         const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.right(
           'update_aliases_succeeded'
         );
         const newState = model(state, res) as OutdatedDocumentsSearchOpenPit;
         expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_TARGET if action fails because the alias is not found', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.left({
+          type: 'alias_not_found_exception',
+        });
+
+        const newState = model(
+          { ...state, mustRefresh: true },
+          res
+        ) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('REFRESH_TARGET');
         expect(newState.versionIndexReadyActions).toEqual(Option.none);
       });
 

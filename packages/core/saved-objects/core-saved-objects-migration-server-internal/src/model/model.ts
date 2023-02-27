@@ -26,7 +26,6 @@ import {
   fatalReasonDocumentExceedsMaxBatchSizeBytes,
   extractDiscardedUnknownDocs,
   extractDiscardedCorruptDocs,
-  extractDeleteQueryFailureReason,
 } from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
@@ -434,7 +433,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           stateP.sourceIndexMappings,
           /* expected */
           stateP.targetIndexMappings
-        )
+        ) &&
+        Math.random() < 10
       ) {
         // the existing mappings match, we can avoid reindexing
         return {
@@ -444,7 +444,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           versionIndexReadyActions: Option.none,
         };
       } else {
-        // the mappings have changed, but changes might still be compatible
         return {
           ...stateP,
           controlState: 'CHECK_COMPATIBLE_MAPPINGS',
@@ -485,7 +484,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      // we didn't need to cleanup, or the cleanup went well
       if (res.right.unknownDocs.length) {
         logs = [
           ...stateP.logs,
@@ -501,11 +499,32 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         })),
       ];
 
+      return {
+        ...stateP,
+        logs,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
+        deleteByQueryTaskId: res.right.taskId,
+      };
+    } else {
+      return {
+        ...stateP,
+        controlState: 'FATAL',
+        reason: extractUnknownDocFailureReason(
+          stateP.migrationDocLinks.resolveMigrationFailures,
+          res.left.unknownDocs
+        ),
+      };
+    }
+  } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
       const source = stateP.sourceIndex.value;
       return {
         ...stateP,
         logs,
         controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+        mustRefresh:
+          stateP.mustRefresh || typeof res.right.deleted === 'undefined' || res.right.deleted > 0,
         targetIndexRawMappings: stateP.sourceIndexMappings,
         targetIndexMappings: mergeMigrationMappingPropertyHashes(
           stateP.targetIndexMappings,
@@ -522,31 +541,21 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ]),
         ],
       };
-    } else if (Either.isLeft(res)) {
-      if (isTypeof(res.left, 'unknown_docs_found')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: extractUnknownDocFailureReason(
-            stateP.migrationDocLinks.resolveMigrationFailures,
-            res.left.unknownDocs
-          ),
-        };
+    } else {
+      if (isTypeof(res.left, 'wait_for_task_completion_timeout')) {
+        // After waiting for the specified timeout, the task has not yet
+        // completed. Retry this step to see if the task has completed after an
+        // exponential delay.  We will basically keep polling forever until the
+        // Elasticsearch task succeeds or fails.
+        return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
       } else {
-        if (stateP.retryCount >= stateP.retryAttempts) {
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason: extractDeleteQueryFailureReason(
-              stateP.sourceIndex.value,
-              res.left.conflictingDocuments
-            ),
-          };
-        } else {
+        if (stateP.retryCount < stateP.retryAttempts) {
           const retryCount = stateP.retryCount + 1;
-          const retryDelay = 1000 * Math.random();
+          const retryDelay = 1500 + 1000 * Math.random();
           return {
             ...stateP,
+            controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+            mustRefresh: true,
             retryCount,
             retryDelay,
             logs: [
@@ -557,17 +566,28 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
               },
             ],
           };
+        } else {
+          const failures = res.left.failures.length;
+          const versionConflicts = res.left.versionConflicts ?? 0;
+
+          let reason = `Migration failed because it was unable to delete unwanted documents from the ${stateP.sourceIndex.value} system index (${failures} failures and ${versionConflicts} conflicts)`;
+          if (failures) {
+            reason += `:\n` + res.left.failures.map((failure: string) => `- ${failure}\n`).join('');
+          }
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason,
+          };
         }
       }
-    } else {
-      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'PREPARE_COMPATIBLE_MIGRATION') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+        controlState: stateP.mustRefresh ? 'REFRESH_TARGET' : 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
       };
     } else if (Either.isLeft(res)) {
       // Note: if multiple newer Kibana versions are competing with each other to perform a migration,
@@ -578,7 +598,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // We assume that the alias was already deleted by another Kibana instance
         return {
           ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+          controlState: stateP.mustRefresh
+            ? 'REFRESH_TARGET'
+            : 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
         };
       } else {
         throwBadResponse(stateP, res.left as never);

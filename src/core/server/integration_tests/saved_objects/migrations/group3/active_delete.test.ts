@@ -10,17 +10,17 @@ import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/li
 import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
-  checkLogContains,
+  readLog,
   clearLog,
+  nextMinor,
   createBaseline,
   currentVersion,
   defaultKibanaIndex,
+  startElasticsearch,
   getCompatibleMappingsMigrator,
   getIdenticalMappingsMigrator,
   getIncompatibleMappingsMigrator,
   getNonDeprecatedMappingsMigrator,
-  nextMinor,
-  startElasticsearch,
 } from '../kibana_migrator_test_kit';
 import { delay } from '../test_utils';
 
@@ -64,17 +64,26 @@ describe('when upgrading to a new stack version', () => {
       });
 
       it('the migrator is skipping reindex operation and executing CLEANUP_UNKNOWN_AND_EXCLUDED step', async () => {
-        await checkLogContains([
-          'INIT -> WAIT_FOR_YELLOW_SOURCE.',
-          'WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
-          // we gotta inform that we are deleting unknown documents too (discardUnknownObjects: true),
-          'Kibana has been configured to discard unknown documents for this migration.',
-          'Therefore, the following documents with unknown types will not be taken into account and they will not be available after the migration:',
-          'CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION.',
-          'PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.',
-          'CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS.',
-          'CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.',
-        ]);
+        const logs = await readLog();
+        expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE');
+        expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED');
+        // we gotta inform that we are deleting unknown documents too (discardUnknownObjects: true)
+        expect(logs).toMatch(
+          'Kibana has been configured to discard unknown documents for this migration.'
+        );
+        expect(logs).toMatch(
+          'Therefore, the following documents with unknown types will not be taken into account and they will not be available after the migration:'
+        );
+        expect(logs).toMatch(
+          'CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'
+        );
+        expect(logs).toMatch(
+          'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION'
+        );
+        expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> REFRESH_TARGET');
+        expect(logs).toMatch('REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS');
+        expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE');
       });
 
       describe('CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
@@ -146,11 +155,10 @@ describe('when upgrading to a new stack version', () => {
           expect(errorMessage).toMatch(/deprecated:.*\(type: "deprecated"\)/);
         }
 
-        await checkLogContains([
-          'INIT -> WAIT_FOR_YELLOW_SOURCE.',
-          'WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
-          'CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL.',
-        ]);
+        const logs = await readLog();
+        expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
+        expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED.');
+        expect(logs).toMatch('CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL.');
       });
 
       it('proceeds if there are no unknown documents', async () => {
@@ -158,17 +166,21 @@ describe('when upgrading to a new stack version', () => {
 
         await runMigrations();
 
-        await checkLogContains([
-          'INIT -> WAIT_FOR_YELLOW_SOURCE.',
-          'WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
-          'CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION.',
-          'PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.',
-          'CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS.',
-          'CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.',
-        ]);
+        const logs = await readLog();
+        expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
+        expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED.');
+        expect(logs).toMatch(
+          'CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK.'
+        );
+        expect(logs).toMatch(
+          'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION.'
+        );
+        expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> REFRESH_TARGET.');
+        expect(logs).toMatch('REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.');
+        expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS.');
+        expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
 
         const indexContents = await client.search({ index: defaultKibanaIndex, size: 100 });
-
         expect(indexContents.hits.hits.length).toEqual(8);
       });
     });
@@ -201,19 +213,30 @@ describe('when upgrading to a new stack version', () => {
       });
 
       it('the migrator is skipping reindex operation and executing CLEANUP_UNKNOWN_AND_EXCLUDED step', async () => {
-        await checkLogContains([
-          'INIT -> WAIT_FOR_YELLOW_SOURCE.',
-          'WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.', // this step is run only if mappings are compatible but NOT equal
-          'CHECK_COMPATIBLE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
-          // we gotta inform that we are deleting unknown documents too (discardUnknownObjects: true),
-          'Kibana has been configured to discard unknown documents for this migration.',
-          'Therefore, the following documents with unknown types will not be taken into account and they will not be available after the migration:',
-          'CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION.',
-          'PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.',
-          'CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS.',
-          'UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.',
-          'CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.',
-        ]);
+        const logs = await readLog();
+
+        expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
+        expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.');
+        // this step is run only if mappings are compatible but NOT equal
+        expect(logs).toMatch('CHECK_COMPATIBLE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED.');
+        // we gotta inform that we are deleting unknown documents too (discardUnknownObjects: true),
+        expect(logs).toMatch(
+          'Kibana has been configured to discard unknown documents for this migration.'
+        );
+        expect(logs).toMatch(
+          'Therefore, the following documents with unknown types will not be taken into account and they will not be available after the migration:'
+        );
+        expect(logs).toMatch(
+          'CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK.'
+        );
+        expect(logs).toMatch(
+          'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION.'
+        );
+        expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> REFRESH_TARGET.');
+        expect(logs).toMatch('REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.');
+        expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS.');
+        expect(logs).toMatch('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.');
+        expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
       });
 
       describe('CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
@@ -286,12 +309,11 @@ describe('when upgrading to a new stack version', () => {
           expect(errorMessage).toMatch(/deprecated:.*\(type: "deprecated"\)/);
         }
 
-        await checkLogContains([
-          'INIT -> WAIT_FOR_YELLOW_SOURCE.',
-          'WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.', // this step is run only if mappings are compatible but NOT equal
-          'CHECK_COMPATIBLE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
-          'CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL.',
-        ]);
+        const logs = await readLog();
+        expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
+        expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.'); // this step is run only if mappings are compatible but NOT equal
+        expect(logs).toMatch('CHECK_COMPATIBLE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED.');
+        expect(logs).toMatch('CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL.');
       });
 
       it('proceeds if there are no unknown documents', async () => {
@@ -299,16 +321,21 @@ describe('when upgrading to a new stack version', () => {
 
         await runMigrations();
 
-        await checkLogContains([
-          'INIT -> WAIT_FOR_YELLOW_SOURCE.',
-          'WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.', // this step is run only if mappings are compatible but NOT equal
-          'CHECK_COMPATIBLE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
-          'CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION.',
-          'PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.',
-          'CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS.',
-          'UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.',
-          'CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.',
-        ]);
+        const logs = await readLog();
+        expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
+        expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.');
+        expect(logs).toMatch('CHECK_COMPATIBLE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED.');
+        expect(logs).toMatch(
+          'CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK.'
+        );
+        expect(logs).toMatch(
+          'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION.'
+        );
+        expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> REFRESH_TARGET.');
+        expect(logs).toMatch('REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.');
+        expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS.');
+        expect(logs).toMatch('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.');
+        expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
 
         const indexContents = await client.search({ index: defaultKibanaIndex, size: 100 });
 
@@ -317,7 +344,7 @@ describe('when upgrading to a new stack version', () => {
     });
   });
 
-  describe('if the mappings do NOT match (diffMappings() === true)', () => {
+  describe('if the mappings do NOT match (diffMappings() === true) and they are NOT compatible', () => {
     beforeAll(async () => {
       esClient = await createBaseline();
     });
@@ -333,16 +360,15 @@ describe('when upgrading to a new stack version', () => {
 
       await runMigrations();
 
-      await checkLogContains([
-        'INIT -> WAIT_FOR_YELLOW_SOURCE',
-        'WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.',
-        'CHECK_COMPATIBLE_MAPPINGS -> CHECK_UNKNOWN_DOCUMENTS.',
-        'CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.',
-        'CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS.',
-        'UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.',
-        'CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.',
-        'MARK_VERSION_INDEX_READY -> DONE',
-      ]);
+      const logs = await readLog();
+      expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE');
+      expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.');
+      expect(logs).toMatch('CHECK_COMPATIBLE_MAPPINGS -> CHECK_UNKNOWN_DOCUMENTS.');
+      expect(logs).toMatch('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.');
+      expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS.');
+      expect(logs).toMatch('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.');
+      expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.');
+      expect(logs).toMatch('MARK_VERSION_INDEX_READY -> DONE');
 
       const indexContents: SearchResponse<
         { type: string },

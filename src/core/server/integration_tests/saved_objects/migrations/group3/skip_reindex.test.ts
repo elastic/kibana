@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  checkLogContains,
-  checkLogDoesNotContain,
+  readLog,
   clearLog,
   createBaseline,
   currentVersion,
@@ -43,19 +43,24 @@ describe('when migrating to a new version', () => {
       migrator.prepareMigrations();
       await migrator.runMigrations();
 
-      await checkLogContains([
-        'INIT -> WAIT_FOR_YELLOW_SOURCE.',
-        'WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
-        'CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION.',
-        'PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.',
-        'CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS.',
-        'CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.',
-      ]);
+      const logs = await readLog();
+      expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
+      expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED.');
+      expect(logs).toMatch(
+        'CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK.'
+      );
+      expect(logs).toMatch(
+        'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION.'
+      );
+      expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> REFRESH_TARGET.');
+      expect(logs).toMatch('REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.');
+      expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS.');
+      expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
 
-      await checkLogDoesNotContain([
-        'CREATE_NEW_TARGET',
-        'CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS.',
-      ]);
+      expect(logs).not.toMatch('CREATE_NEW_TARGET');
+      expect(logs).not.toMatch('CHECK_UNKNOWN_DOCUMENTS');
+      expect(logs).not.toMatch('REINDEX');
+      expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS');
     });
   });
 
@@ -66,18 +71,25 @@ describe('when migrating to a new version', () => {
       migrator.prepareMigrations();
       await migrator.runMigrations();
 
-      await checkLogContains([
-        'INIT -> WAIT_FOR_YELLOW_SOURCE.',
-        'WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.',
-        'CHECK_COMPATIBLE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
-        'CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION.',
-        'PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.',
-        'CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS.',
-        'UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.',
-        'CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.',
-      ]);
+      const logs = await readLog();
+      expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
+      expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.');
+      expect(logs).toMatch('CHECK_COMPATIBLE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED.');
+      expect(logs).toMatch(
+        'CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK.'
+      );
+      expect(logs).toMatch(
+        'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION.'
+      );
+      expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> REFRESH_TARGET.');
+      expect(logs).toMatch('REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.');
+      expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS.');
+      expect(logs).toMatch('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.');
+      expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
 
-      await checkLogDoesNotContain(['CREATE_NEW_TARGET', 'CHECK_UNKNOWN_DOCUMENTS.', 'REINDEX']);
+      expect(logs).not.toMatch('CREATE_NEW_TARGET');
+      expect(logs).not.toMatch('CHECK_UNKNOWN_DOCUMENTS');
+      expect(logs).not.toMatch('REINDEX');
     });
   });
 
@@ -88,21 +100,18 @@ describe('when migrating to a new version', () => {
       migrator.prepareMigrations();
       await migrator.runMigrations();
 
-      await checkLogContains([
-        'INIT -> WAIT_FOR_YELLOW_SOURCE.',
-        'WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.',
-        'CHECK_COMPATIBLE_MAPPINGS -> CHECK_UNKNOWN_DOCUMENTS.',
-        'CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS.',
-        'UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.',
-        'CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.',
-        'MARK_VERSION_INDEX_READY -> DONE.',
-      ]);
+      const logs = await readLog();
+      expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
+      expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.');
+      expect(logs).toMatch('CHECK_COMPATIBLE_MAPPINGS -> CHECK_UNKNOWN_DOCUMENTS.');
+      expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS.');
+      expect(logs).toMatch('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.');
+      expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.');
+      expect(logs).toMatch('MARK_VERSION_INDEX_READY -> DONE.');
 
-      await checkLogDoesNotContain([
-        'CREATE_NEW_TARGET',
-        'CLEANUP_UNKNOWN_AND_EXCLUDED.',
-        'PREPARE_COMPATIBLE_MIGRATION.',
-      ]);
+      expect(logs).not.toMatch('CREATE_NEW_TARGET');
+      expect(logs).not.toMatch('CLEANUP_UNKNOWN_AND_EXCLUDED');
+      expect(logs).not.toMatch('PREPARE_COMPATIBLE_MIGRATION');
     });
   });
 
@@ -110,17 +119,16 @@ describe('when migrating to a new version', () => {
     // we run the migrator again to ensure that the next time state is loaded everything still works as expected
     await clearLog();
     await migrator.runMigrations({ rerun: true });
-    await checkLogContains([
-      'INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-      'CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.',
-    ]);
 
-    await checkLogDoesNotContain([
-      'WAIT_FOR_YELLOW_SOURCE',
-      'CLEANUP_UNKNOWN_AND_EXCLUCED',
-      'PREPARE_COMPATIBLE_MIGRATION',
-      'UPDATE_TARGET_MAPPINGS',
-    ]);
+    const logs = await readLog();
+    expect(logs).toMatch('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.');
+    expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
+
+    expect(logs).not.toMatch('WAIT_FOR_YELLOW_SOURCE');
+    expect(logs).not.toMatch('CLEANUP_UNKNOWN_AND_EXCLUCED');
+    expect(logs).not.toMatch('CREATE_NEW_TARGET');
+    expect(logs).not.toMatch('PREPARE_COMPATIBLE_MIGRATION');
+    expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS');
 
     // clear the system index for next test
     await esClient?.indices.delete({ index: `${defaultKibanaIndex}_${currentVersion}_001` });

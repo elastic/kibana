@@ -22,8 +22,8 @@ import {
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
   SavedObjectTypeRegistry,
-  IKibanaMigrator,
-  MigrationResult,
+  type IKibanaMigrator,
+  type MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
@@ -35,13 +35,13 @@ import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-
 
 import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
-import { LoggerFactory } from '@kbn/logging';
+import type { LoggerFactory } from '@kbn/logging';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { registerServiceConfig } from '@kbn/core-root-server-internal';
-import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
-import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
@@ -53,6 +53,12 @@ export const nextMinor = new SemVer(currentVersion).inc('minor').format();
 export const currentBranch = env.packageInfo.branch;
 export const defaultKibanaIndex = '.kibana_migrator_tests';
 
+export interface GetEsClientParams {
+  settings?: Record<string, any>;
+  kibanaVersion?: string;
+  logFilePath?: string;
+}
+
 export interface KibanaMigratorTestKitParams {
   kibanaIndex?: string;
   kibanaVersion?: string;
@@ -62,12 +68,20 @@ export interface KibanaMigratorTestKitParams {
   logFilePath?: string;
 }
 
-export const startElasticsearch = async () => {
+export const startElasticsearch = async ({
+  basePath,
+  dataArchive,
+}: {
+  basePath?: string;
+  dataArchive?: string;
+} = {}) => {
   const { startES } = createTestServers({
     adjustTimeout: (t: number) => jest.setTimeout(t),
     settings: {
       es: {
         license: 'basic',
+        basePath,
+        dataArchive,
       },
     },
   });
@@ -90,25 +104,14 @@ export const createBaseline = async () => {
   return client;
 };
 
-export const checkLogContains = async (
-  entries: string[],
-  logFilePath: string = defaultLogFilePath
-): Promise<void> => {
-  const logs = await fs.readFile(logFilePath, 'utf-8');
-  entries.forEach((entry) => expect(logs).toMatch(entry));
-};
-
-export const checkLogDoesNotContain = async (
-  entries: string[],
-  logFilePath: string = defaultLogFilePath
-): Promise<void> => {
-  const logs = await fs.readFile(logFilePath, 'utf-8');
-  entries.forEach((entry) => expect(logs).not.toMatch(entry));
+export const readLog = async (logFilePath: string = defaultLogFilePath): Promise<string> => {
+  return await fs.readFile(logFilePath, 'utf-8');
 };
 
 export const clearLog = async (logFilePath: string = defaultLogFilePath): Promise<void> => {
   await fs.truncate(logFilePath).catch(() => {});
 };
+
 export interface KibanaMigratorTestKit {
   client: ElasticsearchClient;
   migrator: IKibanaMigrator;
@@ -116,6 +119,23 @@ export interface KibanaMigratorTestKit {
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsRepository: ISavedObjectsRepository;
 }
+
+export const getEsClient = async ({
+  settings = {},
+  kibanaVersion = currentVersion,
+  logFilePath = defaultLogFilePath,
+}: GetEsClientParams = {}) => {
+  const loggingSystem = new LoggingSystem();
+  const loggerFactory = loggingSystem.asLoggerFactory();
+
+  const configService = getConfigService(settings, loggerFactory, logFilePath);
+
+  // configure logging system
+  const loggingConf = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
+  loggingSystem.upgrade(loggingConf);
+
+  return await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
+};
 
 export const getKibanaMigratorTestKit = async ({
   settings = {},
