@@ -13,6 +13,7 @@ import type {
   DataViewSpec,
 } from '@kbn/data-views-plugin/public';
 import { RuntimeField } from '@kbn/data-views-plugin/public';
+import { DataViewMissingIndices } from '@kbn/data-views-plugin/common';
 import { DataTypesLabels } from '../../components/shared/exploratory_view/labels';
 import { syntheticsRuntimeFields } from '../../components/shared/exploratory_view/configurations/synthetics/runtime_fields';
 import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';
@@ -229,6 +230,9 @@ export class ObservabilityDataViews {
       } catch (e: unknown) {
         if (e instanceof SavedObjectNotFound) {
           return await this.createAndSavedDataView(app, appIndices);
+        }
+        if (e instanceof DataViewMissingIndices) {
+          this.dataViews.clearInstanceCache();
         }
       }
     }
