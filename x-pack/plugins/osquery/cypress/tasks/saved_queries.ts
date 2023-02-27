@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { closeToastIfVisible } from './integrations';
 import { RESULTS_TABLE_BUTTON } from '../screens/live_query';
 import {
   checkResults,
@@ -81,7 +82,7 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
       findFormFieldByRowsLabelAndType('Description (optional)', savedQueryDescription);
       cy.react('EuiButtonDisplay').contains('Save').click();
       cy.contains('Successfully saved');
-      cy.getBySel('toastCloseButton').click();
+      closeToastIfVisible();
 
       // play saved query
       cy.contains('Saved queries').click();
