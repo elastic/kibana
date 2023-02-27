@@ -68,6 +68,14 @@ export interface KibanaMigratorTestKitParams {
   logFilePath?: string;
 }
 
+export interface KibanaMigratorTestKit {
+  client: ElasticsearchClient;
+  migrator: IKibanaMigrator;
+  runMigrations: (rerun?: boolean) => Promise<MigrationResult[]>;
+  typeRegistry: ISavedObjectTypeRegistry;
+  savedObjectsRepository: ISavedObjectsRepository;
+}
+
 export const startElasticsearch = async ({
   basePath,
   dataArchive,
@@ -87,38 +95,6 @@ export const startElasticsearch = async ({
   });
   return await startES();
 };
-
-export const createBaseline = async () => {
-  const { client, migrator, savedObjectsRepository } = await getKibanaMigratorTestKit({
-    kibanaIndex: defaultKibanaIndex,
-    types: baselineTypes,
-  });
-
-  migrator.prepareMigrations();
-  await migrator.runMigrations();
-
-  await savedObjectsRepository.bulkCreate(baselineDocuments, {
-    refresh: 'wait_for',
-  });
-
-  return client;
-};
-
-export const readLog = async (logFilePath: string = defaultLogFilePath): Promise<string> => {
-  return await fs.readFile(logFilePath, 'utf-8');
-};
-
-export const clearLog = async (logFilePath: string = defaultLogFilePath): Promise<void> => {
-  await fs.truncate(logFilePath).catch(() => {});
-};
-
-export interface KibanaMigratorTestKit {
-  client: ElasticsearchClient;
-  migrator: IKibanaMigrator;
-  runMigrations: (rerun?: boolean) => Promise<MigrationResult[]>;
-  typeRegistry: ISavedObjectTypeRegistry;
-  savedObjectsRepository: ISavedObjectsRepository;
-}
 
 export const getEsClient = async ({
   settings = {},
@@ -303,6 +279,22 @@ const registerTypes = (
   (types || []).forEach((type) => typeRegistry.registerType(type));
 };
 
+export const createBaseline = async () => {
+  const { client, migrator, savedObjectsRepository } = await getKibanaMigratorTestKit({
+    kibanaIndex: defaultKibanaIndex,
+    types: baselineTypes,
+  });
+
+  migrator.prepareMigrations();
+  await migrator.runMigrations();
+
+  await savedObjectsRepository.bulkCreate(baselineDocuments, {
+    refresh: 'wait_for',
+  });
+
+  return client;
+};
+
 interface GetMutatedMigratorParams {
   kibanaVersion?: string;
   settings?: Record<string, any>;
@@ -387,4 +379,12 @@ export const getIncompatibleMappingsMigrator = async ({
     kibanaVersion,
     settings,
   });
+};
+
+export const readLog = async (logFilePath: string = defaultLogFilePath): Promise<string> => {
+  return await fs.readFile(logFilePath, 'utf-8');
+};
+
+export const clearLog = async (logFilePath: string = defaultLogFilePath): Promise<void> => {
+  await fs.truncate(logFilePath).catch(() => {});
 };
